@@ -1,7 +1,5 @@
-// size: allow 350, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Contents sections (Character, Ancestry, Carrying, Map, Settings; Journal: journal.tsx) and
 // the chapter and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
-import { useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -11,13 +9,11 @@ import {
   conditionLine,
   plain,
   isPool,
-  refused,
   toneOf,
   type group,
   type Thing,
 } from './model.ts';
 import type { Button } from './presenter.ts';
-import { cardKey } from './presenter.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { ReadingSize } from './Chip.tsx';
@@ -168,49 +164,12 @@ export function CarryingPage(p: Carrying) {
   );
 }
 
-// Each exit's own controls, kept separate from movement; sight is read-only cartridge prose.
-function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
-  const c = usePalette();
-  const t = useType();
-  return p.view.exits.map((e) => {
-    const move = p.g.exits.find((x) => x.direction === e.direction)?.button;
-    return (
-      <View key={e.direction} style={{ gap: space.sm }}>
-        {move ? (
-          <ActionCard b={move} press={p.press} />
-        ) : (
-          <ActionCard
-            label={cap(e.direction)}
-            reason={e.available ? undefined : refused(e, p.text).text}
-          />
-        )}
-        {e.door && ( // UF2: the card reads only its direction, so the door's state shows here
-          <Text style={prose(c, t)}>
-            {cap(p.text(e.door.name))}: {e.door.state}
-          </Text>
-        )}
-        {p.g.door(e.direction).map((b) => (
-          <ActionCard key={b.action_key} b={b} press={p.press} />
-        ))}
-        {e.sight && (
-          <Text style={note(c, t)}>
-            {`${LABEL.beyond(e.direction)}${p.text(e.sight.title)}${
-              e.sight.entities.length
-                ? ` — ${e.sight.entities.map((x) => p.text(x.name)).join(', ')}`
-                : ''
-            }.`}
-          </Text>
-        )}
-      </View>
-    );
-  });
-}
-
 /**
  * The full map and Where (book-ui.md, Minimap, map and presentation controls).
  * - Use: Contents, and a tap on the minimap.
- * - Rules: reuses the room's exit controls and lists the place's targetless actions.
- * - States: discovered, two levels; barred exits; Where.
+ * - Rules: the drawing and the current place only; no movement, door or place actions (owner
+ *   2026-10-30). Where lists each known NPC's offered Where action.
+ * - States: discovered, one level; two levels; unexplored exits; a dot tapped; Where.
  * - Story: MapPage.stories.tsx
  */
 export function MapPage(
@@ -223,32 +182,11 @@ export function MapPage(
 ) {
   const c = usePalette();
   const t = useType();
-  const [selected, select] = useState<string | null>(null);
-  const chosen = p.view.map?.rooms.some((r) => r.id === selected);
   return (
-    <Page
-      title={LABEL.map}
-      foot={
-        <>
-          {chosen && <Control label={LABEL.backToMap} onPress={() => select(null)} />}
-          {home(p)}
-        </>
-      }
-    >
-      {p.view.map && (
-        <DiscoveredMap view={p.view} text={p.text} selected={selected} select={select} />
-      )}
+    <Page title={LABEL.map} foot={home(p)}>
+      {p.view.map && <DiscoveredMap view={p.view} text={p.text} />}
       <Text style={prose(c, t)}>{LABEL.currentPlace(p.text(p.view.place.title.key))}</Text>
       {p.view.exits.length === 0 && <Note>{LABEL.noWayOut}</Note>}
-      <Ways
-        {...p}
-        view={p.view.map ? { ...p.view, exits: p.view.exits.map(({ sight, ...e }) => e) } : p.view}
-      />
-      <Cards>
-        {p.g.place.map((b) => (
-          <ActionCard key={cardKey(b)} b={b} press={p.press} />
-        ))}
-      </Cards>
       {where(p)}
     </Page>
   );

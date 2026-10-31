@@ -11,8 +11,7 @@ import { book } from './__tests__/polish-book.test.ts';
 test('farm yard: a too-heavy seed sack reads "Take"; a press sends nothing and says why', () => {
   const b = book(compiled('cartridges/toolbox_showcase') as never);
   for (const d of ['north', 'west', 'south']) {
-    b.map();
-    b.tap(`Go ${d}`);
+    b.go(d);
   }
   b.tap('seed sack, open');
   const head = () => b.sql.prepare('SELECT revision FROM head').get()!.revision;
@@ -34,8 +33,7 @@ test('farm yard: a too-heavy seed sack reads "Take"; a press sends nothing and s
 test('glade: three pelts are one link "Three rabbit pelts", and after a Take the sentence recounts', () => {
   const b = book(compiled('cartridges/toolbox_showcase') as never);
   for (const d of ['north', 'west', 'south', 'west']) {
-    b.map();
-    b.tap(`Go ${d}`);
+    b.go(d);
   }
   assert.ok(b.text().includes('Three rabbit pelts are here.'));
   b.tap('Three rabbit pelts, open');

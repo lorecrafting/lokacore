@@ -4,6 +4,13 @@
   "map": {
    "rooms": [
     {
+     "id": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "title": "room.shore_steps.title",
+     "x": 2,
+     "y": 0,
+     "z": 0
+    },
+    {
      "id": "470b4175-5b92-89c1-bdac-645a128dc72f",
      "title": "room.crossroads_inn.title",
      "x": 0,
@@ -27,6 +34,16 @@
    ],
    "links": [
     {
+     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "to": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "west"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "direction": "east"
+    },
+    {
      "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
      "to": "4c52acd0-a115-8aa7-8f2a-1a90fa463ca7",
      "direction": "south"
@@ -49,12 +66,20 @@
    ],
    "unexplored": [
     {
-     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
-     "direction": "down"
+     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "direction": "east"
+    },
+    {
+     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "direction": "north"
+    },
+    {
+     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "direction": "south"
     },
     {
      "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
-     "direction": "east"
+     "direction": "down"
     },
     {
      "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
@@ -735,7 +760,7 @@
      "kind": "resource",
      "key": "mv"
     },
-    "current": 98,
+    "current": 96,
     "maximum": 100,
     "band": "mv_ready",
     "tone": "normal"

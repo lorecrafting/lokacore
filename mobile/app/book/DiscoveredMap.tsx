@@ -2,57 +2,72 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
-import { size, type } from './tokens.ts';
+import { LABEL } from './labels.ts';
+import { prose, usePalette, useType, type Palette, type Type } from './palette.ts';
+import { size } from './tokens.ts';
 
 type Props = { view: GameView; text: (key: string) => string };
-// The chosen room is the Map page's: its foot offers Back to map while one is open.
 type Drawn = NonNullable<GameView['map']>;
 type Room = Drawn['rooms'][number];
+type At = { x: number; y: number };
+// A drawing (BOOK-UI-COMPONENTS.md, design tokens: exempt from space tokens): one grid cell per
+// room, a dot's radius, the current room's ring, and a stub's length toward an exit's open dot (open
+// dots on neighbouring stubs stay 24 apart). The margin keeps an edge stub's touch target inside.
+const [CELL, DOT, HERE, STUB] = [72, 6, 11, 32];
+const MARGIN = STUB + size.touch / 2 - CELL / 2;
+// Up and down point up-right and down-right, as the minimap's stair nodes do.
+const AIM: Record<string, At> = {
+  north: { x: 0, y: -1 },
+  south: { x: 0, y: 1 },
+  east: { x: 1, y: 0 },
+  west: { x: -1, y: 0 },
+  up: { x: Math.SQRT1_2, y: -Math.SQRT1_2 },
+  down: { x: Math.SQRT1_2, y: Math.SQRT1_2 },
+};
 /**
- * The Map page's drawing of discovered rooms.
+ * The Map page's drawing: dots and lines, no actions and no names inside it (owner 2026-10-30).
  * - Use: the Map page.
- * - Rules: a drawing, exempt from space tokens; colours are the minimap's roles. The chosen room
- *   makes the foot offer Back to map.
- * - States: one level; two levels; barred exits.
+ * - Rules: a filled dot per visited room on the shown level, the current one ringed; a line per
+ *   known exit; each unexplored exit a short line to an open dot, an up or down one drawn
+ *   aslant. A tapped dot's room name, or "Unexplored", shows in the caption under the drawing.
+ *   Every dot is a touch-sized button named by its room title. Colours are the minimap's roles.
+ * - States: one level; two levels; unexplored exits; a dot tapped.
  * - Story: MapPage.stories.tsx
  */
-export function DiscoveredMap({
-  view,
-  text,
-  selected,
-  select,
-}: Props & { selected: string | null; select: (id: string | null) => void }) {
+export function DiscoveredMap({ view, text }: Props) {
   const c = usePalette();
   const t = useType();
   const map = view.map!;
   const current = map.rooms.find((r) => r.id === view.place.id);
   const [level, setLevel] = useState(current?.z ?? 0);
+  const [caption, setCaption] = useState<string | null>(null);
   const levels = [...new Set(map.rooms.map((r) => r.z))].sort((a, b) => a - b);
   const rooms = map.rooms.filter((r) => r.z === level);
-  const minimum = (axis: 'x' | 'y') => Math.min(0, ...rooms.map((r) => r[axis]));
-  const x = minimum('x'),
-    y = minimum('y');
-  const point = (r: (typeof rooms)[number]) => ({
-    left: (r.x - x) * 144 + 16,
-    top: (r.y - y) * 80 + 16,
+  const low = (axis: 'x' | 'y') => Math.min(...rooms.map((r) => r[axis]));
+  const high = (axis: 'x' | 'y') => Math.max(...rooms.map((r) => r[axis]));
+  const at = (r: Room): At => ({
+    x: (r.x - low('x') + 0.5) * CELL + MARGIN,
+    y: (r.y - low('y') + 0.5) * CELL + MARGIN,
   });
-  const chosen = map.rooms.find((r) => r.id === selected);
+  const dot = (r: Room) => (
+    <Dot key={r.id} c={c} at={at(r)} name={text(r.title)} here={r === current} tap={setCaption} />
+  );
   return (
     <View>
-      {levelBar(c, t, level, levels, (next) => (setLevel(next), select(null)))}
-      <Follow x={current?.z === level ? point(current).left - 16 : undefined}>
+      {levelBar(c, t, level, levels, (next) => (setLevel(next), setCaption(null)))}
+      <Follow x={current?.z === level ? at(current).x - CELL / 2 - MARGIN : undefined}>
         <View
           style={{
-            minHeight: (Math.max(0, ...rooms.map((r) => r.y)) - y) * 80 + 112,
-            minWidth: (Math.max(0, ...rooms.map((r) => r.x)) - x) * 144 + 164,
+            width: (high('x') - low('x') + 1) * CELL + 2 * MARGIN,
+            height: (high('y') - low('y') + 1) * CELL + 2 * MARGIN,
           }}
         >
-          {map.links.map((link) => linkLine(c, link, rooms, point))}
-          {rooms.map((r) => roomButton(c, r, r.id === view.place.id, text, point(r), select))}
+          {lines(c, map, rooms, at)}
+          {stubs(c, map, rooms, at, text, setCaption)}
+          {rooms.map(dot)}
         </View>
       </Follow>
-      {chosen && roomDetail(c, t, map, chosen, text)}
+      <Text style={prose(c, t)}>{caption ?? ' '}</Text>
     </View>
   );
 }
@@ -107,79 +122,100 @@ function levelBar(
   );
 }
 
-function linkLine(
+// Each known exit between two rooms on this level, centre to centre.
+function lines(c: Palette, map: Drawn, rooms: Room[], at: (r: Room) => At) {
+  return map.links.map((link) => {
+    const a = rooms.find((r) => r.id === link.from),
+      b = rooms.find((r) => r.id === link.to);
+    return a && b && <Line key={`${link.from}:${link.direction}`} c={c} from={at(a)} to={at(b)} />;
+  });
+}
+
+// Each unexplored exit from a room on this level: a short line to an open dot.
+function stubs(
   c: Palette,
-  link: Drawn['links'][number],
+  map: Drawn,
   rooms: Room[],
-  point: (r: Room) => { left: number; top: number },
+  at: (r: Room) => At,
+  text: Props['text'],
+  tap: (caption: string) => void,
 ) {
-  const a = rooms.find((r) => r.id === link.from),
-    b = rooms.find((r) => r.id === link.to);
-  if (!a || !b) return null;
-  const from = point(a),
-    to = point(b),
-    dx = to.left - from.left,
-    dy = to.top - from.top;
+  return map.unexplored.map((u) => {
+    const from = rooms.find((r) => r.id === u.from);
+    if (!from) return null;
+    const a = at(from),
+      b = { x: a.x + AIM[u.direction].x * STUB, y: a.y + AIM[u.direction].y * STUB };
+    return (
+      <View key={`${u.from}:${u.direction}`}>
+        <Line c={c} from={a} to={b} />
+        <Dot
+          c={c}
+          at={b}
+          name={LABEL.unexplored}
+          tap={tap}
+          open
+          label={LABEL.unexploredExit(u.direction, text(from.title))}
+        />
+      </View>
+    );
+  });
+}
+
+function Line(p: { c: Palette; from: At; to: At }) {
+  const [dx, dy] = [p.to.x - p.from.x, p.to.y - p.from.y];
+  const length = Math.hypot(dx, dy);
   return (
     <View
-      key={`${link.from}:${link.direction}`}
       style={{
         position: 'absolute',
-        left: (from.left + to.left) / 2 - Math.hypot(dx, dy) / 2 + 64,
-        top: (from.top + to.top) / 2 + 28,
-        width: Math.hypot(dx, dy),
-        height: 1,
-        backgroundColor: c.dim,
+        left: (p.from.x + p.to.x) / 2 - length / 2,
+        top: (p.from.y + p.to.y) / 2 - size.rule / 2,
+        width: length,
+        height: size.rule,
+        backgroundColor: p.c.dim,
         transform: [{ rotate: `${(Math.atan2(dy, dx) * 180) / Math.PI}deg` }],
       }}
     />
   );
 }
 
-function roomDetail(c: Palette, t: Type, map: Drawn, chosen: Room, text: Props['text']) {
-  return (
-    <View>
-      <Text style={prose(c, t)}>{text(chosen.title)}</Text>
-      {map.links
-        .filter((l) => l.from === chosen.id)
-        .map((l) => (
-          <Text key={l.direction} style={note(c, t)}>
-            {l.direction}: {text(map.rooms.find((r) => r.id === l.to)!.title)}
-          </Text>
-        ))}
-    </View>
-  );
-}
-
-function roomButton(
-  c: Palette,
-  r: Room,
-  here: boolean,
-  text: Props['text'],
-  at: { left: number; top: number },
-  select: (id: string) => void,
-) {
+// A touch-sized button centred on its point; the dot drawn inside. The current room's is ringed in
+// the action colour, so it is told by shape as well as colour; an unexplored one is open and muted.
+function Dot(p: {
+  c: Palette;
+  at: At;
+  name: string;
+  label?: string;
+  here?: boolean;
+  open?: boolean;
+  tap: (caption: string) => void;
+}) {
+  const r = p.here ? HERE : DOT;
   return (
     <Pressable
-      key={r.id}
       accessibilityRole="button"
-      accessibilityLabel={`${text(r.title)}${here ? ', current place' : ''}`}
-      onPress={() => select(r.id)}
+      accessibilityLabel={p.label ?? `${p.name}${p.here ? ', current place' : ''}`}
+      onPress={() => p.tap(p.name)}
       style={{
         position: 'absolute',
-        ...at,
-        padding: 5,
-        minHeight: 56,
-        width: 128,
-        backgroundColor: c.bg,
-        borderWidth: 1,
-        borderColor: c.fg,
+        left: p.at.x - size.touch / 2,
+        top: p.at.y - size.touch / 2,
+        width: size.touch,
+        height: size.touch,
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <Text style={note(c, type)}>
-        {here && <Text aria-hidden>● </Text>}
-        {text(r.title)}
-      </Text>
+      <View
+        style={{
+          width: r * 2,
+          height: r * 2,
+          borderRadius: r,
+          borderWidth: p.open || p.here ? size.speechBar : 0,
+          borderColor: p.here ? p.c.action : p.c.dim,
+          backgroundColor: p.open ? p.c.bg : p.c.fg,
+        }}
+      />
     </Pressable>
   );
 }

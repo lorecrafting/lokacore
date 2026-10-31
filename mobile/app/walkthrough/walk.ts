@@ -145,14 +145,14 @@ const spellOn = (walked: Screen, browser: Browser) => async (word: string) => {
 
 type Locator = ReturnType<Screen['getByRole']>;
 
-// The screen whose taps first wait for the control, then log a step.
+// The screen whose taps and key presses first wait for the control, then log a step.
 function narrated(screen: Screen, browser: Browser, note: (action: string) => Promise<void>) {
   const wrap = (locator: Locator, name: unknown): Locator =>
     new Proxy(locator, {
       get(target, key) {
         const value = Reflect.get(target, key);
         if (typeof value !== 'function') return value;
-        if (key === 'tap' || key === 'doubleTap')
+        if (key === 'tap' || key === 'doubleTap' || key === 'press')
           return async (...args: unknown[]) => {
             await expect(target)
               .toBeVisible()
@@ -161,7 +161,9 @@ function narrated(screen: Screen, browser: Browser, note: (action: string) => Pr
                   `walk dead end: no "${String(name)}"; buttons: ${(await browser.evaluate(top)).buttons.join(' | ')}`,
                 );
               });
-            await note(`${key === 'tap' ? 'Tap' : 'Double-tap'} ${String(name)}`);
+            const verb =
+              key === 'press' ? `Press ${args[0]} on` : key === 'tap' ? 'Tap' : 'Double-tap';
+            await note(`${verb} ${String(name)}`);
             return value.apply(target, args);
           };
         return (...args: unknown[]) => {

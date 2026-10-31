@@ -12,8 +12,7 @@ const showcase = compiled('cartridges/toolbox_showcase');
 // Nell's page on the Low Wardle green, after calling the Reeve a cheat (standing 0 to -2) or not.
 function nell(cheat: boolean) {
   const b = book(showcase as never);
-  b.map();
-  b.tap('Go south');
+  b.go('south');
   if (cheat) {
     for (const c of ['Reeve, open', /^Talk/, 'Call him a cheat']) b.tap(c);
     b.tap(LABEL.leaveConversation);
@@ -44,8 +43,7 @@ test('Nell at standing -2 shows her refusal line, no Talk or Trade; at 0 she tra
 // a sale leaves the sell page, does not redraw the purse, or keeps the sold row.
 test('a buy keeps the buy page: its line, the new purse, the row refused in words', () => {
   const b = book(showcase as never);
-  b.map();
-  b.tap('Go south');
+  b.go('south');
   for (const c of ['Nell, open', LABEL.trade]) b.tap(c);
   const purse = (t: string[]) => t.find((l) => /^You have \d+p\.$/.test(l));
   const before = purse(b.text());
@@ -84,10 +82,7 @@ test('a buy keeps the buy page: its line, the new purse, the row refused in word
 // conversation.
 test('an insult mid-talk keeps the conversation page, no refusal Note', () => {
   const b = book(showcase as never);
-  for (const s of ['Go south', 'Go south']) {
-    b.map();
-    b.tap(s);
-  }
+  for (const d of ['south', 'south']) b.go(d);
   for (const c of [/^Bess/, /^Talk/, 'Insult the village']) b.tap(c);
   const shown = b.text();
   assert.ok(shown.includes('Bess scowls and turns to her next customer, as she will every time.'));
@@ -100,10 +95,7 @@ test('an insult mid-talk keeps the conversation page, no refusal Note', () => {
 // Breaks (loka-x6t.21): a multi-choice showcase talk draws an authored Leave beside the foot's own.
 test('a multi-choice talk has no authored Leave; the foot Leave the conversation ends it', () => {
   const b = book(showcase as never);
-  for (const s of ['Go south', 'Go south']) {
-    b.map();
-    b.tap(s);
-  }
+  for (const d of ['south', 'south']) b.go(d);
   for (const c of [/^Bess/, /^Talk/]) b.tap(c);
   const labels = b.labels();
   assert.ok(labels.includes('Insult the village'), JSON.stringify(labels));
@@ -116,8 +108,7 @@ test('a multi-choice talk has no authored Leave; the foot Leave the conversation
 // foot sends close_choice (no "You take your leave."); or a stale left history after the second exit.
 test("a talk's authored Leave is the foot's: one Leave the conversation, sending that choice", () => {
   const b = book(showcase as never);
-  b.map();
-  b.tap('Go south');
+  b.go('south');
   b.tap('Nell, open');
   for (let i = 0; i < 2; i++) {
     b.tap(/^Talk/);

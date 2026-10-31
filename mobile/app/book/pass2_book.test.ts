@@ -10,8 +10,7 @@ import { book } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 
 const showcase = () => book(compiled('cartridges/toolbox_showcase') as never);
-const go = (b: ReturnType<typeof showcase>, ...ds: string[]) =>
-  ds.forEach((d) => (b.map(), b.tap(`Go ${d}`)));
+const go = (b: ReturnType<typeof showcase>, ...ds: string[]) => ds.forEach((d) => b.go(d));
 
 // Breaks: a teach line dumps its fields, a qualified one repeats how to learn it (H3), or an
 // unqualified or locked one stops naming its requirement (loka-x6t.24).

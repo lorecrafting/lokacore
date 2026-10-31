@@ -196,10 +196,20 @@ export function book(
     assert.ok(card, `no unavailable ${shown}`);
     card.props.onPress();
   };
-  const map = () => {
-    const footer = draw().find((n) => n.type.name === 'Footer');
-    assert.ok(footer);
-    footer.props.openMap();
+  const footer = () => {
+    const f = draw().find((n) => n.type.name === 'Footer');
+    assert.ok(f);
+    return f.props;
+  };
+  const map = () => footer().openMap();
+  // One step as the minimap's arrow key takes it (Footer's walker): an open exit walks, a shut door
+  // presses its offered Unlock, else Open.
+  const go = (direction: string) => {
+    const f = footer();
+    const e = f.exits.find((x: { direction: string }) => x.direction === direction);
+    assert.ok(e, `no exit ${direction}`);
+    if (e.available) f.go(direction);
+    else assert.ok(f.door(direction), `the way ${direction} is shut`);
   };
   const text = () =>
     draw()
@@ -228,6 +238,7 @@ export function book(
     tap,
     refuse,
     map,
+    go,
     text,
   };
 }

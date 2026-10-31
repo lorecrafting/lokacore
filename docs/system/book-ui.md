@@ -63,8 +63,8 @@ notice entry: every action, available or refused, draws on its target's fixture,
 page, a pair through its [pick list](#item-details-and-takedrop) (owner 2026-10-23, quoted: "all
 actions on targets [...] should be in the target detail page, or item detail page, and not in the
 main room page").
-World draws no door card: Open and Unlock work from the Map and the
-[joystick](#minimap-map-and-presentation-controls), and a door's state shows on the minimap: World
+World draws no door card: Open and Unlock work from the
+[joystick](#minimap-map-and-presentation-controls) (the Map has no actions, owner 2026-10-30), and a door's state shows on the minimap: World
 draws no door state line (a walk into a shut door still logs its refusal, [Minimap](#minimap-map-and-presentation-controls)) (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
 would show in the minimap joystick thing, not in the main description or event log page").
 The description
@@ -245,32 +245,35 @@ logs one line naming the door ("The door to the south is locked.", "above"/"belo
 and walks nowhere. The reader actions name the reason too ("Go west, locked").
 Direction/reason appears opposite the finger. The existing
 tip explains hold/drag/tap; Got it, a map tap or walking dismisses it, persisted separately with
-memory fallback. The accessible Map activation opens the section; Go-direction actions use the
-same offered exits. Gesture/drawing details remain in
+memory fallback. The accessible Map activation opens the section; the footer and its keys are
+the Book's only movement and door-opening controls. Gesture/drawing details remain in
 [joystick](../../mobile/app/book/joystick.ts) and [footer](../../mobile/app/book/Footer.tsx).
 
-Map is a scrolling projection, distinct from the enlarged joystick. Releases without
-discovery metadata retain the current-room exit/door projection.
+Map is a scrolling projection, distinct from the enlarged joystick, drawn as dots and lines
+([DiscoveredMap](../../mobile/app/book/DiscoveredMap.tsx), owner 2026-10-30, loka-wz6f). It holds
+no actions: no movement, door or room cards and no Go; the footer walks and opens doors. Releases
+without discovery metadata draw no map and keep the current place line.
 
 The [discovery contract](mechanics.md#d10-discovered-places-observations-and-knock-selected-contract)
-is installed: Map draws only
-visited rooms at their authored level/position and links whose two endpoints were visited.
-Remote visited links are drawn as known static connections without a current traversal
-claim; only exits from the actor's current room show live availability/refusal from
-ordinary Move admission, including any ingress rule.
-The current-room marker and a level stepper are visible; a room detail names that known
-room and its known exits. While a room detail is open, Back to map is the page's nearest return,
-beside the section's own return ([Contents](#world-and-status-entry)). An unvisited endpoint, NPC or item is never drawn merely because
-the cartridge contains it or adjacent sight names it. Existing current-room exit and door
-controls retain live admission. Where labels distinguish currently visible `here`,
+is installed: Map draws a filled dot for each visited room at its authored level/position and a
+line for each link whose two endpoints were visited, as known static connections without a current
+traversal claim. The current room's dot is ringed, told by shape as well as colour. Each exit of a
+visited room that leads nowhere visited yet (`map.unexplored`) is a short line to an open, muted
+dot; an up or down one leans aslant. An open dot stands for the exit only, never the unvisited
+room, its name, an NPC or an item; nothing is drawn merely because the cartridge contains it or
+adjacent sight names it. No room name is written inside the drawing: tapping a dot puts its room
+title in the caption under the map, an open dot's "Unexplored"; changing level clears the caption.
+Every dot is a touch-sized button named by its room title (", current place" on the ringed one), an
+open dot "Unexplored, <direction> of <room>". A level stepper shows when rooms span levels.
+
+Under the drawing the page keeps the current place line, "No way out" when the room has no exits,
+and Where. Where labels distinguish currently visible `here`,
 `last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
 become `here`, and a stale observation is never phrased as a current location. A last-seen
 answer gives the time since in the [condition durations](#conditions-details) ("Maud: last
 seen at Inn yard, 2h ago."), "just now" under two minutes. Each known
 NPC's Where control reads "Ask where <name> is"; only a living known NPC has one, a dead one
 none (pass-1 UF3; the kernel leaves the dead out of `known_npcs`, GE6).
-Knock appears on the actual local door's context card and uses its exact direction and
-freshness token. It leaves that card and Map reachable after its reply.
 
 In the web Book, unmodified Arrow Up/Down/Left/Right walk north/south/west/east and
 Page Up/Page Down use offered up/down exits. Keyboard movement uses the same captured
@@ -304,8 +307,7 @@ Give to…), then asks, Trade and services (a person's page orders its own cards
 spell…, [rule](#item-details-and-takedrop)) close the first group in that order; a corpse's Take from it precedes Put into it. Within a group the
 GameView's order stands. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World follows the [room page anatomy](#room-page-anatomy).
-A page's local returns (Leave, Back to World, Back to Contents, Back to board, Back to map,
-Close) sit in its page foot, below the scrolling content, nearest first, and the foot's last
+A page's local returns (Leave, Back to World, Back to Contents, Back to board, Close) sit in its page foot, below the scrolling content, nearest first, and the foot's last
 control ends the page; offered actions never do. Item, notice, board, NPC and shop pages, Contents and its
 sections draw no status line or compass (owner pick mvlrlvappy4w, 2026-10-23;
 loka-8lpm): a pending save shows

@@ -60,7 +60,7 @@ x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on 
 - Known: none filed.
 
 ## 10. Map and notices
-- pages-map--discovered-two-levels, --barred-exits, --where
+- pages-map--start, --several-rooms, --discovered-two-levels, --selected, --where
 - pages-notices--notice-with-read, --dream-available, --dream-acknowledged
 - Known: x6t.99 (signpost wording, Word bar height).
 

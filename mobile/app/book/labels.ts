@@ -9,7 +9,6 @@ export const LABEL = {
   backToWorld: 'Back to World',
   backToContents: 'Back to Contents',
   backToBoard: 'Back to board',
-  backToMap: 'Back to map',
   close: 'Close',
   resumeDream: 'Resume dream',
   gotIt: 'Got it',
@@ -89,7 +88,10 @@ export const LABEL = {
   noWayOut: 'No way out is known.',
   nothingWritten: 'Nothing written yet.',
   currentPlace: (place: string) => `Current place: ${place}`,
-  beyond: (direction: string) => `Beyond ${direction}: `,
+  // A Map drawing's open dot: its caption and its accessible name.
+  unexplored: 'Unexplored',
+  unexploredExit: (direction: string, from: string) =>
+    `Unexplored, ${AT[direction] ?? `${direction} of`} ${from}`,
   // A quest's patrol and expedition lines on the Journal page.
   patrolProgress: (credit: number, required: number, status: string) =>
     `${credit} of ${required} checkpoints. ${status}.`,
@@ -122,3 +124,5 @@ export const COUNT: readonly string[] = [
   'eight',
   'nine',
 ];
+// An up or down way's place word: "above", "below" ("The door below is locked.").
+export const AT: Record<string, string> = { up: 'above', down: 'below' };

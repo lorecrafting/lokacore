@@ -174,12 +174,12 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### Doors move through the minimap and joystick
 
-- Rule: no door cards on World; releasing the joystick toward a shut door presses Unlock when
+- Rule: no door cards on World or the Map (owner 2026-10-30); releasing the joystick toward a shut door presses Unlock when
   available, else Open; the minimap tick tells closed from locked; a refusal logs one line.
 - Why: movement is spatial, so it lives on the spatial control, not in the prose.
 - Source: [Minimap, Map and presentation controls](../system/book-ui.md#minimap-map-and-presentation-controls).
 - Enforcement: joystick and minimap tests under `mobile/app/book/`; none yet for "no door card on
-  World" beyond `room_anatomy.test.ts`.
+  World" beyond `room_anatomy.test.ts`; `map_drawing.test.ts` for the Map.
 
 ### Page turns
 

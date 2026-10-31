@@ -13,6 +13,7 @@ import type { DetailLine } from './logs.ts';
 import { emoteSentence, lineSentence } from '../../packages/game-view/line_words.ts';
 import { things } from './item-pages.ts';
 import { levelWords } from './pick.ts';
+import { AT } from './labels.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
@@ -104,7 +105,6 @@ export const SENTENCE: Record<string, string> = {
 };
 export type Refusal = { code: string; cause?: string };
 // A shut door's refusal ("The door to the south is locked.", owner 2026-10-23); none when open.
-const AT: Record<string, string> = { up: 'above', down: 'below' };
 export const doorSentence = (x: { direction: string; door?: { state: string } }) =>
   x.door && x.door.state !== 'open'
     ? `The door ${AT[x.direction] ?? `to the ${x.direction}`} is ${x.door.state}.`

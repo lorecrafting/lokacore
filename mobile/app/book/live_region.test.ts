@@ -87,7 +87,7 @@ test('two equal buys on a shop page are each read in full', () => {
   writeFileSync(item, readFileSync(item, 'utf8').replace('candle_02.short', 'candle_03.short'));
   const b = book(compiled(dir) as never);
   rmSync(dir, { recursive: true });
-  for (const c of ['Go down', 'Go north']) (b.map(), b.tap(c));
+  for (const d of ['down', 'north']) b.go(d);
   for (const c of ['chandler, open', LABEL.trade]) b.tap(c);
   const batches = [0, 1].map(() => {
     b.tap(/tallow candle, \d+p\. Buy for /);

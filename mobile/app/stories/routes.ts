@@ -10,7 +10,7 @@ export type Harness = ReturnType<typeof book> & { steps: Step[] };
 const go =
   (...directions: string[]): Step =>
   (b) => {
-    for (const d of directions) (b.map(), b.tap(`Go ${d}`));
+    for (const d of directions) b.go(d);
   };
 
 // Real time passes: the elapsed clocks advance and the game catches up (a pulse).
@@ -128,8 +128,9 @@ export const routes: Record<string, Step[]> = {
         throw new Error('not bleeding');
     },
   ],
+  'map-start': [(b) => b.map()],
+  'map-rooms': [go('east', 'west'), ...hall, (b) => b.map()],
   'map-two-levels': [go('up'), (b) => b.map()],
-  'map-barred': [...hall, (b) => b.map()],
   'map-where': [...hall, (b) => b.map(), 'Ask where Bess, the alewife is'],
   journal: [...errand, ...contents('Journal')],
   'carrying-empty': [...contents(LABEL.inventory)],

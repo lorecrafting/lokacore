@@ -1097,7 +1097,7 @@
   "You arrive from the north.",
   "You open the sack's tie.",
   {
-   "quiet": "[\"item.put\",{\"item\":\"item.loaf.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"fe91520e-73f4-8409-a933-1ef6d86a4055\",\"a73c20e5-6215-859b-a573-fd34b4ffc92d\"],13]",
+   "quiet": "[\"item.put\",{\"item\":\"item.loaf.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"fe91520e-73f4-8409-a933-1ef6d86a4055\",\"a73c20e5-6215-859b-a573-fd34b4ffc92d\"],7]",
    "plain": "You put a loaf in a seed sack.",
    "times": 1,
    "text": "You put a loaf in a seed sack."

@@ -159,10 +159,9 @@ const law = async (screen: Screen, { tap, take, moves, fixture }: Steps) => {
   await npc(/^(?:the )?clerk, open$/i, /^Buy the strongroom/);
   await take(/^(?:the )?strongroom key, open$/i, /^Take the strongroom key/);
   await moves('west');
-  await tap('Map');
-  await tap(/^Unlock the strongroom door/);
-  await tap(/^Open the strongroom door/);
-  await tap('Go south');
+  // the footer's south key unlocks, then opens, then walks through the strongroom door
+  for (let i = 0; i < 2; i++) await go(screen, 'south');
+  await moves('south');
   await take(/^(?:a )?strongroom chest, open$/i, /^Open a strongroom chest/);
   // Open turns to the chest's Inside page, which offers the held candle's Put (loka-2qk5)
   await tap(/^Put a tallow candle/);
@@ -217,7 +216,8 @@ const magic = async (r: Walk, steps: Steps) => {
   await tap(LABEL.useOn); // the oilcan's Pick list; a pick returns to World
   await tap(/, oil the winch$/);
   // the Map, a Contents section, draws no status line (loka-8lpm)
-  for (const l of ['Map', /^Open/, LABEL.backToWorld]) await tap(l);
+  for (const l of ['Map', LABEL.backToWorld]) await tap(l);
+  await go(screen, 'down'); // the down key opens the crypt's shut way (the Map offers no actions)
   await held(/^the lantern/);
   await tap(/^Drop/); // the lit lantern left on the stair: the crypt below is dark
   await tap(LABEL.backToContents); // a Drop returns to Inventory (loka-8lpm)

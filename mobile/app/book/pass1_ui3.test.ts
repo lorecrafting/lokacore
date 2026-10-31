@@ -1,43 +1,35 @@
-// Pass-1 UI3 (book-ui.md, World and status entry; Map): the Map draws no log (UF1), a door's state
-// line beside its exit card, which reads only its direction (UF2), and a shut door's Open also on World (R4).
+// Pass-1 UI3 (book-ui.md, World and status entry; Map): World draws no door card and the Map draws
+// no log or door lines (owner 2026-10-30, loka-wz6f); the footer's shut-door press sends one command.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 
-// Breaks: the Map draws the log again (UF1); the exit card reads "East: locked" again, or the door
-// line drops (UF2); World draws a door card again (owner 2026-10-23
-// reverses R4: doors work from the Map and the joystick), or a repeat Map press sends another command.
-test('doors sampler lane: Map door lines, none on World, after closing the hut door', (t) => {
+// Breaks: World draws a door card again; the Map draws the log (UF1) or a door line again; one
+// footer press on a shut door sends no command or more than one.
+test('doors sampler lane: no door card on World or the Map', (t) => {
   const b = book(compiled('cartridges/doors_sampler') as never);
   t.after(() => b.sql.close());
-  const sent: unknown[] = [];
-  const invoke = b.game.invoke;
-  b.game.invoke = (c) => (sent.push({ ...c, view_freshness_token: undefined }), invoke(c));
-  assert.ok(!b.labels().includes('Close the hut door (north)'));
+  assert.ok(!b.labels().some((l) => /door|gate/.test(l)), JSON.stringify(b.labels()));
+  b.go('north');
+  b.go('south');
+  const line = b.text().at(-1)!;
   b.map();
-  const before = b.text();
-  assert.ok(before.includes('The hut door: open'));
-  assert.ok(before.includes('East') && !before.some((l) => l.startsWith('East:')));
-  assert.ok(before.includes('The gate: locked'));
-  b.tap('Close the hut door (north)');
   const map = b.text();
-  assert.ok(map.includes('North'));
-  assert.ok(map.includes('The hut door: closed'));
-  assert.ok(!map.includes('You close the hut door.'), JSON.stringify(map));
-  b.tap('Back to World');
-  const world = b.text();
-  assert.ok(world.includes('You close the hut door.'));
-  assert.ok(!world.includes('Open the hut door (north)'), JSON.stringify(world));
-  b.map();
-  b.tap('Open the hut door (north)');
-  b.tap('Close the hut door (north)');
-  b.tap('Open the hut door (north)');
-  assert.deepEqual(sent[1], sent[3]);
-  assert.deepEqual(sent[3], {
-    action_key: 'open',
-    target_ids: [],
-    input: { direction: 'north' },
-    view_freshness_token: undefined,
-  });
+  assert.ok(!map.includes(line), JSON.stringify(map));
+  assert.ok(!map.some((l) => /^The (hut door|gate)/.test(l)), JSON.stringify(map));
+  assert.ok(!b.labels().some((l) => /door|gate\b/.test(l)), JSON.stringify(b.labels()));
+});
+
+test('trial sampler: one footer press on the shut cell door sends one Open', (t) => {
+  const b = book(compiled('cartridges/trial_sampler') as never);
+  t.after(() => b.sql.close());
+  const sent: { action_key: string; input: unknown }[] = [];
+  const invoke = b.game.invoke;
+  b.game.invoke = (c) => (sent.push(c as never), invoke(c));
+  b.go('east');
+  assert.deepEqual(
+    sent.map((c) => [c.action_key, c.input]),
+    [['open', { direction: 'east' }]],
+  );
 });

@@ -8,7 +8,7 @@ const meta = {
   args: { back: fn(), leave: fn() },
   render: (args: { back?: () => void; leave: () => void }) => (
     <PageFoot>
-      {args.back && <Control label="Back to map" onPress={args.back} />}
+      {args.back && <Control label="Back to board" onPress={args.back} />}
       <Control label={args.back ? 'Back to World' : 'Leave'} onPress={args.leave} />
     </PageFoot>
   ),
@@ -26,11 +26,11 @@ export const OneReturn: Story = {
   },
 };
 
-// Breaks: PageFoot drops or misroutes the second of two returns (a Map room detail's pair).
+// Breaks: PageFoot drops or misroutes the second of two returns (a notice's Back to board, then Back to World).
 export const TwoReturns: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await expect(canvas.getAllByRole('button')).toHaveLength(2);
-    await userEvent.click(canvas.getByRole('button', { name: 'Back to map' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Back to board' }));
     await userEvent.click(canvas.getByRole('button', { name: 'Back to World' }));
     await expect(args.back).toHaveBeenCalledTimes(1);
     await expect(args.leave).toHaveBeenCalledTimes(1);

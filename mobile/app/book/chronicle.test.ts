@@ -24,13 +24,12 @@ const rows = (b: ReturnType<typeof book>) =>
 // again on day 7; a hand-built milestone receipt repeats the tick line on day 7.
 function journal() {
   const b = book(bundle as never, undefined, ids);
-  for (const d of ['east', 'west']) (b.map(), b.tap(`Go ${d}`));
+  for (const d of ['east', 'west']) b.go(d);
   b.clock.wall += HOURS3;
   b.clock.mono += HOURS3;
   const pulse = () => (b.game as unknown as { pulse(): { kind: string } }).pulse().kind;
   for (let i = 0; pulse() === 'catching_up'; i++) assert.ok(i < 100, 'never settled');
-  b.map();
-  b.tap('Go east');
+  b.go('east');
   b.sql
     .prepare(
       `INSERT INTO receipt SELECT scope, 'milestone', 'milestone', actor_id, intent_digest_version,

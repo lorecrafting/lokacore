@@ -15,8 +15,8 @@ type Book = ReturnType<typeof book>;
 // `ms` of real time passes; pulses until time stops catching up.
 function away(ms: number) {
   const b = book(bundle as never);
-  b.map();
-  for (const c of ['Go south', 'Reeve, open', /^Talk/, 'Take the letter to Wat']) b.tap(c);
+  b.go('south');
+  for (const c of ['Reeve, open', /^Talk/, 'Take the letter to Wat']) b.tap(c);
   b.tap('Leave the conversation');
   b.tap('Leave');
   // The recap's "no deadline line" only means something with the letter quest running.
