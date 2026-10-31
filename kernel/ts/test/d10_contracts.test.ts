@@ -25,7 +25,8 @@ const cases: [string, any, string?][] = [
   ['KnownRoomView', room],
   ['KnownConnectionView', { from: id, to: id, direction: 'north' }],
   ['KnownNpcView', { id, name: 'npc.smith.short' }],
-  ['MapView', { rooms: [room], links: [] }],
+  ['UnexploredExitView', { from: id, direction: 'east' }],
+  ['MapView', { rooms: [room], links: [], unexplored: [{ from: id, direction: 'east' }] }],
   ['MutationTarget', { kind: 'visit', ...visit }, 'visit'],
   ['MutationTarget', { kind: 'observation', actor_id: id, npc_id: id }, 'observation'],
   ['DeltaOp', { op: 'visit.record', writer_group: 0, ...visit, value: visit }, 'visit.record'],
@@ -91,6 +92,22 @@ test('D10 contracts require each binding and bound with executable schema red co
         );
       }
     }
+  }
+});
+
+// Breaks: an unexplored stub carries its unvisited destination's id or title onto the wire.
+// Declared properties close the object (validate.ts), so the red control declares the leaked key.
+test('an unexplored stub admits no destination id or title, with a declared-key red control', () => {
+  for (const key of ['to', 'title']) {
+    const leak = { from: id, direction: 'east', [key]: id };
+    assert.notDeepEqual(validate('MapView', { rooms: [], links: [], unexplored: [leak] }), [], key);
+    const mutant = structuredClone(DEFS) as any;
+    mutant.UnexploredExitView.properties[key] = {};
+    assert.deepEqual(
+      validate('MapView', { rooms: [], links: [], unexplored: [leak] }, mutant),
+      [],
+      `${key} red`,
+    );
   }
 });
 

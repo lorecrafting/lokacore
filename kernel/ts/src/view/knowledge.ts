@@ -55,21 +55,23 @@ export function knowledgeView(
       visited.has(id) ? [{ id, title: world.rooms[id].name, x: p.x, y: p.y, z: p.z }] : [],
     )
     .sort((a, b) => cmp(a.id, b.id));
-  const links = rooms.flatMap(({ id }) =>
+  // The exits `sight` shows (movement/rule.ts): a hidden face is neither a link nor a stub.
+  const seen = rooms.flatMap(({ id }) =>
     COMPASS.flatMap((direction) => {
       const exit = exitOf(world.rooms[id], direction);
       const to = exit && world.roomIds[refString(exit.to)];
-      return to &&
-        visited.has(to) &&
-        at.has(to) &&
-        !hidden(world, world.rooms[id], direction, actor)
+      return to && !hidden(world, world.rooms[id], direction, actor)
         ? [{ from: id, to, direction }]
         : [];
     }),
   );
+  const links = seen.filter(({ to }) => visited.has(to) && at.has(to));
+  const unexplored = seen
+    .filter(({ to }) => !visited.has(to))
+    .map(({ from, direction }) => ({ from, direction }));
   return {
     ...name,
-    map: { rooms, links },
+    map: { rooms, links, unexplored },
     ...(resolved(world, actor).where && { known_npcs: knownNpcs(world, actor, steps) }),
   };
 }

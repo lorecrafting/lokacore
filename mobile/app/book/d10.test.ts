@@ -13,7 +13,11 @@ const view = {
   inventory: [],
   journal: [],
   known_npcs: [{ id: 'ash', name: 'Ash' }],
-  map: { rooms: [{ id: 'landing', title: 'Landing', x: 0, y: 0, z: 0 }], links: [] },
+  map: {
+    rooms: [{ id: 'landing', title: 'Landing', x: 0, y: 0, z: 0 }],
+    links: [],
+    unexplored: [],
+  },
 } as unknown as GameView;
 const reply = (location: object): Reply =>
   ({

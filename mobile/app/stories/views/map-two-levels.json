@@ -29,6 +29,44 @@
      "to": "470b4175-5b92-89c1-bdac-645a128dc72f",
      "direction": "down"
     }
+   ],
+   "unexplored": [
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "down"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "east"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "north"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "south"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "west"
+    },
+    {
+     "from": "8a20c3d3-0f0f-84ec-b058-d27c85d5ba17",
+     "direction": "east"
+    },
+    {
+     "from": "8a20c3d3-0f0f-84ec-b058-d27c85d5ba17",
+     "direction": "north"
+    },
+    {
+     "from": "8a20c3d3-0f0f-84ec-b058-d27c85d5ba17",
+     "direction": "up"
+    },
+    {
+     "from": "8a20c3d3-0f0f-84ec-b058-d27c85d5ba17",
+     "direction": "west"
+    }
    ]
   },
   "known_npcs": [

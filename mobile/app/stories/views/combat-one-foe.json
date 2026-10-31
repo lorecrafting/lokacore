@@ -46,6 +46,40 @@
      "to": "251e7a71-b5ad-8d22-858b-533e52cc5415",
      "direction": "west"
     }
+   ],
+   "unexplored": [
+    {
+     "from": "251e7a71-b5ad-8d22-858b-533e52cc5415",
+     "direction": "down"
+    },
+    {
+     "from": "251e7a71-b5ad-8d22-858b-533e52cc5415",
+     "direction": "south"
+    },
+    {
+     "from": "251e7a71-b5ad-8d22-858b-533e52cc5415",
+     "direction": "west"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "down"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "east"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "north"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "south"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "up"
+    }
    ]
   },
   "levelling": {

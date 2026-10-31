@@ -7,6 +7,7 @@
 // 172800 (day 3, 00:00) of each 345600; season: winter from 259200 (day 4).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { validate } from '../src/foundation/validate.ts';
 import { gameView } from '../src/index.ts';
 import { describe } from '../src/mechanics/description_variant/rule.ts';
 import type { World } from '../src/runtime/decision.ts';
@@ -66,6 +67,24 @@ test('world 2: at 07:00 the tide is high: the gate refuses, the room says why, n
   assert.equal(refused(w, { type: 'open', direction: 'east' }), 'invalid_state');
   assert.equal(place(w), 'room.shore_steps.high_tide');
   assert.equal(offersOpen(w, 'east'), false);
+});
+
+// Breaks: the map stubs a hidden face, stubs a visited destination, or a stub names the room
+// beyond it. A side walk to the cave that never visits the stair, so its `up` face is a stub.
+test('map: a visited room stubs its unvisited exits by direction only, never a hidden face', () => {
+  let x = play(wait(w, 12 * HOUR).world, { type: 'open', direction: 'east' }).world;
+  x = wait(go(x, 'east').world, 20 * HOUR).world;
+  const stubs = (v: World, k: string) =>
+    gameView(v)
+      .map!.unexplored.filter((s) => s.from === v.roomIds[ref('room', k)])
+      .map((s) => s.direction)
+      .sort();
+  assert.deepEqual([stubs(x, 'sea_cave'), stubs(x, 'shore_steps')], [[], ['north', 'south']]);
+  x = perform(x, 'search_cleft').world;
+  assert.deepEqual(stubs(x, 'sea_cave'), ['up']);
+  const view = gameView(x);
+  assert.ok(view.map!.unexplored.every((s) => Object.keys(s).sort().join() === 'direction,from'));
+  assert.deepEqual(validate('GameView', view), []);
 });
 
 // Breaks: the climb face is missing, its damage differs, or the rope is not checked.
