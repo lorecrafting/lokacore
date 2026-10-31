@@ -337,6 +337,10 @@ test('a tick in combat is no blow; a blow beside a tick is its own size', () => 
   assert.equal(hp(fought(6, poison(160)), fought(10, poison(100))), 3);
   assert.equal(hp(fought(9, poison(160, 2)), fought(10, poison(100, 2))), 3); // heals 2, blow 3
   assert.equal(hp(fought(7, poison(100)), fought(10, poison(100))), 3); // no tick fell
+  const stamina = (next_tick_at: number) => ({
+    conditions: [{ label: 's', resource: 'stamina', per_tick: -5, tick_every: 60, next_tick_at }],
+  });
+  assert.equal(hp(fought(7, stamina(160)), fought(10, stamina(100))), 3); // a stamina tick takes no HP
   const bleed = (next_tick_at: number, generation = 1) => ({
     bleeding: { label: 'b', hp_loss: 2, tick_every: 100, next_tick_at, generation },
   });
