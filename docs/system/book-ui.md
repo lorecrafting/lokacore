@@ -139,7 +139,7 @@ The enabled status/resources tap opens Contents. It lists exactly **Character**,
 row. Character shows existing projected resources and position, without unrelated index links.
 Inventory separates held items from worn slots; Journal uses projected quest text;
 Settings retains Start over and its confirmation/error handling, and holds the
-[page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Contents and every
+[Sound, Music, Haptics and Flashes](#effects-sound-and-haptics) on/off controls. Contents and every
 section it opens draw no status line (owner, 2026-10-30, loka-8lpm; the [page foot](#detail-page-order)
 rule). A section opened from Contents returns with **Back to Contents** (one page back), and Contents
 returns with **Back to World**; a section opened another way (Character from a status icon, the map
@@ -725,6 +725,64 @@ reads "<reason>, <sentence>". History, redraws, page turns and a reopen are neve
 repeated line is read again. Condition changes arrive as log narration, so they are read the same
 way. The region is text only, so motion settings do not apply to it. The one exception is an
 [unavailable card](#unavailable-actions)'s own polite region: its press sends nothing and writes no log line, so it reads its sentence there.
+
+## Effects, sound and haptics
+
+Values, roles and the wash's contrast exemption: the catalogue's
+[design tokens](../BOOK-UI-COMPONENTS.md#design-tokens). An effect names which thing changed; none
+delays a tap, moves text the eye is on, or reaches the live region.
+
+**Press.** Every pressable answers on press-in, before the command returns: an action card and a
+letter tile lift; a Control, Continue, the page foot, a Tap and an entity name change ink; a chip
+lifts and, once chosen, holds its pressed colour. An unavailable card does not lift; its reason
+dries. A press gives the selection haptic, except a Tap (none) and the footer direction (on commit).
+
+**Ink drying.** A line entering the log in this redraw dries in; a narrated event follows its line
+by a beat. A refused line dries like any other, a repeat's count does not re-dry, an away recap
+dries once, and history never does. Under reduced motion a line dries as a plain cross-fade.
+
+**Status icon.** A status arriving scales up in its icon, and one ending fades. A permanent status
+has no arrival effect. Under reduced motion an arriving icon just appears.
+
+**Running head.** A changed objective cross-fades. A resolved one settles to secondary ink, then
+out, and the next dries in; a failed one fades through secondary ink, then out.
+
+**Blow wash.** A hit point loss during combat washes the paper once under the ink, and the hit point
+value dries in the wash's colour and back, with the thud and the heavy haptic. The page does not
+scale. Reduced motion halves the wash; Flashes off removes it, leaving the value, thud and haptic.
+
+**Flash limit.** At most one full-page luminance change per second, never three in any second; a
+later blow in that second keeps the value, thud and haptic. Flashes and reduced motion are separate.
+
+**Chapter card.** Over the leaving page's picture, blurred, the card's label, title and rule dry in
+one after another. The theme cut plays with the medium haptic. With no picture (reduced motion, a
+failed or late snapshot) there is no blur and the label, title and rule appear together; the cut
+stays. Only a chapter index change plays this, once as [Chapters](#chapters-scenes-and-recovery) says.
+
+**Event sounds.** A sound marks what the hand did or how the player's story moved, never what the
+world did. Pressed or moved: the page turn, a pickup flick (a buy plays coin instead, so one purchase
+is one sound), coin, a blow's thud. The story: level, new skill, quest resolved, quest failed, skill
+improved (rate limited), quest gained, the chapter cut. **Silent:** hint change, knowledge, fact,
+rumour and reputation, a new map room, a generic narrated event, saves, loading, errors, empty
+states, senses, status ticks and expiry, and an NPC's background life.
+
+**Haptics.** The kind for each event sits in the catalogue's tokens; refused and unavailable give
+warning, a save error or fault gives error once. Never two within the shortest gap, none during a
+page turn. Reduced motion leaves them on. Web uses the browser's vibration where supported, the
+device build is a silent stub until mobile resumes, and no device proof is required before then.
+A preview or Storybook build also marks each haptic with a pulse: a ring round the Book column,
+outside the page turn, naming the kind, taking no touch or focus and hidden from screen readers. A
+player's build never has it.
+
+**Settings.** Sound, Music, Haptics and Flashes follow the Reading size and precede Start over, in
+that row pattern, each on by default and kept on the device, not in the save. Each previews itself
+on change. Music governs the theme cut; Sound every other sound. Reduced motion follows the system,
+with no control of its own.
+
+**Queue.** One chapter or death interrupts and clears the queue. One large cue plays with one
+pending, and a third of the same key replaces the pending one. Small cues of one key coalesce into
+one. A page turn cancels the leaving page's effects; the arriving page's start after its picture
+deadline. A merged cue fires once.
 
 ## Future boundaries
 

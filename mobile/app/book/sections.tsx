@@ -175,7 +175,7 @@ export function MapPage(p: { view: GameView; text: Say } & Home) {
 }
 
 /**
- * Settings: the Reading size first, then Start over.
+ * Settings: the Reading size first, then Sound, Music, Haptics and Flashes, then Start over.
  * - Use: Contents.
  * - Rules: `startOver` asks first: it destroys the save (10 §31; the shell's confirm).
  * - Story: SectionPages.stories.tsx

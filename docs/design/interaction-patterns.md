@@ -112,7 +112,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 - Order: Contents lists exactly Character, Inventory, Map, Journal, Settings; each section ends
   with "Back to World". Character: resources, levelling and Raise cards, skills and professions,
   Spells (refused words with reasons). Journal: quests, then Lore. Settings: Reading size,
-  page-turn sound.
+  Sound, Music, Haptics, Flashes, Start over.
 - Never appears: a sixth section without an owner decision; game actions other than Raise and
   aimed spells; a status line.
 - Source: [World and status entry](../system/book-ui.md#world-and-status-entry),
