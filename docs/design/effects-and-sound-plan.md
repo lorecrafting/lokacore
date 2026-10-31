@@ -60,7 +60,7 @@ Five primitives, each with a vocabulary the catalogue reuses by name. Nothing ou
 | **Ink** | *press* (a tapped word darkens toward `fg` then releases); *dry* (a new line enters at `dim` and settles to `fg`); *wash* (a tint over the page for a blow, `action` on light palettes and `danger` on dusk and dark, where `action` is amber, never more than `opacity.wash`); *settle* (a line that is finished fades to `dim`); *gilt* (a rare word briefly carries `warning`'s hue as a sheen, the lab's "Gilt words") | `color.*`, new `opacity.wash`, `motion.dry`, `motion.flash` |
 | **Paper** | *lift* (a card rises 1 px with a `line`-coloured shadow); *curl* (the page turn, built); *riffle* (several curls compressed, for travel); *flutter* (the page edge lifts in wind, lab); *flick* (the pickup pop's motion: a short rise-and-settle under the log) | `motion.turn`, `motion.quick`, new `motion.pop`, `motion.riffle` |
 | **Light** | *phase* (the palette cross-fade, built); *glow* (a warm radial at the page's hip when a lamp is lit, owner's choice, Beads x6t.7); *flicker* (candle, indoors at night, lab); *afterimage* (lightning: the page flashes to `bg` of the light palette and fades over 1.2 s, lab); *meteor* (built); *faint* (a slow breathing vignette at low HP, lab) | `color.*.bg`, new `motion.flicker`, `motion.afterimage`, `motion.breathe` |
-| **Sound** | *paper* (turn, flick, riffle, damp pages); *tick* (a 10 ms transient for a selection); *flick* (the pickup, any item into the hand: one recorded paper flick, Q7; replaces the lab's `pluck()`); *coin* (one short clink: buy, sell, pennies); *tone* (one note: quest gained, low; skill improves, high); *note* (a two-note rise cut from the main theme's first interval: high for level, low for quest resolved and new skill learned); *chord* (the lab's low open chord, chapter card only); *bed* (ambience loops: wind, surf, hearth, drip, crowd); *weather* (rain, thunder); *mechanism* (latch, lever, dial) | `sound.*` (section 6) |
+| **Sound** | *paper* (turn, flick, riffle, damp pages); *tick* (a 10 ms transient for a selection); *flick* (the pickup, any item into the hand: one recorded paper flick, Q7; replaces the lab's `pluck()`); *coin* (one short clink: buy, sell, pennies); *tone* (one note: quest gained, low; skill improves, high); *note* (a two-note rise cut from the main theme's first interval: high for level, low for quest resolved and new skill learned); *theme cut* (an 8-15 s cut of the main theme, section 14, chapter card only); *bed* (ambience loops: wind, surf, hearth, drip, crowd); *weather* (rain, thunder); *mechanism* (latch, lever, dial) | `sound.*` (section 6) |
 | **Haptic** | *selection* (iOS `selectionAsync`), *light*, *medium*, *heavy* impact, *warning*, *error* notification | `haptic.*` (section 7) |
 
 ### Severity scale
@@ -73,7 +73,7 @@ Every entry carries a severity; it decides stacking, loudness, haptic and what r
 | S1 | whisper | type only, ≤ `motion.dry` (240 ms), no sound of its own beyond the page turn, no haptic | a new log line drying; a refused line |
 | S2 | note | one ink or paper change ≤ 300 ms, a tick, coin, flick or tone, at whisper to note loudness, at most one haptic of the weight its entry names | a press; a pickup; a coin counted; a status icon arriving |
 | S3 | beat | page-level change ≤ 500 ms, one sound at note loudness, light or medium haptic | a blow taken; a quest resolved; a lever thrown; lightning |
-| S4 | chapter | the whole page (blur, card), the chord, medium haptic; the only severity that waits for a tap | the chapter card; death and waking |
+| S4 | chapter | the whole page (blur, card), the theme cut, medium haptic; the only severity that waits for a tap | the chapter card; death and waking |
 
 ### Timing and easing tokens
 
@@ -303,7 +303,7 @@ gilt, no note; a single low *paper* close. Haptic *warning*. P0. Cue: view-diff 
 **Chapter card** (`chapter.index` rises; book-ui.md Chapters; `ChapterPage`): S4, the owner's choice: the page
 behind blurs (Skia `Blur` over the leaving page's snapshot image, the one `PageTurn` already takes, sigma 6 →
 12 over `motion.card`), the card's label, title and short rule dry in staggered by 120 ms; sound: the chapter cut of the main theme (section 14, 8-15 s, tier chapter); haptic *medium*. Reserved for story-arc markers, never a level.
-Under reduced motion: no blur ramp (a fixed blur), no stagger; the chord stays (sound is not motion; Sound off
+Under reduced motion: no blur ramp (a fixed blur), no stagger; the cut stays (sound is not motion; Sound off
 silences it). P0. Cost M, Skia on the existing snapshot (the only blur in the Book; never a live view blur on
 Android). Cue: view-diff.
 
@@ -496,7 +496,7 @@ animation (sleep reflow is archived).
 
 ### 4.10 Chapter, scene, dream, ancestry (`pages.tsx ChapterPage/ScenePage`, `DreamPage.tsx`, `AncestryPage`)
 
-3.6. Ancestry (once-only choice): the chosen chip presses and the page curls; no card, no chord (the
+3.6. Ancestry (once-only choice): the chosen chip presses and the page curls; no card, no cut (the
 chapter card has just played at launch).
 
 ### 4.11 Loading, errors, refused, empty, save, launch, settings
@@ -525,8 +525,8 @@ player misses nothing: the bell has its cue line, weather is in the status line,
 Beat by beat; each uses only catalogue entries.
 
 1. **Opening the book** (launch): paper, nothing else, 300 ms. The Chapter one card dries in label → rule →
-   title (120 ms stagger), the chord opens under it, haptic medium. Continue presses; the curl turns to the
-   ancestry page or the inn. The first turn's paper sound is the first sound the player hears after the chord.
+   title (120 ms stagger), the theme cut opens under it, haptic medium. Continue presses; the curl turns to the
+   ancestry page or the inn. The first turn's paper sound is the first sound the player hears after the cut.
 2. **First thing taken** (the sack at the inn or the lantern in the loft): the line reads "You take the sack.";
    under the log "+ sack" flicks up with the paper flick and a light haptic, holds, fades. No other item pops for the
    next 300 ms.
@@ -543,7 +543,7 @@ Beat by beat; each uses only catalogue entries.
    does not reach the page.
 6. **Falling and waking**: the fatal blow's wash does not fade; it holds while the page settles to dark over
    `motion.card`; "You fall." dries alone; a beat; the curl to the inn lands on the palette of the current in-game hour (death does not jump the clock) and
-   "You wake at the inn." dries. No chord: death is not a chapter. Haptic heavy then nothing.
+   "You wake at the inn." dries. No theme cut: death is not a chapter. Haptic heavy then nothing.
 7. **The letter delivered** (Reeve → Wat): Wat's speech dries; the running head "Deliver the Reeve's letter"
    settles out, the note rises, the journal line gilds; the new objective (if any) dries into the running head.
 8. **Level two**: the log reads "Level 2."; the line gilds, the note rises a fifth higher than the quest's,
@@ -703,7 +703,7 @@ first; each phase shippable alone.
 
 **Phase 1: P0 batch** (S-M)
 press feedback (4.1), log dry (4.6), paper turn sample (3.1), pickup pop + flick (3.2), damage wash + thud +
-haptic (3.3), status icon pop/fade (3.4), running head cross-fade (3.6), chapter card blur + chord (3.6),
+haptic (3.3), status icon pop/fade (3.4), running head cross-fade (3.6), chapter card blur + theme cut (3.6),
 save-error haptic (4.11), and, moved up by owner request, the coin clink (3.7) and all quest, level and skill tones (3.5, 3.6), whatever priority their entries give: the level and journal gilt, the running head settle and fade, their haptics, and the quest failed close. Depends on Phase 0. Design review once for the batch.
 
 **Phase 2: P1 batch** (M)
@@ -760,14 +760,14 @@ none of its melodies are to be imitated.
 
 | Moment | Music | Ends | Trigger | Cue |
 |---|---|---|---|---|
-| Title and opening | the main theme, whose first phrase becomes the chapter chord | fades into the first room's bed | launch | none |
+| Title and opening | the main theme, cut down for the chapter card | fades into the first room's bed | launch | none |
 | Chapter card | a short cut of the theme, 8-15 s | fades on Continue | `chapter.index` rises | view-diff |
 | Exploration | sparse: one 1-3 min piece on first entry to a new area, then at least 5-10 min of beds only | plays out, never cut | area changes | cartridge area tag |
 | Town or inn | a soft piece by time of day, same sparse rule | plays out | room tag | cartridge tag |
 | Ordinary fight | battle track (below) | victory, flight or death | `combat` appears | view-diff |
 | Story or boss fight | its own full battle theme | as above | the encounter names a track | new cartridge field |
 | Cutscene | as the scene's author names | as the scene's author names | scene step | new cartridge field |
-| Death | none: everything cuts on "You fall."; the morning bed returns on waking | | death sequence | as 5.6 |
+| Death | none: everything cuts on "You fall."; the current hour's bed returns on waking | | death sequence | as 5.6 |
 
 ### Battle music
 

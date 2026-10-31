@@ -99,7 +99,7 @@ About twelve items; a keep/maybe/no on each settles most of the score.
 
 | # | Listen to | For | Listen for |
 |---|---|---|---|
-| 1 | [Memories Of Stone](https://www.scottbuckley.com.au/library/memories-of-stone/) | main theme | a first phrase that could stand alone as the chapter chord; the Hardanger fiddle |
+| 1 | [Memories Of Stone](https://www.scottbuckley.com.au/library/memories-of-stone/) | main theme | a first phrase that could stand alone as the chapter cut; the Hardanger fiddle |
 | 2 | [Precipice](https://www.scottbuckley.com.au/library/precipice/) | chapter card | the first 15 s as a card; whether it feels like a threshold |
 | 3 | [Path Through The Mountains](https://www.scottbuckley.com.au/library/path-through-the-mountains/) | wild | whether it sits under reading without demanding attention |
 | 4 | [Echoes Of Home](https://www.scottbuckley.com.au/library/echoes-of-home/) | inn, day | warmth without sweetness |
@@ -122,7 +122,7 @@ means a full orchestral build that will need a shorter edit for a room. Area nam
 
 | Moment | First pick | Listen for | Alternates | Loop or cut |
 |---|---|---|---|---|
-| Title and opening | [Memories Of Stone](https://www.scottbuckley.com.au/library/memories-of-stone/) | a theme the chapter chord can quote | [Passage Of Time](https://www.scottbuckley.com.au/library/passage-of-time/), [Chronicle](https://www.scottbuckley.com.au/library/chronicle/), [Invocation](https://www.scottbuckley.com.au/library/invocation/), [The Legend Of Kvothe](https://www.scottbuckley.com.au/library/the-legend-of-kvothe/), [Sanctuary](https://www.scottbuckley.com.au/library/sanctuary/), [Hiraeth](https://www.scottbuckley.com.au/library/hiraeth/), [World Of Magic](https://www.scottbuckley.com.au/library/world-of-magic/) | plays out once |
+| Title and opening | [Memories Of Stone](https://www.scottbuckley.com.au/library/memories-of-stone/) | a theme the chapter cut can quote | [Passage Of Time](https://www.scottbuckley.com.au/library/passage-of-time/), [Chronicle](https://www.scottbuckley.com.au/library/chronicle/), [Invocation](https://www.scottbuckley.com.au/library/invocation/), [The Legend Of Kvothe](https://www.scottbuckley.com.au/library/the-legend-of-kvothe/), [Sanctuary](https://www.scottbuckley.com.au/library/sanctuary/), [Hiraeth](https://www.scottbuckley.com.au/library/hiraeth/), [World Of Magic](https://www.scottbuckley.com.au/library/world-of-magic/) | plays out once |
 | Chapter card (8-15 s) | a cut of the main theme's first phrase | a phrase that ends cleanly | [Precipice](https://www.scottbuckley.com.au/library/precipice/), [Hymn](https://www.scottbuckley.com.au/library/hymn/), [Phoenix (2026)](https://www.scottbuckley.com.au/library/phoenix-2026/), [Wildflowers](https://www.scottbuckley.com.au/library/wildflowers/), [The Call](https://www.scottbuckley.com.au/library/the-call/) | cut; credit notes the edit |
 
 ### Exploration by area
