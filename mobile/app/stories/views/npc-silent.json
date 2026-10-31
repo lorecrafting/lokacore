@@ -46,6 +46,44 @@
      "to": "1d977082-84af-8453-b374-f8e9be74e514",
      "direction": "east"
     }
+   ],
+   "unexplored": [
+    {
+     "from": "1d977082-84af-8453-b374-f8e9be74e514",
+     "direction": "down"
+    },
+    {
+     "from": "1d977082-84af-8453-b374-f8e9be74e514",
+     "direction": "east"
+    },
+    {
+     "from": "1d977082-84af-8453-b374-f8e9be74e514",
+     "direction": "north"
+    },
+    {
+     "from": "1d977082-84af-8453-b374-f8e9be74e514",
+     "direction": "south"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "east"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "north"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "south"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "up"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "west"
+    }
    ]
   },
   "known_npcs": [

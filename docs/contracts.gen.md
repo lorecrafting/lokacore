@@ -506,7 +506,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **KnownConnectionView**: A known directed exit between visited rooms; carries no live traversal availability.
 - **KnownNpcView**: A currently visible NPC or one previously observed by this actor, offered for exact-ID Where.
 - **KnownRoomView**: An actor’s visited room with its title and static drawing coordinates.
-- **MapView**: The actor’s visited places and connections between visited endpoints.
+- **MapView**: The actor’s visited places, connections between visited endpoints and seen exits toward unvisited places.
 - **NarrationRecord**: The committed narration of one accepted command, as this actor sees it: the lines of that command's DecisionResult narration (decision.schema.json), keyed by its command_id (06 §43: required narration is committed with its consequence as a stable record of pinned text keys and bindings; 04 §5.2 steps 7-8). Redisplay is read-only. A retry of that command replays its receipt and returns this same record with a current GameView (06 §43; 03 §14).
 - **NoticeBoardView**: Current-room board identity, authored detail key, title, selected description and ordered notice membership; no bodies.
 - **NoticeView**: Current-room readable detail identity, authored detail key, authored page title and selected description; no body. Optional actions list exact-subject readable-detail scripted actions, exclusively on this Notice, with ordinary availability/reasons and no fabricated command targets.
@@ -525,6 +525,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
   - `false`
 - **TransportOffer**: Exact endpoint route and base quote, effective charge and waiver, and admitted keyed action.
 - **UnavailableReason**: Why an action, choice or exit is shown but not legal now (00 §4.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide), and optionally the engine's typed cause, the same RefusalCause the command's GameError carries (a move while sitting: invalid_state, not_standing). The error registry stays unchanged.
+- **UnexploredExitView**: A seen exit from a visited room whose destination the actor has not visited; the (from, direction) pair is its stable id, and it carries no destination id, title or coordinates.
 - **WornSlotView**: One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order, one entry per place: the finger holder has two (toolbox row 3).
 
 ## Identity contracts (`protocol/identity.schema.json`)

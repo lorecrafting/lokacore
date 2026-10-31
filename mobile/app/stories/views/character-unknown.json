@@ -11,7 +11,33 @@
      "z": 0
     }
    ],
-   "links": []
+   "links": [],
+   "unexplored": [
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "down"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "east"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "north"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "south"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "up"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "west"
+    }
+   ]
   },
   "known_npcs": [
    {
