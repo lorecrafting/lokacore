@@ -103,6 +103,9 @@ test('Map joins actor-owned visited rooms and only links with two visited endpoi
   // The shaft is placed and only another actor's visit: a stub. The lane's east and north lead to
   // rooms with no map position: neither link nor stub.
   assert.deepEqual(map.unexplored, [{ from: north, direction: 'down' }]);
+  // Links and stubs start only in visited rooms, never in the shaft another actor visited.
+  const shown = new Set(map.rooms.map(({ id }) => id));
+  assert.ok([...map.links, ...map.unexplored].every(({ from }) => shown.has(from)));
   assert.deepEqual(validate('MapView', map), []);
 });
 

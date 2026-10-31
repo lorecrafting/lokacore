@@ -8,7 +8,7 @@ import {
   type Steps,
   type World,
 } from '../runtime/decision.ts';
-import { exitOf, hidden } from '../mechanics/lookups.ts';
+import { shownExit } from '../mechanics/lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { living } from '../mechanics/death/shared.ts';
 import { refusal, resolved } from '../commands/actions.ts';
@@ -55,14 +55,12 @@ export function knowledgeView(
       visited.has(id) ? [{ id, title: world.rooms[id].name, x: p.x, y: p.y, z: p.z }] : [],
     )
     .sort((a, b) => cmp(a.id, b.id));
-  // Exits toward a placed room, minus those `sight` hides (movement/rule.ts): each is a link or a stub.
+  // Exits `sight` also shows (shownExit) toward a placed room, from visited rooms: a link or a stub.
   const seen = rooms.flatMap(({ id }) =>
     COMPASS.flatMap((direction) => {
-      const exit = exitOf(world.rooms[id], direction);
+      const exit = shownExit(world, world.rooms[id], direction, actor);
       const to = exit && world.roomIds[refString(exit.to)];
-      return to && at.has(to) && !hidden(world, world.rooms[id], direction, actor)
-        ? [{ from: id, to, direction }]
-        : [];
+      return to && at.has(to) ? [{ from: id, to, direction }] : [];
     }),
   );
   const links = seen.filter(({ to }) => visited.has(to));
