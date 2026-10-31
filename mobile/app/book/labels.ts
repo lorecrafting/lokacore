@@ -31,7 +31,6 @@ export const LABEL = {
   // Take, on an item a living NPC holds (pass-1 E14).
   lift: 'Lift',
   worn: 'Worn',
-  where: 'Where',
   askWhere: 'Ask where',
   // Before a topic's authored label on an NPC's card (row FD7).
   askAbout: 'Ask about',

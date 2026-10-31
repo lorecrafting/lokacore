@@ -8,10 +8,9 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, SPOT, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
 import { refused, why, type Hint } from './model.ts';
-import { cardKey, type Button, type DetailLine } from './presenter.ts';
+import type { Button, DetailLine } from './presenter.ts';
 import { commandOf } from './buttons.ts';
 import { Control } from './pages.tsx';
-import { ActionCard, Cards } from './actions.tsx';
 import { usePalette, useType, type Palette } from './palette.ts';
 import { motion, radius, size, space } from './tokens.ts';
 import { LABEL } from './labels.ts';
@@ -56,11 +55,10 @@ const keys: Record<string, string> = {
  *   the footer.
  * - Rules: press to zoom, drag toward a path to light it, release to walk, drag back to the middle
  *   to cancel; a tap opens the Map page. Release toward a shut door presses its offered Unlock, else
- *   Open; with neither it logs the refusal ("The door to the south is locked."). Every other offered
- *   door verb (Close, Lock, Knock) is an Action card under the joystick, so no door verb is left
- *   without a control (PM ruling 2026-10-30). A walk keeps the action and context from the drag start;
- *   the presenter revalidates its token.
- * - States: at rest; held; an exit barred by a closed or a locked door; with door verb cards.
+ *   Open; with neither it logs the refusal ("The door to the south is locked."). Close and Lock are
+ *   not drawn (owner 2026-10-30; book-ui.md, Verbs the Book does not draw). A walk keeps the action
+ *   and context from the drag start; the presenter revalidates its token.
+ * - States: at rest; held; an exit barred by a closed or a locked door.
  * - Story: Footer.stories.tsx
  */
 export function Footer(p: Props) {
@@ -99,25 +97,6 @@ export function Footer(p: Props) {
         </View>
         <View style={rule(c)} />
       </View>
-      {doorVerbs(p)}
-    </View>
-  );
-}
-
-// The door verbs a release does not press: an open door's Close, a closed one's Lock, a locked one's Knock.
-export function doorVerbs({ exits, door, press }: Props) {
-  const rest = exits.flatMap((e) => {
-    const all = door(e.direction);
-    const released = e.available ? undefined : doorPick(all);
-    return all.filter((b) => b !== released);
-  });
-  return (
-    <View style={{ marginHorizontal: space.page }}>
-      <Cards>
-        {rest.map((b) => (
-          <ActionCard key={cardKey(b)} b={b} press={press} />
-        ))}
-      </Cards>
     </View>
   );
 }

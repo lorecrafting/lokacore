@@ -8,7 +8,6 @@ import { pageStory } from './screen.tsx';
 import MapStartView from './views/map-start.json';
 import MapRoomsView from './views/map-rooms.json';
 import MapTwoLevelsView from './views/map-two-levels.json';
-import MapWhereView from './views/map-where.json';
 
 const meta: Meta = {
   title: 'Pages/Map',
@@ -40,4 +39,3 @@ export const Selected: StoryObj = {
     await expect(canvas.queryByText('Crossroads Inn')).toBeNull();
   },
 };
-export const Where: StoryObj = { ...pageStory(MapWhereView), name: 'Where' };

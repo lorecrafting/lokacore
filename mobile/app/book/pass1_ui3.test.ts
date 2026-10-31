@@ -1,19 +1,21 @@
 // Pass-1 UI3 (book-ui.md, World and status entry; Minimap; Map): the room list draws no door card,
-// the footer draws every door verb its release does not press, and the Map draws no log or door
-// lines (owner 2026-10-30, loka-wz6f). Every draw also runs the harness's stranded-verb check.
+// the footer's release unlocks, else opens, a shut door, Close and Lock are not drawn (owner
+// 2026-10-30), and the Map draws no log or door lines (loka-wz6f). Every draw also runs the
+// harness's stranded-verb check.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
+import { commandOf } from './buttons.ts';
 
 const doorish = (l: string) => /door|gate\b/.test(l);
 
-// Breaks: World or the Map draws a door card or line outside the footer again; the Map draws the
-// log (UF1).
-test('doors sampler lane: door verbs only under the joystick; none on the Map', (t) => {
+// Breaks: World or the Map draws a door card or line again (an open door's Close); the Map draws
+// the log (UF1).
+test('doors sampler lane: no door card on World or the Map', (t) => {
   const b = book(compiled('cartridges/doors_sampler') as never);
   t.after(() => b.sql.close());
-  assert.deepEqual(b.labels().filter(doorish), ['Close the hut door (north)']);
+  assert.deepEqual(b.labels().filter(doorish), []);
   b.go('north');
   b.go('south');
   const line = b.text().at(-1)!;
@@ -24,36 +26,28 @@ test('doors sampler lane: door verbs only under the joystick; none on the Map', 
   assert.deepEqual(b.labels().filter(doorish), [], JSON.stringify(b.labels()));
 });
 
-// Breaks: an open door's Close or a closed door's Lock loses its card (the door could not be shut
-// or locked); the release stops pressing Unlock, then Open; a repeat press sends another command.
-test('doors sampler hut door: Close and Lock cards, then the release unlocks and opens', (t) => {
+// Breaks: Close or Lock gets a card while the engine offers it; the release stops pressing Unlock,
+// then Open, on a locked door; a press sends more than one command.
+test('doors sampler hut door: no Close or Lock; the release unlocks, opens, then walks', (t) => {
   const b = book(compiled('cartridges/doors_sampler') as never);
   t.after(() => b.sql.close());
-  const sent: { action_key: string; input: unknown }[] = [];
+  const sent: string[] = [];
   const invoke = b.game.invoke;
-  b.game.invoke = (c) => (sent.push(c as never), invoke(c));
+  b.game.invoke = (c) => (sent.push((c as { action_key: string }).action_key), invoke(c));
   b.tap('A hut key, open');
   b.tap('Take a hut key');
-  b.tap('Close the hut door (north)');
-  assert.deepEqual(b.labels().filter(doorish), ['Lock the hut door (north)']);
-  b.tap('Lock the hut door (north)');
-  assert.deepEqual(b.labels().filter(doorish), []); // locked: the release's Unlock is its control
-  b.go('north');
-  b.go('north');
-  assert.deepEqual(b.labels().filter(doorish), ['Close the hut door (north)']);
-  b.tap('Close the hut door (north)');
-  b.go('north');
-  assert.deepEqual(
-    sent.filter((c) => c.action_key !== 'take').map((c) => [c.action_key, c.input]),
-    [
-      ['close', { direction: 'north' }],
-      ['lock', { direction: 'north' }],
-      ['unlock', { direction: 'north' }],
-      ['open', { direction: 'north' }],
-      ['close', { direction: 'north' }],
-      ['open', { direction: 'north' }],
-    ],
-  );
+  // The engine still offers Close, then Lock: press them as the Book would, outside any drawn control.
+  for (const verb of ['close', 'lock']) {
+    const f = b.draw().find((n) => n.type.name === 'Footer').props;
+    const offered = f.door('north').find((x: never) => commandOf(x) === verb);
+    assert.ok(offered, `${verb} not offered`);
+    assert.deepEqual(b.labels().filter(doorish), [], JSON.stringify(b.labels()));
+    f.press(offered);
+  }
+  const before = b.game.view().view.place.id;
+  for (let i = 0; i < 3; i++) b.go('north');
+  assert.deepEqual(sent.slice(sent.indexOf('close')), ['close', 'lock', 'unlock', 'open', 'move']);
+  assert.notEqual(b.game.view().view.place.id, before);
 });
 
 // Breaks: one footer press on a shut door sends no command or more than one.

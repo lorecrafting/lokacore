@@ -54,10 +54,13 @@ registerHooks({
   },
 });
 const { default: Book } = await import('../Book.tsx');
-const { doorPick, doorVerbs, pressDoor } = await import('../Footer.tsx');
+const { doorPick, pressDoor } = await import('../Footer.tsx');
+const { commandOf } = await import('../buttons.ts');
 
-// Every offered door verb has a control on World (owner 2026-10-30): the release presses a shut
-// door's pick, and each other verb is drawn (a pressable reading its label). Runs on every draw of every test.
+// Every offered door verb has a control on World: the release presses a shut door's pick, and any
+// other verb is drawn (a pressable reading its label) unless the Book leaves it undrawn on purpose
+// (book-ui.md, Verbs the Book does not draw). Runs on every draw of every test.
+const UNDRAWN_DOOR_VERBS = ['close', 'lock'];
 function stranded(rendered: any[]) {
   const f = rendered.find((n) => n.type?.name === 'Footer')?.props;
   if (!f) return;
@@ -65,7 +68,9 @@ function stranded(rendered: any[]) {
   for (const e of f.exits)
     for (const b of f.door(e.direction))
       assert.ok(
-        (!e.available && b === doorPick(f.door(e.direction))) || drawn.includes(b.label),
+        UNDRAWN_DOOR_VERBS.includes(commandOf(b)) ||
+          (!e.available && b === doorPick(f.door(e.direction))) ||
+          drawn.includes(b.label),
         `door verb ${b.label} has no control`,
       );
 }
@@ -89,7 +94,7 @@ export function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
   if (!element || typeof element !== 'object') return [];
   if (typeof element.type === 'function') {
-    if (element.type.name === 'Footer') return [element, ...nodes(doorVerbs(element.props))];
+    if (element.type.name === 'Footer') return [element];
     // The live region repeats page lines for a screen reader: page text leaves it out (live_region.test.ts reads it).
     if (element.type.name === 'Heard') return [element];
     if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];

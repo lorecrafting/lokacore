@@ -90,19 +90,16 @@ const doors: Record<string, Button[]> = {
   east: [verb('open', 'east'), verb('lock', 'east')],
 };
 
-// The door verbs a release does not press, as cards under the joystick: the open north door's
-// Close and the closed east door's Lock. Release east presses its Open, never the Lock.
+// Close and Lock are not drawn (owner 2026-10-30), though offered: no card for the open north
+// door's Close or the closed east door's Lock. Release east presses its Open, never the Lock.
 export const DoorVerbs: Story = {
   args: {
     exits: [open('north'), shut('east', 'closed')],
     door: fn((d: string) => doors[d] ?? []),
   },
   play: async ({ canvas, args }) => {
-    await expect(
-      canvas.getByRole('button', { name: 'Close the north door (north)' }),
-    ).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Lock the east door (east)' })).toBeVisible();
-    await expect(canvas.queryByRole('button', { name: 'Open the east door (east)' })).toBeNull();
+    for (const name of [/Close/, /Lock/, /Open/])
+      await expect(canvas.queryByRole('button', { name })).toBeNull();
     const map = canvas.getByRole('button', { name: 'Map' });
     fireEvent.mouseDown(map, { button: 0, buttons: 1 });
     fireEvent.mouseMove(map, { buttons: 1, clientX: 40 });

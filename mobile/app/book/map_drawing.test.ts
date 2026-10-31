@@ -7,13 +7,12 @@ import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 const showcase = () => book(compiled('cartridges/toolbox_showcase') as never);
 const INN = 'Crossroads Inn';
 
-// Breaks: the Map draws action or Go cards again, a room name or Back to map inside it, or loses an
+// Breaks: the Map draws action, Where or Go cards again, a room name or Back to map inside it, or loses an
 // unexplored exit's open dot or its name.
 test('the Map at the start: the inn ringed, an open dot per exit, no actions', () => {
   const h = showcase();
   h.map();
-  const labels = h.labels().filter((l) => l !== 'Ask where Hob, the innkeeper is'); // Where stays
-  assert.deepEqual(labels.sort(), [
+  assert.deepEqual(h.labels().sort(), [
     'Back to World',
     `${INN}, current place`,
     ...['above', 'below', 'east of', 'north of', 'south of', 'west of'].map(
@@ -33,13 +32,7 @@ test('a tapped dot names its room under the map; an open dot reads Unexplored', 
   h.tap('Next map level'); // the inn's level, from the undercroft's
   assert.deepEqual(
     h.labels().filter((l) => !l.startsWith('Unexplored')),
-    [
-      'Previous map level',
-      'Tidewater Steps',
-      INN,
-      'Ask where Hob, the innkeeper is',
-      'Back to World',
-    ],
+    ['Previous map level', 'Tidewater Steps', INN, 'Back to World'],
   );
   h.tap(INN);
   assert.ok(h.text().includes(INN));

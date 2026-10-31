@@ -112,7 +112,7 @@ export function NpcPage(p: NpcProps) {
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
   const enemy = hostile(p.npc);
-  // Where is the Map's control (sections.tsx); on the NPC's own page they are already here.
+  // Where is never drawn (book-ui.md, Verbs the Book does not draw); on this page they are here.
   const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
   const { talk, answer, foot } = conversation(p, choice);
   const services = serviceOrder(p.npc && 'services' in p.npc ? (p.npc.services ?? []) : []);

@@ -67,8 +67,8 @@ World draws no door card: Open and Unlock work from the
 [joystick](#minimap-map-and-presentation-controls) (the Map has no door or movement actions, owner 2026-10-30), and a door's state shows on the minimap: World
 draws no door state line (a walk into a shut door still logs its refusal, [Minimap](#minimap-map-and-presentation-controls)) (owner 2026-10-23, reversing pass-1 R4; quoted: "the 'locked' door
 would show in the minimap joystick thing, not in the main description or event log page").
-PM ruling 2026-10-30, pending owner confirmation against the rule above: every other offered door
-verb (Close, Lock, Knock) is an Action card under the joystick, so none is left without a control.
+Close and Lock are not drawn (owner 2026-10-30, option C, paraphrased: doors you open stay open;
+Lock returns later for property in the paid books; [Verbs the Book does not draw](#verbs-the-book-does-not-draw)).
 The description
 may contain underlined touch links for projected room fixtures: scenery, fixed doors or
 exit cues, and other room-bound subjects. A fixture link stays within the authored prose,
@@ -243,10 +243,9 @@ as one sentence ([unavailable actions](#unavailable-actions)) and logs the refus
 one ([MapDrawing](../../mobile/app/book/MapDrawing.tsx), owner 2026-10-23). Release (or an arrow key)
 toward a shut door presses its offered Unlock, else Open, one action per release; with neither it
 logs one line naming the door ("The door to the south is locked.", "above"/"below" for up/down)
-and walks nowhere. Every other offered door verb is an Action card under the joystick, in the
-engine's words: an open door's Close, a closed door's Lock (offered only with the key), a locked
-door's Knock where the exit offers one; no offered door verb is left without a control (PM ruling
-2026-10-30). The reader actions name the reason too ("Go west, locked").
+and walks nowhere. Close and Lock are not drawn ([Verbs the Book does not draw](#verbs-the-book-does-not-draw));
+Knock is an action on the door's own page; any other offered door verb without a control fails
+the stranded-verb check. The reader actions name the reason too ("Go west, locked").
 Direction/reason appears opposite the finger. The existing
 tip explains hold/drag/tap; Got it, a map tap or walking dismisses it, persisted separately with
 memory fallback. The accessible Map activation opens the section; the footer and its keys are
@@ -271,13 +270,7 @@ Every dot is a touch-sized button named by its room title (", current place" on 
 open dot "Unexplored, <direction> of <room>". A level stepper shows when rooms span levels.
 
 Under the drawing the page keeps the current place line, "No way out" when the room has no exits,
-and Where. Where labels distinguish currently visible `here`,
-`last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
-become `here`, and a stale observation is never phrased as a current location. A last-seen
-answer gives the time since in the [condition durations](#conditions-details) ("Maud: last
-seen at Inn yard, 2h ago."), "just now" under two minutes. Each known
-NPC's Where control reads "Ask where <name> is"; only a living known NPC has one, a dead one
-none (pass-1 UF3; the kernel leaves the dead out of `known_npcs`, GE6).
+and no Where ([Verbs the Book does not draw](#verbs-the-book-does-not-draw)).
 
 In the web Book, unmodified Arrow Up/Down/Left/Right walk north/south/west/east and
 Page Up/Page Down use offered up/down exits. Keyboard movement uses the same captured
@@ -896,6 +889,20 @@ The Journal's last section, **Chronicle**, shown when at least one entry exists 
 `mobile/packages/game-view/line_words.ts`) and a talk's opening prompt (`dialogue.<npc>.prompt`,
 which the conversation page and the room log show; the Chronicle stays as before the narration
 batch); the Book adds no words but the heading, the count and the accessible name. Opening the Journal reads the receipts once; the page is not live-updated while open (a press returns to World anyway). A Chronicle day counts as written for "Nothing written yet." ([Lore details](#lore-details)).
+
+## Verbs the Book does not draw
+
+The GameView may offer these; the Book draws no control for them, on any page:
+
+- Say and Shout in single-player ([Word bar](#word-bar); owner, loka-evzt 2026-10-30).
+- Close and Lock on doors in single-player (owner 2026-10-30, option C, paraphrased: doors you
+  open stay open; Lock will matter later for property in the paid books, perhaps as a
+  press-and-hold on the joystick, not built). Open and Unlock stay on the
+  [joystick](#minimap-map-and-presentation-controls).
+- Where (PM 2026-10-30): the Map rings the current room and a tapped dot names its room.
+
+Any other offered verb with no control fails the Book harness's stranded-verb check, which lists
+the door half of this section (`UNDRAWN_DOOR_VERBS`).
 
 ## Word bar
 

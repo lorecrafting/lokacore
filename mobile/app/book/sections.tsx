@@ -3,16 +3,7 @@
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import {
-  bandPhrase,
-  cap,
-  conditionLine,
-  plain,
-  isPool,
-  toneOf,
-  type group,
-  type Thing,
-} from './model.ts';
+import { bandPhrase, cap, conditionLine, plain, isPool, toneOf, type Thing } from './model.ts';
 import type { Button } from './presenter.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
@@ -20,7 +11,7 @@ import { ReadingSize } from './Chip.tsx';
 import type { Reading } from './reading.ts';
 import { levelLine, Professions, RaiseCards, SkillDetails, spells, xpLine } from './skills.tsx';
 import { size, space } from './tokens.ts';
-import { ActionCard, Cards, ContinueButton } from './actions.tsx';
+import { ActionCard, ContinueButton } from './actions.tsx';
 import { EntityLine, Note } from './lines.tsx';
 import { band, Control, home, type Home, Page, SectionTitle, useTitleFocus } from './pages.tsx';
 import { LABEL } from './labels.ts';
@@ -32,7 +23,6 @@ type Carrying = Home & {
   text: Say;
   open: (id: string) => void;
 };
-type Grouped = ReturnType<typeof group>;
 
 // A profession box is drawn even unacquired (book-ui.md Skill tree details), so it counts as known.
 const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired || !!s.profession;
@@ -165,21 +155,14 @@ export function CarryingPage(p: Carrying) {
 }
 
 /**
- * The full map and Where (book-ui.md, Minimap, map and presentation controls).
+ * The full map (book-ui.md, Minimap, map and presentation controls).
  * - Use: Contents, and a tap on the minimap.
  * - Rules: the drawing and the current place only; no movement, door or place actions (owner
- *   2026-10-30). Where lists each known NPC's offered Where action.
- * - States: discovered, one level; two levels; unexplored exits; a dot tapped; Where.
+ *   2026-10-30) and no Where (PM 2026-10-30): the current room is marked and a tapped dot names its room.
+ * - States: discovered, one level; two levels; unexplored exits; a dot tapped.
  * - Story: MapPage.stories.tsx
  */
-export function MapPage(
-  p: {
-    view: GameView;
-    text: Say;
-    g: Grouped;
-    press: (b: Button) => void;
-  } & Home,
-) {
+export function MapPage(p: { view: GameView; text: Say } & Home) {
   const c = usePalette();
   const t = useType();
   return (
@@ -187,25 +170,9 @@ export function MapPage(
       {p.view.map && <DiscoveredMap view={p.view} text={p.text} />}
       <Text style={prose(c, t)}>{LABEL.currentPlace(p.text(p.view.place.title.key))}</Text>
       {p.view.exits.length === 0 && <Note>{LABEL.noWayOut}</Note>}
-      {where(p)}
     </Page>
   );
 }
-
-// Where each known NPC is: its offered Where action.
-const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) => (
-  <>
-    {p.view.known_npcs?.length ? <SectionTitle>{LABEL.where}</SectionTitle> : null}
-    <Cards>
-      {(p.view.known_npcs ?? []).map((n) =>
-        p.g
-          .on(n.id)
-          .filter((b) => b.action_key === 'where')
-          .map((b) => <ActionCard key={n.id} b={b} press={p.press} />),
-      )}
-    </Cards>
-  </>
-);
 
 /**
  * Settings: the Reading size first, then Start over.
