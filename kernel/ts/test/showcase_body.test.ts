@@ -158,9 +158,12 @@ test('body 7: Wat arrives at 08:00, is chilled, leaves at 09:00, ticks at 10:00,
   assert.equal(line(x), 'npc.wat.description');
 });
 
-// Breaks: bread or water ends the wrong status, or bread feeds the hunger pool instead of mv.
+// Breaks: bread or water ends the wrong status, or bread feeds the hunger pool instead of mv;
+// hungry or thirsty is timed again and lapses on its own within a day (loka-rn3b).
 test('body 8: in the hut bread ends hungry and water ends thirsty', () => {
   w = go(w, 'east').world;
+  const unfed = wait(w, w.state.clock + DAY + HOUR).world;
+  assert.deepEqual(labels(unfed), ['condition.hungry', 'condition.thirsty']);
   const [hunger, mv] = [pool(w, 'hunger'), pool(w, 'mv')];
   w = play(take(w, 'hut_loaf'), { type: 'eat', item_id: id(w, 'item', 'hut_loaf') }).world;
   assert.deepEqual([pool(w, 'hunger'), pool(w, 'mv')], [hunger, Math.min(100, mv! + 5)]);
