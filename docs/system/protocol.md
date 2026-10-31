@@ -372,8 +372,12 @@ item: every item inside it in reach (containment@1 custody: no closed or locked 
 at any depth, flattened in DefinitionRefString order, each with its `container_id` (its direct
 container), its `state` if it has a barrier, and as actions only `take` and its container verbs
 (a `ContentView`, also with its explicit full-description TextKey; a recursive view is not
-allowed in the schemas). An NPC's possessions and a
-worn item's contents are never shown (c1-locks); `equipment`, one entry per slot
+allowed in the schemas). A visible NPC carries `worn`, its direct holdings whose definition
+declares a `slot` (ContentViews, `take` refused `not_present` without theft), shown to anyone who sees it;
+its possessions, worn ones included, show as `contents` only under `world.theft` (row 33); a worn item's contents are never
+shown (c1-locks; loka-oc5i, the owner's NPC Look request in loka-ewtx: "list all the character items worn",
+the pack only with a skill). Reads: `containers`, item `slot`, `visible`; writes none; kernel_api 1.125;
+`equipment`, one entry per slot
 holder in slot-key order with its `slot` and, when one is worn, the `item` with the actions it
 accepts (only those resolving to `remove`), absent when the world has no holder
 ([equipment@1](mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets)); `journal` (each quest the player
@@ -394,7 +398,8 @@ minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 The `combat` opponent, and each `active_opponents` member, carries the `band` key of its `hp`
 pool by the same rule and table (`bandOf`, `kernel/ts/src/view/resources.ts`), only while the
 player sees it (light `visible`) and it lives (a member a spell or status kills stays on the roster
-until the round-end prune); the name is present either way and no hp number is sent
+until the round-end prune) and it has hp of its own (no hp, no band, as in `entities`; loka-zvwh);
+the name is present either way and no hp number is sent
 (loka-y6yg.49). Composition record: reads the encounter row, the opponent's hp level and spec,
 the band table, `visible` and `living`; writes, events, jobs and save rows: none; no version bump (an
 optional view field, as ConditionView `duration`).

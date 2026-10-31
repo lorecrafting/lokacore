@@ -150,7 +150,8 @@ function bleedingView(world: World, bleed: NonNullable<ReturnType<typeof current
 
 // The entities directly in `holder` (room, body or slot holder), each with its short name, kind and
 // actions (`worn`, else by scope: room_contents, room_occupants or inventory); an item also with its
-// barrier's state and, unless worn, its contents (c1-locks); a theft NPC its holdings (row 33).
+// barrier's state and, unless worn, its contents (c1-locks); an NPC its slotted direct holdings as
+// `worn` (loka-oc5i), and under theft all it holds its get lock admits (row 33).
 function within(
   world: World,
   actor: CharacterId,
@@ -169,17 +170,22 @@ function within(
     )
     .map(([id, e]) => {
       const scope = holder === body ? 'inventory' : SCOPE[e.kind];
+      const held =
+        e.kind === 'npc'
+          ? inside(world, actor, body, actions, id, 'room_contents', steps, true)
+          : [];
+      // ponytail: no NPC slot holders, so a slotted pack item reads as worn; holders: loka-0vrs.
+      const dressed = held.filter((c) => c.slot);
       // Row 33: an NPC's direct holdings its get lock admits; a vault's locked pool stays private.
       const contents =
         e.kind === 'item' && !worn
           ? inside(world, actor, body, actions, id, scope, steps)
-          : e.kind === 'npc' && world.cartridge.world?.theft
-            ? inside(world, actor, body, actions, id, 'room_contents', steps, true).filter(
-                (c) => !lockRefused(world, actor, e.locks?.get, c.id, steps),
-              )
+          : world.cartridge.world?.theft
+            ? held.filter((c) => !lockRefused(world, actor, e.locks?.get, c.id, steps))
             : [];
       return {
         ...viewOf(world, actor, id, e, worn ? worn(id) : actions.of(scope, id), steps),
+        ...(dressed.length > 0 && { worn: dressed }),
         ...(contents.length > 0 && { contents }),
       };
     });
@@ -237,7 +243,7 @@ const viewOf = (
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
   // Only an NPC with its own hp has a condition (living's test; loka-ysbt ruling a): no hp, no band.
-  ...(e.kind === 'npc' && e.hp && { band: bandOf(world, id as EntityId, 'hp').band }),
+  ...(e.kind === 'npc' && e.hp && { band: bandOf(world, id as EntityId, 'hp')!.band }),
   ...liquidView(world, id),
   ...(e.kind === 'npc' && freeLessons(world, id, actor, steps)),
   // Book hostile refusal: the page needs hostility, which refusal codes cannot tell apart.
