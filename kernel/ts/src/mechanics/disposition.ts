@@ -120,7 +120,7 @@ function hostileAt(
       const npc = world.entities[id] as NpcEntity;
       return (
         world.state.containers[id] === there &&
-        ((combat && npc.attack && npc.disposition?.engage) ||
+        ((combat && npc.attack && npc.hp && npc.disposition?.engage) || // no hp, no fight (loka-xyyd)
           // An arrest skipped (a fall, or `to` is this room) lets a later fighter engage.
           (arrests &&
             npc.disposition?.arrest &&

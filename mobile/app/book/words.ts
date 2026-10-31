@@ -115,6 +115,7 @@ export const refusedSentence = ({ code, cause }: Refusal) =>
 const CAUSE: Record<string, string> = {
   not_standing: 'not standing',
   cursed: 'it will not come off',
+  cannot_be_hurt: 'cannot be hurt',
 };
 export const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -154,7 +155,6 @@ export const hostileRefusal = (name: string) => `${name} will have nothing to do
 // The titles of a shopkeeper's buy and sell pages (owner picks mvlymuams73l, mvlynyikyw57).
 export const sellsTitle = (name: string) => `${name} can sell you…`;
 export const buysTitle = (name: string) => `${name} will buy…`;
-
 type Say = (key: string) => string;
 
 // Compare structured TextKeys, never rendered English. Authored non-navigation consequences stay.

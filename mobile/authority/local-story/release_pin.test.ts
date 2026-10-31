@@ -1,6 +1,6 @@
 // A save made before a kernel_api bump is refused at its pin with Start over (loka-548k review;
 // loka-oc5i): each bump changes what a save replays into (1.124 dialogue receipts gained `speaker`,
-// 1.125 GameView gained `worn`), so a showcase save from the previous kernel_api must not reopen.
+// 1.125 GameView gained `worn`, 1.126 Attack refuses an NPC with no hp: loka-xyyd), so a showcase save from the previous kernel_api must not reopen.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtempSync } from 'node:fs';
@@ -40,11 +40,11 @@ const open = (path: string, releases: [Release], n = { i: 0 }) => {
   return { sql, opened: openStory(db as never, releases, { kernel_version: 'k', newId }) };
 };
 
-// Breaks: kernel_api (and the showcase's at_least) left at 1.124, so main's save keeps its pin.
-test('a showcase save from kernel_api 1.124 is refused at its pin and offers Start over', () => {
+// Breaks: kernel_api (and the showcase's at_least) left at 1.125, so main's save keeps its pin.
+test('a showcase save from kernel_api 1.125 is refused at its pin and offers Start over', () => {
   const installed = release(showcase.canonical);
-  // The same showcase as main shipped it before loka-oc5i: only its at_least differs.
-  const old = release(showcase.canonical.replace(/"at_least":"[0-9.]+"/, '"at_least":"1.124"'));
+  // The same showcase as main shipped it before loka-xyyd: only its at_least differs.
+  const old = release(showcase.canonical.replace(/"at_least":"[0-9.]+"/, '"at_least":"1.125"'));
   const path = join(mkdtempSync(join(tmpdir(), 'loka-pin-')), 'save.db');
   const a = open(path, [old]);
   assert.equal(a.opened.kind, 'open');

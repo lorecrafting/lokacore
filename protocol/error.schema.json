@@ -91,10 +91,11 @@
       ]
     },
     "RefusalCause": {
-      "description": "Why a refusal with a shared code was refused, so a client can tell the player (owner Q13 option A): not_standing, a move while the actor is not standing (position@1); cursed, a remove of a worn item a curse holds on (equipment@1). Optional on GameError and on GameView UnavailableReason; a reader that does not know it reads the code alone. The code stays the contract; a cause never changes it.",
+      "description": "Why a refusal with a shared code was refused, so a client can tell the player (owner Q13 option A): not_standing, a move while the actor is not standing (position@1); cursed, a remove of a worn item a curse holds on (equipment@1); cannot_be_hurt, an Attack on an NPC that cannot be hurt, today one with no hp of its own (invalid_target, combat@1). Optional on GameError and on GameView UnavailableReason; a reader that does not know it reads the code alone. The code stays the contract; a cause never changes it.",
       "enum": [
         "not_standing",
-        "cursed"
+        "cursed",
+        "cannot_be_hurt"
       ],
       "examples": [
         "not_standing"
