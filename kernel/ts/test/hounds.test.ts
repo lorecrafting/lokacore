@@ -121,7 +121,7 @@ test('combat-first and population-first boundaries conserve the same fatal gobli
   const hp = key({ kind: 'resource', entity_id: member, resource: ref('resource', 'hp') });
   for (const [n, combatFirst] of [
     [3, true],
-    [5, false],
+    [7, false], // job ids hash the cartridge: re-pick n when its content shifts ids (loka-eyk7)
   ] as const) {
     let w = elapsed(fresh(), 68250);
     for (const [i, direction] of ['west', 'south'].entries())

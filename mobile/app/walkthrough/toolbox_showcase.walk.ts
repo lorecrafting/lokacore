@@ -282,16 +282,16 @@ walk('3-magic', 'Magic: lux, hush, grimoire, ward, winch, flamma, golem', async 
   await magic(r, steps(r));
 });
 
-walk('4-traps', "Traps: the shout in the chief's den; the goblins flee", async (r) => {
+walk('4-traps', "Traps: the shout at the chief's den bones; the goblins flee", async (r) => {
   const { screen } = r;
   await r.app.clearState();
   await settle();
   await scene(screen);
   await r.room();
-  const { tap, moves, speak } = steps(r);
+  const { tap, moves, fixture } = steps(r);
   await moves('west', 'down', 'north', 'north'); // the passage plate bites on the way
   // Afraid lasts 600 game s (~12 s of wall time at rate 50): nothing slow between shout and Attack.
-  await speak('begone', LABEL.shout);
+  await fixture('gnawed bones', 'Shout "Begone!"'); // the bones' card (loka-eyk7)
   await tap(/^two cowering goblins, open$/i); // both afraid: one link, their mood words (W6)
   await tap(/Attack/);
   // A round is 150 game s, 3 s of wall time at rate 50.

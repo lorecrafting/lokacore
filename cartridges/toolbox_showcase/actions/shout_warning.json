@@ -1,0 +1,32 @@
+{
+  "name": "actions.shout_warning",
+  "aliases": [
+    "warn"
+  ],
+  "reason": "reason.shout_warning",
+  "target": {
+    "kind": "detail",
+    "room": "drill_yard",
+    "detail": "yard_gate"
+  },
+  "priority": 5,
+  "policy": {
+    "op": "fact_compare",
+    "fact": "gil_warned",
+    "equals": false
+  },
+  "outcomes": {
+    "success": {
+      "steps": [
+        {
+          "op": "fact.assign",
+          "fact": "gil_warned",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.shout_warning.success"
+      }
+    }
+  }
+}

@@ -1,13 +1,13 @@
 {
   "on": {
-    "event": "spoken",
-    "word": "begone",
-    "loudness": "shout"
+    "event": "custom_event",
+    "custom": "shouted_begone"
   },
   "steps": [
     {
       "op": "status.apply",
-      "status": "afraid"
+      "status": "afraid",
+      "co_present": true
     }
   ]
 }

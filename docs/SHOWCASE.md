@@ -55,7 +55,7 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | allies x kill credit x quest | combat | `gate_yard` (Gil's blow kills the raider; the bounty resolves) | `showcase_combat.test.ts` (combat 4) | built |
 | scars x death x same-body return | combat | the boar's `gored` survives the unarmed death in `boar_run` | `showcase_combat.test.ts` (combat 6) | built |
 | bleed status x cure x attacker filter | combat | `bleeding` from the boar, the poultice; only a boar's hit wounds, never a goblin's beside the tilt boar (Beads `loka-kgd.79`) | `showcase_combat.test.ts` (combat 6, 8, tilt yard) | built |
-| say and shout x keyword dialogue x reactions | combat | `say steel` opens Aldous's answer; `shout ware` warns Gil next door | `showcase_combat.test.ts` (combat 2, 3) | built; the Book's Word bar (#391) shows a shout chip once the cartridge declares `speech.phrases` (plan 7 adds `ware` and `begone`) |
+| offered actions x dialogue choice x facts | combat | Aldous's `steel` choice gives his answer; the yard gate's Shout a warning card warns Gil next door (once) | `showcase_combat.test.ts` (combat 2, 3) | built; typed speech replaced by cards (loka-eyk7) |
 | lesson x weapon x derived damage | combat | Aldous's lesson and sword; Raise str after level 2 | `showcase_combat.test.ts` (combat 2, 5, 8) | built |
 | disposition x resistances | social and combat | the Warden's mail (`physical` 100) against the sword | `showcase_combat.test.ts` (combat 10) | built |
 | fuse status x status_expired x schedule cases x disposition | social | `tollhouse` (the forced strongbox carries `word_travels`), `village_green` (the Warden's 13:00 walk), `warden_gate` (engage, the ledger mend) | `showcase_consequence.test.ts` (social 15-18, 21) | built |
@@ -82,7 +82,7 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | status readers x reactions x NPC statuses | magic/use-on | `golem_yard` | `showcase_magic.test.ts` (magic 9) | built |
 | traps x statuses x reset x senses | traps | `sapper_stair` (search, disarm), `plate_passage` | `kernel/ts/test/showcase_traps.test.ts` (traps 1-4, 7) | built |
 | puzzles x barriers x readables | traps | `lever_hall`, `lever_vault`, `dial_vault` | `showcase_traps.test.ts` (traps 5, 6) | built |
-| fear x pack x shout x death | traps | `chief_den` | `showcase_traps.test.ts` (traps 8, 9) | built |
+| fear x pack x offered action x death | traps | `chief_den` (the bones' Shout begone card) | `showcase_traps.test.ts` (traps 8, 9) | built |
 
 ## How a batch adds a district
 
