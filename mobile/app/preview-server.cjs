@@ -30,14 +30,18 @@ const expo = spawn(
   { cwd: __dirname, stdio: 'inherit', env: { ...process.env, EXPO_NO_TELEMETRY: '1' } },
 );
 
+// `/__author/*` goes to `bin/loka dev --watch`'s live stream (kernel/ts/play/live.ts).
+const authorPort = Number(process.env.LOKA_AUTHOR_PORT || 19008);
 const server = http.createServer((request, response) => {
+  const author = request.url.startsWith('/__author/');
+  const port = author ? authorPort : metroPort;
   const upstream = http.request(
     {
       hostname: 'localhost',
-      port: metroPort,
-      path: request.url,
+      port,
+      path: author ? request.url.slice('/__author'.length) : request.url,
       method: request.method,
-      headers: { ...request.headers, host: `localhost:${metroPort}` },
+      headers: { ...request.headers, host: `localhost:${port}` },
     },
     (result) => {
       response.writeHead(result.statusCode, {
@@ -52,7 +56,7 @@ const server = http.createServer((request, response) => {
     if (response.headersSent) response.destroy();
     else {
       response.writeHead(502);
-      response.end('Metro is starting');
+      response.end(author ? 'bin/loka dev --watch is not running' : 'Metro is starting');
     }
   });
   request.pipe(upstream);

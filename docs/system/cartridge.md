@@ -851,10 +851,12 @@ build. The author tools below exist only in that bundle and change no protocol, 
   in milliseconds) under the artifact's hash. After a reload into a different hash it replays the
   path through the normal command path, one step at a time; the first step the session does not
   save and accept stops the replay and is named by its ordinal and reply. Nothing writes state directly.
-- **Fast loop.** An edit that changes only `text.json` is pushed to the open page as a text overlay
-  and shows at once: no compile, reload or replay. The full compile still runs after it and
-  reports its diagnostics to the column; its artifact is written on the next structural edit. Any
-  other edit compiles, and the page reloads and replays. A failed compile keeps the last good
+- **Fast loop.** A `text.json` save is pushed to the open page as a text overlay before its
+  compile and shows at once: no compile, reload or replay. The compile still runs after it and
+  reports its diagnostics to the page; an edit whose compiled cartridge differs from the page's
+  only in text values (inline prose too) is pushed the same way once compiled, and the artifact
+  is written on the next structural edit. Any other edit compiles, and the page reloads and
+  replays. The overlay lives in the watcher's memory and the page; no file carries it. A failed compile keeps the last good
   artifact and names the fault. The release compile (`mix loka.compile`) and every CI check are
   unchanged by the fast path; the overlay never becomes an artifact.
 - **Checkpoints.** A recorded path saved under a name is a plain file in the source tree,

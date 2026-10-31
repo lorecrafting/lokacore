@@ -1,10 +1,11 @@
 // Author preview only (`?dev=1` on the web dev cartridge; never the pinned save): the dev clock
 // control and keep my place (docs/system/cartridge.md#author-preview). Both drive the kernel's own
 // paths: the clock skews the host clocks, the place replays saved inputs through `invoke`.
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Button, Platform, Text, TextInput, View } from 'react-native';
 import type { localSession } from '../../authority/local-story/session';
 import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
+import { listen, overlay } from './live.ts';
 import { asRefs, replay, type Place, type Step } from './place.ts';
 
 export const devClock =
@@ -57,6 +58,7 @@ export function played(game: Opened | undefined) {
   if (!recorded.has(game))
     recorded.set(game, {
       ...game,
+      text: (key) => overlay[key] ?? game.text(key),
       invoke: (intent) => {
         const reply = game.invoke(intent);
         if (reply.kind === 'saved' && reply.decision.kind === 'accepted')
@@ -95,16 +97,25 @@ function DevClock() {
   );
 }
 
-/** The Book with the author's tools over it; outside the author preview, the Book alone. */
-export function DevPanel({ children }: { children: ReactNode }) {
-  if (!devClock) return children;
+/** The Book with the author's tools over it (App mounts it only in the author preview). `redraw`
+ * is App's state setter, stable, so the stream opens once per page. */
+export function DevPanel({
+  children,
+  redraw,
+}: {
+  children: ReactNode;
+  redraw: (next: object) => void;
+}) {
+  const [said, setSaid] = useState<string[]>([]); // the last compile's diagnostics
+  useEffect(() => listen((lines) => (setSaid(lines), redraw({}))), [redraw]);
+  const note = [placeNote, ...said].filter(Boolean).join('\n');
   return (
     <>
       {children}
       <DevClock />
-      {placeNote ? (
+      {note ? (
         <Text style={{ position: 'absolute', bottom: 4, left: 4, backgroundColor: 'white' }}>
-          {placeNote}
+          {note}
         </Text>
       ) : null}
     </>

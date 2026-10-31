@@ -16,6 +16,15 @@ import type { Db } from '../authority/local-story/store.ts';
 import { LABEL } from './book/labels.ts';
 import { webDb } from './sqlite-web.ts';
 
+// The pinned app: no author preview, so App mounts the Book alone (author/panel.tsx).
+const panel = {
+  devClock: false,
+  played: (g: unknown) => g,
+  restorePlace() {},
+  resetPlace() {},
+  skew: () => 0,
+};
+
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 const adapt = (sql: DatabaseSync): Db => ({
@@ -107,6 +116,7 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     './book/reading.ts': { readingSize: () => ({}) },
     './book/labels.ts': { LABEL },
     './SaveError': {},
+    './author/panel.tsx': panel,
   };
   const js = ts.transpileModule(readFileSync(new URL('App.tsx', import.meta.url), 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.React },
@@ -292,6 +302,7 @@ function appHost() {
     './book/reading.ts': { readingSize: () => ({}) },
     './book/labels.ts': { LABEL },
     './SaveError': {},
+    './author/panel.tsx': panel,
   };
   const globals: { loka_session?: ReturnType<typeof localSession> } = {},
     exports: any = {};

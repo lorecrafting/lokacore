@@ -259,9 +259,6 @@ export default function App() {
         tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined}
       />
     );
-  return (
-    <DevPanel>
-      <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />
-    </DevPanel>
-  );
+  const book = <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />;
+  return devClock ? <DevPanel redraw={redraw}>{book}</DevPanel> : book; // the pinned tree is the Book alone
 }
