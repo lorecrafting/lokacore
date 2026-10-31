@@ -212,7 +212,10 @@ function SaidLabel({ text, side }: { text: string; side: keyof typeof SPOT }) {
   const t = useType();
   const ink = useDry(c.fg, 0, motion.press.duration);
   return (
-    <InkText pointerEvents="none" style={[t.small, { position: 'absolute', ...SPOT[side] }, ink]}>
+    <InkText
+      pointerEvents="none"
+      style={[t.small, { color: c.fg, position: 'absolute', ...SPOT[side] }, ink]}
+    >
       {text}
     </InkText>
   );

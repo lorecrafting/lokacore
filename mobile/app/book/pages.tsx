@@ -5,7 +5,6 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { onCue } from './cues.ts';
 import { InkText, Reanimated, useAnimatedStyle } from './fade.ts';
 import { plain, type Pool } from './model.ts';
 import { useDrying, useInk, usePress, useThin } from './press.ts';
@@ -67,10 +66,20 @@ export function Tap(p: {
   );
 }
 
-// What the head last drew: it sits inside the page turn, whose remount forgets it.
-let lastHead: string | undefined;
+// What the head last drew (null: nothing yet): it sits inside the page turn, whose remount forgets it.
+let lastHead: string | undefined | null = null;
 
-// A gained quest's objective over the old one, across `motion.dry` (reduced: `motion.fade`).
+// Keyed on the words: a changed objective cross-fades, a redraw or a page turn does not.
+function HeadLine(p: { words: string; style: object }) {
+  const [was] = useState(() => lastHead);
+  return was === null || was === p.words ? (
+    <Text style={p.style}>{p.words}</Text>
+  ) : (
+    <HeadFade was={was} {...p} />
+  );
+}
+
+// The new objective over the old one, across `motion.dry` (reduced: `motion.fade`).
 function HeadFade(p: { was?: string; words: string; style: object }) {
   const dry = useDrying();
   const arriving = useAnimatedStyle(() => ({ opacity: dry.value }));
@@ -105,15 +114,9 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
     (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
   );
   const words = quest && plain(text(quest.journal!));
-  const [gained, setGained] = useState<{ was?: string; words?: string }>();
   useEffect(() => {
-    const was = lastHead;
     lastHead = words;
-    return onCue((cue) => {
-      if (cue.name === 'quest_on' && quest && cue.ids?.includes(quest.quest.key))
-        setGained({ was, words });
-    });
-  }, [words, quest?.quest.key]); // eslint-disable-line
+  }, [words]);
   if (!words) return null;
   const style = {
     ...t.runningHead,
@@ -121,11 +124,7 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
     paddingHorizontal: space.page,
     paddingTop: space.page,
   };
-  return gained?.words === words ? (
-    <HeadFade was={gained.was} style={style} words={words} />
-  ) : (
-    <Text style={style}>{words}</Text>
-  );
+  return <HeadLine key={words} style={style} words={words} />;
 }
 
 /**

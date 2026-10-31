@@ -29,15 +29,19 @@ export function SaveError({
   failed,
   startOver,
   tryAgain,
+  haptics = true,
 }: {
   failed: Failed;
   startOver: () => void;
   tryAgain?: () => void;
+  haptics?: boolean; // no Book here to give the haptic module the setting
 }) {
   const paper = color.light; // no GameView here, so no solar phase
   useFocusRing(paper); // outside the Book, so its ring is not installed
   const why = detail(failed);
-  useEffect(() => haptic('error'), [failed.kind]);
+  useEffect(() => {
+    if (haptics) haptic('error');
+  }, [failed.kind]);
   return (
     <PaletteContext value={paper}>
       <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>

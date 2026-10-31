@@ -133,18 +133,18 @@ const card = (shown: any[]) => shown.find((n) => n.type === 'Pressable');
 test('a card lifts on press-in with a selection haptic; reduced motion keeps the colour, no travel', (t) => {
   for (const [reduced, rise] of [
     [false, -1],
-    [true, undefined],
+    [true, 0],
   ] as const) {
     effects(t, reduced);
     const draw = rig(t);
     const shown = () => card(draw(() => nodes(ActionCard({ label: 'Go', onPress: () => {} }))));
     const rest = flat(shown().props.style);
-    assert.equal(rest.transform?.[0].translateY ?? 0, reduced ? 0 : -0);
+    assert.equal(Math.abs(rest.transform[0].translateY), 0);
     shown().props.onPressIn();
     assert.deepEqual(g.bookDevice, [['haptic', 'selection']]);
     assert.deepEqual(g.timings, [90]);
     const held = flat(shown().props.style);
-    assert.equal(held.transform?.[0].translateY, rise);
+    assert.equal(held.transform[0].translateY, rise);
     assert.notEqual(held.backgroundColor, rest.backgroundColor);
     shown().props.onPressOut();
     assert.deepEqual(g.timings, [90, 160]);
@@ -185,7 +185,7 @@ test('a chip lifts when free and holds when chosen', (t) => {
   const chosen = chip(true);
   const held = flat(chosen().props.style).backgroundColor;
   chosen().props.onPressIn();
-  assert.equal(flat(chosen().props.style).transform, undefined);
+  assert.equal(flat(chosen().props.style).transform[0].translateY, 0);
   assert.equal(flat(chosen().props.style).backgroundColor, held);
 });
 
@@ -262,32 +262,21 @@ for (const [reduced, popped] of [
   });
 }
 
-// Breaks: the head fades on any objective change, or for another quest, or keeps no old words.
-test("the running head cross-fades only on its own quest's quest_on", (t) => {
+// Breaks: the head does not fade on a changed objective, fades on launch or a redraw, or keeps no old words.
+test('the running head cross-fades a changed objective only', (t) => {
   effects(t);
-  const quest = (key: string) => ({ quest: { key }, state: 'active', journal: `${key} words` });
-  const a = view({ journal: [quest('a')] });
-  const b = view({ journal: [quest('b')] });
-  const c = view({ journal: [quest('c')] });
-  const draw = rig(t);
-  const head = (v: GameView) =>
-    draw(() => nodes(RunningHead({ view: v, text: ((s: string) => s) as never })));
-  const cue = publish(t);
+  const objective = (journal: string) =>
+    view({ journal: [{ quest: { key: 'q' }, state: 'active', journal }] });
+  // A fresh rig each draw: the words key the line, so each one mounts (a page turn does too).
   const words = (v: GameView) =>
-    head(v)
+    rig(t)(() => nodes(RunningHead({ view: v, text: ((s: string) => s) as never })))
       .filter((n) => n.type === 'Text')
       .map((n) => n.props.children);
-  assert.deepEqual(words(a), ['a words']);
-  cue(a);
-  assert.deepEqual(words(a), ['a words']);
-  head(b);
-  cue(b);
-  assert.deepEqual(words(b), ['a words', 'b words']);
-  assert.deepEqual(g.timings, [240]);
-  // c arrives with no quest_on (say a state change the cue bus does not name): it just appears.
-  g.timings = [];
-  assert.deepEqual(words(c), ['c words']);
+  assert.deepEqual(words(objective('find it')), ['find it']);
+  assert.deepEqual(words(objective('find it')), ['find it']);
   assert.deepEqual(g.timings, []);
+  assert.deepEqual(words(objective('bring it')), ['find it', 'bring it']);
+  assert.deepEqual(g.timings, [240]);
 });
 
 // Breaks: every redraw of a fault or save error buzzes again, or neither buzzes at all; or a sound.
@@ -312,4 +301,9 @@ test('Fault and the save error give one error haptic on arrival', (t) => {
   save();
   save();
   assert.deepEqual(g.bookDevice, [['haptic', 'error']]);
+  // Breaks: the Haptics setting is ignored here, where no Book has given it to the module.
+  g.bookDevice = [];
+  const quiet = rig(t);
+  quiet(() => nodes(SaveError({ failed, startOver: () => {}, haptics: false })));
+  assert.deepEqual(g.bookDevice, []);
 });

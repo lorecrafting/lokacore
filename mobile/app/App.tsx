@@ -284,8 +284,8 @@ export default function App() {
       <SaveError
         failed={activeSession.failed()!}
         startOver={() => shell.confirm(startOver)}
-        // the lock is web-only: a reload reopens the save
-        tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined}
+        tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined} // web-only lock
+        haptics={shell.effects?.haptics?.get()}
       />
     );
   const book = <Book key={starts} game={game} shell={bookShell} startOver={startOver} />;

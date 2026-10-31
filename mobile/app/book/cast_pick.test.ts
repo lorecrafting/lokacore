@@ -100,13 +100,13 @@ test("Character's Cast on… lists a spell's targets; the pick turns to World wi
   character();
   b.tap('Lux, cast on…');
   b.refuse('The lantern');
-  assert.ok(b.text().join('\n').includes("The lantern\nYou can't do that—need 1 ash."));
+  assert.match(b.text().join('\n'), /The lantern\s+You can't do that—need 1 ash\./);
   b.tap('Back to Contents');
   b.tap('Inventory, open');
   b.tap(/lantern/);
   b.tap('Cast a spell…');
   b.refuse('Lux');
-  assert.ok(b.text().join('\n').includes("Lux\nYou can't do that—need 1 ash."));
+  assert.match(b.text().join('\n'), /Lux\s+You can't do that—need 1 ash\./);
 });
 
 // Breaks: one list per foe line each with its own open state, so two lists open at once

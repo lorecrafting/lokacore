@@ -1,9 +1,9 @@
 // LogLines: the event log and detail history (LogLines's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { useState } from 'react';
-import { Button } from 'react-native';
 import { expect, waitFor } from 'storybook/test';
 import { LogLines } from '../book/lines.tsx';
+import { Control } from '../book/pages.tsx';
 import type { DetailLine } from '../book/logs.ts';
 import { markDrawn } from '../book/logs.ts';
 import { lineWords } from '../book/words.ts';
@@ -31,8 +31,8 @@ function Growing() {
   return (
     <>
       <LogLines lines={lines} />
-      <Button
-        title="Add a line"
+      <Control
+        label="Back to World"
         onPress={() => redraw(lines.push('A bell carries over the yard.'))}
       />
     </>
@@ -43,7 +43,7 @@ export const NewLineDries: Story = {
   play: async ({ canvas, userEvent }) => {
     const color = (text: string) => getComputedStyle(canvas.getByText(text)).color;
     const settled = color('The water is black and still.');
-    await userEvent.click(canvas.getByRole('button', { name: 'Add a line' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Back to World' }));
     await expect(color('The water is black and still.')).toBe(settled);
     await waitFor(() => expect(color('A bell carries over the yard.')).toBe(settled));
   },

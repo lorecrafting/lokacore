@@ -1,4 +1,4 @@
-// size: allow 340, the card's two press paths (lift, refusal) and the verb, pick and continue lists stay one family
+// size: allow 345, the card's two press paths (lift, refusal) and the verb, pick and continue lists stay one family
 // The offered-action controls: action card, pick lists, verb line, continue button (BOOK-UI-COMPONENTS.md).
 import { Children, type ReactNode, type Ref, useContext, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Pressable, View } from 'react-native';
@@ -123,7 +123,7 @@ const linked = (label: string, link: string) => {
 // ponytail: announceForAccessibility is a no-op on web, where the card's own polite region reads the
 // sentence; where native maps aria-live too, it may be read twice (Footer.tsx, check on device).
 function Unavailable(p: { label: string; reason?: string; name?: string; link?: string }) {
-  const [c, t] = [usePalette(), useType()];
+  const c = usePalette();
   const sentence = reasonSentence(p.reason);
   const [pressed, setPressed] = useState<string>();
   const shown = `${p.label}\n${sentence}`;
@@ -136,12 +136,8 @@ function Unavailable(p: { label: string; reason?: string; name?: string; link?: 
     haptic('warning');
     if (sentence) AccessibilityInfo.announceForAccessibility(sentence);
   };
-  const body = (
-    <>
-      <Text style={grayed ? note(c, t) : prose(c, t)}>{label}</Text>
-      {grayed && sentence ? <DriedReason>{sentence}</DriedReason> : null}
-    </>
-  );
+  const reason = grayed ? sentence : '';
+  const body = <RefusedBody grayed={grayed} label={label} reason={reason} />;
   return (
     <View>
       {p.link ? (
@@ -158,7 +154,7 @@ function Unavailable(p: { label: string; reason?: string; name?: string; link?: 
           {body}
         </Pressable>
       )}
-      <SaidReason>{grayed && sentence ? sentence : null}</SaidReason>
+      <SaidReason>{reason || null}</SaidReason>
     </View>
   );
 }
@@ -168,6 +164,19 @@ const SaidReason = ({ children }: { children: string | null }) => (
     {children ? <Text>{children}</Text> : null}
   </View>
 );
+
+function RefusedBody(p: { grayed: boolean; label: ReactNode; reason: string }) {
+  const [c, t] = [usePalette(), useType()];
+  return (
+    <>
+      <Text style={p.grayed ? note(c, t) : prose(c, t)}>
+        {p.label}
+        {p.reason ? ' ' /* keeps the blocks' text apart: the name contains what is shown */ : null}
+      </Text>
+      {p.reason ? <DriedReason>{p.reason}</DriedReason> : null}
+    </>
+  );
+}
 
 // Its own block and component: a nested Text cannot animate on native, and this mounts on the press.
 function DriedReason({ children }: { children: string }) {

@@ -44,14 +44,13 @@ type Press = ReturnType<typeof usePress>;
 export function useLift({ pressed }: Press, rest: string, held = false) {
   const still = useReducedMotion();
   const { line } = usePalette();
-  return useAnimatedStyle(() =>
-    held
-      ? { backgroundColor: rest }
-      : {
-          backgroundColor: interpolateColor(pressed.value * opacity.press, [0, 1], [rest, line]),
-          ...(still ? {} : { transform: [{ translateY: -size.rule * pressed.value }] }),
-        },
-  );
+  return useAnimatedStyle(() => ({
+    backgroundColor: held
+      ? rest
+      : interpolateColor(pressed.value * opacity.press, [0, 1], [rest, line]),
+    // Always written: a surface held mid-press must come back down.
+    transform: [{ translateY: held || still ? 0 : -size.rule * pressed.value }],
+  }));
 }
 
 /** A one-text ink press: the label's ink goes from `rest` to `to`. */
