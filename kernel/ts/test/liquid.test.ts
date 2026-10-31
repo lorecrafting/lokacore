@@ -110,6 +110,26 @@ test('Fill, Drink, partial Pour and Drink conserve finite contents and affect no
   assert.equal(world.state.clock, initial.clock);
   assert.deepEqual(world.state.rng, initial.rng);
 });
+// Breaks: the line binds the moved amount as the level, names the pour source, or drops capacity
+// (literals: fixture capacity 4, drink_amount 1; the receiver is tuned to capacity 3).
+test('each liquid line binds its vessel with the committed level and capacity', () => {
+  const small = (a: number, b: number) => ({
+    ...owned(a, b),
+    liquidSpecs: { ...fresh.liquidSpecs, [spare]: { capacity: 3, kinds: [waterRef] } },
+  });
+  const fill = { type: 'fill', source_id: well, vessel_id: skin };
+  const pour = { type: 'pour', source_id: skin, receiver_id: spare };
+  const rows: [World, object, string, string, number, number, number][] = [
+    [owned(1, 2), fill, 'liquid.filled', skin, 3, 4, 4],
+    [owned(4, 2), { type: 'drink', vessel_id: skin }, 'liquid.drank', skin, 1, 3, 4],
+    [small(3, 1), pour, 'liquid.poured', spare, 2, 3, 3],
+  ];
+  const words = { kind: 'liquid.water', unit_label: 'liquid.units' };
+  for (const [w, p, key, vessel, quantity, remaining, capacity] of rows)
+    assert.deepEqual(JSON.parse(JSON.stringify(run(w, p).decision)).narration, [
+      { key, participants: { vessel }, bindings: { ...words, quantity, remaining, capacity } },
+    ]);
+});
 // Breaks: a ground/corpse/foreign/closed vessel is usable merely because its identity is known.
 test('liquid refusal participants and custody leave every row unchanged while open nested skins work', () => {
   const start = owned(4, 3);
@@ -138,6 +158,8 @@ test('liquid refusal participants and custody leave every row unchanged while op
     assert.notEqual(result.decision.kind, 'accepted');
     assert.equal(result.world, w);
   }
+  const full = (run(...cases[1]).decision as any).error; // a pour that moves nothing (row 4)
+  assert.deepEqual(full, { code: 'invalid_state' });
   const nested = {
     ...start,
     state: {
