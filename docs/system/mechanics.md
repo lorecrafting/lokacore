@@ -399,7 +399,7 @@ A quest starts through its offer, which is optional, a quest-resolution reaction
 `accept_quest {quest}` is admitted only through the quest's offer (a quest without one has no
 accept action), withdrawn once the actor has an instance (`commands/quest_offers.ts:44`), so a second accept
 and an undeclared quest are refused before the rule. An offer with a target is admitted only while that target is in the actor's
-room and alive (else `unsupported_capability`) and seen (else `invalid_state`); a dialogue choice's `accept` reads no offer target. Accepted: `quest.activate` at player scope and `quest_activated`; the outcome is
+room and alive (else `unsupported_capability`) and seen (else `invalid_state`); a dialogue choice's `accept` reads no offer target, so an offer policy on `target_present` holds on the offer's card and fails that accept with `invalid_state`. Accepted: `quest.activate` at player scope and `quest_activated`; the outcome is
 `activated_with_possession` when a `current_state` objective already holds, else `activated`
 (nothing is stored for it). Objectives: `current_state` (a policy evaluated when needed, never
 stored) or `post_activation_event` (met by an `item_acquired` of the named item into the

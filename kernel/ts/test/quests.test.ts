@@ -1,4 +1,4 @@
-// size: allow 545, quest@1's whole lifecycle and its offer's targets over one artifact loader
+// size: allow 555, quest@1's whole lifecycle and its offer's targets over one artifact loader
 // quest@1 (Early R7/R8 Q; 06 §1-§5, §43; 04 §5.2): accept_quest through the offer, the two
 // evidence policies, delivery, resolution, quest_state, the journal and the loader's quest
 // checks. Worlds are the errand known answer (protocol/fixtures/cartridge_errand_hash.json: Bram
@@ -504,6 +504,15 @@ test('world_lists_no_fixture_action refuses a targeted offer on the World card',
     check('world_lists_no_fixture_action', { view: { ...v, actions: [entry] }, ...maps }),
     false,
   );
+});
+
+// Breaks: offerMaps naming an untargeted offer as a fixture's, so its one legal World card fails.
+test('world_lists_no_fixture_action allows an untargeted offer on the World card', () => {
+  const w = world(bare);
+  const v = gameView(w);
+  assert.ok(v.actions.some((a) => a.action_key === 'lantern'));
+  const maps = offerMaps(Object.values(offered(w, w.character)));
+  assert.ok(check('world_lists_no_fixture_action', { view: v, ...maps }));
 });
 
 // Breaks: gameview_agrees_with_admission false on a legal accept from the NPC's page, or blind to
