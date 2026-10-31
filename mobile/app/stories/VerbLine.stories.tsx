@@ -31,14 +31,16 @@ export const ThreeInARoom: Story = {
   ),
 };
 
-// Pass-1 R2: a refused place action follows the available verb lines as a `label: reason` note.
-// Breaks: a refused line becomes a button (only the available verb presses), or loses its reason.
+// Pass-1 R2: a refused place action follows the available verb lines as its plain verb, disabled.
+// Breaks: a refused card is enabled, or reads `label: reason` instead of its verb.
 export const WithRefused: Story = {
   play: async ({ canvas }) => {
-    await expect(canvas.getAllByRole('button').map((b) => b.textContent)).toEqual([
-      'Rest by the fire',
+    const buttons = canvas.getAllByRole('button');
+    await expect(buttons.map((b) => [b.textContent, b.getAttribute('aria-disabled')])).toEqual([
+      ['Rest by the fire', null],
+      ['Chop wood', 'true'],
+      ['Fish in', 'true'],
     ]);
-    await expect(canvas.getByText('Chop wood: more than you can carry')).toBeVisible();
   },
   render: (args) => (
     <View>

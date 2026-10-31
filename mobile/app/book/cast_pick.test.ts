@@ -100,12 +100,14 @@ test("Character's Cast on… lists a spell's targets; the pick turns to World wi
   assert.ok(b.text().includes('You speak lux and the ash flares.'));
   character();
   b.tap('Lux, cast on…');
-  assert.ok(b.text().includes('The lantern: need 1 ash'), b.text().join(' | '));
+  b.refuse('The lantern');
+  assert.ok(b.text().includes("The lantern\nYou can't do that—need 1 ash."), b.text().join(' | '));
   b.tap('Back to Contents');
   b.tap('Inventory, open');
   b.tap(/lantern/);
   b.tap('Cast a spell…');
-  assert.ok(b.text().includes('Lux: need 1 ash'), b.text().join(' | '));
+  b.refuse('Lux');
+  assert.ok(b.text().includes("Lux\nYou can't do that—need 1 ash."), b.text().join(' | '));
 });
 
 // Breaks: one list per foe line each with its own open state, so two lists open at once
@@ -136,8 +138,8 @@ test('a resting spell is its Cast a spell… row alone, no refusal note', (t) =>
   lantern();
   b.tap('Cast a spell…');
   assert.deepEqual(
-    b.text().filter((l) => l.startsWith('Lux:')),
-    ['Lux: not yet'],
+    b.text().filter((l) => l.startsWith('Lux')),
+    ['Lux'],
     b.text().join(' | '),
   );
 });

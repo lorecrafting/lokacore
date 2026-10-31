@@ -207,7 +207,7 @@ a new component needs a real consumer, its comment and its line here in the same
 existing pieces, no new token: the option is an available `ActionCard` that takes a local press
 instead of a `Button` and carries `accessibilityState.expanded`; while open, its rows render
 directly beneath it as a `Cards` stack of `ActionCard`s (available) and the `ActionCard`
-unavailable form (`label: reason`), inset `space.lg` from the option so they read as its
+unavailable form (its plain label; a press shows the reason, [Book UI](system/book-ui.md#unavailable-actions)), inset `space.lg` from the option so they read as its
 children. No chevron or other glyph: the label's ellipsis says it opens. At phone width rows take
 the full inset width, a long name wraps and never truncates, and the open list stays in the
 page's scroll; opening scrolls the first row into view. Web keyboard: Tab and Shift-Tab move

@@ -5,9 +5,12 @@ import assert from 'node:assert/strict';
 // The status line's Contents button shows the resources, so it is found by its suffix.
 export const CONTENTS = /; opens Contents$/;
 
-// A pressable, or a link inside a sentence (the room's people and items, lines.tsx Here).
+// A pressable, or a link inside a sentence (the room's people and items, lines.tsx Here); an
+// unavailable Action card (exposed as disabled, pressable for its reason) is no control.
 export const pressable = (n: any) =>
-  (n.type === 'Pressable' || (n.type === 'Text' && !!n.props.onPress)) && !n.props.disabled;
+  (n.type === 'Pressable' || (n.type === 'Text' && !!n.props.onPress)) &&
+  !n.props.disabled &&
+  !n.props.accessibilityState?.disabled;
 
 export function control(drawn: any[], shown: string | RegExp) {
   const all = drawn.filter(pressable);

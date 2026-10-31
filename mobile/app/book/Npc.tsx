@@ -199,7 +199,7 @@ const about = (c: Palette, t: Type, p: NpcProps, priced: boolean) => (
   </>
 );
 
-// A service as an Action card; unavailable, its Note with the reason.
+// A service as an Action card; unavailable, the unavailable card (its press shows the reason).
 function service(s: Offer, p: NpcProps & { actions: Button[] }) {
   const b = p.actions.find((b) => b.action_key === s.action.action_key);
   return b ? (

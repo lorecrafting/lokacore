@@ -127,7 +127,9 @@ test('a resting rod keeps its use as a Use on… note', (t) => {
   rod();
   b.tap(LABEL.useOn); // the resting use is its Pick list row
   const shown = b.text();
-  assert.ok(shown.includes('Fish in: not yet.'), JSON.stringify(shown));
+  assert.ok(shown.includes('Fish in'), JSON.stringify(shown));
+  b.refuse('Fish in');
+  assert.ok(b.text().includes("Fish in\nYou can't do that—not yet."), JSON.stringify(b.text()));
   // two targets of one resting use (controlled view): one note, not two under one key
   const real = b.game.view.bind(b.game);
   b.game.view = () => {
@@ -138,11 +140,7 @@ test('a resting rod keeps its use as a Use on… note', (t) => {
     }));
     return { ...r, view: { ...r.view, inventory } } as never;
   };
-  assert.equal(
-    b.text().filter((l) => l === 'Fish in: not yet.').length,
-    1,
-    JSON.stringify(b.text()),
-  );
+  assert.equal(b.text().filter((l) => l.startsWith('Fish in')).length, 1, JSON.stringify(b.text()));
   // the use's first target is refused for an unnoted reason: the resting target still draws
   // its note, so the dedupe runs over drawn notes only (loka-x6t.80)
   b.game.view = () => {
@@ -155,5 +153,5 @@ test('a resting rod keeps its use as a Use on… note', (t) => {
     }));
     return { ...r, view: { ...r.view, inventory } } as never;
   };
-  assert.ok(b.text().includes('Fish in: not yet.'), JSON.stringify(b.text()));
+  assert.ok(b.text().includes("Fish in\nYou can't do that—not yet."), JSON.stringify(b.text()));
 });

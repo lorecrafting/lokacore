@@ -1,10 +1,11 @@
 // The offered-action controls: action card, pick lists, verb line, continue button (BOOK-UI-COMPONENTS.md).
 import { Children, type ReactNode, type Ref, useContext, useEffect, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { AccessibilityInfo, Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import { Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
-import { onKey } from './lines.tsx';
+import { onKey, unseen } from './lines.tsx';
+import { reasonSentence } from './words.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { picks, type Pick } from './pick.ts';
 import { focusTitle, titleContext } from './title.ts';
@@ -15,13 +16,14 @@ import { radius, size, space, type } from './tokens.ts';
  * An offered action as a card.
  * - Use: a detail page's offered action or dialogue choice, the
  *   Raise cards, a Pick list's option and rows; never an accent text link.
- * - Rules: no outer margin; cards stack in Cards. Without a Button it is the unavailable form: a
- *   Note reading `label: reason` (a service's price and benefit stay inside the label's
- *   parentheses), or the label alone with no reason (book-ui.md, Notice board details). Never a
- *   disabled card. With `onPress` it sends nothing: a Pick list's option (with `expanded`) or a
- *   card that opens a child page (the NPC page's Trade). A row may show its own label,
- *   accessible name and quiet note in place of the Button's label.
- * - States: available; unavailable.
+ * - Rules: no outer margin; cards stack in Cards. Without a Button it is the unavailable form
+ *   (book-ui.md, Unavailable actions): the same card reading its plain label, never `label: reason`;
+ *   a press sends nothing and grays it, its reason as one sentence beneath (`reasonSentence`, words.ts), read
+ *   once. It is exposed as disabled yet stays focusable and pressable, its sentence its hint. With
+ *   `onPress` it sends nothing: a Pick list's option (with `expanded`) or a card that opens a child
+ *   page (the NPC page's Trade). A row may show its own label, accessible name and quiet note in
+ *   place of the Button's label.
+ * - States: available; unavailable; unavailable, pressed.
  * - Story: ActionCard.stories.tsx
  */
 export function ActionCard(
@@ -33,8 +35,7 @@ export function ActionCard(
 ) {
   const c = usePalette();
   const t = useType();
-  if (!('b' in p) && !('onPress' in p))
-    return <Text style={note(c, t)}>{p.reason ? `${p.label}: ${p.reason}` : p.label}</Text>;
+  if (!('b' in p) && !('onPress' in p)) return <Unavailable label={p.label} reason={p.reason} />;
   const label = p.label ?? ('b' in p ? p.b.label : '');
   return (
     <Pressable
@@ -43,16 +44,7 @@ export function ActionCard(
       accessibilityLabel={('b' in p && p.name) || label}
       aria-expanded={'onPress' in p ? p.expanded : undefined} // RN web maps aria-expanded, not accessibilityState
       onPress={'b' in p ? () => p.press(p.b) : p.onPress}
-      style={{
-        backgroundColor: c.card,
-        borderColor: c.line,
-        borderWidth: size.rule,
-        borderRadius: radius.card,
-        minHeight: size.card,
-        justifyContent: 'center',
-        paddingVertical: space.md,
-        paddingHorizontal: space.lg,
-      }}
+      style={card(c)}
     >
       <Text style={prose(c, t)}>
         {/* One text node with a line break, so axe reads "label note" as the name's start. */}
@@ -61,6 +53,54 @@ export function ActionCard(
           : label}
       </Text>
     </Pressable>
+  );
+}
+
+const card = (c: ReturnType<typeof usePalette>, grayed = false) => ({
+  backgroundColor: grayed ? c.bg : c.card,
+  borderColor: c.line,
+  borderWidth: size.rule,
+  borderRadius: radius.card,
+  minHeight: size.card,
+  justifyContent: 'center' as const,
+  paddingVertical: space.md,
+  paddingHorizontal: space.lg,
+});
+
+// The unavailable form: its own component, so its pressed state is the card's alone. The state
+// keeps the label and reason it was pressed on, so a changed card starts unpressed.
+// ponytail: announceForAccessibility is a no-op on web, where the card's own polite region reads the
+// sentence; where native maps aria-live too, it may be read twice (Footer.tsx, check on device).
+function Unavailable(p: { label: string; reason?: string }) {
+  const c = usePalette();
+  const t = useType();
+  const sentence = p.reason ? reasonSentence(p.reason) : '';
+  const [pressed, setPressed] = useState<string>();
+  const shown = `${p.label}\n${sentence}`;
+  const grayed = pressed === shown;
+  return (
+    <View>
+      <Pressable
+        // web: aria-disabled by hand; as a prop RN web also sets the native `disabled`, which drops the press
+        ref={(n) => (n as unknown as Element | null)?.setAttribute?.('aria-disabled', 'true')}
+        accessibilityRole="button"
+        accessibilityLabel={grayed && sentence ? shown : p.label} // the name starts with the shown text
+        accessibilityHint={sentence || undefined}
+        accessibilityState={{ disabled: true }} // native: exposed as disabled, still pressable
+        onPress={() => {
+          setPressed(shown);
+          if (sentence) AccessibilityInfo.announceForAccessibility(sentence);
+        }}
+        style={card(c, grayed)}
+      >
+        <Text style={grayed ? note(c, t) : prose(c, t)}>
+          {grayed && sentence ? [p.label, `\n${sentence}`] : p.label}
+        </Text>
+      </Pressable>
+      <View aria-live="polite" style={unseen}>
+        {grayed && sentence ? <Text>{sentence}</Text> : null}
+      </View>
+    </View>
   );
 }
 
@@ -170,8 +210,8 @@ export function Cards({ children }: { children: ReactNode }) {
 /**
  * A room's offered place action as an italic `action` line.
  * - Use: the room's list, after the entity lines.
- * - Rules: an unavailable one is the Action card's unavailable form (`Chop wood: too heavy to
- *   carry`) after the available lines, never dropped.
+ * - Rules: an unavailable one is the Action card's unavailable form (its plain label) after the
+ *   available lines, never dropped.
  * - States: available; unavailable.
  * - Story: VerbLine.stories.tsx
  */

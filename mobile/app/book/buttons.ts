@@ -226,7 +226,7 @@ function heldButtons(
         o.label === 'action.wear' && e.slot === 'wield' ? { ...o, label: 'action.wield' } : o,
       )
       .flatMap((a) => {
-        // An aimed spell is a Cast a spell… row on its target, refused as `Lux: need 1 ash` (pick.ts).
+        // An aimed spell is a Cast a spell… row on its target, an unavailable `Lux` row when refused (pick.ts).
         if (commandOf(a) === 'cast') return pickRows(button(a, ''), why(a, text), [e.id]);
         const two = other(a, e.id);
         // the Book never shows a thing the view does not project (PM ruling, loka-x6t.109.4)

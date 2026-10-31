@@ -72,7 +72,7 @@ test('a resting use is one Use on… note; each resting tool is its own row on t
   ]);
 });
 
-// Breaks: two scripted actions resting on one tool read as two identical "A bucket: not yet" rows (PM ruling).
+// Breaks: two scripted actions resting on one tool read as two identical unavailable "A bucket" rows (PM ruling).
 test('two scripted actions resting on one tool name their verb on the target', () => {
   const rest = [pair('quench', 'cart', 'b1', 'not yet'), pair('oil', 'cart', 'b1', 'not yet')];
   assert.deepEqual(shown(picks(view, rest, 'cart', say)), [

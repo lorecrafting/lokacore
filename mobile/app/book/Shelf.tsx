@@ -73,8 +73,8 @@ function ShopCards(p: { view: GameView; rows: Row[]; press: (b: Button) => void 
  * - Use: the buy page the NPC page's Trade card opens, and the sell page its Sell card opens;
  *   Leave returns one page.
  * - Rules: the buy page, titled `<Name> can sell you…`, draws one buy card per stock row
- *   (`Cob of bread — 4p`, refused as its Note form with a words.ts reason, `… — 4p: can't
- *   afford`), the purse Note, this visit's history, then the Sell card, drawn only with a row.
+ *   (`Cob of bread — 4p`; refused, the unavailable card under the same label, its press showing
+ *   `You can't afford it.`, book-ui.md Unavailable actions), the purse Note, this visit's history, then the Sell card, drawn only with a row.
  *   The sell page, titled `<Name> will buy…`, draws one card per thing the player may sell with
  *   its price, then the purse and history. A buy or sale keeps its page, no page turn (owner,
  *   2026-10-23): its line joins the person's visit history (shared with the NPC page), the purse

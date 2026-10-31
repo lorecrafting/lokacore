@@ -1,6 +1,6 @@
 // C row Pages, Sections (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect } from 'storybook/test';
+import { expect, waitFor } from 'storybook/test';
 import { ContentsPage } from '../book/Menu.tsx';
 import { Professions, RaiseCards, SkillDetails } from '../book/skills.tsx';
 import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
@@ -142,7 +142,8 @@ export const JournalLore: StoryObj = {
 export const JournalLoreAway: StoryObj = {
   ...loreStory(JournalView.view.actions, 'Journal lore, deduction elsewhere'),
   play: async ({ canvas }) => {
-    await canvas.findByText('Think it through: Not here');
+    const card = await canvas.findByRole('button', { name: 'Think it through' });
+    await expect(card).toHaveAttribute('aria-disabled', 'true');
   },
 };
 // No quests yet, and the deduction listed here but refused with its own reason (a cost), not "Not here".
@@ -152,8 +153,11 @@ export const JournalLoreRefused: StoryObj = {
     'Journal lore only, deduction refused here',
     [],
   ),
-  play: async ({ canvas }) => {
-    await canvas.findByText('Think it through: too exhausted');
+  play: async ({ canvas, userEvent }) => {
+    const card = await canvas.findByRole('button', { name: 'Think it through' });
+    await userEvent.click(card);
+    await waitFor(() => expect(card).toHaveTextContent(/^Think it through\s+\S/));
+    await expect(card).not.toHaveTextContent(/Not here/);
     if (canvas.queryByText('Nothing written yet.')) throw new Error('empty line above Lore');
   },
 };

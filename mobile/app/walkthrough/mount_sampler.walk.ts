@@ -22,7 +22,7 @@ walk(
     await horse(screen, 'Mount the horse');
     await moves(screen, 'north');
     await settle();
-    // Mounted, the map reads "East: not now" and offers no Go east.
+    // Mounted, the map's East card is unavailable and it offers no Go east.
     await screen.getByRole('button', 'Map').tap();
     await settle();
     await screen.getByRole('button', LABEL.backToWorld).tap();

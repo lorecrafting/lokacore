@@ -87,7 +87,9 @@ export const NellShop: StoryObj = {
     await tap(LABEL.trade);
     await tap('Cob of bread — 4p');
     // the buy page stays open, the row sold out and the purse redrawn; the own buy line is quiet here
-    await page.findByText('Cob of bread — 4p: sold out');
+    await waitFor(() =>
+      expect(page.getByLabelText('Cob of bread — 4p')).toHaveAttribute('aria-disabled', 'true'),
+    );
     await page.findByText('You have 6p.');
     await tap(LABEL.leave);
     await tap(LABEL.leave);

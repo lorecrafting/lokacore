@@ -50,7 +50,7 @@ Book still draws it, the passage names the Beads item that removes it.
 
 World is one current-room page ([room page anatomy](#room-page-anatomy)). Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
 description, the people and items sentences and, last, the event log (words go through the
-[say field](#word-bar)). World draws no verb line, refused `label: reason` note or
+[say field](#word-bar)). World draws no verb line, [unavailable card](#unavailable-actions) or
 notice entry: every action, available or refused, draws on its target's fixture, person or item
 page, a pair through its [pick list](#item-details-and-takedrop) (owner 2026-10-23, quoted: "all
 actions on targets [...] should be in the target detail page, or item detail page, and not in the
@@ -117,8 +117,8 @@ the `words.ts` outcome word ("Time passes.") draws only for a receipt with no na
 results, rerenders, same-room NPC actions, Leave and section navigation do not clear it. Active
 save status/error UI remains accurate; NPC histories stay independently bounded. Map
 retains movement, adjacent sight and legal door actions, and draws no event log: the log lives
-on World only (pass-1 UF1). An exit's door state line ("The hut door: open", the cartridge's door name capitalised) draws only when no
-exit card already carries that state as its reason; the door's action cards stay (pass-1 UF2).
+on World only (pass-1 UF1). An exit's door state line ("The hut door: open", the cartridge's door name capitalised) always draws:
+an unavailable exit card reads its plain direction until pressed; the door's action cards stay (pass-1 UF2).
 The World minimap/joystick sits outside
 the scrolling body, with status beneath it, inside the existing safe area.
 
@@ -135,8 +135,9 @@ rule). A section opened from Contents returns with **Back to Contents** (one pag
 returns with **Back to World**; a section opened another way (Character from a status icon, the map
 from the joystick or footer) says **Back to World** and clears the stack to World; an Inventory
 restored on reopen sits on Contents and returns with **Back to Contents**. A page a section opens returns to that section (an item page's Leave to Inventory).
-A room change, death, combat, a new chapter, Start over and an accepted Take or Drop still clear
-straight to World.
+A room change, death, combat, a new chapter, Start over and an accepted Take still clear
+straight to World; an accepted Drop does too, except from a Contents section, where it returns to
+that section ([Take/Drop](#item-details-and-takedrop)).
 
 Settings opens with the **Reading size**: Standard, Large or Larger, one chosen, kept on the
 device (not in the save) and Standard until changed. It scales the reading text (prose, entity
@@ -200,6 +201,21 @@ ordinary action only when eligible; rendering, arrival and reopening do not pres
 A pending retry keeps its original invocation, token, receipt and presentation context; this
 rule never refreshes an already-sent invocation or weakens authority freshness/admission.
 
+## Unavailable actions
+
+(Owner, 2026-10-30, Beads `loka-uzt6`.) An action the GameView lists unavailable (Take too heavy,
+a shop row not afforded, a blocked exit, a refused pick row, teach card or spell word) is the same
+[Action card](../BOOK-UI-COMPONENTS.md) reading its plain label, never `label: reason`. It is
+exposed as disabled, stays focusable and pressable, and carries its reason sentence as its hint.
+A press sends nothing to the engine: the card grays (the Note style) and shows the reason beneath
+the label as one sentence (`reasonSentence`, [words.ts](../../mobile/app/book/words.ts):
+`It's too heavy to carry.`, `You can't afford it.`, otherwise the
+[novel-prose](#line-placement) fallback), which its own polite region reads once. The card follows
+the latest GameView under [live action freshness](#live-action-freshness): a new reason clears the gray,
+and an action that turns available becomes its ordinary card. A walked blocked exit (joystick) shows
+and announces the same sentence. Web: `aria-disabled` is set on the node, never the prop, which
+would also set the native `disabled` and drop the press.
+
 ## Minimap, Map and presentation controls
 
 The World endpaper minimap sits in the footer: a center dot, existing compass paths/rings,
@@ -207,7 +223,7 @@ barred-exit ticks and offered up/down stair nodes. Holding enlarges it; dragging
 existing direction and releasing attempts that exit. Returning to center cancels; a short tap
 opens Map; a terminated gesture walks nowhere. Release keeps the action/context captured at
 drag start and follows [live action freshness](#live-action-freshness), never a new target after redraw. An unavailable exit announces its projected reason
-and logs the refusal without movement. The barred-exit tick tells a closed door from a locked
+as one sentence ([unavailable actions](#unavailable-actions)) and logs the refusal without movement. The barred-exit tick tells a closed door from a locked
 one ([MapDrawing](../../mobile/app/book/MapDrawing.tsx), owner 2026-10-23). Release (or an arrow key)
 toward a shut door presses its offered Unlock, else Open, one action per release; with neither it
 logs one line naming the door ("The door to the south is locked.", "above"/"below" for up/down)
@@ -303,7 +319,8 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
 - Every log line reads as novel prose (owner, 2026-10-30, Beads `loka-r9mr`): no colon label
   (`Name: ...`) anywhere in the log. A found person reads `Nell is here.` or `Nell was last seen
   at the Landing, 2m ago.`; an appositive name closes with a comma before its verb (`Bess, the
-  alewife, is here.`); a refusal with no sentence of its own reads `You can't do that—locked.`
+  alewife, is here.`); a refusal with no sentence of its own reads `You can't do that—locked.`, and so does an
+  [unavailable card](#unavailable-actions)'s sentence
   Dialogue: speaker, speech verb, the
   listener when there is one, a comma, then the spoken line in double quotes. To the player:
   `Nell says to you, "Well, stranger?"`; to the room: `Nell says, "Ale's a penny."`; the player:
@@ -355,7 +372,7 @@ Read text never enters the room event log.
 A projected notice board opens locally from its prose link, with its title and selected description,
 nonempty chronological detail log, then its ordered notice options. A notice option uses the
 current available place offer with exactly that notice ID and inspectable-details target
-scope, including an authored Read alias. Unavailable offers show their reason; absent offers
+scope, including an authored Read alias. Unavailable offers are [unavailable cards](#unavailable-actions); absent offers
 are not actionable. Neither English labels nor cartridge internals determine membership.
 
 Tapping a notice pushes its detail and invokes that captured offer. Its title and selected
@@ -377,8 +394,8 @@ continues to follow the existing World recovery rule.
 
 A readable detail's exact-subject scripted actions appear only in its Notice actions. Available controls
 follow nonempty history; Leave sits in the page foot (on a person's page in conversation, Leave the
-conversation, per the [conversation rule](#npc-dialogue-and-action-details)); unavailable controls show their real reason.
-Available controls and unavailable notes use the same catalog action-label resolver
+conversation, per the [conversation rule](#npc-dialogue-and-action-details)); unavailable controls are [unavailable cards](#unavailable-actions) with their real reason.
+Available and unavailable controls use the same catalog action-label resolver
 and its existing human-readable fallback. Never display an action TextKey as prose.
 Opening the detail always invokes Read, never Study. Detail membership stays UI-only: a
 no-target scripted action sends `target_ids: []`. These controls use the shared offer-to-button builder,
@@ -480,7 +497,7 @@ and absent speakers get no invented body, inferred name suffix or substituted ro
 Player descriptions are required when real player entities/descriptions are projected; there is
 currently no player-presence UI.
 
-**Barter offers.** A service offer with price 0 shows its authored label alone ("Knife for two pelts"), with no " — " and no parentheses, never "free"; its unavailable form is "Knife for two pelts: <reason>". The label names the inputs.
+**Barter offers.** A service offer with price 0 shows its authored label alone ("Knife for two pelts"), with no " — " and no parentheses, never "free"; unavailable, it is an [unavailable card](#unavailable-actions) reading the same label. The label names the inputs.
 
 **Hostile refusal.** The Book cannot tell hostility from refusal codes (`invalid_state` also
 means a full load or an open encounter), so the NPC EntityView carries `hostile: true` while
@@ -517,11 +534,11 @@ closes its detail through the ordinary stale-route rule; no success is inferred.
 
 A container with a lid (cartridge item `barrier`, loka-x6t.121) draws its state as a note (**Closed**, **Open**) and, while closed, no Look inside: Open is one of its own cards (first group), an accepted Open logs **Opened.** in the item page's history and turns to the Inside page (owner, 2026-10-30, loka-mo0p), so Close shows the line on the item page, now with Look inside; a refused or pending Open stays on the item page; Close is offered while open and nothing closes on Leave; Unlock appears only when the lid has a `key_item`. Take from and Put into a closed container are refused by the engine (`not_present`, `exit_closed`), so the page never lists them.
 
-An item action advertised unavailable with `too_heavy` appears as a non-action note using its
-actual catalog label and **too heavy to carry**; one refused because the load is full reads
-**more than you can carry** (kernel code `over_load`) (pass-1 R3). `resource.short` reads "need <n> <key>"; `permission_denied` reads "not yours". It invokes nothing; available actions retain their
-existing buttons. The note follows the latest GameView, including Take aliases and Contents,
-and disappears when shedding held load makes Take legal. An item or NPC page with nothing to do
+An item action advertised unavailable is an [unavailable card](#unavailable-actions) under its
+actual catalog label; pressed, `too_heavy` reads **It's too heavy to carry.** and `over_load` (the
+load is full) **That's more than you can carry.** (pass-1 R3); `permission_denied` reads **It's not
+yours.** Available actions retain their existing buttons. The card follows the latest GameView,
+including Take aliases and Contents, and becomes Take when shedding held load makes Take legal. An item or NPC page with nothing to do
 draws no filler line ("Nothing to do here.", "<Name> has nothing to say just now."): title,
 description, then Leave (owner pick mvlyb5x2m9i3, 2026-10-23).
 
@@ -543,20 +560,20 @@ and confirmed receipt routing. There is no separate storage session or recipient
 - **Give an item…** is not drawn: a person's page has no Give card (owner pick mvlymuams73l, 2026-10-23); the item's Give to… gives.
 - **Give to…** on a held item's page, its reverse (PM 2026-10-23, for symmetry with Use on…): one row per person the GameView lists in a Give pair with this item, labelled with the person's projected name.
 
-Rows keep the GameView's order. When one list holds pairs of more than one scripted action, each row reads the scripted action's authored label and the other object ("Douse with the bucket", "Fill from the trough" on the cart; "Douse the cart" under Use on…), so two pairs of one tool never read alike. Two things that share a name stay two rows, each bound to its own EntityId, never merged, with no invented suffix: a row shows the item's projected state (empty, full) as its quiet note when the GameView projects one, otherwise the rows stay identical in listed order (PM 2026-10-23). A row's accessible name is its shown label, then the action ("bucket, douse the cart"). Unavailable rows: a use pair refused `cooldown` is one row in the Action card's unavailable form (`rod: not yet`; under Use on…, one row per scripted action, `Fish in: not yet`, whatever its targets); a refused aimed spell reads `lux: need 1 ash`; any other refused use pair and every refused Give pair is no row. An option whose list would have no row is not drawn, and the Book never infers usability; an option shown with only unavailable rows still draws.
+Rows keep the GameView's order. When one list holds pairs of more than one scripted action, each row reads the scripted action's authored label and the other object ("Douse with the bucket", "Fill from the trough" on the cart; "Douse the cart" under Use on…), so two pairs of one tool never read alike. Two things that share a name stay two rows, each bound to its own EntityId, never merged, with no invented suffix: a row shows the item's projected state (empty, full) as its quiet note when the GameView projects one, otherwise the rows stay identical in listed order (PM 2026-10-23). A row's accessible name is its shown label, then the action ("bucket, douse the cart"). Unavailable rows: a use pair refused `cooldown` is one [unavailable](#unavailable-actions) row under the tool's name; under Use on…, one row per scripted action, `Fish in`, whatever its targets; a refused aimed spell is an unavailable row under its target's name; any other refused use pair and every refused Give pair is no row. An option whose list would have no row is not drawn, and the Book never infers usability; an option shown with only unavailable rows still draws.
 
 The option is an Action card that sends nothing: a press opens its list in the page's flow directly beneath it, and focus moves to the first row; the option reads as expanded while open. The option again, Escape from anywhere in the list, or the device's Back (Android back, browser back) closes it unsent and returns focus to the option; Back closes an open list before it leaves the page (PM 2026-10-23). Device Back is not built yet: the Book has no Back handling on native or web (loka-x6t.113); until then the option and Escape close the list. One list is open at a time: opening another closes the first. Leaving the page by any route closes it, and a reopened page starts closed. A redraw keeps the list open with the latest rows; when it would be empty the option goes and focus moves to the page title.
 
-A row press (or Enter on a focused row) sends that pair under [live action freshness](#live-action-freshness); nothing sends while an action is pending, and the list stays as it is. A confirmed accepted pick closes the detail page back to World and adds the receipt's authored narration to the World log once; without narration the Book writes one line from [`words.ts`](../../mobile/app/book/words.ts) with the original projected names: **You give an apple to the farmer.** (Give), **You douse the cart with the bucket.** (a use pair: the scripted action's authored label, first letter lowercased, then target and tool), **You cast lux on the cart.** (a spell). The existing [Announcements](#announcements) region reads it; the list adds no live region of its own. A refused pick keeps the page, closes the list, returns focus to the option, and the refusal shows as a Note in that page's history in the unavailable form; a stale pick redraws and nothing acts. An item the pick consumes follows the [consumed-item](#item-details-and-takedrop) line rule, which already ends in World. Put keeps its concrete pair button.
+A row press (or Enter on a focused row) sends that pair under [live action freshness](#live-action-freshness); nothing sends while an action is pending, and the list stays as it is. A confirmed accepted pick closes the detail page back to World and adds the receipt's authored narration to the World log once; without narration the Book writes one line from [`words.ts`](../../mobile/app/book/words.ts) with the original projected names: **You give an apple to the farmer.** (Give), **You douse the cart with the bucket.** (a use pair: the scripted action's authored label, first letter lowercased, then target and tool), **You cast lux on the cart.** (a spell). The existing [Announcements](#announcements) region reads it; the list adds no live region of its own. A refused pick keeps the page, closes the list, returns focus to the option, and the refusal shows as a refused line in that page's history; a stale pick redraws and nothing acts. An item the pick consumes follows the [consumed-item](#item-details-and-takedrop) line rule, which already ends in World. Put keeps its concrete pair button.
 
-**Aimed spells off the target's page** (owner 2026-10-23, loka-x6t.109.5; PM approved as built 2026-10-23). The Character page's Spells block draws one pick option per aimed spell the GameView offers on some target, labelled with the spell's label and **Cast on…** ("Flamma, cast on…"); its rows are that spell's targets, labelled with each target's projected name, a refused one in the unavailable form (`The lantern: need 1 ash`), and an accepted pick turns to World with its line as above. During a live fight each foe line on the Combat page draws that foe's **Cast a spell…** option; an accepted pick stays on Combat while the fight goes on, and its narration goes to the combat log, never the World log. When the foe dies its option goes with it. Open item: with two foes, the two options read alike (the foe's name is in each row's accessible name, not the option's).
+**Aimed spells off the target's page** (owner 2026-10-23, loka-x6t.109.5; PM approved as built 2026-10-23). The Character page's Spells block draws one pick option per aimed spell the GameView offers on some target, labelled with the spell's label and **Cast on…** ("Flamma, cast on…"); its rows are that spell's targets, labelled with each target's projected name, a refused one an [unavailable](#unavailable-actions) row (`The lantern`), and an accepted pick turns to World with its line as above. During a live fight each foe line on the Combat page draws that foe's **Cast a spell…** option; an accepted pick stays on Combat while the fight goes on, and its narration goes to the combat log, never the World log. When the foe dies its option goes with it. Open item: with two foes, the two options read alike (the foe's name is in each row's accessible name, not the option's).
 
 **Equipment and skills.** A weapon's or shield's page shows its projected slot, attack or block
 figures ("2–4 damage", or "2 damage" when the two are equal) and skill requirement, read from the projection, never renderer literals or inferred
 names; a carried weapon is visibly distinct from a wielded one, and a description grants no use.
 How Character shows learned skills is the [skill tree rule](#skill-tree-details).
-A worn item a curse holds on keeps Remove in its list, unavailable, with the engine's reason
-("Remove: it will not come off."); the Book never hides it.
+A worn item a curse holds on keeps Remove in its list as an [unavailable card](#unavailable-actions)
+whose press shows the engine's reason as its sentence; the Book never hides it.
 An item's authored `equip` words name its Wear and Remove buttons and their lines ("Wield the
 training sword", "You take up the training sword."). With none, a wield-slot item reads **Wield**
 and answers "You take it up." and "You put it away."; any other slot reads Wear and answers "You
@@ -659,7 +676,8 @@ lines, so a page history or the combat log is never read as well. A quiet line i
 form on every press; its " (N times)" count is visual only ([line placement](#line-placement)). A refused line
 reads "<reason>, <sentence>". History, redraws, page turns and a reopen are never read again. A
 repeated line is read again. Condition changes arrive as log narration, so they are read the same
-way. The region is text only, so motion settings do not apply to it.
+way. The region is text only, so motion settings do not apply to it. The one exception is an
+[unavailable card](#unavailable-actions)'s own polite region: its press sends nothing and writes no log line, so it reads its sentence there.
 
 ## Future boundaries
 
@@ -818,7 +836,7 @@ GameView `levelling` carries `{level, experience, next, unspent}` from [experien
 
 ## Lore details
 
-The Journal page says "Nothing written yet." only when it has no quests, no known topics and no [Chronicle](#chronicle-details) day; after its quests, it shows **Lore** (a section title) when GameView `topics` is non-empty: each known topic's authored label, one per line, in projected order, then for each GameView `deduction` its topics' labels joined by " + " and its card. The card is the deduction's offered action when the current place offers it; when the place lists it unavailable, the unavailable card with the action's own reason; otherwise the unavailable card with the reason "Not here". Pressing the card performs the scripted action as any place action; the topic it grants then joins the list and the deduction disappears. Badges are topics and are listed with them. Nothing shows when no topic is known. ([Lore codex](mechanics.md#lore-codex-and-deduction-toolbox-row-46); wording proposed, designer to approve: Beads `loka-x6t.14`.)
+The Journal page says "Nothing written yet." only when it has no quests, no known topics and no [Chronicle](#chronicle-details) day; after its quests, it shows **Lore** (a section title) when GameView `topics` is non-empty: each known topic's authored label, one per line, in projected order, then for each GameView `deduction` its topics' labels joined by " + " and its card. The card is the deduction's offered action when the current place offers it; when the place lists it unavailable, the [unavailable card](#unavailable-actions) with the action's own reason; otherwise the unavailable card with the reason "Not here.". Pressing the card performs the scripted action as any place action; the topic it grants then joins the list and the deduction disappears. Badges are topics and are listed with them. Nothing shows when no topic is known. ([Lore codex](mechanics.md#lore-codex-and-deduction-toolbox-row-46); wording proposed, designer to approve: Beads `loka-x6t.14`.)
 
 ## Chronicle details
 
@@ -847,8 +865,8 @@ the status line, the cartridge phrases (GameView `phrases`), then each learned s
 GameView offers to cast here (`spell_words`, only while Cast is offered; never an unlearned or a
 refused one). A chip press only fills the field (and
 clears the bad-word Note); it never sends. A refused spell word is no chip: the Character page
-lists it under a **Spells** section title in the Action card's unavailable form `word, cast: reason`
-(`lux, cast: need 1 ash`); no refused word, no Spells section.
+lists it under a **Spells** section title as an [unavailable card](#unavailable-actions) `word, cast`
+(`lux, cast`); no refused word, no Spells section.
 Cast in the say field is for untargeted words only: a spell aimed at a thing is a row of that
 thing's **Cast a spell…** [list](#item-details-and-takedrop) ([World](#world-and-status-entry), owner
 2026-10-23). An aimed spell (cartridge `aimed`, loka-x6t.109) is never a chip or a Spells-section line: the GameView offers it on each admitted target's entry (`command: cast`, `target_ids: [target]`) and the Book lists it in that page's Cast a spell… pick list.
@@ -861,6 +879,6 @@ word anywhere; only its writer sees it.
 
 ## Skill tree details
 
-Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified. <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified. <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws in the Action card's unavailable form `label: reason`, never dropped (pass-1 R2); locked as a Note "Carving — locked. <requirement>"; any other unacquired box as a Note "Joinery — not learned. <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing. After the Raise cards comes the [Spells](#word-bar) section, while a spell word is refused.
+Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified. <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified. <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws as an [unavailable card](#unavailable-actions), never dropped (pass-1 R2); locked as a Note "Carving — locked. <requirement>"; any other unacquired box as a Note "Joinery — not learned. <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing. After the Raise cards comes the [Spells](#word-bar) section, while a spell word is refused.
 
 An NPC's lesson line names the teacher while the skill is open to learn: "Aldous teaches Blade." while its projected `qualified` is true, else "Aldous teaches Blade. <requirement>". A locked skill reads "Blade: locked. <requirement>"; a learned one "Blade: learned." with no requirement (nothing is left to meet, pass-2), or while unqualified "Blade: learned, unqualified. <requirement>" as on Character (loka-x6t.24).

@@ -170,15 +170,16 @@ test('a typed word is said like its chip, even after the view moves on, and echo
 // admitted (mana unchanged).
 test('spell words: refused ones list their reason under Spells; lux casts once ash is gathered', () => {
   const b = book(spells as never);
-  const spellsBlock = () => {
+  const spellsBlock = (refused: string) => {
     b.tap(CONTENTS);
     b.tap('Character');
+    b.refuse(`${refused}, cast`);
     const t = b.text();
     b.tap(LABEL.backToContents);
     b.tap(LABEL.backToWorld);
     return t.slice(t.indexOf(LABEL.spells));
   };
-  assert.ok(spellsBlock().includes('lux, cast: need 1 ash'));
+  assert.ok(spellsBlock('lux').includes("lux, cast\nYou can't do that—need 1 ash."));
   const v = b.game.view().view;
   assert.deepEqual(
     castWords({ ...v, actions: v.actions.filter((x) => x.action_key !== 'cast') }),
@@ -190,7 +191,7 @@ test('spell words: refused ones list their reason under Spells; lux casts once a
   b.tap('sigil, open');
   b.tap('Trace the sigil');
   b.tap(LABEL.leave);
-  assert.ok(spellsBlock().includes('ward, cast: Needs level 2 and wisdom 11'));
+  assert.ok(spellsBlock('ward').includes('ward, cast\nNeeds level 2 and wisdom 11.'));
   b.tap('hearth, open');
   b.tap('Gather ash');
   b.tap(LABEL.leave);

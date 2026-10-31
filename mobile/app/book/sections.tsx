@@ -11,8 +11,8 @@ import {
   conditionLine,
   plain,
   isPool,
+  refused,
   toneOf,
-  why,
   type group,
   type Thing,
 } from './model.ts';
@@ -47,7 +47,7 @@ type Character = { view?: GameView; text: Say; pending?: boolean } & Home &
 
 /**
  * The Character section: attributes, skills, professions, the Raise cards, then Spells: each
- * spell word refused here in ActionCard's unavailable form `<word>, cast: <reason>`, none when
+ * spell word refused here in ActionCard's unavailable form `<word>, cast` (book-ui.md, Unavailable actions), none when
  * none is, and each aimed spell's Cast on… list (book-ui.md, Skill tree details; Word bar).
  * - Use: Contents, and the status pools when only pennies show.
  * - Story: SectionPages.stories.tsx
@@ -178,14 +178,16 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
         {move ? (
           <ActionCard b={move} press={p.press} />
         ) : (
-          <ActionCard label={cap(e.direction)} reason={e.available ? undefined : why(e, p.text)} />
+          <ActionCard
+            label={cap(e.direction)}
+            reason={e.available ? undefined : refused(e, p.text).text}
+          />
         )}
-        {e.door &&
-          why(e, p.text) !== e.door.state && ( // UF2: once, when the card says it
-            <Text style={prose(c, t)}>
-              {cap(p.text(e.door.name))}: {e.door.state}
-            </Text>
-          )}
+        {e.door && ( // UF2: the card reads only its direction, so the door's state shows here
+          <Text style={prose(c, t)}>
+            {cap(p.text(e.door.name))}: {e.door.state}
+          </Text>
+        )}
         {p.g.door(e.direction).map((b) => (
           <ActionCard key={b.action_key} b={b} press={p.press} />
         ))}

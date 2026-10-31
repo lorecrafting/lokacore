@@ -98,9 +98,7 @@ test('an item an NPC holds reads Lift after the holder Note; a box item reads Ta
     'Leave',
   ]);
   const book = await page(view, ID.book);
-  const [holder, lift] = ['Npc.nell.short is holding it.', 'Lift: not yours.'].map((l) =>
-    book.indexOf(l),
-  );
+  const [holder, lift] = ['Npc.nell.short is holding it.', 'Lift'].map((l) => book.indexOf(l));
   assert.ok(holder >= 0 && lift > holder, JSON.stringify(book)); // book-ui.md: holder Note first
   for (const id of ['coin', 'pebble'] as const) {
     const lines = await page(view, ID[id]);
@@ -142,9 +140,9 @@ test('detail options: act on it, then move it, then store it', async () => {
 });
 
 // Breaks: a refused two-target offer that is no use pair (a Put resting, cooldown) is let through
-// as a use pair would be and draws as a pressable card, or loses its "not yet" note as a use
-// pair's Pick list row would.
-test('a resting Put draws no card but keeps its note', async () => {
+// as a use pair would be and draws as an available card, or goes missing as a use pair's Pick
+// list row would.
+test('a resting Put draws as its unavailable card', async () => {
   const v = nellView();
   const resting = {
     available: false,
@@ -158,13 +156,13 @@ test('a resting Put draws no card but keeps its note', async () => {
   const corpse = await page(view, ID.corpse);
   assert.deepEqual(
     corpse.filter((l) => l.startsWith('Put')),
-    ['Put: not yet.'],
+    ['Put'],
   );
 });
 
 // Breaks: an item page with no actions, contents or notes draws a filler line instead of title,
 // description, Leave (owner pick mvlyb5x2m9i3); or a cartridge without action label text prints the
-// refusal's raw key, "action.take: not yours." (loka-x6t.53).
+// refusal's raw key, "action.take" (loka-x6t.53).
 test('a refusal reads its word; an empty item page draws no filler', async () => {
   const v = nellView();
   const refused = action('take', { available: false, reason: { code: 'permission_denied' } });
@@ -173,7 +171,7 @@ test('a refusal reads its word; an empty item page draws no filler', async () =>
     entities: [...v.entities, thing('coin', [refused]), thing('pebble', [])],
   } as GameView;
   const coin = await page(view, ID.coin);
-  assert.ok(coin.includes('Take: not yours.'), JSON.stringify(coin));
+  assert.ok(coin.includes('Take'), JSON.stringify(coin)); // its plain verb; the reason waits for a press
   const pebble = await page(view, ID.pebble);
   assert.equal(pebble.at(-1), LABEL.leave, JSON.stringify(pebble));
   assert.ok(!pebble.includes('Nothing to do here.'), JSON.stringify(pebble));

@@ -255,7 +255,7 @@ export function Heard({ said }: { said: { key: number; text: string } }) {
 }
 
 // Read by a screen reader, not seen: one pixel, clipped.
-const unseen = {
+export const unseen = {
   position: 'absolute',
   width: size.unseen,
   height: size.unseen,

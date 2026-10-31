@@ -66,7 +66,7 @@ const notes = (thing: Thing | undefined, label: Say, held?: string) => {
           <ActionCard
             key={a.action_key}
             label={held && commandOf(a) === 'take' ? LABEL.lift : label(a.label)} // E14, refused too
-            reason={`${a.word}.`}
+            reason={a.word}
           />
         ))}
       </View>

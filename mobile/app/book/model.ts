@@ -147,7 +147,7 @@ export { cap, why };
 export const refused = (
   e: Extract<GameView['exits'][number], { available: false }>,
   text: (key: string) => string,
-): DetailLine => ({
+): Extract<DetailLine, { kind: 'refused' }> => ({
   kind: 'refused',
   reason: reasonOf(e.reason),
   text: e.reason.message
