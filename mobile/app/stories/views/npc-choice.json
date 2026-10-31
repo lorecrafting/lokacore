@@ -764,12 +764,12 @@
  ],
  "log": [
   "You arrive from the north.",
-  "\"Well, stranger?\""
+  "The Reeve says to you, \"Well, stranger?\""
  ],
  "combatLog": [],
  "details": {
   "dce25ff1-322e-80ae-8f48-e0c4062c2783": [
-   "\"Well, stranger?\""
+   "The Reeve says to you, \"Well, stranger?\""
   ]
  }
 }
