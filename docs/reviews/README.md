@@ -11,7 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: NPC condition band in GameView, PR #515 (loka-ysbt, kernel_api 1.123)](2026-10-30-ysbt-npc-condition-review.md): **APPROVE**
-- [Review: an NPC with no hp of its own cannot be hurt, PR #518 (loka-xyyd, kernel_api 1.126)](2026-10-30-xyyd-unhurtable-review.md): **CHANGES REQUIRED**
+- [Review: an NPC with no hp of its own cannot be hurt, PR #518 (loka-xyyd, kernel_api 1.126)](2026-10-30-xyyd-unhurtable-review.md): **APPROVE**
 - [Review: NPC moods, PR #507 (loka-x6t.71)](2026-10-30-x6t71-moods-review.md): **APPROVE**
 - [Review: liquid line binds its vessel, PR #512 (loka-tc2e, kernel_api 1.122)](2026-10-30-tc2e-liquid-vessel-review.md): **APPROVE**
 - [Review: a seen NPC shows its worn items, PR #517 (loka-oc5i, kernel_api 1.125)](2026-10-30-oc5i-npc-worn-review.md): **APPROVE WITH NOTES**

@@ -3,7 +3,7 @@
 - PR [#518](https://github.com/lorecrafting/lokacore/pull/518) `fix/xyyd-unhurtable` at `e2dd2d15bce1c3aff3a15f534fb406ec60b09a26`, diff `origin/main...e2dd2d15b` (main `d96295868`, kernel_api 1.125 after #517).
 - Governing: the brief in `br show loka-xyyd`; release-pin rule in `br show loka-ewtx` (strictly above main at merge); [mechanics.md combat@1](../system/mechanics.md); [protocol.md RefusalCause](../system/protocol.md); book-ui.md Unavailable actions; AGENTS.md "Writing tests".
 - Reviewer: independent; authored none of the work.
-- Verdict: **CHANGES REQUIRED** at `e2dd2d15bce1c3aff3a15f534fb406ec60b09a26` (two should-fix; the head also conflicts with main).
+- Verdict: **CHANGES REQUIRED** at `e2dd2d15bce1c3aff3a15f534fb406ec60b09a26`; fix re-check at `6d11c9cc2db3243c7798de7a5cdabe40e6bdb1ba`: **APPROVE** (below).
 
 ## Must be true (written before reading the diff)
 
@@ -33,3 +33,13 @@ Head is `CONFLICTING` (`git merge-tree` against `origin/main`: showcase `cartrid
 - Fixtures: showcase transcripts, `stories/live/*.sql`, `protocol/fixtures/toolbox_showcase_hash.json` change hash and version only (normalized diff).
 - PR body reports `/code-review medium`.
 - CI at head (`gh run list --commit e2dd2d1…`): graph-diff success; ci and book-e2e in_progress.
+
+## Fix re-check at `6d11c9cc2db3243c7798de7a5cdabe40e6bdb1ba`
+
+Scope: commits `01efd2399` and `6d11c9cc2` only. Verdict: **APPROVE**.
+
+- Merge: one merge of main (`eadb1b0f3`, #517 at 1.125); `kernel/ts/src/runtime/world.ts:108` and showcase `cartridge.json` `at_least` stay 1.126; PR mergeable. `transcripts/food.jsonl` against main: 4 lines changed, identical after normalizing hash and version.
+- Finding 1 fixed: `release_pin.test.ts:43-47` now refuses a 1.125 save with Start over; green at head. Red control: showcase `at_least` set to 1.125 and the fixture regenerated (`bin/regen_hash_fixture.sh`) makes it fail (`not ok 1`); restored.
+- Finding 2: ruled by the PM; the sentence goes in the polish batch (`reasons.ts` on the session branch), stated in the PR body. Not a finding.
+- This record is carried at `5d94b8b0c`, the same content as the original review commit.
+- CI at head: graph-diff success; ci and book-e2e in_progress.
