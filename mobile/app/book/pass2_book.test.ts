@@ -79,7 +79,9 @@ test('a reopen during a talk shows its question once', () => {
   go(b, 'north', 'west', 'west');
   b.tap('carpenter, open');
   b.tap('Talk to the carpenter');
-  const ask = b.text().filter((x) => x.startsWith('"Knife, axe or saw?'));
+  const ask = b
+    .text()
+    .filter((x) => x.startsWith('The carpenter says to you, "Knife, axe or saw?'));
   assert.equal(ask.length, 1, JSON.stringify(b.text()));
   b.unmount();
   const r = book(cart, { ...a, game: openGame(a.db, cart, a.host) });
