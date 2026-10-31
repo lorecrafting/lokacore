@@ -181,7 +181,8 @@ defmodule Loka.ContentLintTest do
           "Cooking: learned.",
           "The door shuts. Too late: the keeper changed the lock.",
           "North, the market: candles.",
-          "A [painted board](board): rides north."
+          "A [painted board](board): rides north.",
+          "[Nell]: ale's a penny."
         ],
         do: assert({s, t.(s)} == {s, bad})
 

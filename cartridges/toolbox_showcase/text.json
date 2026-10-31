@@ -1674,6 +1674,6 @@
   "topic.mill": "The mill",
   "topic.parish": "The parish",
   "topic.surety": "The surety",
-  "topic.walker": "You have walked all of Wardle, from green and gate to tollhouse, mill and church",
-  "trial.charge": "The jailer reads the charge from his ledger: seen stealing. Three pennies pays it; short of three, work it off."
+  "topic.walker": "Wardle walker",
+  "trial.charge": "The jailer reads from his ledger that you were seen stealing. Three pennies pays it; short of three, work it off."
 }
