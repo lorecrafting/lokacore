@@ -112,6 +112,16 @@ test('fields that first appear, or leave, are no change', () => {
   assert.deepEqual(cuesOf(view(fight), full), []);
 });
 
+// Breaks: a gain of nothing reads as a gain; or a skill or level with no number stays silent.
+test('a skill or level that stands still is silent, one first numbered has risen', () => {
+  const blade = (level?: number) => view({ skills: [skill('blade', true, level)] });
+  assert.deepEqual(cuesOf(blade(2), blade(2)), []);
+  assert.deepEqual(names(cuesOf(blade(1), blade())), ['skill_up']);
+  const lv = (level: number) => view({ levelling: { level } });
+  assert.deepEqual(cuesOf(lv(3), lv(3)), []);
+  assert.deepEqual(cuesOf(view({}), lv(0)), []);
+});
+
 // Breaks: taking off a worn item flicks as a pickup.
 test('an item off the body is no pickup', () => {
   const worn = view({ equipment: [{ slot: 'head', item: item('cap') }] });
@@ -205,6 +215,62 @@ test('a blow within a second of a wash keeps all but the wash', () => {
   const a = step(QUIET, [blow(1)], 1000);
   assert.equal(step(a.q, [blow(2)], 1999).fired[0]?.wash, false);
   assert.equal(step(a.q, [blow(2)], 2000).fired[0]?.wash, true);
+});
+
+// Breaks: a cue moves severity against plan section 2's table, so it queues or merges wrongly.
+test('each cue behaves as its severity', () => {
+  const felt = (name: CueName) => {
+    const first = step(QUIET, [{ name }], 1000);
+    const next = step(first.q, [{ name }], 1100);
+    if (first.q.card) return 4;
+    if (next.q.pending) return 3;
+    return next.fired.length ? 1 : 2;
+  };
+  const severities = Object.fromEntries(
+    (
+      [
+        'pickup',
+        'coin',
+        'hp_loss',
+        'status_in',
+        'status_out',
+        'quest_on',
+        'quest_resolved',
+        'quest_fail',
+        'level',
+        'skill_learned',
+        'skill_up',
+        'chapter',
+        'place',
+        'combat_open',
+        'combat_close',
+      ] as CueName[]
+    ).map((n) => [n, felt(n)]),
+  );
+  assert.deepEqual(severities, {
+    pickup: 2,
+    coin: 2,
+    hp_loss: 3,
+    status_in: 2,
+    status_out: 1,
+    quest_on: 2,
+    quest_resolved: 3,
+    quest_fail: 2,
+    level: 3,
+    skill_learned: 2,
+    skill_up: 2,
+    chapter: 4,
+    place: 1,
+    combat_open: 3,
+    combat_close: 3,
+  });
+});
+
+// Breaks: the 30 s limit of skill_up silences every other small cue.
+test('other small cues keep their sound past coalescing', () => {
+  const coin: Cue = { name: 'coin' };
+  const first = step(QUIET, [coin], 1000);
+  assert.deepEqual(step(first.q, [coin], 1300).fired, [coin]);
 });
 
 // Breaks: anything survives the chapter, or a second card stacks, or others play under it, or a

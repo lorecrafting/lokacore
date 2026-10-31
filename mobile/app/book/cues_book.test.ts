@@ -29,7 +29,7 @@ function mount() {
   let i = 0;
   let deps: unknown[] | undefined;
   let cleanup: (() => void) | undefined;
-  return (view: GameView, catchingUp: boolean, turn: number) => {
+  const draw = (view: GameView, catchingUp: boolean, turn: number) => {
     i = 0;
     const g = globalThis as any;
     g[Symbol.for('loka-book-test-state')] = (v: unknown) => [(slots[i++] ??= v), () => {}];
@@ -41,6 +41,7 @@ function mount() {
     };
     useCues(view, catchingUp, turn);
   };
+  return Object.assign(draw, { unmount: () => cleanup?.() });
 }
 function listen(t: { after: (f: () => void) => void }) {
   const heard: string[] = [];
@@ -98,6 +99,23 @@ test('a timer landing early waits again', (t) => {
   assert.deepEqual(heard, ['hp_loss']);
   tick(1);
   assert.deepEqual(heard, ['hp_loss', 'hp_loss']);
+});
+
+// Breaks: a closed Book plays its pending blow; a listener that left still hears.
+test('unmounting drops the pending cue, unsubscribing stops the listener', (t) => {
+  const tick = clock(t);
+  const heard = listen(t);
+  const gone: string[] = [];
+  const off = onCue((c) => gone.push(c.name));
+  const draw = mount();
+  draw(hit(9), false, 0);
+  draw(hit(8), false, 0);
+  off();
+  draw(hit(7), false, 0);
+  draw.unmount();
+  tick(1000);
+  assert.deepEqual(heard, ['hp_loss']);
+  assert.deepEqual(gone, ['hp_loss']);
 });
 
 // Breaks: a turn leaves the old page's blow to play on the new page, or every view counts as a turn.

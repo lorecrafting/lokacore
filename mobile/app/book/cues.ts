@@ -147,7 +147,7 @@ export type Queue = {
   toned: number; // when skill_up last sounded
   washed: number; // when an hp_loss last washed
 };
-export const QUIET: Queue = { until: 0, merged: {}, toned: -Infinity, washed: -Infinity };
+export const QUIET: Queue = { until: 0, merged: {}, toned: -Infinity, washed: -Infinity }; // mutate-skip: until is unread before a play or card sets it
 
 // An S3 holds for the severity's 500 ms budget, which the blow wash fills.
 const BEAT = motion.flash.duration + motion.flash.out;
