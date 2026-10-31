@@ -8,7 +8,7 @@ import { chapter, journal } from './quest_journal.ts';
 import { lore } from '../mechanics/topics/shared.ts';
 import { services } from './services.ts';
 import { liquidView } from './liquid.ts';
-import { conditionViews, resources } from './resources.ts';
+import { bandOf, conditionViews, resources } from './resources.ts';
 import { combatView, named } from './combat.ts';
 import { KernelError } from '../foundation/error.ts';
 import { LIMITS } from '../contracts.gen.ts';
@@ -236,6 +236,8 @@ const viewOf = (
   ...(e.kind === 'item' && e.block_chance !== undefined && { block_chance: e.block_chance }),
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
+  // Only an NPC with its own hp has a condition (living's test; loka-ysbt ruling a): no hp, no band.
+  ...(e.kind === 'npc' && e.hp && { band: bandOf(world, id as EntityId, 'hp').band }),
   ...liquidView(world, id),
   ...(e.kind === 'npc' && freeLessons(world, id, actor, steps)),
   // Book hostile refusal: the page needs hostility, which refusal codes cannot tell apart.

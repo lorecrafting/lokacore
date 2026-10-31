@@ -364,6 +364,7 @@
     "description": "npc.boar.description",
     "kind": "npc",
     "actions": [],
+    "band": "ready",
     "contents": [
      {
       "id": "cd96d994-df5b-8158-b798-019f0397c557",
