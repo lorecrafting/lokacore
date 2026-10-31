@@ -12,7 +12,7 @@ import type { RngState, WorldContextId } from '../../../kernel/ts/src/contracts.
 import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/index.ts';
 import { INSTALLED } from '../../../kernel/ts/src/runtime/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { openStory } from './authority.ts';
+import { openStory, type Release } from './authority.ts';
 
 const showcase = read('protocol/fixtures/toolbox_showcase_hash.json');
 const release = (canonical: string) => {
@@ -26,7 +26,7 @@ const release = (canonical: string) => {
   ] as unknown as RngState);
   return { content_hash: sha, fresh };
 };
-const open = (path: string, releases: ReturnType<typeof release>[], n = { i: 0 }) => {
+const open = (path: string, releases: [Release], n = { i: 0 }) => {
   const sql = new DatabaseSync(path);
   type P = (string | number | null)[];
   const db = {
