@@ -6,7 +6,8 @@ import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 
 // Breaks: the showcase text lacks action.take (the card reads "action.take"); the card keeps the old
-// "Take: too heavy to carry." form; it shows its reason before a press; or a press reaches the engine.
+// "Take: too heavy to carry." form; it shows its reason before a press; a press reaches the engine;
+// or the pressed card's name repeats the reason its hint reads.
 test('farm yard: a too-heavy seed sack reads "Take"; a press sends nothing and says why', () => {
   const b = book(compiled('cartridges/toolbox_showcase') as never);
   for (const d of ['north', 'west', 'south']) {
@@ -20,7 +21,12 @@ test('farm yard: a too-heavy seed sack reads "Take"; a press sends nothing and s
   b.refuse('Take');
   assert.equal(head(), before);
   assert.ok(b.text().includes("Take\nIt's too heavy to carry."), JSON.stringify(b.text()));
-  assert.ok(b.draw().some((n) => n.props?.accessibilityLabel === "Take\nIt's too heavy to carry."));
+  const card = b.draw().find((n) => n.props?.accessibilityState?.disabled);
+  // The reason is read once, as the hint; the name stays the label (book-ui.md, Unavailable actions).
+  assert.deepEqual(
+    [card?.props.accessibilityLabel, card?.props.accessibilityHint],
+    ['Take', "It's too heavy to carry."],
+  );
 });
 
 // Breaks: the Book collapses by name key (the Glade's pelts are pelt_01..03, one key each), so three

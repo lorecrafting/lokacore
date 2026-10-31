@@ -224,6 +224,65 @@ test('one balance Note after the description on a page with a priced service', a
   assert.ok(!draw(bare).some((l) => l.startsWith('You have')));
 });
 
+// Breaks: a person who cannot be hurt (Attack refused, cause cannot_be_hurt; loka-xyyd) loses the
+// unavailable Attack card, draws it twice, or a press does not show "You can't hurt <name>."
+// (book-ui.md, Unavailable actions).
+test("an hp-less person's page shows its unavailable Attack; a press reads You can't hurt them", async () => {
+  const { NpcPage } = await import('./Npc.tsx');
+  const g = globalThis as any;
+  const hook = Symbol.for('loka-book-test-state');
+  const stateless = g[hook];
+  const slots: unknown[] = [];
+  let i = 0;
+  g[hook] = (v: unknown) => {
+    const k = i++;
+    if (!(k in slots)) slots[k] = v;
+    return [slots[k], (x: unknown) => (slots[k] = x)];
+  };
+  try {
+    const v = nellView();
+    const nell = v.entities.find((e) => e.shop)!;
+    const reason = { code: 'invalid_target', cause: 'cannot_be_hurt' };
+    const attack = { ...action('attack'), available: false, reason };
+    const view = {
+      ...v,
+      entities: v.entities.map((e) => (e.id === nell.id ? { ...e, actions: [attack] } : e)),
+    } as GameView;
+    const s = screenOf(view);
+    const text = (k: string) =>
+      ({ 'action.attack': 'Attack', [nell.name]: 'Nell' })[k] ?? s.text(k);
+    const npc = s.view.entities.find((e) => e.id === nell.id);
+    const draw = () => {
+      i = 0;
+      return nodes(
+        NpcPage({
+          ...s,
+          text,
+          npc,
+          g: group(s.buttons),
+          press() {},
+          leave() {},
+          open() {},
+        } as never),
+      );
+    };
+    const cards = draw().filter((n) => n.props?.accessibilityState?.disabled);
+    assert.deepEqual(
+      cards.map((n) => n.props.accessibilityLabel),
+      ['Attack'],
+    );
+    cards[0].props.onPress();
+    assert.ok(
+      draw()
+        .filter((n) => n.type === 'Text')
+        .map(words)
+        .includes("Attack\nYou can't hurt Nell."),
+    );
+  } finally {
+    g[hook] = stateless;
+  }
+});
+
 // Breaks: the World log's refused line brings back its boxed reason chip (a Text of its own), or
 // drops the reason from what a screen reader hears (owner pick mvlyp3gphp2t, 2026-10-23).
 test('a refused World line is one prose Text; its reason stays in the accessible name', () => {

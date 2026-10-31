@@ -217,9 +217,9 @@ test("a person's Look page names their condition from the band, none without one
 });
 
 // Breaks (loka-oc5i): the Look page drops the worn sentence or draws it out of order (condition,
-// worn, carried), the carried sentence repeats a worn item the theft lane also lists, a worn-only
-// person gains a carries sentence, an empty worn draws a bare "wears", or a worn item's page outside the theft lane shows the
-// unavailable Take (as Lift, "not here") or the holding Note; inside the theft lane it keeps Lift.
+// worn, carried), the carried sentence repeats a worn item (listed in contents or not), an empty
+// worn draws a bare "wears", or a worn item's page outside the theft lane (the person lists other
+// contents) shows the unavailable Take (as Lift, "not here") or the holding Note; inside it keeps Lift.
 test("a person's Look page names what they wear; a worn item's page has no Take without theft", () => {
   const { buttonsOf } = buttons;
   const take = (available: boolean) => ({
@@ -240,7 +240,7 @@ test("a person's Look page names what they wear; a worn item's page has no Take 
       band: 'hurt',
       actions: [],
       worn: [worn],
-      ...(theft && { contents: [worn, knife] }),
+      contents: theft ? [worn, knife] : [knife],
     };
     return { entities: [m], inventory: [], exits: [], actions: [], place: { id: 'p' } } as any;
   };
@@ -253,13 +253,13 @@ test("a person's Look page names what they wear; a worn item's page has no Take 
   );
   assert.deepEqual(
     look(view(false)).filter((s) => s.startsWith('Bess')),
-    ['Bess', 'Bess looks to be hurt.', 'Bess wears apron.'],
+    ['Bess', 'Bess looks to be hurt.', 'Bess wears apron.', 'Bess carries knife.'],
   );
   const bare = view(false);
   bare.entities[0].worn = []; // a seen NPC always has worn; empty draws no "Bess wears ."
   assert.deepEqual(
     look(bare).filter((s) => s.startsWith('Bess')),
-    ['Bess', 'Bess looks to be hurt.'],
+    ['Bess', 'Bess looks to be hurt.', 'Bess carries knife.'],
   );
   const page = (v: any) => {
     const screen = { view: v, text, label: text, detail: () => [], pending: false };
