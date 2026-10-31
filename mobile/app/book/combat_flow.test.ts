@@ -54,7 +54,13 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
   let listener: ((event: any) => void) | undefined;
   const state: any[] = [],
     effects: (() => void)[] = [];
-  let slot = 0;
+  // Per component, as React's are: a log's lines vary in number and must not shift the hooks after them.
+  let slots: Record<string, number> = {};
+  const slotOf = () => {
+    const scope = (globalThis as any)[Symbol.for('combat-scope')];
+    slots[scope] = (slots[scope] ?? 0) + 1;
+    return `${scope}:${slots[scope]}`;
+  };
   const projection = () => ({ view: current, token: `view:${revision}` });
   const g: Game = {
     ...game(initial),
@@ -84,7 +90,7 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
     ),
   };
   (globalThis as any)[Symbol.for('combat-state')] = (initial: any) => {
-    const i = slot++;
+    const i = slotOf();
     if (!(i in state)) state[i] = typeof initial === 'function' ? initial() : initial;
     return [
       state[i],
@@ -94,7 +100,7 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
     ];
   };
   (globalThis as any)[Symbol.for('combat-effect')] = (f: () => any, deps: any[]) => {
-    const i = slot++,
+    const i = slotOf(),
       before = state[i];
     if (before && deps.every((d, j) => Object.is(d, before.deps[j]))) return;
     effects.push(() => {
@@ -103,7 +109,8 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
     });
   };
   const draw = () => {
-    slot = 0;
+    slots = {};
+    (globalThis as any)[Symbol.for('combat-scope')] = 'Book';
     const root = Book({
       game: g,
       shell: { confirm: (f) => f(), learned: { get: () => true } as never },

@@ -7,6 +7,7 @@ import { createRequire, registerHooks } from 'node:module';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { presenter } from './presenter.ts';
 import { group } from './model.ts';
+import { fadeStub } from './__tests__/fade-stub.ts';
 import {
   bundle,
   entity,
@@ -17,6 +18,7 @@ const require = createRequire(import.meta.url),
   ts = require('typescript');
 registerHooks({
   resolve(specifier, context, next) {
+    if (specifier === './fade.ts') return fadeStub;
     if (specifier === 'react') return { url: 'test:riddle-react', shortCircuit: true };
     if (specifier === 'react-native') return { url: 'test:riddle-native', shortCircuit: true };
     return next(specifier, context);

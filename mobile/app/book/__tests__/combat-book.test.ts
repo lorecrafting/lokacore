@@ -62,6 +62,7 @@ export function nodes(element: any): any[] {
     if (element.type.name === 'Footer') return [element];
     if (element.type.name === 'Heard') return [element]; // the live region: not page text
     if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
+    (globalThis as any)[Symbol.for('combat-scope')] = element.type.name;
     return nodes(element.type(element.props));
   }
   return [element, ...nodes(element.props?.children)];
