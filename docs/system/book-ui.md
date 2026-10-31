@@ -203,17 +203,20 @@ rule never refreshes an already-sent invocation or weakens authority freshness/a
 
 ## Unavailable actions
 
-(Owner, 2026-10-30, Beads `loka-uzt6`.) An action the GameView lists unavailable (Take too heavy,
+(Owner, 2026-10-30, Beads `loka-uzt6`, `loka-3751`.) A grayed unavailable card shows only when the
+player could change the outcome: an action the GameView lists unavailable (Take too heavy,
 a [shop line](#npc-dialogue-and-action-details) not afforded, a blocked exit, a refused pick row, teach card or spell word) is the same
-[Action card](../BOOK-UI-COMPONENTS.md) reading its plain label, never `label: reason`. It is
+[Action card](../BOOK-UI-COMPONENTS.md) reading its plain label, never `label: reason`. A permanent
+refusal, one the player cannot change, hides its card: its reason is on the hidden list beside
+`reasonSentence` ([reasons.ts](../../mobile/app/book/reasons.ts), `hides`; today an Attack on a person who
+cannot be hurt), and the card returns as its ordinary card once the action turns available. A worn
+item's Take (`not_present`) stays hidden as before. The shown card is
 exposed as disabled, stays focusable and pressable, and carries its reason sentence as its hint; once
 pressed its accessible name is its shown text, the label then the reason sentence (label in name), and the
 hint is dropped, so the reason is read once.
 A press sends nothing to the engine: the card grays (the Note style) and shows the reason beneath
-the label as one sentence (`reasonSentence`, [reasons.ts](../../mobile/app/book/reasons.ts):
-`It's too heavy to carry.`, `You can't afford it.`, `You can't do that here.`, an Attack on a
-person who cannot be hurt `You can't hurt the shopkeeper.` (the person's name with its article on
-their page; `That can't be hurt.` where no target is known), with no reason
+the label as one sentence (`reasonSentence`:
+`It's too heavy to carry.`, `You can't afford it.`, `You can't do that here.`, with no reason
 `You can't do that.`, otherwise the [novel-prose](#line-placement) fallback), which its own polite region reads once. The card follows
 the latest GameView under [live action freshness](#live-action-freshness): a new reason clears the gray,
 and an action that turns available becomes its ordinary card. A walked blocked exit (joystick) shows

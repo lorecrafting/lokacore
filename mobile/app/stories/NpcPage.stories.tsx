@@ -10,6 +10,7 @@ import NpcServicesView from './views/npc-services.json';
 import NpcClosedView from './views/npc-closed.json';
 import NpcShelfView from './views/npc-shelf.json';
 import NpcSilentView from './views/npc-silent.json';
+import { View } from 'react-native';
 import { LABEL } from '../book/labels.ts';
 
 const meta: Meta = {
@@ -169,26 +170,27 @@ export const WornItem: StoryObj = {
     await expect(canvas.queryByText(/holding it|not here/i)).toBeNull();
   },
 };
-// An Attack on a person with no hp (loka-xyyd) is the unavailable card naming them (book-ui.md,
-// Unavailable actions). Breaks: no card, or "You can't do that—cannot be hurt."
-const reason = { code: 'invalid_target', cause: 'cannot_be_hurt' };
-const attack = { available: false, action_key: 'attack', label: 'action.attack', reason };
-export const AttackRefused: StoryObj = {
-  ...pageStory({
-    ...NpcChoiceView,
-    view: {
-      ...NpcChoiceView.view,
-      choice: undefined,
-      entities: NpcChoiceView.view.entities.map((e) =>
-        e === reeve ? { ...e, actions: [attack] } : e,
-      ),
-    },
-  }),
+// Breaks: a grayed Attack on an hp-less person, or none on one with hp (loka-3751; book-ui.md).
+const refused = { available: false, reason: { code: 'invalid_target', cause: 'cannot_be_hurt' } };
+const attack = (offer: object, band?: string) => {
+  const actions = [{ action_key: 'attack', label: 'action.attack', ...offer }];
+  const view = { ...NpcChoiceView.view, choice: undefined, entities: reeveWith({ band, actions }) };
+  return pageStory({ ...NpcChoiceView, view });
+};
+const panes = [attack(refused), attack({ available: true }, 'ready')];
+export const AttackHidden: StoryObj = {
+  ...panes[0],
   args: { words: { 'action.attack': 'Attack' } },
-  name: 'Attack refused',
+  render: (args, ctx) =>
+    panes.map((s, i) => (
+      <View key={i} testID={`pane${i}`}>
+        {s.render!(args, ctx)}
+      </View>
+    )),
+  name: 'No Attack on an NPC that cannot be hurt',
   play: async ({ canvas }) => {
-    await userEvent.click(await canvas.findByRole('button', { name: 'Attack' }));
-    await expect(await canvas.findByText(/You can't hurt the Reeve\./)).toBeVisible();
+    await within(canvas.getByTestId('pane1')).findByRole('button', { name: /^Attack/ });
+    await expect(canvas.getAllByRole('button', { name: /^Attack/ })).toHaveLength(1);
   },
 };
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
