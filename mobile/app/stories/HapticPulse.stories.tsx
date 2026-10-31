@@ -15,10 +15,11 @@ export const Fires: StoryObj = {
       <HapticPulse />
     </View>
   ),
-  play: async ({ canvas }) => {
-    await expect(canvas.queryByText('heavy')).toBeNull();
+  play: async ({ canvas, canvasElement }) => {
+    const ring = () => canvasElement.querySelector('[aria-hidden="true"]');
+    await expect(ring()).toBeNull();
     haptic('heavy');
     await canvas.findByText('heavy');
-    await waitFor(() => expect(canvas.queryByText('heavy')).toBeNull());
+    await waitFor(() => expect(ring()).toBeNull());
   },
 };

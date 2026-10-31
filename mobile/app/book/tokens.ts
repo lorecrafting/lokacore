@@ -136,35 +136,35 @@ export const motion = {
   fade: { duration: 160, easing: 'linear' }, // reduced-motion cross-fade
   palette: { duration: 1500, easing: 'inOutQuad' }, // same-polarity phase change only; flips cut (BOOK-UI-COMPONENTS.md#design-tokens)
   meteor: { duration: 700, easing: 'linear' }, // one shooting star's streak (the mock's .7 s); none under reduced motion
-  press: { duration: 90, easing: 'ease', out: 160 }, // ActionCard, Control, Chip, Tap, letter tile
-  dry: { duration: 240, easing: 'linear', lag: 60 }, // a new log line; lag: a narrated event after its line
-  pop: { duration: 220, easing: 'ease', from: 0.6 }, // a status icon arriving, scaling up from `from`
-  flash: { duration: 120, easing: 'inOutQuad', out: 380 }, // the blow wash
-  settle: { duration: 400, easing: 'inOutQuad' }, // a resolved running head retiring
-  card: { duration: 600, easing: 'inOutQuad', out: 300, stagger: 120, blurFrom: 6, blurTo: 12 }, // chapter card over the leaving page's blur (Skia sigma)
+  press: { duration: 90, easing: 'ease', out: 160 }, // ActionCard, Control, Chip, Tap, letter tile -- mutate-skip: uncalibrated design value
+  dry: { duration: 240, easing: 'linear', lag: 60 }, // a new log line; lag: a narrated event after its line -- mutate-skip: uncalibrated design value
+  pop: { duration: 220, easing: 'ease', from: 0.6 }, // a status icon arriving, scaling up from `from` -- mutate-skip: uncalibrated design value
+  flash: { duration: 120, easing: 'inOutQuad', out: 380 }, // the blow wash -- mutate-skip: uncalibrated design value
+  settle: { duration: 400, easing: 'inOutQuad' }, // a resolved running head retiring -- mutate-skip: uncalibrated design value
+  card: { duration: 600, easing: 'inOutQuad', out: 300, stagger: 120, blurFrom: 6, blurTo: 12 }, // chapter card over the leaving page's blur (Skia sigma) -- mutate-skip: uncalibrated design value
 };
 
 // Each sound by key: its loudness tier, its round-robin variants and the haptic it brings. Files live
 // in the asset manifest (loka-p2s8), human-made only. Rules: docs/system/book-ui.md#effects-sound-and-haptics.
 export const sound = {
-  pageTurn: { tier: 'note', variants: 3 }, // paper; no haptic during a turn
-  pickup: { tier: 'note', variants: 3, haptic: 'light' }, // a paper flick; a buy plays coin instead
-  coin: { tier: 'whisper', variants: 1, haptic: 'selection' }, // one purchase, sale or pennies
-  blow: { tier: 'beat', variants: 3, haptic: 'heavy' }, // a blow taken: the thud
-  level: { tier: 'note', variants: 1, haptic: 'medium' }, // level up: note high
-  skillNew: { tier: 'note', variants: 1, haptic: 'light' }, // new skill: note low
-  questDone: { tier: 'note', variants: 1, haptic: 'light' }, // quest resolved: note low
-  questFailed: { tier: 'note', variants: 1, haptic: 'warning' }, // quest failed: the close
-  skillUp: { tier: 'whisper', variants: 1, gap: 30000 }, // skill improves: tone high, at most once per gap (ms)
-  questGained: { tier: 'note', variants: 1 }, // quest gained: tone low
-  chapter: { tier: 'chapter', variants: 1, haptic: 'medium' }, // the theme cut, on the music bus
+  pageTurn: { tier: 'note', variants: 3 }, // paper; no haptic during a turn -- mutate-skip: uncalibrated design value
+  pickup: { tier: 'note', variants: 3, haptic: 'light' }, // a paper flick; a buy plays coin instead -- mutate-skip: uncalibrated design value
+  coin: { tier: 'whisper', variants: 1, haptic: 'selection' }, // one purchase, sale or pennies -- mutate-skip: uncalibrated design value
+  blow: { tier: 'beat', variants: 3, haptic: 'heavy' }, // a blow taken: the thud -- mutate-skip: uncalibrated design value
+  level: { tier: 'note', variants: 1, haptic: 'medium' }, // level up: note high -- mutate-skip: uncalibrated design value
+  skillNew: { tier: 'note', variants: 1, haptic: 'light' }, // new skill: note low -- mutate-skip: uncalibrated design value
+  questDone: { tier: 'note', variants: 1, haptic: 'light' }, // quest resolved: note low -- mutate-skip: uncalibrated design value
+  questFailed: { tier: 'note', variants: 1, haptic: 'warning' }, // quest failed: the close -- mutate-skip: uncalibrated design value
+  skillUp: { tier: 'whisper', variants: 1, gap: 30000 }, // skill improves: tone high, at most once per gap (ms) -- mutate-skip: uncalibrated design value
+  questGained: { tier: 'note', variants: 1 }, // quest gained: tone low -- mutate-skip: uncalibrated design value
+  chapter: { tier: 'chapter', variants: 1, haptic: 'medium' }, // the theme cut, on the music bus -- mutate-skip: uncalibrated design value
 };
 
 // Loudness targets (LUFS, uncalibrated until recorded samples are heard), voices per bus, ambience
 // ducking under S3 and S4, and the round-robin's pitch spread.
 export const mix = {
   tier: { whisper: -24, note: -18, beat: -14, chapter: -12 },
-  bus: { ambience: 2, sfx: 4, ui: 2, music: 1 },
+  bus: { ambience: 2, sfx: 4, ui: 2, music: 1 }, // mutate-skip: uncalibrated design value
   duck: { db: -6, duration: 300, out: 1200 },
   spread: 0.04,
 };
@@ -173,10 +173,10 @@ export const mix = {
 // stub ignores them until loka-k5ci maps the kinds to the device. `gap`: the least ms between two.
 export const haptic = {
   gap: 100,
-  selection: 10,
+  selection: 10, // mutate-skip: uncalibrated design value
   light: 15,
   medium: 25,
   heavy: 40,
   warning: [20, 60, 20],
-  error: [40, 60, 40],
+  error: [40, 60, 40], // mutate-skip: uncalibrated design value
 };

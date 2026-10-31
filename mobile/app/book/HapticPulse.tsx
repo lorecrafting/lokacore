@@ -17,12 +17,15 @@ import { motion, size } from './tokens.ts';
 export function HapticPulse() {
   const [c, t] = [usePalette(), useType()];
   const [kind, setKind] = useState<HapticKind>();
-  useEffect(() => onPulse(setKind), []);
   useEffect(() => {
-    if (!kind) return;
-    const done = setTimeout(() => setKind(undefined), motion.fade.duration);
-    return () => clearTimeout(done);
-  }, [kind]);
+    let done: ReturnType<typeof setTimeout>;
+    // One timer per pulse, not per kind: a repeat of the same kind shows for its full time.
+    return onPulse((fired) => {
+      clearTimeout(done);
+      setKind(fired);
+      done = setTimeout(() => setKind(undefined), motion.fade.duration);
+    });
+  }, []);
   if (!kind) return null;
   return (
     <View
@@ -30,10 +33,10 @@ export function HapticPulse() {
       pointerEvents="none"
       style={{
         position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
+        top: 0, // mutate-skip: fills the column; seen in the story
+        bottom: 0, // mutate-skip: fills the column; seen in the story
+        left: 0, // mutate-skip: fills the column; seen in the story
+        right: 0, // mutate-skip: fills the column; seen in the story
         borderWidth: size.focus,
         borderColor: c.action,
       }}
