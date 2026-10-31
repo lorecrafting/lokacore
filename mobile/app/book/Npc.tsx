@@ -1,15 +1,14 @@
-// The NPC page: conversation, choices, skills, shop and services, what the NPC holds, with the existing book controls.
+// The NPC page: conversation, choices, skills, shop and services, Look, with the existing book controls.
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { absent, cap, plain, things, why, type group, type Page as Route } from './model.ts';
+import { absent, cap, plain, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 import { ActionCard, Cards, PickLists } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
-import { inside } from './Menu.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { npcSkills } from './skills.tsx';
@@ -76,6 +75,7 @@ type NpcProps = {
   talk?: (on: boolean) => void;
   open: (id: string) => void;
   shelf?: () => void; // opens the person's shop page (Shelf.tsx)
+  look?: () => void; // opens the person's Look page (InsidePage)
 };
 type Offer = NonNullable<GameView['entities'][number]['services']>[number];
 
@@ -88,9 +88,10 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  *   name the offer's own label (the first available talk; with none, no card and no filler
  *   line), Trade (opens the shop page), Use an item… and Cast a spell…, Take and other acts,
  *   Ask about, then services, an open order's claim and cancel under Your order with its
- *   commission hidden. Leave in the PageFoot. No Whisper (loka-x6t.115), no Give an item… card. The
- *   purse shows only beside a priced service; shop stock is not Held. History restarts after
- *   Leave the conversation.
+ *   commission hidden. A **Look** Control
+ *   (not in conversation) opening the Look page (InsidePage), Leave in the PageFoot. No Whisper
+ *   (loka-x6t.115), no Give an item… card, no list of what the person carries. The purse shows
+ *   only beside a priced service. History restarts after Leave the conversation.
  * - States: choice; shop; services; open order; nothing to say (no line); closed conversation.
  * - Story: NpcPage.stories.tsx
  */
@@ -119,7 +120,7 @@ export function NpcPage(p: NpcProps) {
       )}
       {choice && <Choice {...p} press={answer} choice={choice} />}
       {!talk && <Offered {...p} actions={actions} enemy={!!enemy} services={services} />}
-      {!talk && inside({ thing: p.npc, contents: held(p), text: p.text, open: p.open })}
+      {!talk && p.npc && p.look && <Control label={LABEL.lookPerson} onPress={p.look} />}
     </Page>
   );
 }
@@ -187,17 +188,6 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
   return { talk, answer, foot };
 };
 
-// What a living NPC holds (Held, book-ui.md Item details): Take on it is the steal (row 33).
-// Shop stock is the shop page's, not Held.
-const held = ({ npc, view }: NpcProps) => {
-  const stock = npc && 'shop' in npc ? (npc.shop ?? []).map((o) => o.item_id) : [];
-  return npc
-    ? things(view).filter(
-        (e) => 'container_id' in e && e.container_id === npc.id && !stock.includes(e.id),
-      )
-    : [];
-};
-
 // The purse shows beside a priced service (pass-1 E15), the bank's fee too.
 const about = (c: Palette, t: Type, p: NpcProps, priced: boolean) => (
   <>
@@ -254,6 +244,7 @@ export function NpcDetail(p: {
       leave={p.world}
       open={(thing) => p.open({ kind: 'thing', id: thing })}
       shelf={() => p.open({ kind: 'shelf', id })}
+      look={() => p.open({ kind: 'inside', id })}
       talking={!!p.visit && p.talkingOn === p.visit}
       talk={(on) => {
         if (!on) p.screen.leave(id);

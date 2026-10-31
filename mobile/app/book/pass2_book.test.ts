@@ -95,13 +95,13 @@ test('a reopen during a talk shows its question once', () => {
 // Breaks: an NPC page lists the shop's rows (they live on the buy page), draws "Nothing to do
 // here.", "Talk: not now" or any filler line for a person with no talk, or keeps Trade
 // with the stock emptied (owner picks mvlrlvappy4w, mvlyb5x2m9i3, mvlymuams73l).
-test('a shop NPC with no talk: Trade, then Leave, no filler', (t) => {
+test('a shop NPC with no talk: Trade, Look, then Leave, no filler', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
   go(b, 'down', 'west');
   b.tap('fence, open');
   const shown = b.text();
-  assert.deepEqual(shown.slice(2), [LABEL.trade, LABEL.leave]);
+  assert.deepEqual(shown.slice(2), [LABEL.trade, LABEL.lookPerson, LABEL.leave]);
   const real = b.game.view.bind(b.game);
   b.game.view = () => {
     const r = real();

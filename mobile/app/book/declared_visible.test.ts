@@ -51,14 +51,21 @@ registerHooks({
   },
 });
 const { CharacterPage } = await import('./sections.tsx');
-const { NpcPage } = await import('./Npc.tsx');
+const { InsidePage } = await import('./Menu.tsx');
 
 function words(element: any): string[] {
   if (Array.isArray(element)) return element.flatMap(words);
   if (!element || typeof element !== 'object') return [];
   if (typeof element.type === 'function') return words(element.type(element.props));
+  // A nested Text (an inline link in a sentence) reads as its words.
   const flatten = (v: any): string =>
-    Array.isArray(v) ? v.map(flatten).join('') : v === undefined || v === null ? '' : String(v);
+    Array.isArray(v)
+      ? v.map(flatten).join('')
+      : v === undefined || v === null || v === false
+        ? ''
+        : typeof v === 'object'
+          ? flatten(v.props?.children)
+          : String(v);
   return element.type === 'Text'
     ? [flatten(element.props.children).toLowerCase()]
     : words(element.props.children);
@@ -112,9 +119,10 @@ for (const [name, bytes] of artifacts()) {
     assert.equal(spellPoolBesideMa(w), SPELL_POOL_BESIDE_MA.has(name), 'spell pool beside ma');
   });
 
-  // Held is scoped to world.theft (book-ui.md:476): elsewhere an NPC's holdings stay private.
+  // What a person carries is scoped to world.theft (book-ui.md, NPC page): elsewhere an NPC's
+  // holdings stay private.
   if (!c.world?.theft) continue;
-  test(`${name}: each NPC's held items are in the GameView and under Held`, () => {
+  test(`${name}: each NPC's held items are in the GameView and in their Look page's carried sentence`, () => {
     let checked = 0;
     for (const [ref, item] of Object.entries(c.items ?? {}) as [string, any][]) {
       if (item.location?.in !== 'npc') continue;
@@ -122,7 +130,7 @@ for (const [name, bytes] of artifacts()) {
       const holder = `${n.cartridge_id}@${n.cartridge_version}:npc/${n.key}`;
       const npc = (c.npcs as any)[holder];
       assert.ok(npc, `${ref} holder ${holder} is declared`);
-      // Shop stock is the shop page's, not Held (Npc.tsx held); an NPC's get lock keeps its
+      // Shop stock is the shop page's, not carried (item-pages.ts held); an NPC's get lock keeps its
       // holdings private (mechanics.md:2960, the theft vault).
       if (npc.locks?.get) continue;
       const stock = (npc.shop?.offers ?? []).flatMap((o: any) => [
@@ -133,29 +141,21 @@ for (const [name, bytes] of artifacts()) {
       const view = viewOf(besides(w, holder));
       const entity = view.entities.find((e) => e.id === w.entityIds[holder]);
       assert.ok(entity, `${holder} in the view`);
-      assert.ok(
-        ('contents' in entity ? (entity.contents ?? []) : []).some(
-          (e) => e.id === w.entityIds[ref],
-        ),
-        `${ref} held in the view`,
+      const held = ('contents' in entity ? (entity.contents ?? []) : []).find(
+        (e) => e.id === w.entityIds[ref],
       );
+      assert.ok(held, `${ref} held in the view`);
       const page = words(
-        NpcPage({
-          view,
-          npc: entity,
-          text,
-          g: { on: () => [], word: [] },
-          press() {},
-          log: [],
-          leave() {},
-          open() {},
-          talking: false,
-        } as any),
+        InsidePage({ screen: { view, text }, id: entity.id, open() {}, close() {} } as any),
       );
-      const at = page.indexOf('held');
+      const name = String(text(entity.name)).toLowerCase();
       assert.ok(
-        at >= 0 && page.slice(at).includes(String(item.name).toLowerCase()),
-        `${ref} under Held`,
+        page.some(
+          (s) =>
+            s.startsWith(`${name} carries `) &&
+            s.includes(String(text(held.words?.bare ?? held.name)).toLowerCase()),
+        ),
+        `${ref} in the carried sentence`,
       );
       checked++;
     }

@@ -26,6 +26,8 @@ export const LABEL = {
   // An open container's Inside page: the item page's control and the empty page's note.
   lookInside: 'Look inside',
   nothingInside: 'There is nothing inside.',
+  // A person's page control to their Look page (loka-aqnc).
+  lookPerson: 'Look',
   held: 'Held',
   // Take, on an item a living NPC holds (pass-1 E14).
   lift: 'Lift',

@@ -64,6 +64,44 @@ export const Carrying: StoryObj = {
     ).toBeTruthy();
   },
 };
+// A person's Look page (book-ui.md, NPC page): description, then what they carry as one sentence
+// of inline links. The Reeve carries the letter here; Nell's bread is her shop stock, not carried.
+// Breaks: the carried sentence lost, its item not a link, or shop stock listed as carried.
+const letter = NpcChoiceView.view.entities[3]!;
+const nell = NpcChoiceView.view.entities[0]!;
+const lookView = (id: string, entities = NpcChoiceView.view.entities) => ({
+  ...NpcChoiceView,
+  view: { ...NpcChoiceView.view, entities },
+  stack: [
+    { kind: 'thing', id },
+    { kind: 'inside', id },
+  ],
+});
+export const Look: StoryObj = {
+  ...pageStory(
+    lookView(
+      reeve.id,
+      NpcChoiceView.view.entities
+        .filter((e) => e !== letter)
+        .map((e) =>
+          e === reeve ? { ...e, contents: [{ ...letter, container_id: reeve.id }] } : e,
+        ),
+    ),
+  ),
+  name: 'Look',
+  play: async ({ canvas }) => {
+    await canvas.findByText(/^The Reeve carries a/);
+    await expect(canvas.getByRole('button', { name: 'sealed letter, open' })).toBeVisible();
+  },
+};
+export const LookNothing: StoryObj = {
+  ...pageStory(lookView(nell.id)),
+  name: 'Look, carrying nothing',
+  play: async ({ canvas }) => {
+    await canvas.findByRole('button', { name: LABEL.close });
+    await expect(canvas.queryByText(/carries/)).toBeNull();
+  },
+};
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };
 // Breaks: the buy page loses its Sell card while the player holds something the shop buys.
 export const Shelf: StoryObj = {

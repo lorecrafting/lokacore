@@ -10,6 +10,12 @@ export const things = (v: GameView): Thing[] =>
 // The things directly inside a container (or held by a person).
 export const within = (v: GameView, id: string) =>
   things(v).filter((e) => 'container_id' in e && e.container_id === id);
+// What a living NPC carries (its Look page, InsidePage): Take on one is the steal (row 33). Shop
+// stock is the shop page's, not carried.
+export const held = (v: GameView, npc: Thing) => {
+  const stock = 'shop' in npc ? (npc.shop ?? []).map((o) => o.item_id) : [];
+  return within(v, npc.id).filter((e) => !stock.includes(e.id));
+};
 // Its contents are reachable: an open lid, or contents the GameView lists (book-ui.md, Item details).
 export const opens = (v: GameView, thing: Thing) =>
   thing.state === 'open' || within(v, thing.id).length > 0;

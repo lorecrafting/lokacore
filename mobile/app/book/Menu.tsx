@@ -1,12 +1,14 @@
 // The thing and Contents views use the existing book controls (the NPC page: Npc.tsx).
 import { View } from 'react-native';
-import { cap, things, type group, type Page as Route } from './model.ts';
-import { opens, within } from './item-pages.ts';
+import { cap, plain, things, type group, type Page as Route } from './model.ts';
+import { held, opens, within } from './item-pages.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 import { ActionCard, Cards, PickLists } from './actions.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { EntityLine, LogLines, Note } from './lines.tsx';
+import { carries, EntityLine, LogLines, Note } from './lines.tsx';
+import { Text } from './Text.tsx';
+import { prose, usePalette, useType } from './palette.ts';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
 import { ItemDetails } from './skills.tsx';
 import { heldBy, NOTED, reasonOf, type Refusal } from './words.ts';
@@ -72,16 +74,11 @@ const notes = (thing: Thing | undefined, label: Say, held?: string) => {
   );
 };
 
-// A container's Inside heading (a living NPC's: Held), then its rows as one block.
-export const inside = (p: {
-  thing?: Thing;
-  contents: Thing[];
-  text: Say;
-  open: (id: string) => void;
-}) =>
+// A container's Inside heading, then its rows as one block.
+const inside = (p: { thing?: Thing; contents: Thing[]; text: Say; open: (id: string) => void }) =>
   p.contents.length > 0 && (
     <>
-      <SectionTitle>{p.thing?.kind === 'npc' ? LABEL.held : LABEL.inside}</SectionTitle>
+      <SectionTitle>{LABEL.inside}</SectionTitle>
       <View>
         {p.contents.map((e) => (
           <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
@@ -141,12 +138,17 @@ export function ThingPage(p: {
 }
 
 /**
- * An open container's contents as an anchored detail page of its item page (book-ui.md, Item
- * details and Take/Drop), as the dream page is of its bed.
- * - Use: the inside route, from the item page's Look inside or an accepted Open.
+ * An open container's contents, or a person's Look, as an anchored detail page of its item or NPC
+ * page (book-ui.md, Item details and Take/Drop; NPC dialogue and action details), as the dream page
+ * is of its bed.
+ * - Use: the inside route, from the item page's Look inside or an accepted Open, or the NPC page's
+ *   Look.
  * - Rules: the container's name, then Inside and one Entity line per item, each opening its item
- *   page; no actions; Close returns to the item page and sends nothing.
- * - States: several items; empty (one Note).
+ *   page. A person's: their name, the description as prose, then what they carry as one sentence,
+ *   "<Name> carries a flask and a knife.", each name an inline link to its item page; nothing
+ *   carried, no sentence. No actions; Close returns to the item or NPC page and sends nothing.
+ * - States: several items; empty (one Note); a person carrying things; a person carrying nothing
+ *   (the person's states: NpcPage.stories.tsx Look).
  * - Story: ItemPage.stories.tsx
  */
 export function InsidePage(p: {
@@ -156,18 +158,26 @@ export function InsidePage(p: {
   close: () => void;
 }) {
   const { view, text } = p.screen;
+  const [c, t] = [usePalette(), useType()];
   const thing = things(view).find((e) => e.id === p.id);
+  const open = (id: string) => p.open({ kind: 'thing', id });
+  const carried = thing?.kind === 'npc' ? held(view, thing) : [];
   return (
     <Page
       title={thing ? cap(text(thing.name)) : LABEL.item}
       foot={<Control label={LABEL.close} onPress={p.close} />}
     >
-      {inside({
-        thing,
-        contents: within(view, p.id),
-        text,
-        open: (id) => p.open({ kind: 'thing', id }),
-      }) || <Note>{LABEL.nothingInside}</Note>}
+      {thing?.kind !== 'npc' ? (
+        inside({ thing, contents: within(view, p.id), text, open }) || (
+          <Note>{LABEL.nothingInside}</Note>
+        )
+      ) : (
+        <>
+          {thing.description && <Text style={prose(c, t)}>{plain(text(thing.description))}</Text>}
+          {carried.length > 0 &&
+            carries({ group: carried, carrier: cap(text(thing.name)), text, open })}
+        </>
+      )}
     </Page>
   );
 }

@@ -114,3 +114,17 @@ test('a restored Read goes through a container Inside page, never a person', () 
     { kind: 'inside', id: 'h' },
   ]);
 });
+
+// Breaks: a person's Look page (loka-aqnc) closes on any turn while they carry nothing, as an
+// emptied container's Inside page does, or stays after the person goes.
+test("a person's Look page stays with them, carrying or not", () => {
+  const view = (...entities: object[]) => ({ place: { id: 'p' }, entities, inventory: [] });
+  const look = [
+    { kind: 'thing', id: 'n' },
+    { kind: 'inside', id: 'n' },
+  ] as const;
+  const nell = { id: 'n', kind: 'npc' };
+  const before = view(nell) as never;
+  assert.deepEqual(pagesAfter([...look], before, view(nell) as never), look);
+  assert.deepEqual(pagesAfter([...look], before, view() as never), []);
+});

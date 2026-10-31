@@ -399,7 +399,18 @@ about](#fd7-ask-details), then the services. The foot is Leave. The Talk card re
 its accessible name stays the offer's label ("Talk to Nell"). Several Talk offers draw one Talk
 card, the first available one; with none available the page draws nothing in its place, no
 filler line and never "Talk: not now" (owner pick mvlyb5x2m9i3): a person with nothing to do
-shows title, description, then Leave. A person's page draws no Give an item… card: a gift is
+shows title, description, then Look and Leave. **Look.** Outside a conversation a **Look** Control
+ends the person's page, after the cards and before Leave, and opens their Look page, an anchored
+detail of the person's page as the [Inside](#item-details-and-takedrop) page is of its container
+(owner, 2026-10-30, loka-aqnc). It draws the person's name as title, their description as prose, then
+what they visibly bear in the fixed order condition, worn, carried (condition and worn wait on
+loka-ysbt and loka-oc5i and draw nothing until then; no placeholder). Carried is one sentence,
+**<Name> carries a flask and a knife.**, joined as the [room's who-is-here
+sentence](#room-page-anatomy) is (articles, serial comma and "and", plurals collapsed), each item an
+inline link opening its item page; GameView has no pronoun, so it names the person. With nothing
+carried it draws no sentence and no Note. Carried means the person's directly held items offered
+under `world.theft`, less their shop stock. The page draws no actions; its foot is a local **Close**
+that returns to the person's page and sends nothing, and it goes with the person, carrying or not. A person's page draws no Give an item… card: a gift is
 given from the item's own Give to… (owner pick mvlymuams73l). **Trade** shows while the
 person's shop has a row; it opens the child buy page **<Name> can sell you…**, as a notice opens
 from its board, and its Leave returns to the person. The buy page holds one buy card per stock
@@ -414,7 +425,7 @@ loka-x6t.117). A buy or sale keeps its page open, with no page turn and no retur
 the room log; the purse redraws on both pages, and the lists redraw (a sold-out row takes its refused form,
 "Cob of bread — 4p: sold out"; a thing sold leaves the sell list). A row that goes moves focus to
 the page title. Shop stock is not listed
-under the person's Held. Each service is its own Action card
+as carried on the person's Look page. Each service is its own Action card
 with its authored label; the claim and cancel of an order sit under a **Your order** Section
 title after the order card, and show only while an order is open (either is offered, or either
 is refused for a reason other than `service.no_order`); while Your order shows, the commission
@@ -502,7 +513,7 @@ Retry retains original action/target context and appends each confirmed Take/Dro
 When Take removes an item from a corpse's Contents, the confirmed result returns to
 that corpse's Inside page (its item page once the corpse is empty), where the take line is quiet ([line placement](#line-placement)), and keeps
 Back to World available. The taken item appears in Carrying. An unavailable corpse
-closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps its **Inside** page and Take.
+closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, are the carried sentence of their [Look page](#npc-dialogue-and-action-details) (not Inside, never a list on the person's page), each link opening the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps its **Inside** page and Take.
 
 A container with a lid (cartridge item `barrier`, loka-x6t.121) draws its state as a note (**Closed**, **Open**) and, while closed, no Look inside: Open is one of its own cards (first group), an accepted Open logs **Opened.** in the item page's history and turns to the Inside page (owner, 2026-10-30, loka-mo0p), so Close shows the line on the item page, now with Look inside; a refused or pending Open stays on the item page; Close is offered while open and nothing closes on Leave; Unlock appears only when the lid has a `key_item`. Take from and Put into a closed container are refused by the engine (`not_present`, `exit_closed`), so the page never lists them.
 

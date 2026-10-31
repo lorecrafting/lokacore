@@ -176,13 +176,17 @@ export function Here(p: {
 // One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29). With name
 // words (loka-6qi): the bare name, its article written when it differs from the previous link's or
 // the name ends in the previous link's last word (a name without one breaks the run), and
-// same-name entities with a plural as one.
+// same-name entities with a plural as one. With a carrier: "<Carrier> carries <links>." (the NPC's
+// Look page, InsidePage), its first link not capitalised.
 const noun = (n?: string) => n?.split(' ').pop(); // 'cowering goblin' and 'goblin' end alike
-function Present(p: {
+type Group = {
   group: GameView['entities'];
   text: (key: string) => string;
   open: (id: string) => void;
-}) {
+  carrier?: string;
+};
+export const carries = (p: Group & { carrier: string }) => <Present {...p} />;
+function Present(p: Group) {
   const [c, t] = [usePalette(), useType()];
   type Link = { id: string; name: string; article?: string; many?: true };
   const links = p.group.flatMap((e): Link[] => {
@@ -196,11 +200,12 @@ function Present(p: {
   });
   return (
     <Text style={prose(c, t)}>
+      {p.carrier && `${p.carrier} carries `}
       {links.map((l, i) => {
         const prev = links[i - 1];
         const article =
           (l.article !== prev?.article || noun(l.name) === noun(prev?.name)) && l.article;
-        const first = (s: string) => (i === 0 ? cap(s) : s);
+        const first = (s: string) => (i === 0 && !p.carrier ? cap(s) : s);
         return (
           <Fragment key={l.id}>
             {i > 0 && (i < links.length - 1 ? ', ' : links.length > 2 ? ', and ' : ' and ')}
@@ -209,8 +214,8 @@ function Present(p: {
           </Fragment>
         );
       })}
-      {subject(links.at(-1)?.name ?? '').endsWith(',') && ','}
-      {links.length > 1 || links[0]?.many ? ' are here.' : ' is here.'}
+      {!p.carrier && subject(links.at(-1)?.name ?? '').endsWith(',') && ','}
+      {p.carrier ? '.' : links.length > 1 || links[0]?.many ? ' are here.' : ' is here.'}
     </Text>
   );
 }

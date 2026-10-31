@@ -79,12 +79,13 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
       (p.kind === 'notice' && !notices.some((n) => n.id === p.id)),
   );
   if (missing >= 0) return stack.slice(0, missing);
-  // A person's pages, shop pages included, go with them (Shelf.tsx); an Inside page with its lid.
+  // A person's pages, shop and Look pages included, go with them (Shelf.tsx); an Inside page with
+  // its lid.
   const gone = stack.findIndex((p) => {
     const at = 'id' in p && visible.find((e) => e.id === p.id);
     return (
       ['thing', 'shelf', 'sale', 'inside'].includes(p.kind) &&
-      (!at || (p.kind === 'inside' && !opens(after, at)))
+      (!at || (p.kind === 'inside' && at.kind !== 'npc' && !opens(after, at)))
     );
   });
   if (gone < 0) return stack;
