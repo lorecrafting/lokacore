@@ -21,7 +21,7 @@ music/sounds is a good idea until we replace them with real things, and we need 
 4. **Honesty:** if a store asks, answer truthfully. Recheck each store's rules before submission.
 
 The [AI-assisted builder](owner-decision-authoring-builder-2026-10-23.md) stays, limited by this rule: it may
-structure content, but shipped prose comes from a person.
+structure content, but shipped prose comes from the owner.
 
 This narrows [LLM uses stay presentation-only](../system/owner-rules.md): runtime LLM text is AI content players consume, so none ships without a new owner decision.
 

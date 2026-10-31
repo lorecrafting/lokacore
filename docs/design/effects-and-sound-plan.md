@@ -70,8 +70,8 @@ Every entry carries a severity; it decides stacking, loudness, haptic and what r
 | S | Name | Budget | Example |
 |---|---|---|---|
 | S0 | silent | nothing; the prose is the effect | a status tick, an NPC leaving in the background |
-| S1 | whisper | type only, ≤ `motion.dry` (240 ms), no sound, no haptic | a new log line drying; a refused line |
-| S2 | note | one ink or paper change ≤ 300 ms, a tick, coin, flick or tone, at whisper to note loudness, selection haptic at most | a press; a pickup; a coin counted; a status icon arriving |
+| S1 | whisper | type only, ≤ `motion.dry` (240 ms), no sound of its own beyond the page turn, no haptic | a new log line drying; a refused line |
+| S2 | note | one ink or paper change ≤ 300 ms, a tick, coin, flick or tone, at whisper to note loudness, at most one haptic of the weight its entry names | a press; a pickup; a coin counted; a status icon arriving |
 | S3 | beat | page-level change ≤ 500 ms, one sound at note loudness, light or medium haptic | a blow taken; a quest resolved; a lever thrown; lightning |
 | S4 | chapter | the whole page (blur, card), the chord, medium haptic; the only severity that waits for a tap | the chapter card; death and waking |
 
@@ -302,7 +302,7 @@ gilt, no note; a single low *paper* close. Haptic *warning*. P0. Cue: view-diff 
 
 **Chapter card** (`chapter.index` rises; book-ui.md Chapters; `ChapterPage`): S4, the owner's choice: the page
 behind blurs (Skia `Blur` over the leaving page's snapshot image, the one `PageTurn` already takes, sigma 6 →
-12 over `motion.card`), the card's label, title and short rule dry in staggered by 120 ms; sound *chord* lab's low open chord, tier chapter, ~2.2 s); haptic *medium*. Reserved for story-arc markers, never a level.
+12 over `motion.card`), the card's label, title and short rule dry in staggered by 120 ms; sound: the chapter cut of the main theme (section 14, 8-15 s, tier chapter); haptic *medium*. Reserved for story-arc markers, never a level.
 Under reduced motion: no blur ramp (a fixed blur), no stagger; the chord stays (sound is not motion; Sound off
 silences it). P0. Cost M, Skia on the existing snapshot (the only blur in the Book; never a live view blur on
 Android). Cue: view-diff.
@@ -324,7 +324,7 @@ No sound in conversation; a book does not click when people talk.
 **Pennies change** (`resources` pennies diff): S2, the status line value dries; sound *coin*, one short recorded clink (one sample, under 300 ms), tier whisper, for coins in or out (owner, 2026-10-31); haptic *selection*. P1. Cue: view-diff.
 
 **Buy / sell on the shop page** (`Shelf.tsx`): the bought line *lifts* then leaves (`motion.settle`); the
-pickup pop fires as in 3.2 for a buy, but the coin plays instead of the flick, so one purchase is one sound. A sale is the coin alone. P1.
+pickup pop fires as in 3.2 for a buy, but the coin plays instead of the flick, so one purchase is one sound. A sale is the coin alone. Coin P0, the rest P1.
 
 **Service received** (sleep at the inn, a meal): S0 beyond the rest or eat entry.
 
@@ -542,7 +542,7 @@ Beat by beat; each uses only catalogue entries.
    heavy haptic. Indoors the beds muffle (the lab's "muffle": a low-pass on the weather bed) and the lightning
    does not reach the page.
 6. **Falling and waking**: the fatal blow's wash does not fade; it holds while the page settles to dark over
-   `motion.card`; "You fall." dries alone; a beat; the curl to the inn turns into the morning palette and
+   `motion.card`; "You fall." dries alone; a beat; the curl to the inn lands on the palette of the current in-game hour (death does not jump the clock) and
    "You wake at the inn." dries. No chord: death is not a chapter. Haptic heavy then nothing.
 7. **The letter delivered** (Reeve → Wat): Wat's speech dries; the running head "Deliver the Reeve's letter"
    settles out, the note rises, the journal line gilds; the new objective (if any) dries into the running head.
@@ -582,9 +582,9 @@ field**, Q3. Until it exists, one bed per world (wind) and no muffling.
 | `expo-av` | the old known API | deprecated by Expo in favour of `expo-audio`; unknown whether it still installs cleanly on SDK 57 |
 | `react-native-sound` | small, native | community-maintained, no web target (the Book's web preview and Storybook would need a shim), no Expo config plugin |
 
-Nothing paid; all three are free. Decision: `expo-audio`, one `AudioManager` module in `mobile/app/book/`
+Nothing paid; all three are free. Decision: `expo-audio` once mobile resumes; until then (owner, 2026-10-31) the browser plays sound and native is a stub. One `AudioManager` module in `mobile/app/book/`
 that owns the buses, preloads the ui set at launch and the sfx set lazily, and exposes `play(name)` keyed by
-`sound` tokens. On web the same module backs onto the browser (expo-audio's web target); the samples page uses
+`sound` tokens. On web the module uses the browser directly; the samples page uses
 WebAudio synthesis only as placeholders.
 
 ### Silent switch and background
@@ -609,7 +609,7 @@ Every sound-only fact already has its text (4.12). No separate caption layer.
 
 ## 7. Haptics plan
 
-`expo-haptics` (free, Expo module, web no-op). Vocabulary and the only uses:
+`expo-haptics` (free, Expo module) once mobile resumes; until then a stub, with the web analogue in Phase 0. Vocabulary and the only uses:
 
 | Haptic | API | Used by |
 |---|---|---|
@@ -693,7 +693,7 @@ first; each phase shippable alone.
 - Owner, 2026-10-31: no phone testing for now; web analogues, with native stubbed until mobile resumes (`loka-k5ci`). Sound plays through the browser; haptics use `navigator.vibrate` where supported, plus a dev-only pulse in preview and Storybook. The native side is a no-op, and `expo-audio` and `expo-haptics` are installed on resume.
 - The asset manifest and its check (section 14, `loka-p2s8`).
 - `AudioManager` with buses, preload, round-robin, ducking; `haptic()`
-  gated by the Settings chip. Both no-op on web/Storybook until the web target is verified.
+  gated by the Settings chip. Native is a no-op until mobile resumes; web plays sound for real.
 - Cue bus: a `useCues(view, was)` hook in `mobile/app/book/` that diffs the two views and emits named cues
   (`pickup`, `hp_loss`, `status_in`, `status_out`, `quest_on/off/fail`, `level`, `place`, `weather`, `combat_open/close`, `pennies`) with the S-queue (coalesce, replace, interrupt). Pure function + one test per
   cue with a red control. Later the record's `events` (9.1) feed the same bus.
@@ -704,7 +704,7 @@ first; each phase shippable alone.
 **Phase 1: P0 batch** (S-M)
 press feedback (4.1), log dry (4.6), paper turn sample (3.1), pickup pop + flick (3.2), damage wash + thud +
 haptic (3.3), status icon pop/fade (3.4), running head cross-fade (3.6), chapter card blur + chord (3.6),
-save-error haptic (4.11), and, moved up by owner request, the coin clink (3.7) and all quest, level and skill tones (3.5, 3.6), whatever priority their entries give. Depends on Phase 0. Design review once for the batch.
+save-error haptic (4.11), and, moved up by owner request, the coin clink (3.7) and all quest, level and skill tones (3.5, 3.6), whatever priority their entries give: the level and journal gilt, the running head settle and fade, their haptics, and the quest failed close. Depends on Phase 0. Design review once for the batch.
 
 **Phase 2: P1 batch** (M)
 place beds + weather layer + muffle (6; needs the room tag, Q3), hip glow + flicker (3.2), foe falls, blow
@@ -817,7 +817,7 @@ schema field and a `docs/system` amendment first. It reverses Q4's original reco
 
 A game's themes must sound like one composer, and mixed CC0 tracks rarely do. Nothing paid has been the rule so
 far. Options: find one CC0 composer or pack with enough range (cheapest; may not reach the bar); commission a
-small score of about 10 pieces (best; costs money, needs an owner decision); or use placeholder CC0 tracks now to
+small score of about 10 pieces (best; costs money, needs an owner decision); or use human-made placeholder tracks (the Scott Buckley list) now to
 prove the system, and decide on the score before release. **Recommendation: placeholders now, decide before
 release.**
 
