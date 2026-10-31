@@ -213,6 +213,7 @@ and not repeated here.
 - Status reports to the owner are in ASD-STE100; design choices and risks in plain English (owner 2026-10-07).
 - Beads: short reads (`| head -5`), quiet writes (`br -q`), notes of one or two lines; mark `in_progress` when work starts (owner 2026-10-08).
 - Browser automation uses the local `browser-use` skill (`bu.sh`); Claude in Chrome is denied in settings (owner 2026-10-21).
+- Lean default: one session works directly, independent review only for an engine change, Sonnet for content, HANDOFF once per session ([record](../decisions/owner-decision-lean-workflow-2026-10-31.md), 2026-10-31).
 - Budget: the weekly allowance resets Wednesdays 05:00 HST; near the cap, keep to 1 or 2 agents (2026-10-13).
 - Pi work is marked (commit trailer `Harness: pi (...)`, a `Written ... in the Pi harness` line, `[Pi · model · session]` on tracker comments) (2026-10-13).
 - Workflows/ultracode: not for routine work; a bounded fan-out only, with explicit models, a concurrency cap, worktree isolation and a usage reading before and after (PM recommendation recorded 2026-10-15).

@@ -30,7 +30,7 @@ Report at the end of the slice, not at every step.
    keep [the roadmap](ROADMAP.md) current. The plan marks slices that share no files; the PM may run
    two developers at once on those, each PR with its own fresh reviewer (steps 2 to 7 per slice, [owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
    Get the owner's OK on the plan and on any decision that is theirs.
-2. **Brief (PM).** An Opus subagent drafts briefs and stage slice plans so the PM session
+2. **Brief (PM).** Under the [lean default](WORKFLOW.md#lean-default) the session writes its own short plan. When roles are used, an Opus subagent drafts briefs and stage slice plans so the PM session
    stays thin; the PM decides ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)). Name the branch; do not check it out (the developer does, in its own
    worktree). Spawn `developer` (`model` per the [routing table](WORKFLOW.md#work-routing)) with a self-contained brief: goal, its [lane](WORKFLOW.md#delivery-lanes),
    `docs/system` sections (the clause for each behavior; an archived plan for new work), files in and out of scope, acceptance (which checks and fixtures must
@@ -78,7 +78,7 @@ Step 3 (build and self-review) is in [WORKFLOW](WORKFLOW.md#loop).
 
 Steps 5 and 6 (fix, re-review) are in [WORKFLOW](WORKFLOW.md#loop).
 
-7. **Merge (PM).** Merge with `bin/merge_pr.sh <PR> <beads-id[,...]> ["ROADMAP status: ..."]` (waits on `bin/wait_ci.sh` for the head, merge commit with `--match-head-commit`, then `bin/after_merge.sh`) once the verdict is
+7. **Merge (PM).** Merge with `bin/merge_pr.sh <PR> <beads-id[,...]> ["ROADMAP status: ..."]` (waits on `bin/wait_ci.sh` for the head, merge commit with `--match-head-commit`, then `bin/after_merge.sh`) once, for a PR that gets a review, the verdict is
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head (a small should-fix needs no fix round:
    [WORKFLOW step 6](WORKFLOW.md#small-should-fix)), and `ci.yml` and
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
