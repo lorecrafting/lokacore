@@ -24,6 +24,7 @@ const MALFORMED = new Set([
   'fuel_composition.json missing-lit',
   'fuel_composition.json extra-row-field',
   'status_composition.json permanent-partial-timing-refused',
+  'status_composition.json ticking-partial-refused',
 ]);
 
 // A named state is a row of fixture.states; `extends` copies another row, then applies `edits`.

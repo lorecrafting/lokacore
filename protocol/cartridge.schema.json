@@ -2749,7 +2749,7 @@
               "const": "permanent"
             }
           ],
-          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status never ticks, so it declares no per_tick (compiler SCHEMA_VIOLATION)."
+          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status that declares per_tick ticks until cured, with no ends_at (loka-rn3b)."
         },
         "tick_every": {
           "type": "integer",
@@ -2763,7 +2763,7 @@
           "type": "integer",
           "minimum": -2147483647,
           "maximum": 2147483647,
-          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent, and absent when duration is permanent (compiler SCHEMA_VIOLATION)."
+          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION)."
         },
         "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -2778,7 +2778,8 @@
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "expired": {
-              "$ref": "text.schema.json#/$defs/TextKey"
+              "$ref": "text.schema.json#/$defs/TextKey",
+              "description": "Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b)."
             },
             "observed": {
               "$ref": "text.schema.json#/$defs/TextKey",
@@ -2791,8 +2792,7 @@
           },
           "required": [
             "applied",
-            "tick",
-            "expired"
+            "tick"
           ],
           "additionalProperties": false
         },

@@ -2565,7 +2565,7 @@
       ]
     },
     "StatusRow": {
-      "description": "One body status generation, retained inactive after removal. The body and status are the row's target; an active timed row owns its pending tick job; a permanent one (toolbox row W8) has no ends_at, next_tick_at or job_id.",
+      "description": "One body status generation, retained inactive after removal. The body and status are the row's target; an active timed row owns its pending tick job; a permanent one (toolbox row W8) has no ends_at, and has next_tick_at and job_id exactly when it ticks (loka-rn3b).",
       "examples": [
         {
           "generation": 1,
@@ -2604,11 +2604,9 @@
               "job_id"
             ],
             "next_tick_at": [
-              "ends_at",
               "job_id"
             ],
             "job_id": [
-              "ends_at",
               "next_tick_at"
             ]
           },

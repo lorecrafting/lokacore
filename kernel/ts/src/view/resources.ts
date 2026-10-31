@@ -67,11 +67,11 @@ export function conditionViews(world: World, body: EntityId | undefined) {
     const kind = polarity(spec);
     return {
       label: spec.name,
-      ...(row.job_id && {
+      ...(row.ends_at !== undefined && {
         ends_at: row.ends_at,
         duration: spec.duration as number, // the ring denominator (loka-x6t.65)
-        next_tick_at: row.next_tick_at,
-      }), // none: row W8
+      }), // none: permanent, row W8
+      ...(row.next_tick_at !== undefined && { next_tick_at: row.next_tick_at }), // ticking (loka-rn3b)
       resource: spec.resource.key as Key,
       ...(spec.per_tick !== undefined && { per_tick: spec.per_tick }),
       tick_every: spec.tick_every,

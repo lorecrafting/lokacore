@@ -82,12 +82,14 @@ test('wisp attempts compose to their literal answers', () => {
   test('status rows, transitions and condition views require their complete shape', () => {
     const op = read('protocol/fixtures/status_composition.json').cases[0].ops[0];
     assert.deepEqual(validate('DeltaOp', op), []);
-    // A permanent row (row W8) has no timing at all; a timed row carries all three fields or none.
+    // A permanent row (row W8) has no timing at all, or only its tick (loka-rn3b); an end needs a tick.
     assert.deepEqual(validate('StatusRow', { active: true, generation: 1 }), []);
-    for (const field of ['generation', 'ends_at', 'next_tick_at', 'job_id']) {
+    const { ends_at: _, ...ticking } = op.value;
+    assert.deepEqual(validate('StatusRow', ticking), []);
+    for (const field of ['generation', 'next_tick_at', 'job_id']) {
       const value = { ...op.value };
       delete value[field];
-      // Each of the other two timing fields requires it (dependentRequired), so it is missed twice.
+      // ends_at and the other tick field each require it (dependentRequired), so it is missed twice.
       const missing = { path: '/' + field, code: 'missing_property' };
       assert.deepEqual(
         validate('StatusRow', value),

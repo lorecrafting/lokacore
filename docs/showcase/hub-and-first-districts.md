@@ -56,8 +56,8 @@ of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-
 - Statuses ([row 1](../system/mechanics.md#status-effects-over-time-toolbox-row-1),
   [row 2c](../system/mechanics.md#status-modifiers-toolbox-row-2c); `exposure_sampler/statuses`,
   `buffs_sampler/statuses`, `needs_sampler`): `chilled`, `soaked`, `windburnt`, `overheated`
-  each hp -1 every 7200 for 9000; `hungry` hunger -1 every 3600 for 86400; `thirsty` thirst -1
-  every 3600 for 86400; `parched` thirst -1 every 1800 for 5400; `might` modifies str +3 for 3600,
+  each hp -1 every 7200 for 9000; `hungry` hunger -1 every 3600 and `thirsty` thirst -1
+  every 3600, both permanent until bread or water cures them (loka-rn3b); `parched` thirst -1 every 1800 for 5400; `might` modifies str +3 for 3600,
   no `per_tick`; `inspired` modifies dex +2 for 1800, no `per_tick`.
 - Liquids: `water` cures `thirsty` and `parched`; `draught` (the potion kind, `drank {kind}`
   reaction applies `might`; `buffs_sampler/liquids/potion.json`).
