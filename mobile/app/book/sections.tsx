@@ -129,7 +129,7 @@ export function AncestryPage(p: {
 /**
  * The Carrying section: Held and Worn items as Entity lines.
  * - Use: Contents.
- * - Rules: an empty Worn slot is a Note; its slot label lends the item line its bleed.
+ * - Rules: an empty Worn slot is a Note; a Worn item's target is its shown line (the next slot covers its bleed).
  * - Story: SectionPages.stories.tsx
  */
 export function CarryingPage(p: Carrying) {

@@ -41,8 +41,9 @@ export function Tap(p: {
   shrink?: boolean; // may give up width in a row (the status position truncates)
   refused?: string; // an unavailable line (book-ui.md, Unavailable actions): disabled yet pressable, this its hint
 }) {
+  // Hit area, no shown space; below only, so the next line in a run covers none of this one (loka-462d).
   const b = tapBleed(useType().body.lineHeight);
-  const bleed = { paddingVertical: b, marginVertical: -b }; // hit area, no shown space
+  const bleed = { paddingBottom: b, marginBottom: -b };
   const shrink = p.shrink ? { flexShrink: 1, minWidth: 0 } : {};
   return (
     <Pressable

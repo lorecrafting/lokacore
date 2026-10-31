@@ -1,6 +1,6 @@
 // C row Pages, Sections (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect, waitFor } from 'storybook/test';
+import { expect, fn, userEvent, waitFor } from 'storybook/test';
 import { ContentsPage } from '../book/Menu.tsx';
 import { Professions, RaiseCards, SkillDetails } from '../book/skills.tsx';
 import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
@@ -84,6 +84,22 @@ export const CharacterAimedSpell: StoryObj = {
   },
 };
 export const Contents: StoryObj = { ...pageStory(ContentsView), name: 'Contents' };
+// Each entry opens its own section, even pressed at the foot of its shown line (loka-462d).
+// Breaks: the next entry's hit area covers this one's line, or an entry opens another section.
+export const ContentsEntries: StoryObj = {
+  name: 'Contents, each entry its own',
+  args: { open: fn(), world: fn() },
+  render: (args) => <ContentsPage {...(args as Parameters<typeof ContentsPage>[0])} />,
+  play: async ({ canvas, args }) => {
+    for (const button of await canvas.findAllByRole('button', { name: /, open$/ })) {
+      const { left, bottom } = button.firstElementChild!.getBoundingClientRect();
+      await userEvent.click(document.elementFromPoint(left + 4, bottom - 2)!);
+    }
+    await expect(args.open.mock.calls).toEqual(
+      ['character', 'carrying', 'map', 'journal', 'settings'].map((k) => [k]),
+    );
+  },
+};
 // Opened from Contents: no status line, and the foot goes Back to Contents (loka-8lpm).
 export const Settings: StoryObj = {
   ...pageStory(SettingsView),
