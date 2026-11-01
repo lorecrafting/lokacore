@@ -37,6 +37,11 @@ const saved = () => {
   return { path, receipt };
 };
 
+const forgeKind = (kind: string) => (sql: DatabaseSync) =>
+  void sql
+    .prepare(`UPDATE state_row SET value = json_set(value, '$.job.kind', ?) WHERE section = 'jobs'`)
+    .run(kind);
+
 const FORGED: [string, (sql: DatabaseSync, receipt: Record<string, never>) => void][] = [
   [
     'the catch-up command already has a receipt of another intent (a conflict)',
@@ -53,10 +58,23 @@ const FORGED: [string, (sql: DatabaseSync, receipt: Record<string, never>) => vo
     (sql) =>
       void sql
         .prepare(
-          `UPDATE state_row SET value = json_set(value, '$.due_time', 1) WHERE section = 'jobs'`,
+          `UPDATE state_row SET value = json_set(value, '$.due_time', 64800, '$.job.kind', 'order') WHERE section = 'jobs'`,
         )
         .run(),
   ],
+  [
+    'a pending NPC job is due at an hour its schedule does not have',
+    (sql) =>
+      void sql
+        .prepare(
+          `UPDATE state_row SET value = json_set(value, '$.due_time', 64900) WHERE section = 'jobs'`,
+        )
+        .run(),
+  ],
+  // Breaks: load admits a row no handler can run, and its TypeError fails every launch.
+  ...['quest', 'bleed', 'room', 'rule', 'tick', 'replenish', 'wage', 'bogus'].map(
+    (kind) => [`a pending job of forged kind ${kind}`, forgeKind(kind)] as (typeof FORGED)[number],
+  ),
 ];
 
 // Breaks: a refused catch-up result escapes openGame with no cause, no Start over, on every launch.
@@ -87,6 +105,45 @@ for (const [name, forge] of FORGED)
       a.sql.close();
     }
   });
+
+// Breaks: a refusal rolls back or re-applies a step already settled (save.md, Opening a story).
+test('a refusal on the second step keeps the first step, and the next launch changes nothing', () => {
+  const { path } = saved();
+  const dueSoon = (sql: DatabaseSync) =>
+    sql.exec(
+      `UPDATE state_row SET value = json_set(value, '$.due_time', 64900, '$.job.kind', 'order') WHERE section = 'jobs'`,
+    );
+  const raw = new DatabaseSync(path);
+  dueSoon(raw);
+  raw.close();
+  const copyPath = `${path}.steps`;
+  copyFileSync(path, copyPath);
+  const copy = launch(copyPath);
+  const [first, second] = copy.sql
+    .prepare('SELECT * FROM receipt ORDER BY revision')
+    .all() as Record<string, never>[];
+  copy.sql.close();
+  const forged = new DatabaseSync(path);
+  FORGED[0][1](forged, second);
+  forged.close();
+
+  const a = launch(path);
+  const kept = a.sql.prepare('SELECT command_id, revision FROM receipt ORDER BY revision').all();
+  assert.equal(a.session.failed()!.kind, 'save_corrupt');
+  assert.deepEqual(
+    kept.map((r) => ({ ...r })),
+    [
+      { command_id: first.command_id, revision: 1 },
+      { command_id: second.command_id, revision: second.revision },
+    ],
+  );
+  a.sql.close();
+  const settled = bytes(path);
+  const b = launch(path);
+  assert.equal(b.session.failed()!.kind, 'save_corrupt');
+  b.sql.close();
+  assert.equal(bytes(path), settled);
+});
 
 // Breaks: a refused open skips the trace catch-up Start over runs before the old receipts go.
 test('Start over after a refused catch-up keeps the old run in the trace', () => {
