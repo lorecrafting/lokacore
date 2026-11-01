@@ -89,7 +89,6 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
     [
       'pickup',
       'coin',
-      'blow',
       'level',
       'skillNew',
       'questDone',
