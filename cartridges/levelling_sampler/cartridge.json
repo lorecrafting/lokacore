@@ -123,7 +123,8 @@
           "experience": 10
         }
       ],
-      "level_up": "levelling.level_up"
+      "level_up": "levelling.level_up",
+      "gained": "levelling.gained"
     }
   }
 }

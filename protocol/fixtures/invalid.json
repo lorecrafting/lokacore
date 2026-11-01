@@ -18665,7 +18665,8 @@
         "level": 0,
         "experience": 0,
         "next": 30,
-        "unspent": 0
+        "unspent": 0,
+        "from": 0
       }
     },
     "errors": [
@@ -18698,7 +18699,8 @@
         "level": 1,
         "experience": -1,
         "next": 30,
-        "unspent": 0
+        "unspent": 0,
+        "from": 0
       }
     },
     "errors": [
@@ -18731,7 +18733,8 @@
         "level": 1,
         "experience": 0,
         "next": 0,
-        "unspent": 0
+        "unspent": 0,
+        "from": 0
       }
     },
     "errors": [
@@ -18764,7 +18767,8 @@
         "level": 1,
         "experience": 0,
         "next": 30,
-        "unspent": -1
+        "unspent": -1,
+        "from": 0
       }
     },
     "errors": [
@@ -18796,7 +18800,8 @@
       "levelling": {
         "experience": 0,
         "next": 30,
-        "unspent": 0
+        "unspent": 0,
+        "from": 0
       }
     },
     "errors": [
@@ -18828,7 +18833,8 @@
       "levelling": {
         "level": 1,
         "next": 30,
-        "unspent": 0
+        "unspent": 0,
+        "from": 0
       }
     },
     "errors": [
@@ -18860,7 +18866,8 @@
       "levelling": {
         "level": 1,
         "experience": 0,
-        "next": 30
+        "next": 30,
+        "from": 0
       }
     },
     "errors": [
@@ -32112,6 +32119,173 @@
       {
         "path": "/penalty/x",
         "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "level_reached"
+    },
+    "errors": [
+      {
+        "path": "/character_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/level",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "level_reached",
+      "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "level": 1
+    },
+    "errors": [
+      {
+        "path": "/level",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "level_reached",
+      "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "level": 2.5
+    },
+    "errors": [
+      {
+        "path": "/level",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "level_reached",
+        "level": 1
+      },
+      "steps": [
+        {
+          "op": "fact.assign",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "f"
+          },
+          "value": true
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/on/level",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "place": {
+        "id": "11111111-2222-4333-8444-555555555555",
+        "title": {
+          "key": "room.t"
+        },
+        "description": {
+          "key": "room.d"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "time": 0,
+      "journal": [],
+      "levelling": {
+        "level": 1,
+        "experience": 0,
+        "unspent": 0
+      }
+    },
+    "errors": [
+      {
+        "path": "/levelling/from",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "place": {
+        "id": "11111111-2222-4333-8444-555555555555",
+        "title": {
+          "key": "room.t"
+        },
+        "description": {
+          "key": "room.d"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "time": 0,
+      "journal": [],
+      "levelling": {
+        "level": 1,
+        "experience": 0,
+        "from": -1,
+        "unspent": 0
+      }
+    },
+    "errors": [
+      {
+        "path": "/levelling/from",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "levelling": {
+        "thresholds": [
+          30
+        ],
+        "points_per_level": 1,
+        "level_up": "levelling.up",
+        "kills": [
+          {
+            "npc": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "npc",
+              "key": "rat"
+            },
+            "experience": 10
+          }
+        ],
+        "gained": "BAD KEY"
+      }
+    },
+    "errors": [
+      {
+        "path": "/levelling/gained",
+        "code": "pattern_mismatch"
       }
     ]
   }

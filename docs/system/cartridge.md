@@ -851,6 +851,8 @@ build. The author tools below are reachable only in that bundle (a production ex
   in milliseconds) under the artifact's hash. After a reload into a different hash it replays the
   path through the normal command path, one step at a time; the first step the session does not
   save and accept stops the replay and is named by its ordinal and reply. Nothing writes state directly.
+  The dev cartridge plays one fixed seed on a frozen clock that moves only with the dev clock, as
+  `bin/loka check` does, so a recording replays alike in both; a release is untouched.
 - **Fast loop.** A `text.json` save is pushed to the open page as a text overlay before its
   compile and shows at once: no compile, reload or replay. The compile still runs after it and
   reports its diagnostics to the page; an edit whose compiled cartridge differs from the page's
@@ -864,7 +866,9 @@ build. The author tools below are reachable only in that bundle (a production ex
   the cartridge; a name is `[a-z0-9_-]+`, never a path). The watcher reads and writes them
   (`GET /__author/checkpoints`, `GET|PUT /__author/checkpoints/<name>`); the compiler and the
   watcher's rebuild skip the directory. The panel lists them; jumping to one starts the game over
-  and replays it.
+  and replays it, and a refused step offers dropping it and replaying the rest. `bin/loka check
+  <cartridge>` replays each one headless on a fresh session through the same replay and exits 1 on
+  any refusal; CI runs it for every cartridge with the directory.
 - **Author panel** (`tools/author-panel`, its own web page framing the Book at `?dev=1`; nothing of it enters the app's dependencies or bundles): the last compile's diagnostics in plain words
   (`severity: file:line message`, which is what `mix loka.compile` prints: one sentence and one fix
   per diagnostic code, from `Loka.Content.Explain`, the path mapped to its line by the source JSON;
@@ -1115,7 +1119,7 @@ Gear budget (balance tool 6b, [study](../rnd/balance-diagnostics-2026-10-11.md) 
 
 Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemDefinition.equip`, `{wear, remove, worn, removed}`, all four TextKeys and all four required). `wear` and `remove` are the item's Wear and Remove labels, `worn` and `removed` the lines [equipment@1](mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets) tells when it is worn or removed. The item needs a `slot`. The compiler (`lib/loka/content/derived.ex`, `lib/loka/content/entities.ex`) refuses `equip` without a slot (SCHEMA_VIOLATION at `equip`), a key outside the text catalog (UNRESOLVED_REFERENCE at `equip.<field>`). A cartridge without `equip` keeps its bytes, hash and behavior.
 
-[Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) read the optional `world.levelling` in `cartridge.json` (owned by `attribute@1`): `{thresholds, points_per_level, kills: [{npc, experience}, ...], level_up}`. `thresholds` are strictly increasing positive ResourceInts; `points_per_level` is at least 1; each `npc` names an NPC of this cartridge (source: its short key) and `experience` is a positive ResourceInt; `level_up` must exist in the text catalog. A reaction step `{op: "experience.grant", amount}` needs `world.levelling`. The compiler (`lib/loka/content/levelling.ex`) refuses thresholds that do not rise (SCHEMA_VIOLATION at the threshold), an unresolved NPC or text (UNRESOLVED_REFERENCE), a grant without `world.levelling` (SCHEMA_VIOLATION at the step), a missing `attribute@1` (UNDECLARED_CAPABILITY at `world.levelling`). `cartridges/levelling_sampler` is the sampler. A cartridge without `world.levelling` keeps its bytes, hash and behavior.
+[Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) read the optional `world.levelling` in `cartridge.json` (owned by `attribute@1`): `{thresholds, points_per_level, kills: [{npc, experience}, ...], level_up, gained}`. `thresholds` are strictly increasing positive ResourceInts; `points_per_level` is at least 1; each `npc` names an NPC of this cartridge (source: its short key) and `experience` is a positive ResourceInt; `level_up` and the optional `gained` (bindings `{amount}`) must exist in the text catalog (UNRESOLVED_REFERENCE at the field). A rule with `on.event: level_reached` needs `world.levelling` (SCHEMA_VIOLATION at `on.event`), its `level` filter is an integer from 2 to the thresholds' count + 1 (SCHEMA_VIOLATION `invalid_value` at `on.level`) and an `experience.grant` step in it is refused (SCHEMA_VIOLATION at the step); a grant reached indirectly, through a `fact_changed` rule, is allowed and bounded by the `reaction_depth` budget. Per level, such a rule narrates what opened and assigns the fact a new ability reads through `level_compare` or `fact_compare`. A reaction step `{op: "experience.grant", amount}` needs `world.levelling`. The compiler (`lib/loka/content/levelling.ex`) refuses thresholds that do not rise (SCHEMA_VIOLATION at the threshold), an unresolved NPC or text (UNRESOLVED_REFERENCE), a grant without `world.levelling` (SCHEMA_VIOLATION at the step), a missing `attribute@1` (UNDECLARED_CAPABILITY at `world.levelling`). `cartridges/levelling_sampler` is the sampler. A cartridge without `world.levelling` keeps its bytes, hash and behavior.
 
 ## Tag declarations
 
