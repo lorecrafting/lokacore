@@ -139,6 +139,7 @@ One dialogue node (06 ยง17; Early R7/R8 D1), keyed in CompiledCartridge.dialogue
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
+| choice_order | list of string |  |  |
 | choices | map of [DialogueChoice](vocabulary.gen.md#choice-fields) | yes | See the type. |
 | keyword | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | Toolbox row G9 (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle. |
 | name | [TextKey](source-kinds.gen.md#textkey) |  | A distinct name (the Talk label) opts that authored control into exact dialogue selection; omission retains first-eligible Talk. |
@@ -1606,7 +1607,7 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 
 ## Fields without a meaning
 
-310 fields.
+311 fields.
 
 - `ActionCraft: consume`
 - `ActionCraft: consume.to`
@@ -1805,6 +1806,7 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `choice: narration_variants`
 - `choice: then`
 - `choice: then_failed`
+- `dialogues: choice_order`
 - `dialogues: riddle.wrong`
 - `dialogues: riddle.wrong_limit`
 - `items: fuel`
