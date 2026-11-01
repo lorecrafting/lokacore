@@ -18,15 +18,7 @@ import type { Db } from '../authority/local-story/store.ts';
 import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
-import {
-  devClock,
-  played,
-  placeDue,
-  resetPlace,
-  restorePlace,
-  skew,
-  useAuthorPanel,
-} from './author/panel.tsx';
+import { bootPlace, devClock, played, resetPlace, skew, useAuthorPanel } from './author/panel.tsx';
 import { frozenClock } from './author/place.ts';
 import { readingSize } from './book/reading.ts';
 import { LABEL } from './book/labels.ts';
@@ -56,7 +48,7 @@ export const fonts = {
 const devCartridge = process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1';
 if (devCartridge && !__DEV__) throw new Error('a release build must bundle the pinned chapter');
 const NAME = devCartridge
-  ? `loka-dev-${INSTALLED.kernel_api}-${chapter.sha256.slice(0, 16)}.db`
+  ? `loka-dev${devClock ? '-frozen' : ''}-${INSTALLED.kernel_api}-${chapter.sha256.slice(0, 16)}.db` // two clocks never share a save
   : 'loka-showcase.db';
 // The build's kernel version (ADR-075 §3): the commit metro.config.js stamped, always -dirty in a
 // development bundle (it can change after the stamp); no stamp: the zero commit, -dirty.
@@ -233,8 +225,7 @@ function useWebSession() {
     let live = true;
     g.loka_web_opening.then((opened) => {
       session = opened;
-      // A start over refused keeps the old save, which a replay must not run over.
-      if (devClock && !(placeDue() && opened.startOver())) restorePlace(opened.game());
+      if (devClock) bootPlace(opened);
       if (live) redrawBoot((n) => n + 1);
     });
     return () => {

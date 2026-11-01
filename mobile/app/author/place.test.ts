@@ -230,7 +230,12 @@ test('the frozen clock moves wall and monotonic together, and only when told', (
 
 test('a step with both kinds, or an unreadable intent, stops by number', () => {
   // Break: an intent skipped beside an advance passes the gate; a missing input throws with no step number.
-  for (const bad of [{ advance: 0, intent: intent([]) }, { intent: {} }]) {
+  for (const bad of [
+    { advance: 0, intent: intent([]) },
+    { intent: {} },
+    1,
+    { intent: { input: {}, target_ids: [1] } },
+  ]) {
     const out = replay([bad as unknown as Step], {} as Replayable, () => {});
     assert.match(out.failed!, /^step 1: not a step/);
   }

@@ -93,9 +93,13 @@ function send(i: number, intent: Intent, game: Replayable): Omit<Outcome, 'done'
 
 /** Exactly one of advance and intent, and an intent `send` can read: this is hand-edited JSON. */
 const wellFormed = (step: Step | null) =>
+  typeof step === 'object' &&
   !!step &&
   'advance' in step !== 'intent' in step &&
-  ('advance' in step || (!!step.intent?.input && Array.isArray(step.intent.target_ids)));
+  ('advance' in step ||
+    (!!step.intent?.input &&
+      Array.isArray(step.intent.target_ids) &&
+      step.intent.target_ids.every((t) => typeof t === 'string')));
 
 /** Sends the steps in order; the first the session does not save and accept stops the replay, named. */
 export function replay(steps: Step[], game: Replayable, moveClock: (ms: number) => void): Outcome {

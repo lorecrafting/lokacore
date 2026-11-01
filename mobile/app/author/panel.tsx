@@ -46,9 +46,16 @@ export const resetPlace = () => {
   placeNote = '';
   savePlace();
 };
-/** This load must replay the saved path, on a fresh game: a hash seen before keeps its old save (an edit undone). */
-export const placeDue = () =>
-  place.hash !== chapter.sha256 && place.stopped?.hash !== chapter.sha256;
+/** At page load: a path due a replay gets a fresh game, as a hash seen before keeps its old save (an edit undone). */
+export function bootPlace(session: {
+  game(): Opened | undefined;
+  startOver(): string | undefined;
+}) {
+  const due = place.hash !== chapter.sha256 && place.stopped?.hash !== chapter.sha256;
+  const why = due && session.game() ? session.startOver() : undefined; // no game: a save that did not open stays as evidence
+  if (why) placeNote = `Place: not replayed (${why}); this is the old save.`;
+  else restorePlace(session.game());
+}
 export function restorePlace(game: Opened | undefined) {
   if (!game) return;
   if (place.hash === chapter.sha256) {
