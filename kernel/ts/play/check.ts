@@ -29,7 +29,7 @@ function compiled(source: string): Bundled | string {
       ['exec', '--', 'mix', 'loka.compile', source, artifact, '--allow-placeholders'],
       { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }, // as play/author.ts
     );
-    if (run.status !== 0) return `${run.stderr || run.error?.message || 'compile failed'}`.trim();
+    if (run.status !== 0) return `${run.stderr || 'compile failed'}`.trim();
     const parts = /^\{"cartridge":(.*),"content_hash":"([0-9a-f]{64})"\}$/s.exec(
       readFileSync(artifact, 'utf8'),
     );
@@ -54,11 +54,12 @@ function memory(sql: DatabaseSync): Db {
 /** `undefined` when the whole path is accepted, else why it stopped. */
 export function replayed(bundled: Bundled, steps: Step[]): string | undefined {
   const sql = new DatabaseSync(':memory:');
-  const clock = { wall: 10_000, mono: 0 };
+  const clock = { wall: 10_000, mono: 0 }; // mutate-skip: any start reads the same; only the deltas matter
   let id = 0;
   try {
     const game = openGame(memory(sql), bundled, {
       kernel_version: `${KERNEL_ID}@${'0'.repeat(40)}`,
+      // mutate-skip: any unique id
       newId: () => `aaaaaaaa-0000-4000-8000-${(++id).toString().padStart(12, '0')}`,
       time: { wall: () => clock.wall, monotonic: () => clock.mono },
     });

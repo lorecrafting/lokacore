@@ -34,9 +34,9 @@ const write = (dir: string, file: string, content: string) =>
 const NORTH = { intent: { action_key: 'move', target_ids: [], input: { direction: 'north' } } };
 
 /** Runs the command with stdin left open, so a prompt would hang until the timeout kills it. */
-function run(dir: string) {
+function run(...args: string[]) {
   return new Promise<{ code: number | null; out: string }>((done) => {
-    const child = spawn(join(ROOT, 'bin/loka'), ['check', dir], {
+    const child = spawn(join(ROOT, 'bin/loka'), ['check', ...args], {
       cwd: ROOT,
       env: { ...process.env, PATH: `${bin}:${process.env.PATH}` },
       stdio: ['pipe', 'pipe', 'ignore'],
@@ -85,7 +85,11 @@ test('an edit that refuses a step names it and exits 1; each checkpoint still re
 test('each checkpoint starts over without a prompt', async () => {
   const dir = sampler('twice');
   write(dir, 'again.json', JSON.stringify({ steps: [NORTH] }));
-  assert.deepEqual(await run(dir), { code: 0, out: 'again: ok\nto_the_well: ok\n' });
+  write(dir, 'no_wait.json', '{"steps":[{"advance":0}]}'); // a zero advance is whole milliseconds
+  assert.deepEqual(await run(dir), {
+    code: 0,
+    out: 'again: ok\nno_wait: ok\nto_the_well: ok\n',
+  });
 });
 
 // Break: a gate with nothing to replay passes, or a broken cartridge replays anyway.
@@ -100,5 +104,11 @@ test('no checkpoints and a failed compile each exit 1', async () => {
   writeFileSync(join(broken, 'cartridge.json'), '{');
   const { code, out } = await run(broken);
   assert.equal(code, 1);
-  assert.match(out, /^not compiled: /);
+  assert.match(out, /^not compiled: (?!compile failed)/); // the compiler's own words
+});
+
+// Break: a mistyped command replays the wrong thing or reads as a gate failure (exit 1).
+test('a command without exactly one cartridge is a usage error', async () => {
+  assert.deepEqual(await run(), { code: 2, out: '' });
+  assert.deepEqual(await run('a', 'b'), { code: 2, out: '' });
 });
