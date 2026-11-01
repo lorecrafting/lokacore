@@ -679,7 +679,7 @@ ordinary details, Leave/Back, Contents and position controls are hidden or disab
 title page shows its chapter label, title and the running head only: no Back to World, and Contents and position are
 locked as in a scene. It turns itself about 4 s from appearing; a tap anywhere
 skips, and its clock pauses while the app is in the background. With a screen reader active it keeps an
-explicit Continue and does not turn itself. The theme cut plays into the next page; its fade is baked into the recording for now. A chapter
+explicit Continue and does not turn itself. The theme cut plays into the next page; it fades out as it ends. A chapter
 title reached with a scene waits until that scene ends. Dismissing the card is presentation
 only. Same-room ordinary updates do not repeat or drop the chapter title.
 

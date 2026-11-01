@@ -2,88 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-type El = {
-  url: string;
-  paused: boolean;
-  onended?: () => void;
-  onerror?: () => void;
-};
-
-// A module instance and browser of its own for each test: the module's state is per page.
-let page = 0;
-async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}) {
-  const els: El[] = [];
-  const ramps: [number, number][] = [];
-  const levels: { value: number }[] = [];
-  const wired: object[] = [];
-  const gains: object[] = [];
-  let resumes = 0;
-  const listeners: Record<string, () => void> = {};
-  Object.assign(globalThis, {
-    addEventListener: (type: string, f: () => void) => (listeners[type] = f),
-    AudioContext: class {
-      constructor() {
-        if (opts.noAudio) throw new Error('no audio');
-      }
-      currentTime = 10;
-      destination = {};
-      state = 'suspended';
-      resume = async () => {
-        resumes++;
-      };
-      createGain = () => {
-        const gain = {
-          value: 1,
-          cancelScheduledValues: () => {},
-          setValueAtTime: () => {},
-          linearRampToValueAtTime: (v: number, t: number) => ramps.push([v, t]),
-        };
-        levels.push(gain);
-        const node = { connect: (to: object) => wired.push(to), disconnect: () => {}, gain };
-        gains.push(node);
-        return node;
-      };
-      createMediaElementSource = () => ({ connect: () => {}, disconnect: () => {} });
-    },
-    Audio: class implements El {
-      paused = false;
-      loop = false;
-      onended?: () => void;
-      onerror?: () => void;
-      url: string;
-      constructor(url: string) {
-        this.url = url;
-        els.push(this);
-      }
-      pause() {
-        this.paused = true;
-      }
-      play = () => (opts.refuse ? Promise.reject(new Error('NotAllowedError')) : Promise.resolve());
-    },
-  });
-  const mod: typeof import('./sound.web.ts') = await import(`./sound.web.ts?page=${page++}`);
-  mod.sources({
-    blow: ['blow.m4a'],
-    coin: ['coin.m4a'],
-    pageTurn: ['turn.m4a', 'turn2.m4a'],
-    pickup: ['flick.m4a'],
-    tick: ['tick.m4a'],
-    chapter: ['theme.m4a'],
-    fightIn: ['in.m4a'],
-    fightLoop: ['loop.m4a'],
-    fightWon: ['won.m4a'],
-  });
-  return {
-    ...mod,
-    els,
-    ramps,
-    levels,
-    wired,
-    gains,
-    resumes: () => resumes,
-    gesture: (kind = 'pointerup') => listeners[kind]!(),
-  };
-}
+import { browser } from './__tests__/sound_rig.ts';
 
 // Breaks: one kind of gesture stops unlocking audio, so a keyboard or touch player has no sound all session.
 for (const kind of ['pointerup', 'touchend', 'keydown'])
@@ -184,7 +103,7 @@ test('a beat ducks ambience; the last one to end releases it', async () => {
   const b = await browser();
   b.gesture();
   b.play('coin');
-  b.play('chapter');
+  b.play('fightIn');
   assert.deepEqual(b.ramps, []);
   b.play('blow');
   b.play('blow');

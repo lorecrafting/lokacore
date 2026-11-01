@@ -1,7 +1,7 @@
 // The effects cue bus (book-ui.md, Effects, sound and haptics; Queue): a pure severity queue over
 // the view diff's cues (cueDiff.ts), and a subscription for the effects to come.
 import { useEffect, useRef } from 'react';
-import type { GameView } from '../../packages/game-view/session.ts';
+import type { GameView, NarrationRecord } from '../../packages/game-view/session.ts';
 import { cuesOf, questCues } from './cueDiff.ts';
 import type { SoundName } from './sound';
 import { mix, motion, sound } from './tokens.ts';
@@ -26,6 +26,9 @@ const CUES = {
   combat_open: { s: 1 },
   combat_close: { s: 1 },
   blow_dealt: { s: 2, sound: 'impact' },
+  miss: { s: 2, sound: 'miss' },
+  lever: { s: 3, sound: 'lever' },
+  latch: { s: 2, sound: 'latch' },
   death: { s: 4 }, // the player's, from the receipt: its haptic and cut are playCue's
 } satisfies Record<string, { s: 1 | 2 | 3 | 4; sound?: SoundName }>; // mutate-skip: a type
 
@@ -162,6 +165,7 @@ export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
 let flashes = true;
 /** The Flashes setting: off, no blow is a wash; the rest of the cue stays. */
 export const flashesOn = (on: boolean) => void (flashes = on);
+export const flashesShown = () => flashes;
 
 // Quests resolved since the Journal last opened; its gilt waits for the visit. Read off the views:
 // the queue can drop the cue and a resume never sends it. A reload forgets them.
@@ -217,6 +221,7 @@ const foundFight = (view: GameView, fought: boolean): Cue[] =>
     ? [{ name: view.combat ? 'combat_open' : 'combat_close', resumed: true }]
     : [];
 
+// An absence is no event: what a resume settled, however fast, is heard as nothing.
 export function useCues(
   view: GameView,
   catchingUp: boolean,
@@ -225,13 +230,14 @@ export function useCues(
   reduced = false,
   onTurn?: () => void,
   died?: string,
+  deed?: NarrationRecord,
 ) {
   const queue = useRef(QUIET);
   const seen = useRef(turn);
   const back = useRef(resumes);
   const settled = useRef<GameView>(undefined);
   const last = useRef<GameView>(undefined);
-  const fell = useRef(died);
+  const told = useRef({ died, deed });
   const fought = useRef(false);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -241,19 +247,17 @@ export function useCues(
     };
     if (last.current) noteResolved(view, last.current);
     last.current = view;
-    // An absence is no event: what a resume settled, however fast, is heard as nothing.
     const away = catchingUp || resumes !== back.current;
     const was = away ? undefined : settled.current;
-    const fresh = !!died && died !== fell.current;
-    advance(
-      [...(was ? [] : foundFight(view, fought.current)), ...cuesOf(view, was, fresh)],
-      turn !== seen.current,
-    );
-    fell.current = died;
+    const fresh = !!died && died !== told.current.died;
+    const done = deed !== told.current.deed ? deed : undefined;
+    const opening = was ? [] : foundFight(view, fought.current);
+    advance([...opening, ...cuesOf(view, was, fresh, done)], turn !== seen.current);
+    told.current = { died, deed };
     fought.current = !!view.combat;
     seen.current = turn;
     back.current = resumes;
     settled.current = catchingUp ? undefined : view;
     return () => clearTimeout(timer);
-  }, [view, catchingUp, turn, resumes, reduced, died]);
+  }, [view, catchingUp, turn, resumes, reduced, died, deed]);
 }

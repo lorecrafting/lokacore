@@ -125,6 +125,7 @@ export const radius = { card: 10, chip: 22 }; // chip: a pill, half size.touch
 export const opacity = {
   disabled: 0.45,
   press: 0.3, // a lifted card: `line` blended into `card` (rises size.rule)
+  afterimage: 0.12, // Storm's light, the second exemption: BOOK-UI-COMPONENTS.md#design-tokens -- mutate-skip: uncalibrated design value
   wash: 0.18, // the blow wash at its peak, the exemption: BOOK-UI-COMPONENTS.md#design-tokens
   washStill: 0.09, // the same wash under reduced motion
   faint: 0.06, // the fatal blow's wash, held until the page turns -- mutate-skip: uncalibrated design value
@@ -150,6 +151,15 @@ export const motion = {
     rise: space.sm,
   }, // a status icon arriving, scaling up from `from`; the item pop rising `rise`, then held and out -- mutate-skip: uncalibrated design value
   flash: { duration: 120, easing: 'inOutQuad', out: 380, gap: 1000, swell: 1.015 }, // the blow wash; swell: the page's scale at its peak; gap: the Flash limit, a later blow keeps all but the wash -- mutate-skip: uncalibrated design value
+  bed: { fade: 1000 }, // a room's bed and weather layer, cross-fading -- mutate-skip: uncalibrated design value
+  afterimage: {
+    duration: 60,
+    out: 1200,
+    outEasing: 'linear',
+    every: [20000, 60000],
+    thunder: [1000, 3000],
+  }, // Storm's light -- mutate-skip: uncalibrated design value
+  flutter: { duration: 600, lift: space.xs, times: 2 }, // Wind's corner paper -- mutate-skip: uncalibrated design value
   settle: { duration: 400, easing: 'inOutQuad', hold: 600 }, // a resolved running head retiring; hold: gilt's warning ink before it settles -- mutate-skip: uncalibrated design value
   card: {
     duration: 600,
@@ -177,6 +187,13 @@ export const sound = {
   skillUp: { tier: 'whisper', variants: 1, gap: 30000 }, // skill improves: tone high, at most once per gap (ms) -- mutate-skip: uncalibrated design value
   questGained: { tier: 'note', variants: 1 }, // quest gained: tone low -- mutate-skip: uncalibrated design value
   chapter: { tier: 'chapter', variants: 1, haptic: 'medium' }, // the theme cut, on the music bus -- mutate-skip: uncalibrated design value
+  miss: { tier: 'whisper', variants: 1 }, // an attack that found nothing: one family -- mutate-skip: uncalibrated design value
+  lever: { tier: 'beat', variants: 1, haptic: 'medium' }, // a lever's clunk -- mutate-skip: uncalibrated design value
+  latch: { tier: 'note', variants: 1, haptic: 'light' }, // the player's own action opened an exit -- mutate-skip: uncalibrated design value
+  thunder: { tier: 'beat', variants: 3 }, // Storm: its heavy haptic is Storm's, only on a room entry's first -- mutate-skip: uncalibrated design value
+  bed: { tier: 'bed', variants: 1 }, // a room's bed, by tag (sources) -- mutate-skip: uncalibrated design value
+  weather: { tier: 'bed', variants: 1 }, // the weather layer -- mutate-skip: uncalibrated design value
+  explore: { tier: 'chapter', variants: 1, gap: 600000 }, // an exploration piece, by tag; gap: ms since the last -- mutate-skip: uncalibrated design value
   impact: { tier: 'note', variants: 3 }, // a blow dealt, under the music -- mutate-skip: uncalibrated design value
   fightIn: { tier: 'chapter', variants: 1 }, // a fight's stinger, into the loop -- mutate-skip: uncalibrated design value
   fightLoop: { tier: 'chapter', variants: 1, gap: 60000 }, // a fight within gap (ms) of the last skips the stinger -- mutate-skip: uncalibrated design value
@@ -186,11 +203,13 @@ export const sound = {
 // Loudness targets (LUFS, uncalibrated until recorded samples are heard), voices per bus, ambience
 // ducking under S3 and S4, and the round-robin's pitch spread.
 export const mix = {
-  tier: { whisper: -24, note: -18, beat: -14, chapter: -12 },
-  bus: { ambience: 2, sfx: 4, ui: 2, music: 1 }, // mutate-skip: uncalibrated design value
+  tier: { bed: -30, whisper: -24, note: -18, beat: -14, chapter: -12 },
+  bus: { ambience: 3, sfx: 4, ui: 2, music: 1 }, // mutate-skip: uncalibrated design value
+  bedUnderMusic: { db: -6 }, // beds under an exploration piece -- mutate-skip: uncalibrated design value
+  muffle: { hz: 800, db: -6 }, // weather and thunder through a wall -- mutate-skip: uncalibrated design value
   duck: { db: -6, duration: 300, out: 1200 },
   dip: { db: -3 }, // music under a blow, on duck's times -- mutate-skip: uncalibrated design value
-  spread: 0.04, // no reader yet: pitch spread moves to loka-gj82.8
+  spread: 0.04, // a short sound's playback rate, plus or minus
   coalesce: 300, // small cues of one key inside this many ms are one
 };
 

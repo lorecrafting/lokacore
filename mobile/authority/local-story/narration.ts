@@ -40,7 +40,8 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     const died = d.events.some(
       (e) => e.payload.type === 'entity_died' && !e.payload.victim_definition,
     );
-    if (!lines.length && !pickup && !died) {
+    const deed = command_id ? deedOf(d) : undefined; // a press's, never what reopen shows again
+    if (!lines.length && !pickup && !died && !deed) {
       if (command_id) return undefined;
       before = r.revision;
       continue;
@@ -51,6 +52,7 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
       command_id: r.command_id,
       lines,
       ...(died && { died: true }),
+      ...deed,
       ...(cue && { cue }),
       ...(combat_lines.length && { combat_lines, ...arrival(s, lines) }),
       ...(detail_id && { detail_id, ...(d.outcome === 'read' && { read: true }) }),
@@ -59,17 +61,34 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
   }
 }
 
+// What the receipt's events say the press did (book-ui.md, Lever and latch; Impact). A lever is a
+// completed action whose outcome emits the authored `lever` event, as weather's phases are authored names.
+function deedOf(d: Accepted): Pick<NarrationRecord, 'lever' | 'opened' | 'missed'> | undefined {
+  const has = (type: string) => d.events.some((e) => e.payload.type === type);
+  const lever = d.events.some(
+    (e) => e.payload.type === 'custom_event' && e.payload.event.key === 'lever',
+  );
+  const opened = has('action_completed') || has('barrier_changed');
+  const missed = d.events.some((e) => e.payload.type === 'attack_result' && !e.payload.hit);
+  if (!lever && !opened && !missed) return undefined;
+  return { ...(lever && { lever }), ...(opened && { opened }), ...(missed && { missed }) };
+}
+
 const latest = (s: Story, command_id: string | undefined, before: number | null) =>
   s.db.getFirstSync<NarrationRow>(
     `SELECT revision, command_id, command, response FROM receipt WHERE scope = ?
      AND (json_array_length(response, '$.narration') > 0
        OR json_extract(response, '$.outcome') = 'taken'
+       OR (? IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(response, '$.events') e
+         WHERE json_extract(e.value, '$.payload.type') IN
+           ('action_completed', 'attack_result', 'barrier_changed')))
        OR EXISTS (SELECT 1 FROM json_each(response, '$.events') e
          WHERE json_extract(e.value, '$.payload.type') = 'entity_died'
            AND json_extract(e.value, '$.payload.victim_definition') IS NULL))
      AND (? IS NULL OR command_id = ?)
      AND (? IS NULL OR revision < ?) ORDER BY revision DESC LIMIT 1`,
     scope(s),
+    command_id ?? null,
     command_id ?? null,
     command_id ?? null,
     before,

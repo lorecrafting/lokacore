@@ -1,8 +1,7 @@
 // size: allow 310, a press's reply is read in one place: its faults, log lines, warned exit and status
-// The book's words and state over a Game (packages/game-view/session.ts): the offered actions as
-// buttons, the log of what each press said, and who came or went. The engine returns structured
-// results; every sentence here is the app's own (docs/decisions/owner-decision-presenter-split-
-// 2026-10-02.md). Plain TypeScript, so any view can replace the React one. It adds no mechanics.
+// The book's words and state over a Game: the offered actions as buttons, the log of what each
+// press said, and who came or went. The engine returns structured results; every sentence here is
+// the app's own (docs/decisions/owner-decision-presenter-split-2026-10-02.md). No mechanics.
 import type {
   Game,
   GameView,
@@ -258,6 +257,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
   return {
     view,
     died: s.died,
+    deed: s.deed,
     text,
     label,
     buttons,

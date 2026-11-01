@@ -22,6 +22,9 @@ export type NarrationRecord = CommittedNarration & {
   detail_id?: string;
   pickup_name?: string; // confirmed corpse-content Take, routed from its saved receipt
   died?: true; // the player's death in this receipt's events (book-ui.md, Falling)
+  lever?: true; // an action completed that emitted the authored `lever` event (book-ui.md, Lever and latch)
+  opened?: true; // an action completed or a barrier changed in this press's receipt (Lever and latch)
+  missed?: true; // an attack in this receipt missed or was prevented (book-ui.md, Impact)
   read?: true; // Read text: its page's only, never the room log (book-ui.md)
 };
 /** One Chronicle entry (mechanics.md, Chronicle): a host projection, not a kernel contract. */

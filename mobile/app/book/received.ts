@@ -123,18 +123,23 @@ const routedLines = (
 
 type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: 'accepted' }>;
 
+const telling = ({ payload: e }: Accepted['events'][number]) =>
+  (e.type === 'entity_died' && !e.victim_definition) ||
+  e.type === 'action_completed' ||
+  e.type === 'attack_result' ||
+  e.type === 'barrier_changed';
+
 // The receipt's retained narration, read back from storage when the reply carried any.
 function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepted) {
   const command_id =
     reply.kind === 'saved' ? (reply.command_id ?? accepted?.events[0]?.causation_id) : undefined;
   const lines = !!accepted?.narration?.length;
   // A death may have no line, and so no retained narration; the Book still falls (book-ui.md, Falling).
+  // So may a miss or an opened latch: read for its record's deed only.
   const last =
-    lines ||
-    accepted?.events.some((e) => e.payload.type === 'entity_died' && !e.payload.victim_definition)
-      ? savedNarration(game, s, command_id)
-      : undefined;
+    lines || accepted?.events.some(telling) ? savedNarration(game, s, command_id) : undefined;
   if (last?.died) s.died = last.command_id;
+  if (last?.lever || last?.opened || last?.missed) s.deed = last;
   return lines && (command_id || accepted.outcome !== 'riddle_wrong') ? last : undefined;
 }
 

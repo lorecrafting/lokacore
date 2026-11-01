@@ -1,5 +1,5 @@
 // The pure diff of two GameViews into named cues (book-ui.md, Effects, sound and haptics; Queue).
-import type { GameView } from '../../packages/game-view/session.ts';
+import type { GameView, NarrationRecord } from '../../packages/game-view/session.ts';
 import type { Cue, CueName } from './cues.ts';
 
 const amount = (v: GameView, key: string) =>
@@ -142,16 +142,37 @@ function statusCues(now: GameView, was: GameView) {
   ];
 }
 
+// Only a press's own events (the receipt's), so a barrier the world moved in another's receipt is silent.
+// ponytail: a wait's receipt can carry a world-driven barrier_changed; events name no writer yet.
+function deedCues(now: GameView, was: GameView, combat: Cue[], deed?: NarrationRecord): Cue[] {
+  if (!deed) return [];
+  const usable = (v: GameView) => v.exits.filter((e) => e.available).map((e) => e.direction);
+  const newly = usable(now).some((d) => !usable(was).includes(d));
+  const landed = combat.some((c) => c.name === 'hp_loss' || c.name === 'blow_dealt');
+  return [
+    ...(deed.missed && !landed ? [{ name: 'miss' } as const] : []),
+    ...(deed.lever ? [{ name: 'lever' } as const] : []),
+    ...(deed.opened && newly && now.place.id === was.place.id ? [{ name: 'latch' } as const] : []),
+  ];
+}
+
 /** What changed from `was` to `now`, the story's first. No `was` (a first view, a catch-up) is silent. */
-export function cuesOf(now: GameView, was: GameView | undefined, died = false): Cue[] {
+export function cuesOf(
+  now: GameView,
+  was: GameView | undefined,
+  died = false,
+  deed?: NarrationRecord,
+): Cue[] {
   if (!was) return [];
   const chapter = now.chapter && was.chapter?.index !== now.chapter.index;
   const level = was.levelling && (now.levelling?.level ?? 0) > was.levelling.level;
+  const combat = combatCues(now, was, died);
   return [
     ...(chapter ? [{ name: 'chapter' } as const] : []),
     ...(level ? [{ name: 'level' } as const] : []),
     ...questCues(now, was),
-    ...combatCues(now, was, died),
+    ...combat,
+    ...deedCues(now, was, combat, deed),
     ...skillCues(now, was),
     ...itemCues(now, was),
     ...statusCues(now, was),
