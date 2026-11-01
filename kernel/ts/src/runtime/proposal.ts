@@ -17,8 +17,9 @@ import { allocator, event, type Mint, type Steps, type World } from './decision.
 import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
-import { diedAfter, sequence, triggered } from '../mechanics/reaction.ts';
-import { levelsReached, oneWrite, poolWriters } from '../mechanics/levelling/shared.ts';
+import { sequence, triggered } from '../mechanics/reaction.ts';
+import { levelsReached, oneWrite } from '../mechanics/levelling/shared.ts';
+import { poolWriters } from '../mechanics/resource.ts';
 import { partings } from '../mechanics/escort/shared.ts';
 import { closing } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
@@ -235,7 +236,7 @@ function react(p: P, ran = false): Admitted | undefined {
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;
-    const dead = diedAfter(p.events, next.cause); // once per delivery
+    const events = [...p.events]; // once per delivery
     for (const rule of triggered(p.world, next.cause)) {
       const at = now(p);
       if (!('cartridge' in at)) return at;
@@ -247,7 +248,7 @@ function react(p: P, ran = false): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
-        { holders: poolWriters(p.ops, p.holders), dead, ran, roots: p.roots },
+        { holders: poolWriters(p.ops, p.holders), events, ran, roots: p.roots },
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });

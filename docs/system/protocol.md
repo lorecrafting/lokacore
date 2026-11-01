@@ -91,7 +91,7 @@ storage half):
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
    (`kernel/ts/src/mechanics/quest/lifecycle.ts:75`), then each ReactionRule it triggers runs as its own writer group when its
    `when` holds (its write to a status holder or fact row an earlier reaction of the advance wrote
-   joins that reaction's group, and its `resource.adjust` on a pool any earlier writer of the proposal wrote joins that writer's group, [mechanics.md](mechanics.md)) (`mechanics/reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
+   joins that reaction's group, and its `resource.adjust` joins the group of any earlier writer of that pool, else of its body's holder, [mechanics.md](mechanics.md)) (`mechanics/reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
    each due pending job runs as a `run_job` in `(due_time, job_id)` order with its reactions
    (`runtime/proposal.ts:265`); a job a run schedules due by the target joins that order and runs
    in the same advance, and a run or its reactions writing a target that a run of strictly earlier

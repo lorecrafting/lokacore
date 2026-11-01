@@ -5,15 +5,12 @@ import type {
   DefinitionRef,
   DeltaOp,
   DomainEvent,
-  EntityId,
   LevellingRow,
   Text,
 } from '../../contracts.gen.ts';
-import { key } from '../../foundation/compose.ts';
 import { saturate } from '../../foundation/int.ts';
-import { bodyOf, type Mint, type World } from '../../runtime/decision.ts';
+import { type Mint, type World } from '../../runtime/decision.ts';
 import type { Base } from '../fact.ts';
-import { adjust } from '../resource.ts';
 
 const NONE: LevellingRow = { experience: 0, allocated: {} };
 
@@ -123,38 +120,6 @@ export const write = (
   expected: world.state.levelling?.[actor] ?? null,
   value,
 });
-
-const pool = (o: { resource: DefinitionRef; entity_id: EntityId }) =>
-  key({ kind: 'resource', resource: o.resource, entity_id: o.entity_id });
-
-/**
- * A reaction's resource.adjust on the actor's body, clamped to its bounds and after the rule's
- * earlier `ops`, so two compose. Nothing without a body or a change. `at`: the composer folds from
- * the base clock otherwise and refuses the settled regen. A pool an earlier writer of the advance
- * wrote joins that group (a bite in the killing round), as a reaction's fact write does.
- */
-export function pooled(
-  then: World,
-  actor: CharacterId,
-  step: { resource: DefinitionRef; by: number },
-  group: number,
-  ops: readonly DeltaOp[],
-  { holders }: { holders: ReadonlyMap<string, number> },
-): DeltaOp[] {
-  const body = bodyOf(then, actor);
-  if (!body) return [];
-  const levels: Record<string, number> = {};
-  for (const o of ops) if (o.op === 'resource.adjust') levels[pool(o)] = o.to;
-  const { op } = adjust(then, body, step.resource, step.by, levels, true);
-  const writer_group = holders.get(pool(op)) ?? group;
-  return op.from === op.to ? [] : [{ ...op, writer_group, at: then.state.clock }];
-}
-
-/** `holders` with each pool written so far and its writer group, for `pooled`. */
-export function poolWriters(ops: readonly DeltaOp[], holders: Map<string, number>) {
-  for (const o of ops) if (o.op === 'resource.adjust') holders.set(pool(o), o.writer_group);
-  return holders;
-}
 
 /** `amount` more experience for the actor, saturating at the ResourceInt maximum. */
 export function grant(world: World, actor: CharacterId, amount: number, group: number) {

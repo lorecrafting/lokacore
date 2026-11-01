@@ -64,4 +64,18 @@ defmodule Loka.ContentLevellingTest do
            ),
            inspect(diags)
   end
+
+  # Breaks: a rule's drain compiles, and a body stands at 0 with no entity_died; or the boundary
+  # moves and `by` 0 (no change, nothing to skip) is refused.
+  test "a reaction's resource.adjust refuses a negative by", %{dir: dir} do
+    by = fn value -> fn r -> put_in(r, ["steps", Access.at(2), "by"], value) end end
+
+    assert {:error, diags} =
+             Loka.ContentSource.compile(dir, [{"reactions/level_two.json", by.(-1)}])
+
+    assert [%{"code" => "REACTION_DRAINS_BODY", "path" => "reactions/level_two.steps[2].by"}] =
+             diags
+
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [{"reactions/level_two.json", by.(0)}])
+  end
 end

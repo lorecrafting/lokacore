@@ -156,6 +156,10 @@ defmodule Loka.Content.Reactions do
       else: [diag("UNRESOLVED_REFERENCE", at(rel, ["steps", i, "text"]), %{"target" => key})]
   end
 
+  # A rule's drain would skip death: hp 0 and no entity_died (the damage mechanisms kill).
+  defp consequence(rel, {%{"op" => "resource.adjust", "by" => by}, i}, _, _) when by < 0,
+    do: [diag("REACTION_DRAINS_BODY", at(rel, ["steps", i, "by"]), %{})]
+
   # A reaction's refill names a declared resource; an unknown one would throw at play.
   defp consequence(rel, {%{"op" => "resource.adjust"} = s, i}, _, ctx),
     do: reference(rel, ["steps", i], "resource", s, ctx.m, ctx.defs)
