@@ -10,7 +10,11 @@ test('a gated choice is no way on for a fall-through', () => {
   const hub = { key: 'hub', npc, choices: {} };
   const world = { cartridge: { dialogues: { hub } } } as unknown as World;
   const ways = (choice: object) =>
-    onward(world, { key: 'g', npc, choices: { go: { then: 'hub', ...choice } } } as never).length;
+    onward(world, {
+      key: 'g',
+      npc,
+      choices: { go: { then: 'hub', ...choice } },
+    } as unknown as Parameters<typeof onward>[1]).length;
   assert.equal(ways({}), 1);
   for (const gate of [
     'accept',
