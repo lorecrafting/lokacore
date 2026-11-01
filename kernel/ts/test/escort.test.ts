@@ -337,6 +337,47 @@ test('real fatal combat leaves the child behind and only a bound explicit Rejoin
   assert.equal(relation(a.world()).status, 'completed');
 });
 
+// Breaks: death stops writing separated itself; only a body waking beside the NPC shows it.
+test('a player who dies at the shrine beside the child still separates', () => {
+  const a = setup();
+  a.ready();
+  a.choose('rescue');
+  a.move(...toCellar);
+  const w = a.world();
+  const death = w.cartridge.world!.death!;
+  const shrine = { ...death.shrine, key: 'lantern_cellar' };
+  const world = { ...w.cartridge.world, death: { ...death, shrine } };
+  a.set({ ...hp(w, w.body, 1), cartridge: { ...w.cartridge, world } } as World);
+  a.run({ type: 'attack', target_id: entity(a.world(), 'npc', 'cellar_rat_1') });
+  const fatal = elapsed(a.world(), a.world().state.clock + 150, 100);
+  assert.equal(fatal.decision.kind, 'accepted', JSON.stringify(fatal.decision));
+  assert.equal(fatal.world.state.containers[fatal.world.body], room(w, 'lantern_cellar'));
+  assert.equal(relation(fatal.world).status, 'separated');
+});
+
+// Breaks: the sweep parts a row the same decision just rejoined: two writes, conflicting_write fault.
+test('a Rejoin whose own reaction ends the quest is accepted, and the next Move separates', () => {
+  const a = setup((c) => {
+    const { quest } = c.dialogues[`${prefix}:dialogue/child_rejoin`].choices.rejoin.escort;
+    (c.reactions ??= {})[`${prefix}:reaction/on_rejoin`] = {
+      key: 'on_rejoin',
+      on: { event: 'choice_resolved', choice: 'rejoin' },
+      steps: [{ op: 'quest.fail', quest, outcome: 'home' }],
+    };
+  });
+  a.ready();
+  a.choose('rescue');
+  fallInCellar(a);
+  a.move(...shrineToCellar);
+  a.talk('child');
+  a.choose('rejoin');
+  assert.equal(quest(a.world()).state, 'failed');
+  assert.equal(relation(a.world()).status, 'following');
+  a.move('up');
+  assert.equal(relation(a.world()).status, 'separated');
+  assert.equal(a.world().state.containers[child(a.world())], room(a.world(), 'lantern_cellar'));
+});
+
 // Breaks: a forged pending start substitutes a different co-located NPC of the same kind.
 test('an escort choice cannot bind the stranger in place of the authored child', () => {
   const a = setup();

@@ -432,8 +432,9 @@ outcome retain the existing confirmed-disk adoption fence.
 
 The existing state_row table persists actor-keyed escorts through the ordinary changed-row
 transaction. Load validates each typed row against its actor/body, original start ChoiceRow
-and quest instance, original living NPC and physical state. Following requires co-location;
-separated permits player departure or later co-location before explicit Rejoin. Completed
+and quest instance, and original NPC, whose container must still be a room. It does not read the NPC's life or
+co-location or the quest's state: each is reachable by accepted commands, and the kernel separates a following escort that loses one
+([escort@1](mechanics.md#escort1)). Separated permits player departure or later co-location before explicit Rejoin. Completed
 requires the proven rescued terminal; the speaker may die and the NPC may move afterward. Every committed
 intermediate state must reopen and reconcile under the same boundary.
 
@@ -477,8 +478,7 @@ Branch, quest outcome, status, escort and own committed receipts must agree. The
 terminal refusal applies before either selection. Missing/swapped/malformed roles or escort
 rows, cross-branch evidence and impossible locations are typed save_corrupt without repair.
 Own committed start/Rejoin/terminal receipts validate escort effects and derive original NPC
-narration. The latest committed escort transition must match the stored relation; separated
-requires the fatal transition's death event and player-body transfer. Unrelated latest
+narration. The latest committed escort transition must match the stored relation. Unrelated latest
 receipts and current room never prove success. Existing rollback,
 unknown-COMMIT fence, exact retries and explicit old-pin refusal remain unchanged.
 

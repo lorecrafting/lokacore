@@ -7,7 +7,6 @@ import type {
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
-import { living } from '../../../kernel/ts/src/mechanics/death/shared.ts';
 import {
   bodyOf,
   refString,
@@ -43,7 +42,6 @@ export function escortSave(world: World, db: Db, scope: string, rows: [string, C
     escort.actor_id !== actor ||
     escort.body_id !== bodyOf(world, world.character) ||
     world.entities[escort.npc_id]?.kind !== 'npc' ||
-    !living(world, escort.npc_id) ||
     !world.rooms[world.state.containers[escort.npc_id]]
   )
     invalid();
@@ -60,7 +58,7 @@ export function escortSave(world: World, db: Db, scope: string, rows: [string, C
   terminal(world, escort, selected);
 }
 
-// A separated row needs its fatal transition; later walking back is not a rejoin.
+// The relation is what the latest transition wrote; a death, a departure or a quest end all write it.
 function latest(world: World, db: Db, scope: string, escort: EscortRelation) {
   const receipt = db.getFirstSync<{ response: string }>(
     `SELECT response FROM receipt WHERE scope=? AND json_extract(response,'$.kind')='accepted'
@@ -77,25 +75,6 @@ function latest(world: World, db: Db, scope: string, escort: EscortRelation) {
     .filter((o) => o.op === 'escort.transition' && o.actor_id === escort.actor_id)
     .at(-1);
   if (op?.op !== 'escort.transition' || !same(op.value, escort)) return invalid();
-  if (escort.status !== 'separated') return;
-  const room = world.state.containers[escort.npc_id];
-  if (
-    !same(op.expected, { ...escort, status: 'following' }) ||
-    !decision.events.some(
-      (e) =>
-        e.payload.type === 'entity_died' &&
-        e.payload.victim_id === escort.body_id &&
-        e.payload.room_id === room,
-    ) ||
-    !decision.delta.ops.some(
-      (o) =>
-        o.op === 'entity.transfer' &&
-        o.writer_group === op.writer_group &&
-        o.entity_id === escort.body_id &&
-        o.source_id === room,
-    )
-  )
-    invalid();
 }
 
 function original(world: World, escort: EscortRelation, selected: Selection[]) {
@@ -114,24 +93,15 @@ function original(world: World, escort: EscortRelation, selected: Selection[]) {
 }
 
 function terminal(world: World, escort: EscortRelation, selected: Selection[]) {
+  if (escort.status !== 'completed') return;
   const quest = world.state.quests![escort.quest_instance_id];
   const completed = selected.filter((s) => s.option.escort!.transition === 'complete');
-  if (escort.status === 'completed') {
-    const end = completed[0];
-    if (
-      completed.length !== 1 ||
-      !same(end.d.quest, quest!.quest) ||
-      quest!.state !== 'resolved' ||
-      quest!.outcome !== end.row.choice_id
-    )
-      invalid();
-    return;
-  }
+  const end = completed[0];
   if (
-    completed.length ||
-    quest!.state !== 'active' ||
-    (escort.status === 'following' &&
-      world.state.containers[escort.body_id] !== world.state.containers[escort.npc_id])
+    completed.length !== 1 ||
+    !same(end.d.quest, quest!.quest) ||
+    quest!.state !== 'resolved' ||
+    quest!.outcome !== end.row.choice_id
   )
     invalid();
 }

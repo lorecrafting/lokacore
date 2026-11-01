@@ -116,6 +116,15 @@ export function escorting(world: World, npc: EntityId) {
   );
 }
 
+/** The bond ends with the NPC's life, its presence beside the body or the quest being active. */
+function parted(world: World, escort: EscortRelation) {
+  return (
+    world.state.quests?.[escort.quest_instance_id]?.state !== 'active' ||
+    !living(world, escort.npc_id) ||
+    world.state.containers[escort.npc_id] !== world.state.containers[escort.body_id]
+  );
+}
+
 function following(world: World, actor: CharacterId) {
   const escort = world.state.escorts?.[actor];
   if (!escort || escort.status !== 'following') return;
@@ -123,10 +132,7 @@ function following(world: World, actor: CharacterId) {
     escort.actor_id !== actor ||
     escort.body_id !== bodyOf(world, actor) ||
     !original(world, escort) ||
-    world.state.quests?.[escort.quest_instance_id]?.state !== 'active' ||
-    world.entities[escort.npc_id]?.kind !== 'npc' ||
-    !living(world, escort.npc_id) ||
-    world.state.containers[escort.npc_id] !== world.state.containers[escort.body_id]
+    world.entities[escort.npc_id]?.kind !== 'npc'
   )
     throw new KernelError('precondition_failed');
   return escort;
@@ -164,7 +170,8 @@ export function travel(
   source_id: EntityId,
   destination_id: EntityId,
 ): DeltaOp[] {
-  const escort = following(world, actor)?.npc_id;
+  const bound = following(world, actor);
+  const escort = bound && !parted(world, bound) ? bound.npc_id : undefined;
   const horse = mounted(world, actor);
   const members = world.cartridge.world?.group
     ? npcsIn(world, [source_id]).filter(
@@ -182,18 +189,28 @@ export function travel(
   }));
 }
 
+const separated = (expected: EscortRelation, writer_group: number): DeltaOp => ({
+  op: 'escort.transition',
+  writer_group,
+  actor_id: expected.actor_id,
+  expected,
+  value: { ...expected, status: 'separated' },
+});
+
 /** Fatal player death returns the body alone; the bound NPC remains in the death room. */
 export function separate(world: World, actor: CharacterId, writer_group: number): DeltaOp[] {
   const expected = following(world, actor);
-  return expected
-    ? [
-        {
-          op: 'escort.transition',
-          writer_group,
-          actor_id: actor,
-          expected,
-          value: { ...expected, status: 'separated' },
-        },
-      ]
-    : [];
+  return expected ? [separated(expected, writer_group)] : [];
+}
+
+/** What a whole decision left behind: each of `held` it parted and did not itself transition. */
+export function partings(
+  world: World,
+  held: (EscortRelation | undefined)[],
+  writer_group: number,
+): DeltaOp[] {
+  return held.flatMap((h) => {
+    const e = h && world.state.escorts?.[h.actor_id];
+    return e?.status === 'following' && parted(world, e) ? [separated(e, writer_group)] : [];
+  });
 }

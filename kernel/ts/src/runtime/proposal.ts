@@ -19,6 +19,7 @@ import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { diedAfter, sequence, triggered } from '../mechanics/reaction.ts';
 import { levelsReached, oneWrite } from '../mechanics/levelling/shared.ts';
+import { partings } from '../mechanics/escort/shared.ts';
 import { closing } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -94,7 +95,7 @@ export function propose(
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
   let failed = join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root);
-  failed ??= farewell(p, () => now(p));
+  failed ??= farewell(p, () => now(p)) ?? parting(p);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
   p.narration = closing(world, command.payload.actor_id, ops, p.events, p.narration);
@@ -107,6 +108,17 @@ export function propose(
       ...(p.narration.length && { narration: vary(world.cartridge, command.id, p.narration) }),
     },
   };
+}
+
+// Last, on the final state: the decision's own writes (a death, a mover, a quest end) may part a
+// following escort (escort@1), and no later command can then fault on it. Only rows already
+// following: a start or Rejoin in this decision wrote its row, so the next decision's sweep parts it.
+function parting(p: P): Admitted | undefined {
+  const held = Object.values(p.world.state.escorts ?? {}).filter((e) => e?.status === 'following');
+  if (!held.length) return;
+  const at = now(p);
+  if (!('cartridge' in at)) return at;
+  p.ops.push(...partings(at, held, ++p.group));
 }
 
 // The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read

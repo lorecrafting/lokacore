@@ -918,10 +918,12 @@ actor's typed relation for that quest instance and supports policy and journal s
 
 Shared Move/Flee sequence appends the bound living NPC's transfer from the player's
 actual source to the same actual destination when following. Ordinary stance, exit,
-gate, fare and Flee choice/RNG remain authoritative. Invalid escort presence is a controlled
-fault/refusal, never detachment or teleport; refused/composition-failed movement changes
+gate, fare and Flee choice/RNG remain authoritative. Refused/composition-failed movement changes
 neither. Fatal player death writes following→separated in death's existing writer group
-beside shrine return, leaving NPC custody unchanged. No independent fare, roll, pathfinding
+beside shrine return, leaving NPC custody unchanged. Whatever else ends the bond (the NPC dies or
+no longer shares the player's room, or the quest stops being active) writes the same
+following→separated after the decision's other writes, in its own writer group, with no event or line of
+its own; a parted NPC is never moved or teleported, and Rejoin stays the only way back. A decision that itself starts or rejoins leaves that row to the next decision's sweep. Installed kernel 1.137. No independent fare, roll, pathfinding
 or after-commit write exists. Completed relations never follow subsequent movement.
 
 <a id="s2-chandlers-debt-selected-contract-pending-implementation"></a>

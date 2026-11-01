@@ -1,3 +1,4 @@
+// size: allow 610, every reopen case here shares one SQLite setup() and its forged-row table
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -386,6 +387,112 @@ test('a completed escort reopens after the keeper dies or a reaction moves the c
   );
 });
 
+const mortal = {
+  hp: { minimum: 0, maximum: 1, start: 1, gain: 0 },
+  attack: { chance: 0, damage_min: 1, damage_max: 1 },
+};
+// Attack an NPC with one hit point and run rounds until it is gone from the view.
+function kill(a: ReturnType<typeof setup>, npc: string) {
+  a.ok('attack', [id('npc', npc)]);
+  const here = () => JSON.stringify(a.game.view().view).includes(id('npc', npc));
+  for (let i = 0; i < 100 && here(); i++) {
+    a.clock.wall += 5000;
+    a.clock.mono += 5000;
+    a.game.pulse();
+  }
+  assert.equal(here(), false);
+}
+// A reaction step fired when the player and child walk north into North Gate.
+const onGate = (step: (quest: object, npc: object) => object) =>
+  escortBundle((c) => {
+    const d = c.dialogues[`${prefix}:dialogue/keeper_home`];
+    (c.reactions ??= {})[`${prefix}:reaction/on_gate`] = {
+      key: 'on_gate',
+      on: { event: 'entity_entered_room', room: { ...d.npc, kind: 'room', key: 'north_gate' } },
+      steps: [step(d.quest, { ...d.npc, key: 'child' })],
+    };
+  });
+
+// Breaks: following escort left in a state the kernel refuses every Move on, or a save check that
+// refuses the lawful state for good. Each case plays, reopens, keeps moving and reopens again.
+for (const [name, source, act, status, child, walk] of [
+  [
+    'child killed',
+    escortBundle((c) => void Object.assign(c.npcs[`${prefix}:npc/child`], mortal)),
+    (a: ReturnType<typeof setup>) => kill(a, 'child'),
+    'separated',
+    'village_green',
+    ['south', 'north'],
+  ],
+  [
+    'keeper killed',
+    escortBundle((c) => void Object.assign(c.npcs[`${prefix}:npc/keeper`], mortal)),
+    (a: ReturnType<typeof setup>) => {
+      a.move('south', 'south');
+      kill(a, 'keeper');
+    },
+    'following',
+    'village_green',
+    ['north', 'north'],
+  ],
+  [
+    'npc.move on the child',
+    onGate((_, npc) => ({
+      op: 'npc.move',
+      npc,
+      room: { ...npc, kind: 'room', key: 'ferry_landing' },
+    })),
+    (a: ReturnType<typeof setup>) => a.move('north'),
+    'following',
+    'well_lane',
+    ['south', 'south'],
+  ],
+  [
+    'quest failed',
+    onGate((quest) => ({ op: 'quest.fail', quest, outcome: 'home' })),
+    (a: ReturnType<typeof setup>) => a.move('north'),
+    'separated',
+    'north_gate',
+    ['south', 'north'],
+  ],
+] as const) {
+  test(`a following escort reopens and keeps moving after: ${name}`, (t) => {
+    const dir = mkdtempSync(join(tmpdir(), 'loka-vduxr.23-'));
+    t.after(() => rmSync(dir, { recursive: true, force: true }));
+    const path = join(dir, 'save.db');
+    let a = setup(path, source);
+    a.offer();
+    a.choose('rescue');
+    act(a);
+    a.sql.close();
+    a = setup(path, source);
+    assert.equal(a.escort().status, status);
+    a.move(...walk);
+    assert.equal(a.row('containers', id('npc', 'child')), room(fresh, child));
+    a.sql.close();
+    setup(path, source).sql.close();
+  });
+}
+
+// Breaks: reopen refuses an NPC out of the room, Move faults on it for good, or Move teleports it.
+// No shipped mover parts a following authored NPC yet, so the row itself is placed.
+test('a following escort out of the room reopens, and the next Move leaves it and separates', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-vduxr.23-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'save.db');
+  let a = setup(path);
+  a.offer();
+  a.choose('rescue');
+  a.put('containers', id('npc', 'child'), room(fresh, 'ferry_landing'));
+  a.sql.close();
+  a = setup(path);
+  a.move('north');
+  assert.equal(a.escort().status, 'separated');
+  assert.equal(a.row('containers', id('npc', 'child')), room(fresh, 'ferry_landing'));
+  a.sql.close();
+  setup(path).sql.close();
+});
+
 // Breaks: escort save validation admits a forged binding, placement or terminal, or an unrelated
 // latest receipt hides a missing/swapped original escort or its evidence. The chapter cases (rescue
 // message removed from Vesper, branch changed to stays) are gone: they pinned chapter story content.
@@ -423,12 +530,7 @@ test('retained escort identity, physical state and own receipts reject corruptio
         }),
     ],
     [
-      'following NPC in another room',
-      false,
-      (a) => a.put('containers', id('npc', 'child'), room(fresh, 'ferry_landing')),
-    ],
-    [
-      'separated without committed death',
+      'separated row with no committed transition',
       false,
       (a) => a.put('escorts', fresh.character, { ...a.escort(), status: 'separated' }),
     ],
