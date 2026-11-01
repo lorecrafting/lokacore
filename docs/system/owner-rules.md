@@ -32,7 +32,7 @@ and not repeated here.
 - Only authored receptacles can hold items ([record](../decisions/owner-decision-container-eligibility-2026-10-05.md)).
 
 - Detail pages follow the [canonical Book order](book-ui.md#detail-page-order), with no empty event-log heading or placeholder ([record](../decisions/owner-decision-detail-page-order-2026-10-05.md)).
-- The World page is title, description (fixture links only), people, items and the event log, nothing else; actions live on detail pages, ambient output in the log ([record](../decisions/owner-decision-room-page-anatomy-2026-10-23.md)).
+- The World page is title, description (fixture links only), people, items and the event log, nothing else; actions live on detail pages, ambient output in the log ([record](../decisions/owner-decision-room-page-anatomy-2026-10-23.md)). Note 2026-10-31 (paraphrased): the owner keeps one exception, the transient `+ item` pop under the log's last line ([Room page anatomy](book-ui.md#room-page-anatomy)).
 - Each room's event log speaks from that room's point of view: the room reached opens with "You arrive from the south." or, after a flight, "You run in from the south." ([record](../decisions/owner-decision-room-point-of-view-2026-10-24.md)).
 - An NPC's mood is its name and description variants; its room line has no variants. Ambient emotes (NPCs, rooms, items) and canned emotes are separate builder tools, each shown in Storybook ([record](../decisions/owner-decision-moods-ambient-emotes-2026-10-30.md)).
 

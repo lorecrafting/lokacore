@@ -11,8 +11,10 @@ import { ShelfPage } from './Shelf.tsx';
 import { NoticePage, proseLinks } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
 import { Here, LogLines, nameLink } from './lines.tsx';
-import { Page as PageShell, RunningHead } from './pages.tsx';
+import { Page as PageShell } from './pages.tsx';
+import { RunningHead } from './RunningHead.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
+import { ItemPop } from './ItemPop.tsx';
 import { space } from './tokens.ts';
 import { chapterLabel } from './words.ts';
 import type { Effects, Reading } from './reading.ts';
@@ -199,7 +201,12 @@ export function RoomPage(p: {
         {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
         <Here view={p.view} text={p.text} open={p.open} />
       </View>
-      {p.log.length > 0 && <LogLines lines={p.log} />}
+      {p.log.length > 0 && (
+        <View>
+          <LogLines lines={p.log} />
+          <ItemPop view={p.view} text={p.text} />
+        </View>
+      )}
     </PageShell>
   );
 }

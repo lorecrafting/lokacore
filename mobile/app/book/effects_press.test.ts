@@ -2,6 +2,7 @@
 // rig that keeps slots and honours effect deps, as React does.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { effects, flat, rig } from './__tests__/hook-rig.ts';
 import { nodes } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
@@ -13,51 +14,12 @@ const { opacity } = await import('./tokens.ts');
 const { useCues } = await import('./cues.ts');
 const { Fault, LogLines } = await import('./lines.tsx');
 const { dropLines, markDrawn, trimLog } = await import('./logs.ts');
-const { Control, RunningHead, Tap } = await import('./pages.tsx');
+const { Control, Tap } = await import('./pages.tsx');
+const { RunningHead } = await import('./RunningHead.tsx');
 const { StatusIcons } = await import('./StatusIcon.tsx');
 const { SaveError } = await import('../SaveError.tsx');
 
 const g = globalThis as any;
-function effects(t: { after: (f: () => void) => void }, reduced = false) {
-  g.reducedMotion = reduced;
-  g.timings = [];
-  g.delays = [];
-  g.bookDevice = [];
-  t.after(() => {
-    g.reducedMotion = g.timings = g.delays = g.bookDevice = g.sharedSlot = undefined;
-  });
-}
-function rig(t: { after: (f: () => void) => void }) {
-  const slots: any[] = [];
-  const stops: (() => void)[] = [];
-  t.after(() => stops.forEach((stop) => stop()));
-  let at = 0;
-  const queued: (() => void)[] = [];
-  return <T>(render: () => T): T => {
-    at = 0;
-    g[Symbol.for('loka-book-test-state')] = (v: any) => {
-      const i = at++;
-      if (!(i in slots)) slots[i] = typeof v === 'function' ? v() : v;
-      return [slots[i], (n: any) => (slots[i] = typeof n === 'function' ? n(slots[i]) : n)];
-    };
-    g[Symbol.for('loka-book-test-effect')] = (f: () => () => void, deps: unknown[]) => {
-      const i = at++;
-      if (!slots[i]?.every((d: unknown, j: number) => Object.is(d, deps[j]))) {
-        slots[i] = deps;
-        queued.push(() => {
-          const stop = f();
-          if (typeof stop === 'function') stops.push(stop);
-        });
-      }
-    };
-    // A shared value lives as long as its component, as Reanimated's does.
-    g.sharedSlot = (value: unknown) => g[Symbol.for('loka-book-test-state')](() => ({ value }))[0];
-    const out = render();
-    for (const f of queued.splice(0)) f();
-    return out;
-  };
-}
-const flat = (style: any) => Object.assign({}, ...[style].flat());
 // A drying line is the only log Text with an animated style beside its own.
 const dried = (shown: any[]) =>
   shown

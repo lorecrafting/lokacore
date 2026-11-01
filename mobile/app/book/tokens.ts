@@ -125,7 +125,8 @@ export const radius = { card: 10, chip: 22 }; // chip: a pill, half size.touch
 export const opacity = {
   disabled: 0.45,
   press: 0.3, // a lifted card: `line` blended into `card` (rises size.rule)
-  wash: 0.18, // the blow wash at its peak, half under reduced motion; the exemption: BOOK-UI-COMPONENTS.md#design-tokens
+  wash: 0.18, // the blow wash at its peak, the exemption: BOOK-UI-COMPONENTS.md#design-tokens
+  washStill: 0.09, // the same wash under reduced motion
 };
 
 // Book motion. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion. `duration` and
@@ -138,8 +139,17 @@ export const motion = {
   meteor: { duration: 700, easing: 'linear' }, // one shooting star's streak (the mock's .7 s); none under reduced motion
   press: { duration: 90, easing: 'ease', out: 160 }, // ActionCard, Control, Chip, Tap, letter tile -- mutate-skip: uncalibrated design value
   dry: { duration: 240, easing: 'linear', lag: 60 }, // a new log line; lag: a narrated event after its line -- mutate-skip: uncalibrated design value
-  pop: { duration: 220, easing: 'ease', from: 0.6 }, // a status icon arriving, scaling up from `from` -- mutate-skip: uncalibrated design value
-  flash: { duration: 120, easing: 'inOutQuad', out: 380, gap: 1000 }, // the blow wash; gap: the Flash limit, a later blow keeps all but the wash -- mutate-skip: uncalibrated design value
+  pop: {
+    duration: 220,
+    easing: 'ease',
+    from: 0.6,
+    hold: 1800,
+    out: 400,
+    outEasing: 'linear',
+    rise: space.sm,
+  }, // a status icon arriving, scaling up from `from`; the item pop rising `rise`, then held and out -- mutate-skip: uncalibrated design value
+  gilt: { hold: 600 }, // warning ink before it settles to its colour over `settle` -- mutate-skip: uncalibrated design value
+  flash: { duration: 120, easing: 'inOutQuad', out: 380, gap: 1000, swell: 1.015 }, // the blow wash; swell: the page's scale at its peak; gap: the Flash limit, a later blow keeps all but the wash -- mutate-skip: uncalibrated design value
   settle: { duration: 400, easing: 'inOutQuad' }, // a resolved running head retiring -- mutate-skip: uncalibrated design value
   card: { duration: 600, easing: 'inOutQuad', out: 300, stagger: 120, blurFrom: 6, blurTo: 12 }, // chapter card over the leaving page's blur (Skia sigma) -- mutate-skip: uncalibrated design value
 };

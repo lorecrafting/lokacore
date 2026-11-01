@@ -1,3 +1,4 @@
+// size: allow 305, the bus reads as one: cue table, view diff, severity queue, subscription
 // The effects cue bus (book-ui.md, Effects, sound and haptics; Queue): a pure diff of two GameViews
 // into named cues, a pure severity queue over them, and a subscription for the effects to come.
 import { useEffect, useRef } from 'react';
@@ -242,7 +243,7 @@ export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
   s.card = false;
   if (chapter) return { q: holdCard(s, now), fired: [chapter] };
   const play = (cue: Cue) => {
-    const wash = cue.name === 'hp_loss' && now - s.washed >= motion.flash.gap;
+    const wash = flashes && cue.name === 'hp_loss' && now - s.washed >= motion.flash.gap;
     if (wash) s.washed = now;
     s.playing = cue;
     s.until = now + BEAT;
@@ -263,6 +264,10 @@ export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
   }
   return { q: s, fired };
 }
+
+let flashes = true;
+/** The Flashes setting: off, no blow is a wash; the rest of the cue stays. */
+export const flashesOn = (on: boolean) => void (flashes = on);
 
 const listeners = new Set<(cue: Cue) => void>();
 export let curlEnds = -Infinity; // at the latest: a curl starts by the picture deadline

@@ -1,7 +1,12 @@
 // C row Pages, Combat (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect } from 'storybook/test';
+import { useState } from 'react';
+import { expect, waitFor } from 'storybook/test';
+import type { GameView } from '../../packages/game-view/session.ts';
+import { Blow } from '../book/Blow.tsx';
 import { Combat } from '../book/Combat.tsx';
+import { useCues } from '../book/cues.ts';
+import { Control } from '../book/pages.tsx';
 import { pageStory } from './screen.tsx';
 import CombatOneFoeView from './views/combat-one-foe.json';
 import CombatPackView from './views/combat-pack.json';
@@ -49,5 +54,34 @@ export const FoeCast: StoryObj = {
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Cast a spell…' }));
     await expect(canvas.getByRole('button', { name: /^Flamma, cast flamma on/ })).toBeVisible();
+  },
+};
+
+// A blow washes the paper below the ink (book-ui.md, Blow wash). Breaks: no wash on a hit point loss.
+const struck = (current: number) =>
+  ({
+    place: { id: 'yard' },
+    journal: [],
+    inventory: [],
+    combat: {},
+    resources: [{ resource: { key: 'hp' }, current, maximum: 20 }],
+  }) as unknown as GameView;
+function Struck() {
+  const [view, setView] = useState(() => struck(20));
+  useCues(view, false, 0);
+  return (
+    <Blow>
+      <Control label="Take the blow" onPress={() => setView(struck(15))} />
+    </Blow>
+  );
+}
+export const BlowWash: StoryObj = {
+  render: () => <Struck />,
+  name: 'Blow wash',
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    const paper = canvasElement.querySelector<HTMLElement>('[aria-hidden="true"]')!;
+    await expect(Number(getComputedStyle(paper).opacity)).toBe(0);
+    await userEvent.click(canvas.getByRole('button', { name: 'Take the blow' }));
+    await waitFor(() => expect(Number(getComputedStyle(paper).opacity)).toBeGreaterThan(0));
   },
 };

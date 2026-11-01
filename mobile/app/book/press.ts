@@ -85,6 +85,19 @@ export function useDrying(lag = 0, duration: number = motion.dry.duration) {
 }
 
 /**
+ * Gilt from mount (a level or quest line, a skill learned): `warning` ink held, then settling to
+ * `to`; reduced motion: `useDry`'s cross-fade, a hold having nothing to settle from.
+ */
+export function useGilt(to: string) {
+  const still = useReducedMotion();
+  const { warning } = usePalette();
+  const dry = useDrying(motion.gilt.hold, motion.settle.duration);
+  return useAnimatedStyle(() =>
+    still ? { opacity: dry.value } : { color: interpolateColor(dry.value, [0, 1], [warning, to]) },
+  );
+}
+
+/**
  * Ink drying from mount: a text's colour goes from `dim` to `to`; with no `to` (a block), or under
  * reduced motion, a plain cross-fade.
  */

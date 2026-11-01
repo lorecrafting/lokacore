@@ -9,6 +9,7 @@ import { COUNT, LABEL } from './labels.ts';
 import { InkText, Reanimated } from './fade.ts';
 import { haptic } from './haptic';
 import { logMark, markDrawn, type DetailLine } from './logs.ts';
+import { GiltLine } from './GiltLine.tsx';
 import { useDry } from './press.ts';
 import { lineText, subject } from './words.ts';
 import { grouped, type RecapLine } from './recap.ts';
@@ -123,6 +124,9 @@ function LogLine({ line, fresh }: { line: DetailLine; fresh: boolean }) {
       ? { accessibilityLabel: `${line.reason}, ${line.text}` }
       : {};
   const words = plain ? lineText(line) : line.text;
+  if (dries && typeof line === 'object' && 'gilt' in line) {
+    return <GiltLine style={style}>{words}</GiltLine>;
+  }
   return dries ? (
     <DryLine style={style} lag={plain ? 0 : motion.dry.lag} {...name}>
       {words}

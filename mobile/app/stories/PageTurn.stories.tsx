@@ -71,3 +71,39 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
     await turn('Start over', /The Missing Child/);
   },
 };
+
+// The chapter card over the leaving page's blurred picture (book-ui.md, Chapters).
+// Breaks: the card curls, or the blur canvas outlives the card and hides it.
+function Carding({ PageTurn }: { PageTurn: ComponentType<Parameters<typeof Turn>[0]> }) {
+  const c = usePalette();
+  const [turn, setTurn] = useState(0);
+  return (
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <PageTurn turn={turn} dir={1} paper={c.bg} card={turn > 0}>
+        {turn ? (
+          <ChapterPage label={chapterLabel(0)} title="The Missing Child" done={() => {}} />
+        ) : (
+          <SettingsPage startOver={() => setTurn(1)} world={() => setTurn(1)} />
+        )}
+      </PageTurn>
+    </View>
+  );
+}
+export const ChapterCardBlur: StoryObj<typeof meta> = {
+  loaders: [loadPageTurn],
+  beforeEach: ChapterToSettings.beforeEach,
+  render: (_, { loaded }) => <Carding PageTurn={loaded.PageTurn} />,
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    await waitFor(() => expect(decodes.length).toBeGreaterThan(0), { timeout: 3000 });
+    await Promise.allSettled(decodes);
+    await userEvent.click(canvas.getByRole('button', { name: 'Start over' }));
+    await expect(
+      await canvas.findByRole('heading', { name: /The Missing Child/ }),
+    ).toBeInTheDocument();
+    await waitFor(() => expect(canvasElement.querySelector('canvas')).not.toBeNull());
+    await waitFor(() => expect(canvasElement.querySelector('canvas')).toBeNull(), {
+      timeout: 5000,
+    });
+    await expect(canvas.getByRole('heading', { name: /The Missing Child/ })).toBeVisible();
+  },
+};

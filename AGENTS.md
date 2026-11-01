@@ -142,7 +142,7 @@ On the M1 run only the tests your diff touches; hosted CI on the pushed head is 
   - developer, reviewer, designer: its `.claude/agents/` file and the [workflow core](docs/WORKFLOW.md) sections it names;
   - PM: the workflow, [PM.md](docs/PM.md) (Beads, merge per step 7) and [the PM handoff](docs/HANDOFF.md), which each PM session starts and ends with: next steps, owner rules, open questions.
 - Book UI code follows the [agent rules](docs/BOOK-UI-COMPONENTS.md#agent-rules-for-book-ui-code).
-- The World page holds only the [room page anatomy](docs/system/book-ui.md#room-page-anatomy): title, description, people, items, log.
+- The World page holds only the [room page anatomy](docs/system/book-ui.md#room-page-anatomy): title, description, people, items, log; its one named exception is the transient `+ item` pop.
 - A new screen or action names its template and patterns from the [interaction patterns](docs/design/interaction-patterns.md) first; what fits none goes to the owner.
 - Update [Book UI](docs/system/book-ui.md) per mechanic ([designer](docs/decisions/owner-decision-designer-role-2026-10-07.md)-approved); fix UI defects now ([workflow](docs/WORKFLOW.md#book-interaction-delivery)).
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.

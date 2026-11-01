@@ -1,4 +1,6 @@
 // A shopkeeper's buy and sell pages, child pages of their NPC page (book-ui.md, NPC dialogue and action details).
+import { View } from 'react-native';
+import { ItemPop } from './ItemPop.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, type group, type Page as Route } from './model.ts';
 import type { Button, presenter } from './presenter.ts';
@@ -71,6 +73,19 @@ function ShopLines(p: { view: GameView; rows: Line[]; press: (b: Button) => void
   );
 }
 
+// An empty wrapper would add a gap: the pop waits for the line its buy writes.
+function Bought(
+  p: { lines: Parameters<typeof LogLines>[0]['lines'] } & Parameters<typeof ItemPop>[0],
+) {
+  if (!p.lines.length) return null;
+  return (
+    <View>
+      <LogLines lines={p.lines} />
+      <ItemPop view={p.view} text={p.text} />
+    </View>
+  );
+}
+
 /**
  * A shopkeeper's shop, two child pages of their NPC page (owner picks mvlrlvappy4w, mvlymuams73l,
  * mvlynyikyw57, 2026-10-23).
@@ -119,7 +134,7 @@ export function ShelfPage(p: {
     >
       <ShopLines view={view} rows={rows} press={press} />
       {money !== undefined && <Note>{balance(money)}</Note>}
-      <LogLines lines={p.screen.detail(p.id)} />
+      <Bought lines={p.screen.detail(p.id)} view={view} text={text} />
       {!p.sale && sell.length > 0 && (
         <Cards>
           <ActionCard label={LABEL.sell} onPress={() => p.open({ kind: 'sale', id: p.id })} />

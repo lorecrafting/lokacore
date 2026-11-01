@@ -1,6 +1,6 @@
 // The Journal page: the projected quests, the lore (toolbox row 46), then the Chronicle (row FD6).
 // Only drawing; what a tap does is passed in by Book.tsx.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -9,10 +9,32 @@ import { expeditionLine } from './words.ts';
 import type { Button } from './presenter.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { ActionCard } from './actions.tsx';
+import { onCue } from './cues.ts';
+import { GiltLine } from './GiltLine.tsx';
 import { AwayRecap, Note } from './lines.tsx';
 import { Control, home, Page, SectionTitle } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import type { ChronicleDay } from './chronicle.ts';
+
+// Quests resolved since the Journal was last open: it is not live, so its gilt waits for the visit.
+let resolved: string[] = [];
+onCue((cue) => {
+  if (cue.name === 'quest_resolved') resolved = [...resolved, ...(cue.ids ?? [])];
+});
+
+// Read once as the Journal opens, then spent: a later visit is plain.
+function useResolved() {
+  const [gilt] = useState(() => resolved);
+  useEffect(() => void (resolved = []), []);
+  return gilt;
+}
+
+const QuestTitle = (p: { gilt: boolean; style: { color: string }; children: string }) =>
+  p.gilt ? (
+    <GiltLine style={p.style}>{p.children}</GiltLine>
+  ) : (
+    <Text style={p.style}>{p.children}</Text>
+  );
 
 type JournalProps = Parameters<typeof LoreDetails>[0] & {
   world: () => void;
@@ -33,6 +55,7 @@ export function JournalPage(p: JournalProps) {
   const c = usePalette();
   const t = useType();
   const [days] = useState(p.chronicle); // read once as the Journal opens, never live
+  const gilt = useResolved();
   return (
     <Page title={LABEL.journal} foot={home(p)}>
       {!view.journal.length && !view.topics?.length && !days.length && (
@@ -40,7 +63,9 @@ export function JournalPage(p: JournalProps) {
       )}
       {view.journal.map((q) => (
         <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
-          <Text style={prose(c, t)}>{text(q.title)}</Text>
+          <QuestTitle gilt={gilt.includes(q.quest.key)} style={prose(c, t)}>
+            {text(q.title)}
+          </QuestTitle>
           <Text style={note(c, t)}>{String(q.state).replaceAll('_', ' ')}</Text>
           {q.patrol && (
             <Text style={prose(c, t)}>

@@ -1,8 +1,15 @@
 // LogLines: the event log and detail history (LogLines's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { useState } from 'react';
+import { View } from 'react-native';
 import { expect, waitFor } from 'storybook/test';
+import type { GameView } from '../../packages/game-view/session.ts';
+import { useCues } from '../book/cues.ts';
+import { ItemPop } from '../book/ItemPop.tsx';
+import { GiltLine } from '../book/GiltLine.tsx';
 import { LogLines } from '../book/lines.tsx';
+import { usePalette, useType } from '../book/palette.ts';
+import { size } from '../book/tokens.ts';
 import { Control } from '../book/pages.tsx';
 import type { DetailLine } from '../book/logs.ts';
 import { markDrawn } from '../book/logs.ts';
@@ -116,5 +123,48 @@ export const NpcSpeech: Story = {
   args: { lines: [speech] },
   play: async ({ canvas }) => {
     await expect(canvas.getByText('Nell says to you, "Well, stranger?"')).toBeVisible();
+  },
+};
+
+// The pop is the log's one transient (book-ui.md, Room page anatomy).
+// Breaks: a first view pops, the words are not the view's names, or two items take two lines.
+const pack = (...names: string[]) =>
+  ({
+    place: { id: 'jetty' },
+    journal: [],
+    inventory: names.map((name) => ({ id: name, name })),
+  }) as unknown as GameView;
+function Picking() {
+  const [view, setView] = useState(() => pack());
+  useCues(view, false, 0);
+  return (
+    <View>
+      <LogLines lines={['You take the sack and the rope.']} />
+      <ItemPop view={view} text={(key) => key} />
+      <View style={{ height: size.touch }} />
+      <Control label="Take" onPress={() => setView(pack('sack', 'rope'))} />
+    </View>
+  );
+}
+export const ItemPopTwoItems: Story = {
+  render: () => <Picking />,
+  play: async ({ canvas, userEvent }) => {
+    await expect(canvas.queryByText(/^\+ /)).toBeNull();
+    await userEvent.click(canvas.getByRole('button', { name: 'Take' }));
+    // Hidden from assistive tech, so found by its words rather than its role.
+    await expect(await canvas.findByText('+ sack, + rope')).toBeInTheDocument();
+  },
+};
+
+function Gilded() {
+  const c = usePalette();
+  return (
+    <GiltLine style={{ ...useType().body, color: c.fg }}>You feel a little stronger.</GiltLine>
+  );
+}
+export const Gilt: Story = {
+  render: () => <Gilded />,
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('You feel a little stronger.')).toBeVisible();
   },
 };

@@ -108,12 +108,6 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
     ]),
   ),
   'mix.spread': 'pitch variation waits for the real samples',
-  ...Object.fromEntries(
-    ['opacity.wash', 'motion.settle'].map((k) => [
-      k,
-      'an effect not yet built; its slice reads it',
-    ]),
-  ),
 };
 test('every token has a consumer outside tokens.ts', async () => {
   const tokens: Record<string, object> = await import('./book/tokens.ts');

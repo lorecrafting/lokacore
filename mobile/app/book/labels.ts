@@ -4,6 +4,7 @@
 // nothing, so the e2e runner can load it. lint/rules/mobile-book-labels.yml lists these words too;
 // lint/rules/mobile-book-english.yml keeps a page's English here.
 export const LABEL = {
+  itemPop: (names: string[]) => names.map((n) => `+ ${n}`).join(', '),
   leave: 'Leave',
   leaveConversation: 'Leave the conversation',
   backToWorld: 'Back to World',

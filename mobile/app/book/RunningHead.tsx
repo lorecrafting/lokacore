@@ -1,0 +1,119 @@
+// The objective above the World page, which changes in place (book-ui.md, Running head).
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { Text } from './Text.tsx';
+import type { GameView } from '../../packages/game-view/session.ts';
+import { InkText, Reanimated, useAnimatedStyle } from './fade.ts';
+import { plain } from './model.ts';
+import { useDrying, useInk } from './press.ts';
+import { usePalette, useType } from './palette.ts';
+import { motion, opacity, space } from './tokens.ts';
+
+type Say = (key: string) => string;
+
+// What the head last drew (null: nothing yet): it sits inside the page turn, whose remount forgets it.
+let lastHead: string | undefined | null = null;
+let lastQuest: string | undefined; // whose words those were
+
+// Keyed on the words: a changed objective cross-fades, a redraw or a page turn does not.
+function HeadLine(p: { words?: string; style: object; view: GameView }) {
+  const [was] = useState(() => lastHead);
+  const [settles] = useState(() =>
+    p.view.journal.some(
+      (q) => q.quest.key === lastQuest && (q.state === 'resolved' || q.state === 'failed'),
+    ),
+  );
+  if (!p.words) return was && settles ? <HeadOut words={was} style={p.style} /> : null;
+  if (was === null || was === p.words) return <Text style={p.style}>{p.words}</Text>;
+  return settles ? (
+    <HeadSettle was={was ?? ''} words={p.words} style={p.style} />
+  ) : (
+    <HeadFade was={was} words={p.words} style={p.style} />
+  );
+}
+
+// A finished objective with none after it: out over `motion.settle`, then the head's space closes.
+function HeadOut(p: { words: string; style: object }) {
+  const [gone, setGone] = useState(false);
+  const dry = useDrying(0, motion.settle.duration);
+  const leaving = useAnimatedStyle(() => ({ opacity: 1 - dry.value }));
+  useEffect(() => {
+    const timer = setTimeout(() => setGone(true), motion.settle.duration);
+    return () => clearTimeout(timer);
+  }, []);
+  if (gone) return null;
+  return (
+    <Reanimated.View style={leaving} aria-hidden>
+      <Text style={p.style}>{p.words}</Text>
+    </Reanimated.View>
+  );
+}
+
+// A resolved or failed objective out over `motion.settle`, then the next dries in. The head's ink
+// is already secondary, so resolved and failed read alike, neither gilt.
+function HeadSettle(p: { was: string; words: string; style: object }) {
+  const out = useDrying(0, motion.settle.duration);
+  const dry = useDrying(motion.settle.duration);
+  const arriving = useAnimatedStyle(() => ({ opacity: dry.value }));
+  const leaving = useAnimatedStyle(() => ({ opacity: 1 - out.value }));
+  return (
+    <View>
+      <Reanimated.View style={[OVER, leaving]} aria-hidden>
+        <Text style={p.style}>{p.was}</Text>
+      </Reanimated.View>
+      <Reanimated.View style={arriving}>
+        <Text style={p.style}>{p.words}</Text>
+      </Reanimated.View>
+    </View>
+  );
+}
+
+const OVER = { position: 'absolute', left: 0, right: 0 } as const; // mutate-skip: layout
+
+// The new objective over the old one, across `motion.dry` (reduced: `motion.fade`).
+function HeadFade(p: { was?: string; words: string; style: object }) {
+  const dry = useDrying();
+  const arriving = useAnimatedStyle(() => ({ opacity: dry.value }));
+  const leaving = useAnimatedStyle(() => ({ opacity: 1 - dry.value }));
+  return (
+    <View>
+      {p.was ? (
+        <Reanimated.View style={[OVER, leaving]} aria-hidden>
+          <Text style={p.style}>{p.was}</Text>
+        </Reanimated.View>
+      ) : null}
+      <Reanimated.View style={arriving}>
+        <Text style={p.style}>{p.words}</Text>
+      </Reanimated.View>
+    </View>
+  );
+}
+
+// ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
+/**
+ * The current quest's projected journal text, above every page but Journal.
+ * - Use: Body only.
+ * - Rules: the first quest in journal order that is active or objectives_complete and has journal
+ *   text; none when no quest qualifies. Not pressable; wraps, never cuts authored words.
+ * - States: one line; long; none.
+ * - Story: Page.stories.tsx
+ */
+export function RunningHead({ view, text }: { view: GameView; text: Say }) {
+  const c = usePalette();
+  const t = useType();
+  const quest = view.journal.find(
+    (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
+  );
+  const words = quest && plain(text(quest.journal!));
+  useEffect(() => {
+    lastHead = words;
+    lastQuest = quest?.quest.key;
+  }, [words]);
+  const style = {
+    ...t.runningHead,
+    color: c.dim,
+    paddingHorizontal: space.page,
+    paddingTop: space.page,
+  };
+  return <HeadLine key={words ?? ''} style={style} words={words} view={view} />;
+}

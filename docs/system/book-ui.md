@@ -55,6 +55,11 @@ and joystick, the status line and the say field sit outside the scrolling page a
 rules below. A passage below that draws anything else on the World page is superseded; where the
 Book still draws it, the passage names the Beads item that removes it.
 
+One exception (owner, 2026-10-31): the `+ item` pop, one aria-hidden transient under the log's last
+line after a pickup or a buy, reserving no layout, not in the record, in the small type. Its words are
+the view's item names, two items on one line, and a page turn removes it. It does not rise under
+reduced motion. The log line stays the record.
+
 ## World and status entry
 
 World is one current-room page ([room page anatomy](#room-page-anatomy)). Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
@@ -751,8 +756,10 @@ has no arrival effect. Under reduced motion an arriving icon just appears.
 out, and the next dries in; a failed one fades through secondary ink, then out.
 
 **Blow wash.** A hit point loss during combat washes the paper once under the ink, and the hit point
-value dries in the wash's colour and back, with the thud and the heavy haptic. The page does not
-scale. Reduced motion halves the wash; Flashes off removes it, leaving the value, thud and haptic.
+value dries in the wash's colour and back, with the thud and the heavy haptic. The page swells 1.5%
+at the wash's peak, with no layout change or reflow (owner, 2026-10-31). Reduced motion halves the
+wash and removes the swell; Flashes off removes both, leaving the value, thud and haptic. A blow
+inside the Flash limit moves the value and the thud alone: a flurry never peaks twice in a second.
 
 **Flash limit.** At most one full-page luminance change per second, never three in any second; a
 later blow in that second keeps the value, thud and haptic. Flashes and reduced motion are separate.

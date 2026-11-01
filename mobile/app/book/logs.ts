@@ -50,7 +50,7 @@ export const rendered = (
 // recap (recap.ts) holds its settlement's lines, `text` its heading.
 export type DetailLine =
   | string
-  | { text: string; event: true }
+  | { text: string; event: true; gilt?: true }
   | { kind: 'refused'; reason: string; text: string }
   | { quiet: string; plain: string; times: number; text: string }
   | { recap: string[]; text: string };

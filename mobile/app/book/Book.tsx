@@ -170,6 +170,9 @@ type ViewProps = {
 
 // A wide screen centres the page column, at most size.column, on the paper (book-ui.md, Page column).
 const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as const;
+const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][number]) =>
+  !s.view.combat && !s.ended && page?.kind === 'chapter' && !!s.view.chapter;
+
 /**
  * The Book's frame: page turn, body, footer, status icons and status line, and the fault, pending
  * and catching-up states.
@@ -197,7 +200,7 @@ export function BookView(p: ViewProps) {
       <TypeContext value={p.reading?.type ?? shown}>
         <SafeAreaView style={{ ...frame, backgroundColor: p.palette.bg }}>
           <View style={{ flex: 1, maxWidth: size.column }}>
-            <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={p.palette.bg}>
+            <PageTurn {...p.flip} paper={p.palette.bg} card={chapterCard(p.screen, page)}>
               {p.screen.view.combat || p.screen.ended ? (
                 <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
               ) : (
@@ -281,7 +284,7 @@ function statusLine(p: BottomProps) {
       conditions={view.conditions}
       position={view.position}
       text={text}
-      locked={!!view.scene || !!view.combat || !!ended || p.page?.kind === 'chapter'}
+      locked={!!view.scene || !!view.combat || !!ended || chapterCard(p.screen, p.page)}
       openPosition={position ? () => p.press(position) : undefined}
       pending={pending}
       open={() => p.open({ kind: 'contents' })}

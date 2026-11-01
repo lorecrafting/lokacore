@@ -199,7 +199,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 - Rule: a buy redraws purse and list on the shop page (its line is quiet); a retained item action appends to the
   item's history; Take, Drop and a confirmed pick return to World with one named log line.
 - Why: the reader sees cause and effect on the same page, or one turn back with one line.
-- Do: "You have 12p." updates under the cards. Don't: a toast, a modal, a second confirming line.
+- Do: "You have 12p." updates under the cards. Don't: a toast, a modal, a second confirming line. The one exception is the `+ item` pop ([Room page anatomy](../system/book-ui.md#room-page-anatomy)).
 - Source: [Item details](../system/book-ui.md#item-details-and-takedrop),
   [Live action freshness](../system/book-ui.md#live-action-freshness).
 - Enforcement: `polish_detail.test.ts:16`, `:123`, `:162`, `:241`; `hostile_refusal.test.ts:43`.

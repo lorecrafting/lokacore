@@ -126,14 +126,16 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
 - **Effect tokens.** Press: `motion.press`; a lifted card blends `line` into `card` at
   `opacity.press` and rises `size.rule`; an ink press goes from `action` to `fg`. Ink drying:
   `motion.dry` from `dim` to the line's colour; a narrated event starts `motion.dry.lag` later.
-  Status icon: `motion.pop` from scale `motion.pop.from`; expiry `motion.fade`. Running head:
+  Status icon: `motion.pop` from scale `motion.pop.from`; expiry `motion.fade`. Item pop: rises
+  `motion.pop.rise` over `motion.pop`, holds `hold`, leaves over `out` (`outEasing`). Gilt: `warning`
+  for `motion.gilt.hold`, then `motion.settle` to the line's colour. Running head:
   `motion.dry` across, `motion.settle` to `dim` then out. Chapter card: `motion.card`, blur sigma
   `blurFrom` to `blurTo`, each of label, title and rule `stagger` apart. Sound, `mix` and `haptic`
   hold levels and kinds; the sound table names each sound's haptic. Queue: small cues of one key merge
   within `mix.coalesce`; `motion.flash.gap` is the Flash limit.
 - **Blow wash.** `opacity.wash` under the ink over `motion.flash`: `action` on `light` and `dawn`,
-  `danger` on `dusk` and `dark` (amber `action` reads as lamplight, not harm). Half opacity under
-  reduced motion. The hp value dries in the same role and back to `fg`. Exemption from the 4.5:1
+  `danger` on `dusk` and `dark` (amber `action` reads as lamplight, not harm). The page scales to
+  `motion.flash.swell` at the peak. Reduced motion: `opacity.washStill`, no swell. The hp value dries in the same role and back to `fg`. Exemption from the 4.5:1
   rule above, for the wash's half second only: at its peak `fg` stays above 7:1 and `action` and
   `danger` above 5:1, while `dim` and `warning` dip to about 3.8:1 (opacity 0.08 would keep them
   at 4.5:1 and barely show). Combat is the only place the wash appears.
@@ -154,6 +156,7 @@ a new component needs a real consumer, its comment and its line here in the same
 
 | Component | File | Story |
 |---|---|---|
+| `Blow` | `book/Blow.tsx` | CombatPage |
 | `Body` | `book/Body.tsx` | RoomPage |
 | `RoomPage` | `book/Body.tsx` | RoomPage |
 | `Book` | `book/Book.tsx` | Live |
@@ -168,7 +171,9 @@ a new component needs a real consumer, its comment and its line here in the same
 | `DreamResume` | `book/DreamPage.tsx` | NoticePage |
 | `Footer` | `book/Footer.tsx` | Footer |
 | `Tip` | `book/Footer.tsx` | Tip |
+| `GiltLine` | `book/GiltLine.tsx` | LogLines |
 | `HapticPulse` | `book/HapticPulse.tsx` | HapticPulse |
+| `ItemPop` | `book/ItemPop.tsx` | LogLines |
 | `MapDrawing` | `book/MapDrawing.tsx` | Footer |
 | `ContentsPage` | `book/Menu.tsx` | SectionPages |
 | `ThingPage` | `book/Menu.tsx` | ItemPage |
@@ -180,6 +185,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `PageTurn` | `book/PageTurn.tsx` | PageTurn |
 | `Riddle` | `book/Riddle.tsx` | Riddle |
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |
+| `RunningHead` | `book/RunningHead.tsx` | Page |
 | `SayField` | `book/SayField.tsx` | SayField |
 | `ShelfPage` | `book/Shelf.tsx` | NpcPage |
 | `StatusLine` | `book/Status.tsx` | StatusLine |
@@ -201,7 +207,6 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Fault` | `book/lines.tsx` | Live |
 | `NoticePage` | `book/notices.tsx` | NoticePage |
 | `Tap` | `book/pages.tsx` | VerbLine |
-| `RunningHead` | `book/pages.tsx` | Page |
 | `Control` | `book/pages.tsx` | Control |
 | `Page` | `book/pages.tsx` | Page |
 | `PageFoot` | `book/pages.tsx` | PageFoot |

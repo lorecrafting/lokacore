@@ -66,69 +66,6 @@ export function Tap(p: {
   );
 }
 
-// What the head last drew (null: nothing yet): it sits inside the page turn, whose remount forgets it.
-let lastHead: string | undefined | null = null;
-
-// Keyed on the words: a changed objective cross-fades, a redraw or a page turn does not.
-function HeadLine(p: { words: string; style: object }) {
-  const [was] = useState(() => lastHead);
-  return was === null || was === p.words ? (
-    <Text style={p.style}>{p.words}</Text>
-  ) : (
-    <HeadFade was={was} {...p} />
-  );
-}
-
-const OVER = { position: 'absolute', left: 0, right: 0 } as const; // mutate-skip: layout
-
-// The new objective over the old one, across `motion.dry` (reduced: `motion.fade`).
-function HeadFade(p: { was?: string; words: string; style: object }) {
-  const dry = useDrying();
-  const arriving = useAnimatedStyle(() => ({ opacity: dry.value }));
-  const leaving = useAnimatedStyle(() => ({ opacity: 1 - dry.value }));
-  return (
-    <View>
-      {p.was ? (
-        <Reanimated.View style={[OVER, leaving]} aria-hidden>
-          <Text style={p.style}>{p.was}</Text>
-        </Reanimated.View>
-      ) : null}
-      <Reanimated.View style={arriving}>
-        <Text style={p.style}>{p.words}</Text>
-      </Reanimated.View>
-    </View>
-  );
-}
-
-// ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
-/**
- * The current quest's projected journal text, above every page but Journal.
- * - Use: Body only.
- * - Rules: the first quest in journal order that is active or objectives_complete and has journal
- *   text; none when no quest qualifies. Not pressable; wraps, never cuts authored words.
- * - States: one line; long; none.
- * - Story: Page.stories.tsx
- */
-export function RunningHead({ view, text }: { view: GameView; text: Say }) {
-  const c = usePalette();
-  const t = useType();
-  const quest = view.journal.find(
-    (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
-  );
-  const words = quest && plain(text(quest.journal!));
-  useEffect(() => {
-    lastHead = words;
-  }, [words]);
-  if (!words) return null;
-  const style = {
-    ...t.runningHead,
-    color: c.dim,
-    paddingHorizontal: space.page,
-    paddingTop: space.page,
-  };
-  return <HeadLine key={words} style={style} words={words} />;
-}
-
 /**
  * Local navigation that is not an offered action (Leave, Back to ..., Close, Got it, Start over).
  * - Use: PageFoot returns and local buttons.
@@ -186,6 +123,7 @@ export function Page(p: {
   onTitlePress?: () => void;
   scrollToEnd?: boolean;
   centred?: boolean; // centres the blocks vertically: the save error, the chapter card
+  paperless?: boolean; // its owner paints the paper, with something on it under the ink
   foot?: ReactNode;
   children: ReactNode;
 }) {
@@ -195,7 +133,7 @@ export function Page(p: {
     <Title title={p.title} fixed={p.fixedTitle} onPress={p.onTitlePress} />
   );
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <View style={{ flex: 1, backgroundColor: p.paperless ? undefined : c.bg }}>
       {p.fixedTitle && (
         <View style={{ paddingHorizontal: space.page, paddingTop: space.xl }}>{title}</View>
       )}

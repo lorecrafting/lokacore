@@ -1,5 +1,6 @@
 // The Settings the Book holds: the player's Reading size and effect settings.
 import { useState } from 'react';
+import { flashesOn } from './cues.ts';
 import { hapticsOn } from './haptic';
 import {
   effects,
@@ -32,7 +33,7 @@ const applyEffect: Record<Effect, (on: boolean) => void> = {
   sound: (on) => setMuted('sound', !on),
   music: (on) => setMuted('music', !on),
   haptics: hapticsOn,
-  flashes: () => {},
+  flashes: flashesOn,
 };
 
 // The effect settings: each read at launch and given to its module.
