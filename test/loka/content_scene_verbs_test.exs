@@ -74,9 +74,9 @@ defmodule Loka.ContentSceneVerbsTest do
     write(tmp, "scenes/a.scene", """
     npc: maud
     maud: hi
-    - Yes
-      quest: resolve job
     - No
+      quest: resolve job
+    - Yes
       quest: resolve job
     """)
 
@@ -98,11 +98,35 @@ defmodule Loka.ContentSceneVerbsTest do
   # Break: a bad form lowers silently, is reported as another fault or on another line, or its
   # row is missing from the plain catalog (the raw `why` reaches the writer).
   for {name, {body, want}} <- [
-        needs: {"npc: maud\nneeds: met\nmaud: hi\n- Go\n", [{2, "not_yet"}]},
-        once: {"npc: maud\nmaud: hi\n- Go\n  once\n", [{4, "not_yet"}]},
-        then: {"npc: maud\nmaud: hi\n- Go\n  then: x\n", [{4, "not_yet"}]},
-        nested: {"npc: maud\nmaud: hi\n- Go\n  - In\n    maud: x\n- Out\n", [{4, "not_yet"}]},
-        nested_holds: {"npc: maud\nmaud: hi\n- Go\n  - In\n    sets: a\n", [{4, "not_yet"}]},
+        needs_outside: {"npc: maud\nneeds: met\nmaud: hi\n- Go\n", [{2, "needs_outside_choice"}]},
+        once_outside: {"npc: maud\nonce\nmaud: hi\n- Go\n", [{2, "once_outside_choice"}]},
+        then_outside: {"npc: maud\nthen: x\nmaud: hi\n- Go\n", [{2, "then_outside_choice"}]},
+        needs_rich: {"npc: maud\nmaud: hi\n- Go\n  needs: a or b\n", [{4, "bad_needs"}]},
+        needs_placeholder: {"npc: maud\nmaud: hi\n- Go\n  needs: ~\n", [{4, "bad_needs"}]},
+        needs_twice: {"npc: maud\nmaud: hi\n- Go\n  needs: a\n  needs: b\n", [{5, "bad_needs"}]},
+        then_placeholder: {"npc: maud\nmaud: hi\n- Go\n  then: ~\n", [{4, "bad_then"}]},
+        then_twice: {"npc: maud\nmaud: hi\n- Go\n  then: a\n  then: b\n", [{5, "bad_then"}]},
+        once_words: {"npc: maud\nmaud: hi\n- Go\n  once: yes\n", [{4, "bad_once"}]},
+        then_and_nested:
+          {"npc: maud\nmaud: hi\n- Go\n  maud: x\n  then: a\n  - In\n    maud: y\n",
+           [{5, "then_and_nested"}]},
+        then_after_nested:
+          {"npc: maud\nmaud: hi\n- Go\n  maud: x\n  - In\n    maud: y\n  then: a\n",
+           [{7, "then_and_nested"}]},
+        nested_no_reply:
+          {"npc: maud\nmaud: hi\n- Go\n  - In\n    maud: y\n", [{4, "nested_no_reply"}]},
+        indent_between:
+          {"npc: maud\nmaud: hi\n- Go\n  maud: x\n    - In\n      maud: y\n  - Off\n    maud: z\n",
+           [{7, "bad_indent"}]},
+        indent_body:
+          {"npc: maud\nmaud: hi\n- Go\n  maud: x\n  - In\n  sets: a\n", [{6, "bad_indent"}]},
+        indent_tab: {"npc: maud\nmaud: hi\n- Go\n\tmaud: x\n", [{4, "bad_indent"}]},
+        nested_key_taken:
+          {"npc: maud\nmaud: hi\n- Go In\n  maud: x\n  - A\n- Go\n  maud: x\n  - In\n    maud: y\n    - B\n",
+           [{10, "nested_key_taken"}]},
+        resolve_nested:
+          {"npc: maud\nmaud: hi\n- A\n  quest: resolve j\n  maud: x\n  - In\n- B\n",
+           [{4, "resolve_nested"}]},
         sets_many: {"npc: maud\nmaud: hi\n- Go\n  sets: a b c\n", [{4, "bad_sets"}]},
         sets_outside: {"npc: maud\nsets: a\nmaud: hi\n- Go\n", [{2, "outside_choice"}]},
         quest_outside: {"npc: maud\nquest: accept a\nmaud: hi\n", [{2, "outside_choice"}]},
@@ -333,7 +357,7 @@ defmodule Loka.ContentSceneVerbsTest do
     [section, _] = String.split(section, "## Jump to a beat")
     fences = for [_, body] <- Regex.scan(~r/^```\w*\n(.*?)^```$/ms, section), do: body
 
-    rels = ~w(first.scene second.scene third.cut third.json point.scene)
+    rels = ~w(first.scene second.scene branching.scene third.cut third.json point.scene)
     files = Enum.map(rels, &"scenes/#{&1}") ++ ["dialogues/point.json"]
     assert length(fences) == length(files)
     dir = Loka.ContentSource.copy("cartridges/scene_sampler")
@@ -349,7 +373,12 @@ defmodule Loka.ContentSceneVerbsTest do
     facts = %{"met_maud" => bool, "door_open" => bool, "mood" => mood}
     json = &(Path.join([dir, &1]) |> File.read!() |> JSON.decode!())
 
-    assert {:ok, _, []} =
+    File.write!(
+      Path.join(dir, "scenes/branch_next.scene"),
+      "npc: maud\nmaud: ~\n- Stay\n  maud: ~\n"
+    )
+
+    assert {:ok, _, warned} =
              Loka.ContentSource.compile(dir, [
                {"facts.json", &update_in(&1, ["facts"], fn f -> Map.merge(f, facts) end)},
                {"npcs/maud.json", json.("npcs/bram.json")},
@@ -357,6 +386,9 @@ defmodule Loka.ContentSceneVerbsTest do
                {"items/bowl.json",
                 Map.put(json.("items/lantern.json"), "location", %{"in" => "npc", "npc" => "maud"})}
              ])
+
+    # All speak for maud in one cartridge, and `branching` has no `when:` before later ones of hers.
+    assert [%{"code" => "ENTRY_GUESSED", "data" => %{"target" => "branching"}}] = warned
   end
 
   # Break: a scene's sidecar drops `entry`, so the guide's way of marking a scene does nothing.

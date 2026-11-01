@@ -522,21 +522,6 @@
     "kind": "npc",
     "actions": [
      {
-      "available": false,
-      "action_key": "aldous_lesson",
-      "label": "action.talk",
-      "target": {
-       "kind": "entity",
-       "scopes": [
-        "room_occupants"
-       ]
-      },
-      "input": [],
-      "reason": {
-       "code": "invalid_state"
-      }
-     },
-     {
       "available": true,
       "action_key": "aldous_talk",
       "label": "action.talk",
@@ -547,21 +532,6 @@
        ]
       },
       "input": []
-     },
-     {
-      "available": false,
-      "action_key": "aldous_yard",
-      "label": "action.talk",
-      "target": {
-       "kind": "entity",
-       "scopes": [
-        "room_occupants"
-       ]
-      },
-      "input": [],
-      "reason": {
-       "code": "invalid_state"
-      }
      },
      {
       "available": true,

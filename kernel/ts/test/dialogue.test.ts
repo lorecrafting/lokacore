@@ -18,8 +18,8 @@ import { encode } from '../src/foundation/canonical.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { decide } from '../play/run.ts';
 import { key } from '../src/foundation/compose.ts';
-import { spokenBy } from '../src/mechanics/dialogue/selection.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
+import { choiceIds, spokenBy } from '../src/mechanics/dialogue/selection.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -114,6 +114,28 @@ test('talk opens one pending choice bound to EntityIds, stamped with its revisio
     { key: 'dialogue.bram.prompt', participants: { actor: BODY, speaker: BRAM } },
   ]);
   assert.equal(w.state.choices![C]!.opened_revision, 3);
+});
+
+// Breaks: the room's actions list lowest priority first.
+test("a place's actions list by priority, then key", () => {
+  const w = world((c) => {
+    for (const [key, priority] of [
+      ['a_low', 0],
+      ['z_high', 1],
+    ] as const)
+      c.actions[`${F}:action/${key}`] = {
+        key,
+        name: 'action.talk',
+        accessibility: 'action.talk',
+        target: { kind: 'none' },
+        command: key,
+        priority,
+        input: [],
+        policy: { op: 'all', items: [] },
+      };
+  });
+  const keys = gameView(w).actions.map((a) => String(a.action_key));
+  assert.ok(keys.indexOf('z_high') < keys.indexOf('a_low') && keys.includes('a_low'), `${keys}`);
 });
 
 // Breaks: every accepted action copying the choices map (O(choice history) per step).
@@ -628,6 +650,18 @@ test('the loader checks story point keys', () => {
     declared: 'lantern_resolved',
     expected: 'other',
   });
+});
+
+// Breaks: `order` is ignored, overrides the wrong way, or a tie or an absent one leaves key order.
+test('choices sort by order, then by key; a choice with none follows', () => {
+  const shown = (order: Record<string, number | undefined>) =>
+    choiceIds({
+      choices: Object.fromEntries(Object.entries(order).map(([k, o]) => [k, { order: o }])),
+    } as unknown as Parameters<typeof choiceIds>[0]);
+  assert.deepEqual(shown({ b: undefined, a: undefined }), ['a', 'b']);
+  assert.deepEqual(shown({ a: 2, z: 1 }), ['z', 'a']);
+  assert.deepEqual(shown({ c: 1, b: 1 }), ['b', 'c']);
+  assert.deepEqual(shown({ a: undefined, z: 1, b: undefined }), ['z', 'a', 'b']);
 });
 
 // Breaks: a Talk that selects one of a speaker's dialogues opens the speaker's first one instead,

@@ -69,7 +69,65 @@ bram: line two
 - `quest: resolve bridge_job` ends the quest, with the choice as its outcome. Every choice in the
   scene must carry the same line, or the compile refuses it.
 
-`needs`, `once`, `then` and nested choices are not available yet; the compile says so.
+A choice can also say when it shows and where it goes next:
+
+```
+npc: maud
+maud: ~
+- choice one
+  needs: met_maud
+  once
+  maud: ~
+  - nested one
+    needs: not door_open
+    maud: ~
+  - nested two
+    maud: ~
+- choice two
+  then: branch_next
+  maud: ~
+- choice three
+  then: end
+  maud: ~
+```
+
+- `needs: met_maud` shows the choice only while that true/false fact is true; `needs: not met_maud`
+  only while it is false. Anything richer (either of two facts, a number, an item) goes in a
+  `policy` in `dialogues/<key>.json`.
+- `once` hides the choice after the player takes it. It makes a fact of its own,
+  `<key>_<choice>_done`; do not declare it.
+- `asked` dims the choice after the player takes it; it stays usable. It makes a fact of its own,
+  `<key>_<choice>_asked`; do not declare it.
+- `then: branch_next` plays the dialogue `branch_next` next; `then: end` closes the talk. A choice
+  with no `then` comes back to these choices, or closes the talk if it is the only choice. A nested
+  choice with no `then` goes back to the choices above it, unless a choice here set the fact the
+  `when:` reads: then going back closes the talk, and the build warns `RETURN_CLOSED`. A scene another scene's `then` leads to
+  closes after a choice with no `then`, unless it has nested choices; write `then: <its own name>` to come back.
+- Choices show in the order you write them. A choice's id comes from its words: moving a line or
+  adding another leaves it alone, and rewording changes it. A reaction, a quest outcome and a `then`
+  name it by that id.
+- A `- ` indented under a choice's reply opens nested choices: its own dialogue, keyed
+  `<key>_<choice>` (here `branching_choice_one`). The reply is what the player reads above them, so
+  it must be written first, and the nested choices are shown next. Going back to a shallower `- `
+  at the same indent as an earlier choice closes what is deeper. A choice has either nested
+  choices or a `then`, not both. Indent with spaces; a tab is refused.
+- A person can have many scenes with nested choices, and Talk only ever opens one at its top, never
+  in the middle. It tries that person's scenes in key order and opens the first whose `when:` holds
+  and that shows a choice; when one fails, it first passes on to what it leads to through a choice
+  the player could take for nothing, and is refused only if nothing further down opens. A Talk with
+  its own `name` is refused. So give each scene but the last a `when:`, since one with no `when:`
+  shuts out those after it (`ENTRY_GUESSED`). `when: not <fact>` asks that a fact is false, so a first
+  meeting and later ones need no order in their names: `maud_first` with `when: not met_maud`, whose
+  choice sets `met_maud`, and `maud_later` with `when: met_maud`. Two scenes open at once go to the
+  first by key, so make their `when:` exclude each other. Only `"entry": true` in the JSON beside a
+  scene makes it the one that opens, shutting out the others.
+- A `needs:` under a `when:` or a choice that asks the opposite, on a fact the file never sets, gets
+  a warning and still compiles: the compiler cannot see another file or a reaction changing that fact.
+
+A JSON of the same key may add what a scene cannot say, but it may not write a field the scene
+already writes (the prompt, the speaker, a choice's words): the compile names the field and asks you
+to keep it in one place. A scene with nested choices cannot resolve a quest or take a keyword or
+riddle from its JSON, since those dialogues do not lead on; give that its own scene.
 
 What you can rely on when dialogues link with `then` (JSON dialogues today):
 
@@ -79,11 +137,13 @@ What you can rely on when dialogues link with `then` (JSON dialogues today):
   A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
   no marker when each but the last by key has a `when:`.
 - A person's default Talk, when a dialogue's condition fails, passes on to what that dialogue leads
-  to, in choice key order, but only through a choice the player could take for nothing: its condition
+  to, in choice key order, what nested choices lead to after that, but only through a choice the player could take for nothing: its condition
   holds, with no check, cost or other gate. So a first meeting is an `intro` with a `when:` that links
   to a `hub`: the first Talk opens the intro, and once the condition fails Talk opens the hub unless
   another dialogue opens first. A locked or paid way on is skipped, and Talk is refused only when
-  nothing further down opens. A Talk with its own `name` opens its dialogue or is refused.
+  nothing further down opens. A way on through a nested choice counts; a way on through a choice with
+  `once`, or one that sets what its own `needs:` forbids, is shut once taken, and the compile warns
+  `FALL_THROUGH_SPENT` when Talk has no other way. A Talk with its own `name` opens its dialogue or is refused.
 - Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
   condition holds and that has a choice to show.
 - A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the

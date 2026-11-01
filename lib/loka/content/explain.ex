@@ -1,3 +1,4 @@
+# size: allow 328, one row per refusal a writer can meet; the table reads together
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -58,6 +59,8 @@ defmodule Loka.Content.Explain do
          LOOP_SPEAKER | Talk opens this `then` loop at its member with the most links, so this speaker is only reached through the loop. | Give the speaker a dialogue of their own if the player should start here.
          ENTRY_INVALID | A speaker takes one `entry` dialogue, and never a keyword one. | Keep `entry: true` on one dialogue Talk can open.
          ENTRY_GUESSED | Talk opens `{target}` here only by inference: it ties another member of its loop for most links, it comes first by key with no condition, or the dialogues with a condition that can fail lead to several, and it is the first of them. | Mark the dialogue Talk should open with `entry: true`, or leave one way on.
+         RETURN_CLOSED | A choice in `{target}` sets the fact its `when:` reads, so going back to these choices closes the talk. | Nothing to do if that is meant; otherwise set the fact on a choice with `then: end`.
+         FALL_THROUGH_SPENT | `{target}` has a `when:`, and its only free way on shuts itself once taken (`once`, or `needs:` of the fact it sets), so once it is taken and the `when:` fails, the speaker's Talk is refused. | Add a free choice that leads on and can always be taken, or a second dialogue for Talk to open.
          ENTRY_UNUSED | `{target}` never opens: its speaker has an `entry` dialogue and no dialogue that opens leads here. | Link to it from one that opens, or remove it.
          ALLY_ENGAGE_UNUSED | This ally has a `disposition.engage` line, and an ally only strikes the opponent, so the line never plays. | Remove the engage line and the `hostile` rule with it (a hostile attacker needs `engage` unless it is `unattackable: true`), or keep `hostile` and set `unattackable: true` before removing engage.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
@@ -74,10 +77,29 @@ defmodule Loka.Content.Explain do
          scene_entry | Line `{text}`: a scene header takes no `entry`. | Put `{"entry": true}` in `dialogues/<key>.json` beside the scene.
          misplaced_header | Line `{text}`: `npc:` comes first, then `when:` and `with:`, before any choice. | Move it to the top of the file.
          no_npc | Line `{text}` comes before the speaker is named. | Start the file with `npc: <key>`.
-         not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:` or `quest:` (docs/guides/writing-the-game.md).
+         not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:`, `quest:`, `needs:`, `once` or `then:` (docs/guides/writing-the-game.md).
          file_name | This file's name cannot be a key. | Rename it with lowercase letters, digits and underscores.
          outside_choice | Line `{text}` belongs under a choice. | Move it under a `- ` line.
-         not_yet | Line `{text}`: `needs`, `once`, `then` and nested choices are not available yet. | Remove it, or write the branch as its own scene.
+         bad_indent | Line `{text}` does not line up under a choice. | Indent with spaces: a nested `- ` goes deeper than its choice, its lines deeper still, and a choice lines up with the ones beside it.
+         bad_needs | Line `{text}` is not `needs: <fact>` or `needs: not <fact>`, or repeats a `needs:`. | Give a choice one `needs:` naming one fact by its key; `~` holds the place of words, not of a fact. Anything richer goes in `policy` in `dialogues/<key>.json`.
+         needs_outside_choice | Line `{text}`: `needs:` belongs under a choice. | Move it under a `- ` line, or use `when:` for the whole scene.
+         unreachable | Line `{text}` may never be true here: the `when:` or a choice above it needs the opposite and this file never sets that fact, and the compiler cannot see another file or a reaction changing it. | Nothing to do if something else changes that fact; otherwise remove the line or move this choice out from under that one.
+         bad_once | Line `{text}` is not `once`, or repeats it. | Write the one word `once`, one time, under the choice.
+         bad_asked | Line `{text}` is not `asked`, or repeats it. | Write the one word `asked`, one time, under the choice.
+         choice_order_written | A choice's `order` is the compiler's mark of a scene's written order, not a field to write. | Remove it: a scene's choices show as written, a JSON dialogue's by key.
+         once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
+         once_key_taken | `once` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice's words.
+         once_key_long | `once` here would make the fact `{key}`, longer than 64 characters. | Shorten the choice's words or the scene's key.
+         bad_then | Line `{text}` is not `then: <key>` or `then: end`, or repeats a `then:`. | Name one dialogue by its key, or `end`; `~` holds the place of words, not of a key.
+         then_outside_choice | Line `{text}`: `then:` belongs under a choice. | Move it under a `- ` line.
+         then_and_nested | Line `{text}`: this choice already goes on to its nested choices. | Remove the `then:`, or remove the nested choices.
+         nested_key_long | Line `{text}` opens the dialogue `{key}`, longer than 64 characters. | Shorten this choice's words or the ones above it.
+         nested_key_taken | Line `{text}` opens the dialogue `{key}`, and another choice in this scene already does. | Change the words of one of the two choices.
+         scene_key_taken | Two scenes make the dialogue `{key}`. | Rename the scene file, or the nested choice that opens it.
+         resolve_nested | Line `{text}`: a scene with nested choices cannot resolve a quest. | Give the resolve its own scene, and lead to it with `then:`.
+         nested_no_reply | Line `{text}` has no reply above it to open on. | Add the speaker's reply under the choice above, before its first nested `- `.
+         unknown_dialogue | `then` names `{target}`, and no dialogue has that key. | Add `scenes/{target}.scene`, fix the spelling, or write `then: end`.
+         scene_overlap | `{written}` is also written in the scene `{key}`, and this file would replace it. | Remove it from this file and keep it in the scene.
          bad_sets | Line `{text}` is not `sets: <fact> [<value>]`. | A fact is a key (lowercase letters, digits, underscores); a value is `true`, `false`, a whole number or a key. `~` holds the place of words, not of these.
          bad_quest | Line `{text}` is not `quest: accept <key>` or `quest: resolve <key>`, or repeats an accept. | Write one `quest:` line per choice with one of those forms; a quest is a key (lowercase letters, digits, underscores). `~` holds the place of words, not of a key.
          resolve_not_all | Line `{text}`: `quest: resolve` needs every choice in the scene to resolve the same quest. | Add the same line under every choice, or remove it.
@@ -101,6 +123,9 @@ defmodule Loka.Content.Explain do
          layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.
          gives_holder | `gives: {item}` hands over nothing until `{holder}` holds `{item}`: the choice stays hidden. | Set the item's location to `{"in": "npc", "npc": "{holder}"}`, or move it there in play.
          gives_receive | `gives:` (`receive`) needs the `item_acquired` event, which `{capability}` owns, and the cartridge does not lock it. | Add `"{capability}": 1` under requires.capabilities in cartridge.json; the NPC must hold the item too.
+         gift_repeats | Picking this choice gives or starts something, and the dialogue can come back to it, so the player could take it again. | Add `once` under the choice in a scene; in JSON, gate it on a fact its steps set.
+         then_into | A `then` cannot lead to `{target}`, which has a `{part}`: that dialogue only opens its own way. | Remove the `then`, or remove `{part}` from `{target}`.
+         then_out_of | A `then` cannot leave from here: `{part}` already decides where this goes next. | Remove the `then`, or remove the `{part}`.
          stray_file | This file is in no folder the compiler reads. | Move it into a kind's folder (docs/system/cartridge.md), or out of the cartridge.
          unknown_fact | Nothing defines the fact `{target}`. | Add it to facts.json or fix the spelling.
          unknown_kind | Nothing defines the {kind} `{target}`. | Create it or fix the spelling.
@@ -180,6 +205,8 @@ defmodule Loka.Content.Explain do
 
   defp entry("SCHEMA_VIOLATION", %{"data" => %{"why" => why}}), do: @words[why]
 
+  defp entry("OUTCOME_MISMATCH", %{"data" => %{"why" => why}}), do: @words[why]
+
   defp entry("OUTCOME_MISMATCH", %{"data" => %{"holder" => _}}),
     do: @words["gives_holder"]
 
@@ -195,7 +222,7 @@ defmodule Loka.Content.Explain do
       else: @words["UNKNOWN_FIELD"]
   end
 
-  defp entry("UNRESOLVED_REFERENCE", %{"data" => %{"target" => t}}) do
+  defp entry("UNRESOLVED_REFERENCE", %{"path" => path, "data" => %{"target" => t}}) do
     case target(t) do
       %{"kind" => "fact"} ->
         @words["unknown_fact"]
@@ -204,7 +231,9 @@ defmodule Loka.Content.Explain do
         @words["unknown_kind"]
 
       _ ->
-        @words["UNRESOLVED_REFERENCE"]
+        if String.ends_with?(path, [".then", ".then_failed"]),
+          do: @words["unknown_dialogue"],
+          else: @words["UNRESOLVED_REFERENCE"]
     end
   end
 

@@ -566,66 +566,6 @@
       ]
      },
      {
-      "available": false,
-      "action_key": "wizard_awaiting",
-      "label": "action.talk",
-      "target": {
-       "kind": "entity",
-       "scopes": [
-        "room_occupants"
-       ]
-      },
-      "input": [],
-      "reason": {
-       "code": "invalid_state"
-      }
-     },
-     {
-      "available": false,
-      "action_key": "wizard_awaiting_report",
-      "label": "action.talk",
-      "target": {
-       "kind": "entity",
-       "scopes": [
-        "room_occupants"
-       ]
-      },
-      "input": [],
-      "reason": {
-       "code": "invalid_state"
-      }
-     },
-     {
-      "available": false,
-      "action_key": "wizard_done",
-      "label": "action.talk",
-      "target": {
-       "kind": "entity",
-       "scopes": [
-        "room_occupants"
-       ]
-      },
-      "input": [],
-      "reason": {
-       "code": "invalid_state"
-      }
-     },
-     {
-      "available": false,
-      "action_key": "wizard_errand",
-      "label": "action.talk",
-      "target": {
-       "kind": "entity",
-       "scopes": [
-        "room_occupants"
-       ]
-      },
-      "input": [],
-      "reason": {
-       "code": "invalid_state"
-      }
-     },
-     {
       "available": true,
       "action_key": "wizard_lux",
       "label": "action.talk",

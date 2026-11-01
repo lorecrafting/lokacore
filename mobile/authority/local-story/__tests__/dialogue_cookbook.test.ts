@@ -79,6 +79,122 @@ function saved(c = COOK) {
 
 const COOK = compile();
 
+// The cookbook with an NPC `sage` in the yard, a bool fact `sage_met` and these scenes.
+const withSage = (scenes: Record<string, string>) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
+  source(dir);
+  const npc = {
+    keywords: ['sage'],
+    name: { prose: 'NPC' },
+    room_line: { prose: 'A [NPC](sage).' },
+  };
+  mkdirSync(join(dir, 'npcs'), { recursive: true });
+  writeFileSync(
+    join(dir, 'npcs/sage.json'),
+    JSON.stringify({ ...npc, description: { prose: 'NPC_TEXT' }, room: 'yard' }),
+  );
+  const facts = JSON.parse(readFileSync(join(dir, 'facts.json'), 'utf8'));
+  facts.facts.sage_met = Object.values<any>(facts.facts).find((f) => f.value_type?.type === 'bool');
+  writeFileSync(join(dir, 'facts.json'), JSON.stringify(facts));
+  mkdirSync(join(dir, 'scenes'), { recursive: true });
+  for (const [name, text] of Object.entries(scenes))
+    writeFileSync(join(dir, `scenes/${name}.scene`), text);
+  const c = compiled(dir);
+  rmSync(dir, { recursive: true });
+  return c;
+};
+
+// Breaks: fall-through stops at a nested set, so an intro that reaches its hub through a nested
+// choice refuses Talk for good, or it opens the nested set itself.
+test('a shut intro falls through its nested choice to the hub', () => {
+  const g = saved(
+    withSage({
+      intro: `npc: sage
+when: not sage_met
+sage: TEXT
+- Start
+  sage: TEXT
+  - Go
+    sage: TEXT
+    sets: sage_met
+    then: hub
+`,
+      hub: `npc: sage
+sage: TEXT
+- Stay
+  sage: TEXT
+- Bye
+  sage: TEXT
+`,
+    }),
+  ).now();
+  g.go('talk', {}, [g.id('sage')], 'intro');
+  assert.deepEqual(g.offered(), ['start']);
+  g.choose('start');
+  assert.deepEqual(g.offered(), ['go']);
+  g.choose('go');
+  assert.deepEqual(g.offered(), ['stay', 'bye']);
+  g.close();
+  const row = g
+    .view()
+    .entities.find((e) => e.id === g.id('sage'))!
+    .actions.find((a) => a.label === 'action.talk')!;
+  assert.equal(row.available, true);
+  g.go('talk', {}, [g.id('sage')], row.action_key);
+  assert.deepEqual(g.offered(), ['stay', 'bye']);
+});
+
+// Breaks: Talk opens at the widest nested set ("ask" has more ways on than the top), a later scene is
+// shut out by the first, a failed first scene falls through its free choice into its own set, or the
+// file names, not `when: not`, decide who opens.
+for (const [first, later] of [
+  ['sage_1_first', 'sage_2_later'],
+  ['sage_2_first', 'sage_1_later'],
+])
+  test(`a first meeting (${first}) then a later nested scene, across a reload`, () => {
+    const c = withSage({
+      [first!]: `npc: sage
+when: not sage_met
+sage: TEXT
+- Ask
+  sage: TEXT
+  sets: sage_met
+  - Deeper
+    sage: TEXT
+    - Deepest
+      sage: TEXT
+  - Back
+    sage: TEXT
+`,
+      [later!]: `npc: sage
+when: sage_met
+sage: TEXT
+- Again
+  sage: TEXT
+  - More
+    sage: TEXT
+`,
+    });
+    const s = saved(c);
+    // As the Book does: the one Talk row the view lists for the speaker.
+    const talk = (g: ReturnType<typeof s.now>) => {
+      const npc = g.view().entities.find((e) => e.id === g.id('sage'))!;
+      const talks = npc.actions.filter((a) => a.label === 'action.talk');
+      assert.equal(talks.length, 1);
+      assert.equal(talks[0]!.available, true);
+      g.go('talk', {}, [g.id('sage')], talks[0]!.action_key);
+    };
+    let g = s.now();
+    talk(g);
+    assert.deepEqual(g.offered(), ['ask']);
+    g.choose('ask');
+    assert.deepEqual(g.offered(), ['deeper', 'back']);
+    g.close();
+    g = s.again();
+    talk(g);
+    assert.deepEqual(g.offered(), ['again']);
+  });
+
 // Breaks: an edit to the page, or a compiler warning a source shape starts to draw.
 test('the page compiles with no warnings', () => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
@@ -89,7 +205,8 @@ test('the page compiles with no warnings', () => {
   });
   rmSync(dir, { recursive: true });
   assert.equal(r.status, 0, r.stderr);
-  assert.equal(r.stderr, '');
+  // Parallel test files share the build directory: mix's wait notice is no compiler warning.
+  assert.equal(r.stderr.replace(/^.*Waiting for lock on the build directory.*\n/m, ''), '');
 });
 
 // Breaks: a stage's policy shows the wrong choice, the reminder is spent, the turn-in leaves the
@@ -279,6 +396,67 @@ test('a check branches both ways and passes to another speaker', () => {
   assert.equal(g.view().choice!.speaker_id, g.id('doubter'));
   g = fail.again();
   g.choose('shrug_doubter');
+});
+
+// Breaks: a choice written out of key order is renamed or shown by key, so its reaction misses, its
+// quest outcome's words are lost, or a save open on it no longer reopens.
+test('a scene choice written out of key order keeps its id, its place and a save', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
+  source(dir);
+  const quest = JSON.parse(readFileSync(join(dir, 'quests/errand.json'), 'utf8'));
+  quest.journal.outcomes = { told: { prose: 'OUTCOME' } };
+  writeFileSync(join(dir, 'quests/omen.json'), JSON.stringify(quest));
+  writeFileSync(
+    join(dir, 'areas/omen.json'),
+    JSON.stringify({
+      npcs: {
+        oracle: {
+          keywords: ['oracle'],
+          name: { prose: 'NPC' },
+          room_line: { prose: 'A [NPC](oracle).' },
+          description: { prose: 'NPC_TEXT' },
+          room: 'yard',
+        },
+      },
+      reactions: {
+        omen_told: {
+          on: { event: 'choice_resolved', choice: 'zed' },
+          steps: [{ op: 'quest.resolve', quest: 'omen', outcome: 'told' }],
+        },
+      },
+    }),
+  );
+  mkdirSync(join(dir, 'scenes'));
+  writeFileSync(
+    join(dir, 'scenes/omen_talk.scene'),
+    `npc: oracle
+oracle: TEXT
+- Zed
+  oracle: TEXT
+- Ask
+  oracle: TEXT
+  sets: errand_done
+`,
+  );
+  mkdirSync(join(dir, 'dialogues'), { recursive: true });
+  writeFileSync(
+    join(dir, 'dialogues/omen_talk.json'),
+    JSON.stringify({ choices: { ask: { accept: 'omen' } } }),
+  );
+  const c = compiled(dir);
+  rmSync(dir, { recursive: true });
+  const s = saved(c);
+  let g = s.now();
+  const npc = g.view().entities.find((e) => e.id === g.id('oracle'))!;
+  const talk = npc.actions.find((a) => a.label === 'action.talk')!;
+  g.go('talk', {}, [g.id('oracle')], talk.action_key);
+  assert.deepEqual(g.offered(), ['zed', 'ask']);
+  g.choose('ask');
+  g = s.again();
+  assert.deepEqual(g.offered(), ['zed', 'ask']);
+  g.choose('zed');
+  const omen = g.view().journal!.find((q) => q.state === 'resolved')!;
+  assert.equal(omen.journal, 'quest.omen.journal.outcomes.told');
 });
 
 // Breaks: a choice_resolved reaction stops reaching a step the page promises.

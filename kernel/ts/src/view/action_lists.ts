@@ -22,6 +22,7 @@ import type {
 } from '../contracts.gen.ts';
 import { admission, detailAt, refusal, resolved, type Offered } from '../commands/actions.ts';
 import { bodyOf, type Steps, type World, type NpcEntity } from '../runtime/decision.ts';
+import { oneTalk } from '../mechanics/dialogue/fall_through.ts';
 import { MODAL, speaks, talkRefused } from '../mechanics/dialogue/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
@@ -60,6 +61,10 @@ const HIDDEN = [
 ];
 const hidden = (world: World, actor: CharacterId, a: Offered) =>
   HIDDEN.includes(a.command) || (a.command === 'continue' && !modalScene(world, actor));
+const byPriority =
+  (set: Record<string, Offered>) => (a: { action_key: string }, b: { action_key: string }) =>
+    set[b.action_key]!.priority - set[a.action_key]!.priority || cmp(a.action_key, b.action_key);
+
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
@@ -99,12 +104,12 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
           a.command !== current,
       ),
       ...readActions(world, actor, set, steps),
-    ].sort(
-      (a, b) =>
-        set[b.action_key].priority - set[a.action_key].priority || cmp(a.action_key, b.action_key),
-    ),
+    ].sort(byPriority(set)),
     of: (scope: string, id: string, nested = false) =>
-      listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope).concat(
+      oneTalk(
+        set,
+        listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope),
+      ).concat(
         liquid(id),
         foodActions(world, actor, id, set, steps),
         useActions(world, actor, id, set, steps),

@@ -4,13 +4,14 @@ Known RPG dialogue patterns, each a small working source to copy. Every word in 
 placeholder for your own. A test compiles this page into one cartridge with no warnings and plays
 each pattern once, with a reload (`mobile/authority/local-story/__tests__/dialogue_cookbook.test.ts`).
 The pattern files are [area bundles](../system/cartridge.md#source-shortcuts); put each `facts.json`
-block into your own `facts.json`. In a `.scene` file a pattern's choices keep their `policy` and `then` in the
-`dialogues/<key>.json` beside it, until the scene forms for them land.
+block into your own `facts.json`. In a `.scene` file `needs:`, `once`, `asked`, `then:` and nested
+choices [say the same](writing-the-game.md#write-a-scene); a richer `policy` stays in the
+`dialogues/<key>.json` beside it.
 
 A dialogue with more than one choice comes back to the player after each answer (the hub), so a
 Leave choice is never needed: Close always ends the talk. Choice ids below are unique across
-dialogues because a `choice_resolved` reaction names a choice by its id alone. The Book lists a
-dialogue's choices in id order, not file order.
+dialogues because a `choice_resolved` reaction names a choice by its id alone. The Book lists a JSON
+dialogue's choices in id order, not file order; a `.scene` file's show as written.
 
 ## The room they stand in
 
@@ -224,7 +225,8 @@ through `narration_variants`. The fact, `errand_done`, is defined in the turn-in
 ## An option already asked
 
 `asked: true` dims a choice once the player has taken it; it stays usable, and no fact of yours is
-needed. A check that fails does not count as asked.
+needed. A check that fails does not count as asked. A `.scene` choice says `asked` on a line of its
+own. `once` is the other way: the choice goes away instead of dimming, so a choice needs only one.
 
 ```json areas/asked_marker.json
 {

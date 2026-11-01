@@ -1,3 +1,4 @@
+# size: allow 400, every whole-cartridge dialogue link check in one graph
 defmodule Loka.Content.DialogueLinks do
   @moduledoc "A dialogue choice's policy and narration variants as roots, and its then and then_failed checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -85,13 +86,99 @@ defmodule Loka.Content.DialogueLinks do
     live_keys = for {_, d} <- live(sorted), do: d["key"]
 
     refused(sorted) ++
-      guessed(open, next, live_keys) ++ fall_through(open, sorted) ++ unused(sorted, open, next)
+      guessed(open, next, live_keys) ++
+      fall_through(open, sorted) ++
+      unused(sorted, open, next) ++
+      return_closed(sorted, next) ++ fall_through_spent(open, sorted)
+  end
+
+  # A speaker's only Talk whose every free way on shuts itself once taken: Talk is refused for good.
+  defp fall_through_spent(open, sorted) do
+    by_key = Map.new(sorted, fn {_, d} -> {d["key"], d} end)
+    talked = for {_, d} <- open, plain_talk?(d), do: d["npc"]
+
+    for {rel, d} <- open, spent_talk?(d, talked, by_key) do
+      warning("FALL_THROUGH_SPENT", rel, ["policy"], d)
+    end
+  end
+
+  defp spent_talk?(d, talked, by_key) do
+    d["policy"] && plain_talk?(d) && Enum.count(talked, &(&1 == d["npc"])) == 1 &&
+      only_spent_ways?(d, by_key)
+  end
+
+  defp plain_talk?(d), do: !d["keyword"] and !d["name"]
+
+  defp only_spent_ways?(d, by_key) do
+    seen = [d["key"]]
+
+    free_links([d], by_key, seen, &free?/1) != [] and
+      free_links([d], by_key, seen, &(free?(&1) and not spends_itself?(&1))) == []
+  end
+
+  # `once` lowers to this, as does `needs: not x` with `sets: x`.
+  defp spends_itself?(c) do
+    gates =
+      case c["policy"] do
+        %{"op" => "all", "items" => items} -> items
+        policy -> [policy]
+      end
+
+    Enum.any?(gates, fn gate ->
+      Enum.any?(when_fact(gate), fn {fact, value} -> assigns?(c, fact, value) end)
+    end)
+  end
+
+  # A `then` target whose policy has failed closes the talk, so setting what a set's root reads closes it.
+  defp return_closed(sorted, next) do
+    by_key = Map.new(sorted, fn {_, d} -> {d["key"], d} end)
+
+    for {rel, d} <- sorted,
+        {fact, value} <- when_fact(d["policy"]),
+        closes?(set_choices(d, by_key, next), d["key"], fact, value, next) do
+      warning("RETURN_CLOSED", rel, ["policy"], d)
+    end
+  end
+
+  # The path that sets the fact must be the one that comes back; a setter ending the talk is the fix.
+  defp closes?(choices, key, fact, value, next) do
+    Enum.any?(
+      choices,
+      &(assigns?(&1, fact, value) and key in walk(List.wrap(&1["then"]), next, MapSet.new()))
+    )
+  end
+
+  defp set_choices(d, by_key, next) do
+    nested = walk(next[d["key"]] || [], next, MapSet.new())
+    members = [d | for(k <- nested, by_key[k]["entry"] == false, do: by_key[k])]
+    Enum.flat_map(members, &Map.values(&1["choices"]))
+  end
+
+  defp when_fact(%{
+         "op" => "not",
+         "item" => %{"op" => "fact_compare", "fact" => f, "equals" => true}
+       }),
+       do: [{f, true}]
+
+  defp when_fact(%{"op" => "fact_compare", "fact" => f, "equals" => true}), do: [{f, false}]
+  defp when_fact(_), do: []
+
+  defp assigns?(choice, fact, value) do
+    Enum.any?(
+      choice["steps"] || [],
+      &(&1["op"] == "fact.assign" and &1["fact"] == fact and &1["value"] == value)
+    )
   end
 
   defp unused(sorted, open, next) do
     played = walk(for({_, d} <- open, do: d["key"]), next, MapSet.new())
 
-    for {rel, d} <- sorted -- live(sorted), d["key"] not in played do
+    linked = next |> Map.values() |> List.flatten()
+
+    # A linked `entry: false` is a nested scene; its parent's own warning covers it.
+    for {rel, d} <- sorted -- live(sorted),
+        d["entry"] != false or d["key"] not in linked,
+        d["key"] not in played do
       warning("ENTRY_UNUSED", rel, ["npc"], d)
     end
   end
@@ -124,7 +211,7 @@ defmodule Loka.Content.DialogueLinks do
   end
 
   # fall_through.ts `onward`: a default Talk whose entries all fail opens the first dialogue of their speaker
-  # that a free choice leads to, in key order, the entries pooled. More than one is a guess; the warning
+  # that a free choice leads to, nearest first, the entries pooled. More than one is a guess; the warning
   # names that pick, on the speaker's first shut entry.
   defp fall_through(open, sorted) do
     by_key = Map.new(sorted, fn {_, d} -> {d["key"], d} end)
@@ -153,7 +240,7 @@ defmodule Loka.Content.DialogueLinks do
   # Down a line of shut dialogues to the first with more than one way on: `[its pick]`, or `[]`.
   # `seen` (entries and shut dialogues passed) are tried already, as `tried.includes` in `spokenBy`.
   defp guess(shut, by_key, seen) do
-    case free_links(shut, by_key, seen) do
+    case free_links(shut, by_key, seen, &free?/1) do
       [first, _ | _] ->
         [first]
 
@@ -165,16 +252,21 @@ defmodule Loka.Content.DialogueLinks do
     end
   end
 
-  defp free_links(shut, by_key, seen) do
-    for(
-      d <- shut,
-      {_, c} <- Enum.sort(d["choices"]),
-      free?(c),
-      c["then"] not in seen,
-      by_key[c["then"]]["npc"] == d["npc"],
-      do: c["then"]
-    )
-    |> Enum.uniq()
+  # What shut dialogues fall through to, as `tried` grows in `spokenBy`: their own links first, then what the
+  # `entry: false` ones among them lead to, which never open themselves; a named one stops there.
+  defp free_links(shut, by_key, seen, way?) do
+    level = shut |> Enum.flat_map(&ways_on(&1, by_key, seen, way?)) |> Enum.uniq()
+    {sets, keys} = Enum.split_with(level, &(by_key[&1]["entry"] == false))
+    through = for k <- sets, !by_key[k]["name"], do: by_key[k]
+    if through == [], do: keys, else: keys ++ free_links(through, by_key, seen ++ level, way?)
+  end
+
+  defp ways_on(d, by_key, seen, way?) do
+    for {_, c} <- Enum.sort(d["choices"]),
+        way?.(c),
+        c["then"] not in seen,
+        by_key[c["then"]]["npc"] == d["npc"],
+        do: c["then"]
   end
 
   defp free?(c) do
@@ -229,10 +321,13 @@ defmodule Loka.Content.DialogueLinks do
     for d <- live, d["entry"] || d["key"] not in named, do: d["key"]
   end
 
-  # A speaker's marked dialogue shuts out their others, keyword ones aside.
+  # A speaker's marked dialogue shuts out their others, keyword ones aside; `entry: false` never opens by itself.
   defp live(sorted) do
     claimed = for {_, d} <- sorted, d["entry"], into: MapSet.new(), do: d["npc"]
-    Enum.filter(sorted, fn {_, d} -> d["entry"] || d["keyword"] || d["npc"] not in claimed end)
+
+    Enum.filter(sorted, fn {_, d} ->
+      d["entry"] != false && (d["entry"] || d["keyword"] || d["npc"] not in claimed)
+    end)
   end
 
   defp heads(rest, next) do
@@ -259,8 +354,17 @@ defmodule Loka.Content.DialogueLinks do
     end)
   end
 
-  defp unlinkable?(t, o, d) do
-    Enum.any?([t["keyword"], t["quest"], t["riddle"], o["patrol"], d["quest"], d["riddle"]])
+  # Why a `then` cannot go there, in data for the writer's sentence; nil when it can.
+  defp unlinkable(t, o, d) do
+    into = Enum.find(~w(keyword quest riddle), &t[&1])
+    out = Enum.find(~w(quest riddle), &d[&1])
+
+    cond do
+      into -> %{"why" => "then_into", "target" => t["key"], "part" => into}
+      o["patrol"] -> %{"why" => "then_out_of", "part" => "patrol"}
+      out -> %{"why" => "then_out_of", "part" => out}
+      true -> nil
+    end
   end
 
   defp link(rel, path, target, o, d, ctx) do
@@ -277,9 +381,10 @@ defmodule Loka.Content.DialogueLinks do
         [diag("UNRESOLVED_REFERENCE", at(rel, path), %{"target" => target})]
 
       {_, t} ->
-        if unlinkable?(t, o, d),
-          do: [diag("OUTCOME_MISMATCH", at(rel, path))],
-          else: elsewhere(rel, path, t, d, ctx)
+        case unlinkable(t, o, d) do
+          nil -> elsewhere(rel, path, t, d, ctx)
+          data -> [diag("OUTCOME_MISMATCH", at(rel, path), data)]
+        end
     end
   end
 

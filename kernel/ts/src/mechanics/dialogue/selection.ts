@@ -31,9 +31,8 @@ const links = (d: DialogueDefinition) =>
 
 /**
  * The dialogues a talk can open: those nothing leads to, then one of each loop with no way in, the
- * member leading to the most other dialogues (a hub), first by key on a tie. What an entry
- * reaches is reached by that answer, or by falling through a failed entry. A speaker's `entry: true` dialogue replaces all
- * that speaker's others except keyword ones. A failed default entry falls through (`spokenBy`).
+ * member leading to the most other dialogues (a hub), first by key on a tie. A speaker's `entry: true` dialogue replaces all that speaker's
+ * others except keyword ones; an `entry: false` one is never a candidate, only a `then` opens it. A failed default entry falls through (`spokenBy`), past `entry: false`.
  */
 const entries = (world: World) => {
   const all = Object.values(world.cartridge.dialogues ?? {}).sort((a, b) => cmp(a.key, b.key));
@@ -49,7 +48,9 @@ const entries = (world: World) => {
   };
   const marked = new Set(all.filter((d) => d.entry).map((d) => refString(d.npc)));
   // A shut-out dialogue never opens, so it is no way into what it links to.
-  const live = all.filter((d) => d.entry || d.keyword || !marked.has(refString(d.npc)));
+  const live = all.filter(
+    (d) => d.entry !== false && (d.entry || d.keyword || !marked.has(refString(d.npc))),
+  );
   const roots = live.filter((d) => d.entry || !named.has(d.key));
   const reached = reach(roots.map((d) => d.key));
   const rest = live.filter((d) => !reached.has(d.key));
@@ -88,8 +89,10 @@ const spoken = (world: World, target: EntityId | undefined) =>
 export const speaks = (world: World, target: EntityId | undefined) =>
   spoken(world, target).length > 0;
 
-/** The ids of `d`'s choices, in key order. */
-export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(cmp) as Key[];
+const at = (d: DialogueDefinition, id: string) => d.choices[id as Key]?.order ?? Infinity; // both absent: NaN, so the key
+/** The ids of `d`'s choices, by `order`, then key. */
+export const choiceIds = (d: DialogueDefinition) =>
+  Object.keys(d.choices).sort((a, b) => at(d, a) - at(d, b) || cmp(a, b)) as Key[];
 
 /** Whether choice `id` of `d` teaches a skill for which `p` holds (Homestead hs-14). */
 const teaches = (d: DialogueDefinition, id: Key, p: (skill: DefinitionRef) => boolean) =>
@@ -166,6 +169,7 @@ export const spokenBy = (
   // grows as it runs: every entry first, then what the failed ones lead to
   for (const d of tried) {
     if (
+      d.entry !== false &&
       holds(world, actor, d.policy, { target, steps }) &&
       shown(world, actor, d, offered(world, actor, d, steps), target, steps).length > 0
     )

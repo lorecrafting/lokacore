@@ -32,3 +32,16 @@ export const onward = (world: World, d: DialogueDefinition) => {
     return to && refString(to.npc) === refString(d.npc) ? [{ choice, to }] : [];
   });
 };
+
+// A speaker with several dialogues offers one Talk, the first that opens; with none open, each keeps its refusal.
+export const oneTalk = <A extends { action_key: string; available: boolean }>(
+  set: Record<string, { command: string; speaker?: unknown; dialogue?: unknown }>,
+  rows: A[],
+) => {
+  const spoken = (r: A) => {
+    const a = set[r.action_key];
+    return a?.command === 'talk' && a.speaker !== undefined && !a.dialogue;
+  };
+  const kept = rows.find((r) => spoken(r) && r.available);
+  return kept ? rows.filter((r) => !spoken(r) || r === kept) : rows;
+};

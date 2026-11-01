@@ -1,3 +1,4 @@
+# size: allow 502, every whole-cartridge dialogue link check has its case here
 defmodule Loka.ContentDialogueLinksTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/persuade_sampler")}
@@ -57,6 +58,23 @@ defmodule Loka.ContentDialogueLinksTest do
 
     assert {:ok, _, warnings} = Loka.ContentSource.compile(dir, [captain, loop, npc, own])
     refute warning in seen.(warnings), inspect(warnings)
+  end
+
+  # Break: a refused `then` gets the generic outcome line that names no field to remove, or names
+  # the wrong side: the target's keyword, or this dialogue's own quest.
+  test "a refused then names the part in its way", %{dir: dir} do
+    said = fn changes ->
+      assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
+      [d] = for d <- diags, d["path"] == @at <> "then", do: d
+      hd(Loka.Content.explained([d], dir))
+    end
+
+    worded = {"dialogues/child.json", talk("guard", %{"keyword" => "gate"})}
+    assert said.([worded, {@guard, field("then", "child")}]) =~ "remove `keyword` from `child`"
+
+    child = {"dialogues/child.json", talk("guard")}
+    quest = {@guard, &Map.put(field("then", "child").(&1), "quest", "any")}
+    assert said.([child, quest]) =~ "remove the `quest`"
   end
 
   # Breaks: the compiler enters a loop at its first key by sort while Talk enters at the hub, so
@@ -419,6 +437,11 @@ defmodule Loka.ContentDialogueLinksTest do
              [{"warning", "ENTRY_UNUSED", "dialogues/a_x.npc", "a_x"}]
 
     assert entry_findings([d("a_x", "z"), d("b", "a", [], m)]) == []
+
+    # Break: a sidecar `entry: false` on an only root, nothing links to it: no Talk and no warning.
+    assert entry_findings([d("a_x", "a", [], %{"entry" => false})]) ==
+             [{"warning", "ENTRY_UNUSED", "dialogues/a_x.npc", "a_x"}]
+
     assert entry_findings([d("a_x", "a", [], %{"keyword" => "w"}), d("b", "a", [], m)]) == []
     unused = &{"warning", "ENTRY_UNUSED", "dialogues/#{&1}.npc", &1}
 
