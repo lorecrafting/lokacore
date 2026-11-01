@@ -138,6 +138,41 @@ test('without combat settings a fatal bolt kills and writes only the spell line'
   assert.deepEqual([wightHp(fatal.world), lines(fatal)], [0, ['narration.flamma']]);
 });
 
+// Breaks: a damage spell hurts or kills an `unattackable` NPC, 8 -> 4 -> 0 with entity_died
+// (loka-w9id).
+test('flamma does nothing to an unattackable wight', () => {
+  const c = cartridge((c) => {
+    c.npcs[W].unattackable = true;
+  });
+  const w = ok(cast(ok(cast(crypt(true, c), 'lux')), 'flamma'));
+  const again = cast(w, 'flamma');
+  assert.equal(wightHp(again.world), 8);
+  assert.ok(!types(again).includes('entity_died'));
+});
+
+// Breaks: an aimed spell drains an `unattackable` NPC through a status, or the guard also blocks
+// a status that does not drain (a gain, no tick, another resource), or one on an unflagged NPC
+// (loka-w9id).
+test('a spell lands an hp-draining status only off an unattackable NPC', () => {
+  for (const [flagged, key, per_tick, lands] of [
+    [true, 'hp', -1, false],
+    [true, 'hp', 1, true],
+    [true, 'hp', 0, true],
+    [true, 'mana', -1, true],
+    [false, 'hp', -1, true],
+  ] as const) {
+    const c = cartridge((c) => {
+      const warded = c.statuses[`${P}:status/warded`];
+      warded.resource = { ...warded.resource, key };
+      warded.per_tick = per_tick;
+      success(c, 'ward').steps[0].npc = success(c, 'flamma').steps[0].npc;
+      if (flagged) c.npcs[W].unattackable = true;
+    });
+    const warded = cast(crypt(true, c), 'ward');
+    assert.equal(types(warded).includes('status_applied'), lands);
+  }
+});
+
 // Breaks: a spell's damage skips the target's status resistances (SR5): 4 hp, not 2.
 test('flamma on a warded wight sums its status resistance with its own', () => {
   const c = cartridge((c) => {

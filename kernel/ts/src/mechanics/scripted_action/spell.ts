@@ -32,7 +32,7 @@ import {
 } from '../combat/shared.ts';
 import { opened } from '../disposition.ts';
 import { prefix } from '../combat/round_attack.ts';
-import { statusStep } from '../status/shared.ts';
+import { specOf, statusStep } from '../status/shared.ts';
 import { transition, visible } from '../light/shared.ts';
 
 export type Effected = {
@@ -77,6 +77,7 @@ export function effect<R extends Effected>(
   const npc = s.npc ? world.entityIds[refString(s.npc)] : aim;
   if (npc && (!living(world, npc) || slain(world, r.levels, npc))) return r;
   if (s.op === 'damage') return npc ? damage(world, command, mint, body, r, npc, s) : r;
+  if (npc && drainsFlagged(world, npc, s.status)) return r;
   const events = [...r.events];
   let position = r.position;
   const emit = (payload: Applied) => events.push(event(world, command, mint, ++position, payload));
@@ -121,6 +122,22 @@ export function fightBack<R extends Effected>(
   return { ...r, ops: [...r.ops, ...opened(world, actor, body, hurt, mint, end)] };
 }
 
+// A spell cannot do by a status what it may not do by damage (loka-w9id); a reaction's status can.
+const drainsFlagged = (
+  world: World,
+  npc: EntityId,
+  status: Extract<Effect, { op: 'status.apply' }>['status'],
+) => {
+  const target = world.entities[npc];
+  const spec = specOf(world, status);
+  return (
+    target?.kind === 'npc' &&
+    target.unattackable &&
+    spec?.resource?.key === 'hp' &&
+    (spec.per_tick ?? 0) < 0
+  );
+};
+
 const hp = (world: World, npc: EntityId) =>
   key({ kind: 'resource', resource: resourceRef(world, 'hp'), entity_id: npc });
 // An NPC an earlier damage step of this spell brought to 0 takes no later effect.
@@ -140,7 +157,7 @@ function damage<R extends Effected>(
   s: Extract<Effect, { op: 'damage' }>,
 ): R {
   const target = world.entities[npc];
-  if (target?.kind !== 'npc' || !target.hp) return r;
+  if (target?.kind !== 'npc' || !target.hp || target.unattackable) return r;
   const loss = resisted(world, npc, [s.kind], s.amount);
   const { op, levels } = adjust(world, npc, resourceRef(world, 'hp'), -loss, r.levels, true);
   if (op.from === op.to) return r;
