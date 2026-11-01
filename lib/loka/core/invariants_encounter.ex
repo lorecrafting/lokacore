@@ -222,7 +222,7 @@ defmodule Loka.Core.InvariantsEncounter do
       do:
         Map.take(
           op,
-          ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id crow_member_id crow_generation crow_phase)
+          ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id crow_member_id crow_generation crow_phase sight)
         )
         |> Map.put("status", "pending")
   end
@@ -260,19 +260,27 @@ defmodule Loka.Core.InvariantsEncounter do
 
   # Independent permitted binding tuples; no call to the job composer.
   defp binding?(op) do
-    present =
+    # A sight binding belongs only to an unbound population job.
+    (op["sight"] == nil or
+       (present_fields(op) == [] and get_in(op, ["job", "kind"]) == "population")) and
+      owner_binding?(op)
+  end
+
+  defp present_fields(op),
+    do:
       Enum.filter(
         ~w(encounter_id quest_instance_id actor_id water_generation water_body_id crow_member_id crow_generation crow_phase),
         &Map.has_key?(op, &1)
       )
 
-    case present do
+  defp owner_binding?(op) do
+    case present_fields(op) do
       fields when fields in [[], ["encounter_id"]] ->
         get_in(op, ["job", "kind"]) != "reaction"
 
       # Built rooms S3: an order job may carry its owner (a build commission's).
       ["actor_id"] ->
-        get_in(op, ["job", "kind"]) in ["reaction", "order"] and op["sight"] == nil
+        get_in(op, ["job", "kind"]) in ["reaction", "order"]
 
       ["quest_instance_id", "actor_id"] ->
         get_in(op, ["job", "kind"]) == "quest"
