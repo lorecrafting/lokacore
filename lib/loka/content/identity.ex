@@ -32,8 +32,9 @@ defmodule Loka.Content.Identity do
         Enum.flat_map(trees, fn {rel, p, root} -> targetless(rel, p, root) end)
 
   # A name variant reads the player's body with no fact subject.
-  defp targetless(rel, p, %{"op" => "fact_compare", "subject" => "target"}),
-    do: [diag("FACT_SCOPE_UNSUPPORTED", at(rel, p ++ ["subject"]), %{})]
+  defp targetless(rel, p, %{"op" => op, "subject" => "target"})
+       when op in ~w(fact_compare fact_at_least),
+       do: [diag("FACT_SCOPE_UNSUPPORTED", at(rel, p ++ ["subject"]), %{})]
 
   defp targetless(rel, p, v) when is_map(v),
     do: Enum.flat_map(v, fn {k, x} -> targetless(rel, p ++ [k], x) end)

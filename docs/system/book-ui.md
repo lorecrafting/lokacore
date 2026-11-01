@@ -532,6 +532,8 @@ conversation on the page, sends no engine verb and preserves any unmatched saved
 structurally; meaningful authored/quest consequences and genuine errors remain. Sections retain
 Back to World. Item Leave remains local navigation.
 
+[Branching dialogue](mechanics.md#branching-dialogue) on the conversation page: an option whose condition fails is not drawn, and a card gone stale is refused `invalid_state` and redrawn. A reply that leads on draws the next prompt and its options after the reply; the foot stays Leave the conversation. When a reply leads on to the same person's earlier options, their prompt draws again as authored. When nothing is left, the talk ends after the reply and the page keeps the reply. A hand-off to someone else in the room turns the page to that person, who then speaks; a hand-off to someone in another room ends the talk after the reply.
+
 An absent pending speaker uses its actual continuation without invented NPC data. World draws no
 control for it: the choice waits on the speaker's page, the conversation page opens on a reopen,
 and a talk to anyone else closes it. Live results

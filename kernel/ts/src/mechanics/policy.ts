@@ -57,8 +57,6 @@ export function holds(
   switch (p.op) {
     case 'fact_compare':
       return read(world, actor, p, ctx.target) === p.equals;
-    case 'time_since': // row FD1: a stamped time; no subject reads undefined, so NaN, false
-      return world.state.clock - (read(world, actor, p, ctx.target) as number) >= p.at_least;
     case 'has_item':
       return held(world, world.entityIds[refString(p.item)], bodyOf(world, actor));
     case 'barrier_state':
@@ -77,6 +75,8 @@ export function holds(
       return livingCount(world, p.plan) >= p.at_least;
     case 'target_present':
       return ctx.target !== undefined && present(world, actor, ctx.target, ctx.steps);
+    case 'fact_at_least':
+    case 'time_since':
     case 'light_off':
     case 'stat_compare':
     case 'resource_compare':
@@ -116,14 +116,13 @@ function uninstalled(leaf: never): never {
 export function read(
   world: World,
   actor: CharacterId,
-  p: Extract<Policy, { op: 'fact_compare' | 'time_since' }>,
+  p: Extract<Policy, { op: 'fact_compare' | 'fact_at_least' | 'time_since' }>,
   target: EntityId | undefined,
 ) {
   const named = p.npc ?? p.item;
-  const by = p.op === 'fact_compare' && p.subject ? target : undefined;
+  const by = p.op !== 'time_since' && p.subject ? target : undefined;
   const subject = named ? world.entityIds[refString(named)] : by;
-  const partner =
-    p.op === 'fact_compare' && p.with ? world.entityIds[refString(p.with)] : undefined;
+  const partner = p.op !== 'time_since' && p.with ? world.entityIds[refString(p.with)] : undefined;
   if (subjective(world, p.fact) && subject === undefined) return undefined;
   if (paired(world, p.fact) && !partner) return undefined;
   return value(world, actor, p.fact, subject, partner);
@@ -137,11 +136,25 @@ function atLeast(
   actor: CharacterId,
   p: Extract<
     Policy,
-    { op: 'stat_compare' | 'resource_compare' | 'light_off' | 'level_compare' | 'skill_compare' }
+    {
+      op:
+        | 'stat_compare'
+        | 'resource_compare'
+        | 'light_off'
+        | 'level_compare'
+        | 'skill_compare'
+        | 'fact_at_least'
+        | 'time_since';
+    }
   >,
   ctx: Ctx,
 ): boolean {
   if (p.op === 'light_off') return !illuminated(world, actor, ctx.steps);
+  // no subject reads undefined: false
+  if (p.op === 'fact_at_least') return (read(world, actor, p, ctx.target) as number) >= p.at_least;
+  // row FD1: a stamped time; no subject reads undefined, so NaN, false
+  if (p.op === 'time_since')
+    return world.state.clock - (read(world, actor, p, ctx.target) as number) >= p.at_least;
   // row 29a: level 1 without world.levelling
   if (p.op === 'level_compare') return (levelling(world, actor)?.level ?? 1) >= p.at_least;
   if (p.op === 'skill_compare') return skillLevel(world, actor, p.skill) >= p.at_least; // row FD2

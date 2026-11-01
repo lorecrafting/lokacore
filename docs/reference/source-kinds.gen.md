@@ -1606,7 +1606,7 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 
 ## Fields without a meaning
 
-301 fields.
+310 fields.
 
 - `ActionCraft: consume`
 - `ActionCraft: consume.to`
@@ -1802,6 +1802,9 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `cartridge: version`
 - `choice: availability.from`
 - `choice: availability.through`
+- `choice: narration_variants`
+- `choice: then`
+- `choice: then_failed`
 - `dialogues: riddle.wrong`
 - `dialogues: riddle.wrong_limit`
 - `items: fuel`
@@ -1812,6 +1815,12 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `npcs: daily_schedule.*{walks=true}.goal`
 - `npcs: daily_schedule.*{walks=true}.room`
 - `npcs: perception`
+- `policy fact_at_least: at_least`
+- `policy fact_at_least: fact`
+- `policy fact_at_least: item`
+- `policy fact_at_least: npc`
+- `policy fact_at_least: subject`
+- `policy fact_at_least: with`
 - `populations: area`
 - `populations: home`
 - `populations: item`

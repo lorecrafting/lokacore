@@ -39,7 +39,8 @@ defmodule Loka.Content.Schedules do
   # Realm seam 5: a job has no player, so a case `when` names no fact with player scope.
   defp no_player(rel, steps, c, md), do: walk(rel, steps ++ ["when"], c["when"], md)
 
-  defp walk(rel, steps, %{"op" => "fact_compare"} = v, {m, defs} = md) do
+  defp walk(rel, steps, %{"op" => op} = v, {m, defs} = md)
+       when op in ~w(fact_compare fact_at_least) do
     here =
       case resolve(v["fact"], "fact", m, defs) do
         {_, _, %{"scopes" => s}} ->

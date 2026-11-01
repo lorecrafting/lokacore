@@ -2,7 +2,6 @@ import { knowledgeSave } from './knowledge-save.ts';
 import { patrolSave } from './patrol-save.ts';
 import { expeditionSave } from './expedition-save.ts';
 import { riddleSave, selectorSave } from './riddle-save.ts';
-import { topicsSave } from './topics-save.ts';
 import { exchangeSave } from './exchange-save.ts';
 import { liquidSave } from './liquid-save.ts';
 import { combatReceipts } from './combat-receipt.ts';
@@ -22,7 +21,6 @@ export function receiptRecovery(fresh: World, world: World, db: Db, meta: Meta, 
   expeditionSave(world, db, meta, revision);
   selectorSave(world, db, meta);
   riddleSave(world, db, meta);
-  topicsSave(world, db, meta);
   skillsSave(world, db, meta);
   combatReceipts(db, `story/${meta.lineage_id}/${world.character}`);
   const liquids = liquidSave(fresh, world, db, meta, revision);

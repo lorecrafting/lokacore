@@ -38,3 +38,8 @@ Hard-won lessons for SQLite and persistence. Persistence lessons from R6 onward 
   content hash alone, so a kernel contract bump (1.124 dialogue receipts gained `speaker`) left
   unbumped cartridges' old saves reopening as `save_corrupt`; #514 bumped `at_least` on every
   dialogue cartridge by hand. The pin now carries `kernel_api`, compared by equality (loka-daha).
+- Reopen refuses a row only when it doesn't parse or validate, its identity doesn't bind, or the
+  kernel would throw or hang on the next command. If any sequence of accepted commands can reach
+  the state, the check goes, and if the kernel then throws, fix the kernel. Facts and holders are
+  evidence of nothing: a book, a reaction, a death or a theft reaches them too, and each inference
+  from them refused a lawful save for good (#544, loka-vduxr.10).
