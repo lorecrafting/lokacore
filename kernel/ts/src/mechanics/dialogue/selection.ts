@@ -170,7 +170,7 @@ export const spokenBy = (
       shown(world, actor, d, offered(world, actor, d, steps), target, steps).length > 0
     )
       return d;
-    if (word !== undefined || selected || d.name) continue;
+    if (word !== undefined || d.name) continue;
     for (const { choice, to } of onward(world, d))
       if (holds(world, actor, choice.policy, { target, steps }) && !tried.includes(to))
         tried.push(to);

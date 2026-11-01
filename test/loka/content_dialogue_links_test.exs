@@ -338,6 +338,10 @@ defmodule Loka.ContentDialogueLinksTest do
     leaves = [d("a_x", "a"), d("z_y", "a")]
     assert entry_findings([d("g", "a", ["a_x", "z_y"], named) | leaves]) == []
 
+    # Breaks: a shut keyword dialogue (a say's, never Talk's) warned as a guess.
+    word = %{"policy" => %{}, "keyword" => "w"}
+    assert entry_findings([d("g", "a", ["a_x", "z_y"], word) | leaves]) == []
+
     # Breaks: a choice that can refuse or charge when taken counts as a way on.
     free = %{"then" => "z_y"}
 
