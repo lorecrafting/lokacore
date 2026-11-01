@@ -15,6 +15,8 @@ async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}) {
   const els: El[] = [];
   const ramps: [number, number][] = [];
   const levels: { value: number }[] = [];
+  const wired: object[] = [];
+  const gains: object[] = [];
   let resumes = 0;
   const listeners: Record<string, () => void> = {};
   Object.assign(globalThis, {
@@ -37,7 +39,9 @@ async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}) {
           linearRampToValueAtTime: (v: number, t: number) => ramps.push([v, t]),
         };
         levels.push(gain);
-        return { connect: () => {}, disconnect: () => {}, gain };
+        const node = { connect: (to: object) => wired.push(to), disconnect: () => {}, gain };
+        gains.push(node);
+        return node;
       };
       createMediaElementSource = () => ({ connect: () => {}, disconnect: () => {} });
     },
@@ -74,6 +78,8 @@ async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}) {
     els,
     ramps,
     levels,
+    wired,
+    gains,
     resumes: () => resumes,
     gesture: (kind = 'pointerup') => listeners[kind]!(),
   };
@@ -250,6 +256,17 @@ test('Sound off silences every effect; the chapter cut answers to Music', async 
   assert.equal(b.els.length, 1);
 });
 
+// Breaks: a music voice skips the music bus, so a beat's dip never reaches it, or a sound goes through it.
+test('music plays through the music bus and a sound straight out', async () => {
+  const b = await browser();
+  b.gesture();
+  const [out, musicBus] = [b.wired[0], b.gains[1]]; // the unlock makes ambience, then music
+  b.play('chapter');
+  assert.equal(b.wired.at(-1), musicBus);
+  b.play('coin');
+  assert.equal(b.wired.at(-1), out);
+});
+
 async function fightRig(t: any) {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   let now = 1000;
@@ -340,6 +357,13 @@ test('how a fight ends is how its music ends', async (t) => {
   b.fight('resume');
   b.fight('cut');
   assert.deepEqual(b.playing(), []);
+});
+
+// Breaks: a win with no voice playing (its loop refused) waits on a fade of nothing, so no fanfare.
+test('a fight won in silence plays its fanfare at once', async (t) => {
+  const b = await fightRig(t);
+  b.fight('won');
+  assert.deepEqual(b.playing(), ['won.m4a']);
 });
 
 // Breaks: a sound's thud is cut with the music (its bus is not the music's), or a fanfare fires after a
