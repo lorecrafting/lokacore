@@ -114,7 +114,9 @@ defmodule Loka.Content.Explain do
     named = for %{"path" => path} = d <- diags, file_name?(d), do: path
 
     diags
-    |> Enum.reject(&(&1["data"]["error"] == "pattern_mismatch" and renamed?(&1["path"], named)))
+    |> Enum.reject(
+      &(&1["data"]["error"] == "pattern_mismatch" and renamed?(&1["path"], named, diags))
+    )
     |> Enum.reject(
       &(&1["data"]["error"] == "missing_property" and String.starts_with?(&1["path"], refused))
     )
@@ -126,11 +128,16 @@ defmodule Loka.Content.Explain do
 
   defp file_name?(_), do: false
 
-  defp renamed?(path, named) do
+  defp renamed?(path, named, diags) do
     Enum.any?(named, fn root ->
       key = root |> String.trim("\"") |> Path.rootname() |> Path.basename()
+      field = String.replace_prefix(path, root <> ".", "")
 
-      String.starts_with?(path, root <> ".") or
+      # A field holds a text key built from the name when that key fails too; a top-level one always
+      # does (room_line's key ends .room). A deeper field with no such key is the author's own fault.
+      (field != path and
+         (not String.contains?(field, ".") or
+            Enum.any?(diags, &String.ends_with?(&1["path"], "." <> key <> "." <> field <> "\"]")))) or
         (String.starts_with?(path, "text[") and String.contains?(path, "." <> key <> "."))
     end)
   end

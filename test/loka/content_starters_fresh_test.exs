@@ -65,6 +65,17 @@ defmodule Loka.ContentStartersFreshTest do
     assert File.exists?(Path.join(dir, "transports/barge.json"))
   end
 
+  # Break: a kind's later checks crash on a definition its bad name left invalid (bleeds did).
+  test "a bad file name never crashes the compile", %{tmp_dir: tmp} do
+    for kind <- Starters.kinds() -- ["cartridge"] do
+      dir = cartridge(Path.join(tmp, kind))
+      follow(dir, kind, "good")
+      from = Path.join([dir, kind, "good.json"])
+      if File.exists?(from), do: File.rename!(from, Path.join([dir, kind, "Bad-Name.json"]))
+      assert {_, _} = {kind, Loka.Content.compile(dir)}
+    end
+  end
+
   # Break: a text.json that is not an object crashes the starter instead of refusing.
   test "a text.json that is a list still refuses", %{tmp_dir: tmp} do
     dir = cartridge(tmp)

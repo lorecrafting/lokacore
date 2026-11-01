@@ -35,17 +35,21 @@ defmodule Loka.Content.Bleed do
   end
 
   defp values(bleeds, text) do
-    Enum.flat_map(bleeds, fn {_, {rel, _, b}} ->
-      n = b["narration"]
+    Enum.flat_map(bleeds, fn
+      {_, :invalid} ->
+        []
 
-      if(b["tick_every"] >= b["duration"],
-        do: [diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))],
-        else: []
-      ) ++
-        if(is_map(n) and Enum.all?(Map.values(n), &known?(text, &1)),
-          do: [],
-          else: [diag("SCHEMA_VIOLATION", at(rel, ["narration"]))]
-        )
+      {_, {rel, _, b}} ->
+        n = b["narration"]
+
+        if(b["tick_every"] >= b["duration"],
+          do: [diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))],
+          else: []
+        ) ++
+          if(is_map(n) and Enum.all?(Map.values(n), &known?(text, &1)),
+            do: [],
+            else: [diag("SCHEMA_VIOLATION", at(rel, ["narration"]))]
+          )
     end)
   end
 

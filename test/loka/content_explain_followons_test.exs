@@ -68,6 +68,29 @@ defmodule Loka.ContentExplainFollowOnsTest do
     assert line =~ "Rename it"
   end
 
+  # Break: a nested prose field's own key failing still prints a line the rename clears.
+  test "a nested prose field under a bad name prints nothing more", %{tmp_dir: dir} do
+    d =
+      &%{
+        "code" => "SCHEMA_VIOLATION",
+        "severity" => "error",
+        "path" => &1,
+        "data" => %{"error" => "pattern_mismatch"}
+      }
+
+    assert [line] =
+             Explain.lines(
+               [
+                 d.(~s("statuses/Bad-Name.json")),
+                 d.(~s("statuses/Bad-Name.json".narration.tick)),
+                 d.(~s(text["status.Bad-Name.narration.tick"]))
+               ],
+               dir
+             )
+
+    assert line =~ "Rename it"
+  end
+
   # Break: the rename filter also hides a fault the rename does not clear.
   test "a bad name keeps the file's other faults", %{tmp_dir: dir} do
     d =
@@ -78,11 +101,12 @@ defmodule Loka.ContentExplainFollowOnsTest do
         "data" => %{"error" => &2}
       }
 
-    assert [_, _, _] =
+    assert [_, _, _, _] =
              Explain.lines(
                [
                  d.(~s("items/Bad-Name.json"), "pattern_mismatch"),
                  d.(~s("items/Bad-Name.json".location), "missing_property"),
+                 d.(~s("items/Bad-Name.json".location.room), "pattern_mismatch"),
                  d.(~s("rooms/a.json".exits.Bad-Name.to), "pattern_mismatch")
                ],
                dir
@@ -93,18 +117,7 @@ defmodule Loka.ContentExplainFollowOnsTest do
   test "a bad tone prints only the tone", %{tmp_dir: dir} do
     band = %{"at_percent" => 0, "key" => "x", "tone" => "lockd"}
     gold = %{"bands" => [band], "gain" => 0, "maximum" => 9, "minimum" => 0, "start" => 0}
-    pools = %{"resources" => %{"gold" => gold}}
-
-    wealthy =
-      ~s({"description":#{@prose},"keywords":["bram"],"name":#{@prose},"resource_starts":{"gold":5},"room":"boathouse","room_line":#{@prose}})
-
-    assert [line] =
-             said(dir, %{
-               "resources.json" => JSON.encode!(pools),
-               "npcs/bram.json" => wealthy,
-               "text.json" => ~s({"band.x":"Low"})
-             })
-
+    assert [line] = pool_lines(dir, gold)
     assert line =~ "one of: normal, warning, danger"
   end
 
@@ -114,6 +127,15 @@ defmodule Loka.ContentExplainFollowOnsTest do
     lines = scene(dir, text)
     assert line_at(lines, "scenes/hi.scene:4") =~ "- Go"
     assert line_at(lines, "scenes/hi.scene:5") =~ "tronel"
+  end
+
+  # Break: a tone fault hides the pool's bad numbers until it is fixed.
+  test "a bad tone with a start out of bounds says both", %{tmp_dir: dir} do
+    band = %{"at_percent" => 0, "key" => "x", "tone" => "lockd"}
+    gold = %{"bands" => [band], "gain" => 0, "maximum" => 9, "minimum" => 0, "start" => 50}
+    lines = pool_lines(dir, gold)
+    assert Enum.any?(lines, &(&1 =~ "one of: normal, warning, danger"))
+    assert Enum.any?(lines, &(&1 =~ "resources.json" and &1 =~ "minimum <= start <= maximum"))
   end
 
   # Break: a tone fault lets through a pool whose other fault leaves its numbers unusable.
