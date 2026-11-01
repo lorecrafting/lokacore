@@ -207,8 +207,9 @@ const gathered = (cues: Cue[]) =>
   cues.reduce<Cue[]>((out, cue) => {
     const i = CUES[cue.name].s === 2 ? out.findIndex((o) => o.name === cue.name) : -1;
     if (i < 0) return [...out, cue];
-    const ids = [...(out[i]!.ids ?? []), ...(cue.ids ?? [])];
-    out[i] = { ...out[i]!, ids, silent: out[i]!.silent && cue.silent };
+    const { silent, ...first } = out[i]!;
+    const ids = [...(first.ids ?? []), ...(cue.ids ?? [])];
+    out[i] = silent && cue.silent ? { ...first, ids, silent } : { ...first, ids };
     return out;
   }, []);
 
