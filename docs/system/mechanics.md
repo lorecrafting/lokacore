@@ -859,7 +859,7 @@ compile error. Installed kernel 1.136.
 
 A round's blow stops at the target's authored hp floor, or at 0 under a negative floor, where death
 fires; a floored foe stays alive and the fight goes on, as under a spell's damage (`aboveFloor`,
-loka-2lvx). A body already below 0 takes nothing and the round runs (loka-vduxr.21).
+loka-2lvx). The compiler refuses an hp floor or start below 0 (`BODY_BELOW_ZERO`, loka-vduxr.21): a body below 0 could not die by a blow.
 It creates an encounter and its first round job at now + the authored interval; it does
 not attack immediately, advance time or draw RNG. The encounter pins character, body,
 NPC, room, round and current job. While the encounter is open, the final shared

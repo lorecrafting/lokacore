@@ -117,8 +117,8 @@ defmodule Loka.Content.Resources do
 
   defp npc_hp(defs) do
     for {_, {rel, [], %{"hp" => hp}}} <- defs["npc"],
-        not start_in_bounds?(hp),
-        do: diag("RESOURCE_SPEC_INVALID", at(rel, ["hp"]))
+        code = hp_fault(hp),
+        do: diag(code, at(rel, ["hp"]))
   end
 
   defp tables(defs, world) do
@@ -233,8 +233,8 @@ defmodule Loka.Content.Resources do
 
   defp number_faults(rel, k, value) do
     cond do
-      not start_in_bounds?(value) ->
-        [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k]))]
+      code = if(k == "hp", do: hp_fault(value), else: value_fault(value)) ->
+        [diag(code, at(rel, ["resources", k]))]
 
       not residual_bound?(value) ->
         [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k, "regen"]))]
@@ -243,6 +243,14 @@ defmodule Loka.Content.Resources do
         []
     end
   end
+
+  # A body below 0 takes no blow's loss, so it could never die (loka-vduxr.21).
+  defp hp_fault(%{"minimum" => minimum, "start" => start}) when minimum < 0 or start < 0,
+    do: "BODY_BELOW_ZERO"
+
+  defp hp_fault(value), do: value_fault(value)
+
+  defp value_fault(value), do: if(!start_in_bounds?(value), do: "RESOURCE_SPEC_INVALID")
 
   defp start_in_bounds?(value),
     do: value["minimum"] <= value["start"] and value["start"] <= value["maximum"]

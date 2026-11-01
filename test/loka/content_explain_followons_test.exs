@@ -141,6 +141,30 @@ defmodule Loka.ContentExplainFollowOnsTest do
   end
 
   # Break: a pool refused for its gain still prints its holder's start as a bad number.
+  # Break: a body pool below 0 compiles again, and the body can never die by a blow.
+  test "an hp floor or start below 0 says the body could never die", %{tmp_dir: dir} do
+    line = "A body with hp below 0 could never die from a blow."
+
+    for {name, hp} <- [
+          {"floor", ~s({"minimum":-5,"maximum":20,"start":3,"gain":0})},
+          {"both", ~s({"minimum":-5,"maximum":20,"start":-3,"gain":0})},
+          {"start", ~s({"minimum":0,"maximum":20,"start":-3,"gain":0})}
+        ] do
+      lines = said(Path.join(dir, name), %{"resources.json" => ~s({"resources":{"hp":#{hp}}})})
+      assert [only] = lines, inspect(lines)
+      assert only =~ line
+    end
+
+    # Control: another pool may go below 0, and a floor of 0 passes; mv's bad gain makes it refuse.
+    assert [only] =
+             said(Path.join(dir, "ok"), %{
+               "resources.json" =>
+                 ~s({"resources":{"hp":{"minimum":0,"maximum":20,"start":0,"gain":0},"ma":{"minimum":-5,"maximum":20,"start":-3,"gain":0},"mv":{"minimum":0,"maximum":20,"start":3,"gain":"x"}}})
+             })
+
+    assert only =~ "`gain`"
+  end
+
   test "a bad gain prints only the gain", %{tmp_dir: dir} do
     gold = %{"gain" => "x", "maximum" => 9, "minimum" => 0, "start" => 0}
     assert [line] = pool_lines(dir, gold)

@@ -96,14 +96,14 @@ path, code, then canonical text (`:73`). The artifact is the canonical encoding 
 `resource@1` and `schedule@1` in its lock, with or without `resources.json`
 (`lib/loka/content/resources.ex:141`, `def requires`); the engine defaults are hp 0..20 start 20 gain 5, ma
 0..100 start 100 gain 4, mv 0..82 start 82 gain 18 per game hour (`:15`), and
-`minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`. Without `world`, a move costs 1 mv
+`minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`; an hp pool with `minimum` or `start` below 0 is `BODY_BELOW_ZERO`. Without `world`, a move costs 1 mv
 and every pool takes the engine default band table ([protocol.md](protocol.md#gameview)); the
 compiler writes `world` and `bands` only where the source authors them.
 
 An optional `NpcDefinition.hp` contains exactly `minimum`, `maximum`, `start`, and `gain`
 for the cartridge's existing hp pool. Bounds/start are ResourceInt; gain is a nonnegative
 ResourceInt. The compiler requires `minimum <= start <= maximum`
-(`RESOURCE_SPEC_INVALID`). No bands, regen, key or arbitrary pool map is accepted.
+(`RESOURCE_SPEC_INVALID`) and refuses `minimum` or `start` below 0 (`BODY_BELOW_ZERO`). No bands, regen, key or arbitrary pool map is accepted.
 Missing hp preserves legacy behavior. Presence requires resource@1. Older-development compatibility is not required under the [owner policy](../decisions/owner-decision-forward-development-2026-10-05.md). Runtime definition and
 row semantics live in [resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets).
 
