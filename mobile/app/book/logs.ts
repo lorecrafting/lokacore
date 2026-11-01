@@ -131,6 +131,8 @@ export const dropLines = (lines: DetailLine[], count = lines.length) => {
   lines.splice(0, n);
 };
 
+export const trimLog = (lines: DetailLine[]) => dropLines(lines, lines.length - 200);
+
 export function restoredLogs(game: Game, text: Say): Logs {
   const last = game.lastNarration();
   const { view } = game.view();

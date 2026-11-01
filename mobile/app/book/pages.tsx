@@ -79,6 +79,8 @@ function HeadLine(p: { words: string; style: object }) {
   );
 }
 
+const OVER = { position: 'absolute', left: 0, right: 0 } as const; // mutate-skip: layout
+
 // The new objective over the old one, across `motion.dry` (reduced: `motion.fade`).
 function HeadFade(p: { was?: string; words: string; style: object }) {
   const dry = useDrying();
@@ -87,7 +89,7 @@ function HeadFade(p: { was?: string; words: string; style: object }) {
   return (
     <View>
       {p.was ? (
-        <Reanimated.View style={[{ position: 'absolute', left: 0, right: 0 }, leaving]} aria-hidden>
+        <Reanimated.View style={[OVER, leaving]} aria-hidden>
           <Text style={p.style}>{p.was}</Text>
         </Reanimated.View>
       ) : null}

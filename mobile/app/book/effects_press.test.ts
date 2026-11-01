@@ -6,10 +6,11 @@ import { nodes } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
 const { ActionCard } = await import('./actions.tsx');
+const { Said } = await import('./Footer.tsx');
 const { Chip } = await import('./Chip.tsx');
 const { useCues } = await import('./cues.ts');
 const { Fault, LogLines } = await import('./lines.tsx');
-const { dropLines, markDrawn } = await import('./logs.ts');
+const { dropLines, markDrawn, trimLog } = await import('./logs.ts');
 const { Control, RunningHead, Tap } = await import('./pages.tsx');
 const { StatusIcons } = await import('./StatusIcon.tsx');
 const { SaveError } = await import('../SaveError.tsx');
@@ -74,6 +75,7 @@ test('only the line entering this redraw dries, and once', (t) => {
   lines.push('new');
   assert.deepEqual(dried(log()), ['new']);
   assert.deepEqual(g.timings, [240]);
+  assert.deepEqual(g.delays, [], 'plain narration has no lag');
   assert.deepEqual(dried(log()), ['new'], 'still drying on the next redraw');
   assert.deepEqual(g.timings, [240], 'its timing started once');
 });
@@ -115,16 +117,35 @@ test('a quiet merge in place does not dry; a trim keeps each line its number', (
 test('a narrated event dries motion.dry.lag later; reduced motion is a plain fade, no lag', (t) => {
   effects(t);
   const line = () => [{ text: 'You learn Cooking.', event: true }] as any[];
-  const shown = rig(t)(() => nodes(LogLines({ lines: line() })));
+  const event = line();
+  const draw = rig(t);
+  const shown = draw(() => nodes(LogLines({ lines: event })));
   assert.deepEqual(g.delays, [60]);
-  assert.ok('color' in flat(shown[1].props.style));
+  const ink = (n: any) => flat(n.props.style).color;
+  assert.equal(ink(shown[1]), '#645c4f', 'wet on its first frame');
+  assert.notEqual(ink(draw(() => nodes(LogLines({ lines: event })))[1]), '#645c4f', 'dry after');
   g.reducedMotion = true;
   g.delays = [];
   g.timings = [];
   const still = rig(t)(() => nodes(LogLines({ lines: line() })));
   assert.deepEqual(g.delays, []);
   assert.deepEqual(g.timings, [160]);
-  assert.deepEqual(Object.keys(still[1].props.style[1]), ['opacity']);
+  assert.deepEqual(still[1].props.style[1], { opacity: 0 });
+});
+
+// Breaks: an away recap entering the log has no drying, or an old one re-dries; the cap drifts.
+test('an away recap dries in like a line; the log keeps its last 200', (t) => {
+  effects(t);
+  const lines: any[] = [{ recap: ['b'], text: 'While you were away' }];
+  const opacities = (shown: any[]) =>
+    shown.map((n) => flat(n.props?.style ?? {}).opacity).filter((o) => o !== undefined);
+  assert.ok(opacities(rig(t)(() => nodes(LogLines({ lines })))).includes(0));
+  markDrawn(lines);
+  assert.ok(!opacities(rig(t)(() => nodes(LogLines({ lines })))).includes(0));
+  const long = Array.from({ length: 201 }, (_, i) => `line ${i}`);
+  trimLog(long);
+  assert.equal(long.length, 200);
+  assert.equal(long[0], 'line 1');
 });
 
 const card = (shown: any[]) => shown.find((n) => n.type === 'Pressable');
@@ -165,6 +186,8 @@ test('an unavailable card never lifts; its press is a warning haptic and its rea
   assert.deepEqual(g.timings, []);
   const after = shown();
   assert.deepEqual(g.timings, [240]);
+  assert.deepEqual(g.delays, [], 'no lag on a refusal');
+  assert.ok(after.some((n) => n.props?.children === "It's too heavy."));
   assert.equal(flat(card(after).props.style).transform, undefined);
 });
 
@@ -247,7 +270,11 @@ for (const [reduced, popped] of [
           } as never),
         ),
       );
-    icons();
+    const scale = () =>
+      icons()
+        .map((n) => flat(n.props?.style ?? {}).transform?.[0]?.scale)
+        .find((s) => s !== undefined);
+    assert.equal(scale(), 1, 'at rest on mount');
     const cue = publish(t);
     cue(view({ conditions: [] }));
     cue(view({ conditions: [chill] }));
@@ -255,12 +282,53 @@ for (const [reduced, popped] of [
     now += 1000; // past the status cue's coalesce window
     cue(view({ conditions: [chill, poison] }));
     assert.deepEqual(g.timings, popped);
+    assert.equal(scale(), 1, 'the pop lands at full size');
     now += 1000;
     cue(view({ conditions: [chill, { ...poison, ends_at: 90 }] }));
     icons();
     assert.deepEqual(g.timings, popped, 'a tick, a redraw');
   });
 }
+
+// Breaks: a repeated status shares a key, or an icon going remounts those after it; one icon's blur
+// lets go of another's held tip.
+test('status icons key by label and count; only the held icon lets go of its tip', (t) => {
+  effects(t);
+  const c = (label: string) => ({ label, ends_at: 100 });
+  const draw = rig(t);
+  const row = (conditions: unknown[]) =>
+    draw(
+      () =>
+        StatusIcons({
+          conditions,
+          time: 10,
+          text: (s: any) => s,
+          open: () => {},
+        } as never) as any,
+    ).props.children;
+  const keys = (conditions: unknown[]) => row(conditions)[0].map((e: any) => e.key);
+  assert.deepEqual(keys([c('a'), c('b'), c('a')]), ['a-0', 'b-0', 'a-1']);
+  assert.deepEqual(keys([c('b'), c('a')]), ['b-0', 'a-0']);
+  const both = [c('a'), c('b')];
+  const hold = (i: number) => row(both)[0][i].props.children.props.hold;
+  const tip = () => Boolean(row(both).at(-1));
+  hold(0)(true);
+  assert.equal(tip(), true);
+  hold(1)(false);
+  assert.equal(tip(), true, "another icon's blur");
+  hold(0)(false);
+  assert.equal(tip(), false);
+});
+
+// Breaks: an exit's name shows on no direction, or labels the empty one; its press-in lags or runs long.
+test('the footer says a lit direction, pressing in; nothing with no words', (t) => {
+  effects(t);
+  assert.equal(Said({ text: '', side: 'left' } as never), false);
+  const shown = rig(t)(() => nodes(Said({ text: 'North', side: 'left' } as never)));
+  assert.ok(shown.some((n) => n.props?.children === 'North'));
+  assert.deepEqual(g.delays, []);
+  assert.deepEqual(g.timings, [90]);
+});
 
 // Breaks: the head does not fade on a changed objective, fades on launch or a redraw, or keeps no old words.
 test('the running head cross-fades a changed objective only', (t) => {
@@ -277,6 +345,13 @@ test('the running head cross-fades a changed objective only', (t) => {
   assert.deepEqual(g.timings, []);
   assert.deepEqual(words(objective('bring it')), ['find it', 'bring it']);
   assert.deepEqual(g.timings, [240]);
+  assert.deepEqual(g.delays, []);
+  const layers = rig(t)(() =>
+    nodes(RunningHead({ view: objective('seek it'), text: ((s: string) => s) as never })),
+  )
+    .map((n) => flat(n.props?.style ?? {}).opacity)
+    .filter((o) => o !== undefined);
+  assert.deepEqual(layers, [1, 0], 'old words full, new words clear, on the first frame');
 });
 
 // Breaks: every redraw of a fault or save error buzzes again, or neither buzzes at all; or a sound.

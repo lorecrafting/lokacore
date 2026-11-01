@@ -49,7 +49,7 @@ import {
   narrationLines,
   quietOf,
   resetLogs,
-  dropLines,
+  trimLog,
   restoredLogs,
   type Logs,
 } from './logs.ts';
@@ -245,9 +245,9 @@ function heard(s: Logs, view: GameView, was: Said | undefined): Said {
 function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, was?: Said) {
   const { view, token } = game.view();
   const said = heard(s, view, was); // before the trim, which drops lines from the front
-  dropLines(s.log, s.log.length - 200);
-  dropLines(s.combatLog, s.combatLog.length - 200);
-  for (const lines of s.details.values()) dropLines(lines, lines.length - 200);
+  trimLog(s.log);
+  trimLog(s.combatLog);
+  for (const lines of s.details.values()) trimLog(lines);
   said.log = s.log.length;
   const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({
     ...b,

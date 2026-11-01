@@ -202,7 +202,7 @@ export function Tip({ dismiss }: { dismiss: () => void }) {
 
 // The lit exit's name (and why it is closed), or a closed exit's reason after release, on the side
 // opposite the drag (joystick.ts `sideOf`, placed by `SPOT`).
-function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
+export function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
   return text !== '' && <SaidLabel key={text} text={text} side={side} />;
 }
 

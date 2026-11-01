@@ -284,7 +284,7 @@ export default function App() {
       <SaveError
         failed={activeSession.failed()!}
         startOver={() => shell.confirm(startOver)}
-        tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined} // web-only lock
+        tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined}
         haptics={shell.effects?.haptics?.get()}
       />
     );

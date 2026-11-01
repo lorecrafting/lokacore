@@ -93,7 +93,7 @@ export function LetterTile(p: {
           borderColor: c.line,
           borderWidth: size.rule,
           borderRadius: radius.card,
-          opacity: p.used ? opacity.disabled : 1,
+          opacity: p.used ? opacity.disabled : 1, // mutate-skip: opacity above full clamps to full
         },
         lift,
       ]}

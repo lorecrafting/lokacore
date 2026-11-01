@@ -92,7 +92,7 @@ export function LogLines({
   of?: readonly DetailLine[];
 }) {
   const { gone, drawn } = logMark(of);
-  const first = gone + of.length - lines.length; // the number of `lines[0]`, also its stable key
+  const first = gone + of.length - lines.length; // the number of the first line shown, also its stable key
   useEffect(() => markDrawn(of), [gone + of.length]);
   if (!lines.length) return null;
   return (

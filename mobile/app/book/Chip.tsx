@@ -55,7 +55,7 @@ export function Chip(p: {
           borderColor: c.line,
           borderWidth: size.rule,
           borderRadius: radius.chip,
-          opacity: p.onPress ? 1 : opacity.disabled,
+          opacity: p.onPress ? 1 : opacity.disabled, // mutate-skip: opacity above full clamps to full
         },
         lift,
       ]}
