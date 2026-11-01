@@ -474,8 +474,8 @@ test('a death clears what is pending and fires at once, past a held card', () =>
   assert.deepEqual(two.fired[0], { name: 'hp_loss', loss: 7, wash: true });
 });
 
-// Breaks: a deed cue fires without its event (a label would), a missed swing sounds beside a blow that
-// landed, or a latch sounds on a walk or when nothing newly opened.
+// Breaks: a deed cue fires without its event (a label would), an ally's blow swallows the player's
+// miss, or a latch sounds on a walk or when nothing newly opened.
 test('miss, lever and latch come from the deed alone', () => {
   const exit = (available: boolean) => ({ exits: [{ direction: 'north', available }] });
   const shut = view(exit(false));
@@ -490,11 +490,8 @@ test('miss, lever and latch come from the deed alone', () => {
   assert.deepEqual(names(shut, open, { opened: true }), []);
   const walked = view({ ...exit(true), place: { ...base.place, id: 'p2' } });
   assert.deepEqual(names(walked, shut, { opened: true }), ['place']);
-  assert.deepEqual(names(pool(9, 0, fight), pool(9, 0, fight), { missed: true }), ['miss']);
-  assert.deepEqual(names(pool(7, 0, fight), pool(9, 0, fight), { missed: true }), [
-    'hp_loss',
-    'miss',
-  ]);
-  const band = (b: string) => ({ combat: { encounter_id: 'e', opponent_id: 'wolf', band: b } });
-  assert.deepEqual(names(view(band('hurt')), view(band('fine')), { missed: true }), ['blow_dealt']);
+  const miss = { missed: true };
+  assert.deepEqual(names(pool(9, 0, fight), pool(9, 0, fight), miss), ['miss']);
+  assert.deepEqual(names(pool(7, 0, fight), pool(9, 0, fight), miss), ['hp_loss', 'miss']);
+  assert.deepEqual(names(view(foe('hurt')), view(foe('fine')), miss), ['blow_dealt', 'miss']);
 });

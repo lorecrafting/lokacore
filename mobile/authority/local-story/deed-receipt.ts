@@ -20,12 +20,15 @@ export function deedOf(
   // A door verb's own barrier, not one a reaction or schedule moved in this receipt: events name no writer.
   const door = () => DOOR_VERBS.has((JSON.parse(r.command) as Command).payload?.type);
   const opened = press && (has('action_completed') || (has('barrier_changed') && door()));
-  const missed = d.events.some(
-    (e) =>
-      e.payload.type === 'attack_result' &&
-      e.payload.hit === false &&
-      e.payload.attacker_id === body,
-  );
+  const swung = (hit: boolean) =>
+    d.events.some(
+      (e) =>
+        e.payload.type === 'attack_result' &&
+        e.payload.hit === hit &&
+        e.payload.attacker_id === body,
+    );
+  // The player's own swings alone: another fighter's blow leaves the miss audible (book-ui.md, Fight music).
+  const missed = swung(false) && !swung(true);
   if (!lever && !opened && !missed) return undefined;
   return { ...(lever && { lever }), ...(opened && { opened }), ...(missed && { missed }) };
 }

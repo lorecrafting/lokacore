@@ -210,9 +210,14 @@ test('a receipt names the deed from its events, with no lines needed', () => {
   sql.exec(
     "CREATE TABLE receipt(command_id TEXT, response TEXT, scope TEXT, revision INTEGER, command TEXT DEFAULT '{}')",
   );
-  const put = (payload: object, type = 'open', narration: object[] = []) => {
+  const put = (payload: object | object[], type = 'open', narration: object[] = []) => {
     sql.exec('DELETE FROM receipt');
-    const response = { kind: 'accepted', delta: { ops: [] }, events: [{ payload }], narration };
+    const response = {
+      kind: 'accepted',
+      delta: { ops: [] },
+      events: [payload].flat().map((p) => ({ payload: p })),
+      narration,
+    };
     sql
       .prepare(
         'INSERT INTO receipt(command_id, response, scope, revision, command) VALUES (?, ?, ?, ?, ?)',
@@ -225,7 +230,7 @@ test('a receipt names the deed from its events, with no lines needed', () => {
         JSON.stringify({ payload: { type } }),
       );
   };
-  const rows: [object, object | undefined][] = [
+  const rows: [object | object[], object | undefined][] = [
     [{ type: 'custom_event', event: { key: 'lever' } }, { lever: true }],
     [{ type: 'custom_event', event: { key: 'bell' } }, undefined],
     [{ type: 'action_completed', action_key: 'pull' }, { opened: true }],
@@ -233,6 +238,21 @@ test('a receipt names the deed from its events, with no lines needed', () => {
     [{ type: 'attack_result', hit: false, attacker_id: 'body' }, { missed: true }],
     [{ type: 'attack_result', hit: true, attacker_id: 'body' }, undefined],
     [{ type: 'attack_result', hit: false, attacker_id: 'wolf' }, undefined],
+    // Breaks: a second swing that landed still whispers, or an ally's blow swallows the miss.
+    [
+      [
+        { type: 'attack_result', hit: false, attacker_id: 'body' },
+        { type: 'attack_result', hit: true, attacker_id: 'body' },
+      ],
+      undefined,
+    ],
+    [
+      [
+        { type: 'attack_result', hit: false, attacker_id: 'body' },
+        { type: 'attack_result', hit: true, attacker_id: 'gil' },
+      ],
+      { missed: true },
+    ],
   ];
   for (const [payload, deed] of rows) {
     put(payload);

@@ -87,6 +87,23 @@ test('off the World page nothing strikes, and the clock keeps running', (t) => {
   r.stop();
 });
 
+// Breaks: a strike's thunder rolls after the page left the World, or into a hidden tab.
+test('thunder keeps quiet when the World is gone by its roll', (t) => {
+  const r = rig(t);
+  r.tick(20_000);
+  r.s.world = false;
+  r.tick(1_000);
+  assert.deepEqual(r.log, ['light']);
+  r.s.world = true;
+  r.tick(19_000);
+  const g = globalThis as { document?: object };
+  g.document = { hidden: true };
+  t.after(() => delete g.document);
+  r.tick(1_000);
+  assert.deepEqual(r.log, ['light', 'light']);
+  r.stop();
+});
+
 // Breaks: leaving the storm leaves a late thunder or a timer running.
 test('stop cancels both timers', (t) => {
   const r = rig(t);

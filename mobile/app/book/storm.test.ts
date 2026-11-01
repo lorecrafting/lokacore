@@ -8,7 +8,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 const { flashesOn, lightFell, QUIET, step } = await import('./cues.ts');
 const { Storm } = await import('./Storm.tsx');
 const { color, motion, opacity } = await import('./tokens.ts');
-const { UnderInk } = await import('./UnderInk.tsx');
+const { footContext, UnderInk } = (await import('./UnderInk.tsx')) as any;
 const PaletteContext = (await import('./palette.ts')).PaletteContext as any;
 
 const g = globalThis as any;
@@ -34,6 +34,15 @@ function sky(t: any, weather: string, given: object = {}, reduced = false) {
     },
   };
 }
+
+// Breaks: the light stops at the foot, so a night strike draws a hard edge across the Book.
+test('the light reaches under the foot', (t) => {
+  const foot = footContext._currentValue;
+  footContext._currentValue = 48;
+  t.after(() => (footContext._currentValue = foot));
+  const layer = sky(t, 'storm').shown.find((n: any) => n.props?.pointerEvents === 'none');
+  assert.equal(flat(layer.props.style).bottom, -48);
+});
 
 // Breaks: the light strikes with no storm, with Flashes off (read when it strikes), under reduced
 // motion, or on a page that is not the World.

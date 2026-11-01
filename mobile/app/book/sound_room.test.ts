@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { browser } from './__tests__/sound_rig.ts';
+import { motion } from './tokens.ts';
 
 const urlsOf = (els: { url: string; paused: boolean }[]) =>
   els.filter((e) => !e.paused).map((e) => e.url);
@@ -54,6 +55,9 @@ test('a fight and Sound off stop beds; a fight ending and Sound on bring them ba
   assert.ok(urlsOf(b.els).includes('inn.m4a'));
   b.setMuted('music', false);
   b.fight('open');
+  assert.ok(!urlsOf(b.els).includes('inn.m4a'));
+  // Breaks: from a fight's second round, the view brings the bed back under the fight music.
+  b.ambience('inn', undefined, true);
   assert.ok(!urlsOf(b.els).includes('inn.m4a'));
   b.fight('away');
   assert.ok(urlsOf(b.els).includes('inn.m4a'));
@@ -148,6 +152,29 @@ test('a piece plays once per tag and gap, and lowers beds by bedUnderMusic', asy
   now += 600_000;
   b.ambience('inn', undefined, true); // past the gap, a tag already entered
   assert.equal(b.els.filter((e) => e.url === 'p-inn.m4a').length, 1);
+});
+
+// Breaks: a chapter cut ends abruptly, or its tail ramps the wrong way or on a voice already stopped
+// (book-ui.md, Chapters).
+test('a chapter fades as it ends, while it still plays', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const tail = motion.palette.duration;
+  const ending = async (stopFirst: boolean) => {
+    const b = await browser();
+    b.gesture();
+    b.play('chapter');
+    const el = b.els.at(-1)! as any;
+    el.duration = 10;
+    el.onloadedmetadata();
+    if (stopFirst) b.setMuted('music', true);
+    const before = b.ramps.length;
+    t.mock.timers.tick(10_000 - tail - 1);
+    assert.equal(b.ramps.length, before, 'not before its tail');
+    t.mock.timers.tick(1);
+    return b.ramps.slice(before);
+  };
+  assert.deepEqual(await ending(false), [[0, 10 + tail / 1000]]);
+  assert.deepEqual(await ending(true), []);
 });
 
 // Breaks: a chapter theme leaves beds up or a piece plays under it.

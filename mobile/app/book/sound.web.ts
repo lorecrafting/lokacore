@@ -283,7 +283,7 @@ export function fight(event: 'open' | 'resume' | 'won' | 'away' | 'cut') {
   else {
     stopAll('music');
     stopAll('ambience');
-    bed = layer = room = undefined; // nothing, not a return to the tab or Sound on, restarts it
+    bed = layer = room = undefined; // only the room page's view restarts it, not the tab or Sound on
     return;
   }
   settleRoom(motion.palette.duration);

@@ -71,7 +71,22 @@ test('place.sound and place.exposed reach the bed and the sky', () => {
   assert.equal(quiet({ combat: view().combat }), true);
   assert.equal(quiet({ chapter: { index: 2 } as never }), true);
   assert.equal(quiet({ chapter: { index: 2 } as never }), false, 'a later view of that chapter');
-  nodes(
+  // Breaks: after a fatal blow the bed returns over the Combat card, not on waking; or a later won
+  // fight's page, or a first view after a past death, holds the bed back.
+  const heard = (next: object) => {
+    g.bed = undefined;
+    effects = true;
+    slot = 0;
+    useCueSounds({ ...screen, view: current, ...next } as never, 0);
+    effects = false;
+    return !!g.bed;
+  };
+  const fight = view().combat;
+  assert.equal(heard({ died: 'fatal', ended: fight }), false, 'the fatal card');
+  assert.equal(heard({ died: 'fatal', ended: fight }), false, 'a next view on the card');
+  assert.equal(heard({ died: 'fatal' }), true, 'Back to World');
+  assert.equal(heard({ died: 'fatal', ended: fight }), true, 'a later fight won');
+  const shown = nodes(
     BookView({
       palette: color.light,
       screen,
@@ -84,6 +99,8 @@ test('place.sound and place.exposed reach the bed and the sky', () => {
       shell: { confirm: (f: () => void) => f(), learned: { get: () => true } },
     } as never),
   );
+  // Breaks: the map is told no room, so every way of a new room dries in on arrival.
+  assert.equal(shown.find((n: any) => n.type?.name === 'Footer')?.props.room, current.place.id);
   assert.equal(g.sky?.weather, 'storm');
   assert.equal(g.sky?.exposed, true);
   assert.equal(g.sky?.room, 'b4e5f6a7-b8c9-4d0e-9f1a-3b4c5d6e7f8a');

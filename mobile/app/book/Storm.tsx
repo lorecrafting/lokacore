@@ -1,5 +1,5 @@
 // The sky on an exposed World page: Storm's light and Wind's corner (book-ui.md, Effects).
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { flashesShown, lightFell, onCue } from './cues.ts';
 import {
   curveOf,
@@ -16,6 +16,7 @@ import { haptic } from './haptic';
 import { cutHeld } from './heldLayer.ts';
 import { thunder } from './sound';
 import { stormClock, windEntry } from './stormClock.ts';
+import { footContext } from './UnderInk.tsx';
 import { color, motion, opacity, space } from './tokens.ts';
 
 const never = { reduceMotion: ReduceMotion.Never };
@@ -55,6 +56,7 @@ const strike = (light: SharedValue<number>) => () => {
 
 function Lightning(p: Sky & { still: boolean }) {
   const light = useSharedValue(0);
+  const foot = useContext(footContext);
   const washed = useRef(-Infinity);
   const turned = useRef(-Infinity);
   const entry = useRef({ room: p.room, n: 0 });
@@ -69,9 +71,7 @@ function Lightning(p: Sky & { still: boolean }) {
       }),
     [],
   );
-  useEffect(() => {
-    turned.current = performance.now();
-  }, [p.turn]);
+  useEffect(() => void (turned.current = performance.now()), [p.turn]);
   useEffect(() => {
     if (p.weather !== 'storm') return;
     const sky = () => ({
@@ -89,7 +89,7 @@ function Lightning(p: Sky & { still: boolean }) {
   return (
     <Reanimated.View
       pointerEvents="none"
-      style={[fill, { backgroundColor: color.light.bg }, struck]}
+      style={[fill, { bottom: -foot, backgroundColor: color.light.bg }, struck]}
     />
   );
 }

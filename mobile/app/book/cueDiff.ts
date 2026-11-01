@@ -146,14 +146,12 @@ function statusCues(now: GameView, was: GameView) {
 }
 
 // Only a press's own events (the record's), so a barrier the world moved is silent; the record tells them apart.
-function deedCues(now: GameView, was: GameView, combat: Cue[], deed?: NarrationRecord): Cue[] {
+function deedCues(now: GameView, was: GameView, deed?: NarrationRecord): Cue[] {
   if (!deed) return [];
   const usable = (v: GameView) => v.exits.filter((e) => e.available).map((e) => e.direction);
   const newly = usable(now).some((d) => !usable(was).includes(d));
-  // A foe's blow in the same round leaves the miss audible; a second swing that landed does not.
-  const landed = combat.some((c) => c.name === 'blow_dealt');
   return [
-    ...(deed.missed && !landed ? [{ name: 'miss' } as const] : []),
+    ...(deed.missed ? [{ name: 'miss' } as const] : []),
     ...(deed.lever ? [{ name: 'lever' } as const] : []),
     ...(deed.opened && newly && now.place.id === was.place.id ? [{ name: 'latch' } as const] : []),
   ];
@@ -187,7 +185,7 @@ export function cuesOf(
       : []),
     ...questCues(now, was),
     ...combat,
-    ...deedCues(now, was, combat, deed),
+    ...deedCues(now, was, deed),
     ...skillCues(now, was),
     ...itemCues(now, was),
     ...statusCues(now, was),

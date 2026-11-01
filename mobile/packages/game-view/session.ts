@@ -24,7 +24,7 @@ export type NarrationRecord = CommittedNarration & {
   died?: true; // the player's death in this receipt's events (book-ui.md, Falling)
   lever?: true; // an action completed that emitted the authored `lever` event (book-ui.md, Lever and latch)
   opened?: true; // an action completed or a barrier changed in this press's receipt (Lever and latch)
-  missed?: true; // an attack in this receipt missed or was prevented (book-ui.md, Impact)
+  missed?: true; // the player's own attack in this receipt missed and none landed (book-ui.md, Fight music)
   read?: true; // Read text: its page's only, never the room log (book-ui.md)
 };
 /** One Chronicle entry (mechanics.md, Chronicle): a host projection, not a kernel contract. */

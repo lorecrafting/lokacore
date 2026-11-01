@@ -15,7 +15,6 @@ type Act = { light: () => void; thunder: (muffled: boolean) => void; heavy: () =
 const between = ([low, high]: readonly number[]) => low! + Math.random() * (high! - low!);
 const away = () => !!globalThis.document?.hidden;
 
-/** Runs for as long as the phase is `storm`; gives back its stop. */
 /** Wind lifts once on the change to wind and once per room entry; a page opened and closed is neither. */
 export function windEntry(
   seen: { current?: string },
@@ -29,6 +28,7 @@ export function windEntry(
   return true;
 }
 
+/** Runs for as long as the phase is `storm`; gives back its stop. */
 export function stormClock(now: () => StormNow, act: Act) {
   let timer: ReturnType<typeof setTimeout>;
   let rumble: ReturnType<typeof setTimeout>;
