@@ -17,6 +17,7 @@ import {
   type World,
 } from '../runtime/decision.ts';
 import { sequence } from './reaction.ts';
+import { poolWriters } from './resource.ts';
 
 /** The advance's writer group of each row written so far (proposal.ts holders) and its latest
  * group; the run takes the next one. Its fire counts in the advance's delivery and step budget. */
@@ -25,6 +26,8 @@ export type Joins = {
   group: number;
   deliveries: number;
   steps: Steps;
+  ops: readonly DeltaOp[];
+  events: readonly DomainEvent[];
 };
 
 /** The job completes; then its rule runs for the stored actor at the due time, as a delivery whose
@@ -38,21 +41,22 @@ export function runDelayed(
   row: { job: DefinitionRef; actor_id?: CharacterId; due_time: number },
   mint: Mint,
   steps: Steps,
-  joins: Joins = { holders: new Map(), group: -1, deliveries: 0, steps },
+  joins: Joins = { holders: new Map(), group: -1, deliveries: 0, steps, ops: [], events: [] },
 ): Decision<never> {
   const { holders, group: last } = joins;
   joins.deliveries++;
   const group = last + 1;
   const done: DeltaOp = { op: 'job.complete', writer_group: group, job_id };
   const rule = world.cartridge.reactions?.[refString(row.job)];
-  // A stand-in cause: no subject field (custom_event names none), the job's time.
-  const cause = { id: command.id, logical_time: row.due_time, position: 0 };
+  // A stand-in cause: no subject field (custom_event names none), the job's time, no death after it.
+  const cause = { id: command.id, logical_time: row.due_time, position: Infinity };
   const stand = { ...cause, payload: { type: 'custom_event' } } as unknown as DomainEvent;
   const ran =
     rule &&
     fire(() =>
       sequence(world, row.actor_id!, rule, stand, group, joins.steps, mint, {
-        holders,
+        holders: poolWriters(joins.ops, holders),
+        events: joins.events,
         fired: true,
       }),
     );

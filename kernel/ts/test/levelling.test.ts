@@ -1,3 +1,4 @@
+// size: allow 658, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
 // Toolbox row 4 on the compiled levelling sampler: rats grant 10 experience each, level 2 at 30
 // grants one point, Raise spends it, and the quest reward grants 20 (mechanics.md row 4).
 import assert from 'node:assert/strict';
@@ -15,9 +16,20 @@ import { encode } from '../src/foundation/canonical.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { derived } from '../src/mechanics/attribute/shared.ts';
 import type { Base } from '../src/mechanics/fact.ts';
-import type { CharacterId } from '../src/contracts.gen.ts';
+import type {
+  CharacterId,
+  DefinitionRef,
+  DeltaOp,
+  DomainEvent,
+  Key,
+  ReactionRule,
+} from '../src/contracts.gen.ts';
+import { key } from '../src/foundation/compose.ts';
+import { resourceRef } from '../src/mechanics/resource.ts';
 import { levelsReached, levelUp, oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
+import { type Joins, runDelayed } from '../src/mechanics/delayed.ts';
+import { sequence } from '../src/mechanics/reaction.ts';
 import { gameView } from '../src/view/view.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { ctx } from './harness.ts';
@@ -192,6 +204,79 @@ test('resolving the den quest grants 20 experience; after two kills it narrates 
   assert.ok(narration(up).includes(LEVEL_UP));
 });
 
+/** Two rats dead, the third engaged, and the body's hp row forged to `value`. */
+function bitten(value: number, c: Cartridge = content, age = 0) {
+  let w = play(fresh(c), { type: 'move', direction: 'east' }).world;
+  w = kill(kill(w, 'rat_a').world, 'rat_b').world;
+  if (age) w = wait(w, age).world; // the clock must pass `age` for the row's `at` to stay valid
+  const row = key({ kind: 'resource', entity_id: w.body, resource: resourceRef(w, 'hp') });
+  return {
+    ...w,
+    state: {
+      ...w.state,
+      resources: {
+        ...w.state.resources,
+        [row]: { value, at: w.state.clock - age, rate: 1, remainder: 0 },
+      },
+    },
+  };
+}
+const hpOps = (r: { decision: object; world: World }) =>
+  (r.decision as { delta: { ops: any[] } }).delta.ops.filter(
+    (o) => o.op === 'resource.adjust' && o.entity_id === r.world.body && o.resource.key === 'hp',
+  );
+const LEVEL_TWO = 'levelling.level_two';
+
+// Breaks: the level_two refill writes nothing, is left in writer group 0 (a composition fault),
+// stops at the wrong value, or carries no `at` (the settled regen is refused against the base clock).
+test('level 2 refills hp in the killing step', () => {
+  const w = bitten(3);
+  assert.deepEqual(hp(w), [3, 10]);
+  const third = kill(w, 'rat_c');
+  assert.deepEqual(hp(third.world), [10, 10]);
+  assert.deepEqual(narration(third).includes(LEVEL_TWO), true);
+  const [op, ...rest] = hpOps(third);
+  assert.deepEqual(rest, []);
+  assert.equal(op.from, 3);
+  assert.equal(op.to, 10);
+  assert.notEqual(op.writer_group, 0);
+  assert.deepEqual(validate('GameView', gameView(third.world)), []);
+});
+
+// Breaks: the op carries no `at`, so the composer folds from the base clock and refuses a `from`
+// holding the regen settled inside the killing window.
+test('the refill counts a regen tick settled before the death', () => {
+  const [op] = hpOps(kill(bitten(3, content, 3599), 'rat_c'));
+  assert.equal(op.from, 4);
+  assert.equal(op.to, 10);
+});
+
+// Breaks: a full pool writes a no-op row, or the narrate step depends on the refill having moved.
+test('level 2 at full hp writes no hp op and still tells', () => {
+  const third = kill(bitten(10), 'rat_c');
+  assert.deepEqual(hpOps(third), []);
+  assert.ok(narration(third).includes(LEVEL_TWO));
+});
+
+// Breaks: the refill does not saturate (to: past the maximum), or a second step on one pool starts
+// again from the row instead of the first step's result, and the composer refuses it.
+test('two refills of one pool compose and stop at the maximum', () => {
+  const c = structuredClone(content);
+  const rule = Object.values(c.reactions!).find((r: any) => r.key === 'level_two') as any;
+  const adjust = rule.steps.find((s: any) => s.op === 'resource.adjust');
+  rule.steps.push({ ...adjust, by: -4 }, { ...adjust, by: 2 });
+  const third = kill(bitten(1, c), 'rat_c');
+  assert.deepEqual(
+    hpOps(third).map((o) => [o.from, o.to]),
+    [
+      [1, 10],
+      [10, 6],
+      [6, 8],
+    ],
+  );
+  assert.deepEqual(hp(third.world), [8, 10]);
+});
+
 const events = (r: { decision: object }) =>
   (r.decision as { events: { id: string; causation_id: string; position: number; payload: any }[] })
     .events;
@@ -210,6 +295,30 @@ function strike(experience: number, worth: number) {
   const c = variant((l) => l.kills.forEach((k: any) => (k.experience = worth)));
   return kill(play(holding(experience, c), { type: 'move', direction: 'east' }).world, 'rat_a');
 }
+
+// Breaks: a refill in its own writer group after the round's bite faults conflicting_write, so an
+// ordinary level-up on an even round (the NPC strikes first) loses the whole command.
+test('a level-up refill after a bite in the killing round joins the round', () => {
+  const c = structuredClone(content) as any;
+  c.world.levelling.kills.forEach((k: any) => (k.experience = 1000));
+  const rat = c.npcs['levelling_sampler@0.0.1:npc/rat_a'];
+  Object.assign(rat.hp, { maximum: 8, start: 8 });
+  rat.attack.chance = 100;
+  const w = play(play(holding(0, c), { type: 'move', direction: 'east' }).world, {
+    type: 'attack',
+    target_id: fresh(c).entityIds['levelling_sampler@0.0.1:npc/rat_a'],
+  }).world;
+  const r = elapse(wait(w, 150).world, 150); // even round: the rat strikes first
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  assert.deepEqual(hp(r.world), [10, 10]);
+  assert.deepEqual(
+    hpOps(r).map((o) => [o.from, o.to]),
+    [
+      [9, 8],
+      [8, 10],
+    ],
+  );
+});
 
 // Breaks: no level_reached from a credited kill, it lands before the round's own events, its
 // rule runs in a later proposal or not at all, or the gained line follows the level-up line.
@@ -490,4 +599,60 @@ test('one levelling write per character keeps the last value and the first expec
     oneWrite([set(1, a, null, 10), other, set(1, b, 5, 15), set(2, a, 10, 20), set(3, a, 20, 40)]),
     [other, set(1, b, 5, 15), set(3, a, null, 40)],
   );
+});
+
+// Breaks: a delayed refill ignores a pool written earlier in the same due batch by a job that holds
+// no body, so the composer faults a second group on the pool.
+test('a delayed refill joins the group that wrote its pool earlier in the batch', () => {
+  const w = bitten(3);
+  const earlier = {
+    op: 'resource.adjust',
+    writer_group: 5,
+    entity_id: w.body,
+    resource: resourceRef(w, 'hp'),
+  } as unknown as DeltaOp;
+  const job: DefinitionRef = { ...resourceRef(w, 'hp'), kind: 'reaction', key: 'level_two' as Key };
+  const steps = { n: 0 };
+  const joins: Joins = {
+    holders: new Map(),
+    group: 7,
+    deliveries: 0,
+    steps,
+    ops: [earlier],
+    events: [],
+  };
+  const row = { job, actor_id: w.character, due_time: w.state.clock };
+  const ran = runDelayed(w, { id: id() }, id(), row, id, steps, joins);
+  assert.equal(ran.kind, 'accepted');
+  const ops = (ran as unknown as { delta: { ops: any[] } }).delta.ops;
+  const refill = ops.find((o) => o.op === 'resource.adjust')!;
+  assert.equal(refill.writer_group, 5);
+});
+
+// Breaks: a fact write that changes nothing takes a causal position, leaving a gap before the event
+// after it (only a change gets a fact_changed to fill that position).
+test('an unchanged fact write takes no position', () => {
+  const w = fresh();
+  const rule: ReactionRule = {
+    key: 'unchanged' as Key,
+    on: { event: 'custom_event' },
+    steps: [
+      {
+        op: 'fact.assign',
+        fact: { ...resourceRef(w, 'hp'), kind: 'fact', key: 'second_wind' as Key },
+        value: false,
+      },
+      { op: 'event.emit', event: 'anything' as Key },
+    ],
+  };
+  const cause = {
+    id: id(),
+    logical_time: w.state.clock,
+    position: 1,
+    payload: { type: 'custom_event' },
+  } as unknown as DomainEvent;
+  const ran = sequence(w, w.character, rule, cause, 0, { n: 0 }, id);
+  assert.equal(ran?.kind, 'accepted');
+  const [emitted] = (ran as unknown as { events: { position: number }[] }).events;
+  assert.equal(emitted!.position, 1);
 });

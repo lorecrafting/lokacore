@@ -6,6 +6,7 @@ import type {
   CharacterId,
   DefinitionRef,
   DeltaOp,
+  DomainEvent,
   EntityId,
   Key,
   MutationTarget,
@@ -14,7 +15,7 @@ import type {
   Text,
   TextKey,
 } from '../contracts.gen.ts';
-import { actorOf, admitted, type World } from '../runtime/decision.ts';
+import { actorOf, admitted, bodyOf, type World } from '../runtime/decision.ts';
 import { add, saturate } from '../foundation/int.ts';
 import { fact, positionOf } from './position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -116,6 +117,46 @@ export function adjust(
     to,
   };
   return { op, levels: { ...levels, [at]: to } };
+}
+
+const pool = (o: { resource: DefinitionRef; entity_id: EntityId }) =>
+  key({ kind: 'resource', resource: o.resource, entity_id: o.entity_id });
+
+/**
+ * A reaction's resource.adjust on the actor's body, clamped to its bounds and after the rule's
+ * earlier `ops`, so two compose. Nothing without a body or a change, or at the moment the body died:
+ * the death's authored return stands. `at`: the composer folds from the base clock otherwise and
+ * refuses the settled regen. Its group: the pool's earlier writer's (a bite in the killing round),
+ * else the body's holder's, else its own, which it holds, so a same-due job on the body joins it.
+ */
+export function pooled(
+  then: World,
+  actor: CharacterId,
+  step: { resource: DefinitionRef; by: number },
+  group: number,
+  ops: readonly DeltaOp[],
+  holders: Map<string, number>,
+  events: readonly DomainEvent[],
+): DeltaOp[] {
+  const body = bodyOf(then, actor);
+  const died = (e: DomainEvent) =>
+    e.payload.type === 'entity_died' &&
+    e.payload.victim_id === body &&
+    e.logical_time === then.state.clock;
+  if (!body || events.some(died)) return [];
+  const levels: Record<string, number> = {};
+  for (const o of ops) if (o.op === 'resource.adjust') levels[pool(o)] = o.to;
+  const { op } = adjust(then, body, step.resource, step.by, levels, true);
+  if (op.from === op.to) return [];
+  const writer_group = holders.get(pool(op)) ?? holders.get(body) ?? group;
+  if (!holders.has(body)) holders.set(body, writer_group);
+  return [{ ...op, writer_group, at: then.state.clock }];
+}
+
+/** `holders` with each pool written so far and its writer group, for `pooled`. */
+export function poolWriters(ops: readonly DeltaOp[], holders: Map<string, number>) {
+  for (const o of ops) if (o.op === 'resource.adjust') holders.set(pool(o), o.writer_group);
+  return holders;
 }
 
 /**

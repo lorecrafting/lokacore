@@ -41,12 +41,41 @@ defmodule Loka.ContentLevellingTest do
        {"SCHEMA_VIOLATION", "reactions/level_two.on.level"}},
       {"reactions/level_two.json",
        &update_in(&1, ["steps"], fn s -> s ++ [%{"op" => "experience.grant", "amount" => 1}] end),
-       {"SCHEMA_VIOLATION", "reactions/level_two.steps[2]"}}
+       {"SCHEMA_VIOLATION", "reactions/level_two.steps[3]"}}
     ]
 
     for {file, change, {code, path}} <- cases do
       assert {:error, diags} = Loka.ContentSource.compile(dir, [{file, change}])
       assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect({path, diags})
     end
+  end
+
+  # Breaks: the step context table drops resource.adjust from reactions (the sampler stops
+  # compiling), or a reaction's step naming an undeclared resource compiles and throws at play.
+  test "a reaction's resource.adjust names a declared resource", %{dir: dir} do
+    missing = fn r -> put_in(r, ["steps", Access.at(2), "resource"], "nerve") end
+
+    assert {:error, diags} =
+             Loka.ContentSource.compile(dir, [{"reactions/level_two.json", missing}])
+
+    assert {"UNRESOLVED_REFERENCE", "reactions/level_two.steps[2].resource"} in Enum.map(
+             diags,
+             &{&1["code"], &1["path"]}
+           ),
+           inspect(diags)
+  end
+
+  # Breaks: a rule's drain compiles, and a body stands at 0 with no entity_died; or the boundary
+  # moves and `by` 0 (no change, nothing to skip) is refused.
+  test "a reaction's resource.adjust refuses a negative by", %{dir: dir} do
+    by = fn value -> fn r -> put_in(r, ["steps", Access.at(2), "by"], value) end end
+
+    assert {:error, diags} =
+             Loka.ContentSource.compile(dir, [{"reactions/level_two.json", by.(-1)}])
+
+    assert [%{"code" => "REACTION_DRAINS_BODY", "path" => "reactions/level_two.steps[2].by"}] =
+             diags
+
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [{"reactions/level_two.json", by.(0)}])
   end
 end

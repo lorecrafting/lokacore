@@ -657,7 +657,7 @@ test('choices sort by order, then by key; a choice with none follows', () => {
   const shown = (order: Record<string, number | undefined>) =>
     choiceIds({
       choices: Object.fromEntries(Object.entries(order).map(([k, o]) => [k, { order: o }])),
-    } as never);
+    } as unknown as Parameters<typeof choiceIds>[0]);
   assert.deepEqual(shown({ b: undefined, a: undefined }), ['a', 'b']);
   assert.deepEqual(shown({ a: 2, z: 1 }), ['z', 'a']);
   assert.deepEqual(shown({ c: 1, b: 1 }), ['b', 'c']);
