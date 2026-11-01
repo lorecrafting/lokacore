@@ -1407,6 +1407,10 @@
             },
             "level_up": {
               "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "gained": {
+              "$ref": "text.schema.json#/$defs/TextKey",
+              "description": "The line telling the experience a proposal added, binding amount."
             }
           },
           "required": [

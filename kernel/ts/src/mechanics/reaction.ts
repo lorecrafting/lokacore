@@ -47,8 +47,7 @@ import { spawn } from './population/react.ts';
 import { isTold, told } from './emote/line.ts';
 
 type On = ReactionRule['on'];
-// Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
-// A field means the same payload field in every event kind that declares it.
+// Each trigger filter (W1; reaction.schema.json): true when the event's same-named payload field equals it.
 type Match = (w: World, want: any, p: any, e: DomainEvent) => boolean;
 // Null-safe: a player's entity_died carries no victim_definition.
 const ref =
@@ -82,6 +81,7 @@ export const FILTERS: Record<string, Match> = {
   hit: equal('hit'),
   status: ref('status'),
   word: equal('word'),
+  level: equal('level'),
   loudness: equal('loudness'),
   topic: ref('topic'), // row FD7
   answered: equal('answered'),
@@ -196,8 +196,7 @@ export function sequence(
   return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
 }
 
-// One quest.activate step: false when the trigger starts no quests; nothing for an NPC delivery or
-// a quest already started (by an earlier step too).
+// One quest.activate step: false when none start; nothing for an NPC delivery or an already started quest.
 function activate(
   world: World,
   rule: ReactionRule,
@@ -256,6 +255,7 @@ const SUBJECT: { [K in On['event']]: keyof Extract<EventPayload, { type: K }> | 
   filled: 'doer',
   poured: 'doer',
   item_dropped: 'doer',
+  level_reached: 'doer',
   shooed: 'doer',
   quest_activated: 'doer',
   quest_failed: 'doer',

@@ -73,6 +73,24 @@
             },
             {
               "type": "object",
+              "description": "Toolbox row 4 (attribute@1): a character reached a level.",
+              "properties": {
+                "event": {
+                  "const": "level_reached"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "description": "The event is for this level."
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
               "description": "Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.",
               "properties": {
                 "event": {

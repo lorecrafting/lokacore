@@ -1451,6 +1451,7 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 | identity.name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | identity.name_variants | [TextVariants](source-kinds.gen.md#textvariants) |  |  |
 | levelling | object |  | Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attribute@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's. |
+| levelling.gained | [TextKey](source-kinds.gen.md#textkey) |  | The line telling the experience a proposal added, binding amount. |
 | levelling.kills | list of object |  |  |
 | levelling.kills[].experience | integer | yes |  |
 | levelling.kills[].npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |

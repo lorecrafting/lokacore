@@ -4429,6 +4429,10 @@
           "additionalProperties": false,
           "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attribute@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
           "properties": {
+            "gained": {
+              "$ref": "#/$defs/TextKey",
+              "description": "The line telling the experience a proposal added, binding amount."
+            },
             "kills": {
               "items": {
                 "additionalProperties": false,
@@ -8012,6 +8016,19 @@
             },
             {
               "additionalProperties": false,
+              "description": "Toolbox row 4 (attribute@1): a character reached a level.",
+              "properties": {
+                "event": { "const": "level_reached" },
+                "level": {
+                  "description": "The event is for this level.",
+                  "minimum": 2,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
               "description": "Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.",
               "properties": {
                 "answered": {
@@ -10346,6 +10363,22 @@
                 "word": {
                   "$ref": "#/$defs/SpokenKeyword",
                   "description": "The word that fires it."
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Toolbox row 4 (attribute@1): a character reached a level.",
+              "properties": {
+                "event": { "const": "level_reached" },
+                "level": {
+                  "description": "The event is for this level.",
+                  "minimum": 2,
+                  "type": "integer"
                 }
               },
               "required": [

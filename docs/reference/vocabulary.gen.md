@@ -557,6 +557,14 @@ Toolbox row G9 (speech@1): one spoken event per NPC that heard the word.
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The hearer is this NPC's authored instance. |
 | word | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | The word that fires it. |
 
+### `level_reached`
+
+Toolbox row 4 (attribute@1): a character reached a level.
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| level | integer |  | The event is for this level. |
+
 ### `asked`
 
 Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.

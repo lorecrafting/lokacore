@@ -44,6 +44,7 @@ const view = (w: World) => {
   assert.deepEqual(validate('GameView', v), []);
   return v;
 };
+const two = { level: 2, from: 30, next: 100 };
 const words = (w: World) => view(w).spell_words;
 const chip = (w: World, key: string) => view(w).actions.find((a) => a.action_key === key);
 const pools = (w: World) =>
@@ -170,7 +171,7 @@ test('magic 4: level 2 from the errand; ward needs cha 7, one raise', () => {
   w = go(w, 'south').world;
   assert.equal(offer(w, npc(w, 'hedge_wizard'), 'flamma'), undefined); // flamma's policy is npc_present wight
   assert.equal(fact(w, 'ward_taught'), true);
-  assert.deepEqual(view(w).levelling, { level: 2, experience: 30, next: 100, unspent: 1 });
+  assert.deepEqual(view(w).levelling, { ...two, experience: 30, unspent: 1 });
   const ward = {
     word: 'ward',
     available: false,
@@ -338,7 +339,7 @@ test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the seco
       : undefined;
   assert.equal((died as { killer_id?: string } | undefined)?.killer_id, w.body);
   assert.equal(hp(w, 'wight'), 0);
-  assert.deepEqual(view(w).levelling, { level: 2, experience: 40, next: 100, unspent: 0 });
+  assert.deepEqual(view(w).levelling, { ...two, experience: 40, unspent: 0 });
   assert.equal(pools(w).ma, 0);
   assert.equal(refused(w, flamma), 'invalid_target'); // a dead wight is no aimed target (loka-x6t.109.2)
 });
