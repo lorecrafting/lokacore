@@ -259,7 +259,7 @@ Accounting uses exact checked integer arithmetic, retaining fractions and existi
 Active monotonic samples are floored absolute milliseconds; resume credits positive wall gaps
 once and durably rebases negative gaps without rewind. Each captured horizon settles at the
 earliest pending job boundary, yielding after 16 commits. Already-due jobs/faults surface
-recovery and retain debt. At load, a changed pending job no handler can run (`local-story/job-save.ts`: unknown definition, or an NPC job off its schedule's hours) is `save_corrupt` with the same route. At open, an already-due job or a refused catch-up delivery is `save_corrupt` with the new game in place; the refused step writes nothing, and steps settled before it stay committed. A kernel fault stays a fault with its debt, and a storage failure during catch-up offers no Start over (`open_catch_up.test.ts`). Sampling never extends a reserved input’s finite horizon.
+recovery and retain debt. At load, a changed job row no handler can run (`local-story/job-save.ts`: unknown definition, or an NPC job off its schedule's hours) is `save_corrupt` with the same route. At open, an already-due job or a refused catch-up delivery is `save_corrupt` with the new game in place; the refused step writes nothing, and steps settled before it stay committed. A kernel fault stays a fault with its debt, and a storage failure during catch-up offers no Start over (`open_catch_up.test.ts`). Sampling never extends a reserved input’s finite horizon.
 
 The existing managed resume pulse arms a private driver obligation synchronously before a
 retained player attempt can consume that call. Arming samples no clock or storage. A new

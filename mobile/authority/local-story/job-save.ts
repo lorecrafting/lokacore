@@ -8,7 +8,6 @@ type Job = NonNullable<World['state']['jobs']>[string];
 function runnable(world: World, row: Job) {
   // Dispatched on row fields or on a kind whose handler answers a missing definition itself.
   if (
-    row.status !== 'pending' ||
     row.water_generation !== undefined ||
     row.encounter_id ||
     row.bleed_body_id ||
@@ -26,7 +25,7 @@ function runnable(world: World, row: Job) {
   return npc?.kind === 'npc' && !!npc.daily_schedule?.[hourOf(world.cartridge, row.due_time)];
 }
 
-/** A pending job no handler can run is a damaged save (schedule/rule.ts decideAt's dispatch). */
+/** A job no handler can run is a damaged save (schedule/rule.ts decideAt's dispatch). */
 export function jobSave(fresh: World, world: World) {
   for (const [id, row] of Object.entries(world.state.jobs ?? {}))
     if (!same(row, fresh.state.jobs?.[id]) && !runnable(world, row))
