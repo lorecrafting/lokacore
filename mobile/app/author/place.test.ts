@@ -7,6 +7,9 @@ import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.
 import {
   advanced,
   asRefs,
+  cheatIntent,
+  cheatNote,
+  sendCheat,
   caughtUp,
   dropStep,
   frozenClock,
@@ -241,6 +244,65 @@ test('a step with both kinds, or an unreadable intent, stops by number', () => {
     const out = replay([bad as unknown as Step], {} as Replayable, () => {});
     assert.match(out.failed!, /^step 1: not a step/);
   }
+});
+
+// Break: the panel's keys reach the session as anything but the refs the schema takes, or a cheat
+// reads as another (wrong action key, wrong kind).
+test('a cheat is the ordinary invocation, by definition ref', () => {
+  const m = { id: 'sampler', version: '0.0.1' };
+  const ref = (kind: string, key: string) => ({
+    cartridge_id: 'sampler',
+    cartridge_version: '0.0.1',
+    kind,
+    key,
+  });
+  assert.deepEqual(cheatIntent({ op: 'go_to_room', room: 'well' }, m, 't'), {
+    action_key: 'dev_go_to_room',
+    target_ids: [],
+    input: { room: ref('room', 'well') },
+    view_freshness_token: 't',
+  });
+  assert.deepEqual(cheatIntent({ op: 'set_fact', fact: 'f', value: 2 }, m, 't'), {
+    action_key: 'dev_set_fact',
+    target_ids: [],
+    input: { fact: ref('fact', 'f'), value: 2 },
+    view_freshness_token: 't',
+  });
+});
+
+// Break: an accepted cheat shows a refusal, or a refusal comes back blank or as a bare code.
+test('a refused cheat says why in plain words', () => {
+  assert.equal(cheatNote('go_to_room', accepted), '');
+  assert.equal(
+    cheatNote('set_fact', {
+      kind: 'saved',
+      decision: { kind: 'rejected', error: { code: 'not_found' } },
+    } as Reply),
+    'Set fact refused: no such fact in this cartridge.',
+  );
+  assert.equal(
+    cheatNote('go_to_room', { kind: 'saved', decision: { kind: 'fault', code: 'x' } } as Reply),
+    'Go to room refused: fault x.',
+  );
+  // Break: a lost ack, which may yet commit, reads as a refusal.
+  assert.equal(
+    cheatNote('set_fact', { kind: 'pending' } as Reply),
+    'Set fact not confirmed: pending.',
+  );
+});
+
+// Break: a cheat sent mid catch-up is held by the session, lands on a later pulse and is never recorded.
+test('a cheat waits for the time due and is not sent while it is undelivered', () => {
+  const { game, sent } = session({}, [accepted]);
+  const m = { id: 'c', version: '1' };
+  const stuck = { ...game, pulse: () => ({ kind: 'catching_up' }) };
+  assert.equal(
+    sendCheat(stuck, { op: 'go_to_room', room: 'well' }, m),
+    'Not sent, the game is still catching up: catching_up.',
+  );
+  assert.equal(sent.length, 0);
+  assert.equal(sendCheat(game, { op: 'go_to_room', room: 'well' }, m), '');
+  assert.equal(sent.length, 1);
 });
 
 // A session that holds: `pending` until told otherwise; `pulsed` is what a pulse delivers.

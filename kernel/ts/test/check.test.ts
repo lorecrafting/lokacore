@@ -89,6 +89,26 @@ test('an edit that refuses a step names it and exits 1; each checkpoint still re
   });
 });
 
+// Break: check's host lacks `dev`, so a checkpoint the preview recorded with a cheat fails here; or a
+// cheat that does nothing still passes (from the well, south is the landing; from the landing, none).
+test('a recorded cheat replays', async () => {
+  const dir = sampler('cheat');
+  const room = {
+    cartridge_id: 'rooms_sampler',
+    cartridge_version: '0.0.1',
+    kind: 'room',
+    key: 'well_lane',
+  };
+  const there = { intent: { action_key: 'dev_go_to_room', target_ids: [], input: { room } } };
+  const south = { intent: { ...NORTH.intent, input: { direction: 'south' } } };
+  write(dir, 'to_the_well.json', JSON.stringify({ steps: [there, south] }));
+  write(dir, 'without.json', JSON.stringify({ steps: [south] }));
+  assert.deepEqual(await run(dir), {
+    code: 1,
+    out: 'to_the_well: ok\nwithout: step 1 (move south): rejected not_found\n',
+  });
+});
+
 // Break: a session carries over between checkpoints instead of the start over the preview's jump
 // does, or a jump's path reaches a prompt: the run would hang on the open stdin.
 test('each checkpoint starts over without a prompt', async () => {

@@ -7,7 +7,7 @@ import { Blow } from '../book/Blow.tsx';
 import { Combat } from '../book/Combat.tsx';
 import { useCues } from '../book/cues.ts';
 import { Control } from '../book/pages.tsx';
-import { size } from '../book/tokens.ts';
+import { opacity, size } from '../book/tokens.ts';
 import { pageStory } from './screen.tsx';
 import CombatOneFoeView from './views/combat-one-foe.json';
 import CombatPackView from './views/combat-pack.json';
@@ -82,7 +82,7 @@ export const BlowWash: StoryObj = {
   render: () => <Struck />,
   name: 'Blow wash',
   play: async ({ canvas, canvasElement, userEvent }) => {
-    const paper = canvasElement.querySelector<HTMLElement>('[aria-hidden="true"]')!;
+    const paper = canvasElement.querySelectorAll<HTMLElement>('[aria-hidden="true"]')[1]!;
     await expect(Number(getComputedStyle(paper).opacity)).toBe(0);
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
     await waitFor(() => expect(Number(getComputedStyle(paper).opacity)).toBeGreaterThan(0));
@@ -91,5 +91,36 @@ export const BlowWash: StoryObj = {
     await waitFor(() => expect(Number(getComputedStyle(paper).opacity)).toBeGreaterThan(0.1));
     await expect(frame.scrollWidth).toBe(frame.clientWidth);
     await expect(frame.scrollHeight).toBe(frame.clientHeight);
+  },
+};
+// A death in a fight leaves a faint wash (book-ui.md, Falling). Breaks: the wash clears after a fatal blow.
+function Fatal() {
+  const [view, setView] = useState(() => struck(5));
+  const [died, setDied] = useState<string>();
+  useCues(view, false, 0, 0, false, undefined, died);
+  return (
+    <div style={{ display: 'flex', width: size.column, height: size.column }}>
+      <Blow>
+        <Control
+          label="Continue"
+          onPress={() => {
+            setView(struck(0));
+            setDied('fatal');
+          }}
+        />
+      </Blow>
+    </div>
+  );
+}
+export const FatalBlowHeld: StoryObj = {
+  render: () => <Fatal />,
+  name: 'Fatal blow held',
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    const faint = canvasElement.querySelector<HTMLElement>('[aria-hidden="true"]')!;
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
+    // Settled at its hold, so axe reads the resting colours (loka-gj82.10).
+    await waitFor(() => expect(Number(getComputedStyle(faint).opacity)).toBe(opacity.faint), {
+      timeout: 3000,
+    });
   },
 };

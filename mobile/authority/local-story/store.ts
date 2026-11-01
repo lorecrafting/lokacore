@@ -97,7 +97,7 @@ const whole = (m: Record<string, Json>) =>
  * or lacks a field play relies on: the head's numbers, the receipt scope and replay ids (03 §14),
  * the binding (null: a guest) (OFF-07). A corrupt save is reported, never replaced by `fresh`.
  */
-export function load(db: Db, fresh: World, first: () => Meta) {
+export function load(db: Db, fresh: World, first: () => Meta, dev = false) {
   // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
   if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
   // Classified before any table is created: empty only when no table holds progress (the trace
@@ -126,7 +126,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const world = hydrate(fresh, { ...state, clock: h.clock, rng } as World['state'], true);
     if (!world || !restorable(world)) return undefined;
     const meta = { ...m, parent, seed, pin } as Meta;
-    receiptRecovery(fresh, world, db, meta, h.revision);
+    receiptRecovery(fresh, world, db, meta, h.revision, dev);
     return saved(world, h.revision, meta, db);
   } catch (e) {
     if (e instanceof SyntaxError || /malformed JSON/.test(String(e))) return undefined;

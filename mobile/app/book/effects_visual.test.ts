@@ -109,7 +109,7 @@ function blown(t: any) {
   return { at, tick, draw };
 }
 const peaks = () => g.sequences.map((s: any[]) => s[1]);
-const scale = (shown: any[]) => flat(shown[2].props.style).transform[0].scale;
+const scale = (shown: any[]) => flat(shown.at(-1).props.style).transform[0].scale;
 
 // Breaks: Flashes off still washes or swells (photosensitive players), or the setting sticks on.
 test('Flashes off gives no wash and no swell', (t) => {
