@@ -127,10 +127,14 @@ test('a narrated event dries motion.dry.lag later; reduced motion is a plain fad
   g.reducedMotion = true;
   g.delays = [];
   g.timings = [];
-  const still = rig(t)(() => nodes(LogLines({ lines: line() })));
+  const quiet = line();
+  const drawStill = rig(t);
+  const still = drawStill(() => nodes(LogLines({ lines: quiet })));
   assert.deepEqual(g.delays, []);
   assert.deepEqual(g.timings, [160]);
   assert.deepEqual(still[1].props.style[1], { opacity: 0 });
+  const settled = drawStill(() => nodes(LogLines({ lines: quiet })));
+  assert.deepEqual(settled[1].props.style[1], { opacity: 1 });
 });
 
 // Breaks: an away recap entering the log has no drying, or an old one re-dries; the cap drifts.
@@ -187,7 +191,8 @@ test('an unavailable card never lifts; its press is a warning haptic and its rea
   const after = shown();
   assert.deepEqual(g.timings, [240]);
   assert.deepEqual(g.delays, [], 'no lag on a refusal');
-  assert.ok(after.some((n) => n.props?.children === "It's too heavy."));
+  const said = after.filter((n) => n.props?.children === "It's too heavy.");
+  assert.equal(said.length, 2, 'on the card and in its live region');
   assert.equal(flat(card(after).props.style).transform, undefined);
 });
 
