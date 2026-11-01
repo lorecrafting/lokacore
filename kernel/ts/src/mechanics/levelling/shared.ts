@@ -1,8 +1,9 @@
 // Toolbox row 4 (docs/system/mechanics.md experience and levelling): one levelling row per
 // character; level and unspent points are derived on read, never stored.
-import type { CharacterId, DeltaOp, LevellingRow, Text } from '../../contracts.gen.ts';
+import type { CharacterId, DeltaOp, DomainEvent, LevellingRow, Text } from '../../contracts.gen.ts';
 import { saturate } from '../../foundation/int.ts';
-import type { World } from '../../runtime/decision.ts';
+import type { Mint, World } from '../../runtime/decision.ts';
+import type { Base } from '../fact.ts';
 
 const NONE: LevellingRow = { experience: 0, allocated: {} };
 
@@ -12,7 +13,7 @@ type Spec = NonNullable<NonNullable<World['cartridge']['world']>['levelling']>;
 const reached = (spec: Spec, experience: number) =>
   spec.thresholds.filter((t) => t <= experience).length;
 
-/** The actor's row, level, experience, next threshold (absent at the top) and unspent points. */
+/** The actor's row, level, experience, thresholds around it (next absent at the top), unspent points. */
 export function levelling(world: World, actor: CharacterId) {
   const spec = world.cartridge.world?.levelling;
   if (!spec) return;
@@ -21,22 +22,60 @@ export function levelling(world: World, actor: CharacterId) {
   const r = reached(spec, experience);
   const spent = Object.values(allocated).reduce((a, n) => a + n, 0);
   const unspent = spec.points_per_level * r - spent;
-  return { row, level: r + 1, experience, next: spec.thresholds[r], unspent };
+  return {
+    row,
+    level: r + 1,
+    experience,
+    from: spec.thresholds[r - 1] ?? 0,
+    next: spec.thresholds[r],
+    unspent,
+  };
 }
 
 /**
- * The cartridge's level_up line when `ops` (a whole proposal from `world`) raise `actor`'s
- * level, or its death penalty narration when they lower the experience (only a death's loss
- * does): the stored row against the last write's value (mechanics.md rows 4 and 47).
+ * The cartridge's gained line when `ops` (a whole proposal from `world`) add to `actor`'s
+ * experience, then its level_up line when they raise the level, or its death penalty narration
+ * when they lower the experience (only a death's loss does): the stored row against the last
+ * write's value (mechanics.md rows 4 and 47).
  */
 export function levelUp(world: World, actor: CharacterId, ops: readonly DeltaOp[]): Text[] {
   const spec = world.cartridge.world?.levelling;
   const last = ops.filter((o) => o.op === 'levelling.set' && o.character_id === actor).at(-1);
   if (!spec || last?.op !== 'levelling.set') return [];
   const from = world.state.levelling?.[actor]?.experience ?? 0;
+  const to = last.value.experience;
   const lost = world.cartridge.world?.death?.penalty?.experience?.narration;
-  if (last.value.experience < from) return lost ? [{ key: lost }] : [];
-  return reached(spec, last.value.experience) > reached(spec, from) ? [{ key: spec.level_up }] : [];
+  if (to < from) return lost ? [{ key: lost }] : [];
+  return [
+    ...(spec.gained && to > from ? [{ key: spec.gained, bindings: { amount: to - from } }] : []),
+    ...(reached(spec, to) > reached(spec, from) ? [{ key: spec.level_up }] : []),
+  ];
+}
+
+/**
+ * A level_reached for each threshold a sequence's folded levelling write raises its character
+ * past, ascending (row 4); a fall crosses none. `join` numbers each one's position.
+ */
+export function levelsReached(
+  world: World,
+  own: readonly DeltaOp[],
+  base: Base,
+  mint: Mint,
+): readonly DomainEvent[] {
+  const spec = world.cartridge.world?.levelling;
+  if (!spec) return [];
+  return oneWrite(own).flatMap((o) => {
+    if (o.op !== 'levelling.set') return [];
+    const { character_id } = o;
+    const from = reached(spec, o.expected?.experience ?? 0);
+    return spec.thresholds.slice(from, reached(spec, o.value.experience)).map((_, i) => ({
+      id: mint() as DomainEvent['id'],
+      ...base,
+      scope: { kind: 'player' as const, character_id },
+      position: 0,
+      payload: { type: 'level_reached' as const, character_id, level: from + i + 2 },
+    }));
+  });
 }
 
 /**

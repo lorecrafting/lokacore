@@ -1328,7 +1328,7 @@
           }
         },
         "levelling": {
-          "description": "The player's level, experience, the total that reaches the next level (absent at the top level) and unspent attribute points, when the cartridge declares world.levelling (toolbox row 4).",
+          "description": "The player's level, experience, the total that reached the current level (0 at level 1), the total that reaches the next level (absent at the top level) and unspent attribute points, when the cartridge declares world.levelling (toolbox row 4).",
           "type": "object",
           "properties": {
             "level": {
@@ -1336,6 +1336,10 @@
               "minimum": 1
             },
             "experience": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "from": {
               "type": "integer",
               "minimum": 0
             },
@@ -1351,6 +1355,7 @@
           "required": [
             "level",
             "experience",
+            "from",
             "unspent"
           ],
           "additionalProperties": false

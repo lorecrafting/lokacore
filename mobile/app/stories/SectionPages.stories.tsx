@@ -46,7 +46,7 @@ export const CharacterPointsToSpend: StoryObj = {
     ...CharacterFullView,
     view: {
       ...CharacterFullView.view,
-      levelling: { level: 2, experience: 30, next: 100, unspent: 1 },
+      levelling: { level: 2, experience: 30, from: 30, next: 100, unspent: 1 },
       actions: [
         ...CharacterFullView.view.actions,
         { ...raise, target: { kind: 'none' }, input: ['attribute'] },

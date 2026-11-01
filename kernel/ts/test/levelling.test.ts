@@ -17,6 +17,7 @@ import { derived } from '../src/mechanics/attribute/shared.ts';
 import { oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
 import { gameView } from '../src/view/view.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-levelling-sampler-'));
@@ -110,9 +111,15 @@ const hp = (w: World) => {
 // point, or the level-up line is dropped from the killing step (or emitted by an earlier kill).
 test('three rat kills reach level 2 with one point and narrate the level-up once', () => {
   const { two, third, w } = cull();
-  assert.deepEqual(two.levelling, { level: 1, experience: 20, next: 30, unspent: 0 });
+  assert.deepEqual(two.levelling, { level: 1, experience: 20, from: 0, next: 30, unspent: 0 });
   assert.ok(!two.actions.some((a) => a.action_key === 'raise_attribute'));
-  assert.deepEqual(gameView(w).levelling, { level: 2, experience: 30, next: 100, unspent: 1 });
+  assert.deepEqual(gameView(w).levelling, {
+    level: 2,
+    experience: 30,
+    from: 30,
+    next: 100,
+    unspent: 1,
+  });
   assert.equal(narration(third).filter((k) => k === LEVEL_UP).length, 1);
 });
 
@@ -126,7 +133,7 @@ test('Raise STR spends the point, raises the derived damage by 1 and is then ref
   assert.equal(narration(raised).includes(LEVEL_UP), false);
   assert.equal(damage(raised.world), 1);
   const view = gameView(raised.world);
-  assert.deepEqual(view.levelling, { level: 2, experience: 30, next: 100, unspent: 0 });
+  assert.deepEqual(view.levelling, { level: 2, experience: 30, from: 30, next: 100, unspent: 0 });
   assert.equal(view.attributes!.find((a) => a.attribute.key === 'str')!.value, 11);
   assert.ok(!view.actions.some((a) => a.action_key === 'raise_attribute'));
   const command = {
@@ -161,6 +168,7 @@ test('resolving the den quest grants 20 experience; after two kills it narrates 
   assert.deepEqual(gameView(quest.world).levelling, {
     level: 1,
     experience: 20,
+    from: 0,
     next: 30,
     unspent: 0,
   });
@@ -172,10 +180,112 @@ test('resolving the den quest grants 20 experience; after two kills it narrates 
   assert.deepEqual(gameView(up.world).levelling, {
     level: 2,
     experience: 40,
+    from: 30,
     next: 100,
     unspent: 1,
   });
   assert.ok(narration(up).includes(LEVEL_UP));
+});
+
+const events = (r: { decision: object }) =>
+  (r.decision as { events: { id: string; causation_id: string; position: number; payload: any }[] })
+    .events;
+const levels = (r: { decision: object }) =>
+  events(r).flatMap((e) => (e.payload.type === 'level_reached' ? [e.payload.level] : []));
+const lines = (r: { decision: object }) => (r.decision as { narration: object[] }).narration;
+const GAINED = 'levelling.gained';
+/** A fresh world whose stored row already holds `experience`. */
+function holding(experience: number, c: Cartridge = content) {
+  const w = fresh(c);
+  const row = { experience, allocated: {} };
+  return { ...w, state: { ...w.state, levelling: { [w.character]: row } } };
+}
+/** One kill of a rat worth `worth` from a stored row of `experience`. */
+function strike(experience: number, worth: number) {
+  const c = variant((l) => l.kills.forEach((k: any) => (k.experience = worth)));
+  return kill(play(holding(experience, c), { type: 'move', direction: 'east' }).world, 'rat_a');
+}
+
+// Breaks: no level_reached from a credited kill, it lands before the round's own events, its
+// rule runs in a later proposal or not at all, or the gained line follows the level-up line.
+test('the third kill places level_reached after the death and its rule fires in the proposal', () => {
+  const { third } = cull();
+  assert.deepEqual(lines(third).slice(-2), [
+    { key: GAINED, bindings: { amount: 10 } },
+    { key: LEVEL_UP },
+  ]);
+  assert.ok(narration(third).includes('levelling.level_two'));
+  const all = events(third);
+  const reached = all.filter((e) => e.payload.type === 'level_reached');
+  const [character_id] = [third.world.character];
+  assert.deepEqual(
+    reached.map((e) => e.payload),
+    [{ type: 'level_reached', character_id, level: 2 }],
+  );
+  const died = all.find((e) => e.payload.type === 'entity_died')!;
+  assert.ok(reached[0]!.position > died.position);
+  const fact = all.find(
+    (e) => e.payload.type === 'fact_changed' && e.payload.fact.key === 'second_wind',
+  )!;
+  assert.equal(fact.causation_id, reached[0]!.id);
+  assert.equal(fact.payload.new, true);
+  assert.deepEqual(validate('DecisionResult', third.decision), []);
+});
+
+// Breaks: a gain within one level emits an event, the gained line needs a level, or its amount
+// reads the row after the write.
+test('a quest reward within a level tells the gain and emits no event', () => {
+  const accept = play(
+    holding(30),
+    { type: 'accept_quest', quest: { ...attr('cull'), kind: 'quest' } },
+    'cull',
+  );
+  const r = play(accept.world, { type: 'move', direction: 'west' });
+  assert.deepEqual(lines(r).slice(-1), [{ key: GAINED, bindings: { amount: 20 } }]);
+  assert.deepEqual(levels(r), []);
+});
+
+// Breaks: the threshold compare is < instead of <=, or one below it counts.
+test('a grant landing exactly on 100 reaches level 3; landing on 99 does not', () => {
+  assert.deepEqual([levels(strike(30, 70)), levels(strike(30, 69))], [[3], []]);
+});
+
+// Breaks: one event per write instead of per threshold, descending levels, a second level-up
+// line, or a filter that ignores the level so a rule fires for each event.
+test('one grant crossing two thresholds gives two events in order and one line', () => {
+  const r = strike(29, 71);
+  assert.deepEqual(levels(r), [2, 3]);
+  const keys = narration(r);
+  assert.equal(keys.filter((k) => k === LEVEL_UP).length, 1);
+  assert.deepEqual(
+    keys.filter((k) => k.startsWith('levelling.level_t')),
+    ['levelling.level_two', 'levelling.level_three'],
+  );
+  assert.deepEqual(lines(r).slice(-2), [
+    { key: GAINED, bindings: { amount: 71 } },
+    { key: LEVEL_UP },
+  ]);
+});
+
+// Breaks: from is the next threshold (thresholds[r]) or goes missing at level 1 or the top.
+test('the view carries the threshold of the current level, validated, at every level', () => {
+  const view = (w: World) => gameView(w);
+  assert.deepEqual(view(fresh()).levelling, {
+    level: 1,
+    experience: 0,
+    from: 0,
+    next: 30,
+    unspent: 0,
+  });
+  const after = view(cull().w);
+  assert.deepEqual(after.levelling, { level: 2, experience: 30, from: 30, next: 100, unspent: 1 });
+  assert.deepEqual(validate('GameView', after), []);
+  assert.deepEqual(view(holding(120)).levelling, {
+    level: 3,
+    experience: 120,
+    from: 100,
+    unspent: 2,
+  });
 });
 
 /** The sampler with its loaded levelling declaration changed by `change`. */
@@ -189,7 +299,13 @@ function variant(change: (l: any) => void) {
 // cartridge does not list still grants experience.
 test('killing an NPC that kills does not list leaves experience unchanged', () => {
   const { w } = cull(variant((l) => (l.kills = l.kills.filter((k: any) => k.npc.key !== 'rat_c'))));
-  assert.deepEqual(gameView(w).levelling, { level: 1, experience: 20, next: 30, unspent: 0 });
+  assert.deepEqual(gameView(w).levelling, {
+    level: 1,
+    experience: 20,
+    from: 0,
+    next: 30,
+    unspent: 0,
+  });
 });
 
 // Breaks (#344 review, finding 2): unspent ignores points_per_level (one point per level).
@@ -239,6 +355,7 @@ test('a kill that also resolves a rewarding quest writes experience once and lev
   assert.deepEqual(gameView(r.world).levelling, {
     level: 2,
     experience: 30,
+    from: 30,
     next: 100,
     unspent: 1,
   });
