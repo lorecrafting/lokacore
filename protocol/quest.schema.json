@@ -522,7 +522,7 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "after": {"description":"Real minutes since the stage began; 1 to 1440, strictly ascending.",
+                  "after": {"description":"Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending.",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 1440
@@ -545,7 +545,7 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "after": {"description":"Real minutes since the stage began; 1 to 1440, strictly ascending.",
+                  "after": {"description":"Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending.",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 1440

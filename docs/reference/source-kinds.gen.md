@@ -1276,10 +1276,10 @@ Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15,
 | failed | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once failed. |
 | hints | object |  | Timed nudges the Journal shows as real time passes in a stage. |
 | hints.active | list of object |  | Hints for the active stage, earliest first. |
-| hints.active[].after | integer | yes | Real minutes since the stage began; 1 to 1440, strictly ascending. |
+| hints.active[].after | integer | yes | Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending. |
 | hints.active[].text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the hint. |
 | hints.objectives_met | list of object |  | Hints for the objectives-met stage, earliest first. |
-| hints.objectives_met[].after | integer | yes | Real minutes since the stage began; 1 to 1440, strictly ascending. |
+| hints.objectives_met[].after | integer | yes | Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending. |
 | hints.objectives_met[].text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the hint. |
 | objectives_met | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once objectives are met. |
 | outcomes | map of [TextKey](source-kinds.gen.md#textkey) |  | Overrides terminal text by outcome key. |
