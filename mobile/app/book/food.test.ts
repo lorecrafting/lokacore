@@ -47,6 +47,7 @@ registerHooks({
 });
 const { Item } = await import('./Menu.tsx');
 const { default: Book, BookView } = await import('./Book.tsx');
+const { Leaf } = await import('./Leaf.tsx');
 function nodes(e: any): any[] {
   if (Array.isArray(e)) return e.flatMap(nodes);
   if (!e || typeof e !== 'object') return [];
@@ -143,7 +144,7 @@ test('actual Book Item Eat returns World once on normal and uncertain settlement
       if (cold.props.stack.some((p) => p.kind === 'chapter')) {
         const chapter = BookView(cold.props).props.children.props.children.props.children[0].props
           .children;
-        chapter.props.chapterDone();
+        Leaf(chapter.props).props.children[1].props.chapterDone();
       }
       assert.deepEqual(draw().props.stack, []);
       assert.equal(draw().props.screen.log.filter((s) => s === line).length, 1);

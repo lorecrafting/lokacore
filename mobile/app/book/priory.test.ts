@@ -65,6 +65,7 @@ const ids = idsOf(source().value);
 const LEDGER = 'The mill ground more sacks at night than by day.';
 const { InsidePage, Item } = await import('./Menu.tsx');
 const { default: Book, BookView } = await import('./Book.tsx');
+const { Leaf } = await import('./Leaf.tsx');
 function nodes(e: any): any[] {
   if (Array.isArray(e)) return e.flatMap(nodes);
   if (!e || typeof e !== 'object') return [];
@@ -220,7 +221,7 @@ for (const settlement of ['pulse', 'title press'])
       if (settlement === 'title press') {
         const chapter = BookView(draw().props).props.children.props.children.props.children[0].props
           .children[0].props.children;
-        chapter.props.chapterDone();
+        Leaf(chapter.props).props.children[1].props.chapterDone();
         assert.deepEqual(draw().props.stack, []);
         a.fault.reads = false;
         const world = BookView(draw().props).props.children.props.children.props.children[0].props
@@ -236,7 +237,7 @@ for (const settlement of ['pulse', 'title press'])
         assert.equal(settled.props.stack.at(-1).kind, 'chapter');
         const chapter = BookView(settled.props).props.children.props.children.props.children[0]
           .props.children[0].props.children;
-        chapter.props.chapterDone();
+        Leaf(chapter.props).props.children[1].props.chapterDone();
       }
       assert.equal(draw().props.screen.detail(book).length, 1);
       assert.deepEqual(draw().props.stack, [
