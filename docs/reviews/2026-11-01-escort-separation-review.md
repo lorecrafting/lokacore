@@ -89,3 +89,40 @@ No accepted command reaches any listed refusal. The reach is `committedDialogue`
 | `shared.ts:219` no parting | killed, kernel and local-story |
 
 Not done: NPC placement played beyond the first round's child-killed and `npc.move` cases; `bin/mutate_diff.sh` rerun; a non-escort non-exchange resolving choice on a repeatable quest (`resolution` serves it too, reached only through `movesItem` at `dialogue-save.ts:27`; not checked whether main behaves the same).
+
+## Re-check at `6f1822cbe9f38dad841276a7ce86827feb9fd972`
+
+Verdict: **CHANGES REQUIRED**. The lawful brick is gone, but the fix also dropped two save bindings on quests that never retire, against its own statement that the row check stays for them; both are one-line restores, and a save-contract slice should not merge with them gone (findings 1 and 2). CI at this head (`gh run list --commit`): graph-diff, book-e2e, ci all success.
+
+Must hold: a lawful repeat reopens (`docs/lessons/storage.md:41-45`), and a quest row that no accepted command retires still binds its receipts. Retire happens only for `repeatable` (`quest/lifecycle.ts:115-117`).
+
+### Dispositions
+
+- B2 fixed. `escort_repeat.test.ts:155` plays my non-exchange Complete + re-accept + reopen + move, two rounds; green. Riddle on a repeatable quest: `escort_repeat.test.ts:232`; green.
+- Readers: the developer's claim holds. Deadline and offer: `exchanges.ex:94,133`. Expedition: `expedition.ex:102`. Patrol: `patrol.ex:19`. Dreams: `dreams.ex:131`. `store.ts:149`, `dialogue-save.ts:88` read shape or definitions only. Only `dialogue-receipt.ts:162` reads the current row.
+
+### Findings
+
+1. **Should-fix** `mobile/authority/local-story/dialogue-receipt.ts:166-169`: for non-exchange, `instance_id` now comes from the transition, so `transitions[0].instance_id === instance_id` compares it with itself. At `4ab5b92b4` it compared with `q[0]`. Probe: a non-repeatable receipt whose op and `quest_resolved` name another instance reopens accepted at head; adding `transitions[0].instance_id !== q[0]` inside the guard gives `save_corrupt`.
+2. **Should-fix** `mobile/authority/local-story/riddle-save.ts:31`: the current-row compare is gone for every quest, not only repeatable, unlike `dialogue-receipt.ts:161`. Probe on the non-repeatable `riddle.test.ts` fixture: row and receipts forged to one other instance reopens `open`; with the old compare restored (mutant f) the same probe gives `save_corrupt`. By reading, the kernel refuses the answer (`shared.ts:145`) rather than throwing, so the sitting is dead, not a fault. Restore the compare behind `!repeatable`.
+
+Both need a forged save; no lawful play reaches them.
+
+### Note, not this fix's to carry
+
+`dialogue-receipt.ts:163`: dropping `q[1].outcome !== row.choice_id` (mutant e) or `!q` (mutant h) leaves all 30 local-story test files that mention a quest green. Head refuses both (probe: row outcome forged, row deleted, each `save_corrupt`). The same two mutants also survive with the `4ab5b92b4` source against those files, and the line is already on `origin/main`, so the gap predates this fix. Proposed housekeeping issue: add the two forged rows to an existing table. Not a condition of merge.
+
+### Mutants, singly (null control green, each reverted)
+
+| Mutant | Result |
+|---|---|
+| a: guard always checks the row | killed, `escort_repeat.test.ts` |
+| b: guard never checks the row | killed, 3 tests in the wider 30-file set |
+| c: `instance_id` always the row's | killed, 35 failure lines |
+| d: drop `state !== 'resolved'` | survives; equivalent, an active row has no outcome, so the outcome clause refuses |
+| e: drop the outcome compare | survives, also at `4ab5b92b4` (note) |
+| h: drop `!q` | survives, also at `4ab5b92b4` (note) |
+| f: riddle-save restores the old compare | killed, riddle test on a repeatable quest |
+| g: riddle-save drops `!d.quest` | survives; compile refuses `wrong_limit` without a quest (`dialogues.ex:206`) |
+
+Not done: `bin/mutate_diff.sh`; compiling a riddle on a repeatable quest (no refusal in `exchanges.ex`, by search; the fixture bypasses compile, so whether the `riddle-save.ts` change is reachable in a real cartridge is unverified); the wider set for mutants a, c, f, g, which were already decided or equivalent.
