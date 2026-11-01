@@ -857,7 +857,7 @@ query. An aimed damage spell (`damage` in `scripted_action/spell.ts`) still read
 `unattackable` NPC with `disposition.engage`, as a population's member or as a death credit's NPC is a
 compile error. Installed kernel 1.136.
 
-A round's blow stops at the target's authored hp floor, or at 0 under a negative floor, where death
+A round's blow stops at the target's authored hp floor, and at a floor of 0 death
 fires; a floored foe stays alive and the fight goes on, as under a spell's damage (`aboveFloor`,
 loka-2lvx). The compiler refuses an hp floor or start below 0 (`BODY_BELOW_ZERO`, loka-vduxr.21): a body below 0 could not die by a blow.
 It creates an encounter and its first round job at now + the authored interval; it does

@@ -140,7 +140,6 @@ defmodule Loka.ContentExplainFollowOnsTest do
     assert Enum.any?(lines, &(&1 =~ "resources.json" and &1 =~ "minimum <= start <= maximum"))
   end
 
-  # Break: a pool refused for its gain still prints its holder's start as a bad number.
   # Break: a body pool below 0 compiles again, and the body can never die by a blow.
   test "an hp floor or start below 0 says the body could never die", %{tmp_dir: dir} do
     line = "A body with hp below 0 could never die from a blow."
@@ -165,6 +164,7 @@ defmodule Loka.ContentExplainFollowOnsTest do
     assert only =~ "`gain`"
   end
 
+  # Break: a pool refused for its gain still prints its holder's start as a bad number.
   test "a bad gain prints only the gain", %{tmp_dir: dir} do
     gold = %{"gain" => "x", "maximum" => 9, "minimum" => 0, "start" => 0}
     assert [line] = pool_lines(dir, gold)
