@@ -220,6 +220,44 @@ when you run `mix loka.compile` by hand.
 | `topics` | [`spells_sampler`](../../cartridges/spells_sampler/) | nothing (it writes its own fact) |
 | `transports` | [`fast_travel_sampler`](../../cartridges/fast_travel_sampler/) | a room, an NPC and a resource; also writes the far room and both legs |
 
+## Make something happen later
+
+A reaction's `steps` can hold a wait, in whole seconds of game time:
+
+```json
+"steps": [
+  { "op": "narrate", "text": "first_line" },
+  { "op": "wait", "seconds": 600 },
+  { "op": "narrate", "text": "second_line" }
+]
+```
+
+The compiler turns the list into delayed rules (`<rule>_wait_1`, and so on), so the game keeps no
+new state. What to expect:
+
+- `when` is read again when each part runs. If it no longer holds, that part does nothing, and so
+  does every later part it still blocks. This is the only way to cancel: nothing stops a wait because
+  the player died, left or saved. A save keeps it, and it runs after the game reopens. Write what
+  should stop it into `when`. A step can do this itself: a part that makes `when` false drops the
+  parts after it, which is a good way to end a sequence early.
+- A wait after a timed action counts from the end of the action, when the rule names it:
+  `"on": { "event": "action_completed", "action": "<key>" }`. The compiler refuses a wait on
+  `action_completed` with no `action` while the game has a timed action, and on a custom event a
+  timed action sends, when the list has two or more delayed parts. Name the action instead. A single
+  wait is allowed there; it runs right after the action if the action is longer.
+- `action_completed` never fires when the action's check fails. To follow a failure, use
+  `check_failed`, or a single wait on the failure's own event. On `check_failed` the next point
+  applies.
+- Other long moments are not known at compile: a rule on another event inside a timed action (a
+  check, a fact change), or a chain of events from one. If such a command already takes longer than
+  the wait, every part due inside it runs right after it, and their order can differ each time. Do
+  not rely on the order there.
+- After a wait a step cannot read the event that started the rule: move an NPC or item, send an
+  event, advance a quest. Put those above the first wait. `when` cannot use `subject: "subject"`.
+  A fact step on a per-subject fact needs its `npc` or `item` after a wait: without one it narrates
+  but writes nothing.
+- A `wait` works only in a reaction, not in an action, a dialogue choice or a scene.
+
 ## Keep a fight from starting
 
 An NPC without an `attack` can never be attacked, so a story NPC needs nothing and may have no `hp`.

@@ -3310,6 +3310,8 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
 
 ## Delayed reactions (toolbox row FD1)
 
+A `wait` in a reaction's `steps` is source only: it lowers to these rules ([Source shortcuts](cartridge.md#source-shortcuts)), with this section's fire and cancel rules.
+
 [Toolbox row FD1](../MECHANICS-TOOLBOX.md#ranked-toolbox) (source: `docs/rnd/depth-and-ux-2026-10-13.md` gap 1): "a consequence arrives later; a rule reads how long ago something happened". The PM brief is in Beads `loka-kgd.138` (2026-10-14). [Declarations](cartridge.md#delayed-reaction-declarations) govern it. Facts hold plain values (no write time), so the row stores a time in an int fact.
 
 - **`after`.** A [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) rule may carry `after: <int >= 1>`, in logical seconds, on the whole rule (not per step). On delivery its `when` is read as today; when it holds, the rule writes one `job.schedule` in its writer group instead of its steps: job `{kind: "reaction", key: <rule key>}`, `actor_id` the delivery's actor (RS-4's [Attribution](#reaction1-kerneltssrcmechanicsreactionts): the subject's character, else the event's `actor_id`, else the root actor), due at `max(cause time + after, horizon + 1)` for a root command's delivery, where the horizon is the proposal's clock (a wait's `until`), and at `cause time + after` for a delivery inside a job run.

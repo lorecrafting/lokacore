@@ -82,6 +82,12 @@ defmodule Loka.Content.Explain do
          unattackable_engage | `{rel}` is `unattackable` and has a `disposition.engage` line, which would never play. | Remove `disposition.engage`, or remove `unattackable`.
          unattackable_foe | `{rel}` is `unattackable`, so no one can fight it, and a population's members and a death credit's NPC are there to be fought. | Remove `unattackable`, or name another NPC.
          template_schedule | `npcs/{key}` is a spawn template, so nothing it would schedule exists to walk. | Remove `daily_schedule`, or remove `spawn_template`.
+         wait_outside | `wait` only works in a reaction's `steps`. | Move these steps into a reaction, or remove `wait`.
+         wait_seconds | A `wait` takes whole `seconds` of at least 1 and nothing else, and a rule's `after` and waits add up to at most 2147483647. | Fix `seconds`.
+         wait_empty | Nothing runs after this `wait`. | Put a step after it, or remove it.
+         wait_event | This step reads the event that started the rule, and that event is gone after a `wait`. | Move the step above the first `wait`.
+         wait_inside_action | This rule can start inside a timed action, and the game cannot tell how long that action takes, so two or more waits could land in one second, in any order. | Start the rule from `action_completed` and name the `action`. That event never fires when the action's check fails: for a failure, use `check_failed` (its parts run right after the action, order not sure) or a single `wait`.
+         wait_subject | A rule with a `wait` reads `when` again when each stretch runs, and the event's `subject` is gone by then. | Read the actor instead, or split the rule by hand.
          duration_status | An action with a duration cannot apply a status. | Remove `duration`, or remove `status.apply`.
          layout_same_spot | Rooms {rooms} share the spot x {x}, y {y}, z {z}. | Give each its own x, y, z in layout.json.
          layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.
