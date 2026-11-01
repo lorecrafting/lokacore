@@ -61,3 +61,27 @@ test('a leaf the report did not annotate does not count as holding', () => {
 test('no policy has no conditions', () => {
   assert.deepEqual(sentences({}), [{ text: 'It has no conditions.', ok: true, depth: 0 }]);
 });
+
+// Breaks: an unknown leaf reads as no, or as yes; a branch hides a verdict its other leaves settle
+// (all with a false leaf is no, any with a true leaf is yes, whatever the target); a fact on the
+// target claims to be unset.
+test('a leaf that depends on the target leaves a branch open only if the rest does not settle it', () => {
+  const open = { op: 'target_present', holds: 'depends' };
+  const yes = fact('a', 1, 1, true);
+  const no = fact('b', 1, 2, false);
+  const verdict = (policy: object) => sentences({ policy })[0]!.ok;
+  assert.equal(verdict(open), 'depends');
+  assert.equal(verdict({ op: 'not', item: open }), 'depends');
+  assert.equal(verdict({ op: 'not', item: yes }), false);
+  assert.equal(verdict({ op: 'not', item: no }), true);
+  assert.equal(verdict({ op: 'all', items: [yes, open] }), 'depends');
+  assert.equal(verdict({ op: 'all', items: [no, open] }), false);
+  assert.equal(verdict({ op: 'any', items: [no, open] }), 'depends');
+  assert.equal(verdict({ op: 'any', items: [yes, open] }), true);
+  assert.equal(
+    sentences({
+      policy: { op: 'fact_compare', fact: { key: 'wet' }, equals: true, holds: 'depends' },
+    })[0]!.text,
+    'fact wet on the target needs true',
+  );
+});

@@ -2,6 +2,7 @@
 // a key or words live. No game logic here.
 import { useState } from 'react';
 import { ask, find, type Found } from './author.ts';
+import type { Row } from '../../../kernel/ts/play/why_words.ts';
 import type { State } from './book.ts';
 import { Button } from './components/ui/button.tsx';
 import { Input } from './components/ui/input.tsx';
@@ -52,20 +53,20 @@ export function Facts({ state }: { state?: State }) {
       </div>
       {shown.choice ? <Listed title={`Choice: ${shown.choice.prompt}`} items={shown.choice.options} /> : null}
       <Separator />
-      <Rows title="Quests" rows={state.quests.map((q) => [q.quest, q.state])} />
+      <Rows title="Quests" rows={shown.quests.map((q) => [q.quest, q.state])} />
       <Rows title="Facts" rows={Object.entries(state.facts).map(([k, v]) => [k, JSON.stringify(v)])} />
     </div>
   );
 }
 
-type Told = { lines: { text: string; ok: boolean; depth: number }[] };
+type Told = { lines: Row[] };
 const Answer = ({ name, report }: { name: string; report: Told }) => (
   <div>
     <Heading>{name}</Heading>
     <ul className="space-y-1">
       {report.lines.map((l, i) => (
-        <li key={i} style={{ paddingLeft: `${l.depth}rem` }} className={l.ok ? '' : 'text-destructive'}>
-          {l.ok ? 'yes' : 'no'}: {l.text}
+        <li key={i} style={{ paddingLeft: `${l.depth}rem` }} className={l.ok === false ? 'text-destructive' : ''}>
+          {l.ok === 'depends' ? 'depends on the target' : l.ok ? 'yes' : 'no'}: {l.text}
         </li>
       ))}
     </ul>
@@ -80,12 +81,14 @@ const Answer = ({ name, report }: { name: string; report: Told }) => (
 
 /** Why an action or dialogue of this room is or is not on offer now (kernel/ts/play/why.ts, over POST /__author/why). */
 export function Why({ state, trace }: { state?: State; trace: () => Promise<string[]> }) {
-  const [told, setTold] = useState<{ key: string; report?: Told; error?: string }>();
+  const [answer, setTold] = useState<{ at: string; key: string; report?: Told; error?: string }>();
+  const at = JSON.stringify(state);
+  const told = answer?.at === at ? answer : undefined; // true of the world it was asked on, no other
   const why = async (on: 'action' | 'dialogue', key: string) => {
     const rows = await trace();
     ask('why', { trace: rows, [on]: key }).then(
-      (r) => setTold(r.ok ? { key, report: r.told as Told } : { key, error: String(r.told) }),
-      (err: Error) => setTold({ key, error: err.message }),
+      (r) => setTold(r.ok ? { at, key, report: r.told as Told } : { at, key, error: String(r.told) }),
+      (err: Error) => setTold({ at, key, error: err.message }),
     );
   };
   const offers = state?.shown.offers;

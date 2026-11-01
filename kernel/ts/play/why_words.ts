@@ -4,8 +4,9 @@
 import type { Policy } from '../src/contracts.gen.ts';
 
 type Leaf = Exclude<Policy, { op: 'all' | 'any' | 'not' }>;
-type Annotated = Policy & { holds?: boolean };
-export type Row = { text: string; ok: boolean; depth: number };
+type Verdict = boolean | 'depends'; // depends: on a target the question has not chosen yet
+type Annotated = Policy & { holds?: Verdict };
+export type Row = { text: string; ok: Verdict; depth: number };
 
 const ON = { lunar: 'moon', weather: 'weather', season: 'season', tide: 'tide' } as const;
 const WORDS: { [O in Leaf['op']]: (p: Extract<Leaf, { op: O }>) => string } = {
@@ -13,7 +14,9 @@ const WORDS: { [O in Leaf['op']]: (p: Extract<Leaf, { op: O }>) => string } = {
   has_item: (p) => `item ${p.item.key} is held`,
   quest_state: (p) => `quest ${p.quest.key} is ${p.state}`,
   fact_compare: (p: Extract<Leaf, { op: 'fact_compare' }> & { now?: unknown }) =>
-    `fact ${p.fact.key} is ${p.now == null ? 'unset' : JSON.stringify(p.now)}; needs ${JSON.stringify(p.equals)}`,
+    p.now === undefined
+      ? `fact ${p.fact.key} on the target needs ${JSON.stringify(p.equals)}`
+      : `fact ${p.fact.key} is ${p.now === null ? 'unset' : JSON.stringify(p.now)}; needs ${JSON.stringify(p.equals)}`,
   time_window: (p) => `the time of day is from ${p.from} to ${p.to}`,
   barrier_state: (p) => `barrier ${p.barrier.key} is ${p.equals}`,
   stat_compare: (p) => `attribute ${p.attribute.key} is at least ${p.at_least}`,
@@ -40,19 +43,24 @@ const WORDS: { [O in Leaf['op']]: (p: Extract<Leaf, { op: O }>) => string } = {
 };
 
 // One tree's rows, parents before children, each branch's verdict from its leaves.
-function rows(p: Annotated, depth: number): { ok: boolean; rows: Row[] } {
+function rows(p: Annotated, depth: number): { ok: Verdict; rows: Row[] } {
   if (p.op === 'all' || p.op === 'any' || p.op === 'not') {
     const kids = (p.op === 'not' ? [p.item] : p.items).map((x) => rows(x, depth + 1));
-    const ok =
-      p.op === 'all'
-        ? kids.every((k) => k.ok)
-        : p.op === 'any'
-          ? kids.some((k) => k.ok)
-          : !kids[0]!.ok;
+    const has = (v: Verdict) => kids.some((k) => k.ok === v);
+    const ok: Verdict =
+      p.op === 'not'
+        ? kids[0]!.ok === 'depends'
+          ? 'depends'
+          : !kids[0]!.ok
+        : has(p.op === 'any')
+          ? p.op === 'any' // one leaf settles it, whatever the target
+          : has('depends')
+            ? 'depends'
+            : p.op === 'all';
     const text = { all: 'all of these', any: 'any one of these', not: 'not this' }[p.op];
     return { ok, rows: [{ text, ok, depth }, ...kids.flatMap((k) => k.rows)] };
   }
-  const ok = p.holds === true;
+  const ok = p.holds === 'depends' ? p.holds : p.holds === true;
   const text = (WORDS[p.op as Leaf['op']] as (p: Policy) => string)(p);
   return { ok, rows: [{ text, ok, depth }] };
 }

@@ -23,6 +23,7 @@ export function shown(
     room: say(view.place.title.key),
     people: view.entities.filter((e) => e.kind === 'npc').map((e) => say(e.name)),
     held: view.inventory.map((e) => say(e.name)),
+    quests: view.journal.map((q) => ({ quest: q.quest.key, state: q.state })),
     pools: (view.resources ?? []).map((r) => ({
       key: r.resource.key,
       current: r.current,

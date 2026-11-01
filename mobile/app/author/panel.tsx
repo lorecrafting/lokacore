@@ -89,7 +89,7 @@ export function restorePlace(game: Opened | undefined) {
     savePlace();
     return;
   }
-  placeNote = `Place: replayed ${done} steps`;
+  placeNote = `Place: replayed ${done} steps on load`;
   place.hash = chapter.sha256;
   delete place.stopped;
   savePlace();
@@ -162,7 +162,6 @@ const stateOf = (game: Opened) => ({
   refused,
   steps: place.steps,
   facts: game.facts(),
-  quests: game.view().view.journal,
   shown: shown(game.view().view, played(game)!.text, canon(), game.entityIds(), game.roomIds()),
 });
 // Alt-click (Option-click) on a Book line: the panel opens its source in the owner's editor.

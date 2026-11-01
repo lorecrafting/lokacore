@@ -2,26 +2,19 @@
 // Book says `ready` when its bridge mounts, the panel says hello, the Book posts `state` on every
 // session update, answers `trace`, and posts `line` for an Alt-clicked Book line.
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import type { Step as PlaceStep } from '../../../mobile/app/author/place.ts';
+import type { shown } from '../../../mobile/app/author/shown.ts';
 
 export const BOOK = `http://localhost:${import.meta.env.VITE_LOKA_PREVIEW_PORT ?? 19006}`;
-export type Step = { intent: unknown } | { advance: number };
+export type Step = PlaceStep;
+// The real shapes, so a field the page renders wrongly fails tsc here (a hand copy once called a Ref a string).
 export type State = {
   hash: string;
   placeNote: string;
   refused?: number;
   steps: Step[];
   facts: Record<string, unknown>;
-  quests: { quest: string; state: string }[];
-  shown: {
-    room: string;
-    people: string[];
-    held: string[];
-    pools: { key: string; current: number; maximum: number; band: string; tone: string }[];
-    statuses: { label: string; ends_at?: unknown }[];
-    clock: { time: unknown; calendar?: Record<string, unknown> };
-    choice?: { prompt: string; options: string[] };
-    offers: { action: string[]; dialogue: string[] };
-  };
+  shown: ReturnType<typeof shown>;
 };
 export type Line = { key?: string; words: string };
 type Told = { loka: 'author'; ready?: true; state?: State; trace?: string[]; line?: Line };

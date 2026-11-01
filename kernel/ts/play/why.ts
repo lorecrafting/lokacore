@@ -75,7 +75,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
       c,
       on,
       on.now ? prefix(cartridge, trace, ordinal + 1).world : before,
-      on.now ? undefined : primaryTarget(command.payload), // the last command's is not the next one's
+      on.now ? null : primaryTarget(command.payload), // the last command's is not the next one's
     ),
   };
 }
@@ -123,7 +123,7 @@ const causes = (rule: ReactionRule, d: DecisionResult, before: World) =>
 // The policies asked for, on `world` (by default the world before the step): a scripted action's target is the command's,
 // a dialogue's its authored NPC (dialogue/selection.ts:93; ponytail: not a choose row's bound
 // speaker, dialogue/shared.ts:93; read speakerOf once a fixture binds a speaker other than the npc).
-const asked = (c: Cartridge, on: Asked, world: World, target: string | undefined) => ({
+const asked = (c: Cartridge, on: Asked, world: World, target: string | null | undefined) => ({
   ...(on.action !== undefined && {
     action: policy(c.scripted_actions, on.action, world, () => target),
   }),
@@ -132,22 +132,31 @@ const asked = (c: Cartridge, on: Asked, world: World, target: string | undefined
   }),
 });
 
+// Whether admission reads this leaf at the action's target (mechanics/policy.ts: read, tagsOf,
+// statusActive, and target_present).
+const readsTarget = (p: Policy) =>
+  p.op === 'target_present' ||
+  (p.op === 'status_active' && p.subject === 'target') ||
+  (p.op === 'fact_compare' && !!p.subject && !p.npc && !p.item) ||
+  (p.op === 'has_tag' && !p.item && !p.barrier && !p.room && p.subject !== 'room');
+
 // The definition keyed `key`, its policy's leaves read on `world` as admission reads them; no
-// policy, none (it holds).
+// policy, none (it holds). A null target is not chosen yet: a leaf that reads it holds 'depends'.
 function policy<D extends { key: string; policy?: Policy }>(
   defs: Readonly<Record<string, D>> | undefined,
   key: string,
   world: World,
-  target: (d: D) => string | undefined,
+  target: (d: D) => string | null | undefined,
 ) {
   const [rule, d] = Object.entries(defs ?? {}).find(([, x]) => x.key === key) ?? [];
   if (!d) throw new Usage(`no definition keyed ${key}`);
-  const ctx = () => ({ target: target(d) as never, steps: { n: 0 } });
+  const ctx = () => ({ target: (target(d) ?? undefined) as never, steps: { n: 0 } });
   const actor = world.character; // not the last command's: `run_job` has none
   const root = d.policy;
   if (!root) return { rule };
   const at = (i: number) => {
     const leaf = leaves(root)[i]!;
+    if (target(d) === null && readsTarget(leaf)) return { holds: 'depends' };
     return {
       holds: holds(world, actor, leaf, ctx()),
       ...(leaf.op === 'fact_compare' && { now: read(world, actor, leaf, ctx().target) ?? null }),

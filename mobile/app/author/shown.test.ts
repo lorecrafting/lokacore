@@ -17,6 +17,7 @@ const view = {
     { id: 'i1', kind: 'item', name: 'item.stone' },
   ],
   inventory: [{ id: 'i2', kind: 'item', name: 'item.lamp' }],
+  journal: [{ quest: ref('quest', 'lantern'), state: 'active' }],
   resources: [
     {
       resource: { key: 'health' },
@@ -54,13 +55,15 @@ const ids = {
 };
 const words: Record<string, string> = { 'room.t': 'Cellar', 'npc.maud': 'Maud', 'choice.a': 'Yes' };
 
-// Breaks: an item listed among the people; a key shown where its words exist; a key with no words lost.
+// Breaks: an item listed among the people; a key shown where its words exist; a key with no words
+// lost; a quest's Ref passed through (an object as a React child blanks the panel, Book included).
 test('the view reads with its words, a key standing in for a line with none', () => {
   const { offers: _, ...state } = shown(view, (k) => words[k], canon, ids, rooms);
   assert.deepEqual(state, {
     room: 'Cellar',
     people: ['Maud'],
     held: ['item.lamp'],
+    quests: [{ quest: 'lantern', state: 'active' }],
     pools: [{ key: 'health', current: 3, maximum: 9, band: 'hurt', tone: 'warn' }],
     statuses: [{ label: 'status.cold', ends_at: 40 }],
     clock: { time: { label: 'dusk' }, calendar: undefined },
