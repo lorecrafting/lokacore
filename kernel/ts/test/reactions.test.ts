@@ -481,8 +481,8 @@ test('a reaction event.emit on a delivery with no subject emits nothing', () => 
 // Breaks (reaction.ts resource.adjust): a rule whose actor has no body here faults the whole root
 // command, or writes the pool of a body that is not the actor's.
 test('a reaction resource.adjust for an actor with no body writes nothing', () => {
-  const refill = { op: 'resource.adjust', resource: ref('resource', 'hp'), by: 1 };
-  const w = only({ ring: [{ event: 'custom_event', custom: 'ping' }, [refill as never]] });
+  const refill = { op: 'resource.adjust', resource: ref('resource', 'hp'), by: 1 } as const;
+  const w = only({ ring: [{ event: 'custom_event', custom: 'ping' }, [refill]] });
   const OTHER = {
     id: CMD as CommandId,
     payload: { actor_id: 'c0ffee00-0000-4000-8000-000000000001' as CharacterId },
