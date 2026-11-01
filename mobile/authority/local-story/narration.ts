@@ -81,7 +81,7 @@ const latest = (s: Story, command_id: string | undefined, before: number | null)
        OR json_extract(response, '$.outcome') = 'taken'
        OR (? IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(response, '$.events') e
          WHERE json_extract(e.value, '$.payload.type') IN
-           ('action_completed', 'attack_result', 'barrier_changed')))
+           ('action_completed', 'attack_result', 'barrier_changed', 'custom_event')))
        OR EXISTS (SELECT 1 FROM json_each(response, '$.events') e
          WHERE json_extract(e.value, '$.payload.type') = 'entity_died'
            AND json_extract(e.value, '$.payload.victim_definition') IS NULL))

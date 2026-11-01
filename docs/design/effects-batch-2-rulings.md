@@ -280,6 +280,31 @@ No lightning, gold or other directed effect on the last beat: scene-called cues 
 
 > A cartridge's ending is its last scene, then its last declared chapter's title page; the Book adds no ending page and no words of its own.
 
+## G6 prologue room table
+
+The outline's 18 rooms (`docs/worldbuilding/notes/prologue-outline-2026-10-30.md`), to tag and piece. Structure only, no wording; the cartridge's rooms take these when written. Exposed is the `exposed` tag.
+
+| Room | `place.sound` | Exposed | Piece (first entry) |
+|---|---|---|---|
+| Awakening Clearing | wild | yes | Path Through The Mountains |
+| Healing Grove | wild | yes | Path Through The Mountains |
+| Heartwood (hearth and hall) | inn | no | Echoes Of Home |
+| The Spring | shore | yes | Ephemera |
+| Lira's Memorial | church | no | Soul Searcher |
+| Elder Hall records | vault | no | Passage Of Time |
+| High Terrace | wild | yes | Path Through The Mountains |
+| Tending Fields | village | yes | Home Was You |
+| Understory (your hut and Dov's) | village | no | Home Was You |
+| Eastern Grove (Blight line, Watering Hollow) | wild | yes | Path Through The Mountains |
+| Small Grove | wild | yes | Path Through The Mountains |
+| Deep threshold (Three Roots stone) | cave | no | Decoherence |
+| Deep caves (Seren) | cave | no | Decoherence |
+| Heartroot Chamber | crypt | no | Katabasis I |
+| The Thinning | wild | yes | Path Through The Mountains |
+| The Edge | wild | yes | Path Through The Mountains |
+| Hull corridor with cradle room | vault | no | Passage Of Time |
+| The stone outside the hull | wild | yes | Path Through The Mountains |
+
 ## Escalated to PM (one item)
 
 What the player sees after the ending card: the World continuing, a hard stop, or an offer to Start over. It is product flow, not design. Until decided, the card turns to the World as any chapter does, which needs no extra build. Not a Fable design request.

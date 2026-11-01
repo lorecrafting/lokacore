@@ -29,7 +29,7 @@ type Sky = { weather?: string; exposed: boolean; room?: string; world: boolean; 
  *   no thunder. Reduced motion or Flashes off keep the thunder and draw no light; not exposed there
  *   is no light, thunder is muffled and no haptic. Wind lifts on the change and once per room entry.
  * - States: at rest (nothing drawn); struck; fluttering.
- * - Story: Storm.stories.tsx
+ * - Story: stories/Storm.stories.tsx
  */
 export function Storm(p: Sky) {
   const still = useReducedMotion();

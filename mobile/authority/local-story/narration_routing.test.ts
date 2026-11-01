@@ -192,3 +192,46 @@ test('a receipt says died only for the player, with or without lines', () => {
   assert.equal(narration(story), undefined);
   sql.close();
 });
+
+// Breaks: a lever reads a label instead of its event, a latch or a miss never reaches the record, a
+// landed blow sounds as a miss, or a deed with no authored line is dropped like an empty receipt.
+test('a receipt names the deed from its events, with no lines needed', () => {
+  const sql = new DatabaseSync(':memory:');
+  const story = {
+    db: {
+      isInTransactionSync: () => sql.isTransaction,
+      getFirstSync: (query: string, ...args: string[]) => sql.prepare(query).get(...args),
+    },
+    meta: { lineage_id: 'lineage' },
+    world: { character: 'player', cartridge: { world: {} } },
+  } as unknown as Story;
+  sql.exec(
+    "CREATE TABLE receipt(command_id TEXT, response TEXT, scope TEXT, revision INTEGER, command TEXT DEFAULT '{}')",
+  );
+  const put = (payload: object) => {
+    sql.exec('DELETE FROM receipt');
+    const response = { kind: 'accepted', delta: { ops: [] }, events: [{ payload }], narration: [] };
+    sql
+      .prepare('INSERT INTO receipt(command_id, response, scope, revision) VALUES (?, ?, ?, ?)')
+      .run('c', JSON.stringify(response), 'story/lineage/player', 1);
+  };
+  const rows: [object, object | undefined][] = [
+    [{ type: 'custom_event', event: { key: 'lever' } }, { lever: true }],
+    [{ type: 'custom_event', event: { key: 'bell' } }, undefined],
+    [{ type: 'action_completed', action_key: 'pull' }, { opened: true }],
+    [{ type: 'barrier_changed', barrier: 'gate' }, { opened: true }],
+    [{ type: 'attack_result', hit: false }, { missed: true }],
+    [{ type: 'attack_result', hit: true }, undefined],
+  ];
+  for (const [payload, deed] of rows) {
+    put(payload);
+    assert.deepEqual(
+      narration(story, 'c'),
+      deed && { command_id: 'c', lines: [], ...deed },
+      JSON.stringify(payload),
+    );
+  }
+  put({ type: 'custom_event', event: { key: 'lever' } });
+  assert.equal(narration(story), undefined, 'a reopen plays no deed again');
+  sql.close();
+});
