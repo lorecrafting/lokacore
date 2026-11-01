@@ -52,7 +52,7 @@ defmodule Loka.Content.Explain do
          SPEAKER_ELSEWHERE | This `then` leads to a speaker in another room, so the talk ends as it reaches them. | Move the speaker, or end the talk here.
          LOOP_SPEAKER | Talk opens this `then` loop at its member with the most links, so this speaker is only reached through the loop. | Give the speaker a dialogue of their own if the player should start here.
          ENTRY_INVALID | A speaker takes one `entry` dialogue, and never a keyword one. | Keep `entry: true` on one dialogue Talk can open.
-         ENTRY_GUESSED | Talk opens `{target}` here only by inference: it is chosen from a loop, or it comes first by key with no condition. | Mark the dialogue Talk should open with `entry: true`.
+         ENTRY_GUESSED | Talk opens `{target}` here only by inference: it ties another member of its loop for most links, or it comes first by key with no condition. | Mark the dialogue Talk should open with `entry: true`.
          ENTRY_UNUSED | `{target}` never opens: its speaker has an `entry` dialogue and no dialogue that opens leads here. | Link to it from one that opens, or remove it.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
          SITE_EXIT_CONFLICT | This site names direction `{field}`, where the room has no exit. | Name a direction the room has an exit in.
@@ -64,6 +64,7 @@ defmodule Loka.Content.Explain do
          gives_speaker | Line `{text}`: a scene cannot give an item named like its speaker. | Rename the item, or write this as `dialogues/<key>.json`.
          repeated_choice | Line `{text}` repeats a choice or has no words to key it by. | Reword the choice.
          gives_outside_choice | Line `{text}`: `gives:` belongs under a choice. | Move it under a `- ` line.
+         scene_entry | Line `{text}`: a scene header takes no `entry`. | Put `{"entry": true}` in `dialogues/<key>.json` beside the scene.
          misplaced_header | Line `{text}`: `npc:` comes first, then `when:` and `with:`, before any choice. | Move it to the top of the file.
          no_npc | Line `{text}` comes before the speaker is named. | Start the file with `npc: <key>`.
          not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:` or `quest:` (docs/guides/writing-the-game.md).

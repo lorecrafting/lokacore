@@ -77,13 +77,11 @@ defmodule Loka.Content.DialogueLinks do
     {sorted, next} = graph(all)
     open = entries(sorted, next)
 
-    refused(sorted) ++ guessed(open, linked(sorted)) ++ unused(sorted, open, next)
+    refused(sorted) ++
+      guessed(open, Map.take(next, live_keys(sorted))) ++ unused(sorted, open, next)
   end
 
-  # A self-link offers Talk no choice, and a shut-out dialogue never plays to link at all.
-  defp linked(sorted) do
-    for {_, d} <- live(sorted), t <- links(d), t != d["key"], into: MapSet.new(), do: t
-  end
+  defp live_keys(sorted), do: for({_, d} <- live(sorted), do: d["key"])
 
   defp unused(sorted, open, next) do
     played = walk(for({_, d} <- open, do: d["key"]), next, MapSet.new())
@@ -107,15 +105,25 @@ defmodule Loka.Content.DialogueLinks do
     end
   end
 
-  # A guess: a member chosen from a loop, or a dialogue with no condition before another of its
-  # speaker's in key order, which that other never gets past. A name makes its own Talk control.
-  defp guessed(open, named) do
+  # A guess: a loop member tying another for most links, or a dialogue with no condition before another of
+  # its speaker's in key order, which that other never gets past. A name makes its own Talk control.
+  # A shut-out dialogue never plays, so `next` here holds only those that do.
+  defp guessed(open, next) do
     talked = Enum.reject(open, fn {_, d} -> d["entry"] || d["keyword"] end)
-    looped = Enum.filter(talked, fn {_, d} -> d["key"] in named end)
+    looped = Enum.filter(talked, fn {_, d} -> loop_tie?(d["key"], next) end)
 
     for {rel, d} <- Enum.uniq(looped ++ tied(talked)) do
       warning("ENTRY_GUESSED", rel, ["npc"], d)
     end
+  end
+
+  defp loop_tie?(k, next) do
+    k_width = elem(rank(k, next), 0)
+
+    Enum.any?(walk(Map.get(next, k, []), next, MapSet.new()), fn o ->
+      o != k and is_map_key(next, o) and k in walk(next[o], next, MapSet.new()) and
+        elem(rank(o, next), 0) == k_width
+    end)
   end
 
   defp tied(talked) do

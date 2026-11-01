@@ -121,6 +121,7 @@ defmodule Loka.ContentSceneVerbsTest do
           {"npc: maud\nwith: bram\nmaud: hi\n- Go\n  gives: bram\n", [{5, "gives_speaker"}]},
         with_placeholder: {"npc: maud\nwith: ~\nmaud: hi\n", [{2, "bad_with"}]},
         unknown_speaker: {"npc: maud\nbram: hi\n", [{2, "wrong_speaker"}]},
+        entry_header: {"npc: maud\nentry: true\nmaud: hi\n", [{2, "scene_entry"}]},
         refused_gives:
           {"npc: maud\nmaud: hi\n- Go\n- Go\n  gives: maud\n",
            [{4, "repeated_choice"}, {5, "gives_speaker"}]},

@@ -376,6 +376,31 @@ defmodule Loka.ContentDialogueLinksTest do
              [unused.("b"), unused.("c")]
   end
 
+  # Breaks: the marker stops making its dialogue an entry when another speaker's root leads to it,
+  # so its own loop reads as unreachable and draws a false LOOP_SPEAKER.
+  test "another speaker's root leading to a marked hub draws no LOOP_SPEAKER" do
+    all = [
+      d("z_intro", "z", ["a_hub"]),
+      d("a_hub", "a", ["a_x"], %{"entry" => true}),
+      d("a_x", "a", ["a_hub"])
+    ]
+
+    assert Loka.Content.DialogueLinks.loops(all) == []
+  end
+
+  # Breaks: a clear hub warned as a guess, or a tie for most links in a loop not warned.
+  test "a loop warns only when its members tie for most links" do
+    hub = [d("a_x", "a", ["main"]), d("main", "a", ["a_x", "z_y"]), d("z_y", "a", ["main"])]
+    assert entry_findings(hub) == []
+
+    assert entry_findings([
+             d("a_x", "a", ["b", "c"]),
+             d("b", "a", ["a_x", "c"]),
+             d("c", "a", ["a_x"])
+           ]) ==
+             [guess("a_x")]
+  end
+
   # Breaks: the compiler drops the marker, or a marked dialogue fails the schema, so Talk never sees it.
   test "entry: true compiles through to the artifact", %{dir: dir} do
     assert {:ok, artifact, []} =

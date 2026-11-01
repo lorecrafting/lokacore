@@ -74,18 +74,18 @@ bram: line two
 What you can rely on when dialogues link with `then` (JSON dialogues today):
 
 - Put `"entry": true` on the dialogue Talk should open, and it opens there, whatever else leads to
-  it. A person takes one; their other dialogues stop opening, except keyword ones. A condition on
-  the marked dialogue that fails refuses the Talk. Without a marker Talk infers, as below, and the
+  it. A person takes one; their other dialogues stop opening, except keyword ones. Without a marker Talk infers, as below, and the
   compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess.
   A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
   no marker when each but the last by key has a `when:`.
+- A dialogue with a condition that fails passes Talk on to what it leads to. So a first meeting is
+  an `intro` with a `when:` that links to a `hub`: the first Talk opens the intro, and every Talk
+  once the condition fails opens the hub. Talk is refused only when nothing further down opens.
 - Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
   condition holds and that has a choice to show.
 - A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the
   member that leads to the most other dialogues; first by key on a tie, so a hub and one detail
-  open at the first key. Give the hub the most links and it is where the talk starts. If that
-  member's condition fails, that loop does not open: no other member opens instead, so put a
-  condition on the choices rather than on the hub.
+  open at the first key. Give the hub the most links and it is where the talk starts.
 - A `then` whose target cannot play (its condition fails, it has no choice to show, its speaker is
   hostile, dead or gone) ends the talk
   quietly, with no added line.

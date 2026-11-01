@@ -1,4 +1,4 @@
-// size: allow 615, every branching rule's pins beside the one play harness
+// size: allow 690, every branching rule's pins beside the one play harness
 // loka-vduxr.10 on the compiled persuade sampler: per-choice conditions, links between dialogues,
 // a check's two ways on, the hand-off, narrate steps, int fact thresholds and narration variants.
 import { decide } from '../src/mechanics/dialogue/rule.ts';
@@ -15,6 +15,7 @@ import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { hydrate } from '../src/runtime/created.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-branching-'));
@@ -101,7 +102,11 @@ function play(c: unknown) {
   const choose = (choice_id: string) =>
     send({ type: 'choose', continuation_id: view().continuation_id, choice_id });
   const ids = () => view()?.choices.map((o: any) => o.choice_id);
-  return { send, talk, opened, choose, ids, view, world: () => w };
+  // a reload holds only what the save holds: the state, as JSON
+  const reload = () => {
+    w = hydrate(w, JSON.parse(JSON.stringify(w.state)), true)!;
+  };
+  return { send, talk, opened, choose, ids, view, reload, world: () => w };
 }
 const ops = (d: any) => d.delta.ops.map((o: any) => o.op);
 const events = (d: any) => d.events.map((e: any) => [e.position, e.payload.type]);
@@ -221,7 +226,8 @@ test('a then target is not talked to and never reopens itself; then: end ends th
       c.dialogues[`${P}:dialogue/guard`].policy = is('flag', true);
     }),
   );
-  assert.deepEqual(only.talk(), { kind: 'rejected', error: { code: 'invalid_state' } });
+  only.opened(); // falls through the failed root to what it leads to
+  assert.deepEqual(only.ids(), ['x']);
 });
 
 // Breaks: a looped pair leaves no way in, a later key of the cycle entered, or the walk back
@@ -587,6 +593,74 @@ test('Talk picks one member of a loop by distinct links, then key', () => {
     g.opened();
     assert.deepEqual(g.ids(), opens, name);
   }
+});
+
+// Breaks: the marker only beats inference for its own speaker's chain: another speaker's root leading
+// to the marked hub hides it, so Talk to that speaker finds nothing.
+test('entry: true opens a hub another speaker leads to', () => {
+  const g = play(
+    content({ on: plain() }, { z_intro: { go: plain({ then: 'guard' }) } }, (c) => {
+      c.dialogues[`${P}:dialogue/guard`].entry = true;
+      c.dialogues[`${P}:dialogue/z_intro`].npc = ref('npc', 'other');
+      c.npcs[`${P}:npc/other`] = { ...structuredClone(c.npcs[`${P}:npc/guard`]), key: 'other' };
+    }),
+  );
+  g.opened();
+  assert.deepEqual(g.ids(), ['on']);
+});
+
+// Breaks: a failed intro refuses Talk for good, the offer or the rule stops at it, the walk leaves the
+// speaker or ignores link order, a keyword failure falls through, a failed marker gives up, or failed
+// dialogues that lead to each other never finish.
+test('Talk falls through a failed entry to what it leads to, in link order', () => {
+  const met = is('flag', false);
+  const intro = { go: plain({ then: 'hub', steps: [set('flag')] }) };
+  const hub = { ask: plain({ then: 'hub' }), bye: plain({ then: 'end' }) };
+  const shape = (extra: object) =>
+    content(intro, { hub }, (c) =>
+      Object.assign(c.dialogues[`${P}:dialogue/guard`], { policy: met, ...extra }),
+    );
+  for (const extra of [{}, { entry: true }]) {
+    const g = play(shape(extra));
+    g.opened();
+    assert.deepEqual(g.ids(), ['go']);
+    assert.equal(g.choose('go').kind, 'accepted');
+    assert.deepEqual(g.ids(), ['ask', 'bye']);
+    g.choose('bye');
+    g.reload();
+    const npc = gameView(g.world()).entities!.find(
+      (e) => e.id === g.world().entityIds[`${P}:npc/guard`],
+    );
+    assert.equal(npc!.actions!.find((a: any) => a.action_key === 'guard')?.available, true);
+    g.opened();
+    assert.deepEqual(g.ids(), ['ask', 'bye']);
+  }
+  const closed = { policy: is('flag', true) };
+  const links = { x: plain({ then: 'z_b' }), y: plain({ then: 'a_c' }) };
+  const order = play(
+    content(links, { a_c: { c: plain() }, z_b: { b: plain() } }, (c) =>
+      Object.assign(c.dialogues[`${P}:dialogue/guard`], closed),
+    ),
+  );
+  order.opened();
+  assert.deepEqual(order.ids(), ['b']);
+  const nowhere = play(
+    content(intro, { hub: { ask: { ...plain(), policy: is('flag', true) } } }, (c) =>
+      Object.assign(c.dialogues[`${P}:dialogue/guard`], closed),
+    ),
+  );
+  assert.equal(nowhere.talk().kind, 'rejected');
+  const circle = play(
+    content(
+      links,
+      { z_b: { b: plain({ then: 'guard' }) }, a_c: { c: plain({ then: 'guard' }) } },
+      (c) => {
+        for (const k of ['guard', 'z_b', 'a_c'])
+          Object.assign(c.dialogues[`${P}:dialogue/${k}`], closed);
+      },
+    ),
+  );
+  assert.equal(circle.talk().kind, 'rejected');
 });
 
 // Breaks: the marker loses to the first key or to a dialogue nothing leads to, or a failed marker

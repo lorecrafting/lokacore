@@ -30,9 +30,9 @@ const links = (d: DialogueDefinition) =>
 
 /**
  * The dialogues a talk can open: those nothing leads to, then one of each loop with no way in, the
- * member leading to the most other dialogues (a hub), first by key on a tie. Everything an
- * entry reaches is reached only by that answer. A speaker's `entry: true` dialogue replaces all
- * that speaker's others except keyword ones.
+ * member leading to the most other dialogues (a hub), first by key on a tie. What an entry
+ * reaches is reached by that answer, or by falling through a failed entry. A speaker's `entry: true` dialogue replaces all
+ * that speaker's others except keyword ones. A failed entry falls through (`spokenBy`).
  */
 const entries = (world: World) => {
   const all = Object.values(world.cartridge.dialogues ?? {}).sort((a, b) => cmp(a.key, b.key));
@@ -66,6 +66,14 @@ const entries = (world: World) => {
     ),
   );
   return [...roots, ...heads];
+};
+
+/** The dialogues of `d`'s own speaker that `d` leads to, in link order: where a failed Talk falls through. */
+const onward = (world: World, d: DialogueDefinition) => {
+  const all = Object.values(world.cartridge.dialogues ?? {});
+  return links(d)
+    .map((key) => all.find((o) => o.key === key))
+    .filter((o) => !!o && refString(o.npc) === refString(d.npc)) as DialogueDefinition[];
 };
 
 /** Whether some answer's `then` or `then_failed` names `d`: such a dialogue never reopens itself. */
@@ -131,8 +139,9 @@ export const shown = (
 
 /**
  * The dialogue `actor`'s talk to `target` opens: the first of `target`'s dialogues, in key order,
- * whose own policy holds and that offers a choice (hs-14), if any; none while `target` is hostile
- * to `actor` (toolbox row G11).
+ * whose own policy holds and that offers a choice (hs-14), else the first such of the speaker's
+ * dialogues the failed ones lead to, in link order; none while `target` is hostile to `actor`
+ * (toolbox row G11).
  * A talk never opens a keyword dialogue; a say or whisper of `word` opens only one keyed by it
  * (speech@1, row G9). Each policy leaf it evaluates adds one to `steps` (04 §5.4).
  */
@@ -143,16 +152,23 @@ export const spokenBy = (
   steps: Steps = { n: 0 },
   selected?: DefinitionRef,
   word?: string,
-) =>
-  disposition(world, actor, target, steps) === 'hostile'
-    ? undefined
-    : spoken(world, target).find(
-        (d) =>
-          d.keyword === word &&
-          (!selected || world.cartridge.dialogues?.[refString(selected)] === d) &&
-          holds(world, actor, d.policy, { target, steps }) &&
-          shown(world, actor, d, offered(world, actor, d, steps), target, steps).length > 0,
-      );
+) => {
+  if (disposition(world, actor, target, steps) === 'hostile') return undefined;
+  const tried = spoken(world, target).filter(
+    (d) =>
+      d.keyword === word && (!selected || world.cartridge.dialogues?.[refString(selected)] === d),
+  );
+  // grows as it runs: every entry first, then what the failed ones lead to
+  for (const d of tried) {
+    if (
+      holds(world, actor, d.policy, { target, steps }) &&
+      shown(world, actor, d, offered(world, actor, d, steps), target, steps).length > 0
+    )
+      return d;
+    if (word === undefined) tried.push(...onward(world, d).filter((o) => !tried.includes(o)));
+  }
+  return undefined;
+};
 
 /**
  * Whether `target`'s dialogues refuse `actor`'s talk now, no policy of theirs holding or the actor
@@ -176,7 +192,8 @@ export const talkRefused = (
 export function talks(world: World, actor: CharacterId): [string, Offered][] {
   const here = world.state.containers[bodyOf(world, actor)!];
   const talked = entries(world).filter((d) => !d.keyword); // row G9
-  return talked.flatMap(({ key, npc, policy, name: label }) => {
+  return talked.flatMap((d) => {
+    const { key, npc, policy, name: label } = d;
     const speaker = world.entityIds[refString(npc)]!;
     if (!living(world, speaker) || world.state.containers[speaker] !== here) return [];
     const target = { kind: 'entity', scopes: ['room_occupants'] } as const;
@@ -186,7 +203,8 @@ export function talks(world: World, actor: CharacterId): [string, Offered][] {
       target,
       input: [],
       priority: 0,
-      policy,
+      // a failed policy with somewhere to fall through to is not the talk's refusal: spokenBy decides
+      ...(!onward(world, d).length && { policy }),
     };
     return [
       [
