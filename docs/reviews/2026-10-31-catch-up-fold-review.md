@@ -5,7 +5,7 @@
 - Reviewer: independent; authored none of the work.
 - CI at head (`gh run list --commit`): ci, book-e2e and graph-diff success.
 
-**Verdict: CHANGES REQUIRED** (one blocker, `job.ts:153`).
+**Verdict at `6b9077fd4`: CHANGES REQUIRED** (one blocker, `job.ts:153`). **At `178763539`: APPROVE**; see Re-check below.
 
 ## Must be true (written before reading the diff)
 
@@ -71,3 +71,39 @@ At head `hungry` ticks stop at 14400 until past the target. All tests stay green
 ## Not run
 
 Full suites (hosted CI is their run). 120-day move and reopen timings, stopped for time. Device timings.
+
+## Re-check at `178763539e20540290ffb923c722c3611154c13c`
+
+**Verdict: APPROVE.** This supersedes the first-round verdict above, for this head only. Scope: fix commits `fefaeb311`, `178763539`, the code they touch and its direct callers. CI at this head (`gh run list --commit`): graph-diff, ci and book-e2e success.
+
+Dispositions:
+
+- **Blocker `job.ts:153`: resolved.** `foldedTicks` (`job.ts:150`) now reads only queue entries after this run. The hungry/fed scenario rerun at this head, direct `elapsed`: to t0+28801 gives 1, to t0+72001 gives 1 (head before the fix: 3 and 9).
+- **Should-fix `mechanics.md:2407`: resolved.** The exception for same-time ties matches the tie measurements of the first round.
+- **`cartridge.md:1015`: correct.** "A non-body holder those checks do not reach ... never folds" matches `folds`, and `weathering` exists at `mechanics.md:3494`.
+- **New tests: fail on the bug.** `permanent_tick.test.ts` passes at this head (21). Hand mutants on `job.ts`, each restored:
+
+| mutant | red |
+|---|---|
+| old skip line restored | both sub-step cases |
+| no position (`of queue`) | "already ran", "a month of catch-up takes 11 steps" |
+| `findIndex` by id only | "already ran" |
+| `slice(self + 2)` | 6 tests |
+
+- **Size allowance 570 to 600: acceptable.** 597 lines, under the 1.5x cap of 750 in `bin/check_ts_size.mjs`, with a reason; every case shares one compiled fixture and harness.
+- **Record commits: review material only.** `c9904b89f` touches the record and `docs/reviews/README.md`; `627f31ff8` touches the record. Each has the same tree as my commit (`git diff 601f6d9c6 c9904b89f` and `git diff 048c0a776 627f31ff8` are empty).
+- **Nits:** `/code-review` is now reported in the PR body. No diff under `cartridges/toolbox_showcase`.
+
+Rulings on the developer's `/code-review` items; none is a real risk:
+
+- `elapsed.ts:70` calendar budget exposure: not reachable. A reaction cannot adjust a pool (`reaction.ts:331` throws `precondition_failed`; the probe faulted `evaluator_error`). A status the calendar applies is due after the step's target, so it never joins that drain. Probe: hunger 5000, `hungry` -1 per 70, calendar reaction applies `surge` +2000 (duration 150, tick 100), driver to 3590 then 400000: no fault, 367 pulses, clock 400000, one tick per step after the raise, none over `due_jobs_per_advance`.
+- `elapsed.ts:70` no kind guard: cost only; `folds` returns false at `if (!held)` for a non-status job.
+- `job.ts:150` per-tick scan: runs only on folding ticks, and the queue is capped by `due_jobs_per_advance`.
+- `job.ts:156` repeated calendar exemption: two one-line sites, host and kernel, one reason, both named by the spec. Leave it.
+- `rule.ts:59` positional queue: one caller passes it (`runtime/proposal.ts:271`), types check, and absence means no fold.
+
+Open: nothing from this re-check. The PM follow-ups above stand.
+
+Not run in this re-check: full suites, a device, `bin/mutate_diff.sh` on the fix (hand mutants instead), `bin/check_ts_size.mjs` directly (read it; CI green). The compiler's handling of `resource.adjust` in a reaction was read, not run; the runtime refusal was run.
+
+**Final verdict at `178763539`: APPROVE.**
