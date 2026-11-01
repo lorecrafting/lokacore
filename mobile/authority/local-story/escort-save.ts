@@ -41,9 +41,8 @@ export function escortSave(world: World, db: Db, scope: string, rows: [string, C
     invalid();
   const start = selected.find((s) => s.id === escort.continuation_id);
   if (
-    start?.option.escort!.transition !== 'start' ||
-    start.row.choice_id !== escort.choice_id ||
-    start.row.roles.find((r) => r.role === start.option.escort!.npc)?.entity_id !== escort.npc_id
+    start?.row.choice_id !== escort.choice_id ||
+    start.row.roles.find((r) => r.role === start.option.escort?.npc)?.entity_id !== escort.npc_id
   )
     invalid();
   latest(world, db, scope, escort);

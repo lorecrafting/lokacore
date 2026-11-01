@@ -157,10 +157,10 @@ function resolution(
   quest: NonNullable<DialogueDefinition['quest']>,
 ) {
   const transitions = ops.filter((o) => o.op === 'quest.transition' && o.to === 'resolved');
-  // An escort's Complete may name a repeatable quest, whose row a later acceptance replaces.
-  const q = option.escort ? undefined : questOf(s.world, row.actor_id, quest);
+  const q = questOf(s.world, row.actor_id, quest);
   if (
     !option.exchange &&
+    // An escort's Complete may name a repeatable quest, whose row a later acceptance replaces.
     !option.escort &&
     (!q || q[1].state !== 'resolved' || q[1].outcome !== row.choice_id)
   )
@@ -197,15 +197,10 @@ function escortEvidence(
   option: DialogueChoice,
   ops: readonly DeltaOp[],
 ) {
-  const effect = option.escort;
-  if (!effect) return true;
-  const transitions = ops.filter((o) => o.op === 'escort.transition');
-  const op = transitions[0];
   return (
-    world.state.escorts?.[row.actor_id] != null && // no command deletes it
-    transitions.length === 1 &&
-    op?.op === 'escort.transition' &&
-    op.value.status === (effect.transition === 'complete' ? 'completed' : 'following')
+    !option.escort ||
+    (world.state.escorts?.[row.actor_id] != null && // no command deletes it
+      ops.some((o) => o.op === 'escort.transition'))
   );
 }
 
