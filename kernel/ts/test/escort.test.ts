@@ -472,3 +472,18 @@ test('a separated escort walks its schedule hour', () => {
     room(hour.world, 'village_green'),
   );
 });
+
+// Breaks: a following row naming a retired quest (a forged or pre-sweep save) faults every Move for
+// good instead of ending as a separation that leaves the NPC behind.
+test('a following escort whose quest row is gone separates on the next Move', () => {
+  const a = setup();
+  a.ready();
+  a.choose('rescue');
+  const w = a.world();
+  const { [relation(w).quest_instance_id]: _gone, ...quests } = w.state.quests!;
+  a.set({ ...w, state: { ...w.state, quests } } as World);
+  a.move('south');
+  const after = a.world();
+  assert.equal(relation(after).status, 'separated');
+  assert.equal(after.state.containers[child(after)], room(after, 'village_green'));
+});

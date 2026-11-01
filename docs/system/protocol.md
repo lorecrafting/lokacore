@@ -547,7 +547,7 @@ preconditioned escort.transition, plus the authored dialogue effect and escort_s
 policy leaf described in [mechanics](mechanics.md#escort1). Contracts and the compiler
 validate typed IDs/references, role/quest agreement, supported transitions and feature
 minimum. The portable delta composer in both kernels checks full prior-row equality, legal
-status edges and immutable binding. Runtime adoption and changed-row persistence add only
+status edges and immutable binding, except a start on a new quest instance replacing an ended row. Runtime adoption and changed-row persistence add only
 the escorts State section. Choose retains current policy and original-role revalidation.
 Move/Flee and death include escort changes in the same root decision, and any decision that
 parts a following escort writes its separation last ([escort@1](mechanics.md#escort1)); no new command,

@@ -913,11 +913,13 @@ and its status is following/separated/completed. The continuation and choice nam
 original accepted start and bind the same authored NPC. No duplicate start or identity
 swap is legal. `escort.transition {actor_id, expected, value}` compares the complete prior
 row (null at start); the only transitions are null→following, following→separated,
-separated→following and following→completed, retaining every identity field.
+separated→following and following→completed, retaining every identity field. The one exception is
+a start on a new quest instance, which replaces a separated or completed row with a fresh identity.
 
 An authored dialogue choice may declare `escort {npc, quest, transition}` where npc is
 a bound NPC role, quest is a local quest reference and transition is start/rejoin/complete.
-Start requires no existing relation, active actor quest, original living co-located NPC
+Start requires no existing relation (or one whose quest instance a repeatable quest's acceptance
+retired: that escort has ended and the start replaces it), active actor quest, original living co-located NPC
 and ordinary dialogue policy/role admission. Rejoin requires the same separated binding,
 active quest and physical presence; complete requires following, active quest and physical
 presence. Complete must resolve that dialogue's same quest. The shared predicate guards
@@ -931,7 +933,7 @@ neither. Fatal player death writes following→separated in death's existing wri
 beside shrine return, leaving NPC custody unchanged. Whatever else ends the bond (the NPC dies or
 no longer shares the player's room, or the quest ends: resolved, failed or abandoned) writes the same
 following→separated after the decision's other writes, in its own writer group, with no event or line of
-its own; a parted NPC is never moved or teleported, and Rejoin stays the only way back. A decision that itself starts or rejoins leaves that row to the next decision's sweep. Installed kernel 1.137. No independent fare, roll, pathfinding
+its own; a parted NPC is never moved or teleported, and Rejoin stays the only way back. A decision that itself starts or rejoins leaves that row to the next decision's sweep. A separated row whose NPC is dead or whose quest has ended stays final until a retirement: Rejoin refuses it, and the sweep says nothing, so a quest line that should fail or change when the NPC dies is the author's to react to. Installed kernel 1.138. No independent fare, roll, pathfinding
 or after-commit write exists. Completed relations never follow subsequent movement.
 
 <a id="s2-chandlers-debt-selected-contract-pending-implementation"></a>

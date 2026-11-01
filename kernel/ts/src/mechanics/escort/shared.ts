@@ -54,6 +54,10 @@ function original(world: World, escort: EscortRelation) {
   );
 }
 
+/** A repeatable quest's next acceptance deletes the row this names: that escort has ended (escort@1). */
+const retired = (world: World, escort: EscortRelation) =>
+  !world.state.quests?.[escort.quest_instance_id];
+
 /** Shared pending-option and Choose admission; only this effect requires the original authored NPC. */
 export function refused(world: World, row: ChoiceRow, option: DialogueChoice) {
   const effect = option.escort;
@@ -69,7 +73,8 @@ export function refused(world: World, row: ChoiceRow, option: DialogueChoice) {
   const quest = questOf(world, row.actor_id, effect.quest);
   if (!quest || quest[1].state !== 'active') return 'invalid_state' as const;
   const escort = world.state.escorts?.[row.actor_id];
-  if (effect.transition === 'start') return escort ? ('invalid_state' as const) : undefined;
+  if (effect.transition === 'start')
+    return escort && !retired(world, escort) ? ('invalid_state' as const) : undefined;
   if (
     !escort ||
     !original(world, escort) ||
@@ -94,18 +99,19 @@ export function transition(
   if (!effect) return [];
   const expected = world.state.escorts?.[row.actor_id] ?? null;
   const status = effect.transition === 'complete' ? 'completed' : 'following';
-  const value: EscortRelation = expected
-    ? { ...expected, status }
-    : {
-        kind: 'escort',
-        actor_id: row.actor_id,
-        body_id: bodyOf(world, row.actor_id)!,
-        npc_id: row.roles.find((r) => r.role === effect.npc)!.entity_id,
-        quest_instance_id: questOf(world, row.actor_id, effect.quest)![0],
-        continuation_id,
-        choice_id,
-        status,
-      };
+  const value: EscortRelation =
+    expected && effect.transition !== 'start'
+      ? { ...expected, status }
+      : {
+          kind: 'escort',
+          actor_id: row.actor_id,
+          body_id: bodyOf(world, row.actor_id)!,
+          npc_id: row.roles.find((r) => r.role === effect.npc)!.entity_id,
+          quest_instance_id: questOf(world, row.actor_id, effect.quest)![0],
+          continuation_id,
+          choice_id,
+          status,
+        };
   return [{ op: 'escort.transition', writer_group: 0, actor_id: row.actor_id, expected, value }];
 }
 
@@ -128,7 +134,7 @@ function parted(world: World, escort: EscortRelation) {
 
 function following(world: World, actor: CharacterId) {
   const escort = world.state.escorts?.[actor];
-  if (!escort || escort.status !== 'following') return;
+  if (!escort || escort.status !== 'following' || retired(world, escort)) return;
   if (
     escort.actor_id !== actor ||
     escort.body_id !== bodyOf(world, actor) ||

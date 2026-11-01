@@ -432,10 +432,10 @@ outcome retain the existing confirmed-disk adoption fence.
 
 The existing state_row table persists actor-keyed escorts through the ordinary changed-row
 transaction. Load validates each typed row against its actor/body, original start ChoiceRow
-and quest instance, and original NPC, whose container must still be a room. It does not read the NPC's life or
-co-location or the quest's state: each is reachable by accepted commands, and the kernel separates a following escort that loses one
+and original NPC, whose container must still be a room. It does not read the NPC's life or
+co-location or the quest row, nor prove a completed row's quest outcome: each is reachable by accepted commands (a repeatable quest's next acceptance deletes the row), and the kernel separates a following escort that loses one
 ([escort@1](mechanics.md#escort1)). Separated permits player departure or later co-location before explicit Rejoin. Completed
-requires the proven rescued terminal; the speaker may die and the NPC may move afterward. Every committed
+requires its own receipt, as every status does; the speaker may die and the NPC may move afterward. Every committed
 intermediate state must reopen and reconcile under the same boundary.
 
 ## Bell choice return recovery

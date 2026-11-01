@@ -1,10 +1,5 @@
 // Recover the single actor's original escort and each authored transition receipt.
-import type {
-  DialogueDefinition,
-  DialogueChoice,
-  EscortRelation,
-  DecisionResult,
-} from '../../../kernel/ts/src/contracts.gen.ts';
+import type { EscortRelation, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import {
@@ -20,9 +15,8 @@ const invalid = () => {
   throw new SyntaxError('malformed JSON: inconsistent escort');
 };
 
-type Selection = { id: string; row: ChoiceRow; d: DialogueDefinition; option: DialogueChoice };
-
-// Every escort choice keeps its own receipt, including repeated explicit rejoins.
+// Every escort choice keeps its own receipt, including repeated rejoins and a repeat quest's start.
+// The quest row is not read: a repeatable quest's next acceptance deletes it (loka-vduxr.23).
 export function escortSave(world: World, db: Db, scope: string, rows: [string, ChoiceRow][]) {
   const selected = rows.flatMap(([id, row]) => {
     const d = world.cartridge.dialogues![refString(row.source)];
@@ -45,17 +39,15 @@ export function escortSave(world: World, db: Db, scope: string, rows: [string, C
     !world.rooms[world.state.containers[escort.npc_id]]
   )
     invalid();
-  const quest = original(world, escort, selected);
+  const start = selected.find((s) => s.id === escort.continuation_id);
+  if (
+    start?.option.escort!.transition !== 'start' ||
+    start.row.choice_id !== escort.choice_id ||
+    start.row.roles.find((r) => r.role === start.option.escort!.npc)?.entity_id !== escort.npc_id
+  )
+    invalid();
   latest(world, db, scope, escort);
-  for (const s of selected) {
-    if (
-      !same(s.option.escort!.quest, quest!.quest) ||
-      s.row.roles.find((r) => r.role === s.option.escort!.npc)?.entity_id !== escort.npc_id
-    )
-      invalid();
-    committedDialogue(world, db, scope, s.id);
-  }
-  terminal(world, escort, selected);
+  for (const s of selected) committedDialogue(world, db, scope, s.id);
 }
 
 // The relation is what the latest transition wrote; a death, a departure or a quest end all write it.
@@ -75,33 +67,4 @@ function latest(world: World, db: Db, scope: string, escort: EscortRelation) {
     .filter((o) => o.op === 'escort.transition' && o.actor_id === escort.actor_id)
     .at(-1);
   if (op?.op !== 'escort.transition' || !same(op.value, escort)) return invalid();
-}
-
-function original(world: World, escort: EscortRelation, selected: Selection[]) {
-  const starts = selected.filter((s) => s.option.escort!.transition === 'start');
-  const start = starts[0];
-  const quest = world.state.quests?.[escort.quest_instance_id];
-  if (
-    starts.length !== 1 ||
-    start.id !== escort.continuation_id ||
-    start.row.choice_id !== escort.choice_id ||
-    !same(quest?.quest, start.option.escort!.quest) ||
-    !same(quest?.scope, { kind: 'player', character_id: escort.actor_id })
-  )
-    invalid();
-  return quest!;
-}
-
-function terminal(world: World, escort: EscortRelation, selected: Selection[]) {
-  if (escort.status !== 'completed') return;
-  const quest = world.state.quests![escort.quest_instance_id];
-  const completed = selected.filter((s) => s.option.escort!.transition === 'complete');
-  const end = completed[0];
-  if (
-    completed.length !== 1 ||
-    !same(end.d.quest, quest!.quest) ||
-    quest!.state !== 'resolved' ||
-    quest!.outcome !== end.row.choice_id
-  )
-    invalid();
 }

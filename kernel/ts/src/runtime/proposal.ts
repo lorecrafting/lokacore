@@ -117,14 +117,13 @@ function parting(p: P): Admitted | undefined {
   const held = Object.values(p.world.state.escorts ?? {}).flatMap((e) =>
     e?.status === 'following' ? [e.actor_id] : [],
   );
-  if (!held.length) return;
   const at = now(p);
   if (!('cartridge' in at)) return at;
   p.ops.push(...partings(at, held, ++p.group));
 }
 
-// The proposal so far, composed lazily (only a job, a delivery, an acquisition's quests or a held
-// escort read it), or its fault. After the advance, the rest composes from the base clock with the advance
+// The proposal so far, composed lazily (a job, a delivery or an acquisition's quests read it, and
+// the parting sweep ends every decision), or its fault. After the advance, the rest composes from the base clock with the advance
 // replayed, so a job's op `at` its due time lies inside the advance; a write conflicting with an
 // earlier slice still faults only in adopt.
 function now(p: P): World | Admitted {

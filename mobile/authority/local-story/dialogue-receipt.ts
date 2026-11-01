@@ -88,6 +88,7 @@ export function dialogueDetail(
   if (!wrong && !consequences(s, command, d, row, source, option, detail)) return invalid();
   return detail;
 }
+type Choose = Extract<Command['payload'], { type: 'choose' }>;
 function evidence(
   d: Extract<DecisionResult, { kind: 'accepted' }>,
   command: Command & { payload: Extract<Command['payload'], { type: 'choose' }> },
@@ -139,19 +140,41 @@ function consequences(
   option: DialogueChoice,
   speaker: EntityId,
 ) {
-  const actor = row.actor_id;
   const ops = d.delta.ops.filter((o) => o.writer_group === 0);
   const events = d.events.filter((e) => e.causation_id === (command.id as string));
   if (!transferEvidence(s, command, row, option, ops, events)) return false;
   if (!assignmentEvidence(s, row, option, ops, events, speaker)) return false;
   if (!paymentEvidence(s, row, option, ops)) return false;
-  if (!escortEvidence(s, command, row, option, ops)) return false;
-  if (!source.quest) return true;
-  const q = questOf(s.world, actor, source.quest);
-  if (!option.exchange && (!q || q[1].state !== 'resolved' || q[1].outcome !== row.choice_id))
+  if (
+    command.payload.type !== 'choose' ||
+    !escortEvidence(s.world, row, option, ops, command.payload)
+  )
     return false;
-  const instance_id = option.exchange ? row.quest_instance_id : q![0];
+  return !source.quest || resolution(s, row, option, ops, events, source.quest);
+}
+
+function resolution(
+  s: Story,
+  row: ChoiceRow,
+  option: DialogueChoice,
+  ops: readonly DeltaOp[],
+  events: readonly DomainEvent[],
+  quest: NonNullable<DialogueDefinition['quest']>,
+) {
   const transitions = ops.filter((o) => o.op === 'quest.transition' && o.to === 'resolved');
+  // An escort's Complete may name a repeatable quest, whose row a later acceptance replaces.
+  const q = option.escort ? undefined : questOf(s.world, row.actor_id, quest);
+  if (
+    !option.exchange &&
+    !option.escort &&
+    (!q || q[1].state !== 'resolved' || q[1].outcome !== row.choice_id)
+  )
+    return false;
+  const instance_id = option.exchange
+    ? row.quest_instance_id
+    : option.escort
+      ? (transitions[0] as { instance_id?: string } | undefined)?.instance_id
+      : q![0];
   const resolved = events.filter((e) => e.payload.type === 'quest_resolved');
   return (
     transitions.length === 1 &&
@@ -160,10 +183,10 @@ function consequences(
     transitions[0].outcome === row.choice_id &&
     resolved.some(
       (e) =>
-        (option.exchange || (resolved.length === 1 && e.actor_id === actor)) &&
+        (option.exchange || (resolved.length === 1 && e.actor_id === row.actor_id)) &&
         same(e.payload, {
           type: 'quest_resolved',
-          quest: source.quest,
+          quest,
           instance_id,
           outcome: row.choice_id,
         }),
@@ -171,47 +194,33 @@ function consequences(
   );
 }
 
-// size: allow 42, exact authored transition binds original identity and receipt effect
+// What this receipt wrote, not the current row or quest row: a repeat quest's start replaces the one and
+// retires the other (loka-vduxr.23). The latest receipt binds the stored row (escort-save).
 function escortEvidence(
-  s: Story,
-  command: Command,
+  world: World,
   row: ChoiceRow,
   option: DialogueChoice,
   ops: readonly DeltaOp[],
+  p: Choose,
 ) {
   const effect = option.escort;
   if (!effect) return true;
-  const escort = s.world.state.escorts?.[row.actor_id];
-  const quest = questOf(s.world, row.actor_id, effect.quest);
-  if (
-    !escort ||
-    !quest ||
-    command.payload.type !== 'choose' ||
-    escort.actor_id !== row.actor_id ||
-    escort.body_id !== bodyOf(s.world, row.actor_id) ||
-    escort.npc_id !== row.roles.find((r) => r.role === effect.npc)?.entity_id ||
-    escort.quest_instance_id !== quest[0]
-  )
-    return false;
-  const start = effect.transition === 'start';
-  if (
-    start &&
-    (escort.continuation_id !== command.payload.continuation_id ||
-      escort.choice_id !== command.payload.choice_id)
-  )
-    return false;
   const transitions = ops.filter((o) => o.op === 'escort.transition');
+  const op = transitions[0];
+  if (transitions.length !== 1 || op?.op !== 'escort.transition') return false;
+  const { value, expected } = op;
+  const start = effect.transition === 'start';
   return (
-    transitions.length === 1 &&
-    same(transitions[0], {
-      op: 'escort.transition',
-      writer_group: 0,
-      actor_id: row.actor_id,
-      expected: start
-        ? null
-        : { ...escort, status: effect.transition === 'rejoin' ? 'separated' : 'following' },
-      value: { ...escort, status: effect.transition === 'complete' ? 'completed' : 'following' },
-    })
+    world.state.escorts?.[row.actor_id] != null && // no command deletes it
+    op.actor_id === row.actor_id &&
+    value.actor_id === row.actor_id &&
+    value.npc_id === row.roles.find((r) => r.role === effect.npc)?.entity_id &&
+    value.status === (effect.transition === 'complete' ? 'completed' : 'following') &&
+    (start
+      ? value.continuation_id === p.continuation_id &&
+        value.choice_id === p.choice_id &&
+        expected?.status !== 'following'
+      : expected?.status === (effect.transition === 'rejoin' ? 'separated' : 'following'))
   );
 }
 function transferEvidence(
