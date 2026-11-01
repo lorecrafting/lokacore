@@ -1196,10 +1196,6 @@
           "enum": [true],
           "type": "boolean"
         },
-        "asked_when": {
-          "$ref": "#/$defs/Policy",
-          "description": "While it holds, the view marks this option asked; it never refuses the choice. Lowered from a source choice's `asked: true`."
-        },
         "availability": {
           "additionalProperties": false,
           "description": "Time limits on offering the choice.",
@@ -5632,10 +5628,6 @@
           "description": "The Book dims this choice once taken; it stays usable. Lowered to the fact <dialogue>_<choice>_asked, a step that sets it and asked_when.",
           "enum": [true],
           "type": "boolean"
-        },
-        "asked_when": {
-          "$ref": "#/$defs/partial.Policy",
-          "description": "While it holds, the view marks this option asked; it never refuses the choice. Lowered from a source choice's `asked: true`."
         },
         "availability": {
           "additionalProperties": false,

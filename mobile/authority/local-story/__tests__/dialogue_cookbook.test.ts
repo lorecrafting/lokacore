@@ -166,7 +166,7 @@ test('an option once taken is marked asked and stays usable, across a reload', (
 });
 
 // Breaks: the marker's lowered fact silently overwrites the author's own, or an overlong name reaches the schema as noise.
-test('an asked fact name that is taken or too long is refused at the choice', () => {
+test('an asked mark that could not work is refused at the choice', () => {
   const refused = (edit: (name: string, body: string) => string, facts = {}) => {
     const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
     source(dir, edit);
@@ -196,6 +196,24 @@ test('an asked fact name that is taken or too long is refused at the choice', ()
     name.endsWith('asked_marker.json') ? b.replaceAll('ask_road', 'q'.repeat(size)) : b;
   assert.match(String(refused(rename(52))), /longer than 64/);
   assert.equal(refused(rename(51)), false);
+  // A riddle's answer is drawn as tiles, so a mark there could never show.
+  const riddle =
+    '"riddle": { "choice_id": "ask_road", "answer": "a", "bank": ["A"], "wrong": { "prose": "W" } }, "choices":';
+  assert.match(
+    String(
+      refused((n, b) => (n.endsWith('asked_marker.json') ? b.replace('"choices":', riddle) : b)),
+    ),
+    /letter tiles/,
+  );
+  // asked_when is compiled only, so it can never overwrite or dodge the generated one.
+  const hand = (n: string, b: string) =>
+    n.endsWith('asked_marker.json')
+      ? b.replace(
+          '"asked": true',
+          '"asked": true, "asked_when": { "op": "fact_compare", "fact": "x", "equals": true }',
+        )
+      : b;
+  assert.match(String(refused(hand)), /asked_when/);
 });
 
 // Breaks: the mark is set before the check resolves, so a failed try reads as asked.
@@ -214,26 +232,6 @@ test('a failed check leaves the option unasked', () => {
   g.choose('persuade_doubter');
   assert.deepEqual(g.offered(), ['shrug_doubter']);
   assert.equal(g.fact('doubter_persuade_doubter_asked'), undefined);
-});
-
-// Breaks: a hand-written asked_when naming no fact reaches the artifact unchecked.
-test('asked_when is checked like a policy', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
-  source(dir, (name, body) =>
-    name.endsWith('asked_marker.json')
-      ? body.replace(
-          '"asked": true',
-          '"asked_when": { "op": "fact_compare", "fact": "no_such_fact", "equals": true }',
-        )
-      : body,
-  );
-  const r = spawnSync('mix', ['loka.compile', dir, join(dir, 'a.json')], {
-    cwd: ROOT,
-    encoding: 'utf8',
-  });
-  rmSync(dir, { recursive: true });
-  assert.notEqual(r.status, 0);
-  assert.match(r.stderr, /asked_marker.json.*no_such_fact/);
 });
 
 // Breaks: skill.acquire stops working from a choice, or the skill is lost on reload.

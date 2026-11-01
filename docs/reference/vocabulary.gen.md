@@ -766,7 +766,6 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 |---|---|---|---|
 | accept | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A quest of this cartridge the choice activates. |
 | asked | `true` |  | The Book dims this choice once taken; it stays usable. Lowered to the fact <dialogue>_<choice>_asked, a step that sets it and asked_when. |
-| asked_when | [Policy](vocabulary.gen.md#policy-leaves) |  | While it holds, the view marks this option asked; it never refuses the choice. Lowered from a source choice's `asked: true`. |
 | availability | object |  | Time limits on offering the choice. |
 | availability.from | [LogicalTime](source-kinds.gen.md#logicaltime) |  | First logical time the choice is offered. |
 | availability.through | [LogicalTime](source-kinds.gen.md#logicaltime) |  | Last logical time the choice is offered, inclusive. |

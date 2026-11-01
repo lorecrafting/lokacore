@@ -327,7 +327,7 @@ defmodule Loka.Content.Source do
     defs
     |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
     |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
-    |> put_in(["DialogueChoice", "properties", "asked"], DialogueAsked.schema())
+    |> update_in(["DialogueChoice", "properties"], &DialogueAsked.source_fields/1)
     |> schedule(defs)
     |> Map.update!(
       "LiquidRow",

@@ -9,7 +9,7 @@ defmodule Loka.Content.CheckKinds do
   check@1 (its check_passed); its key is no scripted action's or other choice's check's
   (DUPLICATE_DEFINITION); its skill, attribute and failure text resolve; it names exactly one of
   rating and npc (SCHEMA_VIOLATION invalid_value), its npc as a scripted action check's (row G3); and it
-  carries only label, narration, steps, availability and check, in a dialogue with no quest and
+  carries only label, narration, asked_when, steps, availability and check, in a dialogue with no quest and
   no riddle, with no skill.acquire step (OUTCOME_MISMATCH at the check).
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]

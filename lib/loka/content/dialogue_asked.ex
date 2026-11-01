@@ -1,7 +1,8 @@
 defmodule Loka.Content.DialogueAsked do
   @moduledoc """
   A dialogue choice's source-only `asked`: lowered to the bool fact `<dialogue>_<choice>_asked`, a
-  `fact.assign` of it on the choice's steps and `asked_when`, which the view reads. It refuses nothing.
+  `fact.assign` of it on the choice's steps and `asked_when`, which the view reads. It never blocks the
+  choice in play. `asked_when` is not a source field, so nothing authored is overwritten.
   """
   import Loka.Content.Source, only: [diag: 3, at: 2]
 
@@ -14,9 +15,9 @@ defmodule Loka.Content.DialogueAsked do
     "enum" => [true]
   }
 
-  @doc "The source field's schema (Source.contracts/0)."
-  @spec schema() :: map()
-  def schema, do: @schema
+  @doc "A source choice's properties (Source.contracts/0): `asked` in, the compiled `asked_when` out."
+  @spec source_fields(map()) :: map()
+  def source_fields(props), do: props |> Map.delete("asked_when") |> Map.put("asked", @schema)
 
   @doc "Reserves each `asked` fact (an @engine_facts module); a fact already of that name is refused."
   @spec facts(term(), map() | nil, map()) :: {term(), [map()]}
@@ -33,21 +34,23 @@ defmodule Loka.Content.DialogueAsked do
     %{defs | "dialogue" => dialogues}
   end
 
-  defp reserve({k, c, rel, steps}, {acc, ds}) do
+  defp reserve({k, c, rel, steps, riddle}, {acc, ds}) do
     name = name(k, c)
     site = at(rel, steps ++ ["choices", c, "asked"])
     taken = if is_map_key(acc, name), do: [refused(site, "asked_key_taken", name)], else: []
     long = if byte_size(name) > @key_max, do: [refused(site, "asked_key_long", name)], else: []
-    {Map.put(acc, name, {"cartridge.json", [], spec(name, k, c)}), ds ++ taken ++ long}
+    # The Book draws a riddle's answer as letter tiles, with no label to dim.
+    tiles = if riddle == c, do: [refused(site, "asked_on_riddle", name)], else: []
+    {Map.put(acc, name, {"cartridge.json", [], spec(name, k, c)}), ds ++ taken ++ long ++ tiles}
   end
 
   defp refused(site, why, name),
     do: diag("SCHEMA_VIOLATION", site, %{"why" => why, "key" => name})
 
   defp asked(defs) do
-    for {k, {rel, steps, %{"choices" => cs}}} <- defs["dialogue"],
+    for {k, {rel, steps, %{"choices" => cs} = d}} <- defs["dialogue"],
         {c, %{"asked" => true}} <- cs,
-        do: {k, c, rel, steps}
+        do: {k, c, rel, steps, get_in(d, ["riddle", "choice_id"])}
   end
 
   defp lowered(k, {rel, steps, %{"choices" => cs} = d}),
