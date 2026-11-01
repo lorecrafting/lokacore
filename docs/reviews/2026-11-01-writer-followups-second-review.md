@@ -40,3 +40,22 @@
 Same on the schema and that the warning is true. It records the shared fixture passing; the disagreement above is a case outside that fixture, and its check (5) covers shipped cartridges only.
 
 **Verdict: CHANGES REQUIRED.**
+
+## Re-check at f0093ef457b29d753b5f636530d49bb6f7a667d6
+
+CI at this head: ci, book-e2e, graph-diff completed, success. Only the fix commit's findings were checked.
+
+| Finding | Disposition | Proof |
+|---|---|---|
+| Friendly-only ally test | Fixed | The any-disposition mutant in `combat.ex` now fails (16/17). |
+| Ally advice | Fixed | Compiled on `targets_sampler`: disposition removed, `unattackable` plus `hostile` without `engage`, and `friendly` kept all pass with no warning; `hostile` without `engage` still gives `SCHEMA_VIOLATION`. |
+| Schema warning list | Fixed | `OUTCOME_MISMATCH` and `cut_scene_line` added; they match the warning sites. |
+| `shut_groups`, reported case | Fixed, new defect below | The new fixture row passes both kernels; removing the exclusion fails (16/17). |
+| Target names first link | Filed `loka-69yuw` | Agreed, same on main. |
+| Hanging 5001 ms mutant | Filed `loka-votey` | First review's item; matches. |
+
+**should-fix** `lib/loka/content/dialogue_links.ex:142`: `always` treats every policy-less entry as one that opens, but `spokenBy` also needs a shown choice (`selection.ts:168-171`). Shut `a_one`->(`a_x`, `b_y`) beside policy-less `z_open` whose only choice has a failing policy: TS opens `a_x` (fixture row passes), Elixir no longer warns (expected `["a_x"]`, row fails). The fix swaps a false warning for a missed real guess, which `ef679cfbf` did warn. Fix: count an entry only if it has a choice with no policy, and add this row.
+
+**blocker** `test/fixtures/dialogue_entry_cases.json`: three conditions of the new `always` line are untested (review step 3). All stay green, 17 passed: (a) exclusion across all speakers (`always == []`); (b) a policy-less keyword entry counts; (c) a named entry does not count. Failure for (a): another NPC's policy-less dialogue silences this speaker's real guess. Probes that kill them, on this head: a row with `z_other` spoken by `other` (`opens: a_x`, `warned: [a_x]`, passes both kernels) for (a); a named policy-less `z_n` (`opens: z_n`, `warned: []`, passes both) for (c); a shut entry beside a policy-less keyword entry, Elixir only, for (b).
+
+**Verdict: CHANGES REQUIRED.**
