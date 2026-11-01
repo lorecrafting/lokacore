@@ -40,7 +40,7 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     const died = d.events.some(
       (e) => e.payload.type === 'entity_died' && !e.payload.victim_definition,
     );
-    const deed = command_id ? deedOf(d) : undefined; // a press's, never what reopen shows again
+    const deed = command_id ? deedOf(d, s.world.character) : undefined; // a press's, never what reopen shows again
     if (!lines.length && !pickup && !died && !deed) {
       if (command_id) return undefined;
       before = r.revision;
@@ -63,13 +63,18 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
 
 // What the receipt's events say the press did (book-ui.md, Lever and latch; Impact). A lever is a
 // completed action whose outcome emits the authored `lever` event, as weather's phases are authored names.
-function deedOf(d: Accepted): Pick<NarrationRecord, 'lever' | 'opened' | 'missed'> | undefined {
+function deedOf(
+  d: Accepted,
+  player: string,
+): Pick<NarrationRecord, 'lever' | 'opened' | 'missed'> | undefined {
   const has = (type: string) => d.events.some((e) => e.payload.type === type);
   const lever = d.events.some(
     (e) => e.payload.type === 'custom_event' && e.payload.event.key === 'lever',
   );
   const opened = has('action_completed') || has('barrier_changed');
-  const missed = d.events.some((e) => e.payload.type === 'attack_result' && !e.payload.hit);
+  const missed = d.events.some(
+    (e) => e.payload.type === 'attack_result' && !e.payload.hit && e.payload.attacker_id === player,
+  );
   if (!lever && !opened && !missed) return undefined;
   return { ...(lever && { lever }), ...(opened && { opened }), ...(missed && { missed }) };
 }

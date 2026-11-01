@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { stormClock, type StormNow } from './stormClock.ts';
+import { stormClock, windEntry, type StormNow } from './stormClock.ts';
 
 function rig(t: { mock: any }, given: Partial<StormNow> = {}) {
   t.mock.timers.enable({ apis: ['setTimeout'] });
@@ -94,4 +94,15 @@ test('stop cancels both timers', (t) => {
   r.stop();
   r.tick(100_000);
   assert.deepEqual(r.log, ['light']);
+});
+
+// Breaks: the corner lifts again each time a page closes, or misses a new room or a return of the wind.
+test('wind lifts on its change and per room entry, not on a page closing', () => {
+  const seen = {};
+  assert.equal(windEntry(seen, 'wind', true, 'a'), true);
+  assert.equal(windEntry(seen, 'wind', false, 'a'), false, 'a page opens');
+  assert.equal(windEntry(seen, 'wind', true, 'a'), false, 'it closes');
+  assert.equal(windEntry(seen, 'wind', true, 'b'), true, 'a new room');
+  assert.equal(windEntry(seen, 'clear', false, 'b'), false);
+  assert.equal(windEntry(seen, 'wind', true, 'b'), true, 'the wind returns');
 });

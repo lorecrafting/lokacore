@@ -12,10 +12,8 @@ export function useCueSounds(s: Screen, turn: number, resumes?: number) {
   useEffect(hearCues, []); // before useCues: heard from its first cue
   const place = s.view.place;
   const weather = s.view.calendar_status?.weather;
-  useEffect(
-    () => ambience(place?.sound, weather, !!place?.exposed),
-    [place?.sound, weather, place?.exposed],
-  );
+  // Every view, not only a changed tag: a death cuts the room, and the next view brings it back.
+  useEffect(() => ambience(place?.sound, weather, !!place?.exposed), [s.view]); // eslint-disable-line react-hooks/exhaustive-deps
   const reduced = useReducedMotion();
   useCues(s.view, s.catchingUp, turn, resumes, reduced, playTurn, s.died, s.deed);
 }

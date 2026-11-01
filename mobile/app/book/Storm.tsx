@@ -14,7 +14,7 @@ import {
 import type { SharedValue } from 'react-native-reanimated';
 import { haptic } from './haptic';
 import { thunder } from './sound';
-import { stormClock } from './stormClock.ts';
+import { stormClock, windEntry } from './stormClock.ts';
 import { color, motion, opacity, space } from './tokens.ts';
 
 const never = { reduceMotion: ReduceMotion.Never };
@@ -94,13 +94,14 @@ function Lightning(p: Sky & { still: boolean }) {
 function WindCorner(p: Sky & { still: boolean }) {
   const lift = useSharedValue(0);
   const blows = p.weather === 'wind' && p.exposed && p.world && !p.still;
+  const seen = useRef<{ current?: string }>({});
   useEffect(() => {
-    if (!blows) return;
+    if (!windEntry(seen.current, p.weather, blows, p.room)) return;
     const leg = motion.flutter.duration / (2 * motion.flutter.times);
     const rise = () => withTiming(motion.flutter.lift, { duration: leg, ...never });
     const fall = () => withTiming(0, { duration: leg, ...never });
     lift.value = withSequence(ReduceMotion.Never, rise(), fall(), rise(), fall());
-  }, [blows, p.room]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [blows, p.room, p.weather]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const paper = useAnimatedStyle(() => ({
     opacity: lift.value ? 1 : 0,

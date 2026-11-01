@@ -123,11 +123,12 @@ const routedLines = (
 
 type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: 'accepted' }>;
 
-const telling = ({ payload: e }: Accepted['events'][number]) =>
+export const telling = ({ payload: e }: Accepted['events'][number]) =>
   (e.type === 'entity_died' && !e.victim_definition) ||
   e.type === 'action_completed' ||
   e.type === 'attack_result' ||
-  e.type === 'barrier_changed';
+  e.type === 'barrier_changed' ||
+  (e.type === 'custom_event' && e.event.key === 'lever');
 
 // The receipt's retained narration, read back from storage when the reply carried any.
 function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepted) {

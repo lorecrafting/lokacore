@@ -140,3 +140,16 @@ test('the first gesture caches the beds and leaves the pieces to stream', async 
   assert.ok(fetched.includes('inn.m4a'));
   assert.ok(!fetched.includes('p-inn.m4a'));
 });
+
+// Breaks: a return to the tab or Sound on restarts the bed over a death or a closed Book.
+test('a cut stays silent until the Book names the room again', async () => {
+  const b = await browser();
+  b.gesture();
+  b.ambience('inn', undefined, true);
+  b.fight('cut');
+  b.setMuted('sound', true);
+  b.setMuted('sound', false);
+  assert.deepEqual(urlsOf(b.els), []);
+  b.ambience('inn', undefined, true);
+  assert.deepEqual(urlsOf(b.els), ['inn.m4a']);
+});

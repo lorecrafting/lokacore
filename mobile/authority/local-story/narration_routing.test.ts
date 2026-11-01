@@ -194,7 +194,7 @@ test('a receipt says died only for the player, with or without lines', () => {
 });
 
 // Breaks: a lever reads a label instead of its event, a latch or a miss never reaches the record, a
-// landed blow sounds as a miss, or a deed with no authored line is dropped like an empty receipt.
+// landed blow or a foe's miss sounds as the player's, or a deed with no authored line is dropped like an empty receipt.
 test('a receipt names the deed from its events, with no lines needed', () => {
   const sql = new DatabaseSync(':memory:');
   const story = {
@@ -220,8 +220,9 @@ test('a receipt names the deed from its events, with no lines needed', () => {
     [{ type: 'custom_event', event: { key: 'bell' } }, undefined],
     [{ type: 'action_completed', action_key: 'pull' }, { opened: true }],
     [{ type: 'barrier_changed', barrier: 'gate' }, { opened: true }],
-    [{ type: 'attack_result', hit: false }, { missed: true }],
-    [{ type: 'attack_result', hit: true }, undefined],
+    [{ type: 'attack_result', hit: false, attacker_id: 'player' }, { missed: true }],
+    [{ type: 'attack_result', hit: true, attacker_id: 'player' }, undefined],
+    [{ type: 'attack_result', hit: false, attacker_id: 'wolf' }, undefined],
   ];
   for (const [payload, deed] of rows) {
     put(payload);

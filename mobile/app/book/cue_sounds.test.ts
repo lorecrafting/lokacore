@@ -196,3 +196,11 @@ test('the room and deed sounds play their manifest files', () => {
     assert.equal(g.bookRooms.pieces[tag], `mus-explore-${tag}-01.m4a`);
   }
 });
+
+// Breaks: a lever with no line and no other event never reads its record, so it pulls in silence.
+test('a lever event alone reads the record for its deed; another authored event does not', async () => {
+  const { telling } = await import('./received.ts');
+  const of = (key: string) => ({ payload: { type: 'custom_event', event: { key } } }) as never;
+  assert.equal(telling(of('lever')), true);
+  assert.equal(telling(of('bell')), false);
+});

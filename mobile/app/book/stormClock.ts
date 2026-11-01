@@ -16,6 +16,19 @@ const between = ([low, high]: readonly number[]) => low! + Math.random() * (high
 const away = () => !!globalThis.document?.hidden;
 
 /** Runs for as long as the phase is `storm`; gives back its stop. */
+/** Wind lifts once on the change to wind and once per room entry; a page opened and closed is neither. */
+export function windEntry(
+  seen: { current?: string },
+  weather?: string,
+  blows = false,
+  room?: string,
+) {
+  if (weather !== 'wind') seen.current = undefined;
+  if (!blows || seen.current === room) return false;
+  seen.current = room;
+  return true;
+}
+
 export function stormClock(now: () => StormNow, act: Act) {
   let timer: ReturnType<typeof setTimeout>;
   let rumble: ReturnType<typeof setTimeout>;
