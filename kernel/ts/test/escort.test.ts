@@ -425,7 +425,7 @@ test('a start refuses a following row whose quest is gone until the next Move se
   const escorts = {
     [before.character]: {
       ...relation(a.world()),
-      quest_instance_id: '00000000-0000-4000-8000-000000000001',
+      quest_instance_id: '00000000-0000-4000-8000-000000000001' as never,
     },
   };
   a.set({ ...before, state: { ...before.state, escorts } });
