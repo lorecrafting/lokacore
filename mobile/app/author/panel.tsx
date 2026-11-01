@@ -118,6 +118,8 @@ const canon = JSON.parse(chapter.canonical) as Canon & {
 };
 function advance(minutes: number, game: Opened) {
   const rate = canon.manifest.time_policy?.rate;
+  if (!rate)
+    placeNote = 'This cartridge has no clock (no time_policy); there is no time to advance.';
   if (!rate || !Number.isSafeInteger(minutes) || minutes <= 0) return;
   const ms = Math.ceil((minutes * 60_000) / rate);
   const stopped = advanced(ms, (by) => (g.loka_dev_skew = skew() + by), game, keep);
@@ -160,7 +162,7 @@ const stateOf = (game: Opened) => ({
   steps: place.steps,
   facts: game.facts(),
   quests: game.view().view.journal,
-  shown: shown(game.view().view, played(game)!.text, canon, game.entityIds()),
+  shown: shown(game.view().view, played(game)!.text, canon, game.entityIds(), game.roomIds()),
 });
 // Alt-click (Option-click) on a Book line: the panel opens its source in the owner's editor.
 const onClick = (e: MouseEvent) => {

@@ -15,6 +15,7 @@ export function shown(
   text: (key: string) => string | undefined,
   canon: Canon,
   ids: Readonly<Record<string, string>>,
+  roomIds: Readonly<Record<string, string>>,
 ) {
   const say = (key: string) => text(key) ?? key;
   const inRoom = (ref: Ref) => view.entities.some((e) => e.id === ids[refString(ref)]);
@@ -39,7 +40,7 @@ export function shown(
       action: Object.values(canon.scripted_actions ?? {})
         .filter(
           ({ target: t }) =>
-            t?.kind !== 'detail' || (t.room && ids[refString(t.room)] === view.place.id),
+            t?.kind !== 'detail' || (t.room && roomIds[refString(t.room)] === view.place.id),
         )
         .map((a) => a.key),
       dialogue: Object.values(canon.dialogues ?? {})

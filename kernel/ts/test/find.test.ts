@@ -16,8 +16,10 @@ const tree = (t: { after: (f: () => void) => void }) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-find-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   mkdirSync(join(dir, 'source/quests'), { recursive: true });
+  mkdirSync(join(dir, 'source/actions'), { recursive: true });
   writeFileSync(join(dir, 'source/text.json'), '{\n  "a": "Old Maud waits"\n}\n');
   writeFileSync(join(dir, 'source/quests/q.json'), '{\n  "giver": "npc/maud"\n}\n');
+  writeFileSync(join(dir, 'source/actions/k.json'), '{\n  "npc": "rook"\n}\n');
   const artifact = join(dir, 'artifact.json');
   writeFileSync(
     artifact,
@@ -28,6 +30,7 @@ const tree = (t: { after: (f: () => void) => void }) => {
         manifest: { x: ref('npc', 'maud') },
         quests: { 'c@1:quest/q': { giver: ref('npc', 'maud'), other: [ref('npc', 'bram')] } },
         dialogues: { 'c@1:dialogue/d': { npc: ref('npc', 'bram') } },
+        scripted_actions: { 'c@1:action/k': { npc: ref('npc', 'rook') } },
         world: { start: ref('npc', 'maud') },
       }),
     }),
@@ -51,6 +54,14 @@ test('a key lists the definitions whose refs name it, located when a file is nam
   assert.deepEqual(find(source, artifact, 'maud').refs, [
     { kind: 'npc', by: 'quests/q', at: 'quests/q.json:2' },
     { kind: 'npc', by: 'world' },
+  ]);
+});
+
+// Breaks: a scripted action, authored under actions/, listed with no file:line.
+test('a scripted action is located in actions/', (t) => {
+  const { source, artifact } = tree(t);
+  assert.deepEqual(find(source, artifact, 'rook').refs, [
+    { kind: 'npc', by: 'scripted_actions/k', at: 'actions/k.json:2' },
   ]);
 });
 

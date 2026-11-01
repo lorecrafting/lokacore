@@ -44,9 +44,11 @@ const canon: Canon = {
     e: { key: 'with_bram', npc: ref('npc', 'bram') },
   },
 };
-const ids = {
+const rooms = {
   'c@1:room/r': 'r1',
   'c@1:room/other': 'r2',
+};
+const ids = {
   'c@1:npc/maud': 'n1',
   'c@1:npc/bram': 'n2',
 };
@@ -54,7 +56,7 @@ const words: Record<string, string> = { 'room.t': 'Cellar', 'npc.maud': 'Maud', 
 
 // Breaks: an item listed among the people; a key shown where its words exist; a key with no words lost.
 test('the view reads with its words, a key standing in for a line with none', () => {
-  const { offers: _, ...state } = shown(view, (k) => words[k], canon, ids);
+  const { offers: _, ...state } = shown(view, (k) => words[k], canon, ids, rooms);
   assert.deepEqual(state, {
     room: 'Cellar',
     people: ['Maud'],
@@ -69,7 +71,7 @@ test('the view reads with its words, a key standing in for a line with none', ()
 // Breaks: a detail action of another room offered; a tool action tied to a room; a dialogue offered
 // whose NPC is elsewhere.
 test('offers are this room: its details, any tool or spell, and the dialogues of who is here', () => {
-  assert.deepEqual(shown(view, () => undefined, canon, ids).offers, {
+  assert.deepEqual(shown(view, () => undefined, canon, ids, rooms).offers, {
     action: ['here', 'tool'],
     dialogue: ['with_maud'],
   });

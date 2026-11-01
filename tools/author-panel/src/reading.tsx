@@ -132,7 +132,7 @@ const Results = ({ found }: { found: Found }) => (
         {found.hits.map((h) => (
           <li key={h.at}>
             <div className="font-mono text-xs text-muted-foreground">{h.at}</div>
-            <div className="truncate" title={h.text}>{h.text}</div>
+            <div className="break-words">{h.text}</div>
           </li>
         ))}
       </ul>

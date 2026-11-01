@@ -42,7 +42,9 @@ function referrers(source: string, artifact: string, q: string, rels: string[]):
       for (const kind of named(def, q)) {
         const short = name.slice(name.lastIndexOf('/') + 1);
         const by = whole ? section : `${section}/${short}`;
-        const file = rels.find((r) => r.startsWith(`${by}.`));
+        // Scripted actions are authored under actions/.
+        const stem = by.replace(/^scripted_actions\//, 'actions/');
+        const file = rels.find((r) => r.startsWith(`${stem}.`));
         found.push({ kind, by, ...(file && { at: `${file}:${lineOf(join(source, file), q)}` }) });
       }
   }
