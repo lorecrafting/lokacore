@@ -114,7 +114,7 @@ test('go to room refuses a water route bottom, and goes to a room off the route'
         ...w.cartridge,
         world: { ...w.cartridge.world, water: { routes: [{ bottom: ref('room', bottom) }] } },
       },
-    }) as World;
+    }) as unknown as World;
   assert.equal(code(go(flooded('boar_run'))), 'invalid_state');
   assert.equal(code(go(flooded('cellar'))), 'accepted');
 });
