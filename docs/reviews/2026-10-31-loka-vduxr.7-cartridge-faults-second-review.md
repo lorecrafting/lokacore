@@ -38,3 +38,20 @@
 - Claims rerun: `transcripts.test.ts` passes (PR body line 19); `round_attack.ts:92` cite right. Story SQL diffs are `kernel_api` lines only. Compile refusals: no sampler refused.
 
 Not checked: escort quest's `keeper_home` end through a later hour; no full-suite or `mutate_diff` sweep (brief).
+
+## Re-check at `3c2d5fafcebf909e746cfec9072d4e86e44a73fe`
+
+Scope: `64b68c5c0`, `3c2d5fafc`. CI (`gh run list --commit`): ci, book-e2e, graph-diff completed success.
+
+- `created.ts:113` blocker: fixed. The `!s.npc` mutant fails `kgd.159: a member in a room no plan move names` (`settle.test.ts`); null control green.
+- `escort/shared.ts:115` blocker: fixed. The status-clause mutant fails `a separated escort walks its schedule hour` (`escort.test.ts`); null control green.
+- `reactions.ex` should-fix: disposed per the coordinator's reruling. `custom_event` with no `when` is refused; other paths are the documented limit (`cartridge.md`, `mechanics.md`); `loka-kgd.104` open. Mutants on `after`, `when`, the custom match and `d > 0` each fail `content_faults_test.exs`.
+- My nit on nil `on.action` with a `when`: fixed.
+- Saves: the only source change is `reactions.ex`; no kernel source moved. Every cartridge under `cartridges/` compiles. An `identity_sampler` copy with `duration` 5000 and `after: 200` on `action_completed` and on `custom_event`: casts accepted, the status row lands by the second cast, cold reopen passes. With an unmet `when`: accepted, cold reopen passes.
+
+Finding:
+- Nit, `lib/loka/content/reactions.ex:76`: `action_completed` with `witness` is still refused, though the rule may not fire with the witness absent, against the comment's "refuses only a path known to run". Compiled a copy: `duration_status`. Fix: treat `witness` like `when`, or say so in the comment.
+
+Not checked: a met `when` at runtime (ruled limit), `mutate_diff` sweep (brief).
+
+Verdict: APPROVE WITH NOTES.
