@@ -156,7 +156,8 @@ test('the page compiles with no warnings', () => {
   });
   rmSync(dir, { recursive: true });
   assert.equal(r.status, 0, r.stderr);
-  assert.equal(r.stderr, '');
+  // Parallel test files share the build directory: mix's wait notice is no compiler warning.
+  assert.equal(r.stderr.replace(/^.*Waiting for lock on the build directory.*\n/m, ''), '');
 });
 
 // Breaks: a stage's policy shows the wrong choice, the reminder is spent, the turn-in leaves the
