@@ -127,3 +127,41 @@ Must be true: a choice keeps the id its words give, so everything that names it 
 ### Tests
 
 Mutants, importing tests, all red: `choiceIds` reversed (`dialogue.test.ts` 1 fail); numbering reversed (2); `is_map_key` guard dropped (1); `order` refusal off (1); `RETURN_CLOSED` without the way-back test (1). Base: `content_scene_branching_test.exs` 26 pass, `dialogue.test.ts` 25 pass, `dialogue_cookbook.test.ts` 12 pass, as the PR claims. No test covers either blocker. `bin/mutate_diff.sh` not rerun, by brief.
+
+## Re-check: head `e108f5428`, blockers R1 and R2 only
+
+**Verdict: APPROVE WITH NOTES.** R1 and R2 are closed; F1 stays open for the developer.
+
+CI at the full sha: `graph-diff`, `ci`, `book-e2e` completed, success.
+
+### Must be true
+
+- A shut intro reaches its hub through a nested choice, and Talk still never opens a nested set ([mechanics.md](../system/mechanics.md), Links).
+- A shut root with no way on is refused as before, and no author line goes with it.
+- A warning names what the kernel does, and does not fire on a shape that is fine.
+
+### Dispositions (probes through `mix loka.compile` and the local story)
+
+| Item | Run | Result |
+| --- | --- | --- |
+| R1 `fall_through.ts:32`, `selection.ts:172` | Original case: `when: not sage_met`, `- Start`, nested `- Go` sets the fact, `then: b2` | Closed. Second Talk opens `[one, two]`. With the old filter restored: refused |
+| R2 `dialogue_links.ex:95` | `when: not sage_met`, `- Hello`, `once`, `sets: sage_met`, `then: d2` | Closed by warning. `FALL_THROUGH_SPENT` at `scenes/d1.scene:2`, Talk refused after, as the guide (`:145-146`) says |
+| Refusal line | `when: sage_met` root, nested ways only, at head and with the old filter | Same at both, row and command: `{code: invalid_state}`, no message. The same as a root with no nesting. No author line exists to lose: a walk of `protocol/dialogue.schema.json` finds no `refus*` or `reason` key, the `scene*` compiler files name no `reason`, and a talk row (`selection.ts:204`) carries no `scripted`, so `policyRefusal` (`action_lists.ts:219`) has no reason to read. The hostile `refusal` is the NPC's and is off this path |
+| Guide | Same probes against `writing-the-game.md:114-118`, `:139-146` | True for both blockers, except the order in F1 |
+| `RETURN_CLOSED` | Setter with nested Back warns; setter with `then: end` is quiet | As before |
+| 107 cartridges | Compile all at head in one VM | 107 ok; 0 `FALL_THROUGH_SPENT`, 0 `ENTRY_GUESSED`, 0 `RETURN_CLOSED`; only `TOUCH_LINK_MISSING` (8). The corpus has no `.scene` file and no `entry: false`, so this shows no noise on old shapes and little else |
+| `needs: x`, `sets: x` | Crafted | Quiet, correct |
+
+`FALL_THROUGH_SPENT` names the shut root, not a target, so the order question does not touch it. It touches `ENTRY_GUESSED`.
+
+### Findings
+
+- **F1 should-fix** `lib/loka/content/dialogue_links.ex:256`, `:269`: new in the fix commit 4ebea38eb (`past_set` is absent at `0440cf678`): `free_links` goes depth-first, `spokenBy` breadth-first (`selection.ts:170`). `when: sage_met`, `- Aaa` nested `- In` with `then: h1`, `- Bbb` with `then: h2`: the compile says "Talk opens `h1`", the Talk opens `h2`. [writing-the-game.md:140](../guides/writing-the-game.md) ("in choice key order") points the same wrong way, so the writer's fix goes on the wrong hub. The `entry: true` remedy still works. Least fix: visit by level in `free_links`, and say nearest first in the guide; no kernel change.
+- **Nit** `lib/loka/content/explain.ex:63`: "refused for good" is false while the `when:` holds. `when: not sage_met`, a `once` way and a plain `- Bye`, with nothing setting the fact: warned, and the second Talk opens `[bye]`.
+- **Nit** PR body, "not its policy's code": no such change exists; the code is `invalid_state` before and after.
+
+### Tests and PR claims
+
+Base: `content_scene_branching_test.exs` 30 passed; `dialogue.test.ts`, `dialogue_fall_through.test.ts`, `dialogue_cookbook.test.ts` 42 passed. Mutants, all red: `selection.ts` guard dropped (cookbook 1), `onward` filter restored (cookbook 1), `spends_itself?` never (1), second-Talk count `>= 1` (1), `past_set` no look-through (2).
+
+PR body rerun: `fall_through.ts:32` and `selection.ts:172` are the fix lines; `content_trial_test.exs:9` pins `trial_sampler` warning-free. `/code-review` is reported. `choice_order.ex:16` is gone from the body. No test pins F1's order. Not run: full suite, `mutate_diff`, hash compare with main.
