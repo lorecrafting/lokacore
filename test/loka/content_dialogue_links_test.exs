@@ -125,6 +125,17 @@ defmodule Loka.ContentDialogueLinksTest do
 
     assert {:ok, _, warned} = Loka.ContentSource.compile(dir, apart)
     assert for(%{"code" => "LOOP_SPEAKER"} = w <- warned, do: w) == []
+
+    # Breaks: a link to itself lifts a detail level with its hub, so the detail is entered.
+    repeat = [
+      {file.("a_x"), second.(["a_x", "g_hub"])},
+      {file.("g_hub"), guard.(["a_x", "z_y"])},
+      {file.("z_y"), guard.(["end"])},
+      npc
+    ]
+
+    assert {:ok, _, warned} = Loka.ContentSource.compile(dir, repeat)
+    assert for(%{"code" => "LOOP_SPEAKER", "path" => p} <- warned, do: p) == ["dialogues/a_x.npc"]
   end
 
   # Breaks: a link rule dropped, so a then the runtime cannot follow compiles and fails at play.

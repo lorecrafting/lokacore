@@ -76,7 +76,7 @@ defmodule Loka.Content.DialogueLinks do
   end
 
   # selection.ts entries: the dialogues nothing links to, then the head of each loop with no way
-  # in: the member leading to the most different dialogues, first by key on a tie.
+  # in: the member leading to the most other dialogues, first by key on a tie.
   defp entries(sorted, next) do
     named = next |> Map.values() |> List.flatten() |> MapSet.new()
     roots = Enum.filter(Map.keys(next), &(&1 not in named))
@@ -96,7 +96,7 @@ defmodule Loka.Content.DialogueLinks do
   end
 
   defp rank(k, next) do
-    {-(next[k] |> Enum.filter(&is_map_key(next, &1)) |> Enum.uniq() |> length()), k}
+    {-(next[k] |> Enum.filter(&(&1 != k and is_map_key(next, &1))) |> Enum.uniq() |> length()), k}
   end
 
   defp links(d) do

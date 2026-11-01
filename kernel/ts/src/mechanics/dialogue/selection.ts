@@ -30,7 +30,7 @@ const links = (d: DialogueDefinition) =>
 
 /**
  * The dialogues a talk can open: those nothing leads to, then one of each loop with no way in, the
- * member leading to the most different dialogues (a hub), first by key on a tie. Everything an
+ * member leading to the most other dialogues (a hub), first by key on a tie. Everything an
  * entry reaches is reached only by that answer.
  */
 const entries = (world: World) => {
@@ -49,7 +49,8 @@ const entries = (world: World) => {
   const reached = reach(roots.map((d) => d.key));
   const rest = all.filter((d) => !reached.has(d.key));
   const from = new Map(rest.map((d) => [d.key, reach([d.key])]));
-  const width = (key: string) => new Set(next.get(key)!.filter((k) => next.has(k))).size;
+  const width = (key: string) =>
+    new Set(next.get(key)!.filter((k) => k !== key && next.has(k))).size;
   const beats = (a: string, b: string) =>
     width(a) > width(b) || (width(a) === width(b) && cmp(a, b) < 0);
   const heads = rest.filter(({ key }) =>

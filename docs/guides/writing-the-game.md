@@ -76,13 +76,16 @@ What you can rely on when dialogues link with `then` (JSON dialogues today):
 - Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
   condition holds and that has a choice to show.
 - A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the
-  member that leads to the most different dialogues; first by key on a tie. Give the hub the most
-  links and it is where the talk starts.
-- A `then` whose target cannot play (its condition fails, it has no choice to show) ends the talk
+  member that leads to the most other dialogues; first by key on a tie, so a hub and one detail
+  open at the first key. Give the hub the most links and it is where the talk starts. If that
+  member's condition fails, Talk is refused: no other member opens instead, so put a condition on
+  the choices rather than on the hub.
+- A `then` whose target cannot play (its condition fails, it has no choice to show, its speaker is
+  hostile, dead or gone) ends the talk
   quietly, with no added line.
-- A plain answer, with no `then`, ends the talk if a `then` anywhere leads to this dialogue. Add
+- A plain answer, with no `then` and no check, ends the talk if a `then` anywhere leads to this dialogue. Add
   `then` naming it to come back.
-- A dialogue nothing links to, with more than one choice, reopens after a plain answer. If its own
+- A dialogue nothing links to, with more than one choice, reopens after a plain answer; an answer with a check or a patrol ends the talk. If its own
   condition stopped holding, it still reopens: its choices show unavailable and the player can leave. Leave is always there.
 
 ### Write a cutscene

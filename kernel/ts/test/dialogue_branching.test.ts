@@ -226,7 +226,7 @@ test('a then target is not talked to and never reopens itself; then: end ends th
 
 // Breaks: a looped pair leaves no way in, a later key of the cycle entered, or the walk back
 // from the child reopening at the wrong dialogue.
-test('a then cycle enters at its first key and its members hand on to each other', () => {
+test('a then cycle with a tie enters at its first key and its members hand on to each other', () => {
   const g = play(
     content({ out: plain({ then: 'zzz' }) }, { zzz: { ret: plain({ then: 'guard' }) } }),
   );
@@ -562,6 +562,12 @@ test('Talk picks one member of a loop by distinct links, then key', () => {
   const rows: [string, object, object, string[]][] = [
     ['end is no link', to('z_other'), { z_other: to('end', 'guard') }, ['c0_z_other']],
     ['a repeat is no link', to('z_other'), { z_other: to('guard', 'guard') }, ['c0_z_other']],
+    [
+      'a link to itself is no link',
+      to('a_x', 'z_y'),
+      { a_x: to('a_x', 'guard'), z_y: to('end') },
+      ['c0_a_x', 'c1_z_y'],
+    ],
     ['a tie goes to the first key', to('a_other'), { a_other: to('guard') }, ['c0_guard']],
     [
       'a loop downstream is no entry',
