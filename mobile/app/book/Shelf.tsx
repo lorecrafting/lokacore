@@ -83,7 +83,8 @@ function Bought(
 ) {
   if (p.money === undefined && !p.lines.length) return null;
   return (
-    <View style={{ gap: space.xl }}>
+    // The pop hangs below this block: room for its line beside the block gap, clear of the card under it.
+    <View style={{ gap: space.xl, paddingBottom: space.xs }}>
       {p.money !== undefined && <Note>{balance(p.money)}</Note>}
       {!!p.lines.length && <LogLines lines={p.lines} />}
       <ItemPop view={p.view} text={p.text} />

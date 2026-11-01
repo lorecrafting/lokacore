@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { onCue } from './cues.ts';
 import { InkText, Reanimated, useAnimatedStyle } from './fade.ts';
 import { plain } from './model.ts';
 import { useDrying, useInk } from './press.ts';
@@ -87,7 +88,21 @@ function HeadFade(p: { was?: string; words: string; style: object }) {
   );
 }
 
-// ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
+// True for `motion.first.hold` after the first quest's cue (book-ui.md, First times).
+function useFirstQuest() {
+  const [first, setFirst] = useState(false);
+  useEffect(() => {
+    let hold: ReturnType<typeof setTimeout>;
+    const off = onCue((cue) => {
+      if (cue.name !== 'quest_on' || !cue.first) return;
+      setFirst(true);
+      hold = setTimeout(() => setFirst(false), motion.first.hold);
+    });
+    return () => (off(), clearTimeout(hold));
+  }, []);
+  return first;
+}
+
 /**
  * The current quest's projected journal text, above every page but Journal.
  * - Use: Body only.
@@ -99,17 +114,19 @@ function HeadFade(p: { was?: string; words: string; style: object }) {
 export function RunningHead({ view, text }: { view: GameView; text: Say }) {
   const c = usePalette();
   const t = useType();
+  // ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
   const quest = view.journal.find(
     (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
   );
   const words = quest && plain(text(quest.journal!));
+  const first = useFirstQuest();
   useEffect(() => {
     lastHead = words;
     lastQuest = quest?.quest.key;
   }, [words]);
   const style = {
     ...t.runningHead,
-    color: c.dim,
+    color: first ? c.warning : c.dim,
     paddingHorizontal: space.page,
     paddingTop: space.page,
   };

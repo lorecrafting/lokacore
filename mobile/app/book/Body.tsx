@@ -10,12 +10,14 @@ import { NpcDetail } from './Npc.tsx';
 import { ShelfPage } from './Shelf.tsx';
 import { NoticePage, proseLinks } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
-import { Here, LogLines, nameLink } from './lines.tsx';
+import { LogLines, nameLink } from './lines.tsx';
+import { Here } from './people.tsx';
 import { Page as PageShell } from './pages.tsx';
 import { RunningHead } from './RunningHead.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { ItemPop } from './ItemPop.tsx';
 import { space } from './tokens.ts';
+import { UnderInk } from './UnderInk.tsx';
 import { chapterLabel } from './words.ts';
 import type { Effects, Reading } from './reading.ts';
 import {
@@ -27,6 +29,7 @@ import {
   ScenePage,
   SettingsPage,
 } from './sections.tsx';
+import { CreditsPage } from './CreditsPage.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
 type Say = (key: string) => string;
@@ -114,6 +117,17 @@ function PageBody(p: BodyProps & Talk) {
 }
 
 // A Contents section's page; Carrying is the last.
+const SettingsRoute = (p: BodyProps & { contents?: () => void }) => (
+  <SettingsPage
+    startOver={p.startOver}
+    credits={() => p.open({ kind: 'credits' })}
+    world={p.world}
+    contents={p.contents}
+    reading={p.reading}
+    effects={p.effects}
+  />
+);
+
 function sectionPage(p: BodyProps, page: Page) {
   const { view, text } = p.screen;
   const openThing = (id: string) => p.open({ kind: 'thing', id });
@@ -136,10 +150,8 @@ function sectionPage(p: BodyProps, page: Page) {
       />
     );
   if (page.kind === 'map') return <MapPage view={view} text={text} {...home} />;
-  if (page.kind === 'settings')
-    return (
-      <SettingsPage startOver={p.startOver} {...home} reading={p.reading} effects={p.effects} />
-    );
+  if (page.kind === 'credits') return <CreditsPage back={p.back} />;
+  if (page.kind === 'settings') return <SettingsRoute {...p} {...home} />;
   if (page.kind === 'journal') return <JournalPage {...p.screen} {...home} press={p.press} />;
   return (
     <CarryingPage
@@ -192,23 +204,27 @@ export function RoomPage(p: {
   const t = useType();
   const look = p.g.look;
   return (
-    <PageShell
-      title={p.text(p.view.place.title.key)}
-      fixedTitle
-      onTitlePress={look && (() => p.press(look))}
-      scrollToEnd={p.log.length > 0}
-    >
-      <View style={{ gap: space.lg }}>
-        {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
-        <Here view={p.view} text={p.text} open={p.open} />
-      </View>
-      {!!p.log.length && (
-        <View>
-          <LogLines lines={p.log} />
-          <ItemPop view={p.view} text={p.text} />
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <UnderInk view={p.view} />
+      <PageShell
+        paperless
+        title={p.text(p.view.place.title.key)}
+        fixedTitle
+        onTitlePress={look && (() => p.press(look))}
+        scrollToEnd={p.log.length > 0}
+      >
+        <View style={{ gap: space.lg }}>
+          {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
+          <Here view={p.view} text={p.text} open={p.open} />
         </View>
-      )}
-    </PageShell>
+        {!!p.log.length && (
+          <View>
+            <LogLines lines={p.log} />
+            <ItemPop view={p.view} text={p.text} />
+          </View>
+        )}
+      </PageShell>
+    </View>
   );
 }
 

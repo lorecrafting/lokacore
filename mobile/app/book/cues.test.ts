@@ -162,7 +162,10 @@ test('a skill first acquired at level 1 is learned, not improved', () => {
 
 // Breaks: a purchase plays two sounds, or loses the visual pop on the item.
 test('a buy is the coin alone, and the item still marked for its pop', () => {
-  const out = cuesOf(pool(9, 2, { inventory: [item('rope')] }), pool(9, 5));
+  const out = cuesOf(
+    pool(9, 2, { inventory: [item('sack'), item('rope')] }),
+    pool(9, 5, { inventory: [item('sack')] }),
+  );
   assert.deepEqual(out, [{ name: 'pickup', ids: ['rope'], silent: true }, { name: 'coin' }]);
   assert.deepEqual(out.map(soundOf), [undefined, 'coin']);
 });
@@ -175,7 +178,10 @@ test('an item arriving with pennies gained still flicks', () => {
 
 // Breaks: the first of two in one command is lost, or both fire.
 test('two pickups in one view are one cue naming both', () => {
-  const out = cuesOf(view({ inventory: [item('sack'), item('rope')] }), base);
+  const out = cuesOf(
+    view({ inventory: [item('pack'), item('sack'), item('rope')] }),
+    view({ inventory: [item('pack')] }),
+  );
   assert.deepEqual(out, [{ name: 'pickup', ids: ['sack', 'rope'] }]);
 });
 

@@ -117,7 +117,11 @@ function Motion() {
     <View style={{ padding: space.page, gap: space.sm }}>
       {row(['name', 'duration (ms)', 'easing'])}
       {Object.entries(motion).map(([name, m]) =>
-        row([`motion.${name}`, String(m.duration), m.easing]),
+        row(
+          'easing' in m
+            ? [`motion.${name}`, String(m.duration), m.easing]
+            : [`motion.${name}`, JSON.stringify(m), ''],
+        ),
       )}
       {Object.entries(sound).map(([name, s]) =>
         row([`sound.${name}`, `tier ${s.tier}`, `variants ${s.variants}`]),

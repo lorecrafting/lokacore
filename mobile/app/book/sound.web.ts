@@ -59,9 +59,9 @@ const duck = (on: boolean) => {
   ramp(audio!.music, amp(on ? mix.dip.db : 0), ms);
 };
 
-export const play = (name: SoundName) => start(name);
+export const play = (name: SoundName, tier?: string) => start(name, { tier });
 
-function start(name: SoundName, opts: { loop?: boolean; then?: () => void } = {}) {
+function start(name: SoundName, opts: { loop?: boolean; then?: () => void; tier?: string } = {}) {
   const files = urls[name];
   const bus = busOf(name);
   if (!audio || !files?.length || muted[groupOf(bus)]) return;
@@ -72,7 +72,7 @@ function start(name: SoundName, opts: { loop?: boolean; then?: () => void } = {}
     const el = new Audio(files[turn % files.length]);
     const node = audio.ctx.createMediaElementSource(el);
     const level = audio.ctx.createGain(); // not el.volume: iOS Safari ignores it
-    level.gain.value = amp(mix.tier[sound[name].tier as keyof typeof mix.tier]);
+    level.gain.value = amp(mix.tier[(opts.tier ?? sound[name].tier) as keyof typeof mix.tier]);
     node.connect(level);
     level.connect(bus === 'music' ? audio.music : audio.ctx.destination);
     if (bus === 'music') tune = level;

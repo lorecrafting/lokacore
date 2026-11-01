@@ -1,4 +1,4 @@
-// size: allow 320, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
+// size: allow 340, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Book draws GameView through its presenter; App injects the shell.
 import { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, View } from 'react-native';
@@ -30,12 +30,14 @@ import {
 } from './palette.ts';
 import type { Effects, Reading } from './reading.ts';
 import { useCues } from './cues.ts';
-import { hearCues, playTurn } from './cueSounds.ts';
+import { riffles } from './cueDiff.ts';
+import { hearCues, playRiffle, playTurn } from './cueSounds.ts';
 import { useSettings, type SettingStores } from './useSettings.ts';
 import { color, size, space } from './tokens.ts';
 import { Fault, Heard } from './lines.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { Body } from './Body.tsx';
+import { footContext } from './UnderInk.tsx';
 import { NightSky } from './NightSky.tsx';
 import { LABEL } from './labels.ts';
 import { HapticPulse } from './HapticPulse.tsx';
@@ -66,12 +68,13 @@ export type BookProps = {
   startOver: () => string | undefined; // a start over that failed and kept the game: why
 };
 
-function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?: string) {
+export function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?: string) {
   const restoring =
     s.restoreInvocation.current === p.game.pendingInvocation()
       ? s.restoreInvocation.current
       : undefined;
   const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
+  const fell = pr.screen().died;
   pr.press(b, detail);
   if (stale && !pr.recovered()) return s.redraw((n) => n + 1);
   const after = pr.screen(),
@@ -101,7 +104,8 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
     s.redraw((n) => n + 1);
   else {
     s.setStack(next);
-    s.setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
+    const riffle = riffles(b.command, before.view, after.view, fell !== after.died);
+    s.setFlip((f) => ({ turn: f.turn + 1, dir: 1, riffle }));
   }
 }
 
@@ -113,7 +117,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
 export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
   const [stack, setStack] = useState(() => firstPages(pr.screen()));
-  const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
+  const [flip, setFlip] = useState<ViewProps['flip']>({ turn: 0, dir: 1 });
   const [, redraw] = useState(0);
   const [talkingOn, talkOn] = useState<Page>();
   const screen = pr.screen();
@@ -155,7 +159,7 @@ type ViewProps = {
   palette: Palette;
   screen: Screen;
   stack: Page[];
-  flip: { turn: number; dir: 1 | -1 };
+  flip: { turn: number; dir: 1 | -1; riffle?: boolean };
   resumes?: number; // returns from the background so far: the view that settles one plays no cues
   go: (pages: Page[], dir: 1 | -1) => void;
   press: (b: Button, detail?: string) => void;
@@ -178,6 +182,15 @@ export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][nu
   page?.kind === 'chapter' &&
   !!s.view.chapter;
 
+const routes = (p: ViewProps, g: ReturnType<typeof group>) => ({
+  ...p,
+  g,
+  open: (page: Page) => p.go([...p.stack, page], 1),
+  walk: (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button),
+  world: () => p.go([], -1),
+  back: () => p.go(p.stack.slice(0, -1), -1),
+});
+
 /**
  * The Book's frame: page turn, body, footer, status icons and status line, and the fault, pending
  * and catching-up states.
@@ -188,36 +201,34 @@ export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][nu
  * - Story: RecoveryPages.stories.tsx
  */
 export function BookView(p: ViewProps) {
+  const [foot, setFoot] = useState(0);
   useCueSounds(p);
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
-  const ctx = {
-    ...p,
-    g,
-    open: (page: Page) => p.go([...p.stack, page], 1),
-    walk: (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button),
-    world: () => p.go([], -1),
-    back: () => p.go(p.stack.slice(0, -1), -1),
-  };
+  const ctx = routes(p, g);
   return (
     <PaletteContext value={p.palette}>
       <TypeContext value={p.reading?.type ?? shown}>
         <SafeAreaView style={{ ...frame, backgroundColor: p.palette.bg }}>
           <View style={{ flex: 1, maxWidth: size.column }}>
-            <PageTurn {...p.flip} paper={p.palette.bg} card={chapterCard(p.screen, page)}>
-              {p.screen.view.combat || p.screen.ended ? (
-                <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
-              ) : (
-                <Body
-                  {...ctx}
-                  page={page}
-                  talkOn={p.talkOn ?? (() => {})}
-                  chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
-                />
-              )}
-            </PageTurn>
-            <Bottom {...ctx} page={page} />
+            <footContext.Provider value={foot}>
+              <PageTurn {...p.flip} paper={p.palette.bg} card={chapterCard(p.screen, page)}>
+                {p.screen.view.combat || p.screen.ended ? (
+                  <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
+                ) : (
+                  <Body
+                    {...ctx}
+                    page={page}
+                    talkOn={p.talkOn ?? (() => {})}
+                    chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
+                  />
+                )}
+              </PageTurn>
+            </footContext.Provider>
+            <View onLayout={(e) => setFoot(e.nativeEvent.layout.height)}>
+              <Bottom {...ctx} page={page} />
+            </View>
             <Heard said={p.screen.said} />
             <HapticPulse />
           </View>
@@ -228,10 +239,18 @@ export function BookView(p: ViewProps) {
   );
 }
 
-function useCueSounds(p: ViewProps) {
+export function useCueSounds(p: ViewProps) {
   useEffect(hearCues, []); // before useCues: heard from its first cue
   const s = p.screen;
-  useCues(s.view, s.catchingUp, p.flip.turn, p.resumes, useReducedMotion(), playTurn, s.died);
+  useCues(
+    s.view,
+    s.catchingUp,
+    p.flip.turn,
+    p.resumes,
+    useReducedMotion(),
+    p.flip.riffle ? playRiffle : playTurn,
+    s.died,
+  );
 }
 
 // The footer (on the world), the status line and a press's fault.
