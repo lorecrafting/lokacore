@@ -358,6 +358,21 @@ defmodule Loka.ContentSceneVerbsTest do
              ])
   end
 
+  # Break: a scene's sidecar drops `entry`, so the guide's way of marking a scene does nothing.
+  test "a scene takes the entry marker from the JSON beside it" do
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+
+    File.write!(
+      Path.join(dir, "scenes/marked.scene"),
+      "npc: bram\n\nbram: one\n- a\n  bram: two\n"
+    )
+
+    File.mkdir_p!(Path.join(dir, "dialogues"))
+    File.write!(Path.join(dir, "dialogues/marked.json"), ~s({"entry": true}))
+    assert {:ok, artifact, _} = Loka.ContentSource.compile(dir, [])
+    assert artifact =~ ~s("entry":true)
+  end
+
   # Break: a paragraph splits or merges wrongly, `---` lowers to anything but one await_ack before
   # end, or the prose is not keyed by its step.
   test "a cutscene lowers to one narrate per paragraph, await_ack, end", %{tmp_dir: tmp} do

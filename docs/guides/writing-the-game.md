@@ -77,6 +77,8 @@ What you can rely on when dialogues link with `then` (JSON dialogues today):
   it. A person takes one; their other dialogues stop opening, except keyword ones. A condition on
   the marked dialogue that fails refuses the Talk. Without a marker Talk infers, as below, and the
   compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess.
+  A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
+  no marker when each but the last by key has a `when:`.
 - Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
   condition holds and that has a choice to show.
 - A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the
@@ -118,6 +120,7 @@ quest names it. Take a scene whose every choice ends the quest:
 
 ```
 npc: maud
+when: door_open
 
 maud: line one
 - carry
