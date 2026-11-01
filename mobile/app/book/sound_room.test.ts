@@ -127,3 +127,16 @@ test('short sounds spread their pitch; a bed does not', async (t) => {
   assert.equal(rate('coin.m4a'), 1.04);
   assert.equal(rate('inn.m4a'), undefined);
 });
+
+// Breaks: a first bed loads at a door, or the first gesture pulls every long piece over the network.
+test('the first gesture caches the beds and leaves the pieces to stream', async (t) => {
+  const b = await browser();
+  const fetched: string[] = [];
+  t.mock.method(globalThis, 'fetch', async (url: string) => {
+    fetched.push(url);
+    return new Response();
+  });
+  b.gesture();
+  assert.ok(fetched.includes('inn.m4a'));
+  assert.ok(!fetched.includes('p-inn.m4a'));
+});

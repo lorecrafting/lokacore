@@ -22,7 +22,7 @@ registerHooks({
     // Metro picks the platform file; here each device module records what the Book tells it.
     if (specifier === './sound')
       return {
-        url: "data:text/javascript,export const setMuted=(g,m)=>globalThis.bookDevice?.push([g,m]);export const play=(n)=>globalThis.bookDevice?.push(['play',n]);export const fight=(e)=>globalThis.bookDevice?.push(['fight',e]);export const sources=(s)=>{globalThis.bookSamples=s}",
+        url: "data:text/javascript,export const setMuted=(g,m)=>globalThis.bookDevice?.push([g,m]);export const play=(n)=>globalThis.bookDevice?.push(['play',n]);export const fight=(e)=>globalThis.bookDevice?.push(['fight',e]);export const ambience=()=>{};export const thunder=()=>{};export const sources=(s,r)=>{globalThis.bookSamples=s;globalThis.bookRooms=r}",
         shortCircuit: true,
       };
     // Metro and Vite give an audio file's URL; here its name.

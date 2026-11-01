@@ -179,3 +179,20 @@ test('the Book going cuts the music', () => {
   g.bookDevice = undefined;
   assert.deepEqual(log, [['fight', 'cut']]);
 });
+
+// Breaks: a sound name or a room tag is wired to another's file, or a tag loses its bed or piece.
+test('the room and deed sounds play their manifest files', () => {
+  assert.deepEqual(samples.miss, ['sfx-miss-01.m4a']);
+  assert.deepEqual(samples.lever, ['sfx-lever-01.m4a']);
+  assert.deepEqual(samples.latch, ['sfx-latch-01.m4a']);
+  assert.deepEqual(samples.weather, ['amb-rain-01.m4a']);
+  assert.deepEqual(samples.thunder, [
+    'sfx-thunder-01.m4a',
+    'sfx-thunder-02.m4a',
+    'sfx-thunder-03.m4a',
+  ]);
+  for (const tag of 'wild shore cave mill forge church crypt vault inn village'.split(' ')) {
+    assert.equal(g.bookRooms.beds[tag], `amb-${tag}-01.m4a`);
+    assert.equal(g.bookRooms.pieces[tag], `mus-explore-${tag}-01.m4a`);
+  }
+});

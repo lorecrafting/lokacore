@@ -45,7 +45,8 @@ const unlock = () => {
       const music = ctx.createGain();
       music.connect(ctx.destination);
       audio = { ctx, ambience, music };
-      for (const file of Object.values(urls).flat()) void globalThis.fetch?.(file).catch(() => {}); // the cache: no load at a press
+      const cached = [...Object.values(urls).flat(), ...Object.values(rooms.beds ?? {})]; // no load at a press; pieces stream
+      for (const file of cached) void globalThis.fetch?.(file).catch(() => {});
       if (inFight) loop(); // a fight reopened before the first gesture
       settleRoom(motion.bed.fade);
       if (room && !inFight) explore(room.tag);
