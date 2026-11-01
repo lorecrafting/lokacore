@@ -46,7 +46,8 @@ export type ElapsedStatus =
   | { kind: 'fault'; code: ErrorCode }
   | { kind: 'error'; reason?: 'save_corrupt'; message: string };
 export type GameSubscription =
-  | { kind: 'state'; projection: Projection; status: ElapsedStatus }
+  // `resumed`: this view settles a return from the background; what changed happened while away.
+  | { kind: 'state'; projection: Projection; status: ElapsedStatus; resumed?: boolean }
   | { kind: 'completion'; invocation_id: string; intent: Intent; before: Projection; reply: Reply };
 
 /** One game being played. */

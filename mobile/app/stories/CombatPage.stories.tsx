@@ -1,7 +1,13 @@
 // C row Pages, Combat (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect } from 'storybook/test';
+import { useState } from 'react';
+import { expect, waitFor } from 'storybook/test';
+import type { GameView } from '../../packages/game-view/session.ts';
+import { Blow } from '../book/Blow.tsx';
 import { Combat } from '../book/Combat.tsx';
+import { useCues } from '../book/cues.ts';
+import { Control } from '../book/pages.tsx';
+import { size } from '../book/tokens.ts';
 import { pageStory } from './screen.tsx';
 import CombatOneFoeView from './views/combat-one-foe.json';
 import CombatPackView from './views/combat-pack.json';
@@ -49,5 +55,41 @@ export const FoeCast: StoryObj = {
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Cast a spell…' }));
     await expect(canvas.getByRole('button', { name: /^Flamma, cast flamma on/ })).toBeVisible();
+  },
+};
+
+// A blow washes the paper below the ink (book-ui.md, Blow wash). Breaks: no wash on a hit point loss.
+const struck = (current: number) =>
+  ({
+    place: { id: 'yard' },
+    journal: [],
+    inventory: [],
+    combat: {},
+    resources: [{ resource: { key: 'hp' }, current, maximum: 20 }],
+  }) as unknown as GameView;
+function Struck() {
+  const [view, setView] = useState(() => struck(20));
+  useCues(view, false, 0);
+  return (
+    <div data-testid="frame" style={{ display: 'flex', width: size.column, height: size.column }}>
+      <Blow>
+        <Control label="Continue" onPress={() => setView(struck(15))} />
+      </Blow>
+    </div>
+  );
+}
+export const BlowWash: StoryObj = {
+  render: () => <Struck />,
+  name: 'Blow wash',
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    const paper = canvasElement.querySelector<HTMLElement>('[aria-hidden="true"]')!;
+    await expect(Number(getComputedStyle(paper).opacity)).toBe(0);
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
+    await waitFor(() => expect(Number(getComputedStyle(paper).opacity)).toBeGreaterThan(0));
+    // The swell is clipped. Breaks: scrollbars on the whole Combat page at the first blow.
+    const frame = canvas.getByTestId('frame');
+    await waitFor(() => expect(Number(getComputedStyle(paper).opacity)).toBeGreaterThan(0.1));
+    await expect(frame.scrollWidth).toBe(frame.clientWidth);
+    await expect(frame.scrollHeight).toBe(frame.clientHeight);
   },
 };

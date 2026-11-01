@@ -1,5 +1,7 @@
 // The screen for a save that does not open (OFF-07; 10 §32; docs/system/book-ui.md, Chapters, scenes and recovery).
+import { useEffect } from 'react';
 import { SafeAreaView } from 'react-native';
+import { haptic } from './book/haptic';
 import { Control, Page } from './book/pages.tsx';
 import { Text } from './book/Text.tsx';
 import { note, PaletteContext, useFocusRing } from './book/palette.ts';
@@ -18,7 +20,7 @@ const PLAIN: Record<string, string> = {
 /**
  * The screen for a save that does not open (book-ui.md, Chapters, scenes and recovery).
  * - Use: App, when the save fails to open; no GameView behind it.
- * - Rules: the Page's centred variant; `startOver` asks first: it destroys the save (10 §31; the
+ * - Rules: an error haptic on arrival, no sound; the Page's centred variant; `startOver` asks first: it destroys the save (10 §31; the
  *   shell's confirm); `tryAgain` (a page reload on web) reopens the save, offered only on the other-tab lock.
  * - States: release; format; corrupt; locked.
  * - Story: RecoveryPages.stories.tsx
@@ -27,14 +29,19 @@ export function SaveError({
   failed,
   startOver,
   tryAgain,
+  haptics = true,
 }: {
   failed: Failed;
   startOver: () => void;
   tryAgain?: () => void;
+  haptics?: boolean; // no Book here to give the haptic module the setting
 }) {
   const paper = color.light; // no GameView here, so no solar phase
   useFocusRing(paper); // outside the Book, so its ring is not installed
   const why = detail(failed);
+  useEffect(() => {
+    if (haptics) haptic('error');
+  }, [failed.kind]);
   return (
     <PaletteContext value={paper}>
       <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>

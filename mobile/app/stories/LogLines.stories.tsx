@@ -1,7 +1,18 @@
 // LogLines: the event log and detail history (LogLines's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect } from 'storybook/test';
+import { useState } from 'react';
+import { View } from 'react-native';
+import { expect, waitFor } from 'storybook/test';
+import type { GameView } from '../../packages/game-view/session.ts';
+import { useCues } from '../book/cues.ts';
+import { ItemPop } from '../book/ItemPop.tsx';
+import { GiltLine } from '../book/GiltLine.tsx';
 import { LogLines } from '../book/lines.tsx';
+import { usePalette, useType } from '../book/palette.ts';
+import { size } from '../book/tokens.ts';
+import { Control } from '../book/pages.tsx';
+import type { DetailLine } from '../book/logs.ts';
+import { markDrawn } from '../book/logs.ts';
 import { lineWords } from '../book/words.ts';
 
 const meta = {
@@ -13,6 +24,37 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Narration: Story = {};
+
+// Only the line entering this redraw dries (book-ui.md, Effects, sound and haptics).
+// Breaks: the older line re-dries (it would leave its settled ink), or the new line never settles.
+function Growing() {
+  // One array grown in place, as a screen's log is: the mark belongs to the array.
+  const [lines] = useState<DetailLine[]>(() => {
+    const old = ['The water is black and still.'];
+    markDrawn(old);
+    return old;
+  });
+  const [, redraw] = useState(0);
+  return (
+    <>
+      <LogLines lines={lines} />
+      <Control
+        label="Back to World"
+        onPress={() => redraw(lines.push('A bell carries over the yard.'))}
+      />
+    </>
+  );
+}
+export const NewLineDries: Story = {
+  render: () => <Growing />,
+  play: async ({ canvas, userEvent }) => {
+    const color = (text: string) => getComputedStyle(canvas.getByText(text)).color;
+    const settled = color('The water is black and still.');
+    await userEvent.click(canvas.getByRole('button', { name: 'Back to World' }));
+    await expect(color('The water is black and still.')).toBe(settled);
+    await waitFor(() => expect(color('A bell carries over the yard.')).toBe(settled));
+  },
+};
 
 // Every narrated event kind (book-ui.md Line placement, loka-lsqi): one ink italic style, no colon.
 // Breaks: an event line draws dim or upright again, or two kinds draw differently.
@@ -81,5 +123,48 @@ export const NpcSpeech: Story = {
   args: { lines: [speech] },
   play: async ({ canvas }) => {
     await expect(canvas.getByText('Nell says to you, "Well, stranger?"')).toBeVisible();
+  },
+};
+
+// The pop is the log's one transient (book-ui.md, Room page anatomy).
+// Breaks: a first view pops, the words are not the view's names, or two items take two lines.
+const pack = (...names: string[]) =>
+  ({
+    place: { id: 'jetty' },
+    journal: [],
+    inventory: names.map((name) => ({ id: name, name })),
+  }) as unknown as GameView;
+function Picking() {
+  const [view, setView] = useState(() => pack());
+  useCues(view, false, 0);
+  return (
+    <View>
+      <LogLines lines={['You take the sack and the rope.']} />
+      <ItemPop view={view} text={(key) => key} />
+      <View style={{ height: size.touch }} />
+      <Control label="Continue" onPress={() => setView(pack('sack', 'rope'))} />
+    </View>
+  );
+}
+export const ItemPopTwoItems: Story = {
+  render: () => <Picking />,
+  play: async ({ canvas, userEvent }) => {
+    await expect(canvas.queryByText(/^\+ /)).toBeNull();
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
+    // Hidden from assistive tech, so found by its words rather than its role.
+    await expect(await canvas.findByText('+ sack, + rope')).toBeInTheDocument();
+  },
+};
+
+function Gilded() {
+  const c = usePalette();
+  return (
+    <GiltLine style={{ ...useType().body, color: c.fg }}>You feel a little stronger.</GiltLine>
+  );
+}
+export const Gilt: Story = {
+  render: () => <Gilded />,
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('You feel a little stronger.')).toBeVisible();
   },
 };

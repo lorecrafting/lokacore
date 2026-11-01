@@ -1,4 +1,4 @@
-// size: allow 560, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
+// size: allow 575, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
 import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -112,6 +112,10 @@ const shut = (direction: string, state: string) =>
   }) as any;
 
 // Breaks: a shortcut chooses the wrong exit or steals a focused input's arrow keys.
+// A status icon's disc: a pressable one sits in the press look's animated wrapper.
+const unpress = (e: any) =>
+  typeof e.props.children.type === 'function' ? e.props.children : e.props.children.props.children;
+
 test('web keyboard uses offered exits and keeps focused controls', (t) => {
   const { key, Target } = browser(t);
   const walked: string[] = [];
@@ -304,7 +308,7 @@ test('status shows hp, ma and mv only; Character bands those only, never pennies
     e && typeof e === 'object' ? [e.props.children].flat().map(text).join('') : String(e ?? '');
   // Breaks (loka-x6t.86): a breakable space inside the pools lets the second line split them.
   assert.equal(text(contents), 'hp\u00a01/9\u2007mv\u00a01/9');
-  const shown = contents.props.children.props.children.map((t: any) => [
+  const shown = contents.props.children.props.children.props.children.map((t: any) => [
     t.key,
     t.props.style.color,
   ]);
@@ -374,7 +378,9 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
   const text = (key: string) => (key === 'condition.fed' ? 'fed' : key);
   const icons = (conditions: any[], open?: () => void) => {
     const [shown, more] = StatusIcons({ conditions, time: 720, text, open }).props.children;
-    return [...shown, more].filter(Boolean).map((e: any) => e.type(e.props));
+    return [...shown.map((arrival: any) => arrival.props.children), more]
+      .filter(Boolean)
+      .map((e: any) => e.type(e.props));
   };
   const names = (es: any[]) => es.map((e) => e.props.accessibilityLabel);
   const opened: string[] = [];
@@ -387,7 +393,7 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
     'scarred, debuff, opens Character',
     'warded, 90s remaining, buff, opens Character',
   ]);
-  const discOf = (e: any) => e.props.children.type(e.props.children.props);
+  const discOf = (e: any) => ((d: any) => d.type(d.props))(unpress(e));
   const glyphOf = (e: any) => discOf(e).props.children.props.children;
   assert.deepEqual(shown.map(glyphOf), ['◡', '−', '○', '−', '+']);
   const c = color.light;
@@ -413,7 +419,7 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
       .props.children[0];
   assert.equal(row({ conditions: five }).props.open, open);
   assert.equal(row({ conditions: five, locked: true }).props.open, undefined);
-  assert.equal(row({ conditions: [] }), false);
+  assert.deepEqual(row({ conditions: [] }).props.conditions, []);
   const locked = icons(five);
   assert.deepEqual(
     locked.map((e) => [e.type, e.props.accessibilityRole]),
@@ -462,13 +468,17 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
   assert.equal(share(undefined, 3600), undefined); // no end
   // The Icon's child: a Ring (track, then halves, then the disc) or the bare disc.
   const ring = (ends_at?: number, duration?: number, locked = false) => {
-    const [icon] = StatusIcons({
+    const [
+      {
+        props: { children: icon },
+      },
+    ] = StatusIcons({
       conditions: [at(ends_at, duration)],
       time: 720,
       text: (k: string) => k,
       open: locked ? undefined : () => {},
     }).props.children[0];
-    return icon.type(icon.props).props.children;
+    return unpress(icon.type(icon.props));
   };
   const halves = (e: any) => {
     const [track, ...rest] = e.type(e.props).props.children;
@@ -532,13 +542,17 @@ test('status icon countdown ring: drains between views, capped, jumps up and und
   assert.deepEqual(turns(0), { right: -180, left: 0 });
   // Rendered: the previous view (288 degrees) came 250 ms ago, this one shows 286.8.
   const ring = () => {
-    const [icon] = StatusIcons({
+    const [
+      {
+        props: { children: icon },
+      },
+    ] = StatusIcons({
       conditions: [{ label: 'fed', kind: 'buff', ends_at: 3600, duration: 3600 }] as any,
       time: 732,
       text: (k: string) => k,
       open: () => {},
     }).props.children[0];
-    const e = icon.type(icon.props).props.children;
+    const e = unpress(icon.type(icon.props));
     return e.type(e.props);
   };
   const drains = (reduced: boolean) => {

@@ -3,7 +3,14 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { CONTENTS } from './__tests__/control.test.ts';
 import { book, nodes } from './__tests__/polish-book.test.ts';
-import { readingFactor, readingSize, readingType, tapBleed } from './reading.ts';
+import {
+  effectStores,
+  onOff,
+  readingFactor,
+  readingSize,
+  readingType,
+  tapBleed,
+} from './reading.ts';
 import { type } from './tokens.ts';
 
 const lines = (f: number) => {
@@ -86,6 +93,19 @@ test('the stored Reading size reads Standard unless it is a step, and a failed w
   assert.doesNotThrow(() => broken.set('larger'));
 });
 
+// Breaks: a shell with no reading store (no saved step, no system scale) drawn at another size than
+// Standard at scale 1.
+test('with no reading store the pages draw at Standard, unscaled', () => {
+  const sizes = (h: ReturnType<typeof book>) =>
+    h.draw().flatMap((n) => (n.type === 'Text' ? [n.props.style?.lineHeight] : []));
+  const standard = book(undefined, undefined, undefined, undefined, {
+    get: () => 'standard',
+    set: () => {},
+    fontScale: () => 1,
+  });
+  assert.deepEqual(sizes(book()), sizes(standard));
+});
+
 // Breaks: the Settings row not a radio group with one checked step, the chosen chip not drawn inverted,
 // the choice not saved or not reaching the page, the launch not reading the stored step, or the system
 // scale ignored.
@@ -97,7 +117,11 @@ test('Settings chooses the Reading size: saved, shown inverted, and the pages gr
     fontScale: () => 1.2,
   });
   const drawn = () => h.draw();
-  const chips = () => drawn().filter((n) => n.props?.accessibilityRole === 'radio');
+  const chips = () =>
+    drawn().filter(
+      (n) =>
+        n.props?.accessibilityRole === 'radio' && !/^(On|Off)$/.test(n.props.accessibilityLabel),
+    );
   const body = () =>
     drawn().filter((n) => n.type === 'Text' && n.props.style?.lineHeight === 42).length;
   h.tap(CONTENTS);
@@ -111,7 +135,7 @@ test('Settings chooses the Reading size: saved, shown inverted, and the pages gr
     ],
   );
   const [plain, chosen] = chips().map((n) => [
-    n.props.style,
+    Object.assign({}, ...n.props.style),
     nodes(n.props.children)[0].props.style,
   ]);
   const page = drawn().find((n) => n.type === 'SafeAreaView').props.style.backgroundColor;
@@ -136,4 +160,94 @@ test('Settings chooses the Reading size: saved, shown inverted, and the pages gr
   assert.equal(title.props.style.textAlign, 'center');
   assert.ok(drawn().some((n) => String(sized(n)) === '20,29'));
   assert.ok(drawn().some((n) => n.type === 'Pressable' && n.props.style?.paddingBottom === 2));
+});
+
+// Breaks: a fresh device or a bad value reads off; a failing store throws into Settings; an off is not kept.
+test('an effect setting is on unless stored off, and a failing store is harmless', () => {
+  const kept = new Map<string, string>();
+  const s = onOff(
+    { getItemSync: (k) => kept.get(k) ?? null, setItemSync: (k, v) => void kept.set(k, v) },
+    'k',
+  );
+  assert.equal(s.get(), true);
+  s.set(false);
+  assert.equal(kept.get('k'), 'off');
+  assert.equal(s.get(), false);
+  s.set(true);
+  assert.equal(s.get(), true);
+  kept.set('k', 'junk');
+  assert.equal(s.get(), true);
+  const boom = () => {
+    throw new Error('disk');
+  };
+  const bad = onOff({ getItemSync: boom, setItemSync: boom }, 'k');
+  assert.equal(bad.get(), true);
+  bad.set(false);
+});
+
+// Breaks: a chip writes another setting's key, a stored Off is ignored at launch, or a chip does not
+// reach its device module (Sound muting music, say, or Haptics left on).
+test('Settings effect chips show, save and apply each setting', () => {
+  const device: unknown[][] = [];
+  Object.assign(globalThis, { bookDevice: device });
+  const kept = new Map([['effects.music', 'off']]);
+  const h = book(
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    effectStores({
+      getItemSync: (i) => kept.get(i) ?? null,
+      setItemSync: (i, v) => void kept.set(i, v),
+    }),
+  );
+  h.tap(CONTENTS);
+  h.tap('Settings');
+  const radios = () =>
+    h
+      .draw()
+      .filter(
+        (n) =>
+          /^(On|Off)$/.test(n.props?.accessibilityLabel ?? '') &&
+          n.props.accessibilityRole === 'radio',
+      );
+  // Sound, Music, Haptics, Flashes, each On then Off.
+  assert.deepEqual(
+    radios().map((n) => n.props['aria-checked']),
+    [true, false, false, true, true, false, true, false],
+  );
+  assert.deepEqual(device.slice(0, 3), [
+    ['sound', false],
+    ['music', true],
+    ['haptics', true],
+  ]);
+  device.length = 0;
+  // Breaks: the module hears a change only after commit, so a preview in the same press plays the old value.
+  radios()[1]!.props.onPress();
+  // and Sound previews itself after applying.
+  assert.deepEqual(device, [
+    ['sound', true],
+    ['play', 'pageTurn'],
+    ['haptic', 'selection'],
+  ]);
+  h.draw();
+  radios()[5]!.props.onPress();
+  radios()[7]!.props.onPress();
+  h.draw();
+  assert.deepEqual(device, [
+    ['sound', true],
+    ['play', 'pageTurn'],
+    ['haptic', 'selection'],
+    ['haptics', false],
+    ['haptic', 'selection'], // the chip's, after applying: the real module is now off
+    ['haptic', 'selection'],
+  ]);
+  assert.deepEqual(Object.fromEntries(kept), {
+    'effects.music': 'off',
+    'effects.sound': 'off',
+    'effects.haptics': 'off',
+    'effects.flashes': 'off',
+  });
+  delete (globalThis as { bookDevice?: unknown }).bookDevice;
 });

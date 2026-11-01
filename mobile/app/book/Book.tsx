@@ -1,6 +1,6 @@
 // size: allow 320, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Book draws GameView through its presenter; App injects the shell.
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
@@ -18,7 +18,7 @@ import {
   type Hint,
   type Page,
 } from './model.ts';
-import { usePaletteCurve } from './fade.ts';
+import { usePaletteCurve, useReducedMotion } from './fade.ts';
 import {
   PaletteContext,
   paletteOf,
@@ -28,19 +28,17 @@ import {
   useType,
   type Palette,
 } from './palette.ts';
-import {
-  readingFactor,
-  readingType,
-  type Reading,
-  type ReadingStep,
-  type ReadingStore,
-} from './reading.ts';
+import type { Effects, Reading } from './reading.ts';
+import { onCue, useCues } from './cues.ts';
+import { playCue, playTurn } from './cueSounds.ts';
+import { useSettings, type SettingStores } from './useSettings.ts';
 import { color, size, space } from './tokens.ts';
 import { Fault, Heard } from './lines.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { Body } from './Body.tsx';
 import { NightSky } from './NightSky.tsx';
 import { LABEL } from './labels.ts';
+import { HapticPulse } from './HapticPulse.tsx';
 import { PageTurn } from './PageTurn.tsx';
 import {
   firstPages,
@@ -53,12 +51,11 @@ import {
 } from './updates.ts';
 
 /** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
-export type Shell = {
+export type Shell = SettingStores & {
   confirm: (go: () => void) => void;
   learned: Hint;
   recovered?: (healthy: boolean) => void;
   subscribed?: (on: boolean) => void; // whether the Book sees every update (the away recap waits)
-  reading?: ReadingStore & { fontScale: () => number }; // and the system font scale
 };
 
 // Actions retain valid detail pages; leaving a room closes them. A pending retry keeps its
@@ -124,7 +121,6 @@ export default function Book(p: BookProps) {
   const current = useRef({ stack, view: screen.view });
   current.current = { stack, view: screen.view };
   const state = { current, restoreInvocation, setStack, setFlip, redraw };
-  useUpdates(p, pr, state);
   const go = (next: Page[], dir: 1 | -1) => {
     pr.leaveCombat(); // every turn leaves an ended Combat page (its foot is the only one shown)
     const view = pr.screen().view;
@@ -149,16 +145,10 @@ export default function Book(p: BookProps) {
       shell={p.shell}
       talkingOn={talkingOn}
       talkOn={talkOn}
-      reading={useReading(p.shell)}
+      {...useSettings(p.shell)}
+      {...useUpdates(p, pr, state)}
     />
   );
-}
-
-// The Reading size the player chose on Settings, scaled by the system font scale.
-function useReading(shell: Shell): Reading {
-  const [step, setStep] = useState(() => shell.reading?.get() ?? 'standard');
-  const choose = (s: ReadingStep) => (setStep(s), shell.reading?.set(s));
-  return { step, choose, type: readingType(readingFactor(step, shell.reading?.fontScale() ?? 1)) };
 }
 
 type ViewProps = {
@@ -166,6 +156,7 @@ type ViewProps = {
   screen: Screen;
   stack: Page[];
   flip: { turn: number; dir: 1 | -1 };
+  resumes?: number; // returns from the background so far: the view that settles one plays no cues
   go: (pages: Page[], dir: 1 | -1) => void;
   press: (b: Button, detail?: string) => void;
   refused: (line: DetailLine) => void;
@@ -174,10 +165,19 @@ type ViewProps = {
   talkingOn?: Page; // Body's conversation latch (Body.tsx), held above PageTurn's remount
   talkOn?: (page?: Page) => void;
   reading?: Reading; // none: the Storybook's Reading global (the TypeContext above)
+  effects?: Effects;
 };
 
 // A wide screen centres the page column, at most size.column, on the paper (book-ui.md, Page column).
 const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as const;
+export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][number]) =>
+  !s.view.combat &&
+  !s.ended &&
+  !s.view.scene && // Body draws these two over the chapter page
+  !s.view.ancestry_choices &&
+  page?.kind === 'chapter' &&
+  !!s.view.chapter;
+
 /**
  * The Book's frame: page turn, body, footer, status icons and status line, and the fault, pending
  * and catching-up states.
@@ -188,6 +188,7 @@ const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as con
  * - Story: RecoveryPages.stories.tsx
  */
 export function BookView(p: ViewProps) {
+  useCueSounds(p);
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
@@ -204,7 +205,7 @@ export function BookView(p: ViewProps) {
       <TypeContext value={p.reading?.type ?? shown}>
         <SafeAreaView style={{ ...frame, backgroundColor: p.palette.bg }}>
           <View style={{ flex: 1, maxWidth: size.column }}>
-            <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={p.palette.bg}>
+            <PageTurn {...p.flip} paper={p.palette.bg} card={chapterCard(p.screen, page)}>
               {p.screen.view.combat || p.screen.ended ? (
                 <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
               ) : (
@@ -218,12 +219,18 @@ export function BookView(p: ViewProps) {
             </PageTurn>
             <Bottom {...ctx} page={page} />
             <Heard said={p.screen.said} />
+            <HapticPulse />
           </View>
           {p.palette.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
       </TypeContext>
     </PaletteContext>
   );
+}
+
+function useCueSounds(p: ViewProps) {
+  useEffect(() => onCue(playCue), []); // before useCues: heard from its first cue
+  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn, p.resumes, useReducedMotion(), playTurn);
 }
 
 // The footer (on the world), the status line and a press's fault.

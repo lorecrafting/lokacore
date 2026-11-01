@@ -11,11 +11,13 @@ import { ShelfPage } from './Shelf.tsx';
 import { NoticePage, proseLinks } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
 import { Here, LogLines, nameLink } from './lines.tsx';
-import { Page as PageShell, RunningHead } from './pages.tsx';
+import { Page as PageShell } from './pages.tsx';
+import { RunningHead } from './RunningHead.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
+import { ItemPop } from './ItemPop.tsx';
 import { space } from './tokens.ts';
 import { chapterLabel } from './words.ts';
-import type { Reading } from './reading.ts';
+import type { Effects, Reading } from './reading.ts';
 import {
   AncestryPage,
   CarryingPage,
@@ -43,6 +45,7 @@ type BodyProps = {
   back: () => void;
   stack: Page[];
   reading?: Reading;
+  effects?: Effects;
 };
 // The NPC page (this visit, by identity) in conversation; BookView holds it outside PageTurn's remount.
 type Talk = { talkingOn?: Page; talkOn: (page?: Page) => void };
@@ -89,6 +92,7 @@ function PageBody(p: BodyProps & Talk) {
   if (page?.kind === 'chapter' && view.chapter)
     return (
       <ChapterPage
+        key={view.chapter.index}
         label={chapterLabel(view.chapter.index)}
         title={text(view.chapter.title)}
         done={p.chapterDone}
@@ -133,7 +137,9 @@ function sectionPage(p: BodyProps, page: Page) {
     );
   if (page.kind === 'map') return <MapPage view={view} text={text} {...home} />;
   if (page.kind === 'settings')
-    return <SettingsPage startOver={p.startOver} {...home} reading={p.reading} />;
+    return (
+      <SettingsPage startOver={p.startOver} {...home} reading={p.reading} effects={p.effects} />
+    );
   if (page.kind === 'journal') return <JournalPage {...p.screen} {...home} press={p.press} />;
   return (
     <CarryingPage
@@ -196,7 +202,12 @@ export function RoomPage(p: {
         {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
         <Here view={p.view} text={p.text} open={p.open} />
       </View>
-      {p.log.length > 0 && <LogLines lines={p.log} />}
+      {!!p.log.length && (
+        <View>
+          <LogLines lines={p.log} />
+          <ItemPop view={p.view} text={p.text} />
+        </View>
+      )}
     </PageShell>
   );
 }

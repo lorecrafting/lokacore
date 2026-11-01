@@ -1,8 +1,12 @@
+// size: allow 345, the card's two press paths (lift, refusal) and the verb, pick and continue lists stay one family
 // The offered-action controls: action card, pick lists, verb line, continue button (BOOK-UI-COMPONENTS.md).
 import { Children, type ReactNode, type Ref, useContext, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
+import { InkText, LiftPressable, Reanimated } from './fade.ts';
+import { haptic } from './haptic';
 import { refusedProps, Tap } from './pages.tsx';
+import { useDry, useInk, useLift, usePress } from './press.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { onKey, unseen } from './lines.tsx';
 import { hides, reasonSentence } from './reasons.ts';
@@ -40,6 +44,8 @@ type CardProps = (
  *   (`type.named`), named by `name` (its shown text, then the action and spoken price); unavailable, the same press and
  *   sentence with no card. Shop lines stack in `Cards lines`.
  * - States: available; unavailable; unavailable, pressed; each as a card or a line.
+ * - Effects: a card lifts with a selection haptic; an unavailable press does not lift, its reason
+ *   dries and it gives a warning haptic.
  * - Line form stories: NpcPage.stories.tsx (Shelf, Sale, Services).
  * - Story: ActionCard.stories.tsx
  */
@@ -54,14 +60,26 @@ export function ActionCard(p: CardProps) {
         <Text style={prose(c, t)}>{linked(label, p.link)}</Text>
       </Tap>
     );
+  return <Available {...p} label={label} />;
+}
+
+function Available(
+  p: Extract<CardProps, { b: Button } | { onPress: () => void }> & { label: string },
+) {
+  const c = usePalette();
+  const t = useType();
+  const label = p.label;
+  const press = usePress('selection');
+  const lift = useLift(press, c.card);
   return (
-    <Pressable
+    <LiftPressable
       ref={p.ref}
+      {...press.handlers}
       accessibilityRole="button"
       accessibilityLabel={('b' in p && p.name) || label}
       aria-expanded={'onPress' in p ? p.expanded : undefined} // RN web maps aria-expanded, not accessibilityState
-      onPress={'b' in p ? () => p.press(p.b) : p.onPress}
-      style={card(c)}
+      onPress={press.commit('b' in p ? () => p.press(p.b) : p.onPress)}
+      style={[card(c), lift]}
     >
       <Text style={prose(c, t)}>
         {/* One text node with a line break, so axe reads "label note" as the name's start. */}
@@ -69,7 +87,7 @@ export function ActionCard(p: CardProps) {
           ? [label, <Text key="note" style={note(c, t)}>{`\n${p.note}`}</Text>]
           : label}
       </Text>
-    </Pressable>
+    </LiftPressable>
   );
 }
 
@@ -105,7 +123,7 @@ const linked = (label: string, link: string) => {
 // ponytail: announceForAccessibility is a no-op on web, where the card's own polite region reads the
 // sentence; where native maps aria-live too, it may be read twice (Footer.tsx, check on device).
 function Unavailable(p: { label: string; reason?: string; name?: string; link?: string }) {
-  const [c, t] = [usePalette(), useType()];
+  const c = usePalette();
   const sentence = reasonSentence(p.reason);
   const [pressed, setPressed] = useState<string>();
   const shown = `${p.label}\n${sentence}`;
@@ -115,13 +133,11 @@ function Unavailable(p: { label: string; reason?: string; name?: string; link?: 
   const hint = grayed ? '' : sentence;
   const press = () => {
     setPressed(shown);
+    haptic('warning');
     if (sentence) AccessibilityInfo.announceForAccessibility(sentence);
   };
-  const body = (
-    <Text style={grayed ? note(c, t) : prose(c, t)}>
-      {grayed && sentence ? [label, `\n${sentence}`].flat() : label}
-    </Text>
-  );
+  const reason = grayed ? sentence : '';
+  const body = <RefusedBody grayed={grayed} label={label} reason={reason} />;
   return (
     <View>
       {p.link ? (
@@ -138,10 +154,37 @@ function Unavailable(p: { label: string; reason?: string; name?: string; link?: 
           {body}
         </Pressable>
       )}
-      <View aria-live="polite" style={unseen}>
-        {grayed && sentence ? <Text>{sentence}</Text> : null}
-      </View>
+      <SaidReason>{reason || null}</SaidReason>
     </View>
+  );
+}
+
+const SaidReason = ({ children }: { children: string | null }) => (
+  <View aria-live="polite" style={unseen}>
+    {children ? <Text>{children}</Text> : null}
+  </View>
+);
+
+function RefusedBody(p: { grayed: boolean; label: ReactNode; reason: string }) {
+  const [c, t] = [usePalette(), useType()];
+  return (
+    <>
+      <Text style={p.grayed ? note(c, t) : prose(c, t)}>
+        {p.label}
+        {p.reason ? ' ' /* keeps the blocks' text apart: the name contains what is shown */ : null}
+      </Text>
+      {p.reason ? <DriedReason>{p.reason}</DriedReason> : null}
+    </>
+  );
+}
+
+// Its own block and component: a nested Text cannot animate on native, and this mounts on the press.
+function DriedReason({ children }: { children: string }) {
+  const [c, t] = [usePalette(), useType()];
+  return (
+    <Reanimated.View style={useDry()}>
+      <Text style={note(c, t)}>{children}</Text>
+    </Reanimated.View>
   );
 }
 
@@ -193,6 +236,7 @@ export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>
  *   the answer leaves the option no row, the option goes and focus moves to the page title.
  *   Rows are inset space.lg; an unavailable row is the unavailable form.
  * - States: closed; open; open with an unavailable row; scripted actions mixed; pending.
+ * - Refs: one per card for its whole life; an animated component keeps the first it is given.
  * - Story: PickList.stories.tsx
  */
 export function PickLists(p: {
@@ -210,12 +254,12 @@ export function PickLists(p: {
   const own = useState<{ page: string; label: string }>();
   const [shown, setShown] = p.state ?? own;
   const open = shown?.page === p.page ? shown.label : undefined;
-  const option = useRef<View>(null);
+  const options = useRef<Record<string, View | null>>({});
   const all = p.lists ?? picks(p.view, p.buttons ?? [], p.page, p.text);
   const { first, sent } = useFocus(open, p.view, all);
   const close = () => {
     setShown(undefined);
-    option.current?.focus();
+    if (open) options.current[open]?.focus();
   };
   const press = (b: Button) => {
     p.press(b);
@@ -226,7 +270,7 @@ export function PickLists(p: {
   return all.map((k) => (
     <View key={k.label} style={{ gap: space.sm }}>
       <ActionCard
-        ref={k.label === open ? option : undefined}
+        ref={(v) => void (options.current[k.label] = v)}
         label={k.label}
         expanded={k.label === open}
         onPress={() => (k.label === open ? close() : setShown({ page: p.page, label: k.label }))}
@@ -270,16 +314,20 @@ export function VerbLine({ b, press }: { b: Button; press: (b: Button) => void }
 /**
  * An ink-filled scene or chapter continuation.
  * - Use: a scene or chapter page's Continue.
+ * - Rules: an ink press (`bg` to `dim`, `action` being unreadable on the ink fill) and a selection haptic.
  * - Story: ContinueButton.stories.tsx
  */
 export function ContinueButton(p: { label: string; onPress: () => void }) {
   const c = usePalette();
   const t = useType();
+  const press = usePress('selection');
+  const ink = useInk(press, c.bg, c.dim);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={p.label}
-      onPress={() => p.onPress()} // no press event: the handler takes none
+      onPress={press.commit(p.onPress)}
+      {...press.handlers}
       style={{
         backgroundColor: c.fg,
         borderRadius: radius.card,
@@ -291,7 +339,7 @@ export function ContinueButton(p: { label: string; onPress: () => void }) {
         paddingHorizontal: space.lg,
       }}
     >
-      <Text style={{ ...t.control, color: c.bg, textAlign: 'center' }}>{p.label}</Text>
+      <InkText style={[t.control, { textAlign: 'center' }, ink]}>{p.label}</InkText>
     </Pressable>
   );
 }

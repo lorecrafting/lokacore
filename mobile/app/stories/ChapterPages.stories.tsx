@@ -2,6 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { ChapterPage, ScenePage } from '../book/sections.tsx';
+import { motion } from '../book/tokens.ts';
 import { DreamPage } from '../book/DreamPage.tsx';
 import { chapterLabel } from '../book/words.ts';
 import { pageStory } from './screen.tsx';
@@ -14,6 +15,24 @@ const meta: Meta = {
   subcomponents: { ScenePage },
 };
 export default meta;
+
+// Breaks: react-native-web's constant yes reaches the card and everyone keeps Continue; or a tap
+// does not skip, or skips and the clock fires too.
+const turned = fn();
+export const ChapterTurnsItself: StoryObj = {
+  name: 'Turns itself, a tap skips',
+  beforeEach: () => void turned.mockClear(),
+  render: () => <ChapterPage label={chapterLabel(0)} title="The Missing Child" done={turned} />,
+  play: async ({ canvas, userEvent }) => {
+    const heading = canvas.getByRole('heading', { name: /The Missing Child/ });
+    await new Promise((r) => setTimeout(r));
+    await expect(canvas.queryByRole('button', { name: 'Continue' })).toBeNull();
+    await userEvent.click(heading);
+    await expect(turned).toHaveBeenCalledTimes(1);
+    await new Promise((r) => setTimeout(r, motion.card.auto + 200));
+    await expect(turned).toHaveBeenCalledTimes(1);
+  },
+};
 
 // A title that wraps at SE width.
 export const ChapterTitleLong: StoryObj = {

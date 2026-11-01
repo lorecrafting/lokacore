@@ -24,7 +24,7 @@ their rules and red controls remain available for resumption.
   contracts, no display text in the authority, renderer imports, which allow Skia, Reanimated and Worklets
   for the page curl; `mobile-book-raw-values`: no raw hex colour or numeric `fontSize` in
   `mobile/app/book/*.tsx`, `mobile/app/SaveError.tsx` or `mobile/app/App*.tsx`, only [design tokens](BOOK-UI-COMPONENTS.md#design-tokens), a designer one-off
-  marked `ast-grep-ignore`; `mobile-book-english`: no English literal in `mobile/app/book/*.tsx` or `mobile/app/SaveError.tsx` outside [`LABEL`](../mobile/app/book/labels.ts), the files still to migrate listed in its `ignores`) keep their cases; `bin/check_all.sh` scans the whole tree with every rule, pre-commit the staged files. Rule
+  marked `ast-grep-ignore`; `mobile-book-effects-literals`: no timing or easing literal outside `tokens.ts`, no direct vibrate or audio play outside `book/sound` and `book/haptic`; `mobile-book-english`: no English literal in `mobile/app/book/*.tsx` or `mobile/app/SaveError.tsx` outside [`LABEL`](../mobile/app/book/labels.ts), the files still to migrate listed in its `ignores`) keep their cases; `bin/check_all.sh` scans the whole tree with every rule, pre-commit the staged files. Rule
   modules live only in `kernel/ts/src/mechanics/<capability>/rule.ts`, are registered in `runtime/world.ts` only as
   `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and
   import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)
@@ -93,6 +93,11 @@ their rules and red controls remain available for resumption.
   send a throwaway repo's writes into the real one (it plants a harness without the line);
   `docs/system/book-ui.md` names no look (a token, hex colour, px size or backticked palette or role
   name): those live in the catalogue (it plants a copy with a px size).
+- `python3 bin/check_sounds.py` (`--report`, `--release`): every bundled audio file under
+  `mobile/app/book/sounds` has a `manifest.json` row and every row a file; required fields are filled, the
+  licence is CC0 or CC BY 4.0 and CC BY carries a credit. `--report` lists placeholders by use; `--release`
+  fails while one remains ([plan, section 14](design/effects-and-sound-plan.md)). `bin/sounds_red_controls.sh`
+  plants each failure in a copy.
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
   nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan
   slices must appear exactly once with unique issue IDs, while supplemental

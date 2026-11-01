@@ -14,6 +14,7 @@ import senses from '../../../cartridges/senses_sampler/text.json';
 import emoteText from '../../../cartridges/emote_sampler/text.json';
 import toolboxText from '../../../cartridges/toolbox_showcase/text.json';
 import { lineWords } from '../book/words.ts';
+import { motion } from '../book/tokens.ts';
 
 const meta: Meta = {
   tags: ['!autodocs'],
@@ -87,6 +88,8 @@ export const AwayRecap: StoryObj = {
     await userEvent.click(heading);
     await expect(canvas.getByText('Maud leaves. (2 times)')).toBeVisible();
     await expect(canvas.getByText('Maud arrives.')).toBeVisible();
+    // The a11y check reads contrast after this: new lines are still drying in until then.
+    await new Promise((done) => setTimeout(done, motion.dry.duration + 2 * motion.dry.lag));
   },
 };
 export const RefusalLine: StoryObj = { ...pageStory(RoomRefusalView), name: 'Refusal line' };

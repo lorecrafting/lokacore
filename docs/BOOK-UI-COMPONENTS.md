@@ -55,7 +55,7 @@ words remain in the cartridge; Book owns layout and navigation.
 | Inspect, take, equip or use an item/container | Item detail; an open container's `InsidePage` ([`Menu.tsx`](../mobile/app/book/Menu.tsx)), ordinary item → inside detail route ([rule](system/book-ui.md#item-details-and-takedrop)) | Exact item/custody, Look inside, local Close to the item page, contents parent return, current actions and load refusal. |
 | Read a notice or a book | Readable/notice detail | Confirmed Read on entry when specified, no duplicate Read, saved text and parent return. |
 | Fight or flee | Combat foreground page | Combat-only response set, isolated log, closure and restored World route. |
-| Continue a current modal scene or chapter | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
+| Continue a current modal scene, or a chapter card under a screen reader (otherwise the card turns itself and a tap skips) | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
 | Resume a bed dream | [`DreamPage.tsx`](../mobile/app/book/DreamPage.tsx), ordinary bed → dream detail route | Saved cursor/choice, local Close to bed, Resume after reopen and ordinary World access ([rule](system/book-ui.md#chapters-scenes-and-recovery)). |
 | Use, give or cast with a second thing | Pick list on the target's or the held thing's page ([rule](system/book-ui.md#item-details-and-takedrop)) | Rows only from GameView pairs, option hidden when empty, pick returns to World, refused pick keeps the page. |
 | Show room travel or status | World/status shell | Confirmed room, legal exits, current time/status and no optimistic move. |
@@ -109,8 +109,9 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   Tab does, and so does an arriving page's title focus after keyboard use. One document-wide rule
   (`useFocusRing`, recoloured by the Book's shown palette), never a per-component style; a device
   draws no ring.
-- **Motion and sound.** Only the plain state changes in `motion` and the page turn's sound;
-  no decorative animation. `motion.palette` is the slow cross-fade between palettes (light
+- **Motion and sound.** Only the effects named in
+  [Effects, sound and haptics](system/book-ui.md#effects-sound-and-haptics); no other decorative
+  animation. `motion.palette` is the slow cross-fade between palettes (light
   changes need more than `motion.fade`). Text stays readable through a change: every frame
   keeps each text role at least 4.5:1 on `bg` and `card`. So a palette change cross-fades
   only when ink and paper keep their polarity (ink darker than paper in both palettes, or
@@ -122,6 +123,22 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   `lum(fg) < lum(bg)` differs between the shown palette and the target. `motion.meteor` is the
   Night sky's one shooting star; `nightSky.star` its colour. The mock's other Effects-panel
   effects and its "Archive, not in v1" group have no tokens and wait for their own owner decisions.
+- **Effect tokens.** Press: `motion.press`; a lifted card blends `line` into `card` at
+  `opacity.press` and rises `size.rule`; an ink press goes from `action` to `fg`. Ink drying:
+  `motion.dry` from `dim` to the line's colour; a narrated event starts `motion.dry.lag` later.
+  Status icon: `motion.pop` from scale `motion.pop.from`; expiry `motion.fade`. Item pop: rises
+  `motion.pop.rise` over `motion.pop`, holds `hold`, leaves over `out` (`outEasing`). Gilt: `warning`
+  for `motion.settle.hold`, then `motion.settle` to the line's colour. Running head:
+  `motion.dry` across, `motion.settle` to `dim` then out. Chapter card: `motion.card.auto` before it turns itself, `motion.card`, blur sigma
+  `blurFrom` to `blurTo`, each of label, title and rule `stagger` apart. Sound, `mix` and `haptic`
+  hold levels and kinds; the sound table names each sound's haptic. Queue: small cues of one key merge
+  within `mix.coalesce`; `motion.flash.gap` is the Flash limit.
+- **Blow wash.** `opacity.wash` under the ink over `motion.flash`: `action` on `light` and `dawn`,
+  `danger` on `dusk` and `dark` (amber `action` reads as lamplight, not harm). The page scales to
+  `motion.flash.swell` at the peak. Reduced motion: `opacity.washStill`, no swell. The hp value dries in the same role and back to `fg`. Exemption from the 4.5:1
+  rule above, for the wash's half second only: at its peak `fg` stays above 7:1 and `action` and
+  `danger` above 5:1, while `dim` and `warning` dip to about 3.8:1 (opacity 0.08 would keep them
+  at 4.5:1 and barely show). Combat is the only place the wash appears.
 
 ## Component catalogue
 
@@ -139,6 +156,7 @@ a new component needs a real consumer, its comment and its line here in the same
 
 | Component | File | Story |
 |---|---|---|
+| `Blow` | `book/Blow.tsx` | CombatPage |
 | `Body` | `book/Body.tsx` | RoomPage |
 | `RoomPage` | `book/Body.tsx` | RoomPage |
 | `Book` | `book/Book.tsx` | Live |
@@ -146,12 +164,16 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Chip` | `book/Chip.tsx` | Chip |
 | `Row` | `book/Chip.tsx` | Chip |
 | `ReadingSize` | `book/Chip.tsx` | Chip |
+| `EffectSettings` | `book/Chip.tsx` | Chip |
 | `Combat` | `book/Combat.tsx` | CombatPage |
 | `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
 | `DreamPage` | `book/DreamPage.tsx` | ChapterPages |
 | `DreamResume` | `book/DreamPage.tsx` | NoticePage |
 | `Footer` | `book/Footer.tsx` | Footer |
 | `Tip` | `book/Footer.tsx` | Tip |
+| `GiltLine` | `book/GiltLine.tsx` | LogLines |
+| `HapticPulse` | `book/HapticPulse.tsx` | HapticPulse |
+| `ItemPop` | `book/ItemPop.tsx` | LogLines |
 | `MapDrawing` | `book/MapDrawing.tsx` | Footer |
 | `ContentsPage` | `book/Menu.tsx` | SectionPages |
 | `ThingPage` | `book/Menu.tsx` | ItemPage |
@@ -163,6 +185,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `PageTurn` | `book/PageTurn.tsx` | PageTurn |
 | `Riddle` | `book/Riddle.tsx` | Riddle |
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |
+| `RunningHead` | `book/RunningHead.tsx` | Page |
 | `SayField` | `book/SayField.tsx` | SayField |
 | `ShelfPage` | `book/Shelf.tsx` | NpcPage |
 | `StatusLine` | `book/Status.tsx` | StatusLine |
@@ -184,7 +207,6 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Fault` | `book/lines.tsx` | Live |
 | `NoticePage` | `book/notices.tsx` | NoticePage |
 | `Tap` | `book/pages.tsx` | VerbLine |
-| `RunningHead` | `book/pages.tsx` | Page |
 | `Control` | `book/pages.tsx` | Control |
 | `Page` | `book/pages.tsx` | Page |
 | `PageFoot` | `book/pages.tsx` | PageFoot |
@@ -249,11 +271,11 @@ There is no second CSS or WebGL curl.
   longer than that.
 - **Reduced motion.** When the system asks for reduced motion, the pages cross-fade over
   `motion.fade` instead, with no curl.
-- **Sound.** The paper page-turn sound plays on every page turn at `sound.pageTurn.volume`,
+- **Sound.** The paper page-turn sound (`sound.pageTurn`) plays on every page turn,
   including the reduced-motion cross-fade; only the Sound setting silences it. It is on
-  by default; Settings has a Sound on/off control kept on the device. Until a short recorded
-  CC0 page-turn sample (under 1 s, bundled) is found and replaces it, the mock's synthesised
-  sound plays, as the [PageTurn story](../mobile/app/stories/PageTurn.stories.tsx) does.
+  by default; Settings has a Sound on/off control kept on the device. Samples are human-made,
+  placeholders too ([owner decision](decisions/owner-decision-human-made-content-2026-10-31.md));
+  a synthesised sound never ships, and with no sample the turn is silent.
 
 ## Delivery cadence
 
