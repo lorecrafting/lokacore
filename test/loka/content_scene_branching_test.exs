@@ -1,4 +1,4 @@
-# size: allow 570, every scene form shares the sampler fixture and its twin
+# size: allow 580, every scene form shares the sampler fixture and its twin
 defmodule Loka.ContentSceneBranchingTest do
   # needs, once, then and nested choices in a `.scene` (docs/system/cartridge.md, Source
   # shortcuts). Expected JSON is hand-written; `~` stands for the words.
@@ -292,6 +292,13 @@ defmodule Loka.ContentSceneBranchingTest do
     end
 
     sets = "- Ask\n  bram: ~\n  sets: knows_potter\n"
+
+    # Break: a setter that ends the talk beside another way back is the guide's fix, not a closed set.
+    assert warned.(
+             "when: not knows_potter",
+             sets <> "  then: end\n- Other\n  bram: ~\n  - In\n    bram: ~\n"
+           ) == []
+
     back = sets <> "  - Back\n    bram: ~\n"
     assert warned.("when: not knows_potter", back) == ["warning"]
     assert warned.("when: knows_potter", back) == []
@@ -300,6 +307,11 @@ defmodule Loka.ContentSceneBranchingTest do
              []
 
     assert warned.("when: not knows_potter", "- Ask\n  bram: ~\n  - Back\n    bram: ~\n") == []
+  end
+
+  # Break: a refused choice in an out-of-order list crashes the compile before its error reaches the writer.
+  test "a refused choice among unsorted ones reports its line" do
+    assert {:error, [_ | _]} = sampler("npc: bram\nbram: ~\n- zebra\n  bram: ~\n- ~\n  bram: ~\n")
   end
 
   # Break: a child under a key too long stays a dialogue and draws an error of its own.

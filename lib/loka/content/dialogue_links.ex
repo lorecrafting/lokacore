@@ -1,4 +1,4 @@
-# size: allow 340, every whole-cartridge dialogue link check in one graph
+# size: allow 345, every whole-cartridge dialogue link check in one graph
 defmodule Loka.Content.DialogueLinks do
   @moduledoc "A dialogue choice's policy and narration variants as roots, and its then and then_failed checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -96,13 +96,17 @@ defmodule Loka.Content.DialogueLinks do
 
     for {rel, d} <- sorted,
         {fact, value} <- when_fact(d["policy"]),
-        closes?(set_choices(d, by_key, next), d["key"], fact, value) do
+        closes?(set_choices(d, by_key, next), d["key"], fact, value, next) do
       warning("RETURN_CLOSED", rel, ["policy"], d)
     end
   end
 
-  defp closes?(choices, key, fact, value) do
-    Enum.any?(choices, &(&1["then"] == key)) and Enum.any?(choices, &assigns?(&1, fact, value))
+  # The path that sets the fact must be the one that comes back; a setter ending the talk is the fix.
+  defp closes?(choices, key, fact, value, next) do
+    Enum.any?(
+      choices,
+      &(assigns?(&1, fact, value) and key in walk(List.wrap(&1["then"]), next, MapSet.new()))
+    )
   end
 
   defp set_choices(d, by_key, next) do

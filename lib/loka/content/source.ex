@@ -148,7 +148,8 @@ defmodule Loka.Content.Source do
 
   # Source-only: which `then`s the writer wrote (until SceneMerge.merge), and an unsorted choice order as each choice's `order`.
   defp written_marks(value, lines) do
-    order = for {["choices", c], _} <- lines, do: c
+    # A refused line stays in `lines` but not in the form; its own diagnostic reports it.
+    order = for {["choices", c], _} <- lines, is_map_key(value["choices"], c), do: c
     value = if order == Enum.sort(order), do: value, else: positioned(value, order)
     Map.put(value, :written_then, for({["choices", c, "then"], _} <- lines, do: c))
   end

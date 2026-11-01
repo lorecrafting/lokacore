@@ -90,8 +90,8 @@ const spoken = (world: World, target: EntityId | undefined) =>
 export const speaks = (world: World, target: EntityId | undefined) =>
   spoken(world, target).length > 0;
 
-/** The ids of `d`'s choices, in key order. */
 const at = (d: DialogueDefinition, id: string) => d.choices[id as Key]?.order ?? Infinity; // both absent: NaN, so the key
+/** The ids of `d`'s choices, by `order`, then key. */
 export const choiceIds = (d: DialogueDefinition) =>
   Object.keys(d.choices).sort((a, b) => at(d, a) - at(d, b) || cmp(a, b)) as Key[];
 

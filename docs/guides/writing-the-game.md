@@ -102,7 +102,7 @@ maud: ~
   with no `then` comes back to these choices, or closes the talk if it is the only choice. A nested
   choice with no `then` goes back to the choices above it, unless a choice here set the fact the
   `when:` reads: then going back closes the talk, and the build warns `RETURN_CLOSED`. A scene another scene's `then` leads to
-  closes after a choice with no `then`; write `then: <its own name>` to come back.
+  closes after a choice with no `then`, unless it has nested choices; write `then: <its own name>` to come back.
 - Choices show in the order you write them. A choice's id comes from its words: moving a line or
   adding another leaves it alone, and rewording changes it. A reaction, a quest outcome and a `then`
   name it by that id.
