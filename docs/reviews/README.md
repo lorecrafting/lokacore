@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Second review: writer follow-ups, PR #568 (loka-vduxr.27, .22, .28)](2026-11-01-writer-followups-second-review.md): **CHANGES REQUIRED**
+- [Second review: skill ranks, PR #570 (loka-g5hh.2.3)](2026-11-01-skill-ranks-second-review.md): **APPROVE WITH NOTES**
 - [Review: skill ranks, PR #570 (loka-g5hh.2.3)](2026-11-01-skill-ranks-review.md): **APPROVE WITH NOTES**
 - [Second opinion: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-second-review.md): **APPROVE WITH NOTES**
 - [Review: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-review.md): **APPROVE WITH NOTES**
