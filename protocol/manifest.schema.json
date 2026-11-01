@@ -81,18 +81,18 @@
         "kernel_api": {
           "$ref": "#/$defs/KernelApiRange"
         },
-        "rule_ir": {
+        "rule_ir": {"description":"Rule format version; must equal the one the engine supports (currently 1).",
           "type": "integer",
           "minimum": 1
         },
-        "content_schema": {
+        "content_schema": {"description":"Content schema version; must equal the one the engine supports (currently 1).",
           "type": "integer",
           "minimum": 1
         },
-        "capabilities": {
+        "capabilities": {"description":"Each capability the cartridge uses, with its version; using a feature whose capability is not listed is refused.",
           "$ref": "capability.schema.json#/$defs/CapabilityVersions"
         },
-        "client_features": {
+        "client_features": {"description":"Features the app must offer; the cartridge is refused where one is missing.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/ClientFeature"

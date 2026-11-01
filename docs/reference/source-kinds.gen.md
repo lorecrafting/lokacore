@@ -628,14 +628,14 @@ What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| consume | object | one of a group |  |
+| consume | object | one of a group | What the actor gives up on every accepted perform, failure included. |
 | consume.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The items that can be consumed. |
 | consume.quantity | integer | yes | How many of them are consumed. |
 | consume.reason | [TextKey](source-kinds.gen.md#textkey) |  | The refusal text shown when the actor holds too few. |
-| consume.to | [ItemLocation](source-kinds.gen.md#itemlocation) | yes |  |
-| yield | object | one of a group |  |
-| yield.from | [ItemLocation](source-kinds.gen.md#itemlocation) | yes |  |
-| yield.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| consume.to | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | Where the consumed items go: the holder they are moved to. |
+| yield | object | one of a group | What the actor receives unless the outcome is failure. |
+| yield.from | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | The holder the yielded item is taken from. |
+| yield.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The items that can be yielded; one of them, directly in the holder, moves to the actor's body. |
 
 ### ActionInputParameter
 
@@ -665,15 +665,15 @@ One authored character choice and its bounded initial effects.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| dark_sight | `true` |  |  |
-| description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| faction | object |  |  |
-| faction.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| faction.value | integer | yes |  |
-| modifier | integer | yes |  |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| skill | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The attribute this choice raises at birth, by modifier. |
+| dark_sight | `true` |  | When true, the character sees in the dark. |
+| description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the choice's description. |
+| faction | object |  | A fact set when the choice is made. |
+| faction.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fact; it must be player-scoped. |
+| faction.value | integer | yes | The value the fact is set to. |
+| modifier | integer | yes | Added to the attribute's starting value; at least 1. |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the choice's label. |
+| skill | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A skill granted at birth, without learning; it may not have a prerequisite. |
 
 ### ApiVersion
 
@@ -689,13 +689,13 @@ Cartridge-owned hit chance and positive damage bounds. Compiler and loader enfor
 |---|---|---|---|
 | chance | integer | yes | Percent chance an attack is accurate; a defense can still prevent the hit. |
 | crit | object |  | Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances. |
-| crit.chance | integer | yes |  |
-| crit.multiplier | integer | yes |  |
+| crit.chance | integer | yes | Percent; a hit whose accuracy draw is below this is a critical hit. |
+| crit.multiplier | integer | yes | Damage of a critical hit is multiplied by this (2 to 10). |
 | damage_max | integer | yes | Most positive damage; at least damage_min. |
 | damage_min | integer | yes | Least positive damage. |
-| kind | [DamageKind](source-kinds.gen.md#damagekind) |  |  |
-| on_positive_hit | object |  |  |
-| on_positive_hit.effect | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| kind | [DamageKind](source-kinds.gen.md#damagekind) |  | The damage kind (cold, fire, physical or poison); the target's resistance to it reduces the damage. |
+| on_positive_hit | object |  | What a hit that takes off HP also does. |
+| on_positive_hit.effect | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bleed applied to the player; used only when the attacker is spawned as a population hunter. |
 
 ### BandTable
 
@@ -721,14 +721,14 @@ calendar@1: authored logical units per hour, hours per day, displayed subdivisio
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| hours_per_day | integer |  |  |
+| hours_per_day | integer |  | Hours in one day. |
 | lunar | [CalendarCycle](source-kinds.gen.md#calendarcycle) |  | See the type. |
 | season | [CalendarCycle](source-kinds.gen.md#calendarcycle) |  | See the type. |
 | solar | list of [CalendarCut](source-kinds.gen.md#calendarcut) |  | See the type. |
-| start | integer | yes |  |
-| subdivisions_per_hour | integer |  |  |
+| start | integer | yes | The logical time a new world begins at. |
+| subdivisions_per_hour | integer |  | Parts the status line splits an hour into; must divide units_per_hour. |
 | tide | [CalendarCycle](source-kinds.gen.md#calendarcycle) |  | See the type. |
-| units_per_hour | integer |  |  |
+| units_per_hour | integer |  | Logical time units in one hour; the three unit fields are given together. |
 | weather | list of [WeatherEntry](source-kinds.gen.md#weatherentry) |  | See the type. |
 
 ### CalendarCut
@@ -737,8 +737,8 @@ An inclusive phase start within one authored solar day or lunar period.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at | integer | yes |  |
-| phase | string | yes |  |
+| at | integer | yes | Logical units into the solar day (or the cycle) at which this phase starts; the first cut of a cycle is 0. |
+| phase | string | yes | The phase's name, lowercase letters, digits and underscores. |
 
 ### CalendarCycle
 
@@ -746,8 +746,8 @@ A repeating cycle of ordered cuts in logical time units (lunar; season and tide,
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| origin | integer | yes |  |
-| period | integer | yes |  |
+| origin | integer | yes | The time at which the cycle is at its start (position 0). |
+| period | integer | yes | Length of the cycle in logical units. |
 | phases | list of [CalendarCut](source-kinds.gen.md#calendarcut) | yes | See the type. |
 
 ### CapabilityVersion
@@ -793,20 +793,20 @@ Type: object.
 | {kind=threshold}.difficulty | [ResourceInt](source-kinds.gen.md#resourceint) | yes | Passes when the resource is at least this. |
 | {kind=threshold}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
 | {kind=threshold}.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The body's resource, read at admission before costs. |
-| {kind=attribute_threshold} | variant |  |  |
+| {kind=attribute_threshold} | variant |  | Passes when the actor's value of the attribute is at least difficulty; draws no random number. |
 | {kind=attribute_threshold}.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The actor's attribute compared. |
 | {kind=attribute_threshold}.difficulty | integer | yes | The value compared against. |
 | {kind=attribute_threshold}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
 | {kind=opposed} | variant |  | An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform. Dialogue choice: A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed. |
-| {kind=opposed}.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group |  |
+| {kind=opposed}.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group | The attribute compared; give this or skill, not both. |
 | {kind=opposed}.failure | [TextKey](source-kinds.gen.md#textkey) |  | The failure branch; a dialogue choice needs it, a scripted action refuses it. |
 | {kind=opposed}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
-| {kind=opposed}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| {kind=opposed}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | With attribute, compares against this NPC's value of the attribute instead of a rating. |
 | {kind=opposed}.rating | integer |  | The target detail's rating; a scripted action refuses it. |
-| {kind=opposed}.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group |  |
+| {kind=opposed}.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group | The skill whose level is compared; give this or attribute, not both. |
 | {kind=track} | variant |  | A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>]. |
-| {kind=track}.key | [Key](source-kinds.gen.md#key) | yes |  |
-| {kind=track}.plan | [Key](source-kinds.gen.md#key) | yes |  |
+| {kind=track}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
+| {kind=track}.plan | [Key](source-kinds.gen.md#key) | yes | Key of the population plan whose trail is looked for; passes when that trail is fresh in the actor's room. |
 
 ### ClientFeature
 
@@ -821,22 +821,22 @@ Cartridge-owned attack profile, round interval, position multipliers and combat 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | allies | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Authored NPCs that fight beside the player (docs/system/mechanics.md, toolbox row 6b, narration ally_hit and ally_miss): the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player. |
-| dodge | object |  |  |
+| dodge | object |  | The player's chance to dodge an NPC's attack; absent means no dodge. |
 | dodge.chance | integer | yes | Percent chance of dodging. |
 | dodge.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill that must be usable for a dodge. |
 | flee_multiplier | integer | yes | Multiplies the move cost of a body that is engaged. |
 | interval | integer | yes | Clock units between combat rounds. |
-| narration | object | yes |  |
-| narration.ally_hit | [TextKey](source-kinds.gen.md#textkey) |  |  |
-| narration.ally_miss | [TextKey](source-kinds.gen.md#textkey) |  |  |
+| narration | object | yes | Text keys told in combat rounds. |
+| narration.ally_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told when an ally's strike hits. |
+| narration.ally_miss | [TextKey](source-kinds.gen.md#textkey) |  | Told when an ally's strike misses. |
 | narration.block | [TextKey](source-kinds.gen.md#textkey) |  | Told when a shield blocks. |
 | narration.dodge | [TextKey](source-kinds.gen.md#textkey) |  | Told when the player dodges. |
 | narration.npc_died | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC falls in a combat round. |
-| narration.npc_hit | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration.npc_miss | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| narration.npc_hit | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC's attack hits the player. |
+| narration.npc_miss | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC's attack misses the player. |
 | narration.player_died | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player falls in a combat round; also the default fall line for tick deaths. |
-| narration.player_hit | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration.player_miss | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| narration.player_hit | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player's attack hits. |
+| narration.player_miss | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player's attack misses. |
 | narration.shot_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told when a ranged first strike hits. Required when any item declares weapon.ranged. |
 | narration.shot_miss | [TextKey](source-kinds.gen.md#textkey) |  | Told when a ranged first strike misses. Required when any item declares weapon.ranged. |
 | player_attack | [AttackProfile](source-kinds.gen.md#attackprofile) | yes | See the type. |
@@ -849,11 +849,11 @@ requires (05 §3): a kernel_api range, exact rule_ir and content_schema versions
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| capabilities | [CapabilityVersions](source-kinds.gen.md#capabilityversions) | yes |  |
-| client_features | list of [ClientFeature](source-kinds.gen.md#clientfeature) | yes |  |
-| content_schema | integer | yes |  |
+| capabilities | [CapabilityVersions](source-kinds.gen.md#capabilityversions) | yes | Each capability the cartridge uses, with its version; using a feature whose capability is not listed is refused. |
+| client_features | list of [ClientFeature](source-kinds.gen.md#clientfeature) | yes | Features the app must offer; the cartridge is refused where one is missing. |
+| content_schema | integer | yes | Content schema version; must equal the one the engine supports (currently 1). |
 | kernel_api | [KernelApiRange](source-kinds.gen.md#kernelapirange) | yes | See the type. |
-| rule_ir | integer | yes |  |
+| rule_ir | integer | yes | Rule format version; must equal the one the engine supports (currently 1). |
 
 ### ConditionBand
 
@@ -931,14 +931,14 @@ Fixed corpse templates, same-body return room and pool restoration; requires dea
 | narration.woke | [TextKey](source-kinds.gen.md#textkey) |  | Told once after every player death, after the penalty line. |
 | npc_corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for an NPC, unless its population names its own. |
 | penalty | object |  | What a player's death costs (toolbox row 47). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body. |
-| penalty.experience | object |  |  |
+| penalty.experience | object |  | Experience lost on death; needs world.levelling. |
 | penalty.experience.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Told once when experience is lost. |
 | penalty.experience.percent | integer | yes | The body loses floor(experience * percent / 100), never below its current level's threshold. |
 | penalty.items | `corpse` or `kept` |  | corpse (the default) moves what the body held into the corpse; kept leaves it on the body. |
 | player_corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for a player. |
-| restore | object | yes |  |
-| restore.hp | integer | yes |  |
-| restore.mv | integer | yes |  |
+| restore | object | yes | The values the dead body's pools are set to. |
+| restore.hp | integer | yes | HP after death; capped at the body's HP maximum. |
+| restore.mv | integer | yes | Movement after death; capped at the body's movement maximum. |
 | shrine | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room a dead player's body returns to. |
 
 ### DefinitionRef
@@ -958,11 +958,11 @@ One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum o
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| divisor | integer |  |  |
-| terms | list of object | yes |  |
-| terms[].attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| terms[].per_point | [ResourceInt](source-kinds.gen.md#resourceint) | yes |  |
-| terms[].pivot | [ResourceInt](source-kinds.gen.md#resourceint) | yes |  |
+| divisor | integer |  | The sum of the terms is divided by this, rounded down; default 1. |
+| terms | list of object | yes | The attributes that make up the bonus; each adds per_point times (the attribute's value minus pivot). |
+| terms[].attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The attribute read. |
+| terms[].per_point | [ResourceInt](source-kinds.gen.md#resourceint) | yes | Bonus added per point of the attribute above pivot (below it, taken away). |
+| terms[].pivot | [ResourceInt](source-kinds.gen.md#resourceint) | yes | The attribute value at which this term adds nothing. |
 
 ### DescriptionVariant
 
@@ -1605,62 +1605,8 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 
 ## Fields without a meaning
 
-301 fields.
+247 fields.
 
-- `ActionCraft: consume`
-- `ActionCraft: consume.to`
-- `ActionCraft: yield`
-- `ActionCraft: yield.from`
-- `ActionCraft: yield.items`
-- `AncestrySpec: attribute`
-- `AncestrySpec: dark_sight`
-- `AncestrySpec: description`
-- `AncestrySpec: faction`
-- `AncestrySpec: faction.fact`
-- `AncestrySpec: faction.value`
-- `AncestrySpec: modifier`
-- `AncestrySpec: name`
-- `AncestrySpec: skill`
-- `AttackProfile: crit.chance`
-- `AttackProfile: crit.multiplier`
-- `AttackProfile: kind`
-- `AttackProfile: on_positive_hit`
-- `AttackProfile: on_positive_hit.effect`
-- `Calendar: hours_per_day`
-- `Calendar: start`
-- `Calendar: subdivisions_per_hour`
-- `Calendar: units_per_hour`
-- `CalendarCut: at`
-- `CalendarCut: phase`
-- `CalendarCycle: origin`
-- `CalendarCycle: period`
-- `Check: {kind=attribute_threshold}`
-- `Check: {kind=opposed}.attribute`
-- `Check: {kind=opposed}.npc`
-- `Check: {kind=opposed}.skill`
-- `Check: {kind=track}.key`
-- `Check: {kind=track}.plan`
-- `CombatSettings: dodge`
-- `CombatSettings: narration`
-- `CombatSettings: narration.ally_hit`
-- `CombatSettings: narration.ally_miss`
-- `CombatSettings: narration.npc_hit`
-- `CombatSettings: narration.npc_miss`
-- `CombatSettings: narration.player_hit`
-- `CombatSettings: narration.player_miss`
-- `CompatibilityRequirements: capabilities`
-- `CompatibilityRequirements: client_features`
-- `CompatibilityRequirements: content_schema`
-- `CompatibilityRequirements: rule_ir`
-- `DeathSettings: penalty.experience`
-- `DeathSettings: restore`
-- `DeathSettings: restore.hp`
-- `DeathSettings: restore.mv`
-- `DerivedStat: divisor`
-- `DerivedStat: terms`
-- `DerivedStat: terms[].attribute`
-- `DerivedStat: terms[].per_point`
-- `DerivedStat: terms[].pivot`
 - `DialogueRole: {role=item}`
 - `DialogueRole: {role=item}.item`
 - `DialogueRole: {role=npc}`

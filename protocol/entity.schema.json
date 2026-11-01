@@ -963,10 +963,10 @@
           "type": "integer",
           "minimum": 1
         },
-        "on_positive_hit": {
+        "on_positive_hit": {"description":"What a hit that takes off HP also does.",
           "type": "object",
           "properties": {
-            "effect": {
+            "effect": {"description":"The bleed applied to the player; used only when the attacker is spawned as a population hunter.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -975,19 +975,19 @@
           ],
           "additionalProperties": false
         },
-        "kind": {
+        "kind": {"description":"The damage kind (cold, fire, physical or poison); the target's resistance to it reduces the damage.",
           "$ref": "entity.schema.json#/$defs/DamageKind"
         },
         "crit": {
           "description": "Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
           "type": "object",
           "properties": {
-            "chance": {
+            "chance": {"description":"Percent; a hit whose accuracy draw is below this is a critical hit.",
               "type": "integer",
               "minimum": 1,
               "maximum": 100
             },
-            "multiplier": {
+            "multiplier": {"description":"Damage of a critical hit is multiplied by this (2 to 10).",
               "type": "integer",
               "minimum": 2,
               "maximum": 10

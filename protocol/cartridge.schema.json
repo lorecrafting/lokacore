@@ -880,29 +880,29 @@
       ],
       "type": "object",
       "properties": {
-        "name": {
+        "name": {"description":"Text key of the choice's label.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description": {
+        "description": {"description":"Text key of the choice's description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "attribute": {
+        "attribute": {"description":"The attribute this choice raises at birth, by modifier.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "modifier": {
+        "modifier": {"description":"Added to the attribute's starting value; at least 1.",
           "type": "integer",
           "minimum": 1
         },
-        "skill": {
+        "skill": {"description":"A skill granted at birth, without learning; it may not have a prerequisite.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "faction": {
+        "faction": {"description":"A fact set when the choice is made.",
           "type": "object",
           "properties": {
-            "fact": {
+            "fact": {"description":"The fact; it must be player-scoped.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "value": {
+            "value": {"description":"The value the fact is set to.",
               "type": "integer"
             }
           },
@@ -912,7 +912,7 @@
           ],
           "additionalProperties": false
         },
-        "dark_sight": {
+        "dark_sight": {"description":"When true, the character sees in the dark.",
           "const": true
         }
       },
@@ -951,19 +951,19 @@
       "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; the compiler checks order, cycle bounds and schedule/window hours (lib/loka/content/calendar.ex). Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
       "type": "object",
       "properties": {
-        "start": {
+        "start": {"description":"The logical time a new world begins at.",
           "type": "integer",
           "minimum": 0
         },
-        "units_per_hour": {
+        "units_per_hour": {"description":"Logical time units in one hour; the three unit fields are given together.",
           "type": "integer",
           "minimum": 1
         },
-        "hours_per_day": {
+        "hours_per_day": {"description":"Hours in one day.",
           "type": "integer",
           "minimum": 1
         },
-        "subdivisions_per_hour": {
+        "subdivisions_per_hour": {"description":"Parts the status line splits an hour into; must divide units_per_hour.",
           "type": "integer",
           "minimum": 1
         },
@@ -1033,11 +1033,11 @@
       "description": "A repeating cycle of ordered cuts in logical time units (lunar; season and tide, toolbox row 31): the phase at time t is the last cut at or before ((t - origin) mod period); the first cut starts at 0.",
       "type": "object",
       "properties": {
-        "period": {
+        "period": {"description":"Length of the cycle in logical units.",
           "type": "integer",
           "minimum": 1
         },
-        "origin": {
+        "origin": {"description":"The time at which the cycle is at its start (position 0).",
           "type": "integer",
           "minimum": 0
         },
@@ -1106,11 +1106,11 @@
       "description": "An inclusive phase start within one authored solar day or lunar period.",
       "type": "object",
       "properties": {
-        "at": {
+        "at": {"description":"Logical units into the solar day (or the cycle) at which this phase starts; the first cut of a cycle is 0.",
           "type": "integer",
           "minimum": 0
         },
-        "phase": {
+        "phase": {"description":"The phase's name, lowercase letters, digits and underscores.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*$"
         }
@@ -1694,19 +1694,19 @@
       "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
       "type": "object",
       "properties": {
-        "terms": {
+        "terms": {"description":"The attributes that make up the bonus; each adds per_point times (the attribute's value minus pivot).",
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
             "properties": {
-              "attribute": {
+              "attribute": {"description":"The attribute read.",
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               },
-              "per_point": {
+              "per_point": {"description":"Bonus added per point of the attribute above pivot (below it, taken away).",
                 "$ref": "resource.schema.json#/$defs/ResourceInt"
               },
-              "pivot": {
+              "pivot": {"description":"The attribute value at which this term adds nothing.",
                 "$ref": "resource.schema.json#/$defs/ResourceInt"
               }
             },
@@ -1718,7 +1718,7 @@
             "additionalProperties": false
           }
         },
-        "divisor": {
+        "divisor": {"description":"The sum of the terms is divided by this, rounded down; default 1.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
@@ -1758,15 +1758,15 @@
         "shrine": {"description":"The room a dead player's body returns to.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "restore": {
+        "restore": {"description":"The values the dead body's pools are set to.",
           "type": "object",
           "properties": {
-            "hp": {
+            "hp": {"description":"HP after death; capped at the body's HP maximum.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
             },
-            "mv": {
+            "mv": {"description":"Movement after death; capped at the body's movement maximum.",
               "type": "integer",
               "minimum": 0,
               "maximum": 2147483647
@@ -1782,7 +1782,7 @@
           "type": "object",
           "description": "What a player's death costs (toolbox row 47). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
           "properties": {
-            "experience": {
+            "experience": {"description":"Experience lost on death; needs world.levelling.",
               "type": "object",
               "properties": {
                 "percent": {"description":"The body loses floor(experience * percent / 100), never below its current level's threshold.",
@@ -1876,25 +1876,25 @@
           "type": "integer",
           "minimum": 1
         },
-        "narration": {
+        "narration": {"description":"Text keys told in combat rounds.",
           "type": "object",
           "properties": {
-            "player_hit": {
+            "player_hit": {"description":"Told when the player's attack hits.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_miss": {
+            "player_miss": {"description":"Told when the player's attack misses.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_hit": {
+            "npc_hit": {"description":"Told when an NPC's attack hits the player.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_miss": {
+            "npc_miss": {"description":"Told when an NPC's attack misses the player.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_hit": {
+            "ally_hit": {"description":"Told when an ally's strike hits.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_miss": {
+            "ally_miss": {"description":"Told when an ally's strike misses.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "shot_hit": {"description":"Told when a ranged first strike hits. Required when any item declares weapon.ranged.",
@@ -1926,7 +1926,7 @@
           ],
           "additionalProperties": false
         },
-        "dodge": {
+        "dodge": {"description":"The player's chance to dodge an NPC's attack; absent means no dodge.",
           "type": "object",
           "properties": {
             "skill": {"description":"The skill that must be usable for a dodge.",

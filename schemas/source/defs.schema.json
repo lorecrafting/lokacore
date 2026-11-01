@@ -72,6 +72,7 @@
       "properties": {
         "consume": {
           "additionalProperties": false,
+          "description": "What the actor gives up on every accepted perform, failure included.",
           "properties": {
             "items": {
               "description": "The items that can be consumed.",
@@ -90,7 +91,10 @@
               "$ref": "#/$defs/TextKey",
               "description": "The refusal text shown when the actor holds too few."
             },
-            "to": { "$ref": "#/$defs/ItemLocation" }
+            "to": {
+              "$ref": "#/$defs/ItemLocation",
+              "description": "Where the consumed items go: the holder they are moved to."
+            }
           },
           "required": [
             "items",
@@ -101,9 +105,14 @@
         },
         "yield": {
           "additionalProperties": false,
+          "description": "What the actor receives unless the outcome is failure.",
           "properties": {
-            "from": { "$ref": "#/$defs/ItemLocation" },
+            "from": {
+              "$ref": "#/$defs/ItemLocation",
+              "description": "The holder the yielded item is taken from."
+            },
             "items": {
+              "description": "The items that can be yielded; one of them, directly in the holder, moves to the actor's body.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
@@ -181,14 +190,30 @@
       "additionalProperties": false,
       "description": "One authored character choice and its bounded initial effects.",
       "properties": {
-        "attribute": { "$ref": "#/$defs/DefinitionRef" },
-        "dark_sight": { "const": true },
-        "description": { "$ref": "#/$defs/TextKey" },
+        "attribute": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The attribute this choice raises at birth, by modifier."
+        },
+        "dark_sight": {
+          "const": true,
+          "description": "When true, the character sees in the dark."
+        },
+        "description": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the choice's description."
+        },
         "faction": {
           "additionalProperties": false,
+          "description": "A fact set when the choice is made.",
           "properties": {
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
-            "value": { "type": "integer" }
+            "fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The fact; it must be player-scoped."
+            },
+            "value": {
+              "description": "The value the fact is set to.",
+              "type": "integer"
+            }
           },
           "required": [
             "fact",
@@ -197,11 +222,18 @@
           "type": "object"
         },
         "modifier": {
+          "description": "Added to the attribute's starting value; at least 1.",
           "minimum": 1,
           "type": "integer"
         },
-        "name": { "$ref": "#/$defs/TextKey" },
-        "skill": { "$ref": "#/$defs/DefinitionRef" }
+        "name": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the choice's label."
+        },
+        "skill": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "A skill granted at birth, without learning; it may not have a prerequisite."
+        }
       },
       "required": [
         "name",
@@ -231,11 +263,13 @@
           "description": "Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
           "properties": {
             "chance": {
+              "description": "Percent; a hit whose accuracy draw is below this is a critical hit.",
               "maximum": 100,
               "minimum": 1,
               "type": "integer"
             },
             "multiplier": {
+              "description": "Damage of a critical hit is multiplied by this (2 to 10).",
               "maximum": 10,
               "minimum": 2,
               "type": "integer"
@@ -257,11 +291,18 @@
           "minimum": 1,
           "type": "integer"
         },
-        "kind": { "$ref": "#/$defs/DamageKind" },
+        "kind": {
+          "$ref": "#/$defs/DamageKind",
+          "description": "The damage kind (cold, fire, physical or poison); the target's resistance to it reduces the damage."
+        },
         "on_positive_hit": {
           "additionalProperties": false,
+          "description": "What a hit that takes off HP also does.",
           "properties": {
-            "effect": { "$ref": "#/$defs/DefinitionRef" }
+            "effect": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The bleed applied to the player; used only when the attacker is spawned as a population hunter."
+            }
           },
           "required": [
             "effect"
@@ -305,6 +346,7 @@
       "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; the compiler checks order, cycle bounds and schedule/window hours (lib/loka/content/calendar.ex). Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
       "properties": {
         "hours_per_day": {
+          "description": "Hours in one day.",
           "minimum": 1,
           "type": "integer"
         },
@@ -316,15 +358,18 @@
           "type": "array"
         },
         "start": {
+          "description": "The logical time a new world begins at.",
           "minimum": 0,
           "type": "integer"
         },
         "subdivisions_per_hour": {
+          "description": "Parts the status line splits an hour into; must divide units_per_hour.",
           "minimum": 1,
           "type": "integer"
         },
         "tide": { "$ref": "#/$defs/CalendarCycle" },
         "units_per_hour": {
+          "description": "Logical time units in one hour; the three unit fields are given together.",
           "minimum": 1,
           "type": "integer"
         },
@@ -345,10 +390,12 @@
       "description": "An inclusive phase start within one authored solar day or lunar period.",
       "properties": {
         "at": {
+          "description": "Logical units into the solar day (or the cycle) at which this phase starts; the first cut of a cycle is 0.",
           "minimum": 0,
           "type": "integer"
         },
         "phase": {
+          "description": "The phase's name, lowercase letters, digits and underscores.",
           "pattern": "^[a-z][a-z0-9_]*$",
           "type": "string"
         }
@@ -364,10 +411,12 @@
       "description": "A repeating cycle of ordered cuts in logical time units (lunar; season and tide, toolbox row 31): the phase at time t is the last cut at or before ((t - origin) mod period); the first cut starts at 0.",
       "properties": {
         "origin": {
+          "description": "The time at which the cycle is at its start (position 0).",
           "minimum": 0,
           "type": "integer"
         },
         "period": {
+          "description": "Length of the cycle in logical units.",
           "minimum": 1,
           "type": "integer"
         },
@@ -475,6 +524,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Passes when the actor's value of the attribute is at least difficulty; draws no random number.",
           "properties": {
             "attribute": {
               "$ref": "#/$defs/DefinitionRef",
@@ -523,7 +573,10 @@
           },
           "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform. Dialogue choice: A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
           "properties": {
-            "attribute": { "$ref": "#/$defs/DefinitionRef" },
+            "attribute": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The attribute compared; give this or skill, not both."
+            },
             "failure": {
               "$ref": "#/$defs/TextKey",
               "description": "The failure branch; a dialogue choice needs it, a scripted action refuses it."
@@ -533,12 +586,18 @@
               "description": "This check's key, unique across scripted actions and dialogue choices."
             },
             "kind": { "const": "opposed" },
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "With attribute, compares against this NPC's value of the attribute instead of a rating."
+            },
             "rating": {
               "description": "The target detail's rating; a scripted action refuses it.",
               "type": "integer"
             },
-            "skill": { "$ref": "#/$defs/DefinitionRef" }
+            "skill": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The skill whose level is compared; give this or attribute, not both."
+            }
           },
           "required": [
             "key",
@@ -550,9 +609,15 @@
           "additionalProperties": false,
           "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
           "properties": {
-            "key": { "$ref": "#/$defs/Key" },
+            "key": {
+              "$ref": "#/$defs/Key",
+              "description": "This check's key, unique across scripted actions and dialogue choices."
+            },
             "kind": { "const": "track" },
-            "plan": { "$ref": "#/$defs/Key" }
+            "plan": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the population plan whose trail is looked for; passes when that trail is fresh in the actor's room."
+            }
           },
           "required": [
             "key",
@@ -581,6 +646,7 @@
         },
         "dodge": {
           "additionalProperties": false,
+          "description": "The player's chance to dodge an NPC's attack; absent means no dodge.",
           "properties": {
             "chance": {
               "description": "Percent chance of dodging.",
@@ -611,9 +677,16 @@
         },
         "narration": {
           "additionalProperties": false,
+          "description": "Text keys told in combat rounds.",
           "properties": {
-            "ally_hit": { "$ref": "#/$defs/TextKey" },
-            "ally_miss": { "$ref": "#/$defs/TextKey" },
+            "ally_hit": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when an ally's strike hits."
+            },
+            "ally_miss": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when an ally's strike misses."
+            },
             "block": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when a shield blocks."
@@ -626,14 +699,26 @@
               "$ref": "#/$defs/TextKey",
               "description": "Told when an NPC falls in a combat round."
             },
-            "npc_hit": { "$ref": "#/$defs/TextKey" },
-            "npc_miss": { "$ref": "#/$defs/TextKey" },
+            "npc_hit": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when an NPC's attack hits the player."
+            },
+            "npc_miss": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when an NPC's attack misses the player."
+            },
             "player_died": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when the player falls in a combat round; also the default fall line for tick deaths."
             },
-            "player_hit": { "$ref": "#/$defs/TextKey" },
-            "player_miss": { "$ref": "#/$defs/TextKey" },
+            "player_hit": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when the player's attack hits."
+            },
+            "player_miss": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when the player's attack misses."
+            },
             "shot_hit": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when a ranged first strike hits. Required when any item declares weapon.ranged."
@@ -677,17 +762,23 @@
       "additionalProperties": false,
       "description": "requires (05 §3): a kernel_api range, exact rule_ir and content_schema versions (published cartridges pin them exactly), exact capability versions and required client features. protocol_version is Realm-only and not here (05 §3 'Version vocabulary').",
       "properties": {
-        "capabilities": { "$ref": "#/$defs/CapabilityVersions" },
+        "capabilities": {
+          "$ref": "#/$defs/CapabilityVersions",
+          "description": "Each capability the cartridge uses, with its version; using a feature whose capability is not listed is refused."
+        },
         "client_features": {
+          "description": "Features the app must offer; the cartridge is refused where one is missing.",
           "items": { "$ref": "#/$defs/ClientFeature" },
           "type": "array"
         },
         "content_schema": {
+          "description": "Content schema version; must equal the one the engine supports (currently 1).",
           "minimum": 1,
           "type": "integer"
         },
         "kernel_api": { "$ref": "#/$defs/KernelApiRange" },
         "rule_ir": {
+          "description": "Rule format version; must equal the one the engine supports (currently 1).",
           "minimum": 1,
           "type": "integer"
         }
@@ -923,6 +1014,7 @@
           "properties": {
             "experience": {
               "additionalProperties": false,
+              "description": "Experience lost on death; needs world.levelling.",
               "properties": {
                 "narration": {
                   "$ref": "#/$defs/TextKey",
@@ -957,13 +1049,16 @@
         },
         "restore": {
           "additionalProperties": false,
+          "description": "The values the dead body's pools are set to.",
           "properties": {
             "hp": {
+              "description": "HP after death; capped at the body's HP maximum.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
             "mv": {
+              "description": "Movement after death; capped at the body's movement maximum.",
               "maximum": 2147483647,
               "minimum": 0,
               "type": "integer"
@@ -1031,17 +1126,28 @@
       "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
       "properties": {
         "divisor": {
+          "description": "The sum of the terms is divided by this, rounded down; default 1.",
           "maximum": 2147483647,
           "minimum": 1,
           "type": "integer"
         },
         "terms": {
+          "description": "The attributes that make up the bonus; each adds per_point times (the attribute's value minus pivot).",
           "items": {
             "additionalProperties": false,
             "properties": {
-              "attribute": { "$ref": "#/$defs/DefinitionRef" },
-              "per_point": { "$ref": "#/$defs/ResourceInt" },
-              "pivot": { "$ref": "#/$defs/ResourceInt" }
+              "attribute": {
+                "$ref": "#/$defs/DefinitionRef",
+                "description": "The attribute read."
+              },
+              "per_point": {
+                "$ref": "#/$defs/ResourceInt",
+                "description": "Bonus added per point of the attribute above pivot (below it, taken away)."
+              },
+              "pivot": {
+                "$ref": "#/$defs/ResourceInt",
+                "description": "The attribute value at which this term adds nothing."
+              }
             },
             "required": [
               "attribute",
@@ -4873,6 +4979,7 @@
       "properties": {
         "consume": {
           "additionalProperties": false,
+          "description": "What the actor gives up on every accepted perform, failure included.",
           "properties": {
             "items": {
               "description": "The items that can be consumed.",
@@ -4891,15 +4998,23 @@
               "$ref": "#/$defs/partial.TextKey",
               "description": "The refusal text shown when the actor holds too few."
             },
-            "to": { "$ref": "#/$defs/partial.ItemLocation" }
+            "to": {
+              "$ref": "#/$defs/partial.ItemLocation",
+              "description": "Where the consumed items go: the holder they are moved to."
+            }
           },
           "type": "object"
         },
         "yield": {
           "additionalProperties": false,
+          "description": "What the actor receives unless the outcome is failure.",
           "properties": {
-            "from": { "$ref": "#/$defs/partial.ItemLocation" },
+            "from": {
+              "$ref": "#/$defs/partial.ItemLocation",
+              "description": "The holder the yielded item is taken from."
+            },
             "items": {
+              "description": "The items that can be yielded; one of them, directly in the holder, moves to the actor's body.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
@@ -4947,11 +5062,13 @@
           "description": "Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
           "properties": {
             "chance": {
+              "description": "Percent; a hit whose accuracy draw is below this is a critical hit.",
               "maximum": 100,
               "minimum": 1,
               "type": "integer"
             },
             "multiplier": {
+              "description": "Damage of a critical hit is multiplied by this (2 to 10).",
               "maximum": 10,
               "minimum": 2,
               "type": "integer"
@@ -4969,11 +5086,18 @@
           "minimum": 1,
           "type": "integer"
         },
-        "kind": { "$ref": "#/$defs/DamageKind" },
+        "kind": {
+          "$ref": "#/$defs/DamageKind",
+          "description": "The damage kind (cold, fire, physical or poison); the target's resistance to it reduces the damage."
+        },
         "on_positive_hit": {
           "additionalProperties": false,
+          "description": "What a hit that takes off HP also does.",
           "properties": {
-            "effect": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "effect": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The bleed applied to the player; used only when the attacker is spawned as a population hunter."
+            }
           },
           "type": "object"
         }
@@ -5022,6 +5146,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Passes when the actor's value of the attribute is at least difficulty; draws no random number.",
           "properties": {
             "attribute": {
               "$ref": "#/$defs/partial.DefinitionRef",
@@ -5043,7 +5168,10 @@
           "additionalProperties": false,
           "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform. Dialogue choice: A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
           "properties": {
-            "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "attribute": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The attribute compared; give this or skill, not both."
+            },
             "failure": {
               "$ref": "#/$defs/partial.TextKey",
               "description": "The failure branch; a dialogue choice needs it, a scripted action refuses it."
@@ -5053,12 +5181,18 @@
               "description": "This check's key, unique across scripted actions and dialogue choices."
             },
             "kind": { "const": "opposed" },
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "With attribute, compares against this NPC's value of the attribute instead of a rating."
+            },
             "rating": {
               "description": "The target detail's rating; a scripted action refuses it.",
               "type": "integer"
             },
-            "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "skill": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The skill whose level is compared; give this or attribute, not both."
+            }
           },
           "type": "object"
         },
@@ -5066,9 +5200,15 @@
           "additionalProperties": false,
           "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
           "properties": {
-            "key": { "$ref": "#/$defs/Key" },
+            "key": {
+              "$ref": "#/$defs/Key",
+              "description": "This check's key, unique across scripted actions and dialogue choices."
+            },
             "kind": { "const": "track" },
-            "plan": { "$ref": "#/$defs/Key" }
+            "plan": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the population plan whose trail is looked for; passes when that trail is fresh in the actor's room."
+            }
           },
           "type": "object"
         }
