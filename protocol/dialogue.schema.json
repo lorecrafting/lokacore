@@ -68,7 +68,7 @@
             "wrong": {"description":"Line told after a wrong answer.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "wrong_limit": {"description":"Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries.",
+            "wrong_limit": {"description":"Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries. Needs the dialogue's quest.",
               "type": "integer",
               "minimum": 1
             }

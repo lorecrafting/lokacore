@@ -151,7 +151,7 @@ One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogue
 | riddle.bank | list of string | yes | The letters an answer may use, each once per entry; an answer that does not fit is refused. |
 | riddle.choice_id | [Key](source-kinds.gen.md#key) | yes | The choice that takes a typed answer. |
 | riddle.wrong | [TextKey](source-kinds.gen.md#textkey) | yes | Line told after a wrong answer. |
-| riddle.wrong_limit | integer |  | Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries. |
+| riddle.wrong_limit | integer |  | Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries. Needs the dialogue's quest. |
 | roles | map of [DialogueRole](source-kinds.gen.md#dialoguerole) | yes | Participants bound when the talk opens. |
 
 ## emotes
@@ -1324,33 +1324,33 @@ Toolbox row G2 (docs/system/mechanics.md damage model): an NPC's percent resista
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| air | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `air`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| bed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `bed`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| burnable | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `burnable`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| chasm | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `chasm`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| cold | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `cold`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| cool | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `cool`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| cursed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `cursed`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| exposed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `exposed`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| fire | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `fire`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| forge | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `forge`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| fragile | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `fragile`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| lamp | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `lamp`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| liquid_holding | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `liquid_holding`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| marsh | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `marsh`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| metal | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `metal`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| physical | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `physical`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| poison | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `poison`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| road | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `road`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| rod | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `rod`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| rug | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `rug`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| sharp | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `sharp`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| silver | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `silver`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| warm | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `warm`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| water | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `water`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| waterproof | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `waterproof`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| windproof | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `windproof`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| wooden | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `wooden`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
+| air | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `air`. Negative is a weakness. |
+| bed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `bed`. Negative is a weakness. |
+| burnable | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `burnable`. Negative is a weakness. |
+| chasm | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `chasm`. Negative is a weakness. |
+| cold | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `cold` damage. Negative is a weakness. |
+| cool | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `cool`. Negative is a weakness. |
+| cursed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `cursed`. Negative is a weakness. |
+| exposed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `exposed`. Negative is a weakness. |
+| fire | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `fire` damage. Negative is a weakness. |
+| forge | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `forge`. Negative is a weakness. |
+| fragile | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `fragile`. Negative is a weakness. |
+| lamp | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `lamp`. Negative is a weakness. |
+| liquid_holding | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `liquid_holding`. Negative is a weakness. |
+| marsh | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `marsh`. Negative is a weakness. |
+| metal | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `metal`. Negative is a weakness. |
+| physical | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `physical` damage. Negative is a weakness. |
+| poison | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `poison` damage. Negative is a weakness. |
+| road | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `road`. Negative is a weakness. |
+| rod | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `rod`. Negative is a weakness. |
+| rug | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `rug`. Negative is a weakness. |
+| sharp | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `sharp`. Negative is a weakness. |
+| silver | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `silver`. Negative is a weakness. |
+| warm | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `warm`. Negative is a weakness. |
+| water | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `water`. Negative is a weakness. |
+| waterproof | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `waterproof`. Negative is a weakness. |
+| windproof | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `windproof`. Negative is a weakness. |
+| wooden | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `wooden`. Negative is a weakness. |
 
 ### ResourceInt
 

@@ -3172,111 +3172,111 @@
       "properties": {
         "air": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `air`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `air`. Negative is a weakness."
         },
         "bed": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `bed`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `bed`. Negative is a weakness."
         },
         "burnable": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `burnable`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `burnable`. Negative is a weakness."
         },
         "chasm": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `chasm`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `chasm`. Negative is a weakness."
         },
         "cold": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `cold`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to `cold` damage. Negative is a weakness."
         },
         "cool": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `cool`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `cool`. Negative is a weakness."
         },
         "cursed": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `cursed`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `cursed`. Negative is a weakness."
         },
         "exposed": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `exposed`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `exposed`. Negative is a weakness."
         },
         "fire": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `fire`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to `fire` damage. Negative is a weakness."
         },
         "forge": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `forge`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `forge`. Negative is a weakness."
         },
         "fragile": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `fragile`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `fragile`. Negative is a weakness."
         },
         "lamp": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `lamp`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `lamp`. Negative is a weakness."
         },
         "liquid_holding": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `liquid_holding`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `liquid_holding`. Negative is a weakness."
         },
         "marsh": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `marsh`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `marsh`. Negative is a weakness."
         },
         "metal": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `metal`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `metal`. Negative is a weakness."
         },
         "physical": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `physical`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to `physical` damage. Negative is a weakness."
         },
         "poison": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `poison`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to `poison` damage. Negative is a weakness."
         },
         "road": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `road`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `road`. Negative is a weakness."
         },
         "rod": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `rod`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `rod`. Negative is a weakness."
         },
         "rug": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `rug`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `rug`. Negative is a weakness."
         },
         "sharp": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `sharp`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `sharp`. Negative is a weakness."
         },
         "silver": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `silver`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `silver`. Negative is a weakness."
         },
         "warm": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `warm`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `warm`. Negative is a weakness."
         },
         "water": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `water`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `water`. Negative is a weakness."
         },
         "waterproof": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `waterproof`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `waterproof`. Negative is a weakness."
         },
         "windproof": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `windproof`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `windproof`. Negative is a weakness."
         },
         "wooden": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `wooden`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `wooden`. Negative is a weakness."
         }
       },
       "type": "object"
@@ -8153,7 +8153,7 @@
               "description": "Line told after a wrong answer."
             },
             "wrong_limit": {
-              "description": "Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries.",
+              "description": "Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries. Needs the dialogue's quest.",
               "minimum": 1,
               "type": "integer"
             }
@@ -10713,7 +10713,7 @@
               "description": "Line told after a wrong answer."
             },
             "wrong_limit": {
-              "description": "Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries.",
+              "description": "Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries. Needs the dialogue's quest.",
               "minimum": 1,
               "type": "integer"
             }
