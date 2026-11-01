@@ -72,3 +72,31 @@ Planted schema violations in `contracts.gen.ts`: `place.exposed` const removed, 
 ## Over-engineering, composition
 
 Nothing to delete. No capability names a mechanic or one piece of content. `bleedingView` moved to `view/bleed.ts`, harmless. The first record's R4 and R5 are not reopened; it had not run the browser or mutants, and does not hold B1 or S1 to S4.
+
+## Re-check at 083353450
+
+Scope: fix commit a77717882, its direct callers, and the merge of main. `kernel_api` 1.141. Not replayed live; the Storm cover was not seen in a browser.
+
+CI at 083353450581d84c3d933932cf2ce7549080ae68 (`gh run list --commit`): ci, book-e2e, graph-diff all completed success.
+
+| Finding | Disposition | Proof |
+|---|---|---|
+| B1 | Fixed | The surviving `sound.web.ts` and `stormClock.ts` rows are now red |
+| S1 | Fixed | `deed-receipt.ts:31` reads the player's own swings; mutants at `deed-receipt.ts` and `cueDiff.ts:154` red |
+| S2 | Fixed | `useCueSounds.ts:22` guard; each death has a new `command_id` (`presenter.ts:102`), a won fight's card still passes; three mutants red |
+| S3 | Fixed | `Storm.tsx:92` uses the foot context; `Leaf.tsx:30` renders Storm inside the provider at `Book.tsx:213`; mutant red |
+| S4 | Fixed | Mutants red: `name !== 'chapter'`, `ramp`, `inFight`, `alive()` |
+| `Book.tsx:302` test | Fixed | Removing `room={view.place.id}` goes red |
+| N1 | Fixed | PR body cite `UnderInk.tsx:95` is the flicker line |
+| N2, N3 | Fixed | Comments in `sound.web.ts`, `session.ts` and `stormClock.ts` now match the code |
+| Q1 | Ruled | Showcase keeps `gale`, Storybook only |
+
+An exploration piece playing on waking is filed by the developer, not a finding.
+
+Main merge: `git diff a77717882 083353450` is empty for `protocol/gameview.schema.json`, `kernel/ts/src/view`, `session.ts` and `deed-receipt.ts`. The hash fixture against main differs in exactly 10 places, all `/sound`.
+
+Hand mutants, 15 rows, 14 red. Touched tests rerun clean after restore: 111 pass, 0 fail.
+
+Survivor, nit: `useCueSounds.ts` deps `[s.view, s.ended]` to `[s.view]`. No failure scenario: `session.ts:111` builds a new view per call, `gameView` does not memoise, and Back to World re-renders through `go`.
+
+Final verdict: APPROVE WITH NOTES.
