@@ -15,6 +15,7 @@ import { key } from '../src/foundation/compose.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { living } from '../src/mechanics/death/shared.ts';
 import { livingCount } from '../src/mechanics/population/refs.ts';
+import { hydrate } from '../src/runtime/created.ts';
 import { cartridgeOf, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-settle-sampler-'));
@@ -234,4 +235,58 @@ test('S4-1: an engaged member stays; the rest of the band moves', () => {
 // Breaks: a plan with no living member faults or emits an event.
 test('S4-1: a plan with no member moves nothing', () => {
   assert.deepEqual(advance(band(8, undefined, false), 800).entered, []);
+});
+
+// Breaks (loka-kgd.159): a spawn and a plan move of the newborn in one hour fault on the containment
+// write the move's writer-group join misses (conflicting_write), whichever rule runs first, and a
+// band out of its plan's area fails the save loader.
+for (const [first, second] of [
+  ['a_spawn', 'z_move'],
+  ['z_spawn', 'a_move'],
+]) {
+  test(`kgd.159: ${first} then ${second} in one hour: the newborn ends in the hills and reloads`, () => {
+    const w = world((c) => {
+      hour(c, first!, 7, [{ op: 'population.spawn', plan: PLAN }]);
+      hour(c, second!, 7, [{ op: 'npc.move', plan: PLAN, room: ref('room', 'hills') }]);
+    });
+    const a = advance(w, 700);
+    const born = member(a.w, 3).member_id!;
+    const expected = second === 'z_move' ? 'hills' : 'square';
+    assert.equal(a.w.state.containers[born], room(a.w, expected));
+    assert.ok(hydrate(w, JSON.parse(JSON.stringify(a.w.state)), true), 'the save loads');
+  });
+}
+
+test('kgd.159: a band moved out of its area in a later hour still reloads', () => {
+  const b = advance(advance(band(8), 700).w, 800);
+  assert.ok(hydrate(band(8), JSON.parse(JSON.stringify(b.w.state)), true));
+});
+
+// Breaks: the loader's new plan-move rooms let a member stand anywhere; a forged room still refuses.
+test('kgd.159: a member in a room no plan move names fails the save loader', () => {
+  // This plan's move to the square; another plan's and one NPC's moves to the hills, in an hour not reached.
+  const w = band(99, undefined, true, (c) => {
+    delete c.reactions[MOVE];
+    hour(c, 'never', 23, [
+      { op: 'npc.move', plan: PLAN, room: ref('room', 'square') },
+      { op: 'npc.move', plan: ref('population', 'other'), room: ref('room', 'hills') },
+      { op: 'npc.move', npc: ref('npc', 'raider'), room: ref('room', 'hills') },
+    ]);
+  });
+  const { w: b } = advance(w, 700);
+  const forged = { ...b.state.containers, [member(b, 3).member_id!]: room(b, 'hills') };
+  assert.ok(hydrate(w, JSON.parse(JSON.stringify(b.state)), true), 'the unforged save loads');
+  assert.equal(hydrate(w, { ...b.state, containers: forged }, true), undefined);
+});
+
+// Breaks: a rule's npc.move with no plan and no npc moves the event's subject, a spawned member too;
+// the loader must take that room, and a move with no room must not throw there.
+test('kgd.159: a member in a room an event-subject move names reloads', () => {
+  const w = band(99, undefined, true, (c) => {
+    delete c.reactions[MOVE];
+    hour(c, 'subject', 23, [{ op: 'npc.move' }, { op: 'npc.move', room: ref('room', 'hills') }]);
+  });
+  const { w: b } = advance(w, 700);
+  const moved = { ...b.state.containers, [member(b, 3).member_id!]: room(b, 'hills') };
+  assert.ok(hydrate(w, { ...b.state, containers: moved }, true));
 });

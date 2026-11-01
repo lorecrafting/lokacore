@@ -6,6 +6,7 @@ import { sightRebindValid } from '../src/foundation/compose_sight_rebind.ts';
 import { compose } from '../src/foundation/compose.ts';
 import { base } from '../src/runtime/apply.ts';
 import { runSight } from '../src/mechanics/population/behavior.ts';
+import { sightsValid } from '../src/mechanics/population/saved.ts';
 import { fresh, ref, shoo } from './deer_fixture.ts';
 const run = 'bbbbbbbb-0000-4000-8000-000000000001' as never;
 // Every player swing misses, so the deer survives the rounds a test needs.
@@ -464,4 +465,27 @@ test('thirty-day replay conserves three live deer and one hide per actual birth'
     ).length,
     4,
   );
+});
+
+// Breaks: a plan move carries a sight plan's prey out of its area, the move commits, and the save
+// then fails the cold load's sight check (store.ts restorable), so the story cannot reopen.
+test('a sight plan moved by a reaction to a room outside its area still reopens', () => {
+  const edited = shoo.genesis((c: any) => {
+    c.reactions = {
+      [ref('reaction', 'herd_moves')]: {
+        key: 'herd_moves',
+        on: { event: 'entity_entered_room', room: shoo.ref('room', 'green') },
+        steps: [
+          {
+            op: 'npc.move',
+            plan: shoo.ref('population', 'oak_deer'),
+            room: shoo.ref('room', 'lane'),
+          },
+        ],
+      },
+    };
+  });
+  const w = command(edited, 'move', 'west', 1);
+  assert.equal(w.state.containers[deer(w, 'oak_deer')], w.roomIds[ref('room', 'lane')]);
+  assert.ok(sightsValid(w));
 });

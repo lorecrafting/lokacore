@@ -109,6 +109,13 @@ export function transition(
   return [{ op: 'escort.transition', writer_group: 0, actor_id: row.actor_id, expected, value }];
 }
 
+/** A following escort stays with its player (escort@1: never detached). */
+export function escorting(world: World, npc: EntityId) {
+  return Object.values(world.state.escorts ?? {}).some(
+    (e) => e?.npc_id === npc && e.status === 'following',
+  );
+}
+
 function following(world: World, actor: CharacterId) {
   const escort = world.state.escorts?.[actor];
   if (!escort || escort.status !== 'following') return;
