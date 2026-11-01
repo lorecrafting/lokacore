@@ -164,6 +164,19 @@ defmodule Loka.ContentExplainFollowOnsTest do
     assert only =~ "`gain`"
   end
 
+  # Break: a world with death also blames its restore amount for the pool's own refusal.
+  test "a refused hp prints no restore line in a world with death", %{tmp_dir: tmp} do
+    File.cp_r!("cartridges/spell_effects_sampler", tmp)
+    path = Path.join(tmp, "resources.json")
+    file = path |> File.read!() |> JSON.decode!()
+    File.write!(path, file |> put_in(["resources", "hp", "minimum"], -5) |> JSON.encode!())
+
+    {:error, diags} = Content.compile(tmp)
+    assert ["resources.resources.hp"] = Enum.map(diags, & &1["path"])
+    assert [line] = Content.explained(diags, tmp)
+    assert line =~ "could never die from a blow"
+  end
+
   # Break: a pool refused for its gain still prints its holder's start as a bad number.
   test "a bad gain prints only the gain", %{tmp_dir: dir} do
     gold = %{"gain" => "x", "maximum" => 9, "minimum" => 0, "start" => 0}
