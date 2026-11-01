@@ -52,3 +52,45 @@ Not run: a random walker (go-to from fresh and selected states only); `dev_look`
 CI at `ee67c0633`: graph-diff, book-e2e, ci completed success.
 
 Verdict: **CHANGES REQUIRED**.
+
+## Re-check of the fix commits at `393cbc928d854fb7d46d30d63e261fdc121cd93c`
+
+Scope: `git diff 49d8a0395 393cbc928` (`a0aadbde8`, `393cbc928`) and direct callers. New reviewer; the first reviewer's context is gone. PM rulings in loka-vduxr.17 not reopened; no wrong result on a real save found against them.
+
+Verdict: **CHANGES REQUIRED**: two should-fix needing logic changes (a fix round per [WORKFLOW](../WORKFLOW.md#small-should-fix)), two nits.
+
+### Dispositions
+
+| First-review finding | State | Proof |
+|---|---|---|
+| 1 blocker `rule.ts` proof facts | fixed on open | Sweep below: no `save_corrupt` at reopen. A new path, finding R1 |
+| 2 should-fix release opens a dev save | fixed | `receipt-save.ts:18-32` refuses; mutant `!dev` dropped: 2 red. A save holding only a refused cheat still opens on release (run, 3 fixtures) |
+| 3 should-fix room event untested | fixed | Mutant `[entered]` to `[]`: red "go to room announces the entry" |
+| 4 nit prefix | fixed | `invocation.ts:174` two names; mutant one name: 4 red |
+| 5 nit empty `no_transcript` | fixed | Planted `""` on `dev@1`: "missing transcript"; null clean |
+
+### Findings
+
+R1. **Should-fix.** `mobile/authority/local-story/save.ts:111` `adopt` calls `load` without `s.host.dev`, so the new gate reads a dev save as corrupt. Callers: `save.ts:67` and `elapsed.ts:46` run only in the fence after an unknown COMMIT (code read), so this needs a fault, not ordinary play; `authority.ts:261` runs on every new game, but a new run holds no cheat receipt. Run on toolbox_showcase with `sqliteHost`, dev host: a cheat whose COMMIT acknowledgement is lost answers `pending`, its retry answers `save_corrupt`, the session stays in the old room; a reopen opens at `boar_run`. Same with a prior cheat. Scenario: any lost-ack step in the preview blocks the session with a corrupt-save message on a healthy file until reload. Control: passing `s.host.dev` there, the retry answers `saved` `replay: true` and the view moves. Fix: pass it, add that test. Reload heals it and the in-session error offers no new reset (only the Book's usual confirmed Start over; `SaveError` shows only at open), hence not a blocker.
+
+R2. **Should-fix.** `kernel/ts/src/mechanics/dev/rule.ts:46-47` refuses `fact.assign` targets of every `receive`/`hand_over` choice, but `dialogue-save.ts:155-161` proves them only for an escort choice or a custody-start item; the `rule.ts:39` comment is wrong for these. Run across all 107 compiled `cartridges/`: with the proof list bypassed, set then dev reopen opens for `search_plan` (cellar, chapters, ferry, journal, lantern_proof, scene samplers: a plain enum branch set by Bram's choices) and `inn_cellar_cleared`; refused `invalid_state` at this head. Scenario: a writer cannot jump to the `party_led` branch of `search_plan`, though the fact is safe, and any future "handed it over" fact is refused the same way. `checkAssignments` compares against a set fixed by the cartridge, so fresh-state passing holds for played states too (code read). Fix: narrow to `c.escort` and custody-start items; adjust the "and only those" cases at `kernel/ts/test/dev.test.ts:209-210`. Likewise `q.expedition.faction` at `rule.ts:55`: `wild_standing` reopens on a fresh game with the bypass, and `expedition-save.ts` tracks it through receipts (code read); played state not run, so drop it only with a played set-then-reopen. Control: the same bypass keeps the 17 topic facts and `night_survived` at `save_corrupt`, so the refusal is needed there.
+
+R3. **Nit.** `mobile/authority/local-story/receipt-save.ts:22` mutant `='accepted'` to `1=1` stays green (29 pass), so "a save with a refused cheat still opens" has no pin. Scenario: the filter is dropped and a preview save copied to a release is refused for a cheat that changed nothing.
+
+R4. **Nit.** PR #546 body: "Accepted, open" still lists `receipt-history.ts:36` and `invocation.ts:174` as they were, "`dev.test.ts`: 20 pass" is now 22, and `/code-review` stops at `689cb11ff`. Update it in the fix round.
+
+### Set-then-reopen
+
+Every fact of all 107 compiled cartridges, fresh game, one cheat, dev reopen, real SQLite: 125 plain facts accepted and reopen; refused: 26 proof facts, 167 by ownership, subjectivity, `position` or scene rules. No `save_corrupt`. Outside the fix, no finding: `green_sampler` `bell_up` answers `fault` `budget_exceeded` (the cartridge's reaction cycle), reopen opens; `hello_sampler` `village_arrived` throws at open, not traced. Frozen fixtures `cartridge_sampler` and `sampler_v009` are `save_corrupt` with no cheat at all, so they are not evidence.
+
+Played states: not walked. Every proof that reads a fact was read instead (`value`/`factDefaults` in `topics-save`, `dialogue-save`, `expedition-save`, `deadline-save`, `deadline-receipts`, `skills-save`): each read is on the refused list or owned by `fact.ts ownership`, except the deadline axis at `deadline-receipts.ts:40-43`, reachable only for `deadline.fact`, which no compiled cartridge has. Question for later content, no failure today.
+
+### Mutants
+
+`dev.test.ts` + `dev-cheats.test.ts`, null 29 pass. Red: `!dev` gate (2), `host.dev` at `authority.ts:102` (4), topics clause (2), deadline clause, trust only, escort, receive, hand_over, riddle, perception, faction (1 each, kernel test only), entry event, one action name (4). Green: R3. Deadline, escort and riddle clauses have no real-save pin, as the brief notes; no cartridge reaches them at this head.
+
+PR claims rerun: "`test/dev.test.ts`: 20 pass": now 22, R4. "`invocation.ts:96` malformed cheat answers `unsupported_capability`": line is `resolveDev`, first-review run stands. `/code-review` reported for `99b9016fc..689cb11ff` only, R4.
+
+CI at `393cbc928`: graph-diff, ci, book-e2e completed success.
+
+Not run: `bin/mutate_diff.sh` (the brief asked for narrow mutants); go-to-room sweep (fix did not touch it; first review ran it).
