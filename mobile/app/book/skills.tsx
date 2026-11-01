@@ -43,7 +43,8 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
         ?.filter((s) => s.acquired && !s.profession)
         .map((s) => (
           <Text key={s.skill.key} style={prose(c, t)}>
-            {p.text(s.label)} — {learned(s, p.text)}
+            {p.text(s.label)}
+            {s.rank && ` — ${p.text(s.rank.label)}`} — {learned(s, p.text)}
           </Text>
         ))}
     </>
@@ -69,7 +70,12 @@ export function Professions(p: { view?: GameView; text: (key: string) => string 
           s.acquired ? (
             <Text key={s.skill.key} style={prose(c, t)}>
               {p.text(s.label)}
-              {s.level === undefined ? '' : `, level ${s.level}`} — {learned(s, p.text)}
+              {s.rank
+                ? ` — ${p.text(s.rank.label)}`
+                : s.level === undefined
+                  ? ''
+                  : `, level ${s.level}`}{' '}
+              — {learned(s, p.text)}
             </Text>
           ) : (
             <Note key={s.skill.key}>

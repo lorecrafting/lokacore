@@ -98,12 +98,15 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   size and line height each rounded): read them through `useType()`. Every Book `Text` sets
   `allowFontScaling={false}`.
 - **Space, size, radius.** Margins, gaps and padding come from `space`; touch, card, rule
-  and minimap sizes from `size`; corners from `radius`. `Tap`'s bleed, below only, is
+  (`size.experienceRule`) and minimap sizes from `size`; corners from `radius`. `Tap`'s bleed, below only, is
   `size.touch` − the scaled `type.body.lineHeight`, never negative: 16 px at Standard, 12, 8
   and 2 px at Large, Larger and the cap, so a body line keeps a 44 px hit area with no visible
   padding. Map drawing geometry
   (`MapDrawing`, `DiscoveredMap` layout, `joystick`) is exempt: its numbers are a drawing,
   not spacing.
+- **Experience rule.** `size.experienceRule` (2 px) under the status row: `line` track, `fg` fill.
+  A gain or loss moves over `motion.dry`. A level: full over `motion.dry`, `warning` for
+  `motion.settle.hold`, then `fg` at the new fraction over `motion.dry`.
 - **Focus.** On web, keyboard focus draws a `size.focus` `action` outline `size.focus` outside the
   focused element, on `:focus-visible` only (the mock's rule): a tap or a click draws no ring; a
   Tab does, and so does an arriving page's title focus after keyboard use. One document-wide rule
@@ -178,6 +181,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
 | `DreamPage` | `book/DreamPage.tsx` | ChapterPages |
 | `DreamResume` | `book/DreamPage.tsx` | NoticePage |
+| `ExperienceRule` | `book/ExperienceRule.tsx` | ExperienceRule |
 | `Footer` | `book/Footer.tsx` | Footer |
 | `Tip` | `book/Footer.tsx` | Tip |
 | `GiltLine` | `book/GiltLine.tsx` | LogLines |

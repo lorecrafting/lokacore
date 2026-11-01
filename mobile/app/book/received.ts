@@ -3,6 +3,7 @@
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
 import { cast, comings, lineText, lineWords, replyLine, spoken, used } from './words.ts';
 import { things } from './item-pages.ts';
+import { skillChanges } from './cueDiff.ts';
 import {
   arrived,
   closing,
@@ -194,14 +195,10 @@ function conversationLines(
 
 // A skill the reply taught or raised narrates itself (book-ui.md Line placement, loka-lsqi).
 export const skillEvents = (was: GameView, now: GameView, text: Say): DetailLine[] =>
-  (was.skills ? (now.skills ?? []) : []).flatMap((n): DetailLine[] => {
-    const w = was.skills!.find((k) => k.skill.key === n.skill.key && k.skill.kind === n.skill.kind);
-    const name = text(n.label);
-    if (n.acquired && !w?.acquired)
-      return [{ text: `You learn ${name}.`, event: true, gilt: true }];
-    if (w?.acquired && (n.level ?? 0) > (w.level ?? 0))
-      return [{ text: `Your ${name} improves.`, event: true, gilt: true }];
-    return [];
+  skillChanges(was, now).map(({ name, skill, key }) => {
+    const label = text(skill.label);
+    const composed = name === 'skill_learned' ? `You learn ${label}.` : `Your ${label} improves.`;
+    return { text: key ? text(key) : composed, event: true, gilt: true };
   });
 
 // Where the reply's lines go: a corpse pickup, the receipt's or button's detail, or a Read target.

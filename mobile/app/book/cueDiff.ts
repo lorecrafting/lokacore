@@ -82,23 +82,28 @@ function combatCues(now: GameView, was: GameView, died: boolean) {
   return [...out, ...dealtCues(now, was)];
 }
 
+type SkillView = NonNullable<GameView['skills']>[number];
+/**
+ * What one reply says of each skill, at most once a skill (book-ui.md, Skill tree details): the one
+ * answer for its line (received.ts skillEvents) and its cue. `key` is the authored line, if any.
+ */
+export const skillChanges = (was: GameView, now: GameView) =>
+  (now.skills ?? []).flatMap((n) => {
+    const w = was.skills?.find((k) => k.skill.key === n.skill.key && k.skill.kind === n.skill.kind);
+    return skillChange(w, n);
+  });
+
+const skillChange = (w: SkillView | undefined, n: SkillView) => {
+  const cue = (name: 'skill_learned' | 'skill_up', key?: string) => [{ name, skill: n, key }];
+  if (n.acquired && !w?.acquired) return cue('skill_learned', n.learned ?? n.rank?.reached);
+  if (!w || (n.level ?? 0) <= (w.level ?? 0)) return [];
+  return w.acquired || n.rank?.reached ? cue('skill_up', n.rank?.reached) : [];
+};
+
 function skillCues(now: GameView, was: GameView) {
-  const old = (key: string) => was.skills?.find((s) => s.skill.key === key);
-  const skills = now.skills?.filter((s) => s.acquired) ?? [];
-  const learned = skills.filter((s) => !old(s.skill.key)?.acquired);
-  const up = skills.filter(
-    (s) => old(s.skill.key)?.acquired && (s.level ?? 0) > (old(s.skill.key)?.level ?? 0),
-  );
-  return [
-    ...named(
-      'skill_learned',
-      learned.map((s) => s.skill.key),
-    ),
-    ...named(
-      'skill_up',
-      up.map((s) => s.skill.key),
-    ),
-  ];
+  const said = skillChanges(was, now);
+  const keys = (name: string) => said.filter((c) => c.name === name).map((c) => c.skill.skill.key);
+  return [...named('skill_learned', keys('skill_learned')), ...named('skill_up', keys('skill_up'))];
 }
 
 // A worn item taken off is no pickup; a buy is one sound, the coin (the item still pops).
