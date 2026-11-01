@@ -123,3 +123,20 @@ test('a full disk during catch-up at open offers no Start over and keeps the byt
     a.sql.close();
   }
 });
+
+// Breaks: a kernel fault during catch-up reads as a damaged save, offering to replace an intact run.
+test('a kernel fault during catch-up at open keeps the game and its debt, with no refusal', () => {
+  const { path } = saved();
+  const raw = new DatabaseSync(path);
+  raw.exec(
+    `UPDATE state_row SET value = json_set(value, '$.due_time', 64900, '$.job.kind', 'population') WHERE section = 'jobs'`,
+  );
+  raw.close();
+  const a = launch(path);
+  try {
+    assert.equal(a.session.failed(), undefined);
+    assert.equal(a.session.game()!.view().view.time, 64800); // nothing settled: the debt remains
+  } finally {
+    a.sql.close();
+  }
+});
