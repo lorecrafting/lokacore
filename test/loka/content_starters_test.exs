@@ -238,6 +238,9 @@ defmodule Loka.ContentStartersTest do
     for kind <- ~w(items npcs resources facts quests),
         do: {:ok, _} = Starters.write(dir, kind, "x")
 
+    assert {:error, "a name is lowercase letters, digits and _, 64 at most" <> _} =
+             Starters.write(dir, "text", String.duplicate("a", 65))
+
     for kind <- ~w(scenes topics actions services transports populations rooms items) do
       assert {:error, "a name" <> _} =
                Starters.write(dir, kind, String.pad_trailing(kind, 33, "b"))
