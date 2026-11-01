@@ -90,4 +90,41 @@ Dead-speaker hand-off (shares the `parted` line, not played separately); hostile
 
 ## Disposition
 
-Pending the developer's fix commits.
+Fix commit below; see the re-check.
+
+## Fix re-check at 50742a46a
+
+Commit `50742a46ab607e99832f942bf65f789c280d530d`. CI by `gh run list --commit`: ci, book-e2e, graph-diff all completed success. Verdict: **CHANGES REQUIRED**.
+
+| Item | Disposition |
+| --- | --- |
+| B1 | Closed. Own inputs: `receive` + `then` to `has_item` opens, to `not has_item` ends; flat self-gate ends; failed-check practice through `then_failed` to `skill_compare` opens, its negation ends. `leadOn` covers `then_failed`: `rule.ts` passes `start`, `leadOn` applies its ops. |
+| S1 | Replaced by S3: the compile refusal closes the silent case and over-refuses. |
+| S2 | Closed. Position `+ 2` is now red. |
+| Open custody item | Partly closed; B2 and S4 remain. |
+| `mechanics.md` | Amended correctly (post-decision world). |
+| Size allowances | Acceptable: `handoff` 42 lines (allow 45), test file 538 lines (allow 545), both with reasons and precedent. |
+
+### Findings
+
+**B2, blocker, `mobile/authority/local-story/dialogue-save.ts:151`.** `expect` refuses two selected choices that assign one fact different values, and it runs over every receive and hand_over of a custody item. Content: `give_allowed: false` item; take sets a flag; give clears it, the natural gate for a take and give-back. It compiles and every command is accepted in play. The next cold reopen is `save_corrupt`, and the player's story does not open. The PR's test has no steps. Take/give with steps on different facts, and take with its step and no give, load.
+
+**S3, should-fix, `lib/loka/content/dialogue_links.ex:71`.** `unreachable?` never asks whether a root reaches the loop, against the comment above it ("a loop no root reaches"). Guard root, then `then: <second speaker>`, then `then: guard` is refused (`OUTCOME_MISMATCH`). That shape composes two spec lines (Hand-off, `then: <parent>`). With the refusal switched off it plays the full round trip, no issues. The one-way hand-off leaves the second speaker just as untalkable and compiles. The author's only way out is an unwanted Talk entry for the second speaker. Refuse only where Talk cannot enter as intended, or warn as `SPEAKER_ELSEWHERE` does.
+
+**S4, should-fix, `dialogue-save.ts:48` and `:204`.** Answer counts are bounded above, not paired. After a reload, forged custody loads: take/give with the item moved back onto the player (no second take); take/give/take with the item moved to the guard. A save edit gets a `give_allowed: false` item the answers do not account for. Require `resolved.length` to equal `handedBack` plus one while no terminal hand-over holds it.
+
+**S5, should-fix (test gap), `dialogue-save.ts:48,50,204,205`.** Five narrow mutants stay green against every local-story test file that mentions custody, receipts, `receive` or `hand_over` (null green): `:48` removed, holder check off, received check off, non-quest receipt unchecked, receive receipt unchecked. The new evidence branch has no forged-state test. Add forged-state cases with the S4 fix.
+
+**Question, `dialogue-save.ts:210`, traced only.** Take, non-quest give to a guard, retake, then quest hand_over to that guard. If the non-quest dialogue iterates first, `completed` is true and `done && completed` refuses a legal save?
+
+### Probes
+
+Forged, after reload, refused as they should be: no answers with item on the captain; taken, moved to the guard with no give; taken, moved to the captain; give-to-captain row, item moved to the guard; give row deleted. Legal, after reload, load: take/give; take/give/take; take/give/take/give.
+
+| Mutant (null kernel, save, Elixir all green) | Result |
+| --- | --- |
+| `leadOn` reads pre world; hub reads pre world; `leadOn` position `+ 2`; `then_failed` gets no practice | red |
+| `loops/1` off; cycle condition off; speakers ignored; `handedBack` returns 0 | red |
+| the five in S5; `handedBack` counts quests (smaller file set only) | green |
+
+Not run: fact-gated give through a chain or to a captain at reload; dead-speaker and escort cases from the first round. The forged cases are save edits, so S4 needs local file access to exploit.
