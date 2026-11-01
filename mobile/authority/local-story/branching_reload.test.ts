@@ -239,3 +239,15 @@ test('a resolved take or give with no receipt is refused at reload', () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+// Breaks: the other answer of the item's dialogue counting as the take, so its first reopen is refused.
+test('another answer of the receive dialogue reopens with the item still on its giver', () => {
+  const once = { op: 'not', item: { op: 'fact_compare', fact: 'gate_open', equals: true } };
+  const take = {
+    ...line,
+    receive: { item: 'token', from: 'guard' },
+    policy: once,
+    steps: [flag(true)],
+  };
+  reopened(withToken({ guard: tokenTalk({ take, leave: line }, false) }), (g) => g.choose('leave'));
+});

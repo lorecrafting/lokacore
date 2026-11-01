@@ -11,6 +11,9 @@ import {
   retakeQuest,
   retakePlay,
   withToken,
+  talkTo,
+  quest,
+  line,
   survives,
   refused,
   put,
@@ -131,23 +134,27 @@ test('a two-way item held by nothing, by itself, or with no row is refused', () 
 });
 
 // A second row and receipt for an answer already saved, so only the count can refuse it.
-const answeredTwice = (g: Play, choice: string) => {
+const COPY = '44444444-5555-8666-8777-888888888888';
+const answeredTwice = (g: Play, choice: string, swaps: [string, string][] = []) => {
   const rows = g.sql.prepare('SELECT key, value FROM state_row WHERE section=?').all('choices');
   const row = rows.find((r) => JSON.parse(String(r.value)).choice_id === choice)!;
   const id = String(row.key);
-  const copy = `${id}-copy`;
-  g.sql
-    .prepare('INSERT INTO state_row(section, key, value) VALUES (?, ?, ?)')
-    .run('choices', copy, row.value);
   const receipts = g.sql.prepare('SELECT * FROM receipt').all();
   const r = receipts.find((x) => JSON.parse(String(x.command)).payload?.continuation_id === id)!;
-  const command = JSON.parse(String(r.command));
-  command.payload.continuation_id = copy;
+  const copied = (text: unknown) =>
+    [[String(r.command_id), COPY], [id, COPY], ...swaps].reduce(
+      (out, [from, to]) => out.replaceAll(from, to),
+      String(text),
+    );
+  g.sql
+    .prepare('INSERT INTO state_row(section, key, value) VALUES (?, ?, ?)')
+    .run('choices', COPY, copied(row.value));
   const values = {
     ...r,
-    invocation_id: `${r.invocation_id}-copy`,
-    command_id: `${r.command_id}-copy`,
-    command: JSON.stringify(command),
+    invocation_id: COPY,
+    command_id: COPY,
+    command: copied(r.command),
+    response: copied(r.response),
   };
   const names = Object.keys(values);
   g.sql
@@ -164,8 +171,56 @@ test('a one-way answer saved twice is refused', () => {
     g.talk('z_q');
     g.choose('give');
   };
-  refused(oneWay(), taken, (g) => answeredTwice(g, 'take'));
+  refused(oneWay(), taken, (g) => {
+    answeredTwice(g, 'take');
+    // Back on its giver, so the holder check would pass the two takes.
+    const rows = g.sql.prepare('SELECT value FROM state_row WHERE section=?').all('choices');
+    const giver = JSON.parse(String(rows[0].value)).roles.find(
+      (r: { role: string }) => r.role === 'guard',
+    );
+    put(g.sql, 'containers', g.fresh.entityIds[TOKEN]!, giver.entity_id);
+  });
   refused(oneWay(), delivered, (g) => answeredTwice(g, 'give'));
+});
+
+// Breaks: two hand-over answers both counting for one item, each with its own resolved quest.
+test('a one-way item handed over by two quests is refused', () => {
+  const second = {
+    ...talkTo({
+      give_too: { ...line, hand_over: { item: 'token', to: 'clerk' }, steps: [flag(false)] },
+    }),
+    roles: {
+      guard: { role: 'npc', npc: 'guard' },
+      clerk: { role: 'npc', npc: 'clerk' },
+      token: { role: 'item', item: 'token' },
+    },
+    quest: 'job_too',
+    policy: { op: 'quest_state', quest: 'job_too', state: 'active' },
+  };
+  refused(
+    oneWay({ z_too: second }, { job_too: quest }),
+    (g) => {
+      g.choose('take');
+      accept(g);
+      g.talk('z_q');
+      g.choose('give');
+    },
+    (g) => {
+      const [key, q] = quests(g);
+      const QUEST = '55555555-5555-8666-8777-888888888888';
+      const row = { ...q, quest: { ...q.quest, key: 'job_too' }, outcome: 'give_too' };
+      g.sql
+        .prepare('INSERT INTO state_row(section, key, value) VALUES (?, ?, ?)')
+        .run('quests', QUEST, JSON.stringify(row));
+      answeredTwice(g, 'give', [
+        [key, QUEST],
+        ['"job"', '"job_too"'],
+        ['"z_q"', '"z_too"'],
+        ['"decline",', ''],
+        ['"give"', '"give_too"'],
+      ]);
+    },
+  );
 });
 
 // Breaks: a one-way item off its giver with no take behind it loading: moved with no answers, or

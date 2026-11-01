@@ -224,7 +224,7 @@ export const retakePlay = (g: ReturnType<typeof run>) => {
 
 // One way: taken from the guard, handed to the clerk, so custody has one history; the receive sets
 // gate_open, the delivery clears it, and the quest answers also offer a way out.
-export const oneWay = () =>
+export const oneWay = (more: Record<string, object> = {}, quests: Record<string, object> = {}) =>
   withToken(
     {
       guard: take({ steps: [flag(true)] }),
@@ -257,8 +257,9 @@ export const oneWay = () =>
           ],
         },
       },
+      ...more,
     },
-    { job: quest },
+    { job: quest, ...quests },
   );
 export const accept = (g: ReturnType<typeof run>) => {
   g.talk('b_offer');
