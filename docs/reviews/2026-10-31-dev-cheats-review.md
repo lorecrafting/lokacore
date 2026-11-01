@@ -130,7 +130,7 @@ Required: `docs/WORKFLOW.md` Review count, the PR changes a protocol schema and 
 
 ### Re-check after rebasing on #544
 
-1. `#544` deletes `topics-save.ts` and its `dialogue-save.ts` no longer infers who wrote a fact, so `rule.ts:43-80` refuses facts that nothing proves. Each kept term needs a live reopen proof on the rebased tree; topic and dialogue custody terms and `held`, `custody` should go unless one remains. Keep `c.escort` when trimming that clause: `escortSave` survives on #544. Expedition, deadline, riddle and perception terms: check each against its save file.
+1. `#544` deletes `topics-save.ts` and its `dialogue-save.ts` no longer infers who wrote a fact, so `rule.ts:43-80` refuses facts that nothing proves. Each kept term needs a live reopen proof on the rebased tree; topic and dialogue custody terms and `held`, `custody` should go unless one remains. Expedition, deadline, riddle and perception terms: check each against its save file.
 2. Rerun the set-then-reopen sweep: no `save_corrupt`, and every newly accepted fact reopens. A term cut too far shows as `save_corrupt`; one left in shows as a refusal with no proof behind it.
 3. Tests that pin the custody refusal in `dev.test.ts` must change with the rule; rerun narrow mutants on what remains.
 4. `#544`'s new dialogue reopen path keeps the `dev` flag; `receipt-history.ts` gate still refuses an accepted cheat on release.
