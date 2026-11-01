@@ -10,6 +10,7 @@ import { useDry, useInk, useLift, usePress } from './press.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { onKey, unseen } from './lines.tsx';
 import { hides, reasonSentence } from './reasons.ts';
+import { ASKED } from './words.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { picks, type Pick } from './pick.ts';
 import { focusTitle, titleContext } from './title.ts';
@@ -43,11 +44,10 @@ type CardProps = (
  *   lines): a Tap reading its label as prose, the `link` words in the room link style
  *   (`type.named`), named by `name` (its shown text, then the action and spoken price); unavailable, the same press and
  *   sentence with no card. Shop lines stack in `Cards lines`.
- * - States: available; asked (a dialogue choice already taken: dim words, still pressable); unavailable; unavailable, pressed; each as a card or a line.
+ * - States: available; asked (a dialogue choice already taken: dim italic words, named with ASKED, still pressable); unavailable; unavailable, pressed; each as a card or a line.
  * - Effects: a card lifts with a selection haptic; an unavailable press does not lift, its reason
  *   dries and it gives a warning haptic.
- * - Line form stories: NpcPage.stories.tsx (Shelf, Sale, Services).
- * - Story: ActionCard.stories.tsx
+ * - Story: ActionCard.stories.tsx; line forms: NpcPage.stories.tsx (Shelf, Sale, Services).
  */
 export function ActionCard(p: CardProps) {
   const c = usePalette();
@@ -76,12 +76,12 @@ function Available(
       ref={p.ref}
       {...press.handlers}
       accessibilityRole="button"
-      accessibilityLabel={('b' in p && p.name) || label}
+      accessibilityLabel={('b' in p && (p.name || (p.asked && `${label}${ASKED}`))) || label}
       aria-expanded={'onPress' in p ? p.expanded : undefined} // RN web maps aria-expanded, not accessibilityState
       onPress={press.commit('b' in p ? () => p.press(p.b) : p.onPress)}
       style={[card(c), lift]}
     >
-      <Text style={'b' in p && p.asked ? note(c, t) : prose(c, t)}>
+      <Text style={'b' in p && p.asked ? { ...note(c, t), ...type.italic } : prose(c, t)}>
         {/* One text node with a line break, so axe reads "label note" as the name's start. */}
         {'b' in p && p.note
           ? [label, <Text key="note" style={note(c, t)}>{`\n${p.note}`}</Text>]

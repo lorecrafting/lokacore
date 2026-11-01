@@ -236,7 +236,14 @@ test('a failed check leaves the option unasked', () => {
 
 // Breaks: skill.acquire stops working from a choice, or the skill is lost on reload.
 test('a choice teaches a skill', () => {
-  const s = saved();
+  // asked on a choice that closes itself: view() validates, so the closed option must not carry it.
+  const s = saved(
+    compile((name, body) =>
+      name.endsWith('learn_skill.json')
+        ? body.replace('"learn_knack": {', '"learn_knack": { "asked": true,')
+        : body,
+    ),
+  );
   let g = s.now();
   g.talk('teacher');
   g.choose('learn_knack');
@@ -286,7 +293,7 @@ test('a choice curses, cures, heals, grants experience and fires an event', () =
   g.choose('take_cure');
   assert.equal(g.view().conditions, undefined);
   g.choose('take_heal');
-  assert.equal(g.view().conditions?.length, 1);
+  assert.equal(g.view().conditions?.[0]?.per_tick, 1);
   g.choose('take_lesson');
   assert.equal(g.view().levelling?.experience, 5);
   g.choose('ring_bell');

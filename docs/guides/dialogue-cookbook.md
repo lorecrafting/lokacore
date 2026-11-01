@@ -176,7 +176,7 @@ until it resolves. A dialogue-level `quest` would resolve on every choice.
 ## A label that changes with the state, and what changed
 
 Two choices with opposite policies are one line whose words change. A reply reads the same fact
-through `narration_variants`.
+through `narration_variants`. The fact, `errand_done`, is defined in the turn-in example above.
 
 ```json areas/label_by_state.json
 {
@@ -423,14 +423,17 @@ a positive `per_tick`, so it comes over time; an instant heal from a choice is n
   "reactions": {
     "curse_taken": {
       "on": { "event": "choice_resolved", "choice": "take_curse" },
+      "silent": true,
       "steps": [{ "op": "status.apply", "status": "hex" }]
     },
     "curse_cured": {
       "on": { "event": "choice_resolved", "choice": "take_cure" },
+      "silent": true,
       "steps": [{ "op": "status.cure", "status": "hex" }]
     },
     "heal_taken": {
       "on": { "event": "choice_resolved", "choice": "take_heal" },
+      "silent": true,
       "steps": [{ "op": "status.apply", "status": "mending" }]
     },
     "lesson_taken": {
@@ -443,6 +446,7 @@ a positive `per_tick`, so it comes over time; an instant heal from a choice is n
     },
     "bell_heard": {
       "on": { "event": "custom_event", "custom": "bell" },
+      "silent": true,
       "steps": [{ "op": "fact.assign", "fact": "bell_heard", "value": true }]
     }
   }
