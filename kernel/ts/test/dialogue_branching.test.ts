@@ -559,7 +559,7 @@ test('Talk opens a loop with no way in at its member leading to the most dialogu
 test('Talk picks one member of a loop by distinct links, then key', () => {
   const to = (...keys: string[]) =>
     Object.fromEntries(keys.map((k, i) => [`c${i}_${k}`, plain({ then: k })]));
-  const rows: [string, object, object, string[]][] = [
+  const rows: [string, object, Record<string, object>, string[]][] = [
     ['end is no link', to('z_other'), { z_other: to('end', 'guard') }, ['c0_z_other']],
     ['a repeat is no link', to('z_other'), { z_other: to('guard', 'guard') }, ['c0_z_other']],
     [
