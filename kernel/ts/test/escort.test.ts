@@ -412,7 +412,7 @@ test('a start refuses while the escort it would replace is still live', () => {
   const before = a.world();
   a.choose('rescue');
   const escorts = { [before.character]: relation(a.world()) };
-  a.set({ ...before, state: { ...before.state, escorts } });
+  a.set({ ...before, state: { ...before.state, escorts } } as World);
   a.choose('rescue', 'invalid_state');
 });
 
@@ -425,10 +425,10 @@ test('a start refuses a following row whose quest is gone until the next Move se
   const escorts = {
     [before.character]: {
       ...relation(a.world()),
-      quest_instance_id: '00000000-0000-4000-8000-000000000001' as never,
+      quest_instance_id: '00000000-0000-4000-8000-000000000001',
     },
   };
-  a.set({ ...before, state: { ...before.state, escorts } });
+  a.set({ ...before, state: { ...before.state, escorts } } as World);
   a.choose('rescue', 'invalid_state');
 });
 
