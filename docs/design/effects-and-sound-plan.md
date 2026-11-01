@@ -114,8 +114,8 @@ is the check for these.
 
 ### Non-blocking in a long read
 
-The Book is read for minutes at a time. Nothing waits for an effect except the chapter card (already a page with
-its own Continue, book-ui.md Chapters) and death (a sequence of pages). No effect delays the next tap, moves text
+The Book is read for minutes at a time. Nothing waits for an effect except the chapter card (already a page that
+turns itself, book-ui.md Chapters) and death (a sequence of pages). No effect delays the next tap, moves text
 the eye is on, or scrolls. Ink dries in place; pops appear under the log, not in it; washes are below the ink
 (the page's background layer), so prose never changes colour.
 
@@ -766,7 +766,7 @@ none of its melodies are to be imitated.
 | Moment | Music | Ends | Trigger | Cue |
 |---|---|---|---|---|
 | Title and opening | the main theme, cut down for the chapter card | fades into the first room's bed | launch | none |
-| Chapter card | a short cut of the theme, 8-15 s | fades on Continue | `chapter.index` rises | view-diff |
+| Chapter card | a short cut of the theme, 8-15 s | plays into the next page and fades there | `chapter.index` rises | view-diff |
 | Exploration | sparse: one 1-3 min piece on first entry to a new area, then at least 5-10 min of beds only | plays out, never cut | area changes | cartridge area tag |
 | Town or inn | a soft piece by time of day, same sparse rule | plays out | room tag | cartridge tag |
 | Ordinary fight | battle track (below) | victory, flight or death | `combat` appears | view-diff |

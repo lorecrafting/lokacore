@@ -171,7 +171,12 @@ type ViewProps = {
 // A wide screen centres the page column, at most size.column, on the paper (book-ui.md, Page column).
 const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as const;
 export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][number]) =>
-  !s.view.combat && !s.ended && page?.kind === 'chapter' && !!s.view.chapter;
+  !s.view.combat &&
+  !s.ended &&
+  !s.view.scene && // Body draws these two over the chapter page
+  !s.view.ancestry_choices &&
+  page?.kind === 'chapter' &&
+  !!s.view.chapter;
 
 /**
  * The Book's frame: page turn, body, footer, status icons and status line, and the fault, pending

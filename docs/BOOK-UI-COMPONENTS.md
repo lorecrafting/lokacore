@@ -55,7 +55,7 @@ words remain in the cartridge; Book owns layout and navigation.
 | Inspect, take, equip or use an item/container | Item detail; an open container's `InsidePage` ([`Menu.tsx`](../mobile/app/book/Menu.tsx)), ordinary item → inside detail route ([rule](system/book-ui.md#item-details-and-takedrop)) | Exact item/custody, Look inside, local Close to the item page, contents parent return, current actions and load refusal. |
 | Read a notice or a book | Readable/notice detail | Confirmed Read on entry when specified, no duplicate Read, saved text and parent return. |
 | Fight or flee | Combat foreground page | Combat-only response set, isolated log, closure and restored World route. |
-| Continue a current modal scene or chapter | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
+| Continue a current modal scene, or a chapter card under a screen reader (otherwise the card turns itself and a tap skips) | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
 | Resume a bed dream | [`DreamPage.tsx`](../mobile/app/book/DreamPage.tsx), ordinary bed → dream detail route | Saved cursor/choice, local Close to bed, Resume after reopen and ordinary World access ([rule](system/book-ui.md#chapters-scenes-and-recovery)). |
 | Use, give or cast with a second thing | Pick list on the target's or the held thing's page ([rule](system/book-ui.md#item-details-and-takedrop)) | Rows only from GameView pairs, option hidden when empty, pick returns to World, refused pick keeps the page. |
 | Show room travel or status | World/status shell | Confirmed room, legal exits, current time/status and no optimistic move. |

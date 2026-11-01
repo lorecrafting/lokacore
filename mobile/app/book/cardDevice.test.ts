@@ -5,22 +5,20 @@ import { test } from 'node:test';
 
 const g = globalThis as any;
 const native =
-  'export const Platform={get OS(){return globalThis.os}},' +
-  'AccessibilityInfo={isScreenReaderEnabled:async()=>true},' +
+  'export const AccessibilityInfo={isScreenReaderEnabled:async()=>true},' +
   'AppState={get currentState(){return globalThis.appState},addEventListener:(_,f)=>{globalThis.appChange=f;return {remove(){globalThis.appChange=undefined}}}};';
 registerHooks({
   resolve: (s, c, next) =>
     s === 'react-native'
       ? { url: `data:text/javascript,${encodeURIComponent(native)}`, shortCircuit: true }
-      : next(s, c),
+      : next(s === './screenReader' ? './screenReader.ts' : s, c),
 });
 const { screenReaderOn, isForeground, onForeground } = await import('./cardDevice.ts');
+const web = await import('./screenReader.web.ts');
 
 // Breaks: react-native-web's constant yes reaches the card, and nobody on the web gets the auto-turn.
 test('the web answers no screen reader; a device answers what it is told', async () => {
-  g.os = 'web';
-  assert.equal(await screenReaderOn(), false);
-  g.os = 'ios';
+  assert.equal(await web.screenReaderOn(), false);
   assert.equal(await screenReaderOn(), true);
 });
 
