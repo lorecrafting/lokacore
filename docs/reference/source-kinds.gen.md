@@ -84,7 +84,7 @@ Shared mutable state for one logical door or gate (21 ยง5 Barrier), owned by bar
 |---|---|---|---|
 | initial | [BarrierState](source-kinds.gen.md#barrierstate) | yes |  |
 | key_item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| keywords | list of [Alias](source-kinds.gen.md#alias) | yes |  |
+| keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | opens_when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected. |
 | tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1). |
@@ -102,14 +102,14 @@ An authored body bleed duration, tick cadence and HP loss.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| duration | integer | yes |  |
-| hp_loss | integer | yes |  |
+| duration | integer | yes | How long it lasts, in seconds. |
+| hp_loss | integer | yes | HP lost per tick. |
 | narration | object | yes |  |
 | narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | narration.expired | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | narration.refreshed | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | narration.tick | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| tick_every | integer | yes |  |
+| tick_every | integer | yes | Seconds between ticks. |
 
 ## cartridge
 
@@ -160,10 +160,10 @@ NPC emotes (G9, emote@1; cartridge.md Emote declarations): one canned emote an N
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| others | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| to | object |  |  |
-| to.others | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| to.you | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| others | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line every reader but the target reads. |
+| to | object |  | The forms with a target. |
+| to.others | [TextKey](source-kinds.gen.md#textkey) | yes | Text key for the other readers. |
+| to.you | [TextKey](source-kinds.gen.md#textkey) | yes | Text key for the target. |
 
 ## facts
 
@@ -234,10 +234,10 @@ Cartridge-owned mass, integer serving and unit labels for a declared liquid.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | cures | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses (toolbox rows 1 and G13) a Drink of this liquid ends; a service serving does not. |
-| drink_amount | integer | yes |  |
-| grams_per_unit | integer | yes |  |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| unit_label | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| drink_amount | integer | yes | The integer serving. |
+| grams_per_unit | integer | yes | Mass of one unit. |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
+| unit_label | [TextKey](source-kinds.gen.md#textkey) | yes | Its unit label. |
 
 ## npcs
 
@@ -496,13 +496,13 @@ Exact original-provider action and conserved quote with one typed immediate bene
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| action | [Key](source-kinds.gen.md#key) | yes |  |
+| action | [Key](source-kinds.gen.md#key) | yes | The provider action. |
 | benefit | [Step](vocabulary.gen.md#steps) | yes | Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S5, a build, mend or raze of a site's room. One Step whose op is one of these 11 (C3 D5; the compiler refuses any other op, SCHEMA_VIOLATION invalid_value at benefit.op). |
-| currency | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| currency | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved quote resource. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | price | integer | yes | Row kgd.70: 0 only on an entitlement with escrow, a barter. |
-| provider | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| provider | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The original provider NPC. |
 
 ## skills
 
@@ -512,11 +512,11 @@ An acquired skill with authored display text and a policy for current qualificat
 |---|---|---|---|
 | growth | list of integer |  | Toolbox row 5 (docs/system/mechanics.md skill growth): strictly increasing use counts reaching levels 2, 3 and so on above the base; the count is the reserved player fact uses_<key>. |
 | hidden | `True` |  | Homestead hs-14 (docs/system/mechanics.md Skill trees): the skill is left out of GameView skills, and of NPC lessons, while its prerequisite fails and it is not acquired. A dialogue choice that teaches it is not offered while it is so left out. A non-hidden skill whose prerequisite or qualification reads a hidden skill, a dialogue policy that reads one, and a dialogue label on a dialogue that teaches one are refused. |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its display name. |
 | prerequisite | [Policy](vocabulary.gen.md#policy-leaves) |  | Homestead hs-11 (docs/system/mechanics.md Skill trees): read for the acquiring actor with no target; skill.acquire is refused while it fails. A skill_compare naming this skill is refused. |
 | profession | [TextKey](source-kinds.gen.md#textkey) |  | Homestead hs-14 (docs/system/book-ui.md Skill tree details): the profession heading this skill is listed under on the Character page. |
 | qualification | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| requirement | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| requirement | [TextKey](source-kinds.gen.md#textkey) | yes | Its display requirement text. |
 
 ## statuses
 
@@ -535,7 +535,7 @@ Toolbox row 1: one authored timed status on a body. Every tick_every seconds unt
 | movement | object |  | Status reader 7: the holding body's move cost and the terrain it may cross while the status is active; may stand in for per_tick. |
 | movement.cost_percent | integer |  | Percent of each move's fare (world.movement.cost or 1 mv, after the flee multiplier) the holding body pays, rounded down; several statuses apply in turn in definition order. |
 | movement.passes | list of `air` or `chasm` or `water` |  | Terrain tags the holding body may enter: a move into a room tagged air, chasm or water is refused invalid_state unless the body's active statuses pass each such tag. |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
 | narration | object | yes |  |
 | narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | narration.expired | [TextKey](source-kinds.gen.md#textkey) |  | Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b). |
@@ -550,8 +550,8 @@ Toolbox row 1: one authored timed status on a body. Every tick_every seconds unt
 | pierced_by.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | pierced_by.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | resistances | [Resistances](source-kinds.gen.md#resistances) |  | Status reader 5: while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick. |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| tick_every | integer | yes |  |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The pool per_tick changes. |
+| tick_every | integer | yes | Seconds between ticks. |
 
 ## structures
 
@@ -581,8 +581,8 @@ A declared localized topic mapped to its player Boolean knowledge fact.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The player Boolean knowledge fact it maps to. |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
 
 ## transports
 
@@ -591,16 +591,16 @@ Paired original boarding detail, destination, conserved fare recipient and corps
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | action | [Key](source-kinds.gen.md#key) | yes |  |
-| currency | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| destination | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| detail | [Key](source-kinds.gen.md#key) | yes |  |
-| fare | integer | yes |  |
+| currency | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fare resource. |
+| destination | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The destination. |
+| detail | [Key](source-kinds.gen.md#key) | yes | The boarding detail. |
+| fare | integer | yes | The conserved fare. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| recipient | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| recovery_rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| recipient | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved fare recipient. |
+| recovery_rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The corpse recovery rooms. |
 | reverse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The boarding room. |
 
 ## Shared types
 
@@ -610,8 +610,8 @@ One source's contribution to an actor's ActionSet (06 ยง19; ADR-016), applied to
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| actions | list of [Key](source-kinds.gen.md#key) | yes |  |
-| op | `union` or `override` or `replace` or `subtract` or `intersect` | yes |  |
+| actions | list of [Key](source-kinds.gen.md#key) | yes | The action keys it applies. |
+| op | `union` or `override` or `replace` or `subtract` or `intersect` | yes | How the actions apply to the set so far: union, override, replace, subtract or intersect. |
 
 ### ActionCost
 
@@ -619,8 +619,8 @@ One resource cost of a ScriptedAction (21 ยง7 Cost): the actor's body pays amoun
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| amount | integer | yes |  |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| amount | integer | yes | How much it pays on every admitted perform. |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource the body pays. |
 
 ### ActionCraft
 
@@ -649,9 +649,9 @@ A scripted action outcome's narration (21 ยง4 NarrationSpec): the actor's line, 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| actor | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| observers | [TextKey](source-kinds.gen.md#textkey) |  |  |
-| participants | map of [NarrationParticipant](source-kinds.gen.md#narrationparticipant) |  |  |
+| actor | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the actor's line. |
+| observers | [TextKey](source-kinds.gen.md#textkey) |  | Text key of the observers' line. |
+| participants | map of [NarrationParticipant](source-kinds.gen.md#narrationparticipant) |  | The entities the actor's line names. |
 
 ### Alias
 
@@ -687,12 +687,12 @@ Cartridge-owned hit chance and positive damage bounds. Compiler and loader enfor
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| chance | integer | yes |  |
+| chance | integer | yes | Hit chance. |
 | crit | object |  | Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances. |
 | crit.chance | integer | yes |  |
 | crit.multiplier | integer | yes |  |
-| damage_max | integer | yes |  |
-| damage_min | integer | yes |  |
+| damage_max | integer | yes | Most positive damage; at least damage_min. |
+| damage_min | integer | yes | Least positive damage. |
 | kind | [DamageKind](source-kinds.gen.md#damagekind) |  |  |
 | on_positive_hit | object |  |  |
 | on_positive_hit.effect | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
@@ -774,9 +774,9 @@ An ordered chapter marker (mechanics.md Chapters): name is a catalog key; only c
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| outcome | [Key](source-kinds.gen.md#key) |  |  |
-| story_point | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
+| outcome | [Key](source-kinds.gen.md#key) |  | One outcome key of that story point. |
+| story_point | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The story point that opens it; only chapter 0 lacks one. |
 
 ### Check
 
@@ -837,9 +837,9 @@ One row of a condition band table: the band key holds when p, the percentage of 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_percent | integer | yes |  |
-| key | [Key](source-kinds.gen.md#key) | yes |  |
-| tone | [BandTone](source-kinds.gen.md#bandtone) | yes |  |
+| at_percent | integer | yes | The percentage of the pool's range at which it holds. |
+| key | [Key](source-kinds.gen.md#key) | yes | The band key; its text is band.<key> when authored. |
+| tone | [BandTone](source-kinds.gen.md#bandtone) | yes | How serious it is. |
 
 ### Connection
 
@@ -869,10 +869,10 @@ A sense cue (toolbox row G6): what a listener smells, hears or feels from its so
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| range | integer | yes |  |
-| sense | `sound` or `smell` or `heat` | yes |  |
-| text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
+| range | integer | yes | Rooms it carries through exits, 0 to 2. |
+| sense | `sound` or `smell` or `heat` | yes | Sound, smell or heat. |
+| text | [TextKey](source-kinds.gen.md#textkey) | yes | The authored line. |
+| when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition read for the listener. |
 
 ### Cues
 
@@ -892,9 +892,9 @@ Finite authored death credit linking one local attackable NPC, its authored room
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The player Boolean fact with false default. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The attackable NPC. |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Its authored room. |
 
 ### DeathSettings
 
@@ -1028,8 +1028,8 @@ One attribute modifier an item grants its wearer while worn (docs/system/mechani
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| modifier | [ResourceInt](source-kinds.gen.md#resourceint) | yes |  |
+| attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | An attribute of this cartridge. |
+| modifier | [ResourceInt](source-kinds.gen.md#resourceint) | yes | The signed amount added. |
 
 ### ItemBandage
 
@@ -1109,12 +1109,12 @@ Exact vessel contents: null iff zero, positive declared kind bounded by immutabl
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| kind | null or [Key](source-kinds.gen.md#key) or object | yes |  |
+| kind | null or [Key](source-kinds.gen.md#key) or object | yes | The declared liquid; null iff quantity is zero. |
 | kind.cartridge_id | [CartridgeId](source-kinds.gen.md#cartridgeid) | yes |  |
 | kind.cartridge_version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | yes |  |
 | kind.key | string | yes |  |
 | kind.kind | string | yes |  |
-| quantity | integer | yes |  |
+| quantity | integer | yes | Exact amount, bounded by capacity. |
 
 ### LogicalTime
 
@@ -1134,10 +1134,10 @@ Static integer drawing coordinates for one room; exits remain the sole connectio
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| x | integer | yes |  |
-| y | integer | yes |  |
-| z | integer | yes |  |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room drawn. |
+| x | integer | yes | Integer drawing coordinate. |
+| y | integer | yes | Integer drawing coordinate. |
+| z | integer | yes | Integer drawing coordinate. |
 
 ### NameVariants
 
@@ -1151,9 +1151,9 @@ Name words (loka-6qi): bare, the text key of the name with no article ("lantern"
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| article | `a` or `an` or `the` |  |  |
-| bare | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| plural | [TextKey](source-kinds.gen.md#textkey) |  |  |
+| article | `a` or `an` or `the` |  | The article a presenter puts before bare. |
+| bare | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the name with no article. |
+| plural | [TextKey](source-kinds.gen.md#textkey) |  | Text key of the plural. |
 
 ### NarrationParticipant
 
@@ -1167,10 +1167,10 @@ Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maxi
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| gain | integer | yes |  |
-| maximum | [ResourceInt](source-kinds.gen.md#resourceint) | yes |  |
-| minimum | [ResourceInt](source-kinds.gen.md#resourceint) | yes |  |
-| start | [ResourceInt](source-kinds.gen.md#resourceint) | yes |  |
+| gain | integer | yes | HP gain. |
+| maximum | [ResourceInt](source-kinds.gen.md#resourceint) | yes | Upper HP bound. |
+| minimum | [ResourceInt](source-kinds.gen.md#resourceint) | yes | Lower HP bound. |
+| start | [ResourceInt](source-kinds.gen.md#resourceint) | yes | Starting HP, between the bounds. |
 
 ### QuestJournal
 
@@ -1178,12 +1178,12 @@ Lifecycle journal texts, selected by quest@1 in GameView (06 ยง2, ยง41; 04 ยง15,
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| abandoned | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| active | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| active_variants | list of object |  |  |
+| abandoned | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once abandoned. |
+| active | [TextKey](source-kinds.gen.md#textkey) | yes | Text key while active. |
+| active_variants | list of object |  | Checked in order for active quests. |
 | active_variants[].text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | active_variants[].when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| failed | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| failed | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once failed. |
 | hints | object |  |  |
 | hints.active | list of object |  |  |
 | hints.active[].after | integer | yes |  |
@@ -1191,9 +1191,9 @@ Lifecycle journal texts, selected by quest@1 in GameView (06 ยง2, ยง41; 04 ยง15,
 | hints.objectives_met | list of object |  |  |
 | hints.objectives_met[].after | integer | yes |  |
 | hints.objectives_met[].text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| objectives_met | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| outcomes | map of [TextKey](source-kinds.gen.md#textkey) |  |  |
-| resolved | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| objectives_met | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once objectives are met. |
+| outcomes | map of [TextKey](source-kinds.gen.md#textkey) |  | Overrides terminal text by outcome key. |
+| resolved | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once resolved. |
 
 ### QuestObjective
 
@@ -1271,16 +1271,16 @@ A finite NPC shop: conserved resource, exact authored item offers and committed 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| bought | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| bought | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the purchase narration. |
 | buy_discount | object |  | A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition). |
 | buy_discount.denominator | integer | yes |  |
 | buy_discount.friendly | `True` |  |  |
 | buy_discount.minimum | integer | yes |  |
 | buy_discount.numerator | integer | yes |  |
 | buy_discount.skill | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| offers | list of [ShopOffer](source-kinds.gen.md#shopoffer) | yes | See the type. |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| sold | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| offers | list of [ShopOffer](source-kinds.gen.md#shopoffer) | yes | The exact item offers. |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved resource prices are paid in. |
+| sold | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the sale narration. |
 
 ### ShopOffer
 
@@ -1288,9 +1288,9 @@ One exact authored shop item definition with its positive buy and sell prices; c
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| buy | integer | yes |  |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| sell | integer | yes |  |
+| buy | integer | yes | Its positive buy price. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definition offered. |
+| sell | integer | yes | Its positive sell price. |
 | stock | object |  | Toolbox row W11: sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy. |
 | stock.buy | list of integer | yes |  |
 | stock.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
@@ -1354,8 +1354,8 @@ Toolbox row G4: what a use scripted action's tool must be, at least one property
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| liquid | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| tag | [Tag](source-kinds.gen.md#tag) |  |  |
+| liquid | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A liquid the tool vessel holds some of. |
+| tag | [Tag](source-kinds.gen.md#tag) |  | A tag the tool item definition declares. |
 
 ### VesselSpec
 
@@ -1363,9 +1363,9 @@ Opted finite vessel shell with authored positive capacity and initial contents.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| capacity | integer | yes |  |
-| initial | [LiquidRow](source-kinds.gen.md#liquidrow) | yes | See the type. |
-| unit_label | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| capacity | integer | yes | Positive capacity. |
+| initial | [LiquidRow](source-kinds.gen.md#liquidrow) | yes | Its initial contents. |
+| unit_label | [TextKey](source-kinds.gen.md#textkey) | yes | Its unit label. |
 
 ### WaterSettings
 
@@ -1389,13 +1389,13 @@ An equipped weapon's required skill and authored attack profile.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| attack | [AttackProfile](source-kinds.gen.md#attackprofile) | yes | See the type. |
+| attack | [AttackProfile](source-kinds.gen.md#attackprofile) | yes | Its attack profile. |
 | durability | object |  | Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed. |
 | durability.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | durability.wear | integer | yes |  |
 | ranged | object |  | Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee. |
 | ranged.ammo | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The required skill. |
 
 ### WeatherEntry
 
@@ -1483,12 +1483,8 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 
 ## Fields without a meaning
 
-545 fields.
+461 fields.
 
-- `ActionContribution: actions`
-- `ActionContribution: op`
-- `ActionCost: amount`
-- `ActionCost: resource`
 - `ActionCraft: consume`
 - `ActionCraft: consume.items`
 - `ActionCraft: consume.quantity`
@@ -1497,9 +1493,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `ActionCraft: yield`
 - `ActionCraft: yield.from`
 - `ActionCraft: yield.items`
-- `ActionNarration: actor`
-- `ActionNarration: observers`
-- `ActionNarration: participants`
 - `AncestrySpec: attribute`
 - `AncestrySpec: dark_sight`
 - `AncestrySpec: description`
@@ -1509,11 +1502,8 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `AncestrySpec: modifier`
 - `AncestrySpec: name`
 - `AncestrySpec: skill`
-- `AttackProfile: chance`
 - `AttackProfile: crit.chance`
 - `AttackProfile: crit.multiplier`
-- `AttackProfile: damage_max`
-- `AttackProfile: damage_min`
 - `AttackProfile: kind`
 - `AttackProfile: on_positive_hit`
 - `AttackProfile: on_positive_hit.effect`
@@ -1525,9 +1515,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `CalendarCut: phase`
 - `CalendarCycle: origin`
 - `CalendarCycle: period`
-- `Chapter: name`
-- `Chapter: outcome`
-- `Chapter: story_point`
 - `CombatSettings: dodge`
 - `CombatSettings: dodge.chance`
 - `CombatSettings: dodge.skill`
@@ -1551,9 +1538,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `CompatibilityRequirements: client_features`
 - `CompatibilityRequirements: content_schema`
 - `CompatibilityRequirements: rule_ir`
-- `ConditionBand: at_percent`
-- `ConditionBand: key`
-- `ConditionBand: tone`
 - `Connection: climb.damage`
 - `Connection: climb.fell`
 - `Connection: climb.item`
@@ -1561,12 +1545,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `Connection: corpse_ingress.fact`
 - `Connection: hidden_until.equals`
 - `Connection: hidden_until.fact`
-- `Cue: range`
-- `Cue: sense`
-- `Cue: text`
-- `DeathCredit: fact`
-- `DeathCredit: npc`
-- `DeathCredit: room`
 - `DeathSettings: narration.player_died`
 - `DeathSettings: narration.woke`
 - `DeathSettings: npc_corpse`
@@ -1614,8 +1592,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `InspectableDetail: transport`
 - `InspectableDetail: transport.route`
 - `InspectableDetail: transport.title`
-- `ItemAffect: attribute`
-- `ItemAffect: modifier`
 - `ItemBandage: action`
 - `ItemBandage: effect`
 - `ItemBandage: narration`
@@ -1628,28 +1604,11 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `ItemReadable: topic`
 - `KernelApiRange: at_least`
 - `KernelApiRange: below`
-- `LiquidRow: kind`
 - `LiquidRow: kind.cartridge_id`
 - `LiquidRow: kind.cartridge_version`
 - `LiquidRow: kind.key`
 - `LiquidRow: kind.kind`
-- `LiquidRow: quantity`
-- `MapPosition: room`
-- `MapPosition: x`
-- `MapPosition: y`
-- `MapPosition: z`
-- `NameWords: article`
-- `NameWords: bare`
-- `NameWords: plural`
-- `NpcHp: gain`
-- `NpcHp: maximum`
-- `NpcHp: minimum`
-- `NpcHp: start`
-- `QuestJournal: abandoned`
-- `QuestJournal: active`
-- `QuestJournal: active_variants`
 - `QuestJournal: active_variants[].text`
-- `QuestJournal: failed`
 - `QuestJournal: hints`
 - `QuestJournal: hints.active`
 - `QuestJournal: hints.active[].after`
@@ -1657,9 +1616,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `QuestJournal: hints.objectives_met`
 - `QuestJournal: hints.objectives_met[].after`
 - `QuestJournal: hints.objectives_met[].text`
-- `QuestJournal: objectives_met`
-- `QuestJournal: outcomes`
-- `QuestJournal: resolved`
 - `Resistances: air`
 - `Resistances: bed`
 - `Resistances: burnable`
@@ -1687,25 +1643,15 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `Resistances: waterproof`
 - `Resistances: windproof`
 - `Resistances: wooden`
-- `Shop: bought`
 - `Shop: buy_discount.denominator`
 - `Shop: buy_discount.friendly`
 - `Shop: buy_discount.minimum`
 - `Shop: buy_discount.numerator`
 - `Shop: buy_discount.skill`
-- `Shop: resource`
-- `Shop: sold`
-- `ShopOffer: buy`
-- `ShopOffer: item`
-- `ShopOffer: sell`
 - `ShopOffer: stock.buy`
 - `ShopOffer: stock.items`
 - `TimePolicy: profile`
 - `TimePolicy: rate`
-- `UseTool: liquid`
-- `UseTool: tag`
-- `VesselSpec: capacity`
-- `VesselSpec: unit_label`
 - `WaterSettings: drowned`
 - `WaterSettings: duration`
 - `WaterSettings: entry_cost`
@@ -1718,7 +1664,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `WeaponProfile: durability.fact`
 - `WeaponProfile: durability.wear`
 - `WeaponProfile: ranged.ammo`
-- `WeaponProfile: skill`
 - `WeatherEntry: phase`
 - `WeatherEntry: weight`
 - `WeatherEntry: wet`
@@ -1791,18 +1736,14 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `attributes: attributes`
 - `barriers: initial`
 - `barriers: key_item`
-- `barriers: keywords`
 - `barriers: name`
 - `behaviours: params`
 - `behaviours: reactions`
-- `bleeds: duration`
-- `bleeds: hp_loss`
 - `bleeds: narration`
 - `bleeds: narration.applied`
 - `bleeds: narration.expired`
 - `bleeds: narration.refreshed`
 - `bleeds: narration.tick`
-- `bleeds: tick_every`
 - `cartridge: api_version`
 - `cartridge: entry`
 - `cartridge: id`
@@ -1833,10 +1774,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `dialogues: riddle.choice_id`
 - `dialogues: riddle.wrong`
 - `dialogues: riddle.wrong_limit`
-- `emotes: others`
-- `emotes: to`
-- `emotes: to.others`
-- `emotes: to.you`
 - `facts: facts.*.meaning`
 - `facts: facts.*.scopes`
 - `facts: facts.*.value_type`
@@ -1851,10 +1788,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `items: equip.wear`
 - `items: equip.worn`
 - `items: fuel`
-- `liquids: drink_amount`
-- `liquids: grams_per_unit`
-- `liquids: name`
-- `liquids: unit_label`
 - `npcs: ask.answers`
 - `npcs: ask.answers[].grants`
 - `npcs: ask.answers[].text`
@@ -1991,14 +1924,8 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `rooms: site.directions`
 - `rooms: site.structures`
 - `rooms: zones`
-- `services: action`
-- `services: currency`
 - `services: name`
 - `services: narration`
-- `services: provider`
-- `skills: name`
-- `skills: requirement`
-- `statuses: name`
 - `statuses: narration`
 - `statuses: narration.applied`
 - `statuses: narration.tick`
@@ -2006,8 +1933,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `statuses: perception.sight`
 - `statuses: pierced_by.attribute`
 - `statuses: pierced_by.skill`
-- `statuses: resource`
-- `statuses: tick_every`
 - `steps build: fact`
 - `steps npc.move: plan`
 - `structures: description`
@@ -2017,16 +1942,7 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `structures: ruin`
 - `structures: tags`
 - `structures: weathering`
-- `topics: fact`
-- `topics: name`
 - `transports: action`
-- `transports: currency`
-- `transports: destination`
-- `transports: detail`
-- `transports: fare`
 - `transports: name`
 - `transports: narration`
-- `transports: recipient`
-- `transports: recovery_rooms`
 - `transports: reverse`
-- `transports: room`

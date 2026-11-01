@@ -457,7 +457,7 @@
       "description": "One source's contribution to an actor's ActionSet (06 §19; ADR-016), applied to the set composed so far by stable action key: union adds the named actions whose keys the set lacks, override adds them and replaces those it has, replace makes the set exactly them, subtract removes them and intersect keeps only them. A key names an engine verb (a registered command type), a cartridge action or a cartridge scripted action; union, override and replace take its definition (a cartridge's own over the engine verb's). A room applies its contributions in order after the engine verbs and the cartridge's actions and scripted actions (kernel/ts/src/actions.ts).",
       "type": "object",
       "properties": {
-        "op": {
+        "op": {"description":"How the actions apply to the set so far: union, override, replace, subtract or intersect.",
           "enum": [
             "union",
             "override",
@@ -466,7 +466,7 @@
             "intersect"
           ]
         },
-        "actions": {
+        "actions": {"description":"The action keys it applies.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/Key"
@@ -663,10 +663,10 @@
       "description": "Toolbox row G4: what a use scripted action's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).",
       "type": "object",
       "properties": {
-        "tag": {
+        "tag": {"description":"A tag the tool item definition declares.",
           "$ref": "entity.schema.json#/$defs/Tag"
         },
-        "liquid": {
+        "liquid": {"description":"A liquid the tool vessel holds some of.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -1044,13 +1044,13 @@
     "ActionNarration": {
       "type": "object",
       "properties": {
-        "actor": {
+        "actor": {"description":"Text key of the actor's line.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "observers": {
+        "observers": {"description":"Text key of the observers' line.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "participants": {
+        "participants": {"description":"The entities the actor's line names.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]{0,63}$"
@@ -1263,10 +1263,10 @@
       "description": "One resource cost of a ScriptedAction (21 §7 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 §5.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.",
       "type": "object",
       "properties": {
-        "resource": {
+        "resource": {"description":"The resource the body pays.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "amount": {
+        "amount": {"description":"How much it pays on every admitted perform.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647

@@ -672,7 +672,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "keywords": {
+        "keywords": {"description":"Words a player names it by.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/Alias"
