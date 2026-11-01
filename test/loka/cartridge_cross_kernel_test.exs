@@ -239,13 +239,14 @@ defmodule Loka.CartridgeCrossKernelTest do
     has_item = %{"op" => "has_item", "item" => %{fact("lantern") | "kind" => "item"}}
     talk = put_in(read("actions/talk.json"), ["policy"], has_item)
 
-    for {name, files, code} <- [
-          {"undeclared", %{"cartridge.json" => undeclared}, "UNDECLARED_CAPABILITY"},
-          {"unresolved", %{"actions/talk.json" => talk}, "UNRESOLVED_REFERENCE"}
+    for {name, files, words} <- [
+          {"undeclared", %{"cartridge.json" => undeclared}, "does not lock"},
+          {"unresolved", %{"actions/talk.json" => talk}, "Nothing defines"}
         ] do
       out = Path.join(tmp, "#{name}.artifact.json")
       stderr = compile(variant(Path.join(tmp, name), files), out)
-      assert stderr =~ ~s("code":"#{code}"), name
+      assert stderr =~ "error: ", name
+      assert stderr =~ words, name
       assert_received {:exit, {:shutdown, 1}}
       refute File.exists?(out), name
     end
