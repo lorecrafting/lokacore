@@ -24,9 +24,9 @@ writeFileSync(join(bin, 'mise'), '#!/bin/sh\nshift 2\nexec "$@"\n');
 chmodSync(join(bin, 'mise'), 0o755);
 
 /** A copy of the sampler to edit. */
-function sampler(name: string) {
+function sampler(name: string, from = 'rooms_sampler') {
   const dir = join(tmp, name);
-  cpSync(join(ROOT, 'cartridges/rooms_sampler'), dir, { recursive: true });
+  cpSync(join(ROOT, 'cartridges', from), dir, { recursive: true });
   return dir;
 }
 const write = (dir: string, file: string, content: string) =>
@@ -90,6 +90,29 @@ test('each checkpoint starts over without a prompt', async () => {
   assert.deepEqual(await run(dir), {
     code: 0,
     out: 'again: ok\nto_the_well: ok\n',
+  });
+});
+
+// Break: an advance step does not reach the game: the clock stays put or the time is not delivered,
+// so a door that opens only in hours 2 to 4 of the world's day stays shut (6000 ms is hour 3 at rate 50).
+test('an advance moves the world for the next step', async () => {
+  const dir = sampler('later', 'time_sampler');
+  mkdirSync(join(dir, 'checkpoints'));
+  const manifest = join(dir, 'cartridge.json');
+  const data = JSON.parse(readFileSync(manifest, 'utf8')) as object;
+  writeFileSync(
+    manifest,
+    JSON.stringify({
+      ...data,
+      time_policy: { profile: 'real_elapsed', rate: 50, recap_after_minutes: 30 },
+    }),
+  );
+  const open = { intent: { action_key: 'open', target_ids: [], input: { direction: 'east' } } };
+  write(dir, 'at_once.json', JSON.stringify({ steps: [open] }));
+  write(dir, 'later.json', JSON.stringify({ steps: [{ advance: 6000 }, open] }));
+  assert.deepEqual(await run(dir), {
+    code: 1,
+    out: 'at_once: step 1 (open): rejected invalid_state\nlater: ok\n',
   });
 });
 
