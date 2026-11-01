@@ -43,6 +43,7 @@ import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
 import { runReplenish } from '../containment/job.ts';
 import { runWage } from '../escort/job.ts';
+import { escorting } from '../escort/shared.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
 import { runBleed } from '../bleed/job.ts';
 import { runStatus, type Queue } from '../status/job.ts';
@@ -135,7 +136,7 @@ function scheduledJob(
   const { room, goal, walks } = placeOf(world, npc, at, steps);
   const from = world.state.containers[npc];
   // Toolbox row W26: a walking case moves only along a path, re-locking each key passage on it.
-  const still = from === room || !moves(world, npc);
+  const still = from === room || !moves(world, npc) || escorting(world, npc);
   const path = !still && walks ? walkPath(world, npc, from, room, steps) : [];
   // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
   const stays = still || !path;
