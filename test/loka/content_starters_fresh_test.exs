@@ -36,7 +36,7 @@ defmodule Loka.ContentStartersFreshTest do
     refute is_map_key(read(dir, "statuses/ill.json"), "name")
   end
 
-  # Breaks: a population on a taken east exit refusing with no next step.
+  # Breaks: a population, which takes no --from, told to use another --from direction.
   test "a starter refused by a taken exit says what to do", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
     {:ok, _} = Starters.write(dir, "rooms", "yard", {"start", "east"})
@@ -44,7 +44,89 @@ defmodule Loka.ContentStartersFreshTest do
     assert {:error, "rooms/start.json: exits east to already" <> message} =
              Starters.write(dir, "populations", "wolves")
 
+    assert message =~ "move it in both rooms' files and rerun"
+    refute message =~ "--from"
+
+    assert {:error, "rooms/start.json: exits east to already" <> message} =
+             Starters.write(dir, "rooms", "barn", {"start", "east"})
+
     assert message =~ "use another --from direction"
+  end
+
+  # Breaks: the author's shared line refusing every later transport, or a stand-in overwriting it.
+  test "a second transport keeps the filled shared line", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    follow(dir, "transports", "ferry")
+    edit(dir, "text.json", &Map.put(&1, "transport.unaffordable", "Mine."))
+
+    assert {:ok, _} = Starters.write(dir, "transports", "barge")
+
+    assert read(dir, "text.json")["transport.unaffordable"] == "Mine."
+    assert File.exists?(Path.join(dir, "transports/barge.json"))
+  end
+
+  # Break: a kind's later checks crash on a definition its bad name left invalid (bleeds did).
+  test "a bad file name never crashes the compile", %{tmp_dir: tmp} do
+    for kind <- Starters.kinds() -- ["cartridge"] do
+      dir = cartridge(Path.join(tmp, kind))
+      follow(dir, kind, "good")
+      from = Path.join([dir, kind, "good.json"])
+      if File.exists?(from), do: File.rename!(from, Path.join([dir, kind, "Bad-Name.json"]))
+      assert {_, _} = {kind, Loka.Content.compile(dir)}
+    end
+  end
+
+  # Break: a rerun over a filled value refuses and leaves the author nothing to do.
+  test "following a rerun's refusal leaves a cartridge that compiles", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    follow(dir, "transports", "ferry")
+    start = read(dir, "cartridge.json")["entry"]
+    room = "rooms/#{start}.json"
+
+    edit(dir, room, &put_in(&1, ["details", "ferry", "description", "prose"], "Mine."))
+    assert {:error, message} = Starters.write(dir, "transports", "ferry")
+    assert message =~ "set it to ~"
+    edit(dir, room, &put_in(&1, ["details", "ferry", "description", "prose"], "~"))
+    assert {:ok, _} = Starters.write(dir, "transports", "ferry")
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+
+    # A value that is not words, outside the starter's own file: deleting it brings it back.
+    caps = ["requires", "capabilities", "transport"]
+    edit(dir, "cartridge.json", &put_in(&1, caps, 9))
+    assert {:error, message} = Starters.write(dir, "transports", "ferry")
+    assert message =~ "delete any other value"
+    edit(dir, "cartridge.json", &(pop_in(&1, caps) |> elem(1)))
+    assert {:ok, _} = Starters.write(dir, "transports", "ferry")
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+
+    # The same in its own file comes back from nothing, so the words say to keep it.
+    follow(dir, "actions", "pull")
+    edit(dir, "actions/pull.json", &Map.put(&1, "priority", 9))
+    assert {:error, message} = Starters.write(dir, "actions", "pull")
+    assert message =~ "keep any other value and skip this rerun"
+    refute message =~ "delete"
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+  end
+
+  # Break: the delete advice on the death setup: followed, a second population fails the compile.
+  test "a second population is told to keep the death setup", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    follow(dir, "populations", "wolves")
+    assert {:error, message} = Starters.write(dir, "populations", "bears")
+    assert message =~ "world death npc_corpse"
+    assert message =~ "keep it and skip this starter"
+    refute message =~ "delete"
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+  end
+
+  # Break: a text.json that is not an object crashes the starter instead of refusing.
+  test "a text.json that is a list still refuses", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    follow(dir, "transports", "ferry")
+    File.write!(Path.join(dir, "text.json"), "[]")
+
+    assert {:error, "text.json: already has a value" <> _} =
+             Starters.write(dir, "transports", "barge")
   end
 
   # Breaks: a room joined --from placed off its direction on the map, or onto a taken cell.

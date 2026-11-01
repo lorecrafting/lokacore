@@ -179,6 +179,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `GiltLine` | `book/GiltLine.tsx` | LogLines |
 | `HapticPulse` | `book/HapticPulse.tsx` | HapticPulse |
 | `ItemPop` | `book/ItemPop.tsx` | LogLines |
+| `Leaf` | `book/Leaf.tsx` | CombatPage |
 | `MapDrawing` | `book/MapDrawing.tsx` | Footer |
 | `ContentsPage` | `book/Menu.tsx` | SectionPages |
 | `ThingPage` | `book/Menu.tsx` | ItemPage |
@@ -196,6 +197,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `StatusLine` | `book/Status.tsx` | StatusLine |
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
+| `Storm` | `book/Storm.tsx` | undefined |
 | `Text` | `book/Text.tsx` | Note |
 | `ActionCard` | `book/actions.tsx` | ActionCard |
 | `PickLists` | `book/actions.tsx` | PickList |

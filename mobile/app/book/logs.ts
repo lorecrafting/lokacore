@@ -144,7 +144,6 @@ export function restoredLogs(game: Game, text: Say): Logs {
     combatLog: [],
     details: new Map(),
     narrationId: last?.command_id,
-    died: last?.died && last.command_id,
     projection: game.view(),
     status: { kind: 'ready' },
   };

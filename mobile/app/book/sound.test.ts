@@ -307,6 +307,19 @@ test('a stinger the browser refuses still leads to the loop', async () => {
   );
 });
 
+// Breaks: pausing a stinger whose play() is pending rejects it, and the stale rejection restarts the loop.
+test('a stinger stolen by a re-engage leads nowhere when its play settles', async (t) => {
+  const b = await fightRig(t);
+  b.fight('open');
+  b.fight('away');
+  b.fight('open');
+  assert.deepEqual(b.playing(), ['loop.m4a']);
+  const made = b.els.length;
+  b.els[0]!.onerror!();
+  assert.equal(b.els.length, made);
+  assert.deepEqual(b.playing(), ['loop.m4a']);
+});
+
 // Breaks: a death or close with no fight playing starts the gap, and the next fight loses its stinger.
 test('a close with no fight playing leaves the next stinger', async (t) => {
   const b = await fightRig(t);

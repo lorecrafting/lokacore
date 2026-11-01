@@ -6,7 +6,7 @@ import './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
 const { cuesOf, QUIET, step } = await import('./cues.ts');
-const { playCue } = await import('./cueSounds.ts');
+const { hearCues, playCue } = await import('./cueSounds.ts');
 await import('./samples.web.ts');
 const g = globalThis as any;
 const samples: Record<string, string[]> = g.bookSamples;
@@ -168,4 +168,14 @@ test('a blow dealt is an impact, with no haptic', () => {
   const log: [string, string][] = g.bookDevice;
   g.bookDevice = undefined;
   assert.deepEqual(log, [['play', 'impact']]);
+});
+
+// Breaks: the loop outlives the Book, so Start over mid-fight plays it over the new game.
+test('the Book going cuts the music', () => {
+  const off = hearCues();
+  g.bookDevice = [];
+  off();
+  const log: [string, string][] = g.bookDevice;
+  g.bookDevice = undefined;
+  assert.deepEqual(log, [['fight', 'cut']]);
 });

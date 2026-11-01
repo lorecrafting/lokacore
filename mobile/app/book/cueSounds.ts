@@ -1,7 +1,7 @@
 // What a cue is heard and felt as (book-ui.md, Effects, sound and haptics). A silent cue is neither;
 // the settings gate each device on its own, so Sound off still leaves the haptic.
 import type { Cue } from './cues.ts';
-import { curlEnds, soundOf } from './cues.ts';
+import { curlEnds, onCue, soundOf } from './cues.ts';
 import { haptic, type HapticKind } from './haptic';
 import { fight, play } from './sound';
 import { sound } from './tokens.ts';
@@ -12,6 +12,15 @@ const feel = (kind: HapticKind) => {
 };
 
 export const playTurn = () => play('pageTurn');
+
+/** Hear the cue bus until the Book goes; a fight's loop goes with it (Start over remounts it). */
+export const hearCues = () => {
+  const off = onCue(playCue);
+  return () => {
+    off();
+    fight('cut');
+  };
+};
 
 export const playCue = (cue: Cue) => {
   if (cue.name === 'combat_open') {

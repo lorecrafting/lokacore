@@ -18,7 +18,7 @@
         "destination": {"description":"The destination.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "reverse": {
+        "reverse": {"description":"The paired return transport: boards at this one's destination, goes back to its room, with the same recipient and currency.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "recipient": {"description":"The conserved fare recipient.",
@@ -39,13 +39,13 @@
           },
           "maxItems": 64
         },
-        "action": {
+        "action": {"description":"Key of the scripted action that boards this transport. It must be a use_transport action on inspectable details taking route and quoted_fare.",
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key for the boarding action and its offer label.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "narration": {
+        "narration": {"description":"Text key told when the player makes the passage.",
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
