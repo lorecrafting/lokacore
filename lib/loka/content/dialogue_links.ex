@@ -1,4 +1,4 @@
-# size: allow 416, every whole-cartridge dialogue link check in one graph
+# size: allow 404, every whole-cartridge dialogue link check in one graph
 defmodule Loka.Content.DialogueLinks do
   @moduledoc "A dialogue choice's policy and narration variants as roots, and its then and then_failed checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -135,8 +135,7 @@ defmodule Loka.Content.DialogueLinks do
 
     for {rel, d} <- sorted,
         {fact, value} <- when_fact(d["policy"]),
-        closes?(set_choices(d, by_key, next), d["key"], fact, value, next) or
-          reopens_shut?(d, fact, value, next) do
+        closes?(set_choices(d, by_key, next), d["key"], fact, value, next) do
       warning("RETURN_CLOSED", rel, ["policy"], d)
     end
   end
@@ -148,17 +147,6 @@ defmodule Loka.Content.DialogueLinks do
       &(assigns?(&1, fact, value) and key in walk(List.wrap(&1["then"]), next, MapSet.new()))
     )
   end
-
-  # selection.ts `reopens`: a plain answer brings its dialogue back unless some `then` names it.
-  defp reopens_shut?(d, fact, value, next) do
-    named = next |> Map.values() |> List.flatten()
-    choices = Map.values(d["choices"])
-
-    d["key"] not in named and !d["quest"] and !d["riddle"] and length(choices) > 1 and
-      Enum.any?(choices, &(assigns?(&1, fact, value) and plain?(&1)))
-  end
-
-  defp plain?(c), do: !c["then"] and !c["check"] and !c["patrol"]
 
   defp set_choices(d, by_key, next) do
     nested = walk(next[d["key"]] || [], next, MapSet.new())

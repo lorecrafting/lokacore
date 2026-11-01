@@ -1,4 +1,4 @@
-# size: allow 668, every scene form shares the sampler fixture and its twin
+# size: allow 653, every scene form shares the sampler fixture and its twin
 defmodule Loka.ContentSceneBranchingTest do
   # needs, once, then and nested choices in a `.scene` (docs/system/cartridge.md, Source
   # shortcuts). Expected JSON is hand-written; `~` stands for the words.
@@ -322,21 +322,6 @@ defmodule Loka.ContentSceneBranchingTest do
     aside = {"dialogues/bram.json", &Map.put(&1, "entry", false)}
     assert {:ok, _, diags} = Loka.ContentSource.compile(dir, [with_facts(), aside])
     for %{"code" => ^code} = d <- diags, do: d["data"]["target"]
-  end
-
-  # Break: a hub with no nesting whose choice flips its own `when:` reopens with every choice
-  # unavailable and no word, or the warning fires where the talk does not come back.
-  test "RETURN_CLOSED marks a plain setter that comes back" do
-    warned =
-      &warned_with_hubs("RETURN_CLOSED", "npc: bram\nwhen: not knows_potter\nbram: ~\n" <> &1)
-
-    sets = "- Ask\n  bram: ~\n  sets: knows_potter\n"
-    other = "- Other\n  bram: ~\n"
-
-    assert warned.(sets <> other) == ["scene"]
-    # The only choice closes the talk.
-    assert warned.(sets) == []
-    assert warned.(sets <> "  then: end\n" <> other) == []
   end
 
   # Break: fall-through stops at a nested set in the guess, so a shut root's real pick of two goes unwarned.
