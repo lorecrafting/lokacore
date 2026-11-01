@@ -8,7 +8,9 @@ import { Platform } from 'react-native';
 import type { localSession } from '../../authority/local-story/session';
 import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
 import { listen, overlay } from './live.ts';
-import { asRefs, caughtUp, replay, type Place, type Step } from './place.ts';
+import { asRefs, dropStep, replay, type Place, type Step } from './place.ts';
+
+export { frozenClock } from './place.ts';
 
 export type Opened = NonNullable<ReturnType<ReturnType<typeof localSession>['game']>>;
 /** words -> text key, filled as the Book resolves text, so a clicked line names its source. */
@@ -31,6 +33,7 @@ function saved(): Place | undefined {
 }
 const place: Place = (devClock && saved()) || { hash: chapter.sha256, steps: [] };
 let placeNote = '';
+let refused: number | undefined; // the step a replay was refused at, which the panel can drop
 const savePlace = () => localStorage.setItem(PLACE, JSON.stringify(place));
 const keep = (step: Step) => {
   if (place.hash !== chapter.sha256) return; // a broken path waits for the edit that mends it
@@ -40,15 +43,37 @@ const keep = (step: Step) => {
 export const resetPlace = () => {
   place.hash = chapter.sha256;
   place.steps = [];
+  delete place.stopped;
+  refused = undefined;
+  placeNote = '';
   savePlace();
 };
+/** At page load: a path due a replay gets a fresh game, as a hash seen before keeps its old save (an edit undone). */
+export function bootPlace(session: {
+  game(): Opened | undefined;
+  startOver(): string | undefined;
+}) {
+  const due = place.hash !== chapter.sha256 && place.stopped?.hash !== chapter.sha256;
+  const why = due && session.game() ? session.startOver() : undefined; // no game: a save that did not open stays as evidence
+  if (why) placeNote = `Place: not replayed (${why}); this is the old save.`;
+  else restorePlace(session.game());
+}
 export function restorePlace(game: Opened | undefined) {
-  if (!game || place.hash === chapter.sha256) return;
+  if (!game) return;
+  if (place.hash === chapter.sha256) {
+    // an edit undone: a stop recorded for that edit no longer describes the path
+    delete place.stopped;
+    return savePlace();
+  }
+  if (place.stopped?.hash === chapter.sha256) {
+    // this save holds the path up to the stop: replaying would re-send those steps
+    ({ at: refused, note: placeNote } = place.stopped);
+    return;
+  }
   let outcome: ReturnType<typeof replay>;
   try {
     outcome = replay(place.steps, game, (ms) => {
       g.loka_dev_skew = skew() + ms;
-      caughtUp(game);
     });
   } catch (e) {
     // a hand-edited checkpoint or stale place with a malformed step must not stop the boot
@@ -56,12 +81,16 @@ export function restorePlace(game: Opened | undefined) {
   }
   const { done, failed } = outcome;
   if (failed) {
+    refused = outcome.refused && done;
     placeNote = `Place: ${failed}; stopped after ${done} of ${place.steps.length} steps. Mend the edit, or Start over to record afresh.`;
     console.warn(placeNote);
+    place.stopped = { hash: chapter.sha256, at: refused, note: placeNote };
+    savePlace();
     return;
   }
   placeNote = `Place: replayed ${done} steps`;
   place.hash = chapter.sha256;
+  delete place.stopped;
   savePlace();
 }
 const recorded = new WeakMap<Opened, Opened>(); // one wrapper per game, so the Book sees one identity
@@ -122,13 +151,15 @@ type Asked =
   | { op: 'hello' }
   | { op: 'advance'; minutes: number }
   | { op: 'jump'; steps: Step[] }
+  | { op: 'drop' }
   | { op: 'trace' };
-const OPS = new Set(['hello', 'advance', 'jump', 'trace']); // any other local window is not the panel
+const OPS = new Set(['hello', 'advance', 'jump', 'drop', 'trace']); // any other local window is not the panel
 let panel: { to: Window; origin: string } | undefined;
 const tell = (sent: object) => panel?.to.postMessage({ loka: 'author', ...sent }, panel.origin);
 const stateOf = (game: Opened) => ({
   hash: chapter.sha256,
   placeNote,
+  refused,
   steps: place.steps,
   facts: game.facts(),
   quests: game.view().view.journal,
@@ -153,7 +184,12 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
       if (e.data.op === 'trace') return void tell({ trace: game.trace() });
       if (e.data.op === 'advance') advance(e.data.minutes);
-      if (e.data.op === 'jump') return jumpTo(e.data.steps, latest.current); // the new game posts its state
+      if (e.data.op === 'jump') {
+        if (Array.isArray(e.data.steps)) return jumpTo(e.data.steps, latest.current); // the new game posts its state
+        placeNote = 'Place: that checkpoint has no steps list; nothing changed.'; // checked before the start over wipes the save
+      }
+      if (e.data.op === 'drop' && refused !== undefined)
+        return jumpTo(dropStep(place.steps, refused), latest.current);
       state();
     };
     window.addEventListener('message', onMessage);

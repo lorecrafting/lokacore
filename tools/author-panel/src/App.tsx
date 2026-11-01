@@ -72,7 +72,7 @@ export default function App() {
       <Book frame={frame} />
       <aside className="flex w-[400px] shrink-0 flex-col border-l max-[900px]:h-1/2 max-[900px]:w-full max-[900px]:border-t max-[900px]:border-l-0">
         <Header hash={book.state?.hash} dark={dark} toggle={toggle} />
-        <Compile said={said} compiled={compiled} placeNote={book.state?.placeNote} />
+        <Compile said={said} compiled={compiled} state={book.state} send={book.send} />
         <Tabs defaultValue="play" className="min-h-0 flex-1 gap-0">
           <TabsList className="mx-3 mt-2 grid w-auto grid-cols-4">
             <TabsTrigger value="play">Play</TabsTrigger>

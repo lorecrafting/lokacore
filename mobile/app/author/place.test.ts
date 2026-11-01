@@ -4,7 +4,15 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Intent, Reply } from '../../packages/game-view/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
-import { asRefs, caughtUp, replay, type Replayable, type Step } from './place.ts';
+import {
+  asRefs,
+  caughtUp,
+  dropStep,
+  frozenClock,
+  replay,
+  type Replayable,
+  type Step,
+} from './place.ts';
 
 const NPC = 'sampler@0.0.1:npc/maud';
 const intent = (target_ids: string[], input = {}) =>
@@ -25,6 +33,7 @@ function session(ids: Record<string, string>, replies: Reply[], choice?: string)
     }),
     invoke: (i) => (sent.push(i), replies[sent.length - 1]!),
     entityIds: () => ids,
+    pulse: () => ({ kind: 'ready' }),
   };
   return { game, sent };
 }
@@ -140,4 +149,94 @@ test('the drain loop gives up at 1000 rounds and stops on the first other reply'
     pulsing((n) => (n < 3 ? 'catching_up' : 'idle')),
     ['active', 'drain', 'drain'],
   );
+});
+
+// Break: the panel's "drop this step" removes the wrong step because replay's `done` counts advances.
+test('dropping the refused step removes that step, counting the advances before it', () => {
+  const steps: Step[] = [
+    { intent: intent([]) },
+    { advance: 1000 },
+    { intent: intent([NPC]) },
+    { intent: intent([]) },
+  ];
+  const { done } = replay(steps, session({ [NPC]: 'id' }, [accepted, refused]).game, () => {});
+  assert.equal(done, 2);
+  assert.deepEqual(dropStep(steps, done), [steps[0], steps[1], steps[3]]);
+});
+
+// Break: a hand-edited advance reaches the clock, moving it backward or turning it into a string,
+// in the preview as in the check; or a zero advance, which is whole, is refused.
+test('an advance that is not whole non-negative milliseconds stops before the clock, droppable', () => {
+  const clock: number[] = [];
+  const replayAdvance = (advance: unknown) =>
+    replay([{ advance } as Step], session({}, []).game, (ms) => clock.push(ms));
+  const stopped = (shown: unknown) => ({
+    done: 0,
+    failed: `step 1 (advance ${shown}): not whole milliseconds`,
+    refused: true,
+  });
+  assert.deepEqual(replayAdvance(-1), stopped(-1));
+  assert.deepEqual(replayAdvance('5'), stopped('5'));
+  assert.deepEqual(replayAdvance(1.5), stopped(1.5));
+  assert.deepEqual(clock, []);
+  assert.deepEqual(replayAdvance(0), { done: 1 });
+  assert.deepEqual(clock, [0]);
+});
+
+// Break: a timed rule that faults, or a drain that never ends, passes the gate as ok.
+test('an advance whose delivery does not end ready stops the replay at that step', () => {
+  const game = session({}, []).game;
+  const after = (kinds: { kind: string; code?: string; message?: string }[]) => {
+    const pulses = [{ kind: 'ready' }, ...kinds];
+    return replay(
+      [{ advance: 5 }],
+      { ...game, pulse: () => pulses.shift() ?? kinds.at(-1)! },
+      () => {},
+    );
+  };
+  assert.deepEqual(after([{ kind: 'ready' }]), { done: 1 });
+  assert.deepEqual(after([{ kind: 'fault', code: 'x' }]), {
+    done: 0,
+    failed: 'step 1 (advance 5): fault x',
+  });
+  assert.deepEqual(after([{ kind: 'error', message: 'corrupt' }]), {
+    done: 0,
+    failed: 'step 1 (advance 5): error corrupt',
+  });
+  assert.deepEqual(after([{ kind: 'catching_up' }]), {
+    done: 0,
+    failed: 'step 1 (advance 5): catching_up',
+  });
+});
+
+// Break: the panel offers to drop a valid step that only caught a pending reply or a fault.
+test('only a step the game refused is marked refused', () => {
+  const once = (reply: unknown, ids: Record<string, string> = { [NPC]: 'b1' }) =>
+    replay([{ intent: intent([NPC]) }], session(ids, [reply as Reply]).game, () => {}).refused;
+  assert.equal(once(refused), true);
+  assert.equal(once(refused, {}), true); // the edit removed the target
+  assert.equal(once({ kind: 'catching_up' }), undefined);
+  assert.equal(once({ kind: 'saved', decision: { kind: 'fault', code: 'x' } }), undefined);
+});
+
+test('the frozen clock moves wall and monotonic together, and only when told', () => {
+  // Break: a wall that stands still loses a dev-clock move for any reader of the wall clock.
+  let moved = 0;
+  const clock = frozenClock(() => moved);
+  const [wall, mono] = [clock.wall(), clock.monotonic()];
+  moved = 600;
+  assert.deepEqual([clock.wall() - wall, clock.monotonic() - mono], [600, 600]);
+});
+
+test('a step with both kinds, or an unreadable intent, stops by number', () => {
+  // Break: an intent skipped beside an advance passes the gate; a missing input throws with no step number.
+  for (const bad of [
+    { advance: 0, intent: intent([]) },
+    { intent: {} },
+    1,
+    { intent: { input: {}, target_ids: [1] } },
+  ]) {
+    const out = replay([bad as unknown as Step], {} as Replayable, () => {});
+    assert.match(out.failed!, /^step 1: not a step/);
+  }
 });

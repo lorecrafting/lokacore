@@ -8,6 +8,7 @@ export type Step = { intent: unknown } | { advance: number };
 export type State = {
   hash: string;
   placeNote: string;
+  refused?: number;
   steps: Step[];
   facts: Record<string, unknown>;
   quests: { quest: string; state: string }[];
@@ -18,6 +19,7 @@ type Asked =
   | { op: 'hello' }
   | { op: 'advance'; minutes: number }
   | { op: 'jump'; steps: Step[] }
+  | { op: 'drop' }
   | { op: 'trace' };
 
 export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
