@@ -158,9 +158,14 @@ defmodule Loka.ContentExplainFollowOnsTest do
 
   # Break: a manifest refused by its schema reaches the emote check as nil and the compile crashes.
   test "an emote beside a refused manifest prints the manifest's line", %{tmp_dir: dir} do
-    manifest = @manifest |> JSON.decode!() |> Map.put("title", 1) |> JSON.encode!()
-    lines = said(dir, %{"cartridge.json" => manifest, "emotes/wave.json" => ~s({"text":"~"})})
-    assert line_at(lines, "cartridge.json") =~ "`title`"
+    manifest =
+      @manifest
+      |> JSON.decode!()
+      |> Map.put("requires", %{"capabilities" => %{"emote" => "~"}})
+      |> JSON.encode!()
+
+    lines = said(dir, %{"cartridge.json" => manifest, "emotes/wave.json" => ~s({"others":"x"})})
+    assert line_at(lines, "cartridge.json") =~ "emote"
   end
 
   # Break: a real `room` under a bad name waits for the rename, then surprises the writer.

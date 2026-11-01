@@ -168,5 +168,12 @@ defmodule Loka.ContentFaultsTest do
              |> Enum.map(& &1["path"])
              |> Enum.filter(&String.starts_with?(&1, "reactions/"))
              |> Enum.sort()
+
+    # Break: a rule's status that schedules no job is refused though its step crosses nothing.
+    edit.("statuses/warded.json", fn s ->
+      s |> Map.delete("per_tick") |> Map.put("duration", "permanent")
+    end)
+
+    assert {:ok, _, _} = Content.compile(tmp)
   end
 end
