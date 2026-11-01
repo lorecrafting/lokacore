@@ -477,7 +477,7 @@ rescue keeps the message with the original source and requires its original esco
 Branch, quest outcome, status, escort and own committed receipts must agree. The forged
 terminal refusal applies before either selection. Missing/swapped/malformed roles or escort
 rows, cross-branch evidence and impossible locations are typed save_corrupt without repair.
-Own committed start/Rejoin/terminal receipts validate escort effects and derive original NPC
+Own committed start/Rejoin/terminal receipts must carry an escort transition and derive original NPC
 narration. The latest committed escort transition must match the stored relation. Unrelated latest
 receipts and current room never prove success. Existing rollback,
 unknown-COMMIT fence, exact retries and explicit old-pin refusal remain unchanged.

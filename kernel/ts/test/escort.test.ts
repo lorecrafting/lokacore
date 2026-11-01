@@ -1,3 +1,4 @@
+// size: allow 520, every escort move, start and Rejoin case shares one setup()
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView, step, type World } from '../src/index.ts';
@@ -411,6 +412,22 @@ test('a start refuses while the escort it would replace is still live', () => {
   const before = a.world();
   a.choose('rescue');
   const escorts = { [before.character]: relation(a.world()) };
+  a.set({ ...before, state: { ...before.state, escorts } });
+  a.choose('rescue', 'invalid_state');
+});
+
+// Breaks: a start over a following row with no quest row is admitted, and composition faults on it.
+test('a start refuses a following row whose quest is gone until the next Move separates it', () => {
+  const a = setup();
+  a.ready();
+  const before = a.world();
+  a.choose('rescue');
+  const escorts = {
+    [before.character]: {
+      ...relation(a.world()),
+      quest_instance_id: '00000000-0000-4000-8000-000000000001',
+    },
+  };
   a.set({ ...before, state: { ...before.state, escorts } });
   a.choose('rescue', 'invalid_state');
 });

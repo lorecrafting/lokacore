@@ -74,7 +74,9 @@ export function refused(world: World, row: ChoiceRow, option: DialogueChoice) {
   if (!quest || quest[1].state !== 'active') return 'invalid_state' as const;
   const escort = world.state.escorts?.[row.actor_id];
   if (effect.transition === 'start')
-    return escort && !retired(world, escort) ? ('invalid_state' as const) : undefined;
+    return escort && (escort.status === 'following' || !retired(world, escort))
+      ? ('invalid_state' as const)
+      : undefined;
   if (
     !escort ||
     !original(world, escort) ||
