@@ -265,15 +265,14 @@ export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
 }
 
 const listeners = new Set<(cue: Cue) => void>();
+export let curlEnds = -Infinity; // at the latest: a curl starts by the picture deadline
 export const onCue = (listener: (cue: Cue) => void) => {
   listeners.add(listener);
   return () => void listeners.delete(listener);
 };
 
-/**
- * Feeds the queue from each new view and page turn. A first view is silent, and catch-up to its end:
- * the first view after it diffs against nothing.
- */
+// Feeds the queue from each new view and page turn. A first view is silent, and catch-up to its end:
+// the first view after it diffs against nothing.
 export function useCues(view: GameView, catchingUp: boolean, turn: number, resumes = 0) {
   const queue = useRef(QUIET);
   const seen = useRef(turn);
@@ -282,6 +281,7 @@ export function useCues(view: GameView, catchingUp: boolean, turn: number, resum
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const advance = (cues: Cue[], turned = false) => {
+      if (turned) curlEnds = performance.now() + motion.quick.duration + motion.turn.duration;
       const { q, fired } = step(queue.current, cues, performance.now(), turned);
       queue.current = q;
       for (const cue of fired) for (const listener of listeners) listener(cue);

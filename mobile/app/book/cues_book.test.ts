@@ -6,6 +6,7 @@ import { book } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
 const { onCue, useCues } = await import('./cues.ts');
+const { playCue } = await import('./cueSounds.ts');
 const { motion } = await import('./tokens.ts');
 
 const place = (id: string, more = {}) =>
@@ -49,6 +50,32 @@ function listen(t: { after: (f: () => void) => void }) {
   t.after(onCue((c) => heard.push(c.name)));
   return heard;
 }
+
+// Breaks: a blow held by a page turn buzzes at its picture deadline, inside the curl (book-ui.md
+// Haptics), or a second turn lets the waiting haptic land in its own curl, or the haptic is lost.
+test('a held cue sounds at the picture deadline and is felt only after the curl', (t) => {
+  const tick = clock(t);
+  t.after(onCue(playCue));
+  const g = globalThis as any;
+  g.bookDevice = [];
+  t.after(() => (g.bookDevice = undefined));
+  const felt = () =>
+    g.bookDevice.filter((l: string[]) => l[0] === 'haptic').map((l: string[]) => l[1]);
+  const draw = mount();
+  draw(hit(20), false, 0);
+  draw(hit(15), false, 1);
+  tick(motion.quick.duration);
+  assert.deepEqual(g.bookDevice, [['play', 'blow']]);
+  tick(motion.turn.duration - 1);
+  assert.deepEqual(felt(), []);
+  draw(hit(15), false, 2); // 1 ms before the first curl's end
+  tick(1);
+  assert.deepEqual(felt(), []);
+  tick(motion.quick.duration + motion.turn.duration - 2);
+  assert.deepEqual(felt(), []);
+  tick(1);
+  assert.deepEqual(felt(), ['heavy']);
+});
 
 // Breaks: opening a save plays what it holds; or nothing is ever published.
 test('a first view is silent, the next change is published', (t) => {

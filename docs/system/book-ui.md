@@ -765,7 +765,9 @@ stays. Only a chapter index change plays this, once as [Chapters](#chapters-scen
 **Event sounds.** A sound marks what the hand did or how the player's story moved, never what the
 world did. Pressed or moved: the page turn, a pickup flick (a buy plays coin instead, so one purchase
 is one sound), coin, a blow's thud. The story: level, new skill, quest resolved, quest failed, skill
-improved (rate limited), quest gained, the chapter cut. **Silent:** hint change, knowledge, fact,
+improved (rate limited), quest gained, the chapter cut, and a tick when a debuff lands on the
+player, since it marks the player's own state (a buff is silent). **Silent:**
+hint change, knowledge, fact,
 rumour and reputation, a new map room, a generic narrated event, saves, loading, errors, empty
 states, senses, status ticks and expiry, and an NPC's background life.
 

@@ -16,11 +16,17 @@ exec(sys.argv[2])
 json.dump([row], open(sys.argv[1], "w"))
 PY
 }
-check() { python3 bin/check_sounds.py --root "$tmp" "$@" >"$tmp/out" 2>&1; }
+run() { python3 "$(dirname "$0")/check_sounds.py" --root "$tmp" "$@" >"$tmp/out" 2>&1; }
+check() { # a good copy must pass
+  run "$@" || {
+    echo "sounds control failed: a good copy was refused: $(cat "$tmp/out")" >&2
+    exit 1
+  }
+}
 refused() { # refused <what the failure says> [check flags]
   said=$1
   shift
-  if check "$@"; then
+  if run "$@"; then
     echo "sounds control failed: accepted, expected: $said" >&2
     exit 1
   fi
@@ -37,10 +43,23 @@ refused 'b.m4a: no row'
 reset
 rm "$dir/a.m4a"
 refused 'a.m4a: row has no file'
+reset
+mkdir "$dir/sub"
+mv "$dir/a.m4a" "$dir/sub/a.m4a"
+refused 'sub/a.m4a: no row' # a same-named file in a folder does not satisfy the row
+reset
+: >"$dir/z.webm"
+refused 'z.webm: no row' # nor does an unlisted type escape
 for field in file status used_for author source_url licence human_made_evidence edited; do
   reset "row['$field'] = ''"
   refused "empty $field"
+  reset "row['$field'] = ' '"
+  refused "empty $field"
 done
+reset "row['status'] = 'placeholder'; row['replace_note'] = ' '"
+refused 'empty replace_note'
+reset "row['licence'] = 'CC BY 4.0'; row['credit'] = ' '"
+refused 'needs a credit'
 reset
 python3 -c 'import json, sys; rows = json.load(open(sys.argv[1])); json.dump(rows * 2, open(sys.argv[1], "w"))' "$dir/manifest.json"
 refused 'a.m4a: two rows'
