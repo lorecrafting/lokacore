@@ -28,6 +28,7 @@ hung=
 # perl: macOS has no timeout(1). The child leads its own process group so a kill takes its children too.
 lim() {
   perl -e '$p = fork; if (!$p) { setpgrp(0, 0); exec "sh", "-c", $ARGV[1]; exit 127 }
+    $SIG{INT} = $SIG{TERM} = sub { kill "KILL", -$p; exit 130 };
     $SIG{ALRM} = sub { kill "KILL", -$p; waitpid $p, 0; exit 124 }; alarm $ARGV[0]; waitpid $p, 0; exit($? ? ($? >> 8 || 1) : 0)' \
     "${MUTATE_MUTANT_SECONDS:-600}" "$1" > /dev/null 2>&1 < /dev/null
   r=$?; [ "$r" != 124 ] || hung=" timeout"; return $r
