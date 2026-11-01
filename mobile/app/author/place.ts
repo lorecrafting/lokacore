@@ -93,7 +93,7 @@ const REFUSED: Record<Cheat['op'], Record<string, string>> = {
   go_to_room: {
     not_found: 'no such room in this cartridge',
     invalid_state:
-      'already there, or in a fight, not standing, in water, riding, escorting, leading a group, on a patrol or expedition, in a scene or at an open choice; finish that first',
+      'already there, the room is underwater, or in a fight, not standing, in water, riding, escorting, leading a group, on a patrol or expedition, in a scene or at an open choice; finish that first',
   },
   set_fact: {
     not_found: 'no such fact in this cartridge',

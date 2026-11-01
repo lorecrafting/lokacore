@@ -15,7 +15,6 @@ import {
 } from '../../runtime/decision.ts';
 import type { CharacterId, Command, EntityId } from '../../contracts.gen.ts';
 import { engaged } from '../combat/shared.ts';
-import { pending } from '../dialogue/shared.ts';
 import { travel } from '../escort/shared.ts';
 import { current } from '../expedition/shared.ts';
 import { assigned, subjective, typed, value } from '../fact.ts';
@@ -26,7 +25,7 @@ import { running } from '../scene/shared.ts';
 const heldInPlace = (world: World, actor: CharacterId, body: EntityId, here: EntityId) =>
   !!engaged(world, body) ||
   !standing(world, actor) ||
-  !!pending(world, actor) ||
+  values(world.state.choices ?? {}).some((c) => c.actor_id === actor && c.status === 'pending') ||
   !!running(world, actor) ||
   !!world.state.water?.[actor]?.room_id ||
   travel(world, actor, here, here).length > 0 ||
@@ -69,7 +68,11 @@ export const decide: Rule<'dev'> = (world, command, mint) => {
     const body = bodyOf(world, actor_id);
     if (!there || !body) return rejected('not_found');
     const here = world.state.containers[body]!;
-    if (here === there || heldInPlace(world, actor_id, body, here))
+    // waterValid: a route bottom holds exactly the bodies with a water row, which only a swim opens.
+    const underwater = world.cartridge.world?.water?.routes.some(
+      (r) => world.roomIds[refString(r.bottom)] === there,
+    );
+    if (here === there || underwater || heldInPlace(world, actor_id, body, here))
       return rejected('invalid_state');
     const op = {
       op: 'entity.transfer',

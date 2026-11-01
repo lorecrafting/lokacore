@@ -5,7 +5,7 @@
     "fixtures": ["protocol/fixtures/toolbox_showcase_hash.json"],
     "invariants": ["facts_typed"],
     "implemented_in": "loka-vduxr.6 go to room and set fact, the author preview only",
-    "no_transcript": "transcripts replay through step, which refuses dev commands"
+    "no_transcript": "author-preview only: no shipped transcript plays a cheat; dev.test.ts and check.test.ts replay them"
   },
   "speech": {
     "spec": "docs/system/mechanics.md Social verbs (toolbox row G9)",

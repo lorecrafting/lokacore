@@ -88,6 +88,10 @@ const held: Record<string, (w: World) => World> = {
     patched(w, {
       choices: { c: { actor_id: w.character, status: 'pending', source: { kind: 'dialogue' } } },
     }),
+  'at an open dream choice': (w) =>
+    patched(w, {
+      choices: { c: { actor_id: w.character, status: 'pending', source: { kind: 'scene' } } },
+    }),
   'in a modal scene': (w) =>
     patched(w, {
       facts: {
@@ -99,6 +103,21 @@ for (const [name, hold] of Object.entries(held))
   test(`go to room refuses while ${name}`, () => {
     assert.equal(code(go(hold(fresh()))), 'invalid_state');
   });
+
+// Break: a route bottom entered with no water row, which waterValid refuses on the next reopen.
+test('go to room refuses a water route bottom, and goes to a room off the route', () => {
+  const w = fresh();
+  const flooded = (bottom: string) =>
+    ({
+      ...w,
+      cartridge: {
+        ...w.cartridge,
+        world: { ...w.cartridge.world, water: { routes: [{ bottom: ref('room', bottom) }] } },
+      },
+    }) as World;
+  assert.equal(code(go(flooded('boar_run'))), 'invalid_state');
+  assert.equal(code(go(flooded('cellar'))), 'accepted');
+});
 
 // Another room of `w`, by ref read from the world, so a sampler's own cartridge can be asked.
 const goElsewhere = (w: World, revision: number) => {
