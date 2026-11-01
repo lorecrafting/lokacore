@@ -108,6 +108,17 @@ defmodule Loka.ContentStartersFreshTest do
     assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
+  # Break: the delete advice on the death setup: followed, a second population fails the compile.
+  test "a second population is told to keep the death setup", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    follow(dir, "populations", "wolves")
+    assert {:error, message} = Starters.write(dir, "populations", "bears")
+    assert message =~ "world death npc_corpse"
+    assert message =~ "keep it and skip this starter"
+    refute message =~ "delete"
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+  end
+
   # Break: a text.json that is not an object crashes the starter instead of refusing.
   test "a text.json that is a list still refuses", %{tmp_dir: tmp} do
     dir = cartridge(tmp)

@@ -255,6 +255,10 @@ defmodule Loka.Content.Starters do
         said <>
           ". If it is words, set it to ~ and rerun; keep any other value and skip this rerun"
 
+      # A second population wants these too; deleting them orphans the first one's corpse items.
+      at =~ ": world death " ->
+        said <> ". A cartridge has one death setup: keep it and skip this starter"
+
       true ->
         said <> ". If it is words, set it to ~; delete any other value; then rerun"
     end
