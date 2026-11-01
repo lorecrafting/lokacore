@@ -1,13 +1,12 @@
-# size: allow 370, scene-triggered chapter point refs join dialogue trigger checks
+# size: allow 375, scene-triggered chapter point refs join dialogue trigger checks
 defmodule Loka.Content.Dialogues do
   @moduledoc "Compiled dialogue roles, consequences, riddle and chapter trigger checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
 
-  @doc "Each schema-valid dialogue's policy root, as `{rel, steps, root}`."
+  @doc "Each schema-valid dialogue's policy root, its choices' and their narration variants', as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
-  def conditions(defs),
-    do: for({rel, d} <- all(defs), do: {rel, ["policy"], d["policy"]})
+  def conditions(defs), do: Enum.flat_map(all(defs), &Loka.Content.DialogueLinks.conditions/1)
 
   defp all(defs), do: for({_, {rel, [], d}} <- defs["dialogue"], do: {rel, d})
 
@@ -30,7 +29,8 @@ defmodule Loka.Content.Dialogues do
       taken: commands() ++ keys,
       kinds: {caps, owners(registry, ["definitions"])},
       events: {caps, owners(registry, ["events"])},
-      proven: Loka.Content.Hub.proven(defs)
+      proven: Loka.Content.Hub.proven(defs),
+      targets: Loka.Content.Hub.targets(defs)
     }
 
     Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++ wide(defs, settings, ctx)
@@ -39,7 +39,8 @@ defmodule Loka.Content.Dialogues do
   # The cartridge-wide checks: keywords (G9), story points, chapters.
   defp wide(defs, settings, ctx),
     do:
-      Loka.Content.Keywords.check(defs, ctx.events) ++
+      Loka.Content.DialogueLinks.loops(all(defs)) ++
+        Loka.Content.Keywords.check(defs, ctx.events) ++
         story_points(defs, ctx) ++ chapters(Map.get(settings, "chapters", []), ctx)
 
   # Chapters derive only from unambiguous quest-resolving dialogue choices (mechanics.md).
@@ -262,7 +263,8 @@ defmodule Loka.Content.Dialogues do
 
     texts(
       rel,
-      [{steps ++ ["label"], o["label"]}, {steps ++ ["narration"], o["narration"]}],
+      [{steps ++ ["label"], o["label"]}, {steps ++ ["narration"], o["narration"]}] ++
+        Loka.Content.DialogueLinks.variant_texts(steps, o),
       ctx.text
     ) ++
       sequence(rel, steps, o, ctx) ++
@@ -274,7 +276,8 @@ defmodule Loka.Content.Dialogues do
       payment(rel, steps, o, d, ctx) ++
       Loka.Content.Skills.choice(rel, steps, o, d, ctx) ++
       Loka.Content.CheckKinds.choice(rel, steps, o, d, ctx) ++
-      Loka.Content.Hub.choice(rel, steps, o, d, ctx.proven)
+      Loka.Content.Hub.choice(rel, steps, o, d, ctx) ++
+      Loka.Content.DialogueLinks.choice(rel, steps, o, d, ctx)
   end
 
   defp sequence(rel, steps, o, ctx) do

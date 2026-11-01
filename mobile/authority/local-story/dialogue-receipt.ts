@@ -79,8 +79,11 @@ export function dialogueDetail(
   )
     return invalid();
   const wrong = riddle && p.answer!.toLowerCase() !== riddle.answer;
-  const key = wrong ? riddle.wrong : option.narration;
-  if (!detail || !same(d.narration?.[0], { key, participants })) return invalid();
+  const keys = wrong
+    ? [riddle.wrong]
+    : [option.narration, ...(option.narration_variants ?? []).map((v) => v.description)];
+  if (!detail || !keys.some((key) => same(d.narration?.[0], { key, participants })))
+    return invalid();
   if (!evidence(d, { ...command, payload: p }, row, !!wrong)) return invalid();
   if (!wrong && !consequences(s, command, d, row, source, option, detail)) return invalid();
   return detail;

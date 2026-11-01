@@ -1606,9 +1606,18 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 
 ## Fields without a meaning
 
-4 fields.
+13 fields.
 
 - `attributes: attributes`
 - `behaviours: params`
 - `behaviours: reactions`
+- `choice: narration_variants`
+- `choice: then`
+- `choice: then_failed`
+- `policy fact_at_least: at_least`
+- `policy fact_at_least: fact`
+- `policy fact_at_least: item`
+- `policy fact_at_least: npc`
+- `policy fact_at_least: subject`
+- `policy fact_at_least: with`
 - `resources: resources`

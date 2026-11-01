@@ -7,6 +7,7 @@ import {
   bundle as escortBundle,
   entity,
   genesis,
+  prefix,
   room,
 } from '../../../kernel/ts/test/escort_fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
@@ -78,8 +79,8 @@ test('a malformed other quest after rescue selection or completion offers typed 
       );
 });
 
-function setup(path = ':memory:') {
-  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+function setup(path = ':memory:', source = bundle) {
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, source);
   const book = presenter(a.game);
   a.game.subscribe(book.update);
   const view = () => a.game.view().view;
@@ -185,6 +186,27 @@ function replay(a: ReturnType<typeof setup>, choice_id: string) {
   );
   assert.deepEqual(a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), before);
 }
+
+// Breaks: a narrate step on the escort answer read as a save-changing assignment the row cannot
+// show, so every reopen after the answer is save_corrupt.
+test('a save reopens after an escort answer with a narrate step', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-escort-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'save.db');
+  const narrated = escortBundle((c) =>
+    c.dialogues[`${prefix}:dialogue/child_escort`].choices.rescue.steps.push({
+      op: 'narrate',
+      text: 'narration.accept',
+    }),
+  );
+  let a = setup(path, narrated);
+  a.offer();
+  a.choose('rescue');
+  a.sql.close();
+  a = setup(path, narrated);
+  assert.equal(a.escort()!.status, 'following');
+  a.sql.close();
+});
 
 // Breaks: an escort row is lost/rejected at reopen or reconciliation, a lawful separated save is
 // rejected, or start/Rejoin/terminal receipts restore to the wrong NPC after their pending row ends.
@@ -303,6 +325,67 @@ test('real SQLite escort reopens start, death separation, Rejoin and terminal wi
   a.sql.close();
 });
 
+// Breaks: a completed escort refused after a lawful keeper death or reaction move, for good.
+test('a completed escort reopens after the keeper dies or a reaction moves the child', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-escort-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const reopens = (
+    name: string,
+    source: typeof bundle,
+    after: (a: ReturnType<typeof setup>) => void,
+  ) => {
+    const path = join(dir, `${name}.db`);
+    const a = setup(path, source);
+    a.offer();
+    a.choose('rescue');
+    a.end();
+    after(a);
+    a.sql.close();
+    setup(path, source).sql.close();
+  };
+  reopens(
+    'killed',
+    escortBundle((c) => {
+      Object.assign(c.npcs[`${prefix}:npc/keeper`], {
+        hp: { minimum: 0, maximum: 1, start: 1, gain: 0 },
+        attack: { chance: 0, damage_min: 1, damage_max: 1 },
+      });
+    }),
+    (a) => {
+      a.ok('attack', [id('npc', 'keeper')]);
+      const here = () => JSON.stringify(a.game.view().view).includes(id('npc', 'keeper'));
+      for (let i = 0; i < 100 && here(); i++) {
+        a.clock.wall += 5000;
+        a.clock.mono += 5000;
+        a.game.pulse();
+      }
+      assert.equal(here(), false);
+    },
+  );
+  reopens(
+    'moved',
+    escortBundle((c) => {
+      const npc = c.dialogues[`${prefix}:dialogue/keeper_home`].npc;
+      (c.reactions ??= {})[`${prefix}:reaction/child_runs`] = {
+        key: 'child_runs',
+        on: {
+          event: 'quest_resolved',
+          quest: c.dialogues[`${prefix}:dialogue/keeper_home`].quest,
+          outcome: 'home',
+        },
+        steps: [
+          {
+            op: 'npc.move',
+            npc: { ...npc, key: 'child' },
+            room: { ...npc, kind: 'room', key: 'village_green' },
+          },
+        ],
+      };
+    }),
+    (a) => assert.equal(a.row('containers', id('npc', 'child')), room(fresh, 'village_green')),
+  );
+});
+
 // Breaks: escort save validation admits a forged binding, placement or terminal, or an unrelated
 // latest receipt hides a missing/swapped original escort or its evidence. The chapter cases (rescue
 // message removed from Vesper, branch changed to stays) are gone: they pinned chapter story content.
@@ -390,11 +473,6 @@ test('retained escort identity, physical state and own receipts reject corruptio
       'home terminal rewritten to another outcome',
       true,
       (a) => a.put('quests', a.quest().key, { ...a.quest().value, outcome: 'other' }),
-    ],
-    [
-      'completed child moved away from the keeper',
-      true,
-      (a) => a.put('containers', id('npc', 'child'), room(fresh, 'village_green')),
     ],
   ];
   for (const [name, terminal, mutate] of cases)

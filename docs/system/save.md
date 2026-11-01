@@ -434,7 +434,7 @@ The existing state_row table persists actor-keyed escorts through the ordinary c
 transaction. Load validates each typed row against its actor/body, original start ChoiceRow
 and quest instance, original living NPC and physical state. Following requires co-location;
 separated permits player departure or later co-location before explicit Rejoin. Completed
-requires the proven rescued terminal and NPC beside the terminal speaker. Every committed
+requires the proven rescued terminal; the speaker may die and the NPC may move afterward. Every committed
 intermediate state must reopen and reconcile under the same boundary.
 
 ## Bell choice return recovery
@@ -543,10 +543,11 @@ validity, exact prior count, actor, participants, causal command/receipt and clo
 or resolution, then reconcile with current rows. Close/death/current light changes
 cannot retroactively invalidate a lawful historical answer. Discovery requires
 successful owned Seek evidence; wrong/malformed answers justify no answered fact
-or ward grant. Reconcile topic truth with actual declared grants, including an
-already-known ward, rather than assume S4 is its only possible future source.
-Missing/null/corrupt bounded counts or bindings, forged wrong receipts, unjustified
-facts and pending-at-limit states refuse `save_corrupt` without repair/deletion.
+or ward grant. Reopen does not reconcile topic truth with grants: a fact has other
+lawful writers, so its current value is no evidence of who wrote it
+([principle](../lessons/storage.md)).
+Missing/null/corrupt bounded counts or bindings, forged wrong receipts and
+pending-at-limit states refuse `save_corrupt` without repair/deletion.
 No defaulting a missing counter to zero on load.
 
 Light changes, location changes and death may make the pending answer unavailable;
@@ -1063,21 +1064,17 @@ Cold reopen at Start with/without an eligible hound, each cursor, wrong in-footp
 
 Installed [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) stores
 ordinary custody, schedule locations and B6 typed knowledge facts; it adds no book
-cursor, transcript, topic ledger or snapshot. Reconcile a grant with the exact
-historical Read command/receipt: actor/body, original item and pinned readable/topic
-metadata, lawful held/open-ancestor custody at that revision, causal assignment and
-prior knowledge. A lawful B6 grant also justifies ward; neither source requires the
-other. Already-known Read supplies narration without a new grant. Later Drop, Put,
-lid closure, travel, schedule movement or death cannot invalidate historical Read.
-Current fact truth must agree with the lawful grant history in both directions.
+cursor, transcript, topic ledger or snapshot. A topic fact has other lawful writers
+(B6, ward, a reaction), so reopen does not reconcile it with a historical Read
+([principle](../lessons/storage.md)). Already-known Read supplies narration without a
+new grant. Later Drop, Put, lid closure, travel, schedule movement or death cannot
+invalidate historical Read.
 
 Real SQLite reopen must accept every legal committed intermediate: ground books,
 directly held, open nested holding, closed nested holding, each learned topic,
 already-known reread and later stored/dropped/dead states. Reopen the novice overlap
 and departure, then exercise the next ordinary Read/Talk/move consumer. Missing or
-malformed topic mapping/fact, forged actor/book/source/cause, grant from unheld or
-closed custody, omitted required grant or unjustified knowledge returns typed
-`save_corrupt`, with existing in-place Start over and no silent repair/deletion.
+malformed topic mapping/fact row returns typed `save_corrupt`, with existing in-place Start over and no silent repair/deletion.
 Operational read failures keep their existing storage-error handling.
 
 Failed COMMIT, both committed and absent uncertain-COMMIT outcomes, and lost
