@@ -1,4 +1,4 @@
-// size: allow 560, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
+// size: allow 594, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
 // Toolbox row 4 on the compiled levelling sampler: rats grant 10 experience each, level 2 at 30
 // grants one point, Raise spends it, and the quest reward grants 20 (mechanics.md row 4).
 import assert from 'node:assert/strict';
@@ -196,9 +196,10 @@ test('resolving the den quest grants 20 experience; after two kills it narrates 
 });
 
 /** Two rats dead, the third engaged, and the body's hp row forged to `value`. */
-function bitten(value: number, c: Cartridge = content) {
+function bitten(value: number, c: Cartridge = content, age = 0) {
   let w = play(fresh(c), { type: 'move', direction: 'east' }).world;
   w = kill(kill(w, 'rat_a').world, 'rat_b').world;
+  if (age) w = wait(w, age).world; // the clock must pass `age` for the row's `at` to stay valid
   const row = key({ kind: 'resource', entity_id: w.body, resource: resourceRef(w, 'hp') });
   return {
     ...w,
@@ -206,7 +207,7 @@ function bitten(value: number, c: Cartridge = content) {
       ...w.state,
       resources: {
         ...w.state.resources,
-        [row]: { value, at: w.state.clock, rate: 1, remainder: 0 },
+        [row]: { value, at: w.state.clock - age, rate: 1, remainder: 0 },
       },
     },
   };
@@ -231,6 +232,14 @@ test('level 2 refills hp in the killing step', () => {
   assert.equal(op.to, 10);
   assert.notEqual(op.writer_group, 0);
   assert.deepEqual(validate('GameView', gameView(third.world)), []);
+});
+
+// Breaks: the op carries no `at`, so the composer folds from the base clock and refuses a `from`
+// holding the regen settled inside the killing window.
+test('the refill counts a regen tick settled before the death', () => {
+  const [op] = hpOps(kill(bitten(3, content, 3599), 'rat_c'));
+  assert.equal(op.from, 4);
+  assert.equal(op.to, 10);
 });
 
 // Breaks: a full pool writes a no-op row, or the narrate step depends on the refill having moved.
@@ -277,6 +286,30 @@ function strike(experience: number, worth: number) {
   const c = variant((l) => l.kills.forEach((k: any) => (k.experience = worth)));
   return kill(play(holding(experience, c), { type: 'move', direction: 'east' }).world, 'rat_a');
 }
+
+// Breaks: a refill in its own writer group after the round's bite faults conflicting_write, so an
+// ordinary level-up on an even round (the NPC strikes first) loses the whole command.
+test('a level-up refill after a bite in the killing round joins the round', () => {
+  const c = structuredClone(content) as any;
+  c.world.levelling.kills.forEach((k: any) => (k.experience = 1000));
+  const rat = c.npcs['levelling_sampler@0.0.1:npc/rat_a'];
+  Object.assign(rat.hp, { maximum: 8, start: 8 });
+  rat.attack.chance = 100;
+  const w = play(play(holding(0, c), { type: 'move', direction: 'east' }).world, {
+    type: 'attack',
+    target_id: fresh(c).entityIds['levelling_sampler@0.0.1:npc/rat_a'],
+  }).world;
+  const r = elapse(wait(w, 150).world, 150); // even round: the rat strikes first
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  assert.deepEqual(hp(r.world), [10, 10]);
+  assert.deepEqual(
+    hpOps(r).map((o) => [o.from, o.to]),
+    [
+      [9, 8],
+      [8, 10],
+    ],
+  );
+});
 
 // Breaks: no level_reached from a credited kill, it lands before the round's own events, its
 // rule runs in a later proposal or not at all, or the gained line follows the level-up line.

@@ -34,7 +34,7 @@ import { eventRooms, itemsTagged, questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { suppress } from './population/shared.ts';
 import { specOf, statusStep } from './status/shared.ts';
-import { adjusted, grant } from './levelling/shared.ts';
+import { grant, pooled } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './death/shared.ts';
 import { setBarrier } from './barrier/react.ts';
@@ -186,7 +186,7 @@ export function sequence(
       ops.push(...refill);
     } else if (step.op === 'experience.grant') gained = saturate(gained + step.amount);
     else if (isTold(step)) narration.push(...told(then, actor, step, about));
-    else if (step.op === 'resource.adjust') ops.push(...adjusted(then, actor, step, group, ops));
+    else if (step.op === 'resource.adjust') ops.push(...pooled(then, actor, step, group, ops, own));
     else if (step.op !== 'event.emit') {
       const assigned = assignment(world, actor, step, group, own, cause);
       if (assigned && ops.push(assigned) && assigned.expected !== assigned.value) position++;

@@ -18,7 +18,7 @@ import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { diedAfter, sequence, triggered } from '../mechanics/reaction.ts';
-import { levelsReached, oneWrite } from '../mechanics/levelling/shared.ts';
+import { levelsReached, oneWrite, poolWriters } from '../mechanics/levelling/shared.ts';
 import { partings } from '../mechanics/escort/shared.ts';
 import { closing } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
@@ -247,7 +247,7 @@ function react(p: P, ran = false): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
-        { holders: p.holders, dead, ran, roots: p.roots },
+        { holders: poolWriters(p.ops, p.holders), dead, ran, roots: p.roots },
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
