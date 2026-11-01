@@ -37,7 +37,7 @@ defmodule Loka.ContentUnattackableTest do
   test "unattackable population members and death credit NPCs are refused", %{tmp_dir: dir} do
     for {sampler, npc, code} <- [
           {"boss_sampler", "guard", "populations/guards"},
-          {"cellar_sampler", "cellar_rat_1", "cartridge.json"}
+          {"cellar_sampler", "cellar_rat_1", "death_credit[0].npc"}
         ] do
       at = Path.join(dir, sampler)
       File.cp_r!("cartridges/#{sampler}", at)
