@@ -14,6 +14,10 @@ const { color } = await import('./tokens.ts');
 const { CharacterPage } = await import('./sections.tsx');
 const { LogLines } = await import('./lines.tsx');
 const { JournalPage } = await import('./journal.tsx');
+const { chapterCard } = await import('./Book.tsx');
+const { cardContext } = await import('./card.ts');
+const { ChapterPage } = await import('./sections.tsx');
+const { dark } = await import('./palette.ts');
 
 const g = globalThis as any;
 const say = ((s: string) => s.replace('.name', '')) as never;
@@ -280,4 +284,105 @@ test('the Journal gilds a quest resolved since its last visit, once, and never a
   finish('resolved');
   assert.equal(open(quest('resolved', null)), color.light.warning);
   assert.notEqual(open(quest('resolved', null)), color.light.warning);
+});
+
+// Breaks: the hp sting spreads to another pool, a pickup starts it, reduced motion lets it pulse or
+// overstay, its frames outlive the beat, or an unmounted line keeps drawing.
+test('reduced motion holds the sting on hp alone for the beat, and leaving the page stops it', (t) => {
+  effects(t, true);
+  const tick = clock(t);
+  const frames: (() => void)[] = [];
+  const cancelled: number[] = [];
+  t.mock.method(globalThis, 'requestAnimationFrame', (f: () => void) => frames.push(f));
+  t.mock.method(globalThis, 'cancelAnimationFrame', (id: number) => cancelled.push(id));
+  const stops: (() => void)[] = [];
+  const draw = rig({ after: (f) => stops.push(f) });
+  const view = (hp: number, ...ids: string[]) => ({
+    ...hit(hp),
+    inventory: ids.map(item),
+    resources: [
+      ...hit(hp).resources!,
+      {
+        resource: { key: 'ma', short_label: 'ma' },
+        current: 5,
+        maximum: 5,
+        tone: 'normal',
+        band: 'hurt',
+      },
+    ],
+  });
+  const inks = (v: any) => {
+    const shown = draw(() => {
+      useCues(v, false, 0);
+      return nodes(
+        StatusLine({
+          resources: v.resources,
+          time: 0,
+          text: say,
+          locked: true,
+          pending: false,
+          open: () => {},
+          openCharacter: () => {},
+        } as never),
+      );
+    });
+    return ['hp', 'ma'].map(
+      (key) =>
+        flat(
+          shown.find((n) => n.type === 'Text' && n.props.children?.[1]?.props?.children === key)
+            .props.style,
+        ).color,
+    );
+  };
+  const run = () => frames.splice(0).forEach((f) => f());
+  const rest = inks(view(20));
+  inks(view(20, 'sack'));
+  assert.deepEqual(frames, []);
+  inks(view(15, 'sack'));
+  tick(1);
+  run();
+  assert.deepEqual(inks(view(15, 'sack')), [color.light.action, rest[1]]);
+  tick(498);
+  run();
+  assert.equal(inks(view(15, 'sack'))[0], color.light.action);
+  tick(1);
+  run();
+  assert.deepEqual(inks(view(15, 'sack')), rest);
+  assert.deepEqual(frames, []);
+  inks(view(10, 'sack'));
+  const pending = frames.length;
+  cancelled.length = 0;
+  stops.forEach((stop) => stop());
+  assert.deepEqual(cancelled, [pending]);
+});
+
+// Breaks: the card's blur runs over a fight, an ending, another page, or a chapter page with no
+// chapter to name.
+test('only a chapter page with a chapter is a card', () => {
+  const screen = (view: object, ended = false) => ({ view, ended }) as never;
+  const chapter = { kind: 'chapter' } as never;
+  const on = { chapter: {} };
+  assert.equal(chapterCard(screen(on), chapter), true);
+  assert.equal(chapterCard(screen({ ...on, combat: {} }), chapter), false);
+  assert.equal(chapterCard(screen(on, true), chapter), false);
+  assert.equal(chapterCard(screen(on), { kind: 'dialogue' } as never), false);
+  assert.equal(chapterCard(screen(on)), false);
+  assert.equal(chapterCard(screen({}), chapter), false);
+});
+
+// Breaks: the card's marks arrive out of order (book-ui.md, Page turn), or its page stops filling.
+test('a chapter page dries label, title, rule in that order on no paper of its own', (t) => {
+  effects(t);
+  const outer = cardContext._currentValue;
+  t.after(() => void (cardContext._currentValue = outer));
+  cardContext._currentValue = 'picture';
+  const shown = rig(t)(() => nodes(ChapterPage({ label: 'one', title: 't', done: () => {} })));
+  assert.deepEqual(g.delays, [0, 120, 240]);
+  const page = flat(shown.find((n) => n.props?.style?.flex !== undefined).props.style);
+  assert.deepEqual([page.flex, page.backgroundColor], [1, undefined]);
+});
+
+// Breaks: paper and ink of one luminance read as dark, so the wash picks the dark book's colour.
+test('equal luminance is not a dark palette', () => {
+  assert.equal(dark({ fg: '#808080', bg: '#808080' } as never), false);
 });

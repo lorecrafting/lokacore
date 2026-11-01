@@ -170,7 +170,7 @@ type ViewProps = {
 
 // A wide screen centres the page column, at most size.column, on the paper (book-ui.md, Page column).
 const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as const;
-const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][number]) =>
+export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][number]) =>
   !s.view.combat && !s.ended && page?.kind === 'chapter' && !!s.view.chapter;
 
 /**

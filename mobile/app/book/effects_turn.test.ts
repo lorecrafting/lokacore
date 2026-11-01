@@ -105,6 +105,17 @@ test('a card over a picture blurs it, without a curl, and lets go at the end', a
   };
   assert.deepEqual(at(0), { blur: 6, shown: 1 });
   assert.deepEqual(at(1), { blur: 12, shown: 0 });
+  // Halfway the picture is still held whole: only motion.card.out lets it go.
+  assert.equal(at(0.5).shown, 1);
+  assert.deepEqual(
+    walk(rig(t)(() => blur.type({ ...blur.props, progress: { value: 0 } }))).find(
+      (n) => n.type === 'SkiaImage',
+    ).props.x,
+    0,
+  );
+  // Breaks: a page or the canvas stops filling the Book, so the turn draws a collapsed page.
+  const fills = tree.filter((n) => n.props?.style?.flex === 1);
+  assert.equal(fills.length, 2);
 });
 
 // Breaks: a turn with no picture (web without CanvasKit) waits for a blur that never comes, leaving
@@ -160,8 +171,19 @@ test('a card dries mark by mark over a picture and is there at once without one'
   cardContext._currentValue = 'picture';
   [0, 1, 2].forEach(mark);
   assert.deepEqual(g.delays, [0, 120, 240]);
-  cardContext._currentValue = 'waiting';
   assert.equal(mark(0).opacity, 0);
+  // Breaks: a card still waiting for its picture inks early, or the "no picture" answer leaves it blank.
+  const ink = rig(t);
+  const draw = () => ink(() => useCardInk(0)).opacity;
+  cardContext._currentValue = 'picture';
+  draw();
+  assert.equal(draw(), 1);
+  const late = rig(t);
+  const wait = () => late(() => useCardInk(0)).opacity;
+  cardContext._currentValue = 'waiting';
+  wait();
+  assert.equal(wait(), 0);
   cardContext._currentValue = undefined;
-  assert.equal(mark(0).opacity, 1);
+  wait();
+  assert.equal(wait(), 1);
 });

@@ -10,6 +10,7 @@ import { usePalette, useType } from './palette.ts';
 import { motion, opacity, space } from './tokens.ts';
 
 type Say = (key: string) => string;
+const useFadeOut = (dry: { value: number }) => useAnimatedStyle(() => ({ opacity: 1 - dry.value }));
 
 // What the head last drew (null: nothing yet): it sits inside the page turn, whose remount forgets it.
 let lastHead: string | undefined | null = null;
@@ -36,7 +37,7 @@ function HeadLine(p: { words?: string; style: object; view: GameView }) {
 function HeadOut(p: { words: string; style: object }) {
   const [gone, setGone] = useState(false);
   const dry = useDrying(0, motion.settle.duration);
-  const leaving = useAnimatedStyle(() => ({ opacity: 1 - dry.value }));
+  const leaving = useFadeOut(dry);
   useEffect(() => void setTimeout(() => setGone(true), motion.settle.duration), []);
   if (gone) return null;
   return (
@@ -71,7 +72,7 @@ const OVER = { position: 'absolute', left: 0, right: 0 } as const; // mutate-ski
 function HeadFade(p: { was?: string; words: string; style: object }) {
   const dry = useDrying();
   const arriving = useAnimatedStyle(() => ({ opacity: dry.value }));
-  const leaving = useAnimatedStyle(() => ({ opacity: 1 - dry.value }));
+  const leaving = useFadeOut(dry);
   return (
     <View>
       {p.was ? (

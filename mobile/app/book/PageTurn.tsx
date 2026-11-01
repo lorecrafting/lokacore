@@ -59,7 +59,7 @@ type Leaving = { turn: number; dir: 1 | -1; page: ReactNode; image?: SkImage };
 
 // `paper`: the shown palette's bg, the leaf's back.
 // card: the arriving page is a chapter card, which dries over the blurred picture and does not curl.
-type Props = { turn: number; dir: 1 | -1; paper: string; card?: boolean; children: ReactNode };
+type Props = { turn: number; dir: 1 | -1; paper: string; card?: boolean; children: ReactNode }; // mutate-skip: type
 type Size = { width: number; height: number };
 type SetLeaving = Dispatch<SetStateAction<Leaving | undefined>>;
 

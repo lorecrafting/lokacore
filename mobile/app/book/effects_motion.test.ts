@@ -74,6 +74,17 @@ test('the pop rises from nothing into action ink, then fades, and a later pickup
   assert.deepEqual(look(1, 1), [0, 0, color.light.action]);
 });
 
+// Breaks: reduced motion keeps the pop's rise (book-ui.md, the fade alone).
+test('reduced motion: the pop fades in place', (t) => {
+  const { at, draw } = popRig(t);
+  g.reducedMotion = true;
+  at(held(['sack']));
+  at(held(['sack', 'rope']));
+  draw.shared.at(-2)!.value = 0;
+  const box = flat(at(held(['sack', 'rope'])).find((n) => n.props?.['aria-hidden'])!.props.style);
+  assert.equal(box.transform[0].translateY, 0);
+});
+
 // Breaks: another cue (a blow) wipes a showing pop, the pop outlives its hold, or a second pickup
 // inherits the first one's timer and leaves early.
 test('a pop stays its whole length: a blow leaves it, a second pickup restarts it', (t) => {

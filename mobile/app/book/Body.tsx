@@ -201,7 +201,7 @@ export function RoomPage(p: {
         {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
         <Here view={p.view} text={p.text} open={p.open} />
       </View>
-      {p.log.length > 0 && (
+      {!!p.log.length && (
         <View>
           <LogLines lines={p.log} />
           <ItemPop view={p.view} text={p.text} />

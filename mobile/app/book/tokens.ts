@@ -143,8 +143,8 @@ export const motion = {
     duration: 220,
     easing: 'ease',
     from: 0.6,
-    hold: 1800,
-    out: 400,
+    hold: 1800, // mutate-skip: uncalibrated design value
+    out: 400, // mutate-skip: uncalibrated design value
     outEasing: 'linear',
     rise: space.sm,
   }, // a status icon arriving, scaling up from `from`; the item pop rising `rise`, then held and out -- mutate-skip: uncalibrated design value

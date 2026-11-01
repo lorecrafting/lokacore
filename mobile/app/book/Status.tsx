@@ -179,7 +179,7 @@ function useStung() {
   const still = useReducedMotion();
   const [stung, setStung] = useState(0);
   useEffect(() => {
-    let frame = 0;
+    let frame = 0; // mutate-skip: cancelling frame 0 is a no-op
     const stop = onCue((cue) => {
       if (cue.name !== 'hp_loss') return;
       const { duration, out } = motion.flash;
@@ -192,9 +192,7 @@ function useStung() {
             ? 0
             : still
               ? 1
-              : at < duration
-                ? at / duration
-                : 1 - (at - duration) / out,
+              : Math.min(at / duration, (duration + out - at) / out),
         );
         if (at < duration + out) frame = requestAnimationFrame(tick);
       });
