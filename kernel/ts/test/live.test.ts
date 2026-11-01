@@ -86,16 +86,16 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   assert.equal(sourceOf(dir, 'rooms.a.name', 'line two'), 'rooms/a.json:3');
   assert.equal(sourceOf(dir, 'room.c'), 'one.json:1');
   assert.equal(sourceOf(dir, 'room.b', 'line five'), undefined);
-  mkdirSync(join(dir, 'scenes'));
-  writeFileSync(join(dir, 'scenes/z.scene'), 'npc: a\n\na: line six\n');
-  assert.equal(sourceOf(dir, 'room.b', ''), undefined); // no words: never a blank line
-  assert.equal(sourceOf(dir, 'room.b', '  \n'), undefined);
   // Break: Alt-click on a scene line answers 404, since a scene holds neither `"key":` nor a JSON
   // string; a prompt arrives joined, a choice label as itself.
   mkdirSync(join(dir, 'scenes'));
   writeFileSync(join(dir, 'scenes/s.scene'), 'npc: maud\nmaud: First.\nmaud: Second.\n- Take it\n');
   assert.equal(sourceOf(dir, 'dialogue.s.prompt', 'First.\nSecond.'), 'scenes/s.scene:2');
   assert.equal(sourceOf(dir, 'dialogue.s.label', 'Take it'), 'scenes/s.scene:4');
+  // Break: an empty text value jumps to a scene's blank line.
+  writeFileSync(join(dir, 'scenes/z.scene'), 'npc: a\n\na: line six\n');
+  assert.equal(sourceOf(dir, 'room.b', ''), undefined);
+  assert.equal(sourceOf(dir, 'room.b', '  \n'), undefined);
   // Break: Alt-click on narration or a cutscene paragraph answers 404.
   writeFileSync(join(dir, 'scenes/n.scene'), 'npc: maud\n* Rain falls.\n');
   writeFileSync(join(dir, 'scenes/c.cut'), 'Bell one.\nBell two.\n---\n');
