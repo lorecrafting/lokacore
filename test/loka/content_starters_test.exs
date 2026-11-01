@@ -101,6 +101,7 @@ defmodule Loka.ContentStartersTest do
     dir = Path.join(tmp, "mine")
     {:ok, _} = Starters.write(dir, "cartridge", dir)
     {:ok, _} = Starters.write(dir, "items", "lamp")
+    {:ok, _} = Starters.write(dir, "quests", "errand")
     written = [%{"type" => "narrate", "text" => "Handwritten"}]
 
     for {kind, rel} <- [{"reactions", "reactions/mine.json"}, {"scenes", "scenes/mine.json"}] do
