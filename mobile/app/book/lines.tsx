@@ -1,17 +1,16 @@
-// size: allow 335, every log and entity line form, each with its drying variant
-// Entity lines, Here lines, log lines and a press's fault (their doc comments).
-import { Fragment, type ReactNode, useEffect, useRef, useState } from 'react';
+// Entity lines, log lines and a press's fault (their doc comments).
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, plain } from './model.ts';
-import { COUNT, LABEL } from './labels.ts';
+import { plain } from './model.ts';
+import { LABEL } from './labels.ts';
 import { InkText, Reanimated } from './fade.ts';
 import { haptic } from './haptic';
 import { logMark, markDrawn, type DetailLine } from './logs.ts';
 import { GiltLine } from './GiltLine.tsx';
 import { useDry } from './press.ts';
-import { lineText, subject } from './words.ts';
+import { lineText } from './words.ts';
 import { grouped, type RecapLine } from './recap.ts';
 import { Control, Tap } from './pages.tsx';
 import { narrated, note, prose, usePalette, useType } from './palette.ts';
@@ -194,79 +193,6 @@ export function AwayRecap({
           );
         })}
     </View>
-  );
-}
-
-/**
- * The room's people, then items; no headings, an empty group omitted (book-ui.md, Room page
- * anatomy).
- * - Use: RoomPage only.
- * - Rules: each group is one sentence, "Aldous, Bess, the carpenter, chandler, and cook are here."
- *   ("A and B are here.", "A crow is here.", "Two crows are here."): serial comma, the first word
- *   capitalised, each name its own link named "<name>, open"; articles, commas and "and" are plain
- *   text. A name with words shows its bare name; an article is shared by a run of different names
- *   that take it.
- * - Story: RoomPage.stories.tsx
- */
-export function Here(p: {
-  view: GameView;
-  text: (key: string) => string;
-  open: (id: string) => void;
-}) {
-  const npcs = p.view.entities.filter((e) => e.kind === 'npc');
-  const items = p.view.entities.filter((e) => e.kind !== 'npc');
-  return [
-    npcs.length > 0 && <Present key="npcs" group={npcs} text={p.text} open={p.open} />,
-    items.length > 0 && <Present key="items" group={items} text={p.text} open={p.open} />,
-  ];
-}
-
-// One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29). With name
-// words (loka-6qi): the bare name, its article written when it differs from the previous link's or
-// the name ends in the previous link's last word (a name without one breaks the run), and
-// same-name entities with a plural as one. With a carrier: "<Carrier> carries <links>." or, with
-// verb wears, "<Carrier> wears <links>." (the NPC's Look page, InsidePage), first link lowercase.
-const noun = (n?: string) => n?.split(' ').pop(); // 'cowering goblin' and 'goblin' end alike
-type Group = {
-  group: GameView['entities'];
-  text: (key: string) => string;
-  open: (id: string) => void;
-  carrier?: string;
-  verb?: 'carries' | 'wears';
-};
-// An empty group draws no sentence (a seen NPC always has worn, often []).
-export const carries = (p: Group & { carrier: string }) => p.group.length > 0 && <Present {...p} />;
-function Present(p: Group) {
-  const [c, t] = [usePalette(), useType()];
-  type Link = { id: string; name: string; article?: string; many?: true };
-  const links = p.group.flatMap((e): Link[] => {
-    const { bare, article, plural } = e.words ?? {};
-    const kind = (o: (typeof p.group)[number]) => o.words?.plural && p.text(o.words.plural); // eggs keyed egg_01..06
-    const same = plural ? p.group.filter((o) => kind(o) === kind(e)) : [e];
-    if (same[0] !== e) return []; // a later member of a collapsed group
-    const n = same.length;
-    if (n > 1) return [{ id: e.id, name: `${COUNT[n - 2] ?? n} ${p.text(plural!)}`, many: true }];
-    return [{ id: e.id, name: p.text(bare ?? e.name), article }];
-  });
-  return (
-    <Text style={prose(c, t)}>
-      {p.carrier && `${p.carrier} ${p.verb ?? 'carries'} `}
-      {links.map((l, i) => {
-        const prev = links[i - 1];
-        const article =
-          (l.article !== prev?.article || noun(l.name) === noun(prev?.name)) && l.article;
-        const first = (s: string) => (i === 0 && !p.carrier ? cap(s) : s);
-        return (
-          <Fragment key={l.id}>
-            {i > 0 && (i < links.length - 1 ? ', ' : links.length > 2 ? ', and ' : ' and ')}
-            {article && `${first(article)} `}
-            {nameLink(article ? l.name : first(l.name), () => p.open(l.id))}
-          </Fragment>
-        );
-      })}
-      {!p.carrier && subject(links.at(-1)?.name ?? '').endsWith(',') && ','}
-      {p.carrier ? '.' : links.length > 1 || links[0]?.many ? ' are here.' : ' is here.'}
-    </Text>
   );
 }
 

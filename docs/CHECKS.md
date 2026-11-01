@@ -96,7 +96,8 @@ their rules and red controls remain available for resumption.
 - `python3 bin/check_sounds.py` (`--report`, `--release`): every bundled audio file under
   `mobile/app/book/sounds` has a `manifest.json` row and every row a file; required fields are filled, the
   licence is CC0 or CC BY 4.0 and CC BY carries a credit. `--report` lists placeholders by use; `--release`
-  fails while one remains ([plan, section 14](design/effects-and-sound-plan.md)). `bin/sounds_red_controls.sh`
+  fails while one remains ([plan, section 14](design/effects-and-sound-plan.md)) and is run by hand before any
+  release, not per push: placeholders are expected until then (loka-gj82.6). `bin/sounds_red_controls.sh`
   plants each failure in a copy.
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
   nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan

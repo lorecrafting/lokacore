@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
 import { NpcPage } from '../book/Npc.tsx';
-import { pageStory } from './screen.tsx';
+import { pageStory, settled } from './screen.tsx';
 import NpcChoiceView from './views/npc-choice.json';
 
 const meta: Meta = {
@@ -43,5 +43,6 @@ export const AskedOption: StoryObj = {
     const fresh = await color('dialogue.reeve_talk.accept');
     await expect(await color('dialogue.reeve_talk.help')).not.toBe(fresh);
     await expect(await color('dialogue.reeve_talk.wrong')).toBe(fresh);
+    await settled(canvas, /Take the letter to Wat/);
   },
 };

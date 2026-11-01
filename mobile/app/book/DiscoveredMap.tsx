@@ -2,11 +2,11 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { Reanimated } from './fade.ts';
+import { Reanimated, useAnimatedStyle } from './fade.ts';
 import { LABEL } from './labels.ts';
-import { usePress, useThin } from './press.ts';
+import { useDrawn, usePress, useThin } from './press.ts';
 import { prose, usePalette, useType, type Palette, type Type } from './palette.ts';
-import { size } from './tokens.ts';
+import { motion, size } from './tokens.ts';
 
 type Props = { view: GameView; text: (key: string) => string };
 type Drawn = NonNullable<GameView['map']>;
@@ -26,10 +26,37 @@ const AIM: Record<string, At> = {
   up: { x: Math.SQRT1_2, y: -Math.SQRT1_2 },
   down: { x: Math.SQRT1_2, y: Math.SQRT1_2 },
 };
+// ponytail: Start over keeps this set, so a replay's rooms appear without ink; reset it if asked.
+// What this Map has shown since launch: the first opening draws nothing on, a reload replays nothing.
+let shown: Set<string> | undefined;
+const linkOf = (l: Drawn['links'][number]) => `${l.from}:${l.direction}`;
+function inkNew(map: Drawn) {
+  const ids = [...map.rooms.map((r) => r.id), ...map.links.map(linkOf)];
+  const fresh = new Set(shown ? ids.filter((id) => !shown!.has(id)) : []);
+  shown = new Set([...(shown ?? []), ...ids]);
+  return fresh;
+}
+
+function spread(rooms: Room[]) {
+  const low = (axis: 'x' | 'y') => Math.min(...rooms.map((r) => r[axis]));
+  const high = (axis: 'x' | 'y') => Math.max(...rooms.map((r) => r[axis]));
+  return {
+    at: (r: Room): At => ({
+      x: (r.x - low('x') + 0.5) * CELL + MARGIN,
+      y: (r.y - low('y') + 0.5) * CELL + MARGIN,
+    }),
+    box: {
+      width: (high('x') - low('x') + 1) * CELL + 2 * MARGIN,
+      height: (high('y') - low('y') + 1) * CELL + 2 * MARGIN,
+    },
+  };
+}
+
 /**
  * The Map page's drawing: dots and lines, no actions and no names inside it (owner 2026-10-30).
  * - Use: the Map page.
- * - Rules: a filled dot per visited room on the shown level, the current one ringed; a line per
+ * - Rules: what is new since the Map last showed draws on over `motion.settle`, silent.
+ *   A filled dot per visited room on the shown level, the current one ringed; a line per
  *   known exit; each unexplored exit a short line to an open dot, an up or down one drawn
  *   aslant. A tapped dot's room name, or "Unexplored", shows in the caption under the drawing.
  *   Every dot is a touch-sized button named by its room title. Colours are the minimap's roles.
@@ -43,28 +70,27 @@ export function DiscoveredMap({ view, text }: Props) {
   const current = map.rooms.find((r) => r.id === view.place.id);
   const [level, setLevel] = useState(current?.z ?? 0);
   const [caption, setCaption] = useState<string | null>(null);
+  const [fresh] = useState(() => inkNew(map)); // a level step clears it: its marks remount
   const levels = [...new Set(map.rooms.map((r) => r.z))].sort((a, b) => a - b);
   const rooms = map.rooms.filter((r) => r.z === level);
-  const low = (axis: 'x' | 'y') => Math.min(...rooms.map((r) => r[axis]));
-  const high = (axis: 'x' | 'y') => Math.max(...rooms.map((r) => r[axis]));
-  const at = (r: Room): At => ({
-    x: (r.x - low('x') + 0.5) * CELL + MARGIN,
-    y: (r.y - low('y') + 0.5) * CELL + MARGIN,
-  });
+  const { at, box } = spread(rooms);
   const dot = (r: Room) => (
-    <Dot key={r.id} c={c} at={at(r)} name={text(r.title)} here={r === current} tap={setCaption} />
+    <Dot
+      key={r.id}
+      c={c}
+      at={at(r)}
+      name={text(r.title)}
+      here={r === current}
+      fresh={fresh.has(r.id)}
+      tap={setCaption}
+    />
   );
   return (
     <View>
-      {levelBar(c, t, level, levels, (next) => (setLevel(next), setCaption(null)))}
+      {levelBar(c, t, level, levels, (next) => (fresh.clear(), setLevel(next), setCaption(null)))}
       <Follow x={current?.z === level ? at(current).x - CELL / 2 - MARGIN : undefined}>
-        <View
-          style={{
-            width: (high('x') - low('x') + 1) * CELL + 2 * MARGIN,
-            height: (high('y') - low('y') + 1) * CELL + 2 * MARGIN,
-          }}
-        >
-          {lines(c, map, rooms, at)}
+        <View style={box}>
+          {lines(c, map, rooms, at, fresh)}
           {stubs(c, map, rooms, at, text, setCaption)}
           {rooms.map(dot)}
         </View>
@@ -125,11 +151,12 @@ function levelBar(
 }
 
 // Each known exit between two rooms on this level, centre to centre.
-function lines(c: Palette, map: Drawn, rooms: Room[], at: (r: Room) => At) {
+function lines(c: Palette, map: Drawn, rooms: Room[], at: (r: Room) => At, fresh: Set<string>) {
   return map.links.map((link) => {
     const a = rooms.find((r) => r.id === link.from),
       b = rooms.find((r) => r.id === link.to);
-    return a && b && <Line key={`${link.from}:${link.direction}`} c={c} from={at(a)} to={at(b)} />;
+    const id = linkOf(link);
+    return a && b && <Line key={id} c={c} from={at(a)} to={at(b)} fresh={fresh.has(id)} />;
   });
 }
 
@@ -163,20 +190,31 @@ function stubs(
   });
 }
 
-function Line(p: { c: Palette; from: At; to: At }) {
+function Line(p: { c: Palette; from: At; to: At; fresh?: boolean }) {
   const [dx, dy] = [p.to.x - p.from.x, p.to.y - p.from.y];
   const length = Math.hypot(dx, dy);
+  const rotate = `${(Math.atan2(dy, dx) * 180) / Math.PI}deg`;
+  const drawn = useDrawn(!!p.fresh, motion.settle);
+  const trim = useAnimatedStyle(() => ({
+    transform: [
+      { rotate },
+      { translateX: (drawn.value - 1) * (length / 2) }, // from its near end
+      { scaleX: drawn.value },
+    ],
+  }));
   return (
-    <View
-      style={{
-        position: 'absolute',
-        left: (p.from.x + p.to.x) / 2 - length / 2,
-        top: (p.from.y + p.to.y) / 2 - size.rule / 2,
-        width: length,
-        height: size.rule,
-        backgroundColor: p.c.dim,
-        transform: [{ rotate: `${(Math.atan2(dy, dx) * 180) / Math.PI}deg` }],
-      }}
+    <Reanimated.View
+      style={[
+        {
+          position: 'absolute',
+          left: (p.from.x + p.to.x) / 2 - length / 2,
+          top: (p.from.y + p.to.y) / 2 - size.rule / 2,
+          width: length,
+          height: size.rule,
+          backgroundColor: p.c.dim,
+        },
+        trim,
+      ]}
     />
   );
 }
@@ -191,6 +229,12 @@ const hit = {
   justifyContent: 'center',
 } as const;
 
+const dotInk = (p: { c: Palette; here?: boolean; open?: boolean }) => ({
+  borderWidth: p.open || p.here ? size.speechBar : 0,
+  borderColor: p.here ? p.c.action : p.c.dim,
+  backgroundColor: p.open ? p.c.bg : p.c.fg,
+});
+
 function Dot(p: {
   c: Palette;
   at: At;
@@ -198,11 +242,14 @@ function Dot(p: {
   label?: string;
   here?: boolean;
   open?: boolean;
+  fresh?: boolean;
   tap: (caption: string) => void;
 }) {
   const r = p.here ? HERE : DOT;
   const press = usePress();
   const ink = useThin(press, false);
+  const drawn = useDrawn(!!p.fresh, motion.settle);
+  const trim = useAnimatedStyle(() => ({ transform: [{ scale: drawn.value }] }));
   return (
     <Pressable
       {...press.handlers}
@@ -216,17 +263,7 @@ function Dot(p: {
       }}
     >
       <Reanimated.View
-        style={[
-          {
-            width: r * 2,
-            height: r * 2,
-            borderRadius: r,
-            borderWidth: p.open || p.here ? size.speechBar : 0,
-            borderColor: p.here ? p.c.action : p.c.dim,
-            backgroundColor: p.open ? p.c.bg : p.c.fg,
-          },
-          ink,
-        ]}
+        style={[{ width: r * 2, height: r * 2, borderRadius: r, ...dotInk(p) }, ink, trim]}
       />
     </Pressable>
   );
