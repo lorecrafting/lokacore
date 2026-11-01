@@ -196,7 +196,6 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
     },
   });
   const owned = [
-    carried({ escort: {} }),
     { quests: { q: { deadline: { fact, trust_fact: other } } } },
     { quests: { q: { deadline: { fact: other, trust_fact: fact } } } },
     { quests: { q: { expedition: { survived_fact: fact, faction: other } } } },
@@ -211,6 +210,7 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
   // Break: a term with no reopen proof (#544 removed them) comes back and blocks a harmless cheat.
   const accepted = [
     carried({}),
+    carried({ escort: {} }),
     carried({ receive: { item: 'it' } }),
     {
       dialogues: {

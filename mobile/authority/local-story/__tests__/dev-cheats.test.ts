@@ -151,6 +151,35 @@ for (const [name, room] of [
     openGame(a.db, sampler, { ...a.host, dev: true }); // the refusal is the host's, not the save's
   });
 
+// Break: the refusal reads the command another way than replay, so an edited save still opens.
+for (const [form, edit] of [
+  [
+    'a duplicate type',
+    (c: string) => c.replace('"type":"dev_go_to_room"', '"type":"look","type":"dev_go_to_room"'),
+  ],
+  [
+    'a duplicate payload',
+    (c: string) => c.replace('"payload":', '"payload":{"type":"look"},"payload":'),
+  ],
+  ['an escaped type', (c: string) => c.replace('"type":"dev_', '"type":"\\u0064ev_')],
+] as const)
+  test(`a release does not open a cheat hidden by ${form}`, () => {
+    const a = sqliteHost();
+    const game = openGame(a.db, bundle, { ...a.host, dev: true });
+    const to = { room: ref('room', 'boar_run') };
+    assert.equal(answer(game.invoke(cheat('dev_go_to_room', to, game.view().token))), 'accepted');
+    const { command } = a.db.getFirstSync<{ command: string }>(
+      `SELECT command FROM receipt WHERE command LIKE '%dev_go_to_room%'`,
+    )!;
+    const forged = edit(command);
+    assert.notEqual(forged, command);
+    a.db.runSync('UPDATE receipt SET command=? WHERE command=?', forged, command);
+    assert.throws(
+      () => openGame(a.db, bundle, a.host),
+      (e: any) => e.cause.kind === 'save_corrupt',
+    );
+  });
+
 // Break: `adopt` loads without the host's dev flag, so the settled cheat reads as a corrupt save.
 test('a dev cheat retried after a lost COMMIT acknowledgement replays', () => {
   const a = sqliteHost();

@@ -36,16 +36,10 @@ const heldInPlace = (world: World, actor: CharacterId, body: EntityId, here: Ent
 
 type SetFact = Extract<Command['payload'], { type: 'dev_set_fact' }>;
 
-// A reopen checks these against its mechanic's receipts (mobile escort-save, expedition-save,
-// deadline-save), so a cheated value would leave the save unopenable.
+// A reopen checks these against its mechanic's receipts (mobile expedition-save, deadline-save), so a cheated value would leave the save unopenable.
 const provenFacts = (world: World) => {
-  const { dialogues, quests } = world.cartridge;
+  const { quests } = world.cartridge;
   return [
-    ...values(dialogues ?? {}).flatMap((d) =>
-      values(d.choices).flatMap((c) =>
-        c.escort ? (c.steps ?? []).flatMap((s) => (s.op === 'fact.assign' ? [s.fact] : [])) : [],
-      ),
-    ),
     ...values(quests ?? {}).flatMap((q) =>
       q.expedition ? [q.expedition.survived_fact, q.expedition.faction] : [],
     ),
