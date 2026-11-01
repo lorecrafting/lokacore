@@ -83,8 +83,8 @@ export function sourceOf(source: string, key: string, words?: string) {
     }
   };
   const defined = find((l) => l.includes(`"${key}":`));
-  if (defined || words === undefined) return defined;
-  const first = words.split('\n')[0];
+  const first = words?.trim().split('\n')[0];
+  if (defined || !first) return defined;
   return (
     find((l) => l.includes(JSON.stringify(words))) ??
     find(

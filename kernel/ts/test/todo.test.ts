@@ -49,17 +49,18 @@ test('a scene placeholder is listed in every form the release compile refuses', 
     join(dir, 'scenes/a.scene'),
     'npc: elder\nwhen: met\nelder: Written line.\nelder:  ~\n- Take it\nelder: ~\ngives: bowl\n',
   );
-  // Break: narration, a second speaker or a cutscene paragraph is not read; a verb is counted.
+  // Break: narration, a second speaker or a cutscene paragraph is not read; a verb is counted, or
+  // a `~` in a verb's key (`sets: tally ~`, which the compile refuses) is not listed.
   writeFileSync(
     join(dir, 'scenes/b.scene'),
-    'npc: elder\nwith: bram\n* ~\nbram:  ~\n- Go\n  sets: ~\n  quest: accept ~\n  * one\n',
+    'npc: elder\nwith: bram\n* ~\nbram:  ~\n- Go\n  sets: tally ~\n  quest: accept ~\n  sets: lit\n  * one\n',
   );
   writeFileSync(join(dir, 'scenes/c.cut'), 'one\n~\n\n~\n---\n');
   writeFileSync(join(dir, 'scenes/done.scene'), 'npc: elder\nelder: All ~ written.\n');
   writeFileSync(join(dir, 'text.json'), '{"a": "one\\n ~"}');
   assert.deepEqual(todo(dir), [
     { file: 'scenes/a.scene', words: 4, placeholders: ['line 4', 'line 6'] },
-    { file: 'scenes/b.scene', words: 2, placeholders: ['line 3', 'line 4'] },
+    { file: 'scenes/b.scene', words: 2, placeholders: ['line 3', 'line 4', 'line 6', 'line 7'] },
     { file: 'scenes/c.cut', words: 1, placeholders: ['line 2', 'line 4'] },
     { file: 'text.json', words: 1, placeholders: ['a'] },
   ]);

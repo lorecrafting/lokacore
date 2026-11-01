@@ -1,4 +1,4 @@
-# size: allow 330, one line clause per verb; each is small, and the verbs read together
+# size: allow 340, one line clause per verb; each is small, and the verbs read together
 defmodule Loka.Content.SceneFiles do
   @moduledoc """
   Scene files: `scenes/<key>.scene` (or `dialogues/<key>.scene`) is one dialogue as plain text,
@@ -184,7 +184,7 @@ defmodule Loka.Content.SceneFiles do
        bad}
 
   defp line({"with: " <> npc, _} = at, {%{"npc" => _} = d, nil, bad}) do
-    if npc =~ ~r/\s/,
+    if not key?(npc),
       do: refuse(at, d, nil, bad),
       else: {put_in(d, ["roles", npc], %{"role" => "npc", "npc" => npc}), nil, bad}
   end
@@ -214,15 +214,15 @@ defmodule Loka.Content.SceneFiles do
   end
 
   defp line({"sets: " <> what, _} = at, {%{"npc" => _} = d, cur, bad}) when cur != nil do
-    case String.split(what) do
-      [fact] -> {sets(d, cur, fact, true), cur, bad}
-      [fact, value] -> {sets(d, cur, fact, value(value)), cur, bad}
-      _ -> refuse(at, d, cur, bad)
+    case assignment(String.split(what)) do
+      {fact, value} -> {sets(d, cur, fact, value), cur, bad}
+      nil -> refuse(at, d, cur, bad)
     end
   end
 
   defp line({"quest: " <> what, n} = at, {%{"npc" => _} = d, cur, bad}) when cur != nil do
-    quest(String.split(what), {at, n}, d, cur, bad)
+    words = String.split(what)
+    quest(if(key?(List.last(words, "")), do: words, else: []), {at, n}, d, cur, bad)
   end
 
   defp line({"* " <> words, _}, {%{"npc" => _} = d, cur, bad}),
@@ -268,6 +268,18 @@ defmodule Loka.Content.SceneFiles do
   end
 
   defp quest(_, {at, _}, d, cur, bad), do: refuse(at, d, cur, bad)
+
+  defp assignment([fact]), do: assignment(fact, true)
+  defp assignment([fact, value]), do: assignment(fact, value(value))
+  defp assignment(_), do: nil
+
+  # `007` stays a word here; its schema decides.
+  defp assignment(fact, value) do
+    if key?(fact) and (not is_binary(value) or value =~ ~r/^[a-z0-9][a-z0-9_.]*$/),
+      do: {fact, value}
+  end
+
+  defp key?(word), do: word =~ ~r/^[a-z][a-z0-9_.]*$/
 
   defp speaker?(d, name), do: get_in(d, ["roles", name, "role"]) == "npc"
 

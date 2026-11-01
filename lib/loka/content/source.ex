@@ -1,4 +1,4 @@
-# size: allow 355, the scene-file and cutscene entries, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 370, the scene-file and cutscene entries, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -47,13 +47,14 @@ defmodule Loka.Content.Source do
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
     {files, diags} = read(dir)
+    replaced = steps_over_cut(files)
     files = SceneFiles.merge(files)
     untriggered = untriggered(files)
     {files, opened} = Areas.split(files, dirs())
     {files, repeats} = Areas.unique(files)
     {files, faults} = Extends.flatten(files)
     {files, located} = shortcuts(files, opened ++ repeats)
-    {files, diags ++ untriggered ++ located ++ Enum.map(faults, &extends_diag/1)}
+    {files, diags ++ replaced ++ untriggered ++ located ++ Enum.map(faults, &extends_diag/1)}
   end
 
   defp shortcuts(files, faults) do
@@ -91,7 +92,8 @@ defmodule Loka.Content.Source do
       for {n, text, why} <- bad do
         speaker = if value["npc"], do: %{"npc" => value["npc"]}, else: %{}
         data = Map.merge(speaker, %{"line" => n, "text" => text, "why" => why})
-        diag("SCHEMA_VIOLATION", at(rel, []), data)
+        bad = diag("SCHEMA_VIOLATION", at(rel, []), data)
+        if why == "cut_scene_line", do: Map.put(bad, "severity", "warning"), else: bad
       end
 
     {{rel, id, value}, diags}
@@ -203,10 +205,22 @@ defmodule Loka.Content.Source do
   defp location(rel, []), do: rel
   defp location(rel, steps), do: {rel, steps}
 
+  # A merge would let `steps` in the JSON replace every word of the `.cut` beside it, silently.
+  defp steps_over_cut(files) do
+    for {rel, {:scene, key, _} = id, _} <- files,
+        String.ends_with?(rel, ".cut"),
+        {json, ^id, %{"steps" => _}} <- files,
+        json != rel do
+      diag("SCHEMA_VIOLATION", at(json, ["steps"]), %{"why" => "cut_steps", "key" => key})
+    end
+  end
+
   # A `.cut` with no `on` would never start, and the schema cannot say so plainly.
   defp untriggered(files) do
     for {rel, {:scene, key, _}, value} <- files,
         String.ends_with?(rel, ".cut"),
+        # A bad file name has its own error, and its `.json` could not help.
+        key =~ ~r/^[a-z][a-z0-9_.]*$/,
         is_map(value) and not is_map_key(value, "on") do
       data = %{"why" => "cut_no_trigger", "key" => key, "line" => 1}
       diag("SCHEMA_VIOLATION", at(rel, []), data)

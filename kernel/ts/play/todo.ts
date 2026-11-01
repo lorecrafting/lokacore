@@ -36,6 +36,10 @@ const catalog = (value: unknown): Prose[] =>
 // `when:`, `with:`, `gives:`, `sets:` and `quest:` being keys (lib/loka/content/scene_files.ex).
 const sceneLines = (text: string): Prose[] =>
   text.split('\n').flatMap((raw, i): Prose[] => {
+    // A `~` standing for a key still needs writing, and the compile refuses it until then.
+    if (/^(?:npc|when|with|gives|sets|quest):(?:\s.*)?\s~$/.test(raw.trim())) {
+      return [[`line ${i + 1}`, '~']];
+    }
     const said = /^(?:- |\* |(?!npc:|when:|with:|gives:|sets:|quest:)[^:\s]+:\s)(.*)$/.exec(
       raw.trim(),
     );

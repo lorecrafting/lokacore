@@ -36,8 +36,11 @@ maud: line one
 `when:` names a true/false fact; a choice is keyed by its words (`choice_one`). `gives:` hands
 the player that item from the scene's NPC: the NPC must hold it (`"location": {"in": "npc", "npc":
 "maud"}`, or moved there in play; otherwise the choice stays hidden and the compile warns) and
-`cartridge.json` must lock `containment`, which owns `item_acquired`. What the scene cannot say (a keyword, a riddle) goes in
+`cartridge.json` must name `containment` under `requires.capabilities`. What the scene cannot say (a keyword, a riddle) goes in
 `dialogues/<key>.json` beside it. An error names the scene file and line.
+
+Everything a scene names must exist: a fact in `facts.json`, an NPC, item or quest as its own JSON
+file.
 
 More lines a scene can hold:
 
@@ -89,7 +92,30 @@ A `.cut` file cannot say what starts it, and a cutscene with no trigger never pl
 { "on": { "story_point": "bridge_done", "outcome": "carry" }, "control": "modal" }
 ```
 
-Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file.
+`bridge_done` is a story point, and it has no file of its own: a choice in a scene that resolves a
+quest names it. Take a scene whose every choice ends the quest:
+
+```
+npc: maud
+
+maud: line one
+- carry
+  quest: resolve bridge_job
+  maud: line of reply
+- leave
+  quest: resolve bridge_job
+  maud: line of reply
+```
+
+and add `dialogues/<key>.json` beside it, with the point and the outcome this choice reaches:
+
+```json
+{ "choices": { "carry": { "story_point": "bridge_done/carry" } } }
+```
+
+Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file. A `~`
+holds the place of words only: in a `sets:` or `quest:` line it is listed too, but the compile
+refuses it until you write the key.
 
 ## Jump to a beat
 

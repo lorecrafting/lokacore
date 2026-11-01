@@ -883,7 +883,8 @@ build. The author tools below are reachable only in that bundle (a production ex
   (`placeholder_text` at the key's path) unless `--allow-placeholders` is given.
 - **Scene files.** `scenes/*.scene` (or `dialogues/*.scene`) is a plain-text form of one dialogue,
   and `scenes/*.cut` of one modal scene's steps (its `on` and `control` come from `scenes/<key>.json`,
-  refused when missing),
+  refused when missing, as is `steps` in that JSON, which would replace the words; a scene-format
+  line in the `.cut` warns and stays words),
   lowered by [Source shortcuts](#source-shortcuts) into today's dialogue or scene JSON and `text.json`
   keys before any other pass; what it cannot say stays in a JSON file of the same key. Errors name the
   scene file and line, with `data.why` for a bad line (`npc` beside it once known); the other lines

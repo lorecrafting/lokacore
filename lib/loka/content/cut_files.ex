@@ -39,8 +39,16 @@ defmodule Loka.Content.CutFiles do
       |> Enum.with_index(1)
       |> Enum.reject(&match?({"", _}, &1))
 
-    {found, _, bad} = Enum.reduce(numbered, {[], nil, misplaced(numbered)}, &paragraph/2)
+    start = misplaced(numbered) ++ scene_lines(numbered)
+    {found, _, bad} = Enum.reduce(numbered, {[], nil, start}, &paragraph/2)
     {Enum.reverse(found), bad}
+  end
+
+  # Legal words, but a likely mistake: Source reports these as warnings.
+  defp scene_lines(numbered) do
+    for {line, n} <- numbered, line =~ ~r/^(- |\* |(npc|when|with|gives|sets|quest): )/ do
+      {n, String.replace_invalid(line), "cut_scene_line"}
+    end
   end
 
   defp paragraph({"---", _}, acc), do: acc

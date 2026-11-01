@@ -119,6 +119,7 @@ defmodule Loka.ContentSceneVerbsTest do
         with_late: {"npc: maud\nmaud: hi\n- Go\n  with: bram\n", [{4, "misplaced_header"}]},
         gives_second_speaker:
           {"npc: maud\nwith: bram\nmaud: hi\n- Go\n  gives: bram\n", [{5, "gives_speaker"}]},
+        with_placeholder: {"npc: maud\nwith: ~\nmaud: hi\n", [{2, "bad_with"}]},
         unknown_speaker: {"npc: maud\nbram: hi\n", [{2, "wrong_speaker"}]},
         refused_gives:
           {"npc: maud\nmaud: hi\n- Go\n- Go\n  gives: maud\n",
@@ -200,6 +201,161 @@ defmodule Loka.ContentSceneVerbsTest do
              {"text.json", unkeyed},
              {"scenes/bell_rung.json", head}
            ]) == {:ok, bytes, []}
+  end
+
+  # Break: `steps` beside a `.cut` replaces its words with no error (written text lost).
+  test "steps in the JSON beside a cutscene are refused", %{tmp_dir: tmp} do
+    write(tmp, "scenes/a.cut", "one\n---\n")
+    write(tmp, "scenes/a.json", ~s({"on": {"quest": "q"}, "steps": [{"type": "end"}]}))
+    {_, diags} = Source.load(tmp)
+    assert [%{"severity" => "error", "data" => %{"why" => "cut_steps"}} = diag] = diags
+    assert diag["path"] == "scenes/a.steps"
+    [said] = Content.explained(diags, tmp)
+    assert said =~ "scenes/a.json"
+    assert said =~ "scenes/a.cut"
+  end
+
+  # Break: a mistyped key or a `~` in its place is blamed on the file's name, or passes the parser.
+  for {line, want} <- [
+        {"sets: tally ~", "bad_sets"},
+        {"sets: tally +1", "bad_sets"},
+        {"sets: Tally 1", "bad_sets"},
+        {"quest: accept ~", "bad_quest"},
+        {"quest: resolve ~", "bad_quest"},
+        {"quest: accept Job", "bad_quest"}
+      ] do
+    test "a scene key line refuses #{line}", %{tmp_dir: tmp} do
+      write(tmp, "scenes/a.scene", "npc: maud\nmaud: hi\n- Go\n  #{unquote(line)}\n")
+      {_, diags} = Source.load(tmp)
+      assert [%{"data" => %{"line" => 4, "why" => unquote(want)}}] = diags
+      [said] = Content.explained(diags, tmp)
+      refute said =~ "file's name"
+    end
+  end
+
+  # Break: a pattern fault deep in a file is blamed on the file's name, or a bad file name loses
+  # that message (or gains a `.cut` trigger error telling the writer to add a bad-named JSON).
+  test "only a file's own name gets the file-name message", %{tmp_dir: tmp} do
+    write(tmp, "scenes/a.scene", "npc: maud\nwhen: Not A Key\nmaud: hi\n- Go\n")
+    write(tmp, "scenes/Bad-Name.cut", "one\n---\n")
+    {:error, diags} = Content.compile(tmp)
+    said = Content.explained(diags, tmp)
+    assert [named] = Enum.filter(said, &(&1 =~ "file's name"))
+    assert named =~ "Bad-Name.cut"
+    refute Enum.any?(said, &(&1 =~ "Bad-Name.json"))
+    assert Enum.any?(said, &(&1 =~ "scenes/a.scene:2"))
+  end
+
+  # Break: a scene-format line in a cutscene ships as prose unnoticed, is an error, or plain prose
+  # with a colon warns.
+  test "a scene line in a cutscene warns and stays words", %{tmp_dir: tmp} do
+    write(tmp, "scenes/a.cut", "- Go\n\nnpc: maud\n\nThe sign says: wait\n---\n")
+    write(tmp, "scenes/a.json", ~s({"control": "modal", "on": {"quest": "q"}}))
+    {files, diags} = Source.load(tmp)
+
+    assert [{1, "warning"}, {3, "warning"}] ==
+             Enum.map(diags, &{&1["data"]["line"], &1["severity"]})
+
+    assert Enum.all?(diags, &(&1["data"]["why"] == "cut_scene_line"))
+    {_, _, value} = List.keyfind(files, "scenes/a.cut", 0)
+    assert length(value["steps"]) == 5
+    assert hd(Content.explained(diags, tmp)) =~ "scenes/a.cut:1"
+  end
+
+  # Breaks (gate): the new verbs' lowering differs in any byte from the dialogue JSON they stand for.
+  test "the scene verbs compile byte-identical to their JSON form" do
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+    npc = dir |> Path.join("npcs/bram.json") |> File.read!() |> JSON.decode!()
+
+    words = %{
+      "dialogue.verbs.prompt" => "Rain falls.\nline one\nline two",
+      "dialogue.verbs.choices.go_on.label" => "Go on",
+      "dialogue.verbs.choices.go_on.narration" => "line three\nHe nods.",
+      "dialogue.verbs.choices.stay.label" => "Stay",
+      "dialogue.verbs.choices.stay.narration" => "line four"
+    }
+
+    json = %{
+      "npc" => "bram",
+      "roles" => %{
+        "bram" => %{"role" => "npc", "npc" => "bram"},
+        "maud" => %{"role" => "npc", "npc" => "maud"}
+      },
+      "prompt" => "dialogue.verbs.prompt",
+      "choices" => %{
+        "go_on" => %{
+          "label" => "dialogue.verbs.choices.go_on.label",
+          "narration" => "dialogue.verbs.choices.go_on.narration",
+          "accept" => "lantern",
+          "steps" => [
+            %{"op" => "fact.assign", "fact" => "bell_heard", "value" => true},
+            %{"op" => "fact.assign", "fact" => "search_plan", "value" => "player_led"}
+          ]
+        },
+        "stay" => %{
+          "label" => "dialogue.verbs.choices.stay.label",
+          "narration" => "dialogue.verbs.choices.stay.narration"
+        }
+      }
+    }
+
+    maud = {"npcs/maud.json", npc}
+    json_form = [maud, {"text.json", &Map.merge(&1, words)}, {"dialogues/verbs.json", json}]
+    assert {:ok, bytes, warnings} = Loka.ContentSource.compile(dir, json_form)
+    assert bytes =~ "He nods."
+
+    write(dir, "scenes/verbs.scene", """
+    npc: bram
+    with: maud
+
+    * Rain falls.
+    bram: line one
+    maud: line two
+    - Go on
+      sets: bell_heard
+      sets: search_plan player_led
+      quest: accept lantern
+      maud: line three
+      * He nods.
+    - Stay
+      bram: line four
+    """)
+
+    assert Loka.ContentSource.compile(dir, [maud]) == {:ok, bytes, warnings}
+  end
+
+  # Break: a guide example stops compiling when copied literally. The test adds only what the guide
+  # says must exist elsewhere: the facts, NPC, item, quest and the NPC's hold on the item.
+  test "the guide's scene examples compile as written" do
+    guide = File.read!("docs/guides/writing-the-game.md")
+    [_, section] = String.split(guide, "## Write a scene\n")
+    [section, _] = String.split(section, "## Jump to a beat")
+    fences = for [_, body] <- Regex.scan(~r/^```\w*\n(.*?)^```$/ms, section), do: body
+
+    rels = ~w(first.scene second.scene third.cut third.json point.scene)
+    files = Enum.map(rels, &"scenes/#{&1}") ++ ["dialogues/point.json"]
+    assert length(fences) == length(files)
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+    File.mkdir_p!(Path.join(dir, "scenes"))
+    for {rel, body} <- Enum.zip(files, fences), do: File.write!(Path.join(dir, rel), body)
+
+    fact = fn type ->
+      %{"version" => 1, "value_type" => type, "scopes" => ["player"], "meaning" => "x"}
+    end
+
+    bool = fact.(%{"type" => "bool", "default" => false})
+    mood = fact.(%{"type" => "enum", "values" => ["calm", "wary"], "default" => "wary"})
+    facts = %{"met_maud" => bool, "door_open" => bool, "mood" => mood}
+    json = &(Path.join([dir, &1]) |> File.read!() |> JSON.decode!())
+
+    assert {:ok, _, []} =
+             Loka.ContentSource.compile(dir, [
+               {"facts.json", &update_in(&1, ["facts"], fn f -> Map.merge(f, facts) end)},
+               {"npcs/maud.json", json.("npcs/bram.json")},
+               {"quests/bridge_job.json", json.("quests/lantern.json")},
+               {"items/bowl.json",
+                Map.put(json.("items/lantern.json"), "location", %{"in" => "npc", "npc" => "maud"})}
+             ])
   end
 
   # Break: a paragraph splits or merges wrongly, `---` lowers to anything but one await_ack before
