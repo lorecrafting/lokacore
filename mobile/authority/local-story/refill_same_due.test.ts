@@ -53,9 +53,10 @@ function compiled(edit: Edit) {
 
 const hpOf = (w: World) => gameView(w).resources!.find((r) => r.resource.key === 'hp')!.current;
 
+type Step = 'attack' | 'pulse' | 'long';
 /** Walks `plan` once per invocation id prefix: every step saves, also after a reopen and a cold
  * reopen, one more pulse then saves (a fault here would be for good); the final state of each. */
-function everyPrefix(c: ReturnType<typeof compiled>, plan: ('attack' | 'pulse')[]) {
+function everyPrefix(c: ReturnType<typeof compiled>, plan: Step[]) {
   const finals: { hp: number; level: number }[] = [];
   for (let i = 0; i < 16; i++) {
     const prefix = i.toString(16).repeat(8);
@@ -81,9 +82,9 @@ function everyPrefix(c: ReturnType<typeof compiled>, plan: ('attack' | 'pulse')[
           input,
         }),
       );
-    const pulse = () => {
+    const pulse = (by = 150) => {
       const from = story.world().state.clock;
-      saved(story.elapsed({ expected_run_id: story.runId(), from, until: from + 150 }));
+      saved(story.elapsed({ expected_run_id: story.runId(), from, until: from + by }));
     };
     invoke('move', [], { direction: 'east' });
     const target =
@@ -91,7 +92,7 @@ function everyPrefix(c: ReturnType<typeof compiled>, plan: ('attack' | 'pulse')[
       Object.keys(c.fresh.state.created ?? {})[0]!;
     for (const s of plan) {
       if (s === 'attack') invoke('attack', [target], {});
-      else pulse();
+      else pulse(s === 'long' ? 600 : 150);
     }
     const final = {
       hp: hpOf(story.world()),
@@ -108,12 +109,18 @@ function everyPrefix(c: ReturnType<typeof compiled>, plan: ('attack' | 'pulse')[
   }
   return finals;
 }
+// A move's own cost holds the pool but not the body; a rule that refunds it joins the cost.
+test('a refill of the pool a move just paid saves', () => {
+  const refund: Edit = (d) =>
+    rule(d, 'refund', {
+      on: { event: 'entity_entered_room', room: 'pit' },
+      steps: [{ op: 'resource.adjust', resource: 'mv', by: 1 }],
+    });
+  assert.equal(everyPrefix(compiled(refund), []).length, 16);
+});
 const hps = (finals: { hp: number }[]) =>
   [...new Set(finals.map((f) => f.hp))].sort((a, b) => a - b);
-const fight = (rounds: number): ('attack' | 'pulse')[] => [
-  'attack',
-  ...Array<'pulse'>(rounds).fill('pulse'),
-];
+const fight = (rounds: number): Step[] => ['attack', ...Array<'pulse'>(rounds).fill('pulse')];
 
 const CAPS = 'cartridge.json';
 const LINE = 'levelling.level_up';
@@ -217,7 +224,7 @@ const delayed = (after: number) => ({
 
 // Each row breaks when the refill neither joins the body's holder nor holds the body itself: the
 // same-due job takes another group, conflicting_write, and the host resends that due for good.
-const ORDERS: [string, Edit, ('attack' | 'pulse')[], number][] = [
+const ORDERS: [string, Edit, Step[], number][] = [
   ['a status tick, a kill with no bite (odd round)', edits(sore, rat(4)), fight(1), 2],
   ['a status tick, a kill after a bite (even round)', edits(sore, rat(8)), fight(2), 2],
   ['a bleed tick, a kill after a bite', edits(rat(8), wounding), fight(2), 2],
@@ -261,6 +268,7 @@ const DEATHS: [string, Edit, number][] = [
     2,
   ],
   ['an attack_result rule', (d) => rule(d, 'hit', onAttack), 1],
+  ['a delayed rule', (d) => rule(d, 'later', delayed(150)), 1],
 ];
 for (const [name, edit, level] of DEATHS)
   test(`${name} in a death round leaves the authored return`, () => {
@@ -270,3 +278,28 @@ for (const [name, edit, level] of DEATHS)
     assert.deepEqual(hps(finals), [4], JSON.stringify(finals));
     assert.ok(finals.every((f) => f.level === level));
   });
+
+// Breaks: a death bars every refill after it in the advance, not only one at its moment.
+test('a delayed refill due after the death in one advance still raises the return', () => {
+  const lethal = rat(100, { chance: 100, damage_min: 99, damage_max: 99 });
+  const low: Edit = (_, json) => json(CAPS, (o) => (o.world.death.restore.hp = 4));
+  const later: Edit = (d) => rule(d, 'later', delayed(450));
+  const finals = everyPrefix(compiled(edits(lethal, low, later)), ['attack', 'long']);
+  assert.deepEqual(hps(finals), [10], JSON.stringify(finals));
+});
+
+// Breaks: a delayed rule's stand-in cause reads as dated before the death, so the status skips it.
+test('a delayed status due with the death still lands on the returned body', () => {
+  const lethal = rat(100, { chance: 100, damage_min: 99, damage_max: 99 });
+  const later: Edit = (d) => {
+    rule(d, 'later', {
+      on: { event: 'entity_entered_room', room: 'pit' },
+      after: 150,
+      steps: [{ op: 'status.apply', status: 'sore' }],
+    });
+  };
+  const noEntry: Edit = (d) => rmSync(join(d, 'reactions/sore.json'));
+  const low: Edit = (_, json) => json(CAPS, (o) => (o.world.death.restore.hp = 4));
+  const finals = everyPrefix(compiled(edits(sore, noEntry, lethal, low, later)), fight(2));
+  assert.deepEqual(hps(finals), [3, 4], JSON.stringify(finals));
+});
