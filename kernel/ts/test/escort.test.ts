@@ -404,6 +404,17 @@ test('an escort choice cannot bind the stranger in place of the authored child',
   assert.equal(a.flag('homeward_started'), false);
 });
 
+// Breaks: a start replaces a live relation, and only the retired row may be replaced.
+test('a start refuses while the escort it would replace is still live', () => {
+  const a = setup();
+  a.ready();
+  const before = a.world();
+  a.choose('rescue');
+  const escorts = { [before.character]: relation(a.world()) };
+  a.set({ ...before, state: { ...before.state, escorts } });
+  a.choose('rescue', 'invalid_state');
+});
+
 // Breaks: Rejoin trusts a surviving relation after its retained original choice no longer binds the same NPC.
 test('Rejoin refuses a relation whose original accepted choice names a different NPC', () => {
   const a = setup();

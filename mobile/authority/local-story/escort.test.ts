@@ -1,4 +1,4 @@
-// size: allow 710, every reopen case here shares one SQLite setup() and its forged-row table
+// size: allow 740, every reopen case here shares one SQLite setup() and its forged-row table
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -663,6 +663,40 @@ test('retained escort identity, physical state and own receipts reject corruptio
           .run(JSON.stringify(response), r.command_id);
       },
     ],
+    ...(
+      [
+        [
+          'a start whose continuation is another choice',
+          (a) => ({
+            continuation_id: a.rows('choices').find((r) => r.value.source.key === 'keeper_offer')!
+              .key,
+          }),
+        ],
+        ['a start whose choice is another', () => ({ choice_id: 'other' })],
+        ['a start whose NPC is another', () => ({ npc_id: id('npc', 'stranger') })],
+      ] as [string, (a: ReturnType<typeof setup>) => object][]
+    ).map(
+      ([name, patch]) =>
+        [
+          `row and start receipt both forged: ${name}`,
+          false,
+          (a: ReturnType<typeof setup>) => {
+            const value = { ...a.escort(), ...patch(a) };
+            const r = a.sql
+              .prepare(
+                "SELECT command_id,response FROM receipt WHERE json_extract(command,'$.payload.continuation_id')=?",
+              )
+              .get(a.escort().continuation_id)!;
+            const response = JSON.parse(r.response as string);
+            for (const op of response.delta.ops)
+              if (op.op === 'escort.transition') op.value = value;
+            a.sql
+              .prepare('UPDATE receipt SET response=? WHERE command_id=?')
+              .run(JSON.stringify(response), r.command_id);
+            a.put('escorts', fresh.character, value);
+          },
+        ] as [string, boolean, (a: ReturnType<typeof setup>) => void],
+    ),
     [
       'forged home terminal without turn-in',
       false,

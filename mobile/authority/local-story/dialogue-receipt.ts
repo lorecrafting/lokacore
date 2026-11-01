@@ -88,7 +88,6 @@ export function dialogueDetail(
   if (!wrong && !consequences(s, command, d, row, source, option, detail)) return invalid();
   return detail;
 }
-type Choose = Extract<Command['payload'], { type: 'choose' }>;
 function evidence(
   d: Extract<DecisionResult, { kind: 'accepted' }>,
   command: Command & { payload: Extract<Command['payload'], { type: 'choose' }> },
@@ -145,11 +144,7 @@ function consequences(
   if (!transferEvidence(s, command, row, option, ops, events)) return false;
   if (!assignmentEvidence(s, row, option, ops, events, speaker)) return false;
   if (!paymentEvidence(s, row, option, ops)) return false;
-  if (
-    command.payload.type !== 'choose' ||
-    !escortEvidence(s.world, row, option, ops, command.payload)
-  )
-    return false;
+  if (!escortEvidence(s.world, row, option, ops)) return false;
   return !source.quest || resolution(s, row, option, ops, events, source.quest);
 }
 
@@ -201,28 +196,19 @@ function escortEvidence(
   row: ChoiceRow,
   option: DialogueChoice,
   ops: readonly DeltaOp[],
-  p: Choose,
 ) {
   const effect = option.escort;
   if (!effect) return true;
   const transitions = ops.filter((o) => o.op === 'escort.transition');
   const op = transitions[0];
-  if (transitions.length !== 1 || op?.op !== 'escort.transition') return false;
-  const { value, expected } = op;
-  const start = effect.transition === 'start';
   return (
     world.state.escorts?.[row.actor_id] != null && // no command deletes it
-    op.actor_id === row.actor_id &&
-    value.actor_id === row.actor_id &&
-    value.npc_id === row.roles.find((r) => r.role === effect.npc)?.entity_id &&
-    value.status === (effect.transition === 'complete' ? 'completed' : 'following') &&
-    (start
-      ? value.continuation_id === p.continuation_id &&
-        value.choice_id === p.choice_id &&
-        expected?.status !== 'following'
-      : expected?.status === (effect.transition === 'rejoin' ? 'separated' : 'following'))
+    transitions.length === 1 &&
+    op?.op === 'escort.transition' &&
+    op.value.status === (effect.transition === 'complete' ? 'completed' : 'following')
   );
 }
+
 function transferEvidence(
   s: Story,
   command: Command,
