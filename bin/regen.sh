@@ -25,6 +25,7 @@ touched() {
 }
 
 m mix do compile + loka.source_schema >/dev/null # one VM: schemas/source/ from the source contracts (loka-tp02)
+python3 bin/source_reference.py >/dev/null # docs/reference/*.gen.md from schemas/source/
 # containers_* derive from the frozen inputs; the three of current cartridges (containers_cartridge_*) must
 # also equal a live compile (test/loka/content_{items,locks,sampler}_test.exs), so the compile below runs after.
 if touched '^(test/loka/cartridge_containers_hash\.py|protocol/fixtures/(cartridge_(items|locks|sampler)_|sampler_v|reward_storage_))'; then

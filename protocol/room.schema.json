@@ -18,20 +18,20 @@
       "description": "One directed exit to another room of the same cartridge (21 §5 Connection; 05 §17). Its identity is its room and direction. barrier, optional (barrier@1), names the Barrier whose one shared state the exit passes through (21 §5 Barrier; 05 §25 coherent connections): move through it is refused while it is closed (exit_closed) or locked (exit_locked); an exit without one means what it always meant. A reciprocal exit is authored in the destination room (00a §2); faces pair by opposite direction: an exit's reciprocal face is its destination's exit in the opposite compass direction when that exit leads back to its room, and an exit with a barrier needs a reciprocal face naming the same barrier (BARRIER_MISMATCH at each face otherwise). One-way and bent barrier passages (no reciprocal face, or an opposite-direction exit that leads elsewhere) are rejected for now and may be allowed later; an exit without a barrier is BARRIER_MISMATCH only when its reciprocal face names one.",
       "type": "object",
       "properties": {
-        "to": {
+        "to": {"description":"The destination room.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "barrier": {
+        "barrier": {"description":"The barrier the exit passes through.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "corpse_ingress": {
           "description": "Close this directed exit while the named global fact has the specified value, except for the living owner of a nonempty player corpse in its destination. The exception is rechecked at movement admission.",
           "type": "object",
           "properties": {
-            "fact": {
+            "fact": {"description":"The global fact that closes the exit.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "equals": {
+            "equals": {"description":"The value at which the exit is closed.",
               "$ref": "delta.schema.json#/$defs/FactValue"
             }
           },
@@ -45,10 +45,10 @@
           "description": "Toolbox row 11 (docs/system/mechanics.md hidden passages): for the commanded character this directed exit does not exist (not listed, not seen through, absent from the map, a move through it not_found) until the named fact has the specified value. No barrier on a hidden face (BARRIER_MISMATCH).",
           "type": "object",
           "properties": {
-            "fact": {
+            "fact": {"description":"A fact of this cartridge, normally a player bool; the exit stays hidden until it has the value.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "equals": {
+            "equals": {"description":"The value that reveals the exit; of the fact's type.",
               "$ref": "delta.schema.json#/$defs/FactValue"
             }
           },
@@ -62,14 +62,14 @@
           "description": "Toolbox row 30 (docs/system/mechanics.md rope and climb): crossing this directed exit is a climb. A mover whose body holds item (directly or in a container) climbs down as on any exit; one without it falls: the move still happens and also costs damage HP, never below 1 (a fall never kills), narrated by fell. The cartridge declares an hp pool (RESOURCE_SPEC_INVALID otherwise). NPCs never take a climb face.",
           "type": "object",
           "properties": {
-            "item": {
+            "item": {"description":"The item a mover must hold to climb rather than fall.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "damage": {
+            "damage": {"description":"HP a fall costs; a fall never takes HP below 1.",
               "type": "integer",
               "minimum": 1
             },
-            "fell": {
+            "fell": {"description":"Told when the mover falls.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -80,7 +80,7 @@
           ],
           "additionalProperties": false
         },
-        "knock": {
+        "knock": {"description":"The face's answer to a knock.",
           "$ref": "room.schema.json#/$defs/KnockResponse"
         },
         "locks": {
@@ -127,7 +127,7 @@
       "description": "A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a player can name it by, the first of which also names it when a lookup is ambiguous, and its description text key (05 §18). Not a RuntimeEntity: a fresh world gives it a target id only (numeric profile, Initial world ids). Two details of one room may share an alias (an ambiguous lookup lists both, 04 §18), but the first alias must be the detail's own and in the form a lookup produces (no empty word, not starting with at, the, a or an), or the player could not pick it by name (UNREACHABLE_DETAIL). Its variants (DescriptionVariant) select other prose by condition. Owned by inspectable_detail (a cartridge with details requires it). R5 freezes this v1 shape (14 §R5): perception, reveal facts and contextual actions join as optional fields.",
       "type": "object",
       "properties": {
-        "aliases": {
+        "aliases": {"description":"The words a player names it by; the first also names an ambiguous lookup.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/Alias"
@@ -135,10 +135,10 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "description": {
+        "description": {"description":"Text key examine shows.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "variants": {
+        "variants": {"description":"Description variants; first match wins.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/DescriptionVariant"
@@ -154,10 +154,10 @@
           "description": "Optional readable@1 prose and its place-action label (docs/system/mechanics.md readable@1); both keys resolve in the text catalog.",
           "type": "object",
           "properties": {
-            "label": {
+            "label": {"description":"The read action's label.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "text": {
+            "text": {"description":"The text read.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "title": {
@@ -173,18 +173,18 @@
         "notice_board": {
           "type": "object",
           "properties": {
-            "title": {
+            "title": {"description":"The board's title.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "notices": {
+            "notices": {"description":"1 to 64 distinct notices, in order.",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
-                  "detail": {
+                  "detail": {"description":"A readable detail in the same room.",
                     "$ref": "action.schema.json#/$defs/Key"
                   },
-                  "title": {
+                  "title": {"description":"The notice's title on the board.",
                     "$ref": "text.schema.json#/$defs/TextKey"
                   }
                 },
@@ -327,7 +327,7 @@
           ],
           "additionalProperties": false
         },
-        "cues": {
+        "cues": {"description":"Sense cues reaching nearby rooms from this detail: 1 to 4 of {sense, text, range, when?}.",
           "$ref": "entity.schema.json#/$defs/Cues"
         }
       },
@@ -413,13 +413,13 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description": {
+        "description": {"description":"Text key of its description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "exits": {
+        "exits": {"description":"Exits by compass direction.",
           "type": "object",
           "properties": {
             "north": {
@@ -469,14 +469,14 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "sanctuary": {
+        "sanctuary": {"description":"Combat cannot be opened here and hostile NPCs do not engage on entry.",
           "type": "boolean"
         },
         "dark": {
           "description": "The room is dark (light@1): a player without light, or blind, reads the engine line place.dark instead of the description and sees none of the room's entities. An authored dark_description wins over the engine line.",
           "const": true
         },
-        "dark_description": {
+        "dark_description": {"description":"Shown instead of the description while the room is dark; authoring it marks the room as having no light of its own.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "tags": {
@@ -489,14 +489,14 @@
             "$ref": "entity.schema.json#/$defs/Tag"
           }
         },
-        "cues": {
+        "cues": {"description":"Sense cues reaching nearby rooms: 1 to 4 of {sense, text, range, when?}.",
           "$ref": "entity.schema.json#/$defs/Cues"
         },
         "site": {
           "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
           "type": "object",
           "properties": {
-            "directions": {
+            "directions": {"description":"Compass directions a built room may take from here.",
               "type": "array",
               "items": {
                 "enum": [
@@ -511,7 +511,7 @@
               "minItems": 1,
               "maxItems": 6
             },
-            "structures": {
+            "structures": {"description":"Structures that may be built from this room.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -625,10 +625,10 @@
       "description": "Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description replaces the base description key when the condition holds for the actor over committed state (policy.schema.json Policy; the evaluator is pure, 06 §21). A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description (21 §6). Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.",
       "type": "object",
       "properties": {
-        "when": {
+        "when": {"description":"The condition.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
-        "description": {
+        "description": {"description":"Text key shown when it holds.",
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
@@ -672,7 +672,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "keywords": {
+        "keywords": {"description":"Words a player names it by.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/Alias"
@@ -739,16 +739,16 @@
     "KnockResponse": {
       "type": "object",
       "properties": {
-        "npc": {
+        "npc": {"description":"The NPC listened for.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "room": {
+        "room": {"description":"The room it must be in.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "answered": {
+        "answered": {"description":"Text key of the answer.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "unanswered": {
+        "unanswered": {"description":"Text key of the no-answer line.",
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },

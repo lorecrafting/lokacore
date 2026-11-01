@@ -1286,7 +1286,7 @@
       "description": "The cartridge's world settings (owner decision world parameters; 00 §4 and 04 §15 as amended 2026-10-02), each optional with an engine default: movement.cost, what a move costs the body (movement@1; default 1 mv when the cartridge declares mv), its resource a pool of this cartridge (UNRESOLVED_REFERENCE otherwise); movement.terrain, the percent each destination room tag scales that cost by (row 43a; default none); movement without cost, or with terrain; bands, the condition band table of every pool without its own (resource.schema.json BandTable; default the 04 §15 table). An optional field of loka-cartridge-v2: the tag stays, and the compiler writes it only when the source authors it. In source it is cartridge.json's world, beside entry.",
       "type": "object",
       "properties": {
-        "movement": {
+        "movement": {"description":"What a move costs the body, and how destination room tags scale it.",
           "type": "object",
           "properties": {
             "cost": {
@@ -1307,14 +1307,14 @@
           },
           "additionalProperties": false
         },
-        "bands": {
+        "bands": {"description":"The condition band table of every pool without its own. Default: the engine's table.",
           "$ref": "resource.schema.json#/$defs/BandTable"
         },
         "carry": {
           "description": "Opts into the voluntary Take ceiling (docs/system/mechanics.md containment@1); every item must author mass_grams. No engine default.",
           "type": "object",
           "properties": {
-            "max_grams": {
+            "max_grams": {"description":"The Take ceiling, in grams.",
               "type": "integer",
               "minimum": 0
             }
@@ -1359,7 +1359,7 @@
                 "maximum": 2147483647
               }
             },
-            "per_level": {
+            "per_level": {"description":"What each level above 1 adds to the slot's budget. Read only by the power report.",
               "type": "integer",
               "minimum": 0,
               "maximum": 2147483647
@@ -1375,7 +1375,7 @@
           "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attribute@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
           "type": "object",
           "properties": {
-            "thresholds": {
+            "thresholds": {"description":"Strictly increasing experience totals that reach levels 2, 3 and so on.",
               "type": "array",
               "minItems": 1,
               "items": {
@@ -1384,21 +1384,21 @@
                 "maximum": 2147483647
               }
             },
-            "points_per_level": {
+            "points_per_level": {"description":"Attribute points each level grants.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
             },
-            "kills": {
+            "kills": {"description":"The experience a credited kill of each NPC definition grants.",
               "type": "array",
               "minItems": 1,
               "items": {
                 "type": "object",
                 "properties": {
-                  "npc": {
+                  "npc": {"description":"The NPC definition.",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
-                  "experience": {
+                  "experience": {"description":"Experience granted per credited kill.",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 2147483647
@@ -1411,7 +1411,7 @@
                 "additionalProperties": false
               }
             },
-            "level_up": {
+            "level_up": {"description":"The receipt line when a decision reaches a new level.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "gained": {
@@ -1470,26 +1470,26 @@
           "description": "Toolbox rows G8, 22a and 22b: member, stay and fight each name a bool pair fact read at each NPC; wage pays every member amount of a conserved resource each `every` clock units (docs/system/cartridge.md#group-declarations).",
           "type": "object",
           "properties": {
-            "member": {
+            "member": {"description":"A bool pair fact, read at each NPC: this NPC is in the player's group.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "stay": {
+            "stay": {"description":"A bool pair fact, read at each NPC: the hireling order to stay.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "fight": {
+            "fight": {"description":"A bool pair fact, read at each NPC: the hireling order to fight.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "wage": {
               "type": "object",
               "properties": {
-                "resource": {
+                "resource": {"description":"The conserved resource paid.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "amount": {
+                "amount": {"description":"How much of the resource each member is paid.",
                   "type": "integer",
                   "minimum": 1
                 },
-                "every": {
+                "every": {"description":"Clock units between payments.",
                   "type": "integer",
                   "minimum": 1
                 }
@@ -1511,7 +1511,7 @@
           "description": "Toolbox row 43b: riding names a bool pair fact, per subject and scoped to player, read at each NPC with a mount declaration; such an NPC carries its rider (docs/system/cartridge.md#mount-declarations).",
           "type": "object",
           "properties": {
-            "riding": {
+            "riding": {"description":"A bool pair fact, per subject and scoped to player: the player rides this NPC.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -1524,29 +1524,29 @@
           "description": "Toolbox row W13 (mechanics.md Tracks and trails): a trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses.",
           "type": "object",
           "properties": {
-            "fresh_for": {
+            "fresh_for": {"description":"A trail is fresh while now minus its time is below this, in logical seconds.",
               "type": "integer",
               "minimum": 1
             },
-            "leads": {
+            "leads": {"description":"What a passed track check appends, per direction some room's exit uses.",
               "type": "object",
               "properties": {
-                "north": {
+                "north": {"description":"Appended when the trail leads north.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "south": {
+                "south": {"description":"Appended when the trail leads south.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "east": {
+                "east": {"description":"Appended when the trail leads east.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "west": {
+                "west": {"description":"Appended when the trail leads west.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "up": {
+                "up": {"description":"Appended when the trail leads up.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "down": {
+                "down": {"description":"Appended when the trail leads down.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -1563,13 +1563,13 @@
           "description": "Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen.",
           "type": "object",
           "properties": {
-            "skill": {
+            "skill": {"description":"The victim notices when the actor's level in this skill is below the victim's attribute.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "attribute": {
+            "attribute": {"description":"The victim's attribute compared with the actor's skill level. Absent: 0.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "stolen": {
+            "stolen": {"description":"The per_subject instance bool fact set true on a stolen item.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "noticed": {
@@ -1605,7 +1605,7 @@
           "description": "Built rooms S1 (construction@1): max_total, the most structures built in this world at once.",
           "type": "object",
           "properties": {
-            "max_total": {
+            "max_total": {"description":"The most structures built in this world at once.",
               "type": "integer",
               "minimum": 1
             }
@@ -1619,10 +1619,10 @@
           "description": "Toolbox rows W15 and FD9 (mechanics.md Recognition and earned titles): the player's displayed name, the text key name, varied by name_variants (TextVariants, first match wins; subject target is the player's body). GameView projects it as actor_name.",
           "type": "object",
           "properties": {
-            "name": {
+            "name": {"description":"Text key of the player's displayed name.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "name_variants": {
+            "name_variants": {"description":"Variants of the name; the first match wins, with the player's body as subject target.",
               "$ref": "entity.schema.json#/$defs/TextVariants"
             }
           },
@@ -1660,13 +1660,13 @@
       "description": "An ordered chapter marker (mechanics.md Chapters): name is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
       "type": "object",
       "properties": {
-        "name": {
+        "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "story_point": {
+        "story_point": {"description":"The story point that opens it; only chapter 0 lacks one.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "outcome": {
+        "outcome": {"description":"One outcome key of that story point.",
           "$ref": "action.schema.json#/$defs/Key"
         }
       },
@@ -1749,13 +1749,13 @@
     "DeathSettings": {
       "type": "object",
       "properties": {
-        "player_corpse": {
+        "player_corpse": {"description":"Corpse template for a player.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "npc_corpse": {
+        "npc_corpse": {"description":"Corpse template for an NPC, unless its population names its own.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "shrine": {
+        "shrine": {"description":"The room a dead player's body returns to.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "restore": {
@@ -1785,12 +1785,12 @@
             "experience": {
               "type": "object",
               "properties": {
-                "percent": {
+                "percent": {"description":"The body loses floor(experience * percent / 100), never below its current level's threshold.",
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 100
                 },
-                "narration": {
+                "narration": {"description":"Told once when experience is lost.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -1800,7 +1800,7 @@
               ],
               "additionalProperties": false
             },
-            "items": {
+            "items": {"description":"corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
               "enum": [
                 "corpse",
                 "kept"
@@ -1813,10 +1813,10 @@
           "type": "object",
           "description": "A player's death lines outside a combat round (loka-3w3q). player_died: the fall line a bleed or status tick death tells after its tick line (default world.combat.narration.player_died; a drowning tells world.water.drowned instead). woke: told once after every player death, combat included, after the penalty line.",
           "properties": {
-            "player_died": {
+            "player_died": {"description":"The fall line a bleed or status tick death tells after its tick line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "woke": {
+            "woke": {"description":"Told once after every player death, after the penalty line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -1864,15 +1864,15 @@
         "player_attack": {
           "$ref": "entity.schema.json#/$defs/AttackProfile"
         },
-        "interval": {
+        "interval": {"description":"Clock units between combat rounds.",
           "type": "integer",
           "minimum": 1
         },
-        "sleep_multiplier": {
+        "sleep_multiplier": {"description":"Multiplies an NPC's damage against a sleeping player.",
           "type": "integer",
           "minimum": 1
         },
-        "flee_multiplier": {
+        "flee_multiplier": {"description":"Multiplies the move cost of a body that is engaged.",
           "type": "integer",
           "minimum": 1
         },
@@ -1897,22 +1897,22 @@
             "ally_miss": {
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "shot_hit": {
+            "shot_hit": {"description":"Told when a ranged first strike hits. Required when any item declares weapon.ranged.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "shot_miss": {
+            "shot_miss": {"description":"Told when a ranged first strike misses. Required when any item declares weapon.ranged.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_died": {
+            "player_died": {"description":"Told when the player falls in a combat round; also the default fall line for tick deaths.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_died": {
+            "npc_died": {"description":"Told when an NPC falls in a combat round.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "dodge": {
+            "dodge": {"description":"Told when the player dodges.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "block": {
+            "block": {"description":"Told when a shield blocks.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -1929,10 +1929,10 @@
         "dodge": {
           "type": "object",
           "properties": {
-            "skill": {
+            "skill": {"description":"The skill that must be usable for a dodge.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "chance": {
+            "chance": {"description":"Percent chance of dodging.",
               "type": "integer",
               "minimum": 0,
               "maximum": 100
@@ -2044,13 +2044,13 @@
     "DeathCredit": {
       "type": "object",
       "properties": {
-        "npc": {
+        "npc": {"description":"The attackable NPC.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "room": {
+        "room": {"description":"Its authored room.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "fact": {
+        "fact": {"description":"The player Boolean fact with false default.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -2090,10 +2090,10 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its display name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "requirement": {
+        "requirement": {"description":"Its display requirement text.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "qualification": {
@@ -2158,10 +2158,10 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "fact": {
+        "fact": {"description":"The player Boolean knowledge fact it maps to.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -2241,13 +2241,13 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "npc": {
+        "npc": {"description":"The NPC each member is copied from.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "item": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "corpse": {
+        "corpse": {"description":"Corpse template for members; overrides world.death.npc_corpse.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "member_role": {
@@ -2268,26 +2268,26 @@
           "minItems": 2,
           "maxItems": 2
         },
-        "cap": {
+        "cap": {"description":"Most members alive at once: the number of slots.",
           "type": "integer",
           "minimum": 1,
           "maximum": 64
         },
-        "day_target": {
+        "day_target": {"description":"Members wanted by day. 0: only a population.spawn step fills the plan.",
           "type": "integer",
           "minimum": 0,
           "maximum": 64
         },
-        "night_target": {
+        "night_target": {"description":"Members wanted by night. 0: only a population.spawn step fills the plan.",
           "type": "integer",
           "minimum": 0,
           "maximum": 64
         },
-        "night_start": {
+        "night_start": {"description":"Hour night begins.",
           "type": "integer",
           "minimum": 0
         },
-        "night_end": {
+        "night_end": {"description":"Hour night ends: night is hour >= night_start or hour < night_end.",
           "type": "integer",
           "minimum": 0
         },
@@ -2295,7 +2295,7 @@
           "type": "integer",
           "minimum": 1
         },
-        "wander_interval": {
+        "wander_interval": {"description":"Clock units between wander opportunities.",
           "type": "integer",
           "minimum": 1
         },
@@ -2564,17 +2564,17 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "duration": {
+        "duration": {"description":"How long it lasts, in seconds.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "tick_every": {
+        "tick_every": {"description":"Seconds between ticks.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "hp_loss": {
+        "hp_loss": {"description":"HP lost per tick.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
@@ -2694,16 +2694,16 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "others": {
+        "others": {"description":"Text key of the line every reader but the target reads.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "to": {
+        "to": {"description":"The forms with a target.",
           "type": "object",
           "properties": {
-            "others": {
+            "others": {"description":"Text key for the other readers.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "you": {
+            "you": {"description":"Text key for the target.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -2761,12 +2761,12 @@
           ],
           "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status that declares per_tick ticks until cured, with no ends_at (loka-rn3b)."
         },
-        "tick_every": {
+        "tick_every": {"description":"Seconds between ticks.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "resource": {
+        "resource": {"description":"The pool per_tick changes.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "per_tick": {
@@ -2775,7 +2775,7 @@
           "maximum": 2147483647,
           "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION)."
         },
-        "name": {
+        "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "narration": {
@@ -2935,20 +2935,20 @@
     "MapPosition": {
       "type": "object",
       "properties": {
-        "room": {
+        "room": {"description":"The room drawn.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "x": {
+        "x": {"description":"Integer drawing coordinate.",
           "type": "integer",
           "minimum": -2147483648,
           "maximum": 2147483647
         },
-        "y": {
+        "y": {"description":"Integer drawing coordinate.",
           "type": "integer",
           "minimum": -2147483648,
           "maximum": 2147483647
         },
-        "z": {
+        "z": {"description":"Integer drawing coordinate.",
           "type": "integer",
           "minimum": -2147483648,
           "maximum": 2147483647

@@ -9,10 +9,10 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "provider": {
+        "provider": {"description":"The original provider NPC.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "action": {
+        "action": {"description":"The provider action.",
           "$ref": "action.schema.json#/$defs/Key"
         },
         "name": {
@@ -21,7 +21,7 @@
         "narration": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "currency": {
+        "currency": {"description":"The conserved quote resource.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "price": {

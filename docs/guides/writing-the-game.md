@@ -150,6 +150,8 @@ why the action was missing or refused.
 
 ## Every kind of content
 
+Every kind's fields are in [source kinds](../reference/source-kinds.gen.md); step ops, policy leaves, events and choice fields are in [vocabulary](../reference/vocabulary.gen.md).
+
 `mise exec -- bin/loka new <kind> <name> [--from <room> <direction>] ... [cartridge dir]` (from any directory; the cartridge dir defaults to the current one, or the cartridge a `cartridge <dir>` pair just made) writes a
 compiling file for each pair (the pairs before a refusal stay written), with every line a `~` placeholder, merged into the files it touches
 (it never replaces a value already there: it refuses, names the value and writes nothing),

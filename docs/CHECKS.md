@@ -68,6 +68,8 @@ their rules and red controls remain available for resumption.
   (`bin/regen.sh` regenerates, also after editing any of the three); an
   Elixir host adapter on a `portable_capability` without a differential fails (ADR-074), and so
   does a registry command, event or policy op that no schema declares.
+- `python3 bin/source_reference.py --check`: [source kinds](reference/source-kinds.gen.md) and
+  [vocabulary](reference/vocabulary.gen.md) match `schemas/source/`.
 - `elixir bin/features.exs --check`: the [feature map](features.gen.md) matches the
   capability registry and `docs/features.json`; an implemented capability (a rule module) with
   a missing cell fails.
