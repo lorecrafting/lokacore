@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { onward } from '../src/mechanics/dialogue/fall_through.ts';
+import { oneTalk, onward } from '../src/mechanics/dialogue/fall_through.ts';
 import type { World } from '../src/runtime/decision.ts';
 
 const npc = { cartridge_id: 'c', cartridge_version: '0.0.1', kind: 'npc', key: 'guard' };
@@ -33,4 +33,21 @@ test('a gated choice is no way on for a fall-through', () => {
     assert.equal(ways({ steps: [{ op }] }), 0, op);
   for (const op of ['narrate', 'topic.grant', 'fact.assign'])
     assert.equal(ways({ steps: [{ op }] }), 1, op);
+});
+
+// Breaks: a named talk, a quest offer or an authored alias collapses into the speaker's one Talk.
+test('one unnamed Talk per speaker, the first that opens; other rows stay', () => {
+  const set = {
+    shut: { command: 'talk', speaker: 'x' },
+    open: { command: 'talk', speaker: 'x' },
+    later: { command: 'talk', speaker: 'x' },
+    named: { command: 'talk', speaker: 'x', dialogue: {} },
+    quest: { command: 'accept_quest', speaker: 'x' },
+    alias: { command: 'talk' },
+  };
+  const row = (action_key: string) => ({ action_key, available: action_key !== 'shut' });
+  assert.deepEqual(
+    oneTalk(set, Object.keys(set).map(row)).map((r) => r.action_key),
+    ['open', 'named', 'quest', 'alias'],
+  );
 });

@@ -439,7 +439,10 @@ defmodule Loka.ContentSceneBranchingTest do
   # Break: a person's second nested scene is refused or warns, the top is marked and shuts out the
   # person's other scenes, or a set can be opened by Talk.
   test "a person's nested scenes compile alone: sets marked, tops not" do
-    nested = "npc: bram\nbram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n"
+    # Two ways on from the `when:` top: a set counted as a fall-through target would warn ENTRY_GUESSED.
+    nested =
+      "npc: bram\nbram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n- Off\n  bram: ~\n  - Up\n    bram: ~\n"
+
     dir = Loka.ContentSource.copy("cartridges/scene_sampler")
 
     write(
