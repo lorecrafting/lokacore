@@ -9,6 +9,7 @@ import { LogLines } from './lines.tsx';
 import { LABEL } from './labels.ts';
 import { Control, Page } from './pages.tsx';
 import { RunningHead } from './RunningHead.tsx';
+import { UnderInk } from './UnderInk.tsx';
 import { Blow } from './Blow.tsx';
 import { onCue } from './cues.ts';
 import {
@@ -176,7 +177,7 @@ export function Combat(p: {
   const stand = p.g.position.find((b) => b.action_key === 'stand');
   return (
     // Paper behind the running head too: the leaving page fades over the arriving one.
-    <Blow>
+    <Blow under={<UnderInk view={view} />}>
       <RunningHead view={view} text={text} />
       <Page paperless title="Combat" foot={foot}>
         <Fight {...p.screen} combat={combat} press={p.press} />

@@ -175,6 +175,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Footer` | `book/Footer.tsx` | Footer |
 | `Tip` | `book/Footer.tsx` | Tip |
 | `GiltLine` | `book/GiltLine.tsx` | LogLines |
+| `Gradient` | `book/Gradient.tsx` | UnderInk |
 | `HapticPulse` | `book/HapticPulse.tsx` | HapticPulse |
 | `ItemPop` | `book/ItemPop.tsx` | LogLines |
 | `MapDrawing` | `book/MapDrawing.tsx` | Footer |
@@ -195,6 +196,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
 | `Text` | `book/Text.tsx` | Note |
+| `UnderInk` | `book/UnderInk.tsx` | UnderInk |
 | `ActionCard` | `book/actions.tsx` | ActionCard |
 | `PickLists` | `book/actions.tsx` | PickList |
 | `Cards` | `book/actions.tsx` | ActionCard |
@@ -219,6 +221,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `CarryingPage` | `book/sections.tsx` | SectionPages |
 | `MapPage` | `book/sections.tsx` | MapPage |
 | `SettingsPage` | `book/sections.tsx` | SectionPages |
+| `CreditsPage` | `book/sections.tsx` | SectionPages |
 | `ChapterPage` | `book/sections.tsx` | ChapterPages |
 | `ScenePage` | `book/sections.tsx` | ChapterPages |
 | `SkillDetails` | `book/skills.tsx` | SectionPages |

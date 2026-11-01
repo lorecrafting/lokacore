@@ -4,6 +4,7 @@ import { expect, fn, userEvent, waitFor, type Mock } from 'storybook/test';
 import { ContentsPage } from '../book/Menu.tsx';
 import { Professions, RaiseCards, SkillDetails } from '../book/skills.tsx';
 import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
+import { CreditsPage } from '../book/CreditsPage.tsx';
 import { JournalPage } from '../book/journal.tsx';
 import { pageStory } from './screen.tsx';
 import JournalView from './views/journal.json';
@@ -26,6 +27,8 @@ const meta: Meta = {
     RaiseCards,
     ContentsPage,
     SettingsPage,
+    CreditsPage,
+    CreditsPage,
   },
 };
 export default meta;
@@ -267,3 +270,5 @@ export const Ancestry: StoryObj = {
     />
   ),
 };
+
+export const Credits: StoryObj = { render: () => <CreditsPage back={() => {}} /> };

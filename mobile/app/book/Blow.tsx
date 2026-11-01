@@ -35,7 +35,7 @@ const layer = (backgroundColor: string, style: object) => (
  * - States: at rest; washing; held after a death; reduced motion (half the wash, no swell).
  * - Story: CombatPage.stories.tsx
  */
-export function Blow({ children }: { children: ReactNode }) {
+export function Blow({ children, under }: { children: ReactNode; under?: ReactNode }) {
   const c = usePalette();
   const still = useReducedMotion();
   const wash = useSharedValue(0);
@@ -69,6 +69,7 @@ export function Blow({ children }: { children: ReactNode }) {
   return (
     <View style={[grow, { backgroundColor: c.bg, overflow: 'hidden' }]}>
       {layer(washInk(c), faint)}
+      {under}
       {layer(washInk(c), paper)}
       <Reanimated.View style={[grow, page]}>{children}</Reanimated.View>
     </View>
