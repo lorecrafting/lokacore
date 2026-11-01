@@ -20,10 +20,10 @@ export function rig(t: After) {
   const stops = new Map<number, () => void>();
   const shared: { value: any }[] = [];
   t.after(() => stops.forEach((stop) => stop()));
-  let at = 0;
+  let at = 0; // mutate-skip: test rig, hook slot cursor
   const queued: (() => void)[] = [];
   const render = <T>(body: () => T): T => {
-    at = 0;
+    at = 0; // mutate-skip: test rig, hook slot cursor
     g[Symbol.for('loka-book-test-state')] = (v: any) => {
       const i = at++;
       if (!(i in slots)) slots[i] = typeof v === 'function' ? v() : v;

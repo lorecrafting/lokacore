@@ -167,12 +167,11 @@ function Contents(p: StatusProps) {
   );
 }
 
-const inkOf = (c: Palette, r: Pool, locked: boolean, stung: number) =>
-  locked
-    ? c.dim
-    : r.resource.key === 'hp' && stung
-      ? mixInk(band(c, toneOf(r)), washInk(c), stung)
-      : band(c, toneOf(r));
+// A blow lands in combat, where the line is locked: the sting shows over the locked ink too.
+const inkOf = (c: Palette, r: Pool, locked: boolean, stung: number) => {
+  const ink = locked ? c.dim : band(c, toneOf(r));
+  return r.resource.key === 'hp' && stung ? mixInk(ink, washInk(c), stung) : ink;
+};
 
 // How far the hp value has dried in the wash's colour, 0 to 1, over the blow's beat. On the JS
 // thread: nested Text colours cannot animate on native. Reduced motion: held, without the tween.

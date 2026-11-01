@@ -17,6 +17,9 @@ import { motion, opacity } from './tokens.ts';
 
 const { duration, out, swell } = motion.flash;
 
+const grow = { flex: 1 }; // mutate-skip: layout
+const fill = { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 } as const; // mutate-skip: layout
+
 /**
  * The paper under the combat page (book-ui.md, Blow wash).
  * - Use: Combat only, around a `paperless` Page.
@@ -48,17 +51,13 @@ export function Blow({ children }: { children: ReactNode }) {
     transform: [{ scale: still ? 1 : 1 + ((swell - 1) * wash.value) / opacity.wash }],
   }));
   return (
-    <View style={{ backgroundColor: c.bg, flex: 1 }}>
+    <View style={[grow, { backgroundColor: c.bg }]}>
       <Reanimated.View
-        style={[
-          { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 },
-          { backgroundColor: washInk(c) },
-          paper,
-        ]}
+        style={[fill, { backgroundColor: washInk(c) }, paper]}
         pointerEvents="none"
         aria-hidden
       />
-      <Reanimated.View style={[{ flex: 1 }, page]}>{children}</Reanimated.View>
+      <Reanimated.View style={[grow, page]}>{children}</Reanimated.View>
     </View>
   );
 }

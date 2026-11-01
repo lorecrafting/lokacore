@@ -143,6 +143,7 @@ test('a blow washes in full and swells 1.5% at the peak', (t) => {
   at(20);
   at(15);
   assert.deepEqual(peaks(), [0.18]);
+  assert.equal(g.sequences[0][2], 0, 'the wash leaves: the paper does not stay tinted');
   draw.shared[0]!.value = 0.18;
   assert.equal(scale(at(15)), 1.015);
   draw.shared[0]!.value = 0;
@@ -179,7 +180,7 @@ test('the hp value dries in the wash colour and back, with Flashes off too', (t)
           resources: v.resources,
           time: 0,
           text: say,
-          locked: false,
+          locked: true, // a fight locks the line, and a blow only lands in a fight
           pending: false,
           open: () => {},
           openCharacter: () => {},
