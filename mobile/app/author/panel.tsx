@@ -15,6 +15,7 @@ import {
   recording,
   replay,
   sendCheat,
+  steps,
   type Cheat,
   type Place,
   type Step,
@@ -93,13 +94,13 @@ export function restorePlace(game: Opened | undefined) {
   const { done, failed } = outcome;
   if (failed) {
     refused = outcome.refused && done;
-    placeNote = `Place: ${failed}; stopped after ${done} of ${place.steps.length} steps. Mend the edit, or Start over to record afresh.`;
+    placeNote = `Place: ${failed}; stopped after ${done} of ${steps(place.steps.length)}. Mend the edit, or Start over to record afresh.`;
     console.warn(placeNote);
     place.stopped = { hash: chapter.sha256, at: refused, note: placeNote };
     savePlace();
     return;
   }
-  placeNote = `Place: replayed ${done} steps on load`;
+  placeNote = `Place: replayed ${steps(done)} on load`;
   place.hash = chapter.sha256;
   delete place.stopped;
   savePlace();
@@ -162,7 +163,7 @@ type Asked =
   | { op: 'advance'; minutes: number }
   | { op: 'jump'; steps: Step[] }
   | { op: 'drop' }
-  | { op: 'trace' }
+  | { op: 'trace'; id: number }
   | Cheat;
 const OPS = new Set(['hello', 'advance', 'jump', 'drop', 'trace', 'go_to_room', 'set_fact']); // any other local window is not the panel
 let panel: { to: Window; origin: string } | undefined;
@@ -188,7 +189,7 @@ function askCheat(game: Opened, cheat: Cheat) {
   const { manifest } = JSON.parse(chapter.canonical) as {
     manifest: { id: string; version: string };
   };
-  placeNote = sendCheat(played(game)!, cheat, manifest);
+  placeNote = sendCheat(played(game)!, cheat, manifest, place.stopped?.note);
 }
 /** Serves the author panel page for `game` while mounted; App calls it only in the author preview. */
 export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
@@ -200,7 +201,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     const onMessage = (e: MessageEvent<Asked>) => {
       if (!LOCAL.test(e.origin) || !e.source || !OPS.has(e.data?.op)) return;
       panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
-      if (e.data.op === 'trace') return void tell({ trace: game.trace() });
+      if (e.data.op === 'trace') return void tell({ trace: game.trace(), id: e.data.id });
       if (e.data.op === 'advance') advance(e.data.minutes, game);
       if (e.data.op === 'go_to_room' || e.data.op === 'set_fact') askCheat(game, e.data);
       if (e.data.op === 'jump') {

@@ -1,5 +1,7 @@
 # Showcase plan 1: hub, body, world and social districts
 
+> Reference only: agent-written plan; any room, NPC or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 District brief for `cartridges/toolbox_showcase` ([showcase](../SHOWCASE.md), Beads `loka-y6yg`),
 written by Fable for an Opus developer to build and an Opus reviewer to check against. Base: `main`
 plus batch M6 (PR #363). It uses only installed mechanics; every field named here has a sampler

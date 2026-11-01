@@ -1,5 +1,7 @@
 # Toolbox showcase
 
+> The showcase cartridge's player-facing text is agent-written placeholder: see [placeholder prose](showcase/placeholder-prose.md).
+
 `cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built, the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is built, the magic district (plan 6) is built, and the Homestead, economy and law districts and the traps district of plans [4](showcase/homestead-district.md), [5](showcase/economy-law-district.md) and [7](showcase/traps-district.md) are built, each held by its `kernel/ts/test/showcase_<district>.test.ts`; compiled answer
 `protocol/fixtures/toolbox_showcase_hash.json`, held by `test/loka/content_showcase_test.exs`) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
 one playable cartridge where finished mechanics meet each other, so a pair that only works in its

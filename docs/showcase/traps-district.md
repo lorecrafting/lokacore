@@ -1,5 +1,7 @@
 # Showcase plan 7: the traps district
 
+> Reference only: agent-written plan; any room, NPC or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 District brief for `cartridges/toolbox_showcase` ([showcase](../SHOWCASE.md), Beads `loka-y6yg.19`),
 written by Fable for an Opus developer and an Opus reviewer. Base: `main` after PR #403. Only
 installed mechanics: rows 12 (traps), W21 (fear), 26 (puzzles), 1 and G6 (a status with a cue),

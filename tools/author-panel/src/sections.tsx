@@ -3,6 +3,7 @@ import { Bookmark, Clock, FileCode2, PenLine } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ask, checkpoints, type Todo as TodoRow, todo } from './author.ts';
 import type { Line, State, Step } from './book.ts';
+import { steps } from '../../../mobile/app/author/place.ts';
 import { Badge } from './components/ui/badge.tsx';
 import { Button } from './components/ui/button.tsx';
 import { GoToRoom, SetFact } from './cheats.tsx';
@@ -102,7 +103,7 @@ function GameTime({ state, send }: { state?: State; send: Send }) {
           Advance minutes
         </Button>
       </form>
-      <p className="mt-1 text-xs text-muted-foreground">{state ? `${state.steps.length} steps recorded` : 'No Book yet'}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{state ? `${steps(state.steps.length)} recorded` : 'No Book yet'}</p>
     </div>
   );
 }
