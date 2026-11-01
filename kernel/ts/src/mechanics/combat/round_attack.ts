@@ -50,7 +50,7 @@ function draw(r: Round, bound: number) {
   return value;
 }
 
-// size: allow 41, the row 21 wear call sits between the attack event and the injury
+// size: allow 42, the row 21 wear call sits between the attack event and the injury
 export function attack(
   world: World,
   command: Pick<Command, 'id'>,
@@ -89,6 +89,7 @@ export function attack(
     }),
   );
   if (hit && profile.worn) wear(world, row, profile.worn, r);
+  if (!loss && damage > 0 && sleeping) wake(prefix(world, [], r.due_time), row, r); // a blow at the hp floor takes nothing, yet still wakes
   if (!loss) return;
   injure(world, command, mint, row, attacker_id, target_id, loss, sleeping, r, close);
 }
