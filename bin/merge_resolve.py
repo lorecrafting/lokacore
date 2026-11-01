@@ -33,6 +33,7 @@ GENERATORS = [
     ["mise", "exec", "--", "elixir", "bin/contracts.exs"],
     ["mise", "exec", "--", "elixir", "bin/features.exs"],
     ["sh", "bin/review_index.sh"],
+    ["python3", "bin/source_reference.py"],
 ]
 
 

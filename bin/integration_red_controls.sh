@@ -434,7 +434,7 @@ case $* in *loka.lint*) echo "lint: ${RG_LINT:-finding}" >&2; exit 1 ;; esac
 SH
 chmod +x "$tmp/rg/mise"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p bin kernel/ts mobile/app protocol/fixtures cartridges/a/transcripts cartridges/b cartridges/c/transcripts test/loka
-cp "$bin/regen.sh" bin/; : > bin/review_index.sh; echo 'print("containers", file=open(__import__("os").environ["RG_LOG"], "a"))' > test/loka/cartridge_containers_hash.py
+cp "$bin/regen.sh" bin/; : > bin/review_index.sh; : > bin/source_reference.py; echo 'print("containers", file=open(__import__("os").environ["RG_LOG"], "a"))' > test/loka/cartridge_containers_hash.py
 printf 'echo "$2" >> "$RG_LOG"; perl -pi -e s/old/new/ "$2"\n' > bin/regen_hash_fixture.sh
 for c in a b; do printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"%s\\"}}",\n  "sha256": "old"\n}\n' $c > protocol/fixtures/${c}_hash.json; done
 printf '{\n  "description": "x",\n  "value": 1,\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"b\\"}}",\n  "sha256": "old"\n}\n' > protocol/fixtures/v_hash.json

@@ -14,7 +14,13 @@ defmodule Loka.Content.SourceSchema do
   @object %{"type" => "object"}
   @prose %{
     "type" => "object",
-    "properties" => %{"prose" => %{"type" => "string", "minLength" => 1}},
+    "properties" => %{
+      "prose" => %{
+        "type" => "string",
+        "minLength" => 1,
+        "description" => "The words themselves, written inline."
+      }
+    },
     "required" => ["prose"],
     "additionalProperties" => false
   }
@@ -75,7 +81,13 @@ defmodule Loka.Content.SourceSchema do
   # The words of inline prose may stand wherever a text key goes (Loka.Content.Prose).
   defp prose(text_key) do
     {doc, rest} = Map.pop(text_key, "description")
-    %{"description" => doc, "anyOf" => [rest, @prose]}
+
+    %{
+      "description" =>
+        String.replace(doc, ", never display text", "") <>
+          " Or inline prose, written as {\"prose\": \"...\"}.",
+      "anyOf" => [rest, @prose]
+    }
   end
 
   # A definition file's member, without `key` (it comes from the file stem), with its shortcuts.
@@ -89,7 +101,15 @@ defmodule Loka.Content.SourceSchema do
   defp unkey(%{"oneOf" => branches} = s), do: %{s | "oneOf" => Enum.map(branches, &unkey/1)}
   defp unkey(s), do: drop(s, "key")
 
-  defp shortcuts("RoomDefinition", s), do: put(s, "zones", %{"type" => "array", "items" => @key})
+  defp shortcuts("RoomDefinition", s),
+    do:
+      put(s, "zones", %{
+        "type" => "array",
+        "items" => @key,
+        "description" =>
+          "The zones this room belongs to; a reaction with `zone` and no `on.room` gets one copy per member room."
+      })
+
   defp shortcuts("NpcDefinition", s), do: put(s, "behaviours", behaviours())
   defp shortcuts("ItemDefinition", s), do: put(s, "behaviours", behaviours())
 
@@ -124,12 +144,21 @@ defmodule Loka.Content.SourceSchema do
   defp behaviours do
     with_args = %{
       "type" => "object",
-      "properties" => %{"behaviour" => @key, "with" => @object},
+      "properties" => %{
+        "behaviour" =>
+          Map.put(@key, "description", "The behaviour's name: `behaviours/<name>.json`."),
+        "with" => Map.put(@object, "description", "Arguments, one per `{\"param\": ...}` marker.")
+      },
       "required" => ["behaviour"],
       "additionalProperties" => false
     }
 
-    %{"type" => "array", "items" => %{"anyOf" => [@key, with_args]}}
+    %{
+      "description" =>
+        "Behaviours this entity takes on: each adds one copy of the behaviour's rules, with `{\"param\": \"holder\"}` replaced by this entity's key.",
+      "type" => "array",
+      "items" => %{"anyOf" => [@key, with_args]}
+    }
   end
 
   defp put(s, name, schema), do: put_in(s, ["properties", name], schema)
@@ -226,6 +255,8 @@ defmodule Loka.Content.SourceSchema do
           do:
             {dir,
              %{
+               "description" =>
+                 "Definitions of this kind in the bundle, by key, each without its key field.",
                "type" => "object",
                "propertyNames" => @key,
                "additionalProperties" => %{"$ref" => "source." <> dir}

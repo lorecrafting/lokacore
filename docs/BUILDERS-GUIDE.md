@@ -87,6 +87,10 @@ Add one entry per directory or root file you edit; the schema file is named afte
 `$schema` in a source file: the compiler refuses it as `UNKNOWN_FIELD`. The compiler is still
 the judge; the schemas do not check references.
 
+For reading, not editing: [source kinds](reference/source-kinds.gen.md) has every kind's fields,
+types, required-ness and meaning; [vocabulary](reference/vocabulary.gen.md) has the step ops, policy
+leaves, events and choice fields. Both are generated from the schemas.
+
 ## Preview an edit
 
 To see a cartridge in the Book on the web, compile it into the author preview, then, in a second

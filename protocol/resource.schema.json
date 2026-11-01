@@ -132,15 +132,15 @@
       "description": "One row of a condition band table: the band key holds when p, the percentage of the pool's range from its minimum, reaches at_percent (in integers: 100 x (current - minimum) >= at_percent x (maximum - minimum)). key is a content Key whose text is band.<key> in the catalog when the cartridge authors it; tone is how serious it is.",
       "type": "object",
       "properties": {
-        "at_percent": {
+        "at_percent": {"description":"The percentage of the pool's range at which it holds.",
           "type": "integer",
           "minimum": 0,
           "maximum": 100
         },
-        "key": {
+        "key": {"description":"The band key; its text is band.<key> when authored.",
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "tone": {
+        "tone": {"description":"How serious it is.",
           "$ref": "#/$defs/BandTone"
         }
       },
@@ -248,16 +248,16 @@
       "description": "Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID). Required legacy-shaped birth/save row; no position recovery.",
       "type": "object",
       "properties": {
-        "minimum": {
+        "minimum": {"description":"Lower HP bound.",
           "$ref": "#/$defs/ResourceInt"
         },
-        "maximum": {
+        "maximum": {"description":"Upper HP bound.",
           "$ref": "#/$defs/ResourceInt"
         },
-        "start": {
+        "start": {"description":"Starting HP, between the bounds.",
           "$ref": "#/$defs/ResourceInt"
         },
-        "gain": {
+        "gain": {"description":"HP added each hour (3600 seconds), up to maximum.",
           "type": "integer",
           "minimum": 0,
           "maximum": 2147483647
