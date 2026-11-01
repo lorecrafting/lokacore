@@ -175,9 +175,11 @@ test('now: only the leaves admission reads at the target depend on it', () => {
     [{ ...rung(true), subject: 'target' }, 'depends'],
     [rung(true), false],
     [{ ...rung(true), subject: 'target', item: lantern }, false],
+    [{ ...rung(true), subject: 'target', npc: ref('npc', 'bram') }, false],
     [{ op: 'has_tag', tag: 'wet', subject: 'target' }, 'depends'],
     [{ op: 'has_tag', tag: 'wet', subject: 'room' }, false],
     [{ op: 'has_tag', tag: 'wet', item: lantern }, false],
+    [{ op: 'has_tag', tag: 'wet', barrier: ref('barrier', 'gate') }, false],
   ];
   for (const [policy, answer] of rows) {
     // set past the loader: the fixture declares none of these capabilities, and only the shape is read
