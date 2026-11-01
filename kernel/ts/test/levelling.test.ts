@@ -15,6 +15,7 @@ import { encode } from '../src/foundation/canonical.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { derived } from '../src/mechanics/attribute/shared.ts';
 import type { Base } from '../src/mechanics/fact.ts';
+import type { CharacterId } from '../src/contracts.gen.ts';
 import { levelsReached, levelUp, oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
 import { gameView } from '../src/view/view.ts';
@@ -56,9 +57,14 @@ function play(w: World, p: object, action?: string) {
   return r;
 }
 function wait(w: World, seconds: number) {
+  const r = elapse(w, seconds);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r;
+}
+function elapse(w: World, seconds: number) {
   const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
   const until = w.state.clock + seconds;
-  const r = stepElapsed(
+  return stepElapsed(
     w,
     {
       id: elapsedCommandId(run_id, w.context, w.state.clock, until) as never,
@@ -67,8 +73,6 @@ function wait(w: World, seconds: number) {
     } as never,
     n,
   );
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r;
 }
 const narration = (r: { decision: object }) =>
   ((r.decision as { narration?: { key: string }[] }).narration ?? []).map((t) => t.key);
@@ -218,7 +222,7 @@ test('the third kill places level_reached after the death and its rule fires in 
   assert.ok(narration(third).includes('levelling.level_two'));
   const all = events(third);
   const reached = all.filter((e) => e.payload.type === 'level_reached');
-  const [character_id] = [third.world.character];
+  const character_id = third.world.character;
   assert.deepEqual(
     reached.map((e) => e.payload),
     [{ type: 'level_reached', character_id, level: 2 }],
@@ -282,18 +286,17 @@ test('one grant crossing two thresholds gives two events in order and one line',
 
 // Breaks: from is the next threshold (thresholds[r]) or goes missing at level 1 or the top.
 test('the view carries the threshold of the current level, validated, at every level', () => {
-  const view = (w: World) => gameView(w);
-  assert.deepEqual(view(fresh()).levelling, {
+  assert.deepEqual(gameView(fresh()).levelling, {
     level: 1,
     experience: 0,
     from: 0,
     next: 30,
     unspent: 0,
   });
-  const after = view(cull().w);
+  const after = gameView(cull().w);
   assert.deepEqual(after.levelling, { level: 2, experience: 30, from: 30, next: 100, unspent: 1 });
   assert.deepEqual(validate('GameView', after), []);
-  assert.deepEqual(view(holding(120)).levelling, {
+  assert.deepEqual(gameView(holding(120)).levelling, {
     level: 3,
     experience: 120,
     from: 100,
@@ -394,6 +397,68 @@ test('folded writes: gained sums the proposal, a loss and regrant or no levellin
   assert.deepEqual(levelsReached(w, [write(35, 25), write(25, 35)], base, none), []);
   const off = { ...w, cartridge: { ...content, world: {} } };
   assert.deepEqual(levelsReached(off, [write(0, 200)], base, none), []);
+});
+
+// Breaks: a level rule's own fact and next level lose their order after one another, or are
+// caused by anything but the level_reached the rule answers.
+test('a level rule that writes a fact and grants: both caused by its event, fact first', () => {
+  const c = structuredClone(content) as any;
+  const rule = Object.values<any>(c.reactions).find((r) => r.on.level === 2);
+  rule.steps.push({ op: 'experience.grant', amount: 70 });
+  const all = events(cull(c).third);
+  const reached = all.filter((e) => e.payload.type === 'level_reached');
+  assert.deepEqual(
+    reached.map((e) => e.payload.level),
+    [2, 3],
+  );
+  const fact = all.find((e) => e.payload.type === 'fact_changed')!;
+  assert.equal(reached[1]!.causation_id, reached[0]!.id);
+  assert.equal(fact.causation_id, reached[0]!.id);
+  assert.ok(fact.position < reached[1]!.position);
+});
+
+// Breaks: level_reached keeps the doer as its actor, so a grant to B inside A's command runs B's
+// level rule for A and writes A's fact (the Realm checklist's Reactions item).
+test('level_reached is attributed to the character who levelled, not the doer', () => {
+  const w = holding(0);
+  const other = 'b0000000-0000-4000-8000-000000000002' as CharacterId;
+  const write = {
+    op: 'levelling.set' as const,
+    writer_group: 1,
+    character_id: other,
+    expected: null,
+    value: { experience: 30, allocated: {} },
+  };
+  const base = { actor_id: w.character } as Base;
+  const [e] = levelsReached(w, [write], base, () => 'e');
+  assert.equal(e!.actor_id, other);
+});
+
+// Breaks: level_reached, or the line it shares with fact_changed, queues one deeper than its
+// sequence, so a chain of level rules hits the reaction_depth budget at the wrong level.
+test('a chain of level rules runs to reaction_depth 32 and faults one past it', () => {
+  const chain = (top: number) => {
+    const c = structuredClone(content) as any;
+    c.world.levelling.thresholds = Array.from({ length: 40 }, (_, i) => 30 + i);
+    for (const [key, r] of Object.entries<any>(c.reactions)) {
+      if (r.on.level) delete c.reactions[key];
+    }
+    for (let level = 2; level <= top; level++) {
+      c.reactions[`chain_${level}`] = {
+        on: { event: 'level_reached', level },
+        steps: [{ op: 'experience.grant', amount: 1 }],
+      };
+    }
+    const w = play(holding(20, c), { type: 'move', direction: 'east' }).world;
+    const target_id = w.entityIds['levelling_sampler@0.0.1:npc/rat_a'];
+    return elapse(play(w, { type: 'attack', target_id }).world, 150);
+  };
+  const edge = chain(33); // level L's rule runs at depth L - 1
+  assert.equal(edge.decision.kind, 'accepted', JSON.stringify(edge.decision));
+  assert.equal(levels(edge).at(-1), 34);
+  const past = chain(34);
+  assert.deepEqual(past.decision, { kind: 'fault', code: 'budget_exceeded' });
+  assert.equal(past.limit, 'reaction_depth');
 });
 
 // Breaks: level_reached's subject is its character_id, not the body, so an event.emit in a level

@@ -71,6 +71,7 @@ export function levelsReached(
     return spec.thresholds.slice(from, reached(spec, o.value.experience)).map((_, i) => ({
       id: mint() as DomainEvent['id'],
       ...base,
+      actor_id: character_id, // a rule on it runs for the character who levelled
       scope: { kind: 'player' as const, character_id },
       position: 0, // mutate-skip: join overwrites it
       payload: { type: 'level_reached' as const, character_id, level: from + i + 2 },
