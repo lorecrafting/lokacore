@@ -76,3 +76,31 @@ Killed: hp floor removed (combat); `homeRoom` any rule and subject branch off (s
 `bin/mutate_diff.sh origin/main` (MUTATE_MINUTES=12, 27 of 33 run): red-narrow 6, SURVIVED 3, NO-TESTS 6, TIMEBOX 18. The PR has no table to compare (nit above). The `resource.ts:74` `0 -> 1` mutant hung its run for 19 minutes after failing tests; I killed that node process, so the rest timeboxed. `bin/mutate.sh` has no per-mutant timeout.
 Rows cleared by hand: `shared.ts:115` first two against `escort.test.ts` and 7 other files naming escorts: red; the third is the blocker above. `bleed.ex:83` two ways, `bleed.ex:87` two ways and the `is_map(n)` `and` at `bleed.ex:44`: red; `population.ex:131` two ways: red (null 24 pass, 9 content test files). The `1 -> 2` rows are `&1` to `&2` in a capture, a compile error, not survivors. TIMEBOX rows for `rule.ts`, `job.ts`, `created.ts`, `scripted_actions.ex:94` overlap the hand mutants above.
 Expected values are hand-written; no frozen fixture touched; showcase hash unchanged. Nothing to delete beyond the nit.
+
+## Re-check at 6e470c5c60f237ef4851fd021c8b0f2cda424b43
+
+Scope: the fix commits, the code they touch and its direct callers.
+- Verdict: CHANGES REQUIRED.
+- CI at the head (`gh run list --commit`): ci success 41286770707, book-e2e success 41286770719, graph-diff success 41286773977.
+
+### First-review dispositions
+
+| Item | Result at this head |
+|---|---|
+| `saved.ts:66` sight on plan move (blocker) | Fixed. `cartridges/shoo_sampler` plus a `herd_out` reaction: compile, load, move the deer west, real `hydrate` of a JSON round trip and `sightsValid` true; still true after time passes. Forged member in six other rooms false; `drowned_oak`, `willow_shade` (area) and `lane` (named) true. `saved.ts` back to area-only: red (`deer.test.ts`) |
+| `shared.ts:115` `&&` to `\|\|` survived (blocker) | Fixed. Red on `escort.test.ts` "a following escort ignores its schedule hour" |
+| `scripted_actions.ex:94` reaction path (should-fix) | Partly: `action_completed` only; findings 1 and 2 |
+| PR body claim (should-fix) | Fixed; line 26 and the `created.ts:105` cite check out |
+| `mechanics.md:3398` nit | Fixed; matches `homeRoom` (`created.ts:105-118`) |
+| PR body mutate table nit | Open |
+
+### Findings
+
+1. **Should-fix, `lib/loka/content/reactions.ex:62`: a lawful `after` reaction is refused.** `timed_status` sees only `on`, never `after`. Answer to the question asked: a delayed status apply is legitimate content. `after` writes a job in place of the steps (`reaction.ts:153`, `:432-447`), so the status row is written when the job runs, not before the action's `time.advance`. Measured: `{"on":{"event":"action_completed"},"after":200,"steps":[status.apply warded]}` on the 90-long ward is refused `duration_status`. The same rule put past the compiler ran with no fault through 6 casts at action/after 90/30, 90/200, 299/200, 299/1, 299/300, 100/50, each with a short and a long status (row written), and 10/3000 (job not yet due). Control without `after`: `precondition_failed`. Limit: that world has no time policy, so the job ran inside later casts, never through `elapsed`. The message's two remedies do not mention `after`. Fix: skip the check when `after` is present (`rule/2`, about line 51, holds `r`), with one test.
+2. **Should-fix, `reactions.ex:62`, `docs/system/mechanics.md:2742`, `docs/system/cartridge.md:1073`: a cascade still compiles and faults.** A `fact_changed` reaction on `ward_landed` that does `status.apply warded`, with the 90-long action assigning `ward_landed`, compiles, loads, and `cast ward` faults `precondition_failed` on the status. The docs name the own step and `action_completed` only, and the PR's kgd.104 row does not state this path. Fix: refuse it, or state the limit in both docs and the PR body and keep `loka-kgd.104` open, narrowed. `mechanics.md:2742` also over-states the refusal per finding 1.
+3. **Should-fix, `kernel/ts/src/mechanics/escort/shared.ts:115`: dropping `e.status === 'following'` survives.** Green on all 9 test files naming escorts (73 pass, 0 fail). Failure scenario: a completed or separated escort's NPC still counts as escorting, so `schedule/rule.ts:150` holds it and `containment/react.ts:108` refuses its move while that row stands; no code deletes escort rows (read, not run). This is a hand mutant, not one of the `mutate_diff` rows cleared in the first review. Fix: one test that such an NPC walks its hour. The other `shared.ts:115` mutant is red, so I hold this at should-fix rather than blocker.
+4. Nit, `test/loka/content_faults_test.exs`: `reactions.ex` `> 0` to `> 100` stays green; the test durations all exceed 100. `on["action"] == nil`, `true`, `== key`, `> 0 or` and `!timed?` are each red.
+5. Nit: the PR body still has no `bin/mutate_diff.sh` table and does not report what was left unrun.
+
+No crash on nil definitions: a cartridge with no actions and an `action_completed` reaction gives plain diagnostics.
+Not rerun here: `bin/mutate_diff.sh` (hand mutants only, scoped re-check).
