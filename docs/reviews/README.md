@@ -62,3 +62,81 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: C2 slice F, `story_point` on the dialogue choice (F11)](2026-10-28-c2-f-review.md): **APPROVE WITH NOTES**
 - [Review: C2 slice E, blueprints -> structures (F8, loka-ivjq.8)](2026-10-28-c2-e-review.md): **APPROVE WITH NOTES**
 - [Review: C2 slice B1, `policy` optional and absent holds (F3, loka-ivjq.3)](2026-10-28-c2-b1-review.md): **APPROVE WITH NOTES**
+- [Review: C2 slice 0+A, prep, signals removal, diag guard, behavior@1 removal (loka-ivjq.3)](2026-10-28-c2-a-review.md): **APPROVE WITH NOTES**
+- [Review: batch C1 final head (loka-ivjq.20 S7, loka-ivjq.2 F2)](2026-10-28-c1-final-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice F2-Ex, one kernel_api check in the compiler (loka-ivjq.2)](2026-10-28-c1-f2-ex-review.md): **APPROVE**
+- [Review: C1 slice F2-docs, drop per-field kernel_api floors from docs and schema descriptions (loka-ivjq.2)](2026-10-28-c1-f2-docs-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice F, final cleanup and docs (loka-ivjq.20)](2026-10-28-c1-f-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice D2, characters and economy loader checks (loka-ivjq.20)](2026-10-28-c1-d2-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice D1, entities and supplies loader checks (loka-ivjq.20)](2026-10-28-c1-d1-review.md): **APPROVE WITH NOTES**
+- [Review: batch C1 slice C2, dialogue and quest loader checks (S7)](2026-10-28-c1-c2-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice C1, rules modules (loka-ivjq.20)](2026-10-28-c1-c1-review.md): **APPROVE WITH NOTES**
+- [Review: C1 B2, world, time and the lock walk (loka-ivjq.20)](2026-10-28-c1-b2-review.md): **APPROVE WITH NOTES**
+- [Review: C1 slice 0 prep and slice B1 references core (loka-ivjq.20)](2026-10-28-c1-b1-review.md): **APPROVE WITH NOTES**
+- [Review: narration log batch, engine lines for every action (loka-kgd.185, loka-x6t.129, loka-x6t.124, PR #475)](2026-10-24-narration-log-batch-review.md): **APPROVE WITH NOTES**
+- [Review: room words batch, signpost fixture link and entity name words (loka-x6t.105, loka-6qi, PR #458, kernel_api 1.118)](2026-10-23-room-words-batch-review.md): **CHANGES REQUIRED**
+- [Review: room fixtures batch slices 1-3, fixture pages, detail title, World guard (loka-x6t.120, PR #464, kernel_api 1.120)](2026-10-23-room-fixtures-review.md): **APPROVE**
+- [Review: containers start closed, Open reveals contents (loka-x6t.121 slices 1-2, PR #463)](2026-10-23-container-open-review.md): **APPROVE WITH NOTES**
+- [Review: aimed targets batch, Pick lists and Douse (loka-x6t.109, PR #460, kernel_api 1.119)](2026-10-23-aimed-spells-batch-review.md): **APPROVE WITH NOTES**
+- [Review: death lines outside a combat round, Book World page on death (loka-3w3q, loka-x6t.26, PR #455, kernel_api 1.117)](2026-10-23-3w3q-death-lines-review.md): **CHANGES REQUIRED**
+- [Review: refusal cause not_standing (loka-x6t.17, PR #447, kernel_api 1.111)](2026-10-22-x6t17-refusal-cause-review.md): **APPROVE WITH NOTES**
+- [Review: dark rooms, LegendMUD style (loka-x6t.36, PR #449)](2026-10-22-x6t-36-dark-rooms-review.md): **CHANGES REQUIRED**
+- [Review: a status-skipped combat turn names its cause (loka-x6t.30, PR #447 row 3)](2026-10-22-x6t-30-skipped-turn-review.md): **CHANGES REQUIRED**
+- [Review: per-item equip words, engine (loka-x6t.20 6a, PR #447 row 4a, kernel_api 1.116)](2026-10-22-x6t-20-equip-words-review.md): **APPROVE WITH NOTES**
+- [Review: validate a DecisionResult on commit (loka-kgd.191, PR #439)](2026-10-22-validate-on-commit-review.md): **APPROVE WITH NOTES**
+- [Review: pack of one Attack narration (loka-kgd.187, PR #427)](2026-10-22-pack-sole-narration-review.md): **APPROVE WITH NOTES**
+- [Review: Retire Ashmere 2 Z, final deletion (loka-4hik.29)](2026-10-21-retire-ashmere-2-z-review.md): **APPROVE WITH NOTES**
+- [Review: Retire Ashmere 2, M1 delete bell/finale save code (loka-4hik.9)](2026-10-21-retire-ashmere-2-m1-review.md): **APPROVE WITH NOTES**
+- [Review: Retire Ashmere 1, bundle the showcase (PR #423, loka-4hik.1)](2026-10-21-retire-ashmere-1-review.md): **APPROVE WITH NOTES**
+- [Pass-1 UI rulings (loka-x6t.72)](2026-10-21-pass1-ui-rulings.md)
+- [Review: pass-1 GE3 named refusals (loka-y6yg.46)](2026-10-21-pass1-refuse-review.md): **APPROVE WITH NOTES**
+- [Review: pass-1 GE2, item status observed and expired lines, burning bier (loka-y6yg.48)](2026-10-21-pass1-itemstatus-review.md): **APPROVE**
+- [Review: pass-1 GE4, death and round receipts lost in a cast-started fight (loka-y6yg.45)](2026-10-21-pass1-death-review.md): **APPROVE**
+- [Review: pass-1 GE7 opponent hp band in GameView (loka-y6yg.49)](2026-10-21-pass1-band-review.md): **APPROVE**
+- [Review: PR #419 opt-in observed line for a status on a seen NPC, kernel_api 1.110 (loka-kgd.176)](2026-10-21-npc-status-observed-review.md): **APPROVE**
+- [Review: authoring checks A, cartridge lints (loka-kgd.180)](2026-10-21-authoring-lints-review.md): **APPROVE**
+- [Review: PR #411 Book hostile NPC refusal line, kernel_api 1.104 (loka-y6yg.20 part B, loka-x6t.33)](2026-10-16-pr411-hostile-refusal-review.md): **APPROVE**
+- [Review: batch M15 head, PR #413 (loka-kgd.170)](2026-10-16-m15-batch-review.md): **APPROVE**
+- [Review: M15 row 47 death penalty options, kernel_api 1.109 (loka-kgd.171)](2026-10-16-m15-47-penalty-review.md): **APPROVE WITH NOTES**
+- [Review: M14 row FD10 companion remarks, NPC asides, kernel_api 1.107 (loka-kgd.147)](2026-10-16-m14-fd10-asides-review.md): **APPROVE WITH NOTES**
+- [Review: M14 row 43b mounts engine, kernel_api 1.108 (loka-kgd.168)](2026-10-16-m14-43b-mounts-review.md): **APPROVE WITH NOTES**
+- [Review: M14 row 43a, terrain movement costs (loka-kgd.167)](2026-10-16-m14-43a-terrain-review.md): **APPROVE WITH NOTES**
+- [Review: M14 row 35 engine, arrest (loka-kgd.165; kernel_api 1.105)](2026-10-16-m14-35e-arrest-review.md): **APPROVE WITH NOTES**
+- [Review: batch M14 head, PR #412 (loka-kgd.164)](2026-10-16-batch-m14-412-review.md): **APPROVE WITH NOTES**
+- [Review: x6t-64 ConditionView.kind and authored status kind (loka-x6t.64, part 1 of loka-x6t.55)](2026-10-15-x6t-64-review.md): **APPROVE**
+- [Review: word bar batch head (loka-x6t.39: S1 loka-jsqq, S2 loka-1lpq, S3 loka-a9pn)](2026-10-15-wordbar-batch-review.md): **APPROVE WITH NOTES**
+- [Review: narrate and plan move engine steps (PR #403, loka-mytp.1, loka-mytp.2)](2026-10-15-pr403-narrate-plan-move-review.md): **APPROVE WITH NOTES**
+- [Review: mechanics batch M13 head (cross-row interactions)](2026-10-15-m13-batch-review.md): **APPROVE**
+- [Review: recognition and earned titles (loka-kgd.146, rows W15 and FD9)](2026-10-15-loka-kgd.146-w15-fd9-review.md): **APPROVE WITH NOTES**
+- [Review: ask about a topic, kernel half (loka-kgd.144 FD7)](2026-10-15-loka-kgd.144-fd7-review.md): **APPROVE WITH NOTES**
+- [Review: witness ledger and reaction moves (loka-kgd.142 FD5, loka-kgd.22)](2026-10-15-loka-kgd.142-fd5-review.md): **APPROVE WITH NOTES**
+- [Second opinion (save and status rows only): Built rooms S4 (loka-kgd.109.3)](2026-10-15-loka-kgd.109.3-built-s4-save-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: Built rooms S4, weather and mend (loka-kgd.109.3)](2026-10-15-loka-kgd.109.3-built-s4-review.md): **APPROVE WITH NOTES**
+- [Review: Built rooms S3, save second opinion (loka-kgd.109.2)](2026-10-15-loka-kgd.109.2-built-s3-save-second-opinion.md): **APPROVE**
+- [Review: Built rooms S3, time and timber (loka-kgd.109.2)](2026-10-15-loka-kgd.109.2-built-s3-review.md): **APPROVE**
+- [Review: Built rooms S1, blueprint and site contract (loka-kgd.109.1, construction@1, kernel_api 1.99)](2026-10-15-loka-kgd.109.1-built-s1-review.md): **APPROVE**
+- [Review: status re-applied inside one long wait (loka-j958, PR #388)](2026-10-15-loka-j958-review.md): **APPROVE WITH NOTES**
+- [Review: theft, fence and witnessed offense (loka-icr4, toolbox row 33)](2026-10-15-loka-icr4-theft-review.md): **APPROVE WITH NOTES**
+- [Review: Built rooms S2, save second opinion (loka-1q3n)](2026-10-15-loka-1q3n-built-s2-save-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: Built rooms S2, raise the hut (loka-1q3n)](2026-10-15-loka-1q3n-built-s2-review.md): **APPROVE**
+- [Review: word bar S2 (loka-1lpq), GameView spell_words and speech.phrases](2026-10-15-loka-1lpq-wordbar-s2-review.md): **APPROVE**
+- [Second opinion (save): loka-kgd.108.14 hidden elites stay secret](2026-10-15-kgd-108-14-second-opinion.md): **APPROVE**
+- [Review: loka-kgd.108.14 hidden elites stay secret](2026-10-15-kgd-108-14-review.md): **APPROVE**
+- [Review: PR #393 recipe reason at kernel_api 1.100 (loka-j64e)](2026-10-15-j64e-review.md): **APPROVE WITH NOTES**
+- [Second opinion: hs-9 Built rooms S5, raze and tombstone (loka-otn4; save)](2026-10-15-hs-9-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: hs-9 Built rooms S5, raze and tombstone (loka-otn4; engine + save)](2026-10-15-hs-9-review.md): **APPROVE WITH NOTES**
+- [Review: Homestead hs-8, Give in the Book (loka-x6t.31) with the hs-7 barter price note](2026-10-15-hs-8-review.md): **APPROVE WITH NOTES**
+- [Second-opinion review: Homestead hs-7 gifting and barter (loka-kgd.108.5, loka-kgd.70)](2026-10-15-hs-7-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: Homestead hs-7 gifting and barter (loka-kgd.108.5, loka-kgd.70)](2026-10-15-hs-7-review.md): **APPROVE**
+- [Review: Homestead hs-6 furnishing, `item_present` leaf + `furnish_sampler` (loka-kgd.108.6)](2026-10-15-hs-6-review.md): **APPROVE**
+- [Save second opinion: Homestead hs-5, the mobile Eat receipt with `applies`](2026-10-15-hs-5-second-opinion.md): **APPROVE**
+- [Review: Homestead hs-5, cooking (`edible.applies`, kitchen_sampler)](2026-10-15-hs-5-review.md): **APPROVE WITH NOTES**
+- [Review: Homestead hs-14, Book skill tree on the Character page (loka-kgd.108.11)](2026-10-15-hs-14-review.md): **APPROVE**
+- [Review: Homestead hs-12, the self-build recipe step and craft_sampler](2026-10-15-hs-12-review.md): **APPROVE**
+- [Review: skill prerequisite, engine (Homestead hs-11, loka-kgd.108.8)](2026-10-15-hs-11-review.md): **APPROVE**
+- [Review: Homestead hs-10 craft (loka-kgd.108.7)](2026-10-15-hs-10-review.md): **APPROVE**
+- [Second opinion: hs-1 replenish.run root-command join (loka-5m0u)](2026-10-15-hs-1-second-opinion.md): **APPROVE**
+- [Review: replenish.run reaction step (Homestead hs-1, loka-5m0u)](2026-10-15-hs-1-review.md): **APPROVE**
+- [Review: Homestead batch B head (PR #402, loka-kgd.108)](2026-10-15-homestead-b-batch-review.md): **APPROVE**
+- [Review: Homestead batch A head (PR #398, loka-kgd.108)](2026-10-15-homestead-a-batch-review.md): **APPROVE**
+- [Review: Built rooms batch head (loka-kgd.109; S1-S4)](2026-10-15-built-batch-review.md): **APPROVE**
