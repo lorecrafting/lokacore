@@ -137,7 +137,7 @@ const asked = (c: Cartridge, on: Asked, world: World, target: string | null | un
 const readsTarget = (p: Policy) =>
   p.op === 'target_present' ||
   (p.op === 'status_active' && p.subject === 'target') ||
-  (p.op === 'fact_compare' && !!p.subject && !p.npc && !p.item) ||
+  ((p.op === 'fact_compare' || p.op === 'fact_at_least') && !!p.subject && !p.npc && !p.item) ||
   (p.op === 'has_tag' && !p.item && !p.barrier && !p.room && p.subject !== 'room');
 
 // The definition keyed `key`, its policy's leaves read on `world` as admission reads them; no

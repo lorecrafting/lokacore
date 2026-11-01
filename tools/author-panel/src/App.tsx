@@ -8,6 +8,7 @@ import { Button } from './components/ui/button.tsx';
 import { Badge } from './components/ui/badge.tsx';
 import { ScrollArea } from './components/ui/scroll-area.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs.tsx';
+import { Numbers } from './numbers.tsx';
 import { Facts, Find, Why } from './reading.tsx';
 import { Compile, Play, Source, Todo } from './sections.tsx';
 
@@ -66,12 +67,13 @@ function Book({ frame }: { frame: RefObject<HTMLIFrameElement | null> }) {
 function Panels({ state, send, trace, said }: Pick<ReturnType<typeof useBook>, 'state' | 'send' | 'trace'> & { said?: string[] }) {
   return (
     <Tabs defaultValue="play" className="min-h-0 flex-1 gap-0">
-      <TabsList className="mx-3 mt-2 grid w-auto grid-cols-5">
+      <TabsList className="mx-3 mt-2 grid w-auto grid-cols-6">
         <TabsTrigger value="play">Play</TabsTrigger>
         <TabsTrigger value="write">Write</TabsTrigger>
         <TabsTrigger value="state">State</TabsTrigger>
         <TabsTrigger value="why">Why</TabsTrigger>
         <TabsTrigger value="find">Find</TabsTrigger>
+        <TabsTrigger value="numbers">Numbers</TabsTrigger>
       </TabsList>
       <ScrollArea className="min-h-0 flex-1">
         <div className="p-3">
@@ -89,6 +91,9 @@ function Panels({ state, send, trace, said }: Pick<ReturnType<typeof useBook>, '
           </TabsContent>
           <TabsContent value="find" forceMount className="data-[state=inactive]:hidden">
             <Find />
+          </TabsContent>
+          <TabsContent value="numbers" forceMount className="data-[state=inactive]:hidden">
+            <Numbers hash={state?.hash} />
           </TabsContent>
         </div>
       </ScrollArea>

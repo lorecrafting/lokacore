@@ -22,6 +22,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: level reached event, level filter, gained line, view from, PR #538 (loka-g5hh.2 E1, kernel_api 1.131)](2026-10-31-loka-g5hh.2-e1-level-reached-review.md): **APPROVE**
 - [Second opinion: catch-up folds saturated permanent status ticks, PR #535 (loka-sgqk, kernel_api 1.130)](2026-10-31-catch-up-fold-second-review.md): **APPROVE WITH NOTES**
 - [Review: catch-up folds saturated permanent status ticks, PR #535 (loka-sgqk, kernel_api 1.130)](2026-10-31-catch-up-fold-review.md): **APPROVE**
+- [Branching dialogue engine, second opinion on save behaviour (loka-vduxr.10)](2026-10-31-branching-dialogue-second-b-review.md): **CHANGES REQUIRED**
+- [Branching dialogue engine, independent review (loka-vduxr.10 slice 1)](2026-10-31-branching-dialogue-review.md): **APPROVE WITH NOTES**
 - [Review: NPC condition band in GameView, PR #515 (loka-ysbt, kernel_api 1.123)](2026-10-30-ysbt-npc-condition-review.md): **APPROVE**
 - [Review: an NPC with no hp of its own cannot be hurt, PR #518 (loka-xyyd, kernel_api 1.126)](2026-10-30-xyyd-unhurtable-review.md): **APPROVE**
 - [Review: NPC moods, PR #507 (loka-x6t.71)](2026-10-30-x6t71-moods-review.md): **APPROVE**

@@ -8,6 +8,7 @@ import { diag, step, type Obj } from './cartridge_refs.ts';
 
 const SITES = [
   'fact_compare',
+  'fact_at_least',
   'fact.assign',
   'fact.adjust',
   'fact.stamp',
@@ -22,9 +23,9 @@ const GROUP = ['member', 'stay', 'fight']
   .map((k) => `.cartridge.world.group.${k}`)
   .concat('.cartridge.world.theft.stolen', '.cartridge.world.mount.riding');
 // Choices whose facts save recovery reconciles by fact alone, with no subject: escort, receive
-// and hand_over (mobile dialogue-save), a riddle answer with a wrong_limit (topics-save) and a
-// dialogue of a legacy deadline quest (deadline-receipts); other choices' receipts are checked
-// at the speaker (dialogue-consequences).
+// and hand_over (mobile dialogue-save), a riddle answer with a wrong_limit and a dialogue of a
+// legacy deadline quest (deadline-receipts); other choices' receipts are checked at the speaker
+// (dialogue-consequences).
 const BOUND = ['escort', 'receive', 'hand_over'];
 // Definitions whose policies are read with no action target (reaction when, quest offer, objective
 // and journal, barrier opens_when, skill qualification, a room or exit lock): subject "target"
@@ -38,8 +39,10 @@ const targetless = (at: string) =>
 const scoped = (spec: Obj | undefined) => spec?.per_subject === true;
 // Toolbox row 21: a weapon's durability and a repair benefit read their fact at the wielded weapon.
 const wielded = (o?: Obj) => o?.wear !== undefined || o?.op === 'repair';
+const FACT_READ = /^(fact_compare|fact_at_least)$/;
+const SUBJECT_READ = /^(fact_compare|fact_at_least|time_since)$/;
 const fieldsOf = (o: Obj) =>
-  SUBJECTS.filter((f) => (f !== 'subject' || o.op === 'fact_compare') && Object.hasOwn(o, f));
+  SUBJECTS.filter((f) => (f !== 'subject' || FACT_READ.test(o.op)) && Object.hasOwn(o, f));
 
 // Visits every object of the cartridge but its facts map, with its path, parent and field name.
 function nodes(c: Obj, visit: (o: Obj, at: string, parent?: Obj, field?: string) => void) {
@@ -74,8 +77,7 @@ export function scopeSites(c: Obj): Diagnostic[] {
       out.push(`${at}.${fields.at(-1)}`);
     else if (fields.length && !subjective(o.fact)) out.push(`${at}.${fields[0]}`);
     else if (o.subject === 'target' && targetless(at)) out.push(`${at}.subject`);
-    else if (/^(fact_compare|time_since)$/.test(o.op) && !fields.length && subjective(o.fact))
-      out.push(at);
+    else if (SUBJECT_READ.test(o.op) && !fields.length && subjective(o.fact)) out.push(at);
   });
   // ponytail: a per_subject fact there waits for a subject-aware reconciler.
   for (const [ref, d] of Object.entries((c.dialogues ?? {}) as Record<string, Obj>)) {

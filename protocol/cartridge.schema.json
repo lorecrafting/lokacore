@@ -1178,7 +1178,9 @@
         "INVALID_TIME_POLICY",
         "VISITS_UNRECORDED",
         "HOSTILE_QUEST_SPEAKER",
-        "SITE_EXIT_CONFLICT"
+        "SITE_EXIT_CONFLICT",
+        "SPEAKER_ELSEWHERE",
+        "LOOP_SPEAKER"
       ],
       "examples": [
         "UNRESOLVED_REFERENCE",
@@ -1187,7 +1189,7 @@
       ]
     },
     "Diagnostic": {
-      "description": "A structured diagnostic (08 §6; 05 §8: every compile stage emits them). severity is error, which fails the build, except for a warning (TOUCH_LINK_MISSING, VISITS_UNRECORDED, HOSTILE_QUEST_SPEAKER), which the compiler reports beside the artifact. message_key is diagnostics. followed by the code in lowercase; data carries the code's facts as strings and integers; suggested_capabilities lists capability pins that would fix it (the key@version form requires uses), possibly none. A list of diagnostics is in one deterministic order (05 §8, CAR-04): by path, then code, comparing UTF-8 bytes, then by the canonical encoding of the whole diagnostic; an identical diagnostic appears once.",
+      "description": "A structured diagnostic (08 §6; 05 §8: every compile stage emits them). severity is error, which fails the build, except for a warning (TOUCH_LINK_MISSING, VISITS_UNRECORDED, HOSTILE_QUEST_SPEAKER, SPEAKER_ELSEWHERE), which the compiler reports beside the artifact. message_key is diagnostics. followed by the code in lowercase; data carries the code's facts as strings and integers; suggested_capabilities lists capability pins that would fix it (the key@version form requires uses), possibly none. A list of diagnostics is in one deterministic order (05 §8, CAR-04): by path, then code, comparing UTF-8 bytes, then by the canonical encoding of the whole diagnostic; an identical diagnostic appears once.",
       "type": "object",
       "properties": {
         "severity": {
