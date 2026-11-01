@@ -9,6 +9,7 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 
 | Capability | Portability | Residency | Effects |
 |---|---|---|---|
+| dev@1 | portable | portable_capability |  |
 | movement@1 | portable | portable_capability |  |
 | barrier@1 | portable | portable_capability |  |
 | containment@1 | portable | portable_capability |  |
@@ -217,6 +218,8 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `run_job`: Execute a due scheduled job (authority-internal, 04 §1): built only by the host's drain of an explicit advance, never from an invocation; its id is the job CommandId (numeric-profile.md).
   - `continue`: Advance one shown modal scene line; last line acknowledges and ends. Offered only while a scene runs.
   - `elapsed`: Authority-only elapsed logical interval (M1-A); admitted only by stepElapsed, never an invocation. Durable run scopes its distinct CommandId.
+  - `dev_go_to_room`: Author preview only (cartridge.md Author preview): put the actor's body in a room. Admitted only by stepDev, which only a dev host calls; step refuses it.
+  - `dev_set_fact`: Author preview only (cartridge.md Author preview): set one fact the actor reads. Admitted only by stepDev, which only a dev host calls; step refuses it.
   - `attack`
   - `shoo`
   - `flee`: Escape an active encounter through one randomly selected currently legal exit; no direction is supplied.

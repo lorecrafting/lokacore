@@ -1,4 +1,4 @@
-// size: allow 325, the closed State row sections include toolbox status, levelling and built rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33) and food status (hs-5); position movement (row 35); rejected takes a GameError cause (x6t.17); reaction composes scripted_action (C3 D7)
+// size: allow 326, the closed State row sections include toolbox status, levelling and built rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33) and food status (hs-5); position movement (row 35); rejected takes a GameError cause (x6t.17); reaction composes scripted_action (C3 D7); dev movement (dev@1)
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -216,6 +216,7 @@ export type Mint = () => string;
  * yield over (item_acquired); a seen theft (row 33) reports its notice as scripted_action@1's custom_event, as a reaction's event.emit does (C3 D7);
  * a meal (row hs-5) lands its `applies`. */
 export const COMPOSES = {
+  dev: ['movement'], // go-to-room's entity_entered_room
   expedition: ['quest'],
   transport: ['movement'],
   scripted_action: ['check', 'status', 'death', 'containment'],

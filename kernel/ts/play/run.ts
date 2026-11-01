@@ -9,7 +9,7 @@ import {
   type EntityId,
   type TargetResolution,
 } from '../src/contracts.gen.ts';
-import { newWorld, step, stepElapsed, type Cartridge, type World } from '../src/index.ts';
+import { newWorld, step, stepElapsed, stepDev, type Cartridge, type World } from '../src/index.ts';
 import { resolve } from '../src/commands/target.ts';
 import { append, line, lookupWords } from './obs.ts';
 import { which } from './text.ts';
@@ -72,7 +72,9 @@ export function decideReplay(r: Run, command: Command) {
   const next =
     command.payload.type === 'elapsed'
       ? stepElapsed(r.world, command, r.revision + 1)
-      : step(r.world, command, r.revision + 1);
+      : command.payload.type.startsWith('dev_') // a preview trace holds accepted cheats
+        ? stepDev(r.world, command, r.revision + 1)
+        : step(r.world, command, r.revision + 1);
   return evaluated(r, command, next, 0, false);
 }
 
