@@ -210,6 +210,41 @@ test('an eaten fish stays eaten when its spoiling ends', () => {
   assert.equal(w.state.containers[item(w, 'fish')], w.consumed);
 });
 
+// Break: runStatus ignores an eaten holder (loka-pyez): a fish in the consumed holder still logs
+// status_expired, which fires any authored reaction on it long after it was eaten.
+test('an eaten fish logs no status event when its spoiling would have ended', () => {
+  const mv = `${S}resource/mv`;
+  let w = fresh((c) => {
+    c.manifest.requires.capabilities.food = c.lock.capabilities.food = 1;
+    c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
+    c.resources[mv].start = 50;
+    c.resources[mv].regen = {
+      every: 3600,
+      by_position: { standing: 1, sitting: 1, resting: 1, sleeping: 1 },
+    };
+    const label = 'item.fish.short';
+    c.items[`${S}item/fish`].edible = {
+      resource: ref('resource', 'mv'),
+      amount: 1,
+      label,
+      narration: label,
+    };
+  });
+  w = ok(play(take(w, 'fish'), { type: 'eat', item_id: item(w, 'fish') }));
+  const run_id = 'aaaaaaaa-0000-4000-8000-000000000002';
+  const [from, until] = [w.state.clock, w.state.clock + 86400];
+  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
+  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
+  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, ++stream.n);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  const events = r.decision.kind === 'accepted' ? r.decision.events : [];
+  assert.deepEqual(
+    events.filter((e) => e.payload.type.startsWith('status_')),
+    [],
+  );
+  assert.deepEqual(activeStatuses(r.world, item(w, 'fish')), []);
+});
+
 // Break: replenish.run ignores the item's earlier group (hs-1: the spoil move and the same-event
 // restock would write the fish in two groups: conflicting_write). `tidy` sorts after `spoil`, so
 // it sees the move.
