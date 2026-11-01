@@ -43,11 +43,11 @@ type CardProps = (
  *   place of the Button's label. With `link` it is a shop line, not a card (book-ui.md, Shop
  *   lines): a Tap reading its label as prose, the `link` words in the room link style
  *   (`type.named`), named by `name` (its shown text, then the action and spoken price); unavailable, the same press and
- *   sentence with no card. Shop lines stack in `Cards lines`.
+ *   sentence with no card. Shop lines stack in `Cards lines`. Stories: NpcPage (Shelf, Sale, Services).
  * - States: available; asked (a dialogue choice already taken: dim italic words, named with ASKED, still pressable); unavailable; unavailable, pressed; each as a card or a line.
  * - Effects: a card lifts with a selection haptic; an unavailable press does not lift, its reason
  *   dries and it gives a warning haptic.
- * - Story: ActionCard.stories.tsx; line forms: NpcPage.stories.tsx (Shelf, Sale, Services).
+ * - Story: ActionCard.stories.tsx
  */
 export function ActionCard(p: CardProps) {
   const c = usePalette();
