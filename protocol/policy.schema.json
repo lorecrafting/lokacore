@@ -557,6 +557,21 @@
           "additionalProperties": false
         },
         {
+          "description": "An int fact's value, read as fact_compare reads it, is at least at_least (a dialogue's relationship or count gate). Owned by fact@1.",
+          "type": "object",
+          "properties": {
+            "op": { "const": "fact_at_least" },
+            "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "subject": { "enum": ["target"] },
+            "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "item": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "with": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "at_least": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 }
+          },
+          "required": ["op", "fact", "at_least"],
+          "additionalProperties": false
+        },
+        {
           "description": "Toolbox row FD1: the world clock minus the int fact's value (as fact_compare reads it, at its named NPC or item) is at least at_least; a fact never stamped holds its default. Owned by fact@1.",
           "type": "object",
           "properties": {

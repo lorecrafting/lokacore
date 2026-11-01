@@ -14,12 +14,14 @@ import {
   type Mint,
   type Steps,
   type World,
+  refString,
   values,
 } from '../../runtime/decision.ts';
-import { bind, continuationId } from './shared.ts';
+import { bind, continuationId, definition, speakerOf } from './shared.ts';
+import { sequence } from './sequence.ts';
 import { exchangeRoles } from './exchange.ts';
 import { questOf } from '../lookups.ts';
-import { offered, reopens } from './selection.ts';
+import { linked, offered, reopens, shown } from './selection.ts';
 
 export function wrongAnswer(
   world: World,
@@ -72,8 +74,10 @@ export function validAttempts(row: ChoiceRow, d: DialogueDefinition) {
  * pending row of the same sitting (`choice.open` of the row's own bound fields, never rebound) and
  * its `choice_opened` after `choice_resolved`, unless the answer ends the conversation: its
  * dialogue resolves a quest or declares a riddle, it sets a patrol leg off, it was checked (row 14:
- * the reopened hub row could not drop the one choice; see mechanics.md Retry rule), or it was the
- * only choice.
+ * the reopened hub row could not drop the one choice; see mechanics.md Retry rule), it was the
+ * only choice, it is `then: end`, a `then` names this dialogue (a target never reopens itself), or
+ * no option would be shown next. A choice's `then` opens that dialogue instead of the same row, of
+ * any speaker. Options are read after the decision's own fact writes.
  */
 export function hub<T extends { kind: string }>(
   world: World,
@@ -83,11 +87,21 @@ export function hub<T extends { kind: string }>(
   d: DialogueDefinition,
   option: DialogueChoice,
   decided: T,
+  steps: Steps,
 ): T {
-  if (decided.kind !== 'accepted' || !reopens(d) || option.patrol || option.check) return decided;
+  if (decided.kind !== 'accepted' || !reopens(d) || option.patrol) return decided;
+  if (!option.then && (option.check || linked(world, d))) return decided;
   const a = decided as unknown as Accepted;
-  const continuation_id = continuationId(mint);
   const { actor_id, source, beat, roles, choice_ids } = row;
+  const speaker = speakerOf(d, row);
+  const facts = sequence(world, actor_id, option, false, d.quest, undefined, speaker)?.facts ?? {};
+  const after = Object.keys(facts).length
+    ? { ...world, state: { ...world.state, facts: { ...world.state.facts, ...facts } } }
+    : world;
+  if (option.then) return leadOn(after, command, mint, row, decided, option.then, steps);
+  if (shown(after, actor_id, d, choice_ids, speaker, steps).length === 0) return decided;
+  const at = a.events.find((e) => e.payload.type === 'choice_resolved')!.position + 1;
+  const continuation_id = continuationId(mint);
   const op = {
     op: 'choice.open',
     writer_group: 0,
@@ -98,7 +112,6 @@ export function hub<T extends { kind: string }>(
     roles,
     choice_ids,
   } as const;
-  const at = a.events.find((e) => e.payload.type === 'choice_resolved')!.position + 1;
   const opened = event(world, command, mint, at, { type: 'choice_opened', continuation_id });
   return {
     ...a,
@@ -107,13 +120,42 @@ export function hub<T extends { kind: string }>(
   } as unknown as T;
 }
 
-/** `d`'s choice.open for the command's actor and its choice_opened at position 1 (talk; say and whisper, row G9). */
+/**
+ * `decided` plus the opening of the dialogue `key` (a choice's then or then_failed), read against
+ * `world` as the decision leaves it; `end`, or no option shown there, ends the talk.
+ */
+export function leadOn<T extends { kind: string }>(
+  world: World,
+  command: Parameters<typeof event>[1],
+  mint: Mint,
+  row: ChoiceRow,
+  decided: T,
+  key: string,
+  steps: Steps,
+): T {
+  if (key === 'end') return decided;
+  const a = decided as unknown as Accepted;
+  const next = definition(world, { ...row.source, key });
+  const ids = offered(world, row.actor_id, next, steps);
+  const speaker = world.entityIds[refString(next.npc)];
+  if (shown(world, row.actor_id, next, ids, speaker, steps).length === 0) return decided;
+  const at = a.events.at(-1)!.position + 1;
+  const [open, opened] = opening(world, command, mint, next, steps, at);
+  return {
+    ...a,
+    delta: { ops: [...a.delta.ops, open] },
+    events: [...a.events, opened],
+  } as unknown as T;
+}
+
+/** `d`'s choice.open for the command's actor and its choice_opened, at position 1 for a talk, say or whisper (row G9), after the answer for a `then`. */
 export function opening(
   world: World,
   command: Parameters<typeof event>[1],
   mint: Mint,
   d: DialogueDefinition,
   steps: Steps,
+  at = 1,
 ) {
   const p = command.payload;
   const continuation_id = continuationId(mint);
@@ -136,5 +178,5 @@ export function opening(
     }),
   } as const;
   const opened = { type: 'choice_opened', continuation_id } as const;
-  return [op, event(world, command, mint, 1, opened)] as const;
+  return [op, event(world, command, mint, at, opened)] as const;
 }

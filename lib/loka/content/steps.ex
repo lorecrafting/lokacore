@@ -24,7 +24,7 @@ defmodule Loka.Content.Steps do
     "npc.move" => {"entity_entered_room", @r},
     "population.suppress" => {nil, @r},
     "experience.grant" => {nil, @r},
-    "narrate" => {nil, @r},
+    "narrate" => {nil, %{reaction: :any, choice: :any}},
     "emote" => {nil, @r},
     "item.move" => {nil, @r},
     "population.spawn" => {nil, @r},
