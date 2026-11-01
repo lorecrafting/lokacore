@@ -1,0 +1,93 @@
+# Branching dialogue engine, independent review (loka-vduxr.10 slice 1)
+
+[PR #544](https://github.com/lorecrafting/lokacore/pull/544), branch `engine/branching-dialogue`, commit
+`9fcd0e99cff64e449f23dffb8ec86b17f883df53`. CI on that sha: `ci` success, `book-e2e` success (`gh run list --commit`).
+
+Governing: [dialogue, branching](../system/mechanics.md#branching-dialogue), [composition](../system/architecture.md#building-mechanics-by-composition), [book-ui](../system/book-ui.md), [Review count](../WORKFLOW.md#review-count), `br show loka-vduxr.10` brief and the owner's bar (quoted): "follow known patterns in Rpg dialogue", with full expressiveness.
+
+**Verdict: CHANGES REQUIRED.** One root cause in new code (B1). The fix is verified and removes code.
+
+## Must be true (written before reading the diff)
+
+1. A hidden option is absent from the view; choosing it is `invalid_state`; view and choose share one rule; Talk skips a dialogue with nothing shown.
+2. A hub reads the answer's own writes: nothing left ends the talk, otherwise a row with the full `choice_ids`.
+3. `then` opens the child in the same decision: resolve, then open, ordered events, new continuation id, the child's prompt.
+4. A `then` target is not opened by Talk and never reopens itself; an answer there without `then` ends; `then: end` ends.
+5. A check takes `then` on pass and `then_failed` on fail, keeps the failure line; `then` with no check rule is refused at compile; patrol is refused.
+6. Another speaker is allowed; a compile warning when elsewhere; a hostile one ends the talk.
+7. Narrate step, `fact_at_least`, `narration_variants` first `when` wins.
+8. Reload: no new save shape; a child row survives cold reopen; `ChoiceRow`, `openable`, GameView schema unchanged.
+9. `parted` closes a one-choice child when the speaker is apart.
+10. Compiler errors at paths; self-gating passes `receive`, plain stays `OUTCOME_MISMATCH`.
+11. Showcase bytes unchanged; `kernel_api` 1.132; no Book code.
+
+## Findings
+
+**B1 blocker: `kernel/ts/src/mechanics/dialogue/behavior.ts:99-100`, `rule.ts:108-110`.** What follows an answer is read against a world that is not the one the decision leaves. The hub and `then` overlay facts only; `then_failed` reads the pre-decision world; `leadOn`'s own comment (`behavior.ts:125`) says "as the decision leaves it". Played through the engine:
+
+| Content | Result | Should be |
+|---|---|---|
+| `receive` + `then`, target option needs `has_item` | talk silently ends after "here's the key" | opens the follow-up |
+| `receive` + `then`, target option `not has_item` | card with every option refused, contradicts `mechanics.md:492` | ends |
+| self-gated `receive` hub, options `not has_item` | card with every option refused | ends |
+| failed check practice, `then_failed` target `skill_compare at_least 1` | silently ends | opens |
+| failed check practice, target `not skill_compare` | card with every option refused | ends |
+
+The give-then-follow-up is the commonest RPG conversation shape, and an author has no workaround on `has_item`. `mechanics.md:490` ("fact writes only") partly sanctions the overlay but conflicts with `:492`, so the spec moves too.
+
+Fix, tried and reverted here: at both sites `const r = apply(world, a.delta.ops, false)` (`runtime/apply.ts`, already imported by other mechanics), `if ('fault' in r) return decided`, read `r.world`; drop the `sequence` import. All five rows then behave as the last column; `dialogue_branching` and `dialogue` 41/41; `test/transcripts.test.ts` passes, so showcase replay is unchanged. Amend `mechanics.md:490,498` ("the decision's own writes"). Add tests pinning rows 1 and 4; the current suite stays green either way.
+
+**S1 should-fix: `selection.ts:36`.** A loop enters at its first key by sort, with no regard to speaker. Keys `captain_talk`, `guard_talk` in a two-speaker loop: Talk to the guard is `rejected:unsupported_capability`, the same as an NPC with no dialogue, and the compile says nothing. Spec-conformant (`mechanics.md:492`), silent for the author. Smallest fix: a compile warning.
+
+**S2 should-fix: `dialogue_branching.test.ts`, no assertion on `behavior.ts:145`.** Mutant `position + 2` survives; a gap in the event order goes unnoticed. Assert the `choice_opened` position once.
+
+**N1 nit: PR body** says "dialogue_branching, dialogue 42 pass"; rerun at head: 41. **N2 nit: PR body** cites `cartridges/showcase`, which does not exist; `cartridges/toolbox_showcase` and its hash fixture are empty against main, so the substance holds. **N3 nit: `lib/loka/content/hub.ex:97`** `key/1` public with no outside caller found.
+
+## Rulings asked of this review
+
+| Item | Ruling |
+|---|---|
+| `behavior.ts:102` hub reopens past its policy, all refused | Not a dead end: `closable: true`, `close_choice` accepted, view null. Same as main, not made easier (`leadOn` checks policy; `shown` narrows). A `holds` check ends it but `walk_economy_jail.jsonl` line 22 loses `choice_opened`, and `mechanics.md` "keep their declared availability" pins it. Follow-up needing a spec change and regenerated transcript; not this slice. |
+| `behavior.ts:99` facts only | B1. |
+| `rule.ts:110` `then_failed` world | B1. |
+| `shared.ts:219` stale row draws refused labels | Keep: a row must offer Leave. With B1 fixed only a row the world moved under reaches it. |
+| `selection.ts:36` cycle entry | S1. |
+| `hub.ex:97` | N3. |
+| `dialogue-receipt.ts:84` variant `when` not re-evaluated | No finding. Receipts are stored, not replayed; membership suffices. Custody receive with variant and `then` reopened cold at every step. |
+| `fact_at_least` op | Accept. Every fact predicate site carries it; `fact_compare`-only sites generate literals or match equals by design. |
+| `then_failed` sibling | Accept; `then_failed: self` retry adds no new exploit (check practice as any retry). |
+| Absent-speaker farewell ends the talk | Accept; consistent with `parted`; `SPEAKER_ELSEWHERE` warns. |
+| Prompt redraw on return (question) | Keep as authored for slice 1. The brief says no repeat where the reply said it; `book-ui.md:529` says it draws again. PM to rule which wins; hub answers already write around it. |
+| Can the Book offer an option that refuses? | No option marked `available: true` was ever refused in any scenario. The only offered-but-refused state is the all-refused card: B1's rows (gone with the fix) and the `behavior.ts:102` hub. |
+| Showcase bytes | `git diff origin/main...HEAD -- cartridges/toolbox_showcase protocol/fixtures/toolbox_showcase_hash.json` empty. |
+
+**Question for slice 2:** a flat answer on a back-linked root ends the talk (spec-conformant). An RPG hub needs `then: <self>` on each answer. Worth one line in the authoring guide?
+
+## Second opinion
+
+Warranted: [Review count](../WORKFLOW.md#review-count) names protocol, and this slice changes `protocol/dialogue.schema.json`, `policy.schema.json`, `cartridge.schema.json`, `capability_registry.json` and `kernel_api`. Precedent gives no carve-out for additive fields: `loka-vx2v` (additive quest schema) took one; `loka-rn3b` did not.
+
+Scope it to the fix head, narrowly: the additive contract (`contracts.gen.ts` adds only `then`, `then_failed`, `policy`, `narration_variants`, `fact_at_least` and the `SPEAKER_ELSEWHERE` code) and the load-time acceptance widened at `dialogue-receipt.ts:84`. Save shape itself gives no extra ground: `dialogue-save.ts` is untouched, `ChoiceRow`, delta ops and GameView are unchanged, cold reopen green at every node including custody.
+
+## Open item, pre-existing, not this PR
+
+A non-quest `hand_over` of a `give_allowed: false` item back to the NPC after a custody `receive` makes the next load `save_corrupt` (`dialogue-save.ts:62`, holder is an NPC). Control with no `then`, no option policy, two dialogues and two separate talks fails the same way. A permanent save brick an author can compile. `then` makes the path easier to write. Needs a Beads issue: compiler refuses it, or the save accepts it.
+
+## Test the tests
+
+Narrow mutants on the PM's instruction, null controls green; `bin/mutate_diff.sh` not run. All restored.
+
+| Mutant | Result |
+|---|---|
+| hub `then` on pre-world; hub `shown` on pre-world; linked reopens itself; hostile check dropped; target policy dropped; target `shown` dropped; `then_failed` ignored; cycles not entered; `at_least` strict; talk ignores `shown`; receipt ignores variants; orphan `then_failed` allowed; `end` clash allowed; keyword target allowed; self gate ignored; self gate always | red |
+| `leadOn` position `+ 2` (`behavior.ts:145`) | green: S2 |
+
+Claims rerun: "hub then clause red by hand (17/18)" backed; `content_ferry` 18 backed; "42 pass" not (N1). No frozen fixture or expected answer touched. `receiptHolds` injecting `patrol: {}` is acceptable; a real custody path probe holds. PR body reports `/code-review medium`. No Book code, so no screenshot to judge. Composition record names no other mechanic in capability code; its "fact writes" wording changes with B1.
+
+## Not run
+
+Dead-speaker hand-off (shares the `parted` line, not played separately); hostile only by existing test and mutant; escort or `skill.acquire` with `then` across reload.
+
+## Disposition
+
+Pending the developer's fix commits.
