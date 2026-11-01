@@ -4,7 +4,7 @@
 // can never be bundled. Checkpoints (named recorded paths) are the one thing the page writes, as
 // plain files under the source tree's `checkpoints/`, which the compiler skips. The author column
 // asks here for a Book line's source (`POST /open`) and the rule explainer (`POST /why`).
-import { spawn } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
@@ -18,6 +18,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
+import { artifactBytes } from './compiled.ts';
+import type { FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
 import { replayRecords } from './replay.ts';
 import { files, todo } from './todo.ts';
 import { find } from './find.ts';
@@ -123,10 +125,9 @@ type Asked = { action?: string; dialogue?: string };
 function explain(artifact: string, rows: string[], on: Asked) {
   const run = lastRun(rows);
   if (!run.length) throw new Error('no run in the trace');
-  const { canonical, sha256 } = JSON.parse(readFileSync(artifact, 'utf8'));
-  // the app rebuilds exactly these bytes from {canonical, sha256} (session.ts cartridgeOf)
-  const bytes = Buffer.from(`{"cartridge":${canonical},"content_hash":"${sha256}"}`);
-  const loaded = loadCartridge(bytes, INSTALLED);
+  const dev = JSON.parse(readFileSync(artifact, 'utf8'));
+  const { sha256 } = dev;
+  const loaded = loadCartridge(artifactBytes(dev), INSTALLED);
   if (!loaded.ok) throw new Error(JSON.stringify(loaded.diagnostic));
   const tmp = mkdtempSync(join(tmpdir(), 'loka-why-')); // replayRecords reads a file
   try {
@@ -185,8 +186,54 @@ async function post(
   }
 }
 
+const SECONDS = 30; // the panel waits this long for each report; `bin/loka sim` has no limit
+const OPTS = { maxBuffer: 256 * 1024 * 1024, killSignal: 'SIGKILL' } as const;
+
+/** A report in a child, so a slow cartridge blocks no other route and is killed at the limit. */
+export const limited = <T>(args: string[], seconds: number) =>
+  new Promise<Section<T>>((done) => {
+    execFile(process.execPath, args, { ...OPTS, timeout: seconds * 1000 }, (e, out, err) => {
+      if (e)
+        return done({
+          why: e.killed
+            ? `timed out after ${seconds} s; bin/loka sim <cartridge dir> runs it with no limit`
+            : err.trim() || e.message,
+        });
+      try {
+        done({ report: JSON.parse(out) as T });
+      } catch (bad) {
+        done({ why: `not a report: ${(bad as Error).message}` }); // a throw here kills the watcher
+      }
+    });
+  });
+
+async function numbers(artifact: string): Promise<Numbers> {
+  const dev = JSON.parse(readFileSync(artifact, 'utf8'));
+  const tmp = mkdtempSync(join(tmpdir(), 'loka-numbers-')); // the reports read a compiled artifact
+  try {
+    const file = join(tmp, 'artifact.json');
+    writeFileSync(file, artifactBytes(dev));
+    const play = (name: string) => join(import.meta.dirname, name);
+    const [pacing, fought] = await Promise.all([
+      limited<{ pools: PoolsReport; levels: LevelRows }>(
+        [play('sim.ts'), '--artifact', file, '--seeds', '4'],
+        SECONDS,
+      ),
+      limited<FightsReport>([play('fight.ts'), file, '--seeds', '8'], SECONDS),
+    ]);
+    return { hash: dev.sha256, pacing, fights: fought };
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+}
+
+const asked = (url: string) => new URL(url, 'http://x').searchParams.get('q') ?? '';
+
+const reply = (response: ServerResponse, artifact: string) =>
+  numbers(artifact).then((n) => json(response, 200, n));
+
 /** Serves `GET /events` (each client gets the current message on connect and every push after),
- * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts) and the column's `POST /open` and
+ * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers` and the column's `POST /open` and
  * `POST /why`. */
 export function serve(port: number, source: string, artifact: string) {
   const clients = new Set<ServerResponse>();
@@ -195,10 +242,9 @@ export function serve(port: number, source: string, artifact: string) {
   const route = (request: IncomingMessage, response: ServerResponse) => {
     if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source);
     if (request.url === '/todo') return json(response, 200, todo(source));
-    if (request.url?.startsWith('/find?')) {
-      const q = new URL(request.url, 'http://x').searchParams.get('q') ?? '';
-      return json(response, 200, find(source, artifact, q));
-    }
+    if (request.url === '/numbers') return reply(response, artifact);
+    if (request.url?.startsWith('/find?'))
+      return json(response, 200, find(source, artifact, asked(request.url)));
     if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
       return post(request, response, source, artifact);
     if (request.url !== '/events') return response.writeHead(404).end();

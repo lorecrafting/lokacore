@@ -3,6 +3,7 @@
 // the real round code, and prints each cell's outcomes and each target's rating as one canonical
 // JSON document. A report for authors, not a check.
 import { readFileSync } from 'node:fs';
+import { NO_ROOMS, type FightsReport } from './numbers.ts';
 import type { Command, DecisionResult, EntityId, PopulationPlan } from '../src/contracts.gen.ts';
 import { decode, encode, type Json } from '../src/foundation/canonical.ts';
 import { elapsedCommandId, id } from '../src/foundation/id_source.ts';
@@ -29,7 +30,10 @@ const ELAPSED: Kernel = { ...KERNEL, step: stepElapsed as Kernel['step'] };
 const byKey = ([a]: [string, unknown], [b]: [string, unknown]) => (a < b ? -1 : 1);
 
 /** The fight matrix and ratings (cartridge.md "Fight matrix and encounter rating"). */
-export function fights(c: Cartridge, opts: { seeds?: number; rounds?: number } = {}) {
+export function fights(
+  c: Cartridge,
+  opts: { seeds?: number; rounds?: number } = {},
+): FightsReport & { cartridge: string } {
   const { seeds = 32, rounds = 100 } = opts;
   const alone = withoutAllies(c);
   const worlds = Array.from({ length: seeds }, (_, s) => genesis(alone, s + 1));
@@ -242,6 +246,10 @@ if (import.meta.main) {
   const loaded = loadCartridge(readFileSync(file), INSTALLED);
   if (!loaded.ok) {
     console.error(JSON.stringify(loaded.diagnostic));
+    process.exit(1);
+  }
+  if (!(loaded.cartridge as Cartridge).rooms) {
+    console.error(NO_ROOMS);
     process.exit(1);
   }
   console.log(encode(fights(loaded.cartridge as Cartridge, { seeds, rounds }) as unknown as Json));

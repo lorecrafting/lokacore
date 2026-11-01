@@ -247,6 +247,12 @@ test('the CLI: usage, a refused artifact and one canonical report line', () => {
   const refused = spawnSync('node', [CLI, forged], { encoding: 'utf8' });
   assert.equal(refused.status, 1);
   assert.equal(JSON.parse(refused.stderr).code, 'CONTENT_HASH_MISMATCH');
+  // Break: a valid cartridge with no rooms ends in a stack trace instead of a plain line.
+  const [hello] = compile('cartridges/hello_sampler', 'hello.json');
+  const roomless = spawnSync('node', [CLI, hello], { encoding: 'utf8' });
+  assert.equal(roomless.status, 1);
+  assert.match(roomless.stderr, /no rooms/);
+  assert.doesNotMatch(roomless.stderr, /TypeError/);
   const ok = spawnSync('node', [CLI, sampler, '--seeds', '2'], { encoding: 'utf8' });
   assert.equal(ok.status, 0, ok.stderr);
   const [line, ...more] = ok.stdout.split('\n');
