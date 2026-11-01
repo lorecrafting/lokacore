@@ -1,4 +1,4 @@
-// size: allow 311, the talk page with its answers' lift, keeping the page's parts together
+// size: allow 312, the talk page with its answers' lift, keeping the page's parts together
 // The NPC page: conversation, choices, skills, shop and services, Look, with the existing book controls.
 import { useEffect, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
@@ -131,7 +131,8 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  * A person's detail and conversation in the detail-page order (book-ui.md, NPC dialogue and
  * action details).
  * - Use: an NPC route.
- * - Rules: the description, state notes and this visit's history, then one ordered list of Action
+ * - Rules: a new choice's answers lift in `motion.stagger.gap` apart, once.
+ *   The description, state notes and this visit's history, then one ordered list of Action
  *   cards (owner picks mvlrlvappy4w, mvlymuams73l): one Talk card reading `Talk`, its accessible
  *   name the offer's own label (the first available talk; with none, no card and no filler
  *   line), Trade (opens the shop page), Use an item… and Cast a spell…, Take and other acts,

@@ -161,6 +161,33 @@ test('a blow dealt presses the phrase once; reduced motion keeps colour, not tra
     });
 });
 
+// Breaks: one blow in a pack presses every foe's line, or a cue other than a blow presses it at all.
+test('only a blow naming this foe presses its line', (t) => {
+  const f = foe(t);
+  const pack = (wolf: string, bear: string, hp: number) =>
+    ({
+      ...fought(),
+      combat: {
+        encounter_id: 'e',
+        opponent_id: 'wolf',
+        active_opponents: [
+          { id: 'wolf', band: wolf },
+          { id: 'bear', band: bear },
+        ],
+      },
+      resources: [{ resource: { key: 'hp' }, current: hp, maximum: 20 }],
+    }) as unknown as GameView;
+  f.at(pack('fine', 'fine', 20));
+  f.at(pack('fine', 'hurt', 20)); // the bear's blow
+  f.at(pack('fine', 'hurt', 15)); // the hero's loss, heard but no blow dealt
+  f.tick(1000);
+  f.at(pack('fine', 'hurt', 15));
+  assert.deepEqual(g.sequences, []);
+  f.at(pack('hurt', 'hurt', 15));
+  f.at(pack('hurt', 'hurt', 15));
+  assert.equal(g.sequences.length, 1);
+});
+
 // Breaks: the foe's line stays in full ink after it falls, or dims on a flight.
 test('a fallen foe settles to dim; a flight does not', (t) => {
   for (const [after, fell] of [

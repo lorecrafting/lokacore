@@ -204,7 +204,7 @@ defmodule Loka.Content.SceneFiles do
         refuse(at, d, cur, bad)
 
       cur == :refused ->
-        {d, cur, bad}
+        {put_in(d, ["roles", item], %{"role" => "item", "item" => item}), cur, bad}
 
       true ->
         {d
