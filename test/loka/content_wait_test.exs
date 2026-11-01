@@ -140,7 +140,7 @@ defmodule Loka.ContentWaitTest do
     for {change, path} <- [
           {&Map.merge(&1, %{"after" => "soon", "steps" => [wait(5), adjust(1)]}),
            "reactions/aftershock.after"},
-          {&Map.merge(&1, %{"after" => -5, "steps" => [wait(5), adjust(1)]}),
+          {&Map.merge(&1, %{"after" => 0, "steps" => [wait(5), adjust(1)]}),
            "reactions/aftershock.after"},
           {steps([wait(5), "narrate"]), "reactions/aftershock.steps[1]"}
         ] do
