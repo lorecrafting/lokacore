@@ -74,9 +74,9 @@ defmodule Loka.ContentSceneVerbsTest do
     write(tmp, "scenes/a.scene", """
     npc: maud
     maud: hi
-    - Yes
-      quest: resolve job
     - No
+      quest: resolve job
+    - Yes
       quest: resolve job
     """)
 
