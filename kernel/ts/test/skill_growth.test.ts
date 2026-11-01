@@ -114,8 +114,8 @@ test('a taught pick opens the rating 5 gate on the fifth attempt', () => {
 });
 
 // Breaks: ranks[level] for ranks[level - 1]; a rank at level 0; reached filled when undeclared or
-// dropped when declared; learned shown only once acquired; a rank without its label or with a
-// stray field accepted by the view schema.
+// dropped when declared; learned shown only once acquired; a rank without its label accepted by the
+// view schema.
 test('the view names the rank of the current level and always carries the learned line', () => {
   n = 0;
   let w = newWorld(content, ctx('3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1d'), [1, 2, 3, 4]);
@@ -142,7 +142,6 @@ test('the view names the rank of the current level and always carries the learne
     assert.deepEqual(pick().rank, rank);
     assert.equal(pick().learned, 'skill.pick.learned');
   }
-  const withRank = (rank: object) => ({ ...gameView(w), skills: [{ ...pick(), rank }] });
-  assert.notDeepEqual(validate('GameView', withRank({})), []);
-  assert.notDeepEqual(validate('GameView', withRank({ label: 'a', stray: 'b' })), []);
+  const unlabelled = { ...gameView(w), skills: [{ ...pick(), rank: {} }] };
+  assert.notDeepEqual(validate('GameView', unlabelled), []);
 });

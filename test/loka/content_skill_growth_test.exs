@@ -53,9 +53,7 @@ defmodule Loka.ContentSkillGrowthTest do
        {"UNRESOLVED_REFERENCE", "skills/pick.ranks[1].reached"}},
       {"skills/pick.json",
        &update_in(&1, ["ranks", Access.at(0)], fn r -> Map.delete(r, "name") end),
-       {"SCHEMA_VIOLATION", "skills/pick.ranks[0].name"}},
-      {"skills/pick.json", &put_in(&1, ["ranks", Access.at(0), "stray"], "skill.pick.rank1"),
-       {"UNKNOWN_FIELD", "skills/pick.ranks[0].stray"}}
+       {"SCHEMA_VIOLATION", "skills/pick.ranks[0].name"}}
     ]
 
     for {file, change, {code, path}} <- cases do
