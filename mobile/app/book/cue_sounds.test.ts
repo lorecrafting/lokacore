@@ -24,6 +24,7 @@ const worn = (kind?: string) => ({
   conditions: [{ label: 'sick', ends_at: 9, ...(kind ? { kind } : {}) }],
 });
 const sack = { inventory: [{ id: 'sack' }] };
+const rope = { inventory: [{ id: 'rope' }] };
 
 /** What this change is heard and felt as: the files in play order, then the haptics. */
 function heard(was: GameView, now: GameView) {
@@ -40,7 +41,13 @@ function heard(was: GameView, now: GameView) {
 const tones = 'sfx-harp-';
 // [event, was, now, file, haptic]: breaks if a row's trigger, file or haptic moves.
 const table: [string, GameView, GameView, string, string?][] = [
-  ['pickup', view(), view(sack), 'ui-paper-flick-01.m4a', 'light'],
+  [
+    'pickup',
+    view(rope),
+    view({ inventory: [...rope.inventory, ...sack.inventory] }),
+    'ui-paper-flick-01.m4a',
+    'light',
+  ],
   ['pennies', purse(5), purse(8), 'sfx-coin-clink-01.m4a', 'selection'],
   ['a blow taken', wounded(9), wounded(7), 'sfx-paper-thud-01.m4a', 'heavy'],
   ['a debuff arrives', view(), view(worn('debuff')), 'ui-paper-tick-01.m4a', 'selection'],
@@ -53,8 +60,8 @@ const table: [string, GameView, GameView, string, string?][] = [
   ],
   [
     'level up',
-    view({ levelling: { level: 1 } }),
     view({ levelling: { level: 2 } }),
+    view({ levelling: { level: 3 } }),
     `${tones}note-high-01.m4a`,
     'medium',
   ],

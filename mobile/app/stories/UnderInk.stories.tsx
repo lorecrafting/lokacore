@@ -7,8 +7,8 @@ import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import type { GameView } from '../../packages/game-view/session.ts';
 import Gradient from '../book/Gradient.tsx';
 import { UnderInk } from '../book/UnderInk.tsx';
-import { usePalette } from '../book/palette.ts';
-import { size } from '../book/tokens.ts';
+import { PaletteContext, usePalette } from '../book/palette.ts';
+import { color, size } from '../book/tokens.ts';
 import RoomFirstView from './views/room-first.json';
 
 const loadSkia = async () => {
@@ -48,13 +48,20 @@ const meta: Meta = {
 export default meta;
 
 export const LampGlow: StoryObj = {
-  globals: { palette: 'dusk' },
-  render: () => <OnPaper view={lit} />,
+  render: () => (
+    <PaletteContext value={color.dusk}>
+      <OnPaper view={lit} />
+    </PaletteContext>
+  ),
   play: draws,
 };
 export const LowHealthVignette: StoryObj = { render: () => <OnPaper view={low} />, play: draws };
 // Breaks: a lamp on a light paper. The glow is for dusk and dark only.
 export const LampByDay: StoryObj = {
-  render: () => <OnPaper view={lit} />,
+  render: () => (
+    <PaletteContext value={color.light}>
+      <OnPaper view={lit} />
+    </PaletteContext>
+  ),
   play: async ({ canvasElement }) => expect(canvasElement.querySelector('canvas')).toBeNull(),
 };

@@ -169,6 +169,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `EffectSettings` | `book/Chip.tsx` | Chip |
 | `Foe` | `book/Combat.tsx` | CombatPage |
 | `Combat` | `book/Combat.tsx` | CombatPage |
+| `CreditsPage` | `book/CreditsPage.tsx` | SectionPages |
 | `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
 | `DreamPage` | `book/DreamPage.tsx` | ChapterPages |
 | `DreamResume` | `book/DreamPage.tsx` | NoticePage |
@@ -187,6 +188,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `NpcPage` | `book/Npc.tsx` | NpcPage |
 | `NpcDetail` | `book/Npc.tsx` | NpcPage |
 | `PageTurn` | `book/PageTurn.tsx` | PageTurn |
+| `RightWord` | `book/Riddle.tsx` | Riddle |
 | `Riddle` | `book/Riddle.tsx` | Riddle |
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |
 | `RunningHead` | `book/RunningHead.tsx` | Page |
@@ -207,7 +209,6 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Note` | `book/lines.tsx` | Note |
 | `LogLines` | `book/lines.tsx` | LogLines |
 | `AwayRecap` | `book/lines.tsx` | AwayRecap |
-| `Here` | `book/lines.tsx` | RoomPage |
 | `Heard` | `book/lines.tsx` | Heard |
 | `Fault` | `book/lines.tsx` | Live |
 | `NoticePage` | `book/notices.tsx` | NoticePage |
@@ -216,12 +217,12 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Page` | `book/pages.tsx` | Page |
 | `PageFoot` | `book/pages.tsx` | PageFoot |
 | `SectionTitle` | `book/pages.tsx` | Page |
+| `Here` | `book/people.tsx` | RoomPage |
 | `CharacterPage` | `book/sections.tsx` | SectionPages |
 | `AncestryPage` | `book/sections.tsx` | SectionPages |
 | `CarryingPage` | `book/sections.tsx` | SectionPages |
 | `MapPage` | `book/sections.tsx` | MapPage |
 | `SettingsPage` | `book/sections.tsx` | SectionPages |
-| `CreditsPage` | `book/sections.tsx` | SectionPages |
 | `ChapterPage` | `book/sections.tsx` | ChapterPages |
 | `ScenePage` | `book/sections.tsx` | ChapterPages |
 | `SkillDetails` | `book/skills.tsx` | SectionPages |

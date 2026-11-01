@@ -85,6 +85,35 @@ export function useDrying(lag = 0, duration: number = motion.dry.duration) {
 }
 
 /**
+ * From nothing to whole on mount when `fresh`, after `lag` (an answer lifting, a map line drawing on);
+ * otherwise, and under reduced motion, whole from the start.
+ */
+export function useDrawn(fresh: boolean, timing: { duration: number; easing: string }, lag = 0) {
+  const still = useReducedMotion();
+  const drawn = useSharedValue(fresh && !still ? 0 : 1);
+  useEffect(() => {
+    if (!fresh || still) return;
+    const to = withTiming(1, {
+      duration: timing.duration,
+      easing: curveOf(timing.easing as never),
+      reduceMotion,
+    });
+    drawn.value = lag ? withDelay(lag, to, reduceMotion) : to;
+  }, []); // eslint-disable-line
+  return drawn;
+}
+
+/** Whole, fading over `motion.fade` while `gone` (reduced motion too: it is no travel). */
+export function useFading(gone: boolean) {
+  const left = useSharedValue(1);
+  useEffect(() => {
+    if (left.value === (gone ? 0 : 1)) return;
+    left.value = withTiming(gone ? 0 : 1, { duration: motion.fade.duration, reduceMotion });
+  }, [gone]); // eslint-disable-line
+  return useAnimatedStyle(() => ({ opacity: left.value }));
+}
+
+/**
  * Gilt from mount (a level or quest line, a skill learned): `warning` ink held, then settling to
  * `to`; reduced motion: `useDry`'s cross-fade, a hold having nothing to settle from.
  */

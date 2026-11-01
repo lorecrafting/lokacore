@@ -28,7 +28,6 @@ const meta: Meta = {
     ContentsPage,
     SettingsPage,
     CreditsPage,
-    CreditsPage,
   },
 };
 export default meta;

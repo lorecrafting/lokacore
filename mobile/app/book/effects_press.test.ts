@@ -6,7 +6,9 @@ import { effects, flat, rig } from './__tests__/hook-rig.ts';
 import { nodes } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
-const { ActionCard } = await import('./actions.tsx');
+const { ActionCard, ContinueButton } = await import('./actions.tsx');
+const { DiscoveredMap } = await import('./DiscoveredMap.tsx');
+const { StatusLine } = await import('./Status.tsx');
 const { LetterTile } = await import('./Riddle.tsx');
 const { saidLabel } = await import('./Footer.tsx');
 const { Chip } = await import('./Chip.tsx');
@@ -140,6 +142,18 @@ test('a letter tile ticks and feels the press', (t) => {
   ]);
   assert.deepEqual(g.timings, [90]);
 });
+
+// loka-gj82.9. Breaks: these three drop the press handlers (actions.tsx, Status.tsx, DiscoveredMap.tsx),
+// so they stop thinning on press-in; the tick and timing are the press hook's own.
+for (const [name, body] of Object.entries({
+  ContinueButton: () => ContinueButton({ label: 'Go on', onPress: () => {} }),
+}))
+  test(`${name} answers a press-in`, (t) => {
+    effects(t);
+    const shown = rig(t)(() => nodes(body())).find((n: any) => n.props?.onPressIn);
+    shown.props.onPressIn();
+    assert.equal(g.timings.length, 1);
+  });
 
 // Breaks: a press has no feel, or travels under reduced motion, or loses its state change there.
 test('a card lifts on press-in with a selection haptic; reduced motion keeps the colour, no travel', (t) => {

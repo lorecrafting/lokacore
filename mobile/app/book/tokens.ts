@@ -153,7 +153,7 @@ export const motion = {
   flash: { duration: 120, easing: 'inOutQuad', out: 380, gap: 1000, swell: 1.015 }, // the blow wash; swell: the page's scale at its peak; gap: the Flash limit, a later blow keeps all but the wash -- mutate-skip: uncalibrated design value
   settle: { duration: 400, easing: 'inOutQuad', hold: 600 }, // a resolved running head retiring; hold: gilt's warning ink before it settles -- mutate-skip: uncalibrated design value
   breathe: { duration: 2400, easing: 'inOutQuad' }, // one way of the vignette and the star groups -- mutate-skip: uncalibrated design value
-  stagger: { gap: 40 }, // choice answers lifting in, with motion.press -- mutate-skip: uncalibrated design value
+  stagger: { gap: 40, most: 8 }, // choice answers lifting in, with motion.press -- mutate-skip: uncalibrated design value
   riffle: { sweeps: 5, duration: 120, easing: 'linear' }, // one travel's sweeps over one snapshot -- mutate-skip: uncalibrated design value
   first: { hold: 1200 }, // gilt's hold on a first of a playthrough (ordinary: motion.settle.hold) -- mutate-skip: uncalibrated design value
   card: {

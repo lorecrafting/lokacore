@@ -13,12 +13,13 @@ const stories = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('
 const EXEMPT: Record<string, string> = {
   'book/Text.tsx:Text': 'every line of every story',
   'book/pages.tsx:Tap': 'shown through VerbLine and the room title',
-  'book/lines.tsx:Here': 'the room page lines, shown through the RoomPage stories',
+  'book/people.tsx:Here': 'the room page lines, shown through the RoomPage stories',
   'book/StatusIcon.tsx:Tooltip':
     'the status icon tip, shown through the StatusIcon Held and Focused stories',
   'book/Chip.tsx:Row': 'a titled chip row, shown through Chip ReadingSize',
   'book/Combat.tsx:Foe': 'one line of the fight block, shown through the Combat stories',
   'book/MapDrawing.tsx:MapDrawing': 'a drawing, shown through the map pages',
+  'book/Riddle.tsx:RightWord': 'shown after a submitted answer, which no story sends',
   'book/lines.tsx:Fault': 'a press that threw; reached live only, no story throws one',
 };
 
