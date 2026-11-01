@@ -41,6 +41,9 @@ for field in file status used_for author source_url licence human_made_evidence 
   reset "row['$field'] = ''"
   refused "empty $field"
 done
+reset
+python3 -c 'import json, sys; rows = json.load(open(sys.argv[1])); json.dump(rows * 2, open(sys.argv[1], "w"))' "$dir/manifest.json"
+refused 'a.m4a: two rows'
 reset "row['status'] = 'placeholder'"
 refused 'empty replace_note'
 reset "row['status'] = 'draft'"
