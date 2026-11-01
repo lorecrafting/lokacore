@@ -35,3 +35,14 @@ Harness artefact, not a player bug. On `origin/main` `2d781bfee` and at this hea
 Not checked: toolbox dialogue choices and deadline jobs mid-state were not reached by the walker; other SQLite versions; the fix was a throwaway, not reviewed code.
 
 Verdict: CHANGES REQUIRED
+
+## Re-check at ff6532c32 (scoped: release gate vs duplicate and escaped keys)
+
+CI at ff6532c32a082baad3a5d7e1a9e485309f254dfa when read: graph-diff success; ci, book-e2e in progress.
+
+- `receipt-save.ts:20` scans with `JSON.parse`, the parser `receipt-history.ts:36` replay uses, so no parser disagreement remains. Forged and run (all refused with `save_corrupt`): duplicate type, duplicate payload, escaped `type` value, escaped key `type`, duplicate with escaped key, escaped duplicate `payload`. Red control: reading `json_extract(command,'$.payload.type')` instead fails four of these (duplicate type, duplicate payload, escaped-key duplicate, nested payload duplicate).
+- A duplicate `kind` in `response` (first `rejected`, last `accepted`) is skipped by the scan and by replay alike, so that cheat never runs; no hole.
+- Cost: `JSON.parse` plus regex over 20,000 commands measured 15 ms; the SQL read is linear. Acceptable for a release open.
+- Nit: `rule.ts:39` comment names mobile files from kernel code. Nit: PR body cites `receipt-save.ts:34` for the scan; it is at lines 17-24; its forged forms list omits nothing material.
+
+Verdict: APPROVE.
