@@ -851,6 +851,8 @@ build. The author tools below are reachable only in that bundle (a production ex
   in milliseconds) under the artifact's hash. After a reload into a different hash it replays the
   path through the normal command path, one step at a time; the first step the session does not
   save and accept stops the replay and is named by its ordinal and reply. Nothing writes state directly.
+  The dev cartridge plays one fixed seed on a frozen clock that moves only with the dev clock, as
+  `bin/loka check` does, so a recording replays alike in both; a release is untouched.
 - **Fast loop.** A `text.json` save is pushed to the open page as a text overlay before its
   compile and shows at once: no compile, reload or replay. The compile still runs after it and
   reports its diagnostics to the page; an edit whose compiled cartridge differs from the page's

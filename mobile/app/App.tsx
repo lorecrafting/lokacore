@@ -26,6 +26,7 @@ import {
   skew,
   useAuthorPanel,
 } from './author/panel.tsx';
+import { frozenClock } from './author/place.ts';
 import { readingSize } from './book/reading.ts';
 import { LABEL } from './book/labels.ts';
 import chapter from '../../protocol/fixtures/toolbox_showcase_hash.json';
@@ -90,8 +91,13 @@ const createSession = (open: () => Db) =>
       latency:
         Platform.OS === 'web' ? undefined : { host: 'hermes_ios', now: () => performance.now() },
       kernel_version,
-      random: getRandomValues,
-      time: { wall: () => Date.now() + skew(), monotonic: () => performance.now() + skew() },
+      // The dev cartridge plays the one seed and frozen clock of `bin/loka check` (no random: the template world).
+      ...(devCartridge
+        ? { time: frozenClock(skew) }
+        : {
+            random: getRandomValues,
+            time: { wall: () => Date.now(), monotonic: () => performance.now() },
+          }),
     },
   ));
 let session = g.loka_session;

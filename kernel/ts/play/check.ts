@@ -1,14 +1,14 @@
 // `bin/loka check <cartridge dir>` (docs/guides/writing-the-game.md#test-your-checkpoints): compiles
 // the cartridge as the author preview does, then replays each `checkpoints/*.json` on a fresh
 // session through the preview's own replay(), with no Book and so no prompt. Prints one line per
-// checkpoint, `ok` or the first refused step, and exits 1 if any failed. No `random` in the host:
-// the template world's fixed seed, so a run repeats (the preview draws a seed per save).
+// checkpoint, `ok` or the first refused step, and exits 1 if any failed. No `random` in the host
+// and the frozen clock: the same seed and time as the preview, so a run repeats there.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { replay, type Step } from '../../../mobile/app/author/place.ts';
+import { frozenClock, replay, type Step } from '../../../mobile/app/author/place.ts';
 import {
   KERNEL_ID,
   openGame,
@@ -53,18 +53,15 @@ function memory(sql: DatabaseSync): Db {
 /** `undefined` when the whole path is accepted, else why it stopped. */
 function replayed(bundled: Bundled, steps: Step[]): string | undefined {
   const sql = new DatabaseSync(':memory:');
-  const clock = { wall: 10_000, mono: 0 }; // mutate-skip: any start reads the same; only the deltas matter
+  let moved = 0;
   let id = 0; // mutate-skip: any start gives unique ids
   try {
     const game = openGame(memory(sql), bundled, {
       kernel_version: `${KERNEL_ID}@${'0'.repeat(40)}`,
       newId: () => `aaaaaaaa-0000-4000-8000-${(++id).toString().padStart(12, '0')}`, // mutate-skip: any unique id
-      time: { wall: () => clock.wall, monotonic: () => clock.mono },
+      time: frozenClock(() => moved),
     });
-    return replay(steps, game, (ms) => {
-      clock.wall += ms; // mutate-skip: a real host's wall moves too; credit reads the monotonic delta
-      clock.mono += ms;
-    }).failed;
+    return replay(steps, game, (ms) => (moved += ms)).failed;
   } finally {
     sql.close();
   }

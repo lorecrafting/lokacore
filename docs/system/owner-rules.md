@@ -280,3 +280,4 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Opening room NPC for conversation and directions: [owner direction and PM selection of the opening NPC](../decisions/owner-decision-opening-npc-2026-10-05.md).
 
+- Authoring readiness and level-up: [owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md).

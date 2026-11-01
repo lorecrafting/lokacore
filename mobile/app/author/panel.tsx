@@ -72,6 +72,7 @@ export function restorePlace(game: Opened | undefined) {
   }
   placeNote = `Place: replayed ${done} steps`;
   place.hash = chapter.sha256;
+  delete place.stopped;
   savePlace();
 }
 const recorded = new WeakMap<Opened, Opened>(); // one wrapper per game, so the Book sees one identity
