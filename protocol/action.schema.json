@@ -1101,13 +1101,13 @@
     "NarrationParticipant": {
       "description": "An entity a scripted action's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE.",
       "oneOf": [
-        {
+        {"description":"An NPC of this cartridge.",
           "type": "object",
           "properties": {
             "role": {
               "const": "npc"
             },
-            "npc": {
+            "npc": {"description":"The NPC definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -1117,13 +1117,13 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"An item of this cartridge.",
           "type": "object",
           "properties": {
             "role": {
               "const": "item"
             },
-            "item": {
+            "item": {"description":"The item definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -1133,7 +1133,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"The player's own body.",
           "type": "object",
           "properties": {
             "role": {

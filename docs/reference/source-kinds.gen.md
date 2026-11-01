@@ -981,10 +981,10 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {role=npc} | variant |  |  |
-| {role=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {role=item} | variant |  |  |
-| {role=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| {role=npc} | variant |  | An NPC of this cartridge takes this role. |
+| {role=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC definition. |
+| {role=item} | variant |  | An item of this cartridge takes this role. |
+| {role=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definition. |
 
 ### EscortStatus
 
@@ -1030,20 +1030,20 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {kind=source} | variant |  |  |
-| {kind=source}.capacity | integer | yes |  |
+| {kind=source} | variant |  | A lightable item that burns fuel while lit, and is refilled from a supply item. |
+| {kind=source}.capacity | integer | yes | The most fuel the source holds, in its unit. |
 | {kind=source}.cues | [Cues](source-kinds.gen.md#cues) |  | Cues active only while this source is lit (toolbox row G6). |
-| {kind=source}.doused | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| {kind=source}.ignited | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| {kind=source}.initial | integer | yes |  |
-| {kind=source}.rate | integer | yes |  |
-| {kind=source}.refueled | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| {kind=source}.supply | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {kind=source}.unit | [Key](source-kinds.gen.md#key) | yes |  |
-| {kind=supply} | variant |  |  |
-| {kind=supply}.capacity | integer | yes |  |
-| {kind=supply}.initial | integer | yes |  |
-| {kind=supply}.unit | [Key](source-kinds.gen.md#key) | yes |  |
+| {kind=source}.doused | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is put out. |
+| {kind=source}.ignited | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is lit. |
+| {kind=source}.initial | integer | yes | Fuel it holds at the start; at most capacity. |
+| {kind=source}.rate | integer | yes | Fuel burned per logical time unit while lit; at least 1. It goes out when the fuel runs out. |
+| {kind=source}.refueled | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is refilled. |
+| {kind=source}.supply | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The supply item that refuels it; the supply's unit must match. |
+| {kind=source}.unit | [Key](source-kinds.gen.md#key) | yes | The fuel's unit name; the supply must use the same one. |
+| {kind=supply} | variant |  | An item that holds fuel for refilling sources; it is emptied by what it gives. |
+| {kind=supply}.capacity | integer | yes | The most fuel the supply holds, in its unit. |
+| {kind=supply}.initial | integer | yes | Fuel it holds at the start; at most capacity. |
+| {kind=supply}.unit | [Key](source-kinds.gen.md#key) | yes | The fuel's unit name; a source takes only a supply with the same one. |
 
 ### InspectableDetail
 
@@ -1052,41 +1052,41 @@ A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a p
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | aliases | list of [Alias](source-kinds.gen.md#alias) | yes | The words a player names it by; the first also names an ambiguous lookup. |
-| bed | object |  |  |
-| bed.entitlement | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| bed.title | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| bed | object |  | Makes the detail a bed: resting here is offered when the entitlement fact reads true. |
+| bed.entitlement | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fact that must read true for the actor before resting here is offered. |
+| bed.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the bed's page. |
 | cues | [Cues](source-kinds.gen.md#cues) |  | Sense cues reaching nearby rooms from this detail: 1 to 4 of {sense, text, range, when?}. |
 | description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key examine shows. |
-| harvest | object |  |  |
-| harvest.careful | object |  |  |
-| harvest.careful.action | [Key](source-kinds.gen.md#key) | yes |  |
-| harvest.careful.count | integer | yes |  |
-| harvest.careful.narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| harvest.careful.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| harvest.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| harvest.label | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| harvest.narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| harvest.title | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| harvest | object |  | Makes the detail a place to gather items from. |
+| harvest.careful | object |  | A slower way to gather: several items at once, for a skilled actor. |
+| harvest.careful.action | [Key](source-kinds.gen.md#key) | yes | The harvest action offered for it; must be a harvest action that takes a method. |
+| harvest.careful.count | integer | yes | Items gathered at once; 2 to 64, and at most the distinct items listed. |
+| harvest.careful.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told after a careful harvest. |
+| harvest.careful.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill the actor must have usable for the careful way. |
+| harvest.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions that can be gathered; each harvest takes the ones lying in the room. |
+| harvest.label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the harvest action's button. |
+| harvest.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told after an ordinary harvest (one item). |
+| harvest.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the harvest page. |
 | harvest.tool | object |  | Toolbox row 19: Harvest needs a held item whose definition declares tag. |
-| harvest.tool.tag | [Tag](source-kinds.gen.md#tag) | yes |  |
-| liquid_source | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| notice_board | object |  |  |
+| harvest.tool.tag | [Tag](source-kinds.gen.md#tag) | yes | The tag a held item must carry for the harvest to be allowed. |
+| liquid_source | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The liquid a held vessel can be filled with at this detail. |
+| notice_board | object |  | Makes the detail a board that lists other readable details of the room. |
 | notice_board.notices | list of object | yes | 1 to 64 distinct notices, in order. |
 | notice_board.notices[].detail | [Key](source-kinds.gen.md#key) | yes | A readable detail in the same room. |
 | notice_board.notices[].title | [TextKey](source-kinds.gen.md#textkey) | yes | The notice's title on the board. |
 | notice_board.title | [TextKey](source-kinds.gen.md#textkey) | yes | The board's title. |
-| perception | object |  |  |
-| perception.self_luminous | `true` | yes |  |
-| perception.title | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| perception | object |  | Perception traits of the detail. |
+| perception.self_luminous | `true` | yes | Must be true: the detail gives light, so it is seen in a dark room. |
+| perception.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the detail's page. |
 | rating | integer |  | Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed scripted action check against this detail must reach. |
 | readable | object |  | Optional readable@1 prose and its place-action label (docs/system/mechanics.md readable@1); both keys resolve in the text catalog. |
 | readable.label | [TextKey](source-kinds.gen.md#textkey) | yes | The read action's label. |
 | readable.text | [TextKey](source-kinds.gen.md#textkey) | yes | The text read. |
-| readable.title | [TextKey](source-kinds.gen.md#textkey) |  |  |
+| readable.title | [TextKey](source-kinds.gen.md#textkey) |  | Text key of the title of the readable's page; without it the label is shown. |
 | title | [TextKey](source-kinds.gen.md#textkey) |  | Optional page title the Book shows for this detail (loka-x6t.120; docs/system/mechanics.md inspectable_detail@1): it resolves in the text catalog (UNRESOLVED_REFERENCE); without it a page falls back to its kind's title or the description. |
-| transport | object |  |  |
-| transport.route | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| transport.title | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| transport | object |  | Makes the detail a stop on a transport route. |
+| transport.route | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The transport route this stop belongs to. |
+| transport.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the stop's page. |
 | variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | Description variants; first match wins. |
 
 ### ItemAffect
@@ -1104,10 +1104,10 @@ A directly held item opted into exact bleed treatment.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| action | [Key](source-kinds.gen.md#key) | yes |  |
-| effect | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| action | [Key](source-kinds.gen.md#key) | yes | Must be bandage: the key of the action that applies it. |
+| effect | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bleed this bandage treats. |
+| narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when the bandage is applied. |
+| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill the actor must have usable to bandage. |
 
 ### ItemEdible
 
@@ -1118,9 +1118,9 @@ D4 held-food metadata; a complete original item grants capped recovery when Eat 
 | amount | integer | yes | Positive integer; the canonical numeric profile supplies the safe-integer upper limit. |
 | applies | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row hs-5: statuses Eat applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute. |
 | cures | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses (toolbox row 1) this food ends when eaten; eating is allowed at the pool maximum while one of them is active. |
-| label | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the eat action's button. |
+| narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is eaten. |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The pool eating restores (for example hp). |
 
 ### ItemLocation
 
@@ -1130,13 +1130,13 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {in=room} | variant |  |  |
-| {in=room}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {in=npc} | variant |  |  |
-| {in=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {in=item} | variant |  |  |
-| {in=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {in=template} | variant |  |  |
+| {in=room} | variant |  | Starts lying in a room. |
+| {in=room}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room it lies in. |
+| {in=npc} | variant |  | Starts carried by an NPC. |
+| {in=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC carrying it. |
+| {in=item} | variant |  | Starts inside another item of this cartridge. |
+| {in=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item that holds it. |
+| {in=template} | variant |  | Starts nowhere: it is a copy source only, and exists in play only once another rule makes a copy. |
 
 ### ItemReadable
 
@@ -1144,9 +1144,9 @@ API1.24: one explicit held-item Read, with optional declared Boolean topic grant
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| label | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| topic | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the read action's button. |
+| text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of what the player reads. |
+| topic | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A topic the reader learns on reading. |
 
 ### KernelApiRange
 
@@ -1154,8 +1154,8 @@ The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility v
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | [KernelApiVersion](source-kinds.gen.md#kernelapiversion) | yes |  |
-| below | [KernelApiVersion](source-kinds.gen.md#kernelapiversion) | yes |  |
+| at_least | [KernelApiVersion](source-kinds.gen.md#kernelapiversion) | yes | Lowest kernel API version accepted, inclusive. |
+| below | [KernelApiVersion](source-kinds.gen.md#kernelapiversion) | yes | First kernel API version refused: the range stops just under it. |
 
 ### KernelApiVersion
 
@@ -1222,7 +1222,7 @@ Toolbox row W6: variants of an item's or NPC's short name (TextVariants), each o
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| [].description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| [].description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the short name used while this variant applies. |
 | [].when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | [].words | [NameWords](source-kinds.gen.md#namewords) |  | See the type. |
 
@@ -1244,11 +1244,11 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {role=npc} | variant |  |  |
-| {role=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {role=item} | variant |  |  |
-| {role=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {role=actor} | variant |  |  |
+| {role=npc} | variant |  | An NPC of this cartridge. |
+| {role=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC definition. |
+| {role=item} | variant |  | An item of this cartridge. |
+| {role=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definition. |
+| {role=actor} | variant |  | The player's own body. |
 
 ### NpcHp
 
@@ -1270,16 +1270,16 @@ Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15,
 | abandoned | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once abandoned. |
 | active | [TextKey](source-kinds.gen.md#textkey) | yes | Text key while active. |
 | active_variants | list of object |  | Checked in order for active quests. |
-| active_variants[].text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| active_variants[].text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key shown while this variant's condition holds. |
 | active_variants[].when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | failed | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once failed. |
-| hints | object |  |  |
-| hints.active | list of object |  |  |
-| hints.active[].after | integer | yes |  |
-| hints.active[].text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| hints.objectives_met | list of object |  |  |
-| hints.objectives_met[].after | integer | yes |  |
-| hints.objectives_met[].text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| hints | object |  | Timed nudges the Journal shows as real time passes in a stage. |
+| hints.active | list of object |  | Hints for the active stage, earliest first. |
+| hints.active[].after | integer | yes | Real minutes since the stage began; 1 to 1440, strictly ascending. |
+| hints.active[].text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the hint. |
+| hints.objectives_met | list of object |  | Hints for the objectives-met stage, earliest first. |
+| hints.objectives_met[].after | integer | yes | Real minutes since the stage began; 1 to 1440, strictly ascending. |
+| hints.objectives_met[].text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the hint. |
 | objectives_met | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once objectives are met. |
 | outcomes | map of [TextKey](source-kinds.gen.md#textkey) |  | Overrides terminal text by outcome key. |
 | resolved | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once resolved. |
@@ -1292,12 +1292,12 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {evidence=current_state} | variant |  |  |
+| {evidence=current_state} | variant |  | Met while the policy holds for the actor now; nothing is stored. |
 | {evidence=current_state}.policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| {evidence=post_activation_event} | variant |  |  |
-| {evidence=post_activation_event}.item_acquired | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {evidence=patrol} | variant |  |  |
-| {evidence=expedition} | variant |  |  |
+| {evidence=post_activation_event} | variant |  | Met when the actor acquires the named item after the quest began. |
+| {evidence=post_activation_event}.item_acquired | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item whose acquisition counts. |
+| {evidence=patrol} | variant |  | Met when the quest's patrol completes. |
+| {evidence=expedition} | variant |  | Met when the quest's expedition succeeds. |
 
 ### QuestState
 
@@ -1605,86 +1605,8 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 
 ## Fields without a meaning
 
-247 fields.
+169 fields.
 
-- `DialogueRole: {role=item}`
-- `DialogueRole: {role=item}.item`
-- `DialogueRole: {role=npc}`
-- `DialogueRole: {role=npc}.npc`
-- `FuelSpec: {kind=source}`
-- `FuelSpec: {kind=source}.capacity`
-- `FuelSpec: {kind=source}.doused`
-- `FuelSpec: {kind=source}.ignited`
-- `FuelSpec: {kind=source}.initial`
-- `FuelSpec: {kind=source}.rate`
-- `FuelSpec: {kind=source}.refueled`
-- `FuelSpec: {kind=source}.supply`
-- `FuelSpec: {kind=source}.unit`
-- `FuelSpec: {kind=supply}`
-- `FuelSpec: {kind=supply}.capacity`
-- `FuelSpec: {kind=supply}.initial`
-- `FuelSpec: {kind=supply}.unit`
-- `InspectableDetail: bed`
-- `InspectableDetail: bed.entitlement`
-- `InspectableDetail: bed.title`
-- `InspectableDetail: harvest`
-- `InspectableDetail: harvest.careful`
-- `InspectableDetail: harvest.careful.action`
-- `InspectableDetail: harvest.careful.count`
-- `InspectableDetail: harvest.careful.narration`
-- `InspectableDetail: harvest.careful.skill`
-- `InspectableDetail: harvest.items`
-- `InspectableDetail: harvest.label`
-- `InspectableDetail: harvest.narration`
-- `InspectableDetail: harvest.title`
-- `InspectableDetail: harvest.tool.tag`
-- `InspectableDetail: liquid_source`
-- `InspectableDetail: notice_board`
-- `InspectableDetail: perception`
-- `InspectableDetail: perception.self_luminous`
-- `InspectableDetail: perception.title`
-- `InspectableDetail: readable.title`
-- `InspectableDetail: transport`
-- `InspectableDetail: transport.route`
-- `InspectableDetail: transport.title`
-- `ItemBandage: action`
-- `ItemBandage: effect`
-- `ItemBandage: narration`
-- `ItemBandage: skill`
-- `ItemEdible: label`
-- `ItemEdible: narration`
-- `ItemEdible: resource`
-- `ItemLocation: {in=item}`
-- `ItemLocation: {in=item}.item`
-- `ItemLocation: {in=npc}`
-- `ItemLocation: {in=npc}.npc`
-- `ItemLocation: {in=room}`
-- `ItemLocation: {in=room}.room`
-- `ItemLocation: {in=template}`
-- `ItemReadable: label`
-- `ItemReadable: text`
-- `ItemReadable: topic`
-- `KernelApiRange: at_least`
-- `KernelApiRange: below`
-- `NameVariants: [].description`
-- `NarrationParticipant: {role=actor}`
-- `NarrationParticipant: {role=item}`
-- `NarrationParticipant: {role=item}.item`
-- `NarrationParticipant: {role=npc}`
-- `NarrationParticipant: {role=npc}.npc`
-- `QuestJournal: active_variants[].text`
-- `QuestJournal: hints`
-- `QuestJournal: hints.active`
-- `QuestJournal: hints.active[].after`
-- `QuestJournal: hints.active[].text`
-- `QuestJournal: hints.objectives_met`
-- `QuestJournal: hints.objectives_met[].after`
-- `QuestJournal: hints.objectives_met[].text`
-- `QuestObjective: {evidence=current_state}`
-- `QuestObjective: {evidence=expedition}`
-- `QuestObjective: {evidence=patrol}`
-- `QuestObjective: {evidence=post_activation_event}`
-- `QuestObjective: {evidence=post_activation_event}.item_acquired`
 - `ScriptedTarget: {kind=detail}`
 - `ScriptedTarget: {kind=detail}.detail`
 - `ScriptedTarget: {kind=detail}.room`

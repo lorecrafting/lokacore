@@ -396,7 +396,7 @@
     "QuestObjective": {
       "description": "A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).",
       "oneOf": [
-        {
+        {"description":"Met while the policy holds for the actor now; nothing is stored.",
           "type": "object",
           "properties": {
             "evidence": {
@@ -411,13 +411,13 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Met when the actor acquires the named item after the quest began.",
           "type": "object",
           "properties": {
             "evidence": {
               "const": "post_activation_event"
             },
-            "item_acquired": {
+            "item_acquired": {"description":"The item whose acquisition counts.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -427,7 +427,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Met when the quest's patrol completes.",
           "type": "object",
           "properties": {
             "evidence": {
@@ -439,7 +439,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Met when the quest's expedition succeeds.",
           "type": "object",
           "properties": {
             "evidence": {
@@ -502,7 +502,7 @@
               "when": {
                 "$ref": "policy.schema.json#/$defs/Policy"
               },
-              "text": {
+              "text": {"description":"Text key shown while this variant's condition holds.",
                 "$ref": "text.schema.json#/$defs/TextKey"
               }
             },
@@ -512,22 +512,22 @@
             "additionalProperties": false
           }
         },
-        "hints": {
+        "hints": {"description":"Timed nudges the Journal shows as real time passes in a stage.",
           "type": "object",
           "properties": {
-            "active": {
+            "active": {"description":"Hints for the active stage, earliest first.",
               "type": "array",
               "minItems": 1,
               "maxItems": 8,
               "items": {
                 "type": "object",
                 "properties": {
-                  "after": {
+                  "after": {"description":"Real minutes since the stage began; 1 to 1440, strictly ascending.",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 1440
                   },
-                  "text": {
+                  "text": {"description":"Text key of the hint.",
                     "$ref": "text.schema.json#/$defs/TextKey"
                   }
                 },
@@ -538,19 +538,19 @@
                 "additionalProperties": false
               }
             },
-            "objectives_met": {
+            "objectives_met": {"description":"Hints for the objectives-met stage, earliest first.",
               "type": "array",
               "minItems": 1,
               "maxItems": 8,
               "items": {
                 "type": "object",
                 "properties": {
-                  "after": {
+                  "after": {"description":"Real minutes since the stage began; 1 to 1440, strictly ascending.",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 1440
                   },
-                  "text": {
+                  "text": {"description":"Text key of the hint.",
                     "$ref": "text.schema.json#/$defs/TextKey"
                   }
                 },

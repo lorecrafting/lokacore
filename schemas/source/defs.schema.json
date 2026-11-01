@@ -1383,8 +1383,12 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "An NPC of this cartridge takes this role.",
           "properties": {
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The NPC definition."
+            },
             "role": { "const": "npc" }
           },
           "required": [
@@ -1395,8 +1399,12 @@
         },
         {
           "additionalProperties": false,
+          "description": "An item of this cartridge takes this role.",
           "properties": {
-            "item": { "$ref": "#/$defs/DefinitionRef" },
+            "item": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The item definition."
+            },
             "role": { "const": "item" }
           },
           "required": [
@@ -1505,8 +1513,10 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "A lightable item that burns fuel while lit, and is refilled from a supply item.",
           "properties": {
             "capacity": {
+              "description": "The most fuel the source holds, in its unit.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
@@ -1515,22 +1525,39 @@
               "$ref": "#/$defs/Cues",
               "description": "Cues active only while this source is lit (toolbox row G6)."
             },
-            "doused": { "$ref": "#/$defs/TextKey" },
-            "ignited": { "$ref": "#/$defs/TextKey" },
+            "doused": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the line told when it is put out."
+            },
+            "ignited": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the line told when it is lit."
+            },
             "initial": {
+              "description": "Fuel it holds at the start; at most capacity.",
               "maximum": 9007199254740991,
               "minimum": 0,
               "type": "integer"
             },
             "kind": { "const": "source" },
             "rate": {
+              "description": "Fuel burned per logical time unit while lit; at least 1. It goes out when the fuel runs out.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
             },
-            "refueled": { "$ref": "#/$defs/TextKey" },
-            "supply": { "$ref": "#/$defs/DefinitionRef" },
-            "unit": { "$ref": "#/$defs/Key" }
+            "refueled": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the line told when it is refilled."
+            },
+            "supply": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The supply item that refuels it; the supply's unit must match."
+            },
+            "unit": {
+              "$ref": "#/$defs/Key",
+              "description": "The fuel's unit name; the supply must use the same one."
+            }
           },
           "required": [
             "kind",
@@ -1547,19 +1574,25 @@
         },
         {
           "additionalProperties": false,
+          "description": "An item that holds fuel for refilling sources; it is emptied by what it gives.",
           "properties": {
             "capacity": {
+              "description": "The most fuel the supply holds, in its unit.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
             },
             "initial": {
+              "description": "Fuel it holds at the start; at most capacity.",
               "maximum": 9007199254740991,
               "minimum": 0,
               "type": "integer"
             },
             "kind": { "const": "supply" },
-            "unit": { "$ref": "#/$defs/Key" }
+            "unit": {
+              "$ref": "#/$defs/Key",
+              "description": "The fuel's unit name; a source takes only a supply with the same one."
+            }
           },
           "required": [
             "kind",
@@ -1585,9 +1618,16 @@
         },
         "bed": {
           "additionalProperties": false,
+          "description": "Makes the detail a bed: resting here is offered when the entitlement fact reads true.",
           "properties": {
-            "entitlement": { "$ref": "#/$defs/DefinitionRef" },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "entitlement": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The fact that must read true for the actor before resting here is offered."
+            },
+            "title": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the title of the bed's page."
+            }
           },
           "required": [
             "title",
@@ -1605,18 +1645,30 @@
         },
         "harvest": {
           "additionalProperties": false,
+          "description": "Makes the detail a place to gather items from.",
           "properties": {
             "careful": {
               "additionalProperties": false,
+              "description": "A slower way to gather: several items at once, for a skilled actor.",
               "properties": {
-                "action": { "$ref": "#/$defs/Key" },
+                "action": {
+                  "$ref": "#/$defs/Key",
+                  "description": "The harvest action offered for it; must be a harvest action that takes a method."
+                },
                 "count": {
+                  "description": "Items gathered at once; 2 to 64, and at most the distinct items listed.",
                   "maximum": 64,
                   "minimum": 2,
                   "type": "integer"
                 },
-                "narration": { "$ref": "#/$defs/TextKey" },
-                "skill": { "$ref": "#/$defs/DefinitionRef" }
+                "narration": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Text key of the line told after a careful harvest."
+                },
+                "skill": {
+                  "$ref": "#/$defs/DefinitionRef",
+                  "description": "The skill the actor must have usable for the careful way."
+                }
               },
               "required": [
                 "skill",
@@ -1627,19 +1679,32 @@
               "type": "object"
             },
             "items": {
+              "description": "The item definitions that can be gathered; each harvest takes the ones lying in the room.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
-            "label": { "$ref": "#/$defs/TextKey" },
-            "narration": { "$ref": "#/$defs/TextKey" },
-            "title": { "$ref": "#/$defs/TextKey" },
+            "label": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the harvest action's button."
+            },
+            "narration": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the line told after an ordinary harvest (one item)."
+            },
+            "title": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the title of the harvest page."
+            },
             "tool": {
               "additionalProperties": false,
               "description": "Toolbox row 19: Harvest needs a held item whose definition declares tag.",
               "properties": {
-                "tag": { "$ref": "#/$defs/Tag" }
+                "tag": {
+                  "$ref": "#/$defs/Tag",
+                  "description": "The tag a held item must carry for the harvest to be allowed."
+                }
               },
               "required": [
                 "tag"
@@ -1655,9 +1720,13 @@
           ],
           "type": "object"
         },
-        "liquid_source": { "$ref": "#/$defs/DefinitionRef" },
+        "liquid_source": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The liquid a held vessel can be filled with at this detail."
+        },
         "notice_board": {
           "additionalProperties": false,
+          "description": "Makes the detail a board that lists other readable details of the room.",
           "properties": {
             "notices": {
               "description": "1 to 64 distinct notices, in order.",
@@ -1696,9 +1765,16 @@
         },
         "perception": {
           "additionalProperties": false,
+          "description": "Perception traits of the detail.",
           "properties": {
-            "self_luminous": { "const": true },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "self_luminous": {
+              "const": true,
+              "description": "Must be true: the detail gives light, so it is seen in a dark room."
+            },
+            "title": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the title of the detail's page."
+            }
           },
           "required": [
             "self_luminous",
@@ -1722,7 +1798,10 @@
               "$ref": "#/$defs/TextKey",
               "description": "The text read."
             },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "title": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the title of the readable's page; without it the label is shown."
+            }
           },
           "required": [
             "label",
@@ -1736,9 +1815,16 @@
         },
         "transport": {
           "additionalProperties": false,
+          "description": "Makes the detail a stop on a transport route.",
           "properties": {
-            "route": { "$ref": "#/$defs/DefinitionRef" },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "route": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The transport route this stop belongs to."
+            },
+            "title": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the title of the stop's page."
+            }
           },
           "required": [
             "route",
@@ -1783,10 +1869,22 @@
       "additionalProperties": false,
       "description": "A directly held item opted into exact bleed treatment.",
       "properties": {
-        "action": { "$ref": "#/$defs/Key" },
-        "effect": { "$ref": "#/$defs/DefinitionRef" },
-        "narration": { "$ref": "#/$defs/TextKey" },
-        "skill": { "$ref": "#/$defs/DefinitionRef" }
+        "action": {
+          "$ref": "#/$defs/Key",
+          "description": "Must be bandage: the key of the action that applies it."
+        },
+        "effect": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The bleed this bandage treats."
+        },
+        "narration": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the line told when the bandage is applied."
+        },
+        "skill": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The skill the actor must have usable to bandage."
+        }
       },
       "required": [
         "effect",
@@ -1817,9 +1915,18 @@
           "minItems": 1,
           "type": "array"
         },
-        "label": { "$ref": "#/$defs/TextKey" },
-        "narration": { "$ref": "#/$defs/TextKey" },
-        "resource": { "$ref": "#/$defs/DefinitionRef" }
+        "label": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the eat action's button."
+        },
+        "narration": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the line told when it is eaten."
+        },
+        "resource": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The pool eating restores (for example hp)."
+        }
       },
       "required": [
         "resource",
@@ -1833,9 +1940,13 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "Starts lying in a room.",
           "properties": {
             "in": { "const": "room" },
-            "room": { "$ref": "#/$defs/DefinitionRef" }
+            "room": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The room it lies in."
+            }
           },
           "required": [
             "in",
@@ -1845,9 +1956,13 @@
         },
         {
           "additionalProperties": false,
+          "description": "Starts carried by an NPC.",
           "properties": {
             "in": { "const": "npc" },
-            "npc": { "$ref": "#/$defs/DefinitionRef" }
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The NPC carrying it."
+            }
           },
           "required": [
             "in",
@@ -1857,9 +1972,13 @@
         },
         {
           "additionalProperties": false,
+          "description": "Starts inside another item of this cartridge.",
           "properties": {
             "in": { "const": "item" },
-            "item": { "$ref": "#/$defs/DefinitionRef" }
+            "item": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The item that holds it."
+            }
           },
           "required": [
             "in",
@@ -1869,6 +1988,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Starts nowhere: it is a copy source only, and exists in play only once another rule makes a copy.",
           "properties": {
             "in": { "const": "template" }
           },
@@ -1884,9 +2004,18 @@
       "additionalProperties": false,
       "description": "API1.24: one explicit held-item Read, with optional declared Boolean topic grant.",
       "properties": {
-        "label": { "$ref": "#/$defs/TextKey" },
-        "text": { "$ref": "#/$defs/TextKey" },
-        "topic": { "$ref": "#/$defs/DefinitionRef" }
+        "label": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the read action's button."
+        },
+        "text": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of what the player reads."
+        },
+        "topic": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "A topic the reader learns on reading."
+        }
       },
       "required": [
         "label",
@@ -1898,8 +2027,14 @@
       "additionalProperties": false,
       "description": "The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility versions'): at_least inclusive, below exclusive, so '>=1.3 <2.0' is at_least 1.3, below 2.0.",
       "properties": {
-        "at_least": { "$ref": "#/$defs/KernelApiVersion" },
-        "below": { "$ref": "#/$defs/KernelApiVersion" }
+        "at_least": {
+          "$ref": "#/$defs/KernelApiVersion",
+          "description": "Lowest kernel API version accepted, inclusive."
+        },
+        "below": {
+          "$ref": "#/$defs/KernelApiVersion",
+          "description": "First kernel API version refused: the range stops just under it."
+        }
       },
       "required": [
         "at_least",
@@ -2058,7 +2193,10 @@
       "items": {
         "additionalProperties": false,
         "properties": {
-          "description": { "$ref": "#/$defs/TextKey" },
+          "description": {
+            "$ref": "#/$defs/TextKey",
+            "description": "Text key of the short name used while this variant applies."
+          },
           "when": { "$ref": "#/$defs/Policy" },
           "words": { "$ref": "#/$defs/NameWords" }
         },
@@ -2101,8 +2239,12 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "An NPC of this cartridge.",
           "properties": {
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The NPC definition."
+            },
             "role": { "const": "npc" }
           },
           "required": [
@@ -2113,8 +2255,12 @@
         },
         {
           "additionalProperties": false,
+          "description": "An item of this cartridge.",
           "properties": {
-            "item": { "$ref": "#/$defs/DefinitionRef" },
+            "item": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The item definition."
+            },
             "role": { "const": "item" }
           },
           "required": [
@@ -2125,6 +2271,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "The player's own body.",
           "properties": {
             "role": { "const": "actor" }
           },
@@ -2803,7 +2950,10 @@
           "items": {
             "additionalProperties": false,
             "properties": {
-              "text": { "$ref": "#/$defs/TextKey" },
+              "text": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Text key shown while this variant's condition holds."
+              },
               "when": { "$ref": "#/$defs/Policy" }
             },
             "required": [
@@ -2821,17 +2971,23 @@
         },
         "hints": {
           "additionalProperties": false,
+          "description": "Timed nudges the Journal shows as real time passes in a stage.",
           "properties": {
             "active": {
+              "description": "Hints for the active stage, earliest first.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
                   "after": {
+                    "description": "Real minutes since the stage began; 1 to 1440, strictly ascending.",
                     "maximum": 1440,
                     "minimum": 1,
                     "type": "integer"
                   },
-                  "text": { "$ref": "#/$defs/TextKey" }
+                  "text": {
+                    "$ref": "#/$defs/TextKey",
+                    "description": "Text key of the hint."
+                  }
                 },
                 "required": [
                   "after",
@@ -2844,15 +3000,20 @@
               "type": "array"
             },
             "objectives_met": {
+              "description": "Hints for the objectives-met stage, earliest first.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
                   "after": {
+                    "description": "Real minutes since the stage began; 1 to 1440, strictly ascending.",
                     "maximum": 1440,
                     "minimum": 1,
                     "type": "integer"
                   },
-                  "text": { "$ref": "#/$defs/TextKey" }
+                  "text": {
+                    "$ref": "#/$defs/TextKey",
+                    "description": "Text key of the hint."
+                  }
                 },
                 "required": [
                   "after",
@@ -2895,6 +3056,7 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "Met while the policy holds for the actor now; nothing is stored.",
           "properties": {
             "evidence": { "const": "current_state" },
             "policy": { "$ref": "#/$defs/Policy" }
@@ -2906,9 +3068,13 @@
         },
         {
           "additionalProperties": false,
+          "description": "Met when the actor acquires the named item after the quest began.",
           "properties": {
             "evidence": { "const": "post_activation_event" },
-            "item_acquired": { "$ref": "#/$defs/DefinitionRef" }
+            "item_acquired": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The item whose acquisition counts."
+            }
           },
           "required": [
             "evidence",
@@ -2918,6 +3084,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Met when the quest's patrol completes.",
           "properties": {
             "evidence": { "const": "patrol" }
           },
@@ -2928,6 +3095,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Met when the quest's expedition succeeds.",
           "properties": {
             "evidence": { "const": "expedition" }
           },
@@ -5492,16 +5660,24 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "An NPC of this cartridge takes this role.",
           "properties": {
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The NPC definition."
+            },
             "role": { "const": "npc" }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "An item of this cartridge takes this role.",
           "properties": {
-            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "item": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The item definition."
+            },
             "role": { "const": "item" }
           },
           "type": "object"
@@ -5513,8 +5689,10 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "A lightable item that burns fuel while lit, and is refilled from a supply item.",
           "properties": {
             "capacity": {
+              "description": "The most fuel the source holds, in its unit.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
@@ -5523,40 +5701,63 @@
               "$ref": "#/$defs/Cues",
               "description": "Cues active only while this source is lit (toolbox row G6)."
             },
-            "doused": { "$ref": "#/$defs/partial.TextKey" },
-            "ignited": { "$ref": "#/$defs/partial.TextKey" },
+            "doused": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the line told when it is put out."
+            },
+            "ignited": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the line told when it is lit."
+            },
             "initial": {
+              "description": "Fuel it holds at the start; at most capacity.",
               "maximum": 9007199254740991,
               "minimum": 0,
               "type": "integer"
             },
             "kind": { "const": "source" },
             "rate": {
+              "description": "Fuel burned per logical time unit while lit; at least 1. It goes out when the fuel runs out.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
             },
-            "refueled": { "$ref": "#/$defs/partial.TextKey" },
-            "supply": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "unit": { "$ref": "#/$defs/Key" }
+            "refueled": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the line told when it is refilled."
+            },
+            "supply": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The supply item that refuels it; the supply's unit must match."
+            },
+            "unit": {
+              "$ref": "#/$defs/Key",
+              "description": "The fuel's unit name; the supply must use the same one."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "An item that holds fuel for refilling sources; it is emptied by what it gives.",
           "properties": {
             "capacity": {
+              "description": "The most fuel the supply holds, in its unit.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
             },
             "initial": {
+              "description": "Fuel it holds at the start; at most capacity.",
               "maximum": 9007199254740991,
               "minimum": 0,
               "type": "integer"
             },
             "kind": { "const": "supply" },
-            "unit": { "$ref": "#/$defs/Key" }
+            "unit": {
+              "$ref": "#/$defs/Key",
+              "description": "The fuel's unit name; a source takes only a supply with the same one."
+            }
           },
           "type": "object"
         }
@@ -5576,9 +5777,16 @@
         },
         "bed": {
           "additionalProperties": false,
+          "description": "Makes the detail a bed: resting here is offered when the entitlement fact reads true.",
           "properties": {
-            "entitlement": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "title": { "$ref": "#/$defs/partial.TextKey" }
+            "entitlement": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The fact that must read true for the actor before resting here is offered."
+            },
+            "title": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the title of the bed's page."
+            }
           },
           "type": "object"
         },
@@ -5592,44 +5800,73 @@
         },
         "harvest": {
           "additionalProperties": false,
+          "description": "Makes the detail a place to gather items from.",
           "properties": {
             "careful": {
               "additionalProperties": false,
+              "description": "A slower way to gather: several items at once, for a skilled actor.",
               "properties": {
-                "action": { "$ref": "#/$defs/Key" },
+                "action": {
+                  "$ref": "#/$defs/Key",
+                  "description": "The harvest action offered for it; must be a harvest action that takes a method."
+                },
                 "count": {
+                  "description": "Items gathered at once; 2 to 64, and at most the distinct items listed.",
                   "maximum": 64,
                   "minimum": 2,
                   "type": "integer"
                 },
-                "narration": { "$ref": "#/$defs/partial.TextKey" },
-                "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+                "narration": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Text key of the line told after a careful harvest."
+                },
+                "skill": {
+                  "$ref": "#/$defs/partial.DefinitionRef",
+                  "description": "The skill the actor must have usable for the careful way."
+                }
               },
               "type": "object"
             },
             "items": {
+              "description": "The item definitions that can be gathered; each harvest takes the ones lying in the room.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
-            "label": { "$ref": "#/$defs/partial.TextKey" },
-            "narration": { "$ref": "#/$defs/partial.TextKey" },
-            "title": { "$ref": "#/$defs/partial.TextKey" },
+            "label": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the harvest action's button."
+            },
+            "narration": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the line told after an ordinary harvest (one item)."
+            },
+            "title": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the title of the harvest page."
+            },
             "tool": {
               "additionalProperties": false,
               "description": "Toolbox row 19: Harvest needs a held item whose definition declares tag.",
               "properties": {
-                "tag": { "$ref": "#/$defs/Tag" }
+                "tag": {
+                  "$ref": "#/$defs/Tag",
+                  "description": "The tag a held item must carry for the harvest to be allowed."
+                }
               },
               "type": "object"
             }
           },
           "type": "object"
         },
-        "liquid_source": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "liquid_source": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The liquid a held vessel can be filled with at this detail."
+        },
         "notice_board": {
           "additionalProperties": false,
+          "description": "Makes the detail a board that lists other readable details of the room.",
           "properties": {
             "notices": {
               "description": "1 to 64 distinct notices, in order.",
@@ -5664,9 +5901,16 @@
         },
         "perception": {
           "additionalProperties": false,
+          "description": "Perception traits of the detail.",
           "properties": {
-            "self_luminous": { "const": true },
-            "title": { "$ref": "#/$defs/partial.TextKey" }
+            "self_luminous": {
+              "const": true,
+              "description": "Must be true: the detail gives light, so it is seen in a dark room."
+            },
+            "title": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the title of the detail's page."
+            }
           },
           "type": "object"
         },
@@ -5686,7 +5930,10 @@
               "$ref": "#/$defs/partial.TextKey",
               "description": "The text read."
             },
-            "title": { "$ref": "#/$defs/partial.TextKey" }
+            "title": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the title of the readable's page; without it the label is shown."
+            }
           },
           "type": "object"
         },
@@ -5696,9 +5943,16 @@
         },
         "transport": {
           "additionalProperties": false,
+          "description": "Makes the detail a stop on a transport route.",
           "properties": {
-            "route": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "title": { "$ref": "#/$defs/partial.TextKey" }
+            "route": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The transport route this stop belongs to."
+            },
+            "title": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the title of the stop's page."
+            }
           },
           "type": "object"
         },
@@ -5716,10 +5970,22 @@
       "additionalProperties": false,
       "description": "A directly held item opted into exact bleed treatment.",
       "properties": {
-        "action": { "$ref": "#/$defs/Key" },
-        "effect": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "narration": { "$ref": "#/$defs/partial.TextKey" },
-        "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+        "action": {
+          "$ref": "#/$defs/Key",
+          "description": "Must be bandage: the key of the action that applies it."
+        },
+        "effect": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The bleed this bandage treats."
+        },
+        "narration": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the line told when the bandage is applied."
+        },
+        "skill": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The skill the actor must have usable to bandage."
+        }
       },
       "type": "object"
     },
@@ -5744,9 +6010,18 @@
           "minItems": 1,
           "type": "array"
         },
-        "label": { "$ref": "#/$defs/partial.TextKey" },
-        "narration": { "$ref": "#/$defs/partial.TextKey" },
-        "resource": { "$ref": "#/$defs/partial.DefinitionRef" }
+        "label": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the eat action's button."
+        },
+        "narration": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the line told when it is eaten."
+        },
+        "resource": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The pool eating restores (for example hp)."
+        }
       },
       "type": "object"
     },
@@ -5754,30 +6029,43 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "Starts lying in a room.",
           "properties": {
             "in": { "const": "room" },
-            "room": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "room": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The room it lies in."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "Starts carried by an NPC.",
           "properties": {
             "in": { "const": "npc" },
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The NPC carrying it."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "Starts inside another item of this cartridge.",
           "properties": {
             "in": { "const": "item" },
-            "item": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "item": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The item that holds it."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "Starts nowhere: it is a copy source only, and exists in play only once another rule makes a copy.",
           "properties": {
             "in": { "const": "template" }
           },
@@ -5790,9 +6078,18 @@
       "additionalProperties": false,
       "description": "API1.24: one explicit held-item Read, with optional declared Boolean topic grant.",
       "properties": {
-        "label": { "$ref": "#/$defs/partial.TextKey" },
-        "text": { "$ref": "#/$defs/partial.TextKey" },
-        "topic": { "$ref": "#/$defs/partial.DefinitionRef" }
+        "label": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the read action's button."
+        },
+        "text": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of what the player reads."
+        },
+        "topic": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "A topic the reader learns on reading."
+        }
       },
       "type": "object"
     },
@@ -5893,22 +6190,31 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "An NPC of this cartridge.",
           "properties": {
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The NPC definition."
+            },
             "role": { "const": "npc" }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "An item of this cartridge.",
           "properties": {
-            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "item": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The item definition."
+            },
             "role": { "const": "item" }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "The player's own body.",
           "properties": {
             "role": { "const": "actor" }
           },
@@ -6401,7 +6707,10 @@
           "items": {
             "additionalProperties": false,
             "properties": {
-              "text": { "$ref": "#/$defs/TextKey" },
+              "text": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Text key shown while this variant's condition holds."
+              },
               "when": { "$ref": "#/$defs/Policy" }
             },
             "required": [
@@ -6419,17 +6728,23 @@
         },
         "hints": {
           "additionalProperties": false,
+          "description": "Timed nudges the Journal shows as real time passes in a stage.",
           "properties": {
             "active": {
+              "description": "Hints for the active stage, earliest first.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
                   "after": {
+                    "description": "Real minutes since the stage began; 1 to 1440, strictly ascending.",
                     "maximum": 1440,
                     "minimum": 1,
                     "type": "integer"
                   },
-                  "text": { "$ref": "#/$defs/TextKey" }
+                  "text": {
+                    "$ref": "#/$defs/TextKey",
+                    "description": "Text key of the hint."
+                  }
                 },
                 "required": [
                   "after",
@@ -6442,15 +6757,20 @@
               "type": "array"
             },
             "objectives_met": {
+              "description": "Hints for the objectives-met stage, earliest first.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
                   "after": {
+                    "description": "Real minutes since the stage began; 1 to 1440, strictly ascending.",
                     "maximum": 1440,
                     "minimum": 1,
                     "type": "integer"
                   },
-                  "text": { "$ref": "#/$defs/TextKey" }
+                  "text": {
+                    "$ref": "#/$defs/TextKey",
+                    "description": "Text key of the hint."
+                  }
                 },
                 "required": [
                   "after",
@@ -6486,6 +6806,7 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "Met while the policy holds for the actor now; nothing is stored.",
           "properties": {
             "evidence": { "const": "current_state" },
             "policy": { "$ref": "#/$defs/partial.Policy" }
@@ -6494,14 +6815,19 @@
         },
         {
           "additionalProperties": false,
+          "description": "Met when the actor acquires the named item after the quest began.",
           "properties": {
             "evidence": { "const": "post_activation_event" },
-            "item_acquired": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "item_acquired": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The item whose acquisition counts."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "Met when the quest's patrol completes.",
           "properties": {
             "evidence": { "const": "patrol" }
           },
@@ -6509,6 +6835,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Met when the quest's expedition succeeds.",
           "properties": {
             "evidence": { "const": "expedition" }
           },

@@ -148,13 +148,13 @@
     "DialogueRole": {
       "description": "A dialogue role's participant, as action.schema.json NarrationParticipant's npc or item branch (the actor is implicit): an NPC or item of this cartridge (else UNRESOLVED_REFERENCE).",
       "oneOf": [
-        {
+        {"description":"An NPC of this cartridge takes this role.",
           "type": "object",
           "properties": {
             "role": {
               "const": "npc"
             },
-            "npc": {
+            "npc": {"description":"The NPC definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -164,13 +164,13 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"An item of this cartridge takes this role.",
           "type": "object",
           "properties": {
             "role": {
               "const": "item"
             },
-            "item": {
+            "item": {"description":"The item definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },

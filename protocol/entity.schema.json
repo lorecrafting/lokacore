@@ -18,13 +18,13 @@
     "ItemLocation": {
       "description": "Where an item starts (00a §12 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED).",
       "oneOf": [
-        {
+        {"description":"Starts lying in a room.",
           "type": "object",
           "properties": {
             "in": {
               "const": "room"
             },
-            "room": {
+            "room": {"description":"The room it lies in.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -34,13 +34,13 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Starts carried by an NPC.",
           "type": "object",
           "properties": {
             "in": {
               "const": "npc"
             },
-            "npc": {
+            "npc": {"description":"The NPC carrying it.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -50,13 +50,13 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Starts inside another item of this cartridge.",
           "type": "object",
           "properties": {
             "in": {
               "const": "item"
             },
-            "item": {
+            "item": {"description":"The item that holds it.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -66,7 +66,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Starts nowhere: it is a copy source only, and exists in play only once another rule makes a copy.",
           "type": "object",
           "properties": {
             "in": {
@@ -833,7 +833,7 @@
           "when": {
             "$ref": "policy.schema.json#/$defs/Policy"
           },
-          "description": {
+          "description": {"description":"Text key of the short name used while this variant applies.",
             "$ref": "text.schema.json#/$defs/TextKey"
           },
           "words": {
@@ -1208,40 +1208,40 @@
     },
     "FuelSpec": {
       "oneOf": [
-        {
+        {"description":"A lightable item that burns fuel while lit, and is refilled from a supply item.",
           "type": "object",
           "properties": {
             "kind": {
               "const": "source"
             },
-            "capacity": {
+            "capacity": {"description":"The most fuel the source holds, in its unit.",
               "type": "integer",
               "minimum": 1,
               "maximum": 9007199254740991
             },
-            "initial": {
+            "initial": {"description":"Fuel it holds at the start; at most capacity.",
               "type": "integer",
               "minimum": 0,
               "maximum": 9007199254740991
             },
-            "rate": {
+            "rate": {"description":"Fuel burned per logical time unit while lit; at least 1. It goes out when the fuel runs out.",
               "type": "integer",
               "minimum": 1,
               "maximum": 9007199254740991
             },
-            "unit": {
+            "unit": {"description":"The fuel's unit name; the supply must use the same one.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "supply": {
+            "supply": {"description":"The supply item that refuels it; the supply's unit must match.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "ignited": {
+            "ignited": {"description":"Text key of the line told when it is lit.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "doused": {
+            "doused": {"description":"Text key of the line told when it is put out.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "refueled": {
+            "refueled": {"description":"Text key of the line told when it is refilled.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "cues": {
@@ -1262,23 +1262,23 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"An item that holds fuel for refilling sources; it is emptied by what it gives.",
           "type": "object",
           "properties": {
             "kind": {
               "const": "supply"
             },
-            "capacity": {
+            "capacity": {"description":"The most fuel the supply holds, in its unit.",
               "type": "integer",
               "minimum": 1,
               "maximum": 9007199254740991
             },
-            "initial": {
+            "initial": {"description":"Fuel it holds at the start; at most capacity.",
               "type": "integer",
               "minimum": 0,
               "maximum": 9007199254740991
             },
-            "unit": {
+            "unit": {"description":"The fuel's unit name; a source takes only a supply with the same one.",
               "$ref": "action.schema.json#/$defs/Key"
             }
           },
@@ -1385,13 +1385,13 @@
       "description": "API1.24: one explicit held-item Read, with optional declared Boolean topic grant.",
       "type": "object",
       "properties": {
-        "label": {
+        "label": {"description":"Text key of the read action's button.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "text": {
+        "text": {"description":"Text key of what the player reads.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "topic": {
+        "topic": {"description":"A topic the reader learns on reading.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -1417,7 +1417,7 @@
       "description": "D4 held-food metadata; a complete original item grants capped recovery when Eat commits.",
       "type": "object",
       "properties": {
-        "resource": {
+        "resource": {"description":"The pool eating restores (for example hp).",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "amount": {
@@ -1425,10 +1425,10 @@
           "minimum": 1,
           "description": "Positive integer; the canonical numeric profile supplies the safe-integer upper limit."
         },
-        "label": {
+        "label": {"description":"Text key of the eat action's button.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "narration": {
+        "narration": {"description":"Text key of the line told when it is eaten.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "cures": {
@@ -1491,16 +1491,16 @@
       ],
       "type": "object",
       "properties": {
-        "effect": {
+        "effect": {"description":"The bleed this bandage treats.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "skill": {
+        "skill": {"description":"The skill the actor must have usable to bandage.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "action": {
+        "action": {"description":"Must be bandage: the key of the action that applies it.",
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "narration": {
+        "narration": {"description":"Text key of the line told when the bandage is applied.",
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },

@@ -55,10 +55,10 @@
       "description": "The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility versions'): at_least inclusive, below exclusive, so '>=1.3 <2.0' is at_least 1.3, below 2.0.",
       "type": "object",
       "properties": {
-        "at_least": {
+        "at_least": {"description":"Lowest kernel API version accepted, inclusive.",
           "$ref": "#/$defs/KernelApiVersion"
         },
-        "below": {
+        "below": {"description":"First kernel API version refused: the range stops just under it.",
           "$ref": "#/$defs/KernelApiVersion"
         }
       },

@@ -160,7 +160,7 @@
             "text": {"description":"The text read.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "title": {
+            "title": {"description":"Text key of the title of the readable's page; without it the label is shown.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -170,7 +170,7 @@
           ],
           "additionalProperties": false
         },
-        "notice_board": {
+        "notice_board": {"description":"Makes the detail a board that lists other readable details of the room.",
           "type": "object",
           "properties": {
             "title": {"description":"The board's title.",
@@ -204,10 +204,10 @@
           ],
           "additionalProperties": false
         },
-        "harvest": {
+        "harvest": {"description":"Makes the detail a place to gather items from.",
           "type": "object",
           "properties": {
-            "items": {
+            "items": {"description":"The item definitions that can be gathered; each harvest takes the ones lying in the room.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -215,30 +215,30 @@
               "minItems": 1,
               "maxItems": 64
             },
-            "label": {
+            "label": {"description":"Text key of the harvest action's button.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "narration": {
+            "narration": {"description":"Text key of the line told after an ordinary harvest (one item).",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "title": {
+            "title": {"description":"Text key of the title of the harvest page.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "careful": {
+            "careful": {"description":"A slower way to gather: several items at once, for a skilled actor.",
               "type": "object",
               "properties": {
-                "skill": {
+                "skill": {"description":"The skill the actor must have usable for the careful way.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "count": {
+                "count": {"description":"Items gathered at once; 2 to 64, and at most the distinct items listed.",
                   "type": "integer",
                   "minimum": 2,
                   "maximum": 64
                 },
-                "action": {
+                "action": {"description":"The harvest action offered for it; must be a harvest action that takes a method.",
                   "$ref": "action.schema.json#/$defs/Key"
                 },
-                "narration": {
+                "narration": {"description":"Text key of the line told after a careful harvest.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -254,7 +254,7 @@
               "description": "Toolbox row 19: Harvest needs a held item whose definition declares tag.",
               "type": "object",
               "properties": {
-                "tag": {
+                "tag": {"description":"The tag a held item must carry for the harvest to be allowed.",
                   "$ref": "entity.schema.json#/$defs/Tag"
                 }
               },
@@ -272,13 +272,13 @@
           ],
           "additionalProperties": false
         },
-        "perception": {
+        "perception": {"description":"Perception traits of the detail.",
           "type": "object",
           "properties": {
-            "self_luminous": {
+            "self_luminous": {"description":"Must be true: the detail gives light, so it is seen in a dark room.",
               "const": true
             },
-            "title": {
+            "title": {"description":"Text key of the title of the detail's page.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -288,16 +288,16 @@
           ],
           "additionalProperties": false
         },
-        "liquid_source": {
+        "liquid_source": {"description":"The liquid a held vessel can be filled with at this detail.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "bed": {
+        "bed": {"description":"Makes the detail a bed: resting here is offered when the entitlement fact reads true.",
           "type": "object",
           "properties": {
-            "title": {
+            "title": {"description":"Text key of the title of the bed's page.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "entitlement": {
+            "entitlement": {"description":"The fact that must read true for the actor before resting here is offered.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -311,13 +311,13 @@
           "description": "Optional page title the Book shows for this detail (loka-x6t.120; docs/system/mechanics.md inspectable_detail@1): it resolves in the text catalog (UNRESOLVED_REFERENCE); without it a page falls back to its kind's title or the description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "transport": {
+        "transport": {"description":"Makes the detail a stop on a transport route.",
           "type": "object",
           "properties": {
-            "route": {
+            "route": {"description":"The transport route this stop belongs to.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "title": {
+            "title": {"description":"Text key of the title of the stop's page.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
