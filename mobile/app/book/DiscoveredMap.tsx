@@ -54,7 +54,8 @@ function spread(rooms: Room[]) {
 /**
  * The Map page's drawing: dots and lines, no actions and no names inside it (owner 2026-10-30).
  * - Use: the Map page.
- * - Rules: a filled dot per visited room on the shown level, the current one ringed; a line per
+ * - Rules: what is new since the Map last showed draws on over `motion.settle`, silent.
+ *   A filled dot per visited room on the shown level, the current one ringed; a line per
  *   known exit; each unexplored exit a short line to an open dot, an up or down one drawn
  *   aslant. A tapped dot's room name, or "Unexplored", shows in the caption under the drawing.
  *   Every dot is a touch-sized button named by its room title. Colours are the minimap's roles.

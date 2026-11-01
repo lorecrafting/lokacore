@@ -100,7 +100,9 @@ function Answering(p: {
  * The riddle answer: a bank of Letter tiles over one local buffer, with Backspace, Clear and
  * Submit.
  * - Use: an NPC page offering a riddle.
- * - Rules: the answer line, the bank, its Controls and the Submit card are one block. Tile indices
+ * - Rules: a right answer holds in `warning` for `motion.settle.hold`, then settles (RightWord); a
+ *   wrong one sends the tiles back over `motion.settle`, silent.
+ *   The answer line, the bank, its Controls and the Submit card are one block. Tile indices
  *   preserve multiplicity; only the bounded submitted word crosses the session boundary.
  * - Story: Riddle.stories.tsx
  */

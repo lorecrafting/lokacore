@@ -57,7 +57,8 @@ function usePeople(view: GameView) {
  * The room's people, then items; no headings, an empty group omitted (book-ui.md, Room page
  * anatomy).
  * - Use: RoomPage only.
- * - Rules: each group is one sentence, "Aldous, Bess, the carpenter, chandler, and cook are here."
+ * - Rules: an arrival dries in; a leaver fades over `motion.fade`, taking no touch, then closes.
+ *   Each group is one sentence, "Aldous, Bess, the carpenter, chandler, and cook are here."
  *   ("A and B are here.", "A crow is here.", "Two crows are here."): serial comma, the first word
  *   capitalised, each name its own link named "<name>, open"; articles, commas and "and" are plain
  *   text. A name with words shows its bare name; an article is shared by a run of different names

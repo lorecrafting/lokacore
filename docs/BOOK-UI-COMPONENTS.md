@@ -109,6 +109,9 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   Tab does, and so does an arriving page's title focus after keyboard use. One document-wide rule
   (`useFocusRing`, recoloured by the Book's shown palette), never a per-component style; a device
   draws no ring.
+- **Under-ink layers.** A layer that stays under the ink (`opacity.faint`, `opacity.glow`) keeps every
+  text role at 4.5:1 at its peak in every palette it shows on. Only one shows at a time, highest first:
+  the fatal hold, the low-health vignette, the lamp glow; together they would break the 4.5:1 rule.
 - **Motion and sound.** Only the effects named in
   [Effects, sound and haptics](system/book-ui.md#effects-sound-and-haptics); no other decorative
   animation. `motion.palette` is the slow cross-fade between palettes (light
