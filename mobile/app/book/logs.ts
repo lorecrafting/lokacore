@@ -64,6 +64,7 @@ export type Logs = {
   status: ElapsedStatus;
   recovered?: boolean;
   narrationId?: string;
+  died?: string; // the command of the last death read, the cue bus's edge (book-ui.md, Falling)
   confirmedRead?: string;
   returnWorld?: boolean | 'section';
   returnDetail?: string;
@@ -142,6 +143,7 @@ export function restoredLogs(game: Game, text: Say): Logs {
     combatLog: [],
     details: new Map(),
     narrationId: last?.command_id,
+    died: last?.died && last.command_id,
     projection: game.view(),
     status: { kind: 'ready' },
   };

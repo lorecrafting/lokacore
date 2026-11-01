@@ -1,5 +1,5 @@
 // A full reading page with the offered actions following its combat history.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import { bandPhrase, type group } from './model.ts';
@@ -10,12 +10,93 @@ import { LABEL } from './labels.ts';
 import { Control, Page } from './pages.tsx';
 import { RunningHead } from './RunningHead.tsx';
 import { Blow } from './Blow.tsx';
+import { onCue } from './cues.ts';
+import {
+  InkText,
+  interpolateColor,
+  Reanimated,
+  ReduceMotion,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from './fade.ts';
+import { useDry } from './press.ts';
+import { motion, size } from './tokens.ts';
 import { prose, usePalette, useType } from './palette.ts';
 import type { presenter, Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Encounter = NonNullable<Screen['ended']>;
+
+const reduceMotion = ReduceMotion.Never; // the colour still shows; `still` takes only the travel
+const { duration: pressIn, out: pressOut } = motion.press;
+
+// A blow dealt: the line lifts and its phrase takes `dim` for one press (a nested Text's colour cannot
+// animate on native, so it steps, and the travel is the line's). A foe falling: its line settles to `dim`.
+function useBlow(id: string) {
+  const { fg, dim } = usePalette();
+  const still = useReducedMotion();
+  const [struck, setStruck] = useState(false);
+  const lift = useSharedValue(0);
+  const fell = useSharedValue(0);
+  useEffect(() => {
+    let release: ReturnType<typeof setTimeout> | undefined;
+    const stop = onCue((cue) => {
+      if (cue.name === 'combat_close' && cue.end === 'fell')
+        fell.value = withTiming(1, { duration: motion.settle.duration, reduceMotion });
+      if (cue.name !== 'blow_dealt' || !cue.ids?.includes(id)) return;
+      setStruck(true);
+      clearTimeout(release);
+      release = setTimeout(() => setStruck(false), pressIn + pressOut);
+      lift.value = withSequence(
+        reduceMotion,
+        withTiming(1, { duration: pressIn, reduceMotion }),
+        withTiming(0, { duration: pressOut, reduceMotion }),
+      );
+    });
+    return () => (stop(), clearTimeout(release));
+  }, [id]);
+  const travel = useAnimatedStyle(() => ({
+    transform: [{ translateY: still ? 0 : -size.rule * lift.value }],
+  }));
+  const settled = useAnimatedStyle(() => ({
+    color: interpolateColor(fell.value, [0, 1], [fg, dim]),
+  }));
+  return { struck, travel, settled };
+}
+
+export function Foe(p: {
+  opponent: Pick<Encounter, 'name' | 'band' | 'words'> & { id: string };
+  target: boolean;
+  live: boolean;
+  text: Screen['text'];
+  children: React.ReactNode;
+}) {
+  const c = usePalette();
+  const t = useType();
+  const { opponent, text } = p;
+  const { struck, travel, settled } = useBlow(opponent.id);
+  return (
+    <Reanimated.View style={travel}>
+      <InkText style={[prose(c, t), settled]}>
+        {opponent.words
+          ? `${opponent.words.article ? `${LABEL.the} ` : ''}${text(opponent.words.bare)}`
+          : text(opponent.name)}
+        {p.target ? ' (your target)' : ''}
+        {/* a closed encounter's band is stale (a dead foe has none) */}
+        {p.live && opponent.band && (
+          <Text style={struck ? { color: c.dim } : undefined}>
+            {` — ${bandPhrase({ band: opponent.band }, text)}`}
+          </Text>
+        )}
+      </InkText>
+      {p.children}
+    </Reanimated.View>
+  );
+}
 
 // The opponent lines, "name — band", one block of touching lines (a run of one kind, like the
 // mock's entity lines; Page's doc comment). A foe with name words reads definite, "the goblin"
@@ -28,8 +109,6 @@ function Fight(
     press: (b: Button) => void;
   },
 ) {
-  const c = usePalette();
-  const t = useType();
   const { view, text, combat } = p;
   const { opponent_id: id, name, band, words } = combat;
   const shown: Shown = useState(); // one for every foe's list: one list open at a time (book-ui.md)
@@ -37,17 +116,13 @@ function Fight(
   return (
     <View>
       {(combat.active_opponents ?? [{ id, name, band, words }]).map((opponent) => (
-        <View key={opponent.id}>
-          <Text style={prose(c, t)}>
-            {opponent.words
-              ? `${opponent.words.article ? `${LABEL.the} ` : ''}${text(opponent.words.bare)}`
-              : text(opponent.name)}
-            {combat.active_opponents && opponent.id === combat.opponent_id && view.combat
-              ? ' (your target)'
-              : ''}
-            {/* a closed encounter's band is stale (a dead foe has none) */}
-            {view.combat && opponent.band && ` — ${bandPhrase({ band: opponent.band }, text)}`}
-          </Text>
+        <Foe
+          key={opponent.id}
+          opponent={opponent}
+          target={!!(combat.active_opponents && opponent.id === combat.opponent_id && view.combat)}
+          live={!!view.combat}
+          text={text}
+        >
           <PickLists
             page={opponent.id}
             view={view}
@@ -57,9 +132,17 @@ function Fight(
             pending={p.pending}
             state={shown}
           />
-        </View>
+        </Foe>
       ))}
     </View>
+  );
+}
+
+function BackToWorld(p: { onPress: () => void }) {
+  return (
+    <Reanimated.View style={useDry()}>
+      <Control label={LABEL.backToWorld} onPress={p.onPress} />
+    </Reanimated.View>
   );
 }
 
@@ -82,7 +165,7 @@ export function Combat(p: {
   const combat = view.combat ?? ended;
   if (!combat) return null;
   // A closed encounter keeps its page: no actions, one Back to World (book-ui.md, Closure).
-  const foot = !view.combat && <Control label={LABEL.backToWorld} onPress={p.world} />;
+  const foot = !view.combat && <BackToWorld onPress={p.world} />;
   const stand = p.g.position.find((b) => b.action_key === 'stand');
   return (
     // Paper behind the running head too: the leaving page fades over the arriving one.

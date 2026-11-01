@@ -132,3 +132,40 @@ test('the page turn has its three recordings', () => {
     'ui-paper-turn-03.m4a',
   ]);
 });
+
+// Every row: [cue, music call, haptics]. Breaks: the fanfare's light haptic reaches a flight, a reopened
+// fight buzzes, a death in a fight doubles the thud's heavy, or one outside a fight has none.
+const fightRows: [Parameters<typeof playCue>[0], string, string[]][] = [
+  [{ name: 'combat_open' }, 'open', ['medium']],
+  [{ name: 'combat_open', resumed: true }, 'resume', []],
+  [{ name: 'combat_close', end: 'fell' }, 'won', ['light']],
+  [{ name: 'combat_close', end: 'fled' }, 'away', []],
+  [{ name: 'combat_close', end: 'quiet' }, 'away', []],
+  [{ name: 'combat_close', resumed: true }, 'away', []],
+  [{ name: 'death', fight: true }, 'cut', []],
+  [{ name: 'death', fight: false }, 'cut', ['heavy']],
+];
+for (const [cue, music, felt] of fightRows)
+  test(`${cue.name} ${JSON.stringify(cue)}: music ${music}, haptic ${felt}`, () => {
+    g.bookDevice = [];
+    playCue(cue);
+    const log: [string, string][] = g.bookDevice;
+    g.bookDevice = undefined;
+    assert.deepEqual(
+      log.filter((l) => l[0] === 'fight').map((l) => l[1]),
+      [music],
+    );
+    assert.deepEqual(
+      log.filter((l) => l[0] === 'haptic').map((l) => l[1]),
+      felt,
+    );
+  });
+
+// Breaks: a blow dealt buzzes, or plays nothing.
+test('a blow dealt is an impact, with no haptic', () => {
+  g.bookDevice = [];
+  playCue({ name: 'blow_dealt', ids: ['wolf'] });
+  const log: [string, string][] = g.bookDevice;
+  g.bookDevice = undefined;
+  assert.deepEqual(log, [['play', 'impact']]);
+});

@@ -21,6 +21,7 @@ export type NarrationRecord = CommittedNarration & {
   arrival?: number; // a room-changing closure's first line in the room reached (book-ui Line placement)
   detail_id?: string;
   pickup_name?: string; // confirmed corpse-content Take, routed from its saved receipt
+  died?: true; // the player's death in this receipt's events (book-ui.md, Falling)
   read?: true; // Read text: its page's only, never the room log (book-ui.md)
 };
 /** One Chronicle entry (mechanics.md, Chronicle): a host projection, not a kernel contract. */

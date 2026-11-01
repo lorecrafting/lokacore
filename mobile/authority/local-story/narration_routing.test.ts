@@ -145,3 +145,50 @@ test('committed combat line indices come from pinned keys and structured receipt
     rmSync(folder, { recursive: true, force: true });
   }
 });
+
+// Breaks: an NPC's death reads as the player's, or a death with no authored line never reaches the Book
+// (no player-facing line may be needed for the wash and the wake); a reopen would then miss it too.
+test('a receipt says died only for the player, with or without lines', () => {
+  const sql = new DatabaseSync(':memory:');
+  const story = {
+    db: {
+      isInTransactionSync: () => sql.isTransaction,
+      getFirstSync: (query: string, scope: string) => sql.prepare(query).get(scope),
+    },
+    meta: { lineage_id: 'lineage' },
+    world: { character: 'player', cartridge: { world: {} } },
+  } as unknown as Story;
+  sql.exec(
+    "CREATE TABLE receipt(command_id TEXT, response TEXT, scope TEXT, revision INTEGER, command TEXT DEFAULT 'null')",
+  );
+  const put = (payload: object, narration: object[]) => {
+    sql.exec('DELETE FROM receipt');
+    sql
+      .prepare('INSERT INTO receipt(command_id, response, scope, revision) VALUES (?, ?, ?, ?)')
+      .run(
+        'c',
+        JSON.stringify({
+          kind: 'accepted',
+          outcome: 'waited',
+          delta: { ops: [] },
+          events: [{ payload }],
+          narration,
+        }),
+        'story/lineage/player',
+        1,
+      );
+    return narration;
+  };
+  const player = { type: 'entity_died', entity_id: 'player' };
+  const npc = { ...player, victim_definition: 'wolf' };
+  const lines = [{ key: 'authored.fall' }];
+  put(player, lines);
+  assert.deepEqual(narration(story), { command_id: 'c', lines, died: true });
+  put(player, []);
+  assert.deepEqual(narration(story), { command_id: 'c', lines: [], died: true });
+  put(npc, lines);
+  assert.deepEqual(narration(story), { command_id: 'c', lines });
+  put(npc, []);
+  assert.equal(narration(story), undefined);
+  sql.close();
+});

@@ -43,6 +43,7 @@ async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}) {
     },
     Audio: class implements El {
       paused = false;
+      loop = false;
       onended?: () => void;
       onerror?: () => void;
       url: string;
@@ -64,6 +65,9 @@ async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}) {
     pickup: ['flick.m4a'],
     tick: ['tick.m4a'],
     chapter: ['theme.m4a'],
+    fightIn: ['in.m4a'],
+    fightLoop: ['loop.m4a'],
+    fightWon: ['won.m4a'],
   });
   return {
     ...mod,
@@ -178,14 +182,18 @@ test('a beat ducks ambience; the last one to end releases it', async () => {
   assert.deepEqual(b.ramps, []);
   b.play('blow');
   b.play('blow');
-  assert.equal(b.ramps.length, 1);
+  assert.equal(b.ramps.length, 2);
   assert.ok(Math.abs(b.ramps[0]![0] - 0.501) < 0.001);
   assert.ok(Math.abs(b.ramps[0]![1] - 10.3) < 1e-9);
+  assert.ok(Math.abs(b.ramps[1]![0] - 0.708) < 0.001); // the music's dip, -3 dB
   b.els[2]!.onended!();
   b.els[2]!.onended!(); // a voice stopping twice must not release another's duck
-  assert.equal(b.ramps.length, 1);
+  assert.equal(b.ramps.length, 2);
   b.els[3]!.onended!();
-  assert.deepEqual(b.ramps[1], [1, 11.2]);
+  assert.deepEqual(b.ramps.slice(2), [
+    [1, 11.2],
+    [1, 11.2],
+  ]);
 });
 
 // Breaks: a sample with no file, a browser refusing play, or a browser with no audio throws into
@@ -198,7 +206,7 @@ test('missing, refused and absent audio are silence', async () => {
   b.play('blow');
   await new Promise((r) => setImmediate(r));
   assert.equal(b.els[0]!.paused, true);
-  assert.deepEqual(b.ramps[1], [1, 11.2]);
+  assert.deepEqual(b.ramps[2], [1, 11.2]);
   const none = await browser({ noAudio: true });
   none.gesture();
   none.play('coin');
@@ -240,4 +248,111 @@ test('Sound off silences every effect; the chapter cut answers to Music', async 
   assert.equal(b.els.length, 0);
   b.play('chapter');
   assert.equal(b.els.length, 1);
+});
+
+async function fightRig(t: any) {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let now = 1000;
+  t.mock.method(performance, 'now', () => now);
+  const b = await browser();
+  b.gesture();
+  const playing = () => b.els.filter((e) => !e.paused).map((e) => e.url);
+  return {
+    ...b,
+    playing,
+    pass: (ms: number) => {
+      now += ms;
+      t.mock.timers.tick(ms);
+    },
+  };
+}
+
+// Breaks: the stinger does not lead into a looping loop, or two music voices overlap.
+test('a fight opens on the stinger, then one looping voice', async (t) => {
+  const b = await fightRig(t);
+  b.fight('open');
+  assert.deepEqual(b.playing(), ['in.m4a']);
+  b.els[0]!.onended!();
+  assert.deepEqual(b.playing(), ['loop.m4a']);
+  assert.equal(b.els.at(-1)!.loop, true);
+});
+
+// Breaks: the gap is ignored either way: 59.9 s after a fight skips the stinger, 60 s plays it.
+test('a fight within the gap of the last is the loop alone', async (t) => {
+  const b = await fightRig(t);
+  b.fight('open');
+  b.fight('away');
+  b.pass(59_999);
+  b.fight('open');
+  assert.equal(b.els.at(-1)!.url, 'loop.m4a');
+  b.fight('away');
+  b.pass(60_000);
+  b.fight('open');
+  assert.equal(b.els.at(-1)!.url, 'in.m4a');
+});
+
+// Breaks: a reopened fight plays its stinger, or waits forever for a gesture that has passed.
+test('a reopened fight is the loop alone, once audio unlocks', async () => {
+  const b = await browser();
+  b.fight('resume');
+  assert.equal(b.els.length, 0);
+  b.gesture();
+  assert.deepEqual(
+    b.els.map((e) => e.url),
+    ['loop.m4a'],
+  );
+});
+
+// Breaks: Music off leaves the loop, Music on restarts it outside a fight or not at all.
+test('Music off stops the loop; on restarts it, in a fight only', async (t) => {
+  const b = await fightRig(t);
+  b.fight('resume');
+  b.setMuted('music', true);
+  assert.deepEqual(b.playing(), []);
+  b.setMuted('music', false);
+  assert.deepEqual(b.playing(), ['loop.m4a']);
+  b.fight('cut');
+  b.setMuted('music', true);
+  b.setMuted('music', false);
+  assert.deepEqual(b.playing(), []);
+});
+
+// Breaks: a win's cut takes too long or skips the fanfare; flight plays a fanfare or stops short of
+// the palette time; a death waits on a fade.
+test('how a fight ends is how its music ends', async (t) => {
+  const b = await fightRig(t);
+  b.fight('resume');
+  b.fight('won');
+  assert.deepEqual(b.ramps.at(-1), [0, 10.16]);
+  b.pass(159);
+  assert.deepEqual(b.playing(), ['loop.m4a']);
+  b.pass(1);
+  assert.deepEqual(b.playing(), ['won.m4a']);
+
+  b.els.at(-1)!.onended!();
+  b.fight('resume');
+  b.fight('away');
+  b.pass(1499);
+  assert.deepEqual(b.playing(), ['loop.m4a']);
+  b.pass(1);
+  assert.deepEqual(b.playing(), []);
+
+  b.fight('resume');
+  b.fight('cut');
+  assert.deepEqual(b.playing(), []);
+});
+
+// Breaks: a sound's thud is cut with the music (its bus is not the music's), or a fanfare fires after a
+// new fight began during the fade.
+test('a death spares the thud; a fight reopening during a fade drops the old voice', async (t) => {
+  const b = await fightRig(t);
+  b.play('blow');
+  b.fight('resume');
+  b.fight('cut');
+  assert.deepEqual(b.playing(), ['blow.m4a']);
+  b.fight('resume');
+  b.fight('won');
+  b.fight('resume');
+  b.pass(1000);
+  assert.deepEqual(b.playing(), ['blow.m4a', 'loop.m4a']);
 });

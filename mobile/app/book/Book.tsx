@@ -230,7 +230,8 @@ export function BookView(p: ViewProps) {
 
 function useCueSounds(p: ViewProps) {
   useEffect(() => onCue(playCue), []); // before useCues: heard from its first cue
-  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn, p.resumes, useReducedMotion(), playTurn);
+  const s = p.screen;
+  useCues(s.view, s.catchingUp, p.flip.turn, p.resumes, useReducedMotion(), playTurn, s.died);
 }
 
 // The footer (on the world), the status line and a press's fault.

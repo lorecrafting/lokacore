@@ -22,13 +22,25 @@ const CUES = {
   skill_up: { s: 2, sound: 'skillUp' },
   chapter: { s: 4, sound: 'chapter' },
   place: { s: 1 },
-  combat_open: { s: 3 },
-  combat_close: { s: 3 },
+  // Fight music must hear every opening and close, so these never queue: useCues sends them straight.
+  combat_open: { s: 1 },
+  combat_close: { s: 1 },
+  blow_dealt: { s: 2, sound: 'impact' },
+  death: { s: 4 }, // the player's, from the receipt: its haptic and cut are playCue's
 } satisfies Record<string, { s: 1 | 2 | 3 | 4; sound?: SoundName }>; // mutate-skip: a type
 
 export type CueName = keyof typeof CUES;
 /** `ids`: what the cue names (items, skills, quests, status labels). `silent`: effects, no sound. `wash: false`: the Flash limit. */
-export type Cue = { name: CueName; ids?: string[]; silent?: true; loss?: number; wash?: boolean };
+export type Cue = {
+  name: CueName;
+  ids?: string[];
+  silent?: true;
+  loss?: number;
+  wash?: boolean;
+  fight?: boolean; // death: in a fight
+  end?: 'fell' | 'fled' | 'quiet'; // combat_close
+  resumed?: true; // combat_open, combat_close: found on a first view, nothing happening now
+};
 
 export const soundOf = (cue: Cue): SoundName | undefined =>
   cue.silent ? undefined : (CUES[cue.name] as { sound?: SoundName }).sound;
@@ -94,6 +106,26 @@ const holdCard = (q: Queue, now: number): Queue => ({
  * wait for its picture deadline (book-ui.md, Queue).
  * A later S3 of another key than the pending one is dropped; the diff lists the story's first.
  */
+function play(s: Queue, fired: Cue[], cue: Cue, now: number) {
+  const wash = flashes && cue.name === 'hp_loss' && now - s.washed >= motion.flash.gap;
+  if (wash) s.washed = now;
+  s.playing = cue;
+  s.until = now + BEAT;
+  fired.push(cue.name === 'hp_loss' ? { ...cue, wash } : cue);
+}
+
+// A death waits for nothing (book-ui.md, Falling). It clears what is pending; a thud sounding plays on.
+function fall(s: Queue, death: Cue, now: number) {
+  const fired: Cue[] = [];
+  const blow = s.held.find((c) => c.name === 'hp_loss');
+  s.held = [];
+  s.card = false;
+  s.playing = s.pending = undefined;
+  s.heldUntil = -Infinity;
+  if (blow) play(s, fired, blow, now);
+  return [...fired, { ...death, wash: !!fired[0]?.wash }];
+}
+
 export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
   const s: Queue = turned
     ? { ...q, card: false, playing: undefined, pending: undefined }
@@ -101,31 +133,26 @@ export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
   s.merged = { ...q.merged };
   const fired: Cue[] = [];
   s.held = [...(turned ? [] : q.held), ...arriving];
+  const death = s.held.find((c) => c.name === 'death');
+  if (death) return { q: s, fired: fall(s, death, now) };
   if (turned) s.heldUntil = now + motion.quick.duration;
   if (now < s.heldUntil) return { q: s, fired };
   const cues = gathered(s.held);
   s.held = [];
-  const chapter = cues.find((c) => CUES[c.name].s === 4);
+  const chapter = cues.find((c) => c.name === 'chapter');
   if (s.card && now < s.until) return { q: s, fired };
   s.card = false;
   if (chapter) return { q: holdCard(s, now), fired: [chapter] };
-  const play = (cue: Cue) => {
-    const wash = flashes && cue.name === 'hp_loss' && now - s.washed >= motion.flash.gap;
-    if (wash) s.washed = now;
-    s.playing = cue;
-    s.until = now + BEAT;
-    fired.push(cue.name === 'hp_loss' ? { ...cue, wash } : cue);
-  };
   if (s.playing && s.until <= now) {
     const next = s.pending;
     s.playing = s.pending = undefined;
-    if (next) play(next);
+    if (next) play(s, fired, next, now);
   }
   for (const cue of cues) {
     const severity = CUES[cue.name].s;
     if (severity === 1) fired.push(cue);
     else if (severity === 3) {
-      if (!s.playing) play(cue);
+      if (!s.playing) play(s, fired, cue, now);
       else if (!s.pending || s.pending.name === cue.name) s.pending = cue;
     } else fired.push(...small(s, cue, now));
   }
@@ -145,6 +172,9 @@ const noteResolved = (now: GameView, was: GameView) =>
     ?.ids?.forEach((id) => unreadResolved.add(id));
 
 const listeners = new Set<(cue: Cue) => void>();
+const send = (cue: Cue) => {
+  for (const listener of listeners) listener(cue);
+};
 // One action, one paper sound (owner, 2026-10-31): a take's flick stands for its page turn.
 const flicks = (cue: Cue) => cue.name === 'pickup' && !cue.silent;
 export let curlEnds = -Infinity; // at the latest: a curl starts by the picture deadline
@@ -155,6 +185,38 @@ export const onCue = (listener: (cue: Cue) => void) => {
 
 // Feeds the queue from each new view and page turn. A first view is silent, and catch-up to its end:
 // the first view after it diffs against nothing.
+// Plays what arrived and says when to look again, if anything waits.
+function deliver(
+  queue: { current: Queue },
+  cues: Cue[],
+  turned: boolean,
+  reduced: boolean,
+  onTurn?: () => void,
+) {
+  // No curl to feel through under reduced motion, or for a chapter card, which does not curl in.
+  if (turned && !reduced && !cues.some((cue) => cue.name === 'chapter'))
+    curlEnds = performance.now() + motion.quick.duration + motion.turn.duration;
+  const fight = (cue: Cue) => cue.name === 'combat_open' || cue.name === 'combat_close';
+  for (const cue of cues.filter(fight)) send(cue);
+  const { q, fired } = step(
+    queue.current,
+    cues.filter((cue) => !fight(cue)),
+    performance.now(),
+    turned,
+  );
+  queue.current = q;
+  if (turned && !cues.some(flicks)) onTurn?.();
+  for (const cue of fired) send(cue);
+  // A timer can land a little early: it waits again rather than strand the pending cue.
+  return q.held.length ? q.heldUntil : q.pending ? q.until : undefined;
+}
+
+// A fight found or gone on a first view is no event, but its music still follows it.
+const foundFight = (view: GameView, fought: boolean): Cue[] =>
+  !!view.combat !== fought
+    ? [{ name: view.combat ? 'combat_open' : 'combat_close', resumed: true }]
+    : [];
+
 export function useCues(
   view: GameView,
   catchingUp: boolean,
@@ -162,34 +224,36 @@ export function useCues(
   resumes = 0,
   reduced = false,
   onTurn?: () => void,
+  died?: string,
 ) {
   const queue = useRef(QUIET);
   const seen = useRef(turn);
   const back = useRef(resumes);
   const settled = useRef<GameView>(undefined);
   const last = useRef<GameView>(undefined);
+  const fell = useRef(died);
+  const fought = useRef(false);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const advance = (cues: Cue[], turned = false) => {
-      // No curl to feel through under reduced motion, or for a chapter card, which does not curl in.
-      if (turned && !reduced && !cues.some((cue) => cue.name === 'chapter'))
-        curlEnds = performance.now() + motion.quick.duration + motion.turn.duration;
-      const { q, fired } = step(queue.current, cues, performance.now(), turned);
-      queue.current = q;
-      if (turned && !cues.some(flicks)) onTurn?.();
-      for (const cue of fired) for (const listener of listeners) listener(cue);
-      // A timer can land a little early: it waits again rather than strand the pending cue.
-      const due = q.held.length ? q.heldUntil : q.pending ? q.until : undefined;
+      const due = deliver(queue, cues, turned, reduced, onTurn);
       if (due !== undefined) timer = setTimeout(() => advance([]), due - performance.now());
     };
     if (last.current) noteResolved(view, last.current);
     last.current = view;
     // An absence is no event: what a resume settled, however fast, is heard as nothing.
     const away = catchingUp || resumes !== back.current;
-    advance(cuesOf(view, away ? undefined : settled.current), turn !== seen.current);
+    const was = away ? undefined : settled.current;
+    const fresh = !!died && died !== fell.current;
+    advance(
+      [...(was ? [] : foundFight(view, fought.current)), ...cuesOf(view, was, fresh)],
+      turn !== seen.current,
+    );
+    fell.current = died;
+    fought.current = !!view.combat;
     seen.current = turn;
     back.current = resumes;
     settled.current = catchingUp ? undefined : view;
     return () => clearTimeout(timer);
-  }, [view, catchingUp, turn, resumes, reduced]);
+  }, [view, catchingUp, turn, resumes, reduced, died]);
 }

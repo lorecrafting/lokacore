@@ -49,15 +49,37 @@ export const questCues = (now: GameView, was: GameView) => {
   ];
 };
 
-function combatCues(now: GameView, was: GameView) {
+// A blow dealt moves a band, or fells one of a pack; same encounter only (book-ui.md, Fight music).
+function dealtCues(now: GameView, was: GameView): Cue[] {
+  const [a, b] = [now.combat, was.combat];
+  if (!a || !b || a.encounter_id !== b.encounter_id) return [];
+  const foes = (c: typeof a) => c.active_opponents ?? [{ id: c.opponent_id, band: c.band }];
+  const before = foes(b);
+  const ids = foes(a)
+    .filter((o) => before.some((p) => p.id === o.id && p.band !== o.band))
+    .map((o) => o.id);
+  return ids.length || foes(a).length < before.length ? [{ name: 'blow_dealt', ids }] : [];
+}
+
+const FIGHT_ENDS = (now: GameView, was: GameView) =>
+  was.place.id !== now.place.id
+    ? 'fled'
+    : !now.entities.some((e) => e.id === was.combat!.opponent_id)
+      ? 'fell'
+      : 'quiet';
+
+function combatCues(now: GameView, was: GameView, died: boolean) {
   const out: Cue[] = [];
   // Status ticks are silent (owner rule), so only a fall in combat beyond them is a blow (plan 3.3).
   // ponytail: the last tick of a status that just ended still thuds; the view no longer shows it.
   const loss = -moved(now, was, 'hp') - ticked(now, was);
-  if (loss > 0 && (now.combat || was.combat)) out.push({ name: 'hp_loss', loss });
+  // A death restores hp before the view shows it, so the fatal blow is known from the fact alone.
+  if ((loss > 0 || (died && was.combat)) && (now.combat || was.combat))
+    out.push({ name: 'hp_loss', loss: Math.max(loss, 0) });
+  if (died) return [...out, { name: 'death', fight: !!was.combat } as const];
   if (!was.combat && now.combat) out.push({ name: 'combat_open' });
-  if (was.combat && !now.combat) out.push({ name: 'combat_close' });
-  return out;
+  if (was.combat && !now.combat) out.push({ name: 'combat_close', end: FIGHT_ENDS(now, was) });
+  return [...out, ...dealtCues(now, was)];
 }
 
 function skillCues(now: GameView, was: GameView) {
@@ -121,7 +143,7 @@ function statusCues(now: GameView, was: GameView) {
 }
 
 /** What changed from `was` to `now`, the story's first. No `was` (a first view, a catch-up) is silent. */
-export function cuesOf(now: GameView, was: GameView | undefined): Cue[] {
+export function cuesOf(now: GameView, was: GameView | undefined, died = false): Cue[] {
   if (!was) return [];
   const chapter = now.chapter && was.chapter?.index !== now.chapter.index;
   const level = was.levelling && (now.levelling?.level ?? 0) > was.levelling.level;
@@ -129,7 +151,7 @@ export function cuesOf(now: GameView, was: GameView | undefined): Cue[] {
     ...(chapter ? [{ name: 'chapter' } as const] : []),
     ...(level ? [{ name: 'level' } as const] : []),
     ...questCues(now, was),
-    ...combatCues(now, was),
+    ...combatCues(now, was, died),
     ...skillCues(now, was),
     ...itemCues(now, was),
     ...statusCues(now, was),

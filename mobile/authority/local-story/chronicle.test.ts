@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
-import { chronicle } from './narration.ts';
+import { chronicle } from './chronicle.ts';
 import type { Story } from './save.ts';
 
 const SCOPE = 'story/lineage/player';
