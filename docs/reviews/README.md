@@ -14,6 +14,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-review.md): **APPROVE WITH NOTES**
 - [Second opinion: level reached emission in `join`, PR #538 (loka-g5hh.2 E1, kernel_api 1.131)](2026-10-31-loka-g5hh.2-e1-level-reached-second-review.md): **APPROVE**
 - [Review: level reached event, level filter, gained line, view from, PR #538 (loka-g5hh.2 E1, kernel_api 1.131)](2026-10-31-loka-g5hh.2-e1-level-reached-review.md): **APPROVE**
+- [Review: dev-only go-to-room and set-fact, PR #546 (loka-vduxr.6, kernel_api 1.133)](2026-10-31-dev-cheats-review.md): **CHANGES REQUIRED**
 - [Second opinion: catch-up folds saturated permanent status ticks, PR #535 (loka-sgqk, kernel_api 1.130)](2026-10-31-catch-up-fold-second-review.md): **APPROVE WITH NOTES**
 - [Review: catch-up folds saturated permanent status ticks, PR #535 (loka-sgqk, kernel_api 1.130)](2026-10-31-catch-up-fold-review.md): **APPROVE**
 - [Review: NPC condition band in GameView, PR #515 (loka-ysbt, kernel_api 1.123)](2026-10-30-ysbt-npc-condition-review.md): **APPROVE**
