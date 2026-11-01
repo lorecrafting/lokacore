@@ -15,7 +15,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { moveItem } from '../src/mechanics/containment/react.ts';
-import { cartridgeOf, commands, ctx, reload } from './harness.ts';
+import { cartridgeOf, cmd, commands, ctx, reload } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-decay-'));
 let artifact: Uint8Array;
@@ -235,7 +235,7 @@ test('an eaten fish logs no status event when its spoiling would have ended', ()
   const [from, until] = [w.state.clock, w.state.clock + 86400];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, ++stream.n);
+  const r = stepElapsed(w, cmd({ ...command, world_context_id: w.context }), ++stream.n);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   const events = r.decision.kind === 'accepted' ? r.decision.events : [];
   assert.deepEqual(

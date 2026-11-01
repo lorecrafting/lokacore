@@ -250,7 +250,7 @@ for (const [first, second] of [
       hour(c, second!, 7, [{ op: 'npc.move', plan: PLAN, room: ref('room', 'hills') }]);
     });
     const a = advance(w, 700);
-    const born = member(a.w, 3).member_id as never;
+    const born = member(a.w, 3).member_id!;
     const expected = second === 'z_move' ? 'hills' : 'square';
     assert.equal(a.w.state.containers[born], room(a.w, expected));
     assert.ok(hydrate(w, JSON.parse(JSON.stringify(a.w.state)), true), 'the save loads');
@@ -273,7 +273,7 @@ test('kgd.159: a member in a room no plan move names fails the save loader', () 
     ]);
   });
   const { w: b } = advance(w, 700);
-  const forged = { ...b.state.containers, [member(b, 3).member_id as never]: room(b, 'hills') };
+  const forged = { ...b.state.containers, [member(b, 3).member_id!]: room(b, 'hills') };
   assert.ok(hydrate(w, JSON.parse(JSON.stringify(b.state)), true), 'the unforged save loads');
   assert.equal(hydrate(w, { ...b.state, containers: forged }, true), undefined);
 });
@@ -286,6 +286,6 @@ test('kgd.159: a member in a room an event-subject move names reloads', () => {
     hour(c, 'subject', 23, [{ op: 'npc.move' }, { op: 'npc.move', room: ref('room', 'hills') }]);
   });
   const { w: b } = advance(w, 700);
-  const moved = { ...b.state.containers, [member(b, 3).member_id as never]: room(b, 'hills') };
+  const moved = { ...b.state.containers, [member(b, 3).member_id!]: room(b, 'hills') };
   assert.ok(hydrate(w, { ...b.state, containers: moved }, true));
 });
