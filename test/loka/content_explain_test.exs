@@ -469,4 +469,11 @@ defmodule Loka.ContentExplainTest do
   test "a file with a bad name is told to rename", %{tmp_dir: dir} do
     assert said(dir, %{"rooms/bad name.json" => @room}) |> line_at("bad name") =~ "Rename it"
   end
+
+  # Break: "add a marker" leaves the author guessing at the syntax.
+  test "a missing touch link gives the syntax", %{tmp_dir: dir} do
+    d = %{"code" => "TOUCH_LINK_MISSING", "severity" => "error", "path" => "x.y", "data" => %{}}
+    assert [line] = Explain.lines([d], dir)
+    assert line =~ "`[words](key)`"
+  end
 end
