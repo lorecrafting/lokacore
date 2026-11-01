@@ -37,10 +37,7 @@ function HeadOut(p: { words: string; style: object }) {
   const [gone, setGone] = useState(false);
   const dry = useDrying(0, motion.settle.duration);
   const leaving = useAnimatedStyle(() => ({ opacity: 1 - dry.value }));
-  useEffect(() => {
-    const timer = setTimeout(() => setGone(true), motion.settle.duration);
-    return () => clearTimeout(timer);
-  }, []);
+  useEffect(() => void setTimeout(() => setGone(true), motion.settle.duration), []);
   if (gone) return null;
   return (
     <Reanimated.View style={leaving} aria-hidden>

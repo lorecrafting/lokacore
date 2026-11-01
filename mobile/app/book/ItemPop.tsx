@@ -43,7 +43,6 @@ function usePop() {
     [],
   );
   useEffect(() => {
-    if (!ids) return;
     const timer = setTimeout(() => setIds(undefined), duration + hold + out);
     return () => clearTimeout(timer);
   }, [ids]);

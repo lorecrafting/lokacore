@@ -284,7 +284,7 @@ function statusLine(p: BottomProps) {
       conditions={view.conditions}
       position={view.position}
       text={text}
-      locked={!!view.scene || !!view.combat || !!ended || chapterCard(p.screen, p.page)}
+      locked={!!view.scene || !!view.combat || !!ended || p.page?.kind === 'chapter'}
       openPosition={position ? () => p.press(position) : undefined}
       pending={pending}
       open={() => p.open({ kind: 'contents' })}

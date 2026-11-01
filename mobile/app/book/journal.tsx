@@ -24,7 +24,7 @@ onCue((cue) => {
 
 // Read once as the Journal opens, then spent: a later visit is plain.
 function useResolved() {
-  const [gilt] = useState(() => resolved);
+  const [gilt] = useState(resolved);
   useEffect(() => void (resolved = []), []);
   return gilt;
 }

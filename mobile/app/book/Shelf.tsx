@@ -75,7 +75,7 @@ function ShopLines(p: { view: GameView; rows: Line[]; press: (b: Button) => void
 
 // An empty wrapper would add a gap: the pop waits for the line its buy writes.
 function Bought(
-  p: { lines: Parameters<typeof LogLines>[0]['lines'] } & Parameters<typeof ItemPop>[0],
+  p: { lines: Parameters<typeof LogLines>[0]['lines'] } & Parameters<typeof ItemPop>[0], // mutate-skip: type
 ) {
   if (!p.lines.length) return null;
   return (

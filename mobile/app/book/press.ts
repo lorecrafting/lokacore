@@ -91,7 +91,7 @@ export function useDrying(lag = 0, duration: number = motion.dry.duration) {
 export function useGilt(to: string) {
   const still = useReducedMotion();
   const { warning } = usePalette();
-  const dry = useDrying(motion.gilt.hold, motion.settle.duration);
+  const dry = useDrying(motion.settle.hold, motion.settle.duration);
   return useAnimatedStyle(() =>
     still ? { opacity: dry.value } : { color: interpolateColor(dry.value, [0, 1], [warning, to]) },
   );

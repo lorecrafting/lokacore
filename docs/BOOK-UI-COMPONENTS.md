@@ -128,7 +128,7 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   `motion.dry` from `dim` to the line's colour; a narrated event starts `motion.dry.lag` later.
   Status icon: `motion.pop` from scale `motion.pop.from`; expiry `motion.fade`. Item pop: rises
   `motion.pop.rise` over `motion.pop`, holds `hold`, leaves over `out` (`outEasing`). Gilt: `warning`
-  for `motion.gilt.hold`, then `motion.settle` to the line's colour. Running head:
+  for `motion.settle.hold`, then `motion.settle` to the line's colour. Running head:
   `motion.dry` across, `motion.settle` to `dim` then out. Chapter card: `motion.card`, blur sigma
   `blurFrom` to `blurTo`, each of label, title and rule `stagger` apart. Sound, `mix` and `haptic`
   hold levels and kinds; the sound table names each sound's haptic. Queue: small cues of one key merge
