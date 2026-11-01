@@ -29,5 +29,8 @@ test('a gated choice is no way on for a fall-through', () => {
     'receive',
   ])
     assert.equal(ways({ [gate]: {} }), 0, gate);
-  assert.equal(ways({ steps: [{ op: 'skill.acquire' }] }), 0);
+  for (const op of ['skill.acquire', 'resource.adjust', 'item.move', 'fact.adjust'])
+    assert.equal(ways({ steps: [{ op }] }), 0, op);
+  for (const op of ['narrate', 'topic.grant', 'fact.assign'])
+    assert.equal(ways({ steps: [{ op }] }), 1, op);
 });

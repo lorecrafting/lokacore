@@ -71,8 +71,10 @@ defmodule Loka.Content.DialogueLinks do
     )
   end
 
-  # selection.ts GATES: what a choice can refuse or charge when taken.
+  # fall_through.ts GATES: what a choice can refuse or charge when taken.
   @gates ~w(accept availability check escort exchange hand_over lesson_payment patrol payment receive)
+  # fall_through.ts FREE_STEPS: the steps that take nothing from the player.
+  @free_steps ~w(narrate topic.grant fact.assign)
 
   @doc "The `entry` marker's refusals, and a warning wherever Talk's entry is a guess or a dialogue is shut out."
   @spec entry_checks([{String.t(), map()}]) :: [map()]
@@ -124,30 +126,45 @@ defmodule Loka.Content.DialogueLinks do
   # fall_through.ts `onward`: a default Talk whose condition fails opens the first dialogue of its speaker
   # that a free choice leads to, in key order. More than one is a guess; the warning names that pick.
   defp fall_through(open, sorted) do
-    speakers = Map.new(sorted, fn {_, d} -> {d["key"], d["npc"]} end)
+    by_key = Map.new(sorted, fn {_, d} -> {d["key"], d} end)
 
     for {rel, d} <- open,
         d["policy"],
         !d["name"],
         !d["keyword"],
-        [first, _ | _] <- [free_links(d, speakers)] do
+        first <- guess(d, by_key, []) do
       warning("ENTRY_GUESSED", rel, ["npc"], %{"key" => first})
     end
   end
 
-  defp free_links(d, speakers) do
+  # Down a line of shut dialogues to the first with more than one way on: `[its pick]`, or `[]`.
+  defp guess(d, by_key, seen) do
+    case free_links(d, by_key) do
+      [first, _ | _] ->
+        [first]
+
+      [only] ->
+        if by_key[only]["policy"] && only not in seen,
+          do: guess(by_key[only], by_key, [only | seen]),
+          else: []
+
+      [] ->
+        []
+    end
+  end
+
+  defp free_links(d, by_key) do
     for(
       {_, c} <- Enum.sort(d["choices"]),
       free?(c),
-      speakers[c["then"]] == d["npc"],
+      by_key[c["then"]]["npc"] == d["npc"],
       do: c["then"]
     )
     |> Enum.uniq()
   end
 
   defp free?(c) do
-    not Enum.any?(@gates, &c[&1]) and
-      not Enum.any?(c["steps"] || [], &(&1["op"] == "skill.acquire"))
+    not Enum.any?(@gates, &c[&1]) and Enum.all?(c["steps"] || [], &(&1["op"] in @free_steps))
   end
 
   defp loop_tie?(k, next, live_keys) do

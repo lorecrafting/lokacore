@@ -352,7 +352,10 @@ defmodule Loka.ContentDialogueLinksTest do
           %{"patrol" => %{}},
           %{"payment" => %{}},
           %{"receive" => %{}},
-          %{"steps" => [%{"op" => "skill.acquire"}]}
+          %{"steps" => [%{"op" => "skill.acquire"}]},
+          %{"steps" => [%{"op" => "resource.adjust"}]},
+          %{"steps" => [%{"op" => "item.move"}]},
+          %{"steps" => [%{"op" => "fact.adjust"}]}
         ] do
       choices = %{"a" => Map.put(gate, "then", "a_x"), "b" => free}
       g = d("g", "a", [], %{"policy" => %{}, "choices" => choices})
