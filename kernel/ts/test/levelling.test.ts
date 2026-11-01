@@ -9,12 +9,12 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
-import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { derived } from '../src/mechanics/attribute/shared.ts';
-import { oneWrite } from '../src/mechanics/levelling/shared.ts';
+import { levelsReached, levelUp, oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
 import { gameView } from '../src/view/view.ts';
 import { validate } from '../src/foundation/validate.ts';
@@ -372,6 +372,35 @@ test('a kill that also resolves a rewarding quest writes experience once and lev
     unspent: 1,
   });
   assert.equal(narration(r).filter((k) => k === LEVEL_UP).length, 1);
+});
+
+// Breaks: the gained line and level_reached read each write instead of the proposal's fold, so a
+// grant on top of a loss tells only its last step or re-crosses a threshold already held.
+test('folded writes: gained sums the proposal, a loss and regrant reaches no level', () => {
+  const w = holding(35);
+  const write = (from: number, to: number) => ({
+    op: 'levelling.set' as const,
+    writer_group: 1,
+    character_id: w.character,
+    expected: { experience: from, allocated: {} },
+    value: { experience: to, allocated: {} },
+  });
+  assert.deepEqual(levelUp(w, w.character, [write(35, 45), write(45, 55)]), [
+    { key: GAINED, bindings: { amount: 20 } },
+  ]);
+  const none = () => assert.fail('no event, no id');
+  assert.deepEqual(levelsReached(w, [write(35, 25), write(25, 35)], {} as never, none), []);
+});
+
+// Breaks: level_reached's subject is its character_id, not the body, so an event.emit in a level
+// rule (or a status) is about a character id instead of the levelled body.
+test('a level rule is about the levelled character body', () => {
+  const c = structuredClone(content) as any;
+  const rule = Object.values<any>(c.reactions).find((r) => r.on.level === 2);
+  rule.steps = [{ op: 'event.emit', event: 'anything' }];
+  const { third, w } = cull(c);
+  const emitted = events(third).find((e) => e.payload.type === 'custom_event')!;
+  assert.equal(emitted.payload.subject_id, bodyOf(w, w.character));
 });
 
 // Breaks: several credited kills in one decision (fatal groups 1 and 2, not reachable in play
