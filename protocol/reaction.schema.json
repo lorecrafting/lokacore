@@ -18,7 +18,7 @@
                 "event": {
                   "const": "fact_changed"
                 },
-                "fact": {
+                "fact": {"description":"Only this fact.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -34,7 +34,7 @@
                 "event": {
                   "const": "entity_entered_room"
                 },
-                "room": {
+                "room": {"description":"Only this room.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
                 "npc": {
@@ -59,10 +59,10 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "The hearer is this NPC's authored instance."
                 },
-                "word": {
+                "word": {"description":"The word that fires it.",
                   "$ref": "dialogue.schema.json#/$defs/SpokenKeyword"
                 },
-                "loudness": {
+                "loudness": {"description":"Only this loudness.",
                   "$ref": "event.schema.json#/$defs/Loudness"
                 }
               },
@@ -82,10 +82,10 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "The asked NPC is this NPC's authored instance."
                 },
-                "topic": {
+                "topic": {"description":"Only this topic.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "answered": {
+                "answered": {"description":"Only asks that were, or were not, answered.",
                   "type": "boolean"
                 }
               },
@@ -100,10 +100,10 @@
                 "event": {
                   "const": "quest_resolved"
                 },
-                "quest": {
+                "quest": {"description":"Only this quest.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "outcome": {
+                "outcome": {"description":"Only this outcome.",
                   "$ref": "action.schema.json#/$defs/Key"
                 }
               },
@@ -120,7 +120,7 @@
                 "event": {
                   "const": "rested"
                 },
-                "room": {
+                "room": {"description":"Only this room.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -140,7 +140,7 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
-                "item": {
+                "item": {"description":"Only this item.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -159,10 +159,10 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
-                "item": {
+                "item": {"description":"Only this item.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "room": {
+                "room": {"description":"Only this room.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -177,10 +177,10 @@
                 "event": {
                   "const": "shooed"
                 },
-                "item": {
+                "item": {"description":"Only this item.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "room": {
+                "room": {"description":"Only this room.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -195,7 +195,7 @@
                 "event": {
                   "const": "quest_activated"
                 },
-                "quest": {
+                "quest": {"description":"Only this quest.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -222,7 +222,7 @@
                 "event": {
                   "const": "choice_resolved"
                 },
-                "choice": {
+                "choice": {"description":"Only this choice.",
                   "$ref": "action.schema.json#/$defs/Key"
                 }
               },
@@ -237,10 +237,10 @@
                 "event": {
                   "const": "story_point_reached"
                 },
-                "story_point": {
+                "story_point": {"description":"Only this story point.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "outcome": {
+                "outcome": {"description":"Only this outcome.",
                   "$ref": "action.schema.json#/$defs/Key"
                 }
               },
@@ -255,7 +255,7 @@
                 "event": {
                   "const": "custom_event"
                 },
-                "custom": {
+                "custom": {"description":"The custom event key.",
                   "$ref": "action.schema.json#/$defs/Key"
                 }
               },
@@ -274,7 +274,7 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
-                "action": {
+                "action": {"description":"Only this action.",
                   "$ref": "action.schema.json#/$defs/Key"
                 }
               },
@@ -293,7 +293,7 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
-                "check": {
+                "check": {"description":"Only this action's check.",
                   "$ref": "action.schema.json#/$defs/Key"
                 }
               },
@@ -312,7 +312,7 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
-                "check": {
+                "check": {"description":"Only this action's check.",
                   "$ref": "action.schema.json#/$defs/Key"
                 }
               },
@@ -327,10 +327,10 @@
                 "event": {
                   "const": "barrier_changed"
                 },
-                "barrier": {
+                "barrier": {"description":"Only this barrier.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "to": {
+                "to": {"description":"Only this new state.",
                   "$ref": "room.schema.json#/$defs/BarrierState"
                 }
               },
@@ -345,7 +345,7 @@
                 "event": {
                   "const": "scene_ended"
                 },
-                "scene": {
+                "scene": {"description":"Only this scene.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -364,10 +364,10 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
-                "victim": {
+                "victim": {"description":"Only this victim.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "room": {
+                "room": {"description":"Only this room.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -386,7 +386,7 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
-                "hit": {
+                "hit": {"description":"Only hits, or only misses.",
                   "type": "boolean"
                 },
                 "attacker": {
@@ -409,7 +409,7 @@
                 "event": {
                   "const": "filled"
                 },
-                "kind": {
+                "kind": {"description":"Only this liquid.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -424,7 +424,7 @@
                 "event": {
                   "const": "poured"
                 },
-                "kind": {
+                "kind": {"description":"Only this liquid.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -439,7 +439,7 @@
                 "event": {
                   "const": "drank"
                 },
-                "kind": {
+                "kind": {"description":"Only this liquid.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -465,7 +465,7 @@
               "type": "object",
               "properties": {
                 "event": { "const": "status_ticked" },
-                "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                "status": {"description":"Only this status.", "$ref": "identity.schema.json#/$defs/DefinitionRef" }
               },
               "required": ["event"],
               "additionalProperties": false
@@ -475,7 +475,7 @@
               "description": "Toolbox row G3 reader 2.",
               "properties": {
                 "event": { "const": "status_applied" },
-                "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                "status": {"description":"Only this status.", "$ref": "identity.schema.json#/$defs/DefinitionRef" }
               },
               "required": ["event"],
               "additionalProperties": false
@@ -484,7 +484,7 @@
               "type": "object",
               "properties": {
                 "event": { "const": "status_expired" },
-                "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                "status": {"description":"Only this status.", "$ref": "identity.schema.json#/$defs/DefinitionRef" }
               },
               "required": ["event"],
               "additionalProperties": false
@@ -493,8 +493,8 @@
               "type": "object",
               "properties": {
                 "event": { "const": "quest_failed" },
-                "quest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                "outcome": { "$ref": "action.schema.json#/$defs/Key" }
+                "quest": {"description":"Only this quest.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                "outcome": {"description":"Only this outcome.", "$ref": "action.schema.json#/$defs/Key" }
               },
               "required": ["event"],
               "additionalProperties": false

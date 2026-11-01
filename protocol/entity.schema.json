@@ -168,7 +168,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "keywords": {
+        "keywords": {"description":"Words a player names it by.",
           "type": "array",
           "items": {
             "$ref": "room.schema.json#/$defs/Alias"
@@ -176,36 +176,36 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "name": {
+        "name": {"description":"Text key of its short description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "words": {
           "$ref": "#/$defs/NameWords"
         },
-        "name_variants": {
+        "name_variants": {"description":"Name variants; first match wins.",
           "$ref": "#/$defs/NameVariants"
         },
-        "room_line": {
+        "room_line": {"description":"Text key of the line a room shows while it lies there.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "room_line_variants": {
+        "room_line_variants": {"description":"Room line variants; first match wins.",
           "$ref": "#/$defs/TextVariants"
         },
-        "description": {
+        "description": {"description":"Text key examine shows.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description_variants": {
+        "description_variants": {"description":"Description variants.",
           "$ref": "#/$defs/TextVariants"
         },
-        "location": {
+        "location": {"description":"Where a fresh world puts it.",
           "$ref": "#/$defs/ItemLocation"
         },
-        "capacity": {
+        "capacity": {"description":"Most items held directly; receptacles only.",
           "type": "integer",
           "minimum": 1,
           "maximum": 1024
         },
-        "slot": {
+        "slot": {"description":"The slot it is worn in.",
           "$ref": "#/$defs/SlotKey"
         },
         "equip": {
@@ -238,7 +238,7 @@
           "minimum": 1,
           "maximum": 2147483647
         },
-        "barrier": {
+        "barrier": {"description":"The barrier on it, a container lid.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "mass_grams": {
@@ -536,7 +536,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "keywords": {
+        "keywords": {"description":"Words a player names it by.",
           "type": "array",
           "items": {
             "$ref": "room.schema.json#/$defs/Alias"
@@ -544,28 +544,28 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "name": {
+        "name": {"description":"Text key of its short description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "words": {
           "$ref": "#/$defs/NameWords"
         },
-        "name_variants": {
+        "name_variants": {"description":"Name variants, its mood.",
           "$ref": "#/$defs/NameVariants"
         },
-        "room_line": {
+        "room_line": {"description":"Text key of the line a room shows.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description": {
+        "description": {"description":"Text key examine shows.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description_variants": {
+        "description_variants": {"description":"Description variants, its mood.",
           "$ref": "#/$defs/TextVariants"
         },
-        "room": {
+        "room": {"description":"The room a fresh world puts it in.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "capacity": {
+        "capacity": {"description":"Most items it holds.",
           "type": "integer",
           "minimum": 1,
           "maximum": 1024

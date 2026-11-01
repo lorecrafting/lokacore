@@ -39,20 +39,20 @@
             "op": {
               "const": "fact.assign"
             },
-            "fact": {
+            "fact": {"description":"The declared fact to set.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "npc": {
+            "npc": {"description":"The NPC whose authored instance holds an entity fact.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "item": {
+            "item": {"description":"The item whose authored instance holds an entity fact.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "with": {
               "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "value": {
+            "value": {"description":"The new value, of the fact's type.",
               "$ref": "delta.schema.json#/$defs/FactValue"
             }
           },
@@ -70,20 +70,20 @@
             "op": {
               "const": "fact.adjust"
             },
-            "fact": {
+            "fact": {"description":"The bounded int fact to change.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "npc": {
+            "npc": {"description":"As fact.assign npc.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "item": {
+            "item": {"description":"As fact.assign item.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "with": {
               "description": "Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "amount": {
+            "amount": {"description":"What to add; negative subtracts. The result is clamped to the fact's bounds.",
               "type": "integer"
             }
           },
@@ -100,7 +100,7 @@
             "op": {
               "const": "quest.activate"
             },
-            "quest": {
+            "quest": {"description":"The quest to activate.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -116,10 +116,10 @@
             "op": {
               "const": "quest.resolve"
             },
-            "quest": {
+            "quest": {"description":"The quest to resolve.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "outcome": {
+            "outcome": {"description":"The outcome key it resolves with.",
               "$ref": "action.schema.json#/$defs/Key"
             }
           },
@@ -136,10 +136,10 @@
             "op": {
               "const": "quest.fail"
             },
-            "quest": {
+            "quest": {"description":"The quest to fail.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "outcome": {
+            "outcome": {"description":"The outcome key it fails with.",
               "$ref": "action.schema.json#/$defs/Key"
             }
           },
@@ -157,10 +157,10 @@
             "op": {
               "const": "population.suppress"
             },
-            "plan": {
+            "plan": {"description":"The population plan to suppress.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "duration": {
+            "duration": {"description":"How long, in logical seconds.",
               "type": "integer",
               "minimum": 1
             }
@@ -179,13 +179,13 @@
             "op": {
               "const": "status.apply"
             },
-            "status": {
+            "status": {"description":"The status to apply.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "item": {
+            "item": {"description":"Lands on this item's authored instance.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "npc": {
+            "npc": {"description":"Lands on this NPC's authored instance; never with item.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "room": {
@@ -221,13 +221,13 @@
             "op": {
               "const": "barrier.set"
             },
-            "to": {
+            "to": {"description":"The state to move to.",
               "$ref": "room.schema.json#/$defs/BarrierState"
             },
-            "barrier": {
+            "barrier": {"description":"The one barrier to move.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "tag": {
+            "tag": {"description":"Moves every barrier on an exit of the event's room carrying this tag.",
               "$ref": "entity.schema.json#/$defs/Tag"
             }
           },
@@ -248,7 +248,7 @@
             "op": {
               "const": "status.cure"
             },
-            "status": {
+            "status": {"description":"The status to end.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -265,7 +265,7 @@
             "op": {
               "const": "experience.grant"
             },
-            "amount": {
+            "amount": {"description":"Experience to add.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -284,7 +284,7 @@
             "op": {
               "const": "item.move"
             },
-            "room": {
+            "room": {"description":"The room the item moves to.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -301,13 +301,13 @@
             "op": {
               "const": "npc.move"
             },
-            "npc": {
+            "npc": {"description":"The NPC to move; else the event's subject when it is an NPC.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "plan": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "room": {
+            "room": {"description":"The destination; else the event's room.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -323,7 +323,7 @@
             "op": {
               "const": "population.spawn"
             },
-            "plan": {
+            "plan": {"description":"The population plan to birth a bundle of.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -340,7 +340,7 @@
             "op": {
               "const": "replenish.run"
             },
-            "replenish": {
+            "replenish": {"description":"The replenish entry to run once.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -357,7 +357,7 @@
             "op": {
               "const": "narrate"
             },
-            "text": {
+            "text": {"description":"The line to append.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -374,13 +374,13 @@
             "op": {
               "const": "emote"
             },
-            "emote": {
+            "emote": {"description":"The emote of the cartridge table to perform.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "npc": {
+            "npc": {"description":"The emoter, alive in the room; else the subject.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "to": {
+            "to": {"description":"`subject` makes the subject the target.",
               "enum": [
                 "subject"
               ]
@@ -399,13 +399,13 @@
             "op": {
               "const": "fact.stamp"
             },
-            "fact": {
+            "fact": {"description":"The int fact that receives the delivery's logical time.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "npc": {
+            "npc": {"description":"As fact.assign npc.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "item": {
+            "item": {"description":"As fact.assign item.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -422,7 +422,7 @@
             "op": {
               "const": "event.emit"
             },
-            "event": {
+            "event": {"description":"The custom event key.",
               "$ref": "action.schema.json#/$defs/Key"
             }
           },
@@ -439,13 +439,13 @@
             "op": {
               "const": "damage"
             },
-            "npc": {
+            "npc": {"description":"The NPC hit; else an aimed spell's target.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "kind": {
+            "kind": {"description":"The damage kind, read against resistances.",
               "$ref": "entity.schema.json#/$defs/DamageKind"
             },
-            "amount": {
+            "amount": {"description":"HP lost before resistances.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -465,7 +465,7 @@
             "op": {
               "const": "light.ignite"
             },
-            "item": {
+            "item": {"description":"The fuel source to ignite; else an aimed spell's target.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -481,10 +481,10 @@
             "op": {
               "const": "resource.adjust"
             },
-            "resource": {
+            "resource": {"description":"The pool on the actor's body.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "by": {
+            "by": {"description":"The signed change.",
               "$ref": "resource.schema.json#/$defs/ResourceInt"
             }
           },
@@ -502,10 +502,10 @@
             "op": {
               "const": "build"
             },
-            "structure": {
+            "structure": {"description":"The structure to raise.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "direction": {
+            "direction": {"description":"The direction from the site the room is raised toward.",
               "enum": [
                 "north",
                 "south",
@@ -515,7 +515,7 @@
                 "down"
               ]
             },
-            "site": {
+            "site": {"description":"The site room.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "fact": {
@@ -525,7 +525,7 @@
               "type": "object",
               "description": "Built rooms S3: the first quantity of these directly held items move to the custody room with the order; ready_after seconds later the order job raises the room.",
               "properties": {
-                "items": {
+                "items": {"description":"The item definitions accepted as payment.",
                   "type": "array",
                   "minItems": 1,
                   "maxItems": 16,
@@ -533,15 +533,15 @@
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   }
                 },
-                "quantity": {
+                "quantity": {"description":"How many of them move.",
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 16
                 },
-                "custody": {
+                "custody": {"description":"The room holding them.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "ready_after": {
+                "ready_after": {"description":"Seconds until the order job raises the room.",
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 31536000
@@ -577,7 +577,7 @@
             "op": {
               "const": "skill.acquire"
             },
-            "skill": {
+            "skill": {"description":"The skill the actor acquires.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -593,7 +593,7 @@
             "op": {
               "const": "topic.grant"
             },
-            "topic": {
+            "topic": {"description":"The topic the actor comes to know.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -609,14 +609,14 @@
             "op": {
               "const": "entitlement"
             },
-            "fact": {
+            "fact": {"description":"The fact recording the entitlement.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "escrow": {
               "type": "object",
               "description": "Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70: output with no ready_after is a barter, handed from custody to the body with the inputs, no job.",
               "properties": {
-                "items": {
+                "items": {"description":"The item definitions accepted as payment.",
                   "type": "array",
                   "minItems": 1,
                   "maxItems": 16,
@@ -624,20 +624,20 @@
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   }
                 },
-                "quantity": {
+                "quantity": {"description":"How many of them move.",
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 16
                 },
-                "custody": {
+                "custody": {"description":"The room holding them.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "ready_after": {
+                "ready_after": {"description":"Seconds of work a claim waits for; needs output.",
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 31536000
                 },
-                "output": {
+                "output": {"description":"The item lying in custody the order hands over.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -666,18 +666,18 @@
             "op": {
               "const": "meal"
             },
-            "stock": {
+            "stock": {"description":"The provider's resource the meal draws on.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "debit": {
+            "debit": {"description":"How much leaves stock per meal.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
             },
-            "recovery": {
+            "recovery": {"description":"The body resource restored.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "amount": {
+            "amount": {"description":"How much is restored, up to its maximum.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -698,16 +698,16 @@
             "op": {
               "const": "drink"
             },
-            "vessel": {
+            "vessel": {"description":"The authored vessel the serving comes from.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "liquid": {
+            "liquid": {"description":"The liquid it must hold.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "recovery": {
+            "recovery": {"description":"The body resource restored.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "amount": {
+            "amount": {"description":"How much is restored, up to its maximum.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -728,10 +728,10 @@
             "op": {
               "const": "repair"
             },
-            "fact": {
+            "fact": {"description":"The durability fact of the wielded weapon (weapon.durability.fact).",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "amount": {
+            "amount": {"description":"Durability restored, up to its maximum.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -750,7 +750,7 @@
             "op": {
               "const": "claim"
             },
-            "service": {
+            "service": {"description":"The service whose order is claimed.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -766,7 +766,7 @@
             "op": {
               "const": "cancel"
             },
-            "service": {
+            "service": {"description":"The service whose order is cancelled.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -782,13 +782,13 @@
             "op": {
               "const": "deposit"
             },
-            "account": {
+            "account": {"description":"The bounded int player fact mirroring the balance.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "vault": {
+            "vault": {"description":"The NPC holding the shared pool.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "amount": {
+            "amount": {"description":"Currency moved, separate from the service's price.",
               "type": "integer",
               "minimum": 1,
               "maximum": 1000000
@@ -808,13 +808,13 @@
             "op": {
               "const": "withdraw"
             },
-            "account": {
+            "account": {"description":"The bounded int player fact mirroring the balance.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "vault": {
+            "vault": {"description":"The NPC holding the shared pool.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "amount": {
+            "amount": {"description":"Currency moved, separate from the service's price.",
               "type": "integer",
               "minimum": 1,
               "maximum": 1000000
@@ -835,10 +835,10 @@
             "op": {
               "const": "mend"
             },
-            "site": {
+            "site": {"description":"As build's site.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "direction": {
+            "direction": {"description":"As build's direction.",
               "enum": [
                 "north",
                 "south",
@@ -852,7 +852,7 @@
               "type": "object",
               "description": "The first quantity of these directly held items move to the custody room with the mend (spent at once).",
               "properties": {
-                "items": {
+                "items": {"description":"The item definitions accepted as payment.",
                   "type": "array",
                   "minItems": 1,
                   "maxItems": 16,
@@ -860,12 +860,12 @@
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   }
                 },
-                "quantity": {
+                "quantity": {"description":"How many of them move.",
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 16
                 },
-                "custody": {
+                "custody": {"description":"The room holding them.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
@@ -891,10 +891,10 @@
             "op": {
               "const": "raze"
             },
-            "site": {
+            "site": {"description":"As build's site.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "direction": {
+            "direction": {"description":"As build's direction.",
               "enum": [
                 "north",
                 "south",

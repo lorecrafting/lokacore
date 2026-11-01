@@ -10,10 +10,10 @@ Assign a fact.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| value | [FactValue](source-kinds.gen.md#factvalue) | yes |  |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The declared fact to set. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item whose authored instance holds an entity fact. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC whose authored instance holds an entity fact. |
+| value | [FactValue](source-kinds.gen.md#factvalue) | yes | The new value, of the fact's type. |
 | with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC). |
 
 ### `fact.adjust`
@@ -22,31 +22,31 @@ Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and ma
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| amount | integer | yes |  |
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| amount | integer | yes | What to add; negative subtracts. The result is clamped to the fact's bounds. |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bounded int fact to change. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | As fact.assign item. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | As fact.assign npc. |
 | with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC). |
 
 ### `quest.activate`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The quest to activate. |
 
 ### `quest.resolve`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| outcome | [Key](source-kinds.gen.md#key) | yes |  |
-| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| outcome | [Key](source-kinds.gen.md#key) | yes | The outcome key it resolves with. |
+| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The quest to resolve. |
 
 ### `quest.fail`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| outcome | [Key](source-kinds.gen.md#key) | yes |  |
-| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| outcome | [Key](source-kinds.gen.md#key) | yes | The outcome key it fails with. |
+| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The quest to fail. |
 
 ### `population.suppress`
 
@@ -54,8 +54,8 @@ Suppress one authored population plan for duration logical seconds from this acc
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| duration | integer | yes |  |
-| plan | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| duration | integer | yes | How long, in logical seconds. |
+| plan | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The population plan to suppress. |
 
 ### `status.apply`
 
@@ -64,10 +64,10 @@ Reaction: Apply one authored status (toolbox row 1) at the cause's time to the e
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | co_present | `True` |  | Toolbox row W21: the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler SCHEMA_VIOLATION). |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Lands on this item's authored instance. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Lands on this NPC's authored instance; never with item. |
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Status reader 9: the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler SCHEMA_VIOLATION). |
-| status | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| status | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The status to apply. |
 | tag | [Tag](source-kinds.gen.md#tag) |  | Toolbox row W22 (only with co_present): the status lands instead on every item lying directly in the event's room whose definition carries this tag, the event's subject included, in EntityId order; an item declaring the status immune takes nothing. |
 
 ### `barrier.set`
@@ -76,9 +76,9 @@ Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier o
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| tag | [Tag](source-kinds.gen.md#tag) |  |  |
-| to | [BarrierState](source-kinds.gen.md#barrierstate) | yes |  |
+| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The one barrier to move. |
+| tag | [Tag](source-kinds.gen.md#tag) |  | Moves every barrier on an exit of the event's room carrying this tag. |
+| to | [BarrierState](source-kinds.gen.md#barrierstate) | yes | The state to move to. |
 
 ### `status.cure`
 
@@ -86,7 +86,7 @@ Reaction: Toolbox row G3 reader 3: end this status when active on the event's su
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| status | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| status | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The status to end. |
 
 ### `experience.grant`
 
@@ -94,7 +94,7 @@ Add amount experience to the acting character's levelling row (toolbox row 4), s
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| amount | integer | yes |  |
+| amount | integer | yes | Experience to add. |
 
 ### `item.move`
 
@@ -102,7 +102,7 @@ Toolbox row 41 (decay): when the event's subject is an item not already directly
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room the item moves to. |
 
 ### `npc.move`
 
@@ -110,9 +110,9 @@ Toolbox row FD5 (loka-kgd.22): jumps the named NPC (else the event's subject whe
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC to move; else the event's subject when it is an NPC. |
 | plan | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The destination; else the event's room. |
 
 ### `population.spawn`
 
@@ -120,7 +120,7 @@ Toolbox row 37a (phased world events): births one bundle of the population plan 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| plan | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| plan | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The population plan to birth a bundle of. |
 
 ### `replenish.run`
 
@@ -128,7 +128,7 @@ Homestead hs-1: one run of the replenish entry key's move, as its job's run does
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| replenish | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| replenish | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The replenish entry to run once. |
 
 ### `narrate`
 
@@ -136,7 +136,7 @@ Settle S3-1: appends the authored line text to the delivery's narration, after t
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| text | [TextKey](source-kinds.gen.md#textkey) | yes | The line to append. |
 
 ### `emote`
 
@@ -144,9 +144,9 @@ NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): an NPC performs a
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| emote | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| to | `subject` |  |  |
+| emote | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The emote of the cartridge table to perform. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The emoter, alive in the room; else the subject. |
+| to | `subject` |  | `subject` makes the subject the target. |
 
 ### `fact.stamp`
 
@@ -154,9 +154,9 @@ Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The int fact that receives the delivery's logical time. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | As fact.assign item. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | As fact.assign npc. |
 
 ### `event.emit`
 
@@ -164,7 +164,7 @@ Emit a custom event.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| event | [Key](source-kinds.gen.md#key) | yes |  |
+| event | [Key](source-kinds.gen.md#key) | yes | The custom event key. |
 
 ### `damage`
 
@@ -172,9 +172,9 @@ Toolbox row 29b (spell scripted actions only): the named NPC's instance (without
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| amount | integer | yes |  |
-| kind | [DamageKind](source-kinds.gen.md#damagekind) | yes |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| amount | integer | yes | HP lost before resistances. |
+| kind | [DamageKind](source-kinds.gen.md#damagekind) | yes | The damage kind, read against resistances. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC hit; else an aimed spell's target. |
 
 ### `light.ignite`
 
@@ -182,7 +182,7 @@ Toolbox row 29b (spell scripted actions only): ignite the named fuel source (wit
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The fuel source to ignite; else an aimed spell's target. |
 
 ### `resource.adjust`
 
@@ -190,8 +190,8 @@ Adjust a resource of the actor's body by `by`, stopping at its bounds.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| by | [ResourceInt](source-kinds.gen.md#resourceint) | yes |  |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| by | [ResourceInt](source-kinds.gen.md#resourceint) | yes | The signed change. |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The pool on the actor's body. |
 
 ### `build`
 
@@ -199,92 +199,92 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| direction | `north` or `south` or `east` or `west` or `up` or `down` | yes |  |
+| direction | `north` or `south` or `east` or `west` or `up` or `down` | yes | The direction from the site the room is raised toward. |
 | escrow | object |  | Built rooms S3: the first quantity of these directly held items move to the custody room with the order; ready_after seconds later the order job raises the room. |
-| escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| escrow.quantity | integer | yes |  |
-| escrow.ready_after | integer | yes |  |
+| escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding them. |
+| escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions accepted as payment. |
+| escrow.quantity | integer | yes | How many of them move. |
+| escrow.ready_after | integer | yes | Seconds until the order job raises the room. |
 | fact | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| site | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| structure | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| site | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The site room. |
+| structure | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The structure to raise. |
 
 ### `skill.acquire`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill the actor acquires. |
 
 ### `topic.grant`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| topic | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| topic | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The topic the actor comes to know. |
 
 ### `entitlement`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | escrow | object |  | Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70: output with no ready_after is a barter, handed from custody to the body with the inputs, no job. |
-| escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| escrow.output | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| escrow.quantity | integer | yes |  |
-| escrow.ready_after | integer |  |  |
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding them. |
+| escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions accepted as payment. |
+| escrow.output | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item lying in custody the order hands over. |
+| escrow.quantity | integer | yes | How many of them move. |
+| escrow.ready_after | integer |  | Seconds of work a claim waits for; needs output. |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fact recording the entitlement. |
 
 ### `meal`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| amount | integer | yes |  |
-| debit | integer | yes |  |
-| recovery | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| stock | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| amount | integer | yes | How much is restored, up to its maximum. |
+| debit | integer | yes | How much leaves stock per meal. |
+| recovery | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The body resource restored. |
+| stock | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The provider's resource the meal draws on. |
 
 ### `drink`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| amount | integer | yes |  |
-| liquid | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| recovery | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| vessel | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| amount | integer | yes | How much is restored, up to its maximum. |
+| liquid | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The liquid it must hold. |
+| recovery | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The body resource restored. |
+| vessel | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The authored vessel the serving comes from. |
 
 ### `repair`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| amount | integer | yes |  |
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| amount | integer | yes | Durability restored, up to its maximum. |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The durability fact of the wielded weapon (weapon.durability.fact). |
 
 ### `claim`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| service | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| service | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The service whose order is claimed. |
 
 ### `cancel`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| service | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| service | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The service whose order is cancelled. |
 
 ### `deposit`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| account | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| amount | integer | yes |  |
-| vault | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| account | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bounded int player fact mirroring the balance. |
+| amount | integer | yes | Currency moved, separate from the service's price. |
+| vault | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC holding the shared pool. |
 
 ### `withdraw`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| account | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| amount | integer | yes |  |
-| vault | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| account | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bounded int player fact mirroring the balance. |
+| amount | integer | yes | Currency moved, separate from the service's price. |
+| vault | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC holding the shared pool. |
 
 ### `mend`
 
@@ -292,12 +292,12 @@ Built rooms S4 (construction@1): mend the built room at site's direction. Refuse
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| direction | `north` or `south` or `east` or `west` or `up` or `down` | yes |  |
+| direction | `north` or `south` or `east` or `west` or `up` or `down` | yes | As build's direction. |
 | escrow | object |  | The first quantity of these directly held items move to the custody room with the mend (spent at once). |
-| escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| escrow.quantity | integer | yes |  |
-| site | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding them. |
+| escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions accepted as payment. |
+| escrow.quantity | integer | yes | How many of them move. |
+| site | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | As build's site. |
 
 ### `raze`
 
@@ -305,8 +305,8 @@ Built rooms S5 (construction@1): raze the live built room at site's direction. R
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| direction | `north` or `south` or `east` or `west` or `up` or `down` | yes |  |
-| site | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| direction | `north` or `south` or `east` or `west` or `up` or `down` | yes | As build's direction. |
+| site | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | As build's site. |
 
 ## Policy leaves
 
@@ -316,7 +316,7 @@ Every item holds; an empty list is the policy with no condition.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| items | list of [Policy](vocabulary.gen.md#policy-leaves) | yes | See the type. |
+| items | list of [Policy](vocabulary.gen.md#policy-leaves) | yes | The policies that must all hold. |
 
 ### `any`
 
@@ -324,7 +324,7 @@ At least one item holds.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| items | list of [Policy](vocabulary.gen.md#policy-leaves) | yes | See the type. |
+| items | list of [Policy](vocabulary.gen.md#policy-leaves) | yes | The policies of which one must hold. |
 
 ### `not`
 
@@ -332,7 +332,7 @@ The item does not hold.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| item | [Policy](vocabulary.gen.md#policy-leaves) | yes | See the type. |
+| item | [Policy](vocabulary.gen.md#policy-leaves) | yes | The policy that must not hold. |
 
 ### `target_present`
 
@@ -346,7 +346,7 @@ The actor holds an item of this definition, directly or inside containers it hol
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definition. |
 
 ### `quest_state`
 
@@ -354,8 +354,8 @@ The actor's instance of the quest is in this lifecycle state.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| state | [QuestState](source-kinds.gen.md#queststate) | yes |  |
+| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The quest. |
+| state | [QuestState](source-kinds.gen.md#queststate) | yes | The lifecycle state. |
 
 ### `fact_compare`
 
@@ -363,11 +363,11 @@ The fact, in the actor's scope, equals this value. An entity or pair fact (toolb
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| equals | [FactValue](source-kinds.gen.md#factvalue) | yes |  |
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| subject | `target` |  |  |
+| equals | [FactValue](source-kinds.gen.md#factvalue) | yes | The value to compare. |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fact to read. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this item's authored instance. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this NPC's authored instance. |
+| subject | `target` |  | `target` reads the action's target. |
 | with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD4: an npc_pair fact's second NPC, read at the pair (subject toward with). |
 
 ### `time_window`
@@ -376,8 +376,8 @@ The fact, in the actor's scope, equals this value. An entity or pair fact (toolb
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| from | integer | yes |  |
-| to | integer | yes |  |
+| from | integer | yes | First hour, inclusive. |
+| to | integer | yes | End hour, exclusive; the window wraps at day end. |
 
 ### `barrier_state`
 
@@ -385,8 +385,8 @@ The barrier's current state equals `equals` (room.schema.json BarrierState; clos
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| equals | [BarrierState](source-kinds.gen.md#barrierstate) | yes |  |
+| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The barrier. |
+| equals | [BarrierState](source-kinds.gen.md#barrierstate) | yes | The state. |
 
 ### `stat_compare`
 
@@ -394,8 +394,8 @@ The actor's value of the attribute (cartridge.schema.json AttributeSpec: its sta
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | [ResourceInt](source-kinds.gen.md#resourceint) | yes |  |
-| attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| at_least | [ResourceInt](source-kinds.gen.md#resourceint) | yes | The least value that holds. |
+| attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The attribute. |
 
 ### `level_compare`
 
@@ -403,7 +403,7 @@ Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | integer | yes |  |
+| at_least | integer | yes | The least level that holds. |
 
 ### `resource_compare`
 
@@ -411,10 +411,10 @@ The current value of the resource on the actor's body (regenerated to now, befor
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | [ResourceInt](source-kinds.gen.md#resourceint) |  |  |
-| at_least_percent | integer |  |  |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| subject | `subject` |  |  |
+| at_least | [ResourceInt](source-kinds.gen.md#resourceint) |  | The least value that holds. |
+| at_least_percent | integer |  | The least percent of the pool's maximum that holds. |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The pool. |
+| subject | `subject` |  | `subject` reads the pool on a reaction's event subject. |
 
 ### `escort_state`
 
@@ -422,8 +422,8 @@ API1.11 escort@1: this actor’s typed escort for the named quest instance has t
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| state | [EscortStatus](source-kinds.gen.md#escortstatus) | yes |  |
+| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The quest. |
+| state | [EscortStatus](source-kinds.gen.md#escortstatus) | yes | The escort status. |
 
 ### `light_off`
 
@@ -435,11 +435,11 @@ The subject's definition declares the tag (entity.schema.json Tag). Exactly one 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| subject | `target` or `room` |  |  |
-| tag | [Tag](source-kinds.gen.md#tag) | yes |  |
+| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this barrier definition. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this item definition. |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this room definition. |
+| subject | `target` or `room` |  | `target` or `room`: what is read. |
+| tag | [Tag](source-kinds.gen.md#tag) | yes | The tag. |
 
 ### `sky`
 
@@ -447,10 +447,10 @@ The derived sky at the committed clock, never stored (toolbox rows 10 and 31): e
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| lunar | string |  |  |
-| season | string |  |  |
-| tide | string |  |  |
-| weather | string |  |  |
+| lunar | string |  | The lunar phase. |
+| season | string |  | The season. |
+| tide | string |  | The tide phase. |
+| weather | string |  | The weather entry. |
 
 ### `wearing`
 
@@ -458,7 +458,7 @@ The actor's body wears an item whose definition declares tag (toolbox row W25): 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| tag | [Tag](source-kinds.gen.md#tag) | yes |  |
+| tag | [Tag](source-kinds.gen.md#tag) | yes | The tag a worn item declares. |
 
 ### `visited_count`
 
@@ -466,8 +466,8 @@ The actor's count of accepted body entries into the room, the current one includ
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | integer | yes |  |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| at_least | integer | yes | The least entry count that holds. |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room. |
 
 ### `skill_compare`
 
@@ -475,8 +475,8 @@ The actor's level in the named skill (skill@1: 1 when acquired, plus each growth
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | integer | yes |  |
-| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| at_least | integer | yes | The least level that holds. |
+| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill. |
 
 ### `population_count`
 
@@ -484,8 +484,8 @@ The named population plan has at least at_least living members: slots 1 to cap w
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | integer | yes |  |
-| plan | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| at_least | integer | yes | The least living count that holds. |
+| plan | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The population plan. |
 
 ### `status_active`
 
@@ -493,8 +493,8 @@ The subject holds an active status of this definition (status@1 row; toolbox row
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| status | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| subject | `target` or `self` or `subject` or `room` | yes |  |
+| status | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The status. |
+| subject | `target` or `self` or `subject` or `room` | yes | Whose status: `target`, `self`, `subject` or `room`. |
 
 ### `item_present`
 
@@ -502,7 +502,7 @@ An item carrying this property tag (Tag, toolbox row G1) lies directly in the ac
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| tag | [Tag](source-kinds.gen.md#tag) | yes |  |
+| tag | [Tag](source-kinds.gen.md#tag) | yes | The tag of an item on the floor. |
 
 ### `npc_present`
 
@@ -510,7 +510,7 @@ The NPC of this definition is present: in the actor's current room and alive (hp
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC. |
 
 ### `cue_perceived`
 
@@ -518,8 +518,8 @@ The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| sense | `sound` or `smell` or `heat` | yes |  |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The perceiving NPC. |
+| sense | `sound` or `smell` or `heat` | yes | The sense. |
 
 ### `time_since`
 
@@ -527,10 +527,10 @@ Toolbox row FD1: the world clock minus the int fact's value (as fact_compare rea
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | integer | yes |  |
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| at_least | integer | yes | The least elapsed time that holds. |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The int fact holding a stamp. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this item's authored instance. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this NPC's authored instance. |
 
 ## Events
 
@@ -538,14 +538,14 @@ Toolbox row FD1: the world clock minus the int fact's value (as fact_compare rea
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Only this fact. |
 
 ### `entity_entered_room`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The entrant is this NPC's authored instance (toolbox row W3). |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
 
 ### `spoken`
 
@@ -553,9 +553,9 @@ Toolbox row G9 (speech@1): one spoken event per NPC that heard the word.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| loudness | [Loudness](source-kinds.gen.md#loudness) |  |  |
+| loudness | [Loudness](source-kinds.gen.md#loudness) |  | Only this loudness. |
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The hearer is this NPC's authored instance. |
-| word | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  |  |
+| word | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | The word that fires it. |
 
 ### `asked`
 
@@ -563,50 +563,50 @@ Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| answered | boolean |  |  |
+| answered | boolean |  | Only asks that were, or were not, answered. |
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The asked NPC is this NPC's authored instance. |
-| topic | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| topic | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this topic. |
 
 ### `quest_resolved`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| outcome | [Key](source-kinds.gen.md#key) | yes |  |
-| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| outcome | [Key](source-kinds.gen.md#key) | yes | Only this outcome. |
+| quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Only this quest. |
 
 ### `rested`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
 
 ### `item_acquired`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this item. |
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `item_dropped`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this item. |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `shooed`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this item. |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
 
 ### `quest_activated`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| quest | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| quest | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this quest. |
 
 ### `choice_opened`
 
@@ -616,61 +616,61 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| choice | [Key](source-kinds.gen.md#key) |  |  |
+| choice | [Key](source-kinds.gen.md#key) |  | Only this choice. |
 
 ### `story_point_reached`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| outcome | [Key](source-kinds.gen.md#key) |  |  |
-| story_point | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| outcome | [Key](source-kinds.gen.md#key) |  | Only this outcome. |
+| story_point | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this story point. |
 
 ### `custom_event`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| custom | [Key](source-kinds.gen.md#key) |  |  |
+| custom | [Key](source-kinds.gen.md#key) |  | The custom event key. |
 
 ### `action_completed`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| action | [Key](source-kinds.gen.md#key) |  |  |
+| action | [Key](source-kinds.gen.md#key) |  | Only this action. |
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `check_passed`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| check | [Key](source-kinds.gen.md#key) |  |  |
+| check | [Key](source-kinds.gen.md#key) |  | Only this action's check. |
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `check_failed`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| check | [Key](source-kinds.gen.md#key) |  |  |
+| check | [Key](source-kinds.gen.md#key) |  | Only this action's check. |
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `barrier_changed`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| to | [BarrierState](source-kinds.gen.md#barrierstate) |  |  |
+| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this barrier. |
+| to | [BarrierState](source-kinds.gen.md#barrierstate) |  | Only this new state. |
 
 ### `scene_ended`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| scene | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| scene | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this scene. |
 
 ### `entity_died`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| victim | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
+| victim | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this victim. |
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `attack_result`
@@ -678,7 +678,7 @@ Type: object.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | attacker | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The attacker is this NPC's authored instance (loka-kgd.79); a player's blow never matches. |
-| hit | boolean |  |  |
+| hit | boolean |  | Only hits, or only misses. |
 | target | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The target is this NPC's authored instance (row 39); a blow on the player never matches. |
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
@@ -686,19 +686,19 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| kind | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| kind | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this liquid. |
 
 ### `poured`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| kind | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| kind | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this liquid. |
 
 ### `drank`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| kind | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| kind | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this liquid. |
 
 ### `clock_hour`
 
@@ -710,7 +710,7 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| status | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| status | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this status. |
 
 ### `status_applied`
 
@@ -718,20 +718,20 @@ Toolbox row G3 reader 2.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| status | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| status | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this status. |
 
 ### `status_expired`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| status | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| status | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this status. |
 
 ### `quest_failed`
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| outcome | [Key](source-kinds.gen.md#key) |  |  |
-| quest | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| outcome | [Key](source-kinds.gen.md#key) |  | Only this outcome. |
+| quest | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this quest. |
 
 ## Step types
 
@@ -743,34 +743,34 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| accept | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| availability | object |  |  |
+| accept | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A quest of this cartridge the choice activates. |
+| availability | object |  | Time limits on offering the choice. |
 | availability.from | [LogicalTime](source-kinds.gen.md#logicaltime) |  |  |
 | availability.through | [LogicalTime](source-kinds.gen.md#logicaltime) |  |  |
-| check | [Check](source-kinds.gen.md#check) |  |  |
+| check | [Check](source-kinds.gen.md#check) |  | An opposed check made when chosen. |
 | escort | object |  | API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest. |
 | escort.npc | [Key](source-kinds.gen.md#key) | yes |  |
 | escort.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | escort.transition | `start` or `rejoin` or `complete` | yes |  |
-| exchange | `True` |  |  |
-| hand_over | object |  |  |
+| exchange | `True` |  | A quest item exchange. |
+| hand_over | object |  | The item role the actor gives to an npc role. |
 | hand_over.item | [Key](source-kinds.gen.md#key) | yes |  |
 | hand_over.to | [Key](source-kinds.gen.md#key) | yes |  |
-| label | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| lesson_payment | object |  |  |
+| label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the option. |
+| lesson_payment | object |  | Coins the actor pays for a lesson. |
 | lesson_payment.amount | integer | yes |  |
 | lesson_payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | lesson_payment.to | [Key](source-kinds.gen.md#key) | yes |  |
-| narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| patrol | object |  |  |
+| narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of what the actor reads on choosing. |
+| patrol | object |  | A patrol transition. |
 | patrol.npc | [Key](source-kinds.gen.md#key) | yes |  |
 | patrol.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | patrol.transition | `start` or `continue` or `rejoin` or `restart` | yes |  |
-| payment | object |  |  |
+| payment | object |  | Coins paid to the actor by an NPC role. |
 | payment.amount | integer | yes |  |
 | payment.from | [Key](source-kinds.gen.md#key) | yes |  |
 | payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| receive | object |  |  |
+| receive | object |  | The bound NPC-held item transferred to the actor. |
 | receive.from | [Key](source-kinds.gen.md#key) | yes |  |
 | receive.item | [Key](source-kinds.gen.md#key) | yes |  |
 | steps | list of [Step](vocabulary.gen.md#steps) |  | See the type. |

@@ -377,21 +377,21 @@
         "key": {
           "$ref": "#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its name.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_.]*$",
           "maxLength": 128
         },
-        "target": {
+        "target": {"description":"The target spec.",
           "$ref": "#/$defs/TargetSpec"
         },
-        "command": {
+        "command": {"description":"The portable Command type it resolves to.",
           "$ref": "#/$defs/Key"
         },
-        "priority": {
+        "priority": {"description":"Presentation priority.",
           "type": "integer"
         },
-        "input": {
+        "input": {"description":"Required input parameters.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/ActionInputParameter"
@@ -400,7 +400,7 @@
         "policy": {
           "$ref": "policy.schema.json#/$defs/Policy"
         },
-        "accessibility": {
+        "accessibility": {"description":"Accessibility description.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_.]*$",
           "maxLength": 128
@@ -689,10 +689,10 @@
         "key": {
           "$ref": "#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "aliases": {
+        "aliases": {"description":"Words a player types as its verb.",
           "type": "array",
           "items": {
             "$ref": "room.schema.json#/$defs/Alias"
@@ -700,16 +700,16 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "target": {
+        "target": {"description":"Its target.",
           "$ref": "#/$defs/ScriptedTarget"
         },
-        "priority": {
+        "priority": {"description":"Presentation priority.",
           "type": "integer"
         },
         "policy": {
           "$ref": "policy.schema.json#/$defs/Policy"
         },
-        "outcomes": {
+        "outcomes": {"description":"The outcomes a perform selects.",
           "type": "object",
           "properties": {
             "success": {
@@ -768,8 +768,8 @@
           ],
           "additionalProperties": false
         },
-        "check": { "$ref": "step.schema.json#/$defs/Check" },
-        "duration": {
+        "check": {"description":"A check selecting success or failure.", "$ref": "step.schema.json#/$defs/Check" },
+        "duration": {"description":"Logical time every accepted perform advances.",
           "type": "integer",
           "minimum": 1
         },

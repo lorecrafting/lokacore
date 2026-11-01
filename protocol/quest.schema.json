@@ -10,10 +10,10 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its journal entry.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "offer": {
+        "offer": {"description":"The accept action offered while the actor has no instance.",
           "type": "object",
           "properties": {
             "label": {
@@ -69,7 +69,7 @@
           ],
           "additionalProperties": false
         },
-        "objective": {
+        "objective": {"description":"Its objective.",
           "$ref": "#/$defs/QuestObjective"
         },
         "deadline": {
@@ -101,7 +101,7 @@
           ],
           "additionalProperties": false
         },
-        "journal": {
+        "journal": {"description":"Lifecycle journal texts.",
           "$ref": "#/$defs/QuestJournal"
         },
         "repeatable": {

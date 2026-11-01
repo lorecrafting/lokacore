@@ -8,13 +8,13 @@ An advertised affordance (04 §19; 06 §20; 21 §7): stable key, name (its local
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| accessibility | string | yes |  |
-| command | [Key](source-kinds.gen.md#key) | yes |  |
-| input | list of [ActionInputParameter](source-kinds.gen.md#actioninputparameter) | yes |  |
-| name | string | yes |  |
+| accessibility | string | yes | Accessibility description. |
+| command | [Key](source-kinds.gen.md#key) | yes | The portable Command type it resolves to. |
+| input | list of [ActionInputParameter](source-kinds.gen.md#actioninputparameter) | yes | Required input parameters. |
+| name | string | yes | Text key of its name. |
 | policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| priority | integer | yes |  |
-| target | [TargetSpec](source-kinds.gen.md#targetspec) | yes |  |
+| priority | integer | yes | Presentation priority. |
+| target | [TargetSpec](source-kinds.gen.md#targetspec) | yes | The target spec. |
 
 ## actions
 
@@ -22,14 +22,14 @@ A cartridge-local action composed only of registered operations (06 §20 Compose
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| aliases | list of [Alias](source-kinds.gen.md#alias) | yes |  |
-| check | [Check](source-kinds.gen.md#check) |  |  |
+| aliases | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player types as its verb. |
+| check | [Check](source-kinds.gen.md#check) |  | A check selecting success or failure. |
 | cooldown | integer |  |  |
 | costs | list of [ActionCost](source-kinds.gen.md#actioncost) |  | See the type. |
 | craft | [ActionCraft](source-kinds.gen.md#actioncraft) |  | See the type. |
-| duration | integer |  |  |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| outcomes | object | yes |  |
+| duration | integer |  | Logical time every accepted perform advances. |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
+| outcomes | object | yes | The outcomes a perform selects. |
 | outcomes.failure | object |  |  |
 | outcomes.failure.cues | [Cues](source-kinds.gen.md#cues) |  | Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown. |
 | outcomes.failure.narration | [ActionNarration](source-kinds.gen.md#actionnarration) | yes | See the type. |
@@ -39,9 +39,9 @@ A cartridge-local action composed only of registered operations (06 §20 Compose
 | outcomes.success.narration | [ActionNarration](source-kinds.gen.md#actionnarration) | yes | See the type. |
 | outcomes.success.steps | list of [Step](vocabulary.gen.md#steps) | yes | See the type. |
 | policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| priority | integer | yes |  |
+| priority | integer | yes | Presentation priority. |
 | reason | [TextKey](source-kinds.gen.md#textkey) |  |  |
-| target | [ScriptedTarget](source-kinds.gen.md#scriptedtarget) | yes |  |
+| target | [ScriptedTarget](source-kinds.gen.md#scriptedtarget) | yes | Its target. |
 | tip | [TextKey](source-kinds.gen.md#textkey) |  |  |
 
 ## areas
@@ -142,17 +142,17 @@ One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogue
 | choices | map of [DialogueChoice](vocabulary.gen.md#choice-fields) | yes | See the type. |
 | keyword | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | Toolbox row G9 (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle. |
 | name | [TextKey](source-kinds.gen.md#textkey) |  | A distinct name (the Talk label) opts that authored control into exact dialogue selection; omission retains first-eligible Talk. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The speaker, also an npc role. |
 | policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| prompt | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| quest | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| riddle | object |  |  |
+| prompt | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the pending choice's prompt. |
+| quest | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The quest a choice resolves, with the choice id as its outcome. |
+| riddle | object |  | A riddle answered by a typed word. |
 | riddle.answer | string | yes |  |
 | riddle.bank | list of string | yes |  |
 | riddle.choice_id | [Key](source-kinds.gen.md#key) | yes |  |
 | riddle.wrong | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | riddle.wrong_limit | integer |  |  |
-| roles | map of [DialogueRole](source-kinds.gen.md#dialoguerole) | yes |  |
+| roles | map of [DialogueRole](source-kinds.gen.md#dialoguerole) | yes | Participants bound when the talk opens. |
 
 ## emotes
 
@@ -185,16 +185,16 @@ A portable thing (21 §8): its key; keywords, the Alias words a player names it 
 |---|---|---|---|
 | affects | list of [ItemAffect](source-kinds.gen.md#itemaffect) |  | See the type. |
 | bandage | [ItemBandage](source-kinds.gen.md#itembandage) |  | See the type. |
-| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The barrier on it, a container lid. |
 | behaviours | list of [Key](source-kinds.gen.md#key) or object |  |  |
 | behaviours[].behaviour | [Key](source-kinds.gen.md#key) | yes |  |
 | behaviours[].with | object |  |  |
 | block_chance | integer |  |  |
-| capacity | integer |  |  |
+| capacity | integer |  | Most items held directly; receptacles only. |
 | container | `True` |  | Only explicitly authored receptacles hold items. Absence is false; capacity and barrier require this field. |
 | cues | [Cues](source-kinds.gen.md#cues) |  |  |
-| description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| description_variants | [TextVariants](source-kinds.gen.md#textvariants) |  |  |
+| description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key examine shows. |
+| description_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Description variants. |
 | edible | [ItemEdible](source-kinds.gen.md#itemedible) |  | See the type. |
 | equip | object |  | Authored wear and remove words (toolbox row 6a, loka-x6t.20): the Wear and Remove labels and the worn and removed lines. Only with slot; each key is in the text catalog. |
 | equip.remove | [TextKey](source-kinds.gen.md#textkey) | yes |  |
@@ -206,18 +206,18 @@ A portable thing (21 §8): its key; keywords, the Alias words a player names it 
 | identified | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row 27: a boolean fact, not per_subject; the item is identified while it reads true for the player, and GameView worn sums identified items only (needs affects). |
 | immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row G3: statuses that status.apply skips on this item's instance; each names a declared status. |
 | intended_level | integer |  | Balance tool 6b: the level the item is meant for, read only by the power report's gear budget (needs affects; the engine ignores it at runtime). |
-| keywords | list of [Alias](source-kinds.gen.md#alias) | yes |  |
-| location | [ItemLocation](source-kinds.gen.md#itemlocation) | yes |  |
+| keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
+| location | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | Where a fresh world puts it. |
 | locks | object |  | Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied. |
 | locks.get | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | locks.put | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | mass_grams | integer |  | The item shell mass in grams, excluding its contents. Required on every item under world.carry; explicit zero is valid (docs/system/cartridge.md Carrying settings and item mass). |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| name_variants | [NameVariants](source-kinds.gen.md#namevariants) |  |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its short description. |
+| name_variants | [NameVariants](source-kinds.gen.md#namevariants) |  | Name variants; first match wins. |
 | readable | [ItemReadable](source-kinds.gen.md#itemreadable) |  | See the type. |
-| room_line | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| room_line_variants | [TextVariants](source-kinds.gen.md#textvariants) |  |  |
-| slot | [SlotKey](source-kinds.gen.md#slotkey) |  |  |
+| room_line | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line a room shows while it lies there. |
+| room_line_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Room line variants; first match wins. |
+| slot | [SlotKey](source-kinds.gen.md#slotkey) |  | The slot it is worn in. |
 | tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1). |
 | vessel | [VesselSpec](source-kinds.gen.md#vesselspec) |  | See the type. |
 | weapon | [WeaponProfile](source-kinds.gen.md#weaponprofile) |  | See the type. |
@@ -259,7 +259,7 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 | behaviours | list of [Key](source-kinds.gen.md#key) or object |  |  |
 | behaviours[].behaviour | [Key](source-kinds.gen.md#key) | yes |  |
 | behaviours[].with | object |  |  |
-| capacity | integer |  |  |
+| capacity | integer |  | Most items it holds. |
 | cues | [Cues](source-kinds.gen.md#cues) |  |  |
 | daily_schedule | map of [Key](source-kinds.gen.md#key) or object or list of [Key](source-kinds.gen.md#key) or object |  | schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing. |
 | daily_schedule.*{walks=True} | variant |  |  |
@@ -273,8 +273,8 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 | daily_schedule.*[]{walks=True}.goal | [TextKey](source-kinds.gen.md#textkey) |  |  |
 | daily_schedule.*[]{walks=True}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | daily_schedule.*[]{walks=True}.when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| description_variants | [TextVariants](source-kinds.gen.md#textvariants) |  |  |
+| description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key examine shows. |
+| description_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Description variants, its mood. |
 | disposition | object |  | Toolbox row G11: how the NPC stands toward the player, derived when read, never stored: hostile while hostile holds, else friendly while friendly holds, else wary (an NPC without it is wary). Each condition is read with the player as the actor and the NPC as the target, so subject target facts are its pair facts with the player. Hostile refuses talk and trade and, with an attack, engages a player who walks in, saying engage; friendly takes a friendly buy_discount. Toolbox row 35: with arrest instead of engage, a hostile NPC stops a player who walks in and the body goes to arrest.to, saying arrest.narration; no encounter opens. |
 | disposition.arrest | object |  |  |
 | disposition.arrest.narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
@@ -288,20 +288,20 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 | drops[].item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | hp | [NpcHp](source-kinds.gen.md#npchp) |  | See the type. |
 | immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row G3: statuses that status.apply skips on this NPC's instance; each names a declared status. |
-| keywords | list of [Alias](source-kinds.gen.md#alias) | yes |  |
+| keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
 | locks | object |  | Toolbox row 33 (mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied. |
 | locks.get | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | mount | object |  | Toolbox row 43b (needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template. |
 | mount.cost_percent | integer |  |  |
 | mount.terrain | list of [Tag](source-kinds.gen.md#tag) | yes |  |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| name_variants | [NameVariants](source-kinds.gen.md#namevariants) |  |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its short description. |
+| name_variants | [NameVariants](source-kinds.gen.md#namevariants) |  | Name variants, its mood. |
 | perception | object |  |  |
 | perception.discovered | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | resistances | [Resistances](source-kinds.gen.md#resistances) |  | See the type. |
 | resource_starts | map of [ResourceInt](source-kinds.gen.md#resourceint) |  |  |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| room_line | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room a fresh world puts it in. |
+| room_line | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line a room shows. |
 | services | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
 | shop | [Shop](source-kinds.gen.md#shop) |  | See the type. |
 | spawn_template | `True` |  |  |
@@ -402,10 +402,10 @@ A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in Compiled
 | expedition.start_detail | [Key](source-kinds.gen.md#key) | yes |  |
 | expedition.start_room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | expedition.survived_fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| journal | [QuestJournal](source-kinds.gen.md#questjournal) |  | See the type. |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| objective | [QuestObjective](source-kinds.gen.md#questobjective) | yes |  |
-| offer | object |  |  |
+| journal | [QuestJournal](source-kinds.gen.md#questjournal) |  | Lifecycle journal texts. |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its journal entry. |
+| objective | [QuestObjective](source-kinds.gen.md#questobjective) | yes | Its objective. |
+| offer | object |  | The accept action offered while the actor has no instance. |
 | offer.label | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | offer.policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | offer.target | object |  | The fixture or NPC the offer draws on (mechanics.md, quest@1). The offer is listed and admitted only while the target is in the actor's room, alive and seen. |
@@ -466,9 +466,9 @@ A navigable place (21 §5 Place/Room): its key, its name and description text ke
 | cues | [Cues](source-kinds.gen.md#cues) |  |  |
 | dark | `True` |  | The room is dark (light@1): a player without light, or blind, reads the engine line place.dark instead of the description and sees none of the room's entities. An authored dark_description wins over the engine line. |
 | dark_description | [TextKey](source-kinds.gen.md#textkey) |  |  |
-| description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its description. |
 | details | map of [InspectableDetail](source-kinds.gen.md#inspectabledetail) |  | See the type. |
-| exits | object | yes |  |
+| exits | object | yes | Exits by compass direction. |
 | exits.down | [Connection](source-kinds.gen.md#connection) |  | See the type. |
 | exits.east | [Connection](source-kinds.gen.md#connection) |  | See the type. |
 | exits.north | [Connection](source-kinds.gen.md#connection) |  | See the type. |
@@ -477,7 +477,7 @@ A navigable place (21 §5 Place/Room): its key, its name and description text ke
 | exits.west | [Connection](source-kinds.gen.md#connection) |  | See the type. |
 | locks | object |  | Toolbox row G7 (mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target. |
 | locks.enter | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
 | sanctuary | boolean |  |  |
 | site | object |  | Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise). |
 | site.directions | list of `north` or `south` or `east` or `west` or `up` or `down` | yes |  |
@@ -847,7 +847,7 @@ One directed exit to another room of the same cartridge (21 §5 Connection; 05 �
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The barrier the exit passes through. |
 | climb | object |  | Toolbox row 30 (docs/system/mechanics.md rope and climb): crossing this directed exit is a climb. A mover whose body holds item (directly or in a container) climbs down as on any exit; one without it falls: the move still happens and also costs damage HP, never below 1 (a fall never kills), narrated by fell. The cartridge declares an hp pool (RESOURCE_SPEC_INVALID otherwise). NPCs never take a climb face. |
 | climb.damage | integer | yes |  |
 | climb.fell | [TextKey](source-kinds.gen.md#textkey) | yes |  |
@@ -858,10 +858,10 @@ One directed exit to another room of the same cartridge (21 §5 Connection; 05 �
 | hidden_until | object |  | Toolbox row 11 (docs/system/mechanics.md hidden passages): for the commanded character this directed exit does not exist (not listed, not seen through, absent from the map, a move through it not_found) until the named fact has the specified value. No barrier on a hidden face (BARRIER_MISMATCH). |
 | hidden_until.equals | [FactValue](source-kinds.gen.md#factvalue) | yes |  |
 | hidden_until.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| knock | [KnockResponse](source-kinds.gen.md#knockresponse) |  | See the type. |
+| knock | [KnockResponse](source-kinds.gen.md#knockresponse) |  | The face's answer to a knock. |
 | locks | object |  | Toolbox row G7 (mechanics.md Access locks): traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target. |
 | locks.traverse | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| to | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| to | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The destination room. |
 
 ### Cue
 
@@ -939,8 +939,8 @@ Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
+| description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key shown when it holds. |
+| when | [Policy](vocabulary.gen.md#policy-leaves) |  | The condition. |
 
 ### DialogueRole
 
@@ -984,12 +984,12 @@ A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a p
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| aliases | list of [Alias](source-kinds.gen.md#alias) | yes |  |
+| aliases | list of [Alias](source-kinds.gen.md#alias) | yes | The words a player names it by; the first also names an ambiguous lookup. |
 | bed | object |  |  |
 | bed.entitlement | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | bed.title | [TextKey](source-kinds.gen.md#textkey) | yes |  |
 | cues | [Cues](source-kinds.gen.md#cues) |  |  |
-| description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key examine shows. |
 | harvest | object |  |  |
 | harvest.careful | object |  |  |
 | harvest.careful.action | [Key](source-kinds.gen.md#key) | yes |  |
@@ -1020,7 +1020,7 @@ A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a p
 | transport | object |  |  |
 | transport.route | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 | transport.title | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | See the type. |
+| variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | Description variants; first match wins. |
 
 ### ItemAffect
 
@@ -1098,10 +1098,10 @@ A local barrier face’s authored answer when the named NPC is in the destinatio
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| answered | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| unanswered | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| answered | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the answer. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC listened for. |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room it must be in. |
+| unanswered | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the no-answer line. |
 
 ### LiquidRow
 
@@ -1483,7 +1483,7 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 
 ## Fields without a meaning
 
-773 fields.
+545 fields.
 
 - `ActionContribution: actions`
 - `ActionContribution: op`
@@ -1554,7 +1554,6 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `ConditionBand: at_percent`
 - `ConditionBand: key`
 - `ConditionBand: tone`
-- `Connection: barrier`
 - `Connection: climb.damage`
 - `Connection: climb.fell`
 - `Connection: climb.item`
@@ -1562,7 +1561,6 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `Connection: corpse_ingress.fact`
 - `Connection: hidden_until.equals`
 - `Connection: hidden_until.fact`
-- `Connection: to`
 - `Cue: range`
 - `Cue: sense`
 - `Cue: text`
@@ -1586,13 +1584,10 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `DerivedStat: terms[].attribute`
 - `DerivedStat: terms[].per_point`
 - `DerivedStat: terms[].pivot`
-- `DescriptionVariant: description`
-- `InspectableDetail: aliases`
 - `InspectableDetail: bed`
 - `InspectableDetail: bed.entitlement`
 - `InspectableDetail: bed.title`
 - `InspectableDetail: cues`
-- `InspectableDetail: description`
 - `InspectableDetail: harvest`
 - `InspectableDetail: harvest.careful`
 - `InspectableDetail: harvest.careful.action`
@@ -1633,10 +1628,6 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `ItemReadable: topic`
 - `KernelApiRange: at_least`
 - `KernelApiRange: below`
-- `KnockResponse: answered`
-- `KnockResponse: npc`
-- `KnockResponse: room`
-- `KnockResponse: unanswered`
 - `LiquidRow: kind`
 - `LiquidRow: kind.cartridge_id`
 - `LiquidRow: kind.cartridge_version`
@@ -1771,23 +1762,10 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `WorldSettings: trails.leads.south`
 - `WorldSettings: trails.leads.up`
 - `WorldSettings: trails.leads.west`
-- `actions: accessibility`
-- `actions: aliases`
-- `actions: check`
-- `actions: command`
 - `actions: cooldown`
-- `actions: duration`
-- `actions: input`
-- `actions: name`
-- `actions: name`
-- `actions: outcomes`
 - `actions: outcomes.failure`
 - `actions: outcomes.success`
-- `actions: priority`
-- `actions: priority`
 - `actions: reason`
-- `actions: target`
-- `actions: target`
 - `actions: tip`
 - `areas: actions`
 - `areas: barriers`
@@ -1832,110 +1810,47 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `cartridge: supported_profiles`
 - `cartridge: title`
 - `cartridge: version`
-- `choice: accept`
-- `choice: availability`
 - `choice: availability.from`
 - `choice: availability.through`
-- `choice: check`
 - `choice: escort.npc`
 - `choice: escort.quest`
 - `choice: escort.transition`
-- `choice: exchange`
-- `choice: hand_over`
 - `choice: hand_over.item`
 - `choice: hand_over.to`
-- `choice: label`
-- `choice: lesson_payment`
 - `choice: lesson_payment.amount`
 - `choice: lesson_payment.resource`
 - `choice: lesson_payment.to`
-- `choice: narration`
-- `choice: patrol`
 - `choice: patrol.npc`
 - `choice: patrol.quest`
 - `choice: patrol.transition`
-- `choice: payment`
 - `choice: payment.amount`
 - `choice: payment.from`
 - `choice: payment.resource`
-- `choice: receive`
 - `choice: receive.from`
 - `choice: receive.item`
-- `dialogues: npc`
-- `dialogues: prompt`
-- `dialogues: quest`
-- `dialogues: riddle`
 - `dialogues: riddle.answer`
 - `dialogues: riddle.bank`
 - `dialogues: riddle.choice_id`
 - `dialogues: riddle.wrong`
 - `dialogues: riddle.wrong_limit`
-- `dialogues: roles`
 - `emotes: others`
 - `emotes: to`
 - `emotes: to.others`
 - `emotes: to.you`
-- `events action_completed: action`
-- `events asked: answered`
-- `events asked: topic`
-- `events attack_result: hit`
-- `events barrier_changed: barrier`
-- `events barrier_changed: to`
-- `events check_failed: check`
-- `events check_passed: check`
-- `events choice_resolved: choice`
-- `events custom_event: custom`
-- `events drank: kind`
-- `events entity_died: room`
-- `events entity_died: victim`
-- `events entity_entered_room: room`
-- `events fact_changed: fact`
-- `events filled: kind`
-- `events item_acquired: item`
-- `events item_dropped: item`
-- `events item_dropped: room`
-- `events poured: kind`
-- `events quest_activated: quest`
-- `events quest_failed: outcome`
-- `events quest_failed: quest`
-- `events quest_resolved: outcome`
-- `events quest_resolved: quest`
-- `events rested: room`
-- `events scene_ended: scene`
-- `events shooed: item`
-- `events shooed: room`
-- `events spoken: loudness`
-- `events spoken: word`
-- `events status_applied: status`
-- `events status_expired: status`
-- `events status_ticked: status`
-- `events story_point_reached: outcome`
-- `events story_point_reached: story_point`
 - `facts: facts.*.meaning`
 - `facts: facts.*.scopes`
 - `facts: facts.*.value_type`
 - `facts: facts.*.version`
-- `items: barrier`
 - `items: behaviours`
 - `items: behaviours[].behaviour`
 - `items: behaviours[].with`
 - `items: block_chance`
-- `items: capacity`
 - `items: cues`
-- `items: description`
-- `items: description_variants`
 - `items: equip.remove`
 - `items: equip.removed`
 - `items: equip.wear`
 - `items: equip.worn`
 - `items: fuel`
-- `items: keywords`
-- `items: location`
-- `items: name`
-- `items: name_variants`
-- `items: room_line`
-- `items: room_line_variants`
-- `items: slot`
 - `liquids: drink_amount`
 - `liquids: grams_per_unit`
 - `liquids: name`
@@ -1950,7 +1865,6 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `npcs: behaviours`
 - `npcs: behaviours[].behaviour`
 - `npcs: behaviours[].with`
-- `npcs: capacity`
 - `npcs: cues`
 - `npcs: daily_schedule.*.cartridge_id`
 - `npcs: daily_schedule.*.cartridge_version`
@@ -1962,73 +1876,19 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `npcs: daily_schedule.*{walks=True}`
 - `npcs: daily_schedule.*{walks=True}.goal`
 - `npcs: daily_schedule.*{walks=True}.room`
-- `npcs: description`
-- `npcs: description_variants`
 - `npcs: disposition.arrest`
 - `npcs: disposition.arrest.narration`
 - `npcs: disposition.arrest.to`
 - `npcs: disposition.engage`
 - `npcs: drops[].chance`
 - `npcs: drops[].item`
-- `npcs: keywords`
 - `npcs: mount.cost_percent`
 - `npcs: mount.terrain`
-- `npcs: name`
-- `npcs: name_variants`
 - `npcs: perception`
 - `npcs: perception.discovered`
 - `npcs: resource_starts`
-- `npcs: room`
-- `npcs: room_line`
 - `npcs: services`
 - `npcs: spawn_template`
-- `policy barrier_state: barrier`
-- `policy barrier_state: equals`
-- `policy cue_perceived: npc`
-- `policy cue_perceived: sense`
-- `policy escort_state: quest`
-- `policy escort_state: state`
-- `policy fact_compare: equals`
-- `policy fact_compare: fact`
-- `policy fact_compare: item`
-- `policy fact_compare: npc`
-- `policy fact_compare: subject`
-- `policy has_item: item`
-- `policy has_tag: barrier`
-- `policy has_tag: item`
-- `policy has_tag: room`
-- `policy has_tag: subject`
-- `policy has_tag: tag`
-- `policy item_present: tag`
-- `policy level_compare: at_least`
-- `policy npc_present: npc`
-- `policy population_count: at_least`
-- `policy population_count: plan`
-- `policy quest_state: quest`
-- `policy quest_state: state`
-- `policy resource_compare: at_least`
-- `policy resource_compare: at_least_percent`
-- `policy resource_compare: resource`
-- `policy resource_compare: subject`
-- `policy skill_compare: at_least`
-- `policy skill_compare: skill`
-- `policy sky: lunar`
-- `policy sky: season`
-- `policy sky: tide`
-- `policy sky: weather`
-- `policy stat_compare: at_least`
-- `policy stat_compare: attribute`
-- `policy status_active: status`
-- `policy status_active: subject`
-- `policy time_since: at_least`
-- `policy time_since: fact`
-- `policy time_since: item`
-- `policy time_since: npc`
-- `policy time_window: from`
-- `policy time_window: to`
-- `policy visited_count: at_least`
-- `policy visited_count: room`
-- `policy wearing: tag`
 - `populations: area`
 - `populations: cap`
 - `populations: corpse`
@@ -2102,9 +1962,6 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `quests: expedition.start_detail`
 - `quests: expedition.start_room`
 - `quests: expedition.survived_fact`
-- `quests: name`
-- `quests: objective`
-- `quests: offer`
 - `quests: offer.label`
 - `quests: offer.target{kind=detail}`
 - `quests: offer.target{kind=detail}.detail`
@@ -2130,9 +1987,6 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `resources: resources`
 - `rooms: cues`
 - `rooms: dark_description`
-- `rooms: description`
-- `rooms: exits`
-- `rooms: name`
 - `rooms: sanctuary`
 - `rooms: site.directions`
 - `rooms: site.structures`
@@ -2154,90 +2008,8 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 - `statuses: pierced_by.skill`
 - `statuses: resource`
 - `statuses: tick_every`
-- `steps barrier.set: barrier`
-- `steps barrier.set: tag`
-- `steps barrier.set: to`
-- `steps build: direction`
-- `steps build: escrow.custody`
-- `steps build: escrow.items`
-- `steps build: escrow.quantity`
-- `steps build: escrow.ready_after`
 - `steps build: fact`
-- `steps build: site`
-- `steps build: structure`
-- `steps cancel: service`
-- `steps claim: service`
-- `steps damage: amount`
-- `steps damage: kind`
-- `steps damage: npc`
-- `steps deposit: account`
-- `steps deposit: amount`
-- `steps deposit: vault`
-- `steps drink: amount`
-- `steps drink: liquid`
-- `steps drink: recovery`
-- `steps drink: vessel`
-- `steps emote: emote`
-- `steps emote: npc`
-- `steps emote: to`
-- `steps entitlement: escrow.custody`
-- `steps entitlement: escrow.items`
-- `steps entitlement: escrow.output`
-- `steps entitlement: escrow.quantity`
-- `steps entitlement: escrow.ready_after`
-- `steps entitlement: fact`
-- `steps event.emit: event`
-- `steps experience.grant: amount`
-- `steps fact.adjust: amount`
-- `steps fact.adjust: fact`
-- `steps fact.adjust: item`
-- `steps fact.adjust: npc`
-- `steps fact.assign: fact`
-- `steps fact.assign: item`
-- `steps fact.assign: npc`
-- `steps fact.assign: value`
-- `steps fact.stamp: fact`
-- `steps fact.stamp: item`
-- `steps fact.stamp: npc`
-- `steps item.move: room`
-- `steps light.ignite: item`
-- `steps meal: amount`
-- `steps meal: debit`
-- `steps meal: recovery`
-- `steps meal: stock`
-- `steps mend: direction`
-- `steps mend: escrow.custody`
-- `steps mend: escrow.items`
-- `steps mend: escrow.quantity`
-- `steps mend: site`
-- `steps narrate: text`
-- `steps npc.move: npc`
 - `steps npc.move: plan`
-- `steps npc.move: room`
-- `steps population.spawn: plan`
-- `steps population.suppress: duration`
-- `steps population.suppress: plan`
-- `steps quest.activate: quest`
-- `steps quest.fail: outcome`
-- `steps quest.fail: quest`
-- `steps quest.resolve: outcome`
-- `steps quest.resolve: quest`
-- `steps raze: direction`
-- `steps raze: site`
-- `steps repair: amount`
-- `steps repair: fact`
-- `steps replenish.run: replenish`
-- `steps resource.adjust: by`
-- `steps resource.adjust: resource`
-- `steps skill.acquire: skill`
-- `steps status.apply: item`
-- `steps status.apply: npc`
-- `steps status.apply: status`
-- `steps status.cure: status`
-- `steps topic.grant: topic`
-- `steps withdraw: account`
-- `steps withdraw: amount`
-- `steps withdraw: vault`
 - `structures: description`
 - `structures: locks`
 - `structures: max_per_owner`
