@@ -17,12 +17,11 @@ const loadSkia = async () => {
 };
 
 const lit = {
-  ...RoomFirstView,
+  ...RoomFirstView.view,
   inventory: [{ id: 'lantern', fuel: { lit: true } }],
-  entities: [],
 } as unknown as GameView;
 const low = {
-  ...RoomFirstView,
+  ...RoomFirstView.view,
   resources: [{ resource: { key: 'hp' }, tone: 'danger' }],
 } as unknown as GameView;
 
