@@ -13,7 +13,7 @@ import { prose, usePalette, useType } from '../book/palette.ts';
 import { Text } from '../book/Text.tsx';
 import { LABEL } from '../book/labels.ts';
 
-type Quest = Pick<GameView['journal'][number], 'state' | 'journal'>;
+type Quest = Pick<GameView['journal'][number], 'quest' | 'state' | 'journal'>;
 const say = (k: string) => k;
 
 // A phone-high frame, so the page scrolls inside itself as on a device.
@@ -57,8 +57,9 @@ type Story = StoryObj<typeof meta>;
 export const WithRunningHead: Story = {
   args: {
     journal: [
-      { state: 'resolved', journal: 'quest.bell.prior' },
+      { quest: { key: 'bell' }, state: 'resolved', journal: 'quest.bell.prior' },
       {
+        quest: { key: 'letter' },
         state: 'active',
         journal: 'Take the Reeve’s letter to Wat on the fell.',
       },
@@ -74,6 +75,7 @@ export const LongRunningHead: Story = {
   args: {
     journal: [
       {
+        quest: { key: 'letter' },
         state: 'objectives_complete',
         journal:
           'Carry the Reeve’s letter directly to Wat at his hut on the fell before the third day at six. Payment is due only by the second day at six.',
@@ -83,7 +85,11 @@ export const LongRunningHead: Story = {
 };
 
 export const NoRunningHead: Story = {
-  args: { journal: [{ state: 'resolved', journal: 'quest.bell.prior' }] as Quest[] },
+  args: {
+    journal: [
+      { quest: { key: 'bell' }, state: 'resolved', journal: 'quest.bell.prior' },
+    ] as Quest[],
+  },
   play: async ({ canvas }) => {
     await expect(canvas.queryByText('quest.bell.prior')).toBeNull();
   },
