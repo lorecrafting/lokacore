@@ -149,6 +149,21 @@ defmodule Loka.ContentSceneBranchingTest do
 
     take = scene["choices"]["take"]
     assert take["policy"] == %{"op" => "not", "item" => compare("scene_take_done")}
+
+    # Break: the fact starts true, so a `once` choice is gone before it is ever taken.
+    facts = JSON.decode!(from_scene)["cartridge"]["facts"]
+    done = Enum.find(facts, fn {k, _} -> String.ends_with?(k, "fact/scene_ask_done") end)
+    assert {_, %{"value_type" => %{"default" => false}}} = done
+  end
+
+  # Break: a fact the choice above sets back is called unreachable under its own opposite `needs`.
+  test "a needs opposite one above is reachable when the file sets that fact", %{tmp_dir: tmp} do
+    text =
+      "npc: bram\nbram: ~\n- Go\n  needs: a\n  sets: a false\n  bram: ~\n  - In\n    needs: not a\n"
+
+    write(tmp, "scenes/s.scene", text)
+    {_, diags} = Source.load(tmp)
+    assert diags == []
   end
 
   defp ref(key),
@@ -176,9 +191,12 @@ defmodule Loka.ContentSceneBranchingTest do
   end
 
   # Break: a `once` fact longer than a Key slips through, or an authored fact of that name is
-  # silently replaced.
+  # silently replaced. `scene_<54 a>_done` is 65 bytes, one over; 53 a is exactly 64 and compiles.
   test "a once key too long or already a fact is refused at the once", %{tmp_dir: tmp} do
-    long = String.duplicate("a", 60)
+    fits = String.duplicate("a", 53)
+    assert {:ok, _, _} = sampler("npc: bram\nbram: ~\n- #{fits}\n  once\n  bram: ~\n")
+
+    long = String.duplicate("a", 54)
     text = "npc: bram\nbram: ~\n- #{long}\n  once\n  bram: ~\n"
     write(tmp, "scenes/s.scene", text)
     assert {:error, diags} = sampler(text)
