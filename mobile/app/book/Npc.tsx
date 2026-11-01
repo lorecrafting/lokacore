@@ -1,6 +1,6 @@
-// size: allow 314, the talk page with its answers' lift, keeping the page's parts together
+// size: allow 317, the talk page with its answers' lift, keeping the page's parts together
 // The NPC page: conversation, choices, skills, shop and services, Look, with the existing book controls.
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -45,7 +45,7 @@ function Answer(p: { at: number; fresh: boolean; left: boolean; children: ReactN
   );
 }
 
-// size: allow 58, the answers' lift and fade share the choice's state
+// size: allow 60, the answers' lift and fade share the choice's state
 function Choice(p: {
   view: GameView;
   choice: NonNullable<GameView['choice']>;
@@ -62,6 +62,9 @@ function Choice(p: {
     return isNew;
   });
   const [chosen, setChosen] = useState<string>();
+  useEffect(() => {
+    if (!p.pending) setChosen(undefined);
+  }, [p.pending]);
   const left = (id: string) => !!p.pending && !!chosen && chosen !== id; // a refusal brings them back
   const answer = (id: string) =>
     p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
@@ -172,7 +175,7 @@ export function NpcPage(p: NpcProps) {
           {enemy.refusal ? p.text(enemy.refusal) : hostileRefusal(cap(p.text(enemy.name)))}
         </Note>
       )}
-      <RightWord view={p.view} choice={choice} />
+      <RightWord view={p.view} choice={choice} pending={p.pending} />
       {choice && <Choice key={choice.continuation_id} {...p} press={answer} choice={choice} />}
       {!talk && <Offered {...p} actions={actions} enemy={!!enemy} services={services} />}
       {!talk && p.npc && p.look && (

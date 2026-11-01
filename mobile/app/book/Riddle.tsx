@@ -42,10 +42,10 @@ function Word({ word }: { word: string }) {
  * - Rules: a wrong answer, a redraw or a riddle's last try shows nothing.
  * - Story: Riddle.stories.tsx
  */
-export function RightWord(p: { view: GameView; choice?: GameView['choice'] }) {
+export function RightWord(p: { view: GameView; choice?: GameView['choice']; pending?: boolean }) {
   useEffect(() => () => void (sent = undefined), []); // leaving the page ends it: no later page shows it
   if (!sent) return null;
-  if (!sent.at) {
+  if (!sent.at && !p.pending) {
     if (p.choice?.riddle?.choice_id === sent.id)
       sent = undefined; // wrong: the tiles went back
     else sent.at = p.view;

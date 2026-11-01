@@ -16,7 +16,7 @@ export function CreditsPage(p: { back: () => void }) {
   const c = usePalette();
   const t = useType();
   return (
-    <Page title={LABEL.credits} foot={<Control label={LABEL.back} onPress={p.back} />}>
+    <Page title={LABEL.credits} foot={<Control label={LABEL.backToSettings} onPress={p.back} />}>
       {creditsOf(sounds).map((line) => (
         <Text key={line} style={{ ...t.log, color: c.fg }}>
           {line}

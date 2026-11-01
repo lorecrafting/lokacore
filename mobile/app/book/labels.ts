@@ -11,6 +11,7 @@ export const LABEL = {
   backToWorld: 'Back to World',
   backToContents: 'Back to Contents',
   backToBoard: 'Back to board',
+  backToSettings: 'Back to Settings',
   close: 'Close',
   resumeDream: 'Resume dream',
   gotIt: 'Got it',

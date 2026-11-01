@@ -126,6 +126,9 @@ test('only a travel that moves, on a plain page, riffles', () => {
   assert.equal(riffles('expedition', was, was), false);
   assert.equal(riffles('expedition', was, view({ place: { id: 'q' }, combat: { on: 1 } })), false);
   assert.equal(riffles('expedition', was, view({ place: { id: 'q' }, scene: { id: 's' } })), false);
+  const card = view({ place: { id: 'q' }, chapter: { index: 2 } });
+  assert.equal(riffles('expedition', was, card), false, 'the chapter card takes the page');
+  assert.equal(riffles('expedition', card, view({ chapter: { index: 2 } })), true, 'same chapter');
 });
 
 // Breaks: the riffle's haptic lands before the curl it follows, or not at all.
@@ -277,6 +280,12 @@ test('choosing an answer fades the others while its reply is pending', (t) => {
   assert.equal(off.length, 2);
   waiting = false;
   assert.equal(page().filter((n) => n.props?.pointerEvents === 'none').length, 0, 'they return');
+  waiting = true; // a later press elsewhere, after a refusal: the old choice is gone
+  assert.equal(
+    page().filter((n) => n.props?.pointerEvents === 'none').length,
+    0,
+    'no stale choice',
+  );
 });
 
 const npc = (id: string) => ({ id, kind: 'npc', name: id });
@@ -318,6 +327,18 @@ test('someone leaving fades without a link, then the paragraph closes up', (t) =
   assert.doesNotMatch(text(draw(left)), /bo/);
 });
 
+// Breaks: the close timer keyed on a count: one back, another gone cuts the new leaver's fade short.
+test('a second leaver in the same count keeps a whole fade', (t) => {
+  const draw = people(t);
+  const text = (shown: any[]) => JSON.stringify(shown.map((n) => n.props?.children));
+  draw(room2(['ann', 'bo']));
+  draw(room2(['ann']));
+  t.mock.timers.tick(motion.fade.duration / 2);
+  draw(room2(['bo']));
+  t.mock.timers.tick(motion.fade.duration / 2 + 1);
+  assert.match(text(draw(room2(['bo']))), /ann/, 'still fading');
+});
+
 function riddleRig(t: any, id: string) {
   effects(t);
   const button0 = { ...button(id), action_key: 'answer', input: { choice_id: id } } as never;
@@ -334,8 +355,8 @@ function riddleRig(t: any, id: string) {
     return riddle(lastTry);
   };
   const word = rig(t);
-  const after = (v: GameView, choice?: GameView['choice']) =>
-    word(() => nodes(RightWord({ view: v, choice })));
+  const after = (v: GameView, choice?: GameView['choice'], pending?: boolean) =>
+    word(() => nodes(RightWord({ view: v, choice, pending })));
   const plays = () => g.bookDevice.filter((d: any[]) => d[0] === 'play' && d[1] === 'riddleRight');
   return { submit, after, plays, word };
 }
@@ -351,6 +372,14 @@ test('a right riddle word shows gilt once, with its sound, and leaves at the nex
   assert.equal(after(v).length > 0, true, 'a redraw of the same view keeps it');
   assert.equal(plays().length, 1);
   assert.deepEqual(after(view({})), []);
+});
+
+// Breaks: the redraw that shows the reply pending claims the old view, so the word never shows.
+test('a right word waits out the pending reply for its view', (t) => {
+  const { submit, after } = riddleRig(t, 'r5');
+  submit();
+  assert.deepEqual(after(view({}), undefined, true), []);
+  assert.equal(after(view({})).filter((n) => n.props?.children === 'a').length, 1);
 });
 
 // Breaks: an answer that also left the NPC page gilds a word on the next person's page.

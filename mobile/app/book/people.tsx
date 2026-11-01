@@ -41,7 +41,7 @@ function usePeople(view: GameView) {
       e,
     );
   Object.assign(s, { place: view.place.id, npcs, group });
-  const fading = s.going.length;
+  const fading = s.going.map((e) => e.id).join();
   useEffect(() => {
     if (!fading) return;
     const close = setTimeout(() => {
