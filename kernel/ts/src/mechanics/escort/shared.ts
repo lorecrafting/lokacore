@@ -54,6 +54,10 @@ function original(world: World, escort: EscortRelation) {
   );
 }
 
+/** A repeatable quest's next acceptance deletes the row this names: that escort has ended (escort@1). */
+const retired = (world: World, escort: EscortRelation) =>
+  !world.state.quests?.[escort.quest_instance_id];
+
 /** Shared pending-option and Choose admission; only this effect requires the original authored NPC. */
 export function refused(world: World, row: ChoiceRow, option: DialogueChoice) {
   const effect = option.escort;
@@ -69,7 +73,10 @@ export function refused(world: World, row: ChoiceRow, option: DialogueChoice) {
   const quest = questOf(world, row.actor_id, effect.quest);
   if (!quest || quest[1].state !== 'active') return 'invalid_state' as const;
   const escort = world.state.escorts?.[row.actor_id];
-  if (effect.transition === 'start') return escort ? ('invalid_state' as const) : undefined;
+  if (effect.transition === 'start')
+    return escort && (escort.status === 'following' || !retired(world, escort))
+      ? ('invalid_state' as const)
+      : undefined;
   if (
     !escort ||
     !original(world, escort) ||
@@ -94,39 +101,47 @@ export function transition(
   if (!effect) return [];
   const expected = world.state.escorts?.[row.actor_id] ?? null;
   const status = effect.transition === 'complete' ? 'completed' : 'following';
-  const value: EscortRelation = expected
-    ? { ...expected, status }
-    : {
-        kind: 'escort',
-        actor_id: row.actor_id,
-        body_id: bodyOf(world, row.actor_id)!,
-        npc_id: row.roles.find((r) => r.role === effect.npc)!.entity_id,
-        quest_instance_id: questOf(world, row.actor_id, effect.quest)![0],
-        continuation_id,
-        choice_id,
-        status,
-      };
+  const value: EscortRelation =
+    expected && effect.transition !== 'start'
+      ? { ...expected, status }
+      : {
+          kind: 'escort',
+          actor_id: row.actor_id,
+          body_id: bodyOf(world, row.actor_id)!,
+          npc_id: row.roles.find((r) => r.role === effect.npc)!.entity_id,
+          quest_instance_id: questOf(world, row.actor_id, effect.quest)![0],
+          continuation_id,
+          choice_id,
+          status,
+        };
   return [{ op: 'escort.transition', writer_group: 0, actor_id: row.actor_id, expected, value }];
 }
 
-/** A following escort stays with its player (escort@1: never detached). */
+/** A following escort stays with its player (escort@1: no NPC move detaches it). */
 export function escorting(world: World, npc: EntityId) {
   return Object.values(world.state.escorts ?? {}).some(
     (e) => e?.npc_id === npc && e.status === 'following',
   );
 }
 
+/** The bond ends with the NPC's life, its presence beside the body or the quest being active. */
+function parted(world: World, escort: EscortRelation) {
+  const quest = world.state.quests?.[escort.quest_instance_id]?.state;
+  return (
+    (quest !== 'active' && quest !== 'objectives_complete') ||
+    !living(world, escort.npc_id) ||
+    world.state.containers[escort.npc_id] !== world.state.containers[escort.body_id]
+  );
+}
+
 function following(world: World, actor: CharacterId) {
   const escort = world.state.escorts?.[actor];
-  if (!escort || escort.status !== 'following') return;
+  if (!escort || escort.status !== 'following' || retired(world, escort)) return;
   if (
     escort.actor_id !== actor ||
     escort.body_id !== bodyOf(world, actor) ||
     !original(world, escort) ||
-    world.state.quests?.[escort.quest_instance_id]?.state !== 'active' ||
-    world.entities[escort.npc_id]?.kind !== 'npc' ||
-    !living(world, escort.npc_id) ||
-    world.state.containers[escort.npc_id] !== world.state.containers[escort.body_id]
+    world.entities[escort.npc_id]?.kind !== 'npc'
   )
     throw new KernelError('precondition_failed');
   return escort;
@@ -164,7 +179,8 @@ export function travel(
   source_id: EntityId,
   destination_id: EntityId,
 ): DeltaOp[] {
-  const escort = following(world, actor)?.npc_id;
+  const bound = following(world, actor);
+  const escort = bound && !parted(world, bound) ? bound.npc_id : undefined;
   const horse = mounted(world, actor);
   const members = world.cartridge.world?.group
     ? npcsIn(world, [source_id]).filter(
@@ -182,18 +198,24 @@ export function travel(
   }));
 }
 
+const separated = (expected: EscortRelation, writer_group: number): DeltaOp => ({
+  op: 'escort.transition',
+  writer_group,
+  actor_id: expected.actor_id,
+  expected,
+  value: { ...expected, status: 'separated' },
+});
+
 /** Fatal player death returns the body alone; the bound NPC remains in the death room. */
 export function separate(world: World, actor: CharacterId, writer_group: number): DeltaOp[] {
   const expected = following(world, actor);
-  return expected
-    ? [
-        {
-          op: 'escort.transition',
-          writer_group,
-          actor_id: actor,
-          expected,
-          value: { ...expected, status: 'separated' },
-        },
-      ]
-    : [];
+  return expected ? [separated(expected, writer_group)] : [];
+}
+
+/** What a whole decision left behind: each actor in `held` it parted and did not itself transition. */
+export function partings(world: World, held: CharacterId[], writer_group: number): DeltaOp[] {
+  return held.flatMap((actor) => {
+    const e = world.state.escorts?.[actor];
+    return e?.status === 'following' && parted(world, e) ? [separated(e, writer_group)] : [];
+  });
 }

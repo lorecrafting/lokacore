@@ -12,8 +12,10 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Second opinion: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-second-review.md): **APPROVE WITH NOTES**
 - [Review: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-review.md): **APPROVE WITH NOTES**
+- [Second opinion: escort separation, PR #555 (loka-vduxr.23, kernel_api 1.137)](2026-11-01-loka-vduxr.23-escort-separation-second-review.md): **APPROVE WITH NOTES**
 - [Review: dialogue cookbook and the asked marker, PR #560 (loka-vduxr.12, kernel_api 1.138)](2026-11-01-loka-vduxr.12-dialogue-patterns-review.md): **APPROVE WITH NOTES**
 - [Second review: `asked` contract, PR #560 (loka-vduxr.12)](2026-11-01-loka-vduxr.12-asked-contract-second-review.md): **APPROVE**
+- [Review: lawful escort parting, PR #555 (loka-vduxr.23, kernel_api 1.137)](2026-11-01-escort-separation-review.md): **CHANGES REQUIRED**
 - [Dev cheats: second opinion (PR #546, loka-vduxr.6)](2026-11-01-dev-cheats-second-review.md): **APPROVE**
 - [Second-opinion review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-review.md): **APPROVE WITH NOTES**

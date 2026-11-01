@@ -29,14 +29,21 @@ defmodule Loka.Core.InvariantsEscort do
 
     value = op["value"]
 
-    identity =
-      before == nil or (is_map(before) and Map.put(value, "status", before["status"]) == before)
-
-    if before == op["expected"] and value["actor_id"] == op["actor_id"] and identity and
-         {before && before["status"], value["status"]} in @edges,
-       do: {:cont, Map.put(written, op["actor_id"], value)},
-       else: {:halt, false}
+    if before == op["expected"] and value["actor_id"] == op["actor_id"] and legal?(before, value),
+      do: {:cont, Map.put(written, op["actor_id"], value)},
+      else: {:halt, false}
   end
 
   defp replay(_, written, _), do: {:cont, written}
+
+  defp legal?(before, value) do
+    identity =
+      before == nil or (is_map(before) and Map.put(value, "status", before["status"]) == before)
+
+    restart =
+      is_map(before) and before["status"] != "following" and value["status"] == "following" and
+        before["quest_instance_id"] != value["quest_instance_id"]
+
+    restart or (identity and {before && before["status"], value["status"]} in @edges)
+  end
 end
