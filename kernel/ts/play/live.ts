@@ -186,9 +186,6 @@ async function post(
   }
 }
 
-/** Serves `GET /events` (each client gets the current message on connect and every push after),
- * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts) and the column's `POST /open` and
- * `POST /why`. */
 const SECONDS = 30; // the panel waits this long for each report; `bin/loka sim` has no limit
 const OPTS = { maxBuffer: 256 * 1024 * 1024, killSignal: 'SIGKILL' } as const;
 
@@ -196,12 +193,17 @@ const OPTS = { maxBuffer: 256 * 1024 * 1024, killSignal: 'SIGKILL' } as const;
 export const limited = <T>(args: string[], seconds: number) =>
   new Promise<Section<T>>((done) => {
     execFile(process.execPath, args, { ...OPTS, timeout: seconds * 1000 }, (e, out, err) => {
-      if (!e) return done({ report: JSON.parse(out) as T });
-      done({
-        why: e.killed
-          ? `timed out after ${seconds} s; bin/loka sim <cartridge dir> runs it with no limit`
-          : err.trim() || e.message,
-      });
+      if (e)
+        return done({
+          why: e.killed
+            ? `timed out after ${seconds} s; bin/loka sim <cartridge dir> runs it with no limit`
+            : err.trim() || e.message,
+        });
+      try {
+        done({ report: JSON.parse(out) as T });
+      } catch (bad) {
+        done({ why: `not a report: ${(bad as Error).message}` }); // a throw here kills the watcher
+      }
     });
   });
 
@@ -230,6 +232,9 @@ const asked = (url: string) => new URL(url, 'http://x').searchParams.get('q') ??
 const reply = (response: ServerResponse, artifact: string) =>
   numbers(artifact).then((n) => json(response, 200, n));
 
+/** Serves `GET /events` (each client gets the current message on connect and every push after),
+ * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers` and the column's `POST /open` and
+ * `POST /why`. */
 export function serve(port: number, source: string, artifact: string) {
   const clients = new Set<ServerResponse>();
   let last: Message = { text: {}, said: [], compiled: true };

@@ -94,7 +94,10 @@ test('bin/loka sim prints the numbers and leaves the cartridge as it was', () =>
   });
   assert.equal(run.status, 0, run.stderr);
   assert.match(run.stdout, /resource\/hunger: 10 to 0, lowest 0, max 10; empty h10 \(1\/1\)/);
-  assert.match(run.stdout, /resource\/hp: 10 to 10, lowest 10, max 10; never empty in 1 days/);
+  assert.match(
+    run.stdout,
+    /resource\/hp: 10 to 10, lowest 10, max 10; never empty in the 24 hours played/,
+  );
   assert.match(run.stdout, /no levelling in this cartridge/);
   const diff = spawnSync('diff', ['-r', copy, join(ROOT, 'cartridges/needs_sampler')], {
     encoding: 'utf8',

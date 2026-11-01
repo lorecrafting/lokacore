@@ -29,11 +29,13 @@ const Cols = ({ rows }: { rows: string[][] }) => (
 
 const fightRow = (c: Cell): string[] =>
   'refused' in c
-    ? [`level ${c.level}`, `refused: ${c.refused}`, '', '', '']
+    ? [`level ${c.level}`, `refused: ${c.refused}`, '', '', '', '', '']
     : [
         `level ${c.level}`,
         `${c.win_pct}%`,
         `${c.death_pct}%`,
+        `${c.fled_pct}%`,
+        String(c.timeouts),
         c.rounds ? String(c.rounds.median) : 'no win',
         c.hp_left ? String(c.hp_left.median) : 'no win',
       ];
@@ -50,7 +52,7 @@ const Fight = ({ target }: { target: Target }) => {
       </p>
       <Cols
         rows={[
-          ['no build', 'win', 'death', 'rounds', 'hp left'],
+          ['no build', 'win', 'death', 'fled', 'no end', 'rounds', 'hp left'],
           ...target.cells.filter((c) => c.build === 'none').map(fightRow),
         ]}
       />
@@ -74,7 +76,7 @@ const Pools = ({ report }: { report: PoolsReport }) => {
             {p.start} to {p.end}, lowest {p.lowest}, max {p.maximum}.{' '}
             {p.empty
               ? `Empty at hour ${p.empty.hour} (${p.empty.seeds} of ${seeds} seeds).`
-              : `Never empty in ${days} days.`}
+              : `Never empty in the ${report.hours_played} hours played.`}
           </p>
           <p className="text-muted-foreground text-xs">
             {p.bands.map((b) => `${b.band} hour ${b.hour} (${b.seeds}/${seeds})`).join(', ')}
@@ -146,6 +148,7 @@ export function Numbers({ hash }: { hash?: string }) {
   const run = () => {
     setRunning(true);
     setNote('');
+    setReport(undefined);
     numbers()
       .then(setReport, (err: Error) => setNote(`Numbers failed: ${err.message}`))
       .finally(() => setRunning(false));

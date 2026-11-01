@@ -43,6 +43,7 @@ function watch(c: Cartridge, opts: { seeds: number; days: number; policy?: Polic
         empty: null,
       });
       p.end = r.current;
+      p.maximum = Math.max(p.maximum, r.maximum); // a level can raise it
       p.lowest = Math.min(p.lowest, r.current);
       p.bands[r.band] ??= at;
       if (r.current <= 0) p.empty ??= at;
@@ -108,7 +109,7 @@ export function levels(c: Cartridge): LevelRows {
       experience: total,
       step,
       points: l.points_per_level,
-      // XP comes only from credited kills (mechanics.md levelling); a 0 XP foe pays for nothing.
+      // Kills only: experience.grant pays XP too, at no count this can read. A 0 XP foe pays for nothing.
       kills: (l.kills ?? []).map((k) => ({
         npc: refString(k.npc),
         experience: k.experience,
@@ -129,7 +130,7 @@ function table(c: Cartridge, p: PoolsReport, l: LevelRows) {
     const bands = r.bands.map((b) => `${b.band} h${b.hour} (${b.seeds}/${p.seeds})`).join(', ');
     const empty = r.empty
       ? `empty h${r.empty.hour} (${r.empty.seeds}/${p.seeds})`
-      : `never empty in ${p.days} days`;
+      : `never empty in the ${p.hours_played} hours played`;
     out.push(
       `  ${r.pool}: ${r.start} to ${r.end}, lowest ${r.lowest}, max ${r.maximum}; ${empty}; ${bands}`,
     );

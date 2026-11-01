@@ -221,10 +221,10 @@ Each goal names the samplers that already do it; copy their files or start with 
 
 ## See the balancing numbers
 
-The panel's Numbers tab, on Run, shows what the current compile plays like. `bin/loka sim <cartridge dir> [--seeds N] [--days D]` prints the same in a terminal (no fight cell table, only each foe's result). Neither writes to your cartridge; the tab shows numbers, you change them in the source.
+The panel's Numbers tab, on Run, shows what the current compile plays like. `bin/loka sim <cartridge dir> [--seeds N] [--days D]` prints the pools and levels in a terminal, with only each foe's result for fights; it defaults to 8 seeds where the tab runs 4, so medians can differ a little. Neither writes to your cartridge; the tab shows numbers, you change them in the source.
 
-- **Pools.** Each body pool over game hours under the [measured-flows worker](../system/cartridge.md#measured-flows-balance-tool-2): where it starts and ends, its lowest, the hour it first reaches each band it reached, and the hour it empties or "Never empty in N days". The worker works; it does not eat or rest on purpose, so read this as how long a need lasts if ignored.
+- **Pools.** Each body pool over game hours under the [measured-flows worker](../system/cartridge.md#measured-flows-balance-tool-2): where it starts and ends, its lowest, the hour it first reaches each band it reached, and the hour it empties or "Never empty in the N hours played", which can be fewer than the days asked if the run ended early. The worker works; it does not eat or rest on purpose, so read this as how long a need lasts if ignored.
 - **Levels.** XP for each level and how many kills of each foe pay for that step, or "No levelling in this cartridge".
-- **Fights.** For each armed foe and population, from the [fight matrix](../system/cartridge.md#fight-matrix-and-encounter-rating-balance-tool-7): win, death, median rounds and hp left per level with no build, and the first level and build that wins half ("No level wins half" otherwise). "no win" means no fight was won, so there is no such number.
+- **Fights.** For each armed foe and population, from the [fight matrix](../system/cartridge.md#fight-matrix-and-encounter-rating-balance-tool-7): win, death, fled, fights with no end by the round cap, median rounds and hp left per level with no build, and the first level and build that wins half ("No level wins half" otherwise). "no win" means no fight was won, so there is no such number.
 
 The tab gives each report 30 seconds and says so if one runs out; `bin/loka sim` has no limit.

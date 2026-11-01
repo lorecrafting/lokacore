@@ -33,6 +33,8 @@ export type Cell = { level: number; build: string } & (
   | {
       win_pct: string;
       death_pct: string;
+      fled_pct: string;
+      timeouts: number;
       rounds?: { median: number; min: number; max: number };
       hp_left?: { median: number; min: number; max: number };
     }

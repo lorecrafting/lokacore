@@ -252,4 +252,7 @@ test('limited: a report past its limit is killed and says so; a failing one give
   assert.ok('why' in slow && /^timed out after 1 s/.test(slow.why), JSON.stringify(slow));
   const bad = await limited(['-e', 'console.error("no such foe"); process.exit(1)'], 5);
   assert.deepEqual(bad, { why: 'no such foe' });
+  // Break: a report that prints something else throws in the callback and takes the watcher down.
+  const garbled = await limited(['-e', 'console.log("x")'], 5);
+  assert.ok('why' in garbled && /^not a report/.test(garbled.why), JSON.stringify(garbled));
 });
