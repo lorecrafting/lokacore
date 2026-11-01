@@ -14,6 +14,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { derived } from '../src/mechanics/attribute/shared.ts';
+import type { Base } from '../src/mechanics/fact.ts';
 import { levelsReached, levelUp, oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
 import { gameView } from '../src/view/view.ts';
@@ -389,9 +390,10 @@ test('folded writes: gained sums the proposal, a loss and regrant or no levellin
     { key: GAINED, bindings: { amount: 20 } },
   ]);
   const none = () => assert.fail('no event, no id');
-  assert.deepEqual(levelsReached(w, [write(35, 25), write(25, 35)], {} as never, none), []);
+  const base = {} as Base; // unread: neither call builds an event
+  assert.deepEqual(levelsReached(w, [write(35, 25), write(25, 35)], base, none), []);
   const off = { ...w, cartridge: { ...content, world: {} } };
-  assert.deepEqual(levelsReached(off, [write(0, 200)], {} as never, none), []);
+  assert.deepEqual(levelsReached(off, [write(0, 200)], base, none), []);
 });
 
 // Breaks: level_reached's subject is its character_id, not the body, so an event.emit in a level
