@@ -5,7 +5,7 @@ defmodule Loka.Content.Source do
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
   alias Loka.Content.{Areas, Behaviours, CutFiles, Extends, Prose, SceneFiles, SourceFiles, Zones}
-  alias Loka.Content.Waits
+  alias Loka.Content.{DialogueAsked, Waits}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -315,8 +315,7 @@ defmodule Loka.Content.Source do
 
   # Source only (Dialogues.points/2 derives CompiledCartridge.story_points and strips it).
   @choice_point %{
-    "description" =>
-      "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+    "description" => "<story point>/<outcome>: the outcome this choice reaches; one per outcome.",
     "type" => "string",
     "pattern" => "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$"
   }
@@ -328,6 +327,7 @@ defmodule Loka.Content.Source do
     defs
     |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
     |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
+    |> put_in(["DialogueChoice", "properties", "asked"], DialogueAsked.schema())
     |> schedule(defs)
     |> Map.update!(
       "LiquidRow",

@@ -24,6 +24,15 @@ export const Short: Story = {
   },
 };
 
+// Breaks: an already asked option stops answering the press instead of only dimming.
+export const Asked: Story = {
+  args: { asked: true },
+  play: async ({ args, canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Ask about the ferry' }));
+    await expect(args.press).toHaveBeenCalledOnce();
+  },
+};
+
 export const TwoLineLabel: Story = {
   args: {
     b: button('Ask Bram the ferryman whether the causeway will be passable before nightfall'),

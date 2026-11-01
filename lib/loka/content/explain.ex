@@ -11,6 +11,8 @@ defmodule Loka.Content.Explain do
   # One row per line: key | what is wrong | what to do. A key is a code, a schema `error`, a scene
   # line's `why` or a named case. {name} is a `data` key, or `field` (the path's last step).
   @words """
+         asked_key_taken | `asked` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice.
+         asked_key_long | `asked` here would make the fact `{key}`, longer than 64 characters. | Shorten the choice's key or the dialogue's.
          INVALID_JSON | This file is not valid JSON. | Close the bracket or quote at this point, or remove the stray comma.
          DUPLICATE_KEY | `{field}` appears twice in one object. | Keep one of them.
          UNKNOWN_FIELD | `{field}` is not a field here. | Remove it or fix its name.

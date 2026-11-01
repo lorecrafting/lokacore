@@ -21,7 +21,7 @@ dialogue's choices in id order, not file order.
   "version": "0.0.1",
   "title": "Dialogue cookbook",
   "requires": {
-    "kernel_api": { "at_least": "1.137", "below": "2.0" },
+    "kernel_api": { "at_least": "1.138", "below": "2.0" },
     "content_schema": 1,
     "rule_ir": 1,
     "capabilities": {
@@ -214,6 +214,44 @@ through `narration_variants`.
               "description": { "prose": "SOMETHING_CHANGED_REPLY" }
             }
           ]
+        }
+      }
+    }
+  }
+}
+```
+
+## An option already asked
+
+`asked: true` dims a choice once the player has taken it; it stays usable, and no fact of yours is
+needed. A check that fails does not count as asked.
+
+```json areas/asked_marker.json
+{
+  "npcs": {
+    "gossip": {
+      "keywords": ["gossip"],
+      "name": { "prose": "NPC" },
+      "room_line": { "prose": "A [NPC](gossip)." },
+      "description": { "prose": "NPC_TEXT" },
+      "room": "yard"
+    }
+  },
+  "dialogues": {
+    "gossip": {
+      "npc": "gossip",
+      "prompt": { "prose": "NPC_GREETING" },
+      "roles": { "gossip": { "role": "npc", "npc": "gossip" } },
+      "choices": {
+        "ask_road": {
+          "label": { "prose": "LABEL_1" },
+          "narration": { "prose": "NPC_LINE_1" },
+          "asked": true
+        },
+        "ask_weather": {
+          "label": { "prose": "LABEL_2" },
+          "narration": { "prose": "NPC_LINE_2" },
+          "asked": true
         }
       }
     }

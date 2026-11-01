@@ -21,7 +21,7 @@ defmodule Loka.Content.Compiler do
 
   # v2 manifest settings, beside entry, calendar and world
   @v2_settings ~w(chapters ancestries alternates speech)
-  @engine_facts [Scenes, Loka.Content.Skills, Loka.Content.Trails]
+  @engine_facts [Scenes, Loka.Content.Skills, Loka.Content.Trails, Loka.Content.DialogueAsked]
   @facts_file %{
     "type" => "object",
     "properties" => %{"facts" => %{"type" => "object", "additionalProperties" => %{}}},
@@ -262,10 +262,10 @@ defmodule Loka.Content.Compiler do
 
   # Short references become full ones once a valid manifest names the cartridge; without one
   # the build fails anyway and reference checks are skipped.
-  defp expanded(defs, nil), do: defs
+  defp expanded(defs, nil), do: Loka.Content.DialogueAsked.lower(defs)
 
   defp expanded(defs, m) do
-    for {kind, ds} <- defs, into: %{} do
+    for {kind, ds} <- Loka.Content.DialogueAsked.lower(defs), into: %{} do
       {kind, Map.new(ds, fn {k, d} -> {k, expand(d, m)} end)}
     end
   end

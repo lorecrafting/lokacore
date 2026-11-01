@@ -24,14 +24,14 @@ type CardProps = (
       name?: string;
       note?: string;
       link?: string;
+      asked?: boolean;
     }
   | { label: string; onPress: () => void; expanded?: boolean }
   | { label: string; reason?: string; name?: string; link?: string }
 ) & { ref?: Ref<View> };
 /**
  * An offered action as a card.
- * - Use: a detail page's offered action or dialogue choice, the
- *   Raise cards, a Pick list's option and rows; never an accent text link.
+ * - Use: a detail page's offered action or dialogue choice, the Raise cards, a Pick list's option and rows; never an accent text link.
  * - Rules: no outer margin; cards stack in Cards. Without a Button it is the unavailable form
  *   (book-ui.md, Unavailable actions): the same card reading its plain label, never `label: reason`;
  *   a press sends nothing and grays it, its reason as one sentence beneath (`reasonSentence`, reasons.ts), read
@@ -43,7 +43,7 @@ type CardProps = (
  *   lines): a Tap reading its label as prose, the `link` words in the room link style
  *   (`type.named`), named by `name` (its shown text, then the action and spoken price); unavailable, the same press and
  *   sentence with no card. Shop lines stack in `Cards lines`.
- * - States: available; unavailable; unavailable, pressed; each as a card or a line.
+ * - States: available; asked (a dialogue choice already taken: dim words, still pressable); unavailable; unavailable, pressed; each as a card or a line.
  * - Effects: a card lifts with a selection haptic; an unavailable press does not lift, its reason
  *   dries and it gives a warning haptic.
  * - Line form stories: NpcPage.stories.tsx (Shelf, Sale, Services).
@@ -81,7 +81,7 @@ function Available(
       onPress={press.commit('b' in p ? () => p.press(p.b) : p.onPress)}
       style={[card(c), lift]}
     >
-      <Text style={prose(c, t)}>
+      <Text style={'b' in p && p.asked ? note(c, t) : prose(c, t)}>
         {/* One text node with a line break, so axe reads "label note" as the name's start. */}
         {'b' in p && p.note
           ? [label, <Text key="note" style={note(c, t)}>{`\n${p.note}`}</Text>]

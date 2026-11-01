@@ -141,6 +141,101 @@ test('a label and a reply follow the state', () => {
   );
 });
 
+// Breaks: the mark lands on the wrong option, refuses a repeat, or a reload forgets it.
+test('an option once taken is marked asked and stays usable, across a reload', () => {
+  const s = saved();
+  let g = s.now();
+  const asked = () =>
+    g.view().choice!.choices.map((o) => [o.choice_id, o.available, 'asked' in o && o.asked]);
+  g.talk('gossip');
+  assert.deepEqual(asked(), [
+    ['ask_road', true, false],
+    ['ask_weather', true, false],
+  ]);
+  g.choose('ask_road');
+  g = s.again();
+  assert.deepEqual(asked(), [
+    ['ask_road', true, true],
+    ['ask_weather', true, false],
+  ]);
+  g.choose('ask_road');
+  assert.deepEqual(asked(), [
+    ['ask_road', true, true],
+    ['ask_weather', true, false],
+  ]);
+});
+
+// Breaks: the marker's lowered fact silently overwrites the author's own, or an overlong name reaches the schema as noise.
+test('an asked fact name that is taken or too long is refused at the choice', () => {
+  const refused = (edit: (name: string, body: string) => string, facts = {}) => {
+    const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
+    source(dir, edit);
+    const file = join(dir, 'facts.json');
+    const all = JSON.parse(readFileSync(file, 'utf8'));
+    Object.assign(all.facts, facts);
+    writeFileSync(file, JSON.stringify(all));
+    const r = spawnSync('mix', ['loka.compile', dir, join(dir, 'a.json')], {
+      cwd: ROOT,
+      encoding: 'utf8',
+    });
+    rmSync(dir, { recursive: true });
+    return r.status !== 0 && r.stdout + r.stderr;
+  };
+  const spec = {
+    version: 1,
+    value_type: { type: 'bool', default: false },
+    scopes: ['player'],
+    meaning: 'M',
+  };
+  assert.match(
+    String(refused((_, b) => b, { gossip_ask_road_asked: spec })),
+    /asked_marker.json:20 .*already exists/,
+  );
+  // 'gossip_' + choice + '_asked' is 13 bytes around the choice id: 51 fits 64 exactly.
+  const rename = (size: number) => (name: string, b: string) =>
+    name.endsWith('asked_marker.json') ? b.replaceAll('ask_road', 'q'.repeat(size)) : b;
+  assert.match(String(refused(rename(52))), /longer than 64/);
+  assert.equal(refused(rename(51)), false);
+});
+
+// Breaks: the mark is set before the check resolves, so a failed try reads as asked.
+test('a failed check leaves the option unasked', () => {
+  const s = saved(
+    compile((name, body) =>
+      name.endsWith('check_branches.json')
+        ? body
+            .replace('"value": 5', '"value": 99')
+            .replace('"persuade_doubter": {', '"persuade_doubter": { "asked": true,')
+        : body,
+    ),
+  );
+  const g = s.now();
+  g.talk('doubter');
+  g.choose('persuade_doubter');
+  assert.deepEqual(g.offered(), ['shrug_doubter']);
+  assert.equal(g.fact('doubter_persuade_doubter_asked'), undefined);
+});
+
+// Breaks: a hand-written asked_when naming no fact reaches the artifact unchecked.
+test('asked_when is checked like a policy', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
+  source(dir, (name, body) =>
+    name.endsWith('asked_marker.json')
+      ? body.replace(
+          '"asked": true',
+          '"asked_when": { "op": "fact_compare", "fact": "no_such_fact", "equals": true }',
+        )
+      : body,
+  );
+  const r = spawnSync('mix', ['loka.compile', dir, join(dir, 'a.json')], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  });
+  rmSync(dir, { recursive: true });
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /asked_marker.json.*no_such_fact/);
+});
+
 // Breaks: skill.acquire stops working from a choice, or the skill is lost on reload.
 test('a choice teaches a skill', () => {
   const s = saved();

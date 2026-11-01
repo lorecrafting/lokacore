@@ -1191,6 +1191,15 @@
           "$ref": "#/$defs/DefinitionRef",
           "description": "A quest of this cartridge the choice activates."
         },
+        "asked": {
+          "description": "The Book dims this choice once taken; it stays usable. Lowered to the fact <dialogue>_<choice>_asked, a step that sets it and asked_when.",
+          "enum": [true],
+          "type": "boolean"
+        },
+        "asked_when": {
+          "$ref": "#/$defs/Policy",
+          "description": "While it holds, the view marks this option asked; it never refuses the choice. Lowered from a source choice's `asked: true`."
+        },
         "availability": {
           "additionalProperties": false,
           "description": "Time limits on offering the choice.",
@@ -1376,7 +1385,7 @@
           "type": "array"
         },
         "story_point": {
-          "description": "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+          "description": "<story point>/<outcome>: the outcome this choice reaches; one per outcome.",
           "pattern": "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
           "type": "string"
         },
@@ -5619,6 +5628,15 @@
           "$ref": "#/$defs/partial.DefinitionRef",
           "description": "A quest of this cartridge the choice activates."
         },
+        "asked": {
+          "description": "The Book dims this choice once taken; it stays usable. Lowered to the fact <dialogue>_<choice>_asked, a step that sets it and asked_when.",
+          "enum": [true],
+          "type": "boolean"
+        },
+        "asked_when": {
+          "$ref": "#/$defs/partial.Policy",
+          "description": "While it holds, the view marks this option asked; it never refuses the choice. Lowered from a source choice's `asked: true`."
+        },
         "availability": {
           "additionalProperties": false,
           "description": "Time limits on offering the choice.",
@@ -5776,7 +5794,7 @@
           "type": "array"
         },
         "story_point": {
-          "description": "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+          "description": "<story point>/<outcome>: the outcome this choice reaches; one per outcome.",
           "pattern": "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
           "type": "string"
         },

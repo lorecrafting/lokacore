@@ -57,7 +57,8 @@ function Choice(p: {
               press={p.press}
             />
           );
-        if (b) return <ActionCard key={o.choice_id} b={b} press={p.press} />;
+        const asked = o.available && o.asked;
+        if (b) return <ActionCard key={o.choice_id} b={b} press={p.press} asked={asked} />;
         return <ActionCard key={o.choice_id} label={p.text(o.label)} reason={why(o, p.text)} />;
       })}
     </View>

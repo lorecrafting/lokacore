@@ -8,7 +8,10 @@ defmodule Loka.Content.DialogueLinks do
   def conditions({rel, d}) do
     choices =
       for {c, o} <- d["choices"],
-          {path, root} <- [{["policy"], o["policy"]} | variants(o)],
+          {path, root} <- [
+            {["policy"], o["policy"]},
+            {["asked_when"], o["asked_when"]} | variants(o)
+          ],
           root,
           do: {rel, ["choices", c | path], root}
 
