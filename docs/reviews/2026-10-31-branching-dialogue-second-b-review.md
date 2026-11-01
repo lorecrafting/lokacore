@@ -134,3 +134,22 @@ Null control: `branching_lawful, branching_forged, branching_reload, message, es
 - "the escort clause red only after the new pin": backed for the `escorts` clause (table); the `escortChoices` clause survives.
 
 Not run: the cycle on base; a reaction writing the same fact as the answer; Elixir tests.
+
+## Scoped re-check at `90479353b27b6da007ddbe1ed9d84928d8789599`
+
+CI by `gh run list --commit`: ci, book-e2e, graph-diff completed success.
+
+**Verdict: APPROVE WITH NOTES.** F1 is fixed. The open part of F2 is filed as loka-vduxr.23, which must land before the prologue gets an escort.
+
+| Item | Now | Proof |
+|---|---|---|
+| F1 assign plus adjust | closed | B1 `[assign 1, adjust +1]` reopens with count 2, B2 `[adjust +1, assign 5]` with count 5; state deep-equal after cold reopen and tables unchanged by it. Mutant `writtenFact` back to `assignmentOf`: red `a moving answer writing one fact twice reopens` |
+| F2 speaker checks, `escort-save.ts:127,128` | closed | E1 completed, keeper killed: reopens; view identical, tables differ only in `elapsed.wall_ms`, which is the probe's own new host clock (34000 vs 10000). Mutant restoring `living(speaker)`: red `a completed escort reopens after the keeper dies or a reaction moves the child` |
+| F2 rest, `escort-save.ts:46` and the following checks | open, filed | E2 completed then child killed, E3 following then child killed: still `save_corrupt` for good. Beads loka-vduxr.23 covers it, open. Shipped content has no such NPC, by the earlier grep |
+| N3 `dialogue-save.ts:34` | closed | Comment now names custody-reached cycles only; the non-custody hang stays pre-existing, by read |
+| N4 `dialogue-save.ts:23` | closed | `escortChoices` clause deleted, so no surviving mutant. A forged escort row with no relation and no custody now loads, as the ruling allows; not probed |
+| N5 `/code-review` head | not rechecked | |
+
+Rerun, all pass: A1-A7, B3, D2-D4 reopen with state deep-equal; forged C1, C3, C5 refused at open, C6 loads. Null control: `branching_lawful, branching_forged, branching_reload, escort, message` 93 pass.
+
+Not run: the full suite; mutants on the new row-clause pins; the merged #550 changes.
