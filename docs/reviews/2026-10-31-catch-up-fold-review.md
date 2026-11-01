@@ -22,7 +22,7 @@ Clause 2 fails in one case; the rest hold. No `cartridges/`, protocol or frozen 
 
 **blocker** `kernel/ts/src/mechanics/status/job.ts:153`. `due_time === clock && other.status !== 'pending'` is meant to skip entries that already ran, but also skips a crossed sub-step entry that has not run: at its second tick in one advance the other row is `complete`, and it sorts after the folder. The fold then jumps past it, breaking mechanics.md:2407 ("at or after the next queued run"). The kernel_api pins replay, so a later fix needs another bump.
 
-Scenario (patched fixture; the compiler accepts it): hunger start 0, `hungry` -1 per 3600, permanent `fed` +1 per 7200, `thirsty` tick 1e7. One `elapsed` from t0, stopping at the listed target. No driver path hits this, since `boundary` stops at each non-folding job; `elapsed` and a scripted action's `time.advance` do.
+Scenario (patched fixture; a showcase copy with a permanent +1 hunger status compiles): hunger start 0, `hungry` -1 per 3600, permanent `fed` +1 per 7200, `thirsty` tick 1e7. One `elapsed` from t0, stopping at the listed target. Reproduced through direct `elapsed` only. ClockDriver does not hit it, since `boundary` stops at each non-folding job. A scripted action's `time.advance` (`scripted_action/rule.ts:106`) takes the same path by reading only, not run; I found no shipped showcase action with a duration.
 
 | until | head direct | no-fold direct | job-by-job | driver |
 |---|---|---|---|---|
@@ -33,7 +33,7 @@ At head `hungry` ticks stop at 14400 until past the target. All tests stay green
 
 **should-fix** `docs/system/mechanics.md:2407`. "The end state equals job-by-job play" has no equal-due exception. Scenario under ruling 2 below.
 
-**should-fix, follow-up outside the diff** `mobile/authority/local-story/liquid-save.ts:30`. Cold open replays receipt history each launch; see ruling 3. A player back from a month waits 17-28 s on a laptop at launch, more on a phone.
+**PM follow-up, outside this PR, not blocking** `mobile/authority/local-story/liquid-save.ts:30`. Cold open replays receipt history each launch; evidence in ruling 3. Pre-existing; no fix asked of this slice.
 
 **nit** PR body line 32, "predicate duplicated in elapsed.ts": `elapsed.ts:16` imports `folds`. Stale.
 
@@ -58,14 +58,14 @@ At head `hungry` ticks stop at 14400 until past the target. All tests stay green
    | 60 d | 9904 | 26 | 1492 | 19.9 | 41 s | 11 |
    | 120 d | 19750 | 26 | 2954 | 39.5 | 223 s | not run |
 
-   Pending stays 26. Finished rows are never pruned: about 165 a day, mostly replenish and population, with status and calendar about 2 and 1 per step. Per-action cost is small. The limits hold at a month, but segment cost per day rises (0.5, 1.4, 3.7 s), so a two-month absence passes 1 min, and 50 MB falls at about 150 days. I did not locate the step-cost growth. Cold open is the larger cost: one `load` at a month takes 17-28 s, of which `receiptHistory` via `liquidSave` is 23 s and `commerceSave` 3-5 s. Timings are under concurrent load. Neither path is in this diff, and pre-fold receipts were about 36k. A follow-up for the PM: finished-row pruning and receipt replay on open.
+   Pending stays 26. Finished rows are never pruned: about 165 a day, mostly replenish and population, with status and calendar about 2 and 1 per step. Per-action cost is small. The limits hold at a month, but segment cost per day rises (0.5, 1.4, 3.7 s), so a two-month absence passes 1 min, and 50 MB falls at about 150 days. I did not locate the step-cost growth. Cold open is the larger cost: at a month one `load` took 23-29 s, of which `liquidSave` (`receiptHistory`) was about 23 s and `commerceSave` 3-5 s; the harness reopen took 34-56 s and logged two `load` calls, cause unconfirmed, so a real launch may pay one. All under concurrent mutate load, on a laptop. Neither path is in this diff, and pre-fold receipts were about 36k. A follow-up for the PM: finished-row pruning and receipt replay on open.
 
 ## Test the tests
 
 - `bin/mutate_diff.sh origin/main`: 43 run, 40 red, 3 SURVIVED, the same three as the handback, no TIMEBOX. Cleared by hand: `job.ts:121` drop `if (!held)` (`elapsed-driver.test.ts` 10 red, tsc TS18048); `status.ex:64` `||` to `&&` (holder test 4 red); `status.ex:78` `or` to `and` (holder test 1 red).
 - Hand mutants in `permanent_tick.test.ts`, all red: `floor+1` to `floor` (month, one second before); listener filter inverted (predicate table, listener); kernel no jump (month, one second before, COMMIT fence); host no carve-out (month). The last two pair prove R1.
 - R1: `boundary` (`elapsed.ts:70`) and the kernel import one `folds` with no clock read; they cannot diverge by construction.
-- Expected values in the tests are hand-traced literals; no fixture or expected answer touched; no change detector found. Composition: the fold names only the calendar job, as 2407 requires, and an `import` of `CLOCK_JOB` makes no cycle. No over-engineering beyond what the PR lists as accepted.
+- Expected values in the tests are hand-traced literals; no fixture or expected answer touched; no change detector found. Composition: the fold names only the calendar job, as 2407 requires, and the new `status/job.ts` import of `schedule/daily.ts` makes no runtime cycle (walked `daily.ts`'s non-type imports; none reaches `status/job.ts`). No over-engineering beyond what the PR lists as accepted.
 - PR claims rerun: showcase month (my run 751 receipts, 4969 jobs, 10.07 MB; body 738, 4968, 9.9 MB; backed, the small gap is my route's moves); "predicate duplicated" not backed (nit above).
 
 ## Not run
