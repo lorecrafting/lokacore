@@ -142,7 +142,7 @@ function Picking() {
       <LogLines lines={['You take the sack and the rope.']} />
       <ItemPop view={view} text={(key) => key} />
       <View style={{ height: size.touch }} />
-      <Control label="Take" onPress={() => setView(pack('sack', 'rope'))} />
+      <Control label="Continue" onPress={() => setView(pack('sack', 'rope'))} />
     </View>
   );
 }
@@ -150,7 +150,7 @@ export const ItemPopTwoItems: Story = {
   render: () => <Picking />,
   play: async ({ canvas, userEvent }) => {
     await expect(canvas.queryByText(/^\+ /)).toBeNull();
-    await userEvent.click(canvas.getByRole('button', { name: 'Take' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
     // Hidden from assistive tech, so found by its words rather than its role.
     await expect(await canvas.findByText('+ sack, + rope')).toBeInTheDocument();
   },

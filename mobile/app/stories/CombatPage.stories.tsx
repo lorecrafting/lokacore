@@ -71,7 +71,7 @@ function Struck() {
   useCues(view, false, 0);
   return (
     <Blow>
-      <Control label="Take the blow" onPress={() => setView(struck(15))} />
+      <Control label="Continue" onPress={() => setView(struck(15))} />
     </Blow>
   );
 }
@@ -81,7 +81,7 @@ export const BlowWash: StoryObj = {
   play: async ({ canvas, canvasElement, userEvent }) => {
     const paper = canvasElement.querySelector<HTMLElement>('[aria-hidden="true"]')!;
     await expect(Number(getComputedStyle(paper).opacity)).toBe(0);
-    await userEvent.click(canvas.getByRole('button', { name: 'Take the blow' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
     await waitFor(() => expect(Number(getComputedStyle(paper).opacity)).toBeGreaterThan(0));
   },
 };
