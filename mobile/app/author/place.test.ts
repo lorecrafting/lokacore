@@ -292,6 +292,16 @@ test('an invoke answered while another is held records the held input, not its o
   assert.deepEqual(h.steps, [{ intent: intent([NPC], { n: 1 }) }]);
 });
 
+test('an input that threw and is not held does not replace the next', () => {
+  // Break: the thrown intent stays held, so the next accepted step records the wrong input.
+  const replies: Reply[] = [];
+  const h = holding(replies);
+  assert.throws(() => h.invoke(intent(['a1'], { n: 1 })), /disk/);
+  replies.push(accepted);
+  h.invoke(intent(['a1'], { n: 2 }));
+  assert.deepEqual(h.steps, [{ intent: intent([NPC], { n: 2 }) }]);
+});
+
 test('a refused input leaves no step and holds nothing into the next', () => {
   // Breaks: a refusal recorded; the refused intent still held when the next is accepted.
   const h = holding([refused, accepted]);

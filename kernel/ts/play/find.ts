@@ -64,5 +64,5 @@ export function find(source: string, artifact: string, q: string) {
         if (!line.toLowerCase().includes(lower)) return;
         if (++total <= CAP) hits.push({ at: `${rel}:${i + 1}`, text: line.trim() });
       });
-  return { hits, total, refs: q ? referrers(source, artifact, q, rels) : [] };
+  return { hits, total, refs: referrers(source, artifact, q, rels) };
 }

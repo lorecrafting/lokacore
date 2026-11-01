@@ -26,7 +26,7 @@ writeFileSync(good, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}
 // environment is fixed at spawn, names the artifact to copy in the file $STUB_WHICH.
 writeFileSync(
   join(dir, 'mise'),
-  '#!/bin/sh\n[ "$4" = loka.lint ] && { echo "items/x.json: unused" >&2; exit 1; }\n[ -n "$STUB_ERR" ] && { echo "$STUB_ERR" >&2; exit 1; }\n' +
+  '#!/bin/sh\n[ "$4" = loka.lint ] && { echo "items/x.json: lint of $(basename "$(cat "$STUB_WHICH")")" >&2; exit 1; }\n[ -n "$STUB_ERR" ] && { echo "$STUB_ERR" >&2; exit 1; }\n' +
     '[ -n "$STUB_WHICH" ] && STUB_ART=$(cat "$STUB_WHICH")\ncp "$STUB_ART" "$6"\n',
 );
 chmodSync(join(dir, 'mise'), 0o755);
@@ -105,7 +105,9 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   await until(() => messages.some((m) => m.text['room.boathouse.description'] === 'line one'));
   // Break: the watcher never lints, or only at its start: this line arrives after the edit's compile
   await until(() =>
-    messages.some((m) => (m as { lint?: string[] }).lint?.[0] === 'items/x.json: unused'),
+    messages.some(
+      (m) => (m as { lint?: string[] }).lint?.[0] === 'items/x.json: lint of edited.json',
+    ),
   );
   await settle(400); // the compile that follows the quick push
   assert.equal(readFileSync(out, 'utf8'), first);

@@ -51,6 +51,13 @@ test('all, any and not answer from their leaves, indented under them', () => {
 });
 
 // Break: a definition with no policy reads as refused, or throws.
+test('a leaf the report did not annotate does not count as holding', () => {
+  // Break: only an explicit false fails, so an unread leaf reads as met.
+  assert.deepEqual(sentences({ policy: { op: 'light_off' } }), [
+    { text: 'the light is off', ok: false, depth: 0 },
+  ]);
+});
+
 test('no policy has no conditions', () => {
   assert.deepEqual(sentences({}), [{ text: 'It has no conditions.', ok: true, depth: 0 }]);
 });
