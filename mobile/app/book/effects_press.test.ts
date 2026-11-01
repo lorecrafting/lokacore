@@ -8,6 +8,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 const { ActionCard } = await import('./actions.tsx');
 const { saidLabel } = await import('./Footer.tsx');
 const { Chip } = await import('./Chip.tsx');
+const { opacity } = await import('./tokens.ts');
 const { useCues } = await import('./cues.ts');
 const { Fault, LogLines } = await import('./lines.tsx');
 const { dropLines, markDrawn, trimLog } = await import('./logs.ts');
@@ -175,6 +176,20 @@ test('a card lifts on press-in with a selection haptic; reduced motion keeps the
     assert.deepEqual(g.timings, [90, 160]);
     assert.deepEqual(flat(shown().props.style).backgroundColor, rest.backgroundColor);
   }
+});
+
+// Breaks: a free chip reads as unavailable, or an unavailable one as free.
+test('a chip with a press is opaque; one without shows the disabled opacity', (t) => {
+  effects(t);
+  const draw = rig(t);
+  const faded = (onPress?: () => void) =>
+    flat(card(draw(() => nodes(Chip({ word: 'Off', label: 'Sound', onPress })))).props.style)
+      .opacity;
+  assert.equal(
+    faded(() => {}),
+    1,
+  );
+  assert.equal(faded(), opacity.disabled);
 });
 
 // Breaks: an unavailable card lifts or ticks like an available one, or a refusal has no warning.
