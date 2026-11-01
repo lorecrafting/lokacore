@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
-import { mock, test } from 'node:test';
+import { afterEach, mock, test } from 'node:test';
 import { askTrace } from '../../../tools/author-panel/src/trace.ts';
+
+afterEach(() => mock.timers.reset());
 
 test('a Book that never answers rejects after the wait, and its late reply is dropped', async () => {
   mock.timers.enable({ apis: ['setTimeout'] });
@@ -13,7 +15,6 @@ test('a Book that never answers rejects after the wait, and its late reply is dr
   mock.timers.tick(1);
   await assert.rejects(p, { message: 'The Book did not answer. Reload the Book, then ask again.' });
   assert.equal(waiting.get(7), undefined);
-  mock.timers.reset();
 });
 
 test('a reply inside the wait resolves with its rows and clears the waiter', async () => {
@@ -24,5 +25,4 @@ test('a reply inside the wait resolves with its rows and clears the waiter', asy
   assert.deepEqual(await p, ['a rule', 'b rule']);
   assert.equal(waiting.size, 0);
   mock.timers.tick(10000); // the cleared timer must not fire a rejection
-  mock.timers.reset();
 });

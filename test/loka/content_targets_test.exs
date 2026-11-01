@@ -48,5 +48,10 @@ defmodule Loka.ContentTargetsTest do
 
     assert {:ok, _, plain} = Loka.ContentSource.compile(dir, [])
     refute Enum.any?(plain, &(&1["code"] == "ALLY_ENGAGE_UNUSED"))
+
+    # The warning must not hide the template-ally error.
+    templated = [{"npcs/guard.json", &Map.put(engage.(&1), "spawn_template", true)} | tl(edits)]
+    assert {:error, errors} = Loka.ContentSource.compile(dir, templated)
+    assert Enum.any?(errors, &(&1["path"] == "cartridge.world.combat.allies[0]"))
   end
 end
