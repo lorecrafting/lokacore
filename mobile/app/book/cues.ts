@@ -1,4 +1,4 @@
-// size: allow 315, the bus reads as one: cue table, view diff, severity queue, subscription
+// size: allow 330, the bus reads as one: cue table, view diff, severity queue, subscription
 // The effects cue bus (book-ui.md, Effects, sound and haptics; Queue): a pure diff of two GameViews
 // into named cues, a pure severity queue over them, and a subscription for the effects to come.
 import { useEffect, useRef } from 'react';
@@ -16,6 +16,7 @@ const CUES = {
   status_out: { s: 1 },
   quest_on: { s: 2, sound: 'questGained' },
   quest_resolved: { s: 3, sound: 'questDone' },
+  page_turn: { s: 1, sound: 'pageTurn' }, // sent past the queue (useCues)
   quest_fail: { s: 2, sound: 'questFailed' },
   level: { s: 3, sound: 'level' },
   skill_learned: { s: 2, sound: 'skillNew' },
@@ -269,7 +270,18 @@ let flashes = true;
 /** The Flashes setting: off, no blow is a wash; the rest of the cue stays. */
 export const flashesOn = (on: boolean) => void (flashes = on);
 
+// Quests resolved since the Journal last opened; its gilt waits for the visit. Read off the views:
+// the queue can drop the cue and a resume never sends it. A reload forgets them.
+export const unreadResolved = new Set<string>();
+const noteResolved = (now: GameView, was: GameView) =>
+  questCues(now, was)
+    .find((c) => c.name === 'quest_resolved')
+    ?.ids?.forEach((id) => unreadResolved.add(id));
+
 const listeners = new Set<(cue: Cue) => void>();
+const send = (cue: Cue) => listeners.forEach((listener) => listener(cue));
+// One action, one paper sound (owner, 2026-10-31): a take's flick stands for its page turn.
+const flicks = (cue: Cue) => cue.name === 'pickup' && !cue.silent;
 export let curlEnds = -Infinity; // at the latest: a curl starts by the picture deadline
 export const onCue = (listener: (cue: Cue) => void) => {
   listeners.add(listener);
@@ -289,6 +301,7 @@ export function useCues(
   const seen = useRef(turn);
   const back = useRef(resumes);
   const settled = useRef<GameView>(undefined);
+  const last = useRef<GameView>(undefined);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const advance = (cues: Cue[], turned = false) => {
@@ -297,11 +310,14 @@ export function useCues(
         curlEnds = performance.now() + motion.quick.duration + motion.turn.duration;
       const { q, fired } = step(queue.current, cues, performance.now(), turned);
       queue.current = q;
-      for (const cue of fired) for (const listener of listeners) listener(cue);
+      if (turned && !cues.some(flicks)) send({ name: 'page_turn' });
+      fired.forEach(send);
       // A timer can land a little early: it waits again rather than strand the pending cue.
       const due = q.held.length ? q.heldUntil : q.pending ? q.until : undefined;
       if (due !== undefined) timer = setTimeout(() => advance([]), due - performance.now());
     };
+    if (last.current) noteResolved(view, last.current);
+    last.current = view;
     // An absence is no event: what a resume settled, however fast, is heard as nothing.
     const away = catchingUp || resumes !== back.current;
     advance(cuesOf(view, away ? undefined : settled.current), turn !== seen.current);

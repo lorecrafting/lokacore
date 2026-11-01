@@ -1,6 +1,6 @@
 # Effects and sound plan (2026-10-31)
 
-**Superseded 2026-10-31:** [book-ui.md](../system/book-ui.md#effects-sound-and-haptics) rules over this plan on the page swell (cut), the reduced-motion chapter blur (none) and the theme cut (Music, not Sound). The pickup pop is held for an owner answer.
+**Superseded 2026-10-31:** [book-ui.md](../system/book-ui.md#effects-sound-and-haptics) rules over this plan on the page swell (cut), the reduced-motion chapter blur (none) and the theme cut (Music, not Sound). The pickup pop is in: book-ui.md's owner exception (2026-10-31) rules it.
 
 Planning document, nothing implemented. The owner asked for a thorough review of where effects and sounds go,
 what they look like and why, at the quality of a polished mobile game, expressed as a book: ink, paper, type,

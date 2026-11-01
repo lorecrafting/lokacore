@@ -51,7 +51,7 @@ export function Blow({ children }: { children: ReactNode }) {
     transform: [{ scale: still ? 1 : 1 + ((swell - 1) * wash.value) / opacity.wash }],
   }));
   return (
-    <View style={[grow, { backgroundColor: c.bg }]}>
+    <View style={[grow, { backgroundColor: c.bg, overflow: 'hidden' }]}>
       <Reanimated.View
         style={[fill, { backgroundColor: washInk(c) }, paper]}
         pointerEvents="none"

@@ -6,6 +6,7 @@ import { cap, type group, type Page as Route } from './model.ts';
 import type { Button, presenter } from './presenter.ts';
 import { ActionCard, Cards, useFocus } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
+import { space } from './tokens.ts';
 import { Control, Page } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import { things } from './item-pages.ts';
@@ -73,14 +74,18 @@ function ShopLines(p: { view: GameView; rows: Line[]; press: (b: Button) => void
   );
 }
 
-// An empty wrapper would add a gap: the pop waits for the line its buy writes.
+// The pop's anchor: a buy writes no line here (book-ui.md, quiet), so it may hang from the balance.
 function Bought(
-  p: { lines: Parameters<typeof LogLines>[0]['lines'] } & Parameters<typeof ItemPop>[0], // mutate-skip: type
+  p: {
+    money?: number;
+    lines: Parameters<typeof LogLines>[0]['lines'];
+  } & Parameters<typeof ItemPop>[0], // mutate-skip: type
 ) {
-  if (!p.lines.length) return null;
+  if (p.money === undefined && !p.lines.length) return null;
   return (
-    <View>
-      <LogLines lines={p.lines} />
+    <View style={{ gap: space.xl }}>
+      {p.money !== undefined && <Note>{balance(p.money)}</Note>}
+      {!!p.lines.length && <LogLines lines={p.lines} />}
       <ItemPop view={p.view} text={p.text} />
     </View>
   );
@@ -133,8 +138,7 @@ export function ShelfPage(p: {
       foot={<Control label={LABEL.leave} onPress={p.back} />}
     >
       <ShopLines view={view} rows={rows} press={press} />
-      {money !== undefined && <Note>{balance(money)}</Note>}
-      <Bought lines={p.screen.detail(p.id)} view={view} text={text} />
+      <Bought money={money} lines={p.screen.detail(p.id)} view={view} text={text} />
       {!p.sale && sell.length > 0 && (
         <Cards>
           <ActionCard label={LABEL.sell} onPress={() => p.open({ kind: 'sale', id: p.id })} />

@@ -5,7 +5,8 @@ import { effects, flat, rig } from './__tests__/hook-rig.ts';
 import { nodes } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
-const { useCues } = await import('./cues.ts');
+const { playCue } = await import('./cueSounds.ts');
+const { onCue, useCues } = await import('./cues.ts');
 const { ItemPop } = await import('./ItemPop.tsx');
 const { RunningHead } = await import('./RunningHead.tsx');
 const { ShelfPage } = await import('./Shelf.tsx');
@@ -153,9 +154,40 @@ test('a changed objective cross-fades with no wait', (t) => {
   assert.deepEqual(g.delays, []);
 });
 
-// Breaks: a shop with no history draws an empty wrapper (a gap in the page), or a buy's line never
-// mounts the pop.
-test('the shop mounts the pop only under the line a buy writes', () => {
+// Breaks: a buy never pops, for a buy writes no line on this page (book-ui.md, quiet; quiet_log.test.ts
+// "the page keeps neither"): the page's own detail is empty, the rest of the path is real.
+test('a buy pops its item on a shop page with no line', (t) => {
+  const { draw } = popRig(t);
+  const buy = (v: GameView) =>
+    draw(() => {
+      useCues(v, false, 0);
+      return nodes(
+        ShelfPage({
+          id: 'npc',
+          screen: {
+            view: { ...v, entities: [{ id: 'npc', name: 'npc.name', shop: [] }] },
+            text: say,
+            detail: () => [],
+          },
+          g: { on: () => [] },
+          press: () => {},
+          open: () => {},
+          back: () => {},
+        } as any),
+      );
+    });
+  const purse = (n: number, ids: string[]) => {
+    const v = held(ids) as any;
+    return { ...v, resources: [{ resource: { key: 'pennies' }, current: n }] } as GameView;
+  };
+  buy(purse(5, []));
+  buy(purse(3, ['rope']));
+  assert.ok(said(buy(purse(3, ['rope']))).includes('+ rope'));
+});
+
+// Breaks: a shop with no purse and no history draws an empty wrapper (a gap in the page), or a line
+// drops the pop.
+test('the shop draws no empty anchor, and the pop hangs under the last line', () => {
   const page = (lines: string[]) =>
     ShelfPage({
       id: 'npc',
@@ -176,7 +208,49 @@ test('the shop mounts the pop only under the line a buy writes', () => {
   assert.equal(bought([]), null);
   const under = bought(['You buy a rope.']).props.children;
   assert.deepEqual(
-    under.map((c: any) => c.type.name),
+    under.filter(Boolean).map((c: any) => c.type.name),
     ['LogLines', 'ItemPop'],
+  );
+});
+
+// Breaks: a take plays the page turn and its flick; a plain turn goes silent; a buy's silent pickup
+// mutes a turn; the first draw counts as a turn. Files from the real sound table, in play order.
+test('one action, one paper sound', (t) => {
+  effects(t);
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let now = 5000;
+  t.mock.method(performance, 'now', () => now);
+  const room = held([]);
+  const off = onCue(playCue);
+  t.after(off);
+  const played = (steps: [GameView, number][]) => {
+    g.bookDevice = [];
+    const draw = rig(t);
+    for (const [v, turn] of steps) {
+      draw(() => useCues(v, false, turn));
+      now += 1000;
+      t.mock.timers.tick(1000);
+    }
+    const log: string[] = g.bookDevice
+      .filter((l: string[]) => l[0] === 'play')
+      .map((l: string[]) => l[1]);
+    g.bookDevice = undefined;
+    return log;
+  };
+  const withSack = held(['sack']);
+  assert.deepEqual(played([[room, 0]]), []);
+  assert.deepEqual(
+    played([
+      [room, 0],
+      [room, 1],
+    ]),
+    ['pageTurn'],
+  );
+  assert.deepEqual(
+    played([
+      [room, 0],
+      [withSack, 1],
+    ]),
+    ['pickup'],
   );
 });

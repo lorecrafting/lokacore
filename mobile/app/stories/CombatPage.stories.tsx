@@ -7,6 +7,7 @@ import { Blow } from '../book/Blow.tsx';
 import { Combat } from '../book/Combat.tsx';
 import { useCues } from '../book/cues.ts';
 import { Control } from '../book/pages.tsx';
+import { size } from '../book/tokens.ts';
 import { pageStory } from './screen.tsx';
 import CombatOneFoeView from './views/combat-one-foe.json';
 import CombatPackView from './views/combat-pack.json';
@@ -70,9 +71,11 @@ function Struck() {
   const [view, setView] = useState(() => struck(20));
   useCues(view, false, 0);
   return (
-    <Blow>
-      <Control label="Continue" onPress={() => setView(struck(15))} />
-    </Blow>
+    <div data-testid="frame" style={{ display: 'flex', width: size.column, height: size.column }}>
+      <Blow>
+        <Control label="Continue" onPress={() => setView(struck(15))} />
+      </Blow>
+    </div>
   );
 }
 export const BlowWash: StoryObj = {
@@ -83,5 +86,10 @@ export const BlowWash: StoryObj = {
     await expect(Number(getComputedStyle(paper).opacity)).toBe(0);
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
     await waitFor(() => expect(Number(getComputedStyle(paper).opacity)).toBeGreaterThan(0));
+    // The swell is clipped. Breaks: scrollbars on the whole Combat page at the first blow.
+    const frame = canvas.getByTestId('frame');
+    await waitFor(() => expect(Number(getComputedStyle(paper).opacity)).toBeGreaterThan(0.1));
+    await expect(frame.scrollWidth).toBe(frame.clientWidth);
+    await expect(frame.scrollHeight).toBe(frame.clientHeight);
   },
 };

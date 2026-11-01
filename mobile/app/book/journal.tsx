@@ -9,23 +9,17 @@ import { expeditionLine } from './words.ts';
 import type { Button } from './presenter.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { ActionCard } from './actions.tsx';
-import { onCue } from './cues.ts';
+import { unreadResolved } from './cues.ts';
 import { GiltLine } from './GiltLine.tsx';
 import { AwayRecap, Note } from './lines.tsx';
 import { Control, home, Page, SectionTitle } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import type { ChronicleDay } from './chronicle.ts';
 
-// Quests resolved since the Journal was last open: it is not live, so its gilt waits for the visit.
-let resolved: string[] = [];
-onCue((cue) => {
-  if (cue.name === 'quest_resolved') resolved = [...resolved, ...(cue.ids ?? [])];
-});
-
 // Read once as the Journal opens, then spent: a later visit is plain.
 function useResolved() {
-  const [gilt] = useState(resolved);
-  useEffect(() => void (resolved = []), []);
+  const [gilt] = useState(() => [...unreadResolved]);
+  useEffect(() => unreadResolved.clear(), []);
   return gilt;
 }
 

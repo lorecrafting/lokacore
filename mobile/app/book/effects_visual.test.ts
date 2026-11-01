@@ -6,7 +6,7 @@ import { book, nodes, words } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
 const { Blow } = await import('./Blow.tsx');
-const { flashesOn, useCues } = await import('./cues.ts');
+const { flashesOn, onCue, useCues } = await import('./cues.ts');
 const { ItemPop } = await import('./ItemPop.tsx');
 const { RunningHead } = await import('./RunningHead.tsx');
 const { StatusLine } = await import('./Status.tsx');
@@ -277,6 +277,33 @@ test('the Character level line is warning ink only while points wait', (t) => {
     )[0];
   assert.equal(flat(line(1).props.style).color, color.light.warning);
   assert.notEqual(flat(line(0).props.style).color, color.light.warning);
+});
+
+// Breaks: a quest resolved with a chapter rise is never gilt: S4 fires alone and drops it from the queue;
+// or one resolved over a resume, which sends no cue.
+test('the Journal gilds a quest the queue never played', (t) => {
+  effects(t);
+  clock(t);
+  const open = (v: GameView) =>
+    ink(
+      rig(t)(() =>
+        nodes(JournalPage({ view: v, text: say, world: () => {}, chronicle: () => [] } as never)),
+      ),
+      'q.title',
+    );
+  const seen: string[] = [];
+  const off = onCue((cue) => void seen.push(cue.name));
+  t.after(off);
+  const done = { ...quest('resolved', null), chapter: { index: 2 } } as GameView;
+  let draw = rig(t);
+  draw(() => useCues({ ...quest('active'), chapter: { index: 1 } } as GameView, false, 0));
+  draw(() => useCues(done, false, 0));
+  assert.deepEqual(seen, ['chapter']);
+  assert.equal(open(done), color.light.warning);
+  draw = rig(t);
+  draw(() => useCues(quest('active'), false, 0, 0));
+  draw(() => useCues(quest('resolved', null), false, 0, 1));
+  assert.equal(open(quest('resolved', null)), color.light.warning);
 });
 
 // Breaks: a failed quest gilds in the Journal, or a resolved one's gilt repeats on a second visit.

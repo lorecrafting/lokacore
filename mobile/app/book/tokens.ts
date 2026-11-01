@@ -184,7 +184,7 @@ export const mix = {
   tier: { whisper: -24, note: -18, beat: -14, chapter: -12 },
   bus: { ambience: 2, sfx: 4, ui: 2, music: 1 }, // mutate-skip: uncalibrated design value
   duck: { db: -6, duration: 300, out: 1200 },
-  spread: 0.04,
+  spread: 0.04, // no reader yet: pitch spread moves to loka-gj82.8
   coalesce: 300, // small cues of one key inside this many ms are one
 };
 

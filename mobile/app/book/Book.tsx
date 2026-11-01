@@ -219,7 +219,7 @@ export function BookView(p: ViewProps) {
             </PageTurn>
             <Bottom {...ctx} page={page} />
             <Heard said={p.screen.said} />
-            <HapticPulse />
+            {__DEV__ && <HapticPulse />}
           </View>
           {p.palette.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>

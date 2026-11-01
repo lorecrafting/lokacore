@@ -677,7 +677,7 @@ ordinary details, Leave/Back, Contents and position controls are hidden or disab
 title page shows its chapter label, title and the running head only: no Back to World, and Contents and position are
 locked as in a scene. It turns itself about 4 s from appearing; a tap anywhere
 skips, and its clock pauses while the app is in the background. With a screen reader active it keeps an
-explicit Continue and does not turn itself. The theme cut plays into the next page and fades there. A chapter
+explicit Continue and does not turn itself. The theme cut plays into the next page; its fade is baked into the recording for now. A chapter
 title reached with a scene waits until that scene ends. Dismissing the card is presentation
 only. Same-room ordinary updates do not repeat or drop the chapter title.
 
@@ -780,8 +780,8 @@ opening, once. The Character page's level line stays gilt while points wait to b
 is gilt, and gilt is never the only sign. Reduced motion is a plain fade in the line's own ink.
 
 **Event sounds.** A sound marks what the hand did or how the player's story moved, never what the
-world did. Pressed or moved: the page turn, a pickup flick (a buy plays coin instead, so one purchase
-is one sound), coin, a blow's thud. The story: level, new skill, quest resolved, quest failed, skill
+world did. Pressed or moved: the page turn, a pickup flick (a take that turns the page plays the flick alone,
+and a buy plays coin instead, so one action is one sound), coin, a blow's thud. The story: level, new skill, quest resolved, quest failed, skill
 improved (rate limited), quest gained, the chapter cut, and a tick when a debuff lands on the
 player, since it marks the player's own state (a buff is silent). **Silent:**
 hint change, knowledge, fact,

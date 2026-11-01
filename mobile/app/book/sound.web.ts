@@ -5,8 +5,8 @@ import { mix, sound } from './tokens.ts';
 type SoundName = keyof typeof sound;
 type Bus = keyof typeof mix.bus;
 
-// ponytail: no pitch spread (mix.spread) and a new element per play, so a load at each press, until
-// the samples are auditioned (loka-gj82.4).
+// ponytail: no pitch spread (mix.spread) and a new element per play, so a load at each press; pitch
+// spread and preload move to loka-gj82.8.
 let urls: Partial<Record<SoundName, string[]>> = {};
 const played: Partial<Record<SoundName, number>> = {};
 /** Each name's samples, played round-robin (samples.web.ts). */
