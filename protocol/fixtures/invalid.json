@@ -32288,5 +32288,149 @@
         "code": "pattern_mismatch"
       }
     ]
+  },
+  {
+    "name": "fact_at_least_missing",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_at_least"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      },
+      {
+        "path": "/fact",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "fact_at_least_too_big_unknown",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_at_least",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "f"
+      },
+      "at_least": 2147483648,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "fact_at_least_too_small",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_at_least",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "f"
+      },
+      "at_least": -2147483649
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "fact_at_least_not_integer",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_at_least",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "f"
+      },
+      "at_least": "1"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_choice_then_not_key",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "then": "Not A Key"
+    },
+    "errors": [
+      {
+        "path": "/then",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_choice_then_failed_not_key",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "then_failed": "Not A Key"
+    },
+    "errors": [
+      {
+        "path": "/then_failed",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_choice_policy_unknown_op",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "policy": {
+        "op": "nope"
+      }
+    },
+    "errors": [
+      {
+        "path": "/policy/op",
+        "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_choice_variants_not_list",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "narration_variants": {}
+    },
+    "errors": [
+      {
+        "path": "/narration_variants",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]
