@@ -59,32 +59,30 @@ defmodule Loka.Content.Reactions do
 
   # The action's completion or its own custom event runs inside it; the status row would start before
   # a duration's time.advance, which faults at runtime (its own steps: `Loka.Content.ScriptedActions`).
-  # Refuses only a path known to run: `after` writes a job instead, and a fact_changed may not fire.
+  # Refuses only a path known to run: `after` writes a job instead, a `when` or a fact_changed may not fire.
   defp timed_status({rel, %{"on" => on, "steps" => steps} = r}, defs) do
     timed =
       for {_, {_, [], %{"duration" => d} = a}} <- defs["scripted_action"] || %{}, d > 0, do: a
 
-    inside? = not is_map_key(r, "after") and Enum.any?(timed, &inside?(on, r, &1))
+    inside? =
+      not is_map_key(r, "after") and not is_map_key(r, "when") and
+        Enum.any?(timed, &inside?(on, &1))
 
     for {%{"op" => "status.apply"}, i} <- Enum.with_index(steps), inside? do
       diag("SCHEMA_VIOLATION", at(rel, ["steps", i]), %{"why" => "duration_status"})
     end
   end
 
-  defp inside?(%{"event" => "action_completed"} = on, r, action),
-    do: on["action"] == action["key"] or (on["action"] == nil and not is_map_key(r, "when"))
+  defp inside?(%{"event" => "action_completed"} = on, action),
+    do: on["action"] in [nil, action["key"]]
 
-  defp inside?(%{"event" => "custom_event", "custom" => custom}, r, action) do
-    not is_map_key(r, "when") and
-      Enum.any?(
-        action["outcomes"],
-        fn {_, o} ->
-          Enum.any?(o["steps"], &(&1["event"] == custom))
-        end
-      )
-  end
+  defp inside?(%{"event" => "custom_event", "custom" => custom}, action),
+    do:
+      Enum.any?(action["outcomes"], fn {_, o} ->
+        Enum.any?(o["steps"], &(&1["event"] == custom))
+      end)
 
-  defp inside?(_, _, _), do: false
+  defp inside?(_, _), do: false
 
   # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
   # moved.

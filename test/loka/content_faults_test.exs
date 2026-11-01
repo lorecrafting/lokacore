@@ -89,6 +89,7 @@ defmodule Loka.ContentFaultsTest do
           {"other_event", ~s("on": {"event": "status_applied"})},
           {"fact", ~s("on": {"event": "fact_changed", "fact": "ward_landed"})},
           {"any_after", any <> ~s(, "after": 200)},
+          {"named_when", ~s("on": {"event": "action_completed", "action": "ward"}, ) <> gate},
           {"any_when", any <> ", " <> gate},
           {"custom_after", custom <> ~s(, "after": 200)},
           {"custom_when", custom <> ", " <> gate}
