@@ -369,7 +369,7 @@ test('social 13: unfinished at +60000 the letter is late: the Reeve turns cold, 
 
 // Breaks: the recap threshold is not authored (no recap_after), or a long absence loses the
 // deadline's writes. The recap block itself is Book-side: mobile/app/book/showcase_recap.test.ts.
-test('social 14: the manifest sets a 30 real minute recap; 150 game hours away the letter is late', () => {
+test('social 14: the manifest sets a 30 real minute recap; 150 game hours of session time the letter is late', () => {
   const x = wait(say(green(), 'reeve', 'accept').world, AT_SEVEN + 150 * HOUR).world;
   assert.equal(gameView(x).recap_after, 86400);
   assert.deepEqual([fact(x, 'letter_late'), fact(x, 'wardle_standing')], [true, -1]);

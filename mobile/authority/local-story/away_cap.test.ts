@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { compiled } from './__tests__/compiled.ts';
+import { CatchUpRefusedError } from './elapsed.ts';
+import { statusOfError } from './session.ts';
 import {
   checkpoint,
   coldReopen,
@@ -163,4 +165,11 @@ test('a return with debt still retained tops it up to one cap, not past it', (t)
   a.game.pulse('resume');
   assert.equal(checkpoint(a.sql).target, drained + 86400);
   a.sql.close();
+});
+
+// Breaks: a recap save defers its catch-up past open, so a refused delivery arrives on a pulse as a
+// plain error with no Start over, where opening would have said save_corrupt.
+test('a catch-up refused on a pulse reads as save_corrupt', () => {
+  const status = statusOfError(new CatchUpRefusedError('elapsed delivery refused: x'));
+  assert.equal(status.kind === 'error' && status.reason, 'save_corrupt');
 });

@@ -275,7 +275,8 @@ Opening a save with an authored `recap_after_minutes` and a checkpoint row does 
 captured and drained by the first pulse, after the Book has subscribed, so the away recap holds every line
 of the capped stretch. Without a recap threshold, opening drains one turn as before. The recap's span is
 the logical time caught up, at most the cap, and its threshold is clamped to the credit (`view/time.ts`),
-so any absence past the cap shows one recap of the capped stretch, whatever the real length.
+so any absence past the cap shows one recap of the capped stretch, whatever the real length. A delivery
+refused on that first pulse reads as `save_corrupt`, as it would at open.
 
 Active monotonic samples are never capped: a long open session is unaffected and a save grows with time
 actually played. Closed app or hidden tab: a capped wall gap on open or resume. A timer stalled for over
