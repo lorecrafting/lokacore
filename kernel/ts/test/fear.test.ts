@@ -17,7 +17,7 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { ctx } from './harness.ts';
-import type { Command } from '../src/contracts.gen.ts';
+import type { Command, Key } from '../src/contracts.gen.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { check } from '../src/runtime/invariants.ts';
@@ -289,7 +289,7 @@ test('a hostile hp-less NPC never engages; the goblins are calm', () => {
 // refusal carries a cause (a Book sentence), a flagged NPC with no hp faults, or the flag leaks to
 // a goblin.
 test('an unattackable NPC has no Attack offer and refuses Attack with no cause, with or without hp', () => {
-  for (const hp of [content.npcs['fear_sampler@0.0.1:npc/goblin'].hp, undefined]) {
+  for (const hp of [(content as any).npcs['fear_sampler@0.0.1:npc/goblin'].hp, undefined]) {
     const c = structuredClone(content) as any;
     Object.assign(c.npcs['fear_sampler@0.0.1:npc/guard'], {
       attack: { chance: 100, damage_min: 1, damage_max: 1 },
@@ -314,7 +314,7 @@ test('an unattackable NPC has no Attack offer and refuses Attack with no cause, 
     assert.ok(found.kind === 'identified', JSON.stringify(found));
     const command = resolve(w, found) as Command;
     assert.equal(command.payload.type, 'attack');
-    const refused = step(w, command, n, 'attack');
+    const refused = step(w, command, n, 'attack' as Key);
     assert.deepEqual(refused.decision, { kind: 'rejected', error: { code: 'invalid_target' } });
     assert.equal(refused.world, w);
     const resolves = Object.fromEntries(
