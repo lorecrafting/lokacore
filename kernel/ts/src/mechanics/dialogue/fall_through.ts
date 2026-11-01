@@ -29,9 +29,7 @@ export const onward = (world: World, d: DialogueDefinition) => {
       !GATES.some((gate) => choice[gate]) &&
       (choice.steps ?? []).every((s) => FREE_STEPS.has(s.op));
     const to = free ? all.find((o) => o.key === choice.then) : undefined;
-    return to && to.entry !== false && refString(to.npc) === refString(d.npc)
-      ? [{ choice, to }]
-      : [];
+    return to && refString(to.npc) === refString(d.npc) ? [{ choice, to }] : [];
   });
 };
 

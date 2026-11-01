@@ -31,9 +31,8 @@ const links = (d: DialogueDefinition) =>
 
 /**
  * The dialogues a talk can open: those nothing leads to, then one of each loop with no way in, the
- * member leading to the most other dialogues (a hub), first by key on a tie. What an entry
- * reaches is reached by that answer, or by falling through a failed entry. A speaker's `entry: true` dialogue replaces all
- * that speaker's others except keyword ones; an `entry: false` one is never a candidate, only a `then` opens it. A failed default entry falls through (`spokenBy`).
+ * member leading to the most other dialogues (a hub), first by key on a tie. A speaker's `entry: true` dialogue replaces all that speaker's
+ * others except keyword ones; an `entry: false` one is never a candidate, only a `then` opens it. A failed default entry falls through (`spokenBy`), past `entry: false`.
  */
 const entries = (world: World) => {
   const all = Object.values(world.cartridge.dialogues ?? {}).sort((a, b) => cmp(a.key, b.key));
@@ -170,6 +169,7 @@ export const spokenBy = (
   // grows as it runs: every entry first, then what the failed ones lead to
   for (const d of tried) {
     if (
+      d.entry !== false &&
       holds(world, actor, d.policy, { target, steps }) &&
       shown(world, actor, d, offered(world, actor, d, steps), target, steps).length > 0
     )

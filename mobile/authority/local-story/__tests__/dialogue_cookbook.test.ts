@@ -79,6 +79,71 @@ function saved(c = COOK) {
 
 const COOK = compile();
 
+// The cookbook with an NPC `sage` in the yard, a bool fact `sage_met` and these scenes.
+const withSage = (scenes: Record<string, string>) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
+  source(dir);
+  const npc = {
+    keywords: ['sage'],
+    name: { prose: 'NPC' },
+    room_line: { prose: 'A [NPC](sage).' },
+  };
+  mkdirSync(join(dir, 'npcs'), { recursive: true });
+  writeFileSync(
+    join(dir, 'npcs/sage.json'),
+    JSON.stringify({ ...npc, description: { prose: 'NPC_TEXT' }, room: 'yard' }),
+  );
+  const facts = JSON.parse(readFileSync(join(dir, 'facts.json'), 'utf8'));
+  facts.facts.sage_met = Object.values<any>(facts.facts).find((f) => f.value_type?.type === 'bool');
+  writeFileSync(join(dir, 'facts.json'), JSON.stringify(facts));
+  mkdirSync(join(dir, 'scenes'), { recursive: true });
+  for (const [name, text] of Object.entries(scenes))
+    writeFileSync(join(dir, `scenes/${name}.scene`), text);
+  const c = compiled(dir);
+  rmSync(dir, { recursive: true });
+  return c;
+};
+
+// Breaks: fall-through stops at a nested set, so an intro that reaches its hub through a nested
+// choice refuses Talk for good, or it opens the nested set itself.
+test('a shut intro falls through its nested choice to the hub', () => {
+  const g = saved(
+    withSage({
+      intro: `npc: sage
+when: not sage_met
+sage: TEXT
+- Start
+  sage: TEXT
+  - Go
+    sage: TEXT
+    sets: sage_met
+    then: hub
+`,
+      hub: `npc: sage
+sage: TEXT
+- Stay
+  sage: TEXT
+- Bye
+  sage: TEXT
+`,
+    }),
+  ).now();
+  g.go('talk', {}, [g.id('sage')], 'intro');
+  assert.deepEqual(g.offered(), ['start']);
+  g.choose('start');
+  assert.deepEqual(g.offered(), ['go']);
+  g.choose('go');
+  assert.deepEqual(g.offered(), ['stay', 'bye']);
+  g.close();
+  const row = g
+    .view()
+    .entities.find((e) => e.id === g.id('sage'))!
+    .actions.find((a) => a.label === 'action.talk')!;
+  assert.equal(row.available, true);
+  g.go('talk', {}, [g.id('sage')], row.action_key);
+  assert.deepEqual(g.offered(), ['stay', 'bye']);
+});
+
 // Breaks: Talk opens at the widest nested set ("ask" has more ways on than the top), a later scene is
 // shut out by the first, a failed first scene falls through its free choice into its own set, or the
 // file names, not `when: not`, decide who opens.
@@ -87,27 +152,8 @@ for (const [first, later] of [
   ['sage_2_first', 'sage_1_later'],
 ])
   test(`a first meeting (${first}) then a later nested scene, across a reload`, () => {
-    const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
-    source(dir);
-    const npc = {
-      keywords: ['sage'],
-      name: { prose: 'NPC' },
-      room_line: { prose: 'A [NPC](sage).' },
-    };
-    mkdirSync(join(dir, 'npcs'), { recursive: true });
-    writeFileSync(
-      join(dir, 'npcs/sage.json'),
-      JSON.stringify({ ...npc, description: { prose: 'NPC_TEXT' }, room: 'yard' }),
-    );
-    const facts = JSON.parse(readFileSync(join(dir, 'facts.json'), 'utf8'));
-    facts.facts.sage_met = Object.values<any>(facts.facts).find(
-      (f) => f.value_type?.type === 'bool',
-    );
-    writeFileSync(join(dir, 'facts.json'), JSON.stringify(facts));
-    mkdirSync(join(dir, 'scenes'));
-    writeFileSync(
-      join(dir, `scenes/${first}.scene`),
-      `npc: sage
+    const c = withSage({
+      [first!]: `npc: sage
 when: not sage_met
 sage: TEXT
 - Ask
@@ -120,10 +166,7 @@ sage: TEXT
   - Back
     sage: TEXT
 `,
-    );
-    writeFileSync(
-      join(dir, `scenes/${later}.scene`),
-      `npc: sage
+      [later!]: `npc: sage
 when: sage_met
 sage: TEXT
 - Again
@@ -131,9 +174,7 @@ sage: TEXT
   - More
     sage: TEXT
 `,
-    );
-    const c = compiled(dir);
-    rmSync(dir, { recursive: true });
+    });
     const s = saved(c);
     // As the Book does: the one Talk row the view lists for the speaker.
     const talk = (g: ReturnType<typeof s.now>) => {

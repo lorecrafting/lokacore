@@ -1,4 +1,4 @@
-# size: allow 580, every scene form shares the sampler fixture and its twin
+# size: allow 660, every scene form shares the sampler fixture and its twin
 defmodule Loka.ContentSceneBranchingTest do
   # needs, once, then and nested choices in a `.scene` (docs/system/cartridge.md, Source
   # shortcuts). Expected JSON is hand-written; `~` stands for the words.
@@ -309,6 +309,73 @@ defmodule Loka.ContentSceneBranchingTest do
     assert warned.("when: not knows_potter", "- Ask\n  bram: ~\n  - Back\n    bram: ~\n") == []
   end
 
+  # Scene `scene`, with the `h1` or `h2` its `then`s name beside it; the given code's targets.
+  defp warned_with_hubs(code, text) do
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+    write(dir, "scenes/scene.scene", text)
+
+    for k <- ~w(h1 h2), text =~ "then: #{k}" do
+      write(dir, "scenes/#{k}.scene", "npc: bram\nbram: ~\n- Bye\n  bram: ~\n")
+    end
+
+    # The sampler's own bram.json would be a second Talk.
+    aside = {"dialogues/bram.json", &Map.put(&1, "entry", false)}
+    assert {:ok, _, diags} = Loka.ContentSource.compile(dir, [with_facts(), aside])
+    for %{"code" => ^code} = d <- diags, do: d["data"]["target"]
+  end
+
+  # Break: a hub with no nesting whose choice flips its own `when:` reopens with every choice
+  # unavailable and no word, or the warning fires where the talk does not come back.
+  test "RETURN_CLOSED marks a plain setter that comes back" do
+    warned =
+      &warned_with_hubs("RETURN_CLOSED", "npc: bram\nwhen: not knows_potter\nbram: ~\n" <> &1)
+
+    sets = "- Ask\n  bram: ~\n  sets: knows_potter\n"
+    other = "- Other\n  bram: ~\n"
+
+    assert warned.(sets <> other) == ["scene"]
+    # The only choice closes the talk.
+    assert warned.(sets) == []
+    assert warned.(sets <> "  then: end\n" <> other) == []
+  end
+
+  # Break: fall-through stops at a nested set in the guess, so a shut root's real pick of two goes unwarned.
+  test "ENTRY_GUESSED looks through a nested set to what Talk would open" do
+    head =
+      "npc: bram\nwhen: not knows_potter\nbram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n    then: h1\n"
+
+    assert warned_with_hubs("ENTRY_GUESSED", head <> "  - Out\n    bram: ~\n    then: h2\n") == [
+             "h1"
+           ]
+
+    # The nested way back to the root is no second way on.
+    assert warned_with_hubs("ENTRY_GUESSED", head <> "  - Back\n    bram: ~\n") == []
+  end
+
+  # Break: `when:` plus `once` then `then` refuses Talk for good with no word to the writer, or the
+  # warning fires where something else still leads on.
+  test "FALL_THROUGH_SPENT marks a shut Talk whose only free way on spends itself" do
+    warned = &warned_with_hubs("FALL_THROUGH_SPENT", "npc: bram\n" <> &1)
+    head = "when: not knows_potter\nbram: ~\n"
+    spent = "- Go\n  bram: ~\n  once\n  sets: knows_potter\n  then: h1\n"
+    lasting = "- Stay\n  bram: ~\n  then: h1\n"
+
+    assert warned.(head <> spent) == ["scene"]
+
+    assert warned.(
+             head <>
+               "- Go\n  bram: ~\n  needs: not saw_lantern\n  sets: saw_lantern\n  then: h1\n"
+           ) == ["scene"]
+
+    assert warned.(head <> "- Go\n  bram: ~\n  - In\n    bram: ~\n    once\n    then: h1\n") == [
+             "scene"
+           ]
+
+    assert warned.(head <> "- Go\n  bram: ~\n  sets: knows_potter\n  then: h1\n") == []
+    assert warned.(head <> spent <> lasting) == []
+    assert warned.("bram: ~\n" <> spent) == []
+  end
+
   # Break: a refused choice in an out-of-order list crashes the compile before its error reaches the writer.
   test "a refused choice among unsorted ones reports its line" do
     assert {:error, [_ | _]} = sampler("npc: bram\nbram: ~\n- zebra\n  bram: ~\n- ~\n  bram: ~\n")
@@ -432,6 +499,18 @@ defmodule Loka.ContentSceneBranchingTest do
     assert got == [{5, "nested_key_long"}, {6, "bad_sets"}]
     assert hd(diags)["data"]["key"] == "s_#{long}"
     assert Enum.any?(Content.explained(diags, tmp), &(&1 =~ "scenes/s.scene:5"))
+  end
+
+  # Break: the longest key Key allows is refused with the one over it.
+  test "a nested key of exactly 64 bytes compiles", %{tmp_dir: tmp} do
+    write(
+      tmp,
+      "scenes/s.scene",
+      "npc: bram\nbram: hi\n- #{String.duplicate("a", 62)}\n  bram: x\n  - In\n    bram: y\n"
+    )
+
+    {_, diags} = Source.load(tmp)
+    assert diags == []
   end
 
   # Break: a sidecar JSON silently replaces a scene's words, or a sidecar's own addition (the

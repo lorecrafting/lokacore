@@ -141,7 +141,9 @@ What you can rely on when dialogues link with `then` (JSON dialogues today):
   holds, with no check, cost or other gate. So a first meeting is an `intro` with a `when:` that links
   to a `hub`: the first Talk opens the intro, and once the condition fails Talk opens the hub unless
   another dialogue opens first. A locked or paid way on is skipped, and Talk is refused only when
-  nothing further down opens. A Talk with its own `name` opens its dialogue or is refused.
+  nothing further down opens. A way on through a nested choice counts; a way on through a choice with
+  `once`, or one that sets what its own `needs:` forbids, is shut once taken, and the compile warns
+  `FALL_THROUGH_SPENT` when Talk has no other way. A Talk with its own `name` opens its dialogue or is refused.
 - Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
   condition holds and that has a choice to show.
 - A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the

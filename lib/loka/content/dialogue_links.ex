@@ -1,4 +1,4 @@
-# size: allow 345, every whole-cartridge dialogue link check in one graph
+# size: allow 401, every whole-cartridge dialogue link check in one graph
 defmodule Loka.Content.DialogueLinks do
   @moduledoc "A dialogue choice's policy and narration variants as roots, and its then and then_failed checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -87,7 +87,46 @@ defmodule Loka.Content.DialogueLinks do
 
     refused(sorted) ++
       guessed(open, next, live_keys) ++
-      fall_through(open, sorted) ++ unused(sorted, open, next) ++ return_closed(sorted, next)
+      fall_through(open, sorted) ++
+      unused(sorted, open, next) ++
+      return_closed(sorted, next) ++ fall_through_spent(open, sorted)
+  end
+
+  # A speaker's only Talk whose every free way on shuts itself once taken: Talk is refused for good.
+  defp fall_through_spent(open, sorted) do
+    by_key = Map.new(sorted, fn {_, d} -> {d["key"], d} end)
+    talked = for {_, d} <- open, plain_talk?(d), do: d["npc"]
+
+    for {rel, d} <- open, spent_talk?(d, talked, by_key) do
+      warning("FALL_THROUGH_SPENT", rel, ["policy"], d)
+    end
+  end
+
+  defp spent_talk?(d, talked, by_key) do
+    d["policy"] && plain_talk?(d) && Enum.count(talked, &(&1 == d["npc"])) == 1 &&
+      only_spent_ways?(d, by_key)
+  end
+
+  defp plain_talk?(d), do: !d["keyword"] and !d["name"]
+
+  defp only_spent_ways?(d, by_key) do
+    seen = [d["key"]]
+
+    free_links(d, by_key, seen, &free?/1) != [] and
+      free_links(d, by_key, seen, &(free?(&1) and not spends_itself?(&1))) == []
+  end
+
+  # `once` lowers to this, as does `needs: not x` with `sets: x`.
+  defp spends_itself?(c) do
+    gates =
+      case c["policy"] do
+        %{"op" => "all", "items" => items} -> items
+        policy -> [policy]
+      end
+
+    Enum.any?(gates, fn gate ->
+      Enum.any?(when_fact(gate), fn {fact, value} -> assigns?(c, fact, value) end)
+    end)
   end
 
   # A `then` target whose policy has failed closes the talk, so setting what a set's root reads closes it.
@@ -96,7 +135,8 @@ defmodule Loka.Content.DialogueLinks do
 
     for {rel, d} <- sorted,
         {fact, value} <- when_fact(d["policy"]),
-        closes?(set_choices(d, by_key, next), d["key"], fact, value, next) do
+        closes?(set_choices(d, by_key, next), d["key"], fact, value, next) or
+          reopens_shut?(d, fact, value, next) do
       warning("RETURN_CLOSED", rel, ["policy"], d)
     end
   end
@@ -108,6 +148,17 @@ defmodule Loka.Content.DialogueLinks do
       &(assigns?(&1, fact, value) and key in walk(List.wrap(&1["then"]), next, MapSet.new()))
     )
   end
+
+  # selection.ts `reopens`: a plain answer brings its dialogue back unless some `then` names it.
+  defp reopens_shut?(d, fact, value, next) do
+    named = next |> Map.values() |> List.flatten()
+    choices = Map.values(d["choices"])
+
+    d["key"] not in named and !d["quest"] and !d["riddle"] and length(choices) > 1 and
+      Enum.any?(choices, &(assigns?(&1, fact, value) and plain?(&1)))
+  end
+
+  defp plain?(c), do: !c["then"] and !c["check"] and !c["patrol"]
 
   defp set_choices(d, by_key, next) do
     nested = walk(next[d["key"]] || [], next, MapSet.new())
@@ -187,12 +238,12 @@ defmodule Loka.Content.DialogueLinks do
 
   # Down a line of shut dialogues to the first with more than one way on: `[its pick]`, or `[]`.
   defp guess(d, by_key, seen) do
-    case free_links(d, by_key) do
+    case free_links(d, by_key, [d["key"] | seen], &free?/1) do
       [first, _ | _] ->
         [first]
 
       [only] ->
-        if by_key[only]["policy"] && only not in seen,
+        if by_key[only]["policy"],
           do: guess(by_key[only], by_key, [only | seen]),
           else: []
 
@@ -201,13 +252,20 @@ defmodule Loka.Content.DialogueLinks do
     end
   end
 
-  defp free_links(d, by_key) do
+  # What a shut dialogue falls through to, past `entry: false` ones, which never open themselves.
+  defp free_links(d, by_key, seen, way?) do
     for(
       {_, c} <- Enum.sort(d["choices"]),
-      free?(c),
+      way?.(c),
       by_key[c["then"]]["npc"] == d["npc"],
-      by_key[c["then"]]["entry"] != false,
-      do: c["then"]
+      c["then"] not in seen,
+      to = by_key[c["then"]],
+      k <-
+        if(to["entry"] == false,
+          do: free_links(to, by_key, [c["then"] | seen], way?),
+          else: [c["then"]]
+        ),
+      do: k
     )
     |> Enum.uniq()
   end
