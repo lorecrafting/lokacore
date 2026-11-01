@@ -101,6 +101,9 @@ defmodule Loka.Content.SceneLines do
 
   defp emit(s, k, text, n), do: %{s | lines: [{k, text, n} | s.lines]}
 
+  defp head("when: not " <> fact = text, n, s),
+    do: emit(%{s | facts: %{fact => false}}, s.root, text, n)
+
   defp head("when: " <> fact = text, n, s),
     do: emit(%{s | facts: %{fact => true}}, s.root, text, n)
 

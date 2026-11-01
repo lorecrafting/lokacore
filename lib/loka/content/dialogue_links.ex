@@ -91,7 +91,12 @@ defmodule Loka.Content.DialogueLinks do
   defp unused(sorted, open, next) do
     played = walk(for({_, d} <- open, do: d["key"]), next, MapSet.new())
 
-    for {rel, d} <- sorted -- live(sorted), d["entry"] != false, d["key"] not in played do
+    linked = next |> Map.values() |> List.flatten()
+
+    # A linked `entry: false` is a nested scene; its parent's own warning covers it.
+    for {rel, d} <- sorted -- live(sorted),
+        d["entry"] != false or d["key"] not in linked,
+        d["key"] not in played do
       warning("ENTRY_UNUSED", rel, ["npc"], d)
     end
   end

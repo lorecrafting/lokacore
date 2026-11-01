@@ -1,4 +1,4 @@
-# size: allow 320, one row per refusal a writer can meet; the table reads together
+# size: allow 324, one row per refusal a writer can meet; the table reads together
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -48,6 +48,7 @@ defmodule Loka.Content.Explain do
          EMPTY_TIME_WINDOW | This time window can never be open. | Widen its hours or days.
          OUTCOME_MISMATCH | This outcome does not fit the choice or story point it belongs to. | Keep one effect on the choice and name an outcome its story point declares.
          RESOURCE_SPEC_INVALID | A resource must have minimum <= start <= maximum. | Fix these numbers.
+         BODY_BELOW_ZERO | A body with hp below 0 could never die from a blow. | Set this hp's `minimum` and `start` to 0 or more.
          BARRIER_MISMATCH | The two sides of this barrier disagree. | Name the same barrier on both, and check its rooms and direction.
          BARRIER_UNREACHABLE_KEY | The key to this barrier is out of reach without passing it. | Place the key on the near side.
          RESERVED_FACT | The engine owns the fact name `{field}`. | Rename your fact.
@@ -66,6 +67,7 @@ defmodule Loka.Content.Explain do
          too_few_items | `{field}` needs at least one entry.
          wrong_speaker | Line `{text}`: only `{npc}:` or a `with:` speaker may speak here (`npc: {npc}`). | Change the speaker to `{npc}`, add `with: <npc>` at the top, or move this into its own scene.
          gives_speaker | Line `{text}`: a scene cannot give an item named like its speaker. | Rename the item, or write this as `dialogues/<key>.json`.
+         gives_key | Line `{text}`: an item's key takes lowercase letters, digits and underscores. | Fix the name after `gives:`.
          repeated_choice | Line `{text}` repeats a choice or has no words to key it by. | Reword the choice.
          gives_outside_choice | Line `{text}`: `gives:` belongs under a choice. | Move it under a `- ` line.
          scene_entry | Line `{text}`: a scene header takes no `entry`. | Put `{"entry": true}` in `dialogues/<key>.json` beside the scene.
@@ -78,8 +80,8 @@ defmodule Loka.Content.Explain do
          bad_needs | Line `{text}` is not `needs: <fact>` or `needs: not <fact>`, or repeats a `needs:`. | Give a choice one `needs:` naming one fact by its key; `~` holds the place of words, not of a fact. Anything richer goes in `policy` in `dialogues/<key>.json`.
          needs_outside_choice | Line `{text}`: `needs:` belongs under a choice. | Move it under a `- ` line, or use `when:` for the whole scene.
          unreachable | Line `{text}` may never be true here: the `when:` or a choice above it needs the opposite and this file never sets that fact, and the compiler cannot see another file or a reaction changing it. | Nothing to do if something else changes that fact; otherwise remove the line or move this choice out from under that one.
-         bad_once | Line `{text}` is not `once`. | Write the one word `once` under the choice.
-         bad_asked | Line `{text}` is not `asked`. | Write the one word `asked` under the choice.
+         bad_once | Line `{text}` is not `once`, or repeats it. | Write the one word `once`, one time, under the choice.
+         bad_asked | Line `{text}` is not `asked`, or repeats it. | Write the one word `asked`, one time, under the choice.
          choice_order_written | `choice_order` is the compiler's mark of a scene's written order, not a field to write. | Remove it: a scene's choices show as written, a JSON dialogue's by key.
          once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
          once_key_taken | `once` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice's words.
@@ -112,7 +114,7 @@ defmodule Loka.Content.Explain do
          wait_event | This step reads the event that started the rule, and that event is gone after a `wait`. | Move the step above the first `wait`.
          wait_inside_action | This rule can start inside a timed action, and the game cannot tell how long that action takes, so two or more waits could land in one second, in any order. | Start the rule from `action_completed` and name the `action`. That event never fires when the action's check fails: for a failure, use `check_failed` (its parts run right after the action, order not sure) or a single `wait`.
          wait_subject | A rule with a `wait` reads `when` again when each stretch runs, and the event's `subject` is gone by then. | Read the actor instead, or split the rule by hand.
-         duration_status | An action with a duration cannot apply a status. | Remove `duration`, or remove `status.apply`.
+         duration_status | An action with a duration cannot apply a status that ticks or ends. | Remove `duration`, or remove `status.apply`.
          layout_same_spot | Rooms {rooms} share the spot x {x}, y {y}, z {z}. | Give each its own x, y, z in layout.json.
          layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.
          gives_holder | `gives: {item}` hands over nothing until `{holder}` holds `{item}`: the choice stays hidden. | Set the item's location to `{"in": "npc", "npc": "{holder}"}`, or move it there in play.
@@ -173,11 +175,12 @@ defmodule Loka.Content.Explain do
       key = root |> String.trim("\"") |> Path.rootname() |> Path.basename()
       field = String.replace_prefix(path, root <> ".", "")
 
-      # A field holds a text key built from the name when that key fails too; a top-level one always
-      # does (room_line's key ends .room). A deeper field with no such key is the author's own fault.
-      (field != path and
-         (not String.contains?(field, ".") or
-            Enum.any?(diags, &String.ends_with?(&1["path"], "." <> key <> "." <> field <> "\"]")))) or
+      # A field holds a text key built from the name when that key fails too (room_line's ends
+      # .room, so `room` itself holds none). Any other field fault is the author's own.
+      text_key = if field == "room_line", do: "room", else: field
+
+      (field not in [path, "room"] and
+         Enum.any?(diags, &String.ends_with?(&1["path"], "." <> key <> "." <> text_key <> "\"]"))) or
         (String.starts_with?(path, "text[") and String.contains?(path, "." <> key <> "."))
     end)
   end
@@ -275,6 +278,7 @@ defmodule Loka.Content.Explain do
 
   # A long-form reference reads as its kind and key; a bare target is a text key or role name.
   defp target(nil), do: %{}
+  defp target(%{"kind" => kind, "key" => key}), do: %{"target" => key, "kind" => kind}
   # A site can pass the authored value itself, when the file gave a non-string there.
   defp target(t) when not is_binary(t), do: %{"target" => JSON.encode!(t)}
 

@@ -5,6 +5,7 @@ defmodule Loka.ContentExplainFollowOnsTest do
 
   alias Loka.Content
   alias Loka.Content.Explain
+  alias Loka.Content.Starters
 
   @moduletag :tmp_dir
 
@@ -139,18 +140,144 @@ defmodule Loka.ContentExplainFollowOnsTest do
     assert Enum.any?(lines, &(&1 =~ "resources.json" and &1 =~ "minimum <= start <= maximum"))
   end
 
-  # Break: a tone fault lets through a pool whose other fault leaves its numbers unusable.
-  test "a bad tone with a bad gain leaves the pool unusable", %{tmp_dir: dir} do
-    band = %{"at_percent" => 0, "key" => "x", "tone" => "lockd"}
-    gold = %{"bands" => [band], "gain" => "x", "maximum" => 9, "minimum" => 0, "start" => 0}
-    assert line_at(pool_lines(dir, gold), "npcs/bram.json") =~ "minimum <= start <= maximum"
+  # Break: a body pool below 0 compiles again, and the body can never die by a blow.
+  test "an hp floor or start below 0 says the body could never die", %{tmp_dir: dir} do
+    line = "A body with hp below 0 could never die from a blow."
+
+    for {name, hp} <- [
+          {"floor", ~s({"minimum":-5,"maximum":20,"start":3,"gain":0})},
+          {"both", ~s({"minimum":-5,"maximum":20,"start":-3,"gain":0})},
+          {"start", ~s({"minimum":0,"maximum":20,"start":-3,"gain":0})}
+        ] do
+      lines = said(Path.join(dir, name), %{"resources.json" => ~s({"resources":{"hp":#{hp}}})})
+      assert [only] = lines, inspect(lines)
+      assert only =~ line
+    end
+
+    # Control: another pool may go below 0, and a floor of 0 passes; mv's bad gain makes it refuse.
+    assert [only] =
+             said(Path.join(dir, "ok"), %{
+               "resources.json" =>
+                 ~s({"resources":{"hp":{"minimum":0,"maximum":20,"start":0,"gain":0},"ma":{"minimum":-5,"maximum":20,"start":-3,"gain":0},"mv":{"minimum":0,"maximum":20,"start":3,"gain":"x"}}})
+             })
+
+    assert only =~ "`gain`"
   end
 
-  # Break: any band fault, not only its tone, is taken as leaving the pool usable.
-  test "a bad percent leaves the pool unusable", %{tmp_dir: dir} do
+  # Break: a world with death also blames its restore amount for the pool's own refusal.
+  test "a refused hp prints no restore line in a world with death", %{tmp_dir: tmp} do
+    File.cp_r!("cartridges/spell_effects_sampler", tmp)
+    path = Path.join(tmp, "resources.json")
+    file = path |> File.read!() |> JSON.decode!()
+    File.write!(path, file |> put_in(["resources", "hp", "minimum"], -5) |> JSON.encode!())
+
+    {:error, diags} = Content.compile(tmp)
+    assert ["resources.resources.hp"] = Enum.map(diags, & &1["path"])
+    assert [line] = Content.explained(diags, tmp)
+    assert line =~ "could never die from a blow"
+  end
+
+  # Break: a pool refused for its gain still prints its holder's start as a bad number.
+  test "a bad gain prints only the gain", %{tmp_dir: dir} do
+    gold = %{"gain" => "x", "maximum" => 9, "minimum" => 0, "start" => 0}
+    assert [line] = pool_lines(dir, gold)
+    assert line =~ "resources.json"
+    assert line =~ "`gain`"
+  end
+
+  # Break: any band fault, not only its tone, leaves the numbers in use, so bram's 5 is held to 3.
+  test "a bad percent leaves no numbers to hold a start to", %{tmp_dir: dir} do
     band = %{"at_percent" => "x", "key" => "x", "tone" => "normal"}
-    gold = %{"bands" => [band], "gain" => 0, "maximum" => 9, "minimum" => 0, "start" => 0}
-    assert line_at(pool_lines(dir, gold), "npcs/bram.json") =~ "minimum <= start <= maximum"
+    gold = %{"bands" => [band], "gain" => 0, "maximum" => 3, "minimum" => 0, "start" => 0}
+    assert [line] = pool_lines(dir, gold)
+    assert line =~ "resources.json"
+  end
+
+  # Break: a manifest refused by its schema reaches the emote check as nil and the compile crashes.
+  test "an emote beside a refused manifest prints the manifest's line", %{tmp_dir: dir} do
+    manifest =
+      @manifest
+      |> JSON.decode!()
+      |> Map.put("requires", %{"capabilities" => %{"emote" => "~"}})
+      |> JSON.encode!()
+
+    lines = said(dir, %{"cartridge.json" => manifest, "emotes/wave.json" => ~s({"others":"x"})})
+    assert line_at(lines, "cartridge.json") =~ "emote"
+  end
+
+  # Break: a real `room` under a bad name waits for the rename, then surprises the writer.
+  test "a bad room under a bad name is said with the rename", %{tmp_dir: dir} do
+    npc =
+      ~s({"description":#{@prose},"keywords":["x"],"name":#{@prose},"room":"Bad Room","room_line":#{@prose}})
+
+    lines = said(dir, %{"npcs/Bad Bram.json" => npc})
+    assert length(lines) == 2
+    assert Enum.any?(lines, &(&1 =~ "Rename it"))
+    assert Enum.any?(lines, &(&1 =~ "`room`"))
+  end
+
+  # Break: only a text key under the bad name fails, printing a line about a text key, not the file.
+  test "a bad behaviours name prints only the rename", %{tmp_dir: dir} do
+    behaviour =
+      ~s({"reactions":{"taken":{"on":{"event":"item_taken"},"steps":[{"op":"narrate","text":#{@prose}}]}}})
+
+    assert [line] = said(dir, %{"behaviours/Bad Pace.json" => behaviour})
+    assert line =~ "behaviours/Bad Pace.json:1"
+    assert line =~ "Rename it"
+  end
+
+  # Break: the item's name reaches the form, and its two pattern faults print two lines.
+  test "a bad name after gives prints one line naming it", %{tmp_dir: dir} do
+    assert [line] = scene(dir, "npc: bram\nbram: hi\n- Go\n  * off\n  gives: Bad Item\n")
+    assert line =~ "scenes/hi.scene:5"
+    assert line =~ "gives: Bad Item"
+  end
+
+  # Break: bram is gone, and the service also calls its currency and provider invalid, which no
+  # edit to those fields clears.
+  test "a service's deleted provider prints one line naming it", %{tmp_dir: tmp} do
+    dir = Path.join(tmp, "mine")
+    {:ok, _} = Starters.write(dir, "cartridge", dir)
+    {:ok, _} = Starters.write(dir, "resources", "coin")
+    {:ok, _} = Starters.write(dir, "npcs", "bram")
+    {:ok, _} = Starters.write(dir, "services", "ferry")
+    File.rm!(Path.join(dir, "npcs/bram.json"))
+    {:error, diags} = Content.compile(dir)
+    assert [line] = diags |> Content.explained(dir) |> Enum.filter(&(&1 =~ "services/ferry"))
+    assert line =~ "Nothing defines the npc `bram`."
+  end
+
+  # Break: the refusal's next step leaves the files one edit short of compiling.
+  test "a second population compiles by the refusal's own steps", %{tmp_dir: tmp} do
+    dir = Path.join(tmp, "mine")
+    {:ok, _} = Starters.write(dir, "cartridge", dir)
+    {:ok, _} = Starters.write(dir, "populations", "rats")
+    assert {:error, message} = Starters.write(dir, "populations", "mice")
+
+    assert message =~
+             "copy the first population's populations, npcs (_npc) and items (_item, _corpse)"
+
+    for {from, to} <- [
+          {"populations/rats", "populations/mice"},
+          {"npcs/rats_npc", "npcs/mice_npc"},
+          {"items/rats_item", "items/mice_item"},
+          {"items/rats_corpse", "items/mice_corpse"}
+        ] do
+      File.cp!(Path.join(dir, from <> ".json"), Path.join(dir, to <> ".json"))
+    end
+
+    path = Path.join(dir, "populations/mice.json")
+
+    File.write!(
+      path,
+      path
+      |> File.read!()
+      |> JSON.decode!()
+      |> Map.merge(%{"npc" => "mice_npc", "item" => "mice_item", "corpse" => "mice_corpse"})
+      |> JSON.encode!()
+    )
+
+    assert {:ok, _, _} = Content.compile(dir)
   end
 
   defp pool_lines(dir, gold) do

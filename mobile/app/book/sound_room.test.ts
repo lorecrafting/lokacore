@@ -135,6 +135,17 @@ test('music holds the piece off; a quiet view spends nothing', async () => {
   assert.ok(urlsOf(c.els).includes('p-inn.m4a'), 'the next view still may');
 });
 
+// Breaks: waking in a room whose tag is new plays its piece, then or on the next view (plan 14: only the bed returns).
+test("waking spends the room's piece and keeps its bed", async () => {
+  const b = await browser();
+  b.gesture();
+  b.ambience('inn', undefined, true, 'woke');
+  b.ambience('inn', undefined, true);
+  assert.deepEqual(urlsOf(b.els), ['inn.m4a']);
+  b.ambience('cave', undefined, true);
+  assert.ok(urlsOf(b.els).includes('p-cave.m4a'), 'a later new tag keeps its piece');
+});
+
 // Breaks: a piece repeats on re-entry, ignores the gap, or lowers nothing.
 test('a piece plays once per tag and gap, and lowers beds by bedUnderMusic', async (t) => {
   let now = 1_000_000;

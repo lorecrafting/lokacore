@@ -1,5 +1,7 @@
 # Worldbuilding: the stub tree
 
+> Reference only: every file in this tree was written or drafted by agents, not the owner (the owner's verbatim notes in [notes/](notes/README.md) excepted). Nothing here ships as written; the owner writes shipped story and lore ([rule](../decisions/owner-decision-human-made-content-2026-10-31.md)). Draft-tier stubs also carry their own mark.
+
 The worldbuilding subproject (Beads epic `loka-ikch`) builds Loka's own cosmology, lore and
 profession systems from the ground up. It replaces the Ashmere setting (owner 2026-10-15; Ashmere
 canon is not an input). This folder is the world bible's skeleton: one short stub per area that

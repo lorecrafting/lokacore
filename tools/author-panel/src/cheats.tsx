@@ -34,9 +34,8 @@ export function SetFact({ state, send }: { state?: State; send: Send }) {
   const typedValue = () => {
     try {
       const parsed: unknown = JSON.parse(value); // true, false, a number or a "quoted" string
-      return ['boolean', 'number', 'string'].includes(typeof parsed)
-        ? (parsed as boolean | number | string)
-        : value;
+      const plain = typeof parsed === 'boolean' || typeof parsed === 'string' || Number.isFinite(parsed);
+      return plain ? (parsed as boolean | number | string) : value; // 1e999 is no number the game can hold
     } catch {
       return value; // a bare word is an enum's or a string's
     }

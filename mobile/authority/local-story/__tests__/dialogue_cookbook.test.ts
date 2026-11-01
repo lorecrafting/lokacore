@@ -80,27 +80,35 @@ function saved(c = COOK) {
 const COOK = compile();
 
 // Breaks: Talk opens at the widest nested set ("ask" has more ways on than the top), a later scene is
-// shut out by the first, or a failed first scene falls through its free choice into its own set.
-test('a first meeting then a later nested scene, chosen by a fact, across a reload', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
-  source(dir);
-  const npc = {
-    keywords: ['sage'],
-    name: { prose: 'NPC' },
-    room_line: { prose: 'A [NPC](sage).' },
-  };
-  mkdirSync(join(dir, 'npcs'), { recursive: true });
-  writeFileSync(
-    join(dir, 'npcs/sage.json'),
-    JSON.stringify({ ...npc, description: { prose: 'NPC_TEXT' }, room: 'yard' }),
-  );
-  const facts = JSON.parse(readFileSync(join(dir, 'facts.json'), 'utf8'));
-  facts.facts.sage_met = Object.values<any>(facts.facts).find((f) => f.value_type?.type === 'bool');
-  writeFileSync(join(dir, 'facts.json'), JSON.stringify(facts));
-  mkdirSync(join(dir, 'scenes'));
-  writeFileSync(
-    join(dir, 'scenes/sage_2_first.scene'),
-    `npc: sage
+// shut out by the first, a failed first scene falls through its free choice into its own set, or the
+// file names, not `when: not`, decide who opens.
+for (const [first, later] of [
+  ['sage_1_first', 'sage_2_later'],
+  ['sage_2_first', 'sage_1_later'],
+])
+  test(`a first meeting (${first}) then a later nested scene, across a reload`, () => {
+    const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
+    source(dir);
+    const npc = {
+      keywords: ['sage'],
+      name: { prose: 'NPC' },
+      room_line: { prose: 'A [NPC](sage).' },
+    };
+    mkdirSync(join(dir, 'npcs'), { recursive: true });
+    writeFileSync(
+      join(dir, 'npcs/sage.json'),
+      JSON.stringify({ ...npc, description: { prose: 'NPC_TEXT' }, room: 'yard' }),
+    );
+    const facts = JSON.parse(readFileSync(join(dir, 'facts.json'), 'utf8'));
+    facts.facts.sage_met = Object.values<any>(facts.facts).find(
+      (f) => f.value_type?.type === 'bool',
+    );
+    writeFileSync(join(dir, 'facts.json'), JSON.stringify(facts));
+    mkdirSync(join(dir, 'scenes'));
+    writeFileSync(
+      join(dir, `scenes/${first}.scene`),
+      `npc: sage
+when: not sage_met
 sage: TEXT
 - Ask
   sage: TEXT
@@ -112,10 +120,10 @@ sage: TEXT
   - Back
     sage: TEXT
 `,
-  );
-  writeFileSync(
-    join(dir, 'scenes/sage_1_later.scene'),
-    `npc: sage
+    );
+    writeFileSync(
+      join(dir, `scenes/${later}.scene`),
+      `npc: sage
 when: sage_met
 sage: TEXT
 - Again
@@ -123,28 +131,28 @@ sage: TEXT
   - More
     sage: TEXT
 `,
-  );
-  const c = compiled(dir);
-  rmSync(dir, { recursive: true });
-  const s = saved(c);
-  // As the Book does: the one Talk row the view lists for the speaker.
-  const talk = (g: ReturnType<typeof s.now>) => {
-    const npc = g.view().entities.find((e) => e.id === g.id('sage'))!;
-    const talks = npc.actions.filter((a) => a.label === 'action.talk');
-    assert.equal(talks.length, 1);
-    assert.equal(talks[0]!.available, true);
-    g.go('talk', {}, [g.id('sage')], talks[0]!.action_key);
-  };
-  let g = s.now();
-  talk(g);
-  assert.deepEqual(g.offered(), ['ask']);
-  g.choose('ask');
-  assert.deepEqual(g.offered(), ['c001_deeper', 'c002_back']);
-  g.close();
-  g = s.again();
-  talk(g);
-  assert.deepEqual(g.offered(), ['again']);
-});
+    );
+    const c = compiled(dir);
+    rmSync(dir, { recursive: true });
+    const s = saved(c);
+    // As the Book does: the one Talk row the view lists for the speaker.
+    const talk = (g: ReturnType<typeof s.now>) => {
+      const npc = g.view().entities.find((e) => e.id === g.id('sage'))!;
+      const talks = npc.actions.filter((a) => a.label === 'action.talk');
+      assert.equal(talks.length, 1);
+      assert.equal(talks[0]!.available, true);
+      g.go('talk', {}, [g.id('sage')], talks[0]!.action_key);
+    };
+    let g = s.now();
+    talk(g);
+    assert.deepEqual(g.offered(), ['ask']);
+    g.choose('ask');
+    assert.deepEqual(g.offered(), ['c001_deeper', 'c002_back']);
+    g.close();
+    g = s.again();
+    talk(g);
+    assert.deepEqual(g.offered(), ['again']);
+  });
 
 // Breaks: an edit to the page, or a compiler warning a source shape starts to draw.
 test('the page compiles with no warnings', () => {

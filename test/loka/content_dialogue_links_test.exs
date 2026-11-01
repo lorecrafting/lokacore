@@ -427,6 +427,11 @@ defmodule Loka.ContentDialogueLinksTest do
              [{"warning", "ENTRY_UNUSED", "dialogues/a_x.npc", "a_x"}]
 
     assert entry_findings([d("a_x", "z"), d("b", "a", [], m)]) == []
+
+    # Break: a sidecar `entry: false` on an only root, nothing links to it: no Talk and no warning.
+    assert entry_findings([d("a_x", "a", [], %{"entry" => false})]) ==
+             [{"warning", "ENTRY_UNUSED", "dialogues/a_x.npc", "a_x"}]
+
     assert entry_findings([d("a_x", "a", [], %{"keyword" => "w"}), d("b", "a", [], m)]) == []
     unused = &{"warning", "ENTRY_UNUSED", "dialogues/#{&1}.npc", &1}
 

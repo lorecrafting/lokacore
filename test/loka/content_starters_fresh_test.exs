@@ -114,7 +114,7 @@ defmodule Loka.ContentStartersFreshTest do
     follow(dir, "populations", "wolves")
     assert {:error, message} = Starters.write(dir, "populations", "bears")
     assert message =~ "world death npc_corpse"
-    assert message =~ "keep it and skip this starter"
+    assert message =~ "one death setup: keep it"
     refute message =~ "delete"
     assert {:ok, _, _} = Loka.Content.compile(dir)
   end

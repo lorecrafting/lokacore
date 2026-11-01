@@ -1,5 +1,7 @@
 # Chapter 1 implementation and proof briefs
 
+> Reference only: agent-written brief; any story, cast or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 These 33 briefs support the [Missing Child completion plan](../../archive/MISSING-CHILD-PLAN.md). They are **provisional PM recommendations** unless their own text links an adopted decision; a brief is not implementation proof, review approval or proof of a playable chapter. Before assigning a slice, the PM must reconcile recommendations with current `docs/system/` and owner decisions, and re-pin the actual merged dependencies, source head, fixtures, release identity and checks. Unknown future pins remain null. The [delivery workflow](../../WORKFLOW.md) governs implementation and review.
 
 The public plan owns the 33-row order and dependencies. These briefs retain dated

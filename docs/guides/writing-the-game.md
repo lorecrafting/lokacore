@@ -15,7 +15,7 @@ It starts the cartridge watcher (`bin/loka dev … --watch`), the Book preview (
 `npm run author`) and the author panel (`tools/author-panel`, installed on its first run). Open
 http://localhost:19009: the Book fills the page and the panel is the pane on the right (Compile at
 the top with its lint lines, then Play, Write, State, Why, Find and Numbers; the source line at the foot). The sun/moon button switches light
-and dark. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), 19006 (Book), `LOKA_PANEL_PORT` (panel, 19009).
+and dark. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book, 19006), `LOKA_PANEL_PORT` (panel, 19009).
 
 ## Write a scene
 
@@ -114,11 +114,12 @@ maud: ~
   in the middle. It tries that person's scenes in key order and opens the first whose `when:` holds
   and that shows a choice; when one fails, it first passes on to what it leads to through a choice
   the player could take for nothing, and is refused only if nothing further down opens. A Talk with
-  its own `name` is refused. So name scenes in the order to try them and give each but the last a
-  `when:`, since one with no `when:` shuts out those after it (`ENTRY_GUESSED`). `when:` asks that a
-  fact is true, so the first meeting comes last: `maud_1_later` with `when: met_maud`, then
-  `maud_2_first`, whose choice sets `met_maud`. Only `"entry": true` in the JSON beside a scene makes
-  it the one that opens, shutting out the others.
+  its own `name` is refused. So give each scene but the last a `when:`, since one with no `when:`
+  shuts out those after it (`ENTRY_GUESSED`). `when: not <fact>` asks that a fact is false, so a first
+  meeting and later ones need no order in their names: `maud_first` with `when: not met_maud`, whose
+  choice sets `met_maud`, and `maud_later` with `when: met_maud`. Two scenes open at once go to the
+  first by key, so make their `when:` exclude each other. Only `"entry": true` in the JSON beside a
+  scene makes it the one that opens, shutting out the others.
 - A `needs:` under a `when:` or a choice that asks the opposite, on a fact the file never sets, gets
   a warning and still compiles: the compiler cannot see another file or a reaction changing that fact.
 

@@ -1,4 +1,4 @@
-# size: allow 423, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
+# size: allow 425, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
 defmodule Loka.Content.SceneFiles do
   @moduledoc """
   Scene files: `scenes/<key>.scene` (or `dialogues/<key>.scene`) is one dialogue as plain text,
@@ -7,6 +7,7 @@ defmodule Loka.Content.SceneFiles do
 
       npc: maud            the speaker (first; its role is `maud`)
       when: met_maud       the dialogue's policy: that bool fact is true
+      when: not met_maud   ... that bool fact is false
       with: bram           a second speaker (an npc role, so bram must be in the room)
       maud: words          the prompt, or under a choice its reply (more lines join with \\n)
       * words              the same, unspoken
@@ -222,7 +223,7 @@ defmodule Loka.Content.SceneFiles do
   # `needs_x: words` is another speaker's line, not a bad `needs`.
   defp verb(text, why) do
     cond do
-      text =~ ~r/^(needs|then|once|asked)(:|\s)/ -> why
+      text =~ ~r/^(needs|then|once|asked)(:|\s|$)/ -> why
       text =~ ~r/^[^\s:]+: / -> "wrong_speaker"
       true -> "not_a_line"
     end
@@ -233,6 +234,9 @@ defmodule Loka.Content.SceneFiles do
     do:
       {Map.merge(d, %{"npc" => npc, "roles" => %{npc => %{"role" => "npc", "npc" => npc}}}), nil,
        bad}
+
+  defp line({"when: not " <> fact, _}, {%{"npc" => _} = d, nil, bad}),
+    do: {Map.put(d, "policy", %{"op" => "not", "item" => fact_true(fact)}), nil, bad}
 
   defp line({"when: " <> fact, _}, {%{"npc" => _} = d, nil, bad}),
     do:
@@ -259,29 +263,18 @@ defmodule Loka.Content.SceneFiles do
   defp line({"then: " <> target, _} = at, {%{"npc" => _}, cur, _} = st) when cur != nil,
     do: only_one(at, "then", if(key?(target), do: target), st)
 
-  defp line({"once", _}, {%{"npc" => _} = d, :refused, bad}), do: {d, :refused, bad}
+  defp line({"once", _} = at, {%{"npc" => _}, cur, _} = st) when cur != nil,
+    do: only_one(at, "once", true, st)
 
-  defp line({"once", _}, {%{"npc" => _} = d, cur, bad}) when cur != nil,
-    do: {put_in(d, ["choices", cur, "once"], true), cur, bad}
-
-  defp line({"asked", _}, {%{"npc" => _} = d, :refused, bad}), do: {d, :refused, bad}
-
-  defp line({"asked", _}, {%{"npc" => _} = d, cur, bad}) when cur != nil,
-    do: {put_in(d, ["choices", cur, "asked"], true), cur, bad}
+  defp line({"asked", _} = at, {%{"npc" => _}, cur, _} = st) when cur != nil,
+    do: only_one(at, "asked", true, st)
 
   # What follows a refused choice is still checked, and written nowhere.
-  defp line({"gives: " <> item, _} = at, {%{"npc" => npc} = d, cur, bad}) when cur != nil do
+  defp line({"gives: " <> item, n} = at, {%{"npc" => _} = d, cur, bad}) when cur != nil do
     cond do
-      speaker?(d, item) ->
-        refuse(at, d, cur, bad)
-
-      cur == :refused ->
-        {put_in(d, ["roles", item], %{"role" => "item", "item" => item}), cur, bad}
-
-      true ->
-        {d
-         |> put_in(["choices", cur, "receive"], %{"item" => item, "from" => npc})
-         |> put_in(["roles", item], %{"role" => "item", "item" => item}), cur, bad}
+      speaker?(d, item) -> refuse(at, d, cur, bad)
+      item =~ ~r/^[a-z][a-z0-9_]{0,63}$/ -> {gives(d, cur, item), cur, bad}
+      true -> {d, cur, [{n, "gives: " <> item, "gives_key"} | bad]}
     end
   end
 
@@ -319,6 +312,15 @@ defmodule Loka.Content.SceneFiles do
     if is_map_key(d["choices"][cur], field),
       do: refuse(at, d, cur, bad),
       else: {put_in(d, ["choices", cur, field], value), cur, bad}
+  end
+
+  defp gives(d, :refused, item),
+    do: put_in(d, ["roles", item], %{"role" => "item", "item" => item})
+
+  defp gives(%{"npc" => npc} = d, cur, item) do
+    d
+    |> put_in(["choices", cur, "receive"], %{"item" => item, "from" => npc})
+    |> gives(:refused, item)
   end
 
   # `d` is the dialogue as of this line: a line above `npc:` is out of order, whatever follows.

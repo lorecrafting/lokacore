@@ -8,6 +8,8 @@ import { defineConfig } from 'vite';
 // port, so this page carries the isolation headers the framed Book's worker needs.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // The Book's port, the one name every tool reads (bin/author.sh, preview-server.cjs).
+  define: { 'import.meta.env.VITE_LOKA_PREVIEW_PORT': JSON.stringify(process.env.LOKA_PREVIEW_PORT || '19006') },
   resolve: { alias: { '@': path.resolve(import.meta.dirname, './src') } },
   server: {
     port: Number(process.env.LOKA_PANEL_PORT || 19009),

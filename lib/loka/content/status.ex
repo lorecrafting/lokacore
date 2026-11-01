@@ -58,6 +58,31 @@ defmodule Loka.Content.Status do
 
   defp permanent?(s), do: s["duration"] == "permanent"
 
+  @doc "A status.apply that schedules no job, so a timed action's advance crosses nothing (`applyStatus`)."
+  def no_job?(%{"status" => name} = step, m, defs) do
+    status = ref(name, "status", m)
+
+    case Refs.resolve(status, "status", m, defs) do
+      {_, [], spec} = found ->
+        (spec["duration"] == "permanent" and not ticking?(found)) or
+          immune?(step["npc"], status, m, defs)
+
+      # A status or body with its own line: its refusal is the writer's next step, not this one.
+      _ ->
+        true
+    end
+  end
+
+  defp immune?(nil, _, _, _), do: false
+
+  defp immune?(npc, status, m, defs) do
+    case Refs.resolve(ref(npc, "npc", m), "npc", m, defs) do
+      {_, [], %{"immune" => immune}} -> status in Enum.map(immune, &ref(&1, "status", m))
+      {_, [], _} -> false
+      _ -> true
+    end
+  end
+
   # Row W8: a ticking permanent status goes on a body only: never a named item or room, a tag, or
   # the subject of a status event, which may be either.
   defp holders(m, defs) do

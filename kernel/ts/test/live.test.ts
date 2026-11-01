@@ -194,6 +194,14 @@ test('lint lines: clean, findings, or a lint that did not run', () => {
     'items/x.json: unused',
     'a/b.json: long line',
   ]);
+  // Breaks: a compiler warning line, or a room detail's finding (`rooms/a.json details.d: ...`), misread.
+  assert.deepEqual(
+    lintLines(
+      1,
+      'warning: variable "x" is unused\nrooms/a.json details.d: variants[1] has no when\n',
+    ),
+    ['rooms/a.json details.d: variants[1] has no when'],
+  );
   assert.deepEqual(lintLines(1, 'crash\n'), ['lint failed (exit 1)']);
   assert.deepEqual(lintLines(2, 'items/x.json: unused\n'), ['lint failed (exit 2)']);
   assert.deepEqual(lintLines(null, ''), ['lint failed (exit null)']);

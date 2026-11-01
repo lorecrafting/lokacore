@@ -2305,7 +2305,7 @@
     },
     "NpcHp": {
       "additionalProperties": false,
-      "description": "Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID). Required legacy-shaped birth/save row; no position recovery.",
+      "description": "Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID) and no minimum or start below 0 (BODY_BELOW_ZERO). Required legacy-shaped birth/save row; no position recovery.",
       "properties": {
         "gain": {
           "description": "HP added each hour (3600 seconds), up to maximum.",
@@ -6374,7 +6374,7 @@
     },
     "partial.NpcHp": {
       "additionalProperties": false,
-      "description": "Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID). Required legacy-shaped birth/save row; no position recovery.",
+      "description": "Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID) and no minimum or start below 0 (BODY_BELOW_ZERO). Required legacy-shaped birth/save row; no position recovery.",
       "properties": {
         "gain": {
           "description": "HP added each hour (3600 seconds), up to maximum.",

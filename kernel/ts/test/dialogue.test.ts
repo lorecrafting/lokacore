@@ -115,7 +115,6 @@ test('talk opens one pending choice bound to EntityIds, stamped with its revisio
   assert.equal(w.state.choices![C]!.opened_revision, 3);
 });
 
-// Breaks: every accepted action copying the choices map (O(choice history) per step).
 // Breaks: the room's actions list lowest priority first.
 test("a place's actions list by priority, then key", () => {
   const w = world((c) => {
@@ -138,6 +137,7 @@ test("a place's actions list by priority, then key", () => {
   assert.ok(keys.indexOf('z_high') < keys.indexOf('a_low') && keys.includes('a_low'), `${keys}`);
 });
 
+// Breaks: every accepted action copying the choices map (O(choice history) per step).
 test('an action that opens no choice shares the choices map', () => {
   const w = talked();
   assert.equal(ok(w, { type: 'look' }, 4).world.state.choices, w.state.choices);

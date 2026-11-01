@@ -1,5 +1,7 @@
 # Cosmic time and cycles
 
+> Reference only: agent-drafted worldbuilding text (not the owner's words). Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Status: draft. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Canon tier: draft (owner-directed 2026-10-16).
 
 **Purpose.** Whether time is a line, a circle, or eons that begin and end, and what an eon is.
