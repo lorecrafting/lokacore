@@ -99,3 +99,48 @@ Red: `shared.ts` start guard (two forms), `following()` retired guard, `escort-s
 Survived: `dialogue-receipt.ts:161` state and outcome clause. No test pins it; pin it if `:161` is kept.
 
 Elixir `restart` was read against TypeScript and matches; not mutated. `bin/mutate_diff.sh` was not rerun for this scoped re-check.
+
+## Re-check at `6f1822cbe9f38dad841276a7ce86827feb9fd972`
+
+**Verdict: APPROVE WITH NOTES.** Scope: fix commit `d5b86b000` (`6f1822cbe` merges `origin/main` over it). CI at this head: `ci`, `book-e2e`, `graph-diff` completed success.
+
+### Dispositions
+
+| Finding | State | Proof |
+|---|---|---|
+| blocker C1, sibling Complete plus re-accept | Fixed | Probe: take, offers, `rescue`, `keeper_home` `home`, reopen, `keeper_offer` accept, reopen, move, reopen. All open |
+| no-escort path, `skills-save.ts:28` | Fixed | Probe: skill choice on a repeatable exchange quest, resolve, reopen, re-accept, reopen. All open |
+| `dialogue-receipt.ts:161` clause survives | Partly | Dropping the whole clause is red; each half alone survives, nit below |
+| nit, `/code-review` head | Open | PR body still reports `0ed43539d` |
+
+Elixir is untouched by the fix, so the compile result from the prior round stands.
+
+### Forged repeatable saves
+
+Answer: no throw at launch and no persisted corruption in any case run. Every open ended in a refusal (`save_corrupt`) or a save that played on and reopened; no other error type reached the launch.
+
+- A cartridge with any `quest.exchange` replays history (`exchange-save.ts:27`). Forged quest row or receipt instance: `save_corrupt`, 9 cases; 2 more, a riddle row's instance alone, refuse earlier at `riddle-save.ts:113`. So forged repeatable saves load only when no quest has an exchange and the other `exchange-save.ts` triggers are absent.
+- That shape, `repeatable` without `exchange`, skill, riddle and escort forms: quest row forged active, deleted or given a false outcome; receipt instance forged; row and receipts forged together. Those that load (and the same forged instances on one-time quests) then took close, offer, accept, turn-in, moves, a presenter screen and a reopen: no throw.
+- Forged receipt instance alone on a riddle or escort, and row-plus-receipt on an escort: `save_corrupt`. On a one-time quest a forged receipt instance on a skill, and row plus receipts on a riddle, load at this head; state/outcome forgeries there still refuse.
+- Pending riddle with forged instance, or quest row deleted or resolved: loads, both answers `rejected/invalid_state`, close accepted, move accepted, reopens. The sitting clears and no quest state changes.
+- Restoring the row binding for one-time quests (`q[0]`) is red. The exact pre-fix `riddle-save.ts` fails only the repeatable riddle test in `escort_repeat.test.ts`; `riddle.test.ts` stays green, so that check's removal is needed for repeatable quests and unpinned for one-time ones.
+
+### Mutants
+
+Null control green. Run first on `escort_repeat`, `escort`, `riddle`, `branching_forged`, `branching_reload`; survivors again on the 57 test files naming forged saves, `skill.acquire`, riddles or `committedDialogue`.
+
+Red: repeatable guard removed, whole state/outcome clause removed, `transition.instance_id` to the row's, `q[0]` binding restored, pre-fix riddle instance check restored (exact file).
+
+Survived both runs: `state` half and `outcome` half of `:163`; `if (!d.quest)` removal at `riddle-save.ts:31`. Survived the first run only, not rerun: `transitions[0].outcome` (the event's own comparison repeats it), `resolved.length === 1`.
+
+### Findings
+
+**nit** `mobile/authority/local-story/dialogue-receipt.ts:163`: a one-time quest row forged `resolved` with another outcome is refused, and removing either half alone stays green. A later edit can drop one half unnoticed; the only effect is a forged save loading. Pin or delete.
+
+**nit** `mobile/authority/local-story/riddle-save.ts:31`: removing `if (!d.quest)` stays green. Same exposure, forged row only.
+
+**nit** PR body: `/code-review` ran at `0ed43539d`, before the fix commits.
+
+**question** `kernel/ts/src/mechanics/dialogue/rule.ts:216`: only an `exchange` or `receive` acceptance retires the prior row, so a plain `repeatable` quest holds the old resolved row beside the new active one (dump: `homeward` resolved and active). Comments at `dialogue-receipt.ts:160`, `riddle-save.ts:30` and `escort/shared.ts:57` say the next acceptance retires it. Reopen passed in this shape, and `rule.ts` is unchanged by this PR. Is that shape meant to be lawful?
+
+`bin/mutate_diff.sh` was not rerun for this scoped re-check. The prior long-run reload walks were not repeated, and an escort restart on a plain repeatable quest was not probed.
