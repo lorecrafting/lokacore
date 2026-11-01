@@ -104,7 +104,7 @@ function moveOne(
   emit: (payload: EventPayload) => void,
 ): DeltaOp[] {
   if (!npc || world.entities[npc]?.kind !== 'npc') return [];
-  // A following escort stays with its player (escort@1: never detached); a rooted NPC stays put.
+  // A following escort stays with its player (escort@1: no NPC move detaches it); a rooted NPC stays put.
   if (!living(world, npc) || engaged(world, npc) || escorting(world, npc) || !moves(world, npc))
     return [];
   const last = ops.filter((o) => o.op === 'entity.transfer' && o.entity_id === npc).pop();
