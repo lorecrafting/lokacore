@@ -86,8 +86,6 @@ const readingOf = (g: unknown) => {
 type Find = { findByRole: (role: 'button', o: { name: string }) => Promise<HTMLElement> };
 export const isCard = async (canvas: Find, name: string) =>
   getComputedStyle(await canvas.findByRole('button', { name })).borderTopWidth !== '0px';
-// Page stories carry `tags: ['!autodocs']` inline (the CSF indexer reads only a literal array): a Docs
-// page would mount every page's BookView at once.
 const inkOf = (el: Element) => {
   let ink = 1;
   for (let e: Element | null = el; e; e = e.parentElement) ink *= +getComputedStyle(e).opacity;
@@ -106,6 +104,8 @@ export const settled = async (
     await waitFor(() => expect(inkOf(b)).toBe(1), { timeout: 3000 });
   }
 };
+// Page stories carry `tags: ['!autodocs']` inline (the CSF indexer reads only a literal array): a Docs
+// page would mount every page's BookView at once.
 export const pageStory = (
   saved: unknown,
   shell?: Partial<Screen>,
