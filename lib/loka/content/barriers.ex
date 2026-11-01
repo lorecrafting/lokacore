@@ -21,6 +21,9 @@ defmodule Loka.Content.Barriers do
     "down" => "up"
   }
 
+  @doc "The direction back through an exit going `dir`, nil for a word that is no direction."
+  def opposite(dir), do: @opposite[dir]
+
   @doc "Diagnostics for the schema-valid barriers and rooms of a v2 source with manifest `m`."
   @spec check(map(), map() | nil, map(), [map()]) :: [map()]
   def check(m, entry, defs, registry) do
