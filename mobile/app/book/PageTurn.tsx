@@ -212,7 +212,7 @@ function CardBlur(p: { image: SkImage; size: Size; progress: SharedValue<number>
   );
   return (
     <View {...over}>
-      <Canvas style={{ flex: 1 }}>
+      <Canvas style={{ flex: 1 /* mutate-skip: layout */ }}>
         <Image image={p.image} fit="fill" x={0} y={0} {...p.size} opacity={shown}>
           <Blur blur={blur} mode="clamp" />
         </Image>

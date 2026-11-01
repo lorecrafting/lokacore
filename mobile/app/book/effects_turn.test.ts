@@ -107,12 +107,10 @@ test('a card over a picture blurs it, without a curl, and lets go at the end', a
   assert.deepEqual(at(1), { blur: 12, shown: 0 });
   // Halfway the picture is still held whole: only motion.card.out lets it go.
   assert.equal(at(0.5).shown, 1);
-  assert.deepEqual(
-    walk(rig(t)(() => blur.type({ ...blur.props, progress: { value: 0 } }))).find(
-      (n) => n.type === 'SkiaImage',
-    ).props.x,
-    0,
-  );
+  const { x, y } = walk(rig(t)(() => blur.type({ ...blur.props, progress: { value: 0 } }))).find(
+    (n) => n.type === 'SkiaImage',
+  ).props;
+  assert.deepEqual([x, y], [0, 0]);
   // Breaks: a page or the canvas stops filling the Book, so the turn draws a collapsed page.
   const fills = tree.filter((n) => n.props?.style?.flex === 1);
   assert.equal(fills.length, 2);
