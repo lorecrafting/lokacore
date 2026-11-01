@@ -83,6 +83,50 @@ defmodule Loka.ContentDialogueLinksTest do
            ]
   end
 
+  # Breaks: a wider loop downstream of the entry counts as a second entry (its speaker's warning is
+  # lost), or a loop with no link to another loses to it (a false warning on its speaker).
+  test "the loop warning reads each loop with no way in once", %{dir: dir} do
+    to = fn keys ->
+      Map.new(keys, &{"to_" <> &1, %{"label" => @label, "narration" => @said, "then" => &1}})
+    end
+
+    second = fn keys ->
+      roles = %{"second" => %{"role" => "npc", "npc" => "second"}}
+      talk("guard", %{"choices" => to.(keys), "npc" => "second", "roles" => roles})
+    end
+
+    guard = &talk("guard", %{"choices" => to.(&1)})
+    npc = {"npcs/second.json", second_npc()}
+    file = &"dialogues/#{&1}.json"
+
+    downstream = [
+      {file.("g_a"), guard.(["g_b", "s_c"])},
+      {file.("g_b"), guard.(["g_a"])},
+      {file.("s_c"), second.(["s_d", "s_e", "s_f"])},
+      {file.("s_d"), second.(["s_c"])},
+      {file.("s_e"), second.(["end"])},
+      {file.("s_f"), second.(["end"])},
+      npc
+    ]
+
+    assert {:ok, _, warned} = Loka.ContentSource.compile(dir, downstream)
+
+    assert Enum.sort(for(%{"code" => "LOOP_SPEAKER", "path" => p} <- warned, do: p)) ==
+             ["dialogues/s_c.npc", "dialogues/s_d.npc"]
+
+    apart = [
+      {file.("g_a"), guard.(["g_b", "g_c"])},
+      {file.("g_b"), guard.(["g_a"])},
+      {file.("g_c"), guard.(["end"])},
+      {file.("s_x"), second.(["s_y"])},
+      {file.("s_y"), second.(["s_x"])},
+      npc
+    ]
+
+    assert {:ok, _, warned} = Loka.ContentSource.compile(dir, apart)
+    assert for(%{"code" => "LOOP_SPEAKER"} = w <- warned, do: w) == []
+  end
+
   # Breaks: a link rule dropped, so a then the runtime cannot follow compiles and fails at play.
   test "then and then_failed refuse what cannot be followed", %{dir: dir} do
     child = {"dialogues/child.json", talk("guard")}
