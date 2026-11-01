@@ -442,12 +442,12 @@ defmodule Loka.ContentExplainTest do
   # Break: the hint names no shape, or no allowed value, so the author must go looking.
   test "a wrong exit names its fields and a wrong enum its values", %{tmp_dir: dir} do
     room = ~s({"description":#{@prose},"exits":{"north":"well"},"name":#{@prose}})
-    assert line_at(said(dir, %{"rooms/start.json" => room}), "`north`") =~ "fields: "
+    assert line_at(said(dir, %{"rooms/start.json" => room}), "`north`") =~ ~r/fields: .*\bto\b/
 
     band = %{"at_percent" => 0, "key" => "x", "tone" => "lockd"}
     worlded = manifest(@caps) |> JSON.decode!() |> Map.put("world", %{"bands" => [band]})
     lines = said(dir, %{"cartridge.json" => JSON.encode!(worlded)})
-    assert line_at(lines, "`tone`") =~ "one of: "
+    assert line_at(lines, "`tone`") =~ "one of: normal, warning, danger"
   end
 
   # Break: duplicates get the rerun hint, and rerunning changes nothing.
