@@ -66,4 +66,33 @@ defmodule Loka.ContentUnattackableTest do
     assert %{"unattackable" => true} =
              JSON.decode!(out)["cartridge"]["npcs"]["fear_sampler@0.0.1:npc/guard"]
   end
+
+  # Break: the flag or the engage line is read before `extends` merges, so a child that inherits
+  # the engage line and sets the flag (or the reverse) compiles and the line never plays.
+  test "unattackable and an engage line meet through extends", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/standing_sampler", dir)
+    guard = Path.join(dir, "npcs/guard.json")
+
+    File.write!(
+      Path.join(dir, "npcs/sentry.json"),
+      JSON.encode!(%{"extends" => "guard", "unattackable" => true})
+    )
+
+    assert {:error, diags} = Loka.Content.compile(dir)
+
+    assert [%{"path" => "npcs/sentry.unattackable"}] =
+             Enum.filter(diags, &(&1["data"]["why"] == "unattackable_engage"))
+
+    File.write!(
+      guard,
+      guard |> File.read!() |> JSON.decode!() |> Map.put("unattackable", true) |> JSON.encode!()
+    )
+
+    File.write!(Path.join(dir, "npcs/sentry.json"), JSON.encode!(%{"extends" => "guard"}))
+    assert {:error, diags} = Loka.Content.compile(dir)
+
+    assert ["npcs/guard.unattackable", "npcs/sentry.unattackable"] ==
+             for(%{"data" => %{"why" => "unattackable_engage"}, "path" => p} <- diags, do: p)
+             |> Enum.sort()
+  end
 end

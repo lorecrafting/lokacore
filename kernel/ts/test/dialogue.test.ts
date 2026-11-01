@@ -12,12 +12,13 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import type { Command, DecisionResult, DefinitionRef } from '../src/contracts.gen.ts';
+import type { Command, DecisionResult, DefinitionRef, EntityId } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { decide } from '../play/run.ts';
 import { key } from '../src/foundation/compose.ts';
+import { spokenBy } from '../src/mechanics/dialogue/selection.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { read } from './read.ts';
 
@@ -627,4 +628,23 @@ test('the loader checks story point keys', () => {
     declared: 'lantern_resolved',
     expected: 'other',
   });
+});
+
+// Breaks: a Talk that selects one of a speaker's dialogues opens the speaker's first one instead,
+// or ignores the selection.
+test('a Talk that selects a dialogue opens that one', () => {
+  const w = open(
+    hub((d, c) => {
+      c.dialogues[`${F}:dialogue/bram2`] = { ...structuredClone(d), key: 'bram2' };
+    }),
+  );
+  const by = (selected?: string) =>
+    spokenBy(
+      w,
+      w.character,
+      BRAM as EntityId,
+      { n: 0 },
+      selected ? ref('dialogue', selected) : undefined,
+    )?.key;
+  assert.deepEqual([by(), by('bram2'), by('bram')], ['bram', 'bram2', 'bram']);
 });

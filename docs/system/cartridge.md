@@ -1274,6 +1274,8 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 Author rule: an NPC with `disposition.hostile` refuses every dialogue while hostile, so give a quest's accept, hand-over, receive and escort to a speaker who cannot turn hostile, or make that betrayal the design. The compiler warns (HOSTILE_QUEST_SPEAKER, severity warning, at `dialogues/<key>.npc`) when such an NPC speaks a dialogue with a choice carrying `accept`, `hand_over`, `receive` or `escort`; the build succeeds and the loader does not check it.
 
+Author rule: an NPC listed in `world.combat.allies` only ever strikes the opponent, so a `disposition.engage` line on it never plays. The compiler warns (ALLY_ENGAGE_UNUSED, severity warning, at `cartridge.json` `world.combat.allies[i]`); the build succeeds. To clear it, remove `disposition` (a `hostile` attacker without `engage` fails SCHEMA_VIOLATION), or set `unattackable: true` and remove `engage`.
+
 ## Rumour declarations
 
 [Rumour by co-presence](mechanics.md#rumour-by-co-presence-toolbox-row-w3) adds one optional reaction trigger filter, `npc` on `entity_entered_room` (a short key the compiler expands, `Loka.Content.Reactions.filters/0`). An unresolved `npc` is UNRESOLVED_REFERENCE at `reactions/<key>.on.npc`, and a spawn template there, which has no instance to enter, is SCHEMA_VIOLATION `invalid_value`. Example (`cartridges/rumour_sampler/reactions/tells_innkeeper.json`): `{"on": {"event": "entity_entered_room", "room": "inn", "npc": "ada"}, "when": {"op": "fact_compare", "fact": "knows_mill", "npc": "ada", "equals": true}, "steps": [{"op": "fact.assign", "fact": "knows_mill", "npc": "innkeeper", "value": true}]}`.
