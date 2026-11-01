@@ -140,7 +140,9 @@ defmodule Loka.Content.Waits do
 
   # One delayed stretch has nothing to swap with, however late it lands.
   defp reorderable(rule, timed, rel, at) do
-    delayed = Enum.count(stretches(rule["steps"], after_of(rule)), fn {t, _} -> t > 0 end)
+    # A wait with bad `seconds` still counts: its own fault reports it.
+    waits = Enum.count(rule["steps"], &wait?/1)
+    delayed = if is_map_key(rule, "after"), do: waits + 1, else: waits
     if delayed > 1, do: inside_action(rule["on"], timed, rel, at), else: []
   end
 
