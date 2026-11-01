@@ -25,7 +25,7 @@
             "target": {
               "description": "The fixture or NPC the offer draws on (mechanics.md, quest@1). The offer is listed and admitted only while the target is in the actor's room, alive and seen.",
               "oneOf": [
-                {
+                {"description":"The offer draws on a fixture in a room: the player must be in that room and see it.",
                   "type": "object",
                   "properties": {
                     "kind": {
@@ -45,7 +45,7 @@
                   ],
                   "additionalProperties": false
                 },
-                {
+                {"description":"The offer draws on an NPC: the player must be in its room with it alive and in view.",
                   "type": "object",
                   "properties": {
                     "kind": {
@@ -107,13 +107,13 @@
         "repeatable": {"description":"The quest may be taken again once resolved.",
           "const": true
         },
-        "exchange": {
+        "exchange": {"description":"Makes the quest a repeatable item-for-item swap with an NPC, run from a dialogue choice that has an exchange. Needs repeatable true, current_state evidence, and no deadline or offer.",
           "type": "object",
           "properties": {
-            "npc": {
+            "npc": {"description":"The NPC swapped with. It must be present, hold the incoming items, and be the dialogue's own NPC.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "outgoing": {
+            "outgoing": {"description":"Item definitions the player hands to the NPC. Must be exactly the items list of a room detail's harvest. Same length as incoming.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -121,7 +121,7 @@
               "minItems": 1,
               "maxItems": 64
             },
-            "incoming": {
+            "incoming": {"description":"Item definitions the NPC hands to the player, held by the NPC at the start. Same length as outgoing.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -129,18 +129,18 @@
               "minItems": 1,
               "maxItems": 64
             },
-            "quantity": {
+            "quantity": {"description":"How many items go each way in one exchange. At most the length of outgoing.",
               "type": "integer",
               "minimum": 1,
               "maximum": 64
             },
-            "contribution": {
+            "contribution": {"description":"Player int fact (starts at 0) that totals the faction gain this quest has given. Its maximum caps the total.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "faction": {
+            "faction": {"description":"Player int fact raised by increment on each exchange. Must differ from contribution.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "increment": {
+            "increment": {"description":"Faction gain per exchange, cut short once contribution reaches its maximum. At most that maximum.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -157,13 +157,13 @@
           ],
           "additionalProperties": false
         },
-        "patrol": {
+        "patrol": {"description":"Makes an NPC walk a looping route that the player follows from room to room. The quest is complete once required checkpoints are reached together.",
           "type": "object",
           "properties": {
-            "npc": {
+            "npc": {"description":"The NPC who leads. It starts in route[initial_cursor], has no hp, attack or daily_schedule, and no other quest may patrol it.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "route": {
+            "route": {"description":"Rooms the NPC visits in order, looping back to the first. Each step needs an exit to the next room that is not hidden or a climb.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -171,12 +171,12 @@
               "minItems": 2,
               "maxItems": 64
             },
-            "initial_cursor": {
+            "initial_cursor": {"description":"Index in route of the room the NPC starts in.",
               "type": "integer",
               "minimum": 0,
               "maximum": 63
             },
-            "checkpoints": {
+            "checkpoints": {"description":"Rooms where arriving together with the NPC counts once toward required.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -184,15 +184,15 @@
               "minItems": 1,
               "maxItems": 64
             },
-            "required": {
+            "required": {"description":"How many different checkpoint rooms the player must reach with the NPC to complete the patrol.",
               "type": "integer",
               "minimum": 1,
               "maximum": 64
             },
-            "trust_fact": {
+            "trust_fact": {"description":"Player bool fact (default false) set true when the patrol completes. No other patrol may share it.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "narration": {
+            "narration": {"description":"Text key told when the patrol completes, naming the player and the NPC leader.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -207,33 +207,33 @@
           ],
           "additionalProperties": false
         },
-        "expedition": {
+        "expedition": {"description":"Makes the quest a guarded walk along a fixed route, with a shelter stop on the way. The objective evidence must be expedition and the quest takes no offer, repeatable, deadline, exchange or patrol.",
           "type": "object",
           "properties": {
-            "start_room": {
+            "start_room": {"description":"Room where the walk begins. Its start_detail starts and restarts the attempt, and it must be in footprint.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "start_detail": {
+            "start_detail": {"description":"Key of the detail in start_room that offers start and restart.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "shelter_room": {
+            "shelter_room": {"description":"Room where the player may take shelter. It must be route[2].to.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "shelter_detail": {
+            "shelter_detail": {"description":"Key of the detail in shelter_room that offers shelter, once three route steps are walked.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "route": {
+            "route": {"description":"Steps the player must walk in order, each from one room to the next by the named exit. At least 3; the first starts at start_room and each starts where the last ended.",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
-                  "from": {
+                  "from": {"description":"Room this step leaves.",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
-                  "direction": {
+                  "direction": {"description":"Exit taken from the room. It must lead to the step's to room and not be hidden.",
                     "$ref": "action.schema.json#/$defs/Key"
                   },
-                  "to": {
+                  "to": {"description":"Room this step arrives in.",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   }
                 },
@@ -247,7 +247,7 @@
               "minItems": 1,
               "maxItems": 32
             },
-            "footprint": {
+            "footprint": {"description":"Rooms the attempt may stay in. Entering any other room fails the attempt. At least 2, no repeats, and it includes start_room.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -255,36 +255,36 @@
               "minItems": 2,
               "maxItems": 32
             },
-            "survived_fact": {
+            "survived_fact": {"description":"Player bool fact (default false) set true when the last step is walked.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "faction": {
+            "faction": {"description":"Player int fact changed by faction_delta when the expedition completes.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "faction_delta": {
+            "faction_delta": {"description":"Added to the faction fact on completion. Always negative, from -100 to -1.",
               "type": "integer",
               "minimum": -100,
               "maximum": -1
             },
-            "population": {
+            "population": {"description":"Population plan (with a pack) whose hunter member, if one is in the start room, opens a fight when an attempt starts or restarts.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "narration": {
+            "narration": {"description":"Text keys told as the expedition goes.",
               "type": "object",
               "properties": {
-                "start": {
+                "start": {"description":"Told when the attempt starts.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "restart": {
+                "restart": {"description":"Told when a failed attempt is restarted.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "shelter": {
+                "shelter": {"description":"Told when the player takes shelter.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "failed": {
+                "failed": {"description":"Told when the attempt fails, such as by entering a room outside footprint.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "completed": {
+                "completed": {"description":"Told when the last step is walked.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -297,16 +297,16 @@
               ],
               "additionalProperties": false
             },
-            "actions": {
+            "actions": {"description":"Keys of the scripted expedition actions that offer each stage.",
               "type": "object",
               "properties": {
-                "start": {
+                "start": {"description":"Action key that starts the attempt.",
                   "$ref": "action.schema.json#/$defs/Key"
                 },
-                "restart": {
+                "restart": {"description":"Action key that restarts after a failed attempt.",
                   "$ref": "action.schema.json#/$defs/Key"
                 },
-                "shelter": {
+                "shelter": {"description":"Action key that takes shelter.",
                   "$ref": "action.schema.json#/$defs/Key"
                 }
               },
@@ -396,7 +396,7 @@
     "QuestObjective": {
       "description": "A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).",
       "oneOf": [
-        {
+        {"description":"Met while the policy holds for the actor now; nothing is stored.",
           "type": "object",
           "properties": {
             "evidence": {
@@ -411,13 +411,13 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Met when the actor acquires the named item after the quest began.",
           "type": "object",
           "properties": {
             "evidence": {
               "const": "post_activation_event"
             },
-            "item_acquired": {
+            "item_acquired": {"description":"The item whose acquisition counts.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -427,7 +427,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Met when the quest's patrol completes.",
           "type": "object",
           "properties": {
             "evidence": {
@@ -439,7 +439,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Met when the quest's expedition succeeds.",
           "type": "object",
           "properties": {
             "evidence": {
@@ -502,7 +502,7 @@
               "when": {
                 "$ref": "policy.schema.json#/$defs/Policy"
               },
-              "text": {
+              "text": {"description":"Text key shown while this variant's condition holds.",
                 "$ref": "text.schema.json#/$defs/TextKey"
               }
             },
@@ -512,22 +512,22 @@
             "additionalProperties": false
           }
         },
-        "hints": {
+        "hints": {"description":"Timed nudges the Journal shows as real time passes in a stage.",
           "type": "object",
           "properties": {
-            "active": {
+            "active": {"description":"Hints for the active stage, earliest first.",
               "type": "array",
               "minItems": 1,
               "maxItems": 8,
               "items": {
                 "type": "object",
                 "properties": {
-                  "after": {
+                  "after": {"description":"Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending.",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 1440
                   },
-                  "text": {
+                  "text": {"description":"Text key of the hint.",
                     "$ref": "text.schema.json#/$defs/TextKey"
                   }
                 },
@@ -538,19 +538,19 @@
                 "additionalProperties": false
               }
             },
-            "objectives_met": {
+            "objectives_met": {"description":"Hints for the objectives-met stage, earliest first.",
               "type": "array",
               "minItems": 1,
               "maxItems": 8,
               "items": {
                 "type": "object",
                 "properties": {
-                  "after": {
+                  "after": {"description":"Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending.",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 1440
                   },
-                  "text": {
+                  "text": {"description":"Text key of the hint.",
                     "$ref": "text.schema.json#/$defs/TextKey"
                   }
                 },
