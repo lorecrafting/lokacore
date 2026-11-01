@@ -1,5 +1,7 @@
 # E2 gate checklist
 
+> Reference only: agent-written brief; any story, cast or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Milestone gate ([workflow](../../PM.md#milestone-gate)) for E2, [slice plan](chapter-one-e2-slice-plan-2026-10-07.md) "Gate" and G.
 Checked by one reviewer. Proof is in the merged slices, the [S5 evidence](../../evidence/2026-10-08-e2-r9c/README.md)
 and the review records. Slices: S1 [#309](https://github.com/lorecrafting/lokacore/pull/309), S0

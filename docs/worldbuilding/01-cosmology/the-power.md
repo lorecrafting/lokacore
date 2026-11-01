@@ -1,5 +1,7 @@
 # The Power: the cosmic force behind the wardens
 
+> Reference only: agent-drafted worldbuilding text (not the owner's words). Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Status: draft. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Canon tier: draft (owner-directed 2026-10-16).
 
 **Purpose.** The category stub for the cosmic force the warden order draws on (unnamed): what it is, where it sits in the cosmos, and how it differs from ordinary magic.
