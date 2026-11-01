@@ -77,40 +77,40 @@
     "WaterSettings": {
       "type": "object",
       "properties": {
-        "skill": {
+        "skill": {"description":"The skill the character must have usable to go under.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "maximum_grams": {
+        "maximum_grams": {"description":"The heaviest load, in grams, a character can carry and still go under.",
           "type": "integer",
           "minimum": 0,
           "maximum": 2147483647
         },
-        "entry_cost": {
+        "entry_cost": {"description":"Movement points paid to go under.",
           "type": "integer",
           "minimum": 0,
           "maximum": 2147483647
         },
-        "duration": {
+        "duration": {"description":"Logical time units a character can stay under before drowning; at least 1.",
           "type": "integer",
           "minimum": 1
         },
-        "warning": {
+        "warning": {"description":"Text key of the warning shown before going under.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "drowned": {
+        "drowned": {"description":"Text key of the line told when the character drowns.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "routes": {
+        "routes": {"description":"The surface and bottom room pairs; entering water at a surface moves to its bottom.",
           "type": "array",
           "minItems": 1,
           "maxItems": 64,
           "items": {
             "type": "object",
             "properties": {
-              "surface": {
+              "surface": {"description":"The room above the water, where the route is entered.",
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               },
-              "bottom": {
+              "bottom": {"description":"The room under the water.",
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               }
             },

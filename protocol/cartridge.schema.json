@@ -1076,16 +1076,16 @@
       "description": "One weather of a calendar's weather table (toolbox row 31): each calendar day takes one entry with probability weight / total weight, by a hash of the world id and the day, never the authority RNG. wet: an exposed room's flame will not light (light@1 ignite). Phases are unique in the table.",
       "type": "object",
       "properties": {
-        "phase": {
+        "phase": {"description":"The weather's name, lowercase letters, digits and underscores; unique in the table.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*$"
         },
-        "weight": {
+        "weight": {"description":"Its chance relative to the other entries: weight over the sum of all weights; 1 to 1000.",
           "type": "integer",
           "minimum": 1,
           "maximum": 1000
         },
-        "wet": {
+        "wet": {"description":"When true, an exposed flame will not light in this weather.",
           "type": "boolean"
         }
       },
@@ -1442,20 +1442,20 @@
         "water": {
           "$ref": "water.schema.json#/$defs/WaterSettings"
         },
-        "bell_cue": {
+        "bell_cue": {"description":"A line told in the listed rooms when the fact turns true.",
           "type": "object",
           "properties": {
-            "fact": {
+            "fact": {"description":"The bool fact whose change to true triggers the line.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "rooms": {
+            "rooms": {"description":"The rooms where it is told, to anyone there.",
               "type": "array",
               "minItems": 1,
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               }
             },
-            "text": {
+            "text": {"description":"Text key of the line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -1479,7 +1479,7 @@
             "fight": {"description":"A bool pair fact, read at each NPC: the hireling order to fight.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "wage": {
+            "wage": {"description":"Pays each group member from the player's purse on a schedule; a member who cannot be paid leaves the group.",
               "type": "object",
               "properties": {
                 "resource": {"description":"The conserved resource paid.",
@@ -1572,16 +1572,16 @@
             "stolen": {"description":"The per_subject instance bool fact set true on a stolen item.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "noticed": {
+            "noticed": {"description":"Key of the custom event emitted when a theft is seen.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "narration": {
+            "narration": {"description":"Text keys told after a theft.",
               "type": "object",
               "properties": {
-                "seen": {
+                "seen": {"description":"Told when the theft is noticed.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "unseen": {
+                "unseen": {"description":"Told when nobody notices the theft.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },

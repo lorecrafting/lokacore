@@ -249,10 +249,10 @@
       "description": "Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play_time. Requires schedule@1. Millisecond conversion and fractional remainder belong to host M1-B. Integer type obeys loka-numeric-v1 safe range.",
       "type": "object",
       "properties": {
-        "profile": {
+        "profile": {"description":"Must be real_elapsed: logical time follows real time.",
           "const": "real_elapsed"
         },
-        "rate": {
+        "rate": {"description":"Logical seconds that pass per real second; at least 1.",
           "type": "integer",
           "minimum": 1
         },

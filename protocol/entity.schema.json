@@ -1048,7 +1048,7 @@
           "description": "Toolbox row W11: sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy.",
           "type": "object",
           "properties": {
-            "items": {
+            "items": {"description":"The interchangeable items sold as one offer; the first is the offer's item.",
               "type": "array",
               "minItems": 2,
               "maxItems": 16,
@@ -1056,7 +1056,7 @@
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               }
             },
-            "buy": {
+            "buy": {"description":"Buy prices by count held: entry n is the price while the shopkeeper holds n of the items; one entry per item.",
               "type": "array",
               "minItems": 2,
               "maxItems": 16,
@@ -1134,23 +1134,23 @@
           "description": "A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition).",
           "type": "object",
           "properties": {
-            "skill": {
+            "skill": {"description":"The discount applies while the actor has this skill usable. Give this or friendly.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "friendly": {
+            "friendly": {"description":"Must be true: the discount applies while the shop's NPC is friendly to the actor. Give this or skill.",
               "const": true
             },
-            "numerator": {
+            "numerator": {"description":"Multiplies the buy price; see denominator.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
             },
-            "denominator": {
+            "denominator": {"description":"Divides the buy price; the price is floor(buy times numerator over denominator).",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
             },
-            "minimum": {
+            "minimum": {"description":"The discounted buy price is never below this.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -1329,7 +1329,7 @@
         "ranged": {
           "type": "object",
           "properties": {
-            "ammo": {
+            "ammo": {"description":"The resource pool one unit of which each shot spends.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -1342,10 +1342,10 @@
         "durability": {
           "type": "object",
           "properties": {
-            "fact": {
+            "fact": {"description":"The bounded int fact that holds the weapon's durability.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "wear": {
+            "wear": {"description":"Durability each of the weapon's hits takes off.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647

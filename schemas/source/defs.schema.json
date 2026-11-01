@@ -3354,10 +3354,17 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "The action acts on one detail of a room, offered only while the actor is in that room.",
           "properties": {
-            "detail": { "$ref": "#/$defs/Key" },
+            "detail": {
+              "$ref": "#/$defs/Key",
+              "description": "The detail's key in that room's details."
+            },
             "kind": { "const": "detail" },
-            "room": { "$ref": "#/$defs/DefinitionRef" }
+            "room": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The room that holds the detail."
+            }
           },
           "required": [
             "kind",
@@ -3368,6 +3375,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "The action uses a tool the actor holds on another item.",
           "properties": {
             "kind": { "const": "use" },
             "tool": { "$ref": "#/$defs/UseTool" }
@@ -3384,8 +3392,10 @@
           "properties": {
             "aimed": {
               "additionalProperties": false,
+              "description": "Makes it an aimed spell, cast at one target; without it the spell takes no target.",
               "properties": {
                 "scopes": {
+                  "description": "Where the target is looked for: the caster's room occupants, room contents or inventory.",
                   "items": {
                     "enum": [
                       "room_occupants",
@@ -3403,8 +3413,14 @@
               "type": "object"
             },
             "kind": { "const": "spell" },
-            "learned": { "$ref": "#/$defs/DefinitionRef" },
-            "word": { "$ref": "#/$defs/SpokenKeyword" }
+            "learned": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "A bool fact; the word works for a caster only while it reads true for them."
+            },
+            "word": {
+              "$ref": "#/$defs/SpokenKeyword",
+              "description": "The word the player types to cast it."
+            }
           },
           "required": [
             "kind",
@@ -3445,22 +3461,31 @@
           "description": "A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition).",
           "properties": {
             "denominator": {
+              "description": "Divides the buy price; the price is floor(buy times numerator over denominator).",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "friendly": { "const": true },
+            "friendly": {
+              "const": true,
+              "description": "Must be true: the discount applies while the shop's NPC is friendly to the actor. Give this or skill."
+            },
             "minimum": {
+              "description": "The discounted buy price is never below this.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
             "numerator": {
+              "description": "Multiplies the buy price; see denominator.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "skill": { "$ref": "#/$defs/DefinitionRef" }
+            "skill": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The discount applies while the actor has this skill usable. Give this or friendly."
+            }
           },
           "required": [
             "numerator",
@@ -3518,6 +3543,7 @@
           "description": "Toolbox row W11: sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy.",
           "properties": {
             "buy": {
+              "description": "Buy prices by count held: entry n is the price while the shopkeeper holds n of the items; one entry per item.",
               "items": {
                 "maximum": 2147483647,
                 "minimum": 1,
@@ -3528,6 +3554,7 @@
               "type": "array"
             },
             "items": {
+              "description": "The interchangeable items sold as one offer; the first is the offer's item.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 16,
               "minItems": 2,
@@ -4527,6 +4554,7 @@
           "properties": {
             "kind": { "const": "entity" },
             "scopes": {
+              "description": "Where the target is looked for: self, inventory, room_contents, room_occupants or inspectable_details.",
               "items": {
                 "enum": [
                   "self",
@@ -4594,8 +4622,12 @@
       "additionalProperties": false,
       "description": "Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play_time. Requires schedule@1. Millisecond conversion and fractional remainder belong to host M1-B. Integer type obeys loka-numeric-v1 safe range.",
       "properties": {
-        "profile": { "const": "real_elapsed" },
+        "profile": {
+          "const": "real_elapsed",
+          "description": "Must be real_elapsed: logical time follows real time."
+        },
         "rate": {
+          "description": "Logical seconds that pass per real second; at least 1.",
           "minimum": 1,
           "type": "integer"
         },
@@ -4673,27 +4705,40 @@
       "additionalProperties": false,
       "description": "D6 exact paired surface/bottom routes, usable skill, entry load/cost, absolute submersion duration and authored warning/death copy; real_elapsed content only.",
       "properties": {
-        "drowned": { "$ref": "#/$defs/TextKey" },
+        "drowned": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the line told when the character drowns."
+        },
         "duration": {
+          "description": "Logical time units a character can stay under before drowning; at least 1.",
           "minimum": 1,
           "type": "integer"
         },
         "entry_cost": {
+          "description": "Movement points paid to go under.",
           "maximum": 2147483647,
           "minimum": 0,
           "type": "integer"
         },
         "maximum_grams": {
+          "description": "The heaviest load, in grams, a character can carry and still go under.",
           "maximum": 2147483647,
           "minimum": 0,
           "type": "integer"
         },
         "routes": {
+          "description": "The surface and bottom room pairs; entering water at a surface moves to its bottom.",
           "items": {
             "additionalProperties": false,
             "properties": {
-              "bottom": { "$ref": "#/$defs/DefinitionRef" },
-              "surface": { "$ref": "#/$defs/DefinitionRef" }
+              "bottom": {
+                "$ref": "#/$defs/DefinitionRef",
+                "description": "The room under the water."
+              },
+              "surface": {
+                "$ref": "#/$defs/DefinitionRef",
+                "description": "The room above the water, where the route is entered."
+              }
             },
             "required": [
               "surface",
@@ -4705,8 +4750,14 @@
           "minItems": 1,
           "type": "array"
         },
-        "skill": { "$ref": "#/$defs/DefinitionRef" },
-        "warning": { "$ref": "#/$defs/TextKey" }
+        "skill": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The skill the character must have usable to go under."
+        },
+        "warning": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the warning shown before going under."
+        }
       },
       "required": [
         "skill",
@@ -4731,8 +4782,12 @@
           "additionalProperties": false,
           "description": "Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed.",
           "properties": {
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
+            "fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The bounded int fact that holds the weapon's durability."
+            },
             "wear": {
+              "description": "Durability each of the weapon's hits takes off.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
@@ -4748,7 +4803,10 @@
           "additionalProperties": false,
           "description": "Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee.",
           "properties": {
-            "ammo": { "$ref": "#/$defs/DefinitionRef" }
+            "ammo": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The resource pool one unit of which each shot spends."
+            }
           },
           "required": [
             "ammo"
@@ -4771,15 +4829,20 @@
       "description": "One weather of a calendar's weather table (toolbox row 31): each calendar day takes one entry with probability weight / total weight, by a hash of the world id and the day, never the authority RNG. wet: an exposed room's flame will not light (light@1 ignite). Phases are unique in the table.",
       "properties": {
         "phase": {
+          "description": "The weather's name, lowercase letters, digits and underscores; unique in the table.",
           "pattern": "^[a-z][a-z0-9_]*$",
           "type": "string"
         },
         "weight": {
+          "description": "Its chance relative to the other entries: weight over the sum of all weights; 1 to 1000.",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
-        "wet": { "type": "boolean" }
+        "wet": {
+          "description": "When true, an exposed flame will not light in this weather.",
+          "type": "boolean"
+        }
       },
       "required": [
         "phase",
@@ -4802,14 +4865,22 @@
         },
         "bell_cue": {
           "additionalProperties": false,
+          "description": "A line told in the listed rooms when the fact turns true.",
           "properties": {
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
+            "fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The bool fact whose change to true triggers the line."
+            },
             "rooms": {
+              "description": "The rooms where it is told, to anyone there.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "minItems": 1,
               "type": "array"
             },
-            "text": { "$ref": "#/$defs/TextKey" }
+            "text": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the line."
+            }
           },
           "required": [
             "fact",
@@ -4911,6 +4982,7 @@
             },
             "wage": {
               "additionalProperties": false,
+              "description": "Pays each group member from the player's purse on a schedule; a member who cannot be paid leaves the group.",
               "properties": {
                 "amount": {
                   "description": "How much of the resource each member is paid.",
@@ -5061,9 +5133,16 @@
             },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told after a theft.",
               "properties": {
-                "seen": { "$ref": "#/$defs/TextKey" },
-                "unseen": { "$ref": "#/$defs/TextKey" }
+                "seen": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the theft is noticed."
+                },
+                "unseen": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when nobody notices the theft."
+                }
               },
               "required": [
                 "seen",
@@ -5071,7 +5150,10 @@
               ],
               "type": "object"
             },
-            "noticed": { "$ref": "#/$defs/Key" },
+            "noticed": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the custom event emitted when a theft is seen."
+            },
             "skill": {
               "$ref": "#/$defs/DefinitionRef",
               "description": "The victim notices when the actor's level in this skill is below the victim's attribute."
@@ -6860,15 +6942,23 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "The action acts on one detail of a room, offered only while the actor is in that room.",
           "properties": {
-            "detail": { "$ref": "#/$defs/Key" },
+            "detail": {
+              "$ref": "#/$defs/Key",
+              "description": "The detail's key in that room's details."
+            },
             "kind": { "const": "detail" },
-            "room": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "room": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The room that holds the detail."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "The action uses a tool the actor holds on another item.",
           "properties": {
             "kind": { "const": "use" },
             "tool": { "$ref": "#/$defs/partial.UseTool" }
@@ -6881,8 +6971,10 @@
           "properties": {
             "aimed": {
               "additionalProperties": false,
+              "description": "Makes it an aimed spell, cast at one target; without it the spell takes no target.",
               "properties": {
                 "scopes": {
+                  "description": "Where the target is looked for: the caster's room occupants, room contents or inventory.",
                   "items": {
                     "enum": [
                       "room_occupants",
@@ -6897,8 +6989,14 @@
               "type": "object"
             },
             "kind": { "const": "spell" },
-            "learned": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "word": { "$ref": "#/$defs/SpokenKeyword" }
+            "learned": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "A bool fact; the word works for a caster only while it reads true for them."
+            },
+            "word": {
+              "$ref": "#/$defs/SpokenKeyword",
+              "description": "The word the player types to cast it."
+            }
           },
           "type": "object"
         }
@@ -6918,22 +7016,31 @@
           "description": "A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition).",
           "properties": {
             "denominator": {
+              "description": "Divides the buy price; the price is floor(buy times numerator over denominator).",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "friendly": { "const": true },
+            "friendly": {
+              "const": true,
+              "description": "Must be true: the discount applies while the shop's NPC is friendly to the actor. Give this or skill."
+            },
             "minimum": {
+              "description": "The discounted buy price is never below this.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
             "numerator": {
+              "description": "Multiplies the buy price; see denominator.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "skill": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The discount applies while the actor has this skill usable. Give this or friendly."
+            }
           },
           "type": "object"
         },
@@ -7671,6 +7778,7 @@
           "properties": {
             "kind": { "const": "entity" },
             "scopes": {
+              "description": "Where the target is looked for: self, inventory, room_contents, room_occupants or inspectable_details.",
               "items": {
                 "enum": [
                   "self",
@@ -7758,8 +7866,12 @@
           "additionalProperties": false,
           "description": "Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed.",
           "properties": {
-            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "fact": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The bounded int fact that holds the weapon's durability."
+            },
             "wear": {
+              "description": "Durability each of the weapon's hits takes off.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
@@ -7771,7 +7883,10 @@
           "additionalProperties": false,
           "description": "Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee.",
           "properties": {
-            "ammo": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "ammo": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The resource pool one unit of which each shot spends."
+            }
           },
           "type": "object"
         },

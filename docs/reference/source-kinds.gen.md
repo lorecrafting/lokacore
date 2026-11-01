@@ -1365,16 +1365,16 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {kind=detail} | variant |  |  |
-| {kind=detail}.detail | [Key](source-kinds.gen.md#key) | yes |  |
-| {kind=detail}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {kind=use} | variant |  |  |
+| {kind=detail} | variant |  | The action acts on one detail of a room, offered only while the actor is in that room. |
+| {kind=detail}.detail | [Key](source-kinds.gen.md#key) | yes | The detail's key in that room's details. |
+| {kind=detail}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room that holds the detail. |
+| {kind=use} | variant |  | The action uses a tool the actor holds on another item. |
 | {kind=use}.tool | [UseTool](source-kinds.gen.md#usetool) | yes | See the type. |
 | {kind=spell} | variant |  | Toolbox row 29a (word bar S2): a spell, cast only by the cast command typing its word (no other spell scripted action has it), never offered by key or performed; it acts on the caster's body. With aimed (loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it. |
-| {kind=spell}.aimed | object |  |  |
-| {kind=spell}.aimed.scopes | list of `room_occupants` or `room_contents` or `inventory` | yes |  |
-| {kind=spell}.learned | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {kind=spell}.word | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) | yes |  |
+| {kind=spell}.aimed | object |  | Makes it an aimed spell, cast at one target; without it the spell takes no target. |
+| {kind=spell}.aimed.scopes | list of `room_occupants` or `room_contents` or `inventory` | yes | Where the target is looked for: the caster's room occupants, room contents or inventory. |
+| {kind=spell}.learned | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A bool fact; the word works for a caster only while it reads true for them. |
+| {kind=spell}.word | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) | yes | The word the player types to cast it. |
 
 ### Shop
 
@@ -1384,11 +1384,11 @@ A finite NPC shop: conserved resource, exact authored item offers and committed 
 |---|---|---|---|
 | bought | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the purchase narration. |
 | buy_discount | object |  | A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition). |
-| buy_discount.denominator | integer | yes |  |
-| buy_discount.friendly | `true` | one of a group |  |
-| buy_discount.minimum | integer | yes |  |
-| buy_discount.numerator | integer | yes |  |
-| buy_discount.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group |  |
+| buy_discount.denominator | integer | yes | Divides the buy price; the price is floor(buy times numerator over denominator). |
+| buy_discount.friendly | `true` | one of a group | Must be true: the discount applies while the shop's NPC is friendly to the actor. Give this or skill. |
+| buy_discount.minimum | integer | yes | The discounted buy price is never below this. |
+| buy_discount.numerator | integer | yes | Multiplies the buy price; see denominator. |
+| buy_discount.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group | The discount applies while the actor has this skill usable. Give this or friendly. |
 | offers | list of [ShopOffer](source-kinds.gen.md#shopoffer) | yes | The exact item offers. |
 | resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved resource prices are paid in. |
 | sold | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the sale narration. |
@@ -1403,8 +1403,8 @@ One exact authored shop item definition with its positive buy and sell prices; c
 | item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definition offered. |
 | sell | integer | yes | Its positive sell price. |
 | stock | object |  | Toolbox row W11: sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy. |
-| stock.buy | list of integer | yes |  |
-| stock.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| stock.buy | list of integer | yes | Buy prices by count held: entry n is the price while the shopkeeper holds n of the items; one entry per item. |
+| stock.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The interchangeable items sold as one offer; the first is the offer's item. |
 | stolen | `true` |  | Toolbox row 34: this shopkeeper is a fence; sell takes only an instance whose world.theft stolen fact is true, and a shop without it only one whose fact is false. Never on a stock offer. |
 
 ### SlotKey
@@ -1435,7 +1435,7 @@ Type: object.
 |---|---|---|---|
 | {kind=none} | variant |  | The action takes no target. |
 | {kind=entity} | variant |  | One entity from the listed scopes. |
-| {kind=entity}.scopes | list of `self` or `inventory` or `room_contents` or `room_occupants` or `inspectable_details` | yes |  |
+| {kind=entity}.scopes | list of `self` or `inventory` or `room_contents` or `room_occupants` or `inspectable_details` | yes | Where the target is looked for: self, inventory, room_contents, room_occupants or inspectable_details. |
 
 ### TextCatalog
 
@@ -1465,8 +1465,8 @@ Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| profile | `real_elapsed` | yes |  |
-| rate | integer | yes |  |
+| profile | `real_elapsed` | yes | Must be real_elapsed: logical time follows real time. |
+| rate | integer | yes | Logical seconds that pass per real second; at least 1. |
 | recap_after_minutes | integer |  | Toolbox row W27, opt-in: an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block. At most one week (10080). |
 
 ### UseTool
@@ -1494,15 +1494,15 @@ D6 exact paired surface/bottom routes, usable skill, entry load/cost, absolute s
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| drowned | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| duration | integer | yes |  |
-| entry_cost | integer | yes |  |
-| maximum_grams | integer | yes |  |
-| routes | list of object | yes |  |
-| routes[].bottom | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| routes[].surface | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| warning | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| drowned | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when the character drowns. |
+| duration | integer | yes | Logical time units a character can stay under before drowning; at least 1. |
+| entry_cost | integer | yes | Movement points paid to go under. |
+| maximum_grams | integer | yes | The heaviest load, in grams, a character can carry and still go under. |
+| routes | list of object | yes | The surface and bottom room pairs; entering water at a surface moves to its bottom. |
+| routes[].bottom | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room under the water. |
+| routes[].surface | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room above the water, where the route is entered. |
+| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill the character must have usable to go under. |
+| warning | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the warning shown before going under. |
 
 ### WeaponProfile
 
@@ -1512,10 +1512,10 @@ An equipped weapon's required skill and authored attack profile.
 |---|---|---|---|
 | attack | [AttackProfile](source-kinds.gen.md#attackprofile) | yes | Its attack profile. |
 | durability | object |  | Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed. |
-| durability.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| durability.wear | integer | yes |  |
+| durability.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bounded int fact that holds the weapon's durability. |
+| durability.wear | integer | yes | Durability each of the weapon's hits takes off. |
 | ranged | object |  | Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee. |
-| ranged.ammo | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| ranged.ammo | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource pool one unit of which each shot spends. |
 | skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The required skill. |
 
 ### WeatherEntry
@@ -1524,9 +1524,9 @@ One weather of a calendar's weather table (toolbox row 31): each calendar day ta
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| phase | string | yes |  |
-| weight | integer | yes |  |
-| wet | boolean |  |  |
+| phase | string | yes | The weather's name, lowercase letters, digits and underscores; unique in the table. |
+| weight | integer | yes | Its chance relative to the other entries: weight over the sum of all weights; 1 to 1000. |
+| wet | boolean |  | When true, an exposed flame will not light in this weather. |
 
 ### Word
 
@@ -1541,10 +1541,10 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | bands | [BandTable](source-kinds.gen.md#bandtable) |  | The condition band table of every pool without its own. Default: the engine's table. |
-| bell_cue | object |  |  |
-| bell_cue.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| bell_cue.rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| bell_cue.text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| bell_cue | object |  | A line told in the listed rooms when the fact turns true. |
+| bell_cue.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bool fact whose change to true triggers the line. |
+| bell_cue.rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The rooms where it is told, to anyone there. |
+| bell_cue.text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line. |
 | carry | object |  | Opts into the voluntary Take ceiling (docs/system/mechanics.md containment@1); every item must author mass_grams. No engine default. |
 | carry.max_grams | integer | yes | The Take ceiling, in grams. |
 | combat | [CombatSettings](source-kinds.gen.md#combatsettings) |  | See the type. |
@@ -1564,7 +1564,7 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 | group.fight | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A bool pair fact, read at each NPC: the hireling order to fight. |
 | group.member | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A bool pair fact, read at each NPC: this NPC is in the player's group. |
 | group.stay | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A bool pair fact, read at each NPC: the hireling order to stay. |
-| group.wage | object |  |  |
+| group.wage | object |  | Pays each group member from the player's purse on a schedule; a member who cannot be paid leaves the group. |
 | group.wage.amount | integer | yes | How much of the resource each member is paid. |
 | group.wage.every | integer | yes | Clock units between payments. |
 | group.wage.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved resource paid. |
@@ -1586,10 +1586,10 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 | movement.terrain | map of integer |  | Terrain movement costs (row 43a; docs/system/mechanics.md, Terrain movement costs): a room tag to the percent a move into a room carrying it scales the fare by, applied after status cost_percent, in the room's authored tag order, rounded down each step. The key pattern repeats the entity.schema.json Tag enum, so a Tag added there is refused here until this list follows (fail closed). |
 | theft | object |  | Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen. |
 | theft.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The victim's attribute compared with the actor's skill level. Absent: 0. |
-| theft.narration | object | yes |  |
-| theft.narration.seen | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| theft.narration.unseen | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| theft.noticed | [Key](source-kinds.gen.md#key) | yes |  |
+| theft.narration | object | yes | Text keys told after a theft. |
+| theft.narration.seen | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the theft is noticed. |
+| theft.narration.unseen | [TextKey](source-kinds.gen.md#textkey) | yes | Told when nobody notices the theft. |
+| theft.noticed | [Key](source-kinds.gen.md#key) | yes | Key of the custom event emitted when a theft is seen. |
 | theft.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The victim notices when the actor's level in this skill is below the victim's attribute. |
 | theft.stolen | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The per_subject instance bool fact set true on a stolen item. |
 | trails | object |  | Toolbox row W13 (mechanics.md Tracks and trails): a trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses. |
@@ -1605,50 +1605,8 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 
 ## Fields without a meaning
 
-169 fields.
+127 fields.
 
-- `ScriptedTarget: {kind=detail}`
-- `ScriptedTarget: {kind=detail}.detail`
-- `ScriptedTarget: {kind=detail}.room`
-- `ScriptedTarget: {kind=spell}.aimed`
-- `ScriptedTarget: {kind=spell}.aimed.scopes`
-- `ScriptedTarget: {kind=spell}.learned`
-- `ScriptedTarget: {kind=spell}.word`
-- `ScriptedTarget: {kind=use}`
-- `Shop: buy_discount.denominator`
-- `Shop: buy_discount.friendly`
-- `Shop: buy_discount.minimum`
-- `Shop: buy_discount.numerator`
-- `Shop: buy_discount.skill`
-- `ShopOffer: stock.buy`
-- `ShopOffer: stock.items`
-- `TargetSpec: {kind=entity}.scopes`
-- `TimePolicy: profile`
-- `TimePolicy: rate`
-- `WaterSettings: drowned`
-- `WaterSettings: duration`
-- `WaterSettings: entry_cost`
-- `WaterSettings: maximum_grams`
-- `WaterSettings: routes`
-- `WaterSettings: routes[].bottom`
-- `WaterSettings: routes[].surface`
-- `WaterSettings: skill`
-- `WaterSettings: warning`
-- `WeaponProfile: durability.fact`
-- `WeaponProfile: durability.wear`
-- `WeaponProfile: ranged.ammo`
-- `WeatherEntry: phase`
-- `WeatherEntry: weight`
-- `WeatherEntry: wet`
-- `WorldSettings: bell_cue`
-- `WorldSettings: bell_cue.fact`
-- `WorldSettings: bell_cue.rooms`
-- `WorldSettings: bell_cue.text`
-- `WorldSettings: group.wage`
-- `WorldSettings: theft.narration`
-- `WorldSettings: theft.narration.seen`
-- `WorldSettings: theft.narration.unseen`
-- `WorldSettings: theft.noticed`
 - `attributes: attributes`
 - `barriers: initial`
 - `barriers: key_item`
