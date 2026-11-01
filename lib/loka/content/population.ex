@@ -127,6 +127,9 @@ defmodule Loka.Content.Population do
 
   defp actorless?(_), do: false
 
+  # A rejected text.json (:unknown) reports at its own path; the keys here cannot be judged.
+  defp known?(text, key), do: text == :unknown or is_map_key(text, key)
+
   defp pack_valid?(nil, _, _, _), do: true
 
   defp pack_valid?(pack, area, rooms, text) do
@@ -135,7 +138,7 @@ defmodule Loka.Content.Population do
     narration = pack["narration"]
 
     Enum.all?(directions, &Map.has_key?(narration["enemy_fled"], &1)) and
-      Enum.all?(narration_keys(narration), &Map.has_key?(text, &1))
+      Enum.all?(narration_keys(narration), &known?(text, &1))
   end
 
   defp sight_valid?(nil, _, _, _, _), do: true
@@ -145,7 +148,7 @@ defmodule Loka.Content.Population do
 
     is_integer(sight["delay"]) and sight["delay"] > 0 and
       Enum.all?(directions, &Map.has_key?(sight["narration"], &1)) and
-      Enum.all?(Map.values(sight["narration"]), &Map.has_key?(text, &1))
+      Enum.all?(Map.values(sight["narration"]), &known?(text, &1))
   end
 
   defp sight_valid?(_, _, _, _, _), do: false
@@ -185,7 +188,7 @@ defmodule Loka.Content.Population do
       ])
 
     p["item"] == nil and
-      Enum.all?(Map.values(s["narration"]), &Map.has_key?(text, &1)) and
+      Enum.all?(Map.values(s["narration"]), &known?(text, &1)) and
       Enum.uniq(corridor) == corridor and
       Enum.member?(corridor, p["home"]) and
       Enum.all?(s["drop_rooms"], &Enum.member?(corridor, &1)) and

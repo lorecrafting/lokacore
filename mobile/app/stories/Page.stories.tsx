@@ -1,18 +1,19 @@
 // Page: one shell for every page (Page's doc comment); RunningHead above it, as Body.tsx
 // draws it. Journal texts are the showcase's own (protocol/fixtures/toolbox_showcase_hash.json).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import type { ComponentProps } from 'react';
+import { type ComponentProps, useState } from 'react';
 import { View } from 'react-native';
 import { expect, fn, waitFor } from 'storybook/test';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { ContinueButton } from '../book/actions.tsx';
 import { EntityLine, LogLines } from '../book/lines.tsx';
-import { Control, Page, RunningHead, SectionTitle } from '../book/pages.tsx';
+import { Control, Page, SectionTitle } from '../book/pages.tsx';
+import { RunningHead } from '../book/RunningHead.tsx';
 import { prose, usePalette, useType } from '../book/palette.ts';
 import { Text } from '../book/Text.tsx';
 import { LABEL } from '../book/labels.ts';
 
-type Quest = Pick<GameView['journal'][number], 'state' | 'journal'>;
+type Quest = Pick<GameView['journal'][number], 'quest' | 'state' | 'journal'>;
 const say = (k: string) => k;
 
 // A phone-high frame, so the page scrolls inside itself as on a device.
@@ -56,8 +57,9 @@ type Story = StoryObj<typeof meta>;
 export const WithRunningHead: Story = {
   args: {
     journal: [
-      { state: 'resolved', journal: 'quest.bell.prior' },
+      { quest: { key: 'bell' }, state: 'resolved', journal: 'quest.bell.prior' },
       {
+        quest: { key: 'letter' },
         state: 'active',
         journal: 'Take the Reeve’s letter to Wat on the fell.',
       },
@@ -73,6 +75,7 @@ export const LongRunningHead: Story = {
   args: {
     journal: [
       {
+        quest: { key: 'letter' },
         state: 'objectives_complete',
         journal:
           'Carry the Reeve’s letter directly to Wat at his hut on the fell before the third day at six. Payment is due only by the second day at six.',
@@ -82,7 +85,11 @@ export const LongRunningHead: Story = {
 };
 
 export const NoRunningHead: Story = {
-  args: { journal: [{ state: 'resolved', journal: 'quest.bell.prior' }] as Quest[] },
+  args: {
+    journal: [
+      { quest: { key: 'bell' }, state: 'resolved', journal: 'quest.bell.prior' },
+    ] as Quest[],
+  },
   play: async ({ canvas }) => {
     await expect(canvas.queryByText('quest.bell.prior')).toBeNull();
   },
@@ -181,6 +188,29 @@ export const ScrollToEnd: Story = {
   play: async ({ canvas }) => {
     const last = canvas.getByText('Bram says line 30.');
     await waitFor(() => expect(inView(last)).toBe(true));
+  },
+};
+
+// Breaks: on the web ScrollView keeps its first ref callback, so a later render's Page has no view
+// and a line arriving on a full page is cut (the pop unseen).
+function Growing() {
+  const [lines, setLines] = useState(30);
+  return (
+    <Framed
+      title="Old Bram"
+      scrollToEnd
+      foot={<Control label="Say" onPress={() => setLines(lines + 5)} />}
+    >
+      <LogLines lines={Array.from({ length: lines }, (_, i) => `Bram says line ${i + 1}.`)} />
+    </Framed>
+  );
+}
+export const LogFollows: Story = {
+  render: () => <Growing />,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 30.'))).toBe(true));
+    await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 35.'))).toBe(true));
   },
 };
 

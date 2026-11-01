@@ -42,7 +42,7 @@ defmodule Loka.Content.Bleed do
         do: [diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))],
         else: []
       ) ++
-        if(is_map(n) and Enum.all?(Map.values(n), &Map.has_key?(text, &1)),
+        if(is_map(n) and Enum.all?(Map.values(n), &known?(text, &1)),
           do: [],
           else: [diag("SCHEMA_VIOLATION", at(rel, ["narration"]))]
         )
@@ -79,8 +79,11 @@ defmodule Loka.Content.Bleed do
     end)
   end
 
+  # A rejected text.json (:unknown) reports at its own path; the keys here cannot be judged.
+  defp known?(text, key), do: text == :unknown or is_map_key(text, key)
+
   defp valid_item?(item, bandage, text),
     do:
-      bandage["action"] == "bandage" and Map.has_key?(text, bandage["narration"]) and
+      bandage["action"] == "bandage" and known?(text, bandage["narration"]) and
         item["container"] != true and item["slot"] == nil and item["edible"] == nil
 end

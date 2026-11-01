@@ -1,9 +1,12 @@
 // A shopkeeper's buy and sell pages, child pages of their NPC page (book-ui.md, NPC dialogue and action details).
+import { View } from 'react-native';
+import { ItemPop } from './ItemPop.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, type group, type Page as Route } from './model.ts';
 import type { Button, presenter } from './presenter.ts';
 import { ActionCard, Cards, useFocus } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
+import { space } from './tokens.ts';
 import { Control, Page } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import { things } from './item-pages.ts';
@@ -71,6 +74,23 @@ function ShopLines(p: { view: GameView; rows: Line[]; press: (b: Button) => void
   );
 }
 
+// The pop's anchor: a buy writes no line here (book-ui.md, quiet), so it may hang from the balance.
+function Bought(
+  p: {
+    money?: number;
+    lines: Parameters<typeof LogLines>[0]['lines'];
+  } & Parameters<typeof ItemPop>[0], // mutate-skip: type
+) {
+  if (p.money === undefined && !p.lines.length) return null;
+  return (
+    <View style={{ gap: space.xl }}>
+      {p.money !== undefined && <Note>{balance(p.money)}</Note>}
+      {!!p.lines.length && <LogLines lines={p.lines} />}
+      <ItemPop view={p.view} text={p.text} />
+    </View>
+  );
+}
+
 /**
  * A shopkeeper's shop, two child pages of their NPC page (owner picks mvlrlvappy4w, mvlymuams73l,
  * mvlynyikyw57, 2026-10-23).
@@ -118,8 +138,7 @@ export function ShelfPage(p: {
       foot={<Control label={LABEL.leave} onPress={p.back} />}
     >
       <ShopLines view={view} rows={rows} press={press} />
-      {money !== undefined && <Note>{balance(money)}</Note>}
-      <LogLines lines={p.screen.detail(p.id)} />
+      <Bought money={money} lines={p.screen.detail(p.id)} view={view} text={text} />
       {!p.sale && sell.length > 0 && (
         <Cards>
           <ActionCard label={LABEL.sell} onPress={() => p.open({ kind: 'sale', id: p.id })} />

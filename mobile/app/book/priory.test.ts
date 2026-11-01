@@ -14,6 +14,12 @@ import {
 import { fadeStub } from './__tests__/fade-stub.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
+// Components drawn with nodes() alone hold no state; the Book's own test sets real hooks.
+(globalThis as any).d2Hooks = {
+  state: (v: any) => [typeof v === 'function' ? v() : v, () => {}],
+  ref: (current: any) => ({ current }),
+  effect() {},
+};
 registerHooks({
   resolve(s, c, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.

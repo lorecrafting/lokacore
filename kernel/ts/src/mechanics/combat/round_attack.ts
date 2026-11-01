@@ -18,7 +18,7 @@ import { apply } from '../../runtime/apply.ts';
 import { add, mul, saturate } from '../../foundation/int.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted } from '../../foundation/rng.ts';
-import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
+import { aboveFloor, adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
 import { deathSequence } from '../death/sequence.ts';
 import { derived, npcValue } from '../attribute/shared.ts';
 import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
@@ -74,7 +74,7 @@ export function attack(
   const sleeping = foe && positionOf(world, row.character_id) === 'sleeping';
   const damage = hit ? dealt(world, target_id, profile, roll, damageRoll(r, profile)) : 0;
   const loss = Math.min(
-    level(world, target_id, resourceRef(world, 'hp'))!,
+    aboveFloor(world, target_id, resourceRef(world, 'hp')),
     mul(damage, sleeping ? world.cartridge.world!.combat!.sleep_multiplier : 1),
   );
   r.events.push(

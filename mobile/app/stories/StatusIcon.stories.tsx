@@ -137,6 +137,10 @@ function Live(p: { text: (key: string) => string }) {
     </>
   );
 }
+// An expired icon fades out in the tree before a new one may share its name.
+const fedGone = (canvas: { queryByRole: Function }) =>
+  waitFor(() => expect(canvas.queryByRole('button', { name: /^fed/ })).toBeNull());
+
 export const Focused: Story = {
   render: (args) => <Live text={args.text} />,
   play: async ({ canvas, userEvent }) => {
@@ -155,6 +159,7 @@ export const Focused: Story = {
     await tip('fed, 47m remaining');
     press('expire'); // poisoned takes fed's place; its tip must not appear
     await none();
+    await fedGone(canvas);
     canvas.getByRole('button', { name: /^poisoned/ }).focus();
     await tip('poisoned, 3m remaining');
     press('lock');
@@ -166,6 +171,7 @@ export const Focused: Story = {
     await tip('fed, 47m remaining');
     press('expire'); // fed unmounts under the pointer; no hover-out fires
     await none();
+    await fedGone(canvas);
     press('reapply'); // fed's new icon is not hovered: no tip
     await none();
     const poisonedIcon = () => canvas.getByRole('button', { name: /^poisoned/ });
@@ -174,8 +180,8 @@ export const Focused: Story = {
     await tip('poisoned, 3m remaining');
     await userEvent.unhover(canvas.getByRole('button', { name: /^fed/ })); // not poisoned's hold
     await tip('poisoned, 3m remaining');
-    press('expire'); // poisoned moves to fed's place: a new icon, unfocused
-    await none();
+    press('expire'); // poisoned moves to fed's place: the same icon, still focused
+    await tip('poisoned, 3m remaining');
   },
 };
 

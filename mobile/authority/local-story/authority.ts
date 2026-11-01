@@ -13,7 +13,7 @@ import { chronicle, narration } from './narration.ts';
 import { adopt, ids, token } from './save.ts';
 import type { Story } from './save.ts';
 import type { ElapsedStatus } from '../../packages/game-view/session.ts';
-import { ClockDriver, type Clocks, type Pulse } from './elapsed.ts';
+import { CatchUpRefusedError, ClockDriver, type Clocks, type Pulse } from './elapsed.ts';
 import { ElapsedRecoveryError, changedRun, formatProblem } from './elapsed-store.ts';
 import { invoke, cancel } from './invocation.ts';
 import { catchUp } from './trace.ts';
@@ -64,7 +64,7 @@ const SAVE_FORMAT = 'loka-save-v2';
  * the save's lineage and the world's character; its actor is the character. Not opened, nothing
  * written: a newer format (`unsupported_save_format`, checked first; the player updates the app,
  * 10 §§31-32), and, offering only the player's new game (settled as any; reopen once `replaced`),
- * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07). `invoke` takes one ActionInvocation: malformed or
+ * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07; also a refused catch-up, `opened`). `invoke` takes one ActionInvocation: malformed or
  * another actor's gets no receipt; a known invocation replays its receipt (altered intent, or a
  * response that is not a DecisionResult, is a conflict) before anything is resolved against the current world; a NEW one with a host view
  * token (`view:<run>:<revision>`) other than `token()` is `stale_view` (04 §16; other tokens are only admission
@@ -116,7 +116,13 @@ function opened(s: Story) {
     s.world.cartridge.manifest.time_policy && s.host.time
       ? new ClockDriver(s, s.host.time, (status) => changed(status))
       : undefined;
-  driver?.pulse('resume', s.meta.run_id);
+  try {
+    driver?.pulse('resume', s.meta.run_id);
+  } catch (e) {
+    if (!(e instanceof CatchUpRefusedError)) throw e;
+    s.behind = true; // Start over's best-effort trace catch-up still runs
+    return { kind: 'save_corrupt' as const, newGame: () => newGame(s) };
+  }
   s.behind = !catchUp(s.db, ids(s), s.fresh.context);
   // world() is not fenced: while `pending` it is the prior revision, which the UI shows as pending.
   return {

@@ -366,7 +366,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
   go('up');
   h.tap('An old trunk');
   h.refuse('Take');
-  assert.ok(h.text().includes("Take\nThat's more than you can carry."), JSON.stringify(h.text()));
+  assert.ok(h.text().includes("That's more than you can carry."), JSON.stringify(h.text()));
   assert.equal(h.labels().includes('Take an old trunk'), false);
   h.tap('Leave');
   carrying();

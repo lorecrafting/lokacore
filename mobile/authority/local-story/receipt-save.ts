@@ -11,10 +11,12 @@ import { dialogueSave } from './dialogue-save.ts';
 import { commerceSave } from './commerce-save.ts';
 import { deadlineSave } from './deadline-save.ts';
 import { deerSave } from './deer-save.ts';
+import { jobSave } from './job-save.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 
 export function receiptRecovery(fresh: World, world: World, db: Db, meta: Meta, revision: number) {
+  jobSave(fresh, world);
   knowledgeSave(world);
   patrolSave(world);
   expeditionSave(world, db, meta, revision);

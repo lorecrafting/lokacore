@@ -41,7 +41,7 @@ type Active = Extract<StatusRow, { active: true }> & { next_tick_at: number; job
  * status/shared.ts refreshed), so the drain carries its true tick (`carried`); only the last
  * sub-step writes the row's successor.
  */
-// size: allow 47, one due job saturates or folds the tick, expires, or runs the fatal death sequence
+// size: allow 50, one due job saturates or folds the tick, expires, or runs the fatal death sequence
 export function runStatus(
   world: World,
   command: Pick<Command, 'id'>,
@@ -63,6 +63,9 @@ export function runStatus(
   const player = actorOf(world, body) !== undefined;
   const tick = carried ?? row.next_tick_at;
   const visit = { ...world, state: { ...world.state, clock: now } };
+  // An eaten holder's status ends silently: nothing may tick, expire or react on it (loka-pyez).
+  if (world.consumed && world.state.containers[body] === world.consumed)
+    return accepted<never>(world, 'job_ran', [...ops, ...expire(visit, body, status, row, 0)], []);
   const expired = now >= (row.ends_at ?? Infinity);
   const due = !expired && spec.per_tick !== undefined && now >= tick;
   const { by, fatal } = due ? amount(visit, body, spec) : { by: 0, fatal: false };

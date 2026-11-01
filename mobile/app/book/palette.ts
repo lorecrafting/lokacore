@@ -58,21 +58,27 @@ const lum = (hex: string) =>
   rgb(hex)
     .map((v) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
     .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
-const dark = (p: Palette) => lum(p.fg) > lum(p.bg); // light ink on dark paper
+export const dark = (p: Palette) => lum(p.fg) > lum(p.bg); // light ink on dark paper
 // WCAG 2 contrast ratio of two #rrggbb colours (the token test and the Tokens story).
 export const contrast = (a: string, b: string) => {
   const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
   return (x + 0.05) / (y + 0.05);
 };
 const hex = (n: number) => Math.round(n).toString(16).padStart(2, '0');
+/** One colour between two #rrggbb colours. */
+export const mixInk = (a: string, b: string, t: number) => {
+  const y = rgb(b);
+  return `#${rgb(a)
+    .map((v, i) => hex(v + (y[i]! - v) * t))
+    .join('')}`;
+};
 function mix(a: Palette, b: Palette, t: number): Palette {
   const out = { ...b };
-  for (const role of Object.keys(b) as (keyof Palette)[]) {
-    const [x, y] = [rgb(a[role]), rgb(b[role])];
-    out[role] = `#${x.map((v, i) => hex(v + (y[i] - v) * t)).join('')}`;
-  }
+  for (const role of Object.keys(b) as (keyof Palette)[]) out[role] = mixInk(a[role], b[role], t);
   return out;
 }
+/** The blow wash's colour: amber `action` reads as lamplight on dark paper, not harm. */
+export const washInk = (c: Palette) => (dark(c) ? c.danger : c.action);
 
 // The web keyboard focus ring (BOOK-UI-COMPONENTS.md#design-tokens): `size.focus` `action` outline,
 // `size.focus` out, on `:focus-visible` only, so a tap or a click draws none. One document-wide rule

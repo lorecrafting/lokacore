@@ -1,6 +1,9 @@
 // The riddle answer: a bank of letter tiles over one local buffer.
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { LiftPressable } from './fade.ts';
+import { useLift, usePress } from './press.ts';
+import { play } from './sound';
 import { Text } from './Text.tsx';
 import type { Button } from './presenter.ts';
 import { ActionCard } from './actions.tsx';
@@ -61,7 +64,7 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
 /**
  * One letter of the riddle bank.
  * - Use: Riddle only.
- * - Rules: a used tile keeps its place (no reflow). Name: the letter, then its place (`N, tile 2`).
+ * - Rules: a press lifts with a tick and a selection haptic; a used tile keeps its place (no reflow). Name: the letter, then its place (`N, tile 2`).
  * - States: free; used (not pressable).
  * - Story: LetterTile.stories.tsx
  */
@@ -72,25 +75,35 @@ export function LetterTile(p: {
   onPress: () => void;
 }) {
   const c = usePalette();
+  const press = usePress('selection');
+  const lift = useLift(press, c.card);
   return (
-    <Pressable
+    <LiftPressable
+      {...press.handlers}
+      onPressIn={() => {
+        play('tick');
+        press.handlers.onPressIn();
+      }}
       accessibilityRole="button"
       accessibilityLabel={p.label}
       disabled={p.used}
-      onPress={() => p.onPress()} // no press event: the handler takes none
-      style={{
-        width: size.touch,
-        height: size.touch,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: c.card,
-        borderColor: c.line,
-        borderWidth: size.rule,
-        borderRadius: radius.card,
-        opacity: p.used ? opacity.disabled : 1,
-      }}
+      onPress={press.commit(p.onPress)}
+      style={[
+        {
+          width: size.touch,
+          height: size.touch,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: c.card,
+          borderColor: c.line,
+          borderWidth: size.rule,
+          borderRadius: radius.card,
+          opacity: p.used ? opacity.disabled : 1,
+        },
+        lift,
+      ]}
     >
       <Text style={{ ...useType().tile, color: c.fg }}>{p.letter}</Text>
-    </Pressable>
+    </LiftPressable>
   );
 }

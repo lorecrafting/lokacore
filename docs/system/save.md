@@ -56,7 +56,7 @@ SQLite read failures such as locks and I/O errors retain their storage-error han
 valid-JSON response of the wrong shape still opens; its replay is a `conflict`
 ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
-`recovery.test.ts`, `start_over.test.ts`, `release_pin.test.ts` (the kernel_api pin).
+`recovery.test.ts`, `start_over.test.ts`, `release_pin.test.ts` (the kernel_api pin), `open_catch_up.test.ts`.
 
 During [pre-production development](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md), old release/save
 compatibility is not required. A save opens only when its exact release pin (content hash and kernel_api) is available;
@@ -259,7 +259,7 @@ Accounting uses exact checked integer arithmetic, retaining fractions and existi
 Active monotonic samples are floored absolute milliseconds; resume credits positive wall gaps
 once and durably rebases negative gaps without rewind. Each captured horizon settles at the
 earliest pending job boundary, yielding after 16 commits. Already-due jobs/faults surface
-recovery and retain debt. Sampling never extends a reserved input’s finite horizon.
+recovery and retain debt. At load, a changed job row no handler can run (`local-story/job-save.ts`: unknown definition, or an NPC job off its schedule's hours) is `save_corrupt` with the same route. A number canonical JSON refuses is judged by the same rule, not refused for itself: a fractional due time is a refused delivery; past safe integers, a runnable kind never comes due and the save plays. At open, an already-due job or a refused catch-up delivery is `save_corrupt` with the new game in place; the refused step writes nothing, and steps settled before it stay committed. A kernel fault stays a fault with its debt, and a storage failure during catch-up offers no Start over (`open_catch_up.test.ts`). Sampling never extends a reserved input’s finite horizon.
 
 The existing managed resume pulse arms a private driver obligation synchronously before a
 retained player attempt can consume that call. Arming samples no clock or storage. A new

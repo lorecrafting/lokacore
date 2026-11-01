@@ -14,10 +14,12 @@ import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.
 import { group } from './model.ts';
 import { presenter } from './presenter.ts';
 import { LABEL } from './labels.ts';
+import { fadeStub } from './__tests__/fade-stub.ts';
 
 const ts = createRequire(import.meta.url)('typescript');
 registerHooks({
   resolve(specifier, context, next) {
+    if (specifier === './fade.ts') return fadeStub;
     // Components are called outside React: the palette context reads its default (light).
     if (specifier === 'react') return { url: 'test:item-react', shortCircuit: true };
     return specifier === 'react-native'
