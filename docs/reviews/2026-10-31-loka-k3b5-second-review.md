@@ -62,3 +62,11 @@ Disposition proof: one FORGED row in `open_catch_up.test.ts` (fractional `due_ti
 - `store.ts:129` cite: backed. PR body line 6 `invalid`: not backed, above.
 
 Not run: full suites; phone; `deer`, `deer_bleed_recovery`, `story_points` test files in the save probe.
+
+## Re-check at `ef623cfbca510bd4c14465fec4f0c5e7d4887306`
+
+**Verdict: APPROVE.** Scope: `job-save.ts` `changed`, its FORGED rows, the `save.md` line. CI at that commit: `ci`, `book-e2e`, `graph-diff` success.
+
+- Blocker fixed. Fractional `order` is `save_corrupt`, `startOver:true`, and Start over plays at 64800. Mutant `elapsed.ts:141` is now red-narrow; rethrowing from `changed`'s catch is red-narrow; a comment-only null control survives. `open_catch_up`: 19 pass.
+- Accepted deviation (PM): `due_time` 1e300 on an `order` row opens, as at base. Eight launches, reloads at the same clock included, wall 20000 to 2e8: time 65300 to 10064300, `look` saved, no refusal, no loop, `integrity_check` ok, row unchanged, one run. Start over from the game plays at 64800.
+- A fractional due time beyond the first credit (70000.5) opens until the clock reaches it, then is refused on every launch with Start over and receipts unchanged. `order` at 9007199254740993: three launches open and play.
