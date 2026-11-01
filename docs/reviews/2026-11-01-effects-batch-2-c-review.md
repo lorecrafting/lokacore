@@ -64,3 +64,33 @@
 Sweep `bin/mutate_diff.sh origin/main` (`MUTATE_MINUTES=20`): **no rows complete; stopped by hand at 11 minutes.** Setup took about 10 minutes, then the first `view.ts` row ran the kernel test files for over a minute, so all 174 queued rows count as unrun. It did show every queued file with a green local baseline: 178 mutants, 174 queued (66 `sound.web.ts`, 21 `narration.ts`, 21 `Storm.tsx`, 19 `stormClock.ts`, 11 `received.ts`, 8 `cueDiff.ts`, 8 `sound_rig.ts`, 7 `cues.ts`, 6 `Leaf.tsx`, 5 `tokens.ts`, 2 `view.ts`), 4 NOT-UNIQUE. The handback's "baseline red, not queued" for six of those files (58 of 178 with the NOT-UNIQUE rows) does not reproduce here. Its table (19 red, 28 survived, 73 not run) is therefore neither confirmed nor refuted by this sweep; the hand mutants below are the evidence. Its `Storm.tsx` and `Leaf.tsx` survivors match B2.
 
 Hand mutants, red: `narration.ts` lever key, opened either half, miss hit, miss attacker, deed without id; `cueDiff.ts` latch not newly, latch any place, miss when landed, lever dropped; `sound.web.ts` bed muffled, gap ignored; `stormClock.ts` wash ignored, gap 0, heavy indoors; `view.ts` sound dropped, exposed dropped, exposed always. Survivors are B2 and S2; "in fight explores" and "fade ms" also survived, dropped here as masked by the bus check and cosmetic.
+
+## Re-check at `24a4044b3d352871698a90a6b23d851c7d8205e9` (fix commits 59f630eff, 24a4044b3)
+
+- **Verdict: APPROVE WITH NOTES.** No blockers; two [small should-fixes](../WORKFLOW.md#small-should-fix) and the PR body to file or fix. CI at this head (`gh run list --commit`): graph-diff, ci, book-e2e completed, success.
+
+Dispositions:
+
+| Finding | Result | Proof |
+|---|---|---|
+| B1 miss | Fixed | Body id compared, fires on the clock; real round in `combat.test.ts`; press path does not double fire (`finished` sets the projection, so `background` returns on the token). Reopen does not replay (`restoredLogs` sets `narrationId`, leaves `deed` unset). Latch reads `command.payload.type`; real `open` in `d10_knowledge.test.ts`. |
+| B2 tests | Fixed, see R1, R2 below | 50 hand mutants: 43 red, 1 hang (not green), 6 survived. |
+| S1 test location | Fixed | `book/room_sound.test.ts` sits in the npm glob and passes. |
+| S2 fixtures | Fixed | `const` loosened and each `sound` `$ref` loosened in `contracts.gen.ts`: all 3 red on `validate.test.ts`. |
+| S3 Flash limit | Fixed | `lightFell` and `step` both use `performance.now()`; dropping `struck`, or `lightFell`, red. |
+| S4 latch | Fixed | Door verbs only; `action_completed` comes only from the scripted action's own command (`scripted_action/rule.ts:99`), press-gated. |
+| S5 quiet | Fixed | Combat and new chapter spend nothing; each mutant red. |
+| N1, N3, N4 | Closed | Sky stays mounted in `Leaf.tsx`; easings read through `curveOf`; PR body sizes corrected. |
+| N2 | Open, designer's call | Not reopened. |
+
+Findings:
+
+- **R1 (should-fix)** `mobile/app/book/Leaf.tsx:29`: `exposed={!!v.place?.exposed}` to `exposed` stays green, though `room_sound.test.ts:42` claims place.exposed reaches the sky and asserts only the bed. Scenario: a dropped or swapped prop draws lightning and wind indoors, which book-ui.md:822 and :824 forbid, or none outdoors. One assertion in the Leaf test at `storm.test.ts:81`.
+- **R2 (should-fix)** `mobile/app/book/sound.web.ts:238`: `settleRoom(motion.bed.duration)` to `settleRoom(0)` stays green. Scenario: a new tag cuts hard where book-ui.md:774 says it cross-fades. One assertion on the rig's `ramps`.
+- **R3 (should-fix)** PR body lines 26, 27, 30: lists `cueDiff.ts`, `received.ts` and others as not queued and says "Not done: hand-written mutants", and "no code reads" the `afterimage` and `flutter` easings (`Storm.tsx:49-50` reads them); the reported 34 of 34 is not in the body. A merge reader is misled. Docs only.
+- **Nit** `mobile/authority/local-story/deed-receipt.ts:9`: comment, and the hand-back, say a lineless miss on the clock stays silent with no record. `narration.ts:45` keeps it (`!deed`) and `combat_flow.test.ts` asserts that record reaches the cues. Unreachable today: every round miss has a line (`round_flow.ts:251`). A lineless press miss would fire twice: it leaves `narrationId` unset, so the next clock walk-back returns it as new (by reading, not run).
+- **Nit** `mobile/app/book/received.ts:128,130`: dropping `attack_result` or `barrier_changed` from `telling` stays green and is equivalent today: rounds and door verbs always carry a line (`barrier/rule.ts:65`). Delete them, or test them with the first nit.
+- **Nit** `mobile/authority/local-story/deed-receipt.ts:33`: `lock`, `unlock` unpinned; `close` and `lock` cannot show an exit. Keep `open`, `unlock` and pin `unlock`.
+- **Nit** `mobile/app/book/cue_sounds.test.ts:200`: the lever comment is orphaned above the new test; its test is at `:226`.
+
+Not checked: `bin/mutate_diff.sh` (hand mutants only, as scoped), audio by ear. Developer's 34 of 34 not rerun as such.
