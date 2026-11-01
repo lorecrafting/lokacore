@@ -21,6 +21,7 @@ import { hint } from './book/model.ts';
 import {
   devClock,
   played,
+  placeDue,
   resetPlace,
   restorePlace,
   skew,
@@ -231,6 +232,7 @@ function useWebSession() {
     let live = true;
     g.loka_web_opening.then((opened) => {
       session = opened;
+      if (devClock && placeDue()) opened.startOver();
       if (devClock) restorePlace(opened.game());
       if (live) redrawBoot((n) => n + 1);
     });

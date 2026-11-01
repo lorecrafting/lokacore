@@ -45,6 +45,9 @@ export const resetPlace = () => {
   refused = undefined;
   savePlace();
 };
+/** This load must replay the saved path, on a fresh game: a hash seen before keeps its old save (an edit undone). */
+export const placeDue = () =>
+  place.hash !== chapter.sha256 && place.stopped?.hash !== chapter.sha256;
 export function restorePlace(game: Opened | undefined) {
   if (!game || place.hash === chapter.sha256) return;
   if (place.stopped?.hash === chapter.sha256) {
