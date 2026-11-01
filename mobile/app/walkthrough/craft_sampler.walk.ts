@@ -1,6 +1,6 @@
 // The self-build route (`LOKA_WALK=craft_sampler npm run walkthrough`, docs/web-preview.md):
 // chop, learn carpentry, saw a timbered hut's timber, raise the hut and enter it (hs-12); then
-// the Character page's skill tree before and after learning carving (hs-14).
+// the Skills page's skill tree before and after learning carving (hs-14).
 import { LABEL } from '../book/labels.ts';
 import { moves, scene, settle, walk } from './walk.ts';
 
@@ -50,11 +50,12 @@ walk(
   'Craft: skill tree locked, carve twice, learn carving, skill tree again',
   async (r) => {
     const { screen } = r;
-    const character = async () => {
+    const skills = async () => {
       await settle();
       await screen.getByRole('button', /opens Contents/).tap();
-      await screen.getByRole('button', /^Character/).tap();
+      await screen.getByRole('button', /^Skills/).tap();
       await settle();
+      await screen.getByRole('button', LABEL.backToContents).tap();
       await screen.getByRole('button', LABEL.backToWorld).tap();
     };
     await r.app.clearState();
@@ -64,7 +65,7 @@ walk(
       .first()
       .tap();
     await scene(screen);
-    await character();
+    await skills();
     for (let i = 0; i < 2; i++) {
       await screen
         .getByRole('button', /^A stick, open$/i)
@@ -82,6 +83,6 @@ walk(
     await screen.getByRole('button', 'Learn carving').tap();
     const leave = () => screen.getByRole('button', /^Leave/).first();
     for (let i = 0; i < 3 && (await settle(), await leave().isVisible()); i++) await leave().tap();
-    await character();
+    await skills();
   },
 );

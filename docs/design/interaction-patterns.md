@@ -150,7 +150,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### Aimed spells
 
-- Rule: Cast a spell… appears on person and item pages, on the Character Spells block ("Flamma,
+- Rule: Cast a spell… appears on person and item pages, on the Skills Spells block ("Flamma,
   cast on…") and per foe on the Combat page; a refused spell lists its reason under Spells. An
   untargeted spell word is a Spells card `lux, cast`; an accepted cast turns to World.
 - Why: a spell is aimed like any other targeted action; the Spells block is the only place to read

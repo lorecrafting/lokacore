@@ -201,7 +201,9 @@ const loft = async (r: Walk, { tap, take, held, moves, fixture }: Steps) => {
   await tap(/^Character/);
   // a section opened from Contents goes back to it (loka-8lpm)
   await tap('Raise CHA');
-  // a spell word casts from Character's Spells; an accepted cast turns to World (loka-evzt)
+  await tap(LABEL.backToContents);
+  await tap(/^Skills/);
+  // a spell word casts from the Skills page's Spells; an accepted cast turns to World (loka-evzt)
   await tap(/^ward, cast$/);
 };
 

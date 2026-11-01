@@ -12,7 +12,6 @@ import CarryingEmptyView from './views/carrying-empty.json';
 import CarryingHeldView from './views/carrying-held.json';
 import CharacterUnknownView from './views/character-unknown.json';
 import CharacterFullView from './views/character-full.json';
-import SkillsFullView from './views/skills-full.json';
 import ContentsView from './views/contents.json';
 import SettingsView from './views/settings.json';
 
@@ -59,6 +58,8 @@ export const CharacterPointsToSpend: StoryObj = {
   }),
   name: 'Character with points to spend',
 };
+// The same real view, one page along: Skills draws what Character no longer does.
+const SkillsFullView = { ...CharacterFullView, stack: [{ kind: 'contents' }, { kind: 'skills' }] };
 export const Skills: StoryObj = { ...pageStory(SkillsFullView), name: 'Skills' };
 // A view with no skill and no spell word. Breaks: a blank page, or the Note beside real rows.
 export const SkillsEmpty: StoryObj = {

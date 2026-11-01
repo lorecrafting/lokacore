@@ -1,5 +1,5 @@
 // Word bar (docs/system/book-ui.md, Word bar): no say icon or field in single-player (loka-evzt), the
-// Character page's Spells, and the say machinery kept for the Realm (twins, echo, conversation turn)
+// Skills page's Spells, and the say machinery kept for the Realm (twins, echo, conversation turn)
 // through the real authority and Book. Expected text is literal from cartridges/speech_sampler and
 // cartridges/spells_sampler text.json; facts are the samplers' reaction facts.
 import assert from 'node:assert/strict';
@@ -81,7 +81,7 @@ test('a say or shout with no narration echoes once in ink', () => {
   assert.equal(spoken('say', undefined), undefined); // a wordless retry falls back to OUTCOME
 });
 
-// Breaks: a refused spell word's reason missing from the Character page's Spells, a refused word
+// Breaks: a refused spell word's reason missing from the Skills page's Spells, a refused word
 // drawn castable, a spell word offered where Cast is not, or a Spells card cast not admitted
 // (mana unchanged).
 test('spell words: refused ones list their reason under Spells; lux casts there once ash is gathered', () => {
