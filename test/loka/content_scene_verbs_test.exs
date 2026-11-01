@@ -93,7 +93,7 @@ defmodule Loka.ContentSceneVerbsTest do
 
   # Break: a bad form lowers silently, is reported as another fault or on another line, or its
   # row is missing from the plain catalog (the raw `why` reaches the writer).
-  for {name, body, want} <- [
+  for {name, {body, want}} <- [
         needs: {"npc: maud\nneeds: met\nmaud: hi\n- Go\n", [{2, "not_yet"}]},
         once: {"npc: maud\nmaud: hi\n- Go\n  once\n", [{4, "not_yet"}]},
         then: {"npc: maud\nmaud: hi\n- Go\n  then: x\n", [{4, "not_yet"}]},
@@ -221,7 +221,7 @@ defmodule Loka.ContentSceneVerbsTest do
 
   # Break: a malformed file passes, or the fault lands on another line, or a follow-on from the
   # order check or the missing trigger joins it in words the writer cannot act on.
-  for {name, body, want} <- [
+  for {name, {body, want}} <- [
         no_close: {"one\n\ntwo\n", [{3, "cut_end"}]},
         early: {"one\n---\ntwo\n---\n", [{2, "cut_end"}]},
         twice: {"one\n---\n---\n", [{2, "cut_end"}]},
