@@ -399,6 +399,24 @@ test('actual App pause and resume preserve 9ms plus 11ms as exactly one logical 
   }
 });
 
+// Breaks: App's hide skips the stall check, or a resume leaves no tick for a stall before the first one.
+test('actual App caps a hide after a stall before the first tick at one in-game day', () => {
+  const h = appHost();
+  try {
+    h.next();
+    h.change('background');
+    h.change('active');
+    const start = checkpoint(h.sql).target;
+    const year = 365 * 86400 * 1000;
+    h.clock.wall += year;
+    h.clock.mono += year;
+    h.change('background');
+    assert.equal(checkpoint(h.sql).target - start, 86400);
+  } finally {
+    h.close();
+  }
+});
+
 // Breaks: pending storage keeps an autonomous retry alive, or confirmed recovery never re-arms App.
 test('actual App stops unknown storage wakeups and resumes after confirmed user recovery', () => {
   const h = appHost();
