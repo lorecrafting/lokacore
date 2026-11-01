@@ -76,6 +76,17 @@ defmodule Loka.ContentStartersFreshTest do
     end
   end
 
+  # Break: a rerun over a filled value refuses and leaves the author nothing to do.
+  test "a rerun over a filled value says what to do", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    follow(dir, "transports", "ferry")
+    start = JSON.decode!(File.read!(Path.join(dir, "cartridge.json")))["entry"]
+    edit(dir, "rooms/#{start}.json", &put_in(&1, ["details", "ferry", "description"], "Mine."))
+    assert {:error, message} = Starters.write(dir, "transports", "ferry")
+    assert message =~ "description already has a value"
+    assert message =~ "Remove that value and rerun"
+  end
+
   # Break: a text.json that is not an object crashes the starter instead of refusing.
   test "a text.json that is a list still refuses", %{tmp_dir: tmp} do
     dir = cartridge(tmp)

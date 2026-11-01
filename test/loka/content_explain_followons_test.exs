@@ -101,13 +101,14 @@ defmodule Loka.ContentExplainFollowOnsTest do
         "data" => %{"error" => &2}
       }
 
-    assert [_, _, _, _] =
+    assert [_, _, _, _, _] =
              Explain.lines(
                [
                  d.(~s("items/Bad-Name.json"), "pattern_mismatch"),
                  d.(~s("items/Bad-Name.json".location), "missing_property"),
                  d.(~s("items/Bad-Name.json".location.room), "pattern_mismatch"),
-                 d.(~s("rooms/a.json".exits.Bad-Name.to), "pattern_mismatch")
+                 d.(~s("rooms/a.json".exits.Bad-Name.to), "pattern_mismatch"),
+                 d.(~s(text["item.other.name"]), "pattern_mismatch")
                ],
                dir
              )

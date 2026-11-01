@@ -247,7 +247,7 @@ defmodule Loka.Content.Starters do
 
     if at =~ ": exits ",
       do: said <> ". That exit is taken: #{other}move it in both rooms' files and rerun",
-      else: said
+      else: said <> ". Remove that value and rerun, or keep it and skip this starter"
   end
 
   # An unchanged file keeps its bytes, the author's formatting too.
