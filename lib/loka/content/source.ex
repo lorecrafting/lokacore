@@ -5,6 +5,7 @@ defmodule Loka.Content.Source do
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
   alias Loka.Content.{Areas, Behaviours, CutFiles, Extends, Prose, SceneFiles, SourceFiles, Zones}
+  alias Loka.Content.Waits
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -61,7 +62,8 @@ defmodule Loka.Content.Source do
     {files, clashes} = Prose.lower(files)
     {files, held} = Behaviours.expand(files)
     {files, zoned} = Zones.expand(files)
-    {files, Enum.map(faults ++ clashes ++ held ++ zoned, &bundle_diag/1)}
+    {files, waited} = Waits.lower(files)
+    {files, Enum.map(faults ++ clashes ++ held ++ zoned ++ waited, &bundle_diag/1)}
   end
 
   defp read(dir) do
