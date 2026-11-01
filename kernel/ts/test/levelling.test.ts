@@ -1,4 +1,4 @@
-// size: allow 649, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
+// size: allow 658, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
 // Toolbox row 4 on the compiled levelling sampler: rats grant 10 experience each, level 2 at 30
 // grants one point, Raise spends it, and the quest reward grants 20 (mechanics.md row 4).
 import assert from 'node:assert/strict';
@@ -16,12 +16,18 @@ import { encode } from '../src/foundation/canonical.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { derived } from '../src/mechanics/attribute/shared.ts';
 import type { Base } from '../src/mechanics/fact.ts';
-import type { CharacterId } from '../src/contracts.gen.ts';
+import type {
+  CharacterId,
+  DefinitionRef,
+  DeltaOp,
+  DomainEvent,
+  ReactionRule,
+} from '../src/contracts.gen.ts';
 import { key } from '../src/foundation/compose.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { levelsReached, levelUp, oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
-import { runDelayed } from '../src/mechanics/delayed.ts';
+import { type Joins, runDelayed } from '../src/mechanics/delayed.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { gameView } from '../src/view/view.ts';
 import { validate } from '../src/foundation/validate.ts';
@@ -603,17 +609,24 @@ test('a delayed refill joins the group that wrote its pool earlier in the batch'
     writer_group: 5,
     entity_id: w.body,
     resource: resourceRef(w, 'hp'),
-  };
-  const job = {
+  } as unknown as DeltaOp;
+  const job: DefinitionRef = {
     cartridge_id: 'levelling_sampler',
     cartridge_version: '0.0.1',
     kind: 'reaction',
     key: 'level_two',
   };
   const steps = { n: 0 };
-  const joins = { holders: new Map(), group: 7, deliveries: 0, steps, ops: [earlier], events: [] };
+  const joins: Joins = {
+    holders: new Map(),
+    group: 7,
+    deliveries: 0,
+    steps,
+    ops: [earlier],
+    events: [],
+  };
   const row = { job, actor_id: w.character, due_time: w.state.clock };
-  const ran = runDelayed(w, { id: id() }, id(), row as never, id, steps, joins as never);
+  const ran = runDelayed(w, { id: id() }, id(), row, id, steps, joins);
   assert.equal(ran.kind, 'accepted');
   const ops = (ran as unknown as { delta: { ops: any[] } }).delta.ops;
   const refill = ops.find((o) => o.op === 'resource.adjust')!;
@@ -624,25 +637,21 @@ test('a delayed refill joins the group that wrote its pool earlier in the batch'
 // after it (only a change gets a fact_changed to fill that position).
 test('an unchanged fact write takes no position', () => {
   const w = fresh();
-  const steps = [
-    { op: 'fact.assign', fact: { ...attr('second_wind'), kind: 'fact' }, value: false },
-    { op: 'event.emit', event: 'anything' },
-  ];
+  const rule: ReactionRule = {
+    key: 'unchanged',
+    on: { event: 'custom_event' },
+    steps: [
+      { op: 'fact.assign', fact: { ...attr('second_wind'), kind: 'fact' }, value: false },
+      { op: 'event.emit', event: 'anything' },
+    ],
+  };
   const cause = {
     id: id(),
     logical_time: w.state.clock,
     position: 1,
     payload: { type: 'custom_event' },
-  };
-  const ran = sequence(
-    w,
-    w.character,
-    { on: { event: 'custom_event' }, steps } as never,
-    cause as never,
-    0,
-    { n: 0 },
-    id,
-  );
+  } as unknown as DomainEvent;
+  const ran = sequence(w, w.character, rule, cause, 0, { n: 0 }, id);
   assert.equal(ran?.kind, 'accepted');
   const [emitted] = (ran as unknown as { events: { position: number }[] }).events;
   assert.equal(emitted!.position, 1);
