@@ -16,6 +16,8 @@ import {
   newWorld,
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
+import { key } from '../../../kernel/ts/src/foundation/compose.ts';
+import { resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { openStory } from './authority.ts';
 import { coldReopen, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
@@ -136,4 +138,57 @@ test('levelling rows survive reopen, failed and lost COMMIT, and replay once', (
       p.sql.close();
       coldReopen(path, bundle);
     }
+});
+
+// Breaks: the level-up refill's hp row is not written to the save or does not reopen.
+test('the level-up refill survives a cold reopen', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-levelling-refill-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'refill.db');
+  let p = elapsedHost(path, undefined, bundle);
+  const open = () => {
+    const s = openStory(p.db, releases, p.host);
+    if (s.kind !== 'open') throw new Error(s.kind);
+    return s;
+  };
+  let story = open();
+  let n = 0;
+  const invoke = (action_key: string, target_ids: string[] = [], input = {}) => ({
+    invocation_id: `dddddddd-9999-4999-8999-${String(++n).padStart(12, '0')}`,
+    actor_id: initial.character,
+    action_key,
+    target_ids,
+    input,
+  });
+  const round = () => {
+    const from = story.world().state.clock;
+    return { expected_run_id: story.runId(), from, until: from + 150 };
+  };
+  const saved = (r: { kind: string }) => assert.equal(r.kind, 'saved', JSON.stringify(r));
+  const hp = (w: World) => gameView(w).resources!.find((r) => r.resource.key === 'hp')!.current;
+  saved(story.invoke(invoke('move', [], { direction: 'east' })));
+  for (const x of ['a', 'b']) {
+    saved(story.invoke(invoke('attack', [rat(x)])));
+    saved(story.elapsed(round()));
+  }
+  saved(story.invoke(invoke('attack', [rat('c')])));
+  const third = round();
+  p.sql
+    .prepare('INSERT OR REPLACE INTO state_row (section, key, value) VALUES (?, ?, ?)')
+    .run(
+      'resources',
+      key({ kind: 'resource', entity_id: initial.body, resource: resourceRef(initial, 'hp') }),
+      JSON.stringify({ value: 3, at: third.from, rate: 1, remainder: 0 }),
+    );
+  p.sql.close();
+  p = elapsedHost(path, undefined, bundle);
+  story = open();
+  assert.equal(hp(story.world()), 3);
+  saved(story.elapsed(third));
+  assert.equal(hp(story.world()), 10);
+  p.sql.close();
+  p = elapsedHost(path, undefined, bundle);
+  assert.equal(hp(open().world()), 10);
+  p.sql.close();
+  coldReopen(path, bundle);
 });

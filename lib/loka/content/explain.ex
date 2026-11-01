@@ -48,6 +48,7 @@ defmodule Loka.Content.Explain do
          OUTCOME_MISMATCH | This outcome does not fit the choice or story point it belongs to. | Keep one effect on the choice and name an outcome its story point declares.
          RESOURCE_SPEC_INVALID | A resource must have minimum <= start <= maximum. | Fix these numbers.
          BODY_BELOW_ZERO | A body with hp below 0 could never die from a blow. | Set this hp's `minimum` and `start` to 0 or more.
+         REACTION_DRAINS_BODY | A rule that lowers a body's pool skips death, so the body could stand at 0. | Hurt it with combat, a status tick or a bleed; give this rule a positive `by`.
          BARRIER_MISMATCH | The two sides of this barrier disagree. | Name the same barrier on both, and check its rooms and direction.
          BARRIER_UNREACHABLE_KEY | The key to this barrier is out of reach without passing it. | Place the key on the near side.
          RESERVED_FACT | The engine owns the fact name `{field}`. | Rename your fact.

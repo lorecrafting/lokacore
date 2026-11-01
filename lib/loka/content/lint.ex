@@ -8,7 +8,7 @@ defmodule Loka.Content.Lint do
 
   alias Loka.Content.Source
 
-  @writes ~w(status.apply status.cure fact.assign fact.adjust fact.stamp)
+  @writes ~w(status.apply status.cure fact.assign fact.adjust fact.stamp resource.adjust)
   @always %{"op" => "all", "items" => []}
 
   @doc "The findings for the source directory `dir`."
