@@ -1,8 +1,6 @@
 defmodule Loka.Content.SceneMerge do
   @moduledoc "A scene entry and the same-key JSON beside it: the merge, and what the merge would silently lose."
 
-  alias Loka.Content.Source
-
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
   @type entry :: {String.t(), term(), term()}
 
@@ -35,32 +33,27 @@ defmodule Loka.Content.SceneMerge do
         do: {json, path, key}
   end
 
-  @doc "The refusals a merge would otherwise hide: a sidecar over a scene's words, two scenes on one key, a written order."
-  @spec refused([entry()]) :: [map()]
+  @doc "The refusals a merge would otherwise hide, as `{rel, path, data}`: a sidecar over a scene's words, two scenes on one key, a written order."
+  @spec refused([entry()]) :: [{term(), [String.t()], map()}]
   def refused(files) do
     words =
       for {json, path, key} <- overlap(files) do
-        data = %{"why" => "scene_overlap", "key" => key, "written" => Enum.join(path, ".")}
-        Source.diag("SCHEMA_VIOLATION", Source.at(json, path), data)
+        {json, path, %{"why" => "scene_overlap", "key" => key, "written" => Enum.join(path, ".")}}
       end
 
     keys =
-      for {rel, key} <- same_key(files) do
-        data = %{"why" => "scene_key_taken", "key" => key}
-        Source.diag("SCHEMA_VIOLATION", Source.at(rel, []), data)
-      end
+      for {rel, key} <- same_key(files),
+          do: {rel, [], %{"why" => "scene_key_taken", "key" => key}}
 
     words ++ keys ++ order_refused(files)
   end
 
   @doc "A file other than a scene writing `choice_order`, the compiler's own mark; an area bundle shows its dialogues only once split."
-  @spec order_refused([entry()]) :: [map()]
+  @spec order_refused([entry()]) :: [{term(), [String.t()], map()}]
   def order_refused(files) do
     for {rel, {:dialogue, _, trail}, %{"choice_order" => _}} <- files,
-        not (is_binary(rel) and String.ends_with?(rel, ".scene")) do
-      data = %{"why" => "choice_order_written"}
-      Source.diag("SCHEMA_VIOLATION", Source.at(rel, trail ++ ["choice_order"]), data)
-    end
+        not (is_binary(rel) and String.ends_with?(rel, ".scene")),
+        do: {rel, trail ++ ["choice_order"], %{"why" => "choice_order_written"}}
   end
 
   @doc "Dialogue keys two `.scene` entries make, as `{rel, key}` of the later one: a merge would silently join them."

@@ -1,4 +1,4 @@
-# size: allow 435, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 439, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -67,7 +67,7 @@ defmodule Loka.Content.Source do
     files = SceneMerge.merge(files)
     untriggered = untriggered(files)
     {files, opened} = Areas.split(files, dirs())
-    replaced = Enum.uniq(replaced ++ SceneMerge.order_refused(files))
+    replaced = Enum.uniq(replaced ++ merge_diags(SceneMerge.order_refused(files)))
     {files, repeats} = Areas.unique(files)
     {files, faults} = Extends.flatten(files)
     {files, located} = shortcuts(files, opened ++ repeats)
@@ -252,7 +252,11 @@ defmodule Loka.Content.Source do
   defp location(rel, []), do: rel
   defp location(rel, steps), do: {rel, steps}
 
-  defp replaced(files), do: steps_over_cut(files) ++ SceneMerge.refused(files)
+  defp replaced(files), do: steps_over_cut(files) ++ merge_diags(SceneMerge.refused(files))
+
+  defp merge_diags(found) do
+    for {rel, path, data} <- found, do: diag("SCHEMA_VIOLATION", at(rel, path), data)
+  end
 
   # A merge would let `steps` in the JSON replace every word of the `.cut` beside it, silently.
   defp steps_over_cut(files) do
