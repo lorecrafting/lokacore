@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Second review: writer follow-ups, PR #568 (loka-vduxr.27, .22, .28)](2026-11-01-writer-followups-second-review.md): **CHANGES REQUIRED**
 - [Second opinion: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-second-review.md): **APPROVE WITH NOTES**
 - [Review: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-review.md): **APPROVE WITH NOTES**
 - [Review: sleeper at hp floor wakes, mutate.sh per-mutant limit, PR #567 (loka-vduxr.15, kernel_api 1.142)](2026-11-01-loka-vduxr15-review.md): **APPROVE**
