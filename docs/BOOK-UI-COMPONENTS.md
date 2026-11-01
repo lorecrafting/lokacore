@@ -195,7 +195,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
 | `Text` | `book/Text.tsx` | Note |
-| `ActionCard` | `book/actions.tsx` | ActionCard |
+| `ActionCard` | `book/actions.tsx` | undefined |
 | `PickLists` | `book/actions.tsx` | PickList |
 | `Cards` | `book/actions.tsx` | ActionCard |
 | `VerbLine` | `book/actions.tsx` | VerbLine |
