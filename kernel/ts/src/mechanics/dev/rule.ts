@@ -36,20 +36,26 @@ const heldInPlace = (world: World, actor: CharacterId, body: EntityId, here: Ent
 
 type SetFact = Extract<Command['payload'], { type: 'dev_set_fact' }>;
 
-// A reopen proves each of these from its mechanic's receipts (mobile topics-save, expedition-save),
-// so a cheated value would leave the save unopenable.
+// A reopen proves each of these from its mechanic's receipts (mobile topics-save, expedition-save,
+// deadline-save, dialogue-save), so a cheated value would leave the save unopenable.
 const provenFacts = ({ topics, dialogues, npcs, quests }: World['cartridge']) => [
   ...values(topics ?? {}).map((t) => t.fact),
   ...values(dialogues ?? {}).flatMap((d) =>
-    d.riddle?.wrong_limit === undefined
-      ? []
-      : (d.choices[d.riddle.choice_id]!.steps ?? []).flatMap((s) =>
-          s.op === 'fact.assign' ? [s.fact] : [],
-        ),
+    values(d.choices).flatMap((c) =>
+      c.escort ||
+      c.receive ||
+      c.hand_over ||
+      (d.riddle?.wrong_limit !== undefined && c === d.choices[d.riddle.choice_id])
+        ? (c.steps ?? []).flatMap((s) => (s.op === 'fact.assign' ? [s.fact] : []))
+        : [],
+    ),
   ),
   ...values(npcs ?? {}).flatMap((n) => (n.perception ? [n.perception.discovered] : [])),
   ...values(quests ?? {}).flatMap((q) =>
     q.expedition ? [q.expedition.survived_fact, q.expedition.faction] : [],
+  ),
+  ...values(quests ?? {}).flatMap((q) =>
+    q.deadline?.fact ? [q.deadline.fact, q.deadline.trust_fact!] : [],
   ),
 ];
 

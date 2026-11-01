@@ -16,7 +16,8 @@ import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 
 // A save holding an accepted cheat opens only on a dev host; here, not in receiptHistory, which
-// some cartridges skip.
+// some cartridges skip. ponytail: scans the receipts on each release open, as receiptHistory does;
+// index only after measuring reopen.
 const DEV_RECEIPT = `SELECT 1 FROM receipt WHERE json_extract(response,'$.kind')='accepted'
   AND json_extract(command,'$.payload.type') GLOB 'dev_*' LIMIT 1`;
 

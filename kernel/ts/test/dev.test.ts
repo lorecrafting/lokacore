@@ -194,8 +194,22 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
     },
   });
   const other = ref('fact', 'other');
+  const carried = (extra: object) => ({
+    dialogues: {
+      d: {
+        choices: {
+          c: { ...extra, steps: [{ op: 'fact.assign', fact, value: true }] },
+        },
+      },
+    },
+  });
   const owned = [
     riddle(1),
+    carried({ escort: {} }),
+    carried({ receive: {} }),
+    carried({ hand_over: {} }),
+    { quests: { q: { deadline: { fact, trust_fact: other } } } },
+    { quests: { q: { deadline: { fact: other, trust_fact: fact } } } },
     { npcs: { n: { perception: { discovered: fact } } } },
     { quests: { q: { expedition: { survived_fact: fact, faction: other } } } },
     { quests: { q: { expedition: { survived_fact: other, faction: fact } } } },
@@ -207,6 +221,7 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
   for (const patch of owned)
     assert.equal(code(set(under(patch), 'cellar_disarmed', true)), 'invalid_state');
   assert.equal(code(set(under(riddle()), 'cellar_disarmed', true)), 'accepted');
+  assert.equal(code(set(under(carried({})), 'cellar_disarmed', true)), 'accepted');
 });
 
 // Break: the trace replay (Why, bin/play) re-decides a preview's cheat through `step`, which refuses it.
