@@ -23,6 +23,7 @@ m mix format --check-formatted
 m mix compile --warnings-as-errors
 m elixir bin/contracts.exs --check
 m elixir bin/features.exs --check
+python3 bin/source_reference.py --check
 m mix xref graph --format cycles --fail-above 0
 m mix xref graph --label compile-connected --fail-above 0
 m mix test

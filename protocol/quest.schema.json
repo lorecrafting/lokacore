@@ -10,13 +10,13 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its journal entry.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "offer": {
+        "offer": {"description":"The accept action offered while the actor has no instance.",
           "type": "object",
           "properties": {
-            "label": {
+            "label": {"description":"The accept action's label.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "policy": {
@@ -31,10 +31,10 @@
                     "kind": {
                       "const": "detail"
                     },
-                    "room": {
+                    "room": {"description":"The room holding the detail.",
                       "$ref": "identity.schema.json#/$defs/DefinitionRef"
                     },
-                    "detail": {
+                    "detail": {"description":"The detail's key in that room.",
                       "$ref": "action.schema.json#/$defs/Key"
                     }
                   },
@@ -51,7 +51,7 @@
                     "kind": {
                       "const": "npc"
                     },
-                    "npc": {
+                    "npc": {"description":"The NPC the offer draws on.",
                       "$ref": "identity.schema.json#/$defs/DefinitionRef"
                     }
                   },
@@ -69,30 +69,30 @@
           ],
           "additionalProperties": false
         },
-        "objective": {
+        "objective": {"description":"Its objective.",
           "$ref": "#/$defs/QuestObjective"
         },
         "deadline": {
           "description": "A quest deadline, one object (validate.ts oneOf needs a const discriminator). Legacy (S2): at, fact, trust_fact and trust_amount, no after. Generic (toolbox row W24): exactly one of after (logical units from activation) or at (absolute logical time), no legacy field; activation schedules one engine job and expiry fails the instance with outcome and emits quest_failed. The compiler (lib/loka/content/quests.ex) refuses any other shape (SCHEMA_VIOLATION).",
           "type": "object",
           "properties": {
-            "after": {
+            "after": {"description":"Generic deadline: logical units from activation, at least 1. Exactly one of after or at.",
               "type": "integer",
               "minimum": 1
             },
-            "at": {
+            "at": {"description":"The logical time the deadline falls due.",
               "$ref": "command.schema.json#/$defs/LogicalTime"
             },
-            "outcome": {
+            "outcome": {"description":"The outcome the open instance fails with, carried by quest_failed.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "fact": {
+            "fact": {"description":"Legacy deadline: the fact assigned at expiry.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "trust_fact": {
+            "trust_fact": {"description":"Legacy deadline: the fact adjusted at expiry.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "trust_amount": {
+            "trust_amount": {"description":"Legacy deadline: how much trust_fact changes at expiry.",
               "type": "integer"
             }
           },
@@ -101,10 +101,10 @@
           ],
           "additionalProperties": false
         },
-        "journal": {
+        "journal": {"description":"Lifecycle journal texts.",
           "$ref": "#/$defs/QuestJournal"
         },
-        "repeatable": {
+        "repeatable": {"description":"The quest may be taken again once resolved.",
           "const": true
         },
         "exchange": {
@@ -468,22 +468,22 @@
       "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal remains LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies. API1.46 hints (toolbox row W23): per stage (active, objectives_met), each after a whole number of real minutes since the stage began (the instance's started_at), strictly ascending, and at least one stage (an empty hints object is a compiler check: the subset has no minProperties); the Journal shows the last one whose time has passed.",
       "type": "object",
       "properties": {
-        "active": {
+        "active": {"description":"Text key while active.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "objectives_met": {
+        "objectives_met": {"description":"Text key once objectives are met.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "resolved": {
+        "resolved": {"description":"Text key once resolved.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "failed": {
+        "failed": {"description":"Text key once failed.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "abandoned": {
+        "abandoned": {"description":"Text key once abandoned.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "outcomes": {
+        "outcomes": {"description":"Overrides terminal text by outcome key.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]*$"
@@ -492,7 +492,7 @@
             "$ref": "text.schema.json#/$defs/TextKey"
           }
         },
-        "active_variants": {
+        "active_variants": {"description":"Checked in order for active quests.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,

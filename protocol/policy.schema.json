@@ -26,7 +26,7 @@
             "op": {
               "const": "all"
             },
-            "items": {
+            "items": {"description":"The policies that must all hold.",
               "type": "array",
               "items": {
                 "$ref": "#/$defs/Policy"
@@ -46,7 +46,7 @@
             "op": {
               "const": "any"
             },
-            "items": {
+            "items": {"description":"The policies of which one must hold.",
               "type": "array",
               "items": {
                 "$ref": "#/$defs/Policy"
@@ -67,7 +67,7 @@
             "op": {
               "const": "not"
             },
-            "item": {
+            "item": {"description":"The policy that must not hold.",
               "$ref": "#/$defs/Policy"
             }
           },
@@ -97,7 +97,7 @@
             "op": {
               "const": "has_item"
             },
-            "item": {
+            "item": {"description":"The item definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -114,10 +114,10 @@
             "op": {
               "const": "quest_state"
             },
-            "quest": {
+            "quest": {"description":"The quest.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "state": {
+            "state": {"description":"The lifecycle state.",
               "$ref": "#/$defs/QuestState"
             }
           },
@@ -135,25 +135,25 @@
             "op": {
               "const": "fact_compare"
             },
-            "fact": {
+            "fact": {"description":"The fact to read.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "subject": {
+            "subject": {"description":"`target` reads the action's target.",
               "enum": [
                 "target"
               ]
             },
-            "npc": {
+            "npc": {"description":"Reads this NPC's authored instance.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "item": {
+            "item": {"description":"Reads this item's authored instance.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "with": {
               "description": "Toolbox row FD4: an npc_pair fact's second NPC, read at the pair (subject toward with).",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "equals": {
+            "equals": {"description":"The value to compare.",
               "$ref": "delta.schema.json#/$defs/FactValue"
             }
           },
@@ -171,11 +171,11 @@
             "op": {
               "const": "time_window"
             },
-            "from": {
+            "from": {"description":"First hour, inclusive.",
               "type": "integer",
               "minimum": 0
             },
-            "to": {
+            "to": {"description":"End hour, exclusive; the window wraps at day end.",
               "type": "integer",
               "minimum": 0
             }
@@ -194,10 +194,10 @@
             "op": {
               "const": "barrier_state"
             },
-            "barrier": {
+            "barrier": {"description":"The barrier.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "equals": {
+            "equals": {"description":"The state.",
               "$ref": "room.schema.json#/$defs/BarrierState"
             }
           },
@@ -215,10 +215,10 @@
             "op": {
               "const": "stat_compare"
             },
-            "attribute": {
+            "attribute": {"description":"The attribute.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "at_least": {
+            "at_least": {"description":"The least value that holds.",
               "$ref": "resource.schema.json#/$defs/ResourceInt"
             }
           },
@@ -236,7 +236,7 @@
             "op": {
               "const": "level_compare"
             },
-            "at_least": {
+            "at_least": {"description":"The least level that holds.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -255,18 +255,18 @@
             "op": {
               "const": "resource_compare"
             },
-            "resource": {
+            "resource": {"description":"The pool.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "subject": {
+            "subject": {"description":"`subject` reads the pool on a reaction's event subject.",
               "enum": [
                 "subject"
               ]
             },
-            "at_least": {
+            "at_least": {"description":"The least value that holds.",
               "$ref": "resource.schema.json#/$defs/ResourceInt"
             },
-            "at_least_percent": {
+            "at_least_percent": {"description":"The least percent of the pool's maximum that holds.",
               "type": "integer",
               "minimum": 1,
               "maximum": 100
@@ -288,10 +288,10 @@
             "op": {
               "const": "escort_state"
             },
-            "quest": {
+            "quest": {"description":"The quest.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "state": {
+            "state": {"description":"The escort status.",
               "$ref": "relation.schema.json#/$defs/EscortStatus"
             }
           },
@@ -322,22 +322,22 @@
             "op": {
               "const": "has_tag"
             },
-            "tag": {
+            "tag": {"description":"The tag.",
               "$ref": "entity.schema.json#/$defs/Tag"
             },
-            "subject": {
+            "subject": {"description":"`target` or `room`: what is read.",
               "enum": [
                 "target",
                 "room"
               ]
             },
-            "item": {
+            "item": {"description":"Reads this item definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "barrier": {
+            "barrier": {"description":"Reads this barrier definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "room": {
+            "room": {"description":"Reads this room definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -360,19 +360,19 @@
             "op": {
               "const": "sky"
             },
-            "lunar": {
+            "lunar": {"description":"The lunar phase.",
               "type": "string",
               "pattern": "^[a-z][a-z0-9_]*$"
             },
-            "weather": {
+            "weather": {"description":"The weather entry.",
               "type": "string",
               "pattern": "^[a-z][a-z0-9_]*$"
             },
-            "season": {
+            "season": {"description":"The season.",
               "type": "string",
               "pattern": "^[a-z][a-z0-9_]*$"
             },
-            "tide": {
+            "tide": {"description":"The tide phase.",
               "type": "string",
               "pattern": "^[a-z][a-z0-9_]*$"
             }
@@ -395,7 +395,7 @@
             "op": {
               "const": "wearing"
             },
-            "tag": {
+            "tag": {"description":"The tag a worn item declares.",
               "$ref": "entity.schema.json#/$defs/Tag"
             }
           },
@@ -412,10 +412,10 @@
             "op": {
               "const": "visited_count"
             },
-            "room": {
+            "room": {"description":"The room.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "at_least": {
+            "at_least": {"description":"The least entry count that holds.",
               "type": "integer",
               "minimum": 1
             }
@@ -434,10 +434,10 @@
             "op": {
               "const": "skill_compare"
             },
-            "skill": {
+            "skill": {"description":"The skill.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "at_least": {
+            "at_least": {"description":"The least level that holds.",
               "type": "integer",
               "minimum": 1
             }
@@ -456,10 +456,10 @@
             "op": {
               "const": "population_count"
             },
-            "plan": {
+            "plan": {"description":"The population plan.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "at_least": {
+            "at_least": {"description":"The least living count that holds.",
               "type": "integer",
               "minimum": 1
             }
@@ -478,7 +478,7 @@
             "op": {
               "const": "status_active"
             },
-            "subject": {
+            "subject": {"description":"Whose status: `target`, `self`, `subject` or `room`.",
               "enum": [
                 "target",
                 "self",
@@ -486,7 +486,7 @@
                 "room"
               ]
             },
-            "status": {
+            "status": {"description":"The status.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -504,7 +504,7 @@
             "op": {
               "const": "item_present"
             },
-            "tag": {
+            "tag": {"description":"The tag of an item on the floor.",
               "$ref": "entity.schema.json#/$defs/Tag"
             }
           },
@@ -521,7 +521,7 @@
             "op": {
               "const": "npc_present"
             },
-            "npc": {
+            "npc": {"description":"The NPC.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -538,10 +538,10 @@
             "op": {
               "const": "cue_perceived"
             },
-            "npc": {
+            "npc": {"description":"The perceiving NPC.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "sense": {
+            "sense": {"description":"The sense.",
               "enum": [
                 "sound",
                 "smell",
@@ -576,10 +576,10 @@
           "type": "object",
           "properties": {
             "op": { "const": "time_since" },
-            "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "item": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "at_least": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
+            "fact": {"description":"The int fact holding a stamp.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "npc": {"description":"Reads this NPC's authored instance.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "item": {"description":"Reads this item's authored instance.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "at_least": {"description":"The least elapsed time that holds.", "type": "integer", "minimum": 0, "maximum": 2147483647 }
           },
           "required": ["op", "fact", "at_least"],
           "additionalProperties": false

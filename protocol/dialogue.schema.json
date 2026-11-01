@@ -16,16 +16,16 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "npc": {
+        "npc": {"description":"The speaker, also an npc role.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "policy": {
           "$ref": "policy.schema.json#/$defs/Policy"
         },
-        "prompt": {
+        "prompt": {"description":"Text key of the pending choice's prompt.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "roles": {
+        "roles": {"description":"Participants bound when the talk opens.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]{0,63}$"
@@ -34,7 +34,7 @@
             "$ref": "#/$defs/DialogueRole"
           }
         },
-        "quest": {
+        "quest": {"description":"The quest a choice resolves, with the choice id as its outcome.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "choices": {
@@ -46,17 +46,17 @@
             "$ref": "#/$defs/DialogueChoice"
           }
         },
-        "riddle": {
+        "riddle": {"description":"A riddle answered by a typed word.",
           "type": "object",
           "properties": {
-            "choice_id": {
+            "choice_id": {"description":"The choice that takes a typed answer.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "answer": {
+            "answer": {"description":"The answer that solves the riddle, compared lowercased.",
               "type": "string",
               "pattern": "^[a-z]{1,32}$"
             },
-            "bank": {
+            "bank": {"description":"The letters an answer may use, each once per entry; an answer that does not fit is refused.",
               "type": "array",
               "items": {
                 "type": "string",
@@ -197,26 +197,26 @@
       "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; steps, its effects in order (Steps of the dialogue choice context, docs/system/cartridge.md Steps and checks; a fact.assign sets a declared fact of the cartridge at the one scope it allows, a value of its type, as a scripted action's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14): check (step.schema.json Check, kind opposed), an opposed check made when the choice is chosen; a checked choice carries only label, narration, narration_variants, steps, availability, check, policy, then and then_failed, in a dialogue with no quest and no riddle, and its steps grant no skill (else OUTCOME_MISMATCH at its check). policy, the option's own condition, read with the speaker as target at the view, the choose and the talk: while it fails the option is not drawn and its choose is invalid_state. then, the key of a dialogue (of any speaker) that the accepted answer opens next as the conversation's new row, or end, which ends the conversation; a dialogue reached this way is no talk of its own and never reopens itself. then_failed, the same for a failed check; refused without check. narration_variants, words read instead of narration by the first when that holds before the answer's writes.",
       "type": "object",
       "properties": {
-        "label": {
+        "label": {"description":"Text key of the option.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "narration": {
+        "narration": {"description":"Text key of what the actor reads on choosing.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "steps": {
           "type": "array",
           "items": { "$ref": "step.schema.json#/$defs/Step" }
         },
-        "accept": {
+        "accept": {"description":"A quest of this cartridge the choice activates.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "hand_over": {
+        "hand_over": {"description":"The item role the actor gives to an npc role.",
           "type": "object",
           "properties": {
-            "item": {
+            "item": {"description":"The item role given.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "to": {
+            "to": {"description":"The npc role receiving it.",
               "$ref": "action.schema.json#/$defs/Key"
             }
           },
@@ -226,13 +226,13 @@
           ],
           "additionalProperties": false
         },
-        "receive": {
+        "receive": {"description":"The bound NPC-held item transferred to the actor.",
           "type": "object",
           "properties": {
-            "item": {
+            "item": {"description":"The bound item transferred.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "from": {
+            "from": {"description":"The npc role holding it.",
               "$ref": "action.schema.json#/$defs/Key"
             }
           },
@@ -242,7 +242,7 @@
           ],
           "additionalProperties": false
         },
-        "availability": {
+        "availability": {"description":"Time limits on offering the choice.",
           "type": "object",
           "properties": {
             "from": {
@@ -254,16 +254,16 @@
           },
           "additionalProperties": false
         },
-        "payment": {
+        "payment": {"description":"An amount of a resource paid to the actor by an NPC role.",
           "type": "object",
           "properties": {
-            "from": {
+            "from": {"description":"The paying npc role.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "resource": {
+            "resource": {"description":"The resource paid.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "amount": {
+            "amount": {"description":"How much.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -279,13 +279,13 @@
         "escort": {
           "type": "object",
           "properties": {
-            "npc": {
+            "npc": {"description":"A bound NPC role.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "quest": {
+            "quest": {"description":"The escort quest.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "transition": {
+            "transition": {"description":"The transition made.",
               "enum": [
                 "start",
                 "rejoin",
@@ -301,19 +301,19 @@
           "additionalProperties": false,
           "description": "API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest."
         },
-        "exchange": {
+        "exchange": {"description":"A quest item exchange.",
           "const": true
         },
-        "lesson_payment": {
+        "lesson_payment": {"description":"An amount of a resource the actor pays for a lesson.",
           "type": "object",
           "properties": {
-            "to": {
+            "to": {"description":"The npc role paid.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "resource": {
+            "resource": {"description":"The resource paid.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "amount": {
+            "amount": {"description":"How much.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -326,16 +326,16 @@
           ],
           "additionalProperties": false
         },
-        "patrol": {
+        "patrol": {"description":"A patrol transition.",
           "type": "object",
           "properties": {
-            "npc": {
+            "npc": {"description":"A bound NPC role.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "quest": {
+            "quest": {"description":"The patrol quest.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "transition": {
+            "transition": {"description":"The transition made.",
               "enum": [
                 "start",
                 "continue",
@@ -351,7 +351,7 @@
           ],
           "additionalProperties": false
         },
-        "check": {
+        "check": {"description":"An opposed check made when chosen.",
           "$ref": "step.schema.json#/$defs/Check"
         },
         "policy": {

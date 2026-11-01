@@ -1,10 +1,10 @@
-# size: allow 340, the scene-file entry, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 370, the scene-file and cutscene entries, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
-  alias Loka.Content.{Areas, Behaviours, Extends, Prose, SceneFiles, SourceFiles, Zones}
+  alias Loka.Content.{Areas, Behaviours, CutFiles, Extends, Prose, SceneFiles, SourceFiles, Zones}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -42,17 +42,19 @@ defmodule Loka.Content.Source do
   @doc """
   Each recognised `.json` file under `dir` (dot files too) as `{rel, kind, value}` (`:invalid` if
   undecodable; bundled: `{bundle rel, {kind, key, [dir, key]}, value}`; a `.scene` file as its
-  dialogue, SceneFiles), with its diagnostics.
+  dialogue, SceneFiles; a `.cut` file as its scene, CutFiles), with its diagnostics.
   """
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
     {files, diags} = read(dir)
+    replaced = steps_over_cut(files)
     files = SceneFiles.merge(files)
+    untriggered = untriggered(files)
     {files, opened} = Areas.split(files, dirs())
     {files, repeats} = Areas.unique(files)
     {files, faults} = Extends.flatten(files)
     {files, located} = shortcuts(files, opened ++ repeats)
-    {files, diags ++ located ++ Enum.map(faults, &extends_diag/1)}
+    {files, diags ++ replaced ++ untriggered ++ located ++ Enum.map(faults, &extends_diag/1)}
   end
 
   defp shortcuts(files, faults) do
@@ -80,17 +82,21 @@ defmodule Loka.Content.Source do
   defp entry(rel, :unknown, _), do: {nil, [diag("UNKNOWN_FIELD", at(rel, []))]}
 
   # A scene's errors name its file and line (docs/system/cartridge.md, Source shortcuts).
-  defp entry(rel, {:scene_file, key}, dir) do
-    {value, bad} = SceneFiles.parse(File.read!(Path.join(dir, rel)))
+  defp entry(rel, {:scene_file, id}, dir) do
+    text = File.read!(Path.join(dir, rel))
+
+    {value, bad} =
+      if elem(id, 0) == :scene, do: CutFiles.parse(text), else: SceneFiles.parse(text)
 
     diags =
       for {n, text, why} <- bad do
         speaker = if value["npc"], do: %{"npc" => value["npc"]}, else: %{}
         data = Map.merge(speaker, %{"line" => n, "text" => text, "why" => why})
-        diag("SCHEMA_VIOLATION", at(rel, []), data)
+        bad = diag("SCHEMA_VIOLATION", at(rel, []), data)
+        if why == "cut_scene_line", do: Map.put(bad, "severity", "warning"), else: bad
       end
 
-    {{rel, {:dialogue, key, []}, value}, diags}
+    {{rel, id, value}, diags}
   end
 
   defp entry(rel, kind, dir) do
@@ -164,7 +170,10 @@ defmodule Loka.Content.Source do
   defp classify(rel) do
     case {Path.split(rel), Path.extname(rel)} do
       {[dir, file], ".scene"} when dir in ~w(scenes dialogues) ->
-        {:scene_file, Path.rootname(file)}
+        {:scene_file, {:dialogue, Path.rootname(file), []}}
+
+      {["scenes", file], ".cut"} ->
+        {:scene_file, {:scene, Path.rootname(file), []}}
 
       {["areas", _], ".json"} ->
         :area
@@ -195,6 +204,28 @@ defmodule Loka.Content.Source do
 
   defp location(rel, []), do: rel
   defp location(rel, steps), do: {rel, steps}
+
+  # A merge would let `steps` in the JSON replace every word of the `.cut` beside it, silently.
+  defp steps_over_cut(files) do
+    for {rel, {:scene, key, _} = id, _} <- files,
+        String.ends_with?(rel, ".cut"),
+        {json, ^id, %{"steps" => _}} <- files,
+        json != rel do
+      diag("SCHEMA_VIOLATION", at(json, ["steps"]), %{"why" => "cut_steps", "key" => key})
+    end
+  end
+
+  # A `.cut` with no `on` would never start, and the schema cannot say so plainly.
+  defp untriggered(files) do
+    for {rel, {:scene, key, _}, value} <- files,
+        String.ends_with?(rel, ".cut"),
+        # A bad file name has its own error, and its `.json` could not help.
+        key =~ ~r/^[a-z][a-z0-9_.]*$/,
+        is_map(value) and not is_map_key(value, "on") do
+      data = %{"why" => "cut_no_trigger", "key" => key, "line" => 1}
+      diag("SCHEMA_VIOLATION", at(rel, []), data)
+    end
+  end
 
   @doc "A diagnostic (Diagnostic in protocol/cartridge.schema.json); raises on a code outside DiagnosticCode."
   @spec diag(String.t(), String.t(), map(), [String.t()]) :: map()

@@ -377,21 +377,21 @@
         "key": {
           "$ref": "#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its name.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_.]*$",
           "maxLength": 128
         },
-        "target": {
+        "target": {"description":"The target spec.",
           "$ref": "#/$defs/TargetSpec"
         },
-        "command": {
+        "command": {"description":"The portable Command type it resolves to.",
           "$ref": "#/$defs/Key"
         },
-        "priority": {
+        "priority": {"description":"Presentation priority.",
           "type": "integer"
         },
-        "input": {
+        "input": {"description":"Required input parameters.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/ActionInputParameter"
@@ -400,7 +400,7 @@
         "policy": {
           "$ref": "policy.schema.json#/$defs/Policy"
         },
-        "accessibility": {
+        "accessibility": {"description":"Accessibility description.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_.]*$",
           "maxLength": 128
@@ -457,7 +457,7 @@
       "description": "One source's contribution to an actor's ActionSet (06 §19; ADR-016), applied to the set composed so far by stable action key: union adds the named actions whose keys the set lacks, override adds them and replaces those it has, replace makes the set exactly them, subtract removes them and intersect keeps only them. A key names an engine verb (a registered command type), a cartridge action or a cartridge scripted action; union, override and replace take its definition (a cartridge's own over the engine verb's). A room applies its contributions in order after the engine verbs and the cartridge's actions and scripted actions (kernel/ts/src/actions.ts).",
       "type": "object",
       "properties": {
-        "op": {
+        "op": {"description":"How the actions apply to the set so far: union, override, replace, subtract or intersect.",
           "enum": [
             "union",
             "override",
@@ -466,7 +466,7 @@
             "intersect"
           ]
         },
-        "actions": {
+        "actions": {"description":"The action keys it applies.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/Key"
@@ -663,10 +663,10 @@
       "description": "Toolbox row G4: what a use scripted action's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).",
       "type": "object",
       "properties": {
-        "tag": {
+        "tag": {"description":"A tag the tool item definition declares.",
           "$ref": "entity.schema.json#/$defs/Tag"
         },
-        "liquid": {
+        "liquid": {"description":"A liquid the tool vessel holds some of.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -689,10 +689,10 @@
         "key": {
           "$ref": "#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "aliases": {
+        "aliases": {"description":"Words a player types as its verb.",
           "type": "array",
           "items": {
             "$ref": "room.schema.json#/$defs/Alias"
@@ -700,19 +700,19 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "target": {
+        "target": {"description":"Its target.",
           "$ref": "#/$defs/ScriptedTarget"
         },
-        "priority": {
+        "priority": {"description":"Presentation priority.",
           "type": "integer"
         },
         "policy": {
           "$ref": "policy.schema.json#/$defs/Policy"
         },
-        "outcomes": {
+        "outcomes": {"description":"The outcomes a perform selects.",
           "type": "object",
           "properties": {
-            "success": {
+            "success": {"description":"Runs when the check passes, or when the action has no check.",
               "type": "object",
               "properties": {
                 "steps": {
@@ -737,7 +737,7 @@
               ],
               "additionalProperties": false
             },
-            "failure": {
+            "failure": {"description":"Runs when the check fails.",
               "type": "object",
               "properties": {
                 "steps": {
@@ -768,8 +768,8 @@
           ],
           "additionalProperties": false
         },
-        "check": { "$ref": "step.schema.json#/$defs/Check" },
-        "duration": {
+        "check": {"description":"A check selecting success or failure.", "$ref": "step.schema.json#/$defs/Check" },
+        "duration": {"description":"Logical time every accepted perform advances.",
           "type": "integer",
           "minimum": 1
         },
@@ -784,14 +784,14 @@
         "craft": {
           "$ref": "#/$defs/ActionCraft"
         },
-        "cooldown": {
+        "cooldown": {"description":"The action is refused until this much logical time has passed since the actor's last admitted attempt.",
           "type": "integer",
           "minimum": 1
         },
-        "tip": {
+        "tip": {"description":"A line the actor reads once, after the outcome's lines, on the first accepted perform.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "reason": {
+        "reason": {"description":"The refusal text shown when the action's policy fails.",
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
@@ -1044,13 +1044,13 @@
     "ActionNarration": {
       "type": "object",
       "properties": {
-        "actor": {
+        "actor": {"description":"Text key of the actor's line.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "observers": {
+        "observers": {"description":"Text key of the observers' line.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "participants": {
+        "participants": {"description":"The entities the actor's line names.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]{0,63}$"
@@ -1168,7 +1168,7 @@
         "consume": {
           "type": "object",
           "properties": {
-            "items": {
+            "items": {"description":"The items that can be consumed.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -1176,7 +1176,7 @@
               "minItems": 1,
               "maxItems": 16
             },
-            "quantity": {
+            "quantity": {"description":"How many of them are consumed.",
               "type": "integer",
               "minimum": 1,
               "maximum": 16
@@ -1184,7 +1184,7 @@
             "to": {
               "$ref": "entity.schema.json#/$defs/ItemLocation"
             },
-            "reason": {
+            "reason": {"description":"The refusal text shown when the actor holds too few.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -1263,10 +1263,10 @@
       "description": "One resource cost of a ScriptedAction (21 §7 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 §5.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.",
       "type": "object",
       "properties": {
-        "resource": {
+        "resource": {"description":"The resource the body pays.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "amount": {
+        "amount": {"description":"How much it pays on every admitted perform.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647

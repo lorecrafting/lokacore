@@ -42,7 +42,10 @@ defmodule Loka.ContentPlaceholdersTest do
         joined_twice: "elder: ~\nelder: ~\n- Yes\nelder: Granted.",
         under_written: "elder: Written line one.\nelder: ~\n- Yes\nelder: Granted.",
         extra_space: "elder:  ~\n- Yes\nelder: Granted.",
-        in_a_reply: "elder: Asked.\n- Yes\nelder: first\nelder: ~"
+        in_a_reply: "elder: Asked.\n- Yes\nelder: first\nelder: ~",
+        narration: "* ~\nelder: Asked.\n- Yes\nelder: Granted.",
+        reply_narration: "elder: Asked.\n- Yes\n* ~",
+        second_speaker: "with: smith\nelder: Asked.\nsmith: ~\n- Yes\nelder: Granted."
       ] do
     test "a release compile refuses a scene's #{form}", %{tmp_dir: tmp} do
       dir = Loka.ContentSource.copy("cartridges/speech_sampler")
@@ -64,6 +67,28 @@ defmodule Loka.ContentPlaceholdersTest do
       assert said =~ "still_to_write"
       refute File.exists?(out)
     end
+  end
+
+  # Break: a cutscene paragraph ships its `~`, the check not reaching lowered scene steps.
+  test "a release compile refuses a cutscene's placeholder", %{tmp_dir: tmp} do
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+
+    File.write!(Path.join(dir, "scenes/bell_rung.cut"), "Written.\n\n~\n---\n")
+
+    File.write!(
+      Path.join(dir, "scenes/bell_rung.json"),
+      ~s({"on": {"story_point": "lantern_resolved", "outcome": "carry"}, "control": "modal"})
+    )
+
+    out = Path.join(tmp, "todo.json")
+
+    said =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert catch_exit(Mix.Tasks.Loka.Compile.run([dir, out])) == {:shutdown, 1}
+      end)
+
+    assert said =~ "placeholder_text at text.scene.bell_rung.steps.1.text"
+    refute File.exists?(out)
   end
 
   # Break: the line rule over-reaches and refuses written prose that merely holds a `~`.

@@ -26,18 +26,18 @@
       "description": "Globally stable, immutable reference to a content definition (03 §2; 05 §4: no global content-key namespace). cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
       "type": "object",
       "properties": {
-        "cartridge_id": {
+        "cartridge_id": {"description":"The owning cartridge. Lowercase snake_case, at most 64 characters.",
           "$ref": "#/$defs/CartridgeId"
         },
-        "cartridge_version": {
+        "cartridge_version": {"description":"The cartridge version, MAJOR.MINOR.PATCH.",
           "$ref": "#/$defs/ReleaseVersion"
         },
-        "kind": {
+        "kind": {"description":"The definition's kind.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*$",
           "maxLength": 64
         },
-        "key": {
+        "key": {"description":"The definition's key within its kind.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*$",
           "maxLength": 64

@@ -36,10 +36,86 @@ maud: line one
 `when:` names a true/false fact; a choice is keyed by its words (`choice_one`). `gives:` hands
 the player that item from the scene's NPC: the NPC must hold it (`"location": {"in": "npc", "npc":
 "maud"}`, or moved there in play; otherwise the choice stays hidden and the compile warns) and
-`cartridge.json` must lock `containment`, which owns `item_acquired`. What the scene cannot say (a keyword, an accept, a riddle) goes in
+`cartridge.json` must name `containment` under `requires.capabilities`. What the scene cannot say (a keyword, a riddle) goes in
 `dialogues/<key>.json` beside it. An error names the scene file and line.
 
-Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file.
+Everything a scene names must exist: a fact in `facts.json`, an NPC, item or quest as its own JSON
+file.
+
+More lines a scene can hold:
+
+```
+npc: maud
+with: bram
+
+* line of narration
+maud: line one
+bram: line two
+- choice one
+  sets: door_open
+  sets: mood calm
+  * line of reply
+- choice two
+  quest: accept bridge_job
+  bram: line of reply
+```
+
+- `with: bram` lets bram speak too. Bram must be in the room when the player chooses, or the choice
+  is refused. The lines read as one passage; only the words say who speaks.
+- `* words` is a line nobody says, joined like speech, above the choices or under one.
+- `sets: door_open` sets a true/false fact to true; `sets: mood calm` sets the fact to that value
+  (`true`, `false`, a whole number or a key).
+- `quest: accept bridge_job` starts that quest when the player takes the choice.
+- `quest: resolve bridge_job` ends the quest, with the choice as its outcome. Every choice in the
+  scene must carry the same line, or the compile refuses it.
+
+`needs`, `once`, `then` and nested choices are not available yet; the compile says so.
+
+### Write a cutscene
+
+`scenes/<key>.cut` is a scene the player reads through, with no choices. Each paragraph is one page,
+and one `---` closes the file:
+
+```
+line one
+line two of the same page
+
+next page
+
+---
+```
+
+A `.cut` file cannot say what starts it, and a cutscene with no trigger never plays. Put that in
+`scenes/<key>.json` beside it, or the compile refuses the file:
+
+```json
+{ "on": { "story_point": "bridge_done", "outcome": "carry" }, "control": "modal" }
+```
+
+`bridge_done` is a story point, and it has no file of its own: a choice in a scene that resolves a
+quest names it. Take a scene whose every choice ends the quest:
+
+```
+npc: maud
+
+maud: line one
+- carry
+  quest: resolve bridge_job
+  maud: line of reply
+- leave
+  quest: resolve bridge_job
+  maud: line of reply
+```
+
+and add `dialogues/<key>.json` beside it, with the point and the outcome this choice reaches:
+
+```json
+{ "choices": { "carry": { "story_point": "bridge_done/carry" } } }
+```
+
+Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file. A `~`
+holds the place of words only: in a `sets:` or `quest:` line it is listed too, but the compile
+refuses it until you write the key.
 
 ## Jump to a beat
 
@@ -73,6 +149,8 @@ Why tab takes an action or dialogue key and explains the last recorded step: whi
 why the action was missing or refused.
 
 ## Every kind of content
+
+Every kind's fields are in [source kinds](../reference/source-kinds.gen.md); step ops, policy leaves, events and choice fields are in [vocabulary](../reference/vocabulary.gen.md).
 
 `mise exec -- bin/loka new <kind> <name> [--from <room> <direction>] ... [cartridge dir]` (from any directory; the cartridge dir defaults to the current one, or the cartridge a `cartridge <dir>` pair just made) writes a
 compiling file for each pair (the pairs before a refusal stay written), with every line a `~` placeholder, merged into the files it touches

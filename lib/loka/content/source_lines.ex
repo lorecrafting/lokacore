@@ -1,15 +1,15 @@
 defmodule Loka.Content.SourceLines do
   @moduledoc "Where each source path sits: a JSON scan and a scene's own lines, for the compiler's words."
 
-  alias Loka.Content.{SceneFiles, Source, SourceFiles}
+  alias Loka.Content.{CutFiles, SceneFiles, Source, SourceFiles}
 
   @doc "Source path => `{file, line}`, or `{file, line, column}` for a file that is not valid JSON."
   @spec index(Path.t()) :: %{String.t() => tuple()}
   def index(dir) do
     paths = SourceFiles.paths(dir)
-    scenes = for rel <- paths, scene?(rel), into: %{}, do: {Path.basename(rel, ".scene"), rel}
+    scenes = for rel <- paths, scene?(rel), into: %{}, do: {json_half(rel), rel}
 
-    # Scenes first: a same-key dialogues/<key>.json merges over its scene, so its lines win.
+    # Scenes first: a same-key JSON file merges over its scene, so its lines win.
     paths
     |> Enum.sort_by(&(not scene?(&1)))
     |> Enum.reduce(%{}, fn rel, acc ->
@@ -26,11 +26,17 @@ defmodule Loka.Content.SourceLines do
     if scene?(rel), do: scene(rel, text, acc), else: json(rel, text, scenes, acc)
   end
 
-  defp scene?(rel), do: String.ends_with?(rel, ".scene")
+  defp scene?(rel), do: String.ends_with?(rel, [".scene", ".cut"])
+
+  # The JSON file a scene file merges with.
+  defp json_half(rel) do
+    if Path.extname(rel) == ".cut",
+      do: Path.rootname(rel) <> ".json",
+      else: "dialogues/" <> Path.basename(rel, ".scene") <> ".json"
+  end
 
   defp scene(rel, text, acc) do
-    text
-    |> SceneFiles.lines()
+    if(Path.extname(rel) == ".cut", do: CutFiles.lines(text), else: SceneFiles.lines(text))
     |> Enum.reduce(Map.put(acc, Source.at(rel, []), {rel, 1}), fn {steps, n}, acc ->
       Map.put(acc, Source.at(rel, steps), {rel, n})
     end)
@@ -39,7 +45,7 @@ defmodule Loka.Content.SourceLines do
   defp json(rel, text, scenes, acc) do
     case JSON.decode(text) do
       {:ok, _} ->
-        scene = if Path.dirname(rel) == "dialogues", do: scenes[Path.basename(rel, ".json")]
+        scene = scenes[rel]
 
         {_, _, acc} =
           value(text, [], 1, {scene || rel, rel}, Map.put(acc, Source.at(rel, []), {rel, 1}))

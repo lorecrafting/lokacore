@@ -6,7 +6,7 @@ defmodule Loka.Content.SourceFiles do
   def paths(dir) do
     # The directory name is literal, not glob syntax.
     String.replace(dir, ~r/[\[\]{}*?\\]/, "\\\\\\0")
-    |> Path.join("**/*.{json,scene}")
+    |> Path.join("**/*.{json,scene,cut}")
     |> Path.wildcard(match_dot: true)
     |> Enum.filter(&File.regular?/1)
     |> Enum.map(&Path.relative_to(&1, dir))
