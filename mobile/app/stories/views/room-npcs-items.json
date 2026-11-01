@@ -284,7 +284,8 @@
    },
    "description": {
     "key": "room.village_green.description"
-   }
+   },
+   "sound": "village"
   },
   "exits": [
    {

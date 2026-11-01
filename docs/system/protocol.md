@@ -335,7 +335,8 @@ projected current-room detail; the Book draws a fixture link only on that match
 ([book-ui.md fixture rule](book-ui.md#world-and-status-entry)). Bodies stay off the wire.
 
 `gameView` (`kernel/ts/src/view/view.ts:49`) projects, for the player: `actor_id`; `place` (room
-id, title, the description variant whose condition holds, `mechanics/description_variant/rule.ts:26`);
+id, title, the description variant whose condition holds, `mechanics/description_variant/rule.ts:26`;
+optional `sound`, the room's authored bed tag; optional `exposed: true`, from the room's `exposed` tag);
 `exits` in compass order, first checking Move against the actor's composed ActionSet with
 the exit's direction: before ancestry selection, each ordinary Move shows `invalid_state`
 under the [D11 gate](mechanics.md#d11-character-choice-selected-contract), matching Step;

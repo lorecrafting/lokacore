@@ -1,6 +1,7 @@
 {
   "name": "room.the_fold.title",
   "description": "room.the_fold.description",
+  "sound": "wild",
   "tags": [
     "exposed"
   ],

@@ -1,6 +1,7 @@
 {
   "name": "room.sea_cave.title",
   "description": "room.sea_cave.description",
+  "sound": "cave",
   "exits": {
     "west": {
       "to": "shore_steps",

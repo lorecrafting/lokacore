@@ -1,6 +1,7 @@
 {
   "name": "room.lever_hall.title",
   "description": "room.lever_hall.description",
+  "sound": "vault",
   "exits": {
     "west": {
       "to": "sapper_stair"

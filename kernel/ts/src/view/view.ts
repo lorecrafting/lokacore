@@ -47,6 +47,7 @@ import { shelf } from '../mechanics/commerce/shared.ts';
 import { timeView } from './time.ts';
 import { carrying } from '../mechanics/crow/behavior.ts';
 import { currentBleed } from '../mechanics/bleed/shared.ts';
+import { bleedingView } from './bleed.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
@@ -133,18 +134,8 @@ function placeView(world: World, actor: CharacterId, here: EntityId | undefined,
         ? (room.dark_description ?? ('place.dark' as TextKey))
         : describe(world, actor, lit, steps),
     ),
-  };
-}
-
-function bleedingView(world: World, bleed: NonNullable<ReturnType<typeof currentBleed>>) {
-  const spec = world.cartridge.bleeds![refString(bleed.effect!)];
-  return {
-    label: 'condition.bleeding' as TextKey,
-    generation: bleed.generation,
-    ends_at: bleed.ends_at!,
-    next_tick_at: bleed.next_tick_at!,
-    hp_loss: spec.hp_loss,
-    tick_every: spec.tick_every,
+    ...(room.sound && { sound: room.sound }),
+    ...(room.tags?.includes('exposed') && { exposed: true as const }),
   };
 }
 

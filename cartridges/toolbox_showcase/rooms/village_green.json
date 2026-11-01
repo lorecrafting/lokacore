@@ -1,6 +1,7 @@
 {
   "name": "room.village_green.title",
   "description": "room.village_green.description",
+  "sound": "village",
   "exits": {
     "north": {
       "to": "crossroads_inn"

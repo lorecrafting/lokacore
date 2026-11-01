@@ -1116,6 +1116,14 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/Text"
+        },
+        "sound": {
+          "description": "The room's authored sound bed tag (room.sound); absent where the room names none. The cartridge owns the tag names.",
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "exposed": {
+          "description": "The room carries the exposed tag: open to the weather. Absent otherwise.",
+          "const": true
         }
       },
       "required": [
