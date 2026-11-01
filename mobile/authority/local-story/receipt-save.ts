@@ -15,7 +15,20 @@ import { jobSave } from './job-save.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 
-export function receiptRecovery(fresh: World, world: World, db: Db, meta: Meta, revision: number) {
+// A save holding an accepted cheat opens only on a dev host; here, not in receiptHistory, which
+// some cartridges skip.
+const DEV_RECEIPT = `SELECT 1 FROM receipt WHERE json_extract(response,'$.kind')='accepted'
+  AND json_extract(command,'$.payload.type') GLOB 'dev_*' LIMIT 1`;
+
+export function receiptRecovery(
+  fresh: World,
+  world: World,
+  db: Db,
+  meta: Meta,
+  revision: number,
+  dev = false,
+) {
+  if (!dev && db.getFirstSync(DEV_RECEIPT)) throw new SyntaxError('malformed JSON: a dev save');
   jobSave(fresh, world);
   knowledgeSave(world);
   patrolSave(world);

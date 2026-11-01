@@ -61,7 +61,7 @@ problems =
             for(c <- required, d["implemented"], not is_map_key(row, c), do: "missing #{c}"),
             if(
               d["implemented"] and not d["ruleless"] and d["transcripts"] == [] and
-                not is_map_key(row, "no_transcript"),
+                row["no_transcript"] in [nil, ""],
               do: ["missing transcript"],
               else: []
             ),

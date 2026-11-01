@@ -148,6 +148,19 @@ test('go to room refuses while riding, and goes on foot', () => {
   assert.equal(code(goElsewhere(ridden, 1)), 'invalid_state');
 });
 
+// Break: go-to moves the body without its entered event, so room reactions silently stop firing.
+test('go to room announces the entry, and a room reaction springs', () => {
+  const out = go(fresh(), 'sapper_cellar');
+  assert.equal(code(out), 'accepted');
+  const cellarSprung = Object.entries(out.world.state.facts ?? {}).filter(([k]) =>
+    k.includes('"key":"cellar_sprung"'),
+  );
+  assert.deepEqual(
+    cellarSprung.map(([, v]) => v),
+    [true],
+  );
+});
+
 // Break: the value is not stored, or the ordinary assignment is bypassed.
 test('set fact stores the value', () => {
   const w = fresh();
@@ -167,6 +180,33 @@ test('set fact refuses unknown, ill-typed, reserved and owned facts', () => {
   assert.equal(code(set(w, 'position', 'sitting')), 'invalid_state');
   assert.equal(code(set(w, 'scene_letter_read', 1)), 'invalid_state');
   assert.equal(code(set(w, 'skill_blade', true)), 'invalid_state'); // the skills mechanic owns it
+});
+
+// Break: one load proof's fact stops being refused, so the cheat leaves a save that never reopens.
+test('set fact refuses every fact a reopen proves from its mechanic, and only those', () => {
+  const fact = ref('fact', 'cellar_disarmed');
+  const riddle = (wrong_limit?: number) => ({
+    dialogues: {
+      d: {
+        riddle: { choice_id: 'c', wrong_limit },
+        choices: { c: { steps: [{ op: 'fact.assign', fact, value: true }] } },
+      },
+    },
+  });
+  const other = ref('fact', 'other');
+  const owned = [
+    riddle(1),
+    { npcs: { n: { perception: { discovered: fact } } } },
+    { quests: { q: { expedition: { survived_fact: fact, faction: other } } } },
+    { quests: { q: { expedition: { survived_fact: other, faction: fact } } } },
+  ];
+  const under = (patch: object) => {
+    const w = fresh();
+    return { ...w, cartridge: { ...w.cartridge, ...patch } } as unknown as World;
+  };
+  for (const patch of owned)
+    assert.equal(code(set(under(patch), 'cellar_disarmed', true)), 'invalid_state');
+  assert.equal(code(set(under(riddle()), 'cellar_disarmed', true)), 'accepted');
 });
 
 // Break: the trace replay (Why, bin/play) re-decides a preview's cheat through `step`, which refuses it.

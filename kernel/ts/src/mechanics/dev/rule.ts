@@ -36,13 +36,31 @@ const heldInPlace = (world: World, actor: CharacterId, body: EntityId, here: Ent
 
 type SetFact = Extract<Command['payload'], { type: 'dev_set_fact' }>;
 
+// A reopen proves each of these from its mechanic's receipts (mobile topics-save, expedition-save),
+// so a cheated value would leave the save unopenable.
+const provenFacts = ({ topics, dialogues, npcs, quests }: World['cartridge']) => [
+  ...values(topics ?? {}).map((t) => t.fact),
+  ...values(dialogues ?? {}).flatMap((d) =>
+    d.riddle?.wrong_limit === undefined
+      ? []
+      : (d.choices[d.riddle.choice_id]!.steps ?? []).flatMap((s) =>
+          s.op === 'fact.assign' ? [s.fact] : [],
+        ),
+  ),
+  ...values(npcs ?? {}).flatMap((n) => (n.perception ? [n.perception.discovered] : [])),
+  ...values(quests ?? {}).flatMap((q) =>
+    q.expedition ? [q.expedition.survived_fact, q.expedition.faction] : [],
+  ),
+];
+
 const setFact = (world: World, payload: SetFact): ReturnType<Rule<'dev'>> => {
   const { actor_id, fact, value: to } = payload;
   const spec = world.cartridge.facts[refString(fact)];
   if (!spec) return rejected('not_found');
   const reserved =
     (fact.key === 'position' && world.cartridge.lock.capabilities.position) ||
-    values(world.cartridge.scenes ?? {}).some((s) => fact.key === `scene_${s.key}`);
+    values(world.cartridge.scenes ?? {}).some((s) => fact.key === `scene_${s.key}`) ||
+    provenFacts(world.cartridge).some((f) => refString(f) === refString(fact));
   if (
     reserved ||
     subjective(world, fact) ||

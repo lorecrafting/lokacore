@@ -33,9 +33,7 @@ export function receiptHistory(fresh: World, saved: World, db: Db, meta: Meta, r
     const replayed =
       command.payload.type === 'elapsed'
         ? stepElapsed(world, command, row.revision)
-        : // ponytail: a release's reopen would accept a hand-edited dev receipt; such a save is local
-          // tampering any save without this history check also admits, and the preview's has its own file.
-          command.payload.type.startsWith('dev_')
+        : command.payload.type.startsWith('dev_')
           ? stepDev(world, command, row.revision)
           : step(world, command, row.revision);
     if (!same(replayed.decision, decision) || replayed.decision.kind !== 'accepted') invalid();

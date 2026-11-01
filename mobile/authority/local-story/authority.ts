@@ -99,7 +99,7 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     if (!release || (saved && saved.pin!.kernel_api !== INSTALLED.kernel_api))
       return refuse({ kind: 'pinned_release_missing' as const, pinned: saved!.pin!, installed });
     const base = saved ? pinned(release, saved.pin!) : drawn(release, host);
-    const loaded = base && load(db, base, () => first(release.content_hash, base, host));
+    const loaded = base && load(db, base, () => first(release.content_hash, base, host), host.dev);
     if (!loaded) return refuse({ kind: 'save_corrupt' as const });
     Object.assign(s, { fresh: base, ...loaded });
     s.recoveryHeader = undefined;
