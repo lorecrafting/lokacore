@@ -109,8 +109,8 @@ function run(path: string, c: ReturnType<typeof compiled>) {
     const command = JSON.parse(String(r.command));
     const world = structuredClone(story.world());
     const row = world.state.choices![command.payload.continuation_id]!;
-    world.cartridge.dialogues![refString(row.source)]!.choices[command.payload.choice_id]!.patrol =
-      {} as never;
+    const dialogue = world.cartridge.dialogues![refString(row.source)]!;
+    Object.assign(dialogue.choices[command.payload.choice_id]!, { patrol: {} });
     return dialogueDetail(
       { world } as never,
       r.command_id as string,
