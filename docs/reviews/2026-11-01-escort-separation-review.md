@@ -126,3 +126,27 @@ Both need a forged save; no lawful play reaches them.
 | g: riddle-save drops `!d.quest` | survives; compile refuses `wrong_limit` without a quest (`dialogues.ex:206`) |
 
 Not done: `bin/mutate_diff.sh`; compiling a riddle on a repeatable quest (no refusal in `exchanges.ex`, by search; the fixture bypasses compile, so whether the `riddle-save.ts` change is reachable in a real cartridge is unverified); the wider set for mutants a, c, f, g, which were already decided or equivalent.
+
+## Final check at `7cc4079079bb31ff2c0603bbf443aca8898daede`
+
+Verdict: **APPROVE WITH NOTES**, on the two re-check findings only. CI at this head (`gh run list --commit`): graph-diff, book-e2e, ci all success.
+
+### Dispositions
+
+- Finding 1 fixed. `mobile/authority/local-story/dialogue-receipt.ts` sets `instance_id = q[0]` inside the one-time guard, so the transition compare is against the row. New test `escort_repeat.test.ts` "a one-time skill choice whose receipt resolved another instance is refused".
+- Finding 2 fixed. `mobile/authority/local-story/riddle-save.ts` compares with the live row unless the quest is repeatable. New case in `riddle.test.ts`, row and receipts forged together.
+- Lawful repeatable cases: not regressed. All 30 local-story test files that mention a quest: 295 pass, 0 fail, in the worktree with compiled Elixir.
+
+### Mutants, singly, against `escort_repeat.test.ts` and `riddle.test.ts` (each reverted)
+
+| Mutant | Result |
+|---|---|
+| riddle compare dropped | killed, `riddle.test.ts` forged rows |
+| riddle compare also on repeatable | killed, riddle on a repeatable quest |
+| `instance_id = q[0]` dropped | killed, one-time skill choice test |
+| guard also checks repeatable | killed, 3 tests: Complete, riddle, skill on a repeatable quest |
+
+### Open notes
+
+- The `dialogue-receipt.ts:163` test gap above stays a proposed housekeeping issue; not a condition of merge.
+- Not done: `bin/mutate_diff.sh`; compiling a riddle on a repeatable quest; anything outside these two findings, including the second opinion's forged repeatable saves.
