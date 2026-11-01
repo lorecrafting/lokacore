@@ -177,8 +177,23 @@ test('a return with more debt than the cap credits nothing and keeps the debt', 
   a.game.pulse();
   assert.equal(checkpoint(a.sql).target, start + 259200);
   a.clock.wall += YEAR;
-  a.game.pulse('resume');
+  assert.notEqual(a.game.pulse('resume').kind, 'error');
   assert.equal(checkpoint(a.sql).target, start + 259200);
+  a.sql.close();
+});
+
+// Breaks: debt converts to ms rounding down, so the credit runs a fraction over what the cap leaves.
+// Rate 7: 1 s owed costs 143 ms of the 12342857 ms cap; 12342714 ms * 7 / 1000 credits 86398 s.
+test('debt rounds up against the cap at a rate that does not divide a second', (t) => {
+  const path = save(t),
+    bundle = elapsedBundle({ rate: 7 });
+  const first = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  first.game.pulse();
+  first.sql.exec('UPDATE elapsed SET target = target + 1');
+  first.sql.close();
+  const a = elapsedHost(path, { wall: 10000 + YEAR, mono: 0 }, bundle);
+  assert.equal(settle(a), 'ready');
+  assert.equal(checkpoint(a.sql).target, START + 1 + 86398);
   a.sql.close();
 });
 
