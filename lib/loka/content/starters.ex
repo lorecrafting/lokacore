@@ -131,10 +131,14 @@ defmodule Loka.Content.Starters do
     path
   end
 
-  # Where the starter would replace something: a scalar or shape that differs. Lists merge (below).
+  # Where the starter would replace something: a scalar or shape that differs, or a list of rows
+  # that drops one. Lists of names union (below).
   defp clash(old, _, _) when old == %{}, do: nil
   defp clash(same, same, _), do: nil
-  defp clash(old, new, _) when is_list(old) and is_list(new), do: nil
+
+  defp clash(old, new, at) when is_list(old) and is_list(new) do
+    if Enum.all?(new, &is_binary/1) or old -- new == [], do: nil, else: at
+  end
 
   defp clash(old, new, at) when is_map(old) and is_map(new) do
     Enum.find_value(new, fn {k, v} ->

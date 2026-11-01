@@ -96,6 +96,21 @@ defmodule Loka.ContentStartersTest do
     assert read(dir, "rooms/yard.json")["description"] == %{"prose" => "Handwritten"}
   end
 
+  # Break: a rerun passes the list pair and replaces written steps with `~`, at exit 0.
+  test "a rerun refuses over a written list of steps, writing nothing", %{tmp_dir: tmp} do
+    dir = Path.join(tmp, "mine")
+    {:ok, _} = Starters.write(dir, "cartridge", dir)
+    {:ok, _} = Starters.write(dir, "items", "lamp")
+    written = [%{"type" => "narrate", "text" => "Handwritten"}]
+
+    for {kind, rel} <- [{"reactions", "reactions/mine.json"}, {"scenes", "scenes/mine.json"}] do
+      {:ok, _} = Starters.write(dir, kind, "mine")
+      edit(dir, rel, &Map.put(&1, "steps", written))
+      assert {:error, ^rel <> ": steps already has" <> _} = Starters.write(dir, kind, "mine")
+      assert read(dir, rel)["steps"] == written
+    end
+  end
+
   # Break: a population replaces home's east exit, leaving a written room unreachable; a second
   # population resets the written combat lines and breaks the compile. A refusal writes no file.
   test "a population refuses a taken east exit and a second population, writing nothing", %{
