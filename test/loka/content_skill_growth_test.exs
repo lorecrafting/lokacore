@@ -2,8 +2,9 @@ defmodule Loka.ContentSkillGrowthTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/skills_sampler")}
 
-  # Breaks: growth that does not increase, an opposed check against an unrated detail or naming an unknown skill or attribute, or an authored
-  # uses_<key> fact compile (toolbox rows 5 and G5).
+  # Breaks: growth that does not increase, an opposed check against an unrated detail or naming an unknown skill or attribute, an authored
+  # uses_<key> fact (toolbox rows 5 and G5), or a wrong rank count, ranks without growth, an unknown
+  # learned or rank text or a malformed rank compile.
   test "growth and opposed checks keep their order, rating and references", %{
     dir: dir
   } do
@@ -38,7 +39,23 @@ defmodule Loka.ContentSkillGrowthTest do
          "value" => 5
        }), {"RESERVED_FACT", "actions/pick_gate.outcomes.success.steps[0].fact"}},
       {"facts.json", &put_in(&1, ["facts", "uses_pick"], uses),
-       {"RESERVED_FACT", "facts.facts.uses_pick"}}
+       {"RESERVED_FACT", "facts.facts.uses_pick"}},
+      {"skills/pick.json", &update_in(&1, ["ranks"], fn r -> Enum.drop(r, 1) end),
+       {"SCHEMA_VIOLATION", "skills/pick.ranks"}},
+      {"skills/pick.json", &update_in(&1, ["ranks"], fn [r | _] = rs -> [r | rs] end),
+       {"SCHEMA_VIOLATION", "skills/pick.ranks"}},
+      {"skills/pick.json", &Map.delete(&1, "growth"), {"SCHEMA_VIOLATION", "skills/pick.ranks"}},
+      {"skills/pick.json", &put_in(&1, ["learned"], "skill.none"),
+       {"UNRESOLVED_REFERENCE", "skills/pick.learned"}},
+      {"skills/pick.json", &put_in(&1, ["ranks", Access.at(3), "name"], "skill.none"),
+       {"UNRESOLVED_REFERENCE", "skills/pick.ranks[3].name"}},
+      {"skills/pick.json", &put_in(&1, ["ranks", Access.at(1), "reached"], "skill.none"),
+       {"UNRESOLVED_REFERENCE", "skills/pick.ranks[1].reached"}},
+      {"skills/pick.json",
+       &update_in(&1, ["ranks", Access.at(0)], fn r -> Map.delete(r, "name") end),
+       {"SCHEMA_VIOLATION", "skills/pick.ranks[0].name"}},
+      {"skills/pick.json", &put_in(&1, ["ranks", Access.at(0), "stray"], "skill.pick.rank1"),
+       {"UNKNOWN_FIELD", "skills/pick.ranks[0].stray"}}
     ]
 
     for {file, change, {code, path}} <- cases do

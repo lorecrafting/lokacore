@@ -3668,6 +3668,17 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
   - New: `SkillDefinition.prerequisite`, `learnable`, the self-reference check.
   - Missing invariant: none.
 
+## Skill ranks (level-up rush)
+
+Beads `loka-g5hh.2.3`, `loka-ot39`; [declarations](cartridge.md#skill-growth-and-rating-declarations). A skill can carry its author's line for learning it and a name per level; the presenter tells them, the engine tells nothing new.
+
+- **Definition.** `SkillDefinition.learned` (optional TextKey): the line for acquiring the skill. `SkillDefinition.ranks` (optional, needs `growth`, exactly `growth.length + 1` entries of `{name, reached?}`, both TextKeys): `ranks[i]` names level `i + 1`. A skill never taught tops out one level lower and never reaches the last entry (known limit: its level starts at 0, [Level](#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5)).
+- **Projection** (`skillView` in `kernel/ts/src/view/skills.ts`). A SkillView gains `learned` (the key, whenever declared, acquired or not, so the presenter reads it from the view that first shows the skill acquired) and `rank` (`{label, reached?}` of the current level, when `ranks` is declared and the level is at least 1). A cartridge declaring neither keeps its view bytes.
+- **Effect.** None. The presenter compares views, as it does for its composed skill lines; the engine does not tell a rank line, so no event and no delta changes.
+- **Sampler.** `cartridges/skills_sampler`: `pick` declares `learned` and six ranks, with `reached` on ranks 2 and 5 only.
+- **Composition record.** Consumer: the Book. Reads: the skill definition and the viewing actor's `level`. Writes: none. Reused: `level`, `skillView`. New: two definition fields, two view fields; no foundation change.
+- **Realm seams.** 1 Actor: met; the viewing actor's level. 6 Text: met; authored keys only, `speech@1` unchanged. Others n/a: no write, no time, no credit.
+
 ## Skill tree view (Homestead hs-14)
 
 Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree state so the Book draws the Character page's skill tree. Declarations: [skill prerequisite](cartridge.md#skill-prerequisite-declarations) `hidden` (with its `prerequisite`) and `profession`.
