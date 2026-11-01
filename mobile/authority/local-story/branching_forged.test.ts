@@ -129,3 +129,66 @@ test('a two-way item held by nothing, by itself, or with no row is refused', () 
     assert.equal(row.run('containers', token(g)).changes, 1);
   });
 });
+
+// A second row and receipt for an answer already saved, so only the count can refuse it.
+const answeredTwice = (g: Play, choice: string) => {
+  const rows = g.sql.prepare('SELECT key, value FROM state_row WHERE section=?').all('choices');
+  const row = rows.find((r) => JSON.parse(String(r.value)).choice_id === choice)!;
+  const id = String(row.key);
+  const copy = `${id}-copy`;
+  g.sql
+    .prepare('INSERT INTO state_row(section, key, value) VALUES (?, ?, ?)')
+    .run('choices', copy, row.value);
+  const receipts = g.sql.prepare('SELECT * FROM receipt').all();
+  const r = receipts.find((x) => JSON.parse(String(x.command)).payload?.continuation_id === id)!;
+  const command = JSON.parse(String(r.command));
+  command.payload.continuation_id = copy;
+  const values = {
+    ...r,
+    invocation_id: `${r.invocation_id}-copy`,
+    command_id: `${r.command_id}-copy`,
+    command: JSON.stringify(command),
+  };
+  const names = Object.keys(values);
+  g.sql
+    .prepare(`INSERT INTO receipt(${names}) VALUES (${names.map(() => '?')})`)
+    .run(...(Object.values(values) as string[]));
+};
+
+// Breaks: a one-way item's answers not being counted, so one answer saved twice loads.
+test('a one-way answer saved twice is refused', () => {
+  const taken = (g: Play) => g.choose('take');
+  const delivered = (g: Play) => {
+    g.choose('take');
+    accept(g);
+    g.talk('z_q');
+    g.choose('give');
+  };
+  refused(oneWay(), taken, (g) => answeredTwice(g, 'take'));
+  refused(oneWay(), delivered, (g) => answeredTwice(g, 'give'));
+});
+
+// Breaks: a one-way item off its giver with no take behind it loading: moved with no answers, or
+// delivered with the take's row removed.
+test('a one-way item moved with no take is refused', () => {
+  refused(
+    oneWay(),
+    () => {},
+    (g) => put(g.sql, 'containers', g.fresh.entityIds[TOKEN]!, g.fresh.body),
+  );
+  refused(
+    oneWay(),
+    (g) => {
+      g.choose('take');
+      accept(g);
+      g.talk('z_q');
+      g.choose('give');
+    },
+    (g) => {
+      const rows = g.sql.prepare('SELECT key, value FROM state_row WHERE section=?').all('choices');
+      const row = rows.find((r) => JSON.parse(String(r.value)).choice_id === 'take')!;
+      const gone = g.sql.prepare('DELETE FROM state_row WHERE section=? AND key=?');
+      assert.equal(gone.run('choices', row.key).changes, 1);
+    },
+  );
+});

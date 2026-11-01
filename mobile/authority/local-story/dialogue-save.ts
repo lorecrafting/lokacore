@@ -56,13 +56,14 @@ export function dialogueSave(world: World, db: Db, meta: Meta) {
     );
     if (resolved.length > 1) invalid();
     const received = resolved.length === 1;
-    const terminal = handoff(world, rows, start.item, received);
+    const terminal = handoff(world, rows, start.item);
     const holder = world.state.containers[start.item];
     if (!received) {
       const original = bind(world, start.d).find(
         (r) => r.role === start.option.receive!.from,
       )!.entity_id;
-      if (holder !== original || terminal) invalid();
+      // A hand-over row needs its take: its destination is never the giver, so the holder check refuses.
+      if (holder !== original) invalid();
     } else if (!terminal) {
       if (npcHolds(world, start.item)) invalid();
     }
@@ -233,11 +234,11 @@ function answeredOutcomes(
   }
 }
 
-function handoff(world: World, rows: [string, ChoiceRow][], item: EntityId, received: boolean) {
+function handoff(world: World, rows: [string, ChoiceRow][], item: EntityId) {
   let completed = false;
   for (const { key, d, option, choice } of transfers(world, item, 'hand_over')) {
     const matches = answered(rows, key, choice);
-    if (matches.length > 1 || (matches.length && (!received || completed))) invalid();
+    if (matches.length > 1 || (matches.length && completed)) invalid();
     if (matches.length) {
       handedOver(world, d, option, item, choice, playerQuest(world, d.quest));
       completed = true;

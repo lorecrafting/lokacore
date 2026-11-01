@@ -37,6 +37,8 @@ import {
   withToken,
   reopened,
   takeGive,
+  tokenTalk,
+  quest,
 } from './__tests__/branching-play.ts';
 
 function build(cha: number) {
@@ -167,6 +169,50 @@ test('a one-way item reopens taken before the quest, delivered, or declined', ()
       g.choose(answer);
       assert.equal(g.at(), undefined);
     });
+});
+
+// Breaks: one-way inference reaching an item with a lawful second history: a second receive, a
+// plain hand-over, or a quest hand-over back to the giver, each then refused as forged.
+test('an item that can come back reopens after each way back', () => {
+  const quested = (extra: object, more: object = {}) => {
+    const held = { op: 'has_item', item: 'token' };
+    const active = { op: 'quest_state', quest: 'job', state: 'active' };
+    return withToken(
+      {
+        guard: take(),
+        b_offer: {
+          ...talkTo({ job: { ...line, accept: 'job' } }),
+          policy: { op: 'all', items: [held, { op: 'not', item: active }] },
+        },
+        z_q: { ...extra, quest: 'job', policy: { op: 'all', items: [held, active] } },
+        ...more,
+      },
+      { job: quest },
+    );
+  };
+  const roles = {
+    guard: { role: 'npc', npc: 'guard' },
+    clerk: { role: 'npc', npc: 'clerk' },
+    token: { role: 'item', item: 'token' },
+  };
+  const toClerk = {
+    ...talkTo({ give: { ...line, hand_over: { item: 'token', to: 'clerk' } } }),
+    roles,
+  };
+  reopened(quested(give()), (g) => {
+    g.choose('take');
+    accept(g);
+    g.talk('z_q');
+    g.choose('give');
+    g.talk();
+    g.choose('take');
+  });
+  reopened(withToken({ guard: take(), z_back: toClerk }), (g) => {
+    g.choose('take');
+    g.talk('z_back');
+    g.choose('give');
+  });
+  reopened(quested(toClerk, { y_second: take() }), (g) => g.choose('take'));
 });
 
 // Breaks: the row's own receipt going unchecked, so a save claiming a Give-restricted item moved
