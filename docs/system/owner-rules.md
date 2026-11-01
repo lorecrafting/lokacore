@@ -9,7 +9,7 @@ and not repeated here.
 ## Product and scope
 
 - Shipped player-facing content and store material are human-made; AI writes code and internal documents; agent-written story text is reference or placeholder only; placeholder audio is human-made and tracked until replaced ([record](../decisions/owner-decision-human-made-content-2026-10-31.md)). The owner writes shipped story and lore prose.
-
+- Every word the player reads is the owner's: AI may create structure with empty text and writes no player-facing prose; outline prose is reference only, written fresh; store wording says a human wrote all story text while AI helped with planning and engine code. A lowered `*.scene` prose format is the one exception to the no-custom-language rule, compile-time only ([record](../decisions/owner-decision-handwritten-prose-2026-10-31.md)).
 - The prologue teaches every basic (Tending, Making, Guarding, Words) through quests of gifts or labour, no coin; houses and guilds open at the landing; Skills stay on Character, one collapsed line per profession, until the landing ([record](../decisions/owner-decision-prologue-abilities-2026-10-23.md)).
 - Proof order for the real game's chapter (PM ruling loka-40d4, 2026-10-28; the rule was set for Chapter 1): E1 coverage complete (harness deleted 2026-10-28, loka-ivjq.16; rebuilt with that chapter), E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 

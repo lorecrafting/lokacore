@@ -3,7 +3,7 @@
 // (SQLite, fonts, Alert, the key-value store) and injects them; the logic is in
 // authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
 import { useEffect, useRef, useState } from 'react';
-import { Alert, AppState, Button, PixelRatio, Platform, TextInput, View } from 'react-native';
+import { Alert, AppState, PixelRatio, Platform, View } from 'react-native';
 import { getRandomValues, randomUUID } from 'expo-crypto';
 import { useFonts } from 'expo-font';
 import {
@@ -18,6 +18,14 @@ import type { Db } from '../authority/local-story/store.ts';
 import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
+import {
+  devClock,
+  played,
+  resetPlace,
+  restorePlace,
+  skew,
+  useAuthorPanel,
+} from './author/panel.tsx';
 import { readingSize } from './book/reading.ts';
 import { LABEL } from './book/labels.ts';
 import chapter from '../../protocol/fixtures/toolbox_showcase_hash.json';
@@ -58,7 +66,6 @@ const g = globalThis as {
   loka_web_opening?: Promise<ReturnType<typeof localSession>>;
   loka_clock_cleanup?: () => void;
   loka_dev_hash?: string;
-  loka_dev_skew?: number; // ms the dev clock control has moved both host clocks forward
 };
 // An edited cartridge replaces the open game: the cached session still plays the old one.
 if (
@@ -67,7 +74,6 @@ if (
   (g.loka_dev_hash ??= chapter.sha256) !== chapter.sha256
 )
   location.reload();
-const skew = () => g.loka_dev_skew ?? 0;
 const createSession = (open: () => Db) =>
   (g.loka_session ??= localSession(
     open,
@@ -219,6 +225,7 @@ function useWebSession() {
     let live = true;
     g.loka_web_opening.then((opened) => {
       session = opened;
+      if (devClock) restorePlace(opened.game());
       if (live) redrawBoot((n) => n + 1);
     });
     return () => {
@@ -226,36 +233,6 @@ function useWebSession() {
     };
   }, []);
   return session;
-}
-
-// Author preview only (`?dev=1`; never the pinned save): moves both host clocks forward by game minutes at the
-// cartridge's rate, so the kernel's own elapsed path delivers the time (none before D11 selection).
-const devClock =
-  devCartridge && Platform.OS === 'web' && new URLSearchParams(location.search).get('dev') === '1';
-type Manifest = { manifest: { time_policy?: { rate: number } } };
-function DevClock() {
-  const [minutes, setMinutes] = useState('60');
-  const advance = () => {
-    const rate = (JSON.parse(chapter.canonical) as Manifest).manifest.time_policy?.rate;
-    const m = Number(minutes);
-    if (rate && Number.isSafeInteger(m) && m > 0)
-      g.loka_dev_skew = skew() + Math.ceil((m * 60_000) / rate);
-  };
-  // The dev-only time panel is a tool, not a Book surface, so it keeps raw sizes.
-  return (
-    // ast-grep-ignore: mobile-book-raw-values
-    <View style={{ position: 'absolute', top: 4, right: 4, flexDirection: 'row', gap: 4 }}>
-      <TextInput
-        aria-label="Game minutes"
-        inputMode="numeric"
-        value={minutes}
-        onChangeText={setMinutes}
-        // ast-grep-ignore: mobile-book-raw-values
-        style={{ width: 56, borderWidth: 1, backgroundColor: 'white' }}
-      />
-      <Button title="Advance game minutes" onPress={advance} />
-    </View>
-  );
 }
 
 export default function App() {
@@ -267,17 +244,20 @@ export default function App() {
   const recovered = useRef<Recovery>({});
   const [bookShell] = useState(() => shellFor(recovered));
   useElapsed(game, recovered);
-  if (!activeSession) return null;
-  if (!loaded && !fontError) return null;
   const startOver = () => {
-    const before = activeSession.game();
-    const why = activeSession.startOver();
+    const before = activeSession!.game();
+    const why = activeSession!.startOver();
     // Only a start over that replaced the game opens a fresh book; a failed one keeps this book
     // and its log (which says why), so the log must not restart.
-    if (activeSession.game() !== before) setStarts((n) => n + 1);
-    else redraw({});
+    if (activeSession!.game() !== before) {
+      if (devClock) resetPlace();
+      setStarts((n) => n + 1);
+    } else redraw({});
     return why;
   };
+  useAuthorPanel({ redraw, session: { game: () => activeSession?.game() }, startOver }, game);
+  if (!activeSession) return null;
+  if (!loaded && !fontError) return null;
   if (!game)
     return (
       <SaveError
@@ -287,13 +267,5 @@ export default function App() {
         tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined}
       />
     );
-  const book = <Book key={starts} game={game} shell={bookShell} startOver={startOver} />;
-  return devClock ? (
-    <>
-      {book}
-      <DevClock />
-    </>
-  ) : (
-    book
-  );
+  return <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />;
 }

@@ -96,18 +96,19 @@ export function openGame(db: Db, bundled: Bundled, host: HostPart) {
   return managedGame(story, cartridge, db);
 }
 
-function managedGame(
-  story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
-  cartridge: Cartridge,
-  db: Db,
-) {
+const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
+type Open = Extract<ReturnType<typeof openStory>, { kind: 'open' }>;
+const TRACE_ROWS = 'SELECT record FROM trace ORDER BY rowid'; // the author column replays these
+const authorTools = (story: Open, db: Db) => ({
+  entityIds: () => story.world().entityIds,
+  facts: () => story.world().state.facts ?? {},
+  trace: () => db.getAllSync<{ record: string }>(TRACE_ROWS).map((r) => r.record),
+});
+function managedGame(story: Open, cartridge: Cartridge, db: Db) {
   const held: SessionAttempt = { catching: false, sent: lastId(db) };
   const listeners = new Set<(update: GameSubscription) => void>();
-  const emit = (update: GameSubscription) => {
-    for (const listener of listeners) listener(update);
-  };
+  const emit = (update: GameSubscription) => listeners.forEach((l) => l(update));
   const projection = (): Projection => ({ view: gameView(story.world()), token: story.token() });
-  const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
   let attempting = false;
   const attempt = (): Reply => {
     const outer = attempting; // a listener may re-enter attempt while this one drains
@@ -134,6 +135,7 @@ function managedGame(
   return Object.assign(game, {
     newGame: story.newGame,
     pulse: pulseOf(story, projection, before, emit, pending, attempt),
+    ...authorTools(story, db),
   });
 }
 

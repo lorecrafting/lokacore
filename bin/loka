@@ -1,8 +1,18 @@
 #!/bin/sh
 # Loka's command line. `loka play <artifact> [script | --replay <transcript>]`: kernel/ts/play.
 # `loka dev <cartridge dir> [--watch]`: the author preview's artifact, kernel/ts/play/author.ts.
+# `loka new <kind> <name> [cartridge dir]`: a compiling starter file, mix loka.new (any cwd; the
+# cartridge dir, default the cwd, and a new cartridge's path resolve against the caller's cwd).
+# `loka todo <cartridge dir>`: the `~` placeholders still to write, by file (kernel/ts/play/todo.ts).
 case "${1-}" in
 play) shift; exec node "$(dirname "$0")/../kernel/ts/play/main.ts" "$@" ;;
 dev) shift; exec node "$(dirname "$0")/../kernel/ts/play/author.ts" "$@" ;;
-*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev <cartridge dir> [--watch]" >&2; exit 2 ;;
+todo) shift; exec node "$(dirname "$0")/../kernel/ts/play/todo.ts" "$@" ;;
+new)
+  [ -n "${3-}" ] || { echo "usage: bin/loka new <kind> <name> [cartridge dir]" >&2; exit 2; }
+  name="$3"; dir="${4:-$PWD}"
+  case "$dir" in /*) ;; *) dir="$PWD/$dir" ;; esac
+  [ "$2" = cartridge ] && case "$name" in /*) ;; *) name="$PWD/$name" ;; esac
+  cd "$(dirname "$0")/.." && exec mix loka.new "$2" "$name" "$dir" ;;
+*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev <cartridge dir> [--watch] | bin/loka new <kind> <name> [cartridge dir] | bin/loka todo <cartridge dir>" >&2; exit 2 ;;
 esac
