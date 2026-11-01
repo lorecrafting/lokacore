@@ -107,6 +107,14 @@ defmodule Loka.ContentFaultsTest do
 
     edit.("npcs/wight.json", &Map.delete(&1, "immune"))
     assert refused?.()
+
+    # Break: a body or status with its own line also gets "remove duration", a false next step.
+    edit.("npcs/wight.json", &Map.put(&1, "immune", 1))
+    assert not refused?.()
+    edit.("npcs/wight.json", &Map.delete(&1, "immune"))
+
+    cast.(%{"status" => "nosuch"})
+    assert not refused?.()
   end
 
   # Break: action_completed runs inside the action, so a reaction's status row on a timed action
