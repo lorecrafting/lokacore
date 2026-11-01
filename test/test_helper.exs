@@ -26,11 +26,22 @@ defmodule Loka.ContentSource do
 
     try do
       for {rel, change} <- changes, do: write(Path.join(dir, rel), change)
-      Loka.Content.compile(dir)
+      plain(Loka.Content.compile(dir))
     after
       for {rel, old} <- saved, do: restore(Path.join(dir, rel), old)
     end
   end
+
+  @doc """
+  Drops the hint data (`valid`, `expected`) from a refusal: the hints quote the schema, so a
+  pin that kept them would move with every new field. The explain tests read them directly.
+  """
+  def plain({:error, diags}) do
+    {:error,
+     Enum.map(diags, fn d -> Map.update!(d, "data", &Map.drop(&1, ["valid", "expected"])) end)}
+  end
+
+  def plain(result), do: result
 
   defp restore(path, {:ok, bytes}), do: File.write!(path, bytes)
   defp restore(path, {:error, :enoent}), do: File.rm_rf!(path)

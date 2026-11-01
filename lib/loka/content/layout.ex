@@ -11,7 +11,7 @@ defmodule Loka.Content.Layout do
     shape = %{"type" => "array", "items" => %{"$ref" => "MapPosition"}, "minItems" => 1}
 
     validation =
-      Contracts.validate(
+      Contracts.detailed(
         "LayoutFile",
         rows,
         Map.put(Loka.Content.Source.contracts(), "LayoutFile", shape)

@@ -309,12 +309,26 @@ defmodule Loka.Content.Dialogues do
 
     owned(at(rel, steps), "item_acquired", ctx.events) ++
       transfer_roles(rel, steps, h, d["roles"], "from") ++
+      unheld(rel, steps, h, d["roles"], ctx) ++
       if is_map_key(o, "hand_over"),
         do: [diag("OUTCOME_MISMATCH", at(rel, steps))],
         else: []
   end
 
   defp receive_item(_, _, _, _, _), do: []
+
+  # A scene's `gives:` starts unavailable unless its speaker holds the item; play can move it there.
+  defp unheld(rel, steps, h, roles, ctx) do
+    item = get_in(roles, [h["item"], "item"])
+    npc = get_in(roles, [h["from"], "npc"])
+
+    for true <- [String.ends_with?(rel, ".scene")],
+        {_, _, %{"location" => location}} <- [resolve(item, "item", ctx.m, ctx.defs)],
+        location != %{"in" => "npc", "npc" => npc} do
+      data = %{"item" => item["key"], "holder" => npc["key"]}
+      diag("OUTCOME_MISMATCH", at(rel, steps), data) |> Map.put("severity", "warning")
+    end
+  end
 
   defp payment(rel, steps, %{"payment" => p}, d, ctx) do
     reference(rel, steps ++ ["payment"], {"resource", "resource"}, p, ctx.m, ctx.defs) ++

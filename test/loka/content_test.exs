@@ -60,7 +60,9 @@ defmodule Loka.ContentTest do
   end
 
   defp errors(dir, files) do
-    assert {:error, diags} = dir |> source(files) |> Loka.Content.compile()
+    assert {:error, diags} =
+             dir |> source(files) |> Loka.Content.compile() |> Loka.ContentSource.plain()
+
     for d <- diags, do: assert(Contracts.validate("Diagnostic", d) == :ok, inspect(d))
     diags
   end

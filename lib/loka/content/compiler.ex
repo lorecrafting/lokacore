@@ -367,7 +367,7 @@ defmodule Loka.Content.Compiler do
   defp authored_key(_, _, _), do: []
 
   defp validated(rel, steps, contract, value, defs \\ Loka.Content.Source.contracts()) do
-    case Contracts.validate(contract, value, defs) do
+    case Contracts.detailed(contract, value, defs) do
       :ok -> []
       {:error, es} -> schema(rel, steps, value, es)
     end

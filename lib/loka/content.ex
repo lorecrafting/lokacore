@@ -30,6 +30,10 @@ defmodule Loka.Content do
   @external_resource @registry_path
   @registry @registry_path |> File.read!() |> JSON.decode!()
 
+  @doc "Compile diagnostics as plain lines, located in the source at `dir`."
+  @spec explained([map()], Path.t()) :: [String.t()]
+  defdelegate explained(diags, dir), to: Loka.Content.Explain, as: :lines
+
   @doc """
   Compiles the source directory into CartridgeArtifact bytes (one canonical JSON document)
   and its warnings (severity warning), or returns its diagnostics, each list in the order

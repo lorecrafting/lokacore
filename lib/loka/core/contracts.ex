@@ -66,6 +66,16 @@ defmodule Loka.Core.Contracts do
   @spec validate(String.t(), Canonical.value(), %{String.t() => map()}) ::
           :ok | {:error, [error()]}
   def validate(contract, value, defs \\ @defs) do
+    with {:error, errors} <- detailed(contract, value, defs),
+         do: {:error, Enum.map(errors, &Map.drop(&1, [:expected, :allowed]))}
+  end
+
+  @doc """
+  `validate/3`, with what a person needs to fix each error (the compiler's words): `expected` on
+  invalid_type (the type's name), `allowed` on unknown_property (the sorted valid names).
+  """
+  @spec detailed(String.t(), Canonical.value(), %{String.t() => map()}) :: :ok | {:error, [map()]}
+  def detailed(contract, value, defs \\ @defs) do
     case Map.fetch(defs, contract) do
       {:ok, schema} -> schema |> errors(value, "", defs) |> result()
       :error -> result([%{path: "", code: :unknown_contract}])
@@ -76,7 +86,9 @@ defmodule Loka.Core.Contracts do
   defp result(errors), do: {:error, Enum.sort_by(errors, &{&1.path, &1.code})}
 
   defp errors(%{"type" => t} = s, v, path, defs) do
-    if type?(t, v), do: keywords(s, v, path, defs), else: [%{path: path, code: :invalid_type}]
+    if type?(t, v),
+      do: keywords(s, v, path, defs),
+      else: [%{path: path, code: :invalid_type, expected: t |> List.wrap() |> Enum.join(" or ")}]
   end
 
   defp errors(%{"oneOf" => _}, v, path, _) when not is_map(v),
@@ -159,8 +171,17 @@ defmodule Loka.Core.Contracts do
   defp keyword("properties", ps, v, path, defs) do
     Enum.flat_map(v, fn {k, x} ->
       case ps do
-        %{^k => sub} -> errors(sub, x, child(path, k), defs)
-        _ -> [%{path: child(path, k), code: :unknown_property}]
+        %{^k => sub} ->
+          errors(sub, x, child(path, k), defs)
+
+        _ ->
+          [
+            %{
+              path: child(path, k),
+              code: :unknown_property,
+              allowed: ps |> Map.keys() |> Enum.sort()
+            }
+          ]
       end
     end)
   end

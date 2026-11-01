@@ -47,14 +47,11 @@ test('a failed compile or a refused artifact keeps the last good artifact', () =
   });
   const last = readFileSync(out, 'utf8');
 
-  const diag =
-    '{"code":"UNRESOLVED_REFERENCE","data":{"target":"room.nope"},"path":"rooms/a.name","severity":"error"}';
-  const failed = dev({ STUB_ERR: diag });
+  const diag = 'error: rooms/a.json:3 Nothing is called `nope`. Fix the name.';
+  const failed = dev({ STUB_ERR: `compile noise\n${diag}` });
   assert.equal(failed.status, 1);
-  assert.match(
-    failed.stderr,
-    /error at rooms\/a\.name: unresolved reference \(target "room\.nope"\)/,
-  );
+  assert.ok(failed.stderr.includes(diag));
+  assert.ok(!failed.stderr.includes('compile noise'));
   assert.equal(readFileSync(out, 'utf8'), last);
 
   const forged = join(dir, 'forged.json');

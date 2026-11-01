@@ -2,8 +2,8 @@ defmodule Mix.Tasks.Loka.Compile do
   @shortdoc "Compiles a cartridge source directory into an artifact file"
   @moduledoc """
   `mix loka.compile <source dir> <artifact path> [--allow-placeholders]`: writes the
-  CartridgeArtifact and prints each warning as one JSON line on stderr, or prints each
-  diagnostic so and exits 1 without writing. A text value of exactly `~` is a placeholder
+  CartridgeArtifact and prints each warning as one plain line on stderr
+  (`severity: file:line what to do`), or prints each diagnostic so and exits 1 without writing. A text value of exactly `~` is a placeholder
   (docs/system/cartridge.md, Still to write): a release compile refuses each as
   `placeholder_text at text.<key>` unless `--allow-placeholders` is given (the author preview
   always gives it).
@@ -17,11 +17,11 @@ defmodule Mix.Tasks.Loka.Compile do
 
     case Loka.Content.compile(dir) do
       {:ok, bytes, warnings} ->
-        said(warnings)
+        said(warnings, dir)
         written(out, bytes, allow)
 
       {:error, diags} ->
-        said(diags)
+        said(diags, dir)
         exit({:shutdown, 1})
     end
   end
@@ -29,7 +29,8 @@ defmodule Mix.Tasks.Loka.Compile do
   def run(_),
     do: Mix.raise("usage: mix loka.compile <source dir> <artifact path> [--allow-placeholders]")
 
-  defp said(lines), do: Enum.each(lines, &IO.puts(:stderr, JSON.encode!(&1)))
+  defp said(diags, dir),
+    do: diags |> Loka.Content.explained(dir) |> Enum.each(&IO.puts(:stderr, &1))
 
   defp written(out, bytes, ["--allow-placeholders"]), do: File.write!(out, bytes)
 

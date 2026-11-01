@@ -42,23 +42,6 @@ let written: Canonical | undefined = existsSync(out)
   ? JSON.parse(JSON.parse(readFileSync(out, 'utf8')).canonical)
   : undefined;
 
-// A compiler diagnostic or warning (one JSON line, mix loka.compile) in plain words.
-function plain(line: string): string {
-  try {
-    const d = JSON.parse(line) as {
-      severity?: string;
-      path?: string;
-      code?: string;
-      data?: object;
-    };
-    const data = Object.entries(d.data ?? {}).map(([k, v]) => `${k} ${JSON.stringify(v)}`);
-    const what = (d.code ?? 'unknown problem').toLowerCase().replaceAll('_', ' ');
-    return `${d.severity ?? 'error'} at ${d.path || 'the cartridge'}: ${what}${data.length ? ` (${data.join(', ')})` : ''}`;
-  } catch {
-    return line;
-  }
-}
-
 const keeps = 'the preview keeps the last good cartridge.';
 // A `text.json` save shows before its compile: the written words, overlaid with the file's.
 function quick() {
@@ -110,10 +93,7 @@ function build(): boolean {
   try {
     const artifact = join(tmp, 'artifact.json');
     const run = compile(artifact);
-    const said = `${run.stderr ?? ''}`
-      .split('\n')
-      .filter((l) => l.startsWith('{'))
-      .map(plain);
+    const said = `${run.stderr ?? ''}`.split('\n').filter((l) => /^(error|warning|info): /.test(l));
     for (const line of said) console.error(line);
     if (run.status !== 0) {
       if (!said.length) said.push(run.error?.message ?? run.stderr);
