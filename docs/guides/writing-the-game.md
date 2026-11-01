@@ -14,7 +14,7 @@ bin/author.sh cartridges/<name>
 It starts the cartridge watcher (`bin/loka dev … --watch`), the Book preview (`mobile/app`,
 `npm run author`) and the author panel (`tools/author-panel`, installed on its first run). Open
 http://localhost:19009: the Book fills the page and the panel is the pane on the right (Compile at
-the top with its lint lines, then Play, Write, State, Why and Find; the source line at the foot). The sun/moon button switches light
+the top with its lint lines, then Play, Write, State, Why, Find and Numbers; the source line at the foot). The sun/moon button switches light
 and dark. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), 19006 (Book), `LOKA_PANEL_PORT` (panel, 19009).
 
 ## Write a scene
@@ -218,3 +218,13 @@ Each goal names the samplers that already do it; copy their files or start with 
 ## Before release
 
 `mise exec -- mix loka.compile cartridges/<name> out.json` refuses placeholders; the preview allows them.
+
+## See the balancing numbers
+
+The panel's Numbers tab, on Run, shows what the current compile plays like. `bin/loka sim <cartridge dir> [--seeds N] [--days D]` prints the same in a terminal (no fight cell table, only each foe's result). Neither writes to your cartridge; the tab shows numbers, you change them in the source.
+
+- **Pools.** Each body pool over game hours under the [measured-flows worker](../system/cartridge.md#measured-flows-balance-tool-2): where it starts and ends, its lowest, the hour it first reaches each band it reached, and the hour it empties or "Never empty in N days". The worker works; it does not eat or rest on purpose, so read this as how long a need lasts if ignored.
+- **Levels.** XP for each level and how many kills of each foe pay for that step, or "No levelling in this cartridge".
+- **Fights.** For each armed foe and population, from the [fight matrix](../system/cartridge.md#fight-matrix-and-encounter-rating-balance-tool-7): win, death, median rounds and hp left per level with no build, and the first level and build that wins half ("No level wins half" otherwise). "no win" means no fight was won, so there is no such number.
+
+The tab gives each report 30 seconds and says so if one runs out; `bin/loka sim` has no limit.

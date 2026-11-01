@@ -1,5 +1,6 @@
 // `bin/loka dev --watch`'s API (kernel/ts/play/live.ts), proxied at /__author by vite.config.ts.
 import { useEffect, useState } from 'react';
+import type { Numbers } from '../../../kernel/ts/play/numbers.ts';
 
 export const ask = (path: string, sent: object) =>
   fetch(`/__author/${path}`, { method: 'POST', body: JSON.stringify(sent) }).then(async (r) => ({
@@ -27,6 +28,13 @@ export const find = (q: string) =>
 export type Todo = { file: string; words: number; placeholders: string[] };
 /** The `~` placeholders still to write, by file (kernel/ts/play/todo.ts). */
 export const todo = () => fetch('/__author/todo').then((r) => r.json() as Promise<Todo[]>);
+
+/** The balancing reports, each bounded by the watcher (kernel/ts/play/live.ts). */
+export const numbers = () =>
+  fetch('/__author/numbers').then(async (r) => {
+    if (!r.ok) throw new Error(await r.text());
+    return (await r.json()) as Numbers;
+  });
 
 /** The last compile's plain-words diagnostics; `undefined` until the watcher answers. */
 export function useDiagnostics() {
