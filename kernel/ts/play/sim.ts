@@ -12,7 +12,14 @@ import { gameView } from '../src/runtime/world.ts';
 import { artifactBytes, compiled } from './compiled.ts';
 import { fights } from './fight.ts';
 import { flows, median, type Observe, type Policy } from './flows.ts';
-import type { LevelRows, PoolsReport } from './numbers.ts';
+import {
+  FIGHT_LIMITS,
+  hours,
+  NO_ROOMS,
+  verdict,
+  type LevelRows,
+  type PoolsReport,
+} from './numbers.ts';
 
 type Seen = {
   maximum: number;
@@ -122,14 +129,14 @@ const FLAGS = 'usage: bin/loka sim <cartridge dir> [--seeds N] [--days D]';
 
 function table(c: Cartridge, p: PoolsReport, l: LevelRows) {
   const out = [
-    `pools: ${p.seeds} seeds of ${p.days} game days, median ${p.hours_played} hours played`,
+    `pools: ${p.seeds} seeds of ${p.days} game days, median ${hours(p.hours_played)} played`,
   ];
   if (!p.pools.length) out.push('  no pools in the view');
   for (const r of p.pools) {
     const bands = r.bands.map((b) => `${b.band} h${b.hour} (${b.seeds}/${p.seeds})`).join(', ');
     const empty = r.empty
       ? `empty h${r.empty.hour} (${r.empty.seeds}/${p.seeds})`
-      : `never empty in the ${p.hours_played} hours played`;
+      : `never empty in the ${hours(p.hours_played)} played`;
     out.push(
       `  ${r.pool}: ${r.start} to ${r.end}, lowest ${r.lowest}, max ${r.maximum}; ${empty}; ${bands}`,
     );
@@ -142,16 +149,11 @@ function table(c: Cartridge, p: PoolsReport, l: LevelRows) {
       `  ${r.level}: ${r.experience} XP (+${r.step}), +${r.points} points; ${kills || 'no kill pays XP'}`,
     );
   }
-  out.push(`fights: ${p.seeds} seeds`);
+  out.push(`fights: ${p.seeds} seeds. ${FIGHT_LIMITS}`);
   console.log(out.join('\n'));
   const { targets } = fights(c, { seeds: p.seeds });
   if (!targets.length) console.log('  no armed foes');
-  for (const { target, rating } of targets) {
-    const at = rating.first_win_level;
-    console.log(
-      `  ${target}: ${at === null ? 'no level wins half' : `wins half from level ${at} (build ${rating.first_win_build})`}`,
-    );
-  }
+  for (const t of targets) console.log(`  ${t.target}: ${verdict(t)}`);
 }
 
 if (import.meta.main) {
@@ -180,6 +182,10 @@ if (import.meta.main) {
     process.exit(1);
   }
   const c = loaded.cartridge as Cartridge;
+  if (!c.rooms) {
+    console.error(NO_ROOMS);
+    process.exit(1);
+  }
   const p = pools(c, { seeds, days });
   const l = levels(c);
   if (artifact) console.log(encode({ pools: p, levels: l } as unknown as Json));

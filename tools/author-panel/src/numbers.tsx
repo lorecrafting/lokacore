@@ -1,11 +1,14 @@
 // The Numbers tab: balancing reports read from the watcher. Read-only; anything unknown says so.
 import { useState } from 'react';
-import type {
-  Cell,
-  LevelRows,
-  Numbers as Report,
-  PoolsReport,
-  Target,
+import {
+  cellRow,
+  FIGHT_LIMITS,
+  hours,
+  verdict,
+  type LevelRows,
+  type Numbers as Report,
+  type PoolsReport,
+  type Target,
 } from '../../../kernel/ts/play/numbers.ts';
 import { numbers } from './author.ts';
 import { Button } from './components/ui/button.tsx';
@@ -27,38 +30,18 @@ const Cols = ({ rows }: { rows: string[][] }) => (
   </table>
 );
 
-const fightRow = (c: Cell): string[] =>
-  'refused' in c
-    ? [`level ${c.level}`, `refused: ${c.refused}`, '', '', '', '', '']
-    : [
-        `level ${c.level}`,
-        `${c.win_pct}%`,
-        `${c.death_pct}%`,
-        `${c.fled_pct}%`,
-        String(c.timeouts),
-        c.rounds ? String(c.rounds.median) : 'no win',
-        c.hp_left ? String(c.hp_left.median) : 'no win',
-      ];
-
-const Fight = ({ target }: { target: Target }) => {
-  const at = target.rating.first_win_level;
-  return (
-    <div>
-      <p className="font-mono text-xs break-all">{target.target}</p>
-      <p className="text-muted-foreground text-xs">
-        {at === null
-          ? 'No level wins half with any build.'
-          : `Wins half from level ${at} (build ${target.rating.first_win_build}).`}
-      </p>
-      <Cols
-        rows={[
-          ['no build', 'win', 'death', 'fled', 'no end (runs)', 'rounds', 'hp left'],
-          ...target.cells.filter((c) => c.build === 'none').map(fightRow),
-        ]}
-      />
-    </div>
-  );
-};
+const Fight = ({ target }: { target: Target }) => (
+  <div>
+    <p className="font-mono text-xs break-all">{target.target}</p>
+    <p className="text-muted-foreground text-xs">{verdict(target)}</p>
+    <Cols
+      rows={[
+        ['no build', 'win', 'death', 'fled', 'no end (runs)', 'rounds', 'hp left'],
+        ...target.cells.filter((c) => c.build === 'none').map(cellRow),
+      ]}
+    />
+  </div>
+);
 
 const Pools = ({ report }: { report: PoolsReport }) => {
   const { seeds, days } = report;
@@ -66,8 +49,9 @@ const Pools = ({ report }: { report: PoolsReport }) => {
   return (
     <>
       <p className="text-muted-foreground text-xs">
-        The measured-flows worker ({seeds} seeds, {days} game days; median {report.hours_played}{' '}
-        hours played). It does not eat or rest on purpose. Hours are medians of the seeds counted.
+        The measured-flows worker ({seeds} seeds, {days} game days; median{' '}
+        {hours(report.hours_played)} played). It does not eat or rest on purpose. Hours are medians
+        of the seeds counted.
       </p>
       {report.pools.map((p) => (
         <div key={p.pool}>
@@ -76,7 +60,7 @@ const Pools = ({ report }: { report: PoolsReport }) => {
             {p.start} to {p.end}, lowest {p.lowest}, max {p.maximum}.{' '}
             {p.empty
               ? `Empty at hour ${p.empty.hour} (${p.empty.seeds} of ${seeds} seeds).`
-              : `Never empty in the ${report.hours_played} hours played.`}
+              : `Never empty in the ${hours(report.hours_played)} played.`}
           </p>
           <p className="text-muted-foreground text-xs">
             {p.bands.map((b) => `${b.band} hour ${b.hour} (${b.seeds}/${seeds})`).join(', ')}
@@ -128,7 +112,8 @@ const Sections = ({ report: { pacing, fights } }: { report: Report }) => (
       ) : fights.report.targets.length ? (
         <>
           <p className="text-muted-foreground text-xs">
-            {fights.report.seeds} seeds, level by level, with no attribute points spent.
+            {fights.report.seeds} seeds, level by level, with no attribute points spent. Up to{' '}
+            {fights.report.rounds} rounds. {FIGHT_LIMITS} Rates count only fights that happened.
           </p>
           {fights.report.targets.map((t) => (
             <Fight key={t.target} target={t} />
