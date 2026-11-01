@@ -89,7 +89,7 @@ export function attack(
     }),
   );
   if (hit && profile.worn) wear(world, row, profile.worn, r);
-  if (!loss && hit && sleeping) wake(prefix(world, [], r.due_time), row, r); // a blow at the hp floor takes nothing, yet still wakes
+  if (!loss && damage > 0 && sleeping) wake(prefix(world, [], r.due_time), row, r); // a blow at the hp floor takes nothing, yet still wakes
   if (!loss) return;
   injure(world, command, mint, row, attacker_id, target_id, loss, sleeping, r, close);
 }

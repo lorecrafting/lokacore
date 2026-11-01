@@ -195,9 +195,9 @@ rc=0; capped sh "$bin/mutate.sh" m.tsv "cat > /dev/null; grep -q '^x=1$' a.txt" 
 # the limit and would then pass (SURVIVED); the limit must kill it and its child, reporting red.
 mt
 printf 'a.txt\ty=1\ty=2\n' > m.tsv
-rc=0; MUTATE_MUTANT_SECONDS=1 capped sh "$bin/mutate.sh" m.tsv "sleep 1234; grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
+rc=0; MUTATE_MUTANT_SECONDS=1 capped sh "$bin/mutate.sh" m.tsv "echo \$\$ > hung.pid; exec sleep 1234" > out 2>&1 || rc=$?
 [ "$rc" = 0 ] && [ "$(cut -f1 out)" = 'red-full timeout' ] || { bad "mutate hung mutant: exit $rc, want 0 and 'red-full timeout'"; cat out; }
-! pgrep -f 'sleep 1234' > /dev/null || { bad 'mutate hung mutant: child left running'; kill $(pgrep -f 'sleep 1234'); }
+! kill -0 "$(cat hung.pid)" 2> /dev/null || { bad 'mutate hung mutant: child left running'; kill "$(cat hung.pid)"; }
 mt
 printf 'a.txt\ty=1\ty=2\n' > m.tsv
 rc=0; capped sh "$bin/mutate.sh" m.tsv "grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
