@@ -213,6 +213,7 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             mobile/app/package-lock.json
+            tools/author-panel/package-lock.json
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
         with:
           otp-version: '28.4'
@@ -221,6 +222,10 @@ jobs:
       - run: mix deps.get --check-locked
       - run: npm ci --no-audit --no-fund && npm test
         working-directory: mobile/app
+      # The panel reads the Book's state by its real types; only tsc catches a shape it renders wrongly.
+      - name: Author panel types
+        run: npm ci --no-audit --no-fund && npx tsc -b
+        working-directory: tools/author-panel
       - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 npx prettier --check
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

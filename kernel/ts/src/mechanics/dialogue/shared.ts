@@ -1,5 +1,5 @@
 import * as patrol from '../patrol/shared.ts';
-import { apart, pending } from './selection.ts';
+import { apart, pending, shown } from './selection.ts';
 import { validAttempts } from './behavior.ts';
 import { learnable } from '../skills.ts';
 import { exchangeBlocked } from './exchange.ts';
@@ -92,6 +92,8 @@ export function blocked(
     return 'invalid_state' as const;
   const target = speakerOf(d, row);
   if (!holds(world, row.actor_id, d.policy, { target, steps })) return 'invalid_state' as const;
+  if (!holds(world, row.actor_id, option.policy, { target, steps }))
+    return 'invalid_state' as const;
   const window = option.availability;
   if (
     window &&
@@ -186,7 +188,7 @@ function roleBlocked(
  * in the row's order, unavailable with blocked's code while it holds, else an accept with
  * acceptRefused's (choose refuses both).
  */
-// size: allow 58, exact drawn choice input shares keyed admission, mechanic eligibility and a lesson's price
+// size: allow 60, exact drawn choice input shares keyed admission, mechanic eligibility and a lesson's price
 export function choiceView(
   world: World,
   actor: CharacterId,
@@ -200,6 +202,7 @@ export function choiceView(
     const r = d.roles[n]!;
     return r.role === 'npc' && same(r.npc, d.npc);
   });
+  const visible = shown(world, actor, d, row.choice_ids, speakerOf(d, row), steps);
   return {
     continuation_id,
     prompt: { key: d.prompt },
@@ -212,7 +215,8 @@ export function choiceView(
         ...(row.attempts && { attempts: row.attempts }),
       },
     }),
-    choices: row.choice_ids.map((choice_id) => {
+    // nothing shown (a one-shot row the world moved past): the row's options, each refused by blocked
+    choices: (visible.length > 0 ? visible : row.choice_ids).map((choice_id) => {
       const option = d.choices[choice_id]!;
       const q = option.patrol && questOf(world, actor, option.patrol.quest);
       const saved = q && world.state.patrols?.[q[0]];

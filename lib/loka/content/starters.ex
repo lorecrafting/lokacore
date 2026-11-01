@@ -12,23 +12,29 @@ defmodule Loka.Content.Starters do
 
   @doc """
   Writes the starter; `{:ok, paths it changed}` or `{:error, one line for the author}`. `from` is
-  `{room, direction}`: a new room joined to an existing one by exits both ways.
+  `{room, direction}`: a new room joined to an existing one by exits both ways. `before_write.(path, old bytes
+  or nil)` runs before each file is written, so a caller can undo; a refusal calls it for none.
   """
-  @spec write(Path.t(), String.t(), String.t(), {String.t(), String.t()} | nil) ::
-          {:ok, [Path.t()]} | {:error, String.t()}
-  def write(dir, kind, name, from \\ nil)
+  @spec write(
+          Path.t(),
+          String.t(),
+          String.t(),
+          {String.t(), String.t()} | nil,
+          (Path.t(), binary() | nil -> any())
+        ) :: {:ok, [Path.t()]} | {:error, String.t()}
+  def write(dir, kind, name, from \\ nil, before_write \\ fn _, _ -> :ok end)
 
-  def write(_dir, "cartridge", path, _from) do
+  def write(_dir, "cartridge", path, _from, hook) do
     cond do
       File.exists?(Path.join(path, "cartridge.json")) -> {:error, "#{path}/cartridge.json exists"}
       valid_name(Path.basename(path)) != :ok -> valid_name(Path.basename(path))
-      true -> put(path, Templates.cartridge(Path.basename(path)))
+      true -> put(path, Templates.cartridge(Path.basename(path)), nil, hook)
     end
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
   end
 
-  def write(dir, kind, name, from) do
+  def write(dir, kind, name, from, hook) do
     with :ok <- valid_name(name, kind),
          :ok <- in_cartridge(dir),
          {:ok, {caps, needs, make}} <- Map.fetch(Templates.kinds(), kind) |> or_unknown(kind),
@@ -36,7 +42,7 @@ defmodule Loka.Content.Starters do
          {:ok, context} <- placed(context, dir, kind, name, from) do
       files = with_capabilities(make.(name, context), caps)
       own = if !from, do: "#{kind}/#{name}.json"
-      put(dir, with_layout(files, dir, context, name), own)
+      put(dir, with_layout(files, dir, context, name), own, hook)
     end
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
@@ -207,20 +213,20 @@ defmodule Loka.Content.Starters do
 
   # `own`, the file this starter names, is the author's once it exists: a rerun checks it, and never
   # adds back what the author removed.
-  defp put(dir, files, own \\ nil) do
+  defp put(dir, files, own, hook) do
     touched =
       for {rel, new} <- files, path = Path.join(dir, rel), do: {rel, path, read(path), new}
 
     case Enum.find_value(touched, fn {rel, _, old, new} -> clash(old, new, rel <> ":") end) do
       nil ->
-        {:ok, touched |> Enum.reject(&authored?(&1, own)) |> write_all()}
+        {:ok, touched |> Enum.reject(&authored?(&1, own)) |> write_all(hook)}
 
       at ->
         {:error, refusal(at)}
     end
   end
 
-  defp write_all(touched), do: touched |> Enum.flat_map(&written/1) |> Enum.sort()
+  defp write_all(touched, hook), do: touched |> Enum.flat_map(&written(&1, hook)) |> Enum.sort()
 
   defp authored?({rel, path, _, _}, own), do: rel == own and File.exists?(path)
 
@@ -235,12 +241,13 @@ defmodule Loka.Content.Starters do
   end
 
   # An unchanged file keeps its bytes, the author's formatting too.
-  defp written({_, path, old, new}) do
+  defp written({_, path, old, new}, hook) do
     case merge(old, new) do
       ^old ->
         []
 
       merged ->
+        hook.(path, if(File.exists?(path), do: File.read!(path)))
         File.mkdir_p!(Path.dirname(path))
         File.write!(path, Parts.pretty(merged))
         [path]

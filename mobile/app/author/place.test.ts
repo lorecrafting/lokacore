@@ -5,10 +5,12 @@ import { test } from 'node:test';
 import type { Intent, Reply } from '../../packages/game-view/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import {
+  advanced,
   asRefs,
   caughtUp,
   dropStep,
   frozenClock,
+  recording,
   replay,
   type Replayable,
   type Step,
@@ -239,4 +241,113 @@ test('a step with both kinds, or an unreadable intent, stops by number', () => {
     const out = replay([bad as unknown as Step], {} as Replayable, () => {});
     assert.match(out.failed!, /^step 1: not a step/);
   }
+});
+
+// A session that holds: `pending` until told otherwise; `pulsed` is what a pulse delivers.
+function holding(replies: Reply[]) {
+  const steps: Step[] = [];
+  let pending = false;
+  let listener: (u: { kind: string; reply?: Reply }) => void = () => {};
+  const game = {
+    invoke: (_: Intent) => {
+      const next = replies.shift();
+      if (!next) throw new Error('disk');
+      if (next !== waiting) pending = false; // a later invoke settles the held attempt
+      return next;
+    },
+    entityIds: () => ({ [NPC]: 'a1' }),
+    pending: () => pending,
+    subscribe: (l: typeof listener) => (listener = l),
+  };
+  const set = (p: boolean) => (pending = p);
+  const invoke = recording(game, (s) => steps.push(s));
+  return {
+    steps,
+    invoke,
+    set,
+    complete: (reply: Reply) => listener({ kind: 'completion', reply }),
+  };
+}
+const waiting = { kind: 'catching_up' } as unknown as Reply;
+
+test('a held input is recorded when it settles, once, as sent', () => {
+  // Break (panel.tsx before this): only the reply to invoke was read, so a held input was lost.
+  const h = holding([waiting]);
+  h.set(true);
+  h.invoke(intent(['a1']));
+  assert.deepEqual(h.steps, []);
+  h.set(false);
+  h.complete(accepted);
+  assert.deepEqual(h.steps, [{ intent: intent([NPC]) }]);
+  h.complete(accepted); // Break: a completion with nothing held records a step
+  assert.equal(h.steps.length, 1);
+});
+
+test('an invoke answered while another is held records the held input, not its own', () => {
+  // Break: the second, ignored intent is recorded in place of the one the session ran.
+  const h = holding([waiting, accepted]);
+  h.set(true);
+  h.invoke(intent(['a1'], { n: 1 }));
+  h.invoke(intent(['a1'], { n: 2 }));
+  assert.deepEqual(h.steps, [{ intent: intent([NPC], { n: 1 }) }]);
+});
+
+test('an input that threw and is not held does not replace the next', () => {
+  // Break: the thrown intent stays held, so the next accepted step records the wrong input.
+  const replies: Reply[] = [];
+  const h = holding(replies);
+  assert.throws(() => h.invoke(intent(['a1'], { n: 1 })), /disk/);
+  replies.push(accepted);
+  h.invoke(intent(['a1'], { n: 2 }));
+  assert.deepEqual(h.steps, [{ intent: intent([NPC], { n: 2 }) }]);
+});
+
+test('a refused input leaves no step and holds nothing into the next', () => {
+  // Breaks: a refusal recorded; the refused intent still held when the next is accepted.
+  const h = holding([refused, accepted]);
+  h.invoke(intent(['a1'], { n: 1 }));
+  assert.deepEqual(h.steps, []);
+  h.invoke(intent(['a1'], { n: 2 }));
+  assert.deepEqual(h.steps, [{ intent: intent([NPC], { n: 2 }) }]);
+});
+
+test('a write that throws and leaves the input held is recorded when it settles', () => {
+  // Break: the throw drops the held input (invocation.ts: the attempt stays pending).
+  const h = holding([]);
+  h.set(true);
+  assert.throws(() => h.invoke(intent(['a1'])));
+  h.set(false);
+  h.complete(accepted);
+  assert.deepEqual(h.steps, [{ intent: intent([NPC]) }]);
+});
+
+test('an advance is delivered and recorded only if delivered', () => {
+  // Breaks: a reload loses a delivered advance (recorded late or never); a refused one is recorded.
+  const moved: number[] = [];
+  const steps: Step[] = [];
+  const pulses: string[] = [];
+  const delivered = {
+    pulse: (mode: 'active' | 'drain') => (pulses.push(mode), { kind: 'ready' }),
+  };
+  assert.equal(
+    advanced(
+      60,
+      (ms) => moved.push(ms),
+      delivered,
+      (s) => steps.push(s),
+    ),
+    undefined,
+  );
+  assert.deepEqual([moved, steps, pulses], [[60], [{ advance: 60 }], ['active', 'drain']]);
+  const stuck = { pulse: () => ({ kind: 'failed', code: 'write' }) };
+  assert.equal(
+    advanced(
+      5,
+      () => {},
+      stuck,
+      (s) => steps.push(s),
+    ),
+    'Advance: failed write; not recorded.',
+  );
+  assert.equal(steps.length, 1);
 });

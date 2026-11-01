@@ -846,12 +846,13 @@ loopback-only author API (`LOKA_AUTHOR_PORT`, default 19008) that the preview pr
 with it set fails to build, and the app throws when the dev cartridge flag reaches a non-`__DEV__`
 build. The author tools below are reachable only in that bundle (a production export keeps a few dead strings) and change no protocol, save or kernel_api.
 
+- **Numbers.** The panel's Numbers tab and `bin/loka sim <cartridge dir>` ([`sim.ts`](../../kernel/ts/play/sim.ts)) report, read-only: each pool over game hours under the [measured-flows](#measured-flows-balance-tool-2) worker, XP per level with the kills that pay for it, and the [fight matrix](#fight-matrix-and-encounter-rating-balance-tool-7) (`GET /__author/numbers`). Each report runs in a child process killed at a limit; one that does not finish says so. Nothing is written to the source tree.
 - **Keep my place.** The preview records each input the Book sends that the session saved (the
   intent, its targets as definition refs `cartridge@version:kind/key`, and each dev-clock advance
   in milliseconds) under the artifact's hash. After a reload into a different hash it replays the
   path through the normal command path, one step at a time; the first step the session does not
   save and accept stops the replay and is named by its ordinal and reply. Nothing writes state directly.
-  The dev cartridge plays one fixed seed on a frozen clock that moves only with the dev clock, as
+  The dev cartridge plays one fixed seed; at `?dev=1`, on a frozen clock that moves only with the dev clock, as
   `bin/loka check` does, so a recording replays alike in both; a release is untouched.
 - **Fast loop.** A `text.json` save is pushed to the open page as a text overlay before its
   compile and shows at once: no compile, reload or replay. The compile still runs after it and
@@ -872,10 +873,17 @@ build. The author tools below are reachable only in that bundle (a production ex
 - **Author panel** (`tools/author-panel`, its own web page framing the Book at `?dev=1`; nothing of it enters the app's dependencies or bundles): the last compile's diagnostics in plain words
   (`severity: file:line message`, which is what `mix loka.compile` prints: one sentence and one fix
   per diagnostic code, from `Loka.Content.Explain`, the path mapped to its line by the source JSON;
-  invalid JSON adds `:column`); current facts, quests and flags from the view; why an action
-  is missing or refused ([rule explainer](#rule-explainer-loka-kgd1943) on the recorded path); each Book
-  line opens its source `file:line` in the owner's editor (`POST /__author/open`, `LOKA_EDITOR`,
-  default `code --goto`); the game-time control; the checkpoint list; the still-to-write list.
+  invalid JSON adds `:column`), and under them the lint findings (`mix loka.lint`, run after each
+  successful compile; a lint that could not run says so); the game state from the view (room, people,
+  held items, pools with their bands, statuses, clock, pending choice, facts and quests); why a
+  scripted action or dialogue is missing or refused, offered from the current room rather than typed and
+  answered in sentences (`fact met_thera is false; needs true`; [rule explainer](#rule-explainer-loka-kgd1943)
+  on the recorded path, its policy read on the world as it stands after the last step); find (`GET /__author/find?q=`): a key or
+  words to every source `file:line`, and each definition of the compiled artifact whose refs name that
+  key; each Book line opens its source `file:line` in the owner's editor (`POST /__author/open`,
+  `LOKA_EDITOR`, default `code --goto`); the game-time control, which delivers the time at once and
+  records it only when delivered; the checkpoint list; the still-to-write list. An input the session held
+  (`pending`, `catching_up`) is recorded when it settles as accepted.
 - **Still to write.** A text value with a line that trims to `~` is a placeholder, in JSON or in
   a scene file. The panel and
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
@@ -978,6 +986,8 @@ player_miss, npc_hit, npc_miss, player_died and npc_died. All six resolve in the
 cartridge catalog. An NPC's optional `attack` profile explicitly
 makes it attackable and supplies its own chance/damage bounds; it requires explicit HP.
 Chances are integers 0..100, damage bounds positive and ordered, multipliers positive.
+An NPC's optional `unattackable: true` overrides `attack`: no offer, no admission, no engage
+([combat@1](mechanics.md#combat1--first-live-encounter-m6-a)); with `disposition.engage` it is a compile error.
 Room `sanctuary: true` forbids admission. All new objects reject unknown fields.
 
 Optional `world.combat.target_choice: true` opts into [target choice](mechanics.md#target-choice-in-the-same-room-toolbox-row-6a)
@@ -1069,6 +1079,8 @@ Required cartridge text: `service.unaffordable`, and `service.no_funds` for eith
 ## Status declarations
 
 [Status effects](mechanics.md#status-effects-over-time-toolbox-row-1) read `statuses/<key>.json` (compiled `statuses`, capabilities `status@1` and `death@1` since a fatal hp tick runs the death sequence): `{duration, tick_every, resource, per_tick, name, narration: {applied, tick, expired}}`. `duration` and `tick_every` are positive logical seconds with `tick_every < duration`; `resource` names one pool of this cartridge; `per_tick` is a nonzero signed integer added each tick; `name` and each narration key must exist in the text catalog. A reaction step `{op: "status.apply", status: <key>}` names a declared status. An edible item's optional `cures: [<key>, ...]` names declared statuses it ends. The compiler (`lib/loka/content/status.ex`) refuses each violation. `cartridges/status_sampler` is the sampler: `poison` (hp −1 every 60 s for 300 s), `blessing` (mv +5 every 600 s for 3600 s), an antidote curing `poison`, and two room-entry reactions. [Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) adds: an NPC or item definition's optional `immune: [<key>, ...]` (declared statuses, at least one); a `status.apply` step's optional `item: <key>` (an item of this cartridge, whose authored instance takes the status); and the triggers `{event: "status_ticked"}` and `{event: "status_expired"}` with an optional `status: <key>` filter. The compiler refuses an unresolved name (`UNRESOLVED_REFERENCE`). `cartridges/npc_status_sampler` is its sampler. [Row 2c](mechanics.md#status-modifiers-toolbox-row-2c) adds a status's optional `modifies: [{attribute, modifier}, ...]` (1 to 16 `ItemAffect`): `attribute` names an attribute of this cartridge (source: its short key), `modifier` is a ResourceInt. The compiler refuses an unresolved attribute (UNRESOLVED_REFERENCE at the entry's `attribute`). A status with `modifies` may omit `per_tick` and then never ticks; the compiler refuses a status with neither (SCHEMA_VIOLATION at `per_tick`). Its samplers are `might` in `cartridges/derived_sampler` and `fury` in `cartridges/npc_status_sampler`, neither of which ticks. [Homestead row hs-5](mechanics.md#cooking-homestead-row-hs-5) adds an edible item's optional `applies: [<key>, ...]` (declared statuses, at least one), applied to the eater's body after the meal and its cures. The compiler refuses an unresolved name (UNRESOLVED_REFERENCE at the entry) and a listed status whose `modifies` names a `world.derived.hp_max` term attribute (SCHEMA_VIOLATION at the entry; loka-kgd.50). Sampler: `cartridges/kitchen_sampler`. Row loka-x6t.64 adds a status's optional `kind: "buff" | "debuff"`, the polarity of its icon in the GameView's `ConditionView.kind`; without it the kernel derives one from the effect fields (`kernel/ts/src/view/resources.ts`): debuff on any harm (a negative `per_tick`, modifier or resistance, `fear`, `blocks`, `allows`, `perception` blind or deaf, a `movement.cost_percent` above 100), buff on a gain alone, and no kind for a status with no effect field. The compiler refuses another value (SCHEMA_VIOLATION at `kind`). Samplers, all authored debuffs: `bruised` and `notched` in `cartridges/variants_sampler` (a positive tick that is harm), `gored` in `cartridges/toolbox_showcase` and `scar` in `cartridges/scars_sampler`. Row loka-kgd.176 adds a status's optional `narration.observed` (a TextKey), told when a first application lands on an NPC or item the player sees in the room, or on the room the player stands in, and for an item it also turns on the expired line when the player sees it go out (for a room, when the player stands in it; loka-x6t.37; a room's lines describe what is felt or heard, not seen, because they also play in a dark room) ([row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3); loka-y6yg.48). The compiler refuses a key missing from the text catalog (SCHEMA_VIOLATION at `narration`, as for the other narration keys). Samplers: the golem's `wet`, `shocked`, `stunned` and `warm`, and the bier's `burning`, in `cartridges/toolbox_showcase`. Row `loka-x6t.30` adds the optional `narration.skipped` (TextKey): told when the status bars a combat blow, in place of the engine's `combat.skipped`; the compiler refuses a missing key.
+
+The `statuses` and `bleeds` maps take the bare key pattern of their sibling maps, so a bad key is a schema diagnostic (loka-k5z4). A rejected `text.json` reports at its own path, not as a crash in the bleed or population checks that read its keys (loka-kgd.194.21). A scripted action with a positive `duration` cannot carry a `status.apply` step, and neither can a reaction without `after` or `when` on its `action_completed` (named or unfiltered) or on a `custom` event the action's own step emits (`SCHEMA_VIOLATION`, why `duration_status`, loka-kgd.104): the row would start before the action's own time advance. A path the compiler cannot know runs (a `fact_changed`, a longer cascade, another event, a `custom_event` rule with no `custom`, any rule with a `when`) still compiles; it is the [known limit](mechanics.md#spell-effects-toolbox-row-29b) at runtime.
 
 [Rows 18 and 42](mechanics.md#potions-and-songs-toolbox-rows-18-and-42) add a `status.apply` step's optional `npc: <key>`: an NPC of this cartridge, whose authored instance takes the status. The compiler refuses an unresolved NPC (UNRESOLVED_REFERENCE at the step's `npc`), a spawn template or a step that also names `item` (SCHEMA_VIOLATION at `npc`). A potion is content: a liquid kind, a vessel holding it and a reaction on `{event: "drank", kind: <key>}`. `cartridges/buffs_sampler` is the sampler.
 
