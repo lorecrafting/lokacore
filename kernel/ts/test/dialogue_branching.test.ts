@@ -1,4 +1,4 @@
-// size: allow 590, every branching rule's pins beside the one play harness
+// size: allow 615, every branching rule's pins beside the one play harness
 // loka-vduxr.10 on the compiled persuade sampler: per-choice conditions, links between dialogues,
 // a check's two ways on, the hand-off, narrate steps, int fact thresholds and narration variants.
 import { decide } from '../src/mechanics/dialogue/rule.ts';
@@ -587,4 +587,25 @@ test('Talk picks one member of a loop by distinct links, then key', () => {
     g.opened();
     assert.deepEqual(g.ids(), opens, name);
   }
+});
+
+// Breaks: the marker loses to the first key or to a dialogue nothing leads to, or a failed marker
+// falls back to the speaker's other dialogue.
+test('entry: true opens the marked dialogue over inference and refuses when its policy fails', () => {
+  const mark = (edit: object) => (c: any) =>
+    Object.assign(c.dialogues[`${P}:dialogue/guard`], edit);
+  const back = { to: plain({ then: 'guard' }) };
+  const hub = content({ on: plain({ then: 'a_x' }) }, { a_x: back }, mark({ entry: true }));
+  const tie = play(hub);
+  tie.opened();
+  assert.deepEqual(tie.ids(), ['on']);
+  const leaf = { a_leaf: { bye: plain() }, a_x: back };
+  const over = play(content({ on: plain({ then: 'a_x' }) }, leaf, mark({ entry: true })));
+  over.opened();
+  assert.deepEqual(over.ids(), ['on']);
+  const shut = mark({ entry: true, policy: is('flag', true) });
+  assert.equal(
+    play(content({ on: plain() }, { a_leaf: { bye: plain() } }, shut)).talk().kind,
+    'rejected',
+  );
 });

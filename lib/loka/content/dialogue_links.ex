@@ -59,9 +59,9 @@ defmodule Loka.Content.DialogueLinks do
   @doc "The members of a then loop whose speaker Talk only reaches through the loop, as warnings."
   @spec loops([{String.t(), map()}]) :: [map()]
   def loops(all) do
-    sorted = Enum.sort_by(all, &elem(&1, 1)["key"])
-    next = Map.new(sorted, &{elem(&1, 1)["key"], links(elem(&1, 1))})
-    speakers = sorted |> entries(next) |> MapSet.new(& &1["npc"])
+    {sorted, next} = graph(all)
+    # a keyword dialogue is spoken, so it is no way for Talk to reach its speaker
+    speakers = for({_, d} <- entries(sorted, next), !d["keyword"], do: d["npc"]) |> MapSet.new()
 
     sorted
     |> Enum.filter(&unreachable?(elem(&1, 1), speakers, next))
@@ -71,18 +71,80 @@ defmodule Loka.Content.DialogueLinks do
     )
   end
 
+  @doc "The `entry` marker's refusals, and a warning wherever Talk's entry is a guess or a dialogue is shut out."
+  @spec entry_checks([{String.t(), map()}]) :: [map()]
+  def entry_checks(all) do
+    {sorted, next} = graph(all)
+    open = entries(sorted, next)
+
+    refused(sorted) ++
+      guessed(open, named(next)) ++
+      for {rel, d} <- candidates(sorted, next) -- open do
+        warning("ENTRY_UNUSED", rel, ["npc"], d)
+      end
+  end
+
+  defp graph(all) do
+    sorted = Enum.sort_by(all, &elem(&1, 1)["key"])
+    {sorted, Map.new(sorted, fn {_, d} -> {d["key"], links(d)} end)}
+  end
+
+  defp named(next), do: next |> Map.values() |> List.flatten() |> MapSet.new()
+
+  defp refused(sorted) do
+    marked = Enum.filter(sorted, &elem(&1, 1)["entry"])
+
+    for {rel, d} <- marked,
+        d["keyword"] || Enum.count(marked, &(elem(&1, 1)["npc"] == d["npc"])) > 1 do
+      diag("ENTRY_INVALID", at(rel, ["entry"]))
+    end
+  end
+
+  # A guess: a member chosen from a loop, or a dialogue with no condition before another of its
+  # speaker's in key order, which that other never gets past. A name makes its own Talk control.
+  defp guessed(open, named) do
+    talked = Enum.reject(open, fn {_, d} -> d["entry"] || d["keyword"] end)
+    looped = Enum.filter(talked, fn {_, d} -> d["key"] in named end)
+
+    for {rel, d} <- Enum.uniq(looped ++ tied(talked)) do
+      warning("ENTRY_GUESSED", rel, ["npc"], d)
+    end
+  end
+
+  defp tied(talked) do
+    talked
+    |> Enum.reject(fn {_, d} -> d["name"] end)
+    |> Enum.group_by(fn {_, d} -> d["npc"] end)
+    |> Enum.flat_map(fn {_, group} ->
+      group |> Enum.drop(-1) |> Enum.reject(fn {_, d} -> d["policy"] end) |> Enum.take(1)
+    end)
+  end
+
+  defp warning(code, rel, path, d) do
+    diag(code, at(rel, path), %{"target" => d["key"]}) |> Map.put("severity", "warning")
+  end
+
   defp unreachable?(d, speakers, next) do
     d["npc"] not in speakers and d["key"] in walk(next[d["key"]], next, MapSet.new())
   end
 
-  # selection.ts entries: the dialogues nothing links to, then the head of each loop with no way
-  # in: the member leading to the most other dialogues, first by key on a tie.
-  defp entries(sorted, next) do
-    named = next |> Map.values() |> List.flatten() |> MapSet.new()
-    roots = Enum.filter(Map.keys(next), &(&1 not in named))
+  # selection.ts entries: the dialogues nothing links to or marked `entry`, then the head of each
+  # loop with no way in: the member leading to the most other dialogues, first by key on a tie.
+  defp candidates(sorted, next) do
+    named = named(next)
+    roots = for {_, d} <- sorted, d["entry"] || d["key"] not in named, do: d["key"]
     reached = walk(roots, next, MapSet.new())
-    wanted = MapSet.new(roots ++ heads(Enum.reject(Map.keys(next), &(&1 in reached)), next))
-    for {_, d} <- sorted, d["key"] in wanted, do: d
+    wanted = MapSet.new(roots ++ heads(Map.keys(next) -- MapSet.to_list(reached), next))
+    for {_, d} = e <- sorted, d["key"] in wanted, do: e
+  end
+
+  # A speaker's marked dialogue shuts out their others, keyword ones aside.
+  defp entries(sorted, next) do
+    claimed = for {_, d} <- sorted, d["entry"], into: MapSet.new(), do: d["npc"]
+
+    Enum.filter(candidates(sorted, next), fn {_, d} ->
+      d["entry"] || d["keyword"] || d["npc"] not in claimed
+    end)
   end
 
   defp heads(rest, next) do

@@ -140,6 +140,7 @@ One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogue
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | choices | map of [DialogueChoice](vocabulary.gen.md#choice-fields) | yes | See the type. |
+| entry | boolean |  | An optional marker: talk to this speaker opens this dialogue and no other of theirs but keyword ones, over the inferred entry (dialogue@1). At most one per speaker; not on a keyword dialogue. |
 | keyword | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | Toolbox row G9 (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle. |
 | name | [TextKey](source-kinds.gen.md#textkey) |  | A distinct name (the Talk label) opts that authored control into exact dialogue selection; omission retains first-eligible Talk. |
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The speaker, also an npc role. |

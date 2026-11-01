@@ -308,4 +308,73 @@ defmodule Loka.ContentDialogueLinksTest do
       {"FACT_TYPE_MISMATCH", @at <> "policy.at_least"}
     )
   end
+
+  defp d(key, npc, links \\ [], extra \\ %{}) do
+    choices = Map.new(links, &{"to_" <> &1, %{"then" => &1}})
+
+    {"dialogues/#{key}.json",
+     Map.merge(%{"key" => key, "npc" => npc, "choices" => choices}, extra)}
+  end
+
+  defp entry_findings(all) do
+    for x <- Loka.Content.DialogueLinks.entry_checks(all),
+        do: {x["severity"], x["code"], x["path"], x["data"]["target"]}
+  end
+
+  defp guess(key), do: {"warning", "ENTRY_GUESSED", "dialogues/#{key}.npc", key}
+
+  # Breaks: a one-way leaf warned; a loop's pick or a condition-free first key not warned, or the
+  # wrong node named; a labelled Talk control or a keyword dialogue counted as tied, or every shadowed key warned.
+  test "ENTRY_GUESSED names Talk's pick only when it is a guess" do
+    p = %{"policy" => %{"op" => "x"}}
+    assert entry_findings([d("leaf", "a", ["next"]), d("next", "a")]) == []
+
+    assert entry_findings([d("a_x", "a", ["hub"]), d("hub", "a", ["a_x"]), d("l", "a", ["hub"])]) ==
+             []
+
+    assert entry_findings([d("a_x", "a", ["b"]), d("b", "a", ["a_x"])]) == [guess("a_x")]
+    assert entry_findings([d("a_x", "a"), d("b", "a")]) == [guess("a_x")]
+    assert entry_findings([d("a_x", "a", [], p), d("b", "a")]) == []
+    assert entry_findings([d("a_x", "a"), d("b", "a", [], %{"name" => "n"})]) == []
+    assert entry_findings([d("a_x", "a"), d("b", "a", [], %{"keyword" => "w"})]) == []
+    assert entry_findings([d("a_x", "a"), d("b", "a"), d("c", "a")]) == [guess("a_x")]
+  end
+
+  # Breaks: the marker still warned as a guess, a second marker or a keyword marker compiled, a
+  # shut-out dialogue not named, another speaker's marker shutting this speaker's out, or a keyword dialogue called shut out.
+  test "the entry marker settles the guess and refuses what Talk could not open" do
+    m = %{"entry" => true}
+    invalid = &{"error", "ENTRY_INVALID", "dialogues/#{&1}.entry", nil}
+    assert entry_findings([d("a_x", "a", ["b"]), d("b", "a", ["a_x"], m)]) == []
+
+    assert entry_findings([d("a_x", "a", [], m), d("b", "a", [], m)]) == [
+             invalid.("a_x"),
+             invalid.("b")
+           ]
+
+    assert entry_findings([d("a_x", "a", [], Map.put(m, "keyword", "w"))]) == [invalid.("a_x")]
+
+    assert entry_findings([d("a_x", "a"), d("b", "a", [], m)]) ==
+             [{"warning", "ENTRY_UNUSED", "dialogues/a_x.npc", "a_x"}]
+
+    assert entry_findings([d("a_x", "z"), d("b", "a", [], m)]) == []
+    assert entry_findings([d("a_x", "a", [], %{"keyword" => "w"}), d("b", "a", [], m)]) == []
+  end
+
+  # Breaks: the compiler drops the marker, or a marked dialogue fails the schema, so Talk never sees it.
+  test "entry: true compiles through to the artifact", %{dir: dir} do
+    assert {:ok, artifact, []} =
+             Loka.ContentSource.compile(dir, [{@guard, &Map.put(&1, "entry", true)}])
+
+    assert artifact =~ ~s("entry":true)
+  end
+
+  # Breaks: a keyword dialogue counts as Talk's way to its speaker, hiding the warning (Talk never
+  # opens one, selection.ts talks).
+  test "a keyword dialogue does not stop the loop speaker warning" do
+    loop = [d("a_x", "a", ["b"]), d("b", "z", ["a_x"]), d("k", "z", [], %{"keyword" => "w"})]
+
+    assert [%{"code" => "LOOP_SPEAKER", "path" => "dialogues/b.npc"}] =
+             Loka.Content.DialogueLinks.loops(loop)
+  end
 end

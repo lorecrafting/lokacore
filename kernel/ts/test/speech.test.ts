@@ -228,6 +228,25 @@ test('talk opens the plain dialogue; an unnamed reaction step lands on each hear
   assert.deepEqual([heard('elder'), heard('smith'), heard('watchman')], [true, true, false]);
 });
 
+// Breaks: a speaker's entry marker also shutting out their keyword dialogue, so the word finds nothing.
+test("an entry marker leaves the speaker's keyword dialogue spoken", () => {
+  const r = reload(content, (c) => {
+    const d = structuredClone(c.dialogues['speech_sampler@0.0.1:dialogue/elder_ward']) as Obj;
+    delete d.keyword;
+    c.dialogues['speech_sampler@0.0.1:dialogue/elder_yarn'] = {
+      ...d,
+      key: 'elder_yarn',
+      entry: true,
+    };
+  });
+  assert.ok(r.ok, JSON.stringify(r));
+  const w = fresh(r.cartridge as Cartridge);
+  const talked = accepted(w, { type: 'talk', target_id: id(w, 'elder') }).world;
+  assert.equal(Object.values(talked.state.choices ?? {})[0]?.source.key, 'elder_yarn');
+  const said = accepted(w, { type: 'say', word: 'ward' });
+  assert.equal(gameView(said.world).choice?.prompt.key, 'dialogue.elder_ward.prompt');
+});
+
 // Breaks (loka-j2mo): a spoken reaction without an npc filter, heard by the elder and the smith,
 // writing one instance fact twice in one decision faults conflicting_write instead of committing.
 test('two hearers of one say write one shared fact and the step commits', () => {

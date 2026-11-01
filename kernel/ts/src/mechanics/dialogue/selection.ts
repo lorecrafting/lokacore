@@ -31,7 +31,8 @@ const links = (d: DialogueDefinition) =>
 /**
  * The dialogues a talk can open: those nothing leads to, then one of each loop with no way in, the
  * member leading to the most other dialogues (a hub), first by key on a tie. Everything an
- * entry reaches is reached only by that answer.
+ * entry reaches is reached only by that answer. A speaker's `entry: true` dialogue replaces all
+ * that speaker's others except keyword ones.
  */
 const entries = (world: World) => {
   const all = Object.values(world.cartridge.dialogues ?? {}).sort((a, b) => cmp(a.key, b.key));
@@ -45,7 +46,7 @@ const entries = (world: World) => {
     }
     return seen;
   };
-  const roots = all.filter((d) => !named.has(d.key));
+  const roots = all.filter((d) => d.entry || !named.has(d.key));
   const reached = reach(roots.map((d) => d.key));
   const rest = all.filter((d) => !reached.has(d.key));
   const from = new Map(rest.map((d) => [d.key, reach([d.key])]));
@@ -61,7 +62,8 @@ const entries = (world: World) => {
         (from.get(key)!.has(o.key) && beats(key, o.key)),
     ),
   );
-  return [...roots, ...heads];
+  const marked = new Set(all.filter((d) => d.entry).map((d) => refString(d.npc)));
+  return [...roots, ...heads].filter((d) => d.entry || d.keyword || !marked.has(refString(d.npc)));
 };
 
 /** Whether some answer's `then` or `then_failed` names `d`: such a dialogue never reopens itself. */

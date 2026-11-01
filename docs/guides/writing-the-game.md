@@ -73,6 +73,10 @@ bram: line two
 
 What you can rely on when dialogues link with `then` (JSON dialogues today):
 
+- Put `"entry": true` on the dialogue Talk should open, and it opens there, whatever else leads to
+  it. A person takes one; their other dialogues stop opening, except keyword ones. A condition on
+  the marked dialogue that fails refuses the Talk. Without a marker Talk infers, as below, and the
+  compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess.
 - Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
   condition holds and that has a choice to show.
 - A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the
