@@ -19,10 +19,11 @@ import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
 import {
+  bootPlace,
   devClock,
+  frozenClock,
   played,
   resetPlace,
-  restorePlace,
   skew,
   useAuthorPanel,
 } from './author/panel.tsx';
@@ -54,7 +55,7 @@ export const fonts = {
 const devCartridge = process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1';
 if (devCartridge && !__DEV__) throw new Error('a release build must bundle the pinned chapter');
 const NAME = devCartridge
-  ? `loka-dev-${INSTALLED.kernel_api}-${chapter.sha256.slice(0, 16)}.db`
+  ? `loka-dev${devClock ? '-frozen' : ''}-${INSTALLED.kernel_api}-${chapter.sha256.slice(0, 16)}.db` // two clocks never share a save
   : 'loka-showcase.db';
 // The build's kernel version (ADR-075 §3): the commit metro.config.js stamped, always -dirty in a
 // development bundle (it can change after the stamp); no stamp: the zero commit, -dirty.
@@ -90,8 +91,14 @@ const createSession = (open: () => Db) =>
       latency:
         Platform.OS === 'web' ? undefined : { host: 'hermes_ios', now: () => performance.now() },
       kernel_version,
-      random: getRandomValues,
-      time: { wall: () => Date.now() + skew(), monotonic: () => performance.now() + skew() },
+      // The author preview plays the one seed and frozen clock of `bin/loka check` (no random: the
+      // template world); only its dev clock can move them, so any other dev build keeps real time.
+      ...(devClock
+        ? { time: frozenClock(skew) }
+        : {
+            random: getRandomValues,
+            time: { wall: () => Date.now(), monotonic: () => performance.now() },
+          }),
     },
   ));
 let session = g.loka_session;
@@ -225,7 +232,7 @@ function useWebSession() {
     let live = true;
     g.loka_web_opening.then((opened) => {
       session = opened;
-      if (devClock) restorePlace(opened.game());
+      if (devClock) bootPlace(opened);
       if (live) redrawBoot((n) => n + 1);
     });
     return () => {
