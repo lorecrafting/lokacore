@@ -25,6 +25,7 @@ function session(ids: Record<string, string>, replies: Reply[], choice?: string)
     }),
     invoke: (i) => (sent.push(i), replies[sent.length - 1]!),
     entityIds: () => ids,
+    pulse: () => ({ kind: 'ready' }),
   };
   return { game, sent };
 }
@@ -35,7 +36,7 @@ test('a target follows its ref into a cartridge where the entity has a new id', 
   assert.deepEqual(step.intent.target_ids, [NPC]);
   const { game, sent } = session({ [NPC]: 'b1' }, [accepted]);
   assert.deepEqual(
-    replay([step], game, () => 'ready'),
+    replay([step], game, () => {}),
     { done: 1 },
   );
   assert.equal(sent[0]!.target_ids[0], 'b1');
@@ -52,7 +53,7 @@ test('a refused step stops the replay, named by ordinal, and later steps are not
   ];
   const advanced: number[] = [];
   const { game, sent } = session({ [NPC]: 'b1' }, [accepted, refused]);
-  const out = replay(steps, game, (ms) => (advanced.push(ms), 'ready'));
+  const out = replay(steps, game, (ms) => advanced.push(ms));
   assert.equal(out.done, 2);
   assert.match(out.failed!, /^step 3 \(talk .*not_here/);
   assert.equal(sent.length, 2);
@@ -62,7 +63,7 @@ test('a refused step stops the replay, named by ordinal, and later steps are not
 test('a target the edited cartridge no longer defines stops the replay before any send', () => {
   // Break: sending the ref string as an entity id and letting the kernel fault on it.
   const { game, sent } = session({}, [accepted]);
-  const out = replay([{ intent: intent([NPC]) }], game, () => 'ready');
+  const out = replay([{ intent: intent([NPC]) }], game, () => {});
   assert.equal(out.done, 0);
   assert.match(out.failed!, /step 1 .*no sampler@0.0.1:npc\/maud/);
   assert.equal(sent.length, 0);
@@ -71,7 +72,7 @@ test('a target the edited cartridge no longer defines stops the replay before an
 test('a choice replays against the continuation this run issued', () => {
   // Break: sending the recorded continuation id, which the fresh run never opened.
   const { game, sent } = session({}, [accepted], 'c2');
-  replay([{ intent: intent([], { choice_id: 'go', continuation_id: 'c1' }) }], game, () => 'ready');
+  replay([{ intent: intent([], { choice_id: 'go', continuation_id: 'c1' }) }], game, () => {});
   assert.deepEqual(sent[0]!.input, { choice_id: 'go', continuation_id: 'c2' });
 });
 
@@ -79,14 +80,10 @@ test('a step gains a continuation only when it had one and a choice is open', ()
   // Break: `&&` to `||`: a plain step sent during a choice gains a continuation, and a recorded
   // continuation with no choice open reads view.choice of undefined and throws.
   const open = session({}, [accepted], 'c2');
-  replay([{ intent: intent([], { choice_id: 'go' }) }], open.game, () => 'ready');
+  replay([{ intent: intent([], { choice_id: 'go' }) }], open.game, () => {});
   assert.deepEqual(open.sent[0]!.input, { choice_id: 'go' });
   const closed = session({}, [refused]);
-  const out = replay(
-    [{ intent: intent([], { continuation_id: 'c1' }) }],
-    closed.game,
-    () => 'ready',
-  );
+  const out = replay([{ intent: intent([], { continuation_id: 'c1' }) }], closed.game, () => {});
   assert.match(out.failed!, /not_here/);
   assert.deepEqual(closed.sent[0]!.input, { continuation_id: 'c1' });
 });
@@ -154,7 +151,7 @@ test('dropping the refused step removes that step, counting the advances before 
     { intent: intent([NPC]) },
     { intent: intent([]) },
   ];
-  const { done } = replay(steps, session({ [NPC]: 'id' }, [accepted, refused]).game, () => 'ready');
+  const { done } = replay(steps, session({ [NPC]: 'id' }, [accepted, refused]).game, () => {});
   assert.equal(done, 2);
   assert.deepEqual(dropStep(steps, done), [steps[0], steps[1], steps[3]]);
 });
@@ -164,7 +161,7 @@ test('dropping the refused step removes that step, counting the advances before 
 test('an advance that is not whole non-negative milliseconds stops before the clock, droppable', () => {
   const clock: number[] = [];
   const replayAdvance = (advance: unknown) =>
-    replay([{ advance } as Step], session({}, []).game, (ms) => (clock.push(ms), 'ready'));
+    replay([{ advance } as Step], session({}, []).game, (ms) => clock.push(ms));
   const stopped = (shown: unknown) => ({
     done: 0,
     failed: `step 1 (advance ${shown}): not whole milliseconds`,
@@ -183,8 +180,10 @@ test('an advance whose delivery does not end ready stops the replay at that step
   const game = session({}, []).game;
   const after = (kinds: { kind: string; code?: string; message?: string }[]) => {
     const pulses = [{ kind: 'ready' }, ...kinds];
-    return replay([{ advance: 5 }], game, () =>
-      caughtUp({ pulse: () => pulses.shift() ?? kinds.at(-1)! }),
+    return replay(
+      [{ advance: 5 }],
+      { ...game, pulse: () => pulses.shift() ?? kinds.at(-1)! },
+      () => {},
     );
   };
   assert.deepEqual(after([{ kind: 'ready' }]), { done: 1 });
@@ -205,7 +204,7 @@ test('an advance whose delivery does not end ready stops the replay at that step
 // Break: the panel offers to drop a valid step that only caught a pending reply or a fault.
 test('only a step the game refused is marked refused', () => {
   const once = (reply: unknown, ids: Record<string, string> = { [NPC]: 'b1' }) =>
-    replay([{ intent: intent([NPC]) }], session(ids, [reply as Reply]).game, () => 'ready').refused;
+    replay([{ intent: intent([NPC]) }], session(ids, [reply as Reply]).game, () => {}).refused;
   assert.equal(once(refused), true);
   assert.equal(once(refused, {}), true); // the edit removed the target
   assert.equal(once({ kind: 'catching_up' }), undefined);

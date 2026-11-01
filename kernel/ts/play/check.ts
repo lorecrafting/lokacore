@@ -8,7 +8,7 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { caughtUp, replay, type Step } from '../../../mobile/app/author/place.ts';
+import { replay, type Step } from '../../../mobile/app/author/place.ts';
 import {
   KERNEL_ID,
   openGame,
@@ -62,9 +62,8 @@ function replayed(bundled: Bundled, steps: Step[]): string | undefined {
       time: { wall: () => clock.wall, monotonic: () => clock.mono },
     });
     return replay(steps, game, (ms) => {
-      clock.wall += ms;
+      clock.wall += ms; // mutate-skip: a real host's wall moves too; credit reads the monotonic delta
       clock.mono += ms;
-      return caughtUp(game);
     }).failed;
   } finally {
     sql.close();

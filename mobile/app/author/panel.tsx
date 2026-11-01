@@ -8,7 +8,7 @@ import { Platform } from 'react-native';
 import type { localSession } from '../../authority/local-story/session';
 import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
 import { listen, overlay } from './live.ts';
-import { asRefs, caughtUp, dropStep, replay, type Place, type Step } from './place.ts';
+import { asRefs, dropStep, replay, type Place, type Step } from './place.ts';
 
 export type Opened = NonNullable<ReturnType<ReturnType<typeof localSession>['game']>>;
 /** words -> text key, filled as the Book resolves text, so a clicked line names its source. */
@@ -56,7 +56,6 @@ export function restorePlace(game: Opened | undefined) {
   try {
     outcome = replay(place.steps, game, (ms) => {
       g.loka_dev_skew = skew() + ms;
-      return caughtUp(game);
     });
   } catch (e) {
     // a hand-edited checkpoint or stale place with a malformed step must not stop the boot

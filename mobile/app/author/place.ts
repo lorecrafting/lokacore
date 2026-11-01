@@ -12,17 +12,16 @@ export type Place = {
   stopped?: { hash: string; at?: number; note: string };
 };
 type Ids = Readonly<Record<string, string>>; // definition ref -> entity id
-export type Replayable = {
+type Pulsed = {
+  pulse: (mode: 'active' | 'drain') => { kind: string; code?: string; message?: string };
+};
+export type Replayable = Pulsed & {
   view: () => { view: Pick<GameView, 'choice'>; token: string };
   invoke: (intent: Intent) => Reply;
   entityIds: () => Ids;
 };
 // refused: the game or the file said no to this step, so dropping it can help; a pending or fault reply is not that.
 export type Outcome = { done: number; failed?: string; refused?: true };
-type Pulsed = {
-  pulse: (mode: 'active' | 'drain') => { kind: string; code?: string; message?: string };
-};
-
 /** After the dev clock moved: credit the elapsed time now, so the next replayed input is not refused as catching up. Returns how the delivery ended. */
 export function caughtUp(game: Pulsed) {
   game.pulse('active'); // a drain never captures the clocks (elapsed.ts pulse); an active pulse does
@@ -57,13 +56,14 @@ const describe = (reply: Reply) => {
 export const dropStep = (steps: Step[], index: number) => steps.filter((_, i) => i !== index);
 
 /** Sends the steps in order; the first the session does not save and accept stops the replay, named. */
-export function replay(steps: Step[], game: Replayable, advance: (ms: number) => string): Outcome {
+export function replay(steps: Step[], game: Replayable, moveClock: (ms: number) => void): Outcome {
   for (const [i, step] of steps.entries()) {
     if ('advance' in step) {
       const name = `step ${i + 1} (advance ${step.advance})`;
       if (!Number.isSafeInteger(step.advance) || step.advance < 0)
         return { done: i, failed: `${name}: not whole milliseconds`, refused: true };
-      const after = advance(step.advance);
+      moveClock(step.advance);
+      const after = caughtUp(game);
       if (after !== 'ready') return { done: i, failed: `${name}: ${after}` };
       continue;
     }
