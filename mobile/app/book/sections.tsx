@@ -1,14 +1,17 @@
 // The Contents sections (Character, Ancestry, Carrying, Map, Settings; Journal: journal.tsx) and
 // the chapter and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
-import { View } from 'react-native';
+import { useContext } from 'react';
+import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { bandPhrase, cap, conditionLine, plain, isPool, toneOf, type Thing } from './model.ts';
 import type { Button } from './presenter.ts';
-import { note, prose, usePalette, useType } from './palette.ts';
+import { cardContext, useCardInk, useCardTurn } from './card.ts';
+import { InkText, Reanimated } from './fade.ts';
+import { note, prose, usePalette, useType, type Palette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
-import { ReadingSize } from './Chip.tsx';
-import type { Reading } from './reading.ts';
+import { EffectSettings, ReadingSize } from './Chip.tsx';
+import type { Effects, Reading } from './reading.ts';
 import { levelLine, Professions, RaiseCards, SkillDetails, spells, xpLine } from './skills.tsx';
 import { size, space } from './tokens.ts';
 import { ActionCard, ContinueButton } from './actions.tsx';
@@ -30,6 +33,16 @@ const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired
 type Character = { view?: GameView; text: Say; pending?: boolean } & Home &
   Pick<GameView, 'resources' | 'position'> &
   Parameters<typeof RaiseCards>[0];
+
+// Gilt, steady, while points wait to be spent.
+function LevelLine({ levelling }: { levelling: NonNullable<GameView['levelling']> }) {
+  const c = usePalette();
+  return (
+    <Text style={[prose(c, useType()), levelling.unspent > 0 && { color: c.warning }]}>
+      {levelLine(levelling)}
+    </Text>
+  );
+}
 
 /**
  * The Character section: attributes, skills, professions, the Raise cards, then Spells: each
@@ -56,7 +69,7 @@ export function CharacterPage(p: Character) {
       {p.view?.ancestry && (
         <Text style={prose(c, t)}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>
       )}
-      {levelling && <Text style={prose(c, t)}>{levelLine(levelling)}</Text>}
+      {levelling && <LevelLine levelling={levelling} />}
       {p.view?.bleeding && <Text style={prose(c, t)}>{p.text(p.view.bleeding.label)}</Text>}
       {p.view?.conditions?.map((x, i) => (
         <Text key={`${x.label}-${i}`} style={prose(c, t)}>
@@ -175,57 +188,84 @@ export function MapPage(p: { view: GameView; text: Say } & Home) {
 }
 
 /**
- * Settings: the Reading size first, then Start over.
+ * Settings: the Reading size first, then Sound, Music, Haptics and Flashes, then Start over.
  * - Use: Contents.
  * - Rules: `startOver` asks first: it destroys the save (10 §31; the shell's confirm).
  * - Story: SectionPages.stories.tsx
  */
-export function SettingsPage(p: { startOver: () => void; reading?: Reading } & Home) {
+export function SettingsPage(
+  p: { startOver: () => void; reading?: Reading; effects?: Effects } & Home,
+) {
   return (
     <Page title={LABEL.settings} foot={home(p)}>
       {p.reading && <ReadingSize {...p.reading} />}
+      {p.effects && <EffectSettings {...p.effects} />}
       <Control label={LABEL.startOver} onPress={p.startOver} />
     </Page>
   );
 }
 
+const ruleStyle = (c: Palette) => ({
+  width: size.chapterRule,
+  height: size.rule,
+  backgroundColor: c.dim,
+  marginTop: space.sm,
+});
+
+function CardMarks(p: { label: string; title: string }) {
+  const c = usePalette();
+  const t = useType();
+  const label = useCardInk(0);
+  const title = useCardInk(1);
+  const rule = useCardInk(2);
+  return (
+    <View style={{ alignItems: 'center', gap: space.sm }}>
+      {/* one header, named label then title, so the arriving focus reads "Chapter one" too */}
+      <View
+        accessible
+        accessibilityRole="header"
+        {...useTitleFocus()}
+        style={{ alignItems: 'center', gap: space.sm }}
+      >
+        <InkText style={[t.chapterLabel, { color: c.dim, textAlign: 'center' }, label]}>
+          {p.label}
+        </InkText>
+        <InkText style={[t.chapterTitle, { color: c.fg, textAlign: 'center' }, title]}>
+          {p.title}
+        </InkText>
+      </View>
+      <Reanimated.View style={[ruleStyle(c), rule]} />
+    </View>
+  );
+}
+
 /**
- * The chapter title page: label, title and rule centred, then Continue.
+ * The chapter title page: label, title and rule centred; it turns itself, and a tap anywhere skips.
  * - Use: a chapter's title page.
  * - Rules: label and title are one header node named by its visible text in order ("Chapter one
- *   <title>"), with the arriving focus. Nothing but Continue is pressable. The mock's `.chapter`
- *   without its fleuron, subtitle and auto-dismiss.
+ *   <title>"), with the arriving focus. Under a screen reader it keeps Continue and waits for it.
+ *   The mock's `.chapter` without its fleuron and subtitle.
  * - Story: ChapterPages.stories.tsx
  */
 export function ChapterPage(p: { label: string; title: string; done: () => void }) {
-  const c = usePalette();
-  const t = useType();
+  const overPicture = !!useContext(cardContext);
+  const { reader, turn } = useCardTurn(p.done);
   return (
-    <Page centred>
-      <View style={{ alignItems: 'center', gap: space.sm }}>
-        {/* one header, named label then title, so the arriving focus reads "Chapter one" too */}
-        <View
-          accessible
-          accessibilityRole="header"
-          {...useTitleFocus()}
-          style={{ alignItems: 'center', gap: space.sm }}
-        >
-          <Text style={[t.chapterLabel, { color: c.dim, textAlign: 'center' }]}>{p.label}</Text>
-          <Text style={[t.chapterTitle, { color: c.fg, textAlign: 'center' }]}>{p.title}</Text>
-        </View>
-        <View
-          style={{
-            width: size.chapterRule,
-            height: size.rule,
-            backgroundColor: c.dim,
-            marginTop: space.sm,
-          }}
-        />
-      </View>
-      <View style={{ alignItems: 'center' }}>
-        <ContinueButton label={LABEL.continue} onPress={p.done} />
-      </View>
-    </Page>
+    <Pressable
+      accessible={false}
+      focusable={false}
+      style={{ flex: 1 /* mutate-skip: layout */ }}
+      onPress={reader ? undefined : turn}
+    >
+      <Page centred paperless={overPicture}>
+        <CardMarks label={p.label} title={p.title} />
+        {reader && (
+          <View style={{ alignItems: 'center' }}>
+            <ContinueButton label={LABEL.continue} onPress={turn} />
+          </View>
+        )}
+      </Page>
+    </Pressable>
   );
 }
 

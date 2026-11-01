@@ -193,11 +193,11 @@ function pulseOf(
             reply,
           });
         const status = statusOf(reply);
-        emit({ kind: 'state', projection: projection(), status });
+        emit({ kind: 'state', projection: projection(), status, resumed: mode === 'resume' });
         return status;
       }
       const status = story.pulse(mode, run);
-      emit({ kind: 'state', projection: projection(), status });
+      emit({ kind: 'state', projection: projection(), status, resumed: mode === 'resume' });
       return status;
     } catch (e) {
       const status = statusOfError(e);

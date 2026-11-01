@@ -7,7 +7,9 @@ import { ActionCard, Cards, PickLists, type Shown } from './actions.tsx';
 import { commandOf } from './buttons.ts';
 import { LogLines } from './lines.tsx';
 import { LABEL } from './labels.ts';
-import { Control, Page, RunningHead } from './pages.tsx';
+import { Control, Page } from './pages.tsx';
+import { RunningHead } from './RunningHead.tsx';
+import { Blow } from './Blow.tsx';
 import { prose, usePalette, useType } from './palette.ts';
 import type { presenter, Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
@@ -84,9 +86,9 @@ export function Combat(p: {
   const stand = p.g.position.find((b) => b.action_key === 'stand');
   return (
     // Paper behind the running head too: the leaving page fades over the arriving one.
-    <View style={{ backgroundColor: c.bg, flex: 1 }}>
+    <Blow>
       <RunningHead view={view} text={text} />
-      <Page title="Combat" foot={foot}>
+      <Page paperless title="Combat" foot={foot}>
         <Fight {...p.screen} combat={combat} press={p.press} />
         <LogLines lines={combatLog} />
         {view.combat && (
@@ -102,6 +104,6 @@ export function Combat(p: {
           </Cards>
         )}
       </Page>
-    </View>
+    </Blow>
   );
 }

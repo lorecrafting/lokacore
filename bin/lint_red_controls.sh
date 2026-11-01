@@ -69,6 +69,7 @@ echo 'export const learnedLine = (label: string) => `${label}: learned`;' >> mob
 echo 'export const card = <ActionCard b={b} press={press} />;' >> mobile/app/book/DiscoveredMap.tsx
 # A Where card back on the Map page (mobile-book-map-page-no-actions).
 echo 'function MapPage() { return <ActionCard b={b} press={press} />; }' >> mobile/app/book/sections.tsx
+echo 'export const v = { duration: 300 };' >> mobile/app/book/sections.tsx
 fi
 if [ "$core_only" -eq 1 ]; then
   out=$(ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src kernel/ts/test 2>&1)

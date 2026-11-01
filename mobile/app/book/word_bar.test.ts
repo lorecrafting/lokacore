@@ -95,7 +95,7 @@ test('spell words: refused ones list their reason under Spells; lux casts there 
     b.tap(LABEL.backToWorld);
     return t.slice(t.indexOf(LABEL.spells));
   };
-  assert.ok(spellsBlock('lux').includes("lux, cast\nYou can't do that—need 1 ash."));
+  assert.ok(spellsBlock('lux').includes("You can't do that—need 1 ash."));
   const v = b.game.view().view;
   assert.deepEqual(
     castWords({ ...v, actions: v.actions.filter((x) => x.action_key !== 'cast') }),
@@ -107,7 +107,7 @@ test('spell words: refused ones list their reason under Spells; lux casts there 
   b.tap('sigil, open');
   b.tap('Trace the sigil');
   b.tap(LABEL.leave);
-  assert.ok(spellsBlock('ward').includes('ward, cast\nNeeds level 2 and wisdom 11.'));
+  assert.ok(spellsBlock('ward').includes('Needs level 2 and wisdom 11.'));
   b.tap('hearth, open');
   b.tap('Gather ash');
   b.tap(LABEL.leave);

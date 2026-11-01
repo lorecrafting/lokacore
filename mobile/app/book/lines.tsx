@@ -1,16 +1,21 @@
+// size: allow 335, every log and entity line form, each with its drying variant
 // Entity lines, Here lines, log lines and a press's fault (their doc comments).
-import { Fragment, useState } from 'react';
+import { Fragment, type ReactNode, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain } from './model.ts';
 import { COUNT, LABEL } from './labels.ts';
-import type { DetailLine } from './logs.ts';
+import { InkText, Reanimated } from './fade.ts';
+import { haptic } from './haptic';
+import { logMark, markDrawn, type DetailLine } from './logs.ts';
+import { GiltLine } from './GiltLine.tsx';
+import { useDry } from './press.ts';
 import { lineText, subject } from './words.ts';
 import { grouped, type RecapLine } from './recap.ts';
 import { Control, Tap } from './pages.tsx';
 import { narrated, note, prose, usePalette, useType } from './palette.ts';
-import { size, space, type } from './tokens.ts';
+import { motion, size, space, type } from './tokens.ts';
 
 // Web keys on a Text or View: react-native-web forwards onKeyDown, React Native's types lack it.
 export const onKey = (f: (key: string) => unknown) =>
@@ -32,7 +37,11 @@ export function EntityLine(p: { name: string; rest?: string; note?: string; onPr
   // A trailing space ends the first line, so the shown text reads like the name (it hangs unseen).
   const gap = p.note ? ' ' : '';
   return (
-    <Tap label={`${p.name}${p.rest ?? ''}${p.note ? ` ${p.note}` : ''}, open`} onPress={p.onPress}>
+    <Tap
+      label={`${p.name}${p.rest ?? ''}${p.note ? ` ${p.note}` : ''}, open`}
+      pulse="selection"
+      onPress={p.onPress}
+    >
       {p.rest ? (
         <Text style={prose(c, t)}>
           <Text style={type.named}>{p.name}</Text>
@@ -69,38 +78,79 @@ export function Note({ children }: { children: string }) {
  *   value`, drawn once in ink italic (palette.ts `narrated`; book-ui.md Line placement, loka-lsqi).
  *   A refused line is a narrated event with no tag or chip (owner pick mvlyp3gphp2t); its reason
  *   word stays in its accessible name (`locked, The way west is locked.`, as the live region reads
- *   it). A speech line (speaker bar) waits until the log projects a speaker.
+ *   it). A speech line (speaker bar) waits until the log projects a speaker. A line no page has
+ *   drawn yet dries in, a narrated event `motion.dry.lag` later; a quiet merge, a page return and
+ *   restored history do not. `keep` hides lines without renumbering the rest.
  * - States: narration (a repeated quiet line reads `<line> (N times)`); narrated event; refused;
- *   an away recap entry, drawn as AwayRecap.
+ *   an away recap entry, drawn as AwayRecap; drying.
  * - Story: LogLines.stories.tsx
  */
-export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
-  const c = usePalette();
-  const t = useType();
-  if (!lines.length) return null;
+export function LogLines({
+  lines,
+  keep,
+}: {
+  lines: readonly DetailLine[];
+  keep?: (line: DetailLine) => boolean; // shows only these; the rest still count as drawn
+}) {
+  const { gone, drawn } = logMark(lines);
+  useEffect(() => markDrawn(lines), [gone + lines.length]);
+  // A line's number, also its stable key.
+  const shown = lines.flatMap((line, i) =>
+    !keep || keep(line) ? [<LogLine key={gone + i} line={line} fresh={gone + i >= drawn} />] : [],
+  );
+  if (!shown.length) return null;
   return (
     // The walk tells log lines from refusal notes by this id (walkthrough/walk.ts live).
     <View testID="log-lines" style={{ gap: space.sm }}>
-      {lines.map((line, i) =>
-        typeof line === 'string' || 'quiet' in line ? (
-          <Text key={i} style={{ ...t.log, color: c.fg }}>
-            {lineText(line)}
-          </Text>
-        ) : 'recap' in line ? (
-          <AwayRecap key={i} lines={grouped(line.recap)} />
-        ) : 'event' in line ? (
-          <Text key={i} style={narrated(c, t)}>
-            {line.text}
-          </Text>
-        ) : (
-          <Text key={i} accessibilityLabel={`${line.reason}, ${line.text}`} style={narrated(c, t)}>
-            {line.text}
-          </Text>
-        ),
-      )}
+      {shown}
     </View>
   );
 }
+
+// `fresh` is read once: the redraw after this one must not cut the drying, and an old line stays a
+// plain Text, so a long log carries no animation.
+function LogLine({ line, fresh }: { line: DetailLine; fresh: boolean }) {
+  const c = usePalette();
+  const t = useType();
+  const dries = useRef(fresh).current;
+  if (typeof line === 'object' && 'recap' in line) {
+    const recap = <AwayRecap lines={grouped(line.recap)} />;
+    return dries ? <DryBlock>{recap}</DryBlock> : recap;
+  }
+  const plain = typeof line === 'string' || 'quiet' in line;
+  const style = plain ? { ...t.log, color: c.fg } : narrated(c, t);
+  const name =
+    typeof line === 'object' && 'reason' in line
+      ? { accessibilityLabel: `${line.reason}, ${line.text}` }
+      : {};
+  const words = plain ? lineText(line) : line.text;
+  if (dries && typeof line === 'object' && 'gilt' in line) {
+    return <GiltLine style={style}>{words}</GiltLine>;
+  }
+  return dries ? (
+    <DryLine style={style} lag={plain ? 0 : motion.dry.lag} {...name}>
+      {words}
+    </DryLine>
+  ) : (
+    <Text style={style} {...name}>
+      {words}
+    </Text>
+  );
+}
+
+function DryLine(p: {
+  style: { color: string };
+  lag: number;
+  accessibilityLabel?: string;
+  children: string;
+}) {
+  const { style, lag, ...rest } = p;
+  return <InkText style={[style, useDry(style.color, lag)]} {...rest} />;
+}
+
+const DryBlock = ({ children }: { children: ReactNode }) => (
+  <Reanimated.View style={useDry()}>{children}</Reanimated.View>
+);
 
 /**
  * A room log entry after an absence (book-ui.md, Away recap).
@@ -267,11 +317,12 @@ export const unseen = {
  * that any press still sends (03 §14).
  * - Use: Book's foot, after a press throws.
  * - Rules: the message sits outside the button, since its accessibilityLabel replaces the
- *   children it reads.
+ *   children it reads. An error haptic once per fault, no sound.
  * - Story: Live.stories.tsx
  */
 export function Fault(p: { fault: string; startOver: () => void }) {
   const c = usePalette();
+  useEffect(() => haptic('error'), [p.fault]);
   return (
     <View style={{ alignItems: 'center' }}>
       <Text style={{ ...useType().small, color: c.dim }}>{p.fault}</Text>

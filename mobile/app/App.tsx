@@ -27,7 +27,7 @@ import {
   skew,
   useAuthorPanel,
 } from './author/panel.tsx';
-import { readingSize } from './book/reading.ts';
+import { effectStores, readingSize } from './book/reading.ts';
 import { LABEL } from './book/labels.ts';
 import chapter from '../../protocol/fixtures/toolbox_showcase_hash.json';
 import { SaveError } from './SaveError';
@@ -118,6 +118,7 @@ const shell: Shell = {
   },
   learned: hint(Storage, 'hint.learned'),
   reading: { ...readingSize(Storage, 'reading.size'), fontScale: () => PixelRatio.getFontScale() },
+  effects: effectStores(Storage),
 };
 
 type Clock = {
@@ -270,8 +271,8 @@ export default function App() {
       <SaveError
         failed={activeSession.failed()!}
         startOver={() => shell.confirm(startOver)}
-        // the lock is web-only: a reload reopens the save
         tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined}
+        haptics={shell.effects?.haptics?.get()}
       />
     );
   return <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />;

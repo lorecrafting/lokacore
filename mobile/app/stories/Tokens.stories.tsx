@@ -119,7 +119,9 @@ function Motion() {
       {Object.entries(motion).map(([name, m]) =>
         row([`motion.${name}`, String(m.duration), m.easing]),
       )}
-      {Object.entries(sound).map(([name, s]) => row([`sound.${name}`, `volume ${s.volume}`, '']))}
+      {Object.entries(sound).map(([name, s]) =>
+        row([`sound.${name}`, `tier ${s.tier}`, `variants ${s.variants}`]),
+      )}
     </View>
   );
 }

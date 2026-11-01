@@ -1,0 +1,47 @@
+// The dev pulse: a haptic seen where no phone can be felt.
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { Text } from './Text.tsx';
+import { onPulse, type HapticKind } from './haptic';
+import { usePalette, useType } from './palette.ts';
+import { motion, size } from './tokens.ts';
+
+/**
+ * A ring round the Book column naming the haptic kind that just fired.
+ * - Use: the Book column, outside the page turn.
+ * - Rules: preview and Storybook only: a player build never notifies it. No touch or focus; hidden
+ *   from screen readers.
+ * - States: hidden; showing a kind.
+ * - Story: HapticPulse.stories.tsx
+ */
+export function HapticPulse() {
+  const [c, t] = [usePalette(), useType()];
+  const [kind, setKind] = useState<HapticKind>();
+  useEffect(() => {
+    let done: ReturnType<typeof setTimeout>;
+    // One timer per pulse, not per kind: a repeat of the same kind shows for its full time.
+    return onPulse((fired) => {
+      clearTimeout(done);
+      setKind(fired);
+      done = setTimeout(() => setKind(undefined), motion.fade.duration);
+    });
+  }, []);
+  if (!kind) return null;
+  return (
+    <View
+      aria-hidden
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        top: 0, // mutate-skip: fills the column; seen in the story
+        bottom: 0, // mutate-skip: fills the column; seen in the story
+        left: 0, // mutate-skip: fills the column; seen in the story
+        right: 0, // mutate-skip: fills the column; seen in the story
+        borderWidth: size.focus,
+        borderColor: c.action,
+      }}
+    >
+      <Text style={{ ...t.small, color: c.action }}>{kind}</Text>
+    </View>
+  );
+}

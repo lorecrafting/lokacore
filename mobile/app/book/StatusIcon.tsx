@@ -1,17 +1,23 @@
+// size: allow 340, the icon, its arrival, its ring and its tooltip are one component's parts
 // The status icon row above the status line.
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { onCue } from './cues.ts';
 import {
+  curveOf,
   Easing,
+  FadeOut,
   Reanimated,
+  ReduceMotion,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   withTiming,
 } from './fade.ts';
 import { statusTip } from './model.ts';
+import { usePress, useThin } from './press.ts';
 import { usePalette, useType, type Palette } from './palette.ts';
 import { motion, radius, size, space, type } from './tokens.ts';
 
@@ -47,14 +53,16 @@ export const ringFraction = (c: Condition, time: number) =>
  * - Rules: a tap opens Character; a hold, hover or keyboard focus shows a Tooltip. The countdown
  *   ring's motion is the Conditions details rule, not restated here.
  * - States: buff; debuff; neutral; permanent; overflow; held; focused; locked (pictures, not
- *   pressable); ring full, near empty, draining.
+ *   pressable); ring full, near empty, draining. Pops on arrival, fades on expiry; ticks are silent.
  * - Story: StatusIcon.stories.tsx
  */
 export function StatusIcons(p: Props) {
   // The held icon's label, so the tip follows the clock and goes with the icon or the lock.
   const [held, setHeld] = useState<string>();
   const shown = p.conditions.slice(0, SHOWN);
-  const key = (x: Condition, i: number) => `${x.label}-${i}`;
+  // A label and its count so far, not the place: an icon going must not remount those after it.
+  const key = (x: Condition, i: number) =>
+    `${x.label}-${shown.slice(0, i).filter((y) => y.label === x.label).length}`;
   const tip = p.open ? shown.find((x, i) => key(x, i) === held) : undefined;
   // An icon that unmounts (locked, expired, moved) never blurs, so its hold is let go here.
   if (held !== undefined && !tip) setHeld(undefined);
@@ -62,16 +70,17 @@ export function StatusIcons(p: Props) {
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'center', columnGap: space.sm }}>
       {shown.map((x, i) => (
-        <Icon
-          key={key(x, i)}
-          look={x.kind ?? 'neutral'}
-          name={[statusTip(x, p.time, p.text), x.kind].filter(Boolean).join(', ')}
-          fraction={ringFraction(x, p.time)}
-          hold={(on) => setHeld((h) => (on ? key(x, i) : h === key(x, i) ? undefined : h))}
-          open={p.open}
-        >
-          {glyph(x.label, x.kind)}
-        </Icon>
+        <Arrival key={key(x, i)} label={x.label}>
+          <Icon
+            look={x.kind ?? 'neutral'}
+            name={[statusTip(x, p.time, p.text), x.kind].filter(Boolean).join(', ')}
+            fraction={ringFraction(x, p.time)}
+            hold={(on) => setHeld((h) => (on ? key(x, i) : h === key(x, i) ? undefined : h))}
+            open={p.open}
+          >
+            {glyph(x.label, x.kind)}
+          </Icon>
+        </Arrival>
       ))}
       {more > 0 && (
         <Icon look="neutral" name={`+${more} more`} open={p.open}>
@@ -80,6 +89,33 @@ export function StatusIcons(p: Props) {
       )}
       {tip && <Tooltip text={statusTip(tip, p.time, p.text)} />}
     </View>
+  );
+}
+
+const popCurve = curveOf(motion.pop.easing);
+
+// Pops on its `status_in` cue (so a tick or a page return does not), appears under reduced motion,
+// and fades on expiry.
+function Arrival(p: { label: string; children: ReactNode }) {
+  const still = useReducedMotion();
+  const scale = useSharedValue(1);
+  useEffect(
+    () =>
+      onCue((cue) => {
+        if (still || cue.name !== 'status_in' || !cue.ids?.includes(p.label)) return;
+        scale.value = motion.pop.from;
+        scale.value = withTiming(1, { duration: motion.pop.duration, easing: popCurve });
+      }),
+    [still, p.label], // eslint-disable-line
+  );
+  const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  return (
+    <Reanimated.View
+      style={style}
+      exiting={FadeOut.duration(motion.fade.duration).reduceMotion(ReduceMotion.Never)}
+    >
+      {p.children}
+    </Reanimated.View>
   );
 }
 
@@ -108,6 +144,8 @@ function Icon(p: {
 }) {
   const face = <Disc look={p.open ? p.look : 'neutral'}>{p.children}</Disc>;
   const disc = ringed(p.fraction, !p.open, face);
+  const press = usePress();
+  const ink = useThin(press, false);
   if (!p.open)
     return (
       <View accessibilityRole="image" accessibilityLabel={p.name} style={box}>
@@ -122,14 +160,15 @@ function Icon(p: {
       accessibilityLabel={`${p.name}, opens Character`}
       onPress={() => p.open?.()} // no press event: open takes none
       onLongPress={show}
-      onPressOut={hide}
+      onPressIn={press.handlers.onPressIn}
+      onPressOut={() => (press.handlers.onPressOut(), hide())}
       onHoverIn={show}
       onHoverOut={hide}
       onFocus={show}
       onBlur={hide}
       style={box}
     >
-      {disc}
+      <Reanimated.View style={ink}>{disc}</Reanimated.View>
     </Pressable>
   );
 }
@@ -164,6 +203,7 @@ function Ring(p: { fraction: number; locked: boolean; children: ReactNode }) {
     const at = performance.now();
     const ms = drainMs(last.current.deg, deg, at - last.current.at, reduced);
     last.current = { deg, at };
+    // ast-grep-ignore: mobile-book-effects-literals -- predates the check; a clock hand's constant speed has no token
     shown.value = ms ? withTiming(deg, { duration: ms, easing: Easing.linear }) : deg;
   }, [deg, reduced, shown]);
   const [track, arc] = p.locked ? [c.line, c.dim] : [c.dim, c.fg];

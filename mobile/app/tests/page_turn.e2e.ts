@@ -79,6 +79,29 @@ test('the page curl draws over a live arriving page, both ways', async ({
   expect(await browser.evaluate(turn, back)).toMatchObject({ curl: true, hit: true, first: 0 });
 });
 
+// Breaks: the page turn goes silent, or the web bundle hands the player a sample it cannot fetch
+// (only this real build runs the bundler's audio imports).
+test('a page turn plays a bundled recording', async ({ app, screen, browser }) => {
+  await browser.addInitScript(() => {
+    const played: string[] = ((globalThis as any).played = []);
+    const Real = window.Audio;
+    window.Audio = function (src?: string) {
+      if (src) played.push(src);
+      // mutate-skip: spy pass-through, the test reads only what the spy recorded
+      return new Real(src);
+    } as unknown as typeof Audio;
+  });
+  await app.open('/'); // the Book itself: the turn is heard through its cue bus
+  await screen.getByRole('button', /; opens Contents$/).tap({ timeout: COLD }); // unlocks the player
+  await screen.getByRole('button', 'Settings, open').tap();
+  await expect(screen.getByRole('button', LABEL.startOver)).toBeVisible();
+  const ok = await browser.evaluate(async () => {
+    const url = ((globalThis as any).played as string[]).find((u) => u.includes('ui-paper-turn-'));
+    return url ? (await fetch(url)).ok : false;
+  });
+  expect(ok).toBe(true);
+});
+
 // Breaks: reduced motion still curls, its cross-fading leaving page takes the touches, keyboard
 // focus or the screen reader, focus stays behind instead of moving to the arriving page's title, or
 // the leaving page vanishes at once instead of fading over motion.fade (160 ms).
