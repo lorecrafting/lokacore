@@ -186,16 +186,17 @@ test('a level step ends the ink: what it mounts appears', (t) => {
   const first = rig(t);
   first(() => nodes(DiscoveredMap({ view: mapOf([at('s0', 0)]), text: say })));
   first.unmount();
-  effects(t);
   const shell = rig(t);
   const v = mapOf([at('s0', 0), at('s1', 0), at('s2', 1)]);
-  const page = () => shell(() => nodes(DiscoveredMap({ view: v, text: say })));
-  page()
-    .find((n) => n.props?.accessibilityLabel === 'Next map level')
-    .props.onPress();
-  assert.deepEqual(g.timings, [motion.settle.duration], 'the new room on this level draws');
-  page();
-  assert.deepEqual(g.timings, [motion.settle.duration], 'the one a level up does not');
+  // The page's elements, not drawn: the rig's hooks go by position, so a remount cannot show here.
+  const all = (e: any): any[] =>
+    Array.isArray(e) ? e.flatMap(all) : e?.props ? [e, ...all(e.props.children)] : [];
+  const page = () => all(shell(() => DiscoveredMap({ view: v, text: say })));
+  const inked = (els: any[]) => els.filter((e) => e.props.fresh).length;
+  const before = page();
+  assert.equal(inked(before), 1, 'the new room on this level');
+  before.find((e) => e.props.accessibilityLabel === 'Next map level').props.onPress();
+  assert.equal(inked(page()), 0, 'after the step, none');
 });
 
 const button = (id: string) => ({
