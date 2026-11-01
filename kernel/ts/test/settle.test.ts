@@ -264,7 +264,14 @@ test('kgd.159: a band moved out of its area in a later hour still reloads', () =
 
 // Breaks: the loader's new plan-move rooms let a member stand anywhere; a forged room still refuses.
 test('kgd.159: a member in a room no plan move names fails the save loader', () => {
-  const w = band(99, undefined, true, (c) => delete c.reactions[MOVE]);
+  // Only this plan's move to the square and another plan's move to the hills, in an hour not reached.
+  const w = band(99, undefined, true, (c) => {
+    delete c.reactions[MOVE];
+    hour(c, 'never', 23, [
+      { op: 'npc.move', plan: PLAN, room: ref('room', 'square') },
+      { op: 'npc.move', plan: ref('population', 'other'), room: ref('room', 'hills') },
+    ]);
+  });
   const { w: b } = advance(w, 700);
   const forged = { ...b.state.containers, [member(b, 3).member_id as never]: room(b, 'hills') };
   assert.ok(hydrate(w, JSON.parse(JSON.stringify(b.state)), true), 'the unforged save loads');
