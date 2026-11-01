@@ -236,6 +236,20 @@ test('a then whose target shows nothing ends the talk', () => {
   assert.equal(g.view(), undefined);
 });
 
+// Breaks: the target's own policy unread: a row every option of which is refused as invalid_state.
+test('a then whose target policy fails ends the talk', () => {
+  const g = play(
+    content(
+      { ask: plain({ then: 'child' }) },
+      { child: { x: plain() } },
+      (c) => (c.dialogues[`${P}:dialogue/child`].policy = is('flag', true)),
+    ),
+  );
+  g.opened();
+  assert.equal(ops(g.choose('ask')).includes('choice.open'), false);
+  assert.equal(g.view(), undefined);
+});
+
 // Breaks: the target read before the answer's facts: a then target opening on what the answer set.
 test('then reads the target against the answer facts', () => {
   const g = play(

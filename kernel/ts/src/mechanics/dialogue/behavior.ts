@@ -21,6 +21,7 @@ import { bind, continuationId, definition, speakerOf } from './shared.ts';
 import { sequence } from './sequence.ts';
 import { exchangeRoles } from './exchange.ts';
 import { questOf } from '../lookups.ts';
+import { holds } from '../policy.ts';
 import { linked, offered, reopens, shown } from './selection.ts';
 
 export function wrongAnswer(
@@ -138,6 +139,7 @@ export function leadOn<T extends { kind: string }>(
   const next = definition(world, { ...row.source, key });
   const ids = offered(world, row.actor_id, next, steps);
   const speaker = world.entityIds[refString(next.npc)];
+  if (!holds(world, row.actor_id, next.policy, { target: speaker, steps })) return decided;
   if (shown(world, row.actor_id, next, ids, speaker, steps).length === 0) return decided;
   const at = a.events.at(-1)!.position + 1;
   const [open, opened] = opening(world, command, mint, next, steps, at);

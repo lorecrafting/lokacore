@@ -66,7 +66,7 @@ defmodule Loka.Content.Refs do
     for {v, ok?} <- [
           {"value", &typed?(&1, t)},
           {"equals", &typed?(&1, t)},
-          {"at_least", fn _ -> match?(%{"type" => "int"}, t) end}
+          {"at_least", fn _ -> n["op"] != "fact_at_least" or match?(%{"type" => "int"}, t) end}
         ],
         is_map_key(n, v),
         not ok?.(n[v]),

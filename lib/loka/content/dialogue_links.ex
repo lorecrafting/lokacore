@@ -54,6 +54,10 @@ defmodule Loka.Content.DialogueLinks do
       )
   end
 
+  defp unlinkable?(t, o, d) do
+    Enum.any?([t["keyword"], t["quest"], t["riddle"], o["patrol"], d["quest"], d["riddle"]])
+  end
+
   defp link(rel, path, target, o, d, ctx) do
     found = Enum.find(for({_, {_, [], t}} <- ctx.defs["dialogue"], do: t), &(&1["key"] == target))
 
@@ -68,7 +72,7 @@ defmodule Loka.Content.DialogueLinks do
         [diag("UNRESOLVED_REFERENCE", at(rel, path), %{"target" => target})]
 
       {_, t} ->
-        if is_map_key(t, "keyword") or Enum.any?([o["patrol"], d["quest"], d["riddle"]]),
+        if unlinkable?(t, o, d),
           do: [diag("OUTCOME_MISMATCH", at(rel, path))],
           else: elsewhere(rel, path, t, d, ctx)
     end

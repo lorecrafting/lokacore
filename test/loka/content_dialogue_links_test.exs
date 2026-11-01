@@ -55,6 +55,26 @@ defmodule Loka.ContentDialogueLinksTest do
       {"OUTCOME_MISMATCH", @at <> "then_failed"}
     )
 
+    # A row opened by an answer has no quest instance and no riddle talk evidence on reload.
+    for extra <- [
+          %{"quest" => "any"},
+          %{
+            "riddle" => %{
+              "choice_id" => "x",
+              "answer" => "x",
+              "bank" => ["X"],
+              "wrong" => "narration.guard.persuade_failed"
+            }
+          }
+        ] do
+      target = {"dialogues/child.json", talk("guard", extra)}
+
+      assert {:error, diags} =
+               Loka.ContentSource.compile(dir, [target, {@guard, field("then", "child")}])
+
+      assert {"OUTCOME_MISMATCH", @at <> "then"} in codes(diags), inspect(extra)
+    end
+
     refused(
       dir,
       [child, {@guard, &(&1 |> field("then", "child").() |> quest.())}],
