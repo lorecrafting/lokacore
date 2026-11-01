@@ -36,7 +36,7 @@ defmodule Loka.ContentStartersFreshTest do
     refute is_map_key(read(dir, "statuses/ill.json"), "name")
   end
 
-  # Breaks: a population on a taken east exit refusing with no next step.
+  # Breaks: a population, which takes no --from, told to use another --from direction.
   test "a starter refused by a taken exit says what to do", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
     {:ok, _} = Starters.write(dir, "rooms", "yard", {"start", "east"})
@@ -44,7 +44,35 @@ defmodule Loka.ContentStartersFreshTest do
     assert {:error, "rooms/start.json: exits east to already" <> message} =
              Starters.write(dir, "populations", "wolves")
 
+    assert message =~ "move it in both rooms' files and rerun"
+    refute message =~ "--from"
+
+    assert {:error, "rooms/start.json: exits east to already" <> message} =
+             Starters.write(dir, "rooms", "barn", {"start", "east"})
+
     assert message =~ "use another --from direction"
+  end
+
+  # Breaks: the author's shared line refusing every later transport, or a stand-in overwriting it.
+  test "a second transport keeps the filled shared line", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    follow(dir, "transports", "ferry")
+    edit(dir, "text.json", &Map.put(&1, "transport.unaffordable", "Mine."))
+
+    assert {:ok, _} = Starters.write(dir, "transports", "barge")
+
+    assert read(dir, "text.json")["transport.unaffordable"] == "Mine."
+    assert File.exists?(Path.join(dir, "transports/barge.json"))
+  end
+
+  # Break: a text.json that is not an object crashes the starter instead of refusing.
+  test "a text.json that is a list still refuses", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    follow(dir, "transports", "ferry")
+    File.write!(Path.join(dir, "text.json"), "[]")
+
+    assert {:error, "text.json: already has a value" <> _} =
+             Starters.write(dir, "transports", "barge")
   end
 
   # Breaks: a room joined --from placed off its direction on the map, or onto a taken cell.

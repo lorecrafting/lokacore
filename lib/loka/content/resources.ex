@@ -204,12 +204,14 @@ defmodule Loka.Content.Resources do
     collect(rel, "resources", results)
   end
 
-  # {key => {rel, steps, spec} | :invalid, diagnostics} of each key's {:ok, spec} | {:error, ds}.
+  # {key => {rel, steps, spec} | :invalid, diagnostics} of each key's {:ok, spec} | {:error, ds},
+  # or {:error, ds, spec} for a fault that leaves the spec usable.
   defp collect(rel, name, results) do
     {Map.new(results, fn
        {k, {:ok, s}} -> {k, {rel, [name, k], s}}
+       {k, {:error, _, s}} -> {k, {rel, [name, k], s}}
        {k, _} -> {k, :invalid}
-     end), for({_, {:error, ds}} <- results, d <- ds, do: d)}
+     end), for({_, r} <- results, elem(r, 0) == :error, d <- elem(r, 1), do: d)}
   end
 
   defp spec(rel, k, fields) do
@@ -231,7 +233,10 @@ defmodule Loka.Content.Resources do
         end
 
       diags ->
-        {:error, diags}
+        # A band's tone changes no number: the pool stays usable, so nothing naming it also fails.
+        if Enum.all?(diags, &(&1["path"] =~ ~r/\.bands\[\d+\]\.tone$/)),
+          do: {:error, diags, value},
+          else: {:error, diags}
     end
   end
 
