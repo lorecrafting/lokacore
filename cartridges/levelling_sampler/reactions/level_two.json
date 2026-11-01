@@ -12,6 +12,11 @@
       "op": "fact.assign",
       "fact": "second_wind",
       "value": true
+    },
+    {
+      "op": "resource.adjust",
+      "resource": "hp",
+      "by": 2147483647
     }
   ]
 }

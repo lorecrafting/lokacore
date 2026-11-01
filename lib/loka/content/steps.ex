@@ -33,7 +33,7 @@ defmodule Loka.Content.Steps do
     "status.cure" => {nil, %{reaction: :any, action: :any}},
     "damage" => {nil, %{action: :any}},
     "light.ignite" => {nil, %{action: :any}},
-    "resource.adjust" => {nil, %{action: :any}},
+    "resource.adjust" => {nil, %{action: :any, reaction: :any}},
     "build" => {nil, %{action: ~w(direction structure), service: :any}},
     "skill.acquire" => {nil, %{choice: :any}},
     "topic.grant" => {nil, %{choice: :any}},

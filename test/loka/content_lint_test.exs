@@ -36,7 +36,7 @@ defmodule Loka.ContentLintTest do
              [~s(reactions/a.json: writes state with no narrate step and no "silent": true)]
 
     # status.cure says nothing by spec, and fact.stamp is a fact write (warmth_dries, water_croft).
-    for op <- ~w(status.cure fact.stamp) do
+    for op <- ~w(status.cure fact.stamp resource.adjust) do
       assert lint(%{"reactions/w.json" => %{"steps" => [%{"op" => op}]}}) ==
                [~s(reactions/w.json: writes state with no narrate step and no "silent": true)]
     end
