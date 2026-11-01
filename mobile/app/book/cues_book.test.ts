@@ -73,6 +73,8 @@ test('a held cue sounds at the picture deadline and is felt only after the curl'
   assert.deepEqual(felt(), []);
   tick(motion.quick.duration + motion.turn.duration - 2);
   assert.deepEqual(felt(), []);
+  tick(1, 1); // a timer landing early waits again
+  assert.deepEqual(felt(), []);
   tick(1);
   assert.deepEqual(felt(), ['heavy']);
 });
