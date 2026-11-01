@@ -1,0 +1,125 @@
+// Catch-up at open (authority.ts opened; save.md, Opening a story): real SQLite files, a forged
+// row or a clamped file. Start over's `remove` must never run: the file is kept.
+import assert from 'node:assert/strict';
+import { createHash, randomUUID } from 'node:crypto';
+import { copyFileSync, mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+import { test } from 'node:test';
+import { elapsedBundle, elapsedHost, sqliteHost } from './__tests__/elapsed-host.test.ts';
+import { localSession } from './session.ts';
+
+const bundle = elapsedBundle();
+const RUN = 'aaaaaaaa-0000-4000-8000-000000000002'; // elapsedHost's first run
+const LATER = { wall: 20000, mono: 0 }; // 10 s after the save's 10000, at rate 50: 500 world seconds
+const bytes = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
+const launch = (path: string, prepare = (_: DatabaseSync) => {}) => {
+  const p = sqliteHost(path, LATER);
+  const session = localSession(
+    () => (prepare(p.sql), p.db),
+    () => assert.fail('the save file was removed'),
+    bundle,
+    { ...p.host, newId: randomUUID },
+  );
+  return { ...p, session };
+};
+/** A new save at 10000 and, with the same debt on a copy, the catch-up receipt it would write. */
+const saved = () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-open-'));
+  const path = join(dir, 'save.db');
+  elapsedHost(path, undefined, bundle).sql.close();
+  copyFileSync(path, join(dir, 'copy.db'));
+  const copy = launch(join(dir, 'copy.db'));
+  assert.equal(copy.session.game()!.view().view.time, 65300); // a valid catch-up credits the 500
+  const receipt = copy.sql.prepare('SELECT * FROM receipt').get() as Record<string, never>;
+  copy.sql.close();
+  return { path, receipt };
+};
+
+const FORGED: [string, (sql: DatabaseSync, receipt: Record<string, never>) => void][] = [
+  [
+    'the catch-up command already has a receipt of another intent (a conflict)',
+    (sql, receipt) => {
+      const row = { ...receipt, intent_digest: 'x'.repeat(64) };
+      const columns = Object.keys(row);
+      sql
+        .prepare(`INSERT INTO receipt (${columns}) VALUES (${columns.map(() => '?')})`)
+        .run(...Object.values(row));
+    },
+  ],
+  [
+    'a pending job is already due',
+    (sql) =>
+      void sql
+        .prepare(
+          `UPDATE state_row SET value = json_set(value, '$.due_time', 1) WHERE section = 'jobs'`,
+        )
+        .run(),
+  ],
+];
+
+// Breaks: a refused catch-up result escapes openGame with no cause, no Start over, on every launch.
+for (const [name, forge] of FORGED)
+  test(`${name}: open offers Start over, keeps the bytes, and Start over plays`, () => {
+    const { path, receipt } = saved();
+    const raw = new DatabaseSync(path);
+    forge(raw, receipt);
+    raw.close();
+    const before = bytes(path);
+    const a = launch(path);
+    try {
+      assert.equal(a.session.game(), undefined);
+      const failed = a.session.failed()!;
+      assert.equal(failed.kind, 'save_corrupt');
+      assert.equal(failed.startOver, true);
+      assert.equal(bytes(path), before);
+      a.session.startOver();
+      assert.equal(a.session.failed(), undefined);
+      assert.equal(a.session.game()!.view().view.time, 64800); // the calendar's start
+      assert.equal(
+        a.session.game()!.invoke({ action_key: 'look' as never, target_ids: [], input: {} }).kind,
+        'saved',
+      );
+      const { run_id } = a.sql.prepare('SELECT run_id FROM save').get() as { run_id: string };
+      assert.notEqual(run_id, RUN);
+    } finally {
+      a.sql.close();
+    }
+  });
+
+// Breaks: a refused open skips the trace catch-up Start over runs before the old receipts go.
+test('Start over after a refused catch-up keeps the old run in the trace', () => {
+  const { path, receipt } = saved();
+  const raw = new DatabaseSync(path);
+  FORGED[0][1](raw, receipt);
+  raw.close();
+  const a = launch(path);
+  try {
+    a.session.startOver();
+    const trace = a.sql.prepare('SELECT record FROM trace').all() as { record: string }[];
+    assert.equal(trace.filter((r) => r.record.includes(receipt.command_id)).length, 1);
+  } finally {
+    a.sql.close();
+  }
+});
+
+// Breaks: the guard widens to any throw, offering a destructive Start over for a full disk that
+// may clear (session.ts: an open that failed for another reason is never started over).
+test('a full disk during catch-up at open offers no Start over and keeps the bytes', () => {
+  const { path } = saved();
+  const before = bytes(path);
+  const a = launch(path, (sql) => {
+    const { page_count } = sql.prepare('PRAGMA page_count').get() as { page_count: number };
+    sql.exec(`PRAGMA max_page_count = ${page_count}`);
+  });
+  try {
+    assert.equal(a.session.game(), undefined);
+    const failed = a.session.failed()!;
+    assert.match(failed.message, /full/);
+    assert.equal(failed.startOver, false);
+    assert.equal(bytes(path), before);
+  } finally {
+    a.sql.close();
+  }
+});

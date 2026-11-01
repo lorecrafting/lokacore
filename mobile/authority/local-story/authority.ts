@@ -13,7 +13,7 @@ import { chronicle, narration } from './narration.ts';
 import { adopt, ids, token } from './save.ts';
 import type { Story } from './save.ts';
 import type { ElapsedStatus } from '../../packages/game-view/session.ts';
-import { ClockDriver, type Clocks, type Pulse } from './elapsed.ts';
+import { CatchUpRefusedError, ClockDriver, type Clocks, type Pulse } from './elapsed.ts';
 import { ElapsedRecoveryError, changedRun, formatProblem } from './elapsed-store.ts';
 import { invoke, cancel } from './invocation.ts';
 import { catchUp } from './trace.ts';
@@ -116,7 +116,13 @@ function opened(s: Story) {
     s.world.cartridge.manifest.time_policy && s.host.time
       ? new ClockDriver(s, s.host.time, (status) => changed(status))
       : undefined;
-  driver?.pulse('resume', s.meta.run_id);
+  try {
+    driver?.pulse('resume', s.meta.run_id);
+  } catch (e) {
+    if (!(e instanceof CatchUpRefusedError)) throw e;
+    s.behind = true; // Start over's best-effort trace catch-up still runs
+    return { kind: 'save_corrupt' as const, newGame: () => newGame(s) };
+  }
   s.behind = !catchUp(s.db, ids(s), s.fresh.context);
   // world() is not fenced: while `pending` it is the prior revision, which the UI shows as pending.
   return {
