@@ -137,7 +137,7 @@ What you can rely on when dialogues link with `then` (JSON dialogues today):
   A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
   no marker when each but the last by key has a `when:`.
 - A person's default Talk, when a dialogue's condition fails, passes on to what that dialogue leads
-  to, in choice key order, but only through a choice the player could take for nothing: its condition
+  to, in choice key order, what nested choices lead to after that, but only through a choice the player could take for nothing: its condition
   holds, with no check, cost or other gate. So a first meeting is an `intro` with a `when:` that links
   to a `hub`: the first Talk opens the intro, and once the condition fails Talk opens the hub unless
   another dialogue opens first. A locked or paid way on is skipped, and Talk is refused only when
