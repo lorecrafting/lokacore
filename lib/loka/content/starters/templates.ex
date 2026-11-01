@@ -253,7 +253,7 @@ defmodule Loka.Content.Starters.Templates do
     }
   end
 
-  # An existing row keeps its coordinates (a removed room's row goes); a new room gets the next x.
+  # An existing row keeps its coordinates; a new room gets the next x.
   defp layout(_, c) do
     kept = Enum.filter(c["layout"], &(&1["room"] in c["room_list"]))
     %{"layout.json" => with_rows(kept, c["room_list"])}

@@ -46,7 +46,7 @@ defmodule Loka.Content.Starters do
     Map.update(files, "cartridge.json", declared, &merge(&1, declared))
   end
 
-  @doc "The kinds `write/3` knows, sorted (the guide's coverage table lists each)."
+  @doc "The kinds `write/4` knows, sorted (the guide's coverage table lists each)."
   def kinds, do: ["cartridge" | Map.keys(Templates.kinds())] |> Enum.sort()
 
   # A text key may be dotted (`service.unaffordable`); every other name is a file or map key.
