@@ -190,11 +190,14 @@ test('a cheat invocation with targets does not resolve', () => {
     target_ids: [],
     input: { room: ref('room', 'boar_run') },
   };
-  const id = { invocation, command_id: 'e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b' } as never;
+  const id = {
+    invocation,
+    command_id: 'e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b',
+  } as unknown as Parameters<typeof resolveDev>[1];
   const bad = {
     invocation: { ...invocation, target_ids: ['x'] },
     command_id: 'e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b',
-  } as never;
+  } as unknown as Parameters<typeof resolveDev>[1];
   assert.equal('payload' in resolveDev(w, id), true);
   assert.deepEqual(resolveDev(w, bad), {
     kind: 'rejected',
