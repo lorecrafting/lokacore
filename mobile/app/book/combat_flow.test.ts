@@ -44,6 +44,28 @@ test('committed opponent death narrates once through the existing subscription',
   assert.deepEqual(p.screen().log, ['The bell rings.', 'The marsh rat falls.', 'A door creaks.']);
 });
 
+// Breaks: a round's miss comes on the clock with no press, and its whisper never reaches the cues.
+test('a round on the clock hands its miss to the cues', () => {
+  let current = view(),
+    token = 'view:1';
+  let last: ReturnType<Game['lastNarration']>;
+  const p = presenter({
+    ...game(current),
+    view: () => ({ view: current, token }),
+    lastNarration: () => last,
+  });
+  const round = (record: object) => {
+    last = record as never;
+    token += '+';
+    p.update({ kind: 'state', projection: { view: current, token }, status: { kind: 'ready' } });
+  };
+  round({ command_id: 'hit', lines: [] });
+  assert.equal(p.screen().deed, undefined);
+  const miss = { command_id: 'miss', lines: [], missed: true };
+  round(miss);
+  assert.equal(p.screen().deed, miss);
+});
+
 // Real Book state/effect routing over controlled committed Game projections; no native layout claim.
 function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']>) {
   let current = initial,

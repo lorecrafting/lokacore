@@ -142,13 +142,13 @@ function statusCues(now: GameView, was: GameView) {
   ];
 }
 
-// Only a press's own events (the receipt's), so a barrier the world moved in another's receipt is silent.
-// ponytail: a wait's receipt can carry a world-driven barrier_changed; events name no writer yet.
+// Only a press's own events (the record's), so a barrier the world moved is silent; the record tells them apart.
 function deedCues(now: GameView, was: GameView, combat: Cue[], deed?: NarrationRecord): Cue[] {
   if (!deed) return [];
   const usable = (v: GameView) => v.exits.filter((e) => e.available).map((e) => e.direction);
   const newly = usable(now).some((d) => !usable(was).includes(d));
-  const landed = combat.some((c) => c.name === 'hp_loss' || c.name === 'blow_dealt');
+  // A foe's blow in the same round leaves the miss audible; a second swing that landed does not.
+  const landed = combat.some((c) => c.name === 'blow_dealt');
   return [
     ...(deed.missed && !landed ? [{ name: 'miss' } as const] : []),
     ...(deed.lever ? [{ name: 'lever' } as const] : []),

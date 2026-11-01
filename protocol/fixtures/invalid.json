@@ -32528,5 +32528,8 @@
         "code": "invalid_type"
       }
     ]
-  }
+  },
+  {"name": "place_exposed_false", "contract": "PlaceView", "value": {"id": "11111111-2222-4333-8444-555555555555", "title": {"key": "room.t"}, "description": {"key": "room.d"}, "exposed": false}, "errors": [{"path": "/exposed", "code": "const_mismatch"}]},
+  {"name": "place_sound_empty", "contract": "PlaceView", "value": {"id": "11111111-2222-4333-8444-555555555555", "title": {"key": "room.t"}, "description": {"key": "room.d"}, "sound": ""}, "errors": [{"path": "/sound", "code": "pattern_mismatch"}]},
+  {"name": "room_sound_empty", "contract": "RoomDefinition", "value": {"key": "fen", "name": "room.fen.title", "description": "room.fen.description", "exits": {}, "sound": ""}, "errors": [{"path": "/sound", "code": "pattern_mismatch"}]}
 ]

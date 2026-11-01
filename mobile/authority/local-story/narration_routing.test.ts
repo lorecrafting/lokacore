@@ -194,7 +194,9 @@ test('a receipt says died only for the player, with or without lines', () => {
 });
 
 // Breaks: a lever reads a label instead of its event, a latch or a miss never reaches the record, a
-// landed blow or a foe's miss sounds as the player's, or a deed with no authored line is dropped like an empty receipt.
+// landed blow or a foe's miss sounds as the player's, a miss compares the character id with the attack's
+// body id, a barrier the world moved in a wait sounds as the player's latch, a round on the clock loses
+// its miss, a clock receipt or a reopen plays a lever, or a deed with no authored line is dropped.
 test('a receipt names the deed from its events, with no lines needed', () => {
   const sql = new DatabaseSync(':memory:');
   const story = {
@@ -203,25 +205,33 @@ test('a receipt names the deed from its events, with no lines needed', () => {
       getFirstSync: (query: string, ...args: string[]) => sql.prepare(query).get(...args),
     },
     meta: { lineage_id: 'lineage' },
-    world: { character: 'player', cartridge: { world: {} } },
+    world: { character: 'player', body: 'body', cartridge: { world: {} } },
   } as unknown as Story;
   sql.exec(
     "CREATE TABLE receipt(command_id TEXT, response TEXT, scope TEXT, revision INTEGER, command TEXT DEFAULT '{}')",
   );
-  const put = (payload: object) => {
+  const put = (payload: object, type = 'open', narration: object[] = []) => {
     sql.exec('DELETE FROM receipt');
-    const response = { kind: 'accepted', delta: { ops: [] }, events: [{ payload }], narration: [] };
+    const response = { kind: 'accepted', delta: { ops: [] }, events: [{ payload }], narration };
     sql
-      .prepare('INSERT INTO receipt(command_id, response, scope, revision) VALUES (?, ?, ?, ?)')
-      .run('c', JSON.stringify(response), 'story/lineage/player', 1);
+      .prepare(
+        'INSERT INTO receipt(command_id, response, scope, revision, command) VALUES (?, ?, ?, ?, ?)',
+      )
+      .run(
+        'c',
+        JSON.stringify(response),
+        'story/lineage/player',
+        1,
+        JSON.stringify({ payload: { type } }),
+      );
   };
   const rows: [object, object | undefined][] = [
     [{ type: 'custom_event', event: { key: 'lever' } }, { lever: true }],
     [{ type: 'custom_event', event: { key: 'bell' } }, undefined],
     [{ type: 'action_completed', action_key: 'pull' }, { opened: true }],
     [{ type: 'barrier_changed', barrier: 'gate' }, { opened: true }],
-    [{ type: 'attack_result', hit: false, attacker_id: 'player' }, { missed: true }],
-    [{ type: 'attack_result', hit: true, attacker_id: 'player' }, undefined],
+    [{ type: 'attack_result', hit: false, attacker_id: 'body' }, { missed: true }],
+    [{ type: 'attack_result', hit: true, attacker_id: 'body' }, undefined],
     [{ type: 'attack_result', hit: false, attacker_id: 'wolf' }, undefined],
   ];
   for (const [payload, deed] of rows) {
@@ -231,6 +241,19 @@ test('a receipt names the deed from its events, with no lines needed', () => {
       deed && { command_id: 'c', lines: [], ...deed },
       JSON.stringify(payload),
     );
+  }
+  put({ type: 'barrier_changed', barrier: 'gate' }, 'wait');
+  assert.equal(narration(story, 'c'), undefined, 'a barrier the world moved is no deed');
+  const line = [{ key: 'player_miss' }];
+  put({ type: 'attack_result', hit: false, attacker_id: 'body' }, 'wait', line);
+  assert.deepEqual(narration(story), { command_id: 'c', lines: line, missed: true }, 'the clock');
+  for (const payload of [
+    { type: 'custom_event', event: { key: 'lever' } },
+    { type: 'action_completed', action_key: 'pull' },
+    { type: 'barrier_changed', barrier: 'gate' },
+  ]) {
+    put(payload, 'open', line);
+    assert.deepEqual(narration(story), { command_id: 'c', lines: line }, 'no press, no deed');
   }
   put({ type: 'custom_event', event: { key: 'lever' } });
   assert.equal(narration(story), undefined, 'a reopen plays no deed again');

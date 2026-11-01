@@ -110,7 +110,8 @@ const holdCard = (q: Queue, now: number): Queue => ({
  * A later S3 of another key than the pending one is dropped; the diff lists the story's first.
  */
 function play(s: Queue, fired: Cue[], cue: Cue, now: number) {
-  const wash = flashes && cue.name === 'hp_loss' && now - s.washed >= motion.flash.gap;
+  const clear = now - Math.max(s.washed, struck) >= motion.flash.gap;
+  const wash = flashes && cue.name === 'hp_loss' && clear;
   if (wash) s.washed = now;
   s.playing = cue;
   s.until = now + BEAT;
@@ -166,6 +167,9 @@ let flashes = true;
 /** The Flashes setting: off, no blow is a wash; the rest of the cue stays. */
 export const flashesOn = (on: boolean) => void (flashes = on);
 export const flashesShown = () => flashes;
+let struck = -Infinity;
+/** Storm's light fell: the next wash keeps the Flash limit's gap from it too. */
+export const lightFell = (at: number) => void (struck = at);
 
 // Quests resolved since the Journal last opened; its gilt waits for the visit. Read off the views:
 // the queue can drop the cue and a resume never sends it. A reload forgets them.

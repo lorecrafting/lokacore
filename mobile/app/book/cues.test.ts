@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cuesOf, QUIET, soundOf, step, type Cue, type CueName } from './cues.ts';
+import { cuesOf, lightFell, QUIET, soundOf, step, type Cue, type CueName } from './cues.ts';
 import { motion } from './tokens.ts';
 
 const base = {
@@ -236,6 +236,14 @@ test('a blow within a second of a wash keeps all but the wash', () => {
   const a = step(QUIET, [blow(1)], 1000);
   assert.equal(step(a.q, [blow(2)], 1999).fired[0]?.wash, false);
   assert.equal(step(a.q, [blow(2)], 2000).fired[0]?.wash, true);
+});
+
+// Breaks: a blow's wash falls just after Storm's light (book-ui.md, Flash limit), off by one either way.
+test('a blow within a second of the light keeps all but the wash', () => {
+  lightFell(1000);
+  assert.equal(step(QUIET, [blow(1)], 1999).fired[0]?.wash, false);
+  assert.equal(step(QUIET, [blow(1)], 2000).fired[0]?.wash, true);
+  lightFell(-Infinity);
 });
 
 // Breaks: a cue moves severity against plan section 2's table, so it queues or merges wrongly.
@@ -477,5 +485,10 @@ test('miss, lever and latch come from the deed alone', () => {
   const walked = view({ ...exit(true), place: { ...base.place, id: 'p2' } });
   assert.deepEqual(names(walked, shut, { opened: true }), ['place']);
   assert.deepEqual(names(pool(9, 0, fight), pool(9, 0, fight), { missed: true }), ['miss']);
-  assert.deepEqual(names(pool(7, 0, fight), pool(9, 0, fight), { missed: true }), ['hp_loss']);
+  assert.deepEqual(names(pool(7, 0, fight), pool(9, 0, fight), { missed: true }), [
+    'hp_loss',
+    'miss',
+  ]);
+  const band = (b: string) => ({ combat: { encounter_id: 'e', opponent_id: 'wolf', band: b } });
+  assert.deepEqual(names(view(band('hurt')), view(band('fine')), { missed: true }), ['blow_dealt']);
 });

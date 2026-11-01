@@ -73,7 +73,8 @@ function background(
     now = update.projection.view;
   resetLogs(s, now);
   const away = holding(s, was, now);
-  world(s, away, comings(was, now, text));
+  // World entries: to the log, or held by the open settlement (book-ui.md, Away recap).
+  (away?.log ?? s.log).push(...comings(was, now, text));
   s.projection = update.projection;
   let last: ReturnType<Game['lastNarration']>;
   try {
@@ -84,11 +85,6 @@ function background(
   }
   if (last && last.command_id !== s.narrationId)
     narrate(s, closing(last, was, now), was, now, away, text);
-}
-
-// World entries: to the log, or held by the open settlement (book-ui.md, Away recap).
-function world(s: Logs, away: Logs['away'], lines: string[]) {
-  (away?.log ?? s.log).push(...lines);
 }
 
 // A new receipt's lines: World (or the open settlement's lines), and its detail or conversation.
@@ -104,12 +100,15 @@ function narrate(
   s.combatLog.push(...combat);
   s.narrationId = last.command_id;
   if (last.died) s.died = last.command_id;
+  if (last.missed) s.deed = last; // a round's miss comes on the clock (book-ui.md, Fight music)
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
   // A room change's fight lines stay on the Combat page; the room log opens at the arrival.
   if (!last.read)
-    world(s, away, narrationLines(arrived(last), now, text, false, was).flat().map(lineText)); // Read text: its page only
+    (away?.log ?? s.log).push(
+      ...narrationLines(arrived(last), now, text, false, was).flat().map(lineText),
+    ); // Read text: its page only
   // A quiet receipt settled in the background is the room log's only, as when restored.
   if (lines.length && !quietOf(s, last.lines, last.detail_id)) to?.push(...lines);
 }

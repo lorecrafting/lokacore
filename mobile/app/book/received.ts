@@ -131,7 +131,7 @@ export const telling = ({ payload: e }: Accepted['events'][number]) =>
   (e.type === 'custom_event' && e.event.key === 'lever');
 
 // The receipt's retained narration, read back from storage when the reply carried any.
-function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepted) {
+export function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepted) {
   const command_id =
     reply.kind === 'saved' ? (reply.command_id ?? accepted?.events[0]?.causation_id) : undefined;
   const lines = !!accepted?.narration?.length;

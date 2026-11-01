@@ -8,9 +8,10 @@ export const sources = (
   _rooms?: { beds?: Record<string, string>; pieces?: Record<string, string> },
 ) => {};
 export const ambience = (
-  _tag: string | undefined,
-  _weather: string | undefined,
-  _exposed: boolean,
+  _tag?: string,
+  _weather?: string,
+  _exposed?: boolean,
+  _quiet?: boolean,
 ) => {};
 export const thunder = (_muffled: boolean) => {};
 export const play = (_name: SoundName) => {};

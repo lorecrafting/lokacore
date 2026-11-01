@@ -48,7 +48,7 @@ const unlock = () => {
       const cached = [...Object.values(urls).flat(), ...Object.values(rooms.beds ?? {})]; // no load at a press; pieces stream
       for (const file of cached) void globalThis.fetch?.(file).catch(() => {});
       if (inFight) loop(); // a fight reopened before the first gesture
-      settleRoom(motion.bed.fade);
+      settleRoom(motion.bed.duration);
       if (room && !inFight) explore(room.tag);
     }
     if (audio.ctx.state !== 'running') audio.ctx.resume().catch(() => {});
@@ -232,13 +232,13 @@ function explore(tag: string) {
 }
 
 const audible = ['rain', 'wind', 'storm'];
-/** The room the Book is on: its bed tag, the weather phase that sounds (rain, wind, storm), exposed. */
-export function ambience(tag: string | undefined, weather: string | undefined, exposed: boolean) {
+/** The room the Book is on: bed tag, weather phase that sounds, exposed; `quiet`: this view plays no piece. */
+export function ambience(tag?: string, weather?: string, exposed = false, quiet = false) {
   room = { tag: tag || 'wild', weather: audible.includes(weather!) ? weather : undefined, exposed };
-  settleRoom(motion.bed.fade);
-  if (!inFight) explore(room.tag);
+  settleRoom(motion.bed.duration);
+  if (!inFight && !quiet) explore(room.tag);
 }
-globalThis.document?.addEventListener?.('visibilitychange', () => settleRoom(motion.bed.fade));
+globalThis.document?.addEventListener?.('visibilitychange', () => settleRoom(motion.bed.duration));
 
 /** Storm's thunder, on the sfx bus; through mix.muffle when the room is not exposed. */
 export const thunder = (muffled: boolean) => start('thunder', { muffled });
@@ -293,7 +293,7 @@ export function fight(event: 'open' | 'resume' | 'won' | 'away' | 'cut') {
 export function setMuted(group: 'sound' | 'music', on: boolean) {
   muted[group] = on;
   if (!on && group === 'music' && inFight && !live.music.length) loop();
-  if (!on && group === 'sound') settleRoom(motion.bed.fade);
+  if (!on && group === 'sound') settleRoom(motion.bed.duration);
   if (!on) return;
   for (const bus of Object.keys(live) as Bus[])
     if (groupOf(bus) === group) for (const stop of [...live[bus]]) stop();

@@ -2,8 +2,8 @@
 import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
 import { test } from 'node:test';
-import type { GameView } from '../../../packages/game-view/session.ts';
-import { validate } from '../../../authority/local-story/__tests__/validate.ts';
+import type { GameView } from '../../packages/game-view/session.ts';
+import { validate } from '../../authority/local-story/__tests__/validate.ts';
 
 const stub = (source: string) => ({
   url: `data:text/javascript,${encodeURIComponent(source)}`,
@@ -24,9 +24,19 @@ registerHooks({
 // Effects run only inside useCueSounds below; the rig reads this at load, so it comes first.
 let effects = false;
 g[Symbol.for('combat-effect')] = (run: () => void) => void (effects && run());
-const { BookView, color, game, nodes, view } = await import('./combat-book.test.ts');
-const { presenter } = await import('../presenter.ts');
-const { useCueSounds } = await import('../useCueSounds.ts');
+// useCueSounds's hooks keep their slots between its calls below; other renders hold no state.
+const kept: unknown[] = [];
+let slot = 0;
+g[Symbol.for('combat-state')] = (v: unknown) => {
+  const made = typeof v === 'function' ? v() : v;
+  if (!effects) return [made, () => {}];
+  const i = slot++;
+  if (!(i in kept)) kept[i] = made;
+  return [kept[i], () => {}];
+};
+const { BookView, color, game, nodes, view } = await import('./__tests__/combat-book.test.ts');
+const { presenter } = await import('./presenter.ts');
+const { useCueSounds } = await import('./useCueSounds.ts');
 
 // Breaks: Book reads another field for the bed or the sky, or drops one on the way down.
 test('place.sound and place.exposed reach the bed and the sky', () => {
@@ -49,7 +59,18 @@ test('place.sound and place.exposed reach the bed and the sky', () => {
   effects = true;
   useCueSounds(screen, 0);
   effects = false;
-  assert.deepEqual(g.bed, ['shore', 'storm', true]);
+  assert.deepEqual(g.bed, ['shore', 'storm', true, false]);
+  // Breaks: a fight's or a new chapter's view starts a piece the music steals at once.
+  const quiet = (next: Partial<GameView>) => {
+    effects = true;
+    slot = 0;
+    useCueSounds({ ...screen, view: { ...current, ...next } }, 0);
+    effects = false;
+    return g.bed[3];
+  };
+  assert.equal(quiet({ combat: view().combat }), true);
+  assert.equal(quiet({ chapter: { index: 2 } as never }), true);
+  assert.equal(quiet({ chapter: { index: 2 } as never }), false, 'a later view of that chapter');
   nodes(
     BookView({
       palette: color.light,

@@ -198,6 +198,31 @@ test('the room and deed sounds play their manifest files', () => {
 });
 
 // Breaks: a lever with no line and no other event never reads its record, so it pulls in silence.
+// Breaks: a deed on the record never reaches the cues, so the latch, lever or miss stays silent.
+test('a saved record with a deed becomes the screen deed', async () => {
+  const { retainedNarration } = await import('./received.ts');
+  for (const deed of [{ lever: true }, { opened: true }, { missed: true }]) {
+    const record = { command_id: 'c', lines: [], ...deed };
+    const s = {} as Parameters<typeof retainedNarration>[1];
+    const game = { lastNarration: () => record } as never;
+    const events = [{ payload: { type: 'action_completed' } }];
+    const accepted = { kind: 'accepted', events };
+    const reply = { kind: 'saved', command_id: 'c', decision: accepted } as never;
+    retainedNarration(game, s, reply, accepted as never);
+    assert.equal(s.deed, record, JSON.stringify(deed));
+  }
+  const s = {} as Parameters<typeof retainedNarration>[1];
+  const game = { lastNarration: () => ({ command_id: 'c', lines: [] }) } as never;
+  const accepted = { kind: 'accepted', events: [{ payload: { type: 'action_completed' } }] };
+  retainedNarration(
+    game,
+    s,
+    { kind: 'saved', command_id: 'c', decision: accepted } as never,
+    accepted as never,
+  );
+  assert.equal(s.deed, undefined, 'no deed on the record');
+});
+
 test('a lever event alone reads the record for its deed; another authored event does not', async () => {
   const { telling } = await import('./received.ts');
   const of = (key: string) => ({ payload: { type: 'custom_event', event: { key } } }) as never;

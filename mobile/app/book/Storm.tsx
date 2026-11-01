@@ -1,6 +1,6 @@
 // The sky on an exposed World page: Storm's light and Wind's corner (book-ui.md, Effects).
 import { useEffect, useRef } from 'react';
-import { flashesShown, onCue } from './cues.ts';
+import { flashesShown, lightFell, onCue } from './cues.ts';
 import {
   curveOf,
   Reanimated,
@@ -42,10 +42,11 @@ export function Storm(p: Sky) {
 }
 
 const strike = (light: SharedValue<number>) => () => {
-  const { duration, out, outEasing } = motion.afterimage;
+  const { duration, easing, out, outEasing } = motion.afterimage;
+  lightFell(performance.now());
   light.value = withSequence(
     ReduceMotion.Never,
-    withTiming(opacity.afterimage, { duration, ...never }),
+    withTiming(opacity.afterimage, { duration, easing: curveOf(easing), ...never }),
     withTiming(0, { duration: out, easing: curveOf(outEasing), ...never }),
   );
 };
@@ -97,9 +98,11 @@ function WindCorner(p: Sky & { still: boolean }) {
   const seen = useRef<{ current?: string }>({});
   useEffect(() => {
     if (!windEntry(seen.current, p.weather, blows, p.room)) return;
-    const leg = motion.flutter.duration / (2 * motion.flutter.times);
-    const rise = () => withTiming(motion.flutter.lift, { duration: leg, ...never });
-    const fall = () => withTiming(0, { duration: leg, ...never });
+    const { duration, easing, lift: up, times } = motion.flutter;
+    const each = duration / (2 * times);
+    const leg = { duration: each, easing: curveOf(easing), ...never };
+    const rise = () => withTiming(up, leg);
+    const fall = () => withTiming(0, leg);
     lift.value = withSequence(ReduceMotion.Never, rise(), fall(), rise(), fall());
   }, [blows, p.room, p.weather]); // eslint-disable-line react-hooks/exhaustive-deps
 

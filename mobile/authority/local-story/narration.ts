@@ -7,6 +7,7 @@ import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { bodyOf, refString, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { NarrationRecord } from '../../packages/game-view/session.ts';
 import { arrival, defenseEvidence } from './combat-receipt.ts';
+import { deedOf } from './deed-receipt.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { dreamDetail } from './dream-receipt.ts';
 import { eatReceipt } from './food-receipt.ts';
@@ -40,7 +41,7 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     const died = d.events.some(
       (e) => e.payload.type === 'entity_died' && !e.payload.victim_definition,
     );
-    const deed = command_id ? deedOf(d, s.world.character) : undefined; // a press's, never what reopen shows again
+    const deed = deedOf(d, r, bodyOf(s.world, s.world.character), !!command_id);
     if (!lines.length && !pickup && !died && !deed) {
       if (command_id) return undefined;
       before = r.revision;
@@ -59,24 +60,6 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
       ...(pickup && { pickup_name: s.world.entities[pickup.item_id].short }),
     } as NarrationRecord;
   }
-}
-
-// What the receipt's events say the press did (book-ui.md, Lever and latch; Impact). A lever is a
-// completed action whose outcome emits the authored `lever` event, as weather's phases are authored names.
-function deedOf(
-  d: Accepted,
-  player: string,
-): Pick<NarrationRecord, 'lever' | 'opened' | 'missed'> | undefined {
-  const has = (type: string) => d.events.some((e) => e.payload.type === type);
-  const lever = d.events.some(
-    (e) => e.payload.type === 'custom_event' && e.payload.event.key === 'lever',
-  );
-  const opened = has('action_completed') || has('barrier_changed');
-  const missed = d.events.some(
-    (e) => e.payload.type === 'attack_result' && !e.payload.hit && e.payload.attacker_id === player,
-  );
-  if (!lever && !opened && !missed) return undefined;
-  return { ...(lever && { lever }), ...(opened && { opened }), ...(missed && { missed }) };
 }
 
 const latest = (s: Story, command_id: string | undefined, before: number | null) =>

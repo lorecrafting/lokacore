@@ -86,6 +86,48 @@ test('thunder passes through the filter only when muffled', async () => {
   assert.equal(b.els.at(-1)!.url, 'thunder.m4a');
 });
 
+// Breaks: the muffle filter is built but not on the path from the file to the speaker, or muffled thunder
+// is as loud as open-sky thunder.
+test('muffled thunder runs through its filter, quieter', async () => {
+  const b = await browser();
+  b.gesture();
+  b.thunder(false);
+  const open = b.levels.at(-1)!.value;
+  const at = b.wired.length;
+  b.thunder(true);
+  const path = b.wired.slice(at);
+  assert.ok(path.includes(b.filters[0]!), 'the file feeds the filter');
+  assert.ok(path.includes(b.gains.at(-1)!), 'the filter feeds the level');
+  assert.ok(b.levels.at(-1)!.value < open);
+});
+
+// Breaks: a hidden page keeps playing a bed or starts a piece.
+test('a hidden page plays no bed and no piece', async (t) => {
+  const b = await browser();
+  b.gesture();
+  (globalThis as any).document = { hidden: true };
+  t.after(() => delete (globalThis as any).document);
+  b.ambience('inn', undefined, true);
+  assert.deepEqual(urlsOf(b.els), []);
+});
+
+// Breaks: a piece plays over the chapter theme, or a fight or chapter view spends the entry and the
+// gap on a piece it stole at once (S5).
+test('music holds the piece off; a quiet view spends nothing', async () => {
+  const b = await browser();
+  b.gesture();
+  b.play('chapter');
+  b.ambience('inn', undefined, true);
+  assert.ok(!urlsOf(b.els).includes('p-inn.m4a'), 'not over the theme');
+  const c = await browser();
+  c.gesture();
+  c.ambience('inn', undefined, true, true);
+  assert.ok(urlsOf(c.els).includes('inn.m4a'), 'the bed still plays');
+  assert.ok(!urlsOf(c.els).includes('p-inn.m4a'), 'a quiet view plays no piece');
+  c.ambience('inn', undefined, true);
+  assert.ok(urlsOf(c.els).includes('p-inn.m4a'), 'the next view still may');
+});
+
 // Breaks: a piece repeats on re-entry, ignores the gap, or lowers nothing.
 test('a piece plays once per tag and gap, and lowers beds by bedUnderMusic', async (t) => {
   let now = 1_000_000;

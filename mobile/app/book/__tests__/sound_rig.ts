@@ -41,9 +41,16 @@ export async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}
         gains.push(node);
         return node;
       };
-      createMediaElementSource = () => ({ connect: () => {}, disconnect: () => {} });
+      createMediaElementSource = () => ({
+        connect: (to: object) => wired.push(to),
+        disconnect: () => {},
+      });
       createBiquadFilter = () => {
-        const filter = { type: '', frequency: { value: 0 }, connect: () => {} };
+        const filter = {
+          type: '',
+          frequency: { value: 0 },
+          connect: (to: object) => wired.push(to),
+        };
         filters.push(filter);
         return filter;
       };

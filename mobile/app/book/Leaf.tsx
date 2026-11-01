@@ -20,8 +20,7 @@ type Props = Omit<ComponentProps<typeof Body>, 'talkOn' | 'chapterDone'> & {
  */
 export function Leaf(p: Props) {
   const v = p.screen.view;
-  if (v.combat || p.screen.ended)
-    return <Combat screen={p.screen} g={p.g} press={p.press} world={p.world} />;
+  const fight = v.combat || p.screen.ended;
   return (
     <>
       {/* lamp flicker (PR B glow) switches on with place.exposed: on merge, read it there */}
@@ -30,13 +29,17 @@ export function Leaf(p: Props) {
         exposed={!!v.place?.exposed}
         room={v.place?.id}
         turn={p.flip.turn}
-        world={!p.page && !v.scene && !v.ancestry_choices}
+        world={!fight && !p.page && !v.scene && !v.ancestry_choices}
       />
-      <Body
-        {...p}
-        talkOn={p.talkOn ?? (() => {})}
-        chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
-      />
+      {fight ? (
+        <Combat screen={p.screen} g={p.g} press={p.press} world={p.world} />
+      ) : (
+        <Body
+          {...p}
+          talkOn={p.talkOn ?? (() => {})}
+          chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
+        />
+      )}
     </>
   );
 }

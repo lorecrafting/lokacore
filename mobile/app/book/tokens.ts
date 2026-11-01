@@ -151,7 +151,7 @@ export const motion = {
     rise: space.sm,
   }, // a status icon arriving, scaling up from `from`; the item pop rising `rise`, then held and out -- mutate-skip: uncalibrated design value
   flash: { duration: 120, easing: 'inOutQuad', out: 380, gap: 1000, swell: 1.015 }, // the blow wash; swell: the page's scale at its peak; gap: the Flash limit, a later blow keeps all but the wash -- mutate-skip: uncalibrated design value
-  bed: { fade: 1000, duration: 1000, easing: 'linear' }, // a room's bed and weather layer, cross-fading; duration is fade for the token table -- mutate-skip: uncalibrated design value
+  bed: { duration: 1000, easing: 'linear' }, // a room's bed and weather layer, cross-fading on a linear ramp -- mutate-skip: uncalibrated design value
   afterimage: {
     duration: 60,
     easing: 'inOutQuad',
