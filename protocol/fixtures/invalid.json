@@ -32432,5 +32432,22 @@
         "code": "invalid_type"
       }
     ]
+  },
+  {
+    "name": "dialogue_choice_variant_entry_empty",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "narration_variants": [
+        {}
+      ]
+    },
+    "errors": [
+      {
+        "path": "/narration_variants/0/description",
+        "code": "missing_property"
+      }
+    ]
   }
 ]
