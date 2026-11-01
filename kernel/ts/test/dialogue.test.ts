@@ -12,7 +12,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import type { Command, DecisionResult, DefinitionRef } from '../src/contracts.gen.ts';
+import type { Command, DecisionResult, DefinitionRef, EntityId } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
@@ -639,6 +639,12 @@ test('a Talk that selects a dialogue opens that one', () => {
     }),
   );
   const by = (selected?: string) =>
-    spokenBy(w, w.character, BRAM, { n: 0 }, selected ? ref('dialogue', selected) : undefined)?.key;
+    spokenBy(
+      w,
+      w.character,
+      BRAM as EntityId,
+      { n: 0 },
+      selected ? ref('dialogue', selected) : undefined,
+    )?.key;
   assert.deepEqual([by(), by('bram2'), by('bram')], ['bram', 'bram2', 'bram']);
 });
