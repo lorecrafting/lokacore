@@ -137,12 +137,16 @@ defmodule Loka.Content.DialogueLinks do
   end
 
   # The entries of each speaker that Talk can fall through from, in key order. A speaker with a policy-less
-  # entry is out: `spokenBy` opens that one when the rest fail, and no fall-through runs.
+  # entry that offers a choice is out: `spokenBy` opens that one when the rest fail, and no fall-through runs.
   defp shut_groups(open) do
-    always = for {_, d} <- open, !d["policy"], !d["keyword"], do: d["npc"]
+    always = for {_, d} <- open, opens?(d), do: d["npc"]
     shut = for {_, d} = e <- open, shut?(d), d["npc"] not in always, do: e
     shut |> Enum.group_by(fn {_, d} -> d["npc"] end) |> Map.values()
   end
+
+  # `spokenBy`: no policy of its own and a choice with none, so it always opens (a keyword one never for Talk).
+  defp opens?(d),
+    do: !d["policy"] && !d["keyword"] && Enum.any?(d["choices"], fn {_, c} -> !c["policy"] end)
 
   defp shut?(d), do: d["policy"] && !d["name"] && !d["keyword"]
 
