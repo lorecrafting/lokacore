@@ -9,7 +9,7 @@ defmodule Loka.Content.Starters.World do
     [here, far, there] = [c["rooms"], "#{name}_far", "#{name}_back"]
 
     route = fn from, to, key, back ->
-      %{"transports/#{key}.json" => leg(from, to, key, back, c)}
+      %{"transports/#{key}.json" => leg(from, to, key, back, name, c)}
     end
 
     detail = fn key ->
@@ -36,10 +36,10 @@ defmodule Loka.Content.Starters.World do
     |> Map.merge(ride(there))
   end
 
-  defp leg(from, to, key, back, c) do
+  defp leg(from, to, key, back, detail, c) do
     %{
       "room" => from,
-      "detail" => Path.basename(key, "_back"),
+      "detail" => detail,
       "destination" => to,
       "reverse" => back,
       "recipient" => c["npcs"],

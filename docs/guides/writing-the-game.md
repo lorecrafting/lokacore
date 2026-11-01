@@ -60,7 +60,7 @@ why the action was missing or refused.
 compiling file for each pair (the pairs before a refusal stay written), with every line a `~` placeholder, merged into the files it touches
 (it never replaces a value already there: it refuses, names the value and writes nothing),
 plus the capabilities it needs in `cartridge.json`; it prints what it changed, then what to fill and the
-next command. `rooms <name> --from <room> <direction>` writes the exit both ways. A kind that refers
+next command. `rooms <name> --from <room> <direction>` writes the exit both ways and, when `layout.json` exists, places the new room's row that way from its source. `cartridge <dir>` stands alone: run it first, then the other pairs with the dir last. A rerun leaves the file it names as you left it, and refuses when that file's steps differ. A kind that refers
 to another takes the first one you have (for a room, the entry) and refuses with the command to run first. The shapes
 come from the samplers; the rules from the [Builders' Guide](../BUILDERS-GUIDE.md#authoring-paths-and-examples).
 
@@ -85,7 +85,7 @@ a compile diagnostic you run by hand reads as `CODE path` (`SCHEMA_VIOLATION roo
 | `layout` | [`identity_sampler`](../../cartridges/identity_sampler/) | rooms; every later `bin/loka new` adds the rows of rooms it lacks |
 | `liquids` | [`buffs_sampler`](../../cartridges/buffs_sampler/) | nothing |
 | `npcs` | [`access_sampler`](../../cartridges/access_sampler/) | a room |
-| `populations` | [`boss_sampler`](../../cartridges/boss_sampler/) | a room; also writes the NPC, corpses, loot item, `hp`/`mv` resources, calendar, combat and death settings the engine requires |
+| `populations` | [`boss_sampler`](../../cartridges/boss_sampler/) | a room whose east exit is free, one population per cartridge; also writes the NPC, corpses, loot item, `hp`/`mv` resources, calendar, combat and death settings the engine requires |
 | `quests` | [`chapters_sampler`](../../cartridges/chapters_sampler/) | an item (the objective is to hold it) |
 | `reactions` | [`scars_sampler`](../../cartridges/scars_sampler/) | an item |
 | `replenish` | [`decay_sampler`](../../cartridges/decay_sampler/) | an item, a room and an NPC |

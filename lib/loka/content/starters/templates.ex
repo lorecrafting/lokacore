@@ -17,7 +17,7 @@ defmodule Loka.Content.Starters.Templates do
   defp kind("attributes"), do: {~w(attribute), [], single("attributes", %{"start" => 8})}
   defp kind("barriers"), do: {~w(barrier), [], &barrier/2}
   defp kind("behaviours"), do: {~w(reaction narration), [], &behaviour/2}
-  defp kind("bleeds"), do: {~w(bleed), ~w(resources), &bleed/2}
+  defp kind("bleeds"), do: {~w(bleed combat food skill), ~w(resources), &bleed/2}
   defp kind("dialogues"), do: {~w(dialogue), ~w(npcs), &dialogue/2}
   defp kind("emotes"), do: {~w(emote), [], file("emotes", %{"others" => p()})}
   defp kind("facts"), do: {~w(fact), [], single("facts", fact())}
@@ -40,7 +40,7 @@ defmodule Loka.Content.Starters.Templates do
   defp kind("skills"),
     do: {~w(skill fact policy), [], file("skills", %{"name" => p(), "requirement" => p()})}
 
-  defp kind("statuses"), do: {~w(status), ~w(resources), &status/2}
+  defp kind("statuses"), do: {~w(status death), ~w(resources), &status/2}
 
   defp kind("structures"),
     do: {~w(construction), [], file("structures", room() |> Map.delete("exits"))}
@@ -254,17 +254,40 @@ defmodule Loka.Content.Starters.Templates do
   end
 
   # An existing row keeps its coordinates; a new room gets the next x.
-  defp layout(_, c) do
-    kept = Enum.filter(c["layout"], &(&1["room"] in c["room_list"]))
-    %{"layout.json" => with_rows(kept, c["room_list"])}
-  end
+  defp layout(_, c), do: %{"layout.json" => with_rows(c["layout"], c["room_list"])}
 
-  @doc "The rows, then one at the next x for each of `rooms` they lack."
-  def with_rows(rows, rooms) do
+  @doc "The rows, the room joined `--from` beside its source, then the next x for each other lack."
+  def with_rows(rows, rooms, name \\ nil, from \\ nil) do
+    rows = rows ++ if(name in rooms, do: beside(rows, name, from), else: [])
     next = Enum.max(Enum.map(rows, & &1["x"]), fn -> -1 end) + 1
 
     rows ++
       for {room, i} <- Enum.with_index(rooms -- Enum.map(rows, & &1["room"])),
           do: %{"room" => room, "x" => next + i, "y" => 0, "z" => 0}
+  end
+
+  # The kernel's axes (kernel/ts/src/view/knowledge.ts): north is -y. No source row or a taken cell
+  # falls back to the next x.
+  @step %{
+    "north" => [0, -1, 0],
+    "south" => [0, 1, 0],
+    "east" => [1, 0, 0],
+    "west" => [-1, 0, 0],
+    "up" => [0, 0, 1],
+    "down" => [0, 0, -1]
+  }
+  defp beside(_, _, nil), do: []
+
+  defp beside(rows, name, {room, way, _}) do
+    case Enum.find(rows, &(&1["room"] == room)) do
+      nil -> []
+      source -> free(rows, name, Enum.zip(~w(x y z), @step[way]), source)
+    end
+  end
+
+  defp free(rows, name, steps, source) do
+    cell = Map.new(steps, fn {axis, d} -> {axis, source[axis] + d} end)
+    taken = Enum.any?(rows, &(&1["room"] == name or Map.take(&1, ~w(x y z)) == cell))
+    if taken, do: [], else: [Map.put(cell, "room", name)]
   end
 end

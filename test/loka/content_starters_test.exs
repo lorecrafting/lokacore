@@ -293,7 +293,7 @@ defmodule Loka.ContentStartersTest do
     outside = Path.join(tmp, "victim.json")
     File.write!(outside, "{}")
 
-    assert {:error, "a name is lowercase" <> _} =
+    assert {:error, "--from: a room is lowercase" <> _} =
              Starters.write(dir, "rooms", "x", {"../../victim", "east"})
 
     assert File.read!(outside) == "{}"

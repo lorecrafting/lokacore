@@ -8,7 +8,7 @@ defmodule Loka.Content.Starters do
   starter, before any write. Every starter adds the rows an existing layout.json lacks.
   """
   alias Loka.Content.Barriers
-  alias Loka.Content.Starters.Templates
+  alias Loka.Content.Starters.{Parts, Templates}
 
   @doc """
   Writes the starter; `{:ok, paths it changed}` or `{:error, one line for the author}`. `from` is
@@ -35,11 +35,13 @@ defmodule Loka.Content.Starters do
          {:ok, context} <- context(dir, needs),
          {:ok, context} <- placed(context, dir, kind, name, from) do
       files = with_capabilities(make.(name, context), caps)
-      put(dir, with_layout(files, dir, context))
+      own = if !from, do: "#{kind}/#{name}.json"
+      put(dir, with_layout(files, dir, context, name), own)
     end
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
-    :bad_layout -> {:error, "layout.json: every row needs a number x: fix it first"}
+    :bad_layout -> {:error, "layout.json: every row needs a number x, y and z: fix it first"}
+    {:bad_area, file} -> {:error, "#{file} needs a rooms object: fix it first"}
   end
 
   defp with_capabilities(files, caps) do
@@ -116,8 +118,9 @@ defmodule Loka.Content.Starters do
     back = Barriers.opposite(way)
 
     cond do
-      valid_name(room) != :ok ->
-        valid_name(room)
+      # An authored room: a compiler key, up to 64; the starter derives nothing from it.
+      !(room =~ ~r/^[a-z][a-z0-9_]{0,63}$/) ->
+        {:error, "--from: a room is lowercase letters, digits and _, 64 at most (got #{room})"}
 
       !back ->
         {:error, "--from: a direction is north, south, east, west, up or down (got #{way})"}
@@ -133,14 +136,14 @@ defmodule Loka.Content.Starters do
     end
   end
 
-  defp with_layout(%{"layout.json" => _} = files, _, _), do: files
+  defp with_layout(%{"layout.json" => _} = files, _, _, _), do: files
 
-  defp with_layout(files, dir, c) do
+  defp with_layout(files, dir, c, name) do
     if File.exists?(Path.join(dir, "layout.json")) do
       rooms =
         Enum.uniq(c["room_list"] ++ Enum.flat_map(files, fn {rel, b} -> rooms_in(rel, b) end))
 
-      Map.put(files, "layout.json", Templates.with_rows(c["layout"], rooms))
+      Map.put(files, "layout.json", Templates.with_rows(c["layout"], rooms, name, c["from"]))
     else
       files
     end
@@ -153,22 +156,32 @@ defmodule Loka.Content.Starters do
   defp rooms(dir) do
     bundled =
       for a <- Path.wildcard(Path.join(dir, "areas/*.json")),
-          r <- Map.keys(read(a)["rooms"] || %{}),
+          r <- area_rooms(a),
           do: r
 
     plain = for r <- Path.wildcard(Path.join(dir, "rooms/*.json")), do: Path.basename(r, ".json")
     Enum.sort(bundled ++ plain)
   end
 
+  defp area_rooms(file) do
+    case read(file) do
+      %{"rooms" => %{} = rooms} -> Map.keys(rooms)
+      area when is_map(area) and not is_map_key(area, "rooms") -> []
+      _ -> throw({:bad_area, file})
+    end
+  end
+
   defp layout_rows(dir) do
     case read(Path.join(dir, "layout.json")) do
       rows when is_list(rows) ->
-        if Enum.all?(rows, &is_number(is_map(&1) && &1["x"])), do: rows, else: throw(:bad_layout)
+        if Enum.all?(rows, &placed_row?/1), do: rows, else: throw(:bad_layout)
 
       _ ->
         []
     end
   end
+
+  defp placed_row?(row), do: is_map(row) and Enum.all?(~w(x y z), &is_number(row[&1]))
 
   @single ~w(facts resources attributes)
   defp first(dir, kind, _) when kind in @single do
@@ -192,18 +205,33 @@ defmodule Loka.Content.Starters do
   defp capabilities(caps),
     do: %{"requires" => %{"capabilities" => Map.new(caps, &{&1, 1})}}
 
-  defp put(dir, files) do
+  # `own`, the file this starter names, is the author's once it exists: a rerun checks it, and never
+  # adds back what the author removed.
+  defp put(dir, files, own \\ nil) do
     touched =
       for {rel, new} <- files, path = Path.join(dir, rel), do: {rel, path, read(path), new}
 
     case Enum.find_value(touched, fn {rel, _, old, new} -> clash(old, new, rel <> ":") end) do
       nil ->
-        {:ok, touched |> Enum.flat_map(&written/1) |> Enum.sort()}
+        {:ok, touched |> Enum.reject(&authored?(&1, own)) |> write_all()}
 
       at ->
-        {:error,
-         "#{at} already has a value and a starter never replaces one; nothing was written"}
+        {:error, refusal(at)}
     end
+  end
+
+  defp write_all(touched), do: touched |> Enum.flat_map(&written/1) |> Enum.sort()
+
+  defp authored?({rel, path, _, _}, own), do: rel == own and File.exists?(path)
+
+  defp refusal(at) do
+    said = "#{at} already has a value and a starter never replaces one; nothing was written"
+
+    if at =~ ": exits ",
+      do:
+        said <>
+          ". That exit is taken: use another --from direction, or move it in both rooms' files and rerun",
+      else: said
   end
 
   # An unchanged file keeps its bytes, the author's formatting too.
@@ -214,18 +242,21 @@ defmodule Loka.Content.Starters do
 
       merged ->
         File.mkdir_p!(Path.dirname(path))
-        File.write!(path, pretty(merged))
+        File.write!(path, Parts.pretty(merged))
         [path]
     end
   end
 
   # Where the starter would replace something: a scalar or shape that differs, or a list of rows
-  # that drops one. Lists of names union (below).
+  # that differs (a rerun must not restore a step the author deleted). Lists of names union, and
+  # layout's rows only grow (below).
   defp clash(old, _, _) when old == %{}, do: nil
   defp clash(same, same, _), do: nil
 
+  defp clash(old, new, "layout.json:") when is_list(old) and is_list(new), do: nil
+
   defp clash(old, new, at) when is_list(old) and is_list(new) do
-    if Enum.all?(new, &is_binary/1) or old -- new == [], do: nil, else: at
+    if Enum.all?(new, &is_binary/1), do: nil, else: at
   end
 
   defp clash(old, new, at) when is_map(old) and is_map(new) do
@@ -259,22 +290,4 @@ defmodule Loka.Content.Starters do
   end
 
   defp merge(_, new), do: new
-
-  @doc false
-  # Two-space JSON the author edits and the column's source finder reads one `"key":` per line.
-  def pretty(value), do: IO.iodata_to_binary([pretty(value, ""), "\n"])
-
-  defp pretty(map, pad) when is_map(map) and map_size(map) > 0 do
-    rows =
-      for {k, v} <- Enum.sort(map), do: [pad, "  ", JSON.encode!(k), ": ", pretty(v, pad <> "  ")]
-
-    ["{\n", Enum.intersperse(rows, ",\n"), "\n", pad, "}"]
-  end
-
-  defp pretty(list, pad) when is_list(list) and list != [] do
-    rows = for v <- list, do: [pad, "  ", pretty(v, pad <> "  ")]
-    ["[\n", Enum.intersperse(rows, ",\n"), "\n", pad, "]"]
-  end
-
-  defp pretty(value, _), do: JSON.encode!(value)
 end
