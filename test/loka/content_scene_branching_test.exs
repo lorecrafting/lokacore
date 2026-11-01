@@ -164,6 +164,14 @@ defmodule Loka.ContentSceneBranchingTest do
     assert [%{"data" => %{"why" => "scene_key_taken", "key" => "s_go"}}] = diags
   end
 
+  # Break: a nested resolve also blames a `then` the writer never wrote.
+  test "a nested resolve is refused at its own line, not at an implied then" do
+    text = "npc: bram\nbram: ~\n- Go\n  quest: resolve q\n  bram: ~\n  - In\n    bram: ~\n"
+    assert {:error, diags} = sampler(text)
+    assert "resolve_nested" in Enum.map(diags, & &1["data"]["why"])
+    assert [] == for(%{"code" => "OUTCOME_MISMATCH"} = d <- diags, do: d)
+  end
+
   # Break: a `then` the scene never wrote is refused as "also written in the scene".
   test "a sidecar then on a choice with no written then is not an overlap" do
     json = {"dialogues/scene.json", %{"choices" => %{"look" => %{"then" => "end"}}}}
