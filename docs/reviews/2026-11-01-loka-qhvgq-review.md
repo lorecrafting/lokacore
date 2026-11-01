@@ -3,7 +3,7 @@
 - PR [#569](https://github.com/lorecrafting/lokacore/pull/569) `engine/cold-open-prune` at `d8045ee6280bb230ff4849f510b7a167a802a971`.
 - Governing: [owner decision](../decisions/owner-decision-away-catch-up-cap-2026-11-01.md), [save.md](../system/save.md), Away cap, [cartridge.md](../system/cartridge.md), W27 in [mechanics.md](../system/mechanics.md).
 - Reviewer: independent; authored none of the work.
-- **Verdict: CHANGES REQUIRED** (two should-fixes on the pinned contract; the cap logic itself holds).
+- **Verdict: CHANGES REQUIRED** (two should-fixes on the pinned contract, a fix round because a schema bound is a logic change; the cap logic itself holds).
 - CI at this head (`gh run list --commit`): ci, book-e2e and graph-diff completed, success. PR is CONFLICTING: only `docs/system-graph.gen.json` (`git merge-tree`).
 
 ## Must be true (written before the diff check)
@@ -16,9 +16,9 @@
 6. No due job is skipped or stuck: the clock does not jump, jobs stay in logical time.
 7. The field is validated at compile; hashes stay unchanged for a cartridge without it, except as the rule explains.
 8. `kernel_api` is main+1 at merge; old saves are refused with Start over.
-9. The owner's goal (about 3 s, bounded save at any absence) holds on a realistic path.
+9. The owner's goal (about 3 s, bounded save at any absence) holds on the path measured.
 
-1-6 hold. 7 holds except as below. 8 holds today (main 1.143 at `d7407bb8d`, head 1.144). 9 holds for one absence on a lightly played save only.
+1-6 hold. 7 holds except as below. 8 holds today (main 1.143 at `d7407bb8d`, head 1.144). 9 holds as the decision words it, for one absence on a lightly played save; see the question below.
 
 ## Findings
 
@@ -26,7 +26,7 @@
 
 **should-fix** `protocol/fixtures/invalid.json:22083` (the sibling rows; no `away_cap` row exists): nothing pins the bounds. `recap_after_minutes` has rows for 10081, 0 and 1.5; `away_cap_hours` has none, and `git grep away_cap` finds no negative test anywhere. Scenario: a contract regeneration that drops `minimum: 1` goes unnoticed; a cartridge with cap 0 then passes `??` at `calendar.ts:18`, and every return credits nothing, so the world stops while closed. Add rows for 0, 1.5 and max+1. Compile does refuse 0, 1.5 and 9007199254740993 today (run). A schema-only mutant to `minimum: 0` left `validate.test.ts`, `recap_after.test.ts` and `contracts_test.exs` green, but `contracts.gen.ts` was not regenerated, so the absence of a row, not that run, is the evidence.
 
-**should-fix (owner or PM item, not code)** PR body "Pruning dropped": the owner's direction made dropping pruning conditional on a fast cold open. The capped rows measure a near-fresh save (25 receipts). A daily player credits a full day per return. My run (node sqlite, load 28): 10 daily returns 245 receipts, 1.3 s; 30 daily returns 732 receipts, 6,496,256 B, 11.6 s. The developer's "4.2 s quiet" is the same save. The PR discloses this as an open question; loka-qhvgq must not close on it without an owner ruling or a follow-up bead. Not a merge blocker: the cap is correct either way.
+**question (owner or PM)** `docs/decisions/owner-decision-away-catch-up-cap-2026-11-01.md:9-11`: the decision conditions dropping pruning on cold open at a month, three months and a year "with the cap alone", under about 3 s "at any absence". Read literally that is met: the rows measure one absence on a near-fresh save (25 receipts). A daily player is not covered; each return credits a full day. My run (node sqlite, load 28): 10 daily returns 245 receipts, 1.3 s; 30 daily returns 732 receipts, 6,496,256 B, 11.6 s (the developer's "4.2 s quiet" is the same save). The PR discloses this as an open question. Does the owner accept it? loka-qhvgq should not close without that ruling or a follow-up bead. Not a merge blocker: the cap is correct either way.
 
 **nit** PR body "`kernel_api` 1.143 (main+1)": head is 1.144.
 
