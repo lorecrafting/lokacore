@@ -20,7 +20,7 @@ const FREE_STEPS = new Set<string>(['narrate', 'topic.grant', 'fact.assign']);
 
 /**
  * Where a failed Talk can fall through from `d`: each dialogue of its own speaker that a choice with
- * nothing to pass or pay leads to, `entry: false` aside, in key order, with that choice, whose policy `spokenBy` tests.
+ * nothing to pass or pay leads to, in key order, with that choice, whose policy `spokenBy` tests.
  */
 export const onward = (world: World, d: DialogueDefinition) => {
   const all = Object.values(world.cartridge.dialogues ?? {});

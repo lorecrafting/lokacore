@@ -1,4 +1,4 @@
-# size: allow 401, every whole-cartridge dialogue link check in one graph
+# size: allow 416, every whole-cartridge dialogue link check in one graph
 defmodule Loka.Content.DialogueLinks do
   @moduledoc "A dialogue choice's policy and narration variants as roots, and its then and then_failed checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -112,8 +112,8 @@ defmodule Loka.Content.DialogueLinks do
   defp only_spent_ways?(d, by_key) do
     seen = [d["key"]]
 
-    free_links(d, by_key, seen, &free?/1) != [] and
-      free_links(d, by_key, seen, &(free?(&1) and not spends_itself?(&1))) == []
+    free_links([d], by_key, seen, &free?/1) != [] and
+      free_links([d], by_key, seen, &(free?(&1) and not spends_itself?(&1))) == []
   end
 
   # `once` lowers to this, as does `needs: not x` with `sets: x`.
@@ -222,30 +222,42 @@ defmodule Loka.Content.DialogueLinks do
     end
   end
 
-  # fall_through.ts `onward`: a default Talk whose condition fails opens the first dialogue of its speaker
-  # that a free choice leads to, in key order. More than one is a guess; the warning names that pick.
+  # fall_through.ts `onward`: a default Talk whose entries all fail opens the first dialogue of their speaker
+  # that a free choice leads to, in key order, the entries pooled. More than one is a guess; the warning
+  # names that pick, on the speaker's first shut entry.
   defp fall_through(open, sorted) do
     by_key = Map.new(sorted, fn {_, d} -> {d["key"], d} end)
+    seen = for {_, d} <- open, do: d["key"]
 
-    for {rel, d} <- open,
-        d["policy"],
-        !d["name"],
-        !d["keyword"],
-        first <- guess(d, by_key, []) do
+    for [{rel, _} | _] = group <- shut_groups(open),
+        first <- guess(Enum.map(group, &elem(&1, 1)), by_key, seen) do
       warning("ENTRY_GUESSED", rel, ["npc"], %{"key" => first})
     end
   end
 
+  # The entries of each speaker that Talk can fall through from, in key order. A speaker with a policy-less
+  # entry that offers a choice is out: `spokenBy` opens that one when the rest fail, and no fall-through runs.
+  defp shut_groups(open) do
+    always = for {_, d} <- open, opens?(d), do: d["npc"]
+    shut = for {_, d} = e <- open, shut?(d), d["npc"] not in always, do: e
+    shut |> Enum.group_by(fn {_, d} -> d["npc"] end) |> Map.values()
+  end
+
+  # `spokenBy`: no policy of its own and a choice with none, so it always opens (a keyword one never for Talk).
+  defp opens?(d),
+    do: !d["policy"] && !d["keyword"] && Enum.any?(d["choices"], fn {_, c} -> !c["policy"] end)
+
+  defp shut?(d), do: d["policy"] && !d["name"] && !d["keyword"]
+
   # Down a line of shut dialogues to the first with more than one way on: `[its pick]`, or `[]`.
-  defp guess(d, by_key, seen) do
-    case free_links(d, by_key, [d["key"] | seen], &free?/1) do
+  # `seen` (entries and shut dialogues passed) are tried already, as `tried.includes` in `spokenBy`.
+  defp guess(shut, by_key, seen) do
+    case free_links(shut, by_key, seen, &free?/1) do
       [first, _ | _] ->
         [first]
 
       [only] ->
-        if by_key[only]["policy"],
-          do: guess(by_key[only], by_key, [only | seen]),
-          else: []
+        if by_key[only]["policy"], do: guess([by_key[only]], by_key, [only | seen]), else: []
 
       [] ->
         []
@@ -253,21 +265,24 @@ defmodule Loka.Content.DialogueLinks do
   end
 
   # What a shut dialogue falls through to, past `entry: false` ones, which never open themselves.
-  defp free_links(d, by_key, seen, way?) do
+  defp free_links(shut, by_key, seen, way?) do
     for(
+      d <- shut,
       {_, c} <- Enum.sort(d["choices"]),
       way?.(c),
-      by_key[c["then"]]["npc"] == d["npc"],
       c["then"] not in seen,
-      to = by_key[c["then"]],
-      k <-
-        if(to["entry"] == false,
-          do: free_links(to, by_key, [c["then"] | seen], way?),
-          else: [c["then"]]
-        ),
+      by_key[c["then"]]["npc"] == d["npc"],
+      k <- past_set(c["then"], by_key, seen, way?),
       do: k
     )
     |> Enum.uniq()
+  end
+
+  defp past_set(key, by_key, seen, way?) do
+    if(by_key[key]["entry"] == false,
+      do: free_links([by_key[key]], by_key, [key | seen], way?),
+      else: [key]
+    )
   end
 
   defp free?(c) do

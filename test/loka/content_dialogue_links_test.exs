@@ -1,3 +1,4 @@
+# size: allow 502, every whole-cartridge dialogue link check has its case here
 defmodule Loka.ContentDialogueLinksTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/persuade_sampler")}
@@ -354,6 +355,15 @@ defmodule Loka.ContentDialogueLinksTest do
     named = %{"policy" => %{}, "name" => "n"}
     leaves = [d("a_x", "a"), d("z_y", "a")]
     assert entry_findings([d("g", "a", ["a_x", "z_y"], named) | leaves]) == []
+
+    # Breaks: a shut keyword dialogue (a say's, never Talk's) warned as a guess.
+    word = %{"policy" => %{}, "keyword" => "w"}
+    assert entry_findings([d("g", "a", ["a_x", "z_y"], word) | leaves]) == []
+
+    # Breaks: a policy-less keyword entry (a say's, never Talk's) counts as the entry Talk opens.
+    z_k = d("z_k", "a", [], %{"keyword" => "w", "choices" => %{"bye" => %{}}})
+    shut = d("g", "a", ["a_x", "z_y"], %{"policy" => %{}})
+    assert [{"warning", "ENTRY_GUESSED", _, "a_x"}] = entry_findings([shut, z_k | leaves])
 
     # Breaks: a choice that can refuse or charge when taken counts as a way on.
     free = %{"then" => "z_y"}
