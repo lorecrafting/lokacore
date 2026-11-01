@@ -1,4 +1,4 @@
-# size: allow 435, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 441, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -137,12 +137,17 @@ defmodule Loka.Content.Source do
     {forms, bad} = SceneFiles.parse(text, key)
     written = Map.new(SceneLines.lines(text, key))
 
-    # Source-only until SceneMerge.merge: which `then`s the writer wrote, not lowering.
     {for {k, value} <- forms do
-       then = for {["choices", c, "then"], _} <- Map.get(written, k, []), do: c
-       value = Map.put(value, :written_then, then)
+       value = written_marks(value, Map.get(written, k, []))
        {if(k == key, do: rel, else: SceneFiles.rel(rel, k)), {:dialogue, k, []}, value}
      end, bad}
+  end
+
+  # Source-only: which `then`s the writer wrote (until SceneMerge.merge), and an unsorted choice order.
+  defp written_marks(value, lines) do
+    order = for {["choices", c], _} <- lines, do: c
+    value = if order == Enum.sort(order), do: value, else: Map.put(value, "choice_order", order)
+    Map.put(value, :written_then, for({["choices", c, "then"], _} <- lines, do: c))
   end
 
   defp checked(rel, kind, value) do
@@ -375,6 +380,9 @@ defmodule Loka.Content.Source do
   }
 
   # Source only (DialogueOnce lowers it to a fact, a step and a policy).
+  # Source only: a scene's written order, where it is not sorted (ChoiceOrder).
+  @choice_order %{"type" => "array", "items" => %{"type" => "string"}}
+
   @choice_once %{
     "description" =>
       "This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset.",
@@ -390,6 +398,7 @@ defmodule Loka.Content.Source do
     |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
     |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
     |> put_in(["DialogueChoice", "properties", "once"], @choice_once)
+    |> put_in(["DialogueDefinition", "properties", "choice_order"], @choice_order)
     |> schedule(defs)
     |> Map.update!(
       "LiquidRow",

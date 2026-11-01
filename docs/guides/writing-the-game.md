@@ -100,6 +100,9 @@ maud: ~
   with no `then` comes back to these choices, or closes the talk if it is the only choice. A nested
   choice with no `then` goes back to the choices above it. A scene another scene's `then` leads to
   closes after a choice with no `then`; write `then: <its own name>` to come back.
+- Choices show in the order you write them. A choice is still known by its words everywhere you
+  write: a `then`, a same-key JSON, a `once` fact. The built cartridge numbers the choices to hold
+  that order, so moving a choice line changes its id there, as rewording one does.
 - A `- ` indented under a choice's reply opens nested choices: its own dialogue, keyed
   `<key>_<choice>` (here `branching_choice_one`). The reply is what the player reads above them, so
   it must be written first, and the nested choices are shown next. Going back to a shallower `- `

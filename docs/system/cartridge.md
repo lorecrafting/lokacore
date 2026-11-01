@@ -900,7 +900,10 @@ build. The author tools below are reachable only in that bundle (a production ex
   deeper `- ` under a reply lowers to the dialogue `<key>_<choice>`, whose `then` the parent takes.
   `once` lowers in the compile pipeline for every dialogue: the engine fact `<key>_<choice>_done`,
   a `fact.assign` step, and a policy `not` of it (under `all` beside an authored policy). A JSON of
-  the same key (a nested set's included) is refused `scene_overlap` for any field the scene writes. A `gives:`
+  the same key (a nested set's included) is refused `scene_overlap` for any field the scene writes. The
+  runtime shows choices sorted by key, so a set written out of key order carries the source-only
+  `choice_order`, and the artifact's keys for that dialogue become `c001_<key>` in written order (a
+  choice only its JSON adds follows, sorted); errors, `once` facts, nested names and JSON keep `<key>`. A `gives:`
   declares its item role. A `gives:` whose item does not start with the scene's NPC is a warning
   `OUTCOME_MISMATCH` (`data.item`, `data.holder`): the choice stays hidden until play moves it there.
   Schema refusals carry hint data for those words: `valid` on `UNKNOWN_FIELD`, `expected` (and an

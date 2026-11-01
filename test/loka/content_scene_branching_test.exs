@@ -17,11 +17,11 @@ defmodule Loka.ContentSceneBranchingTest do
     needs: saw_lantern
     once
     bram: ~
+    - Leave
+      bram: ~
     - Who
       bram: ~
       sets: knows_potter
-    - Leave
-      bram: ~
   - Take
     gives: lantern
     once
@@ -175,7 +175,7 @@ defmodule Loka.ContentSceneBranchingTest do
   # Break: a `then` the scene never wrote is refused as "also written in the scene".
   test "a sidecar then on a choice with no written then is not an overlap" do
     json = {"dialogues/scene.json", %{"choices" => %{"look" => %{"then" => "end"}}}}
-    text = "npc: bram\nbram: ~\n- Look\n  bram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n"
+    text = "npc: bram\nbram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n- Look\n  bram: ~\n"
     assert {:ok, out, _} = sampler(text, [json])
     scene = JSON.decode!(out)["cartridge"]["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]
     assert scene["choices"]["look"]["then"] == "end"
@@ -238,6 +238,62 @@ defmodule Loka.ContentSceneBranchingTest do
       )
 
     assert parent == [{"dialogues/s_go.choices.in.then", "scene_overlap"}]
+  end
+
+  # Break: choices the writer ordered show sorted (the runtime sorts by key); or the numbering
+  # reaches a nested dialogue's name, a `once` fact or a same-key JSON; or the source-only list
+  # reaches the artifact; or a choice a JSON added jumps ahead.
+  test "choices show as written, known by their words everywhere else" do
+    text =
+      "npc: bram\nbram: ~\n- Plain\n  bram: ~\n  once\n  sets: knows_potter\n- Ask\n  bram: ~\n  - Who\n    bram: ~\n"
+
+    add = %{"label" => prose("~"), "narration" => prose("~")}
+    json = {"dialogues/scene.json", %{"choices" => %{"zed" => add, "add" => add}}}
+
+    assert {:ok, out, []} = sampler(text, [json, with_facts()])
+    c = JSON.decode!(out)["cartridge"]
+    scene = c["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]
+
+    assert Enum.sort(Map.keys(scene["choices"])) ==
+             ~w(c001_plain c002_ask c003_add c004_zed)
+
+    refute is_map_key(scene, "choice_order")
+    assert scene["choices"]["c002_ask"]["then"] == "scene_ask"
+    assert is_map_key(c["dialogues"], "scene_sampler@0.0.1:dialogue/scene_ask")
+    assert is_map_key(c["facts"], "scene_sampler@0.0.1:fact/scene_plain_done")
+
+    sorted = "npc: bram\nbram: ~\n- Ask\n  bram: ~\n- Plain\n  bram: ~\n"
+    assert {:ok, out, []} = sampler(sorted)
+    d = JSON.decode!(out)["cartridge"]["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]
+    assert Enum.sort(Map.keys(d["choices"])) == ~w(ask plain)
+  end
+
+  # Break: a story point's claim or a riddle's answer choice still names the word key, which the
+  # numbered cartridge no longer has.
+  test "what points at a numbered choice follows it" do
+    json =
+      {"dialogues/scene.json",
+       %{
+         "quest" => "lantern",
+         "riddle" => %{
+           "answer" => "tide",
+           "bank" => ["T", "I", "D", "E"],
+           "choice_id" => "ask",
+           "wrong" => prose("~")
+         },
+         "choices" => %{"plain" => %{"story_point" => "tale/told"}}
+       }}
+
+    assert {:ok, out, _} =
+             sampler("npc: bram\nbram: ~\n- Plain\n  bram: ~\n- Ask\n  bram: ~\n", [json])
+
+    c = JSON.decode!(out)["cartridge"]
+
+    assert c["story_points"]["scene_sampler@0.0.1:story_point/tale"]["outcomes"]["told"]["choice"] ==
+             "c001_plain"
+
+    assert c["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]["riddle"]["choice_id"] ==
+             "c002_ask"
   end
 
   # Break: a fact the choice above sets back is called unreachable under its own opposite `needs`.
