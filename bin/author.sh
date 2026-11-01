@@ -6,6 +6,7 @@ set -eu
 cd "$(dirname "$0")/.."
 [ -d tools/author-panel/node_modules ] || (cd tools/author-panel && npm ci --no-audit --no-fund)
 trap 'trap - INT TERM EXIT; kill 0 2>/dev/null' INT TERM EXIT
+rm -f "mobile/app/${LOKA_DEV_CARTRIDGE:-.dev-cartridge/current.json}" # a stale artifact would end the wait below at once
 mise exec -- bin/loka dev "$1" --watch &
 watcher=$!
 # Metro refuses to start before the first good compile has written the artifact: wait for it, and stop if the watcher dies.
