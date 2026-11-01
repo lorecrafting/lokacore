@@ -2,7 +2,7 @@
 // by the real BookView, its buttons from the real buttonsOf and its words from the showcase's text table.
 import type { StoryObj } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
-import { fn } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import showcase from '../../../protocol/fixtures/toolbox_showcase_hash.json';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
@@ -88,6 +88,24 @@ export const isCard = async (canvas: Find, name: string) =>
   getComputedStyle(await canvas.findByRole('button', { name })).borderTopWidth !== '0px';
 // Page stories carry `tags: ['!autodocs']` inline (the CSF indexer reads only a literal array): a Docs
 // page would mount every page's BookView at once.
+const inkOf = (el: Element) => {
+  let ink = 1;
+  for (let e: Element | null = el; e; e = e.parentElement) ink *= +getComputedStyle(e).opacity;
+  return ink;
+};
+// Axe reads the settled page: an answer mid-lift measures a contrast no one reads.
+export const settled = async (
+  canvas: {
+    findByText: (text: RegExp) => Promise<HTMLElement>;
+    getAllByRole: (role: 'button') => HTMLElement[];
+  },
+  text: RegExp,
+) => {
+  await canvas.findByText(text);
+  for (const b of canvas.getAllByRole('button')) {
+    await waitFor(() => expect(inkOf(b)).toBe(1), { timeout: 3000 });
+  }
+};
 export const pageStory = (
   saved: unknown,
   shell?: Partial<Screen>,

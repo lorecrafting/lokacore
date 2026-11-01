@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { NpcDetail, NpcPage } from '../book/Npc.tsx';
 import { ShelfPage } from '../book/Shelf.tsx';
-import { isCard, pageStory } from './screen.tsx';
+import { isCard, pageStory, settled } from './screen.tsx';
 import NpcChoiceView from './views/npc-choice.json';
 import NpcShopView from './views/npc-shop.json';
 import NpcServicesView from './views/npc-services.json';
@@ -31,7 +31,7 @@ export const Choice: StoryObj = {
   name: 'Choice',
   // Breaks: the Map's "Ask where the Reeve is" (known_npcs) leaks onto her own page.
   play: async ({ canvas }) => {
-    await canvas.findByText(/Take the letter to Wat/);
+    await settled(canvas, /Take the letter to Wat/);
     await expect(canvas.queryByText(/^Ask where/)).toBeNull();
   },
 };
