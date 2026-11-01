@@ -58,6 +58,13 @@ export function contentGraph(c: Obj): { nodes: { ref: string; kind: string }[]; 
   return { nodes, edges };
 }
 
+// A quest with its own offer can start through it (quest@1) if its target can be reached; the offer's policy is not evaluated.
+const offerReached = (offer: Obj | undefined, rooms: Set<string>, npcs: Set<string>) => {
+  if (offer?.target?.kind === 'detail') return rooms.has(refString(offer.target.room));
+  if (offer?.target?.kind === 'npc') return npcs.has(refString(offer.target.npc));
+  return offer;
+};
+
 /**
  * What a player can never reach from the initial state, and what content nothing uses
  * (cartridge.md Content reports). ponytail: static initial state only; dialogue choices and
@@ -84,8 +91,7 @@ export function reachReport(c: Obj) {
     refs('dialogues').filter((d) => npcs.has(refString(c.dialogues[d].npc))),
   );
   const reached = [...keyed.rooms, ...keyed.items, ...npcs, ...dialogues];
-  // a quest with its own offer can start through it (quest@1); the offer's policy is not evaluated
-  const offered = refs('quests').filter((q) => c.quests[q].offer);
+  const offered = refs('quests').filter((q) => offerReached(c.quests[q].offer, keyed.rooms, npcs));
   const quests = new Set([...offered, ...reached.flatMap((r) => out(r, 'quest'))]);
   return {
     unreachable: {

@@ -58,7 +58,7 @@
       ]
     },
     "AdvertisedAction": {
-      "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.",
+      "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details; an empty list means the action names its own target) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.",
       "oneOf": [
         {
           "description": "Offered and currently legal.",
@@ -1328,7 +1328,7 @@
           }
         },
         "levelling": {
-          "description": "The player's level, experience, the total that reaches the next level (absent at the top level) and unspent attribute points, when the cartridge declares world.levelling (toolbox row 4).",
+          "description": "The player's level, experience, the total that reached the current level (0 at level 1), the total that reaches the next level (absent at the top level) and unspent attribute points, when the cartridge declares world.levelling (toolbox row 4).",
           "type": "object",
           "properties": {
             "level": {
@@ -1336,6 +1336,10 @@
               "minimum": 1
             },
             "experience": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "from": {
               "type": "integer",
               "minimum": 0
             },
@@ -1351,6 +1355,7 @@
           "required": [
             "level",
             "experience",
+            "from",
             "unspent"
           ],
           "additionalProperties": false

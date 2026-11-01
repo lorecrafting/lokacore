@@ -455,6 +455,7 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `quest_failed`: Toolbox row W24: a generic quest deadline expired and failed the open instance with its authored outcome; a legacy deadline or a quest.fail reaction emits none.
   - `spoken`: Toolbox row G9 (speech@1): the NPC entity_id heard the actor speak, one event per hearer. word is the case-folded word only when it is an authored keyword (a dialogue's keyword or a spoken reaction's word), else absent.
   - `asked`: Toolbox row FD7 (speech@1): the actor asked the NPC entity_id about a topic; answered is false when the NPC gave its unknown line.
+  - `level_reached`: Toolbox row 4 (attribute@1): the character reached level, one event per threshold a sequence's levelling write crosses, ascending.
 - **Loudness**: How a word was spoken (speech@1; toolbox row G9): whisper reaches the addressee, say the speaker's room, shout the rooms one exit away too.
 
 ## Fact contracts (`protocol/fact.schema.json`)
@@ -480,7 +481,7 @@ R3B versioned feature envelopes (14 §R3B): the closed kind list, a version, and
 
 The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 §15).
 
-- **AdvertisedAction**: One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.
+- **AdvertisedAction**: One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details; an empty list means the action names its own target) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.
   - `true`: Offered and currently legal.
   - `false`: Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).
 - **AttributeView**: An authored attribute reference and the actor's current value, which includes allocated levelling points (toolbox row 4) and worn, the nonzero sum its worn items grant (item affects, toolbox row 3; absent when zero), counting identified items only (toolbox row 27: an unidentified worn item moves value but not worn).

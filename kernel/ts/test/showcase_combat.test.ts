@@ -164,7 +164,7 @@ test('combat 4: Gil kills the raider; the bounty resolves and the player reaches
   assert.deepEqual([died?.killer_id, died?.credited_character_id], [npc(w, 'gil'), w.character]);
   assert.deepEqual([hp(w, raider), pool(w, 'hp'), fact(w, 'raider_slain')], [0, 9, true]);
   assert.equal(gameView(w).journal[0]?.state, 'resolved');
-  assert.deepEqual(levelling(w), { level: 2, experience: 30, next: 100, unspent: 1 });
+  assert.deepEqual(levelling(w), { level: 2, experience: 30, from: 30, next: 100, unspent: 1 });
   assert.equal(r.lines.filter((k) => k === LEVEL_UP).length, 1);
   assert.equal(r.lines.at(-1), LEVEL_UP);
   assert.deepEqual(inside(w, corpseOf(w, raider)), []);
@@ -181,7 +181,7 @@ test('combat 5: Raise str spends the point', () => {
     attribute: { ...C, kind: 'attribute', key: 'str' },
   }).world;
   assert.equal(attribute(w, 'str'), 11);
-  assert.deepEqual(levelling(w), { level: 2, experience: 30, next: 100, unspent: 0 });
+  assert.deepEqual(levelling(w), { level: 2, experience: 30, from: 30, next: 100, unspent: 0 });
   assert.ok(!gameView(w).actions.some((a) => a.action_key === 'raise_attribute'));
 });
 
@@ -236,7 +236,7 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   assert.equal(where(w, w.body), room(w, 'crossroads_inn'));
   assert.deepEqual([pool(w, 'hp'), pool(w, 'mv')], [10, 100]);
   assert.deepEqual(conditions(w), [GORED]);
-  assert.deepEqual(levelling(w), { level: 2, experience: 30, next: 100, unspent: 0 });
+  assert.deepEqual(levelling(w), { level: 2, experience: 30, from: 30, next: 100, unspent: 0 });
   assert.equal(attribute(w, 'str'), 11);
   const corpse = corpseOf(w, w.body);
   assert.equal(where(w, corpse), room(w, 'boar_run'));
@@ -284,7 +284,7 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
     [id(w, 'item', 'tusk'), id(w, 'item', 'purse')].sort(),
   );
   assert.deepEqual(inside(noPurse, corpseOf(noPurse, boar)), [id(w, 'item', 'tusk')]);
-  assert.deepEqual(levelling(w), { level: 2, experience: 60, next: 100, unspent: 0 });
+  assert.deepEqual(levelling(w), { level: 2, experience: 60, from: 30, next: 100, unspent: 0 });
   assert.deepEqual(cues(w), [{ sense: 'smell', text: 'cue.blood' }]);
   // Without the poultice: ticks at +1050 and +1950, expiry at +2100 (the round-1 refresh at +150).
   const tick1 = wait(w, start + 1050).world;
@@ -338,7 +338,7 @@ test('combat 9: in the pit the player turns on the second goblin; each kill pays
   w = wait(r3, start + 600).world;
   assert.deepEqual(hps(w), [0, 0, 2]);
   assert.equal(engaged(w, w.body), undefined);
-  assert.deepEqual(levelling(w), { level: 2, experience: 80, next: 100, unspent: 0 });
+  assert.deepEqual(levelling(w), { level: 2, experience: 80, from: 30, next: 100, unspent: 0 });
 });
 
 // Breaks: the Warden's physical resistance is missing (the sword kills him in three rounds and
@@ -372,7 +372,7 @@ test('combat 11: the raider falls before the bounty is taken; the fight ends nor
   assert.equal(fact(s, 'raider_slain'), true);
   assert.equal(engaged(s, s.body), undefined);
   assert.deepEqual(gameView(s).journal, []);
-  assert.deepEqual(levelling(s), { level: 1, experience: 10, next: 30, unspent: 0 });
+  assert.deepEqual(levelling(s), { level: 1, experience: 10, from: 0, next: 30, unspent: 0 });
   assert.equal(talk(go(s, 'east').world, 'aldous').opened, 'aldous_lesson');
 });
 

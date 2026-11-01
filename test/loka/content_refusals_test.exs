@@ -8,7 +8,7 @@ defmodule Loka.ContentRefusalsTest do
 
   setup_all do
     for name <-
-          ~w(derived_sampler scene_sampler prices_sampler harvest_sampler shoo_sampler codex_sampler toolbox_showcase),
+          ~w(derived_sampler scene_sampler prices_sampler harvest_sampler shoo_sampler codex_sampler identity_sampler toolbox_showcase),
         into: %{},
         do: {String.to_atom(name), Source.copy("cartridges/#{name}")}
   end
@@ -380,5 +380,29 @@ defmodule Loka.ContentRefusalsTest do
              {"topics/mill_copy.json",
               File.read!(Path.join(dir, "topics/mill.json")) |> JSON.decode!()}
            ])
+  end
+
+  # Breaks: an NPC's discovered fact or a room detail's marker title names a
+  # definition or text key that does not exist, so a Codex entry is granted or lit by nothing.
+  test "NPC discovery and detail markers must resolve", %{identity_sampler: dir} do
+    marker = fn r ->
+      put_in(r, ["details", "notice", "perception"], %{
+        "self_luminous" => true,
+        "title" => "missing"
+      })
+    end
+
+    found =
+      codes(dir, [
+        {"npcs/stranger.json", &Map.put(&1, "perception", %{"discovered" => "missing"})},
+        {"rooms/square.json", marker}
+      ])
+
+    for path <- [
+          "npcs/stranger.perception.fact",
+          "rooms/square.details.notice.perception.title"
+        ] do
+      assert {"UNRESOLVED_REFERENCE", path} in found, inspect({path, found})
+    end
   end
 end

@@ -6,7 +6,7 @@
     "LiquidRow": {
       "type": "object",
       "properties": {
-        "kind": {
+        "kind": {"description":"The declared liquid; null iff quantity is zero.",
           "anyOf": [
             {
               "type": "null"
@@ -16,7 +16,7 @@
             }
           ]
         },
-        "quantity": {
+        "quantity": {"description":"Exact amount, bounded by capacity.",
           "type": "integer",
           "minimum": 0,
           "maximum": 2147483647
@@ -47,15 +47,15 @@
     "VesselSpec": {
       "type": "object",
       "properties": {
-        "capacity": {
+        "capacity": {"description":"Positive capacity.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "unit_label": {
+        "unit_label": {"description":"Its unit label.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "initial": {
+        "initial": {"description":"Its initial contents.",
           "$ref": "liquid.schema.json#/$defs/LiquidRow"
         }
       },
@@ -83,18 +83,18 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "unit_label": {
+        "unit_label": {"description":"Its unit label.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "grams_per_unit": {
+        "grams_per_unit": {"description":"Mass of one unit.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "drink_amount": {
+        "drink_amount": {"description":"The integer serving.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647

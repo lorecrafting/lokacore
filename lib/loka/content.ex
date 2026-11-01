@@ -30,6 +30,10 @@ defmodule Loka.Content do
   @external_resource @registry_path
   @registry @registry_path |> File.read!() |> JSON.decode!()
 
+  @doc "Compile diagnostics as plain lines, located in the source at `dir`."
+  @spec explained([map()], Path.t()) :: [String.t()]
+  defdelegate explained(diags, dir), to: Loka.Content.Explain, as: :lines
+
   @doc """
   Compiles the source directory into CartridgeArtifact bytes (one canonical JSON document)
   and its warnings (severity warning), or returns its diagnostics, each list in the order
@@ -55,6 +59,14 @@ defmodule Loka.Content do
   @doc "The author-time lint findings for a story cartridge source (Loka.Content.Lint)."
   @spec lint(Path.t()) :: [String.t()]
   defdelegate lint(dir), to: Loka.Content.Lint, as: :run
+
+  @doc "Writes a compiling starter of one source kind into a cartridge (Loka.Content.Starters)."
+  @spec new(Path.t(), String.t(), String.t(), {String.t(), String.t()} | nil) ::
+          {:ok, [Path.t()]} | {:error, String.t()}
+  defdelegate new(dir, kind, name, from), to: Loka.Content.Starters, as: :write
+
+  @doc "The kinds `new/4` knows."
+  defdelegate kinds(), to: Loka.Content.Starters
 
   @doc "The source JSON Schema files, name => text (Loka.Content.SourceSchema)."
   @spec source_schema() :: %{String.t() => binary()}

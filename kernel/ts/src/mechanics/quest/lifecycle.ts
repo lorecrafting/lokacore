@@ -149,9 +149,9 @@ export function boundActivation(
 }
 
 /**
- * Why `actor` cannot accept `quest` now, as accept_quest's admission refuses it (commands/actions.ts):
- * invalid_state when the actor already has an instance or the quest's offer, if it declares one,
- * has a policy that fails (target none). Each policy leaf it evaluates adds one to `steps`.
+ * Why a dialogue choice's `accept` cannot activate `quest` for `actor` now: invalid_state when the
+ * actor already has an instance or the quest's offer, if it declares one, has a policy that fails
+ * read with no target, where accept_quest's admission (commands/actions.ts) reads the offer's target. Each policy leaf it evaluates adds one to `steps`.
  */
 export function acceptRefused(
   world: World,

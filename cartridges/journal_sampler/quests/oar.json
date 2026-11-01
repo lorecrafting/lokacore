@@ -1,7 +1,12 @@
 {
   "name": "quest.oar.title",
   "offer": {
-    "label": "quest.oar.accept"
+    "label": "quest.oar.accept",
+    "target": {
+      "kind": "detail",
+      "room": "ferry_landing",
+      "detail": "mooring_post"
+    }
   },
   "objective": {
     "evidence": "post_activation_event",

@@ -16,6 +16,16 @@ import type { Db } from '../authority/local-story/store.ts';
 import { LABEL } from './book/labels.ts';
 import { webDb } from './sqlite-web.ts';
 
+// The pinned app: no author preview, so App mounts the Book alone (author/panel.tsx).
+const panel = {
+  devClock: false,
+  played: (g: unknown) => g,
+  restorePlace() {},
+  resetPlace() {},
+  skew: () => 0,
+  useAuthorPanel() {},
+};
+
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 const adapt = (sql: DatabaseSync): Db => ({
@@ -107,6 +117,7 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     './book/reading.ts': { readingSize: () => ({}), effectStores: () => ({}) },
     './book/labels.ts': { LABEL },
     './SaveError': {},
+    './author/panel.tsx': panel,
   };
   const js = ts.transpileModule(readFileSync(new URL('App.tsx', import.meta.url), 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.React },
@@ -157,6 +168,9 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     edit.close();
     session = run();
     assert.equal(session.game(), undefined);
+    // Breaks: a changed-hash save refused as save_corrupt, which Start over would replace blind.
+    assert.equal(session.failed()?.kind, 'pinned_release_missing');
+    assert.equal((session.failed() as { replace?: boolean }).replace, false);
     assert.equal(session.failed()?.startOver, true);
     assert.equal(pin().content_hash, '0'.repeat(64));
     assert.equal(session.startOver(), undefined);
@@ -292,6 +306,7 @@ function appHost() {
     './book/reading.ts': { readingSize: () => ({}), effectStores: () => ({}) },
     './book/labels.ts': { LABEL },
     './SaveError': {},
+    './author/panel.tsx': panel,
   };
   const globals: { loka_session?: ReturnType<typeof localSession> } = {},
     exports: any = {};

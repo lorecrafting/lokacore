@@ -184,10 +184,17 @@ test('a death at 50 lowers experience to 45 once, keeps the spent point, and sur
   assert.deepEqual(validate('DecisionResult', full.decision), []);
   const reopened = hydrate(hall(0), JSON.parse(JSON.stringify(r.world.state)), true);
   assert.ok(reopened);
-  assert.deepEqual(levelling(reopened), { level: 2, experience: 45, next: 100, unspent: 0 });
+  assert.deepEqual(levelling(reopened), {
+    level: 2,
+    experience: 45,
+    from: 30,
+    next: 100,
+    unspent: 0,
+  });
   assert.deepEqual(levelling(die(hall(50)).world), {
     level: 2,
     experience: 45,
+    from: 30,
     next: 100,
     unspent: 1,
   });
@@ -222,6 +229,37 @@ test('a reaction grant in the death step builds on the loss in one write, untold
   assert.deepEqual(sets(r), [[50, 65]]);
   assert.ok(!narration(r).includes('death.penalty'));
   assert.ok(!narration(r).includes('levelling.level_up'));
+});
+
+const GAINED = 'item.player_corpse.short'; // any catalog key
+const gainedSampler = (c: any) => (c.world.levelling.gained = GAINED);
+const levels = (r: Step) =>
+  (r.decision as any).events.filter((e: any) => e.payload.type === 'level_reached');
+
+// Breaks: a fall emits level_reached (a reversed slice) or tells the gained line.
+test('a death penalty emits no level event and no gained line', () => {
+  const r = die(hall(50, gainedSampler));
+  assert.deepEqual(sets(r), [[50, 45]]);
+  assert.deepEqual(levels(r), []);
+  assert.ok(!narration(r).includes(GAINED));
+  assert.ok(narration(r).includes('death.penalty'));
+});
+
+// Breaks: amount reads the first write (a loss of 5) or the grant alone (20), not the net.
+test('a same-proposal loss and larger grant tell the net gain and no penalty line', () => {
+  const r = die(
+    hall(50, (c) => {
+      gainedSampler(c);
+      c.reactions[`${P}:reaction/died_reward`] = {
+        key: 'died_reward',
+        on: { event: 'entity_died' },
+        steps: [{ op: 'experience.grant', amount: 20 }],
+      };
+    }),
+  );
+  const told = (r.decision as any).narration.filter((t: any) => t.key === GAINED);
+  assert.deepEqual(told, [{ key: GAINED, bindings: { amount: 15 } }]);
+  assert.ok(!narration(r).includes('death.penalty'));
 });
 
 // Breaks: kept items still move to the corpse (or the default no longer does), the corpse is no
@@ -293,5 +331,22 @@ test('the loader refuses each malformed penalty', () => {
       refused((c) => (penalty(c).items = 'kept')),
     ],
     [at('.experience.percent'), at('.experience.percent'), at('.items'), 'loaded'],
+  );
+});
+
+// Breaks: the cull quest's page unreachable in the Book (the hall's notice unlinked from its
+// description, or the offer not on the notice's page) (loka-vx2v).
+test("the hall's description links the notice, whose page holds the cull offer", () => {
+  const v = gameView(hall(0)) as any;
+  assert.deepEqual(validate('GameView', v), []);
+  assert.ok(kat.value.text['room.hall.description'].includes('[notice](cull_notice)'));
+  const page = v.notices.find((n: any) => n.key === 'cull_notice');
+  assert.deepEqual(
+    page.actions.map((a: any) => a.action_key),
+    ['cull'],
+  );
+  assert.deepEqual(
+    v.actions.filter((a: any) => a.action_key === 'cull'),
+    [],
   );
 });

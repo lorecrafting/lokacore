@@ -87,6 +87,10 @@ Add one entry per directory or root file you edit; the schema file is named afte
 `$schema` in a source file: the compiler refuses it as `UNKNOWN_FIELD`. The compiler is still
 the judge; the schemas do not check references.
 
+For reading, not editing: [source kinds](reference/source-kinds.gen.md) has every kind's fields,
+types, required-ness and meaning; [vocabulary](reference/vocabulary.gen.md) has the step ops, policy
+leaves, events and choice fields. Both are generated from the schemas.
+
 ## Preview an edit
 
 To see a cartridge in the Book on the web, compile it into the author preview, then, in a second
@@ -97,11 +101,15 @@ http://localhost:19006):
 mise exec -- bin/loka dev cartridges/cellar_sampler --watch
 ```
 
-Each save of a source file recompiles it; the page reloads with the edit in a few seconds.
-Without `--watch` it compiles once. A failed compile prints its diagnostics and keeps the last
-good cartridge. Each edited cartridge has its own save, so an edit starts a new game and the
-normal preview's save is never touched. Add `?dev=1` to the URL for a control that advances game
-time through the normal elapsed-time path; the world credits none before the ancestry choice.
+Each save of a source file recompiles it. A text-only edit shows in the open page at once; any
+other edit reloads the page and replays your inputs so far, stopping at the first step the edit
+broke and naming it ([author preview](system/cartridge.md#author-preview)). Without `--watch` it
+compiles once. A failed compile prints its diagnostics and keeps the last good cartridge. Each
+edited cartridge has its own save; the normal preview's save is never touched. Add `?dev=1` to
+the URL for the author column: compile errors, facts, quests and flags, why an action is missing,
+checkpoints, still-to-write text and a control that advances game time through the normal
+elapsed-time path (the world credits none before the ancestry choice). The owner's walkthrough:
+[writing the game](guides/writing-the-game.md).
 Release, test and e2e builds always use the pinned chapter
 ([`metro.config.js`](../mobile/app/metro.config.js), [`bin/loka dev`](../kernel/ts/play/author.ts)).
 

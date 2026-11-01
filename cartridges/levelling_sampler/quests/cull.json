@@ -1,7 +1,12 @@
 {
   "name": "quest.cull.title",
   "offer": {
-    "label": "quest.cull.accept"
+    "label": "quest.cull.accept",
+    "target": {
+      "kind": "detail",
+      "room": "hall",
+      "detail": "cull_notice"
+    }
   },
   "objective": {
     "evidence": "current_state",

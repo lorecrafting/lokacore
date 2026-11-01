@@ -28,7 +28,7 @@ defmodule Loka.Content.Resources do
   def load([{rel, file}]) when file != :invalid do
     defs = Map.put(Contracts.defs(), "ResourcesFile", file_schema("resources"))
 
-    case Contracts.validate("ResourcesFile", file, defs) do
+    case Contracts.detailed("ResourcesFile", file, defs) do
       :ok -> specs(rel, file["resources"])
       {:error, es} -> {specs(rel, %{}) |> elem(0), schema(rel, [], file, es)}
     end
@@ -48,7 +48,7 @@ defmodule Loka.Content.Resources do
   def attributes([{rel, file}]) do
     defs = Map.put(Contracts.defs(), "AttributesFile", file_schema("attributes"))
 
-    case Contracts.validate("AttributesFile", file, defs) do
+    case Contracts.detailed("AttributesFile", file, defs) do
       :ok ->
         collect(
           rel,
@@ -247,7 +247,7 @@ defmodule Loka.Content.Resources do
   end
 
   defp validated(rel, steps, contract, value) do
-    case Contracts.validate(contract, value) do
+    case Contracts.detailed(contract, value) do
       :ok -> []
       {:error, es} -> schema(rel, steps, value, es)
     end

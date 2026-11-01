@@ -30,7 +30,7 @@ defmodule Loka.ContentAttributesTest do
 
     write.("actions/pray.json", put_in(src("actions/pray.json"), ["policy"], root))
     if attributes, do: write.("attributes.json", %{"attributes" => attributes})
-    Loka.Content.compile(dir)
+    Loka.ContentSource.plain(Loka.Content.compile(dir))
   end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))

@@ -61,6 +61,7 @@ jobs:
       - run: mix compile --warnings-as-errors
       - run: elixir bin/contracts.exs --check
       - run: elixir bin/features.exs --check
+      - run: python3 bin/source_reference.py --check
       - run: mix xref graph --format cycles --fail-above 0
       - run: mix xref graph --label compile-connected --fail-above 0
       - run: mix test
@@ -174,6 +175,14 @@ jobs:
       - run: mix deps.get --check-locked
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm run test:nosim
         working-directory: kernel/ts
+      # Each checkpoint replays headless; bin/loka check compiles through `mise exec -- mix`, so a
+      # stub runs the command (as book-e2e.yml does).
+      - run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          printf '#!/bin/sh\nshift 2\nexec "$@"\n' > "$RUNNER_TEMP/bin/mise"
+          chmod +x "$RUNNER_TEMP/bin/mise"
+          export PATH="$RUNNER_TEMP/bin:$PATH"
+          rc=0; for d in cartridges/*/checkpoints; do bin/loka check "${d%/checkpoints}" || rc=1; done; exit $rc
       - run: bin/kernel_red_controls.sh
       - run: node bin/check_ts_size.mjs # loads typescript from kernel/ts
       - run: bin/ts_size_red_controls.sh

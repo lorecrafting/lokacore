@@ -80,8 +80,6 @@ const { commandOf } = await import('../buttons.ts');
 // a shut door's release pick, a targetless action is a notice's; the rest are undrawn on purpose
 // (book-ui.md, Verbs the Book does not draw, and Room page anatomy). Runs on every draw.
 const UNDRAWN_VERBS = ['close', 'lock'];
-// ponytail: temporary; quest offers have no target field yet (loka-vx2v). Drop when content gives them one.
-const UNTARGETED_QUESTS = ['lantern', 'oar', 'cull', 'find_key', 'apprentice'];
 let room: { g: { place: Button[] }; view: GameView } | undefined; // RoomPage's props: World shows
 function stranded(rendered: any[]) {
   const f = rendered.find((n) => n.type?.name === 'Footer')?.props;
@@ -97,9 +95,7 @@ function stranded(rendered: any[]) {
   const notice = [...(v?.notices ?? []), ...(v?.notice_boards ?? []).flatMap((n) => n.notices)];
   for (const b of room?.g.place.filter((b) => !b.target_ids.length) ?? [])
     assert.ok(
-      has(b) ||
-        UNTARGETED_QUESTS.includes(b.action_key) ||
-        notice.some((n) => n.actions?.some((a) => a.action_key === b.action_key)),
+      has(b) || notice.some((n) => n.actions?.some((a) => a.action_key === b.action_key)),
       `targetless action ${b.label} has no control`,
     );
 }

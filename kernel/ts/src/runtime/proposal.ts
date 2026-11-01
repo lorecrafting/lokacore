@@ -18,7 +18,7 @@ import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { diedAfter, sequence, triggered } from '../mechanics/reaction.ts';
-import { oneWrite } from '../mechanics/levelling/shared.ts';
+import { levelsReached, oneWrite } from '../mechanics/levelling/shared.ts';
 import { closing } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -156,7 +156,8 @@ function join(
   const quests = earns ? Object.entries(before.state.quests ?? {}) : [];
   const active = new Map(quests.map(([i, q]) => [i, q.state === 'active']));
   const assigns = own.filter((o) => o.op === 'fact.assign') as Assign[];
-  for (const e of factChanged(base, m, assigns, evs)) {
+  const facts = factChanged(base, m, assigns, evs);
+  for (const e of [...facts, ...levelsReached(p.world, own, base, m)]) {
     const placed = { ...e, position: p.events.length + 1, correlation_id: base.correlation_id };
     const x = placed.payload;
     if (x.type === 'quest_activated' || x.type === 'quest_resolved')
@@ -268,7 +269,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
       payload: { type: 'run_job', job_id: job_id as JobId },
     } as const;
     const m = allocator(at, run);
-    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time, tick, p));
+    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time, tick, p, due));
     if (ran.kind !== 'accepted') return ran;
     if ((p.limit = queueHour(due, job_id, ran) ?? over({ deliveries: p.deliveries })))
       return BUDGET;

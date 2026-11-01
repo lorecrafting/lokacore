@@ -23,7 +23,7 @@ defmodule Loka.ContentScriptedActionsTest do
       File.write!(Path.join(dir, rel), text(v))
     end
 
-    Loka.Content.compile(dir)
+    Loka.ContentSource.plain(Loka.Content.compile(dir))
   end
 
   defp text({:raw, text}), do: text

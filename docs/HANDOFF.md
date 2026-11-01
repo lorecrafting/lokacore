@@ -1,13 +1,10 @@
 # PM handoff
 
 The present only: open work, next steps, owner questions, and standing owner rules the repo does not state
-yet. Rewrite this page in place at each checkpoint (a merge, a review verdict, a pushed fix) and before a
-session ends; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
+yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #527 (e5515bd48); written 2026-10-30 by Claude Code (Opus 5.5), PM session 30f61613.
-Owner (2026-10-28, quoted): "you can use fable when you think it would help, we have a lot of weekly limit ...
-this will be my last week before a break so yeah make it right!"
+AS OF main after #530, #535, #537, #539, #538; written 2026-10-31 by Claude Code (Opus 5.5), engine-track PM session. A parallel session reviews the prologue beats and files "Prologue gap: ..." children of loka-g5hh; this session owns this page. Lean default in force since #533.
 
 ## Direction (owner 2026-10-30)
 
@@ -27,46 +24,37 @@ this will be my last week before a break so yeah make it right!"
 
 ## Next, in order
 
-1. Owner is reviewing the beats (said they will continue in the morning). Then, per the PM's plan the owner
-   heard: a one-page prologue pitch and a player-verb pass per beat (what the player does, which mechanic, which
-   engine gap), the map of the 18 rooms, scene sheets for Part 1, then build Part 1.
-2. Engine gaps known now, build before the downgrade: loka-vx2v quest offers need a fixture or NPC target (10
-   sampler offers have no Book control until then; temporary allow-list in
-   `mobile/app/book/__tests__/polish-book.test.ts`); loka-sgqk catch-up cost with permanent ticking needs (a
-   month away is about 36k steps and 345 MB of save); companion remarks were retired (FD10) and the companion
-   is central, so check whether the prologue needs them; needs switched on by story events and room text by
-   stage are expected to be content only (verify in the player-verb pass).
-3. loka-mpu9 lean workflow into AGENTS.md and WORKFLOW before about 2026-11-10.
-4. loka-n4dg effects brief (designer), then the owner's pick, then Fable builds.
-5. Polish follow-ups: loka-6sig dead Gil still answers the shout; loka-c5uu delete undrawn "Ask where" buttons;
-   loka-lk8i band text wording; loka-tol6 service noun; loka-fsfq picker queue gitignore. Condition icons
-   (loka-x6t.63) owner undecided.
-6. Engine follow-ups (epic loka-ewtx): loka-zmqs, loka-dgko, loka-w9id (plan first), loka-0vrs (plan first).
-7. Held until after the owner's polish pass: loka-698n, loka-8ghm (showcase; may be moot now it is frozen).
+1. #540 loka-vduxr.4 `bin/loka check`: fix round 1 running (preview and check share one fixed seed and frozen clock; mend replay; decision record in the PR). Then the reviewer's scoped re-check, merge.
+2. #541 loka-k3b5, head 9d2ed1dca, CI green: Opus reviewer, then a second opinion (save-affecting), merge.
+3. loka-vduxr.2 scene verbs: building `sets`, `quest: accept`, narration, second speaker, `.cut`. `needs`, `once`, `then` and nesting cannot lower to existing JSON: Fable is designing a runtime slice; its brief goes in the issue notes.
+4. loka-ivjq.9 generated reference: building.
+5. Queue: loka-vduxr.5 panel and .6 dev cheats after #540; .7 fault batch; .8, .9 follow-ups; loka-kgd.175 benchmark; loka-qhvgq month-away cold open; a Part 2 placeholder spike after scene verbs (owned plot and hut against no property; hut at the landing; tiredness). Later briefs use narrow mutants, no `bin/mutate_diff.sh`: sweeps cost hours per slice.
+6. loka-g5hh.2 level-up: E1 merged (#538). E2, E3, then B1 to B3; B2 needs #532 and loka-gj82.4. Brief and owner answers in its notes; a multi-slice issue needs a child id for `bin/merge_pr.sh`.
+7. Proposed release work, awaiting the owner's three calls (store fees, iOS first, a save guarantee from launch): save migrations, loka-k3b5 off the P3 hold, resume mobile, rebuild the E1 harness and gates.
+8. Ending page and outside link (owner wants a next-chapter message and giving to a hunger charity; PM advised a website link, not a Kickstarter button, and a direct link to a named charity for the free prologue). Not filed; the owner has not decided whether the game must fund itself.
+9. Follow-ups: loka-xy1js, loka-9g1q1, loka-1b68q; loka-n4dg and loka-gj82.4 effects; loka-ewtx engine follow-ups.
 
-Merged 2026-10-30 after #520: #521 docs, #522 retro, #523 showcase speech as cards (loka-eyk7), #524 map stubs
-(loka-6bmd, kernel_api 1.127), #525 colon sweep and colon-label lint (loka-pxa0), #526 permanent ticking needs
-(loka-rn3b, loka-dw0k, kernel_api 1.128), #527 polish batch 3 (hidden permanent refusals, one conversation exit,
-Look as a card, web column, Contents tap fix, lidded Close and Put on Inside, narrated-event italics, no Say
-icon with spell cards on Character, the Map as dots and lines; doors: the Book draws no Close or Lock, owner
-option C), #528 the prologue outline.
+`cartridges/lantern_proof` stays as host of the frozen conformance traces (PM ruling, in `docs/system/cartridge.md`); Bram stays in the samplers because literal ids and frozen fixtures pin him. Retiring the traces would need the owner.
 
-## Retro 2026-10-30b (awaiting owner approval)
+Owner resets the weekly limit by hand at 99% (owner 2026-10-31); read `~/.claude/usage-cache.json` and warn near it. The spawn gate is CPU load, not usage; other sessions' tests hold it above 8 at times.
 
-loka-3rym generated story saves conflict on every kernel_api bump (three extra merge rounds today);
-loka-9ack polish close passed locally but CI went red a third time (stories type check, tests pinning changed
-wording). Also: the PM briefly ruled loose cards onto World against the owner's room page anatomy, caught by
-the designer; read [Room page anatomy](system/book-ui.md#room-page-anatomy) before ruling on World placement.
+Merged 2026-10-31: #529 quest offer targets (loka-vx2v), #533 lean workflow (loka-mpu9), #534 Lantern cleanup (loka-4hik.31, .4), #536 restored tests (loka-4hik.30).
+
+## Retro 2026-10-31 (awaiting owner approval)
+
+loka-3rym and loka-9ack from before; new items are in the housekeeping queue: `push_slice` reports CI "not started" because it samples too early; the spawn load gate gives no fair wait across sessions.
 
 ## Holds
 
 - P3 hold (owner 2026-10-22, quoted: "lets hold off on the p3 stuff for now"): draft #454 (before merge:
   /code-review and split lib/loka/core/compose_encounter.ex instead of its size allowance), kgd.188, 2lvx,
-  5i4c, k3b5, x6t.98, y6yg.36, the 8 P3 engine bugs, and the P3 retro items (czpp, 14oe, 70yc, 7h3v).
+  5i4c, x6t.98, the 8 P3 engine bugs, and the P3 retro items (czpp, 14oe, 70yc, 7h3v).
 - loka-x6t.126 skill-gated room depth (owner: "hold on that for now").
 
 ## Waiting on the owner
 
+- Store fees, iOS first, the save guarantee; the component kit for the authoring UI.
+- Decided 2026-10-31 ("ok go ahead with all your recs"): see loka-vduxr and loka-g5hh.2 notes.
 - The beats review; the two PM defaults in the outline (the Vowed are dozens; the other cradles stay sealed).
 - Approval of the two retro items above; condition icons (loka-x6t.63).
 

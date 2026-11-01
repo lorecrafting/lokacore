@@ -9,30 +9,30 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "room": {
+        "room": {"description":"The boarding room.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "detail": {
+        "detail": {"description":"The boarding detail.",
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "destination": {
+        "destination": {"description":"The destination.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "reverse": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "recipient": {
+        "recipient": {"description":"The conserved fare recipient.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "currency": {
+        "currency": {"description":"The fare resource.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "fare": {
+        "fare": {"description":"The conserved fare.",
           "type": "integer",
           "minimum": 0,
           "maximum": 2147483647
         },
-        "recovery_rooms": {
+        "recovery_rooms": {"description":"The corpse recovery rooms.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
