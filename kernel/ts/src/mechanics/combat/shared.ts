@@ -26,19 +26,21 @@ export function engaged(world: World, body: EntityId) {
   return found && { id: found[0] as EncounterId, row: found[1] };
 }
 
+/** The one test of "can this NPC be fought" (loka-w9id): Attack's admission, the GameView's Attack
+ * offer and the entry engage all read it, so a companion or `unattackable` NPC is out of all three. */
+export function attackable(world: World, actor: CharacterId, id: EntityId) {
+  const npc = world.entities[id];
+  return npc?.kind === 'npc' && !!npc.attack && !npc.unattackable && !ally(world, actor, id);
+}
+
 export function attackRefused(world: World, actor: CharacterId, target: EntityId) {
   const body = bodyOf(world, actor);
   if (!body) return 'not_found' as const;
   const npc = world.entities[target];
   if (!npc) return 'not_found' as const;
-  if (
-    npc.kind !== 'npc' ||
-    !npc.attack ||
-    !world.cartridge.world?.combat ||
-    ally(world, actor, target)
-  )
+  if (npc.kind !== 'npc' || !attackable(world, actor, target) || !world.cartridge.world?.combat)
     return 'invalid_target' as const;
-  // No hp of its own: nothing to lose, so nothing to fight (loka-xyyd); the cause is generic (loka-w9id).
+  // No hp of its own: nothing to lose, so nothing to fight (loka-xyyd).
   if (!npc.hp) return { code: 'invalid_target', cause: 'cannot_be_hurt' } as const;
   const origin = world.state.created?.[target]?.origin;
   if (

@@ -16,7 +16,7 @@ import {
 } from '../runtime/decision.ts';
 import { holds } from './policy.ts';
 import { living } from './death/shared.ts';
-import { engaged, encounterId, npcRef } from './combat/shared.ts';
+import { attackable, engaged, encounterId, npcRef } from './combat/shared.ts';
 import { jobId } from './schedule/daily.ts';
 import { attacked } from './crow/behavior.ts';
 import { running } from './scene/shared.ts';
@@ -100,7 +100,7 @@ const arrived = (body: EntityId, there: EntityId, to: EntityId) =>
   }) as const;
 
 /**
- * The first NPC in `there`, in EntityId order, living, unengaged, with an attack and an engage
+ * The first NPC in `there`, in EntityId order, living, unengaged, `attackable` with hp and an engage
  * line (with combat) or an arrest (row 35), hostile to `actor` and seeing its body (status
  * reader 8); none in a sanctuary or during a scene.
  * ponytail: read before the move's own writes (the room, an expedition's faction fact), so a room- or presence-relative
@@ -120,7 +120,10 @@ function hostileAt(
       const npc = world.entities[id] as NpcEntity;
       return (
         world.state.containers[id] === there &&
-        ((combat && npc.attack && npc.hp && npc.disposition?.engage) || // no hp, no fight (loka-xyyd)
+        ((combat &&
+          attackable(world, actor, id as EntityId) &&
+          npc.hp &&
+          npc.disposition?.engage) || // no hp, no fight (loka-xyyd)
           // An arrest skipped (a fall, or `to` is this room) lets a later fighter engage.
           (arrests &&
             npc.disposition?.arrest &&

@@ -1,7 +1,7 @@
 import type { CharacterId, EntityId } from '../contracts.gen.ts';
 import type { Offered } from '../commands/actions.ts';
 import type { Steps, World } from '../runtime/decision.ts';
-import { ally, engaged } from '../mechanics/combat/shared.ts';
+import { attackable, engaged } from '../mechanics/combat/shared.ts';
 import { shooRefused } from '../mechanics/crow/behavior.ts';
 import { holds } from '../mechanics/policy.ts';
 import { living } from '../mechanics/death/shared.ts';
@@ -17,11 +17,7 @@ export function combatOffered(
   if (a.command === 'move' && body && engaged(world, body)) return false;
   if (a.command === 'flee') return !!body && !!engaged(world, body);
   if (a.command === 'shoo') return !!id && !shooRefused(world, actor, id as EntityId);
-  const entity = id && world.entities[id];
-  return (
-    a.command !== 'attack' ||
-    (entity && entity.kind === 'npc' && !!entity.attack && !ally(world, actor, id as EntityId))
-  );
+  return a.command !== 'attack' || (!!id && attackable(world, actor, id as EntityId));
 }
 
 // An entity's view name with its words: the first name variant that holds, else the base (loka-6qi, W6).
