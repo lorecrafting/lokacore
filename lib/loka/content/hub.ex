@@ -61,11 +61,13 @@ defmodule Loka.Content.Hub do
     conditions = if policy["op"] == "all", do: policy["items"], else: [policy]
 
     Enum.any?(conditions, fn
-      %{"op" => "not", "item" => %{"op" => "fact_compare", "fact" => f, "equals" => v}} ->
-        Enum.any?(
-          steps,
-          &(match?(%{"op" => "fact.assign", "value" => ^v}, &1) and key(&1["fact"]) == key(f))
-        )
+      %{"op" => "not", "item" => %{"op" => "fact_compare", "fact" => f, "equals" => v} = leaf} ->
+        # A leaf reading another holder (subject, npc, with) never sees the step's write.
+        Map.take(leaf, ~w(subject npc with)) == %{} and
+          Enum.any?(
+            steps,
+            &(match?(%{"op" => "fact.assign", "value" => ^v}, &1) and key(&1["fact"]) == key(f))
+          )
 
       _ ->
         false

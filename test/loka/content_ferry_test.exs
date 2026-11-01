@@ -381,6 +381,10 @@ defmodule Loka.ContentFerryTest do
     # lantern_lit is not a fact here, so it fails on that alone, never on the repeat rule.
     assert {:error, gated} = compile(dir, offer.(Map.merge(give, once)))
     refute d("OUTCOME_MISMATCH", path, %{}) in gated, inspect(gated)
+    # A gate reading another holder never closes for this speaker.
+    elsewhere = put_in(once, ~w(policy item), Map.put(held, "subject", "target"))
+    assert {:error, open} = compile(dir, offer.(Map.merge(give, elsewhere)))
+    assert d("OUTCOME_MISMATCH", path, %{}) in open
   end
 
   # Breaks (23 §3: the compiler validates its triggers and capability dependencies): the compiler

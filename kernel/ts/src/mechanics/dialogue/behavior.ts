@@ -6,6 +6,7 @@ import type {
   EntityId,
 } from '../../contracts.gen.ts';
 import { KernelError } from '../../foundation/error.ts';
+import { disposition } from '../disposition.ts';
 import {
   accepted,
   event,
@@ -96,11 +97,11 @@ export function hub<T extends { kind: string }>(
   const { actor_id, source, beat, roles, choice_ids } = row;
   const speaker = speakerOf(d, row);
   const facts = sequence(world, actor_id, option, false, d.quest, undefined, speaker)?.facts ?? {};
-  const after = Object.keys(facts).length
-    ? { ...world, state: { ...world.state, facts: { ...world.state.facts, ...facts } } }
-    : world;
+  const after = { ...world, state: { ...world.state, facts: { ...world.state.facts, ...facts } } };
   if (option.then) return leadOn(after, command, mint, row, decided, option.then, steps);
-  if (shown(after, actor_id, d, choice_ids, speaker, steps).length === 0) return decided;
+  const standing = holds(after, actor_id, d.policy, { target: speaker, steps });
+  if (!standing || shown(after, actor_id, d, choice_ids, speaker, steps).length === 0)
+    return decided;
   const at = a.events.find((e) => e.payload.type === 'choice_resolved')!.position + 1;
   const continuation_id = continuationId(mint);
   const op = {
@@ -139,6 +140,8 @@ export function leadOn<T extends { kind: string }>(
   const next = definition(world, { ...row.source, key });
   const ids = offered(world, row.actor_id, next, steps);
   const speaker = world.entityIds[refString(next.npc)];
+  // As a talk: a hostile speaker takes no hand-off (row G11); a dead one's row the farewell closes.
+  if (disposition(world, row.actor_id, speaker, steps) === 'hostile') return decided;
   if (!holds(world, row.actor_id, next.policy, { target: speaker, steps })) return decided;
   if (shown(world, row.actor_id, next, ids, speaker, steps).length === 0) return decided;
   const at = a.events.at(-1)!.position + 1;

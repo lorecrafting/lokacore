@@ -378,6 +378,34 @@ test('a hand-off to a speaker elsewhere ends the talk after the reply', () => {
   assert.equal(g.view(), undefined);
 });
 
+// Breaks: a hostile speaker drawn into talk a talk to them would refuse (row G11).
+test('a hand-off to a hostile speaker ends the talk after the reply', () => {
+  const g = play(
+    content({ ask: plain({ then: 'captain_talk' }) }, { captain_talk: { x: plain() } }, (c) => {
+      captain('gate_room')(c);
+      c.npcs[`${P}:npc/captain`].disposition = {
+        hostile: { op: 'all', items: [] },
+        engage: 'npc.guard.short',
+      };
+    }),
+  );
+  g.opened();
+  assert.deepEqual(ops(g.choose('ask')).includes('choice.open'), false);
+  assert.equal(g.view(), undefined);
+});
+
+// Breaks: a hub reopened past its own policy: a live row whose every option is refused.
+test('an answer that fails the dialogue policy ends the hub', () => {
+  const g = play(
+    content({ a: plain({ steps: [set('flag')] }), z: plain() }, {}, (c) => {
+      c.dialogues[`${P}:dialogue/guard`].policy = is('flag', false);
+    }),
+  );
+  g.opened();
+  assert.deepEqual(ops(g.choose('a')).includes('choice.open'), false);
+  assert.equal(g.view(), undefined);
+});
+
 // Breaks: a narrate step refused or dropped; its line before the choice's reply.
 test('a narrate step adds its line after the reply', () => {
   const g = play(content({ a: plain({ steps: [{ op: 'narrate', text: FAILED }] }) }));
