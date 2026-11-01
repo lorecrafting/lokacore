@@ -114,19 +114,17 @@ defmodule Loka.Content.SourceSchema do
   defp shortcuts("ItemDefinition", s), do: put(s, "behaviours", behaviours())
 
   defp shortcuts("ReactionRule", s),
-    do:
-      s
-      |> put(
-        "zone",
-        Map.put(
-          @key,
-          "description",
-          "A zone name: the rule becomes one copy per room listing that zone, named <rule>_<room>. Leave on.room out."
-        )
-      )
-      |> zoned()
+    do: s |> put("zone", zone_rule()) |> zoned() |> Loka.Content.Waits.schema()
 
   defp shortcuts(_, s), do: s
+
+  defp zone_rule,
+    do:
+      Map.put(
+        @key,
+        "description",
+        "A zone name: the rule becomes one copy per room listing that zone, named <rule>_<room>. Leave on.room out."
+      )
 
   # A zone rule names no on.room (Loka.Content.Zones gives each copy its room); others still do.
   defp zoned(s) do

@@ -9752,7 +9752,30 @@
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it."
         },
         "steps": {
-          "items": { "$ref": "#/$defs/Step" },
+          "description": "The steps in order; a `wait` splits them in time.",
+          "items": {
+            "anyOf": [
+              { "$ref": "#/$defs/Step" },
+              {
+                "additionalProperties": false,
+                "description": "Run the steps after it this many logical seconds later, as a sibling delayed rule with the same `on` and `when`; `when` is read again when they run.",
+                "properties": {
+                  "op": { "const": "wait" },
+                  "seconds": {
+                    "description": "Logical seconds, added to the rule's `after` and the waits before it.",
+                    "maximum": 2147483647,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "op",
+                  "seconds"
+                ],
+                "type": "object"
+              }
+            ]
+          },
           "type": "array"
         },
         "when": { "$ref": "#/$defs/partial.Policy" },
@@ -12598,7 +12621,30 @@
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it."
         },
         "steps": {
-          "items": { "$ref": "#/$defs/Step" },
+          "description": "The steps in order; a `wait` splits them in time.",
+          "items": {
+            "anyOf": [
+              { "$ref": "#/$defs/Step" },
+              {
+                "additionalProperties": false,
+                "description": "Run the steps after it this many logical seconds later, as a sibling delayed rule with the same `on` and `when`; `when` is read again when they run.",
+                "properties": {
+                  "op": { "const": "wait" },
+                  "seconds": {
+                    "description": "Logical seconds, added to the rule's `after` and the waits before it.",
+                    "maximum": 2147483647,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "op",
+                  "seconds"
+                ],
+                "type": "object"
+              }
+            ]
+          },
           "type": "array"
         },
         "when": { "$ref": "#/$defs/Policy" },
