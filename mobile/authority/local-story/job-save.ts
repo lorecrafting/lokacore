@@ -1,28 +1,18 @@
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
-import { CLOCK_JOB, hourOf } from '../../../kernel/ts/src/mechanics/schedule/daily.ts';
+import { hourOf, scheduleOf } from '../../../kernel/ts/src/mechanics/schedule/daily.ts';
+import { jobRoute } from '../../../kernel/ts/src/mechanics/schedule/rule.ts';
 import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
 
 type Job = NonNullable<World['state']['jobs']>[string];
 
-/** The definition the schedule rule's handler reads exists; else every launch throws a TypeError. */
+/** The definition the routed handler reads exists; else every launch throws a TypeError. */
 function runnable(world: World, row: Job) {
-  // Dispatched on row fields or on a kind whose handler answers a missing definition itself.
-  if (
-    row.water_generation !== undefined ||
-    row.encounter_id ||
-    row.bleed_body_id ||
-    row.quest_instance_id ||
-    row.crow_phase !== undefined ||
-    row.sight ||
-    [CLOCK_JOB, 'status', 'population', 'order', 'reaction'].includes(row.job.kind)
-  )
-    return true;
-  const ref = refString(row.job);
-  if (row.job.kind === 'replenish') return !!world.cartridge.replenish?.[ref];
-  if (row.job.kind === 'wage') return !!world.cartridge.world?.group?.wage;
-  const npc = world.entities[world.entityIds[ref]];
+  const route = jobRoute(row);
+  if (route === 'replenish') return !!world.cartridge.replenish?.[refString(row.job)];
+  if (route === 'wage') return !!world.cartridge.world?.group?.wage;
   // A lawful job is due at an hour of its own schedule (daily.ts nextHour; placeOf reads that hour).
-  return npc?.kind === 'npc' && !!npc.daily_schedule?.[hourOf(world.cartridge, row.due_time)];
+  if (route === 'npc') return !!scheduleOf(world, row.job)[hourOf(world.cartridge, row.due_time)];
+  return true;
 }
 
 /** A job no handler can run is a damaged save (schedule/rule.ts decideAt's dispatch). */

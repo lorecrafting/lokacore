@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
+import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { elapsedBundle, elapsedHost, sqliteHost } from './__tests__/elapsed-host.test.ts';
 import { localSession } from './session.ts';
 
@@ -14,12 +15,12 @@ const bundle = elapsedBundle();
 const RUN = 'aaaaaaaa-0000-4000-8000-000000000002'; // elapsedHost's first run
 const LATER = { wall: 20000, mono: 0 }; // 10 s after the save's 10000, at rate 50: 500 world seconds
 const bytes = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
-const launch = (path: string, prepare = (_: DatabaseSync) => {}) => {
-  const p = sqliteHost(path, LATER);
+const launch = (path: string, prepare = (_: DatabaseSync) => {}, clock = LATER, b = bundle) => {
+  const p = sqliteHost(path, clock);
   const session = localSession(
     () => (prepare(p.sql), p.db),
     () => assert.fail('the save file was removed'),
-    bundle,
+    b,
     { ...p.host, newId: randomUUID },
   );
   return { ...p, session };
@@ -196,4 +197,42 @@ test('a kernel fault during catch-up at open keeps the game and its debt, with n
   } finally {
     a.sql.close();
   }
+});
+
+// Break detected: the load check refusing a lawful save whose wage row the kernel already moved.
+test('a wage row the kernel advanced loads', () => {
+  const c = JSON.parse(bundle.canonical);
+  const ref = { cartridge_id: 'ferry_sampler', cartridge_version: '0.0.1' };
+  const member = { ...ref, kind: 'fact', key: 'hired' };
+  const resource = { ...ref, kind: 'resource', key: 'ma' };
+  c.facts['ferry_sampler@0.0.1:fact/hired'] = {
+    version: 1,
+    value_type: { type: 'bool', default: false },
+    scopes: ['player'],
+    per_subject: true,
+    meaning: 'hired',
+    key: 'hired',
+  };
+  c.world = { group: { member, wage: { resource, amount: 3, every: 3600 } } };
+  const canonical = encode(c);
+  const b = { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-open-')), 'save.db');
+  elapsedHost(path, undefined, b).sql.close();
+  const wageDue = (sql: DatabaseSync) =>
+    (
+      sql.prepare('SELECT value FROM state_row WHERE section = ?').all('jobs') as {
+        value: string;
+      }[]
+    )
+      .map((r) => JSON.parse(r.value))
+      .filter((r) => r.job.kind === 'wage')
+      .map((r) => r.due_time)
+      .sort();
+  const later = launch(path, undefined, { wall: 90000, mono: 0 }, b); // 4000 world s: one wage due
+  later.session.game();
+  assert.deepEqual(wageDue(later.sql), [64800 + 3600, 64800 + 7200]); // the run row and the next
+  later.sql.close();
+  const again = launch(path, undefined, { wall: 90000, mono: 0 }, b);
+  assert.equal(again.session.game()!.view().view.time, 64800 + 4000);
+  again.sql.close();
 });
