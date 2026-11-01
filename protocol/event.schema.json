@@ -792,6 +792,17 @@
           "required": ["type", "entity_id", "topic", "answered"],
           "additionalProperties": false,
           "description": "Toolbox row FD7 (speech@1): the actor asked the NPC entity_id about a topic; answered is false when the NPC gave its unknown line."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "level_reached" },
+            "character_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
+            "level": { "type": "integer", "minimum": 2 }
+          },
+          "required": ["type", "character_id", "level"],
+          "additionalProperties": false,
+          "description": "Toolbox row 4 (attribute@1): the character reached level, one event per threshold a sequence's levelling write crosses, ascending."
         }
       ],
       "examples": [

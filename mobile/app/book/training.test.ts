@@ -228,7 +228,7 @@ test('Character shows the level, xp and one Raise card per attribute only while 
     const buttons = buttonsOf(view, (k) => k, text) as never[];
     return { buttons, words: words(CharacterPage({ view, text, world: () => {}, buttons })) };
   };
-  const spend = page({ level: 2, experience: 30, next: 100, unspent: 1 }, [raise]);
+  const spend = page({ level: 2, experience: 30, from: 30, next: 100, unspent: 1 }, [raise]);
   assert.deepEqual(spend.words, [
     'Character',
     'Level 2, 1 point to spend',
@@ -241,9 +241,9 @@ test('Character shows the level, xp and one Raise card per attribute only while 
   ]);
   assert.deepEqual((spend.buttons[0] as any).input, { attribute: str });
   assert.deepEqual(group(spend.buttons).place, []);
-  const two = page({ level: 3, experience: 100, next: 200, unspent: 2 }, [raise]);
+  const two = page({ level: 3, experience: 100, from: 100, next: 200, unspent: 2 }, [raise]);
   assert.equal(two.words[1], 'Level 3, 2 points to spend');
-  const top = page({ level: 3, experience: 120, unspent: 0 }, []);
+  const top = page({ level: 3, experience: 120, from: 100, unspent: 0 }, []);
   assert.deepEqual(top.words, [
     'Character',
     'Level 3',
