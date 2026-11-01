@@ -266,6 +266,11 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 10080
+        },
+        "away_cap_hours": {
+          "description": "In-game hours one absence can catch up at most; the rest of the absence is skipped, not played. Absent: one in-game day.",
+          "type": "integer",
+          "minimum": 1
         }
       },
       "required": [

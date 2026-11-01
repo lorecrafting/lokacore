@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { checkpoint, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
+import { checkpoint, elapsedBundle, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
 import type { GameSubscription, Intent } from '../../packages/game-view/session.ts';
 const LOOK: Intent = { action_key: 'look' as never, target_ids: [], input: {} };
 
@@ -38,7 +38,7 @@ test('resumed wall survives fractional reconciliation and invalid/stale prefligh
 // Breaks: a failed prerequisite candidate freezes A to its old horizon, or prerequisite drain
 // and the new seventeen-boundary horizon share an unbounded turn.
 test('a new reservation waits for its actual resumed horizon and yields after sixteen boundaries', () => {
-  const a = elapsedHost();
+  const a = elapsedHost(undefined, undefined, elapsedBundle({ away_cap_hours: 240 }));
   try {
     a.sql.exec(
       'PRAGMA foreign_keys = ON; CREATE TABLE parent(id INTEGER PRIMARY KEY); CREATE TABLE child(id INTEGER REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',

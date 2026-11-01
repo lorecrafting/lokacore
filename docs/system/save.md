@@ -257,7 +257,27 @@ pins stay refused; no save is retargeted. A managed elapsed session without cloc
 
 Accounting uses exact checked integer arithmetic, retaining fractions and existing target debt.
 Active monotonic samples are floored absolute milliseconds; resume credits positive wall gaps
-once and durably rebases negative gaps without rewind. Each captured horizon settles at the
+once and durably rebases negative gaps without rewind.
+
+**Away cap ([owner ruling](../decisions/owner-decision-away-catch-up-cap-2026-11-01.md)).** A wall-gap
+credit (the first capture after open, and every resume) is at most `manifest.time_policy.away_cap_hours`
+in-game hours of world time (absent: one in-game day of the cartridge's calendar), that many logical
+seconds converted to real milliseconds at `rate`, rounded down (`ClockDriver.capture`, `awayCap` in
+`mechanics/calendar.ts`). The rest of the span is skipped: the logical clock never passes through it, so
+no job comes due and no receipt or job row exists for it. The capture records it only by moving `wall_ms`
+to the sampled wall clock while `target` rises by the capped credit, in the same checkpoint write as any
+other capture. So a crash or failed COMMIT recomputes at most one capped credit from the durable row, and
+replay, which reads receipts and samples no clock, is unchanged. Retained target debt is not trimmed.
+
+Active monotonic samples are never capped: a long open session is unaffected and a save grows with time
+actually played. Closed app or hidden tab: a capped wall gap on open or resume. A timer stalled for over
+a minute with the tab still visible (a sleeping laptop, a suspended tab with no visibility event): the
+App's next tick pulses `resume`, so it is a capped wall gap too (`mobile/app/clock-tick.ts`). Device clock
+jump: forward during open play is ignored, since active credit reads the monotonic clock; forward while
+closed is a capped gap; backward credits nothing and rebases. Time-based authoring (`after`, hunger, the
+away recap) sees the capped span only. The dev clock's active pulses are session time.
+
+Each captured horizon settles at the
 earliest pending job boundary, yielding after 16 commits. Already-due jobs/faults surface
 recovery and retain debt. At load, a changed job row no handler can run (`local-story/job-save.ts`: unknown definition, or an NPC job off its schedule's hours) is `save_corrupt` with the same route. A number canonical JSON refuses is judged by the same rule, not refused for itself: a fractional due time is a refused delivery; past safe integers, a runnable kind never comes due and the save plays. At open, an already-due job or a refused catch-up delivery is `save_corrupt` with the new game in place; the refused step writes nothing, and steps settled before it stay committed. A kernel fault stays a fault with its debt, and a storage failure during catch-up offers no Start over (`open_catch_up.test.ts`). Sampling never extends a reserved input’s finite horizon.
 

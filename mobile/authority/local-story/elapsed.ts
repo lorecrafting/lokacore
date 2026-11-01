@@ -12,6 +12,7 @@ import {
   natural,
 } from './elapsed-store.ts';
 import { needsAncestry } from '../../../kernel/ts/src/commands/actions.ts';
+import { awayCap } from '../../../kernel/ts/src/mechanics/calendar.ts';
 import { CLOCK_JOB } from '../../../kernel/ts/src/mechanics/schedule/daily.ts';
 import { folds } from '../../../kernel/ts/src/mechanics/status/job.ts';
 import type { JobId } from '../../../kernel/ts/src/contracts.gen.ts';
@@ -116,13 +117,19 @@ export class ClockDriver {
     };
     const resumed = this.resumeNeeded || mode === 'resume';
     // World time starts at D11 selection: before it a capture only re-anchors, crediting nothing.
+    const rate = this.s.world.cartridge.manifest.time_policy!.rate;
+    // Time away: at most the away cap is credited, the rest skipped (save.md). A session stays exact.
+    const away = () =>
+      Math.min(
+        Math.max(0, wall - old.wall_ms),
+        Math.floor((awayCap(this.s.world.cartridge) * 1000) / rate),
+      );
     const d =
       !this.s.elapsed || needsAncestry(this.s.world, this.s.world.character)
         ? 0
         : !resumed && this.baseline !== undefined
           ? mono - this.baseline
-          : Math.max(0, wall - old.wall_ms);
-    const rate = this.s.world.cartridge.manifest.time_policy!.rate;
+          : away();
     this.candidate = { row: accounted(old, d, rate, wall), mono, pause: mode === 'pause' };
     if (resumed) this.resumeNeeded = false;
   }

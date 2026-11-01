@@ -1,0 +1,148 @@
+// The away cap: an absence catches up at most one capped stretch (docs/system/save.md).
+import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { test } from 'node:test';
+import { compiled } from './__tests__/compiled.ts';
+import {
+  checkpoint,
+  coldReopen,
+  elapsedBundle,
+  elapsedHost,
+  receipts,
+} from './__tests__/elapsed-host.test.ts';
+
+const YEAR = 365 * 86_400_000;
+const START = 64800; // the fixture calendar's start
+const FK =
+  'PRAGMA foreign_keys = ON; CREATE TABLE parent(id INTEGER PRIMARY KEY); CREATE TABLE child(id INTEGER PRIMARY KEY, parent REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED);';
+const settle = (a: ReturnType<typeof elapsedHost>) => {
+  let status = a.game.pulse('resume');
+  while (status.kind === 'catching_up') status = a.game.pulse('drain');
+  return status.kind;
+};
+function save(t: { after: (f: () => void) => void }) {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-away-cap-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  return join(dir, 'save.db');
+}
+
+// Breaks: the wall gap is credited whole, so a year away plays a year of world time.
+test('a year closed catches up one day on reopen, records the skip, and reopens', (t) => {
+  const path = save(t),
+    bundle = elapsedBundle();
+  const first = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  first.game.pulse();
+  first.sql.close();
+  const clock = { wall: 10000 + YEAR, mono: 0 };
+  const a = elapsedHost(path, clock, bundle);
+  assert.equal(settle(a), 'ready');
+  assert.equal(a.game.view().view.time, START + 86400);
+  assert.deepEqual(checkpoint(a.sql), { wall_ms: clock.wall, remainder: 0, target: START + 86400 });
+  const count = receipts(a.sql);
+  a.sql.close();
+  // A second reopen at the same wall adds nothing: the skip is durable, not owed.
+  const b = elapsedHost(path, clock, bundle);
+  assert.equal(settle(b), 'ready');
+  assert.equal(b.game.view().view.time, START + 86400);
+  assert.equal(receipts(b.sql), count);
+  b.sql.close();
+  coldReopen(path, bundle);
+});
+
+// Breaks: the cartridge's cap is ignored; or the milliseconds round up, crediting past the cap at a
+// rate that does not divide it (3600 s at rate 7 is 514285 whole ms: 3599.995 s).
+test('a cartridge sets its own cap, and a rate that does not divide it rounds down', (t) => {
+  const a = elapsedHost(save(t), undefined, elapsedBundle({ away_cap_hours: 1, rate: 7 }));
+  a.game.pulse();
+  a.clock.wall += YEAR;
+  assert.equal(settle(a), 'ready');
+  assert.deepEqual(checkpoint(a.sql), {
+    wall_ms: 10000 + YEAR,
+    remainder: 995,
+    target: START + 3599,
+  });
+  a.sql.close();
+});
+
+// Breaks: a failed COMMIT during capped catch-up leaves a save that will not reopen, or the retry
+// credits a second cap. A real reopen, after a real failed COMMIT.
+test('a failed COMMIT during capped catch-up reopens and credits once', (t) => {
+  const path = save(t),
+    bundle = elapsedBundle();
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  a.game.pulse();
+  a.sql.exec(FK);
+  a.clock.wall += YEAR;
+  a.fault.kind = 'failed';
+  a.fault.armed = true;
+  assert.equal(a.game.pulse('resume').kind, 'error');
+  a.sql.close();
+  const clock = { wall: 10000 + YEAR + 1000, mono: 0 };
+  const b = elapsedHost(path, clock, bundle);
+  assert.equal(settle(b), 'ready');
+  assert.equal(b.game.view().view.time, START + 86400);
+  assert.equal(checkpoint(b.sql).target, START + 86400);
+  assert.equal(b.sql.prepare('SELECT count(*) n FROM child').get()!.n, 0);
+  b.sql.close();
+  coldReopen(path, bundle);
+});
+
+// Breaks: a COMMIT whose acknowledgement is lost is retried as unsettled, crediting a second cap.
+test('a lost acknowledgement of the capped credit never credits it twice', (t) => {
+  const path = save(t),
+    bundle = elapsedBundle();
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  a.game.pulse();
+  a.clock.wall += YEAR;
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  assert.equal(a.game.pulse('resume').kind, 'pending');
+  a.sql.close();
+  const b = elapsedHost(path, { wall: 10000 + YEAR + 1000, mono: 0 }, bundle);
+  assert.equal(settle(b), 'ready');
+  assert.equal(checkpoint(b.sql).target, START + 86400 + 50); // the 1000 ms since, at rate 50
+  b.sql.close();
+  coldReopen(path, bundle);
+});
+
+// Breaks: a failed COMMIT on a catch-up turn loses the capped debt, or the reopen adds to it.
+test('a failed COMMIT on a catch-up turn keeps the capped horizon through a reopen', (t) => {
+  const path = save(t),
+    bundle = compiled('cartridges/toolbox_showcase');
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  assert.equal(
+    a.game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'south' } }).kind,
+    'saved',
+  );
+  a.sql.exec(FK);
+  const horizon = checkpoint(a.sql).target + 86400;
+  a.clock.wall += YEAR;
+  assert.equal(a.game.pulse('resume').kind, 'catching_up');
+  const wall = a.clock.wall;
+  a.fault.kind = 'failed';
+  a.fault.armed = true;
+  assert.equal(a.game.pulse('drain').kind, 'error');
+  assert.equal(a.sql.isTransaction, false);
+  a.sql.close();
+  const b = elapsedHost(path, { wall, mono: 0 }, bundle);
+  assert.equal(settle(b), 'ready');
+  assert.deepEqual(checkpoint(b.sql), { wall_ms: wall, remainder: 0, target: horizon });
+  assert.equal(b.game.view().view.time, horizon);
+  b.sql.close();
+  coldReopen(path, bundle);
+});
+
+// Breaks: a backward clock on reopen rewinds the checkpoint or credits time.
+test('a device clock moved backward while closed credits nothing and rebases', (t) => {
+  const path = save(t),
+    bundle = elapsedBundle();
+  const first = elapsedHost(path, { wall: 10000 + YEAR, mono: 0 }, bundle);
+  first.game.pulse();
+  first.sql.close();
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  assert.equal(settle(a), 'ready');
+  assert.deepEqual(checkpoint(a.sql), { wall_ms: 10000, remainder: 0, target: START });
+  a.sql.close();
+});

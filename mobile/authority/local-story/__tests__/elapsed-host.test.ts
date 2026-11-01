@@ -6,9 +6,9 @@ import { read } from '../../../../kernel/ts/test/read.ts';
 import { openGame } from '../session.ts';
 import type { Db } from '../store.ts';
 
-export function elapsedBundle() {
+export function elapsedBundle(policy: object = {}) {
   const c = structuredClone(read('protocol/fixtures/cartridge_ferry_hash.json').value);
-  c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
+  c.manifest.time_policy = { profile: 'real_elapsed', rate: 50, ...policy };
   c.manifest.requires.kernel_api.at_least = '1.1';
   c.calendar.start = 64800;
   for (const scripted of Object.values(c.scripted_actions) as any[]) delete scripted.duration;

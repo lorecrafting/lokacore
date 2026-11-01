@@ -12,6 +12,12 @@ export function units(cartridge: Cartridge) {
   return { hour, hours, day: hour * hours };
 }
 
+// Longest logical span one capture credits; the rest of an absence never happens (save.md).
+export function awayCap(cartridge: Cartridge) {
+  const { hour, hours } = units(cartridge);
+  return (cartridge.manifest.time_policy?.away_cap_hours ?? hours) * hour;
+}
+
 export function hourOf(cartridge: Cartridge, time: number): number {
   const { hour, hours } = units(cartridge);
   return Math.floor(time / hour) % hours;

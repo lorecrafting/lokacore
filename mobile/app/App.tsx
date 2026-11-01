@@ -2,6 +2,7 @@
 // expo-sqlite, or the screen for a save that does not open. The shell owns every phone-only API
 // (SQLite, fonts, Alert, the key-value store) and injects them; the logic is in
 // authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
+import { tickPulse } from './clock-tick';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, AppState, PixelRatio, Platform, View } from 'react-native';
 import { getRandomValues, randomUUID } from 'expo-crypto';
@@ -127,6 +128,7 @@ type Clock = {
   draining: boolean;
   booked: boolean; // the Book has subscribed, so it sees the catch-up (away recap, book-ui.md)
   timer?: ReturnType<typeof setTimeout>;
+  ticked?: number;
   cleanup: () => void;
 };
 const current = (c: Clock) => session?.game() === c.game && g.loka_clock_cleanup === c.cleanup;
@@ -143,7 +145,9 @@ function tick(c: Clock) {
   if (!current(c) || !c.active) return;
   const held = c.game.pendingInvocation(),
     draining = c.draining;
-  const status = c.game.pulse(draining ? 'drain' : 'active');
+  const now = performance.now();
+  const status = c.game.pulse(tickPulse(draining, now - (c.ticked ?? now)));
+  c.ticked = now;
   if (!current(c) || !c.active) return;
   if (status.kind !== 'ready' && status.kind !== 'catching_up') return cancel(c);
   c.draining = status.kind === 'catching_up';

@@ -679,7 +679,7 @@
    "season": "spring",
    "tide": "high"
   },
-  "recap_after": 90000,
+  "recap_after": 86400,
   "choice": {
    "continuation_id": "b8c95efe-eaa1-89eb-bac3-087c5e30c77a",
    "prompt": {
