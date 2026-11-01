@@ -12,6 +12,7 @@ const stories = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('
 // Not drawn on their own: each with its reason.
 const EXEMPT: Record<string, string> = {
   'book/Text.tsx:Text': 'every line of every story',
+  'book/Leaf.tsx:Leaf': 'the open page inside Book, shown through every page story',
   'book/pages.tsx:Tap': 'shown through VerbLine and the room title',
   'book/people.tsx:Here': 'the room page lines, shown through the RoomPage stories',
   'book/StatusIcon.tsx:Tooltip':
@@ -99,18 +100,23 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
       'chapter',
       'impact',
       'fightIn',
+      'miss',
+      'lever',
+      'latch',
+      'thunder',
+      'bed',
+      'weather',
     ].map((k) => [
       `sound.${k}`,
       'reached as sound[name] in play(name); played by the cue that names it (cueSounds.ts)',
     ]),
   ),
   ...Object.fromEntries(
-    ['light', 'medium', 'heavy'].map((k) => [
+    ['light', 'medium'].map((k) => [
       `haptic.${k}`,
       'reached as tokens.haptic[kind] in haptic(kind); its first caller comes with loka-gj82.4',
     ]),
   ),
-  'mix.spread': 'pitch variation waits for the real samples',
 };
 test('every token has a consumer outside tokens.ts', async () => {
   const tokens: Record<string, object> = await import('./book/tokens.ts');

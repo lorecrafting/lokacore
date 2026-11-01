@@ -22,6 +22,7 @@ const meta = {
   component: Footer,
   args: {
     keyboardEnabled: false,
+    room: 'r',
     exits: [open('north'), open('east'), open('south'), open('west')],
     text: (key: string) => key,
     go: fn(),

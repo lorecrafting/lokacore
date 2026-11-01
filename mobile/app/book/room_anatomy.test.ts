@@ -247,3 +247,19 @@ test('a card is its chapter index, and a scene takes its place', async () => {
   const scene = { scene: { id: 's', lines: [], current: 0 } };
   assert.notEqual(inner({ ...chapter(1), ...scene }).type, ChapterPage);
 });
+
+// Breaks: the World page's opaque paper sits over the sky, so lightning and the wind fold never show
+// (book-ui.md, Storm).
+test('the paper lies under the sky and the World page draws none above it', async () => {
+  const { Leaf } = await import('./Leaf.tsx');
+  const { Storm } = await import('./Storm.tsx');
+  const screen = presenter(game(() => forge())).screen();
+  const leaf = (Leaf as any)({ screen, g: group(screen.buttons), flip: { turn: 0 }, stack: [] });
+  assert.ok(leaf.props.style.backgroundColor, 'the leaf is the paper');
+  assert.equal(leaf.props.children[0].type, Storm, 'the sky is first, under the ink');
+  const opaque = (await world(forge())).filter((n) => {
+    const { flex, backgroundColor } = Object.assign({}, ...[n.props?.style].flat());
+    return flex === 1 && backgroundColor;
+  });
+  assert.deepEqual(opaque, [], 'nothing on the World page covers the sky');
+});

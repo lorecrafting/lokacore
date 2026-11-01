@@ -1,6 +1,7 @@
 {
   "name": "room.mill.title",
   "description": "room.mill.description",
+  "sound": "mill",
   "exits": {
     "down": {
       "to": "village_green"

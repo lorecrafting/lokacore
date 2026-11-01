@@ -487,6 +487,7 @@ A navigable place (21 §5 Place/Room): its key, its name and description text ke
 | site | object |  | Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise). |
 | site.directions | list of `north` or `south` or `east` or `west` or `up` or `down` | yes | Compass directions a built room may take from here. |
 | site.structures | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Structures that may be built from this room. |
+| sound | [Key](source-kinds.gen.md#key) |  | Its sound bed tag, projected as place.sound: the host plays that tag's bed and exploration piece. The cartridge owns the names; a tag with no file plays the wild bed. |
 | tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice. |
 | variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | See the type. |
 | zones | list of [Key](source-kinds.gen.md#key) |  | The zones this room belongs to; a reaction with `zone` and no `on.room` gets one copy per member room. |

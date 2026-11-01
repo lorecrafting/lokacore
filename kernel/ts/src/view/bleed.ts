@@ -1,6 +1,6 @@
-import type { AdvertisedAction, CharacterId, EntityId } from '../contracts.gen.ts';
+import type { AdvertisedAction, CharacterId, EntityId, TextKey } from '../contracts.gen.ts';
 import type { ActionSet } from '../commands/actions.ts';
-import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
+import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { availability } from '../mechanics/bleed/rule.ts';
 import { currentBleed } from '../mechanics/bleed/shared.ts';
 
@@ -41,4 +41,16 @@ export function bandageActions(
             },
           ];
     });
+}
+
+export function bleedingView(world: World, bleed: NonNullable<ReturnType<typeof currentBleed>>) {
+  const spec = world.cartridge.bleeds![refString(bleed.effect!)];
+  return {
+    label: 'condition.bleeding' as TextKey,
+    generation: bleed.generation,
+    ends_at: bleed.ends_at!,
+    next_tick_at: bleed.next_tick_at!,
+    hp_loss: spec.hp_loss,
+    tick_every: spec.tick_every,
+  };
 }

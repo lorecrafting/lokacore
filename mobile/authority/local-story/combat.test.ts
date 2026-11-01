@@ -96,6 +96,27 @@ test('real SQLite reopens Attack and both M4 A rounds with original receipt repl
   coldReopen(path, bundle);
 });
 
+// Breaks: the miss compares attacker_id with the character id (entity ids differ), or the clock path
+// skips it, so the whisper never fires on a real round (#558 B1).
+test('a real round on the clock names the player miss on its record', () => {
+  const p = setup();
+  try {
+    assert.equal(p.story.invoke(p.invocation('attack', [rat(fresh)])).kind, 'saved');
+    let from = 64800;
+    const records = [];
+    for (let i = 0; i < 12; i++) {
+      const evidence = { expected_run_id: p.story.runId(), from, until: from + 150 };
+      assert.equal(p.story.elapsed(evidence).kind, 'saved');
+      from += 150;
+      records.push(p.story.narration());
+    }
+    assert.ok(records.some((r) => r?.missed));
+    assert.ok(records.some((r) => !r?.missed));
+  } finally {
+    p.sql.close();
+  }
+});
+
 // Breaks: the fatal receipt omits credit/identity, or replay delivers the death mapper twice.
 test('a real rat kill commits corpse and preacceptance credit together and reopens exactly', () => {
   const p = setup(':memory:', 'rat');

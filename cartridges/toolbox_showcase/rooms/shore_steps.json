@@ -1,6 +1,7 @@
 {
   "name": "room.shore_steps.title",
   "description": "room.shore_steps.description",
+  "sound": "shore",
   "exits": {
     "west": {
       "to": "crossroads_inn"

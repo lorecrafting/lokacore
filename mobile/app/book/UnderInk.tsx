@@ -11,9 +11,10 @@ import {
   useSharedValue,
   withRepeat,
   withSequence,
+  withDelay,
   withTiming,
 } from './fade.ts';
-import { heldLayer, lampLit, lowHealth, type HeldLayer } from './heldLayer.ts';
+import { flickerClock, heldLayer, lampLit, lowHealth, onCut, type HeldLayer } from './heldLayer.ts';
 import { usePalette } from './palette.ts';
 import { color, motion, opacity } from './tokens.ts';
 
@@ -38,6 +39,31 @@ function Layer(p: { style: object; children: React.ReactNode }) {
       <Suspense>{p.children}</Suspense>
     </Reanimated.View>
   );
+}
+
+function useFlicker(flickers: boolean) {
+  const flick = useSharedValue(1);
+  useEffect(() => {
+    flick.value = 1;
+    if (flickers) return flickerClock((share) => (flick.value = share));
+  }, [flickers]);
+  return flick;
+}
+
+function useCut() {
+  const cut = useSharedValue(1);
+  useEffect(
+    () =>
+      onCut(() => {
+        cut.value = 0;
+        cut.value = withDelay(
+          motion.afterimage.duration + motion.afterimage.out,
+          withTiming(1, { duration: motion.settle.duration }),
+        );
+      }),
+    [],
+  );
+  return cut;
 }
 
 function useLayers(view: GameView, paper: string) {
@@ -66,8 +92,10 @@ function useLayers(view: GameView, paper: string) {
         -1,
       );
   }, [held, still]);
-  const glowStyle = useAnimatedStyle(() => ({ opacity: glow.value }));
-  const edgeStyle = useAnimatedStyle(() => ({ opacity: edge.value }));
+  const flick = useFlicker(held === 'glow' && !still && !view.place?.exposed);
+  const cut = useCut();
+  const glowStyle = useAnimatedStyle(() => ({ opacity: glow.value * flick.value * cut.value }));
+  const edgeStyle = useAnimatedStyle(() => ({ opacity: edge.value * cut.value }));
   return { glowStyle, edgeStyle };
 }
 
@@ -76,7 +104,8 @@ function useLayers(view: GameView, paper: string) {
  * - Use: behind a `paperless` Page, on World and Combat.
  * - Rules: paper, not a part: draws no block, holds no words, takes no touch. Only the highest of
  *   the fatal hold, the vignette and the glow shows; a lower one fades out over `motion.settle` and
- *   returns the same way.
+ *   returns the same way. Storm's light cuts it for the strike; it returns over `motion.settle`.
+ *   The glow flickers by `motion.flicker` away from an exposed room, steady under reduced motion.
  * - States: none; glow (in `motion.palette`, by cut under reduced motion); vignette (breathes;
  *   steady at `opacity.faint` under reduced motion); under a fatal hold.
  * - Story: UnderInk.stories.tsx

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cuesOf, QUIET, soundOf, step, type Cue, type CueName } from './cues.ts';
+import { cuesOf, lightFell, QUIET, soundOf, step, type Cue, type CueName } from './cues.ts';
 import { motion } from './tokens.ts';
 
 const base = {
@@ -244,6 +244,14 @@ test('a blow within a second of a wash keeps all but the wash', () => {
   assert.equal(step(a.q, [blow(2)], 2000).fired[0]?.wash, true);
 });
 
+// Breaks: a blow's wash falls just after Storm's light (book-ui.md, Flash limit), off by one either way.
+test('a blow within a second of the light keeps all but the wash', () => {
+  lightFell(1000);
+  assert.equal(step(QUIET, [blow(1)], 1999).fired[0]?.wash, false);
+  assert.equal(step(QUIET, [blow(1)], 2000).fired[0]?.wash, true);
+  lightFell(-Infinity);
+});
+
 // Breaks: a cue moves severity against plan section 2's table, so it queues or merges wrongly.
 test('each cue behaves as its severity', () => {
   const felt = (name: CueName) => {
@@ -464,4 +472,26 @@ test('a death clears what is pending and fires at once, past a held card', () =>
     5000,
   );
   assert.deepEqual(two.fired[0], { name: 'hp_loss', loss: 7, wash: true });
+});
+
+// Breaks: a deed cue fires without its event (a label would), an ally's blow swallows the player's
+// miss, or a latch sounds on a walk or when nothing newly opened.
+test('miss, lever and latch come from the deed alone', () => {
+  const exit = (available: boolean) => ({ exits: [{ direction: 'north', available }] });
+  const shut = view(exit(false));
+  const open = view(exit(true));
+  const names = (now: GameView, was: GameView, deed?: object) =>
+    cuesOf(now, was, false, { command_id: 'c', lines: [], ...deed }).map((c) => c.name);
+  assert.deepEqual(cuesOf(open, shut), []);
+  assert.deepEqual(names(open, shut), []);
+  assert.deepEqual(names(shut, shut, { lever: true }), ['lever']);
+  assert.deepEqual(names(open, shut, { opened: true }), ['latch']);
+  assert.deepEqual(names(open, open, { opened: true }), []);
+  assert.deepEqual(names(shut, open, { opened: true }), []);
+  const walked = view({ ...exit(true), place: { ...base.place, id: 'p2' } });
+  assert.deepEqual(names(walked, shut, { opened: true }), ['place']);
+  const miss = { missed: true };
+  assert.deepEqual(names(pool(9, 0, fight), pool(9, 0, fight), miss), ['miss']);
+  assert.deepEqual(names(pool(7, 0, fight), pool(9, 0, fight), miss), ['hp_loss', 'miss']);
+  assert.deepEqual(names(view(foe('hurt')), view(foe('fine')), miss), ['blow_dealt', 'miss']);
 });

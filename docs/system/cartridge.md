@@ -1155,6 +1155,8 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 
 ## Tag declarations
 
+A room's optional `sound` (`RoomDefinition`, a `Key` the cartridge names) is its sound bed tag, projected unchanged as `place.sound`; it needs no capability, since nothing but the host reads it, and the Book plays that tag's bed ([Beds](book-ui.md#effects-sound-and-haptics)).
+
 [Property tags](mechanics.md#property-tags-and-the-policy-leaf-set-toolbox-row-g1) are an optional `tags` list on an item, barrier or room source file (`ItemDefinition`, `BarrierDefinition`, `RoomDefinition`), each a `Tag` of the engine set; the compiler copies it into the artifact unchanged. A `tags` list and a `has_tag` policy node need `tag@1` in `requires.capabilities` (UNDECLARED_CAPABILITY at the member otherwise); its `item`, `barrier` or `room` takes a short key, expanded like `has_item`'s, and an unresolved one is UNRESOLVED_REFERENCE at that member in the compiler. Precedent sampler: `cartridges/tags_sampler`.
 
 ## Drop declarations

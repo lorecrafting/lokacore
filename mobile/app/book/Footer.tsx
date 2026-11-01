@@ -20,6 +20,7 @@ import { LABEL } from './labels.ts';
 
 type Props = {
   keyboardEnabled: boolean;
+  room: string; // the place shown: a way newly open in it dries in
   exits: readonly GameView['exits'][number][];
   text: (key: string) => string;
   go: (direction: string) => void; // walks to an open exit
@@ -95,7 +96,7 @@ export function Footer(p: Props) {
           {...readerActions(p, said, (d) => walk(d, p), openMap)}
           {...pan.panHandlers}
         >
-          <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
+          <MapDrawing room={p.room} exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
           {saidLabel(said, sideOf(lit))}
         </View>
         <View style={rule(c)} />

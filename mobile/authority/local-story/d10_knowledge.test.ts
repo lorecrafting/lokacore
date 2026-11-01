@@ -92,7 +92,12 @@ test('D10 real SQLite keeps each entry/Look and shared door commit across cold r
   assert.equal(blocked.kind, 'saved');
   if (blocked.kind === 'saved') assert.equal(blocked.decision.kind, 'rejected');
   assert.equal(names(game).includes('room.woodstore.title'), false);
-  invoke(game, 'open', { direction: 'south' });
+  const pressed = invoke(game, 'open', { direction: 'south' });
+  // Breaks: the door check reads the stored command's envelope, not its payload, and the latch never plays.
+  assert.equal(
+    game.lastNarration(pressed.kind === 'saved' ? pressed.command_id : '')?.opened,
+    true,
+  );
   reopen();
   invoke(game, 'move', { direction: 'south' });
   reopen();

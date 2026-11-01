@@ -3,7 +3,17 @@
 import type { sound } from './tokens.ts';
 
 export type SoundName = keyof typeof sound;
-export const sources = (_urls: Partial<Record<SoundName, string[]>>) => {};
+export const sources = (
+  _urls: Partial<Record<SoundName, string[]>>,
+  _rooms?: { beds?: Record<string, string>; pieces?: Record<string, string> },
+) => {};
+export const ambience = (
+  _tag?: string,
+  _weather?: string,
+  _exposed?: boolean,
+  _quiet?: boolean,
+) => {};
+export const thunder = (_muffled: boolean) => {};
 export const play = (_name: SoundName, _tier?: string) => {};
 export const fight = (_event: 'open' | 'resume' | 'won' | 'away' | 'cut') => {};
 export const setMuted = (_group: 'sound' | 'music', _muted: boolean) => {};

@@ -7,6 +7,7 @@ import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { bodyOf, refString, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { NarrationRecord } from '../../packages/game-view/session.ts';
 import { arrival, defenseEvidence } from './combat-receipt.ts';
+import { deedOf } from './deed-receipt.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { dreamDetail } from './dream-receipt.ts';
 import { eatReceipt } from './food-receipt.ts';
@@ -40,7 +41,8 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     const died = d.events.some(
       (e) => e.payload.type === 'entity_died' && !e.payload.victim_definition,
     );
-    if (!lines.length && !pickup && !died) {
+    const deed = deedOf(d, r, bodyOf(s.world, s.world.character), !!command_id);
+    if (!lines.length && !pickup && !died && !deed) {
       if (command_id) return undefined;
       before = r.revision;
       continue;
@@ -51,6 +53,7 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
       command_id: r.command_id,
       lines,
       ...(died && { died: true }),
+      ...deed,
       ...(cue && { cue }),
       ...(combat_lines.length && { combat_lines, ...arrival(s, lines) }),
       ...(detail_id && { detail_id, ...(d.outcome === 'read' && { read: true }) }),
@@ -64,12 +67,16 @@ const latest = (s: Story, command_id: string | undefined, before: number | null)
     `SELECT revision, command_id, command, response FROM receipt WHERE scope = ?
      AND (json_array_length(response, '$.narration') > 0
        OR json_extract(response, '$.outcome') = 'taken'
+       OR (? IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(response, '$.events') e
+         WHERE json_extract(e.value, '$.payload.type') IN
+           ('action_completed', 'attack_result', 'barrier_changed', 'custom_event')))
        OR EXISTS (SELECT 1 FROM json_each(response, '$.events') e
          WHERE json_extract(e.value, '$.payload.type') = 'entity_died'
            AND json_extract(e.value, '$.payload.victim_definition') IS NULL))
      AND (? IS NULL OR command_id = ?)
      AND (? IS NULL OR revision < ?) ORDER BY revision DESC LIMIT 1`,
     scope(s),
+    command_id ?? null,
     command_id ?? null,
     command_id ?? null,
     before,

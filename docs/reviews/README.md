@@ -16,6 +16,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: dialogue cookbook and the asked marker, PR #560 (loka-vduxr.12, kernel_api 1.138)](2026-11-01-loka-vduxr.12-dialogue-patterns-review.md): **APPROVE WITH NOTES**
 - [Second review: `asked` contract, PR #560 (loka-vduxr.12)](2026-11-01-loka-vduxr.12-asked-contract-second-review.md): **APPROVE**
 - [Review: lawful escort parting, PR #555 (loka-vduxr.23, kernel_api 1.137)](2026-11-01-escort-separation-review.md): **APPROVE WITH NOTES**
+- [Second opinion: effects batch 2 PR C, room sound, exposed, deeds, and a live play (loka-xz76e.6, kernel_api 1.138)](2026-11-01-effects-batch-2-c-second-review.md): **APPROVE WITH NOTES**
+- [Review: effects batch 2 PR C, room beds, music, storm, wind, lever, latch, ending (loka-xz76e.6, kernel_api 1.138)](2026-11-01-effects-batch-2-c-review.md): **APPROVE WITH NOTES**
 - [Second opinion: dialogue entry contract and in-progress play, PR #556 (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-second-review.md): **APPROVE WITH NOTES**
 - [Review: dialogue entry (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-review.md): **APPROVE WITH NOTES**
 - [Dev cheats: second opinion (PR #546, loka-vduxr.6)](2026-11-01-dev-cheats-second-review.md): **APPROVE**

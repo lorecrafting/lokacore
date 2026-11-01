@@ -4,6 +4,8 @@ Decided, one pass, for the build of G1 to G8. The epic's owner approval is the p
 
 The designer writes `tokens.ts` values on request, or the developer pastes the table below under this approval. The spec paragraphs below are approved text for the developer to paste.
 
+**As built, batch 2 C (designer sign-off on PR 558, 2026-11-01), where the text below differs and stays as history:** G2's miss sounds a whisper, read from the event (`book-ui.md`, Impact), not silence; G7's lever is the authored `lever` custom event and the latch a door verb or `action_completed`; `thunder` has no `haptic` field; `motion.bed.fade` is `motion.bed.duration`.
+
 ## Rulings that override the plan
 
 Each was checked against `tokens.ts`. The plan's values break the 4.5:1 rule (`docs/BOOK-UI-COMPONENTS.md`, Motion and sound), whose only exemption was the blow wash.
@@ -279,6 +281,31 @@ No lightning, gold or other directed effect on the last beat: scene-called cues 
 **Spec, `book-ui.md`, Chapters, scenes and recovery, add:**
 
 > A cartridge's ending is its last scene, then its last declared chapter's title page; the Book adds no ending page and no words of its own.
+
+## G6 prologue room table
+
+The outline's 18 rooms (`docs/worldbuilding/notes/prologue-outline-2026-10-30.md`), to tag and piece. Structure only, no wording; the cartridge's rooms take these when written. Exposed is the `exposed` tag.
+
+| Room | `place.sound` | Exposed | Piece (first entry) |
+|---|---|---|---|
+| Awakening Clearing | wild | yes | Path Through The Mountains |
+| Healing Grove | wild | yes | Path Through The Mountains |
+| Heartwood (hearth and hall) | inn | no | Echoes Of Home |
+| The Spring | shore | yes | Ephemera |
+| Lira's Memorial | church | no | Soul Searcher |
+| Elder Hall records | vault | no | Passage Of Time |
+| High Terrace | wild | yes | Path Through The Mountains |
+| Tending Fields | village | yes | Home Was You |
+| Understory (your hut and Dov's) | village | no | Home Was You |
+| Eastern Grove (Blight line, Watering Hollow) | wild | yes | Path Through The Mountains |
+| Small Grove | wild | yes | Path Through The Mountains |
+| Deep threshold (Three Roots stone) | cave | no | Decoherence |
+| Deep caves (Seren) | cave | no | Decoherence |
+| Heartroot Chamber | crypt | no | Katabasis I |
+| The Thinning | wild | yes | Path Through The Mountains |
+| The Edge | wild | yes | Path Through The Mountains |
+| Hull corridor with cradle room | vault | no | Passage Of Time |
+| The stone outside the hull | wild | yes | Path Through The Mountains |
 
 ## Escalated to PM (one item)
 

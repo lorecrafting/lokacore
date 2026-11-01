@@ -142,6 +142,8 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   rule above, for the wash's half second only: at its peak `fg` stays above 7:1 and `action` and
   `danger` above 5:1, while `dim` and `warning` dip to about 3.8:1 (opacity 0.08 would keep them
   at 4.5:1 and barely show). Combat is the only place the wash appears.
+- **Lightning.** The second exemption from the 4.5:1 rule, for at most 700 ms: at `opacity.afterimage`, `fg` stays above 7:1 and `action` and `danger` above 5:1, while `dim` dips to 4.25:1 and `warning` to 4.03:1 on dusk, and `warning` to 3.95:1 on dark. No other role falls below 4.5:1. It draws with no other held layer under it.
+- **Room sound and sky.** Bed cross-fade `motion.bed.duration`; exploration gap `sound.explore.gap`; lightning stays `motion.flash.gap` from a wash; wind corner `motion.flutter`; the light is `color.light.bg` at `opacity.afterimage`, up over 60 ms, away over 1200 ms.
 - **Falling.** The held wash is `opacity.faint`; with Flashes off it fades in over `motion.settle`.
 - **Fight music.** Stinger `sound.fightIn`, loop `sound.fightLoop` (`gap` is the fight gap), fanfare `sound.fightWon`, blow dealt `sound.impact`. A blow taken dips music by `mix.dip` with `mix.duck`'s times. Foe falling: the loop cuts over `motion.quick`; a fall-away fades over `motion.palette`. The band press is `motion.press`.
 
@@ -182,6 +184,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Gradient` | `book/Gradient.tsx` | UnderInk |
 | `HapticPulse` | `book/HapticPulse.tsx` | HapticPulse |
 | `ItemPop` | `book/ItemPop.tsx` | LogLines |
+| `Leaf` | `book/Leaf.tsx` | CombatPage |
 | `MapDrawing` | `book/MapDrawing.tsx` | Footer |
 | `ContentsPage` | `book/Menu.tsx` | SectionPages |
 | `ThingPage` | `book/Menu.tsx` | ItemPage |
@@ -200,6 +203,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `StatusLine` | `book/Status.tsx` | StatusLine |
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
+| `Storm` | `book/Storm.tsx` | Storm |
 | `Text` | `book/Text.tsx` | Note |
 | `UnderInk` | `book/UnderInk.tsx` | UnderInk |
 | `ActionCard` | `book/actions.tsx` | ActionCard |
