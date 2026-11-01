@@ -1,4 +1,4 @@
-# size: allow 320, one line clause per verb; each is small, and the verbs read together
+# size: allow 330, one line clause per verb; each is small, and the verbs read together
 defmodule Loka.Content.SceneFiles do
   @moduledoc """
   Scene files: `scenes/<key>.scene` (or `dialogues/<key>.scene`) is one dialogue as plain text,
@@ -120,8 +120,12 @@ defmodule Loka.Content.SceneFiles do
   defp located({"gives: " <> item, n}, {cur, _} = at) when cur != nil,
     do: {[{["choices", cur, "receive"], n}, {["roles", item], n}], at}
 
-  defp located({"sets: " <> _, n}, {cur, i}) when cur != nil,
-    do: {[{["choices", cur, "steps", i], n}], {cur, i + 1}}
+  defp located({"sets: " <> what, n}, {cur, i}) when cur != nil do
+    # A refused `sets:` lowers to no step, so it takes no index.
+    if length(String.split(what)) in 1..2,
+      do: {[{["choices", cur, "steps", i], n}], {cur, i + 1}},
+      else: {[{["prompt"], n}], {cur, i}}
+  end
 
   defp located({"quest: accept " <> _, n}, {cur, _} = at) when cur != nil,
     do: {[{["choices", cur, "accept"], n}], at}
@@ -278,8 +282,11 @@ defmodule Loka.Content.SceneFiles do
   defp value("false"), do: false
 
   defp value(word) do
-    case Integer.parse(word) do
-      {number, ""} -> number
+    # `007` keeps its spelling: only a number written plainly is a number.
+    with {number, ""} <- Integer.parse(word),
+         true <- Integer.to_string(number) == word do
+      number
+    else
       _ -> word
     end
   end

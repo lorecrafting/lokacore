@@ -29,6 +29,7 @@ defmodule Loka.ContentSceneVerbsTest do
       sets: count 3
       sets: lit false
       sets: bar true
+      sets: code 007
       quest: accept bridge_job
       bram: line three
       * He nods.
@@ -55,7 +56,8 @@ defmodule Loka.ContentSceneVerbsTest do
                     %{"op" => "fact.assign", "fact" => "mood", "value" => "calm"},
                     %{"op" => "fact.assign", "fact" => "count", "value" => 3},
                     %{"op" => "fact.assign", "fact" => "lit", "value" => false},
-                    %{"op" => "fact.assign", "fact" => "bar", "value" => true}
+                    %{"op" => "fact.assign", "fact" => "bar", "value" => true},
+                    %{"op" => "fact.assign", "fact" => "code", "value" => "007"}
                   ]
                 },
                 "stay" => %{"label" => "dialogue.a.choices.stay.label"}

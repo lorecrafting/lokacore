@@ -4,7 +4,6 @@ defmodule Loka.Content.CutFiles do
   paragraph, a last `---` as its await_ack, then end. `on` and `control` come from
   `scenes/<key>.json`, merged over it (SceneFiles.merge/1). Lowering only: no runtime reads one.
   """
-  alias Loka.Content.Source
 
   @doc "A `.cut` file's text as its scene steps, with its bad lines (SceneFiles.parse/1's form)."
   @spec parse(String.t()) :: {map(), [{pos_integer(), String.t(), String.t()}]}
@@ -26,17 +25,6 @@ defmodule Loka.Content.CutFiles do
     for {{_, n}, i} <- Enum.with_index(paragraphs),
         path <- [["steps", i], ["steps", i, "text"]] do
       {path, n}
-    end
-  end
-
-  @doc "`SCHEMA_VIOLATION` for each merged `.cut` with no `on`: nothing would ever start it."
-  @spec untriggered([{String.t(), term(), term()}]) :: [map()]
-  def untriggered(files) do
-    for {rel, {:scene, key, _}, value} <- files,
-        String.ends_with?(rel, ".cut"),
-        is_map(value) and not is_map_key(value, "on") do
-      data = %{"why" => "cut_no_trigger", "key" => key, "line" => 1}
-      Source.diag("SCHEMA_VIOLATION", Source.at(rel, []), data)
     end
   end
 
@@ -73,7 +61,7 @@ defmodule Loka.Content.CutFiles do
   defp joined([{words, first} | rest], line), do: [{words <> "\n" <> line, first} | rest]
 
   # A scene is paragraphs, then one acknowledgement: `---` once, last, under some words.
-  defp misplaced([]), do: [{1, "", "cut_end"}]
+  defp misplaced([]), do: [{1, "(empty file)", "cut_end"}]
 
   defp misplaced(numbered) do
     {last, n} = List.last(numbered)

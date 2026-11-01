@@ -1,3 +1,4 @@
+# size: allow 510, one catalog walked row by row; each row is its own small test
 defmodule Loka.ContentExplainTest do
   # What an author reads from a refused compile (loka-vduxr A1, A9). Expected fragments are
   # hand-written; wording around them may move.
@@ -162,8 +163,12 @@ defmodule Loka.ContentExplainTest do
 
     lines = said(dir, %{"npcs/thera.json" => npc, "scenes/hi.scene" => scene})
 
-    assert line_at(lines, "scenes/hi.scene:5") =~ "only `thera:` may speak here (`npc: thera`)"
-    assert line_at(lines, "scenes/hi.scene:6") =~ "only `thera:` may speak here (`npc: thera`)"
+    assert line_at(lines, "scenes/hi.scene:5") =~
+             "only `thera:` or a `with:` speaker may speak here (`npc: thera`)"
+
+    assert line_at(lines, "scenes/hi.scene:6") =~
+             "only `thera:` or a `with:` speaker may speak here (`npc: thera`)"
+
     assert line_at(lines, "scenes/hi.scene:9") =~ "repeats a choice"
     when_line = line_at(lines, "scenes/hi.scene:2")
     assert when_line =~ "fact `never_defined`"
@@ -209,6 +214,12 @@ defmodule Loka.ContentExplainTest do
 
   defp scene(dir, text, extra \\ %{}),
     do: said(dir, Map.merge(%{"scenes/hi.scene" => text}, extra))
+
+  # Break: a refused `sets:` takes a step index, so the next one's fault cites the refused line.
+  test "a fault after a refused sets names its own line", %{tmp_dir: dir} do
+    lines = scene(dir, "npc: bram\nbram: hi\n- Go\n  sets: a b c\n  sets: gone\n  bram: ok\n")
+    assert line_at(lines, "scenes/hi.scene:5") =~ "gone"
+  end
 
   # Break: a resolve's bad quest points at the prompt, not the line that names it.
   test "a resolve's bad quest names its own line", %{tmp_dir: dir} do

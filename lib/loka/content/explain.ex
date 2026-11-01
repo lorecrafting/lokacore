@@ -55,7 +55,7 @@ defmodule Loka.Content.Explain do
          missing_property | `{field}` is required here and is missing.
          not_in_enum | `{field}` must be one of: {allowed}.
          too_few_items | `{field}` needs at least one entry.
-         wrong_speaker | Line `{text}`: only `{npc}:` may speak here (`npc: {npc}`). | Change the speaker to `{npc}`, add `with: <npc>` at the top, or move this into its own scene.
+         wrong_speaker | Line `{text}`: only `{npc}:` or a `with:` speaker may speak here (`npc: {npc}`). | Change the speaker to `{npc}`, add `with: <npc>` at the top, or move this into its own scene.
          gives_speaker | Line `{text}`: a scene cannot give an item named like its speaker. | Rename the item, or write this as `dialogues/<key>.json`.
          repeated_choice | Line `{text}` repeats a choice or has no words to key it by. | Reword the choice.
          gives_outside_choice | Line `{text}`: `gives:` belongs under a choice. | Move it under a `- ` line.

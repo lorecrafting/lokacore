@@ -1,4 +1,4 @@
-# size: allow 345, the scene-file and cutscene entries, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 355, the scene-file and cutscene entries, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -48,7 +48,7 @@ defmodule Loka.Content.Source do
   def load(dir) do
     {files, diags} = read(dir)
     files = SceneFiles.merge(files)
-    untriggered = CutFiles.untriggered(files)
+    untriggered = untriggered(files)
     {files, opened} = Areas.split(files, dirs())
     {files, repeats} = Areas.unique(files)
     {files, faults} = Extends.flatten(files)
@@ -202,6 +202,16 @@ defmodule Loka.Content.Source do
 
   defp location(rel, []), do: rel
   defp location(rel, steps), do: {rel, steps}
+
+  # A `.cut` with no `on` would never start, and the schema cannot say so plainly.
+  defp untriggered(files) do
+    for {rel, {:scene, key, _}, value} <- files,
+        String.ends_with?(rel, ".cut"),
+        is_map(value) and not is_map_key(value, "on") do
+      data = %{"why" => "cut_no_trigger", "key" => key, "line" => 1}
+      diag("SCHEMA_VIOLATION", at(rel, []), data)
+    end
+  end
 
   @doc "A diagnostic (Diagnostic in protocol/cartridge.schema.json); raises on a code outside DiagnosticCode."
   @spec diag(String.t(), String.t(), map(), [String.t()]) :: map()
