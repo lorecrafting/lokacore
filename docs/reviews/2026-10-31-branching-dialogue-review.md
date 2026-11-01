@@ -165,3 +165,55 @@ Open: F1, F2, F3. Question, not run: reaction `item.move`; giver killed before t
 | `LOOP_SPEAKER` severity | red |
 
 Not run: full mutate_diff sweep (narrow sample, as briefed); the Elixir and TypeScript rules were not compared in this round.
+
+## Fix re-check at 82e8c0a1d
+
+Broad re-review, commit `82e8c0a1deeb2bf7be9a7ef7962419748cb011ff`. CI at that sha: `graph-diff`, `ci`, `book-e2e` all completed success. **Merge held for Fable on E1**, a pre-existing lawful-save refusal, under the PM's rule for the round. **Verdict on what this PR changes: APPROVE WITH NOTES.**
+
+Must be true: ([save](../system/save.md#escort-and-alternate-return-recovery), PM round rule) a lawful committed state reopens; a forged state refused only for row shape, id, bindings, receipt identity, or a holder cycle; a forged state that loads does not throw on launch, loop or corrupt the next save.
+
+### Disposition
+
+| Item | Result |
+| --- | --- |
+| F1 policy variants sharing `deliver` | Closed. `branching_lawful` green. |
+| F2 topic grant before a take | Closed. `branching_lawful` green. |
+| F3 PR body | Closed, one nit below. |
+| Deleting `topics-save.ts` | **Justified, not scope creep.** Main's file restored at this head: `topic grant before a one-way take`, `reaction setting the fact before a one-way take`, `moving answer writing one fact twice` go red, and shipped `identity_sampler` (`reactions/houndbane.json`) and `ask_sampler` (`reactions/square_topics.json`) give `save_corrupt` on cold reopen after one move. Loses only refusal of forged topic, perception and riddle facts; a forged topic shows a codex entry, no throw. |
+| #546 `kernel/ts/src/mechanics/dev/rule.ts:40-77` `provenFacts` | After #544 its topic, perception and custody clauses guard nothing and block set-fact needlessly; expedition and deadline clauses stay valid. Rebase and trim on #546. Not a #544 finding. |
+| Forged states, each played open, act, save, reopen | Branch fact reset or deleted; back with courier; NPC-held; terminal fact reset; terminal returned; held by `no-such`; resolved with no branch; forged resolved hand-over; two quests handed over; moved with no take; fact forged then give. None throws at launch, loops or corrupts. Worst outcome: an ordinary rejection that dead-ends that forged quest. |
+| `holderLoop` | No lawful path: every transfer passes `kernel/ts/src/foundation/compose.ts:272` `containment_cycle`. Removing it hangs the suite. |
+| `fact_at_least` in Why | Correct, `kernel/ts/play/why.ts:140`; clause mutant red in `why.test.ts`. |
+
+### Findings
+
+**E1, should-fix, pre-existing, for Fable: `mobile/authority/local-story/escort-save.ts:46,127,128`.** Lawful saves refused. Real play then cold reopen, each `save_corrupt`: following, child killed by the player (`:46`; the same session's next Move also faults `evaluator_error` from `kernel/ts/src/mechanics/escort/shared.ts` `following()`); completed, keeper killed (`:127`); completed, child killed (`:46`); completed, child moved by a reaction `npc.move`, no combat (`:128`). Controls reopen: completed with nothing killed, keeper killed before the end. The PR changes only return values here and the kernel rule is unchanged. Reproduced on `origin/main` 927e9d85c: following child killed and completed keeper killed give `save_corrupt`; the control reopens. [`save.md`](../system/save.md#escort-and-alternate-return-recovery) (`:431-438`) both mandates these checks and requires every committed state to reopen, so the spec contradicts itself. No shipped cartridge has an escort choice, only the fixture. Fix shape: delete the three checks after a ruling on what a following escort with a dead NPC does on Move.
+
+**S1, should-fix, `docs/system/save.md:546,1062-1078`; `docs/system/mechanics.md:2472`.** `save.md` still requires reconciling topic truth with grants and refusing forged ones; the code now forbids it. `mechanics.md` still says `dialogue-save.ts` reconciles facts. The next developer restores the check from the spec and breaks `ask_sampler` saves.
+
+**S2, should-fix, test gap, `mobile/authority/local-story/dialogue-save.ts:75,86,87,97,100`.** Removing the beat, bindings, attempts, open-row `choice_id` or actor clause leaves all story tests green (null green). Not raised to blocker: the clauses are unchanged from main, and the beat and bindings mutants add no red on main either (all story tests; null has 6 reds in other tests, e.g. hut and elapsed, count unchanged by each mutant). But after this round they are the guards left and the PM rule keeps bindings by name. Failure: a refactor drops the bindings clause and a forged item role moves another item, unseen.
+
+**N1, nit, PR body.** `/code-review medium` is reported at `1fbc8ccdd`, before this rewrite; run it in the fix round.
+
+**N2, nit, PR body.** "null control red" should say green. It also omits that deleting `topics-save.ts` fixes `save_corrupt` on shipped samplers.
+
+**N3, nit, `lib/loka/content/hub.ex:79-92`.** `proven` still refuses a repeating hub choice for a reason save recovery no longer has. Over-strict only; the PR lists it as open.
+
+**Question, not run on main.** A forged body and satchel holding each other, with no custody item in the chain, throws in setup and look. It is outside `dialogue-save.ts`.
+
+### Test the tests
+
+| Mutant (null green on the listed files) | Result |
+| --- | --- |
+| `holderLoop` off | hang, counted killed |
+| `movesItem` always false; ignores `hand_over` | red, 2 each |
+| `:23` early return ignores escort rows | red |
+| Custody inference added (holder must exist) | red, 21 |
+| `escort-save.ts:58` receipt off | red, 3 |
+| `why.ts:140` `fact_at_least` clause | red |
+| `:96` `openable`; `:99` `choice_ids` | red only in `hidden_skill.test.ts` |
+| `:86` beat; `:87` bindings; `:97` attempts; `:100` open row; `:75` actor | **green, all story tests** (S2) |
+
+Claims rerun: `lib/loka/content/population.ex:250` `scavenge_item?` refuses Give-restricted items, as cited; `why` and `why_words` 15 pass, as stated.
+
+Not run: `bin/mutate_diff.sh` this round (narrow sample, as briefed); the `npc.move` and completed-child E1 cases on main; attempts, open-row and actor mutants on main; Elixir and TypeScript rule comparison.
