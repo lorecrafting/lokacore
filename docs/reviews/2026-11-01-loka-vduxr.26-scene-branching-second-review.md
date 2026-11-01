@@ -67,3 +67,28 @@ Keep the warning. Probe `when: not flip` with Back: the talk closes with no faul
 - Contract: `order` integer, minimum 1, in `protocol/dialogue.schema.json` and source defs; `kernel_api` 1.144. JSON sidecar and area bundle writing it are refused (`choice_order_written`). `extends` of an unsorted scene inherits it with no false refusal; sidecar-added `mid` follows, `zed, ask, mid`. Nested unsorted set gets its own `order`; sorted scene gets none.
 - Mutants, singly, nulls green, tree clean. Red: `scene_files` comes_back condition, `put_new then`, `@key_max` 65, `is_map_key` filter, always-positioned, `order_refused` file test, `closes?` walk, `set_choices` entry filter; `selection.ts` `?? Infinity`, `|| cmp` (`kernel/ts/test/dialogue.test.ts`); `action_lists.ts:109` `oneTalk` wrapper (cookbook, sage first meeting). Survived: `@key_max` 63. The `oneTalk` mutant's full kernel run timed out and adds nothing.
 - Not probed: `fall_through.ts:32`, `selection.ts:178` (first reviewer); a JSON `all[...]` policy, which `when_fact` does not read; `scene_lines` parser.
+
+# Re-check at e108f5428
+
+Scope: contract delta since 0440cf678 (`FALL_THROUGH_SPENT`, `fall_through.ts:32`, `selection.ts:172`, save and replay). Verdict: **APPROVE WITH NOTES**. CI at e108f5428: ci, graph-diff and book-e2e success.
+
+Must hold: the code is listed and marked a warning in the contract; the warning names what Talk does; a Talk that changes behaviour cannot reopen an old save under the same pin.
+
+**should-fix** `protocol/cartridge.schema.json:1201`. The `Diagnostic` description says severity is error except for its listed warnings, and neither `FALL_THROUGH_SPENT` nor `RETURN_CLOSED` is listed; `DiagnosticCode` describes neither. A repair loop reading the contract takes a warned, successful build as failed. Add both, in `DiagnosticCode` too; regenerate.
+
+**should-fix** `lib/loka/content/dialogue_links.ex:256`. `free_links` flattens depth first; `spokenBy` is breadth first. Shut `a` with choices `a` -> `set` (`entry: false`) -> `h`, and `b` -> `z`: the shared fixture runners show TS opens `z`, Elixir warns `ENTRY_GUESSED` target `h`. A writer is told the wrong dialogue. New with `past_set`. Add this case to `dialogue_entry_cases.json`.
+
+**nit** `lib/loka/content/dialogue_links.ex:269`. `past_set` walks a named `entry: false` set; `selection.ts:177` stops there. Shut `a` -> named set with two ways: TS refuses Talk, Elixir warns a guess.
+
+**Open at merge.** #569 and #570 also carry `kernel_api` 1.144, main 1.143. If either lands first, merging main here does not conflict on that line (`bin/merge_resolve.py:7` acts only on a conflict) and two kernels share 1.144, against `docs/system/save.md:19`: a save reopens under a kernel that opens a different dialogue. Whichever merges later must bump.
+
+Save and replay: no further finding. The change is a contract change and head is 1.144 against main 1.143, so a main save is refused at its pin (`authority.ts:100`, `pinned_release_missing`, Start over). A refused Talk is not re-decided (only accepted receipts are, `world.ts`). An accepted Talk can diverge (`a` -> set -> `h`, `b` -> shut `z` -> `y`: `y` before by reading, `h` now), which only the pin guards; a save made on the unmerged 0440cf678 build shares 1.144, a dev-only case. `spoken` draws from `entries`, so the `selection.ts:172` guard cannot refuse a selected or keyword entry.
+
+Hub finding: agreed. `jailer_talk.json` is the same shape by reading (`when` on `wanted`, `pay` clears it, no `then`), pin at `content_trial_test.exs:9`; firing not rerun. `loka-vduxr.35` is open. Earlier nits fixed: `mechanics.md:441`, 64-byte key test.
+
+Evidence:
+- 107 cartridges, compile output including warnings, head and merge-base `d7407bb8d`: identical.
+- Play: `once` then `then` with `when:`: taken once, Talk row `available: false`, so the warning is true.
+- Code list: enum, `contracts.gen.ts:85`, `explain.ex:63`; the explain test reads the enum.
+- Mutants singly, nulls green, tree clean. Red: `selection.ts:172` guard off; `fall_through.ts:32` restored (red only in `dialogue_cookbook.test.ts`, green in the kernel files); `past_set` stops; `spends_itself?` false; second Talk ignored; policy not required.
+- Not run: whole kernel suite, an actual old-log replay, `/code-review` and PR-claim reruns (scoped re-check).
