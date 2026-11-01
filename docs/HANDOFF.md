@@ -19,8 +19,7 @@ AS OF main after #530, #535, #537, #539, #538; written 2026-10-31 by Claude Code
 - **Plan downgrade around 2026-11-10** to the Pro plan: build the prologue's engine gaps and the lean workflow
   (loka-mpu9) before then. After it: content PRs without a separate reviewer, one session working directly,
   Sonnet for content, reviews for engine changes only.
-- **Book effects** (epic loka-n4dg): designer brief in the book's register (paper, ink, candlelight, sound),
-  owner picks, Fable builds alongside the prologue.
+- **Book effects** (epic loka-xz76e): #554, #559 and #558 merged the approved list; all audio is placeholder and not auditioned. Design source: [batch 2 rulings](design/effects-batch-2-rulings.md). Storm and wind need content phases named `rain`, `wind`, `storm` (the frozen showcase has `gale`), so they are Storybook-verified only.
 
 ## Next, in order
 
@@ -32,7 +31,7 @@ AS OF main after #530, #535, #537, #539, #538; written 2026-10-31 by Claude Code
 6. loka-g5hh.2 level-up: E1 merged (#538). E2, E3, then B1 to B3; B2 needs #532 and loka-gj82.4. Brief and owner answers in its notes; a multi-slice issue needs a child id for `bin/merge_pr.sh`.
 7. Proposed release work, awaiting the owner's three calls (store fees, iOS first, a save guarantee from launch): save migrations, loka-k3b5 off the P3 hold, resume mobile, rebuild the E1 harness and gates.
 8. Ending page and outside link (owner wants a next-chapter message and giving to a hunger charity; PM advised a website link, not a Kickstarter button, and a direct link to a named charity for the free prologue). Not filed; the owner has not decided whether the game must fund itself.
-9. Follow-ups: loka-xy1js, loka-9g1q1, loka-1b68q; loka-n4dg and loka-gj82.4 effects; loka-ewtx engine follow-ups.
+9. Follow-ups: loka-xy1js, loka-9g1q1, loka-1b68q; loka-xz76e.10 waking music; loka-ewtx engine follow-ups.
 
 `cartridges/lantern_proof` stays as host of the frozen conformance traces (PM ruling, in `docs/system/cartridge.md`); Bram stays in the samplers because literal ids and frozen fixtures pin him. Retiring the traces would need the owner.
 

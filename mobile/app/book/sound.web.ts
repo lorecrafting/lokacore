@@ -230,12 +230,12 @@ function explore(tag: string) {
   if (globalThis.document?.hidden) return;
   if (voice('explore', piece, {})) lastPiece = now;
 }
-
 const audible = ['rain', 'wind', 'storm'];
-/** The room the Book is on: bed tag, weather phase that sounds, exposed; `quiet`: this view plays no piece. */
-export function ambience(tag?: string, weather?: string, exposed = false, quiet = false) {
-  room = { tag: tag || 'wild', weather: audible.includes(weather!) ? weather : undefined, exposed };
+/** The room the Book is on: bed tag, weather phase that sounds, exposed; `quiet`: this view plays no piece; 'woke' also spends the room's. */
+export function ambience(tag?: string, phase?: string, exposed = false, quiet?: boolean | 'woke') {
+  room = { tag: tag || 'wild', weather: audible.includes(phase!) ? phase : undefined, exposed };
   settleRoom(motion.bed.duration);
+  if (quiet === 'woke') entered.add(room.tag);
   if (!inFight && !quiet) explore(room.tag);
 }
 globalThis.document?.addEventListener?.('visibilitychange', () => settleRoom(motion.bed.duration));
