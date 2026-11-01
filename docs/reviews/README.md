@@ -12,6 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Second opinion: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-second-review.md): **APPROVE WITH NOTES**
 - [Review: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-review.md): **APPROVE WITH NOTES**
+- [Dev cheats: second opinion (PR #546, loka-vduxr.6)](2026-11-01-dev-cheats-second-review.md): **APPROVE**
 - [Second-opinion review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-review.md): **APPROVE WITH NOTES**
 - [Second review: cartridge fault batch, PR #545 (loka-vduxr.7, save behaviour)](2026-10-31-loka-vduxr.7-cartridge-faults-second-review.md): **APPROVE WITH NOTES**
@@ -20,6 +21,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: open-time catch-up refusal offers Start over (loka-k3b5, PR #541)](2026-10-31-loka-k3b5-review.md): **APPROVE WITH NOTES**
 - [Second opinion: level reached emission in `join`, PR #538 (loka-g5hh.2 E1, kernel_api 1.131)](2026-10-31-loka-g5hh.2-e1-level-reached-second-review.md): **APPROVE**
 - [Review: level reached event, level filter, gained line, view from, PR #538 (loka-g5hh.2 E1, kernel_api 1.131)](2026-10-31-loka-g5hh.2-e1-level-reached-review.md): **APPROVE**
+- [Review: dev-only go-to-room and set-fact, PR #546 (loka-vduxr.6, kernel_api 1.133)](2026-10-31-dev-cheats-review.md): **APPROVE WITH NOTES**
 - [Second opinion: catch-up folds saturated permanent status ticks, PR #535 (loka-sgqk, kernel_api 1.130)](2026-10-31-catch-up-fold-second-review.md): **APPROVE WITH NOTES**
 - [Review: catch-up folds saturated permanent status ticks, PR #535 (loka-sgqk, kernel_api 1.130)](2026-10-31-catch-up-fold-review.md): **APPROVE**
 - [Branching dialogue engine, second opinion on save behaviour (loka-vduxr.10)](2026-10-31-branching-dialogue-second-b-review.md): **APPROVE WITH NOTES**

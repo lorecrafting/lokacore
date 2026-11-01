@@ -8,7 +8,17 @@ import { Platform } from 'react-native';
 import type { localSession } from '../../authority/local-story/session';
 import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
 import { listen, overlay } from './live.ts';
-import { advanced, dropStep, recording, replay, type Place, type Step } from './place.ts';
+import {
+  advanced,
+  asRefs,
+  dropStep,
+  recording,
+  replay,
+  sendCheat,
+  type Cheat,
+  type Place,
+  type Step,
+} from './place.ts';
 import { shown, type Canon } from './shown.ts';
 
 export { frozenClock } from './place.ts';
@@ -152,8 +162,9 @@ type Asked =
   | { op: 'advance'; minutes: number }
   | { op: 'jump'; steps: Step[] }
   | { op: 'drop' }
-  | { op: 'trace' };
-const OPS = new Set(['hello', 'advance', 'jump', 'drop', 'trace']); // any other local window is not the panel
+  | { op: 'trace' }
+  | Cheat;
+const OPS = new Set(['hello', 'advance', 'jump', 'drop', 'trace', 'go_to_room', 'set_fact']); // any other local window is not the panel
 let panel: { to: Window; origin: string } | undefined;
 const tell = (sent: object) => panel?.to.postMessage({ loka: 'author', ...sent }, panel.origin);
 const stateOf = (game: Opened) => ({
@@ -172,6 +183,13 @@ const onClick = (e: MouseEvent) => {
   const words = (e.target as HTMLElement).textContent ?? '';
   tell({ line: { key: seen.get(words), words } });
 };
+// Through `played`, so an accepted cheat is a recorded step `bin/loka check` replays.
+function askCheat(game: Opened, cheat: Cheat) {
+  const { manifest } = JSON.parse(chapter.canonical) as {
+    manifest: { id: string; version: string };
+  };
+  placeNote = sendCheat(played(game)!, cheat, manifest);
+}
 /** Serves the author panel page for `game` while mounted; App calls it only in the author preview. */
 export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
   const latest = useRef(tools); // App's closures change per render; the bridge lives per game
@@ -184,6 +202,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
       if (e.data.op === 'trace') return void tell({ trace: game.trace() });
       if (e.data.op === 'advance') advance(e.data.minutes, game);
+      if (e.data.op === 'go_to_room' || e.data.op === 'set_fact') askCheat(game, e.data);
       if (e.data.op === 'jump') {
         if (Array.isArray(e.data.steps)) return jumpTo(e.data.steps, latest.current); // the new game posts its state
         placeNote = 'Place: that checkpoint has no steps list; nothing changed.'; // checked before the start over wipes the save

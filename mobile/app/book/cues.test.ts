@@ -115,7 +115,7 @@ test('hit points falling outside combat is no blow', () => {
 test('a fall on the view that closes combat is still a blow', () => {
   assert.deepEqual(cuesOf(pool(7), pool(9, 0, fight)), [
     { name: 'hp_loss', loss: 2 },
-    { name: 'combat_close' },
+    { name: 'combat_close', end: 'fell' },
   ]);
 });
 
@@ -265,6 +265,7 @@ test('each cue behaves as its severity', () => {
         'place',
         'combat_open',
         'combat_close',
+        'blow_dealt',
       ] as CueName[]
     ).map((n) => [n, felt(n)]),
   );
@@ -282,8 +283,9 @@ test('each cue behaves as its severity', () => {
     skill_up: 2,
     chapter: 4,
     place: 1,
-    combat_open: 3,
-    combat_close: 3,
+    combat_open: 1,
+    combat_close: 1,
+    blow_dealt: 2,
   });
 });
 
@@ -379,4 +381,81 @@ test('skill_up sounds once per 30 s and stays a cue between', () => {
   // A hushed one does not push the next sound back.
   assert.deepEqual(step(hushed.q, [up], 31298).fired, []);
   assert.deepEqual(step(hushed.q, [up], 31299).fired.map(soundOf), ['skillUp']);
+});
+
+const foe = (band: string, more = {}) => ({
+  combat: { encounter_id: 'e', opponent_id: 'wolf', band, ...more },
+});
+const standing = view({ entities: [{ id: 'wolf' }] });
+const endOf = (now: GameView) =>
+  cuesOf(now, view({ ...foe('hurt') })).find((c) => c.name === 'combat_close')?.end;
+
+// Breaks: the fanfare plays for a flight, or for a fight the foe walked away from; the room is checked
+// after the foe, whose entity is gone from any new room.
+test('a close knows flight, then a fallen foe, then a quiet end', () => {
+  assert.equal(endOf(view({ place: { id: 'p2' } })), 'fled');
+  assert.equal(endOf(view()), 'fell');
+  assert.equal(endOf(standing), 'quiet');
+});
+
+// Breaks: a death also closes the fight, so the fanfare races the cut; or the fatal blow, whose hp the
+// death restores, loses its thud; or a death outside a fight thuds.
+test('a death is the fatal blow and the death, and no close', () => {
+  const fall = cuesOf(view(), view(foe('hurt')), true);
+  assert.deepEqual(fall, [
+    { name: 'hp_loss', loss: 0 },
+    { name: 'death', fight: true },
+  ]);
+  assert.deepEqual(cuesOf(view(), view(), true), [{ name: 'death', fight: false }]);
+});
+
+// Breaks: an unmoved band, or a new encounter's first band, plays an impact.
+test('a blow dealt is a moved band or a pack fallen by one, in one encounter', () => {
+  const dealt = (was: object, now: object) =>
+    cuesOf(view(now), view(was)).filter((c) => c.name === 'blow_dealt');
+  assert.deepEqual(dealt(foe('fine'), foe('hurt')), [{ name: 'blow_dealt', ids: ['wolf'] }]);
+  assert.deepEqual(dealt(foe('hurt'), foe('hurt')), []);
+  assert.deepEqual(dealt(foe('fine'), foe('hurt', { encounter_id: 'e2' })), []);
+  const pack = (...ids: string[]) =>
+    foe('hurt', { active_opponents: ids.map((id) => ({ id, band: 'hurt' })) });
+  assert.deepEqual(dealt(pack('a', 'b'), pack('a')), [{ name: 'blow_dealt', ids: [] }]);
+});
+
+// Breaks: a death waits behind a card or a turn's hold, leaves a pending cue to sound over it, or stops
+// a thud already playing (the queue has no such power: `playing` is only forgotten, nothing is fired).
+test('a death clears what is pending and fires at once, past a held card', () => {
+  const later = { ...QUIET, card: true, until: 9999, heldUntil: 9999 };
+  const pending = {
+    ...later,
+    playing: { name: 'hp_loss' as const },
+    pending: { name: 'coin' as const },
+  };
+  const { q, fired } = step(pending, [{ name: 'coin' }, { name: 'death', fight: false }], 10);
+  assert.deepEqual(fired, [{ name: 'death', fight: false, wash: false }]);
+  assert.equal(q.pending, undefined);
+  assert.equal(q.card, false);
+  assert.deepEqual(q.held, []);
+  // The blow comes first and its wash decision reaches the death, which Blow's hold reads.
+  const blow = step(
+    QUIET,
+    [
+      { name: 'hp_loss', loss: 0 },
+      { name: 'death', fight: true },
+    ],
+    5000,
+  );
+  assert.deepEqual(blow.fired, [
+    { name: 'hp_loss', loss: 0, wash: true },
+    { name: 'death', fight: true, wash: true },
+  ]);
+  // Two blows held behind a turn: the thud is the fatal one's.
+  const two = step(
+    { ...QUIET, held: [{ name: 'hp_loss', loss: 1 }] },
+    [
+      { name: 'hp_loss', loss: 7 },
+      { name: 'death', fight: true },
+    ],
+    5000,
+  );
+  assert.deepEqual(two.fired[0], { name: 'hp_loss', loss: 7, wash: true });
 });

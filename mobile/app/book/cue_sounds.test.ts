@@ -6,7 +6,7 @@ import './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
 const { cuesOf, QUIET, step } = await import('./cues.ts');
-const { playCue } = await import('./cueSounds.ts');
+const { hearCues, playCue } = await import('./cueSounds.ts');
 await import('./samples.web.ts');
 const g = globalThis as any;
 const samples: Record<string, string[]> = g.bookSamples;
@@ -131,4 +131,51 @@ test('the page turn has its three recordings', () => {
     'ui-paper-turn-02.m4a',
     'ui-paper-turn-03.m4a',
   ]);
+});
+
+// Every row: [cue, music call, haptics]. Breaks: the fanfare's light haptic reaches a flight, a reopened
+// fight buzzes, a death in a fight doubles the thud's heavy, or one outside a fight has none.
+const fightRows: [Parameters<typeof playCue>[0], string, string[]][] = [
+  [{ name: 'combat_open' }, 'open', ['medium']],
+  [{ name: 'combat_open', resumed: true }, 'resume', []],
+  [{ name: 'combat_close', end: 'fell' }, 'won', ['light']],
+  [{ name: 'combat_close', end: 'fled' }, 'away', []],
+  [{ name: 'combat_close', end: 'quiet' }, 'away', []],
+  [{ name: 'combat_close', resumed: true }, 'away', []],
+  [{ name: 'death', fight: true }, 'cut', []],
+  [{ name: 'death', fight: false }, 'cut', ['heavy']],
+];
+for (const [cue, music, felt] of fightRows)
+  test(`${cue.name} ${JSON.stringify(cue)}: music ${music}, haptic ${felt}`, () => {
+    g.bookDevice = [];
+    playCue(cue);
+    const log: [string, string][] = g.bookDevice;
+    g.bookDevice = undefined;
+    assert.deepEqual(
+      log.filter((l) => l[0] === 'fight').map((l) => l[1]),
+      [music],
+    );
+    assert.deepEqual(
+      log.filter((l) => l[0] === 'haptic').map((l) => l[1]),
+      felt,
+    );
+  });
+
+// Breaks: a blow dealt buzzes, or plays nothing.
+test('a blow dealt is an impact, with no haptic', () => {
+  g.bookDevice = [];
+  playCue({ name: 'blow_dealt', ids: ['wolf'] });
+  const log: [string, string][] = g.bookDevice;
+  g.bookDevice = undefined;
+  assert.deepEqual(log, [['play', 'impact']]);
+});
+
+// Breaks: the loop outlives the Book, so Start over mid-fight plays it over the new game.
+test('the Book going cuts the music', () => {
+  const off = hearCues();
+  g.bookDevice = [];
+  off();
+  const log: [string, string][] = g.bookDevice;
+  g.bookDevice = undefined;
+  assert.deepEqual(log, [['fight', 'cut']]);
 });

@@ -440,9 +440,9 @@ defmodule Loka.Content.Resolve do
   defp expand_attack(npc, m),
     do: if(npc["attack"], do: Map.put(npc, "attack", expand(npc["attack"], m)), else: npc)
 
-  # run_job is authority-internal (04 §1): no action builds it.
+  # run_job is authority-internal (04 §1), dev_* the author preview's (cartridge.md): no action builds them.
   defp command(rel, name, required, elapsed?) do
-    if name in commands() and name not in ["run_job", "elapsed"] and
+    if name in commands() and name not in ["run_job", "elapsed", "dev_go_to_room", "dev_set_fact"] and
          not (elapsed? and name == "wait"),
        do: owned(at(rel, ["command"]), name, required),
        else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]

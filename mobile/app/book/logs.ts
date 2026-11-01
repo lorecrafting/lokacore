@@ -64,6 +64,7 @@ export type Logs = {
   status: ElapsedStatus;
   recovered?: boolean;
   narrationId?: string;
+  died?: string; // the command of the last death read, the cue bus's edge (book-ui.md, Falling)
   confirmedRead?: string;
   returnWorld?: boolean | 'section';
   returnDetail?: string;

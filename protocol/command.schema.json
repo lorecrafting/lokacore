@@ -147,6 +147,17 @@
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
         },
         {
+          "type": "dev_set_fact",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "fact": { "cartridge_id": "toolbox_showcase", "cartridge_version": "0.0.1", "kind": "fact", "key": "cellar_disarmed" },
+          "value": true
+        },
+        {
+          "type": "dev_go_to_room",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "room": { "cartridge_id": "toolbox_showcase", "cartridge_version": "0.0.1", "kind": "room", "key": "boar_run" }
+        },
+        {
           "type": "elapsed",
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
           "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
@@ -863,6 +874,52 @@
             "run_id",
             "from",
             "until"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Author preview only (cartridge.md Author preview): put the actor's body in a room. Admitted only by stepDev, which only a dev host calls; step refuses it.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "dev_go_to_room"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "room"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Author preview only (cartridge.md Author preview): set one fact the actor reads. Admitted only by stepDev, which only a dev host calls; step refuses it.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "dev_set_fact"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "value": {
+              "$ref": "delta.schema.json#/$defs/FactValue"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "fact",
+            "value"
           ],
           "additionalProperties": false
         },
