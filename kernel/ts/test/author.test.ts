@@ -26,7 +26,7 @@ writeFileSync(good, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}
 // environment is fixed at spawn, names the artifact to copy in the file $STUB_WHICH.
 writeFileSync(
   join(dir, 'mise'),
-  '#!/bin/sh\n[ -n "$STUB_ERR" ] && { echo "$STUB_ERR" >&2; exit 1; }\n' +
+  '#!/bin/sh\n[ "$4" = loka.lint ] && { echo "items/x.json: lint of $(basename "$(cat "$STUB_WHICH")")" >&2; exit 1; }\n[ -n "$STUB_ERR" ] && { echo "$STUB_ERR" >&2; exit 1; }\n' +
     '[ -n "$STUB_WHICH" ] && STUB_ART=$(cat "$STUB_WHICH")\ncp "$STUB_ART" "$6"\n',
 );
 chmodSync(join(dir, 'mise'), 0o755);
@@ -103,6 +103,12 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   writeFileSync(which, join(dir, 'edited.json'));
   writeFileSync(join(src, 'text.json'), '{"room.boathouse.description":"line one"}');
   await until(() => messages.some((m) => m.text['room.boathouse.description'] === 'line one'));
+  // Break: the watcher never lints, or only at its start: this line arrives after the edit's compile
+  await until(() =>
+    messages.some(
+      (m) => (m as { lint?: string[] }).lint?.[0] === 'items/x.json: lint of edited.json',
+    ),
+  );
   await settle(400); // the compile that follows the quick push
   assert.equal(readFileSync(out, 'utf8'), first);
   assert.deepEqual(messages.at(-1)!.text, { 'room.boathouse.description': 'line one' });
@@ -122,11 +128,17 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   await until(() => messages.at(-1)!.text['room.boathouse.description'] === undefined);
   assert.equal(messages.at(-1)!.compiled, true);
 
+  await until(
+    () => (messages.at(-1) as { lint?: string[] }).lint?.[0] === 'items/x.json: lint of rest.json',
+  );
+
   // Break: a kernel refusal has no `error:` line, so a panel reading the lines badges it compiled.
   writeFileSync(join(dir, 'refused.json'), '{"cartridge":{},"content_hash":"00"}');
   writeFileSync(which, join(dir, 'refused.json'));
   writeFileSync(join(src, 'rooms.json'), '{ }');
   await until(() => messages.at(-1)!.compiled === false);
   assert.match(messages.at(-1)!.said.join(), /kernel refuses/);
+  // Break: the lint of the last good compile still shows, as if it read the refused source.
+  assert.equal((messages.at(-1) as { lint?: string[] }).lint, undefined);
   reader.cancel();
 });
