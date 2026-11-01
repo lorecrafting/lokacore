@@ -1,5 +1,8 @@
+// size: allow 545, every branching rule's pins beside the one play harness
 // loka-vduxr.10 on the compiled persuade sampler: per-choice conditions, links between dialogues,
 // a check's two ways on, the hand-off, narrate steps, int fact thresholds and narration variants.
+import { decide } from '../src/mechanics/dialogue/rule.ts';
+import { allocator } from '../src/runtime/decision.ts';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -449,4 +452,87 @@ test('the first narration variant that holds is the reply; else the narration', 
     none.choose('a').narration.map((n: any) => n.key),
     [SAID],
   );
+});
+
+// The sampler with a token the guard holds, given by `take` and leading to `next`.
+const token = { role: 'item', item: ref('item', 'token') };
+const hasToken = { op: 'has_item', item: ref('item', 'token') };
+const gives = (next: object) =>
+  content(
+    { take: plain({ receive: { item: 'token', from: 'guard' }, then: 'next' }) },
+    { next },
+    (c: any) => {
+      const persuade = c.dialogues[`${P}:dialogue/guard`];
+      c.items = {
+        [`${P}:item/token`]: {
+          key: 'token',
+          keywords: ['token'],
+          name: LABEL,
+          room_line: LABEL,
+          description: LABEL,
+          location: { in: 'npc', npc: ref('npc', 'guard') },
+        },
+      };
+      persuade.roles.token = token;
+    },
+  );
+
+// Breaks: a then read against the facts alone, not the world the decision leaves, so the item just
+// received is missing: the follow-up silently ends, or its refusing option draws an all-refused
+// card. Also: choice_opened placed anywhere but right after the answer's last event.
+test('a then reads the item its own answer just moved', () => {
+  const g = play(gives({ n: plain({ policy: hasToken }) }));
+  g.opened();
+  const w = g.world();
+  const command = {
+    id: 'ffffffff-9999-4999-8999-00000000aaaa',
+    world_context_id: w.context,
+    payload: {
+      type: 'choose',
+      actor_id: w.character,
+      continuation_id: g.view().continuation_id,
+      choice_id: 'take',
+    },
+  } as unknown as Parameters<typeof decide>[1];
+  // The rule's own positions: composition renumbers them (proposal.ts), so step alone cannot see them.
+  const d = decide(w, command, allocator(w, command));
+  g.choose('take');
+  assert.deepEqual(g.ids(), ['n']);
+  assert.deepEqual(events(d), [
+    [1, 'item_acquired'],
+    [2, 'choice_resolved'],
+    [3, 'choice_opened'],
+  ]);
+  const not = play(gives({ n: plain({ policy: { op: 'not', item: hasToken } }) }));
+  not.opened();
+  not.choose('take');
+  assert.equal(not.view(), undefined);
+});
+
+// Breaks: then_failed read against the pre-decision world, so the skill the failed check just
+// practised is missing and the follow-up silently ends.
+test('a then_failed reads the practice its own failure just gave', () => {
+  const skill = ref('skill', 'intimidate');
+  const practised = { op: 'skill_compare', skill, at_least: 1 };
+  const talk = (policy: object) =>
+    play(
+      content(
+        {
+          c: {
+            ...plain(),
+            check: { key: 'intimidate_guard', kind: 'opposed', skill, rating: 99, failure: FAILED },
+            then_failed: 'lost',
+          },
+        },
+        { lost: { l: plain({ policy }) } },
+      ),
+    );
+  const g = talk(practised);
+  g.opened();
+  g.choose('c');
+  assert.deepEqual(g.ids(), ['l']);
+  const not = talk({ op: 'not', item: practised });
+  not.opened();
+  not.choose('c');
+  assert.equal(not.view(), undefined);
 });

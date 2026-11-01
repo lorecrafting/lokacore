@@ -22,11 +22,37 @@ defmodule Loka.ContentDialogueLinksTest do
     )
   end
 
+  defp second_npc do
+    "cartridges/persuade_sampler/npcs/guard.json"
+    |> File.read!()
+    |> Jason.decode!()
+  end
+
   defp codes(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
   defp refused(dir, changes, want) do
     assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
     assert want in codes(diags), inspect({want, diags})
+  end
+
+  # Breaks: a two-speaker loop compiling though Talk enters it only at its first key, so the other
+  # speaker is rejected in play; or that refusal reaching a speaker with an entry of their own.
+  test "a then loop refuses a speaker Talk cannot reach", %{dir: dir} do
+    to = fn key -> %{"x" => %{"label" => @label, "narration" => @said, "then" => key}} end
+    captain = {"dialogues/a_captain.json", talk("guard", %{"choices" => to.("z_loop")})}
+    other = Map.put(talk("guard", %{"choices" => to.("a_captain")}), "npc", "second")
+    other = Map.put(other, "roles", %{"second" => %{"role" => "npc", "npc" => "second"}})
+    loop = {"dialogues/z_loop.json", other}
+    npc = {"npcs/second.json", second_npc()}
+    refused(dir, [captain, loop, npc], {"OUTCOME_MISMATCH", "dialogues/z_loop.npc"})
+
+    own = Map.put(talk("guard"), "npc", "second")
+
+    own =
+      {"dialogues/b_second.json",
+       Map.put(own, "roles", %{"second" => %{"role" => "npc", "npc" => "second"}})}
+
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [captain, loop, npc, own])
   end
 
   # Breaks: a link rule dropped, so a then the runtime cannot follow compiles and fails at play.

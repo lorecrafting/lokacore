@@ -45,9 +45,9 @@ export function dialogueSave(world: World, db: Db, meta: Meta) {
         row.status === 'resolved' &&
         row.choice_id === start.choice,
     );
-    if (resolved.length > 1) invalid();
-    const received = resolved.length === 1;
-    if (received) committedDialogue(world, db, scope, resolved[0][0]);
+    if (resolved.length > 1 + handedBack(world, rows, start.item)) invalid();
+    const received = resolved.length > 0;
+    for (const [id] of resolved) committedDialogue(world, db, scope, id);
     const terminal = handoff(world, db, scope, rows, start.item, received, rescued);
     const holder = world.state.containers[start.item];
     if (!received) {
@@ -65,6 +65,16 @@ export function dialogueSave(world: World, db: Db, meta: Meta) {
       }
     }
   }
+}
+
+// A non-quest hand_over returns the item, so its receive can be answered once more.
+function handedBack(world: World, rows: [string, ChoiceRow][], item: EntityId) {
+  return rows.filter(([, row]) => {
+    const d = world.cartridge.dialogues?.[refString(row.source)];
+    const given = row.status === 'resolved' && !d?.quest && d?.choices[row.choice_id!]?.hand_over;
+    const role = given && d!.roles[given.item];
+    return role && role.role === 'item' && world.entityIds[refString(role.item)] === item;
+  }).length;
 }
 
 function custodyStarts(world: World) {
@@ -169,6 +179,7 @@ function checkAssignments(world: World, rows: [string, ChoiceRow][], items: Enti
     if (!same(value(world, world.character, e.fact), e.value)) invalid();
 }
 
+// size: allow 45, quest and non-quest hand-overs of one custody item share one evidence walk
 function handoff(
   world: World,
   db: Db,
@@ -182,12 +193,19 @@ function handoff(
   for (const [key, d] of Object.entries(world.cartridge.dialogues ?? {})) {
     for (const [choice, option] of Object.entries(d.choices)) {
       const role = option.hand_over && d.roles[option.hand_over.item];
-      if (!d.quest || role?.role !== 'item' || world.entityIds[refString(role.item)] !== item)
-        continue;
+      if (role?.role !== 'item' || world.entityIds[refString(role.item)] !== item) continue;
       const matches = rows.filter(
         ([, row]) =>
           refString(row.source) === key && row.status === 'resolved' && row.choice_id === choice,
       );
+      if (!d.quest) {
+        // No quest to resolve: the answer that gave it to the NPC holding it is its evidence.
+        const to = bind(world, d).find((r) => r.role === option.hand_over!.to)!.entity_id;
+        if (!received || !matches.length || world.state.containers[item] !== to) continue;
+        for (const [id] of matches) committedDialogue(world, db, scope, id);
+        completed = true;
+        continue;
+      }
       const done = matches.length === 1;
       if (matches.length > 1 || (done && (!received || completed))) invalid();
       const q = playerQuest(world, d.quest);

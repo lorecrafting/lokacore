@@ -54,6 +54,48 @@ defmodule Loka.Content.DialogueLinks do
       )
   end
 
+  # Talk enters a loop no root reaches at its first key by sort (selection.ts), so a member whose
+  # speaker has no entry of their own could never be talked to: refused, not silent.
+  @doc "The members of a then loop whose speaker Talk could not reach, as errors."
+  @spec loops([{String.t(), map()}]) :: [map()]
+  def loops(all) do
+    sorted = Enum.sort_by(all, &elem(&1, 1)["key"])
+    next = Map.new(sorted, &{elem(&1, 1)["key"], links(elem(&1, 1))})
+    speakers = sorted |> entries(next) |> MapSet.new(& &1["npc"])
+
+    sorted
+    |> Enum.filter(&unreachable?(elem(&1, 1), speakers, next))
+    |> Enum.map(&diag("OUTCOME_MISMATCH", at(elem(&1, 0), ["npc"])))
+  end
+
+  defp unreachable?(d, speakers, next) do
+    d["npc"] not in speakers and d["key"] in walk(next[d["key"]], next, MapSet.new())
+  end
+
+  # selection.ts entries: the dialogues nothing links to, then the first by key of each loop left.
+  defp entries(sorted, next) do
+    named = next |> Map.values() |> List.flatten() |> MapSet.new()
+    all = Enum.map(sorted, &elem(&1, 1))
+    roots = Enum.reject(all, &(&1["key"] in named))
+
+    {entries, _} =
+      Enum.reduce(roots ++ all, {[], MapSet.new()}, fn d, {es, seen} ->
+        if d["key"] in seen, do: {es, seen}, else: {[d | es], walk([d["key"]], next, seen)}
+      end)
+
+    entries
+  end
+
+  defp links(d) do
+    for {_, c} <- d["choices"], f <- ~w(then then_failed), k = c[f], do: k
+  end
+
+  defp walk(keys, next, seen) do
+    Enum.reduce(keys, seen, fn k, acc ->
+      if k in acc, do: acc, else: walk(Map.get(next, k, []), next, MapSet.put(acc, k))
+    end)
+  end
+
   defp unlinkable?(t, o, d) do
     Enum.any?([t["keyword"], t["quest"], t["riddle"], o["patrol"], d["quest"], d["riddle"]])
   end

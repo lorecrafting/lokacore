@@ -93,8 +93,7 @@ defmodule Loka.Content.Hub do
   defp once?(_, _), do: false
 
   # A fact ref (short `key`, qualified `cartridge@version:fact/key` or a ref map) by its key.
-  @doc false
-  def key(%{"key" => key}), do: key
-  def key(ref) when is_binary(ref), do: ref |> String.split("/") |> List.last()
-  def key(_), do: nil
+  defp key(%{"key" => key}), do: key
+  defp key(ref) when is_binary(ref), do: ref |> String.split("/") |> List.last()
+  defp key(_), do: nil
 end

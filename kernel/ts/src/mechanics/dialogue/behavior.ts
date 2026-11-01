@@ -6,6 +6,7 @@ import type {
   EntityId,
 } from '../../contracts.gen.ts';
 import { KernelError } from '../../foundation/error.ts';
+import { apply } from '../../runtime/apply.ts';
 import { disposition } from '../disposition.ts';
 import {
   accepted,
@@ -19,7 +20,6 @@ import {
   values,
 } from '../../runtime/decision.ts';
 import { bind, continuationId, definition, speakerOf } from './shared.ts';
-import { sequence } from './sequence.ts';
 import { exchangeRoles } from './exchange.ts';
 import { questOf } from '../lookups.ts';
 import { holds } from '../policy.ts';
@@ -79,7 +79,7 @@ export function validAttempts(row: ChoiceRow, d: DialogueDefinition) {
  * the reopened hub row could not drop the one choice; see mechanics.md Retry rule), it was the
  * only choice, it is `then: end`, a `then` names this dialogue (a target never reopens itself), or
  * no option would be shown next. A choice's `then` opens that dialogue instead of the same row, of
- * any speaker. Options are read after the decision's own fact writes.
+ * any speaker. Options are read in the world the decision leaves.
  */
 export function hub<T extends { kind: string }>(
   world: World,
@@ -96,9 +96,10 @@ export function hub<T extends { kind: string }>(
   const a = decided as unknown as Accepted;
   const { actor_id, source, beat, roles, choice_ids } = row;
   const speaker = speakerOf(d, row);
-  const facts = sequence(world, actor_id, option, false, d.quest, undefined, speaker)?.facts ?? {};
-  const after = { ...world, state: { ...world.state, facts: { ...world.state.facts, ...facts } } };
-  if (option.then) return leadOn(after, command, mint, row, decided, option.then, steps);
+  if (option.then) return leadOn(world, command, mint, row, decided, option.then, steps);
+  const left = apply(world, a.delta.ops, false);
+  if ('fault' in left) return decided;
+  const after = left.world;
   if (shown(after, actor_id, d, choice_ids, speaker, steps).length === 0) return decided;
   const at = a.events.find((e) => e.payload.type === 'choice_resolved')!.position + 1;
   const continuation_id = continuationId(mint);
@@ -122,10 +123,10 @@ export function hub<T extends { kind: string }>(
 
 /**
  * `decided` plus the opening of the dialogue `key` (a choice's then or then_failed), read against
- * `world` as the decision leaves it; `end`, or no option shown there, ends the talk.
+ * the world the decision leaves; `end`, or no option shown there, ends the talk.
  */
 export function leadOn<T extends { kind: string }>(
-  world: World,
+  before: World,
   command: Parameters<typeof event>[1],
   mint: Mint,
   row: ChoiceRow,
@@ -133,8 +134,11 @@ export function leadOn<T extends { kind: string }>(
   key: string,
   steps: Steps,
 ): T {
-  if (key === 'end') return decided;
+  if (key === 'end' || decided.kind !== 'accepted') return decided;
   const a = decided as unknown as Accepted;
+  const left = apply(before, a.delta.ops, false);
+  if ('fault' in left) return decided;
+  const world = left.world;
   const next = definition(world, { ...row.source, key });
   const ids = offered(world, row.actor_id, next, steps);
   const speaker = world.entityIds[refString(next.npc)];

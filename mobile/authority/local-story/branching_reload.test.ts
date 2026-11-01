@@ -2,7 +2,7 @@
 // conversation paused at a linked dialogue, after a passed or failed check and after a state-picked
 // reply, reopens from its receipts (dialogue-save.ts, dialogue-receipt.ts).
 import assert from 'node:assert/strict';
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -78,9 +78,11 @@ function run(path: string, c: ReturnType<typeof compiled>) {
   const story = openStory(p.db, [{ fresh, content_hash: c.sha256 }], p.host);
   if (story.kind !== 'open') throw new Error(JSON.stringify(story));
   let n = 0;
-  const go = (command: string, input: object = {}, target_ids: string[] = []) => {
+  const go = (command: string, input: object = {}, target_ids: string[] = [], only?: string) => {
     const set = resolved(story.world(), fresh.character);
-    const action_key = Object.keys(set).find((k) => set[k]!.command === command)!;
+    const action_key = Object.keys(set).find(
+      (k) => set[k]!.command === command && (!only || k.includes(only)),
+    )!;
     const r = story.invoke({
       invocation_id: `aaaaaaaa-1414-4414-8414-${String(++n).padStart(12, '0')}`,
       actor_id: fresh.character,
@@ -99,7 +101,9 @@ function run(path: string, c: ReturnType<typeof compiled>) {
     const [continuation_id] = at()!;
     return go('choose', { choice_id, continuation_id });
   };
-  go('talk', {}, [fresh.entityIds['persuade_sampler@0.0.1:npc/guard']!]);
+  const talk = (only = 'guard') =>
+    go('talk', {}, [fresh.entityIds['persuade_sampler@0.0.1:npc/guard']!], only);
+  talk();
   // The receipt check runs only on an answer with a save-visible consequence (detailNeeded), so
   // the sampler's answer is read as one that starts a patrol.
   const receiptHolds = () => {
@@ -118,7 +122,7 @@ function run(path: string, c: ReturnType<typeof compiled>) {
       JSON.parse(String(r.response)),
     );
   };
-  return { ...p, at, choose, receiptHolds };
+  return { ...p, at, choose, talk, receiptHolds };
 }
 
 // Breaks: the receipt check holding a nested row to the opening dialogue's key or its narration to
@@ -157,4 +161,67 @@ test('a talk saved after a failed check reopens at then_failed', (t) => {
   assert.deepEqual(g.at()?.slice(1), ['lost', ['l']]);
   g.sql.close();
   coldReopen(path, c);
+});
+
+// Breaks: a non-quest hand_over of a Give-restricted item read as a corrupt custody path, so an
+// ordinary answer makes the next load save_corrupt for good (dialogue-save.ts).
+test('a save reopens after a Give-restricted item is handed back outside a quest', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-branching-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const src = mkdtempSync(join(tmpdir(), 'loka-branching-src-'));
+  cpSync(fileURLToPath(new URL('../../../cartridges/persuade_sampler', import.meta.url)), src, {
+    recursive: true,
+  });
+  mkdirSync(join(src, 'items'));
+  writeFileSync(
+    join(src, 'items/token.json'),
+    JSON.stringify({
+      keywords: ['token'],
+      name: LABEL,
+      room_line: LABEL,
+      description: LABEL,
+      location: { in: 'npc', npc: 'guard' },
+      give_allowed: false,
+    }),
+  );
+  const talk = (choices: object) => ({
+    ...talkTo(choices),
+    roles: { guard: { role: 'npc', npc: 'guard' }, token: { role: 'item', item: 'token' } },
+  });
+  const line = { label: LABEL, narration: SAID };
+  writeFileSync(
+    join(src, 'dialogues/guard.json'),
+    JSON.stringify({
+      ...talk({ take: { ...line, receive: { item: 'token', from: 'guard' } } }),
+      policy: { op: 'not', item: { op: 'has_item', item: 'token' } },
+    }),
+  );
+  writeFileSync(
+    join(src, 'dialogues/back.json'),
+    JSON.stringify({
+      ...talk({ give: { ...line, hand_over: { item: 'token', to: 'guard' } } }),
+      policy: { op: 'has_item', item: 'token' },
+    }),
+  );
+  const c = compiled(src);
+  rmSync(src, { recursive: true });
+  const path = join(dir, 'give.db');
+  const g = run(path, c);
+  g.choose('take');
+  g.talk('back');
+  g.choose('give');
+  assert.equal(g.at(), undefined);
+  // The next talk gives it again: the second receive holds on reload too.
+  const again = join(dir, 'again.db');
+  const h = run(again, c);
+  h.choose('take');
+  h.talk('back');
+  h.choose('give');
+  h.talk();
+  h.choose('take');
+  assert.equal(h.at(), undefined);
+  g.sql.close();
+  h.sql.close();
+  coldReopen(path, c);
+  coldReopen(again, c);
 });
