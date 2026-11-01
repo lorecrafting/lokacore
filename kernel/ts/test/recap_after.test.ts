@@ -51,7 +51,8 @@ test('recap_after never exceeds the away cap', () => {
 // Breaks: the default assumes a 24-hour day of 3600-second hours, not the cartridge's calendar.
 test('the away cap defaults to one calendar day, in hours when authored', () => {
   const calendar = { units_per_hour: 60, hours_per_day: 10 };
-  const cap = (time_policy: object) => awayCap({ calendar, manifest: { time_policy } } as never);
+  const cap = (time_policy: object) =>
+    awayCap({ calendar, manifest: { time_policy } } as unknown as Parameters<typeof awayCap>[0]);
   assert.equal(cap({}), 600);
   assert.equal(cap({ away_cap_hours: 3 }), 180);
 });
