@@ -84,3 +84,28 @@ CI (`gh run list --commit`): ci 41275992471, book-e2e 41275992432, graph-diff 41
 Not checked: 120 game days (62 run), a wage row at load (static only, `escort/job.ts:24` matches), a phone, a walker-driven spawned scheduled NPC.
 
 Verdict: APPROVE WITH NOTES
+
+## Scoped re-check at eb014312d179eadd8c77a230c0660640dac96538 (fix eb014312d)
+
+Must hold: dispatch unchanged; `jobRoute` is the one answer for `decideAt` and `job-save.ts`; no false refusal or forged row reopened; a moved wage row loads.
+
+CI (`gh run list --commit`): ci 41279099837, book-e2e 41279099846, graph-diff 41279104084, all success.
+
+- Dispatch: `jobRoute` (`rule.ts:60-69`) keeps the old order; read branch by branch.
+- Removed conditions: `a58b6936e` and this head give the same answer on all 102400 row shapes (two cartridges, 20 kinds, 5 keys, 4 due times, 2 statuses, all 64 marker sets): 0 differences, 1132 refused. The a58 false-refusal hunt therefore carries over. The markers moved into `jobRoute`; a forged marker row is treated as it was.
+- Wage: `open_catch_up.test.ts:203` opens, runs one wage and reopens; wage gate to false is red.
+- tsc, tried: `if (route === 'ferry')` in `decideAt` alone gives TS2367, as claimed. Removing the `crow` return or `reaction` from `KIND_ROUTES` also gives a tsc error.
+
+Mutants, with green null controls on the same commands. Red: wage gate, npc check, wage, replenish, `CLOCK_JOB`, sight and status routes, `same` skip. Crow and reaction survive their focused runtime tests and are red only by tsc. The `same` skip's a58 row is confirmed here. Correction: the a58 and first eb014312d `red-full` rows ran where mix-compiling kernel tests failed at baseline, so they are not evidence; only the rows above count.
+
+### Findings
+
+**Nit. `rule.ts:60-69`.** The tsc guard covers a `route ===` branch only. Tried: `if (row.job.kind === 'ferry')` in `decideAt` and `'ferry'` in `KIND_ROUTES` with no branch both compile. By reading: in the first, a changed `ferry` row routes `npc` and is refused on a good save; the second passes the load check and reaches `scheduledJob` at run (not run). The first needs a developer to bypass the pattern every other branch now uses, so the earlier should-fix is closed.
+
+PR body nit from the a58 re-check: closed; the body now names `job-save.ts`, says 16 pass, scopes its `/code-review` range and drops the forged-kinds claim.
+
+Template NPC question: PM sends it to the fault batch, not this PR. Earlier sampler note stands.
+
+Not checked: walkers not rerun (differential instead), 120 days, a phone.
+
+Verdict: APPROVE WITH NOTES
