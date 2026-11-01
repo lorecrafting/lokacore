@@ -12,6 +12,7 @@ import {
   type ReadingStep,
   type ReadingStore,
 } from './reading.ts';
+import './samples';
 import { play, setMuted } from './sound';
 
 export type SettingStores = {

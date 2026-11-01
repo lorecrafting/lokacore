@@ -36,6 +36,8 @@ m elixir bin/check_docs.exs
 m bin/docs_red_controls.sh
 m python3 bin/check_beads_export.py
 m sh bin/beads_red_controls.sh
+m python3 bin/check_sounds.py
+m sh bin/sounds_red_controls.sh
 m sh bin/graph_diff_red_controls.sh
 m sh bin/prose_lint_red_controls.sh
 m sh bin/orphans_red_controls.sh

@@ -11,7 +11,7 @@ const CUES = {
   pickup: { s: 2, sound: 'pickup' },
   coin: { s: 2, sound: 'coin' },
   hp_loss: { s: 3, sound: 'blow' },
-  status_in: { s: 2 },
+  status_in: { s: 2, sound: 'tick' }, // only when it hurts (statusCues)
   status_out: { s: 1 },
   quest_on: { s: 2, sound: 'questGained' },
   quest_resolved: { s: 3, sound: 'questDone' },
@@ -132,10 +132,16 @@ function statusCues(now: GameView, was: GameView) {
   const permanent = (now.conditions ?? [])
     .filter((c) => c.ends_at === undefined)
     .map((c) => c.label);
+  const arrived = labels(now).filter((l) => !labels(was).includes(l) && !permanent.includes(l));
+  const hurts = [
+    ...(now.conditions ?? []).filter((c) => c.kind === 'debuff').map((c) => c.label),
+    ...(now.bleeding ? [now.bleeding.label] : []),
+  ];
   return [
     ...named(
       'status_in',
-      labels(now).filter((l) => !labels(was).includes(l) && !permanent.includes(l)),
+      arrived,
+      arrived.some((l) => hurts.includes(l)) ? undefined : { silent: true },
     ),
     ...named(
       'status_out',
@@ -196,12 +202,13 @@ function small(s: Queue, cue: Cue, now: number): Cue[] {
   return [cue];
 }
 
-// Cues of one small key waiting together are one cue, with all their ids.
+// Cues of one small key waiting together are one cue, with all their ids, silent only if all are.
 const gathered = (cues: Cue[]) =>
   cues.reduce<Cue[]>((out, cue) => {
     const i = CUES[cue.name].s === 2 ? out.findIndex((o) => o.name === cue.name) : -1;
     if (i < 0) return [...out, cue];
-    out[i] = { ...out[i]!, ids: [...(out[i]!.ids ?? []), ...(cue.ids ?? [])] };
+    const ids = [...(out[i]!.ids ?? []), ...(cue.ids ?? [])];
+    out[i] = { ...out[i]!, ids, silent: out[i]!.silent && cue.silent };
     return out;
   }, []);
 

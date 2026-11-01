@@ -58,11 +58,12 @@ async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}) {
   });
   const mod: typeof import('./sound.web.ts') = await import(`./sound.web.ts?page=${page++}`);
   mod.sources({
-    blow: 'blow.m4a',
-    coin: 'coin.m4a',
-    pageTurn: 'turn.m4a',
-    pickup: 'flick.m4a',
-    chapter: 'theme.m4a',
+    blow: ['blow.m4a'],
+    coin: ['coin.m4a'],
+    pageTurn: ['turn.m4a', 'turn2.m4a'],
+    pickup: ['flick.m4a'],
+    tick: ['tick.m4a'],
+    chapter: ['theme.m4a'],
   });
   return {
     ...mod,
@@ -216,4 +217,27 @@ test('an element the browser refuses to make is silence', async () => {
   };
   b.play('chapter');
   assert.equal(b.els[0]!.paused, false);
+});
+
+// Breaks: a variant is never reached, or the rotation restarts each play.
+test('a name with several samples plays them in turn', async () => {
+  const s = await browser();
+  s.gesture();
+  for (let i = 0; i < 3; i++) s.play('pageTurn');
+  assert.deepEqual(
+    s.els.map((e) => e.url),
+    ['turn.m4a', 'turn2.m4a', 'turn.m4a'],
+  );
+});
+
+// Breaks: a new name lands on the music bus, so Sound off leaves it playing; or the chapter cut
+// moves to Sound and goes silent with it.
+test('Sound off silences every effect; the chapter cut answers to Music', async () => {
+  const b = await browser();
+  b.gesture();
+  b.setMuted('sound', true);
+  for (const name of ['tick', 'pageTurn', 'blow', 'coin'] as const) b.play(name);
+  assert.equal(b.els.length, 0);
+  b.play('chapter');
+  assert.equal(b.els.length, 1);
 });

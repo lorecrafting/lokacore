@@ -22,9 +22,16 @@ registerHooks({
     // Metro picks the platform file; here each device module records what the Book tells it.
     if (specifier === './sound')
       return {
-        url: "data:text/javascript,export const setMuted=(g,m)=>globalThis.bookDevice?.push([g,m]);export const play=(n)=>globalThis.bookDevice?.push(['play',n])",
+        url: "data:text/javascript,export const setMuted=(g,m)=>globalThis.bookDevice?.push([g,m]);export const play=(n)=>globalThis.bookDevice?.push(['play',n]);export const sources=(s)=>{globalThis.bookSamples=s}",
         shortCircuit: true,
       };
+    // Metro and Vite give an audio file's URL; here its name.
+    if (specifier.endsWith('.m4a'))
+      return {
+        url: `data:text/javascript,export default ${JSON.stringify(specifier.split('/').at(-1))}`,
+        shortCircuit: true,
+      };
+    if (specifier === './samples') return next('./samples.ts', context);
     if (specifier === './haptic' || specifier === './book/haptic')
       return {
         url: "data:text/javascript,export const hapticsOn=(o)=>globalThis.bookDevice?.push(['haptics',o]);export const onPulse=()=>()=>{};export const haptic=(k)=>globalThis.bookDevice?.push(['haptic',k])",

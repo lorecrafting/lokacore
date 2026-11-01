@@ -5,16 +5,21 @@ import { mix, sound } from './tokens.ts';
 type SoundName = keyof typeof sound;
 type Bus = keyof typeof mix.bus;
 
-// ponytail: one sample per name, no variants or pitch spread, a new element per play (so a load at
-// each press) until the files land (loka-gj82.4).
-let urls: Partial<Record<SoundName, string>> = {};
-/** The samples; the manifest fills them (loka-p2s8). */
+// ponytail: no pitch spread (mix.spread) and a new element per play, so a load at each press, until
+// the samples are auditioned (loka-gj82.4).
+let urls: Partial<Record<SoundName, string[]>> = {};
+const played: Partial<Record<SoundName, number>> = {};
+/** Each name's samples, played round-robin (samples.web.ts). */
 export const sources = (given: typeof urls) => {
   urls = given;
 };
 
 const busOf = (name: SoundName): Bus =>
-  name === 'chapter' ? 'music' : name === 'pageTurn' || name === 'pickup' ? 'ui' : 'sfx';
+  name === 'chapter'
+    ? 'music'
+    : name === 'pageTurn' || name === 'pickup' || name === 'tick'
+      ? 'ui'
+      : 'sfx';
 const live: Record<Bus, (() => void)[]> = { ambience: [], sfx: [], ui: [], music: [] };
 const muted = { sound: false, music: false };
 const groupOf = (bus: Bus) => (bus === 'music' ? 'music' : 'sound');
@@ -48,12 +53,14 @@ const duck = (db: number, ms: number) => {
 };
 
 export function play(name: SoundName) {
-  const url = urls[name];
+  const files = urls[name];
   const bus = busOf(name);
-  if (!audio || !url || muted[groupOf(bus)]) return;
+  if (!audio || !files?.length || muted[groupOf(bus)]) return;
+  const turn = played[name] ?? 0;
+  played[name] = turn + 1;
   try {
     const voices = live[bus];
-    const el = new Audio(url);
+    const el = new Audio(files[turn % files.length]);
     const node = audio.ctx.createMediaElementSource(el);
     const level = audio.ctx.createGain(); // not el.volume: iOS Safari ignores it
     level.gain.value = amp(mix.tier[sound[name].tier as keyof typeof mix.tier]);

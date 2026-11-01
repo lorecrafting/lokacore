@@ -6,6 +6,7 @@ import { nodes } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
 const { ActionCard } = await import('./actions.tsx');
+const { LetterTile } = await import('./Riddle.tsx');
 const { saidLabel } = await import('./Footer.tsx');
 const { Chip } = await import('./Chip.tsx');
 const { opacity } = await import('./tokens.ts');
@@ -154,6 +155,22 @@ test('an away recap dries in like a line; the log keeps its last 200', (t) => {
 });
 
 const card = (shown: any[]) => shown.find((n) => n.type === 'Pressable');
+
+// Breaks: the tile loses its tick, or the tick replaces the press's own haptic and lift.
+test('a letter tile ticks and feels the press', (t) => {
+  effects(t);
+  const draw = rig(t);
+  const shown = () =>
+    card(
+      draw(() => nodes(LetterTile({ letter: 'a', used: false, label: 'a', onPress: () => {} }))),
+    );
+  shown().props.onPressIn();
+  assert.deepEqual(g.bookDevice, [
+    ['play', 'tick'],
+    ['haptic', 'selection'],
+  ]);
+  assert.deepEqual(g.timings, [90]);
+});
 
 // Breaks: a press has no feel, or travels under reduced motion, or loses its state change there.
 test('a card lifts on press-in with a selection haptic; reduced motion keeps the colour, no travel', (t) => {

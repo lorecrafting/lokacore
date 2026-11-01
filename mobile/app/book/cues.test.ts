@@ -35,7 +35,19 @@ const rows: [CueName, GameView, GameView, string | undefined][] = [
   ['coin', pool(9, 5), pool(9, 8), 'coin'],
   ['hp_loss', pool(9, 0, fight), pool(7, 0, fight), 'blow'],
   ['status_in', base, view({ conditions: [{ label: 'dazed', ends_at: 9 }] }), undefined],
-  ['status_in', base, view({ bleeding: { label: 'cut' } }), undefined],
+  [
+    'status_in',
+    base,
+    view({ conditions: [{ label: 'sick', ends_at: 9, kind: 'debuff' }] }),
+    'tick',
+  ],
+  [
+    'status_in',
+    base,
+    view({ conditions: [{ label: 'keen', ends_at: 9, kind: 'buff' }] }),
+    undefined,
+  ],
+  ['status_in', base, view({ bleeding: { label: 'cut' } }), 'tick'],
   ['status_out', view({ conditions: [{ label: 'dazed' }] }), base, undefined],
   ['quest_on', base, view({ journal: [quest('q', 'active')] }), 'questGained'],
   [

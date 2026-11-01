@@ -183,6 +183,23 @@ test('what a resume settled is silent; the same time passing while open is not',
   open.unmount();
 });
 
+// Breaks: the Book no longer plays its cues, or subscribes after useCues has fired.
+test('a poison in the real Book is heard', (t) => {
+  const tick = clock(t);
+  const g = globalThis as any;
+  const b = book(compiled('cartridges/recap_sampler') as never);
+  g.bookDevice = [];
+  t.after(() => (g.bookDevice = undefined));
+  b.go('east');
+  b.draw();
+  tick(1000);
+  assert.ok(
+    g.bookDevice.some((e: string[]) => e[0] === 'play' && e[1] === 'tick'),
+    JSON.stringify(g.bookDevice),
+  );
+  b.unmount();
+});
+
 // Breaks: Book stops feeding the bus, passes the wrong view, or a restored save is heard.
 test('the Book publishes a walk, and is silent opening and reopening', (t) => {
   const tick = clock(t);

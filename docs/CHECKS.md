@@ -91,6 +91,11 @@ their rules and red controls remain available for resumption.
   send a throwaway repo's writes into the real one (it plants a harness without the line);
   `docs/system/book-ui.md` names no look (a token, hex colour, px size or backticked palette or role
   name): those live in the catalogue (it plants a copy with a px size).
+- `python3 bin/check_sounds.py` (`--report`, `--release`): every bundled audio file under
+  `mobile/app/book/sounds` has a `manifest.json` row and every row a file; required fields are filled, the
+  licence is CC0 or CC BY 4.0 and CC BY carries a credit. `--report` lists placeholders by use; `--release`
+  fails while one remains ([plan, section 14](design/effects-and-sound-plan.md)). `bin/sounds_red_controls.sh`
+  plants each failure in a copy.
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
   nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan
   slices must appear exactly once with unique issue IDs, while supplemental

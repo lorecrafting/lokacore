@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { LiftPressable } from './fade.ts';
 import { useLift, usePress } from './press.ts';
+import { play } from './sound';
 import { Text } from './Text.tsx';
 import type { Button } from './presenter.ts';
 import { ActionCard } from './actions.tsx';
@@ -63,7 +64,7 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
 /**
  * One letter of the riddle bank.
  * - Use: Riddle only.
- * - Rules: a press lifts with a selection haptic; a used tile keeps its place (no reflow). Name: the letter, then its place (`N, tile 2`).
+ * - Rules: a press lifts with a tick and a selection haptic; a used tile keeps its place (no reflow). Name: the letter, then its place (`N, tile 2`).
  * - States: free; used (not pressable).
  * - Story: LetterTile.stories.tsx
  */
@@ -79,6 +80,10 @@ export function LetterTile(p: {
   return (
     <LiftPressable
       {...press.handlers}
+      onPressIn={() => {
+        play('tick');
+        press.handlers.onPressIn();
+      }}
       accessibilityRole="button"
       accessibilityLabel={p.label}
       disabled={p.used}

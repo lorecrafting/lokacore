@@ -149,6 +149,7 @@ export const motion = {
 export const sound = {
   pageTurn: { tier: 'note', variants: 3 }, // paper; no haptic during a turn -- mutate-skip: uncalibrated design value
   pickup: { tier: 'note', variants: 3, haptic: 'light' }, // a paper flick; a buy plays coin instead -- mutate-skip: uncalibrated design value
+  tick: { tier: 'whisper', variants: 1, haptic: 'selection' }, // a debuff arriving; a letter tile's press plays it too -- mutate-skip: uncalibrated design value
   coin: { tier: 'whisper', variants: 1, haptic: 'selection' }, // one purchase, sale or pennies -- mutate-skip: uncalibrated design value
   blow: { tier: 'beat', variants: 3, haptic: 'heavy' }, // a blow taken: the thud -- mutate-skip: uncalibrated design value
   level: { tier: 'note', variants: 1, haptic: 'medium' }, // level up: note high -- mutate-skip: uncalibrated design value

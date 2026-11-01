@@ -98,7 +98,7 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
       'chapter',
     ].map((k) => [
       `sound.${k}`,
-      'reached as sound[name] in play(name); its first caller comes with loka-gj82.4',
+      'reached as sound[name] in play(name); played by the cue that names it (cueSounds.ts)',
     ]),
   ),
   ...Object.fromEntries(

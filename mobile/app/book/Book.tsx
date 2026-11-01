@@ -1,6 +1,6 @@
 // size: allow 320, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Book draws GameView through its presenter; App injects the shell.
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
@@ -29,7 +29,8 @@ import {
   type Palette,
 } from './palette.ts';
 import type { Effects, Reading } from './reading.ts';
-import { useCues } from './cues.ts';
+import { onCue, useCues } from './cues.ts';
+import { playCue } from './cueSounds.ts';
 import { useSettings, type SettingStores } from './useSettings.ts';
 import { color, size, space } from './tokens.ts';
 import { Fault, Heard } from './lines.tsx';
@@ -179,7 +180,7 @@ const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as con
  * - Story: RecoveryPages.stories.tsx
  */
 export function BookView(p: ViewProps) {
-  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn, p.resumes);
+  useCueSounds(p);
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
@@ -217,6 +218,11 @@ export function BookView(p: ViewProps) {
       </TypeContext>
     </PaletteContext>
   );
+}
+
+function useCueSounds(p: ViewProps) {
+  useEffect(() => onCue(playCue), []); // before useCues: heard from its first cue
+  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn, p.resumes);
 }
 
 // The footer (on the world), the status line and a press's fault.

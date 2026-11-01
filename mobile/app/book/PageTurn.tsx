@@ -35,6 +35,7 @@ import {
 } from '@shopify/react-native-skia';
 import curl from './page-curl.sksl';
 import { easing } from './easing.ts';
+import { play } from './sound';
 import { motion } from './tokens.ts';
 import { titleContext, titleFocus } from './title.ts';
 import { snapshot, warm } from './snapshot';
@@ -155,9 +156,13 @@ function useLeaving(p: Props) {
   useLayoutEffect(() => {
     lastPage.current = p.children;
   });
+  // Curl and cross-fade alike; an effect, since a render can run twice and the first turn is no turn.
+  const heard = useRef(p.turn);
+  useEffect(() => {
+    if (heard.current !== p.turn) play('pageTurn');
+    heard.current = p.turn;
+  }, [p.turn]);
   if (p.turn !== turn) {
-    // Sound: the polish phase plays sound.pageTurn here (curl and cross-fade alike) unless Sound is
-    // off; there is no audio library yet.
     setTurn(p.turn);
     state[1]({ turn, dir: p.dir, page: lastPage.current });
   }
