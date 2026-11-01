@@ -153,9 +153,9 @@ why the action was missing or refused.
 Every kind's fields are in [source kinds](../reference/source-kinds.gen.md); step ops, policy leaves, events and choice fields are in [vocabulary](../reference/vocabulary.gen.md).
 
 `mise exec -- bin/loka new <kind> <name> [--from <room> <direction>] ... [cartridge dir]` (from any directory; the cartridge dir defaults to the current one, or the cartridge a `cartridge <dir>` pair just made) writes a
-compiling file for each pair (the pairs before a refusal stay written), with every line a `~` placeholder, merged into the files it touches
+compiling file for each pair on one Mix boot (name several pairs in one call; if any is refused, nothing is written), with every line a `~` placeholder, merged into the files it touches
 (it never replaces a value already there: it refuses, names the value and writes nothing),
-plus the capabilities it needs in `cartridge.json`; it prints what it changed, then what to fill and the
+plus the capabilities it needs in `cartridge.json`; it prints what it changed, then what to fill (the list `bin/loka todo` prints) and the
 next command. `rooms <name> --from <room> <direction>` writes the exit both ways and, when `layout.json` exists, places the new room's row that way from its source. `cartridge <dir>` stands alone: run it first, then the other pairs with the dir last. A rerun leaves the file it names as you left it, and refuses when that file's steps differ. A kind that refers
 to another takes the first one you have (for a room, the entry) and refuses with the command to run first. The shapes
 come from the samplers; the rules from the [Builders' Guide](../BUILDERS-GUIDE.md#authoring-paths-and-examples).
