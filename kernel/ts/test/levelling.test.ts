@@ -1,3 +1,4 @@
+// size: allow 560, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
 // Toolbox row 4 on the compiled levelling sampler: rats grant 10 experience each, level 2 at 30
 // grants one point, Raise spends it, and the quest reward grants 20 (mechanics.md row 4).
 import assert from 'node:assert/strict';
@@ -16,6 +17,8 @@ import { resolve } from '../src/commands/invocation.ts';
 import { derived } from '../src/mechanics/attribute/shared.ts';
 import type { Base } from '../src/mechanics/fact.ts';
 import type { CharacterId } from '../src/contracts.gen.ts';
+import { key } from '../src/foundation/compose.ts';
+import { resourceRef } from '../src/mechanics/resource.ts';
 import { levelsReached, levelUp, oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
 import { gameView } from '../src/view/view.ts';
@@ -190,6 +193,70 @@ test('resolving the den quest grants 20 experience; after two kills it narrates 
     unspent: 1,
   });
   assert.ok(narration(up).includes(LEVEL_UP));
+});
+
+/** Two rats dead, the third engaged, and the body's hp row forged to `value`. */
+function bitten(value: number, c: Cartridge = content) {
+  let w = play(fresh(c), { type: 'move', direction: 'east' }).world;
+  w = kill(kill(w, 'rat_a').world, 'rat_b').world;
+  const row = key({ kind: 'resource', entity_id: w.body, resource: resourceRef(w, 'hp') });
+  return {
+    ...w,
+    state: {
+      ...w.state,
+      resources: {
+        ...w.state.resources,
+        [row]: { value, at: w.state.clock, rate: 1, remainder: 0 },
+      },
+    },
+  };
+}
+const hpOps = (r: { decision: object; world: World }) =>
+  (r.decision as { delta: { ops: any[] } }).delta.ops.filter(
+    (o) => o.op === 'resource.adjust' && o.entity_id === r.world.body && o.resource.key === 'hp',
+  );
+const LEVEL_TWO = 'levelling.level_two';
+
+// Breaks: the level_two refill writes nothing, is left in writer group 0 (a composition fault),
+// stops at the wrong value, or carries no `at` (the settled regen is refused against the base clock).
+test('level 2 refills hp in the killing step', () => {
+  const w = bitten(3);
+  assert.deepEqual(hp(w), [3, 10]);
+  const third = kill(w, 'rat_c');
+  assert.deepEqual(hp(third.world), [10, 10]);
+  assert.deepEqual(narration(third).includes(LEVEL_TWO), true);
+  const [op, ...rest] = hpOps(third);
+  assert.deepEqual(rest, []);
+  assert.equal(op.from, 3);
+  assert.equal(op.to, 10);
+  assert.notEqual(op.writer_group, 0);
+  assert.deepEqual(validate('GameView', gameView(third.world)), []);
+});
+
+// Breaks: a full pool writes a no-op row, or the narrate step depends on the refill having moved.
+test('level 2 at full hp writes no hp op and still tells', () => {
+  const third = kill(bitten(10), 'rat_c');
+  assert.deepEqual(hpOps(third), []);
+  assert.ok(narration(third).includes(LEVEL_TWO));
+});
+
+// Breaks: the refill does not saturate (to: past the maximum), or a second step on one pool starts
+// again from the row instead of the first step's result, and the composer refuses it.
+test('two refills of one pool compose and stop at the maximum', () => {
+  const c = structuredClone(content);
+  const rule = Object.values(c.reactions!).find((r: any) => r.key === 'level_two') as any;
+  const adjust = rule.steps.find((s: any) => s.op === 'resource.adjust');
+  rule.steps.push({ ...adjust, by: -4 }, { ...adjust, by: 2 });
+  const third = kill(bitten(1, c), 'rat_c');
+  assert.deepEqual(
+    hpOps(third).map((o) => [o.from, o.to]),
+    [
+      [1, 10],
+      [10, 6],
+      [6, 8],
+    ],
+  );
+  assert.deepEqual(hp(third.world), [8, 10]);
 });
 
 const events = (r: { decision: object }) =>

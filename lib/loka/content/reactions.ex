@@ -152,6 +152,10 @@ defmodule Loka.Content.Reactions do
       else: [diag("UNRESOLVED_REFERENCE", at(rel, ["steps", i, "text"]), %{"target" => key})]
   end
 
+  # A reaction's refill names a declared resource; an unknown one would throw at play.
+  defp consequence(rel, {%{"op" => "resource.adjust"} = s, i}, _, ctx),
+    do: reference(rel, ["steps", i], "resource", s, ctx.m, ctx.defs)
+
   defp consequence(rel, {%{"op" => "status.apply"} = s, i}, on, ctx),
     do:
       revealed(rel, s, i, on, ctx) ++

@@ -1,9 +1,18 @@
 // Toolbox row 4 (docs/system/mechanics.md experience and levelling): one levelling row per
 // character; level and unspent points are derived on read, never stored.
-import type { CharacterId, DeltaOp, DomainEvent, LevellingRow, Text } from '../../contracts.gen.ts';
+import type {
+  CharacterId,
+  DefinitionRef,
+  DeltaOp,
+  DomainEvent,
+  LevellingRow,
+  Text,
+} from '../../contracts.gen.ts';
+import { key } from '../../foundation/compose.ts';
 import { saturate } from '../../foundation/int.ts';
-import type { Mint, World } from '../../runtime/decision.ts';
+import { bodyOf, type Mint, type World } from '../../runtime/decision.ts';
 import type { Base } from '../fact.ts';
+import { adjust } from '../resource.ts';
 
 const NONE: LevellingRow = { experience: 0, allocated: {} };
 
@@ -113,6 +122,28 @@ export const write = (
   expected: world.state.levelling?.[actor] ?? null,
   value,
 });
+
+/**
+ * A reaction's resource.adjust on the actor's body, clamped to its bounds and after the rule's
+ * earlier `ops`, so two compose. Nothing without a body or a change. `at`: the composer folds from
+ * the base clock otherwise and refuses the settled regen.
+ */
+export function adjusted(
+  then: World,
+  actor: CharacterId,
+  step: { resource: DefinitionRef; by: number },
+  writer_group: number,
+  ops: readonly DeltaOp[],
+): DeltaOp[] {
+  const body = bodyOf(then, actor);
+  if (!body) return [];
+  const levels: Record<string, number> = {};
+  for (const o of ops)
+    if (o.op === 'resource.adjust')
+      levels[key({ kind: 'resource', resource: o.resource, entity_id: o.entity_id })] = o.to;
+  const { op } = adjust(then, body, step.resource, step.by, levels, true);
+  return op.from === op.to ? [] : [{ ...op, writer_group, at: then.state.clock }];
+}
 
 /** `amount` more experience for the actor, saturating at the ResourceInt maximum. */
 export function grant(world: World, actor: CharacterId, amount: number, group: number) {
