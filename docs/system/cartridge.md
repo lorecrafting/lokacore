@@ -864,7 +864,9 @@ build. The author tools below are reachable only in that bundle (a production ex
   the cartridge; a name is `[a-z0-9_-]+`, never a path). The watcher reads and writes them
   (`GET /__author/checkpoints`, `GET|PUT /__author/checkpoints/<name>`); the compiler and the
   watcher's rebuild skip the directory. The panel lists them; jumping to one starts the game over
-  and replays it.
+  and replays it, and a refused step offers dropping it and replaying the rest. `bin/loka check
+  <cartridge>` replays each one headless on a fresh session through the same replay and exits 1 on
+  any refusal; CI runs it for every cartridge with the directory.
 - **Author panel** (`tools/author-panel`, its own web page framing the Book at `?dev=1`; nothing of it enters the app's dependencies or bundles): the last compile's diagnostics in plain words
   (`severity: file:line message`); current facts, quests and flags from the view; why an action
   is missing or refused ([rule explainer](#rule-explainer-loka-kgd1943) on the recorded path); each Book

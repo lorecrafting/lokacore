@@ -8,7 +8,7 @@ import { Platform } from 'react-native';
 import type { localSession } from '../../authority/local-story/session';
 import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
 import { listen, overlay } from './live.ts';
-import { asRefs, caughtUp, replay, type Place, type Step } from './place.ts';
+import { asRefs, caughtUp, dropStep, replay, type Place, type Step } from './place.ts';
 
 export type Opened = NonNullable<ReturnType<ReturnType<typeof localSession>['game']>>;
 /** words -> text key, filled as the Book resolves text, so a clicked line names its source. */
@@ -31,6 +31,7 @@ function saved(): Place | undefined {
 }
 const place: Place = (devClock && saved()) || { hash: chapter.sha256, steps: [] };
 let placeNote = '';
+let refused: number | undefined; // the step a replay was refused at, which the panel can drop
 const savePlace = () => localStorage.setItem(PLACE, JSON.stringify(place));
 const keep = (step: Step) => {
   if (place.hash !== chapter.sha256) return; // a broken path waits for the edit that mends it
@@ -40,11 +41,13 @@ const keep = (step: Step) => {
 export const resetPlace = () => {
   place.hash = chapter.sha256;
   place.steps = [];
+  refused = undefined;
   savePlace();
 };
 export function restorePlace(game: Opened | undefined) {
   if (!game || place.hash === chapter.sha256) return;
   let outcome: ReturnType<typeof replay>;
+  let threw = false;
   try {
     outcome = replay(place.steps, game, (ms) => {
       g.loka_dev_skew = skew() + ms;
@@ -52,10 +55,12 @@ export function restorePlace(game: Opened | undefined) {
     });
   } catch (e) {
     // a hand-edited checkpoint or stale place with a malformed step must not stop the boot
+    threw = true;
     outcome = { done: 0, failed: `malformed step (${(e as Error).message})` };
   }
   const { done, failed } = outcome;
   if (failed) {
+    if (!threw) refused = done;
     placeNote = `Place: ${failed}; stopped after ${done} of ${place.steps.length} steps. Mend the edit, or Start over to record afresh.`;
     console.warn(placeNote);
     return;
@@ -122,13 +127,15 @@ type Asked =
   | { op: 'hello' }
   | { op: 'advance'; minutes: number }
   | { op: 'jump'; steps: Step[] }
+  | { op: 'drop' }
   | { op: 'trace' };
-const OPS = new Set(['hello', 'advance', 'jump', 'trace']); // any other local window is not the panel
+const OPS = new Set(['hello', 'advance', 'jump', 'drop', 'trace']); // any other local window is not the panel
 let panel: { to: Window; origin: string } | undefined;
 const tell = (sent: object) => panel?.to.postMessage({ loka: 'author', ...sent }, panel.origin);
 const stateOf = (game: Opened) => ({
   hash: chapter.sha256,
   placeNote,
+  refused,
   steps: place.steps,
   facts: game.facts(),
   quests: game.view().view.journal,
@@ -154,6 +161,8 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       if (e.data.op === 'trace') return void tell({ trace: game.trace() });
       if (e.data.op === 'advance') advance(e.data.minutes);
       if (e.data.op === 'jump') return jumpTo(e.data.steps, latest.current); // the new game posts its state
+      if (e.data.op === 'drop' && refused !== undefined)
+        return jumpTo(dropStep(place.steps, refused), latest.current);
       state();
     };
     window.addEventListener('message', onMessage);

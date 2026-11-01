@@ -43,6 +43,9 @@ const describe = (reply: Reply) => {
 };
 
 /** Sends the steps in order; the first the session does not save and accept stops the replay, named. */
+/** The path without the step at `index`. */
+export const dropStep = (steps: Step[], index: number) => steps.filter((_, i) => i !== index);
+
 export function replay(steps: Step[], game: Replayable, advance: (ms: number) => void): Outcome {
   for (const [i, step] of steps.entries()) {
     if ('advance' in step) {

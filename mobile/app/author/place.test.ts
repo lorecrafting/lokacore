@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Intent, Reply } from '../../packages/game-view/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
-import { asRefs, caughtUp, replay, type Replayable, type Step } from './place.ts';
+import { asRefs, caughtUp, dropStep, replay, type Replayable, type Step } from './place.ts';
 
 const NPC = 'sampler@0.0.1:npc/maud';
 const intent = (target_ids: string[], input = {}) =>
@@ -140,4 +140,17 @@ test('the drain loop gives up at 1000 rounds and stops on the first other reply'
     pulsing((n) => (n < 3 ? 'catching_up' : 'idle')),
     ['active', 'drain', 'drain'],
   );
+});
+
+// Break: the panel's "drop this step" removes the wrong step because replay's `done` counts advances.
+test('dropping the refused step removes that step, counting the advances before it', () => {
+  const steps: Step[] = [
+    { intent: intent([]) },
+    { advance: 1000 },
+    { intent: intent([NPC]) },
+    { intent: intent([]) },
+  ];
+  const { done } = replay(steps, session({ [NPC]: 'id' }, [accepted, refused]).game, () => {});
+  assert.equal(done, 2);
+  assert.deepEqual(dropStep(steps, done), [steps[0], steps[1], steps[3]]);
 });

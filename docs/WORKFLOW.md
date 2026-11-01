@@ -12,7 +12,7 @@ The default since the [owner's lean decision](decisions/owner-decision-lean-work
 - **Engine change** (`kernel/`, `lib/`, `protocol/`, `schemas/`, `mobile/authority/`): Opus designs it; one fresh
   independent reviewer, with a second opinion where [Review count](#review-count) requires it.
 - **Everything else** (cartridge content, walks, Book style, tools, docs): no separate reviewer. Compiler, content
-  lint, the affected walkthrough and hosted CI are the gate; the session's self-review stays.
+  lint, the affected walkthrough (and, for a cartridge with `checkpoints/`, `bin/loka check`) and hosted CI are the gate; the session's self-review stays.
 - **Models:** Sonnet for content and mechanical edits; Opus for engine design and review.
 - **Content:** no mutation runs. Prologue prose is the [owner's alone](system/owner-rules.md#process).
 - **Polish:** notes go to Beads and land as one batch on the owner's go.

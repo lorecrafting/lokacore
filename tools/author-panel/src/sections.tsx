@@ -15,7 +15,8 @@ const Heading = ({ children }: { children: React.ReactNode }) => (
 );
 
 /** The last compile's diagnostics first: a writer reads the error before anything else. */
-export function Compile({ said, placeNote }: { said?: string[]; placeNote?: string }) {
+export function Compile({ said, state, send }: { said?: string[]; state?: State; send: Send }) {
+  const placeNote = state?.placeNote;
   const broken = said?.length ? said[0].startsWith('error') : false;
   return (
     <section className="border-b px-3 py-2 text-sm">
@@ -29,6 +30,11 @@ export function Compile({ said, placeNote }: { said?: string[]; placeNote?: stri
         )}
         {placeNote ? <span className="truncate text-muted-foreground" title={placeNote}>{placeNote}</span> : null}
       </div>
+      {state?.refused === undefined ? null : (
+        <Button className="mt-2" size="sm" variant="outline" onClick={() => send({ op: 'drop' })}>
+          drop this step and continue
+        </Button>
+      )}
       {said?.length ? (
         <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-xs">
           {said.join('\n')}
@@ -38,7 +44,7 @@ export function Compile({ said, placeNote }: { said?: string[]; placeNote?: stri
   );
 }
 
-type Send = (asked: { op: 'advance'; minutes: number } | { op: 'jump'; steps: Step[] }) => void;
+type Send = (asked: { op: 'advance'; minutes: number } | { op: 'jump'; steps: Step[] } | { op: 'drop' }) => void;
 /** Game time and named checkpoints; both go through the Book's own replay path. */
 export function Play({ state, send }: { state?: State; send: Send }) {
   return (

@@ -45,6 +45,17 @@ Play to the moment you want to work on, then in the panel's Play tab type a name
 Save. Later, pick it from the list: the game starts over and replays to that point. Checkpoints
 are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
 
+## Test your checkpoints
+
+`bin/loka check cartridges/<name>` compiles the cartridge and replays every checkpoint from a fresh
+start, with no Book. It prints `<checkpoint>: ok`, or the first step the game refused and why, and
+exits 1 if any failed. Run it after an edit, and save a checkpoint at each beat you want to keep
+working: CI runs it for every cartridge with a `checkpoints/` folder.
+
+When you jump to a checkpoint and an edit has made one of its steps impossible, the panel names the
+step and offers **drop this step and continue**. It starts over and replays the path without that step. Save under the same name to
+keep the shorter path.
+
 ## Read an error
 
 A broken edit keeps the last good page; the panel's Compile card says what broke, as
