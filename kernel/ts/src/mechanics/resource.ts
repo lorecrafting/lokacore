@@ -68,6 +68,11 @@ export function resourceSpec(world: World, entity: EntityId, resource: Definitio
   return maximum === undefined ? spec : { ...spec, maximum };
 }
 
+/** What a blow can take: it saturates at the authored floor, as a spell's and a status's damage do. */
+export function aboveFloor(world: World, entity: EntityId, resource: DefinitionRef) {
+  return level(world, entity, resource)! - resourceSpec(world, entity, resource).minimum;
+}
+
 /** `entity`'s current value of `resource` at the world's clock; undefined if undeclared. */
 export function level(world: World, entity: EntityId, resource: DefinitionRef): number | undefined {
   const spec = resourceSpec(world, entity, resource);

@@ -15,6 +15,7 @@ import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
+import { living } from '../src/mechanics/death/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
 
 const pools = (w: ReturnType<typeof combatWorld>) => [
@@ -244,4 +245,26 @@ test('eight raw draws including damage rejections exhaust the whole round atomic
   const next = elapsed(begun, 150);
   assert.equal(next.decision.kind, 'fault');
   assert.equal(next.world, begun);
+});
+
+// Breaks (loka-2lvx): a blow past an NPC's authored hp floor writes a level below its minimum and the
+// round faults evaluator_error; it saturates at the floor, the foe alive, as a spell's damage does.
+test('a blow at an NPC with hp minimum 1 stops at 1 and the fight goes on', () => {
+  const w = combatWorld();
+  const target = key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: rat(w) });
+  const spec = w.entityResourceSpecs[target]!;
+  const floored = {
+    ...w,
+    entityResourceSpecs: { ...w.entityResourceSpecs, [target]: { ...spec, minimum: 1 } },
+  };
+  let at = attack(hp(floored, rat(floored), 2)).world;
+  const seen: number[] = [];
+  for (let n = 1; n <= 8; n++) {
+    const round = elapsed(at, n * 150, n + 1);
+    assert.equal(round.decision.kind, 'accepted', JSON.stringify(round.decision));
+    at = round.world;
+    seen.push(level(at, rat(at), resourceRef(at, 'hp'))!);
+  }
+  assert.deepEqual(seen, [1, 1, 1, 1, 1, 1, 1, 1]);
+  assert.ok(living(at, rat(at)));
 });
