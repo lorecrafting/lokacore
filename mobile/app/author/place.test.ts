@@ -210,3 +210,12 @@ test('only a step the game refused is marked refused', () => {
   assert.equal(once({ kind: 'catching_up' }), undefined);
   assert.equal(once({ kind: 'saved', decision: { kind: 'fault', code: 'x' } }), undefined);
 });
+
+test('the frozen clock moves wall and monotonic together, and only when told', () => {
+  // Break: a wall that stands still loses a dev-clock move for any reader of the wall clock.
+  let moved = 0;
+  const clock = frozenClock(() => moved);
+  const [wall, mono] = [clock.wall(), clock.monotonic()];
+  moved = 600;
+  assert.deepEqual([clock.wall() - wall, clock.monotonic() - mono], [600, 600]);
+});
