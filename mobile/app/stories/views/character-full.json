@@ -816,7 +816,8 @@
   "Aldous drills you until your arm aches, then hands you the training sword. \"Keep your guard up.\"",
   {
    "text": "You learn Blade.",
-   "event": true
+   "event": true,
+   "gilt": true
   }
  ],
  "combatLog": [],
