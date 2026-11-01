@@ -490,6 +490,18 @@ test('a nested conversation with one option ends once the player leaves', () => 
   assert.equal(away.state.choices![NEXT]!.status, 'closed');
 });
 
+// Breaks: a one-option dialogue that leads on only when its check fails read as ending at its
+// answer, so walking away leaves the talk open.
+test('a one-option dialogue with only then_failed closes when the player leaves', () => {
+  const linked = hub((d, c) => {
+    const key = Object.keys(d.choices)[0]!;
+    c.dialogues[`${F}:dialogue/nested`] = { ...d, key: 'nested' };
+    d.choices = { [key]: { ...d.choices[key], then_failed: 'nested' } };
+  });
+  const away = ok(open(linked), { type: 'move', direction: 'north' }, 4).world;
+  assert.equal(away.state.choices![C]!.status, 'closed');
+});
+
 // Breaks (loka-x6t.5): a hub reopened after an answer that ends the conversation: the dialogue's
 // only choice, or a riddle's solved answer.
 test('a single-choice or riddle dialogue ends at its answer', () => {

@@ -355,6 +355,27 @@ defmodule Loka.ContentFerryTest do
     path = "dialogues/bram_offer.choices.give.receive"
     assert {:error, diags} = compile(dir, offer.(give))
     assert d("OUTCOME_MISMATCH", path, %{}) in diags
+    # A one-option target of another answer runs again through that answer.
+    target = Map.delete(give, "then")
+
+    linked =
+      offer.(target)
+      |> Map.put("dialogues/bram_lead.json", %{
+        "npc" => "bram",
+        "policy" => %{"op" => "all", "items" => []},
+        "prompt" => "dialogue.bram.prompt",
+        "roles" => %{"bram" => %{"role" => "npc", "npc" => "bram"}},
+        "choices" => %{
+          "go" => %{
+            "label" => "dialogue.bram.leave",
+            "narration" => "narration.bram.leave",
+            "then" => "bram_offer"
+          }
+        }
+      })
+
+    assert {:error, reached} = compile(dir, linked)
+    assert d("OUTCOME_MISMATCH", path, %{}) in reached
     # lantern_lit is not a fact here, so it fails on that alone, never on the repeat rule.
     assert {:error, gated} = compile(dir, offer.(Map.merge(give, once)))
     refute d("OUTCOME_MISMATCH", path, %{}) in gated, inspect(gated)

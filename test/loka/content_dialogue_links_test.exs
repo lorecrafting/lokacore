@@ -80,6 +80,28 @@ defmodule Loka.ContentDialogueLinksTest do
       [child, {@guard, &(&1 |> field("then", "child").() |> quest.())}],
       {"OUTCOME_MISMATCH", @at <> "then"}
     )
+
+    # An answer on a riddle or starting a patrol has its own continuation.
+    riddled = %{
+      "choice_id" => "persuade",
+      "answer" => "x",
+      "bank" => ["X"],
+      "wrong" => "narration.guard.persuade_failed"
+    }
+
+    refused(
+      dir,
+      [child, {@guard, &(&1 |> field("then", "child").() |> Map.put("riddle", riddled))}],
+      {"OUTCOME_MISMATCH", @at <> "then"}
+    )
+
+    patrol = %{"npc" => "guard", "quest" => "any", "transition" => "start"}
+
+    refused(
+      dir,
+      [child, {@guard, &(&1 |> field("then", "child").() |> field("patrol", patrol).())}],
+      {"OUTCOME_MISMATCH", @at <> "then"}
+    )
   end
 
   # Breaks: a link that is allowed refused, the old same-speaker refusal back among them.

@@ -11,6 +11,7 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-branching-'));
@@ -125,6 +126,31 @@ test('talk passes over a dialogue whose options are all hidden', () => {
   g.opened();
   assert.deepEqual(g.ids(), ['shown']);
   assert.deepEqual(g.view().prompt?.key ?? g.view().prompt, 'dialogue.guard.prompt');
+});
+
+// Breaks: the hub opening an empty row when the answer spends every option; or a card with nothing
+// shown (the world moved past an open row) drawn empty, which GameView forbids.
+test('nothing left ends the talk, and a stale row still draws its options, each refused', () => {
+  const once = (key: string) => plain({ policy: is(key, false), steps: [set(key)] });
+  const g = play(content({ a: once('flag'), z: once('flag') }));
+  g.opened();
+  const before = g.world();
+  const done = g.choose('a');
+  assert.deepEqual(ops(done).includes('choice.open'), false);
+  assert.equal(g.view(), undefined);
+
+  const view = gameView({
+    ...before,
+    state: { ...before.state, facts: g.world().state.facts },
+  } as World);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.deepEqual(
+    view.choice!.choices.map((o: any) => [o.choice_id, o.available, o.reason?.code]),
+    [
+      ['a', false, 'invalid_state'],
+      ['z', false, 'invalid_state'],
+    ],
+  );
 });
 
 // Breaks: the hub reads the world before the answer's facts, so a spent option is redrawn or a

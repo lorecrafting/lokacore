@@ -14,9 +14,11 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 import { resolved } from '../../../kernel/ts/src/commands/actions.ts';
+import { refString } from '../../../kernel/ts/src/runtime/decision.ts';
 import { pending } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
 import { compiled } from './__tests__/compiled.ts';
 import { openStory } from './authority.ts';
+import { dialogueDetail } from './dialogue-receipt.ts';
 import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const LABEL = 'dialogue.guard.persuade';
@@ -98,11 +100,30 @@ function run(path: string, c: ReturnType<typeof compiled>) {
     return go('choose', { choice_id, continuation_id });
   };
   go('talk', {}, [fresh.entityIds['persuade_sampler@0.0.1:npc/guard']!]);
-  return { ...p, at, choose };
+  // The receipt check runs only on an answer with a save-visible consequence (detailNeeded), so
+  // the sampler's answer is read as one that starts a patrol.
+  const receiptHolds = () => {
+    const r = p.sql
+      .prepare('SELECT command_id, command, response FROM receipt ORDER BY revision DESC LIMIT 1')
+      .get()!;
+    const command = JSON.parse(String(r.command));
+    const world = structuredClone(story.world());
+    const row = world.state.choices![command.payload.continuation_id]!;
+    world.cartridge.dialogues![refString(row.source)]!.choices[command.payload.choice_id]!.patrol =
+      {} as never;
+    return dialogueDetail(
+      { world } as never,
+      r.command_id as string,
+      command,
+      JSON.parse(String(r.response)),
+    );
+  };
+  return { ...p, at, choose, receiptHolds };
 }
 
 // Breaks: the receipt check holding a nested row to the opening dialogue's key or its narration to
-// the plain line (dialogue-receipt.ts), so a save past the first answer is save_corrupt.
+// the plain line (dialogue-receipt.ts), so a custody or escort save past the first answer is
+// save_corrupt.
 test('a talk saved at each linked step reopens, with the variant reply on the receipt', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-branching-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -119,12 +140,13 @@ test('a talk saved at each linked step reopens, with the variant reply on the re
     const last = picks.map((pick) => g.choose(pick)).at(-1);
     assert.deepEqual(g.at()?.slice(1), expected);
     if (said) assert.equal(last.narration[0].key, said);
+    assert.ok(g.receiptHolds());
     g.sql.close();
     coldReopen(path, c);
   }
 });
 
-// Breaks: the receipt check refusing the choice.open that follows a failed check.
+// Breaks: a failed check's closed row and its then_failed row in one commit not surviving a reopen.
 test('a talk saved after a failed check reopens at then_failed', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-branching-failed-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));

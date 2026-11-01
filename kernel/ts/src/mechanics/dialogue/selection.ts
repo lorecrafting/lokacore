@@ -26,7 +26,7 @@ import { concealed } from '../skills.ts';
 const links = (d: DialogueDefinition) =>
   Object.values(d.choices)
     .flatMap((c) => [c.then, c.then_failed] as (string | undefined)[])
-    .filter((k): k is string => !!k && k !== 'end');
+    .filter((k): k is string => !!k);
 
 /**
  * The dialogues a talk can open: those nothing leads to, then the first by key of each cycle left
