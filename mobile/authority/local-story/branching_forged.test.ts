@@ -19,6 +19,8 @@ import {
   holder,
   quests,
   TOKEN,
+  line,
+  talkTo,
   type Play,
 } from './__tests__/branching-play.ts';
 
@@ -173,5 +175,17 @@ test('a one-way item moved with no take keeps playing', () => {
     (g) => put(g.sql, 'containers', g.fresh.entityIds[TOKEN]!, g.fresh.body),
     (g) => g.go('drop', {}, [g.fresh.entityIds[TOKEN]!]),
     (g) => assert.equal(holder(g), g.story.world().state.containers[g.fresh.body]),
+  );
+});
+
+// Breaks: the early return skipping a forged escort row when no dialogue can start an escort.
+test('an escort row in a world with no escort answer is refused', () => {
+  refused(
+    withToken({ guard: talkTo({ leave: line }) }),
+    (g) => g.choose('leave'),
+    (g) =>
+      g.sql
+        .prepare('INSERT INTO state_row(section, key, value) VALUES (?, ?, ?)')
+        .run('escorts', g.story.world().character, '{"forged":true}'),
   );
 });

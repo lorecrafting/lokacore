@@ -17,6 +17,7 @@ const WORDS: { [O in Leaf['op']]: (p: Extract<Leaf, { op: O }>) => string } = {
     p.now === undefined
       ? `fact ${p.fact.key} on the target needs ${JSON.stringify(p.equals)}`
       : `fact ${p.fact.key} is ${p.now === null ? 'unset' : JSON.stringify(p.now)}; needs ${JSON.stringify(p.equals)}`,
+  fact_at_least: (p) => `fact ${p.fact.key} is at least ${p.at_least}`,
   time_window: (p) => `the time of day is from ${p.from} to ${p.to}`,
   barrier_state: (p) => `barrier ${p.barrier.key} is ${p.equals}`,
   stat_compare: (p) => `attribute ${p.attribute.key} is at least ${p.at_least}`,

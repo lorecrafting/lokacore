@@ -84,4 +84,11 @@ test('a leaf that depends on the target leaves a branch open only if the rest do
     })[0]!.text,
     'fact wet on the target needs true',
   );
+  // Break: a counted fact's threshold left out of its sentence.
+  assert.equal(
+    sentences({
+      policy: { op: 'fact_at_least', fact: { key: 'met' }, at_least: 2, holds: true },
+    })[0]!.text,
+    'fact met is at least 2',
+  );
 });

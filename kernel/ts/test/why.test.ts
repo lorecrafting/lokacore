@@ -173,6 +173,10 @@ test('now: only the leaves admission reads at the target depend on it', () => {
     [{ op: 'status_active', status, subject: 'target' }, 'depends'],
     [{ op: 'status_active', status, subject: 'self' }, false],
     [{ ...rung(true), subject: 'target' }, 'depends'],
+    [
+      { op: 'fact_at_least', fact: ref('fact', 'bell_heard'), at_least: 1, subject: 'target' },
+      'depends',
+    ],
     [rung(true), false],
     [{ ...rung(true), subject: 'target', item: lantern }, false],
     [{ ...rung(true), subject: 'target', npc: ref('npc', 'bram') }, false],
