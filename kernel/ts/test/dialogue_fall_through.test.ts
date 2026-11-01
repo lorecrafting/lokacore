@@ -50,4 +50,10 @@ test('one unnamed Talk per speaker, the first that opens; other rows stay', () =
     oneTalk(set, Object.keys(set).map(row)).map((r) => r.action_key),
     ['open', 'named', 'quest', 'alias'],
   );
+  // Breaks: with none open, a dialogue's own refusal disappears from the view.
+  const shut = (action_key: string) => ({ action_key, available: false });
+  assert.deepEqual(
+    oneTalk(set, ['shut', 'later'].map(shut)).map((r) => r.action_key),
+    ['shut', 'later'],
+  );
 });

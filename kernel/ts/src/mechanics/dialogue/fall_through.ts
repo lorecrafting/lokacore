@@ -35,7 +35,7 @@ export const onward = (world: World, d: DialogueDefinition) => {
   });
 };
 
-// A speaker with several dialogues has one Talk: the first that opens, else the first with its refusal.
+// A speaker with several dialogues offers one Talk, the first that opens; with none open, each keeps its refusal.
 export const oneTalk = <A extends { action_key: string; available: boolean }>(
   set: Record<string, { command: string; speaker?: unknown; dialogue?: unknown }>,
   rows: A[],
@@ -44,7 +44,6 @@ export const oneTalk = <A extends { action_key: string; available: boolean }>(
     const a = set[r.action_key];
     return a?.command === 'talk' && a.speaker !== undefined && !a.dialogue;
   };
-  const talks = rows.filter(spoken);
-  const kept = talks.find((r) => r.available) ?? talks[0];
-  return rows.filter((r) => !spoken(r) || r === kept);
+  const kept = rows.find((r) => spoken(r) && r.available);
+  return kept ? rows.filter((r) => !spoken(r) || r === kept) : rows;
 };

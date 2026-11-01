@@ -499,6 +499,36 @@
       "reason": {
        "code": "invalid_state"
       }
+     },
+     {
+      "available": false,
+      "action_key": "nell_rumour",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "nell_talk",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
      }
     ],
     "shop": [
