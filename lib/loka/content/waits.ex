@@ -61,7 +61,7 @@ defmodule Loka.Content.Waits do
   end
 
   defp lowered(rel, {:reaction, _, at} = id, rule, timed) do
-    case faults(rule["steps"], rule, rel, at) ++ inside_action(rule["on"], timed, rel, at) do
+    case faults(rule["steps"], rule, rel, at) ++ reorderable(rule, timed, rel, at) do
       [] -> {rules(rel, id, rule, lead(rule["on"], timed)), []}
       faults -> {[{rel, id, :invalid}], faults}
     end
@@ -137,6 +137,12 @@ defmodule Loka.Content.Waits do
   end
 
   defp lead(_, _), do: 0
+
+  # One delayed stretch has nothing to swap with, however late it lands.
+  defp reorderable(rule, timed, rel, at) do
+    delayed = Enum.count(stretches(rule["steps"], after_of(rule)), fn {t, _} -> t > 0 end)
+    if delayed > 1, do: inside_action(rule["on"], timed, rel, at), else: []
+  end
 
   # Which action, and so how long, is known only for action_completed naming it.
   defp inside_action(%{"event" => "action_completed"} = on, [_ | _], rel, at)

@@ -219,7 +219,11 @@ new state. What to expect:
 - A wait after a timed action counts from the end of the action, when the rule names it:
   `"on": { "event": "action_completed", "action": "<key>" }`. The compiler refuses a wait on
   `action_completed` with no `action` while the game has a timed action, and on a custom event a
-  timed action sends. Name the action instead.
+  timed action sends, when the list has two or more delayed parts. Name the action instead. A single
+  wait is allowed there; it runs right after the action if the action is longer.
+- `action_completed` never fires when the action's check fails. To follow a failure, use
+  `check_failed`, or a single wait on the failure's own event. On `check_failed` the next point
+  applies.
 - Other long moments are not known at compile: a rule on another event inside a timed action (a
   check, a fact change), or a chain of events from one. If such a command already takes longer than
   the wait, every part due inside it runs right after it, and their order can differ each time. Do

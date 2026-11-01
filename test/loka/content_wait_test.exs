@@ -201,10 +201,26 @@ defmodule Loka.ContentWaitTest do
     end
 
     # Breaks: the rule compiles and its waits collapse: no duration is known for it.
+    # Breaks: a single wait, which cannot reorder anything, is refused; or the refusal's advice
+    # (name the action; check_failed for a failure) itself does not compile.
+    test "one wait and the refusal's advice compile", %{dir: dir} do
+      failed = %{"event" => "check_failed"}
+      bite = %{"event" => "custom_event", "custom" => "bite"}
+
+      for {on, list} <- [
+            {bite, [nar(), wait(10), nar()]},
+            {@completed, [nar(), wait(10), nar()]},
+            {Map.put(@completed, "action", "fish"), [wait(10), nar(), wait(10), nar()]},
+            {failed, [wait(10), nar(), wait(10), nar()]}
+          ] do
+        assert %{} = reactions(dir, [rule(on, list)])
+      end
+    end
+
     test "an unnamed completion or the action's own event is refused", %{dir: dir} do
       for on <- [@completed, %{"event" => "custom_event", "custom" => "bite"}] do
         assert {"reactions/echo.on", "wait_inside_action"} in refused(dir, [
-                 rule(on, [nar(), wait(10), nar()])
+                 rule(on, [wait(5), nar(), wait(10), nar()])
                ])
       end
     end
