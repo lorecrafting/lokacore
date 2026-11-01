@@ -16,7 +16,7 @@ const invalid = () => {
 };
 
 // Every escort choice keeps its own receipt, including repeated rejoins and a repeat quest's start.
-// The quest row is not read: a repeatable quest's next acceptance deletes it (loka-vduxr.23).
+// A repeatable quest's row is not read: its next acceptance deletes it (loka-vduxr.23).
 export function escortSave(world: World, db: Db, scope: string, rows: [string, ChoiceRow][]) {
   const selected = rows.flatMap(([id, row]) => {
     const d = world.cartridge.dialogues![refString(row.source)];

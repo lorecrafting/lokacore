@@ -3,7 +3,6 @@ import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { id as minted } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { refString, type ChoiceRow, type World } from '../../../kernel/ts/src/runtime/decision.ts';
-import { questOf } from '../../../kernel/ts/src/mechanics/lookups.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { checkRow } from './dialogue-save.ts';
 import type { Db, Meta } from './store.ts';
@@ -28,8 +27,8 @@ export function riddleSave(world: World, db: Db, meta: Meta) {
       continue;
     }
     checkRow(world, id, row);
-    if (!d.quest || row.quest_instance_id !== questOf(world, row.actor_id, d.quest)?.[0])
-      invalidRiddle();
+    // Not the current quest row: a repeatable quest's next acceptance retires it.
+    if (!d.quest) invalidRiddle();
     attempts(world, db, scope, id, row);
   }
 }

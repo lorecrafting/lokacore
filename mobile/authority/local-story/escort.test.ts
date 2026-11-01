@@ -1,4 +1,4 @@
-// size: allow 740, every reopen case here shares one SQLite setup() and its forged-row table
+// size: allow 570, every reopen case here shares one SQLite setup() and its forged-row table
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -6,25 +6,18 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
   bundle as escortBundle,
-  entity,
   genesis,
   prefix,
-  ref,
   room,
 } from '../../../kernel/ts/test/escort_fixture.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
-import { presenter } from '../../app/book/presenter.ts';
 import { localSession, openGame } from './session.ts';
 import { openStory } from './authority.ts';
+import { bundle, homeward, id, setup } from './escort_play.test.ts';
 
-const bundle = escortBundle();
 const fresh = genesis();
-const id = (kind: string, name: string) => entity(fresh, kind, name);
 const startLine = 'The child joins you for the walk to Ferry Landing.';
 const rejoinLine = 'The child steps beside you again';
 const endLine = 'The child runs to the keeper.';
-const homeward = (a: ReturnType<typeof setup>) =>
-  a.view().journal.find((q) => q.quest.key === 'homeward')!;
 
 // Breaks: a malformed unrelated quest row (the cellar Lantern quest) crashes receipt recovery or
 // silently disappears from the journal instead of offering typed corruption recovery.
@@ -80,90 +73,6 @@ test('a malformed other quest after rescue selection or completion offers typed 
         },
       );
 });
-
-function setup(path = ':memory:', source = bundle) {
-  const a = elapsedHost(path, { wall: 10000, mono: 0 }, source);
-  const book = presenter(a.game);
-  a.game.subscribe(book.update);
-  const view = () => a.game.view().view;
-  const ok = (action_key: string, target_ids: string[] = [], input: object = {}) => {
-    const reply = a.game.invoke({ action_key, target_ids, input } as never);
-    assert.equal(reply.kind, 'saved', JSON.stringify(reply));
-    if (reply.kind === 'saved')
-      assert.equal(reply.decision.kind, 'accepted', JSON.stringify(reply));
-  };
-  const move = (...directions: string[]) =>
-    directions.forEach((direction) => ok('move', [], { direction }));
-  const choose = (choice_id: string, answer?: string) =>
-    ok('choose', [], {
-      choice_id,
-      continuation_id: view().choice!.continuation_id,
-      ...(answer && { answer }),
-    });
-  const accept = (dialogue: string, npc: string) => {
-    ok(dialogue, [id('npc', npc)]);
-    choose('accept');
-    if (view().choice) ok('close_choice');
-  };
-  // Two quests (the cellar Lantern quest and Homeward), then the child's escort offer.
-  const offer = () => {
-    accept('bram_offer', 'bram');
-    accept('keeper_offer', 'keeper');
-    move('north', 'north');
-    ok('child_escort', [id('npc', 'child')]);
-  };
-  const press = (npc: string) => {
-    const button = book.screen().buttons.find((b) => b.action_key === 'choose');
-    assert.ok(button);
-    book.press(button, id('npc', npc));
-  };
-  const row = (section: string, key: string) => {
-    const r = a.sql
-      .prepare('SELECT value FROM state_row WHERE section=? AND key=?')
-      .get(section, key);
-    return r && JSON.parse(r.value as string);
-  };
-  const rows = (section: string) =>
-    a.sql
-      .prepare('SELECT key,value FROM state_row WHERE section=?')
-      .all(section)
-      .map((r) => ({ key: r.key as string, value: JSON.parse(r.value as string) }));
-  const put = (section: string, key: string, value: unknown) =>
-    a.sql
-      .prepare('INSERT OR REPLACE INTO state_row VALUES (?,?,?)')
-      .run(section, key, JSON.stringify(value));
-  const fact = (key: string) => rows('facts').find((r) => JSON.parse(r.key).fact?.key === key);
-  const quest = () => rows('quests').find((r) => r.value.quest.key === 'homeward')!;
-  const escort = () => row('escorts', fresh.character);
-  const lines = (npc: string, text: string) =>
-    book
-      .screen()
-      .detail(id('npc', npc))
-      .filter((line) => typeof line === 'string' && line.includes(text));
-  const end = () => {
-    move('south', 'south');
-    ok('keeper_home', [id('npc', 'keeper')]);
-    choose('home');
-  };
-  return {
-    ...a,
-    book,
-    view,
-    ok,
-    move,
-    choose,
-    offer,
-    press,
-    row,
-    rows,
-    put,
-    fact,
-    quest,
-    escort,
-    lines,
-    end,
-  };
-}
 
 function replay(a: ReturnType<typeof setup>, choice_id: string) {
   const r = a.sql.prepare('SELECT * FROM receipt ORDER BY revision DESC LIMIT 1').get()!;
@@ -497,109 +406,6 @@ test('a following escort out of the room reopens, and the next Move leaves it an
 // Breaks: escort save validation admits a forged binding, placement or terminal, or an unrelated
 // latest receipt hides a missing/swapped original escort or its evidence. The chapter cases (rescue
 // message removed from Vesper, branch changed to stays) are gone: they pinned chapter story content.
-// An escort naming a repeatable exchange quest (compile accepts it): the turn-in cannot be its
-// Complete, the next acceptance retires the row the escort names, and the repeat starts it again.
-const repeating = (c: any) => {
-  const named = (kind: string, key: string) => `${prefix}:${kind}/${key}`;
-  const int = (key: string) => ({
-    key,
-    version: 1,
-    value_type: { type: 'int', minimum: 0, maximum: 9, default: 0 },
-    scopes: ['player'],
-    meaning: key,
-  });
-  c.facts[named('fact', 'favour')] = int('favour');
-  c.facts[named('fact', 'standing')] = int('standing');
-  const ware = (key: string, location: object) =>
-    (c.items[named('item', key)] = {
-      key,
-      keywords: [key],
-      name: 'npc.child.short',
-      room_line: 'npc.child.room',
-      description: 'npc.child.description',
-      mass_grams: 10,
-      location,
-    });
-  const keeper = ref('npc', 'keeper');
-  for (const n of ['1', '2']) {
-    ware(`coin_${n}`, { in: 'room', room: ref('room', 'ferry_landing') });
-    ware(`loaf_${n}`, { in: 'npc', npc: keeper });
-  }
-  Object.assign(c.quests[named('quest', 'homeward')], {
-    repeatable: true,
-    exchange: {
-      npc: keeper,
-      outgoing: [ref('item', 'coin_1'), ref('item', 'coin_2')],
-      incoming: [ref('item', 'loaf_1'), ref('item', 'loaf_2')],
-      quantity: 1,
-      contribution: ref('fact', 'favour'),
-      faction: ref('fact', 'standing'),
-      increment: 1,
-    },
-  });
-  delete c.dialogues[named('dialogue', 'keeper_home')];
-  const escorting = c.dialogues[named('dialogue', 'child_escort')];
-  escorting.policy.items.pop(); // the fact gate would refuse the repeat
-  delete escorting.choices.rescue.steps;
-  delete escorting.roles.stranger; // he stays on the green; the repeat starts at the landing
-  c.dialogues[named('dialogue', 'keeper_turn_in')] = {
-    key: 'keeper_turn_in',
-    npc: keeper,
-    quest: ref('quest', 'homeward'),
-    prompt: 'dialogue.keeper_home.prompt',
-    policy: {
-      op: 'all',
-      items: [{ op: 'quest_state', quest: ref('quest', 'homeward'), state: 'active' }],
-    },
-    roles: { keeper: { role: 'npc', npc: keeper } },
-    choices: {
-      swap: { label: 'dialogue.home.label', narration: 'narration.home', exchange: true },
-    },
-  };
-};
-
-// Breaks: quest.retire deletes the quest row an escort or its receipts name, so reopen is
-// save_corrupt for good, Move faults on the missing quest, or the repeat cannot start again.
-test('an escort on a repeatable quest reopens after re-acceptance and starts again on the repeat', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-vduxr.23-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const path = join(dir, 'save.db');
-  const source = escortBundle(repeating);
-  const quests = genesis(repeating);
-  const reopened = (a: ReturnType<typeof setup>) => {
-    a.sql.close();
-    return setup(path, source);
-  };
-  let a = setup(path, source);
-  a.ok('take', [entity(quests, 'item', 'coin_1')]);
-  a.ok('take', [entity(quests, 'item', 'coin_2')]);
-  a.offer();
-  a.choose('rescue');
-  const first = a.escort();
-  a.move('south', 'south');
-  a.ok('keeper_turn_in', [id('npc', 'keeper')]);
-  a.choose('swap');
-  if (a.view().choice) a.ok('close_choice');
-  a.ok('keeper_offer', [id('npc', 'keeper')]);
-  a.choose('accept');
-  if (a.view().choice) a.ok('close_choice');
-  assert.notEqual(a.quest().key, first.quest_instance_id);
-  a = reopened(a);
-  a.move('north');
-  a = reopened(a);
-  a.move('south');
-  a.ok('child_escort', [id('npc', 'child')]);
-  a.choose('rescue');
-  assert.equal(a.escort().status, 'following');
-  assert.equal(a.escort().quest_instance_id, a.quest().key);
-  assert.notEqual(a.escort().continuation_id, first.continuation_id);
-  a = reopened(a);
-  a.move('north', 'north');
-  assert.equal(a.row('containers', id('npc', 'child')), room(fresh, 'village_green'));
-  a = reopened(a);
-  a.sql.close();
-});
-
 test('retained escort identity, physical state and own receipts reject corruption behind a later look', async (t) => {
   const cases: [string, boolean, (a: ReturnType<typeof setup>) => void][] = [
     [
