@@ -22,7 +22,7 @@ defmodule Loka.Content.Starters.Templates do
   defp kind("emotes"), do: {~w(emote), [], file("emotes", %{"others" => p()})}
   defp kind("facts"), do: {~w(fact), [], single("facts", fact())}
   defp kind("items"), do: {~w(containment), ~w(entry), &item/2}
-  defp kind("layout"), do: {~w(knowledge), ~w(rooms), &layout/2}
+  defp kind("layout"), do: {~w(knowledge), ~w(entry), &layout/2}
   defp kind("liquids"), do: {~w(liquid food), [], &liquid/2}
   defp kind("npcs"), do: {~w(containment), ~w(entry), &npc/2}
 

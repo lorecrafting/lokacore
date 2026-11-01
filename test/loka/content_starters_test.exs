@@ -226,6 +226,41 @@ defmodule Loka.ContentStartersTest do
     assert snapshot(dir) == before
   end
 
+  # Breaks: a starter reporting success on a cartridge the compile then refuses (a duplicate room,
+  # a derived key or text path over its limit), or a stack trace from a bad layout.
+  test "a room in another file, a long name and a bad layout are refused", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    assert {:error, "a room start" <> _} = Starters.write(dir, "areas", "start")
+    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    assert {:error, "a room marsh" <> _} = Starters.write(dir, "rooms", "marsh")
+    assert {:ok, []} = Starters.write(dir, "areas", "marsh")
+
+    for kind <- ~w(items npcs resources facts quests),
+        do: {:ok, _} = Starters.write(dir, kind, "x")
+
+    for kind <- ~w(scenes topics actions services transports populations rooms items) do
+      assert {:error, "a name" <> _} =
+               Starters.write(dir, kind, String.pad_trailing(kind, 33, "b"))
+
+      assert {:ok, _} = Starters.write(dir, kind, String.pad_trailing(kind, 32, "b"))
+    end
+
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+
+    File.write!(Path.join(dir, "layout.json"), ~s([{"room":"start","y":0,"z":0}]))
+    assert {:error, "layout.json: every" <> _} = Starters.write(dir, "text", "hello")
+  end
+
+  # Breaks: layout demanding a plain room file when every room is in a bundle.
+  test "layout takes a cartridge whose rooms are all bundled", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    edit(dir, "cartridge.json", &Map.put(&1, "entry", "marsh"))
+    File.rm!(Path.join(dir, "rooms/start.json"))
+    assert {:ok, _} = Starters.write(dir, "layout", "x")
+    assert ["marsh"] == for(r <- read(dir, "layout.json"), do: r["room"])
+  end
+
   # Breaks: --from replacing a written exit, or joining a room that is not there, not a file, or
   # by a word that is no direction, with a dangling or one-way exit as the result.
   test "--from writes the opposite exit and refuses a bad join, writing nothing", %{tmp_dir: tmp} do
@@ -260,22 +295,6 @@ defmodule Loka.ContentStartersTest do
 
     assert File.read!(outside) == "{}"
     assert snapshot(dir) == before
-  end
-
-  # Breaks: a name that passes alone but whose derived quest or fact key overflows the 64 limit,
-  # a starter that reports success on a cartridge that then fails to compile.
-  test "scenes and topics leave room for their derived key", %{tmp_dir: tmp} do
-    dir = cartridge(tmp)
-    {:ok, _} = Starters.write(dir, "items", "lamp")
-    long = String.duplicate("a", 58)
-    {:ok, _} = Starters.write(dir, "topics", long)
-    {:ok, _} = Starters.write(dir, "scenes", long)
-    assert {:ok, _, _} = Loka.Content.compile(dir)
-
-    for kind <- ~w(topics scenes) do
-      assert {:error, "a name is lowercase letters, digits and _, 58 at most" <> _} =
-               Starters.write(dir, kind, long <> "a")
-    end
   end
 
   # Breaks: a hand-placed row flattened by the automatic rows, a layout.json appearing in a
@@ -379,7 +398,12 @@ defmodule Loka.ContentStartersTest do
 
     assert File.exists?(Path.join(dir, "items/lamp.json"))
 
-    for args <- [[], ~w(npcs thera --from start east), ~w(rooms y --from start)] do
+    for args <- [
+          [],
+          ~w(npcs thera --from start east),
+          ~w(rooms y --from start),
+          ~w(cartridge a rooms y elsewhere)
+        ] do
       assert_raise Mix.Error, ~r/^usage: mix loka.new/, fn -> Mix.Tasks.Loka.New.run(args) end
     end
   end

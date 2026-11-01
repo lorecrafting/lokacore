@@ -19,7 +19,8 @@ defmodule Mix.Tasks.Loka.New do
 
   defp new(args, cwd) do
     {pairs, dir} = plan(args, [])
-    if pairs == [], do: Mix.raise(@usage)
+    # A cartridge pair names its own directory; a trailing one would be silently ignored.
+    if pairs == [] or (dir && List.keymember?(pairs, "cartridge", 0)), do: Mix.raise(@usage)
     # Before any write: a surplus argument reads as a kind, and the pairs before it would land.
     for {kind, _, _} <- pairs, kind not in Loka.Content.kinds() do
       Mix.raise(
@@ -27,7 +28,7 @@ defmodule Mix.Tasks.Loka.New do
       )
     end
 
-    last = Enum.reduce(pairs, Path.expand(dir, cwd), &starter(&1, &2, cwd))
+    last = Enum.reduce(pairs, Path.expand(dir || ".", cwd), &starter(&1, &2, cwd))
     IO.puts("Fill the ~ lines (bin/loka todo #{last}), then run: bin/loka dev #{last} --watch")
   end
 
@@ -50,5 +51,5 @@ defmodule Mix.Tasks.Loka.New do
 
   defp plan(["--" <> _ | _], _), do: Mix.raise(@usage)
   defp plan([kind, name | rest], done), do: plan(rest, [{kind, name, nil} | done])
-  defp plan(rest, done), do: {Enum.reverse(done), List.first(rest, ".")}
+  defp plan(rest, done), do: {Enum.reverse(done), List.first(rest)}
 end

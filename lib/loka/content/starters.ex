@@ -33,12 +33,13 @@ defmodule Loka.Content.Starters do
          :ok <- in_cartridge(dir),
          {:ok, {caps, needs, make}} <- Map.fetch(Templates.kinds(), kind) |> or_unknown(kind),
          {:ok, context} <- context(dir, needs),
-         {:ok, context} <- joined(context, dir, name, from) do
+         {:ok, context} <- placed(context, dir, kind, name, from) do
       files = with_capabilities(make.(name, context), caps)
       put(dir, with_layout(files, dir, context))
     end
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
+    :bad_layout -> {:error, "layout.json: every row needs a number x: fix it first"}
   end
 
   defp with_capabilities(files, caps) do
@@ -53,8 +54,8 @@ defmodule Loka.Content.Starters do
   defp valid_name(name, kind \\ nil) do
     pattern = if kind == "text", do: ~r/^[a-z][a-z0-9_.]{0,63}$/, else: ~r/^[a-z][a-z0-9_]{0,63}$/
 
-    # scenes and topics also write <name>_quest or <name>_known, under the same 64.
-    room = if kind in ~w(scenes topics), do: 58, else: 64
+    # A template derives longer keys and text paths from the name; 32 leaves them all under theirs.
+    room = if kind == "text", do: 64, else: 32
 
     if name =~ pattern and String.length(name) <= room,
       do: :ok,
@@ -95,6 +96,18 @@ defmodule Loka.Content.Starters do
           {:cont, {:ok, Map.put(acc, kind, key)}}
       end
     end)
+  end
+
+  defp placed(context, dir, kind, name, from) do
+    with :ok <- new_room(dir, kind, name, context), do: joined(context, dir, name, from)
+  end
+
+  # A rerun finds its own file; another file holding the room would be a duplicate definition.
+  defp new_room(dir, kind, name, c) do
+    if kind in ~w(rooms areas) and name in c["room_list"] and
+         !File.exists?(Path.join(dir, "#{kind}/#{name}.json")),
+       do: {:error, "a room #{name} already exists in another file"},
+       else: :ok
   end
 
   defp joined(context, _, _, nil), do: {:ok, context}
@@ -149,8 +162,11 @@ defmodule Loka.Content.Starters do
 
   defp layout_rows(dir) do
     case read(Path.join(dir, "layout.json")) do
-      rows when is_list(rows) -> rows
-      _ -> []
+      rows when is_list(rows) ->
+        if Enum.all?(rows, &is_number(is_map(&1) && &1["x"])), do: rows, else: throw(:bad_layout)
+
+      _ ->
+        []
     end
   end
 
