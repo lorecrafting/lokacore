@@ -49,6 +49,16 @@ defmodule Loka.ContentTargetsTest do
     assert {:ok, _, plain} = Loka.ContentSource.compile(dir, [])
     refute Enum.any?(plain, &(&1["code"] == "ALLY_ENGAGE_UNUSED"))
 
+    # A friendly-only ally has no engage line, so it must not warn.
+    friendly = [
+      {"npcs/guard.json",
+       &Map.put(&1, "disposition", %{"friendly" => %{"op" => "all", "items" => []}})},
+      List.last(edits)
+    ]
+
+    assert {:ok, _, quiet} = Loka.ContentSource.compile(dir, friendly)
+    refute Enum.any?(quiet, &(&1["code"] == "ALLY_ENGAGE_UNUSED"))
+
     # The warning must not hide the template-ally error.
     templated = [{"npcs/guard.json", &Map.put(engage.(&1), "spawn_template", true)} | tl(edits)]
     assert {:error, errors} = Loka.ContentSource.compile(dir, templated)

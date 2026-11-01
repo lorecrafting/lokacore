@@ -58,7 +58,7 @@ defmodule Loka.Content.Explain do
          ENTRY_INVALID | A speaker takes one `entry` dialogue, and never a keyword one. | Keep `entry: true` on one dialogue Talk can open.
          ENTRY_GUESSED | Talk opens `{target}` here only by inference: it ties another member of its loop for most links, it comes first by key with no condition, or the dialogues with a condition that can fail lead to several, and it is the first of them. | Mark the dialogue Talk should open with `entry: true`, or leave one way on.
          ENTRY_UNUSED | `{target}` never opens: its speaker has an `entry` dialogue and no dialogue that opens leads here. | Link to it from one that opens, or remove it.
-         ALLY_ENGAGE_UNUSED | This ally has a `disposition.engage` line, and an ally only strikes the opponent, so the line never plays. | Remove the engage line, or take the NPC out of `world.combat.allies`.
+         ALLY_ENGAGE_UNUSED | This ally has a `disposition.engage` line, and an ally only strikes the opponent, so the line never plays. | Remove the engage line and the `hostile` rule with it (a hostile attacker needs `engage` unless it is `unattackable: true`), or keep `hostile` and set `unattackable: true` before removing engage.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
          SITE_EXIT_CONFLICT | This site names direction `{field}`, where the room has no exit. | Name a direction the room has an exit in.
          invalid_type | `{field}` must be {expected}{fields_named}.

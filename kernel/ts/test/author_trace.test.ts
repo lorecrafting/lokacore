@@ -24,5 +24,8 @@ test('a reply inside the wait resolves with its rows and clears the waiter', asy
   waiting.get(3)!(['a rule', 'b rule']);
   assert.deepEqual(await p, ['a rule', 'b rule']);
   assert.equal(waiting.size, 0);
-  mock.timers.tick(10000); // the cleared timer must not fire a rejection
+  // the cleared timer must not fire later and evict a waiter that now holds the id
+  waiting.set(3, () => {});
+  mock.timers.tick(10000);
+  assert.equal(waiting.has(3), true);
 });
