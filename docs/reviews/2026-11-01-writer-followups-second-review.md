@@ -59,3 +59,18 @@ CI at this head: ci, book-e2e, graph-diff completed, success. Only the fix commi
 **blocker** `test/fixtures/dialogue_entry_cases.json`: three conditions of the new `always` line are untested (review step 3). All stay green, 17 passed: (a) exclusion across all speakers (`always == []`); (b) a policy-less keyword entry counts; (c) a named entry does not count. Failure for (a): another NPC's policy-less dialogue silences this speaker's real guess. Probes that kill them, on this head: a row with `z_other` spoken by `other` (`opens: a_x`, `warned: [a_x]`, passes both kernels) for (a); a named policy-less `z_n` (`opens: z_n`, `warned: []`, passes both) for (c); a shut entry beside a policy-less keyword entry, Elixir only, for (b).
 
 **Verdict: CHANGES REQUIRED.**
+
+## Final re-check at acf36c5f7e776eac7ab2f71c25337e657bddfeef
+
+Only the two re-check findings and `opens?/1` were checked.
+
+- `z_n` row: the developer is right; my re-check wording "a named entry does not count" named only the mutant, and the row is correct. `spokenBy`'s `tried` filters on `keyword` and `selected`, never `name` (`selection.ts:162-165`); `d.name` only stops the fall-through after a failure (`:173`). A TS mutant skipping named entries fails the shared cases.
+- Shared cases pass in both kernels. Elixir mutants fail 16/17: `always == []`, keyword counts, named not counted, choice condition dropped.
+- Should-fix on a policy-less entry whose only choice fails: fixed, row passes both kernels.
+- Filed: `loka-vduxr.31`, `loka-69yuw`, `loka-votey`. Agreed.
+
+**blocker** `lib/loka/content/dialogue_links.ex:149`: `Enum.any?` to `Enum.all?` in `opens?` stays green, 17 passed (review step 3). Failure: a policy-less hub with one plain and one gated choice opens in TS, yet the mutant warns `ENTRY_GUESSED`, the original false positive. Fix: add a fixture row, shut `a_one`->(`a_x`, `b_y`), `z_open` with `bye` and a `gate: policy` choice, `opens: z_open`, `warned: []`. Run here: the row passes both kernels and fails the mutant.
+
+**nit** `lib/loka/content/dialogue_links.ex:149`: `opens?` and its "always opens" comment ignore `offered` (`selection.ts:99`). A policy-less entry whose only plain choice teaches a concealed skill offers nothing in TS, so a real guess goes unwarned. Read from the code, not run. Disposition: file it, or fix the comment.
+
+**Verdict: CHANGES REQUIRED.**
