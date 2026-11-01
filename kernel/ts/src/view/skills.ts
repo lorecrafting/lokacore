@@ -64,12 +64,12 @@ function skillView(
   ];
 }
 
-/** The player's level, experience, next threshold (absent at the top) and unspent points (row 4). */
+/** The player's level, experience, thresholds around it (next absent at the top), unspent points (row 4). */
 function levellingView(world: World, actor: CharacterId) {
   const l = levelling(world, actor);
   if (!l) return {};
-  const { level, experience, next, unspent } = l;
-  return { levelling: { level, experience, ...(next !== undefined && { next }), unspent } };
+  const { level, experience, from, next, unspent } = l;
+  return { levelling: { level, experience, from, ...(next !== undefined && { next }), unspent } };
 }
 
 /**

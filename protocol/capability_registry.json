@@ -152,6 +152,9 @@
       "choose_ancestry",
       "raise_attribute"
     ],
+    "events": [
+      "level_reached"
+    ],
     "definitions": [
       "attribute"
     ],

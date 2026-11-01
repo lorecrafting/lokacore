@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #536 (loka-4hik.30), #530 and #535 in fix rounds; written 2026-10-31 by Claude Code (Opus 5.5), engine-track PM session. A parallel session reviews the prologue beats and files "Prologue gap: ..." children of loka-g5hh; this session owns this page. Lean default in force since #533.
+AS OF main after #530, #535, #537, #539, #538; written 2026-10-31 by Claude Code (Opus 5.5), engine-track PM session. A parallel session reviews the prologue beats and files "Prologue gap: ..." children of loka-g5hh; this session owns this page. Lean default in force since #533.
 
 ## Direction (owner 2026-10-30)
 
@@ -24,14 +24,15 @@ AS OF main after #536 (loka-4hik.30), #530 and #535 in fix rounds; written 2026-
 
 ## Next, in order
 
-1. #535 loka-sgqk (engine/catch-up-fold, kernel_api 1.130): review 1 CHANGES REQUIRED (record 048c0a776, branch `review-535`); fix round 1 in progress. Then the same reviewer's scoped re-check, the required second opinion on the fixed head, merge. Tie and job growth ruled: not bugs; follow-up loka-qhvgq (finished rows never pruned, month-away cold open 23-29 s).
-2. #530 loka-kgd.194.23 authoring tools (tools/authoring): fix round 2 in progress for the last blocker (`bin/loka new` rerun resets written `steps`, `starters.ex:137,166`). Then the same reviewer's re-check, merge.
-3. Epic loka-vduxr authoring readiness (Fable audit in its description, owner's decisions in its notes): start after #530 merges, in order .1 to .7, plus loka-ivjq.9, loka-k3b5, loka-kgd.175. This is the priority before the downgrade: the owner builds the game with these tools. A decision record still goes in the session housekeeping PR.
-4. loka-g5hh.2 level-up rush: Fable's brief and the owner's answers are in its notes. E1 (kernel_api 1.131) after #535 merges, since both touch `proposal.ts`; B2 needs #532 and loka-gj82.4.
-5. Prologue gaps as the parallel session files them.
-6. Proposed release work, awaiting the owner's three calls (store fees, iOS first, a save guarantee from launch): save migrations, loka-k3b5 off the P3 hold, resume mobile, rebuild the E1 harness and gates.
-7. Ending page and outside link (owner wants a next-chapter message and giving to a hunger charity; PM advised a website link, not a Kickstarter button, and a direct link to a named charity for the free prologue). Not filed; the owner has not decided whether the game must fund itself.
-8. Follow-ups: loka-xy1js, loka-9g1q1, loka-1b68q; loka-n4dg and loka-gj82.4 effects; loka-ewtx engine follow-ups.
+1. #540 loka-vduxr.4 `bin/loka check`: fix round 1 running (preview and check share one fixed seed and frozen clock; mend replay; decision record in the PR). Then the reviewer's scoped re-check, merge.
+2. #541 loka-k3b5, head 9d2ed1dca, CI green: Opus reviewer, then a second opinion (save-affecting), merge.
+3. loka-vduxr.2 scene verbs: building `sets`, `quest: accept`, narration, second speaker, `.cut`. `needs`, `once`, `then` and nesting cannot lower to existing JSON: Fable is designing a runtime slice; its brief goes in the issue notes.
+4. loka-ivjq.9 generated reference: building.
+5. Queue: loka-vduxr.5 panel and .6 dev cheats after #540; .7 fault batch; .8, .9 follow-ups; loka-kgd.175 benchmark; loka-qhvgq month-away cold open; a Part 2 placeholder spike after scene verbs (owned plot and hut against no property; hut at the landing; tiredness). Later briefs use narrow mutants, no `bin/mutate_diff.sh`: sweeps cost hours per slice.
+6. loka-g5hh.2 level-up: E1 merged (#538). E2, E3, then B1 to B3; B2 needs #532 and loka-gj82.4. Brief and owner answers in its notes; a multi-slice issue needs a child id for `bin/merge_pr.sh`.
+7. Proposed release work, awaiting the owner's three calls (store fees, iOS first, a save guarantee from launch): save migrations, loka-k3b5 off the P3 hold, resume mobile, rebuild the E1 harness and gates.
+8. Ending page and outside link (owner wants a next-chapter message and giving to a hunger charity; PM advised a website link, not a Kickstarter button, and a direct link to a named charity for the free prologue). Not filed; the owner has not decided whether the game must fund itself.
+9. Follow-ups: loka-xy1js, loka-9g1q1, loka-1b68q; loka-n4dg and loka-gj82.4 effects; loka-ewtx engine follow-ups.
 
 `cartridges/lantern_proof` stays as host of the frozen conformance traces (PM ruling, in `docs/system/cartridge.md`); Bram stays in the samplers because literal ids and frozen fixtures pin him. Retiring the traces would need the owner.
 

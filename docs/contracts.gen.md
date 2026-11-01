@@ -455,6 +455,7 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `quest_failed`: Toolbox row W24: a generic quest deadline expired and failed the open instance with its authored outcome; a legacy deadline or a quest.fail reaction emits none.
   - `spoken`: Toolbox row G9 (speech@1): the NPC entity_id heard the actor speak, one event per hearer. word is the case-folded word only when it is an authored keyword (a dialogue's keyword or a spoken reaction's word), else absent.
   - `asked`: Toolbox row FD7 (speech@1): the actor asked the NPC entity_id about a topic; answered is false when the NPC gave its unknown line.
+  - `level_reached`: Toolbox row 4 (attribute@1): the character reached level, one event per threshold a sequence's levelling write crosses, ascending.
 - **Loudness**: How a word was spoken (speech@1; toolbox row G9): whisper reaches the addressee, say the speaker's room, shout the rooms one exit away too.
 
 ## Fact contracts (`protocol/fact.schema.json`)
