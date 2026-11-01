@@ -157,3 +157,27 @@ test('the light cuts the held layer, which returns over the settle after the str
   struck();
   assert.deepEqual(writes, [], 'an unmounted layer stops listening');
 });
+
+// Breaks: only the glow is cut, so the breathing vignette stays up under the light.
+test('the cut reaches the vignette too', (t) => {
+  g.CanvasKit = {};
+  t.after(() => delete g.CanvasKit);
+  effects(t, false);
+  const under = rig(t);
+  const low = {
+    place: { id: 'p' },
+    inventory: [],
+    equipment: [],
+    entities: [],
+    resources: [{ resource: { key: 'hp' }, tone: 'danger' }],
+  } as unknown as GameView;
+  const edge = () =>
+    flat(
+      nodes(under(() => UnderInk({ view: low }))).find((n) => n.props?.['aria-hidden'])!.props
+        .style,
+    ).opacity;
+  edge();
+  under.shared[1]!.value = 1;
+  under.shared.at(-1)!.value = 0;
+  assert.equal(edge(), 0);
+});

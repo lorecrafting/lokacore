@@ -67,4 +67,21 @@ test('the lamp flickers away from an exposed room, by its depth, and holds still
     assert.equal(steps.length, 2, 'stopped');
     r.mock.restore();
   }
+  // Breaks: the clock runs with no lamp held, or a dimmed glow stays dim once the room opens.
+  const shell = rig(t);
+  const r = t.mock.method(Math, 'random', () => 1);
+  effects(t, false);
+  const draw = (v: GameView) => shell(() => nodes(UnderInk({ view: v })));
+  draw(view({ place: { exposed: false } }));
+  assert.equal(r.mock.callCount(), 0, 'no lamp, no clock');
+  const glow = (place: object) =>
+    flat(
+      draw(view({ place, inventory: [{ fuel: { lit: true } }] })).find(
+        (n) => n.props?.['aria-hidden'],
+      )!.props.style,
+    ).opacity;
+  glow({ exposed: false });
+  assert.equal(glow({ exposed: false }), dim, 'dim from the first step');
+  glow({ exposed: true });
+  assert.equal(glow({ exposed: true }), opacity.glow, 'whole again in the open');
 });
