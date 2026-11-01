@@ -921,7 +921,7 @@ actual source to the same actual destination when following. Ordinary stance, ex
 gate, fare and Flee choice/RNG remain authoritative. Refused/composition-failed movement changes
 neither. Fatal player death writes following→separated in death's existing writer group
 beside shrine return, leaving NPC custody unchanged. Whatever else ends the bond (the NPC dies or
-no longer shares the player's room, or the quest resolves or fails) writes the same
+no longer shares the player's room, or the quest ends: resolved, failed or abandoned) writes the same
 following→separated after the decision's other writes, in its own writer group, with no event or line of
 its own; a parted NPC is never moved or teleported, and Rejoin stays the only way back. A decision that itself starts or rejoins leaves that row to the next decision's sweep. Installed kernel 1.137. No independent fare, roll, pathfinding
 or after-commit write exists. Completed relations never follow subsequent movement.
