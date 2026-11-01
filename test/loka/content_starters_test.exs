@@ -61,7 +61,8 @@ defmodule Loka.ContentStartersTest do
     for k <- ~w(npcs resources services), do: {:ok, _} = Starters.write(dir, k, "my_#{k}")
     {:ok, _} = Starters.write(dir, "services", "other")
     assert read(dir, "npcs/my_npcs.json")["services"] == ["my_services", "other"]
-    File.write!(Path.join(dir, "layout.json"), ~s([{"room":"start","x":5,"y":2,"z":0}]))
+    {:ok, _} = Starters.write(dir, "layout", "layout")
+    edit(dir, "layout.json", fn _ -> [%{"room" => "start", "x" => 5, "y" => 2, "z" => 0}] end)
     {:ok, _} = Starters.write(dir, "rooms", "yard")
     {:ok, _} = Starters.write(dir, "layout", "x")
     rows = read(dir, "layout.json")
@@ -146,6 +147,202 @@ defmodule Loka.ContentStartersTest do
     assert {:error, message} = Starters.write(dir, "text", "hello")
     assert message =~ "text.json is not valid JSON"
     assert snapshot(dir) == before
+  end
+
+  # Breaks: look refused for a missing capability, an exit written one way, an NPC in the
+  # alphabetically first room. Literal answers from the real headless client.
+  test "a fresh cartridge, a joined room and an NPC play headless", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    {:ok, _} = Starters.write(dir, "rooms", "grove", {"start", "east"})
+    {:ok, _} = Starters.write(dir, "npcs", "thera")
+    assert read(dir, "npcs/thera.json")["room"] == "start"
+    assert {:ok, bytes, _} = Loka.Content.compile(dir)
+    art = Path.join(tmp, "art.json")
+    script = Path.join(tmp, "script")
+    File.write!(art, bytes)
+    File.write!(script, "look\nlook thera\neast\nlook thera\nwest\nlook thera\n")
+    {out, 0} = System.cmd("node", ["kernel/ts/play/main.ts", art, script], stderr_to_stdout: true)
+    played = out |> String.split("\n") |> Enum.reject(&(&1 =~ ~r/^(hp |\[|transcript:)/))
+
+    assert played == [
+             # opening: name, description, the NPC's room line
+             "~",
+             "~",
+             "~",
+             "Exits: east",
+             "> look",
+             "~",
+             "~",
+             "~",
+             "Exits: east",
+             "> look thera",
+             "~",
+             "> east",
+             "You arrive from the west.",
+             "~",
+             "~",
+             "Exits: west",
+             "> look thera",
+             "You don't see that here.",
+             "> west",
+             "You arrive from the east.",
+             # a revisited room drops its description
+             "~",
+             "~",
+             "Exits: east",
+             "> look thera",
+             "~",
+             ""
+           ]
+  end
+
+  # Breaks: the compile's DUPLICATE_DEFINITION on a shared scene quest or topic fact, or the
+  # layout missing the new room of a second rooms, areas or transports.
+  test "a second starter of a kind under a new name compiles", %{tmp_dir: tmp} do
+    for kind <- ~w(scenes topics rooms areas transports) do
+      dir = cartridge(Path.join(tmp, kind))
+      for k <- ~w(items npcs resources layout), do: {:ok, _} = Starters.write(dir, k, "my_#{k}")
+      {:ok, _} = Starters.write(dir, kind, "one")
+      {:ok, _} = Starters.write(dir, kind, "two")
+      assert {:ok, _, _} = Loka.Content.compile(dir), kind
+    end
+  end
+
+  # Breaks: a rerun reformatting a file it does not change (a watcher reloads, the diff is noise),
+  # or a template that is not idempotent.
+  test "a rerun of every kind changes no file", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+
+    order =
+      ~w(items npcs resources facts quests) ++
+        (Starters.kinds() -- ~w(cartridge items npcs resources facts quests layout)) ++ ["layout"]
+
+    for kind <- order, do: {:ok, _} = Starters.write(dir, kind, "my_#{kind}")
+    {:ok, _} = Starters.write(dir, "rooms", "yard", {"start", "up"})
+    edit(dir, "cartridge.json", & &1)
+    before = snapshot(dir)
+    for kind <- order, do: assert({:ok, []} = Starters.write(dir, kind, "my_#{kind}"), kind)
+    assert {:ok, []} = Starters.write(dir, "rooms", "yard", {"start", "up"})
+    assert snapshot(dir) == before
+  end
+
+  # Breaks: --from replacing a written exit, or joining a room that is not there, not a file, or
+  # by a word that is no direction, with a dangling or one-way exit as the result.
+  test "--from writes the opposite exit and refuses a bad join, writing nothing", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    {:ok, _} = Starters.write(dir, "rooms", "loft", {"start", "up"})
+    assert read(dir, "rooms/start.json")["exits"] == %{"up" => %{"to" => "loft"}}
+    assert read(dir, "rooms/loft.json")["exits"] == %{"down" => %{"to" => "start"}}
+    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    before = snapshot(dir)
+
+    assert {:error, "rooms/start.json: exits up to already has" <> _} =
+             Starters.write(dir, "rooms", "attic", {"start", "up"})
+
+    assert Starters.write(dir, "rooms", "x", {"start", "sideways"}) ==
+             {:error,
+              "--from: a direction is north, south, east, west, up or down (got sideways)"}
+
+    assert Starters.write(dir, "rooms", "start", {"start", "east"}) ==
+             {:error, "--from: a room cannot join itself"}
+
+    assert Starters.write(dir, "rooms", "x", {"nowhere", "east"}) ==
+             {:error, "--from: no rooms/nowhere.json"}
+
+    assert Starters.write(dir, "rooms", "x", {"marsh", "east"}) ==
+             {:error, "--from: no rooms/marsh.json"}
+
+    assert snapshot(dir) == before
+  end
+
+  # Breaks: a hand-placed row flattened by the automatic rows, a layout.json appearing in a
+  # cartridge that chose none, a bundled room's row missed.
+  test "any starter adds only the rows an existing layout lacks", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    {:ok, _} = Starters.write(dir, "rooms", "yard")
+    refute File.exists?(Path.join(dir, "layout.json"))
+    {:ok, _} = Starters.write(dir, "layout", "layout")
+    edit(dir, "layout.json", fn _ -> [%{"room" => "start", "x" => 5, "y" => 2, "z" => 0}] end)
+    {:ok, _} = Starters.write(dir, "text", "hello")
+
+    assert read(dir, "layout.json") == [
+             %{"room" => "start", "x" => 5, "y" => 2, "z" => 0},
+             %{"room" => "yard", "x" => 6, "y" => 0, "z" => 0}
+           ]
+
+    {:ok, _} = Starters.write(dir, "areas", "marsh")
+
+    assert List.last(read(dir, "layout.json")) == %{
+             "room" => "marsh",
+             "x" => 7,
+             "y" => 0,
+             "z" => 0
+           }
+
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+  end
+
+  # Breaks: the alphabetically first room winning over the entry, or a template writing a partial
+  # rooms/<entry>.json beside the entry's bundle.
+  test "a room reference takes the entry, in a file or a bundle", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    {:ok, _} = Starters.write(dir, "rooms", "grove")
+    {:ok, _} = Starters.write(dir, "items", "lamp")
+    assert read(dir, "items/lamp.json")["location"]["room"] == "start"
+    {:ok, _} = Starters.write(dir, "populations", "wolves")
+    assert read(dir, "populations/wolves.json")["home"] == "start"
+
+    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    edit(dir, "cartridge.json", &Map.put(&1, "entry", "marsh"))
+    {:ok, _} = Starters.write(dir, "npcs", "thera")
+    assert read(dir, "npcs/thera.json")["room"] == "marsh"
+    {:ok, _} = Starters.write(dir, "items", "rope")
+    assert read(dir, "items/rope.json")["location"]["room"] == "marsh"
+    {:ok, _} = Starters.write(dir, "actions", "pull")
+    refute File.exists?(Path.join(dir, "rooms/marsh.json"))
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+  end
+
+  # Breaks: the second pair lost, --from read as a pair, a relative path resolved against the
+  # repo instead of the caller, no next step, or a refused pair undoing the one before it.
+  test "the task takes several pairs and ends with the next step", %{tmp_dir: tmp} do
+    out =
+      ExUnit.CaptureIO.capture_io(fn ->
+        Mix.Tasks.Loka.New.run(
+          ~w(--cwd #{tmp} cartridge mine rooms yard --from start east npcs thera)
+        )
+      end)
+
+    dir = Path.join(tmp, "mine")
+    assert read(dir, "rooms/yard.json")["exits"] == %{"west" => %{"to" => "start"}}
+    assert read(dir, "npcs/thera.json")["room"] == "start"
+    assert out =~ Path.join(dir, "npcs/thera.json") <> "\n"
+
+    assert String.ends_with?(
+             out,
+             "Fill the ~ lines (bin/loka todo #{dir}), then run: bin/loka dev #{dir} --watch\n"
+           )
+
+    assert_raise Mix.Error,
+                 "mix loka.new: unknown kind \"shop\"; one of: " <>
+                   Enum.join(Starters.kinds(), " "),
+                 fn ->
+                   ExUnit.CaptureIO.capture_io(fn ->
+                     Mix.Tasks.Loka.New.run(~w(--cwd #{tmp} items lamp shop x mine))
+                   end)
+                 end
+
+    assert File.exists?(Path.join(dir, "items/lamp.json"))
+
+    for args <- [[], ~w(npcs thera --from start east), ~w(rooms y --from start)] do
+      assert_raise Mix.Error, ~r/^usage: mix loka.new/, fn -> Mix.Tasks.Loka.New.run(args) end
+    end
+  end
+
+  defp cartridge(parent) do
+    dir = Path.join(parent, "mine")
+    {:ok, _} = Starters.write(dir, "cartridge", dir)
+    dir
   end
 
   defp edit(dir, rel, change) do

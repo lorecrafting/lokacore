@@ -57,8 +57,9 @@ defmodule Loka.Content do
   defdelegate lint(dir), to: Loka.Content.Lint, as: :run
 
   @doc "Writes a compiling starter of one source kind into a cartridge (Loka.Content.Starters)."
-  @spec new(Path.t(), String.t(), String.t()) :: {:ok, [Path.t()]} | {:error, String.t()}
-  defdelegate new(dir, kind, name), to: Loka.Content.Starters, as: :write
+  @spec new(Path.t(), String.t(), String.t(), {String.t(), String.t()} | nil) ::
+          {:ok, [Path.t()]} | {:error, String.t()}
+  defdelegate new(dir, kind, name, from), to: Loka.Content.Starters, as: :write
 
   @doc "The source JSON Schema files, name => text (Loka.Content.SourceSchema)."
   @spec source_schema() :: %{String.t() => binary()}

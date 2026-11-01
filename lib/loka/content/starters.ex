@@ -3,14 +3,22 @@ defmodule Loka.Content.Starters do
   `bin/loka new <kind> <name>`: writes a compiling starter for one source kind with every line a
   `~` placeholder (docs/guides/writing-the-game.md#coverage). A starter is JSON merged into the
   files it touches, plus the capabilities it needs in cartridge.json; a kind that references
-  another (an item needs a room) takes the first existing one and refuses without it. A starter
-  never replaces what is there: a value that differs refuses the whole starter, before any write.
+  another (an item needs a room) takes the first existing one, the entry for a room, and refuses
+  without it. A starter never replaces what is there: a value that differs refuses the whole
+  starter, before any write. Every starter adds the rows an existing layout.json lacks.
   """
+  alias Loka.Content.Barriers
   alias Loka.Content.Starters.Templates
 
-  @doc "Writes the starter; `{:ok, written paths}` or `{:error, one line for the author}`."
-  @spec write(Path.t(), String.t(), String.t()) :: {:ok, [Path.t()]} | {:error, String.t()}
-  def write(_dir, "cartridge", path) do
+  @doc """
+  Writes the starter; `{:ok, paths it changed}` or `{:error, one line for the author}`. `from` is
+  `{room, direction}`: a new room joined to an existing one by exits both ways.
+  """
+  @spec write(Path.t(), String.t(), String.t(), {String.t(), String.t()} | nil) ::
+          {:ok, [Path.t()]} | {:error, String.t()}
+  def write(dir, kind, name, from \\ nil)
+
+  def write(_dir, "cartridge", path, _from) do
     cond do
       File.exists?(Path.join(path, "cartridge.json")) -> {:error, "#{path}/cartridge.json exists"}
       valid_name(Path.basename(path)) != :ok -> valid_name(Path.basename(path))
@@ -20,23 +28,22 @@ defmodule Loka.Content.Starters do
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
   end
 
-  def write(dir, kind, name) do
+  def write(dir, kind, name, from) do
     with :ok <- valid_name(name, kind),
          :ok <- in_cartridge(dir),
          {:ok, {caps, needs, make}} <- Map.fetch(Templates.kinds(), kind) |> or_unknown(kind),
-         {:ok, context} <- context(dir, needs) do
-      files =
-        Map.update(
-          make.(name, context),
-          "cartridge.json",
-          capabilities(caps),
-          &merge(&1, capabilities(caps))
-        )
-
-      put(dir, files)
+         {:ok, context} <- context(dir, needs),
+         {:ok, context} <- joined(context, dir, name, from) do
+      files = with_capabilities(make.(name, context), caps)
+      put(dir, with_layout(files, dir, context))
     end
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
+  end
+
+  defp with_capabilities(files, caps) do
+    declared = capabilities(caps)
+    Map.update(files, "cartridge.json", declared, &merge(&1, declared))
   end
 
   @doc "The kinds `write/3` knows, sorted (the guide's coverage table lists each)."
@@ -66,7 +73,14 @@ defmodule Loka.Content.Starters do
   # The first key of each kind the template references (dirs only: an area bundle's npcs are not
   # scanned), plus every room, bundled ones too, for layout's completeness check.
   defp context(dir, needs) do
-    start = %{"room_list" => rooms(dir), "layout" => layout_rows(dir)}
+    room_list = rooms(dir)
+    entry = read(Path.join(dir, "cartridge.json"))["entry"]
+
+    start = %{
+      "room_list" => room_list,
+      "layout" => layout_rows(dir),
+      "entry" => if(entry in room_list, do: entry)
+    }
 
     Enum.reduce_while(needs, {:ok, start}, fn kind, {:ok, acc} ->
       case first(dir, kind) do
@@ -75,6 +89,43 @@ defmodule Loka.Content.Starters do
       end
     end)
   end
+
+  defp joined(context, _, _, nil), do: {:ok, context}
+
+  defp joined(context, dir, name, {room, way}) do
+    back = Barriers.opposite(way)
+
+    cond do
+      !back ->
+        {:error, "--from: a direction is north, south, east, west, up or down (got #{way})"}
+
+      room == name ->
+        {:error, "--from: a room cannot join itself"}
+
+      !File.exists?(Path.join(dir, "rooms/#{room}.json")) ->
+        {:error, "--from: no rooms/#{room}.json"}
+
+      true ->
+        {:ok, Map.put(context, "from", {room, way, back})}
+    end
+  end
+
+  defp with_layout(%{"layout.json" => _} = files, _, _), do: files
+
+  defp with_layout(files, dir, c) do
+    if File.exists?(Path.join(dir, "layout.json")) do
+      rooms =
+        Enum.uniq(c["room_list"] ++ Enum.flat_map(files, fn {rel, b} -> rooms_in(rel, b) end))
+
+      Map.put(files, "layout.json", Templates.with_rows(c["layout"], rooms))
+    else
+      files
+    end
+  end
+
+  defp rooms_in("rooms/" <> file, _), do: [Path.basename(file, ".json")]
+  defp rooms_in("areas/" <> _, body), do: Map.keys(body["rooms"])
+  defp rooms_in(_, _), do: []
 
   defp rooms(dir) do
     bundled =
@@ -101,11 +152,11 @@ defmodule Loka.Content.Starters do
     end
   end
 
+  # A template that writes into the room's file takes the entry only when it has one.
   defp first(dir, kind) do
-    case Path.wildcard(Path.join([dir, kind, "*.json"])) do
-      [] -> nil
-      paths -> paths |> Enum.min() |> Path.basename(".json")
-    end
+    keys = for p <- Path.wildcard(Path.join([dir, kind, "*.json"])), do: Path.basename(p, ".json")
+    entry = read(Path.join(dir, "cartridge.json"))["entry"]
+    if kind == "rooms" and entry in keys, do: entry, else: List.first(keys)
   end
 
   defp capabilities(caps),
@@ -117,7 +168,7 @@ defmodule Loka.Content.Starters do
 
     case Enum.find_value(touched, fn {rel, _, old, new} -> clash(old, new, rel <> ":") end) do
       nil ->
-        {:ok, touched |> Enum.map(&written/1) |> Enum.sort()}
+        {:ok, touched |> Enum.flat_map(&written/1) |> Enum.sort()}
 
       at ->
         {:error,
@@ -125,10 +176,17 @@ defmodule Loka.Content.Starters do
     end
   end
 
+  # An unchanged file keeps its bytes, the author's formatting too.
   defp written({_, path, old, new}) do
-    File.mkdir_p!(Path.dirname(path))
-    File.write!(path, pretty(merge(old, new)))
-    path
+    case merge(old, new) do
+      ^old ->
+        []
+
+      merged ->
+        File.mkdir_p!(Path.dirname(path))
+        File.write!(path, pretty(merged))
+        [path]
+    end
   end
 
   # Where the starter would replace something: a scalar or shape that differs, or a list of rows

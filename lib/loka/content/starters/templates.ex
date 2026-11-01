@@ -33,8 +33,8 @@ defmodule Loka.Content.Starters.Templates do
   defp kind("reactions"), do: {~w(reaction narration), ~w(items), &reaction/2}
   defp kind("replenish"), do: {[], ~w(items rooms npcs), &replenish/2}
   defp kind("resources"), do: {~w(resource), [], single("resources", resource())}
-  defp kind("rooms"), do: {~w(movement), [], file("rooms", room())}
-  defp kind("scenes"), do: {~w(scene), ~w(quests), &scene/2}
+  defp kind("rooms"), do: {~w(movement), [], &new_room/2}
+  defp kind("scenes"), do: {~w(scene quest), ~w(items), &scene/2}
   defp kind("services"), do: {~w(service), ~w(npcs resources), &service/2}
 
   defp kind("skills"),
@@ -46,7 +46,7 @@ defmodule Loka.Content.Starters.Templates do
     do: {~w(construction), [], file("structures", room() |> Map.delete("exits"))}
 
   defp kind("text"), do: {[], [], fn name, _ -> %{"text.json" => %{name => "~"}} end}
-  defp kind("topics"), do: {~w(topic), ~w(facts), &topic/2}
+  defp kind("topics"), do: {~w(topic fact), [], &topic/2}
 
   defp kind("transports"),
     do: {~w(transport inspectable_detail), ~w(rooms npcs resources), &World.transport/2}
@@ -64,7 +64,13 @@ defmodule Loka.Content.Starters.Templates do
           "kernel_api" => %{"at_least" => "1.0", "below" => "2.0"},
           "content_schema" => 1,
           "rule_ir" => 1,
-          "capabilities" => %{"movement" => 1, "containment" => 1, "fact" => 1},
+          # description_variant owns the look command.
+          "capabilities" => %{
+            "movement" => 1,
+            "containment" => 1,
+            "fact" => 1,
+            "description_variant" => 1
+          },
           "client_features" => []
         },
         "supported_profiles" => ["offline_private"]
@@ -83,10 +89,22 @@ defmodule Loka.Content.Starters.Templates do
       "barriers/#{name}.json" => %{"keywords" => [name], "name" => p(), "initial" => "closed"}
     }
 
-  defp item(name, c),
-    do: %{"items/#{name}.json" => Map.put(thing(name), "location", in_room(c["rooms"]))}
+  defp new_room(name, %{"from" => {from, way, back}}),
+    do: %{
+      "rooms/#{name}.json" => Map.put(room(), "exits", %{back => %{"to" => from}}),
+      "rooms/#{from}.json" => %{"exits" => %{way => %{"to" => name}}}
+    }
 
-  defp npc(name, c), do: %{"npcs/#{name}.json" => Map.put(thing(name), "room", c["rooms"])}
+  defp new_room(name, _), do: %{"rooms/#{name}.json" => room()}
+
+  # The entry when it is a room here, even one in an area bundle.
+  defp item(name, c),
+    do: %{
+      "items/#{name}.json" => Map.put(thing(name), "location", in_room(c["entry"] || c["rooms"]))
+    }
+
+  defp npc(name, c),
+    do: %{"npcs/#{name}.json" => Map.put(thing(name), "room", c["entry"] || c["rooms"])}
 
   defp liquid(name, _),
     do: %{
@@ -98,7 +116,12 @@ defmodule Loka.Content.Starters.Templates do
       }
     }
 
-  defp topic(name, c), do: %{"topics/#{name}.json" => %{"name" => p(), "fact" => c["facts"]}}
+  # Its own fact: a topic's fact is unique to it.
+  defp topic(name, _),
+    do: %{
+      "topics/#{name}.json" => %{"name" => p(), "fact" => "#{name}_known"},
+      "facts.json" => %{"facts" => %{"#{name}_known" => fact()}}
+    }
 
   defp quest(name, c) do
     objective = %{
@@ -124,8 +147,14 @@ defmodule Loka.Content.Starters.Templates do
 
   defp scene(name, c) do
     steps = [%{"type" => "narrate", "text" => p()}, %{"type" => "await_ack"}, %{"type" => "end"}]
-    on = %{"quest" => c["quests"], "outcome" => "completed"}
-    %{"scenes/#{name}.json" => %{"on" => on, "control" => "modal", "steps" => steps}}
+    # Its own quest: only one scene may start on a quest's outcome.
+    on = %{"quest" => "#{name}_quest", "outcome" => "completed"}
+
+    Map.put(
+      quest("#{name}_quest", c),
+      "scenes/#{name}.json",
+      %{"on" => on, "control" => "modal", "steps" => steps}
+    )
   end
 
   defp action(name, c) do
@@ -228,12 +257,15 @@ defmodule Loka.Content.Starters.Templates do
   # An existing row keeps its coordinates (a removed room's row goes); a new room gets the next x.
   defp layout(_, c) do
     kept = Enum.filter(c["layout"], &(&1["room"] in c["room_list"]))
-    next = Enum.max(Enum.map(kept, & &1["x"]), fn -> -1 end) + 1
+    %{"layout.json" => with_rows(kept, c["room_list"])}
+  end
 
-    rows =
-      for {room, i} <- Enum.with_index(c["room_list"] -- Enum.map(kept, & &1["room"])),
+  @doc "The rows, then one at the next x for each of `rooms` they lack."
+  def with_rows(rows, rooms) do
+    next = Enum.max(Enum.map(rows, & &1["x"]), fn -> -1 end) + 1
+
+    rows ++
+      for {room, i} <- Enum.with_index(rooms -- Enum.map(rows, & &1["room"])),
           do: %{"room" => room, "x" => next + i, "y" => 0, "z" => 0}
-
-    %{"layout.json" => kept ++ rows}
   end
 end
