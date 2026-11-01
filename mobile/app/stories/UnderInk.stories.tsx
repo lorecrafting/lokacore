@@ -19,6 +19,7 @@ const loadSkia = async () => {
 const lit = {
   ...RoomFirstView,
   inventory: [{ id: 'lantern', fuel: { lit: true } }],
+  entities: [],
 } as unknown as GameView;
 const low = {
   ...RoomFirstView,
