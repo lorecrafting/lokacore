@@ -82,10 +82,10 @@ Shared mutable state for one logical door or gate (21 ยง5 Barrier), owned by bar
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| initial | [BarrierState](source-kinds.gen.md#barrierstate) | yes |  |
-| key_item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| initial | [BarrierState](source-kinds.gen.md#barrierstate) | yes | The barrier's state in a fresh world. |
+| key_item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item whose holder may lock and unlock this barrier. |
 | keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the barrier's short description. |
 | opens_when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected. |
 | tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1). |
 
@@ -105,10 +105,10 @@ An authored body bleed duration, tick cadence and HP loss.
 | duration | integer | yes | How long it lasts, in seconds. |
 | hp_loss | integer | yes | HP lost per tick. |
 | narration | object | yes |  |
-| narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration.expired | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration.refreshed | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration.tick | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the bleed first starts on a body. |
+| narration.expired | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the bleed ends by running out. |
+| narration.refreshed | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the bleed is applied again while already active. |
+| narration.tick | [TextKey](source-kinds.gen.md#textkey) | yes | Text told on a tick that costs hit points. |
 | tick_every | integer | yes | Seconds between ticks. |
 
 ## cartridge
@@ -443,12 +443,12 @@ One replenish entry (docs/system/cartridge.md Replenish declarations): each due 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| cap | integer | yes |  |
-| count | integer | yes |  |
-| every | integer | yes |  |
-| from | [ItemLocation](source-kinds.gen.md#itemlocation) | yes |  |
-| items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| to | [ItemLocation](source-kinds.gen.md#itemlocation) | yes |  |
+| cap | integer | yes | Stop moving once the destination holds this many of the items. |
+| count | integer | yes | The most items moved per run, lowest entity id first. |
+| every | integer | yes | Seconds between runs, counted from the previous due time. |
+| from | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | Where the items are taken from. |
+| items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The items moved on each due run. |
+| to | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | Where the items are put; filled until it holds cap of them. |
 
 ## resources
 
@@ -499,8 +499,8 @@ Exact original-provider action and conserved quote with one typed immediate bene
 | action | [Key](source-kinds.gen.md#key) | yes | The provider action. |
 | benefit | [Step](vocabulary.gen.md#steps) | yes | Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S5, a build, mend or raze of a site's room. One Step whose op is one of these 11 (C3 D5; the compiler refuses any other op, SCHEMA_VIOLATION invalid_value at benefit.op). |
 | currency | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved quote resource. |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the service's name. |
+| narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the service is used. |
 | price | integer | yes | Row kgd.70: 0 only on an entitlement with escrow, a barter. |
 | provider | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The original provider NPC. |
 
@@ -537,18 +537,18 @@ Toolbox row 1: one authored timed status on a body. Every tick_every seconds unt
 | movement.passes | list of `air` or `chasm` or `water` |  | Terrain tags the holding body may enter: a move into a room tagged air, chasm or water is refused invalid_state unless the body's active statuses pass each such tag. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
 | narration | object | yes |  |
-| narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the status is applied. |
 | narration.expired | [TextKey](source-kinds.gen.md#textkey) |  | Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b). |
 | narration.observed | [TextKey](source-kinds.gen.md#textkey) |  | Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent. |
 | narration.skipped | [TextKey](source-kinds.gen.md#textkey) |  | Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name. |
-| narration.tick | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| narration.tick | [TextKey](source-kinds.gen.md#textkey) | yes | Text told on each tick of the status. |
 | per_tick | integer |  | Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION). |
 | perception | object |  | Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick. |
-| perception.hearing | `deaf` |  |  |
-| perception.sight | `blind` or `dark_sight` or `see_invisible` |  |  |
+| perception.hearing | `deaf` |  | deaf: no sound cue reaches the holder. |
+| perception.sight | `blind` or `dark_sight` or `see_invisible` |  | Changes what the holder sees: blind (every room is dark), dark_sight (sees in an unlit room) or see_invisible (sees holders of an invisible status). |
 | pierced_by | object |  | Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it. |
-| pierced_by.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| pierced_by.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| pierced_by.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The attribute whose value the seer needs; it is compared with the holder's skill level. |
+| pierced_by.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill whose level the seer's attribute value must beat to see through the concealment. |
 | resistances | [Resistances](source-kinds.gen.md#resistances) |  | Status reader 5: while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick. |
 | resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The pool per_tick changes. |
 | tick_every | integer | yes | Seconds between ticks. |
@@ -559,15 +559,15 @@ Built rooms S1 (construction@1; cartridge.md Structure and site declarations): o
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| locks | object |  |  |
+| description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the description of the room this structure becomes. |
+| locks | object |  | Rules for the built room; enter is the policy a mover must meet to come in. |
 | locks.enter | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| max_per_owner | integer |  |  |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| ruin | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| tags | list of [Tag](source-kinds.gen.md#tag) |  |  |
+| max_per_owner | integer |  | The most rooms of this structure one character may own at once; an order past it is refused. |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the name of the room this structure becomes. |
+| ruin | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The status a mend cures; mending is refused unless the room has it. |
+| tags | list of [Tag](source-kinds.gen.md#tag) |  | Tags the built room carries, as on a room. |
 | variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | See the type. |
-| weathering | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| weathering | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The status the room gets when it is raised and again when mended. |
 
 ## text
 
@@ -1605,19 +1605,12 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 
 ## Fields without a meaning
 
-127 fields.
+99 fields.
 
 - `attributes: attributes`
-- `barriers: initial`
-- `barriers: key_item`
-- `barriers: name`
 - `behaviours: params`
 - `behaviours: reactions`
 - `bleeds: narration`
-- `bleeds: narration.applied`
-- `bleeds: narration.expired`
-- `bleeds: narration.refreshed`
-- `bleeds: narration.tick`
 - `cartridge: api_version`
 - `cartridge: entry`
 - `cartridge: id`
@@ -1707,29 +1700,8 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `quests: patrol.route`
 - `quests: patrol.trust_fact`
 - `reactions: zone`
-- `replenish: cap`
-- `replenish: count`
-- `replenish: every`
-- `replenish: from`
-- `replenish: items`
-- `replenish: to`
 - `resources: resources`
-- `services: name`
-- `services: narration`
 - `statuses: narration`
-- `statuses: narration.applied`
-- `statuses: narration.tick`
-- `statuses: perception.hearing`
-- `statuses: perception.sight`
-- `statuses: pierced_by.attribute`
-- `statuses: pierced_by.skill`
-- `structures: description`
-- `structures: locks`
-- `structures: max_per_owner`
-- `structures: name`
-- `structures: ruin`
-- `structures: tags`
-- `structures: weathering`
 - `transports: action`
 - `transports: name`
 - `transports: narration`

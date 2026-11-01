@@ -680,13 +680,13 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "name": {
+        "name": {"description":"Text key of the barrier's short description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "initial": {
+        "initial": {"description":"The barrier's state in a fresh world.",
           "$ref": "#/$defs/BarrierState"
         },
-        "key_item": {
+        "key_item": {"description":"The item whose holder may lock and unlock this barrier.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "tags": {

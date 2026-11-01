@@ -2192,7 +2192,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "items": {
+        "items": {"description":"The items moved on each due run.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2200,23 +2200,23 @@
           "minItems": 1,
           "maxItems": 64
         },
-        "from": {
+        "from": {"description":"Where the items are taken from.",
           "$ref": "entity.schema.json#/$defs/ItemLocation"
         },
-        "to": {
+        "to": {"description":"Where the items are put; filled until it holds cap of them.",
           "$ref": "entity.schema.json#/$defs/ItemLocation"
         },
-        "cap": {
+        "cap": {"description":"Stop moving once the destination holds this many of the items.",
           "type": "integer",
           "minimum": 1,
           "maximum": 64
         },
-        "count": {
+        "count": {"description":"The most items moved per run, lowest entity id first.",
           "type": "integer",
           "minimum": 1,
           "maximum": 64
         },
-        "every": {
+        "every": {"description":"Seconds between runs, counted from the previous due time.",
           "type": "integer",
           "minimum": 1
         }
@@ -2582,16 +2582,16 @@
         "narration": {
           "type": "object",
           "properties": {
-            "applied": {
+            "applied": {"description":"Text told when the bleed first starts on a body.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "refreshed": {
+            "refreshed": {"description":"Text told when the bleed is applied again while already active.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "tick": {
+            "tick": {"description":"Text told on a tick that costs hit points.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "expired": {
+            "expired": {"description":"Text told when the bleed ends by running out.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -2620,10 +2620,10 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of the name of the room this structure becomes.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description": {
+        "description": {"description":"Text key of the description of the room this structure becomes.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "variants": {
@@ -2634,7 +2634,7 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "tags": {
+        "tags": {"description":"Tags the built room carries, as on a room.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -2642,7 +2642,7 @@
             "$ref": "entity.schema.json#/$defs/Tag"
           }
         },
-        "locks": {
+        "locks": {"description":"Rules for the built room; enter is the policy a mover must meet to come in.",
           "type": "object",
           "properties": {
             "enter": {
@@ -2651,15 +2651,15 @@
           },
           "additionalProperties": false
         },
-        "max_per_owner": {
+        "max_per_owner": {"description":"The most rooms of this structure one character may own at once; an order past it is refused.",
           "type": "integer",
           "minimum": 1,
           "maximum": 1000
         },
-        "weathering": {
+        "weathering": {"description":"The status the room gets when it is raised and again when mended.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "ruin": {
+        "ruin": {"description":"The status a mend cures; mending is refused unless the room has it.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -2781,10 +2781,10 @@
         "narration": {
           "type": "object",
           "properties": {
-            "applied": {
+            "applied": {"description":"Text told when the status is applied.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "tick": {
+            "tick": {"description":"Text told on each tick of the status.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "expired": {
@@ -2881,14 +2881,14 @@
         "perception": {
           "type": "object",
           "properties": {
-            "sight": {
+            "sight": {"description":"Changes what the holder sees: blind (every room is dark), dark_sight (sees in an unlit room) or see_invisible (sees holders of an invisible status).",
               "enum": [
                 "blind",
                 "dark_sight",
                 "see_invisible"
               ]
             },
-            "hearing": {
+            "hearing": {"description":"deaf: no sound cue reaches the holder.",
               "enum": [
                 "deaf"
               ]
@@ -2907,10 +2907,10 @@
         "pierced_by": {
           "type": "object",
           "properties": {
-            "skill": {
+            "skill": {"description":"The skill whose level the seer's attribute value must beat to see through the concealment.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "attribute": {
+            "attribute": {"description":"The attribute whose value the seer needs; it is compared with the holder's skill level.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },

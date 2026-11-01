@@ -7941,8 +7941,14 @@
       "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
       "properties": {
         "extends": { "$ref": "#/$defs/Key" },
-        "initial": { "$ref": "#/$defs/BarrierState" },
-        "key_item": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "initial": {
+          "$ref": "#/$defs/BarrierState",
+          "description": "The barrier's state in a fresh world."
+        },
+        "key_item": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The item whose holder may lock and unlock this barrier."
+        },
         "keywords": {
           "description": "Words a player names it by.",
           "items": { "$ref": "#/$defs/Alias" },
@@ -7950,7 +7956,10 @@
           "minItems": 1,
           "type": "array"
         },
-        "name": { "$ref": "#/$defs/partial.TextKey" },
+        "name": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the barrier's short description."
+        },
         "opens_when": {
           "$ref": "#/$defs/partial.Policy",
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
@@ -7986,10 +7995,22 @@
         "narration": {
           "additionalProperties": false,
           "properties": {
-            "applied": { "$ref": "#/$defs/partial.TextKey" },
-            "expired": { "$ref": "#/$defs/partial.TextKey" },
-            "refreshed": { "$ref": "#/$defs/partial.TextKey" },
-            "tick": { "$ref": "#/$defs/partial.TextKey" }
+            "applied": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told when the bleed first starts on a body."
+            },
+            "expired": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told when the bleed ends by running out."
+            },
+            "refreshed": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told when the bleed is applied again while already active."
+            },
+            "tick": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told on a tick that costs hit points."
+            }
           },
           "type": "object"
         },
@@ -9508,28 +9529,38 @@
       "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
       "properties": {
         "cap": {
+          "description": "Stop moving once the destination holds this many of the items.",
           "maximum": 64,
           "minimum": 1,
           "type": "integer"
         },
         "count": {
+          "description": "The most items moved per run, lowest entity id first.",
           "maximum": 64,
           "minimum": 1,
           "type": "integer"
         },
         "every": {
+          "description": "Seconds between runs, counted from the previous due time.",
           "minimum": 1,
           "type": "integer"
         },
         "extends": { "$ref": "#/$defs/Key" },
-        "from": { "$ref": "#/$defs/partial.ItemLocation" },
+        "from": {
+          "$ref": "#/$defs/partial.ItemLocation",
+          "description": "Where the items are taken from."
+        },
         "items": {
+          "description": "The items moved on each due run.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 64,
           "minItems": 1,
           "type": "array"
         },
-        "to": { "$ref": "#/$defs/partial.ItemLocation" },
+        "to": {
+          "$ref": "#/$defs/partial.ItemLocation",
+          "description": "Where the items are put; filled until it holds cap of them."
+        },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -9870,8 +9901,14 @@
           "description": "The conserved quote resource."
         },
         "extends": { "$ref": "#/$defs/Key" },
-        "name": { "$ref": "#/$defs/partial.TextKey" },
-        "narration": { "$ref": "#/$defs/partial.TextKey" },
+        "name": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the service's name."
+        },
+        "narration": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text told when the service is used."
+        },
         "price": {
           "description": "Row kgd.70: 0 only on an entitlement with escrow, a barter.",
           "maximum": 2147483647,
@@ -10021,7 +10058,10 @@
         "narration": {
           "additionalProperties": false,
           "properties": {
-            "applied": { "$ref": "#/$defs/partial.TextKey" },
+            "applied": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told when the status is applied."
+            },
             "expired": {
               "$ref": "#/$defs/partial.TextKey",
               "description": "Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b)."
@@ -10034,7 +10074,10 @@
               "$ref": "#/$defs/partial.TextKey",
               "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name."
             },
-            "tick": { "$ref": "#/$defs/partial.TextKey" }
+            "tick": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told on each tick of the status."
+            }
           },
           "type": "object"
         },
@@ -10049,11 +10092,13 @@
           "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick.",
           "properties": {
             "hearing": {
+              "description": "deaf: no sound cue reaches the holder.",
               "enum": [
                 "deaf"
               ]
             },
             "sight": {
+              "description": "Changes what the holder sees: blind (every room is dark), dark_sight (sees in an unlit room) or see_invisible (sees holders of an invisible status).",
               "enum": [
                 "blind",
                 "dark_sight",
@@ -10067,8 +10112,14 @@
           "additionalProperties": false,
           "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
           "properties": {
-            "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "attribute": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The attribute whose value the seer needs; it is compared with the holder's skill level."
+            },
+            "skill": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The skill whose level the seer's attribute value must beat to see through the concealment."
+            }
           },
           "type": "object"
         },
@@ -10094,23 +10145,35 @@
       "additionalProperties": false,
       "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
       "properties": {
-        "description": { "$ref": "#/$defs/partial.TextKey" },
+        "description": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the description of the room this structure becomes."
+        },
         "extends": { "$ref": "#/$defs/Key" },
         "locks": {
           "additionalProperties": false,
+          "description": "Rules for the built room; enter is the policy a mover must meet to come in.",
           "properties": {
             "enter": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
         "max_per_owner": {
+          "description": "The most rooms of this structure one character may own at once; an order past it is refused.",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
-        "name": { "$ref": "#/$defs/partial.TextKey" },
-        "ruin": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "name": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the name of the room this structure becomes."
+        },
+        "ruin": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The status a mend cures; mending is refused unless the room has it."
+        },
         "tags": {
+          "description": "Tags the built room carries, as on a room.",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -10122,7 +10185,10 @@
           "minItems": 1,
           "type": "array"
         },
-        "weathering": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "weathering": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The status the room gets when it is raised and again when mended."
+        },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -10238,8 +10304,14 @@
       "additionalProperties": false,
       "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
       "properties": {
-        "initial": { "$ref": "#/$defs/BarrierState" },
-        "key_item": { "$ref": "#/$defs/DefinitionRef" },
+        "initial": {
+          "$ref": "#/$defs/BarrierState",
+          "description": "The barrier's state in a fresh world."
+        },
+        "key_item": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The item whose holder may lock and unlock this barrier."
+        },
         "keywords": {
           "description": "Words a player names it by.",
           "items": { "$ref": "#/$defs/Alias" },
@@ -10247,7 +10319,10 @@
           "minItems": 1,
           "type": "array"
         },
-        "name": { "$ref": "#/$defs/TextKey" },
+        "name": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the barrier's short description."
+        },
         "opens_when": {
           "$ref": "#/$defs/Policy",
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
@@ -10286,10 +10361,22 @@
         "narration": {
           "additionalProperties": false,
           "properties": {
-            "applied": { "$ref": "#/$defs/TextKey" },
-            "expired": { "$ref": "#/$defs/TextKey" },
-            "refreshed": { "$ref": "#/$defs/TextKey" },
-            "tick": { "$ref": "#/$defs/TextKey" }
+            "applied": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told when the bleed first starts on a body."
+            },
+            "expired": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told when the bleed ends by running out."
+            },
+            "refreshed": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told when the bleed is applied again while already active."
+            },
+            "tick": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told on a tick that costs hit points."
+            }
           },
           "required": [
             "applied",
@@ -12111,27 +12198,37 @@
       "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
       "properties": {
         "cap": {
+          "description": "Stop moving once the destination holds this many of the items.",
           "maximum": 64,
           "minimum": 1,
           "type": "integer"
         },
         "count": {
+          "description": "The most items moved per run, lowest entity id first.",
           "maximum": 64,
           "minimum": 1,
           "type": "integer"
         },
         "every": {
+          "description": "Seconds between runs, counted from the previous due time.",
           "minimum": 1,
           "type": "integer"
         },
-        "from": { "$ref": "#/$defs/ItemLocation" },
+        "from": {
+          "$ref": "#/$defs/ItemLocation",
+          "description": "Where the items are taken from."
+        },
         "items": {
+          "description": "The items moved on each due run.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 64,
           "minItems": 1,
           "type": "array"
         },
-        "to": { "$ref": "#/$defs/ItemLocation" }
+        "to": {
+          "$ref": "#/$defs/ItemLocation",
+          "description": "Where the items are put; filled until it holds cap of them."
+        }
       },
       "required": [
         "items",
@@ -12547,8 +12644,14 @@
           "$ref": "#/$defs/DefinitionRef",
           "description": "The conserved quote resource."
         },
-        "name": { "$ref": "#/$defs/TextKey" },
-        "narration": { "$ref": "#/$defs/TextKey" },
+        "name": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the service's name."
+        },
+        "narration": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text told when the service is used."
+        },
         "price": {
           "description": "Row kgd.70: 0 only on an entitlement with escrow, a barter.",
           "maximum": 2147483647,
@@ -12712,7 +12815,10 @@
         "narration": {
           "additionalProperties": false,
           "properties": {
-            "applied": { "$ref": "#/$defs/TextKey" },
+            "applied": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told when the status is applied."
+            },
             "expired": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b)."
@@ -12725,7 +12831,10 @@
               "$ref": "#/$defs/TextKey",
               "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name."
             },
-            "tick": { "$ref": "#/$defs/TextKey" }
+            "tick": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told on each tick of the status."
+            }
           },
           "required": [
             "applied",
@@ -12744,11 +12853,13 @@
           "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick.",
           "properties": {
             "hearing": {
+              "description": "deaf: no sound cue reaches the holder.",
               "enum": [
                 "deaf"
               ]
             },
             "sight": {
+              "description": "Changes what the holder sees: blind (every room is dark), dark_sight (sees in an unlit room) or see_invisible (sees holders of an invisible status).",
               "enum": [
                 "blind",
                 "dark_sight",
@@ -12762,8 +12873,14 @@
           "additionalProperties": false,
           "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
           "properties": {
-            "attribute": { "$ref": "#/$defs/DefinitionRef" },
-            "skill": { "$ref": "#/$defs/DefinitionRef" }
+            "attribute": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The attribute whose value the seer needs; it is compared with the holder's skill level."
+            },
+            "skill": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The skill whose level the seer's attribute value must beat to see through the concealment."
+            }
           },
           "required": [
             "skill",
@@ -12799,22 +12916,34 @@
       "additionalProperties": false,
       "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
       "properties": {
-        "description": { "$ref": "#/$defs/TextKey" },
+        "description": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the description of the room this structure becomes."
+        },
         "locks": {
           "additionalProperties": false,
+          "description": "Rules for the built room; enter is the policy a mover must meet to come in.",
           "properties": {
             "enter": { "$ref": "#/$defs/Policy" }
           },
           "type": "object"
         },
         "max_per_owner": {
+          "description": "The most rooms of this structure one character may own at once; an order past it is refused.",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
-        "name": { "$ref": "#/$defs/TextKey" },
-        "ruin": { "$ref": "#/$defs/DefinitionRef" },
+        "name": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the name of the room this structure becomes."
+        },
+        "ruin": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The status a mend cures; mending is refused unless the room has it."
+        },
         "tags": {
+          "description": "Tags the built room carries, as on a room.",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -12826,7 +12955,10 @@
           "minItems": 1,
           "type": "array"
         },
-        "weathering": { "$ref": "#/$defs/DefinitionRef" }
+        "weathering": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The status the room gets when it is raised and again when mended."
+        }
       },
       "required": [
         "name",
