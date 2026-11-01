@@ -233,7 +233,7 @@ defmodule Loka.Content.Starters do
         {:ok, touched |> Enum.reject(&authored?(&1, own)) |> write_all(hook)}
 
       at ->
-        {:error, refusal(at, own == nil)}
+        {:error, refusal(at, own)}
     end
   end
 
@@ -241,13 +241,23 @@ defmodule Loka.Content.Starters do
 
   defp authored?({rel, path, _, _}, own), do: rel == own and File.exists?(path)
 
-  defp refusal(at, from?) do
+  # `~` is the starter's stand-in, so words go back to it. Any other value only comes back outside
+  # `own`, which a rerun never writes: emptying it there would break the compile.
+  defp refusal(at, own) do
     said = "#{at} already has a value and a starter never replaces one; nothing was written"
-    other = if from?, do: "use another --from direction, or ", else: ""
+    other = if own == nil, do: "use another --from direction, or ", else: ""
 
-    if at =~ ": exits ",
-      do: said <> ". That exit is taken: #{other}move it in both rooms' files and rerun",
-      else: said <> ". Remove that value and rerun, or keep it and skip this starter"
+    cond do
+      at =~ ": exits " ->
+        said <> ". That exit is taken: #{other}move it in both rooms' files and rerun"
+
+      own != nil and String.starts_with?(at, own <> ":") ->
+        said <>
+          ". If it is words, set it to ~ and rerun; keep any other value and skip this rerun"
+
+      true ->
+        said <> ". If it is words, set it to ~; delete any other value; then rerun"
+    end
   end
 
   # An unchanged file keeps its bytes, the author's formatting too.

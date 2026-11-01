@@ -77,14 +77,35 @@ defmodule Loka.ContentStartersFreshTest do
   end
 
   # Break: a rerun over a filled value refuses and leaves the author nothing to do.
-  test "a rerun over a filled value says what to do", %{tmp_dir: tmp} do
+  test "following a rerun's refusal leaves a cartridge that compiles", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
     follow(dir, "transports", "ferry")
-    start = JSON.decode!(File.read!(Path.join(dir, "cartridge.json")))["entry"]
-    edit(dir, "rooms/#{start}.json", &put_in(&1, ["details", "ferry", "description"], "Mine."))
+    start = read(dir, "cartridge.json")["entry"]
+    room = "rooms/#{start}.json"
+
+    edit(dir, room, &put_in(&1, ["details", "ferry", "description", "prose"], "Mine."))
     assert {:error, message} = Starters.write(dir, "transports", "ferry")
-    assert message =~ "description already has a value"
-    assert message =~ "Remove that value and rerun"
+    assert message =~ "set it to ~"
+    edit(dir, room, &put_in(&1, ["details", "ferry", "description", "prose"], "~"))
+    assert {:ok, _} = Starters.write(dir, "transports", "ferry")
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+
+    # A value that is not words, outside the starter's own file: deleting it brings it back.
+    caps = ["requires", "capabilities", "transport"]
+    edit(dir, "cartridge.json", &put_in(&1, caps, 9))
+    assert {:error, message} = Starters.write(dir, "transports", "ferry")
+    assert message =~ "delete any other value"
+    edit(dir, "cartridge.json", &(pop_in(&1, caps) |> elem(1)))
+    assert {:ok, _} = Starters.write(dir, "transports", "ferry")
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+
+    # The same in its own file comes back from nothing, so the words say to keep it.
+    follow(dir, "actions", "pull")
+    edit(dir, "actions/pull.json", &Map.put(&1, "priority", 9))
+    assert {:error, message} = Starters.write(dir, "actions", "pull")
+    assert message =~ "keep any other value and skip this rerun"
+    refute message =~ "delete"
+    assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
   # Break: a text.json that is not an object crashes the starter instead of refusing.
