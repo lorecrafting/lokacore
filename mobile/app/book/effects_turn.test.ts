@@ -234,10 +234,11 @@ test('the card turns with the latest done', async (t) => {
 test('a tap skips once and cancels the clock', async (t) => {
   const { turned, hook, tick } = await card(t);
   tick(10);
+  const cancel = t.mock.method(globalThis, 'clearTimeout');
   hook.turn();
   hook.turn();
   assert.equal(turned.count, 1);
-  assert.equal(t.mock.timers.getTimers?.()?.length ?? 0, 0);
+  assert.ok(cancel.mock.callCount() > 0);
   tick(motion.card.auto);
   assert.equal(turned.count, 1);
 });
