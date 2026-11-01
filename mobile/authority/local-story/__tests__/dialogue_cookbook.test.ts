@@ -203,7 +203,7 @@ test('an asked mark that could not work is refused at the choice', () => {
     String(
       refused((n, b) => (n.endsWith('asked_marker.json') ? b.replace('"choices":', riddle) : b)),
     ),
-    /letter tiles/,
+    /letter tiles with no label to dim/,
   );
   // asked_when is compiled only, so it can never overwrite or dodge the generated one.
   const hand = (n: string, b: string) =>
