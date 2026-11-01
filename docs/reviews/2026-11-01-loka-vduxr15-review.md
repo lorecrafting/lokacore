@@ -25,3 +25,11 @@
 2. **question** `round_attack.ts:92`: the spec says positive damage wakes. A hit resisted or authored to 0 damage, not at the floor, now also wakes (the PR disputes this). No docs/system text changed; state the choice in mechanics.md or narrow to `damage > 0`.
 3. **nit** `integration_red_controls.sh` `pgrep -f 'sleep 1234'` matches any process on the host; use the exact PID.
 4. kernel_api: 1.142 is main+1 only while main is 1.141; if main has bumped, the fix needs main+1 (rerun `bin/regen.sh`).
+
+## Re-check at `3683f58f9` (scoped to the fixes)
+
+- CI at this head: ci, book-e2e, graph-diff completed, success.
+- Finding 1 fixed: `round_attack.ts:92` is `!loss && damage > 0 && sleeping`; `damage` is 0 on a miss or prevented hit. Mutants against `combat.test.ts`: drop `damage > 0` fails the miss and 0-damage tests; drop `sleeping` fails the sitting test; `>= 0` fails two; back to `hit` fails the 0-damage test. All killed. Combat file 15/15 pass.
+- Finding 2 settled by the coordinator's ruling (positive damage wakes); code and the 0-damage test agree. No `docs/system` text changed; the rule already reads "positive damage".
+- Finding 3 fixed: `exec sleep 1234` after `echo $$ > hung.pid`, then `kill -0` on that pid. Sound for the leader (run: pid dead after the timeout). Limit: it does not prove a grandchild dies, and an unwritten pid file passes vacuously (nit, no action).
+- Verdict: **APPROVE**.
