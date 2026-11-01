@@ -77,19 +77,26 @@ defmodule Loka.Content.DialogueLinks do
     {sorted, next} = graph(all)
     open = entries(sorted, next)
 
-    refused(sorted) ++
-      guessed(open, named(next)) ++
-      for {rel, d} <- candidates(sorted, next) -- open do
-        warning("ENTRY_UNUSED", rel, ["npc"], d)
-      end
+    refused(sorted) ++ guessed(open, linked(sorted)) ++ unused(sorted, open, next)
+  end
+
+  # A self-link offers Talk no choice, and a shut-out dialogue never plays to link at all.
+  defp linked(sorted) do
+    for {_, d} <- live(sorted), t <- links(d), t != d["key"], into: MapSet.new(), do: t
+  end
+
+  defp unused(sorted, open, next) do
+    played = walk(for({_, d} <- open, do: d["key"]), next, MapSet.new())
+
+    for {rel, d} <- sorted -- live(sorted), d["key"] not in played do
+      warning("ENTRY_UNUSED", rel, ["npc"], d)
+    end
   end
 
   defp graph(all) do
     sorted = Enum.sort_by(all, &elem(&1, 1)["key"])
     {sorted, Map.new(sorted, fn {_, d} -> {d["key"], links(d)} end)}
   end
-
-  defp named(next), do: next |> Map.values() |> List.flatten() |> MapSet.new()
 
   defp refused(sorted) do
     marked = Enum.filter(sorted, &elem(&1, 1)["entry"])
@@ -113,10 +120,15 @@ defmodule Loka.Content.DialogueLinks do
 
   defp tied(talked) do
     talked
-    |> Enum.reject(fn {_, d} -> d["name"] end)
     |> Enum.group_by(fn {_, d} -> d["npc"] end)
     |> Enum.flat_map(fn {_, group} ->
-      group |> Enum.drop(-1) |> Enum.reject(fn {_, d} -> d["policy"] end) |> Enum.take(1)
+      group
+      |> Enum.reverse()
+      |> Enum.drop_while(fn {_, d} -> d["name"] end)
+      |> Enum.drop(1)
+      |> Enum.reverse()
+      |> Enum.reject(fn {_, d} -> d["policy"] end)
+      |> Enum.take(1)
     end)
   end
 
@@ -130,21 +142,25 @@ defmodule Loka.Content.DialogueLinks do
 
   # selection.ts entries: the dialogues nothing links to or marked `entry`, then the head of each
   # loop with no way in: the member leading to the most other dialogues, first by key on a tie.
-  defp candidates(sorted, next) do
-    named = named(next)
-    roots = for {_, d} <- sorted, d["entry"] || d["key"] not in named, do: d["key"]
+  # A shut-out dialogue never opens, so it is no way into what it links to.
+  defp entries(sorted, next) do
+    live = for {_, d} <- live(sorted), do: d
+    roots = roots(live, next)
     reached = walk(roots, next, MapSet.new())
-    wanted = MapSet.new(roots ++ heads(Map.keys(next) -- MapSet.to_list(reached), next))
+    rest = for d <- live, d["key"] not in reached, do: d["key"]
+    wanted = MapSet.new(roots ++ heads(rest, next))
     for {_, d} = e <- sorted, d["key"] in wanted, do: e
   end
 
-  # A speaker's marked dialogue shuts out their others, keyword ones aside.
-  defp entries(sorted, next) do
-    claimed = for {_, d} <- sorted, d["entry"], into: MapSet.new(), do: d["npc"]
+  defp roots(live, next) do
+    named = next |> Map.values() |> List.flatten() |> MapSet.new()
+    for d <- live, d["entry"] || d["key"] not in named, do: d["key"]
+  end
 
-    Enum.filter(candidates(sorted, next), fn {_, d} ->
-      d["entry"] || d["keyword"] || d["npc"] not in claimed
-    end)
+  # A speaker's marked dialogue shuts out their others, keyword ones aside.
+  defp live(sorted) do
+    claimed = for {_, d} <- sorted, d["entry"], into: MapSet.new(), do: d["npc"]
+    Enum.filter(sorted, fn {_, d} -> d["entry"] || d["keyword"] || d["npc"] not in claimed end)
   end
 
   defp heads(rest, next) do

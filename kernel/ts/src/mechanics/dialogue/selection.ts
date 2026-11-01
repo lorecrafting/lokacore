@@ -46,9 +46,12 @@ const entries = (world: World) => {
     }
     return seen;
   };
-  const roots = all.filter((d) => d.entry || !named.has(d.key));
+  const marked = new Set(all.filter((d) => d.entry).map((d) => refString(d.npc)));
+  // A shut-out dialogue never opens, so it is no way into what it links to.
+  const live = all.filter((d) => d.entry || d.keyword || !marked.has(refString(d.npc)));
+  const roots = live.filter((d) => d.entry || !named.has(d.key));
   const reached = reach(roots.map((d) => d.key));
-  const rest = all.filter((d) => !reached.has(d.key));
+  const rest = live.filter((d) => !reached.has(d.key));
   const from = new Map(rest.map((d) => [d.key, reach([d.key])]));
   const width = (key: string) =>
     new Set(next.get(key)!.filter((k) => k !== key && next.has(k))).size;
@@ -62,8 +65,7 @@ const entries = (world: World) => {
         (from.get(key)!.has(o.key) && beats(key, o.key)),
     ),
   );
-  const marked = new Set(all.filter((d) => d.entry).map((d) => refString(d.npc)));
-  return [...roots, ...heads].filter((d) => d.entry || d.keyword || !marked.has(refString(d.npc)));
+  return [...roots, ...heads];
 };
 
 /** Whether some answer's `then` or `then_failed` names `d`: such a dialogue never reopens itself. */

@@ -324,7 +324,7 @@ defmodule Loka.ContentDialogueLinksTest do
   defp guess(key), do: {"warning", "ENTRY_GUESSED", "dialogues/#{key}.npc", key}
 
   # Breaks: a one-way leaf warned; a loop's pick or a condition-free first key not warned, or the
-  # wrong node named; a labelled Talk control or a keyword dialogue counted as tied, or every shadowed key warned.
+  # wrong node named; a labelled Talk control or a keyword dialogue counted as tied, every shadowed key warned, a named first key not warned, or a lone self-link warned.
   test "ENTRY_GUESSED names Talk's pick only when it is a guess" do
     p = %{"policy" => %{"op" => "x"}}
     assert entry_findings([d("leaf", "a", ["next"]), d("next", "a")]) == []
@@ -338,6 +338,8 @@ defmodule Loka.ContentDialogueLinksTest do
     assert entry_findings([d("a_x", "a"), d("b", "a", [], %{"name" => "n"})]) == []
     assert entry_findings([d("a_x", "a"), d("b", "a", [], %{"keyword" => "w"})]) == []
     assert entry_findings([d("a_x", "a"), d("b", "a"), d("c", "a")]) == [guess("a_x")]
+    assert entry_findings([d("a_x", "a", [], %{"name" => "n"}), d("b", "a")]) == [guess("a_x")]
+    assert entry_findings([d("a_x", "a", ["a_x"])]) == []
   end
 
   # Breaks: the marker still warned as a guess, a second marker or a keyword marker compiled, a
@@ -359,6 +361,19 @@ defmodule Loka.ContentDialogueLinksTest do
 
     assert entry_findings([d("a_x", "z"), d("b", "a", [], m)]) == []
     assert entry_findings([d("a_x", "a", [], %{"keyword" => "w"}), d("b", "a", [], m)]) == []
+    unused = &{"warning", "ENTRY_UNUSED", "dialogues/#{&1}.npc", &1}
+
+    # the shut-out dialogue is no way in: another speaker's chain or loop past it still opens
+    assert entry_findings([d("a_x", "a", [], m), d("b", "a", ["c"]), d("c", "z")]) == [
+             unused.("b")
+           ]
+
+    assert entry_findings([d("a_x", "a", [], m), d("b", "a", ["c"]), d("c", "z", ["b"])]) ==
+             []
+
+    # a shut-out loop warns for every member, not only the head
+    assert entry_findings([d("a_x", "a", [], m), d("b", "a", ["c"]), d("c", "a", ["b"])]) ==
+             [unused.("b"), unused.("c")]
   end
 
   # Breaks: the compiler drops the marker, or a marked dialogue fails the schema, so Talk never sees it.

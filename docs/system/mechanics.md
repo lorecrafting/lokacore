@@ -847,7 +847,7 @@ definition's `unattackable`, an optional key that is absent from existing conten
 `attackRefused`, `combatOffered`, `hostileAt`, `sanctuary`; new: the key and the `attackable`
 query. An aimed damage spell (`damage` in `scripted_action/spell.ts`) still reads only `hp`. An
 `unattackable` NPC with `disposition.engage`, as a population's member or as a death credit's NPC is a
-compile error. Installed kernel 1.137.
+compile error. Installed kernel 1.136.
 
 A round's blow stops at the target's authored hp floor, or at 0 under a negative floor, where death
 fires; a floored foe stays alive and the fight goes on, as under a spell's damage (`aboveFloor`,

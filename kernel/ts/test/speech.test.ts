@@ -247,6 +247,26 @@ test("an entry marker leaves the speaker's keyword dialogue spoken", () => {
   assert.equal(gameView(said.world).choice?.prompt.key, 'dialogue.elder_ward.prompt');
 });
 
+// Breaks: a shut-out dialogue still counting as the way into what it links to, so the other
+// speaker's dialogue past it never opens.
+test('a dialogue an entry marker shuts out is no way into another speaker', () => {
+  const r = reload(content, (c) => {
+    const d = structuredClone(c.dialogues['speech_sampler@0.0.1:dialogue/elder_ward']) as Obj;
+    delete d.keyword;
+    const add = (key: string, extra: object) => {
+      c.dialogues[`speech_sampler@0.0.1:dialogue/${key}`] = { ...d, key, ...extra };
+    };
+    const [id0, choice] = Object.entries(d.choices as Obj)[0]!;
+    add('elder_yarn', { entry: true });
+    add('elder_old', { choices: { [id0]: { ...(choice as Obj), then: 'smith_past' } } });
+    add('smith_past', { npc: ref('npc', 'smith') });
+  });
+  assert.ok(r.ok, JSON.stringify(r));
+  const w = fresh(r.cartridge as Cartridge);
+  const talked = accepted(w, { type: 'talk', target_id: id(w, 'smith') }).world;
+  assert.equal(Object.values(talked.state.choices ?? {})[0]?.source.key, 'smith_past');
+});
+
 // Breaks (loka-j2mo): a spoken reaction without an npc filter, heard by the elder and the smith,
 // writing one instance fact twice in one decision faults conflicting_write instead of committing.
 test('two hearers of one say write one shared fact and the step commits', () => {
