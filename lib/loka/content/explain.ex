@@ -65,6 +65,7 @@ defmodule Loka.Content.Explain do
          too_few_items | `{field}` needs at least one entry.
          wrong_speaker | Line `{text}`: only `{npc}:` or a `with:` speaker may speak here (`npc: {npc}`). | Change the speaker to `{npc}`, add `with: <npc>` at the top, or move this into its own scene.
          gives_speaker | Line `{text}`: a scene cannot give an item named like its speaker. | Rename the item, or write this as `dialogues/<key>.json`.
+         gives_key | Line `{text}`: an item's key takes lowercase letters, digits and underscores. | Fix the name after `gives:`.
          repeated_choice | Line `{text}` repeats a choice or has no words to key it by. | Reword the choice.
          gives_outside_choice | Line `{text}`: `gives:` belongs under a choice. | Move it under a `- ` line.
          scene_entry | Line `{text}`: a scene header takes no `entry`. | Put `{"entry": true}` in `dialogues/<key>.json` beside the scene.
@@ -150,11 +151,12 @@ defmodule Loka.Content.Explain do
       key = root |> String.trim("\"") |> Path.rootname() |> Path.basename()
       field = String.replace_prefix(path, root <> ".", "")
 
-      # A field holds a text key built from the name when that key fails too; a top-level one always
-      # does (room_line's key ends .room). A deeper field with no such key is the author's own fault.
-      (field != path and
-         (not String.contains?(field, ".") or
-            Enum.any?(diags, &String.ends_with?(&1["path"], "." <> key <> "." <> field <> "\"]")))) or
+      # A field holds a text key built from the name when that key fails too (room_line's ends
+      # .room, so `room` itself holds none). Any other field fault is the author's own.
+      text_key = if field == "room_line", do: "room", else: field
+
+      (field not in [path, "room"] and
+         Enum.any?(diags, &String.ends_with?(&1["path"], "." <> key <> "." <> text_key <> "\"]"))) or
         (String.starts_with?(path, "text[") and String.contains?(path, "." <> key <> "."))
     end)
   end
@@ -248,6 +250,7 @@ defmodule Loka.Content.Explain do
 
   # A long-form reference reads as its kind and key; a bare target is a text key or role name.
   defp target(nil), do: %{}
+  defp target(%{"kind" => kind, "key" => key}), do: %{"target" => key, "kind" => kind}
   # A site can pass the authored value itself, when the file gave a non-string there.
   defp target(t) when not is_binary(t), do: %{"target" => JSON.encode!(t)}
 

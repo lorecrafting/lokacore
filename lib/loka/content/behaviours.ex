@@ -29,7 +29,7 @@ defmodule Loka.Content.Behaviours do
   # name => {params, [{rel, steps, rule, value}]}; a refused or undecodable behaviour stays known,
   # with params nil and no rules, so its holders add no second cause.
   defp rules({rel, {_, name, steps}, %{} = value}) do
-    extra = unknown({rel, steps}, value)
+    extra = file_name({rel, name, steps}) ++ unknown({rel, steps}, value)
     {rs, bad} = reactions({rel, steps ++ ["reactions"]}, value["reactions"])
     {params, wrong} = params({rel, steps}, value)
 
@@ -41,6 +41,13 @@ defmodule Loka.Content.Behaviours do
 
   defp rules({_, {_, name, _}, :invalid}), do: {{name, {nil, []}}, []}
   defp rules({rel, {_, name, steps}, _}), do: {{name, {nil, []}}, [invalid_type({rel, steps})]}
+
+  # The compiler checks every other kind's key; a behaviour leaves before that.
+  defp file_name({rel, name, steps}) do
+    if name =~ ~r/^[a-z][a-z0-9_]{0,63}$/,
+      do: [],
+      else: [{"SCHEMA_VIOLATION", {rel, steps}, %{"error" => "pattern_mismatch"}}]
+  end
 
   defp unknown({rel, steps}, value),
     do:

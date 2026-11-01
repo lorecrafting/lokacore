@@ -109,9 +109,9 @@ defmodule Loka.Content.Resources do
   defp npc_balances(defs) do
     for {_, {rel, [], npc}} <- defs["npc"],
         {name, value} <- Map.get(npc, "resource_starts", %{}),
-        spec = defs["resource"][name],
-        not (match?({_, _, _}, spec) and elem(spec, 2)["minimum"] <= value and
-               value <= elem(spec, 2)["maximum"]),
+        # A refused resource has its own line, and no numbers to hold this start to.
+        {_, _, spec} <- [defs["resource"][name]],
+        not (spec["minimum"] <= value and value <= spec["maximum"]),
         do: diag("RESOURCE_SPEC_INVALID", at(rel, ["resource_starts", name]))
   end
 

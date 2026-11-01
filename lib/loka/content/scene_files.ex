@@ -199,18 +199,11 @@ defmodule Loka.Content.SceneFiles do
   end
 
   # What follows a refused choice is still checked, and written nowhere.
-  defp line({"gives: " <> item, _} = at, {%{"npc" => npc} = d, cur, bad}) when cur != nil do
+  defp line({"gives: " <> item, n} = at, {%{"npc" => _} = d, cur, bad}) when cur != nil do
     cond do
-      speaker?(d, item) ->
-        refuse(at, d, cur, bad)
-
-      cur == :refused ->
-        {put_in(d, ["roles", item], %{"role" => "item", "item" => item}), cur, bad}
-
-      true ->
-        {d
-         |> put_in(["choices", cur, "receive"], %{"item" => item, "from" => npc})
-         |> put_in(["roles", item], %{"role" => "item", "item" => item}), cur, bad}
+      speaker?(d, item) -> refuse(at, d, cur, bad)
+      item =~ ~r/^[a-z][a-z0-9_]{0,63}$/ -> {gives(d, cur, item), cur, bad}
+      true -> {d, cur, [{n, "gives: " <> item, "gives_key"} | bad]}
     end
   end
 
@@ -239,6 +232,15 @@ defmodule Loka.Content.SceneFiles do
   end
 
   defp line(at, {d, cur, bad}), do: refuse(at, d, cur, bad)
+
+  defp gives(d, :refused, item),
+    do: put_in(d, ["roles", item], %{"role" => "item", "item" => item})
+
+  defp gives(%{"npc" => npc} = d, cur, item) do
+    d
+    |> put_in(["choices", cur, "receive"], %{"item" => item, "from" => npc})
+    |> gives(:refused, item)
+  end
 
   # `d` is the dialogue as of this line: a line above `npc:` is out of order, whatever follows.
   defp refuse({"gives: " <> _ = text, n}, %{"npc" => _} = d, nil, bad),

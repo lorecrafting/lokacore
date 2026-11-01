@@ -257,7 +257,8 @@ defmodule Loka.Content.Starters do
 
       # A second population wants these too; deleting them orphans the first one's corpse items.
       at =~ ": world death " ->
-        said <> ". A cartridge has one death setup: keep it and skip this starter"
+        said <>
+          ". A cartridge has one death setup: keep it, then copy the first population's populations, npcs (_npc) and items (_item, _corpse) files under the new name and point the new population file's npc, item and corpse at the copies"
 
       true ->
         said <> ". If it is words, set it to ~; delete any other value; then rerun"
