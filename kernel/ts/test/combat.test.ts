@@ -274,12 +274,32 @@ test('a killing blow at an NPC with a negative hp minimum stops at 0', () => {
   const w = combatWorld();
   const target = key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: rat(w) });
   const spec = w.entityResourceSpecs[target]!;
+  const combat = w.cartridge.world!.combat!;
   const below = {
     ...w,
+    cartridge: {
+      ...w.cartridge,
+      world: {
+        ...w.cartridge.world!,
+        combat: {
+          ...combat,
+          player_attack: { ...combat.player_attack, chance: 100, damage_min: 4, damage_max: 4 },
+        },
+      },
+    },
     entityResourceSpecs: { ...w.entityResourceSpecs, [target]: { ...spec, minimum: -5 } },
   };
   let at = attack(hp(below, rat(below), 1)).world;
-  for (let n = 1; n <= 20 && living(at, rat(at)); n++) at = elapsed(at, n * 150, n + 1).world;
+  const losses: number[] = [];
+  for (let n = 1; n <= 20 && living(at, rat(at)); n++) {
+    const round = elapsed(at, n * 150, n + 1);
+    at = round.world;
+    for (const e of (round.decision as any).events ?? [])
+      if (e.payload.type === 'attack_result' && e.payload.target_id === rat(at))
+        losses.push(e.payload.loss);
+  }
   assert.equal(living(at, rat(at)), false, 'the blow kills');
+
+  assert.equal(Math.max(...losses), 1);
   assert.equal(level(at, rat(at), resourceRef(at, 'hp')), 0);
 });

@@ -282,7 +282,8 @@ test('kgd.159: a member in a room no plan move names fails the save loader', () 
 // the loader must take that room, and a move with no room must not throw there.
 test('kgd.159: a member in a room an event-subject move names reloads', () => {
   const w = band(99, undefined, true, (c) => {
-    hour(c, 'subject', 23, [{ op: 'npc.move', room: ref('room', 'hills') }, { op: 'npc.move' }]);
+    delete c.reactions[MOVE];
+    hour(c, 'subject', 23, [{ op: 'npc.move' }, { op: 'npc.move', room: ref('room', 'hills') }]);
   });
   const { w: b } = advance(w, 700);
   const moved = { ...b.state.containers, [member(b, 3).member_id as never]: room(b, 'hills') };
