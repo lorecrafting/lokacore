@@ -134,6 +134,21 @@ defmodule Loka.ContentWaitTest do
              Loka.ContentSource.compile(dir, [{"text.json", &Map.put(&1, "op", "wait")}])
   end
 
+  # Breaks: a bad `after` is overwritten by the waits' total and ships with the wrong timing; a step
+  # that is no object crashes the compiler instead of reaching the schema.
+  test "what the schema refuses still reaches it", %{dir: dir} do
+    for {change, path} <- [
+          {&Map.merge(&1, %{"after" => "soon", "steps" => [wait(5), adjust(1)]}),
+           "reactions/aftershock.after"},
+          {&Map.merge(&1, %{"after" => -5, "steps" => [wait(5), adjust(1)]}),
+           "reactions/aftershock.after"},
+          {steps([wait(5), "narrate"]), "reactions/aftershock.steps[1]"}
+        ] do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, [{@rule, change}])
+      assert path in Enum.map(diags, & &1["path"]), inspect(diags)
+    end
+  end
+
   # Breaks: an authored rule already named like a generated one is silently replaced.
   test "a generated rule that repeats a definition key is refused", %{dir: dir} do
     existing = File.read!(Path.join(dir, @rule)) |> Jason.decode!()
@@ -161,6 +176,11 @@ defmodule Loka.ContentWaitTest do
     assert found.() == []
 
     write.([adjust(1), wait(5), adjust(2)])
-    assert [_ | _] = found.()
+
+    # Breaks: lint keeps only the last stretch of the file, so a finding in an earlier one is lost.
+    assert [
+             "reactions/aftershock.json: writes state with no narrate step and no \"silent\": true",
+             "reactions/aftershock_wait_1.json: writes state with no narrate step and no \"silent\": true"
+           ] = found.()
   end
 end

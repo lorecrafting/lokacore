@@ -38,7 +38,7 @@ defmodule Loka.Content.Waits do
 
   defp file({rel, {:reaction, _, at} = id, %{"steps" => steps} = rule} = file)
        when is_list(steps) do
-    if Enum.any?(steps, &wait?/1) do
+    if Enum.any?(steps, &wait?/1) and lowerable?(rule) do
       case faults(steps, rule, rel, at) do
         [] -> {rules(rel, id, rule), []}
         faults -> {[{rel, id, :invalid}], faults}
@@ -53,6 +53,12 @@ defmodule Loka.Content.Waits do
       [] -> {[file], []}
       paths -> {[{rel, kind, :invalid}], Enum.map(paths, &fault(rel, at(kind) ++ &1, "outside"))}
     end
+  end
+
+  # A step that is no object or a bad `after` is the schema's to report, not ours to overwrite.
+  defp lowerable?(%{"steps" => steps} = rule) do
+    Enum.all?(steps, &is_map/1) and
+      (not Map.has_key?(rule, "after") or (is_integer(rule["after"]) and rule["after"] >= 1))
   end
 
   defp at({_, _, steps}), do: steps
@@ -151,7 +157,7 @@ defmodule Loka.Content.Waits do
   end
 
   defp after_of(rule) do
-    if is_integer(rule["after"]), do: rule["after"], else: 0
+    Map.get(rule, "after", 0)
   end
 
   defp wait?(s), do: match?(%{"op" => "wait"}, s)
@@ -178,7 +184,7 @@ defmodule Loka.Content.Waits do
         "seconds" => %{
           "type" => "integer",
           "minimum" => 1,
-          "maximum" => 2_147_483_647,
+          "maximum" => @max,
           "description" => "Logical seconds, added to the rule's `after` and the waits before it."
         }
       }
