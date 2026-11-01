@@ -1,7 +1,7 @@
 // The panel's sections, each reading the Book's state or the watcher's API; no game logic here.
 import { Bookmark, Clock, FileCode2, PenLine } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ask, checkpoints, type Todo as Row, todo } from './author.ts';
+import { ask, checkpoints, type Todo as TodoRow, todo } from './author.ts';
 import type { Line, State, Step } from './book.ts';
 import { Badge } from './components/ui/badge.tsx';
 import { Button } from './components/ui/button.tsx';
@@ -9,14 +9,14 @@ import { GoToRoom, SetFact } from './cheats.tsx';
 import { Input } from './components/ui/input.tsx';
 import { Separator } from './components/ui/separator.tsx';
 
-const Heading = ({ children }: { children: React.ReactNode }) => (
+export const Heading = ({ children }: { children: React.ReactNode }) => (
   <h2 className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
     {children}
   </h2>
 );
 
 /** The last compile's diagnostics first: a writer reads the error before anything else. */
-export function Compile({ said, compiled, state, send }: { said?: string[]; compiled: boolean; state?: State; send: Send }) {
+export function Compile({ said, compiled, lint, state, send }: { said?: string[]; compiled: boolean; lint?: string[]; state?: State; send: Send }) {
   const placeNote = state?.placeNote;
   return (
     <section className="border-b px-3 py-2 text-sm">
@@ -40,6 +40,13 @@ export function Compile({ said, compiled, state, send }: { said?: string[]; comp
           {said.join('\n')}
         </pre>
       ) : null}
+      {lint === undefined ? null : lint.length ? (
+        <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-xs">
+          {lint.join('\n')}
+        </pre>
+      ) : (
+        <p className="mt-1 text-xs text-muted-foreground">lint clean</p>
+      )}
     </section>
   );
 }
@@ -152,71 +159,10 @@ function CheckpointList({ names, jump }: { names: string[]; jump: (n: string) =>
   );
 }
 
-/** Facts and quests as the kernel holds them now. */
-export function Facts({ state }: { state?: State }) {
-  const facts = Object.entries(state?.facts ?? {});
-  const quests = state?.quests ?? [];
-  return (
-    <div className="space-y-4 text-sm">
-      <div>
-        <Heading>Quests ({quests.length})</Heading>
-        <ul className="space-y-1">
-          {quests.map((q) => (
-            <li key={q.quest} className="flex items-center justify-between gap-2">
-              <span className="font-mono text-xs">{q.quest}</span>
-              <Badge variant="secondary">{q.state}</Badge>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <Separator />
-      <div>
-        <Heading>Facts ({facts.length})</Heading>
-        <ul className="space-y-1">
-          {facts.map(([k, v]) => (
-            <li key={k} className="flex items-center justify-between gap-2">
-              <span className="truncate font-mono text-xs">{k}</span>
-              <span className="shrink-0 font-mono text-xs text-muted-foreground">{JSON.stringify(v)}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-/** The rule explainer for the last recorded step (kernel/ts/play/why.ts, over POST /__author/why). */
-export function Why({ trace }: { trace: () => Promise<string[]> }) {
-  const [key, setKey] = useState('');
-  const [told, setTold] = useState('');
-  const why = async (on: 'action' | 'dialogue') => {
-    const rows = await trace();
-    ask('why', { trace: rows, [on]: key }).then(
-      ({ told }) => setTold(JSON.stringify(told, null, 1)),
-      (err: Error) => setTold(`Why failed: ${err.message}`),
-    );
-  };
-  return (
-    <div className="space-y-2">
-      <Heading>Why did the last step go that way?</Heading>
-      <Input aria-label="Action or dialogue key" placeholder="action or dialogue key" value={key} onChange={(e) => setKey(e.target.value)} />
-      <div className="flex gap-2">
-        <Button variant="secondary" size="sm" disabled={!key} onClick={() => void why('action')}>
-          Why action
-        </Button>
-        <Button variant="secondary" size="sm" disabled={!key} onClick={() => void why('dialogue')}>
-          Why dialogue
-        </Button>
-      </div>
-      {told ? <pre className="overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-xs">{told}</pre> : null}
-    </div>
-  );
-}
-
 /** Still to write: every `~` by the file that owns it, with the words written there; read again
  * after each compile (`said` changes), so a line just written leaves the list. */
 export function Todo({ said }: { said?: string[] }) {
-  const [rows, setRows] = useState<Row[]>();
+  const [rows, setRows] = useState<TodoRow[]>();
   useEffect(() => {
     todo().then(setRows, () => setRows(undefined));
   }, [said]);

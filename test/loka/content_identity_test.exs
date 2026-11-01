@@ -45,6 +45,18 @@ defmodule Loka.ContentIdentityTest do
                 "cartridge.world.identity.name_variants[1].when.subject"}
              ]
 
+    # Breaks: fact_at_least read with a subject a name variant does not have.
+    least = %{
+      "op" => "fact_at_least",
+      "fact" => "knows_name",
+      "subject" => "target",
+      "at_least" => 1
+    }
+
+    assert {"FACT_SCOPE_UNSUPPORTED", "cartridge.world.identity.name_variants[1].when.subject"} in diags.(
+             [id.(["name_variants", Access.at(1), "when"], least)]
+           )
+
     since = %{"op" => "time_since", "fact" => "wanted", "at_least" => 1}
 
     assert diags.([id.(["name_variants", Access.at(1), "when"], since)]) ==

@@ -363,7 +363,7 @@ defmodule Loka.ContentStartersTest do
   end
 
   # Breaks: the second pair lost, --from read as a pair, a relative path resolved against the
-  # repo instead of the caller, no next step, or a refused pair undoing the one before it.
+  # repo instead of the caller, no next step, or a refused pair leaving the ones before it written.
   test "the task takes several pairs and ends with the next step", %{tmp_dir: tmp} do
     out =
       ExUnit.CaptureIO.capture_io(fn ->
@@ -376,6 +376,9 @@ defmodule Loka.ContentStartersTest do
     assert read(dir, "rooms/yard.json")["exits"] == %{"west" => %{"to" => "start"}}
     assert read(dir, "npcs/thera.json")["room"] == "start"
     assert out =~ Path.join(dir, "npcs/thera.json") <> "\n"
+
+    assert out =~ "Still to write:\n"
+    assert out =~ "\nnpcs/thera.json (0 words written)\n  description\n  name\n  room_line\n"
 
     assert String.ends_with?(
              out,
@@ -399,7 +402,16 @@ defmodule Loka.ContentStartersTest do
       end)
     end
 
-    assert File.exists?(Path.join(dir, "items/lamp.json"))
+    refute File.exists?(Path.join(dir, "items/lamp.json"))
+
+    # A new cartridge made earlier in the same call goes too.
+    assert_raise Mix.Error, ~r/no rooms\/nowhere/, fn ->
+      ExUnit.CaptureIO.capture_io(fn ->
+        Mix.Tasks.Loka.New.run(~w(--cwd #{tmp} cartridge fresh rooms x --from nowhere east))
+      end)
+    end
+
+    refute File.exists?(Path.join(tmp, "fresh"))
 
     for args <- [
           [],
@@ -409,6 +421,48 @@ defmodule Loka.ContentStartersTest do
         ] do
       assert_raise Mix.Error, ~r/^usage: mix loka.new/, fn -> Mix.Tasks.Loka.New.run(args) end
     end
+  end
+
+  # Break: a refusal after a pair merged into an author's file deletes it or leaves the merge.
+  test "a refusal restores a hand-written file an earlier pair merged into", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    mine = ~s({"name":{"prose":"A cold cellar."},"description":{"prose":"Damp."},"exits":{}})
+    File.write!(Path.join(dir, "rooms/start.json"), mine)
+
+    assert_raise Mix.Error, ~r/no rooms\/nowhere/, fn ->
+      ExUnit.CaptureIO.capture_io(fn ->
+        Mix.Tasks.Loka.New.run(
+          ~w(--cwd #{tmp} rooms yard --from start east rooms z --from nowhere east mine)
+        )
+      end)
+    end
+
+    assert File.read!(Path.join(dir, "rooms/start.json")) == mine
+    refute File.exists?(Path.join(dir, "rooms/yard.json"))
+  end
+
+  # Break: a refused call deletes what it did not write (a scene saved in the editor meanwhile)
+  # or leaves the directory it made, or loses the old bytes of a file it merged into.
+  test "undo removes only what the run wrote", %{tmp_dir: tmp} do
+    made = Path.join(tmp, "newdir")
+    File.mkdir_p!(made)
+    File.write!(Path.join(made, "mine.json"), "new")
+    File.write!(Path.join(made, "bystander.scene"), "saved by the writer")
+    File.write!(Path.join(tmp, "old.json"), "merged")
+    File.mkdir_p!(Path.join(tmp, "gone/deeper"))
+    File.write!(Path.join(tmp, "gone/deeper/f.json"), "x")
+
+    Mix.Tasks.Loka.New.undo([
+      {Path.join(tmp, "old.json"), "before", []},
+      {Path.join(made, "mine.json"), nil, [made]},
+      {Path.join(tmp, "gone/deeper/f.json"), nil,
+       [Path.join(tmp, "gone/deeper"), Path.join(tmp, "gone")]}
+    ])
+
+    assert File.read!(Path.join(tmp, "old.json")) == "before"
+    assert File.read!(Path.join(made, "bystander.scene")) == "saved by the writer"
+    refute File.exists?(Path.join(made, "mine.json"))
+    refute File.exists?(Path.join(tmp, "gone"))
   end
 
   defp cartridge(parent) do

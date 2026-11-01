@@ -1,7 +1,6 @@
 // size: allow 450, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job; quest.activate split out for hs-1)
-// reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
-// §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
-// propose runs the FIFO queue, numbers the writer groups and counts the budgets.
+// reaction@1 (reaction.schema.json ReactionRule): the rules an event triggers and one delivery's
+// explicit sequence. proposal.ts propose runs the queue, numbers writer groups and counts budgets.
 import type {
   CharacterId,
   CommandId,
@@ -179,7 +178,8 @@ export function sequence(
       ops.push(...setBarrier(then, step, cause, about.subject, group, own, emit)); // row W22
     } else if (step.op === 'item.move' || step.op === 'npc.move') {
       ops.push(...moved(then, step, actor, about, group, ops, holders, emit)); // rows 41, FD5
-    } else if (step.op === 'population.spawn') ops.push(...spawn(then, step, group, ops, mint));
+    } else if (step.op === 'population.spawn')
+      ops.push(...spawn(then, step, group, ops, mint, holders));
     else if (step.op === 'replenish.run') {
       const refill = replenishStep(then, step.replenish, group, steps, holders, roots); // hs-1
       if (typeof refill === 'string') return { kind: 'fault', code: refill };

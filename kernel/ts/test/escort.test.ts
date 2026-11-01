@@ -363,3 +363,57 @@ test('Rejoin refuses a relation whose original accepted choice names a different
   a.choose('rejoin', 'invalid_state');
   assert.equal(relation(a.world()).status, 'separated');
 });
+
+// Breaks (loka-ynfo): a schedule hour reaching a following escort counts as a move the single-NPC
+// body refuses, the job goes unrun, and the next Move faults evaluator_error.
+test('a following escort ignores its schedule hour and still follows the next Move', () => {
+  const a = setup((c) => {
+    c.npcs[`${prefix}:npc/child`].daily_schedule = { '20': ref('room', 'village_green') };
+    c.npcs[`${prefix}:npc/stranger`].daily_schedule = { '20': ref('room', 'well_lane') };
+  });
+  a.ready();
+  a.choose('rescue');
+  a.move('south');
+  const hour = elapsed(a.world(), 72000, 100);
+  assert.equal(hour.decision.kind, 'accepted', JSON.stringify(hour.decision));
+  // Only the escort's own NPC holds still: another's hour still walks it.
+  assert.equal(
+    hour.world.state.containers[entity(hour.world, 'npc', 'stranger')],
+    room(hour.world, 'well_lane'),
+  );
+  assert.equal(
+    hour.world.state.containers[entity(hour.world, 'npc', 'child')],
+    room(hour.world, 'well_lane'),
+  );
+  const moved = step(
+    hour.world,
+    {
+      id: 'dddddddd-0000-4000-8000-000000000099',
+      world_context_id: hour.world.context,
+      payload: { actor_id: hour.world.character, type: 'move', direction: 'south' },
+    } as Command,
+    101,
+  );
+  assert.equal(moved.decision.kind, 'accepted', JSON.stringify(moved.decision));
+  assert.equal(
+    moved.world.state.containers[entity(moved.world, 'npc', 'child')],
+    room(moved.world, 'ferry_landing'),
+  );
+});
+
+// Breaks: a separated escort's NPC still counts as escorting, so its schedule hour never walks it.
+test('a separated escort walks its schedule hour', () => {
+  const a = setup((c) => {
+    c.npcs[`${prefix}:npc/child`].daily_schedule = { '20': ref('room', 'village_green') };
+  });
+  a.ready();
+  a.choose('rescue');
+  fallInCellar(a);
+  assert.equal(relation(a.world()).status, 'separated');
+  const hour = elapsed(a.world(), 72000, 200);
+  assert.equal(hour.decision.kind, 'accepted', JSON.stringify(hour.decision));
+  assert.equal(
+    hour.world.state.containers[entity(hour.world, 'npc', 'child')],
+    room(hour.world, 'village_green'),
+  );
+});

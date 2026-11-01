@@ -14,6 +14,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { refString, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
+import { escorting } from '../escort/shared.ts';
 import { living } from '../death/shared.ts';
 import { eventRooms } from '../lookups.ts';
 import { livingMembers } from '../population/refs.ts';
@@ -104,10 +105,8 @@ function moveOne(
 ): DeltaOp[] {
   if (!npc || world.entities[npc]?.kind !== 'npc') return [];
   // A following escort stays with its player (escort@1: never detached); a rooted NPC stays put.
-  const escorting = Object.values(world.state.escorts ?? {}).some(
-    (e) => e?.npc_id === npc && e.status === 'following',
-  );
-  if (!living(world, npc) || engaged(world, npc) || escorting || !moves(world, npc)) return [];
+  if (!living(world, npc) || engaged(world, npc) || escorting(world, npc) || !moves(world, npc))
+    return [];
   const last = ops.filter((o) => o.op === 'entity.transfer' && o.entity_id === npc).pop();
   const at = last?.op === 'entity.transfer' ? last.destination_id : world.state.containers[npc];
   if (!at || at === room) return [];

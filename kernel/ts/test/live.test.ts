@@ -1,10 +1,12 @@
 // Fast loop: only a change confined to text values travels as an overlay; anything structural
 // does not (docs/system/cartridge.md#author-preview).
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  rmSync,
   readdirSync,
   readFileSync,
   writeFileSync,
@@ -12,7 +14,8 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { lastRun, serve, sourceOf, textOnly } from '../play/live.ts';
+import { ROOT } from '../play/obs.ts';
+import { lastRun, limited, lintLines, serve, sourceOf, textOnly } from '../play/live.ts';
 
 const was = { format: 1, rooms: { a: { name: 'room.a' } }, text: { 'room.a': 'line one' } };
 
@@ -158,6 +161,19 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   assert.equal(told.status, 200, await told.clone().text());
   const { reactions } = (await told.json()) as { reactions: { rule: string; fired: number }[] };
   assert.equal(reactions.find((r) => r.rule.endsWith('reaction/bell_after'))?.fired, 1);
+  const toScene = (sent: object) =>
+    fetch(`http://127.0.0.1:${port + 1}/why`, { method: 'POST', body: JSON.stringify(sent) });
+  // Break: a run with no step yet answers as a failure to explain, not with what to do
+  const none = await toScene({ trace: [rows[0]] });
+  assert.equal(none.status, 400);
+  assert.equal(await none.json(), 'Take a step in the Book first.');
+  // Break: the page gets no sentences, or the answer for the world before the last step.
+  // Step 1 accepts the lantern quest, so bram's policy holds only after that step.
+  const asked = await toScene({ trace: rows.slice(0, 2), dialogue: 'bram' });
+  assert.equal(asked.status, 200, await asked.clone().text());
+  assert.deepEqual(((await asked.json()) as { lines: unknown }).lines, [
+    { text: 'quest lantern is active', ok: true, depth: 0 },
+  ]);
   // Break: an artifact the kernel will not load reaches the explainer, not its own diagnostic
   writeFileSync(join(dir, 'bad.json'), '{"canonical":"{}","sha256":"x"}');
   const refused = serve(port + 2, dir, join(dir, 'bad.json'));
@@ -168,4 +184,75 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   });
   assert.equal(unloaded.status, 400);
   assert.match((await unloaded.json()) as string, /"code":"UNKNOWN_FORMAT"/);
+});
+
+// Breaks: a clean run reads as findings; findings lost; a lint that crashed reads as clean, or its
+// stack trace as findings.
+test('lint lines: clean, findings, or a lint that did not run', () => {
+  assert.deepEqual(lintLines(0, 'compiling...\n'), []);
+  assert.deepEqual(lintLines(1, 'Compiling 3 files\nitems/x.json: unused\na/b.json: long line\n'), [
+    'items/x.json: unused',
+    'a/b.json: long line',
+  ]);
+  assert.deepEqual(lintLines(1, 'crash\n'), ['lint failed (exit 1)']);
+  assert.deepEqual(lintLines(2, 'items/x.json: unused\n'), ['lint failed (exit 2)']);
+  assert.deepEqual(lintLines(null, ''), ['lint failed (exit null)']);
+});
+
+// Break: the route is unwired, or does not decode the question, or reads the wrong source tree.
+test('find is served from the source and artifact the watcher was given', async (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-find-route-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  writeFileSync(join(dir, 'text.json'), '{"a": "Old Maud"}\n');
+  const port = 21000 + Math.floor(Math.random() * 20000);
+  const server = serve(port, dir, join(dir, 'none.json'));
+  t.after(() => server.close());
+  const found = await fetch(`http://127.0.0.1:${port}/find?q=${encodeURIComponent('old maud')}`);
+  assert.deepEqual(await found.json(), {
+    hits: [{ at: 'text.json:1', text: '{"a": "Old Maud"}' }],
+    total: 1,
+    refs: [],
+  });
+});
+
+test('GET /numbers: reports on the dev artifact', async (t) => {
+  // Break: handing the dev {canonical, sha256} form to the reports, which refuse it.
+  const dir = mkdtempSync(join(tmpdir(), 'loka-live-'));
+  const port = 20000 + Math.floor(Math.random() * 20000);
+  const artifact = join(dir, 'dev.json');
+  const server = serve(port, dir, artifact);
+  t.after(() => {
+    server.close();
+    rmSync(dir, { recursive: true, force: true });
+  });
+  const url = `http://127.0.0.1:${port}/numbers`;
+  execFileSync('mix', ['loka.compile', 'cartridges/needs_sampler', join(dir, 'c.json')], {
+    cwd: ROOT,
+    stdio: 'pipe',
+  });
+  const [, canonical, sha256] = /^\{"cartridge":(.*),"content_hash":"(.*)"\}$/s.exec(
+    readFileSync(join(dir, 'c.json'), 'utf8'),
+  )!;
+  writeFileSync(artifact, JSON.stringify({ canonical, sha256 }));
+  const told = (await (await fetch(url)).json()) as {
+    hash: string;
+    pacing: { report: { levels: null; pools: { pools: { pool: string; empty: unknown }[] } } };
+    fights: { report: { targets: unknown[] } };
+  };
+  assert.equal(told.hash, sha256);
+  assert.equal(told.pacing.report.levels, null);
+  const hunger = told.pacing.report.pools.pools.find((p) => p.pool.endsWith('resource/hunger'));
+  assert.deepEqual(hunger?.empty, { seeds: 4, hour: 10 });
+  assert.deepEqual(told.fights.report.targets, []);
+});
+
+test('limited: a report past its limit is killed and says so; a failing one gives its words', async () => {
+  // Break: no kill, so a slow cartridge hangs the panel; or a failure shown as an empty report.
+  const slow = await limited(['-e', 'setTimeout(() => {}, 9000)'], 1);
+  assert.ok('why' in slow && /^timed out after 1 s/.test(slow.why), JSON.stringify(slow));
+  const bad = await limited(['-e', 'console.error("no such foe"); process.exit(1)'], 5);
+  assert.deepEqual(bad, { why: 'no such foe' });
+  // Break: a report that prints something else throws in the callback and takes the watcher down.
+  const garbled = await limited(['-e', 'console.log("x")'], 5);
+  assert.ok('why' in garbled && /^not a report/.test(garbled.why), JSON.stringify(garbled));
 });

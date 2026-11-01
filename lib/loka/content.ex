@@ -65,6 +65,9 @@ defmodule Loka.Content do
           {:ok, [Path.t()]} | {:error, String.t()}
   defdelegate new(dir, kind, name, from), to: Loka.Content.Starters, as: :write
 
+  @doc "`new/4` calling `before_write.(path, old bytes or nil)` before each file it writes."
+  defdelegate new(dir, kind, name, from, before_write), to: Loka.Content.Starters, as: :write
+
   @doc "The kinds `new/4` knows."
   defdelegate kinds(), to: Loka.Content.Starters
 

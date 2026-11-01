@@ -32,6 +32,19 @@ export function caughtUp(game: Pulsed) {
   return why ? `${last.kind} ${why}` : last.kind;
 }
 
+/** The dev clock moved by `ms`, delivered now and recorded only if delivered; else what stopped it. */
+export function advanced(
+  ms: number,
+  moveClock: (ms: number) => void,
+  game: Pulsed,
+  keep: (step: Step) => void,
+) {
+  moveClock(ms);
+  const how = caughtUp(game);
+  if (how !== 'ready') return `Advance: ${how}; not recorded.`;
+  keep({ advance: ms });
+}
+
 /**
  * The dev cartridge's host clocks, the same in the author preview and `bin/loka check`: they move
  * only with the dev clock, so a recording replays alike in both.
@@ -50,6 +63,36 @@ export const asRefs = (intent: Intent, ids: Ids): Intent => ({
     (id) => (Object.keys(ids).find((ref) => ids[ref] === id) ?? id) as EntityId,
   ),
 });
+
+type Recorded = {
+  invoke: (intent: Intent) => Reply;
+  entityIds: () => Ids;
+  pending: () => boolean;
+  subscribe: (update: (u: { kind: string; reply?: Reply }) => void) => unknown;
+};
+/**
+ * `game.invoke` recording each accepted input once. The session may hold an input (invocation.ts):
+ * it settles on a later pulse, and until then any other invoke is answered with the held input's
+ * reply, so what is recorded is the held input, not the latest sent.
+ */
+export function recording(game: Recorded, keep: (step: Step) => void) {
+  let held: Intent | undefined;
+  const settle = (reply: Reply) => {
+    if (reply.kind === 'saved' && reply.decision.kind === 'accepted' && held)
+      keep({ intent: held });
+    if (!game.pending()) held = undefined;
+  };
+  game.subscribe((u) => {
+    if (u.kind === 'completion' && u.reply) settle(u.reply);
+  });
+  return (intent: Intent) => {
+    if (!game.pending()) held = undefined; // a throw that left nothing held
+    held ??= asRefs(intent, game.entityIds()); // before the action eats, gives away or kills its target
+    const reply = game.invoke(intent); // a throw (the write failed) leaves the attempt held
+    settle(reply);
+    return reply;
+  };
+}
 
 const describe = (reply: Reply) => {
   if (reply.kind !== 'saved') return reply.kind;

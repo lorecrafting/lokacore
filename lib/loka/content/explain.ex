@@ -49,6 +49,8 @@ defmodule Loka.Content.Explain do
          RESERVED_FACT | The engine owns the fact name `{field}`. | Rename your fact.
          INVALID_TIME_POLICY | This needs a time policy the cartridge does not have, or does not fit it. | Fix time_policy in cartridge.json, or remove this.
          VISITS_UNRECORDED | A visits check can never pass, because nothing records visits. | Add `knowledge` under requires.capabilities in cartridge.json.
+         SPEAKER_ELSEWHERE | This `then` leads to a speaker in another room, so the talk ends as it reaches them. | Move the speaker, or end the talk here.
+         LOOP_SPEAKER | Talk opens this `then` loop at its first key, so this speaker is only reached through the loop. | Give the speaker a dialogue of their own if the player should start here.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
          SITE_EXIT_CONFLICT | This site names direction `{field}`, where the room has no exit. | Name a direction the room has an exit in.
          invalid_type | `{field}` must be {expected}{fields_named}.
@@ -74,6 +76,10 @@ defmodule Loka.Content.Explain do
          cut_steps | `steps` here would replace every word of `scenes/{key}.cut`. | Remove `steps` and keep the words in the `.cut`, or delete the `.cut`.
          cut_scene_line | Line `{text}` looks like a `.scene` line, but a cutscene is only paragraphs, so the player would read it as written. | Move it to a `.scene` file, or reword it if it is meant as words.
          not_utf8 | Line `{text}` is not valid UTF-8 (the odd character marks the byte). | Save the file as UTF-8.
+         unattackable_engage | `{rel}` is `unattackable` and has a `disposition.engage` line, which would never play. | Remove `disposition.engage`, or remove `unattackable`.
+         unattackable_foe | `{rel}` is `unattackable`, so no one can fight it, and a population's members and a death credit's NPC are there to be fought. | Remove `unattackable`, or name another NPC.
+         template_schedule | `npcs/{key}` is a spawn template, so nothing it would schedule exists to walk. | Remove `daily_schedule`, or remove `spawn_template`.
+         duration_status | An action with a duration cannot apply a status. | Remove `duration`, or remove `status.apply`.
          layout_same_spot | Rooms {rooms} share the spot x {x}, y {y}, z {z}. | Give each its own x, y, z in layout.json.
          layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.
          gives_holder | `gives: {item}` hands over nothing until `{holder}` holds `{item}`: the choice stays hidden. | Set the item's location to `{"in": "npc", "npc": "{holder}"}`, or move it there in play.

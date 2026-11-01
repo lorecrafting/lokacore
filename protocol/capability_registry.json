@@ -143,6 +143,7 @@
     ],
     "policies": [
       "fact_compare",
+      "fact_at_least",
       "time_since"
     ]
   },

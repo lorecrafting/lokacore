@@ -305,6 +305,7 @@ A non-player character (00a ยง4), as a holder of items so far: its key, keywords
 | services | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Services this NPC offers. |
 | shop | [Shop](source-kinds.gen.md#shop) |  | See the type. |
 | spawn_template | `true` |  | Not placed in a fresh world; used as a population template. |
+| unattackable | boolean |  | loka-w9id: this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile. |
 | words | [NameWords](source-kinds.gen.md#namewords) |  | See the type. |
 
 ## populations
@@ -1605,7 +1606,7 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 
 ## Fields without a meaning
 
-301 fields.
+310 fields.
 
 - `ActionCraft: consume`
 - `ActionCraft: consume.to`
@@ -1801,6 +1802,9 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `cartridge: version`
 - `choice: availability.from`
 - `choice: availability.through`
+- `choice: narration_variants`
+- `choice: then`
+- `choice: then_failed`
 - `dialogues: riddle.wrong`
 - `dialogues: riddle.wrong_limit`
 - `items: fuel`
@@ -1811,6 +1815,12 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `npcs: daily_schedule.*{walks=true}.goal`
 - `npcs: daily_schedule.*{walks=true}.room`
 - `npcs: perception`
+- `policy fact_at_least: at_least`
+- `policy fact_at_least: fact`
+- `policy fact_at_least: item`
+- `policy fact_at_least: npc`
+- `policy fact_at_least: subject`
+- `policy fact_at_least: with`
 - `populations: area`
 - `populations: home`
 - `populations: item`

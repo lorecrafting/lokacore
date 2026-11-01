@@ -114,4 +114,10 @@ test('every definition map of the cartridge schema is in the key stage', () => {
     maps.filter((m: string) => !DEFINITION_MAPS.includes(m)),
     [],
   );
+  // The other way round (loka-k5z4): the key stage parses each key without a guard, so a map in it
+  // without a pattern lets a bad key reach that parse and throw a TypeError, not a diagnostic.
+  assert.deepEqual(
+    DEFINITION_MAPS.filter((m) => !maps.includes(m)),
+    [],
+  );
 });

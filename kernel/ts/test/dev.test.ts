@@ -185,14 +185,6 @@ test('set fact refuses unknown, ill-typed, reserved and owned facts', () => {
 // Break: one load proof's fact stops being refused, so the cheat leaves a save that never reopens.
 test('set fact refuses every fact a reopen proves from its mechanic, and only those', () => {
   const fact = ref('fact', 'cellar_disarmed');
-  const riddle = (wrong_limit?: number) => ({
-    dialogues: {
-      d: {
-        riddle: { choice_id: 'c', wrong_limit },
-        choices: { c: { steps: [{ op: 'fact.assign', fact, value: true }] } },
-      },
-    },
-  });
   const other = ref('fact', 'other');
   const carried = (extra: object) => ({
     dialogues: {
@@ -204,11 +196,9 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
     },
   });
   const owned = [
-    riddle(1),
     carried({ escort: {} }),
     { quests: { q: { deadline: { fact, trust_fact: other } } } },
     { quests: { q: { deadline: { fact: other, trust_fact: fact } } } },
-    { npcs: { n: { perception: { discovered: fact } } } },
     { quests: { q: { expedition: { survived_fact: fact, faction: other } } } },
     { quests: { q: { expedition: { survived_fact: other, faction: fact } } } },
   ];
@@ -218,38 +208,26 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
   };
   for (const patch of owned)
     assert.equal(code(set(under(patch), 'cellar_disarmed', true)), 'invalid_state');
-  assert.equal(code(set(under(riddle()), 'cellar_disarmed', true)), 'accepted');
-  assert.equal(code(set(under(carried({})), 'cellar_disarmed', true)), 'accepted');
+  // Break: a term with no reopen proof (#544 removed them) comes back and blocks a harmless cheat.
+  const accepted = [
+    carried({}),
+    carried({ receive: { item: 'it' } }),
+    {
+      dialogues: {
+        d: {
+          riddle: { choice_id: 'c', wrong_limit: 1 },
+          choices: { c: { steps: [{ op: 'fact.assign', fact, value: true }] } },
+        },
+      },
+    },
+    { npcs: { n: { perception: { discovered: fact } } } },
+    { topics: { t: { fact } } },
+  ];
+  for (const patch of accepted)
+    assert.equal(code(set(under(patch), 'cellar_disarmed', true)), 'accepted');
   // Break: an absent optional trust_fact reaches refString and the cheat throws.
   const noTrust = { quests: { q: { deadline: { fact: other } } } };
   assert.equal(code(set(under(noTrust), 'cellar_disarmed', true)), 'accepted');
-
-  // Break: a choice is refused for carrying any item, or a custody item is let through.
-  const itemRef = ref('item', 'x');
-  const steps = [{ op: 'fact.assign', fact, value: true }];
-  const dialogue = (choice: object, quest?: string) => ({
-    quest,
-    roles: { it: { role: 'item', item: itemRef } },
-    choices: { c: choice },
-  });
-  const custody = (give: boolean, dialogues: object) => {
-    const w = under({ dialogues });
-    const entities = { ...w.entities, x: { kind: 'item', give_allowed: give } };
-    const entityIds = { ...w.entityIds, [refString(itemRef as DefinitionRef)]: 'x' };
-    return { ...w, entities, entityIds } as unknown as World;
-  };
-  const verdict = (give: boolean, dialogues: object) =>
-    code(set(custody(give, dialogues), 'cellar_disarmed', true));
-  const receive = { receive: { item: 'it' }, steps };
-  const handOver = { hand_over: { item: 'it' }, steps };
-  assert.equal(verdict(false, { d: dialogue(receive) }), 'invalid_state');
-  assert.equal(verdict(true, { d: dialogue(receive) }), 'accepted');
-  assert.equal(verdict(false, { d: dialogue(receive, 'q') }), 'accepted');
-  assert.equal(verdict(false, { d: dialogue(handOver) }), 'accepted');
-  assert.equal(
-    verdict(false, { d: dialogue({ receive: { item: 'it' } }), h: dialogue(handOver) }),
-    'invalid_state',
-  );
 });
 
 // Break: the trace replay (Why, bin/play) re-decides a preview's cheat through `step`, which refuses it.

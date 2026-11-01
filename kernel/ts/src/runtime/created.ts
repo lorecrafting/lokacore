@@ -101,12 +101,28 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
   return true;
 }
 
+// The plan's area, or a room a plan or event-subject move names: a move may take a member out (loka-kgd.159).
+export function homeRoom(world: World, plan: DefinitionRef, room: EntityId | undefined) {
+  return (
+    world.populationSpecs[key(plan)]!.plan.area.some((r) => world.roomIds[refString(r)] === room) ||
+    Object.values(world.cartridge.reactions ?? {}).some((rule) =>
+      rule.steps.some(
+        (s) =>
+          s.op === 'npc.move' &&
+          s.room &&
+          (s.plan ? key(s.plan) === key(plan) : !s.npc) &&
+          world.roomIds[refString(s.room)] === room,
+      ),
+    )
+  );
+}
+
 function houndValid(world: World, state: State, id: string, identity: Identity, draft: Draft) {
   if (identity.origin.kind !== 'spawned') return false;
   const spec = world.populationSpecs[key(identity.origin.by)];
   const room = state.containers[id];
   if (!spec) return false;
-  const ordinary = spec.plan.area.some((r) => world.roomIds[refString(r)] === room);
+  const ordinary = homeRoom(world, identity.origin.by, room);
   const crow =
     state.crows?.[key({ kind: 'crow', plan: identity.origin.by, slot: identity.origin.slot })];
   const excursion =
