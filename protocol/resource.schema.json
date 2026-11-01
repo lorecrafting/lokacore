@@ -257,7 +257,7 @@
         "start": {"description":"Starting HP, between the bounds.",
           "$ref": "#/$defs/ResourceInt"
         },
-        "gain": {"description":"HP added per gain interval, up to maximum.",
+        "gain": {"description":"HP added each hour (3600 seconds), up to maximum.",
           "type": "integer",
           "minimum": 0,
           "maximum": 2147483647

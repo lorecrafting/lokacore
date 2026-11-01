@@ -49,14 +49,14 @@
         "riddle": {"description":"A riddle answered by a typed word.",
           "type": "object",
           "properties": {
-            "choice_id": {
+            "choice_id": {"description":"The choice that takes a typed answer.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "answer": {
+            "answer": {"description":"The answer that solves the riddle, compared lowercased.",
               "type": "string",
               "pattern": "^[a-z]{1,32}$"
             },
-            "bank": {
+            "bank": {"description":"The letters an answer may use, each once per entry; an answer that does not fit is refused.",
               "type": "array",
               "items": {
                 "type": "string",

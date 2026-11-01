@@ -950,13 +950,13 @@
           "description": "A luck check (21 §7 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 §5.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two checks, of scripted actions or dialogue choices, may not share one (DUPLICATE_DEFINITION).",
           "type": "object",
           "properties": {
-            "key": {
+            "key": {"description":"This check's key, unique across scripted actions and dialogue choices.",
               "$ref": "action.schema.json#/$defs/Key"
             },
             "kind": {
               "const": "luck"
             },
-            "chance": {
+            "chance": {"description":"Passes when a draw from 0 to 99 is below this.",
               "type": "integer",
               "minimum": 1,
               "maximum": 99
@@ -973,16 +973,16 @@
           "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the scripted action's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of a luck check apply.",
           "type": "object",
           "properties": {
-            "key": {
+            "key": {"description":"This check's key, unique across scripted actions and dialogue choices.",
               "$ref": "action.schema.json#/$defs/Key"
             },
             "kind": {
               "const": "threshold"
             },
-            "resource": {
+            "resource": {"description":"The body's resource, read at admission before costs.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "difficulty": {
+            "difficulty": {"description":"Passes when the resource is at least this.",
               "$ref": "resource.schema.json#/$defs/ResourceInt"
             }
           },
@@ -997,16 +997,16 @@
         {
           "type": "object",
           "properties": {
-            "key": {
+            "key": {"description":"This check's key, unique across scripted actions and dialogue choices.",
               "$ref": "action.schema.json#/$defs/Key"
             },
             "kind": {
               "const": "attribute_threshold"
             },
-            "attribute": {
+            "attribute": {"description":"The actor's attribute compared.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "difficulty": {
+            "difficulty": {"description":"The value compared against.",
               "type": "integer"
             }
           },
@@ -1022,7 +1022,7 @@
           "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform. Dialogue choice: A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
           "type": "object",
           "properties": {
-            "key": {
+            "key": {"description":"This check's key, unique across scripted actions and dialogue choices.",
               "$ref": "action.schema.json#/$defs/Key"
             },
             "kind": {
@@ -1037,10 +1037,10 @@
             "npc": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "rating": {
+            "rating": {"description":"The target detail's rating; a scripted action refuses it.",
               "type": "integer"
             },
-            "failure": {
+            "failure": {"description":"The failure branch; a dialogue choice needs it, a scripted action refuses it.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },

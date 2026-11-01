@@ -214,10 +214,10 @@
           "additionalProperties": false,
           "required": ["wear", "remove", "worn", "removed"],
           "properties": {
-            "wear": {"$ref": "text.schema.json#/$defs/TextKey"},
-            "remove": {"$ref": "text.schema.json#/$defs/TextKey"},
-            "worn": {"$ref": "text.schema.json#/$defs/TextKey"},
-            "removed": {"$ref": "text.schema.json#/$defs/TextKey"}
+            "wear": {"description":"The item's Wear label.","$ref": "text.schema.json#/$defs/TextKey"},
+            "remove": {"description":"The item's Remove label.","$ref": "text.schema.json#/$defs/TextKey"},
+            "worn": {"description":"The line told when the item is worn.","$ref": "text.schema.json#/$defs/TextKey"},
+            "removed": {"description":"The line told when the item is removed.","$ref": "text.schema.json#/$defs/TextKey"}
           }
         },
         "affects": {
@@ -261,7 +261,7 @@
         "weapon": {
           "$ref": "entity.schema.json#/$defs/WeaponProfile"
         },
-        "block_chance": {
+        "block_chance": {"description":"Percent chance that this shield blocks while held.",
           "type": "integer",
           "minimum": 0,
           "maximum": 100
@@ -296,7 +296,7 @@
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
           }
         },
-        "cues": {
+        "cues": {"description":"Sense cues reaching nearby rooms from this item: 1 to 4 of {sense, text, range, when?}.",
           "$ref": "entity.schema.json#/$defs/Cues"
         },
         "locks": {
@@ -438,85 +438,85 @@
       "description": "Toolbox row G2 (docs/system/mechanics.md damage model): an NPC's percent resistance per damage kind (DamageKind) and per material tag (Tag) of the weapon whose own attack strikes (an unarmed or NPC attack has none); negative is a weakness. An attack sums the entries for its kind and each such tag, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.",
       "type": "object",
       "properties": {
-        "cold": {
+        "cold": {"description":"Percent resistance to `cold`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "fire": {
+        "fire": {"description":"Percent resistance to `fire`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "physical": {
+        "physical": {"description":"Percent resistance to `physical`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "poison": {
+        "poison": {"description":"Percent resistance to `poison`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "burnable": {
+        "burnable": {"description":"Percent resistance to `burnable`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "cool": {
+        "cool": {"description":"Percent resistance to `cool`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "cursed": {
+        "cursed": {"description":"Percent resistance to `cursed`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "exposed": {
+        "exposed": {"description":"Percent resistance to `exposed`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "fragile": {
+        "fragile": {"description":"Percent resistance to `fragile`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "lamp": {
+        "lamp": {"description":"Percent resistance to `lamp`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "liquid_holding": {
+        "liquid_holding": {"description":"Percent resistance to `liquid_holding`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "metal": {
+        "metal": {"description":"Percent resistance to `metal`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "rod": {
+        "rod": {"description":"Percent resistance to `rod`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "sharp": {
+        "sharp": {"description":"Percent resistance to `sharp`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "silver": {
+        "silver": {"description":"Percent resistance to `silver`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "warm": {
+        "warm": {"description":"Percent resistance to `warm`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "waterproof": {
+        "waterproof": {"description":"Percent resistance to `waterproof`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "windproof": {
+        "windproof": {"description":"Percent resistance to `windproof`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "wooden": {
+        "wooden": {"description":"Percent resistance to `wooden`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "air": {
+        "air": {"description":"Percent resistance to `air`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "chasm": {
+        "chasm": {"description":"Percent resistance to `chasm`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "water": {
+        "water": {"description":"Percent resistance to `water`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "bed": {
+        "bed": {"description":"Percent resistance to `bed`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "forge": {
+        "forge": {"description":"Percent resistance to `forge`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "rug": {
+        "rug": {"description":"Percent resistance to `rug`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "marsh": {
+        "marsh": {"description":"Percent resistance to `marsh`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "road": {
+        "road": {"description":"Percent resistance to `road`, as a damage kind or the striking weapon's material tag. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         }
       },
@@ -590,16 +590,16 @@
             "friendly": {
               "$ref": "policy.schema.json#/$defs/Policy"
             },
-            "engage": {
+            "engage": {"description":"Said when this hostile NPC engages a player who walks in.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "arrest": {
+            "arrest": {"description":"Instead of engage: this hostile NPC stops a player who walks in, and no encounter opens.",
               "type": "object",
               "properties": {
-                "to": {
+                "to": {"description":"The room the arrested body goes to.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "narration": {
+                "narration": {"description":"Said when the player is arrested.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -617,24 +617,24 @@
           "description": "Toolbox row FD7 (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
           "type": "object",
           "properties": {
-            "unknown": {
+            "unknown": {"description":"What the NPC says when no answer matches the topic.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "answers": {
+            "answers": {"description":"What the NPC answers, topic by topic.",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
-                  "topic": {
+                  "topic": {"description":"The topic this answer is for.",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
-                  "text": {
+                  "text": {"description":"What the NPC says when asked about this topic.",
                     "$ref": "text.schema.json#/$defs/TextKey"
                   },
                   "when": {
                     "$ref": "policy.schema.json#/$defs/Policy"
                   },
-                  "grants": {
+                  "grants": {"description":"Granted when this answer is given.",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   }
                 },
@@ -661,7 +661,7 @@
         "hp": {
           "$ref": "resource.schema.json#/$defs/NpcHp"
         },
-        "resource_starts": {
+        "resource_starts": {"description":"Starting value of each named resource.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]*$"
@@ -679,7 +679,7 @@
         "perception": {
           "type": "object",
           "properties": {
-            "discovered": {
+            "discovered": {"description":"A fact that must be true for this NPC to be visible.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -688,10 +688,10 @@
           ],
           "additionalProperties": false
         },
-        "spawn_template": {
+        "spawn_template": {"description":"Not placed in a fresh world; used as a population template.",
           "const": true
         },
-        "services": {
+        "services": {"description":"Services this NPC offers.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -705,10 +705,10 @@
           "items": {
             "type": "object",
             "properties": {
-              "item": {
+              "item": {"description":"An item of this cartridge held by this NPC.",
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               },
-              "chance": {
+              "chance": {"description":"Percent chance, 1 to 100, that the item stays on the corpse; otherwise it is kept back.",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 100
@@ -743,10 +743,10 @@
           "items": {
             "type": "object",
             "properties": {
-              "attribute": {
+              "attribute": {"description":"A cartridge attribute, read by opposed checks.",
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               },
-              "value": {
+              "value": {"description":"This NPC's value of the attribute.",
                 "$ref": "resource.schema.json#/$defs/ResourceInt"
               }
             },
@@ -757,7 +757,7 @@
             "additionalProperties": false
           }
         },
-        "cues": {
+        "cues": {"description":"Sense cues reaching nearby rooms from this NPC: 1 to 4 of {sense, text, range, when?}.",
           "$ref": "entity.schema.json#/$defs/Cues"
         },
         "locks": {
@@ -774,7 +774,7 @@
           "description": "Toolbox row 43b (needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template.",
           "type": "object",
           "properties": {
-            "terrain": {
+            "terrain": {"description":"Room tags this mount carries a rider over; a move into a room with none of them is refused. 1 to 8 unique tags.",
               "type": "array",
               "minItems": 1,
               "maxItems": 8,
@@ -783,7 +783,7 @@
                 "$ref": "entity.schema.json#/$defs/Tag"
               }
             },
-            "cost_percent": {
+            "cost_percent": {"description":"Percent, 0 to 1000, applied last to the rider's move cost, rounded down. Absent: the cost is not scaled.",
               "type": "integer",
               "minimum": 0,
               "maximum": 1000
