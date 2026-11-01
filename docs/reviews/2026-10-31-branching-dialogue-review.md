@@ -128,3 +128,40 @@ Forged, after reload, refused as they should be: no answers with item on the cap
 | the five in B3; `handedBack` counts quests (smaller file set only) | green |
 
 Not run: fact-gated give through a chain or to a captain at reload; dead-speaker and escort cases from the first round. The forged cases are save edits, so S4 needs local file access to exploit.
+
+## Fix re-check at 34700e6ac
+
+Commit `34700e6ac3d17b2ab5c1fcebae51ad4cf5651537`, round 2, the last. CI by `gh run list --commit`: ci, book-e2e, graph-diff all completed success. Verdict: **CHANGES REQUIRED** (F1, F2). Governing rule: the PM's ruling in the `loka-vduxr.10` notes (not the owner's): never refusing a lawful save outranks catching every forgery; a forged save that loads must not throw on every launch or persist corruption. Whether the save guarantee covers tampered saves stays an open owner question.
+
+| Item | Disposition |
+| --- | --- |
+| B2 fact-set take, fact-clear give | Closed for op writers; `branching_reload` green. Residue is F2. |
+| B3 five green mutants | Closed. The `:57`, `:66`, `:132`, `:130`, `:241`, `:206`, `:232` mutants below are red. |
+| S3 refused root, hand-off, return chain | Closed. Warning `LOOP_SPEAKER` (`dialogue_links.ex:69`), in explain, schema and `mechanics.md`; the compile task prints warnings; severity mutant red. |
+| S4 forged custody loads | Closed by the ruling. `branching_forged` plays on after forged holder; forged facts, deleted quest row and forged terminal row are still refused. |
+| Question, retake then quest hand_over | Closed. Reloads, test green. |
+| Narrate step on receive, skill.acquire, escort | Closed. `dialogue-consequences.ts:51` and `rule.ts:186` mutants red. |
+| Refusals on main | `message.test.ts` three-dot diff empty. Only test deletions are two setup lines in `escort.test.ts`. |
+
+### Findings
+
+**F1, blocker, `mobile/authority/local-story/dialogue-save.ts:232`.** Ran it. A custody item with two variant dialogues of one quest told apart by policy (`y_a` when `gate_open`, `z_b` when not), both offering choice id `deliver` with `hand_over` to the clerk. Take, accept, deliver through either one, reopen: `save_corrupt` on every launch. The guard looks only at this dialogue's key, so the variant nobody answered refuses. Same when `z_b` is a plain `deliver` answer resolving the quest with the token kept. Control with distinct choice ids loads. By reading, main's guard is also keyed to one dialogue, and dialogue `policy` predates this PR, so this is probably not a regression (no run on main); branching makes the shape likelier. Fix direction: accept an answered row of any dialogue of that quest with that choice id, keeping `branching_forged:94`. A `quest.resolve` reaction with the same outcome is the same line by reading, not run.
+
+**F2, blocker, `dialogue-save.ts:178-182,206`.** Ran it. `factWriters` counts only dialogue ops. Topic `gate` with fact `known`, answer `a_learn` granting it, one-way take with `fact.assign known true`: learn before take, reopen, `save_corrupt` at `:210`. Control without the grant loads. Scene `on_end.assign` and combat credit write facts the same way, by reading. Same class as F1 and the residue of B2, a blocker: a lawful save refused on every launch. By reading, main's check also ignored other writers (no run on main). Fix direction: skip the check when a non-dialogue writer of that fact exists (topic grant, scene `on_end.assign`, combat credit, rest), keeping the `branching_forged:48` refusal for a fact only dialogue writes.
+
+**F3, should-fix, PR #544 body line 45.** It says reload "validates only what a row asserts", that a forged terminal quest row now loads, and that `message.test.ts` refusal cases moved or went. At this head `message.test.ts` is unchanged and `branching_forged:94` refuses. The owner would read a removed guard that was kept. The body also has no round for this head's fix.
+
+### Probes and open items
+
+Eliminated: `repeatable` non-exchange quest (compile refuses); per-subject fact on a take (`FACT_SCOPE_UNSUPPORTED`). `oneWayStarts` (`:126-134`) refuses nothing by itself, it only drops item inference, so it does not restrict a writer. Real samplers: no cartridge dialogue moves a custody item (`give_allowed: false` with a non-quest `receive`) and none uses `then`, so there was nothing real to replay; every probe is constructed content.
+
+Open: F1, F2, F3. Question, not run: reaction `item.move`; giver killed before the take (holder corpse, `:66`); crow theft (`:68`). `:66` and `:68` are on main too.
+
+| Mutant (null 54 pass on reload, forged, escort; 78 with `quest_started_at`, `quest_deadline`, `message`) | Result |
+| --- | --- |
+| `:57`, `:66`, `:130`, `:132`, `:206`, `:232`, `:241`; `dialogue-consequences.ts:51`; `rule.ts:186` | red |
+| `:68`, `:78` | red, only in `message.test.ts` |
+| `seen` check removed in `handoff` walk | hangs, counted killed |
+| `LOOP_SPEAKER` severity | red |
+
+Not run: full mutate_diff sweep (narrow sample, as briefed); the Elixir and TypeScript rules were not compared in this round.
