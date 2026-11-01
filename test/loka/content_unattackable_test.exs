@@ -43,7 +43,13 @@ defmodule Loka.ContentUnattackableTest do
       File.cp_r!("cartridges/#{sampler}", at)
       update(Path.join(at, "npcs/#{npc}.json"), &Map.put(&1, "unattackable", true))
       assert {:error, diags} = Loka.Content.compile(at)
-      assert Enum.any?(diags, &(&1["path"] =~ code))
+      assert [%{"path" => path}] = Enum.filter(diags, &(&1["data"]["why"] == "unattackable_foe"))
+      assert path =~ code
+
+      assert Enum.any?(
+               Loka.Content.explained(diags, at),
+               &(&1 =~ "`npcs/#{npc}.json` is `unattackable`, so no one can fight it")
+             )
     end
   end
 

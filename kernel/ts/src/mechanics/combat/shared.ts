@@ -40,7 +40,7 @@ export function attackRefused(world: World, actor: CharacterId, target: EntityId
   if (!npc) return 'not_found' as const;
   if (npc.kind !== 'npc' || !attackable(world, actor, target) || !world.cartridge.world?.combat)
     return 'invalid_target' as const;
-  // No hp of its own: nothing to lose, so nothing to fight (loka-xyyd); the cause is generic (loka-w9id).
+  // No hp of its own: nothing to lose, so nothing to fight (loka-xyyd).
   if (!npc.hp) return { code: 'invalid_target', cause: 'cannot_be_hurt' } as const;
   const origin = world.state.created?.[target]?.origin;
   if (

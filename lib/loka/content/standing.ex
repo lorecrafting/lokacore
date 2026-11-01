@@ -21,7 +21,7 @@ defmodule Loka.Content.Standing do
     adjusts = for {_, {rel, [], r}} <- defs["reaction"] || %{}, a <- adjusts(r), do: {rel, a}
 
     shapes(npcs) ++
-      unattackable_engage(npcs) ++
+      unattackable(npcs, m, defs) ++
       arrests(npcs, m, defs) ++
       ints(adjusts, m, defs) ++ speakers(m, defs)
   end
@@ -40,6 +40,8 @@ defmodule Loka.Content.Standing do
     for {%{"op" => "fact.adjust"} = s, i} <- Enum.with_index(r["steps"] || []), do: {s, i}
   end
 
+  defp unattackable(npcs, m, defs), do: unattackable_engage(npcs) ++ unattackable_members(m, defs)
+
   # An engage line opens a fight, which an unattackable NPC never has (loka-w9id).
   defp unattackable_engage(npcs) do
     for {rel, %{"unattackable" => true, "disposition" => %{"engage" => _}}} <- npcs,
@@ -49,6 +51,16 @@ defmodule Loka.Content.Standing do
             "rel" => rel
           })
   end
+
+  # A population's members are there to be fought, which an unattackable NPC never is.
+  defp unattackable_members(m, defs) do
+    for {_, {rel, steps, %{"npc" => npc}}} <- defs["population"] || %{},
+        {npc_rel, _, %{"unattackable" => true}} <- [Refs.resolve(npc, "npc", m, defs)],
+        do: unattackable_foe(at(rel, steps ++ ["npc"]), npc_rel)
+  end
+
+  def unattackable_foe(path, rel),
+    do: diag("SCHEMA_VIOLATION", path, %{"why" => "unattackable_foe", "rel" => rel})
 
   defp shapes(npcs) do
     for {rel, %{"disposition" => d} = n} <- npcs,

@@ -804,7 +804,7 @@ without hp never engages (`hostileAt`), so no round ever targets a body with no 
 (loka-xyyd, after the #515 ruling "no hp, no band"). Composition record: consumer Attack
 and the GameView Attack offer; reads the NPC definition's `hp`; writes, events, jobs and save
 rows: none new; reused `attackRefused`, `hostileAt` and the RefusalCause route; new: the
-`cannot_be_hurt` cause, a generic name a later protection flag (loka-w9id) reuses. Installed
+`cannot_be_hurt` cause. Installed
 kernel 1.126.
 
 An NPC with `unattackable: true` (loka-w9id) can never be fought, whatever else it carries. One

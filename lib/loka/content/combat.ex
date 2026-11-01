@@ -196,11 +196,14 @@ defmodule Loka.Content.Combat do
 
   defp credit_npc(c, path, m, defs) do
     case resolve(c["npc"], "npc", m, defs) do
-      {_, _, n} ->
-        if(n["attack"] && n["unattackable"] != true,
-          do: [],
-          else: [bad(at("cartridge.json", path ++ ["npc"]))]
-        ) ++
+      {rel, _, n} ->
+        npc_at = at("cartridge.json", path ++ ["npc"])
+
+        if(n["attack"], do: [], else: [bad(npc_at)]) ++
+          if(n["unattackable"],
+            do: [Loka.Content.Standing.unattackable_foe(npc_at, rel)],
+            else: []
+          ) ++
           if(not is_tuple(resolve(c["room"], "room", m, defs)) or n["room"] == c["room"],
             do: [],
             else: [bad(at("cartridge.json", path ++ ["room"]))]
