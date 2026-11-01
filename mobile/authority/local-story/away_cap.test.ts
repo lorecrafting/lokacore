@@ -167,6 +167,21 @@ test('a return with debt still retained tops it up to one cap, not past it', (t)
   a.sql.close();
 });
 
+// Breaks: debt from open play past the cap makes the room for credit negative, so a return lowers the target.
+test('a return with more debt than the cap credits nothing and keeps the debt', (t) => {
+  const a = elapsedHost(save(t), { wall: 10000, mono: 0 }, compiled('cartridges/toolbox_showcase'));
+  a.game.invoke(south);
+  const start = Number(checkpoint(a.sql).target);
+  a.clock.wall += 5184000;
+  a.clock.mono += 5184000; // 72 real minutes of open play at rate 50
+  a.game.pulse();
+  assert.equal(checkpoint(a.sql).target, start + 259200);
+  a.clock.wall += YEAR;
+  a.game.pulse('resume');
+  assert.equal(checkpoint(a.sql).target, start + 259200);
+  a.sql.close();
+});
+
 // Breaks: a recap save defers its catch-up past open, so a refused delivery arrives on a pulse as a
 // plain error with no Start over, where opening would have said save_corrupt.
 test('a catch-up refused on a pulse reads as save_corrupt', () => {
