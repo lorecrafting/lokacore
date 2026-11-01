@@ -55,7 +55,8 @@ const setFact = (world: World, payload: SetFact): ReturnType<Rule<'dev'>> => {
     const run = assigned(world, actor_id, { ops: [], position: 0, facts: {} }, { fact, value: to });
     return accepted(world, 'dev_fact_set', run.ops, []);
   } catch (e) {
-    if (e instanceof KernelError) return rejected('invalid_state'); // another mechanic owns this fact
+    if (e instanceof KernelError && e.code === 'precondition_failed')
+      return rejected('invalid_state'); // another mechanic owns this fact
     throw e;
   }
 };

@@ -94,7 +94,7 @@ const createSession = (open: () => Db) =>
       // The author preview plays the one seed and frozen clock of `bin/loka check` (no random: the
       // template world); only its dev clock can move them, so any other dev build keeps real time.
       ...(devClock
-        ? { time: frozenClock(skew), dev: true }
+        ? { time: frozenClock(skew), dev: true } // mutate-skip: preview host wiring; the gate is pinned in dev-cheats.test
         : {
             random: getRandomValues,
             time: { wall: () => Date.now(), monotonic: () => performance.now() },
