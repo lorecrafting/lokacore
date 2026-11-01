@@ -30,7 +30,7 @@ import {
 } from './palette.ts';
 import type { Effects, Reading } from './reading.ts';
 import { onCue, useCues } from './cues.ts';
-import { playCue } from './cueSounds.ts';
+import { playCue, playTurn } from './cueSounds.ts';
 import { useSettings, type SettingStores } from './useSettings.ts';
 import { color, size, space } from './tokens.ts';
 import { Fault, Heard } from './lines.tsx';
@@ -219,7 +219,7 @@ export function BookView(p: ViewProps) {
             </PageTurn>
             <Bottom {...ctx} page={page} />
             <Heard said={p.screen.said} />
-            {__DEV__ && <HapticPulse />}
+            <HapticPulse />
           </View>
           {p.palette.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
@@ -230,7 +230,7 @@ export function BookView(p: ViewProps) {
 
 function useCueSounds(p: ViewProps) {
   useEffect(() => onCue(playCue), []); // before useCues: heard from its first cue
-  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn, p.resumes, useReducedMotion());
+  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn, p.resumes, useReducedMotion(), playTurn);
 }
 
 // The footer (on the world), the status line and a press's fault.

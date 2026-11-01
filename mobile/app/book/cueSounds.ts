@@ -11,6 +11,8 @@ const feel = (kind: HapticKind) => {
   if (performance.now() >= curlEnds) haptic(kind);
 };
 
+export const playTurn = () => play('pageTurn');
+
 export const playCue = (cue: Cue) => {
   const name = soundOf(cue);
   if (!name) return;

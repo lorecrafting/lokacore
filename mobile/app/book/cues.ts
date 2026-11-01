@@ -16,7 +16,6 @@ const CUES = {
   status_out: { s: 1 },
   quest_on: { s: 2, sound: 'questGained' },
   quest_resolved: { s: 3, sound: 'questDone' },
-  page_turn: { s: 1, sound: 'pageTurn' }, // sent past the queue (useCues)
   quest_fail: { s: 2, sound: 'questFailed' },
   level: { s: 3, sound: 'level' },
   skill_learned: { s: 2, sound: 'skillNew' },
@@ -279,7 +278,6 @@ const noteResolved = (now: GameView, was: GameView) =>
     ?.ids?.forEach((id) => unreadResolved.add(id));
 
 const listeners = new Set<(cue: Cue) => void>();
-const send = (cue: Cue) => listeners.forEach((listener) => listener(cue));
 // One action, one paper sound (owner, 2026-10-31): a take's flick stands for its page turn.
 const flicks = (cue: Cue) => cue.name === 'pickup' && !cue.silent;
 export let curlEnds = -Infinity; // at the latest: a curl starts by the picture deadline
@@ -296,6 +294,7 @@ export function useCues(
   turn: number,
   resumes = 0,
   reduced = false,
+  onTurn?: () => void,
 ) {
   const queue = useRef(QUIET);
   const seen = useRef(turn);
@@ -310,8 +309,8 @@ export function useCues(
         curlEnds = performance.now() + motion.quick.duration + motion.turn.duration;
       const { q, fired } = step(queue.current, cues, performance.now(), turned);
       queue.current = q;
-      if (turned && !cues.some(flicks)) send({ name: 'page_turn' });
-      fired.forEach(send);
+      if (turned && !cues.some(flicks)) onTurn?.();
+      for (const cue of fired) for (const listener of listeners) listener(cue);
       // A timer can land a little early: it waits again rather than strand the pending cue.
       const due = q.held.length ? q.heldUntil : q.pending ? q.until : undefined;
       if (due !== undefined) timer = setTimeout(() => advance([]), due - performance.now());

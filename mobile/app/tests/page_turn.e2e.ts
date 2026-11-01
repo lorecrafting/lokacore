@@ -91,9 +91,9 @@ test('a page turn plays a bundled recording', async ({ app, screen, browser }) =
       return new Real(src);
     } as unknown as typeof Audio;
   });
-  await app.open('/?preview=page-turn');
-  await expect(screen.getByRole('button', 'Continue')).toBeVisible({ timeout: COLD });
-  await screen.getByRole('button', 'Continue').click(); // a real press: it unlocks the player
+  await app.open('/'); // the Book itself: the turn is heard through its cue bus
+  await screen.getByRole('button', /; opens Contents$/).tap({ timeout: COLD }); // unlocks the player
+  await screen.getByRole('button', 'Settings, open').tap();
   await expect(screen.getByRole('button', LABEL.startOver)).toBeVisible();
   const ok = await browser.evaluate(async () => {
     const url = ((globalThis as any).played as string[]).find((u) => u.includes('ui-paper-turn-'));

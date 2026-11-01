@@ -5,7 +5,7 @@ import { effects, flat, rig } from './__tests__/hook-rig.ts';
 import { nodes } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
-const { playCue } = await import('./cueSounds.ts');
+const { playCue, playTurn } = await import('./cueSounds.ts');
 const { onCue, useCues } = await import('./cues.ts');
 const { ItemPop } = await import('./ItemPop.tsx');
 const { RunningHead } = await import('./RunningHead.tsx');
@@ -227,7 +227,7 @@ test('one action, one paper sound', (t) => {
     g.bookDevice = [];
     const draw = rig(t);
     for (const [v, turn] of steps) {
-      draw(() => useCues(v, false, turn));
+      draw(() => useCues(v, false, turn, 0, false, playTurn));
       now += 1000;
       t.mock.timers.tick(1000);
     }

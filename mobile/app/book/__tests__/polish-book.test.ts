@@ -105,7 +105,6 @@ export const bundle = (name = 'containers_cartridge_sampler_hash') =>
     readFileSync(new URL(`../../../../protocol/fixtures/${name}.json`, import.meta.url), 'utf8'),
   );
 export const fixture = bundle();
-(globalThis as any).__DEV__ = true; // Book's HapticPulse gate
 
 // A component drawn outside book() (nodes() alone) gets stateless hooks; book()'s draw sets its own.
 (globalThis as any)[Symbol.for('loka-book-test-state')] = (v: any) => [
