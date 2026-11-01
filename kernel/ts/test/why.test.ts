@@ -131,6 +131,69 @@ test('W3, W4: a broken guard names its failing leaf; rule-key order holds', () =
   });
 });
 
+// Breaks: `now` ignored, so the panel answers for the world before the last step; a fact leaf's value
+// missing or read on the wrong world; the last step (7) past the end of the replay.
+test('now: a policy reads on the world after the step, a fact leaf saying its value', () => {
+  const c = load((c) => {
+    c.scripted_actions[`${S}action/coil_rope`].policy = rung(1);
+  });
+  const leaf = (n: number, now?: true) => {
+    const { holds, now: value } = (
+      why(c, trace, n, { action: 'coil_rope', ...(now && { now }) }).action as any
+    ).policy;
+    return [holds, value];
+  };
+  assert.deepEqual(leaf(4), [false, 0]); // before the first ring
+  assert.deepEqual(leaf(4, true), [true, 1]);
+  assert.deepEqual(leaf(7), [false, 3]);
+  assert.deepEqual(leaf(7, true), [false, -1]);
+});
+
+// Breaks: `now` keeps the last command's target, so "could I do this next?" answers for who was
+// just talked to (step 3 is `talk`, whose target stays in the room); or `now` answers a flat false
+// for a target not chosen yet, though the next command may well be admitted.
+test('now: a leaf that reads the target depends on it', () => {
+  const c = load((c) => {
+    c.manifest.requires.capabilities.target_resolution = c.lock.capabilities.target_resolution = 1;
+    c.scripted_actions[`${S}action/coil_rope`].policy = { op: 'target_present' };
+  });
+  const present = (now?: true) =>
+    (why(c, trace, 3, { action: 'coil_rope', ...(now && { now }) }).action as any).policy.holds;
+  assert.equal(present(), true);
+  assert.equal(present(true), 'depends');
+});
+
+// Breaks: a leaf that does not read the target answers 'depends' too (it can be known), or one
+// that does is read as a flat false. Each row: the leaf, its answer on the world after step 3.
+test('now: only the leaves admission reads at the target depend on it', () => {
+  const base = load(() => {});
+  const lantern = ref('item', 'lantern');
+  const status = ref('status', 'burning');
+  const rows: [object, unknown][] = [
+    [{ op: 'status_active', status, subject: 'target' }, 'depends'],
+    [{ op: 'status_active', status, subject: 'self' }, false],
+    [{ ...rung(true), subject: 'target' }, 'depends'],
+    [rung(true), false],
+    [{ ...rung(true), subject: 'target', item: lantern }, false],
+    [{ ...rung(true), subject: 'target', npc: ref('npc', 'bram') }, false],
+    [{ op: 'has_tag', tag: 'wet', subject: 'target' }, 'depends'],
+    [{ op: 'has_tag', tag: 'wet', subject: 'room' }, false],
+    [{ op: 'has_tag', tag: 'wet', item: lantern }, false],
+    [{ op: 'has_tag', tag: 'wet', barrier: ref('barrier', 'gate') }, false],
+  ];
+  for (const [policy, answer] of rows) {
+    // set past the loader: the fixture declares none of these capabilities, and only the shape is read
+    const key = `${S}action/coil_rope`;
+    const actions = {
+      ...base.scripted_actions!,
+      [key]: { ...base.scripted_actions![key]!, policy },
+    };
+    const c = { ...base, scripted_actions: actions } as Cartridge;
+    const on = { action: 'coil_rope', now: true } as const;
+    assert.equal((why(c, trace, 3, on).action as any).policy.holds, answer, JSON.stringify(policy));
+  }
+});
+
 // Break: an on-demand policy read on the world after the step (at 1 the quest is active after
 // accept_quest; at 2 the lantern is held after take).
 test('W5, W6: dialogue and scripted action policies read on the world before the step', () => {
