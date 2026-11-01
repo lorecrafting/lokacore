@@ -846,6 +846,7 @@ loopback-only author API (`LOKA_AUTHOR_PORT`, default 19008) that the preview pr
 with it set fails to build, and the app throws when the dev cartridge flag reaches a non-`__DEV__`
 build. The author tools below are reachable only in that bundle (a production export keeps a few dead strings) and change no protocol, save or kernel_api.
 
+- **Numbers.** The panel's Numbers tab and `bin/loka sim <cartridge dir>` ([`sim.ts`](../../kernel/ts/play/sim.ts)) report, read-only: each pool over game hours under the [measured-flows](#measured-flows-balance-tool-2) worker, XP per level with the kills that pay for it, and the [fight matrix](#fight-matrix-and-encounter-rating-balance-tool-7) (`GET /__author/numbers`). Each report runs in a child process killed at a limit; one that does not finish says so. Nothing is written to the source tree.
 - **Keep my place.** The preview records each input the Book sends that the session saved (the
   intent, its targets as definition refs `cartridge@version:kind/key`, and each dev-clock advance
   in milliseconds) under the artifact's hash. After a reload into a different hash it replays the
