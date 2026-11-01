@@ -812,15 +812,16 @@ query, `attackable` in `kernel/ts/src/mechanics/combat/shared.ts` (an NPC with a
 `unattackable`, not an ally or group member), decides it for three readers: Attack's admission
 (`attackRefused`: resolved command `attack`, action key `attack`, target ids `[npc]`, refused
 `invalid_target` with no cause), the GameView (`combatOffered`: the Attack offer is absent), and
-the entry engage (`hostileAt`: it does not open a fight, so neither a flagged NPC nor a companion
-ever engages). `attackRefused` also guards the spell fight-back and the expedition, unchanged. The
+the entry engage (`hostileAt`: neither a flagged NPC nor a companion opens a fight; an arrest is
+not a fight and still applies). `attackRefused` also guards the spell fight-back and the expedition, unchanged. The
 kernel adds no refusal words. A peaceful room is the existing room `sanctuary: true`, not a second
 key: it refuses Attack `invalid_state`, its offer stays listed unavailable, and nothing engages on
 entry. Composition record: consumer the owner's prologue NPCs and companions; reads the NPC
 definition's `unattackable`, an optional key that is absent from existing content; writes, events, jobs and save rows: none new; reused `ally`,
 `attackRefused`, `combatOffered`, `hostileAt`, `sanctuary`; new: the key and the `attackable`
 query. An aimed damage spell (`damage` in `scripted_action/spell.ts`) still reads only `hp`. An
-`unattackable` NPC with `disposition.engage` is a compile error. Installed kernel 1.135.
+`unattackable` NPC with `disposition.engage`, as a population's member or as a death credit's NPC is a
+compile error. Installed kernel 1.135.
 
 A round's blow stops at the target's authored hp floor, or at 0 under a negative floor, where death
 fires; a floored foe stays alive and the fight goes on, as under a spell's damage (`aboveFloor`,

@@ -21,13 +21,30 @@ defmodule Loka.ContentUnattackableTest do
            )
   end
 
-  # Break: the flag is accepted on something it cannot apply to, and silently does nothing.
-  test "unattackable on an item is an unknown field", %{tmp_dir: dir} do
-    File.cp_r!("cartridges/fear_sampler", dir)
-    update(Path.join(dir, "items/ear.json"), &Map.put(&1, "unattackable", true))
+  # Break: removing the engage line, as the error advises, trips the "hostile with attack needs an
+  # engage line" shape, so a protected NPC with a profile cannot compile at all.
+  test "unattackable with attack, hostile and no engage line compiles", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/standing_sampler", dir)
 
-    {:error, diags} = Loka.Content.compile(dir)
-    assert Enum.any?(diags, &(&1["code"] == "UNKNOWN_FIELD" and &1["path"] =~ "unattackable"))
+    update(Path.join(dir, "npcs/guard.json"), fn n ->
+      n |> Map.put("unattackable", true) |> update_in(["disposition"], &Map.delete(&1, "engage"))
+    end)
+
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+  end
+
+  # Break: a population or death credit names an NPC no one can fight: it compiles and never pays.
+  test "unattackable population members and death credit NPCs are refused", %{tmp_dir: dir} do
+    for {sampler, npc, code} <- [
+          {"boss_sampler", "guard", "populations/guards"},
+          {"cellar_sampler", "cellar_rat_1", "cartridge.json"}
+        ] do
+      at = Path.join(dir, sampler)
+      File.cp_r!("cartridges/#{sampler}", at)
+      update(Path.join(at, "npcs/#{npc}.json"), &Map.put(&1, "unattackable", true))
+      assert {:error, diags} = Loka.Content.compile(at)
+      assert Enum.any?(diags, &(&1["path"] =~ code))
+    end
   end
 
   # Break: the compiler drops the key (kernel never sees it), or refuses it on a story NPC with no

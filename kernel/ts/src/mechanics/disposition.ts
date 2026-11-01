@@ -100,7 +100,7 @@ const arrived = (body: EntityId, there: EntityId, to: EntityId) =>
   }) as const;
 
 /**
- * The first NPC in `there`, in EntityId order, living, unengaged, with an attack and an engage
+ * The first NPC in `there`, in EntityId order, living, unengaged, `attackable` with hp and an engage
  * line (with combat) or an arrest (row 35), hostile to `actor` and seeing its body (status
  * reader 8); none in a sanctuary or during a scene.
  * ponytail: read before the move's own writes (the room, an expedition's faction fact), so a room- or presence-relative

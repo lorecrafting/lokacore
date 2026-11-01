@@ -220,7 +220,7 @@ defmodule Loka.Content.Population do
     Enum.any?(refs, &(&1 in [:invalid, :unresolved])) or
       ((b["item"] != nil or allow_empty) && npc && corpse &&
          npc["spawn_template"] == true && npc["room"] == b["home"] &&
-         is_map(npc["hp"]) && is_map(npc["attack"]) &&
+         is_map(npc["hp"]) && is_map(npc["attack"]) && npc["unattackable"] != true &&
          (b["item"] == nil or
             ((is_map(item) and item["location"] == %{"in" => "template"} and
                 item["container"] == nil and

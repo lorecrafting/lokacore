@@ -2,7 +2,7 @@ defmodule Loka.Content.Standing do
   @moduledoc """
   Toolbox rows 15 and G11: a reaction's fact.adjust names a bounded int fact (FACT_TYPE_MISMATCH);
   an NPC's disposition is on an authored NPC, with an engage line exactly when it is hostile and
-  has an attack (SCHEMA_VIOLATION). Row 35: an arrest instead of the engage line needs
+  has an attack and is not `unattackable` (SCHEMA_VIOLATION). Row 35: an arrest instead of the engage line needs
   `hostile` and no `engage` (SCHEMA_VIOLATION) and a room to move the body to
   (UNRESOLVED_REFERENCE).
   The conditions and the engage text are
@@ -58,6 +58,9 @@ defmodule Loka.Content.Standing do
   end
 
   defp bad?(%{"arrest" => _} = d, _), do: not is_map_key(d, "hostile") or is_map_key(d, "engage")
+
+  # An unattackable NPC never engages: an engage line has its own diagnostic, none is required.
+  defp bad?(_, %{"unattackable" => true}), do: false
 
   defp bad?(d, n),
     do: is_map_key(d, "engage") != (is_map_key(d, "hostile") and is_map_key(n, "attack"))
