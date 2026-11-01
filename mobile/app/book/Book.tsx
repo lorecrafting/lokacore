@@ -29,8 +29,8 @@ import {
   type Palette,
 } from './palette.ts';
 import type { Effects, Reading } from './reading.ts';
-import { onCue, useCues } from './cues.ts';
-import { playCue, playTurn } from './cueSounds.ts';
+import { useCues } from './cues.ts';
+import { hearCues, playTurn } from './cueSounds.ts';
 import { useSettings, type SettingStores } from './useSettings.ts';
 import { color, size, space } from './tokens.ts';
 import { Fault, Heard } from './lines.tsx';
@@ -229,7 +229,7 @@ export function BookView(p: ViewProps) {
 }
 
 function useCueSounds(p: ViewProps) {
-  useEffect(() => onCue(playCue), []); // before useCues: heard from its first cue
+  useEffect(hearCues, []); // before useCues: heard from its first cue
   const s = p.screen;
   useCues(s.view, s.catchingUp, p.flip.turn, p.resumes, useReducedMotion(), playTurn, s.died);
 }
