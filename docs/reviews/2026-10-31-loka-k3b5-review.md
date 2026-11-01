@@ -42,3 +42,45 @@ PR claims rerun: implementation back at the merge-base gives 4 red, the full-dis
 Not run: the fault display in a browser (read from code, status confirmed at the session).
 
 Verdict: CHANGES REQUIRED
+
+## Re-check at a58b6936e03b36adc4f63cdedfe4cb0abfde172f (fixes a3279fed6, a58b6936e), full review of the fix
+
+Must hold ([save.md:262](../system/save.md)): a job row no handler can run is `save_corrupt`; a save written by normal play never is. A cold open never throws a raw TypeError from such a row.
+
+CI (`gh run list --commit`): ci 41275992471, book-e2e 41275992432, graph-diff 41275996708, all success.
+
+### False-refusal hunt: 0 refusals
+
+- Every lawful writer read: off-hour NPC rows carry a marker (`combat/rule.ts:56`, `round_flow.ts:220`, `disposition.ts:163`, `expedition/sequence.ts:146`) or come from `nextHour` (`daily.ts:68`, `rule.ts:147,152`). Completed rows keep markers (`compose_job.ts` spreads the row).
+- Local-story suite, `jobSave` after every commit: rows bleed, calendar, npc with and without encounter (completed and pending), order, population, crow, sight, quest, reaction, replenish, room water, status.
+- Random walker on real file SQLite, 14 reopens each: showcase seeds 2-5, build_sampler, bleed, shoo, expedition, penalty, containers_sampler_v010.
+- Long run: showcase seed 7, 62 game days, 72 h jumps, 5 reopens, 1611 receipts, about 8292 finished rows.
+- `kernel/ts/test/sim.test.ts` with the row check after each step: 0.
+- An edited schedule cannot reach an old save: the save's `pin.content_hash` selects its release (`authority.ts:94`), so the row is judged against the cartridge that wrote it.
+- A `schedule_cases` hour cannot refuse: `nextHour` is only given `daily_schedule` (`daily.ts:68`, `rule.ts:147` through `scheduleOf`, `daily.ts:28`), so a due hour is always one of its keys; `.scene` lowering derives cases and fallbacks from one key set (`schedules.ex:77-84`). Keys read back through `hourOf` (`calendar.ex:114-119`).
+- A killed scheduled NPC cannot refuse: nothing deletes from `world.entities` (`created.ts:91` only adds), so `npc?.kind` still reads `npc`.
+
+### Cost
+
+19750 NPC rows, worst path: 84-124 ms against a 23-29 s load (loka-qhvgq, mostly `liquid-save.ts:30`). Acceptable. Synthetic world, this machine.
+
+### Test the tests
+
+`bin/mutate.sh` hand mutants, tree restored. Red: `elapsed.ts:70` `<=` to `<` (the blocker mutant), hour check dropped, `same` skip dropped, replenish lookup true, wage gate true, kinds order, reaction and `CLOCK_JOB` removed, `water_generation` removed. Survived: see nit below. Forged cases fail on their planted rows; `open_catch_up.test.ts` 15 pass. `bin/mutate_diff.sh` not rerun (BASELINE-RED here in round one).
+
+### Findings
+
+**Should-fix, non-blocking. `job-save.ts:8-27`.** It mirrors `decideAt`'s dispatch (`schedule/rule.ts:74-99`) with no shared table and no sync check. A new job kind added to `decideAt` alone is refused as `save_corrupt` on each reload holding a changed row of that kind: Start over offered on a good save. Only a cold reopen in that kind's walkthrough catches it. Cheapest fix: a comment at the dispatch naming `job-save.ts`, or a Beads follow-up.
+
+**Nit. `job-save.ts:14,15,25`.** `row.crow_phase !== undefined ||`, `row.sight ||` and `npc?.kind === 'npc' &&` survive their mutants. Sight and crow rows carry kind `population` (`crow/shared.ts:22`, `population/behavior.ts:135`) and an item ref has no `daily_schedule`, so for lawful rows all three are deletable. Only a forged row differs.
+
+**Nit. PR #541 body.** Says "5 pass" (15 now), omits `job-save.ts`, its `/code-review` range `origin/main..e919b218a` does not cover it, and Open says forged kinds' TypeErrors are "Unchanged from main", now false. Forged-kind refusal and mutant-red claims rerun and backed; these are not. Fix in the next push or at merge.
+
+### Notes and questions
+
+- Question: a spawn-template NPC with a `daily_schedule` gets a first row and no entity. `placeOf` (`daily.ts:40`) throws at run, pre-existing; the fresh-equal skip keeps the row from being refused. Compiler refusal not confirmed.
+- Frozen `sampler_v010_hash`, `reward_storage_hash`, `cartridge_sampler_hash` give `save_corrupt` on first reopen through `custodyValid` (`created.ts`): trunk with no `container: true`. The compiler refuses that source (`entities.ex:227-239`); kernel diff is empty, so not this PR.
+
+Not checked: 120 game days (62 run), a wage row at load (static only, `escort/job.ts:24` matches), a phone, a walker-driven spawned scheduled NPC.
+
+Verdict: APPROVE WITH NOTES

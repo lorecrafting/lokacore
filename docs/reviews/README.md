@@ -12,7 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Second-opinion review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-review.md): **APPROVE WITH NOTES**
-- [Review: open-time catch-up refusal offers Start over (loka-k3b5, PR #541)](2026-10-31-loka-k3b5-review.md): **CHANGES REQUIRED**
+- [Review: open-time catch-up refusal offers Start over (loka-k3b5, PR #541)](2026-10-31-loka-k3b5-review.md): **APPROVE WITH NOTES**
 - [Second opinion: level reached emission in `join`, PR #538 (loka-g5hh.2 E1, kernel_api 1.131)](2026-10-31-loka-g5hh.2-e1-level-reached-second-review.md): **APPROVE**
 - [Review: level reached event, level filter, gained line, view from, PR #538 (loka-g5hh.2 E1, kernel_api 1.131)](2026-10-31-loka-g5hh.2-e1-level-reached-review.md): **APPROVE**
 - [Second opinion: catch-up folds saturated permanent status ticks, PR #535 (loka-sgqk, kernel_api 1.130)](2026-10-31-catch-up-fold-second-review.md): **APPROVE WITH NOTES**
