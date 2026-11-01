@@ -363,7 +363,7 @@ defmodule Loka.ContentStartersTest do
   end
 
   # Breaks: the second pair lost, --from read as a pair, a relative path resolved against the
-  # repo instead of the caller, no next step, or a refused pair undoing the one before it.
+  # repo instead of the caller, no next step, or a refused pair leaving the ones before it written.
   test "the task takes several pairs and ends with the next step", %{tmp_dir: tmp} do
     out =
       ExUnit.CaptureIO.capture_io(fn ->
@@ -376,6 +376,9 @@ defmodule Loka.ContentStartersTest do
     assert read(dir, "rooms/yard.json")["exits"] == %{"west" => %{"to" => "start"}}
     assert read(dir, "npcs/thera.json")["room"] == "start"
     assert out =~ Path.join(dir, "npcs/thera.json") <> "\n"
+
+    assert out =~ "Still to write:\n"
+    assert out =~ "\nnpcs/thera.json (0 words written)\n  description\n  name\n  room_line\n"
 
     assert String.ends_with?(
              out,
@@ -399,7 +402,16 @@ defmodule Loka.ContentStartersTest do
       end)
     end
 
-    assert File.exists?(Path.join(dir, "items/lamp.json"))
+    refute File.exists?(Path.join(dir, "items/lamp.json"))
+
+    # A new cartridge made earlier in the same call goes too.
+    assert_raise Mix.Error, ~r/no rooms\/nowhere/, fn ->
+      ExUnit.CaptureIO.capture_io(fn ->
+        Mix.Tasks.Loka.New.run(~w(--cwd #{tmp} cartridge fresh rooms x --from nowhere east))
+      end)
+    end
+
+    refute File.exists?(Path.join(tmp, "fresh"))
 
     for args <- [
           [],
