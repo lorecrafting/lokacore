@@ -50,3 +50,40 @@ Governing: [mechanics.md Branching dialogue](../system/mechanics.md), [writing-t
 14 rows, one at a time, against the importing test files, two null controls green, tree clean. All 12 mutants died: `ts_live_entry`, `ts_onward_entry`, `ts_oneTalk_first_when_none`, `ts_oneTalk_first_not_available`, `ts_oneTalk_named_too`, `ex_live_entry`, `ex_unused_false`, `ex_free_links`, `ex_opened_entry`, `ex_merge_written`, `ex_merge_own`, `ex_unreachable_refused`. Hand-picked over the last commits, not a `bin/mutate_diff.sh` rerun. No frozen fixture touched beyond the regenerated `mobile/app/stories/live/*.sql` stamp lines.
 
 Reruns of PR claims: "No runtime or `kernel_api` change" is false (S3); "107 cartridges, no difference" is backed.
+
+## Re-check: head `280fe76d0` (merged with main `295aaeff5`, `kernel_api` 1.142, main 1.141)
+
+**Verdict: CHANGES REQUIRED** (two blockers, one should-fix). CI at the full sha: `ci`, `book-e2e`, `graph-diff` completed success. The second opinion is still required.
+
+| Earlier | State |
+| --- | --- |
+| S1 name order | Fixed. Played `sage_first`/`sage_later`, `sage_later`/`sage_first`, `sage_10_first`/`sage_9_later`, `sage_10_later`/`sage_9_first`: no warning, first meeting opens first, reload keeps it, later opens after. Mutants: `when: not` lowering without the `not` (`scene_files.ex:239`), fact recorded true (`scene_lines.ex:105`): both died |
+| S2 `mechanics.md:485` | Fixed |
+| S3 PR claim | Fixed: "Runtime change, unavoidable"; `kernel_api` 1.142 confirmed against main |
+| N1 | Not rechecked (my run paired `entry: false` with `keyword`, which warned) |
+| N2, N4 | Fixed |
+| N5 | Doubled `once` refused; the `dialogue_once.ex:58` test now exists |
+| N3 `explain.ex:85` | Open, nit |
+
+### Findings
+
+- **B1 blocker** `lib/loka/content/choice_order.ex:22`: `lower/1` renames choices but not a reaction's `on.choice`, and no check names it. Reaction on `choice_resolved` `choice: zebra`: written Apple, Zebra fires; written Zebra, Apple compiles with no warning, ids `c001_zebra`, `c002_apple`, fact never set. `writing-the-game.md:105-107` says moving a line changes the built id, but lists where a choice keeps its words (`then`, same-key JSON, `once` fact) and leaves out reactions; the cookbook teaches `choice_resolved` by id, and nothing warns. The rename is new here: `choice_order.ex` is not on main.
+- **B2 blocker** `lib/loka/content/choice_order.ex:11`: same for `quest_resolved` `outcome`, because `rule.ts` resolves with the renamed id. Written Carry, Leave fires, outcome `carry`; written Leave, Carry compiles clean, saved outcome `c002_carry`, reaction never fires. `dialogues/<key>.json` story points are rewritten; this is not.
+- **S1 should-fix** `lib/loka/content/scene_files.ex:124`: the guide's first meeting with nesting. Under `when: not sage_met`, a choice with `sets: sage_met` and a nested `Back`: Back closes the talk, no warning (`back -> undefined`), where `writing-the-game.md:102` promises it goes back. The implied return names a scene whose policy just closed. No loss; the next Talk opens the later scene.
+
+### The ten `/code-review` items
+
+| Item | Result | Disposition |
+| --- | --- | --- |
+| `choice_order.ex:22` | Run, confirmed | B1 |
+| `choice_order.ex:11` | Run, confirmed | B2 |
+| `choice_order.ex:16` | Run: new content over an old save refuses, `pinned_release_missing`; a migration across a release not run | File |
+| `scene_files.ex:124` | Run, confirmed | S1 |
+| `dialogue_links.ex:221` | Run: compiles with the warning `never opens`; wording speaks of "an `entry` dialogue" | File (wording) |
+| `scene_lines.ex:157` | Run: `\xFF\xFE` and NUL in a nested line give a clean line-numbered refusal | Not a bug; drop |
+| `scene_lines.ex:48` | Run: the refused line already fails the compile | File, harmless |
+| `dialogue_once.ex:58` | Run: `once` beside `asked` hides the choice after taking it. Riddle: compiles, not played; `rule.ts:105` returns before the choice's steps, so a wrong answer spends nothing | File |
+| `scene_lines.ex:107` | Run with one top unconditional: warns `ENTRY_GUESSED`. Two passing `when:` not played; guide teaches exclusive | File |
+| `scene_files.ex:348` | Run: `Line `asked` is not `asked`, or repeats it` above the first choice; `once` has the proper message | File (wording) |
+
+Reruns: new Elixir test 4 passed, cookbook test 11 passed at this head.
