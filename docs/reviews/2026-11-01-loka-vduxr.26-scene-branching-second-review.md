@@ -38,3 +38,32 @@
 - Narrow mutants, singly, null green, tree clean: `selection.ts` entry check, `fall_through.ts` `to.entry`, `oneTalk` kept row, `dialogue_links.ex` live, `dialogue_links.ex:166`, `choice_order` story_point, riddle rewrite and order swap: 8 of 8 red.
 - `MUTATE_MINUTES=15 bin/mutate_diff.sh origin/main`: 113 mutants, 66 red, 31 survived, 12 no tests, 4 not unique. The PR reports only ten narrow rows. Survivors are mostly parser conditions in `scene_files.ex` and `scene_lines.ex`, plus `scene_merge.ex`. Ten sampled against all scene test files, including all three `scene_merge.ex` survivors: nine red, one green (the nit). Four `dialogue_once.ex` narrow mutants (gate, set, `Map.delete`, name): all red. Not run: `kernel/ts/src/view/action_lists.ts:66` (my null control was red on the file subset, so no result) and the remaining survivors; their state is unknown.
 - `/code-review` is reported in the PR body. `entry` rulings and `when: not` not reopened.
+
+## Re-check at 0440cf678 (fix commits 4b3b1289a, 6d8075f33; merge 0440cf678)
+
+Verdict: **APPROVE WITH NOTES**. CI at the head: `ci`, `book-e2e`, `graph-diff` all completed success.
+
+Must hold: `order` is optional and only the compiler writes it; ids stay the words; sorted scenes and existing cartridges keep their hash; display, save check and schema read one order.
+
+Dispositions:
+- blocker `choice_order.ex`: fixed, file deleted, no `c00N_` left. Probe: `Yes, done`/`All done` keep ids `yes_done`/`all_done` with `order` 1, 2 and match the journal outcomes. New cookbook test covers reaction, outcome words and reload.
+- nit `scene_files.ex:135`: fixed, clause removed; `or -> and` on the remaining clause goes red.
+
+Findings:
+
+**should-fix** `lib/loka/content/dialogue_links.ex:94` (`return_closed`). Scene with no nesting: `when: not flip`, `- Ask` with `sets: flip`, `- Other`. It compiles with no warning. In play Ask reopens the hub (`behavior.ts:94`, unchanged here), every choice shows unavailable, choosing Other is refused `invalid_state`, and only closing works. This is worse than the warned case, and `docs/guides/writing-the-game.md:103` says the choice comes back. Warn here too, or file it as a follow-up.
+
+**nit** `docs/system/mechanics.md:441`. Still says "the choice ids in key order"; `:498` is right. A reader of the Accepted paragraph gets the old order.
+
+**nit** `lib/loka/content/scene_files.ex:38`. `@key_max` 64 -> 63 stays green (65 is red). A 64-byte child key refused would pass. Probe at head: 64 compiles, 65 refused.
+
+## RETURN_CLOSED: warning is right
+
+Keep the warning. Probe `when: not flip` with Back: the talk closes with no fault and no stuck state, as ruled. Closing can be meant (ask once), and the compiler cannot see a reaction resetting the fact, so an error would refuse valid content. No shipped cartridge carries it (hashes identical to base, and the cookbook test requires no warnings).
+
+## Evidence, re-check
+
+- Old and new source: all 107 cartridges compiled at head and merge-base `bfeaeb6a5`: 107 same `content_hash`, 0 differ, no choice with `order`.
+- Contract: `order` integer, minimum 1, in `protocol/dialogue.schema.json` and source defs; `kernel_api` 1.144. JSON sidecar and area bundle writing it are refused (`choice_order_written`). `extends` of an unsorted scene inherits it with no false refusal; sidecar-added `mid` follows, `zed, ask, mid`. Nested unsorted set gets its own `order`; sorted scene gets none.
+- Mutants, singly, nulls green, tree clean. Red: `scene_files` comes_back condition, `put_new then`, `@key_max` 65, `is_map_key` filter, always-positioned, `order_refused` file test, `closes?` walk, `set_choices` entry filter; `selection.ts` `?? Infinity`, `|| cmp` (`kernel/ts/test/dialogue.test.ts`); `action_lists.ts:109` `oneTalk` wrapper (cookbook, sage first meeting). Survived: `@key_max` 63. The `oneTalk` mutant's full kernel run timed out and adds nothing.
+- Not probed: `fall_through.ts:32`, `selection.ts:178` (first reviewer); a JSON `all[...]` policy, which `when_fact` does not read; `scene_lines` parser.
