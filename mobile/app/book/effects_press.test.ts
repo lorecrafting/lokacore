@@ -98,20 +98,25 @@ test('a quiet merge in place does not dry; a trim keeps each line its number', (
   const merged = draw(() => nodes(LogLines({ lines })));
   assert.ok(merged.some((n) => n.props?.children === 'Rain. (2 times)'));
   assert.deepEqual(dried(merged), []);
-  const keys = (shown: readonly any[], of?: any[]) =>
-    (LogLines({ lines: shown, of }) as any).props.children.map((e: any) => e.key);
+  const keys = (shown: readonly any[]) =>
+    (LogLines({ lines: shown }) as any).props.children.map((e: any) => e.key);
   assert.deepEqual(keys(lines), ['0', '1', '2']);
   dropLines(lines, 2);
   assert.deepEqual(keys(lines), ['2']);
   lines.push('c');
   assert.deepEqual(keys(lines), ['2', '3']);
-  assert.deepEqual(keys(lines.slice(-1), lines), ['3'], 'a filtered copy numbers by its log');
   assert.deepEqual(dried(rig(t)(() => nodes(LogLines({ lines })))), ['c']);
   const missed: any[] = ['seen', 'also seen'];
   markDrawn(missed);
   dropLines(missed, 1);
   missed.push('fresh');
   assert.deepEqual(dried(rig(t)(() => nodes(LogLines({ lines: missed })))), ['fresh']);
+  // A notice hides a read equal to its description: from mid-list, the line after it stays old.
+  const read = ['A', 'desc', 'B'];
+  markDrawn(read);
+  const kept = rig(t)(() => nodes(LogLines({ lines: read, keep: (l) => l !== 'desc' })));
+  assert.deepEqual(dried(kept), []);
+  assert.ok(!kept.some((n) => n.props?.children === 'desc'));
 });
 
 // Breaks: a narrated event dries with the narration above it; reduced motion keeps the colour travel
@@ -165,6 +170,8 @@ test('a letter tile ticks and feels the press', (t) => {
       draw(() => nodes(LetterTile({ letter: 'a', used: false, label: 'a', onPress: () => {} }))),
     );
   shown().props.onPressIn();
+  assert.deepEqual(g.bookDevice, [['play', 'tick']]);
+  shown().props.onPress();
   assert.deepEqual(g.bookDevice, [
     ['play', 'tick'],
     ['haptic', 'selection'],
@@ -184,6 +191,8 @@ test('a card lifts on press-in with a selection haptic; reduced motion keeps the
     const rest = flat(shown().props.style);
     assert.equal(Math.abs(rest.transform[0].translateY), 0);
     shown().props.onPressIn();
+    assert.deepEqual(g.bookDevice, [], 'a scroll starts with a press-in: no buzz');
+    shown().props.onPress();
     assert.deepEqual(g.bookDevice, [['haptic', 'selection']]);
     assert.deepEqual(g.timings, [90]);
     const held = flat(shown().props.style);
@@ -228,18 +237,32 @@ test('an unavailable card never lifts; its press is a warning haptic and its rea
   assert.equal(flat(card(after).props.style).transform, undefined);
 });
 
-// Breaks: a chosen chip loses its inverted colour to the press, or travels; its press stays silent.
+// Breaks: a chosen chip loses its inverted colour to the press, or travels; or its haptic comes
+// before the choice applies, which would buzz when turning Haptics off.
 test('a chip lifts when free and holds when chosen', (t) => {
   effects(t);
   const chip = (chosen: boolean) => {
     const draw = rig(t);
     return () =>
-      card(draw(() => nodes(Chip({ word: 'Off', label: 'Sound', chosen, onPress: () => {} }))));
+      card(
+        draw(() =>
+          nodes(
+            Chip({
+              word: 'Off',
+              label: 'Sound',
+              chosen,
+              onPress: () => g.bookDevice.push(['applied']),
+            }),
+          ),
+        ),
+      );
   };
   const free = chip(false);
   const color = flat(free().props.style).backgroundColor;
   free().props.onPressIn();
-  assert.deepEqual(g.bookDevice, [['haptic', 'selection']]);
+  assert.deepEqual(g.bookDevice, []);
+  free().props.onPress();
+  assert.deepEqual(g.bookDevice, [['applied'], ['haptic', 'selection']]);
   assert.equal(flat(free().props.style).transform[0].translateY, -1);
   assert.notEqual(flat(free().props.style).backgroundColor, color);
   const chosen = chip(true);
@@ -247,6 +270,29 @@ test('a chip lifts when free and holds when chosen', (t) => {
   chosen().props.onPressIn();
   assert.equal(flat(chosen().props.style).transform[0].translateY, 0);
   assert.equal(flat(chosen().props.style).backgroundColor, held);
+});
+
+// Breaks: a status icon loses its press look, or buzzes for a press its spec keeps silent.
+test('a status icon thins while pressed', (t) => {
+  effects(t);
+  const draw = rig(t);
+  const icon = () =>
+    draw(() =>
+      nodes(
+        StatusIcons({
+          conditions: [{ label: 'poison', ends_at: 100 }],
+          time: 10,
+          text: (s: any) => s,
+          open: () => {},
+        } as never),
+      ),
+    );
+  const button = () => icon().find((n) => n.props?.onPressIn);
+  const thin = () => icon().filter((n) => flat(n.props?.style ?? {}).opacity === 0.7);
+  assert.equal(thin().length, 0);
+  button().props.onPressIn();
+  assert.equal(thin().length, 1);
+  assert.deepEqual(g.bookDevice, []);
 });
 
 // Breaks: a Control's label stays still, or a Tap thins or pulses when refused.
@@ -257,6 +303,8 @@ test('a Control inks on press-in; a Tap thins and pulses only when it may act', 
   const ink = () => flat(shown().find((n) => n.type === 'Text').props.style).color;
   const rest = ink();
   card(shown()).props.onPressIn();
+  assert.deepEqual(g.bookDevice, []);
+  card(shown()).props.onPress();
   assert.deepEqual(g.bookDevice, [['haptic', 'selection']]);
   assert.notEqual(ink(), rest);
   g.bookDevice = [];
@@ -267,6 +315,7 @@ test('a Control inks on press-in; a Tap thins and pulses only when it may act', 
     const thin = () =>
       flat(each().find((n) => n.props?.style?.[1]?.opacity !== undefined).props.style).opacity;
     each()[0].props.onPressIn();
+    each()[0].props.onPress();
     return thin();
   };
   assert.equal(tap({ pulse: 'selection' }), 0.7);

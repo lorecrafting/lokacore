@@ -87,7 +87,7 @@ export function LetterTile(p: {
       accessibilityRole="button"
       accessibilityLabel={p.label}
       disabled={p.used}
-      onPress={() => p.onPress()} // no press event: the handler takes none
+      onPress={press.commit(p.onPress)}
       style={[
         {
           width: size.touch,

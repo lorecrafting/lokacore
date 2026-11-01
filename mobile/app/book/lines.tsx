@@ -79,28 +79,29 @@ export function Note({ children }: { children: string }) {
  *   word stays in its accessible name (`locked, The way west is locked.`, as the live region reads
  *   it). A speech line (speaker bar) waits until the log projects a speaker. A line no page has
  *   drawn yet dries in, a narrated event `motion.dry.lag` later; a quiet merge, a page return and
- *   restored history do not. `of` is the log when `lines` is a filtered copy of it.
+ *   restored history do not. `keep` hides lines without renumbering the rest.
  * - States: narration (a repeated quiet line reads `<line> (N times)`); narrated event; refused;
  *   an away recap entry, drawn as AwayRecap; drying.
  * - Story: LogLines.stories.tsx
  */
 export function LogLines({
   lines,
-  of = lines,
+  keep,
 }: {
   lines: readonly DetailLine[];
-  of?: readonly DetailLine[];
+  keep?: (line: DetailLine) => boolean; // shows only these; the rest still count as drawn
 }) {
-  const { gone, drawn } = logMark(of);
-  const first = gone + of.length - lines.length; // the number of the first line shown, also its stable key
-  useEffect(() => markDrawn(of), [gone + of.length]);
-  if (!lines.length) return null;
+  const { gone, drawn } = logMark(lines);
+  useEffect(() => markDrawn(lines), [gone + lines.length]);
+  // A line's number, also its stable key.
+  const shown = lines.flatMap((line, i) =>
+    !keep || keep(line) ? [<LogLine key={gone + i} line={line} fresh={gone + i >= drawn} />] : [],
+  );
+  if (!shown.length) return null;
   return (
     // The walk tells log lines from refusal notes by this id (walkthrough/walk.ts live).
     <View testID="log-lines" style={{ gap: space.sm }}>
-      {lines.map((line, i) => (
-        <LogLine key={first + i} line={line} fresh={first + i >= drawn} />
-      ))}
+      {shown}
     </View>
   );
 }

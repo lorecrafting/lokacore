@@ -6,6 +6,8 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { bleedingLine, branch, pools, said, sky, toneOf, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
 import { LABEL } from './labels.ts';
+import { Reanimated } from './fade.ts';
+import { usePress, useThin } from './press.ts';
 import { StatusIcons } from './StatusIcon.tsx';
 import { usePalette, useType, type Palette, type Type } from './palette.ts';
 import { size, space } from './tokens.ts';
@@ -142,8 +144,11 @@ const joined = (c: Palette, t: Type, item: ReactElement) => (
 function Contents(p: StatusProps) {
   const c = usePalette();
   const t = useType();
+  const press = usePress();
+  const ink = useThin(press, false);
   return (
     <Pressable
+      {...press.handlers}
       disabled={p.locked}
       accessibilityRole="button"
       // Label in name (book-ui.md): the shown text first (its no-break spaces as spaces), then where it goes.
@@ -151,9 +156,11 @@ function Contents(p: StatusProps) {
       onPress={() => p.open()} // no press event: open takes none
       style={{ minHeight: size.touch, justifyContent: 'center' }}
     >
-      <Text style={{ ...t.small, color: p.locked ? c.dim : c.action }}>
-        {p.resources ? shown(c, t, p.resources, p.locked) : 'character'}
-      </Text>
+      <Reanimated.View style={ink}>
+        <Text style={{ ...t.small, color: p.locked ? c.dim : c.action }}>
+          {p.resources ? shown(c, t, p.resources, p.locked) : 'character'}
+        </Text>
+      </Reanimated.View>
     </Pressable>
   );
 }

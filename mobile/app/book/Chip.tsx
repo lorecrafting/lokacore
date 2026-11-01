@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { LiftPressable } from './fade.ts';
+import { haptic } from './haptic';
 import { useLift, usePress } from './press.ts';
 import { Text } from './Text.tsx';
 import { LABEL } from './labels.ts';
@@ -23,7 +24,8 @@ const box = {
  * - Use: the say field's known words (named by the word; a press fills the field); a radio row
  *   setting (Reading size).
  * - Rules: a row wraps, never truncates. Unavailable: not pressable; chosen: role radio, checked.
- *   A press lifts with a selection haptic; chosen holds the pressed colour.
+ *   A press lifts; a selection haptic after the choice applies, so turning Haptics off is
+ *   silent; chosen holds the pressed colour.
  * - States: available; unavailable; pending; chosen.
  * - Story: Chip.stories.tsx
  */
@@ -37,7 +39,7 @@ export function Chip(p: {
   const c = usePalette();
   const t = useType();
   const off = !p.onPress || !!p.pending;
-  const press = usePress('selection');
+  const press = usePress();
   const lift = useLift(press, p.chosen ? c.fg : c.card, !!p.chosen);
   return (
     <LiftPressable
@@ -47,7 +49,7 @@ export function Chip(p: {
       accessibilityLabel={p.label}
       aria-busy={!!p.pending} // RN web maps aria-busy, not accessibilityState.busy
       disabled={off}
-      onPress={() => p.onPress?.()} // no press event: the handler takes none
+      onPress={() => (p.onPress?.(), haptic('selection'))} // no press event: the handler takes none
       style={[
         {
           ...box,

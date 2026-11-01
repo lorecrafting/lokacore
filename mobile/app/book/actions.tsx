@@ -78,7 +78,7 @@ function Available(
       accessibilityRole="button"
       accessibilityLabel={('b' in p && p.name) || label}
       aria-expanded={'onPress' in p ? p.expanded : undefined} // RN web maps aria-expanded, not accessibilityState
-      onPress={'b' in p ? () => p.press(p.b) : p.onPress}
+      onPress={press.commit('b' in p ? () => p.press(p.b) : p.onPress)}
       style={[card(c), lift]}
     >
       <Text style={prose(c, t)}>
@@ -326,7 +326,7 @@ export function ContinueButton(p: { label: string; onPress: () => void }) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={p.label}
-      onPress={() => p.onPress()} // no press event: the handler takes none
+      onPress={press.commit(p.onPress)}
       {...press.handlers}
       style={{
         backgroundColor: c.fg,

@@ -17,6 +17,7 @@ import {
   withTiming,
 } from './fade.ts';
 import { statusTip } from './model.ts';
+import { usePress, useThin } from './press.ts';
 import { usePalette, useType, type Palette } from './palette.ts';
 import { motion, radius, size, space, type } from './tokens.ts';
 
@@ -143,6 +144,8 @@ function Icon(p: {
 }) {
   const face = <Disc look={p.open ? p.look : 'neutral'}>{p.children}</Disc>;
   const disc = ringed(p.fraction, !p.open, face);
+  const press = usePress();
+  const ink = useThin(press, false);
   if (!p.open)
     return (
       <View accessibilityRole="image" accessibilityLabel={p.name} style={box}>
@@ -157,14 +160,15 @@ function Icon(p: {
       accessibilityLabel={`${p.name}, opens Character`}
       onPress={() => p.open?.()} // no press event: open takes none
       onLongPress={show}
-      onPressOut={hide}
+      onPressIn={press.handlers.onPressIn}
+      onPressOut={() => (press.handlers.onPressOut(), hide())}
       onHoverIn={show}
       onHoverOut={hide}
       onFocus={show}
       onBlur={hide}
       style={box}
     >
-      {disc}
+      <Reanimated.View style={ink}>{disc}</Reanimated.View>
     </Pressable>
   );
 }

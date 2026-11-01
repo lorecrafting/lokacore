@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { Reanimated } from './fade.ts';
 import { LABEL } from './labels.ts';
+import { usePress, useThin } from './press.ts';
 import { prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { size } from './tokens.ts';
 
@@ -181,6 +183,14 @@ function Line(p: { c: Palette; from: At; to: At }) {
 
 // A touch-sized button centred on its point; the dot drawn inside. The current room's is ringed in
 // the action colour, so it is told by shape as well as colour; an unexplored one is open and muted.
+const hit = {
+  position: 'absolute',
+  width: size.touch,
+  height: size.touch,
+  alignItems: 'center',
+  justifyContent: 'center',
+} as const;
+
 function Dot(p: {
   c: Palette;
   at: At;
@@ -191,30 +201,32 @@ function Dot(p: {
   tap: (caption: string) => void;
 }) {
   const r = p.here ? HERE : DOT;
+  const press = usePress();
+  const ink = useThin(press, false);
   return (
     <Pressable
+      {...press.handlers}
       accessibilityRole="button"
       accessibilityLabel={p.label ?? `${p.name}${p.here ? ', current place' : ''}`}
       onPress={() => p.tap(p.name)}
       style={{
-        position: 'absolute',
         left: p.at.x - size.touch / 2,
         top: p.at.y - size.touch / 2,
-        width: size.touch,
-        height: size.touch,
-        alignItems: 'center',
-        justifyContent: 'center',
+        ...hit,
       }}
     >
-      <View
-        style={{
-          width: r * 2,
-          height: r * 2,
-          borderRadius: r,
-          borderWidth: p.open || p.here ? size.speechBar : 0,
-          borderColor: p.here ? p.c.action : p.c.dim,
-          backgroundColor: p.open ? p.c.bg : p.c.fg,
-        }}
+      <Reanimated.View
+        style={[
+          {
+            width: r * 2,
+            height: r * 2,
+            borderRadius: r,
+            borderWidth: p.open || p.here ? size.speechBar : 0,
+            borderColor: p.here ? p.c.action : p.c.dim,
+            backgroundColor: p.open ? p.c.bg : p.c.fg,
+          },
+          ink,
+        ]}
       />
     </Pressable>
   );

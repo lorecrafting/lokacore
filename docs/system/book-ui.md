@@ -732,10 +732,13 @@ Values, roles and the wash's contrast exemption: the catalogue's
 [design tokens](../BOOK-UI-COMPONENTS.md#design-tokens). An effect names which thing changed; none
 delays a tap, moves text the eye is on, or reaches the live region.
 
-**Press.** Every pressable answers on press-in, before the command returns: an action card and a
-letter tile lift; a Control, Continue, the page foot, a Tap and an entity name change ink; a chip
-lifts and, once chosen, holds its pressed colour. An unavailable card does not lift; its reason
-dries. A press gives the selection haptic, except a Tap (none) and the footer direction (on commit).
+**Press.** A pressable answers on press-in, before the command returns: an action card and a
+letter tile lift; a Control, Continue, the page foot, a Tap and an entity name change ink; the
+Contents button, a status icon and a map place thin; a chip lifts and, once chosen, holds its
+pressed colour. The map's level arrows have no press look, nor has the say field's shield, which
+only closes. An unavailable card does not lift; its reason dries. A press gives the selection haptic
+on commit, never on press-in, so a scroll stays silent; a Tap, the Contents button, a status icon
+and a map place give none. A chip's comes after its choice applies, so turning Haptics off is silent.
 
 **Ink drying.** A line entering the log in this redraw dries in; a narrated event follows its line
 by a beat. A refused line dries like any other, a repeat's count does not re-dry, an away recap

@@ -112,6 +112,10 @@ const shut = (direction: string, state: string) =>
   }) as any;
 
 // Breaks: a shortcut chooses the wrong exit or steals a focused input's arrow keys.
+// A status icon's disc: a pressable one sits in the press look's animated wrapper.
+const unpress = (e: any) =>
+  typeof e.props.children.type === 'function' ? e.props.children : e.props.children.props.children;
+
 test('web keyboard uses offered exits and keeps focused controls', (t) => {
   const { key, Target } = browser(t);
   const walked: string[] = [];
@@ -304,7 +308,7 @@ test('status shows hp, ma and mv only; Character bands those only, never pennies
     e && typeof e === 'object' ? [e.props.children].flat().map(text).join('') : String(e ?? '');
   // Breaks (loka-x6t.86): a breakable space inside the pools lets the second line split them.
   assert.equal(text(contents), 'hp\u00a01/9\u2007mv\u00a01/9');
-  const shown = contents.props.children.props.children.map((t: any) => [
+  const shown = contents.props.children.props.children.props.children.map((t: any) => [
     t.key,
     t.props.style.color,
   ]);
@@ -389,7 +393,7 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
     'scarred, debuff, opens Character',
     'warded, 90s remaining, buff, opens Character',
   ]);
-  const discOf = (e: any) => e.props.children.type(e.props.children.props);
+  const discOf = (e: any) => ((d: any) => d.type(d.props))(unpress(e));
   const glyphOf = (e: any) => discOf(e).props.children.props.children;
   assert.deepEqual(shown.map(glyphOf), ['◡', '−', '○', '−', '+']);
   const c = color.light;
@@ -474,7 +478,7 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
       text: (k: string) => k,
       open: locked ? undefined : () => {},
     }).props.children[0];
-    return icon.type(icon.props).props.children;
+    return unpress(icon.type(icon.props));
   };
   const halves = (e: any) => {
     const [track, ...rest] = e.type(e.props).props.children;
@@ -548,7 +552,7 @@ test('status icon countdown ring: drains between views, capped, jumps up and und
       text: (k: string) => k,
       open: () => {},
     }).props.children[0];
-    const e = icon.type(icon.props).props.children;
+    const e = unpress(icon.type(icon.props));
     return e.type(e.props);
   };
   const drains = (reduced: boolean) => {

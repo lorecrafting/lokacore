@@ -20,8 +20,9 @@ const dryCurve = curveOf(motion.dry.easing);
 const reduceMotion = ReduceMotion.Never; // the state change still shows; only travel goes
 
 /**
- * Answers on press-in: the pressed amount, a haptic, and the Pressable's handlers. A disabled
- * Pressable fires neither handler.
+ * The look answers on press-in; the haptic waits for the commit, so a scroll never buzzes. Gives the
+ * pressed amount, the Pressable's handlers, and `commit`, which wraps its onPress. A disabled Pressable
+ * fires none of them.
  */
 export function usePress(pulse?: HapticKind) {
   const pressed = useSharedValue(0);
@@ -29,13 +30,14 @@ export function usePress(pulse?: HapticKind) {
     pressed.value = withTiming(value, { duration, easing: pressCurve, reduceMotion });
   };
   const handlers = {
-    onPressIn: () => {
-      if (pulse) haptic(pulse);
-      to(1, motion.press.duration);
-    },
+    onPressIn: () => to(1, motion.press.duration),
     onPressOut: () => to(0, motion.press.out),
   };
-  return { pressed, handlers };
+  const commit = (run: () => void) => () => {
+    if (pulse) haptic(pulse);
+    run();
+  };
+  return { pressed, handlers, commit };
 }
 
 type Press = ReturnType<typeof usePress>;

@@ -1,6 +1,6 @@
 // The Settings the Book holds: the player's Reading size and effect settings.
 import { useState } from 'react';
-import { haptic, hapticsOn } from './haptic';
+import { hapticsOn } from './haptic';
 import {
   effects,
   readingFactor,
@@ -46,11 +46,8 @@ function useEffects(shell: SettingStores): Effects {
     return Object.fromEntries(effects.map(read)) as Effects['on'];
   });
   const choose = (e: Effect, value: boolean) => {
-    applyEffect[e](value); // first: turning one off previews silently
-    if (on[e] !== value) {
-      if (e === 'sound') play('pageTurn');
-      if (e === 'haptics') haptic('selection');
-    }
+    applyEffect[e](value); // first: turning Sound off previews silently, and the chip's haptic, after this, obeys Haptics
+    if (e === 'sound' && on[e] !== value) play('pageTurn');
     setOn((o) => ({ ...o, [e]: value }));
     shell.effects?.[e].set(value);
   };

@@ -225,10 +225,11 @@ test('Settings effect chips show, save and apply each setting', () => {
   device.length = 0;
   // Breaks: the module hears a change only after commit, so a preview in the same press plays the old value.
   radios()[1]!.props.onPress();
-  // and Sound and Haptics preview themselves after applying; Flashes has nothing to preview.
+  // and Sound previews itself after applying.
   assert.deepEqual(device, [
     ['sound', true],
     ['play', 'pageTurn'],
+    ['haptic', 'selection'],
   ]);
   h.draw();
   radios()[5]!.props.onPress();
@@ -237,12 +238,11 @@ test('Settings effect chips show, save and apply each setting', () => {
   assert.deepEqual(device, [
     ['sound', true],
     ['play', 'pageTurn'],
+    ['haptic', 'selection'],
     ['haptics', false],
+    ['haptic', 'selection'], // the chip's, after applying: the real module is now off
     ['haptic', 'selection'],
   ]);
-  device.length = 0;
-  radios()[5]!.props.onPress(); // Off again: no change, no preview
-  assert.deepEqual(device, [['haptics', false]]);
   assert.deepEqual(Object.fromEntries(kept), {
     'effects.music': 'off',
     'effects.sound': 'off',

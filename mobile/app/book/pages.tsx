@@ -35,7 +35,7 @@ export const refusedProps = (hint: string) => ({
  * (BOOK-UI-COMPONENTS.md, Where each fact lives).
  * - Use: entity lines, verb lines, the room title, the status position.
  * - Rules: pressed, its ink thins at `opacity.press`, whatever colours the words inside it hold (a
- *   nested Text cannot animate on native); no haptic unless `pulse` says, none refused and no thinning.
+ *   nested Text cannot animate on native); no haptic unless `pulse` says (on commit), none refused and no thinning.
  * - Story: VerbLine.stories.tsx
  */
 export function Tap(p: {
@@ -57,7 +57,7 @@ export function Tap(p: {
       accessibilityRole="button"
       accessibilityLabel={p.label}
       {...(p.refused === undefined ? {} : refusedProps(p.refused))}
-      onPress={() => p.onPress()} // no press event: the handler takes none
+      onPress={press.commit(p.onPress)}
       {...press.handlers}
       style={{ minHeight: size.touch, justifyContent: 'center', ...bleed, ...shrink }}
     >
@@ -133,8 +133,8 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
  * Local navigation that is not an offered action (Leave, Back to ..., Close, Got it, Start over).
  * - Use: PageFoot returns and local buttons.
  * - Rules: Start over is a Control wherever it appears: its confirmation carries the weight, never
- *   `action` or `danger`. `onInk` sets the label in `bg` on an ink fill. An ink press and a selection
- *   haptic on press-in.
+ *   `action` or `danger`. `onInk` sets the label in `bg` on an ink fill. An ink press on press-in, a
+ *   selection haptic on commit.
  * - States: enabled; disabled.
  * - Story: Control.stories.tsx
  */
@@ -154,7 +154,7 @@ export function Control(p: {
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled} // also sets accessibilityState.disabled (aria-disabled on web)
-      onPress={() => onPress()} // no press event: the handler takes none
+      onPress={press.commit(onPress)}
       {...press.handlers}
       style={{
         minHeight: size.touch,
