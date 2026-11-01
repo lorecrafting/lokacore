@@ -687,7 +687,7 @@ Cartridge-owned hit chance and positive damage bounds. Compiler and loader enfor
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| chance | integer | yes | Hit chance. |
+| chance | integer | yes | Percent chance an attack is accurate; a defense can still prevent the hit. |
 | crit | object |  | Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances. |
 | crit.chance | integer | yes |  |
 | crit.multiplier | integer | yes |  |
@@ -1167,7 +1167,7 @@ Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maxi
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| gain | integer | yes | HP gain. |
+| gain | integer | yes | HP added per gain interval, up to maximum. |
 | maximum | [ResourceInt](source-kinds.gen.md#resourceint) | yes | Upper HP bound. |
 | minimum | [ResourceInt](source-kinds.gen.md#resourceint) | yes | Lower HP bound. |
 | start | [ResourceInt](source-kinds.gen.md#resourceint) | yes | Starting HP, between the bounds. |

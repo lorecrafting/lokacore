@@ -950,7 +950,7 @@
     "AttackProfile": {
       "type": "object",
       "properties": {
-        "chance": {"description":"Hit chance.",
+        "chance": {"description":"Percent chance an attack is accurate; a defense can still prevent the hit.",
           "type": "integer",
           "minimum": 0,
           "maximum": 100

@@ -216,7 +216,7 @@
       "description": "Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max.",
       "properties": {
         "chance": {
-          "description": "Hit chance.",
+          "description": "Percent chance an attack is accurate; a defense can still prevent the hit.",
           "maximum": 100,
           "minimum": 0,
           "type": "integer"
@@ -1884,7 +1884,7 @@
       "description": "Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID). Required legacy-shaped birth/save row; no position recovery.",
       "properties": {
         "gain": {
-          "description": "HP gain.",
+          "description": "HP added per gain interval, up to maximum.",
           "maximum": 2147483647,
           "minimum": 0,
           "type": "integer"
@@ -4626,7 +4626,7 @@
       "description": "Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max.",
       "properties": {
         "chance": {
-          "description": "Hit chance.",
+          "description": "Percent chance an attack is accurate; a defense can still prevent the hit.",
           "maximum": 100,
           "minimum": 0,
           "type": "integer"
@@ -5386,7 +5386,7 @@
       "description": "Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID). Required legacy-shaped birth/save row; no position recovery.",
       "properties": {
         "gain": {
-          "description": "HP gain.",
+          "description": "HP added per gain interval, up to maximum.",
           "maximum": 2147483647,
           "minimum": 0,
           "type": "integer"
