@@ -22,6 +22,7 @@ test('every committed cartridge source file validates against its kind schema', 
   for (const cart of readdirSync(join(root, 'cartridges'))) {
     const base = join(root, 'cartridges', cart);
     for (const entry of readdirSync(base)) {
+      if (entry === 'checkpoints') continue; // recorded walks, not compiled source
       const path = join(base, entry);
       const sources = statSync(path).isDirectory()
         ? readdirSync(path).map((name) => [entry, join(path, name)])

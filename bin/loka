@@ -5,13 +5,15 @@
 # mix loka.new (any cwd; the cartridge dir, default the cwd, and a new cartridge's path resolve
 # against the caller's cwd).
 # `loka todo <cartridge dir>`: the `~` placeholders still to write, by file (kernel/ts/play/todo.ts).
+# `loka check <cartridge dir>`: replays each checkpoints/*.json headless (kernel/ts/play/check.ts).
 case "${1-}" in
 play) shift; exec node "$(dirname "$0")/../kernel/ts/play/main.ts" "$@" ;;
 dev) shift; exec node "$(dirname "$0")/../kernel/ts/play/author.ts" "$@" ;;
 todo) shift; exec node "$(dirname "$0")/../kernel/ts/play/todo.ts" "$@" ;;
+check) shift; exec node "$(dirname "$0")/../kernel/ts/play/check.ts" "$@" ;;
 new)
   shift
   caller="$PWD"
   cd "$(dirname "$0")/.." && exec mix loka.new --cwd "$caller" "$@" ;;
-*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev <cartridge dir> [--watch] | bin/loka new <kind> <name> [--from <room> <direction>] ... [cartridge dir] | bin/loka todo <cartridge dir>" >&2; exit 2 ;;
+*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev <cartridge dir> [--watch] | bin/loka new <kind> <name> [--from <room> <direction>] ... [cartridge dir] | bin/loka todo <cartridge dir> | bin/loka check <cartridge dir>" >&2; exit 2 ;;
 esac
