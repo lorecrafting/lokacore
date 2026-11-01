@@ -4,7 +4,15 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Intent, Reply } from '../../packages/game-view/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
-import { asRefs, caughtUp, dropStep, frozenClock, replay, type Replayable, type Step } from './place.ts';
+import {
+  asRefs,
+  caughtUp,
+  dropStep,
+  frozenClock,
+  replay,
+  type Replayable,
+  type Step,
+} from './place.ts';
 
 const NPC = 'sampler@0.0.1:npc/maud';
 const intent = (target_ids: string[], input = {}) =>
