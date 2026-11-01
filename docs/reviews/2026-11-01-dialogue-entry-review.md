@@ -79,3 +79,22 @@ Answers:
 - Shipped content: no `then` in any `cartridges/*/dialogues/*.json`, so nothing changes today.
 
 Not run: full suite under mutants; `bin/mutate_diff.sh` (hand mutants at this round, per the scope); the Book screen itself.
+
+## Final re-check: head `11484a193bb90518d32adc4ca1722024fdd87814`
+
+Verdict: **CHANGES REQUIRED**: no blocker; both should-fixes are logic changes, which take a fix round ([small should-fix](../WORKFLOW.md#small-should-fix)). CI at this head (`gh run list --commit`): ci, book-e2e, graph-diff completed, success.
+
+Dispositions, run on this head:
+- Gates: checked-only and paid-only links: no offer, Talk rejected. Checked or paid first with a free second: Talk opens the free target. Paid target run for the first time.
+- Named failed entry: offer unavailable, press rejected (developer's test; removing `selected` red).
+- Two surviving mutants pinned: same-speaker filter (`fall_through.ts:29`), `word` (`selection.ts`): both red.
+- Warning and TS share `test/fixtures/dialogue_entry_cases.json`. Red: Elixir speaker, uniq, `free?`, name, policy, `live_keys`, rank; TS choice policy, `payment`, `check`, `skill.acquire`.
+- Green and equivalent: following `then_failed` (needs a `check`, which is already a gate; compile refuses it alone).
+- Round nits: title, link order and guide fixed. `/code-review` still absent from the PR body (0 matches).
+
+**Should-fix. Warning misses a closed hub one level down.** `lib/loka/content/dialogue_links.ex:129` reads entries only. Closed intro to closed hub to `a_buy`, `z_g`: Talk opens `a_buy`; `entry_checks` returns `[]`. Walk free links until a dialogue without `policy` or more than one link.
+
+**Should-fix. A step charge counts as free.** `kernel/ts/src/mechanics/dialogue/fall_through.ts:26`, Elixir `free?`. Failed entry, choice `steps: [resource.adjust by -5], then: r`: Talk opens `r`, nothing charged. The guide says "no check, cost or other gate". No shipped dialogue has such a step. Treat `resource.adjust` and `item.move` as `skill.acquire`, or narrow the guide to named gate fields.
+
+**Nit.** `dialogue_links.ex:74` cites `selection.ts GATES`; they are in `fall_through.ts`.
+**Nit.** A closed `a_buy`, listed first: warning names `a_buy`, Talk opens `z_g`. Decided only at run time; the message says "picks it first".
