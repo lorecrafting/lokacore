@@ -165,3 +165,22 @@ CI at the full sha: `graph-diff`, `ci`, `book-e2e` completed, success.
 Base: `content_scene_branching_test.exs` 30 passed; `dialogue.test.ts`, `dialogue_fall_through.test.ts`, `dialogue_cookbook.test.ts` 42 passed. Mutants, all red: `selection.ts` guard dropped (cookbook 1), `onward` filter restored (cookbook 1), `spends_itself?` never (1), second-Talk count `>= 1` (1), `past_set` no look-through (2).
 
 PR body rerun: `fall_through.ts:32` and `selection.ts:172` are the fix lines; `content_trial_test.exs:9` pins `trial_sampler` warning-free. `/code-review` is reported. `choice_order.ex:16` is gone from the body. No test pins F1's order. Not run: full suite, `mutate_diff`, hash compare with main.
+
+## Re-check: head `1734b36d5`, F1 only
+
+**Verdict: APPROVE.** F1 is closed.
+
+CI at the full sha: `graph-diff`, `ci`, `book-e2e` completed, success.
+
+| Case (scene files, `mix loka.compile`, local story) | Warning names | Talk opens |
+| --- | --- | --- |
+| F1: `- Aaa` nested `- In` `then: h1`, `- Bbb` `then: h2` | `h2` | `h2` |
+| Second reviewer: `a` to a set to `h`, `b` to `z` | `z` | `z` |
+| Both ways nested | `h1` | `h1` |
+| Two sets deep to `h1`, one set to `h2` | `h2` | `h2` |
+
+`free_links` (`dialogue_links.ex:258`) now follows `tried` in `spokenBy`: direct ways first, then what sets lead to, and a named set stops. [writing-the-game.md:140](../guides/writing-the-game.md) says so. `explain.ex:63` also took the "for good" nit.
+
+Base: `content_dialogue_links_test.exs`, `content_scene_branching_test.exs` 46 passed; `dialogue_branching.test.ts` 27 passed. Mutants, all red on the shared cases: deeper level first (1), named set passed in Elixir (1), named set passed in `selection.ts` (1).
+
+Not run: full suite, `mutate_diff`.
