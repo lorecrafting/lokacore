@@ -63,7 +63,7 @@ export function levelsReached(
   mint: Mint,
 ): readonly DomainEvent[] {
   const spec = world.cartridge.world?.levelling;
-  if (!spec) return [];
+  if (!spec) return []; // mutate-skip: narrows the type; no levelling write exists without the spec
   return oneWrite(own).flatMap((o) => {
     if (o.op !== 'levelling.set') return [];
     const { character_id } = o;
@@ -72,7 +72,7 @@ export function levelsReached(
       id: mint() as DomainEvent['id'],
       ...base,
       scope: { kind: 'player' as const, character_id },
-      position: 0,
+      position: 0, // mutate-skip: join overwrites it
       payload: { type: 'level_reached' as const, character_id, level: from + i + 2 },
     }));
   });

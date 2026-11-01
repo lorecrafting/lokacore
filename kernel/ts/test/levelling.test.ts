@@ -245,6 +245,18 @@ test('a quest reward within a level tells the gain and emits no event', () => {
   assert.deepEqual(levels(r), []);
 });
 
+// Breaks: spending a point, a levelling write that adds nothing, tells a gain of 0.
+test('raising an attribute tells no gain', () => {
+  assert.ok(!narration(raise(cull().w, 'str')).includes(GAINED));
+});
+
+// Breaks: a character with no row yet counts from anything but 0, so a first threshold at 1 is missed.
+test('a first grant from no row crosses a threshold at 1', () => {
+  const c = variant((l) => (l.thresholds = [1, 30, 100]));
+  const r = kill(play(fresh(c), { type: 'move', direction: 'east' }).world, 'rat_a');
+  assert.deepEqual(levels(r), [2]);
+});
+
 // Breaks: the threshold compare is < instead of <=, or one below it counts.
 test('a grant landing exactly on 100 reaches level 3; landing on 99 does not', () => {
   assert.deepEqual([levels(strike(30, 70)), levels(strike(30, 69))], [[3], []]);
