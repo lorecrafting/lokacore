@@ -95,9 +95,8 @@ test('muffled thunder runs through its filter, quieter', async () => {
   const open = b.levels.at(-1)!.value;
   const at = b.wired.length;
   b.thunder(true);
-  const path = b.wired.slice(at);
-  assert.ok(path.includes(b.filters[0]!), 'the file feeds the filter');
-  assert.ok(path.includes(b.gains.at(-1)!), 'the filter feeds the level');
+  assert.ok(b.wired.slice(at).includes(b.filters[0]!), 'the file feeds the filter');
+  assert.equal(b.filters[0]!.out, b.gains.at(-1), 'the filter feeds the level');
   assert.ok(b.levels.at(-1)!.value < open);
 });
 

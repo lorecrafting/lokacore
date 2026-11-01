@@ -49,7 +49,11 @@ export async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}
         const filter = {
           type: '',
           frequency: { value: 0 },
-          connect: (to: object) => wired.push(to),
+          out: undefined as object | undefined,
+          connect: (to: object) => {
+            filter.out = to;
+            wired.push(to);
+          },
         };
         filters.push(filter);
         return filter;

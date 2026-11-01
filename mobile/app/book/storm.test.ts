@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import { effects, rig } from './__tests__/hook-rig.ts';
 import { nodes } from './__tests__/polish-book.test.ts';
 
-const { flashesOn } = await import('./cues.ts');
+const { flashesOn, lightFell, QUIET, step } = await import('./cues.ts');
 const { Storm } = await import('./Storm.tsx');
 const { motion } = await import('./tokens.ts');
 
@@ -44,6 +44,14 @@ test('the light falls only in a storm, with Flashes on and motion allowed', (t) 
   flashesOn(false);
   t.after(() => flashesOn(true));
   assert.equal(off.struck(), false);
+});
+
+// Breaks: Storm's light does not tell the cues, so a blow's wash follows it inside the Flash limit.
+test('a blow just after the light keeps all but its wash', (t) => {
+  t.after(() => lightFell(-Infinity));
+  sky(t, 'storm').struck();
+  const fired = step(QUIET, [{ name: 'hp_loss', loss: 1 }], performance.now()).fired;
+  assert.equal(fired[0]?.wash, false);
 });
 
 // Breaks: wind lifts indoors, under reduced motion, or on a page that is not the World.
