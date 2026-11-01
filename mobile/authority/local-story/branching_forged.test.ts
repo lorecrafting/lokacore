@@ -189,3 +189,35 @@ test('an escort row in a world with no escort answer is refused', () => {
         .run('escorts', g.story.world().character, '{"forged":true}'),
   );
 });
+
+// Breaks: a dropped clause in checkRow: a row bound to another actor, beat or item, a forged attempt
+// count, or a choice on a row still open, each loading and moving the wrong thing.
+test('a dialogue row that does not bind is refused', async (t) => {
+  const row = (g: Play) => Object.entries(g.story.world().state.choices!)[0]!;
+  const forge = (g: Play, change: (r: any) => object) => {
+    const [id, value] = row(g);
+    put(g.sql, 'choices', id, { ...value, ...change(value) });
+  };
+  const c = withToken({ guard: take(), back: give() });
+  const cases: [string, (r: any, g: Play) => object][] = [
+    ['actor', (_, g) => ({ actor_id: g.fresh.entityIds[TOKEN] })],
+    ['beat', () => ({ beat: 'back' })],
+    ['bindings', (r) => ({ roles: r.roles.filter((b: any) => b.role !== 'token') })],
+    ['attempts', () => ({ attempts: 1 })],
+  ];
+  for (const [name, change] of cases)
+    await t.test(name, () =>
+      refused(
+        c,
+        (g) => g.choose('take'),
+        (g) => forge(g, (r) => change(r, g)),
+      ),
+    );
+  await t.test('open row with a choice', () =>
+    refused(
+      c,
+      () => {},
+      (g) => forge(g, () => ({ choice_id: 'take' })),
+    ),
+  );
+});

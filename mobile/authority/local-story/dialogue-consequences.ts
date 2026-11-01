@@ -54,7 +54,7 @@ export function assignmentEvidence(
     const matching = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, assignment.fact));
     // Two steps writing one fact leave no single op to compare; the kernel folded them.
     const writers = (option.steps ?? []).filter(
-      (other) => other.op !== 'narrate' && same(assignmentOf(s, other)?.fact, assignment.fact),
+      (other) => other.op !== 'narrate' && same(writtenFact(s, other), assignment.fact),
     );
     if (writers.length > 1) continue;
     const op = matching[0];
@@ -74,6 +74,9 @@ export function assignmentEvidence(
   }
   return true;
 }
+
+const writtenFact = (s: Story, step: NonNullable<DialogueChoice['steps']>[number]) =>
+  step.op === 'fact.adjust' ? step.fact : assignmentOf(s, step)?.fact;
 
 function assignmentOf(s: Story, step: NonNullable<DialogueChoice['steps']>[number]) {
   if (step.op === 'fact.adjust') return undefined;

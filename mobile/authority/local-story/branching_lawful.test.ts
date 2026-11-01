@@ -302,6 +302,21 @@ test('a taken item later held by another NPC keeps playing', () => {
 // Breaks: receipt evidence refusing a moving answer that writes one fact twice, or writes it by
 // assign and by grant, since the two ops read as disagreement.
 test('a moving answer writing one fact twice reopens', () => {
+  const count = {
+    version: 1,
+    value_type: { type: 'int', minimum: 0, maximum: 9, default: 0 },
+    scopes: ['player'],
+    meaning: 'x',
+  };
+  const set = { op: 'fact.assign', fact: 'count', value: 1 };
+  const bump = { op: 'fact.adjust', fact: 'count', amount: 1 };
+  for (const steps of [
+    [set, bump],
+    [bump, set],
+  ])
+    reopened(withToken({ guard: take({ steps }) }, {}, adding({}, { count })), (g) =>
+      g.choose('take'),
+    );
   reopened(withToken({ guard: take({ steps: [flag(true), flag(false)] }) }), (g) =>
     g.choose('take'),
   );

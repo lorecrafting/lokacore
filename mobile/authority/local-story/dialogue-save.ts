@@ -17,10 +17,7 @@ const invalid = () => {
 // holder or fact loads and plays on (loka-vduxr.10).
 export function dialogueSave(world: World, db: Db, meta: Meta) {
   const items = custodyItems(world);
-  const escortChoices = Object.values(world.cartridge.dialogues ?? {}).some((d) =>
-    Object.values(d.choices).some((o) => o.escort),
-  );
-  if (!items.size && !escortChoices && !Object.keys(world.state.escorts ?? {}).length) return;
+  if (!items.size && !Object.keys(world.state.escorts ?? {}).length) return;
   for (const item of items) if (holderLoop(world, item)) invalid();
   const rows = ordinaryRows(world);
   for (const [id, row] of rows) checkRow(world, id, row);
@@ -31,7 +28,7 @@ export function dialogueSave(world: World, db: Db, meta: Meta) {
       committedDialogue(world, db, scope, id);
 }
 
-// A holder cycle hangs every holder walk at launch, so it cannot be left to play on.
+// A holder cycle reached from a custody item hangs the kernel's holder walks at launch.
 function holderLoop(world: World, item: EntityId) {
   const seen = new Set<string>();
   for (let at: string | undefined = item; at; at = world.state.containers[at as EntityId]) {

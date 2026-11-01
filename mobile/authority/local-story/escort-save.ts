@@ -118,14 +118,11 @@ function terminal(world: World, escort: EscortRelation, selected: Selection[]) {
   const completed = selected.filter((s) => s.option.escort!.transition === 'complete');
   if (escort.status === 'completed') {
     const end = completed[0];
-    const speaker = end && world.entityIds[refString(end.d.npc)];
     if (
       completed.length !== 1 ||
       !same(end.d.quest, quest!.quest) ||
       quest!.state !== 'resolved' ||
-      quest!.outcome !== end.row.choice_id ||
-      !living(world, speaker) ||
-      world.state.containers[speaker] !== world.state.containers[escort.npc_id]
+      quest!.outcome !== end.row.choice_id
     )
       invalid();
     return;
