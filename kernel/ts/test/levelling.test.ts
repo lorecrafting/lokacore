@@ -21,6 +21,7 @@ import type {
   DefinitionRef,
   DeltaOp,
   DomainEvent,
+  Key,
   ReactionRule,
 } from '../src/contracts.gen.ts';
 import { key } from '../src/foundation/compose.ts';
@@ -610,12 +611,7 @@ test('a delayed refill joins the group that wrote its pool earlier in the batch'
     entity_id: w.body,
     resource: resourceRef(w, 'hp'),
   } as unknown as DeltaOp;
-  const job: DefinitionRef = {
-    cartridge_id: 'levelling_sampler',
-    cartridge_version: '0.0.1',
-    kind: 'reaction',
-    key: 'level_two',
-  };
+  const job: DefinitionRef = { ...resourceRef(w, 'hp'), kind: 'reaction', key: 'level_two' as Key };
   const steps = { n: 0 };
   const joins: Joins = {
     holders: new Map(),
@@ -638,11 +634,15 @@ test('a delayed refill joins the group that wrote its pool earlier in the batch'
 test('an unchanged fact write takes no position', () => {
   const w = fresh();
   const rule: ReactionRule = {
-    key: 'unchanged',
+    key: 'unchanged' as Key,
     on: { event: 'custom_event' },
     steps: [
-      { op: 'fact.assign', fact: { ...attr('second_wind'), kind: 'fact' }, value: false },
-      { op: 'event.emit', event: 'anything' },
+      {
+        op: 'fact.assign',
+        fact: { ...resourceRef(w, 'hp'), kind: 'fact', key: 'second_wind' as Key },
+        value: false,
+      },
+      { op: 'event.emit', event: 'anything' as Key },
     ],
   };
   const cause = {
