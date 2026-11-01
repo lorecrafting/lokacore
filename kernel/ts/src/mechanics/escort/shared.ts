@@ -109,7 +109,7 @@ export function transition(
   return [{ op: 'escort.transition', writer_group: 0, actor_id: row.actor_id, expected, value }];
 }
 
-/** A following escort stays with its player (escort@1: never detached). */
+/** A following escort stays with its player (escort@1: no NPC move detaches it). */
 export function escorting(world: World, npc: EntityId) {
   return Object.values(world.state.escorts ?? {}).some(
     (e) => e?.npc_id === npc && e.status === 'following',
@@ -118,8 +118,9 @@ export function escorting(world: World, npc: EntityId) {
 
 /** The bond ends with the NPC's life, its presence beside the body or the quest being active. */
 function parted(world: World, escort: EscortRelation) {
+  const quest = world.state.quests?.[escort.quest_instance_id]?.state;
   return (
-    world.state.quests?.[escort.quest_instance_id]?.state !== 'active' ||
+    (quest !== 'active' && quest !== 'objectives_complete') ||
     !living(world, escort.npc_id) ||
     world.state.containers[escort.npc_id] !== world.state.containers[escort.body_id]
   );
@@ -203,14 +204,10 @@ export function separate(world: World, actor: CharacterId, writer_group: number)
   return expected ? [separated(expected, writer_group)] : [];
 }
 
-/** What a whole decision left behind: each of `held` it parted and did not itself transition. */
-export function partings(
-  world: World,
-  held: (EscortRelation | undefined)[],
-  writer_group: number,
-): DeltaOp[] {
-  return held.flatMap((h) => {
-    const e = h && world.state.escorts?.[h.actor_id];
+/** What a whole decision left behind: each actor in `held` it parted and did not itself transition. */
+export function partings(world: World, held: CharacterId[], writer_group: number): DeltaOp[] {
+  return held.flatMap((actor) => {
+    const e = world.state.escorts?.[actor];
     return e?.status === 'following' && parted(world, e) ? [separated(e, writer_group)] : [];
   });
 }

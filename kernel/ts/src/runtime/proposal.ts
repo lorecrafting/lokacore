@@ -114,15 +114,16 @@ export function propose(
 // following escort (escort@1), and no later command can then fault on it. Only rows already
 // following: a start or Rejoin in this decision wrote its row, so the next decision's sweep parts it.
 function parting(p: P): Admitted | undefined {
-  const held = Object.values(p.world.state.escorts ?? {}).filter((e) => e?.status === 'following');
+  const rows = p.world.state.escorts ?? {};
+  const held = Object.keys(rows).filter((actor) => rows[actor]?.status === 'following');
   if (!held.length) return;
   const at = now(p);
   if (!('cartridge' in at)) return at;
   p.ops.push(...partings(at, held, ++p.group));
 }
 
-// The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read
-// it), or its fault. After the advance, the rest composes from the base clock with the advance
+// The proposal so far, composed lazily (only a job, a delivery, an acquisition's quests or a held
+// escort read it), or its fault. After the advance, the rest composes from the base clock with the advance
 // replayed, so a job's op `at` its due time lies inside the advance; a write conflicting with an
 // earlier slice still faults only in adopt.
 function now(p: P): World | Admitted {

@@ -378,6 +378,20 @@ test('a Rejoin whose own reaction ends the quest is accepted, and the next Move 
   assert.equal(a.world().state.containers[child(a.world())], room(a.world(), 'lantern_cellar'));
 });
 
+// Breaks: earning a quest's objectives mid-walk reads as the quest ending and drops the child.
+test('a quest at objectives_complete keeps its escort following', () => {
+  const a = setup();
+  a.ready();
+  a.choose('rescue');
+  const w = a.world();
+  const [id, row] = homeward(w);
+  const state = { ...row, state: 'objectives_complete' };
+  a.set({ ...w, state: { ...w.state, quests: { ...w.state.quests, [id]: state } } } as World);
+  a.move(...toCellar);
+  assert.equal(relation(a.world()).status, 'following');
+  together(a.world(), 'lantern_cellar');
+});
+
 // Breaks: a forged pending start substitutes a different co-located NPC of the same kind.
 test('an escort choice cannot bind the stranger in place of the authored child', () => {
   const a = setup();
