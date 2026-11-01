@@ -54,12 +54,11 @@ function memory(sql: DatabaseSync): Db {
 function replayed(bundled: Bundled, steps: Step[]): string | undefined {
   const sql = new DatabaseSync(':memory:');
   const clock = { wall: 10_000, mono: 0 }; // mutate-skip: any start reads the same; only the deltas matter
-  let id = 0;
+  let id = 0; // mutate-skip: any start gives unique ids
   try {
     const game = openGame(memory(sql), bundled, {
       kernel_version: `${KERNEL_ID}@${'0'.repeat(40)}`,
-      // mutate-skip: any unique id
-      newId: () => `aaaaaaaa-0000-4000-8000-${(++id).toString().padStart(12, '0')}`,
+      newId: () => `aaaaaaaa-0000-4000-8000-${(++id).toString().padStart(12, '0')}`, // mutate-skip: any unique id
       time: { wall: () => clock.wall, monotonic: () => clock.mono },
     });
     return replay(steps, game, (ms) => {
