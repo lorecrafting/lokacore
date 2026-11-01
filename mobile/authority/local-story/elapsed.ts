@@ -13,6 +13,8 @@ import {
 } from './elapsed-store.ts';
 import { needsAncestry } from '../../../kernel/ts/src/commands/actions.ts';
 import { CLOCK_JOB } from '../../../kernel/ts/src/mechanics/schedule/daily.ts';
+import { folds } from '../../../kernel/ts/src/mechanics/status/job.ts';
+import type { JobId } from '../../../kernel/ts/src/contracts.gen.ts';
 import { adopt, type Story } from './save.ts';
 import { identityOf, persistElapsed, reconcile, transaction } from './store.ts';
 
@@ -60,11 +62,13 @@ function metadata(s: Story, row: Checkpoint): ElapsedStatus {
 
 function boundary(s: Story, target: number): number {
   let until = target;
-  for (const job of Object.values(s.world.state.jobs ?? {})) {
+  for (const [id, job] of Object.entries(s.world.state.jobs ?? {})) {
     if (job.status !== 'pending') continue;
     if (job.due_time <= s.world.state.clock) throw new Error('already-due job; recovery required');
     // The calendar job (toolbox row W25) runs in whichever step passes it, once: never a stop.
-    if (job.job.kind !== CLOCK_JOB) until = Math.min(until, job.due_time);
+    // Nor is a saturated tick the kernel will fold (mechanics.md, W8 Catch-up).
+    if (job.job.kind !== CLOCK_JOB && !folds(s.world, id as JobId, job))
+      until = Math.min(until, job.due_time);
   }
   return until;
 }
