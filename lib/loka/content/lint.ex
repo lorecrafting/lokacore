@@ -272,7 +272,7 @@ defmodule Loka.Content.Lint do
     for {"dialogues/" <> _ = rel, %{"choices" => %{} = cs}} <- Enum.sort(files),
         map_size(cs) > 1,
         {key, c} <- Enum.sort(cs),
-        Map.keys(c) -- ["label", "narration"] == [],
+        Map.keys(c) -- ["label", "narration", "asked"] == [],
         s = text[c["label"]],
         is_binary(s) and s =~ ~r/^(Leave|Close)\b/,
         do: "#{rel}: choice #{key} only leaves; the page's own Leave control ends the talk"

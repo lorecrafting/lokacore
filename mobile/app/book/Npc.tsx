@@ -66,8 +66,6 @@ function Choice(p: {
     if (!p.pending) setChosen(undefined);
   }, [p.pending]);
   const left = (id: string) => !!p.pending && !!chosen && chosen !== id; // a refusal brings them back
-  const answer = (id: string) =>
-    p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
   return (
     <View style={{ gap: space.sm }}>
       {p.choice.riddle?.attempts && (
@@ -78,7 +76,7 @@ function Choice(p: {
       )}
       {absent(p.view) !== '' && <Text style={note(c, t)}>{absent(p.view)}</Text>}
       {p.choice.choices.map((o, at) => {
-        const b = answer(o.choice_id);
+        const b = p.g.choice.find((x) => choiceId(x) === o.choice_id);
         if (b && b === exit(p.g)) return null; // the foot's Leave the conversation sends it
         const riddle = p.choice.riddle;
         if (b && riddle?.choice_id === o.choice_id)
@@ -93,10 +91,11 @@ function Choice(p: {
               />
             </Answer>
           );
+        const asked = o.available && o.asked;
         return (
           <Answer key={o.choice_id} at={at} fresh={fresh} left={left(o.choice_id)}>
             {b ? (
-              <ActionCard b={b} press={(x) => (setChosen(o.choice_id), p.press(x))} />
+              <ActionCard b={b} press={(x) => (setChosen(o.choice_id), p.press(x))} asked={asked} />
             ) : (
               <ActionCard label={p.text(o.label)} reason={why(o, p.text)} />
             )}
@@ -107,8 +106,9 @@ function Choice(p: {
   );
 }
 
-// An authored choice whose whole label is the Book's Leave or Close is the talk's exit
-// (loka-512o): the foot sends it, so the content omits it.
+const choiceId = (b: Button) => (b.input as { choice_id?: string }).choice_id;
+
+// A choice labelled just the Book's Leave or Close is the talk's exit; the foot sends it (loka-512o).
 const exit = (g: Grouped) =>
   g.choice.find(
     (b) => b.action_key === 'choose' && ([LABEL.leave, LABEL.close] as string[]).includes(b.label),

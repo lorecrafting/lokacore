@@ -19,6 +19,7 @@ import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { diedAfter, sequence, triggered } from '../mechanics/reaction.ts';
 import { levelsReached, oneWrite } from '../mechanics/levelling/shared.ts';
+import { partings } from '../mechanics/escort/shared.ts';
 import { closing } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -94,7 +95,7 @@ export function propose(
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
   let failed = join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root);
-  failed ??= farewell(p, () => now(p));
+  failed ??= farewell(p, () => now(p)) ?? parting(p);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
   p.narration = closing(world, command.payload.actor_id, ops, p.events, p.narration);
@@ -109,8 +110,22 @@ export function propose(
   };
 }
 
-// The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read
-// it), or its fault. After the advance, the rest composes from the base clock with the advance
+// Last, on the final state: the decision's own writes (a death, a mover, a quest end) may part a
+// following escort (escort@1), and no later command can then fault on it. Only rows already
+// following: a start or Rejoin in this decision wrote its row, so the next decision's sweep parts it.
+function parting(p: P): Admitted | undefined {
+  const held = Object.values(p.world.state.escorts ?? {}).flatMap((e) =>
+    e?.status === 'following' ? [e.actor_id] : [],
+  );
+  // Composing here would name a lazy limit before adopt's whole-proposal order (04 §5.4).
+  if (!held.length) return;
+  const at = now(p);
+  if (!('cartridge' in at)) return at;
+  p.ops.push(...partings(at, held, ++p.group));
+}
+
+// The proposal so far, composed lazily (only a job, a delivery, an acquisition's quests or a held
+// escort read it), or its fault. After the advance, the rest composes from the base clock with the advance
 // replayed, so a job's op `at` its due time lies inside the advance; a write conflicting with an
 // earlier slice still faults only in adopt.
 function now(p: P): World | Admitted {

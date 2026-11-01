@@ -28,7 +28,12 @@ export function riddleSave(world: World, db: Db, meta: Meta) {
       continue;
     }
     checkRow(world, id, row);
-    if (!d.quest || row.quest_instance_id !== questOf(world, row.actor_id, d.quest)?.[0])
+    if (!d.quest) invalidRiddle();
+    // A repeatable quest's next acceptance retires the row, so its sittings stand alone.
+    if (
+      !world.cartridge.quests?.[refString(d.quest)]?.repeatable &&
+      row.quest_instance_id !== questOf(world, row.actor_id, d.quest)?.[0]
+    )
       invalidRiddle();
     attempts(world, db, scope, id, row);
   }

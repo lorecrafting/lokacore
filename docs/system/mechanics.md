@@ -502,6 +502,14 @@ A `DialogueChoice` may carry `policy`, `then`, `then_failed`, `narration_variant
 - **Hand-off.** `then` may name another speaker's dialogue: the new row binds its own roles and `speaker_id`. A speaker in another room draws the compile warning `SPEAKER_ELSEWHERE`, because the proposal's farewell closes the new row in the same decision and the talk ends after the reply.
 - **`narration_variants`.** `TextVariants` on the reply: the first whose `when` holds replaces `narration`, read before the answer's effects. The narration key on the receipt is one of the choice's declared words (`dialogue-receipt.ts`).
 - **`narrate` steps.** A choice step that adds its `text` line after the reply, in step order; the key must be in the catalog.
+- **`asked`.** A source choice's `asked: true` marks it once taken without a fact of the author's: it lowers to the player fact `<dialogue>_<choice>_asked` (a name already taken or over 64 bytes, or a riddle's typed answer, is `SCHEMA_VIOLATION`; `asked_when` itself is not a source field), a `fact.assign` on its steps and the compiled `asked_when` policy. While that holds, an available option's view carries `asked: true`; it never refuses, so the Book [dims](book-ui.md) the option and it stays usable. A failed check applies no steps, so it leaves the option unasked. The save holds only the fact.
+- **Composition record, `asked`** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: the [dialogue cookbook](../guides/dialogue-cookbook.md) and the Book's option list. Later: the first authored conversation that sets it.
+  - Reads: `holds` on the player fact, for each available option.
+  - Writes: `fact.assign` through the choice's steps. Events, jobs and save rows: none new.
+  - Reused: choice steps, the `Policy` schema, `fact_compare`, the engine-fact lowering in the compiler.
+  - New: source key `asked`, compiled `asked_when`, GameView `asked`.
+  - Missing invariant: none. Named exceptions: none.
 - **Repeats.** A linked dialogue can run again, so the [hub's repeat refusal](#dialogue-skill-checks-toolbox-row-14) applies to it however many choices it has, except a choice whose own `policy` negates a fact its own steps set (`lib/loka/content/hub.ex`).
 - **Composition record.** Consumer: the dialogue rule and the GameView. Reads: dialogue definitions, facts through `holds`, the row's roles and ids, the world the decision's own writes leave. Writes, save rows and fields: none new; `choice.open` of another dialogue. Events: `choice_opened` after `choice_resolved` or `check_failed`. Reused: `holds`, `opening`, `bind`, `offered`, `openable`, `blocked`, the hub, `parted`. New: optional fields, `shown`, `linked`, `leadOn`, `replies`, the `fact_at_least` leaf, the `narrate` choice step. Invariants: none new. Exceptions: none.
 
@@ -905,7 +913,7 @@ not earn credit. Quest acceptance/rewards are later consumers of these facts.
 
 ## escort@1
 
-A following escort skips its schedule hour and any plan or NPC move (`escorting`, loka-ynfo): it stays with the player and follows the next Move.
+A following escort skips its schedule hour and any plan or NPC move (`escorting`, loka-ynfo): it stays with the player and follows the next Move, unless a decision parted it (below).
 
 API1.11 adds one actor-keyed typed escort relation. Its immutable identity is
 `{kind: escort, actor_id, body_id, npc_id, quest_instance_id, continuation_id, choice_id}`
@@ -913,11 +921,13 @@ and its status is following/separated/completed. The continuation and choice nam
 original accepted start and bind the same authored NPC. No duplicate start or identity
 swap is legal. `escort.transition {actor_id, expected, value}` compares the complete prior
 row (null at start); the only transitions are null→following, following→separated,
-separated→following and following→completed, retaining every identity field.
+separated→following and following→completed, retaining every identity field. The one exception is
+a start on a new quest instance, which replaces a separated or completed row with a fresh identity.
 
 An authored dialogue choice may declare `escort {npc, quest, transition}` where npc is
 a bound NPC role, quest is a local quest reference and transition is start/rejoin/complete.
-Start requires no existing relation, active actor quest, original living co-located NPC
+Start requires no existing relation (or one whose quest instance a repeatable quest's acceptance
+retired: that escort has ended and the start replaces it), active actor quest, original living co-located NPC
 and ordinary dialogue policy/role admission. Rejoin requires the same separated binding,
 active quest and physical presence; complete requires following, active quest and physical
 presence. Complete must resolve that dialogue's same quest. The shared predicate guards
@@ -926,10 +936,12 @@ actor's typed relation for that quest instance and supports policy and journal s
 
 Shared Move/Flee sequence appends the bound living NPC's transfer from the player's
 actual source to the same actual destination when following. Ordinary stance, exit,
-gate, fare and Flee choice/RNG remain authoritative. Invalid escort presence is a controlled
-fault/refusal, never detachment or teleport; refused/composition-failed movement changes
+gate, fare and Flee choice/RNG remain authoritative. Refused/composition-failed movement changes
 neither. Fatal player death writes following→separated in death's existing writer group
-beside shrine return, leaving NPC custody unchanged. No independent fare, roll, pathfinding
+beside shrine return, leaving NPC custody unchanged. Whatever else ends the bond (the NPC dies or
+no longer shares the player's room, or the quest ends: resolved, failed or abandoned) writes the same
+following→separated after the decision's other writes, in its own writer group, with no event or line of
+its own; a parted NPC is never moved or teleported, and Rejoin stays the only way back. A decision that itself starts or rejoins leaves that row to the next decision's sweep. A separated row whose NPC is dead or whose quest has ended stays final until a retirement: Rejoin refuses it, and the sweep says nothing, so a quest line that should fail or change when the NPC dies is the author's to react to. Installed kernel 1.139. No independent fare, roll, pathfinding
 or after-commit write exists. Completed relations never follow subsequent movement.
 
 <a id="s2-chandlers-debt-selected-contract-pending-implementation"></a>

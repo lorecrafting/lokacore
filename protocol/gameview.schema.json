@@ -221,6 +221,11 @@
             },
             "action_key": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "asked": {
+              "description": "The player has already taken this option; it stays usable and the Book dims it (DialogueChoice.asked_when).",
+              "type": "boolean",
+              "enum": [true]
             }
           },
           "required": [
@@ -270,6 +275,12 @@
           "available": true,
           "choice_id": "carry",
           "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "ask",
+          "label": "choice.ask",
+          "asked": true
         },
         {
           "available": true,
