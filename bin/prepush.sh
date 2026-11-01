@@ -40,6 +40,7 @@ if touched "$ex"; then
   run CREDO mix credo --strict
 fi
 run DOCS elixir bin/check_docs.exs
+run SOUNDS python3 bin/check_sounds.py
 # (docs/state-sections.gen.json needs no check: regen rewrites it, so REGEN_DIRTY catches a stale one).
 # Story views, saves and CSF meta indexing (#431); hosted mobile runs it too (loka-8qzi, loka-yz58).
 if touched '^(mobile/|kernel/ts/src/|protocol/)'; then

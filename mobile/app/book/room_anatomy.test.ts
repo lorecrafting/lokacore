@@ -222,3 +222,28 @@ test('each sense cue is one log line, once per room visit, after the narration',
   assert.deepEqual(show(yard), []);
   assert.deepEqual(show(here()), cues);
 });
+
+// Breaks: a queued chapter inherits the card before it, its clock spent; or a chapter card outranks
+// a scene (book-ui.md Chapters), whose unmount is what stops the clock.
+test('a card is its chapter index, and a scene takes its place', async () => {
+  const { Body } = await import('./Body.tsx');
+  const { ChapterPage } = await import('./sections.tsx');
+  const inner = (more: object) => {
+    const screen = presenter(game(() => ({ ...forge(), ...more }) as GameView)).screen();
+    const nop = () => {};
+    const body = (Body as any)({
+      screen,
+      page: { kind: 'chapter' },
+      g: group(screen.buttons),
+      press: nop,
+    });
+    const page = body.props.children.at(-1);
+    return page.type(page.props);
+  };
+  const chapter = (index: number) => ({ chapter: { index, title: 'smith.name' } });
+  assert.equal(inner(chapter(1)).type, ChapterPage);
+  assert.equal(inner(chapter(1)).key, '1');
+  assert.equal(inner(chapter(2)).key, '2');
+  const scene = { scene: { id: 's', lines: [], current: 0 } };
+  assert.notEqual(inner({ ...chapter(1), ...scene }).type, ChapterPage);
+});

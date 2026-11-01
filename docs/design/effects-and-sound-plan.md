@@ -1,5 +1,7 @@
 # Effects and sound plan (2026-10-31)
 
+**Superseded 2026-10-31:** [book-ui.md](../system/book-ui.md#effects-sound-and-haptics) rules over this plan on the page swell (cut), the reduced-motion chapter blur (none) and the theme cut (Music, not Sound). The pickup pop is in: book-ui.md's owner exception (2026-10-31) rules it.
+
 Planning document, nothing implemented. The owner asked for a thorough review of where effects and sounds go,
 what they look like and why, at the quality of a polished mobile game, expressed as a book: ink, paper, type,
 light and sound. This is the keeper; batches build from it. Playable samples of the entries where seeing
@@ -73,7 +75,7 @@ Every entry carries a severity; it decides stacking, loudness, haptic and what r
 | S1 | whisper | type only, ≤ `motion.dry` (240 ms), no sound of its own beyond the page turn, no haptic | a new log line drying; a refused line |
 | S2 | note | one ink or paper change ≤ 300 ms, a tick, coin, flick or tone, at whisper to note loudness, at most one haptic of the weight its entry names | a press; a pickup; a coin counted; a status icon arriving |
 | S3 | beat | page-level change ≤ 500 ms, one sound at note loudness, light or medium haptic | a blow taken; a quest resolved; a lever thrown; lightning |
-| S4 | chapter | the whole page (blur, card), the theme cut, medium haptic; the only severity that waits for a tap | the chapter card; death and waking |
+| S4 | chapter | the whole page (blur, card), the theme cut, medium haptic; turns itself after about 4 s | the chapter card; death and waking |
 
 ### Timing and easing tokens
 
@@ -99,8 +101,8 @@ is the check for these.
 ### Stacking, queue and interrupt
 
 - At most one S4 on screen; it interrupts everything and clears the queue.
-- S3: one playing, one pending; a third of the same key replaces the pending one (a flurry of blows is one
-  wash that re-peaks, never three).
+- S3: one playing, one pending; a third of the same key replaces the pending one (a flurry of blows never
+  peaks the wash twice within `motion.flash.gap`, 1 s; later blows keep all but the wash).
 - S2: coalesced by key within 300 ms (two pickups in one command are one pop reading "+ sack, + rope";
   two coins counted are one clink).
 - S1: free; they are type transitions on their own lines.
@@ -112,8 +114,8 @@ is the check for these.
 
 ### Non-blocking in a long read
 
-The Book is read for minutes at a time. Nothing waits for an effect except the chapter card (already a page with
-its own Continue, book-ui.md Chapters) and death (a sequence of pages). No effect delays the next tap, moves text
+The Book is read for minutes at a time. Nothing waits for an effect except the chapter card (already a page that
+turns itself, book-ui.md Chapters) and death (a sequence of pages). No effect delays the next tap, moves text
 the eye is on, or scrolls. Ink dries in place; pops appear under the log, not in it; washes are below the ink
 (the page's background layer), so prose never changes colour.
 
@@ -122,7 +124,7 @@ the eye is on, or scrolls. Ink dries in place; pops appear under the log, not in
 - **Senses** (G6 cues): the rule is "the sense is in the words, never an icon or colour"
   (book-ui.md Mechanic renderings). No visual. A sound bed may respond to the room, not to a cue line.
 - **Status ticks and expiry, item statuses** (owner rule: silent); the countdown ring is the whole story.
-- **NPC background life**: schedules, population births, patrol moves, crow flights out of sight, wages.
+- **NPC background life**: schedules, population births, patrol moves, crow flights out of sight. A wage paid in the player's pennies is the coin cue, as any change to them is.
   The prose says "Nell leaves."; an effect would make the world feel like it is performing for the player.
 - **Facts, knowledge, reputation, disposition, rumour, fear, scars**: narrated or not by content; no cue.
 - **Save**: confirmed saves are silent; "save not confirmed" is a Note (StatusLine pending state). A save
@@ -303,6 +305,9 @@ gilt, no note; a single low *paper* close. Haptic *warning*. P0. Cue: view-diff 
 **Chapter card** (`chapter.index` rises; book-ui.md Chapters; `ChapterPage`): S4, the owner's choice: the page
 behind blurs (Skia `Blur` over the leaving page's snapshot image, the one `PageTurn` already takes, sigma 6 →
 12 over `motion.card`), the card's label, title and short rule dry in staggered by 120 ms; sound: the chapter cut of the main theme (section 14, 8-15 s, tier chapter); haptic *medium*. Reserved for story-arc markers, never a level.
+The card turns the page itself after `motion.card.auto` (about 4 s from appearing); a tap anywhere skips; the
+clock pauses while the app is in the background. With a screen reader active it keeps an explicit Continue and
+does not turn itself. The cut plays into the next page and fades there. Presentation only.
 Under reduced motion: no blur ramp (a fixed blur), no stagger; the cut stays (sound is not motion; Sound off
 silences it). P0. Cost M, Skia on the existing snapshot (the only blur in the Book; never a live view blur on
 Android). Cue: view-diff.
@@ -328,7 +333,7 @@ pickup pop fires as in 3.2 for a buy, but the coin plays instead of the flick, s
 
 **Service received** (sleep at the inn, a meal): S0 beyond the rest or eat entry.
 
-**Wage paid** (escort): S0; the pennies entry covers the player's side.
+**Wage paid** (escort): the coin cue when the player's pennies change (the pennies entry); S0 otherwise.
 
 ### 3.8 Food, liquid, water, rest, dreams (`food/`, `liquid/`, `water/`, `rested`)
 
@@ -525,15 +530,15 @@ player misses nothing: the bell has its cue line, weather is in the status line,
 Beat by beat; each uses only catalogue entries.
 
 1. **Opening the book** (launch): paper, nothing else, 300 ms. The Chapter one card dries in label → rule →
-   title (120 ms stagger), the theme cut opens under it, haptic medium. Continue presses; the curl turns to the
-   ancestry page or the inn. The first turn's paper sound is the first sound the player hears after the cut.
+   title (120 ms stagger), the theme cut opens under it, haptic medium. After about 4 s, or at a tap, the curl
+   turns to the ancestry page or the inn while the cut fades there. The first turn's paper sound is the first sound the player hears after the cut.
 2. **First thing taken** (the sack at the inn or the lantern in the loft): the line reads "You take the sack.";
    under the log "+ sack" flicks up with the paper flick and a light haptic, holds, fades. No other item pops for the
    next 300 ms.
 3. **First blow** (the boar at boar_run): the Combat page curls open a touch louder, medium haptic. The boar's
    line reads; on its hit the page swells 1.5 % and the oxblood wash rises and falls in half a second, the hp
    value dries red, the paper thud lands with a heavy haptic. The band phrase "the boar — hurt" presses when
-   the player's blow lands. Three blows in a round are one wash that re-peaks.
+   the player's blow lands. A flurry never peaks the wash twice within `motion.flash.gap` (1 s); later blows keep all but the wash.
 4. **Nightfall at the inn**: the status line reads dusk; the palette crosses to dusk over 1.5 s, then to dark
    at night. Outdoors the stars come up (built) and a meteor streaks; indoors with the lamp lit the hip glow
    fades in and flickers. The inn bed (hearth and low voices) comes in under the wind bed, which fades.
@@ -761,7 +766,7 @@ none of its melodies are to be imitated.
 | Moment | Music | Ends | Trigger | Cue |
 |---|---|---|---|---|
 | Title and opening | the main theme, cut down for the chapter card | fades into the first room's bed | launch | none |
-| Chapter card | a short cut of the theme, 8-15 s | fades on Continue | `chapter.index` rises | view-diff |
+| Chapter card | a short cut of the theme, 8-15 s | plays into the next page and fades there | `chapter.index` rises | view-diff |
 | Exploration | sparse: one 1-3 min piece on first entry to a new area, then at least 5-10 min of beds only | plays out, never cut | area changes | cartridge area tag |
 | Town or inn | a soft piece by time of day, same sparse rule | plays out | room tag | cartridge tag |
 | Ordinary fight | battle track (below) | victory, flight or death | `combat` appears | view-diff |

@@ -4,6 +4,7 @@
 // nothing, so the e2e runner can load it. lint/rules/mobile-book-labels.yml lists these words too;
 // lint/rules/mobile-book-english.yml keeps a page's English here.
 export const LABEL = {
+  itemPop: (names: string[]) => names.map((n) => `+ ${n}`).join(', '),
   leave: 'Leave',
   leaveConversation: 'Leave the conversation',
   backToWorld: 'Back to World',
@@ -50,7 +51,13 @@ export const LABEL = {
   spells: 'Spells',
   // The Contents section of held and worn things (owner 2026-10-15, loka-x6t.55).
   inventory: 'Inventory',
-  // The Reading size setting (docs/system/book-ui.md#world-and-status-entry, loka-x6t.42).
+  // The effect settings (docs/system/book-ui.md, Effects, sound and haptics).
+  sound: 'Sound',
+  music: 'Music',
+  haptics: 'Haptics',
+  flashes: 'Flashes',
+  on: 'On',
+  off: 'Off',
   readingSize: 'Reading size',
   readingStandard: 'Standard',
   readingLarge: 'Large',

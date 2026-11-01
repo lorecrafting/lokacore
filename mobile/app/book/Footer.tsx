@@ -10,6 +10,9 @@ import { MapDrawing } from './MapDrawing.tsx';
 import { refused, why, type Hint } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { commandOf } from './buttons.ts';
+import { InkText } from './fade.ts';
+import { haptic } from './haptic';
+import { useDry } from './press.ts';
 import { Control } from './pages.tsx';
 import { usePalette, useType, type Palette } from './palette.ts';
 import { motion, radius, size, space } from './tokens.ts';
@@ -93,7 +96,7 @@ export function Footer(p: Props) {
           {...pan.panHandlers}
         >
           <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
-          <Said text={said} side={sideOf(lit)} />
+          {saidLabel(said, sideOf(lit))}
         </View>
         <View style={rule(c)} />
       </View>
@@ -115,11 +118,13 @@ export const pressDoor = (door: Button[], press: (b: Button) => void) => {
 const walker =
   (learn: () => void, setNote: (note: string) => void) => (d: string | null, at: Props) => {
     const e = at.exits.find((x) => x.direction === d);
-    if (e?.available) (at.go(e.direction), learn());
+    if (e?.available) (haptic('selection'), at.go(e.direction), learn());
     else if (e && pressDoor(at.door(e.direction), at.press)) setNote('');
     else if (e) {
       const line = refused(e, at.text); // its one sentence; a screen reader hears it too
-      (setNote(line.text), AccessibilityInfo.announceForAccessibility(line.text));
+      (haptic('warning'),
+        setNote(line.text),
+        AccessibilityInfo.announceForAccessibility(line.text));
       at.refused(line);
     }
   };
@@ -197,18 +202,22 @@ export function Tip({ dismiss }: { dismiss: () => void }) {
 
 // The lit exit's name (and why it is closed), or a closed exit's reason after release, on the side
 // opposite the drag (joystick.ts `sideOf`, placed by `SPOT`).
-function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
+export function saidLabel(text: string, side: keyof typeof SPOT) {
+  return text !== '' && <SaidLabel key={text} text={text} side={side} />;
+}
+
+// Keyed on the words: a newly lit direction's label presses in, dim to `fg`.
+function SaidLabel({ text, side }: { text: string; side: keyof typeof SPOT }) {
   const c = usePalette();
   const t = useType();
+  const ink = useDry(c.fg, 0, motion.press.duration);
   return (
-    text !== '' && (
-      <Text
-        pointerEvents="none"
-        style={{ ...t.small, position: 'absolute', ...SPOT[side], color: c.fg }}
-      >
-        {text}
-      </Text>
-    )
+    <InkText
+      pointerEvents="none"
+      style={[t.small, { color: c.fg, position: 'absolute', ...SPOT[side] }, ink]}
+    >
+      {text}
+    </InkText>
   );
 }
 

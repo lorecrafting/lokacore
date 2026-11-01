@@ -1,7 +1,7 @@
 // Chip: one word as a pill (Chip's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { expect, fn } from 'storybook/test';
-import { Chip, ReadingSize } from '../book/Chip.tsx';
+import { expect, fn, within } from 'storybook/test';
+import { Chip, EffectSettings, ReadingSize } from '../book/Chip.tsx';
 import { type } from '../book/tokens.ts';
 
 const meta = {
@@ -60,5 +60,21 @@ export const ReadingSizeRow: Story = {
     await expect(canvas.getAllByRole('radio', { checked: true })).toHaveLength(1);
     await userEvent.click(canvas.getByRole('radio', { name: 'Larger' }));
     await expect(choose).toHaveBeenCalledWith('larger');
+  },
+};
+const chooseEffect = fn();
+// Sound, Music, Haptics and Flashes: one checked chip each, and a press names its setting.
+export const EffectRows: Story = {
+  render: () => (
+    <EffectSettings
+      on={{ sound: true, music: false, haptics: true, flashes: true }}
+      choose={chooseEffect}
+    />
+  ),
+  play: async ({ canvas, userEvent }) => {
+    await expect(canvas.getAllByRole('radio', { checked: true })).toHaveLength(4);
+    const flashes = within(canvas.getByRole('radiogroup', { name: 'Flashes' }));
+    await userEvent.click(flashes.getByRole('radio', { name: 'Off' }));
+    await expect(chooseEffect).toHaveBeenCalledWith('flashes', false);
   },
 };

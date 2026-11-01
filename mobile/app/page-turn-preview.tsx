@@ -1,12 +1,15 @@
-// Web preview `?preview=page-turn` (App.web.tsx): PageTurn between two real Book pages, Chapter
-// (Continue turns forward) and Settings (Start over here turns back). Not the live Book.
+// Web preview `?preview=page-turn` (App.web.tsx): PageTurn between two real Book pages, a Page with
+// Continue (turns forward; no chapter card, which turns itself) and Settings (Start over here turns
+// back). Not the live Book.
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useFonts } from 'expo-font';
 import { fonts } from './App.tsx';
 import { PageTurn } from './book/PageTurn.tsx';
-import { ChapterPage, SettingsPage } from './book/sections.tsx';
-import { chapterLabel } from './book/words.ts';
+import { ContinueButton } from './book/actions.tsx';
+import { LABEL } from './book/labels.ts';
+import { Page } from './book/pages.tsx';
+import { SettingsPage } from './book/sections.tsx';
 import { usePalette } from './book/palette.ts';
 
 export default function PageTurnPreview() {
@@ -21,7 +24,9 @@ export default function PageTurnPreview() {
         {at.turn % 2 ? (
           <SettingsPage startOver={() => go(-1)} world={() => go(-1)} />
         ) : (
-          <ChapterPage label={chapterLabel(0)} title="The Missing Child" done={() => go(1)} />
+          <Page title="The Missing Child">
+            <ContinueButton label={LABEL.continue} onPress={() => go(1)} />
+          </Page>
         )}
       </PageTurn>
     </View>

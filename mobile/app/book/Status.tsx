@@ -1,14 +1,17 @@
 // The status line under the footer.
-import type { ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { bleedingLine, branch, pools, said, sky, toneOf, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
 import { LABEL } from './labels.ts';
+import { onCue } from './cues.ts';
+import { Reanimated, useReducedMotion } from './fade.ts';
+import { usePress, useThin } from './press.ts';
 import { StatusIcons } from './StatusIcon.tsx';
-import { usePalette, useType, type Palette, type Type } from './palette.ts';
-import { size, space } from './tokens.ts';
+import { mixInk, usePalette, useType, washInk, type Palette, type Type } from './palette.ts';
+import { motion, size, space } from './tokens.ts';
 
 // The status icon row (StatusIcon.tsx) when any condition is on, then the line: the sky glyph (sun by day, moon by night), the position, bleeding, then
 // the resource button, which shows the condition pools coloured by band when GameView carries them
@@ -86,14 +89,13 @@ export function StatusLine(p: StatusProps) {
   const items = leading(c, t, p);
   return (
     <View>
-      {!!p.conditions?.length && (
-        <StatusIcons
-          conditions={p.conditions}
-          time={p.time}
-          text={p.text}
-          open={p.locked ? undefined : p.openCharacter}
-        />
-      )}
+      {/* Mounted when empty too, so the last icon's fade plays. */}
+      <StatusIcons
+        conditions={p.conditions ?? []}
+        time={p.time}
+        text={p.text}
+        open={p.locked ? undefined : p.openCharacter}
+      />
       <View style={statusRow}>
         {/* Two wrap units, so the only break falls before the pools. */}
         <View style={{ ...group, ...shrink }}>
@@ -141,10 +143,14 @@ const joined = (c: Palette, t: Type, item: ReactElement) => (
 
 // The resources (or "character"), a button that opens Contents; not pressable while locked.
 function Contents(p: StatusProps) {
+  const stung = useStung();
   const c = usePalette();
   const t = useType();
+  const press = usePress();
+  const ink = useThin(press, false);
   return (
     <Pressable
+      {...press.handlers}
       disabled={p.locked}
       accessibilityRole="button"
       // Label in name (book-ui.md): the shown text first (its no-break spaces as spaces), then where it goes.
@@ -152,20 +158,57 @@ function Contents(p: StatusProps) {
       onPress={() => p.open()} // no press event: open takes none
       style={{ minHeight: size.touch, justifyContent: 'center' }}
     >
-      <Text style={{ ...t.small, color: p.locked ? c.dim : c.action }}>
-        {p.resources ? shown(c, t, p.resources, p.locked) : 'character'}
-      </Text>
+      <Reanimated.View style={ink}>
+        <Text style={{ ...t.small, color: p.locked ? c.dim : c.action }}>
+          {p.resources ? shown(c, t, p.resources, p.locked, stung) : 'character'}
+        </Text>
+      </Reanimated.View>
     </Pressable>
   );
+}
+
+// A blow lands in combat, where the line is locked: the sting shows over the locked ink too.
+const inkOf = (c: Palette, r: Pool, locked: boolean, stung: number) => {
+  const ink = locked ? c.dim : band(c, toneOf(r));
+  return r.resource.key === 'hp' && stung ? mixInk(ink, washInk(c), stung) : ink;
+};
+
+// How far the hp value has dried in the wash's colour, 0 to 1, over the blow's beat. On the JS
+// thread: nested Text colours cannot animate on native. Reduced motion: held, without the tween.
+function useStung() {
+  const still = useReducedMotion();
+  const [stung, setStung] = useState(0);
+  useEffect(() => {
+    let frame = 0; // mutate-skip: cancelling frame 0 is a no-op
+    const stop = onCue((cue) => {
+      if (cue.name !== 'hp_loss') return;
+      const { duration, out } = motion.flash;
+      const start = performance.now();
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(function tick() {
+        const at = performance.now() - start;
+        setStung(
+          at >= duration + out
+            ? 0
+            : still
+              ? 1
+              : Math.min(at / duration, (duration + out - at) / out),
+        );
+        if (at < duration + out) frame = requestAnimationFrame(tick);
+      });
+    });
+    return () => (stop(), cancelAnimationFrame(frame));
+  }, [still]);
+  return stung;
 }
 
 // The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
 // locked); its label is model.ts `said`. A figure space between resources and a no-break space
 // within each, as text, not a margin: both are no-break, so the pools never split and the shown
 // words lead the button's name (book-ui.md, Label in name).
-const shown = (c: Palette, t: Type, rs: readonly Pool[], locked: boolean) =>
+const shown = (c: Palette, t: Type, rs: readonly Pool[], locked: boolean, stung: number) =>
   rs.map((r, i) => (
-    <Text key={r.resource.key} style={{ color: locked ? c.dim : band(c, toneOf(r)) }}>
+    <Text key={r.resource.key} style={{ color: inkOf(c, r, locked, stung) }}>
       {i ? '\u2007' : ''}
       <Text style={t.label}>{r.resource.key}</Text>
       {`\u00a0${r.current}/${r.maximum}`}

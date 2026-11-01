@@ -8,10 +8,12 @@ import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
 import { test } from 'node:test';
 import { trainingPin } from '../../authority/local-story/__tests__/training-host.ts';
+import { fadeStub } from './__tests__/fade-stub.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 registerHooks({
   resolve(specifier, context, next) {
+    if (specifier === './fade.ts') return fadeStub;
     if (specifier === 'react') return { url: 'test:training-react', shortCircuit: true };
     return specifier === 'react-native'
       ? { url: 'test:training-native', shortCircuit: true }

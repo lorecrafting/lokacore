@@ -1,14 +1,16 @@
 // The book's page shell and its shared controls (the room page: Body.tsx; the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { InkText, Reanimated, useAnimatedStyle } from './fade.ts';
 import { plain, type Pool } from './model.ts';
+import { useDrying, useInk, usePress, useThin } from './press.ts';
 import { tapBleed } from './reading.ts';
 import { usePalette, useType, type Palette } from './palette.ts';
-import { opacity, size, space } from './tokens.ts';
+import { motion, opacity, size, space } from './tokens.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
 export { useTitleFocus };
@@ -32,6 +34,8 @@ export const refusedProps = (hint: string) => ({
  * A text pressable whose hit area bleeds onto the paper around it; the only component that bleeds
  * (BOOK-UI-COMPONENTS.md, Where each fact lives).
  * - Use: entity lines, verb lines, the room title, the status position.
+ * - Rules: pressed, its ink thins at `opacity.press`, whatever colours the words inside it hold (a
+ *   nested Text cannot animate on native); no haptic unless `pulse` says (on commit), none refused and no thinning.
  * - Story: VerbLine.stories.tsx
  */
 export function Tap(p: {
@@ -40,7 +44,10 @@ export function Tap(p: {
   children: ReactNode;
   shrink?: boolean; // may give up width in a row (the status position truncates)
   refused?: string; // an unavailable line (book-ui.md, Unavailable actions): disabled yet pressable, this its hint
+  pulse?: 'selection'; // the entity line's press
 }) {
+  const press = usePress(p.refused === undefined ? p.pulse : undefined);
+  const ink = useThin(press, p.refused !== undefined);
   // Hit area, no shown space; below only, so the next line in a run covers none of this one (loka-462d).
   const b = tapBleed(useType().body.lineHeight);
   const bleed = { paddingBottom: b, marginBottom: -b };
@@ -50,41 +57,12 @@ export function Tap(p: {
       accessibilityRole="button"
       accessibilityLabel={p.label}
       {...(p.refused === undefined ? {} : refusedProps(p.refused))}
-      onPress={() => p.onPress()} // no press event: the handler takes none
+      onPress={press.commit(p.onPress)}
+      {...press.handlers}
       style={{ minHeight: size.touch, justifyContent: 'center', ...bleed, ...shrink }}
     >
-      {p.children}
+      <Reanimated.View style={[shrink, ink]}>{p.children}</Reanimated.View>
     </Pressable>
-  );
-}
-
-// ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
-/**
- * The current quest's projected journal text, above every page but Journal.
- * - Use: Body only.
- * - Rules: the first quest in journal order that is active or objectives_complete and has journal
- *   text; none when no quest qualifies. Not pressable; wraps, never cuts authored words.
- * - States: one line; long; none.
- * - Story: Page.stories.tsx
- */
-export function RunningHead({ view, text }: { view: GameView; text: Say }) {
-  const c = usePalette();
-  const t = useType();
-  const quest = view.journal.find(
-    (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
-  );
-  if (!quest) return null;
-  return (
-    <Text
-      style={{
-        ...t.runningHead,
-        color: c.dim,
-        paddingHorizontal: space.page,
-        paddingTop: space.page,
-      }}
-    >
-      {plain(text(quest.journal!))}
-    </Text>
   );
 }
 
@@ -92,7 +70,8 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
  * Local navigation that is not an offered action (Leave, Back to ..., Close, Got it, Start over).
  * - Use: PageFoot returns and local buttons.
  * - Rules: Start over is a Control wherever it appears: its confirmation carries the weight, never
- *   `action` or `danger`. `onInk` sets the label in `bg` on an ink fill.
+ *   `action` or `danger`. `onInk` sets the label in `bg` on an ink fill. An ink press on press-in, a
+ *   selection haptic on commit.
  * - States: enabled; disabled.
  * - Story: Control.stories.tsx
  */
@@ -105,12 +84,15 @@ export function Control(p: {
   const { label, onPress, disabled, onInk } = p;
   const c = usePalette();
   const t = useType();
+  const press = usePress('selection');
+  const ink = useInk(press, disabled ? c.dim : onInk ? c.bg : c.fg, onInk ? c.dim : c.action);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled} // also sets accessibilityState.disabled (aria-disabled on web)
-      onPress={() => onPress()} // no press event: the handler takes none
+      onPress={press.commit(onPress)}
+      {...press.handlers}
       style={{
         minHeight: size.touch,
         minWidth: size.touch,
@@ -120,7 +102,7 @@ export function Control(p: {
         opacity: disabled ? opacity.disabled : 1,
       }}
     >
-      <Text style={{ ...t.control, color: disabled ? c.dim : onInk ? c.bg : c.fg }}>{label}</Text>
+      <InkText style={[t.control, ink]}>{label}</InkText>
     </Pressable>
   );
 }
@@ -141,23 +123,22 @@ export function Page(p: {
   onTitlePress?: () => void;
   scrollToEnd?: boolean;
   centred?: boolean; // centres the blocks vertically: the save error, the chapter card
+  paperless?: boolean; // its owner paints the paper, with something on it under the ink
   foot?: ReactNode;
   children: ReactNode;
 }) {
   const c = usePalette();
-  let scroll: ScrollView | null = null; // this render's view: a ref callback, so no hook
+  const scroll = useRef<ScrollView>(null);
   const title = p.title !== undefined && (
     <Title title={p.title} fixed={p.fixedTitle} onPress={p.onTitlePress} />
   );
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <View style={{ flex: 1, backgroundColor: p.paperless ? undefined : c.bg }}>
       {p.fixedTitle && (
         <View style={{ paddingHorizontal: space.page, paddingTop: space.xl }}>{title}</View>
       )}
       <ScrollView
-        ref={(view) => {
-          scroll = view;
-        }}
+        ref={scroll}
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: space.page,
@@ -165,7 +146,9 @@ export function Page(p: {
           gap: space.xl,
           ...(p.centred && { flexGrow: 1, justifyContent: 'center' }),
         }}
-        onContentSizeChange={() => p.scrollToEnd && scroll?.scrollToEnd({ animated: false })}
+        onContentSizeChange={() =>
+          p.scrollToEnd && scroll.current?.scrollToEnd({ animated: false })
+        }
       >
         {!p.fixedTitle && title}
         {p.children}

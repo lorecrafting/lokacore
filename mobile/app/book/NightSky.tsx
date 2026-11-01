@@ -44,6 +44,7 @@ export function meteors(box: { width: number; height: number }, show: (s: Streak
     Animated.timing(k, {
       toValue: 1,
       duration: motion.meteor.duration,
+      // ast-grep-ignore: mobile-book-effects-literals -- predates the check; a meteor's constant speed has no token
       easing: Easing.linear,
       useNativeDriver: true,
     }).start(() => live && later());

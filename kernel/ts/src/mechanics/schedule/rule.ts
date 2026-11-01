@@ -56,6 +56,19 @@ import { built } from '../service/shared.ts';
 // `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
 // row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4;
 // runStatus, loka-6ztc).
+const KIND_ROUTES = [CLOCK_JOB, 'population', 'replenish', 'wage', 'order', 'reaction'] as const;
+/** Which handler runs a job row; load's refusal (local-story/job-save.ts) reads the same answer. */
+export function jobRoute(row: JobRow) {
+  if (row.water_generation !== undefined) return 'water';
+  if (row.encounter_id) return 'round';
+  if (row.bleed_body_id) return 'bleed';
+  if (row.job.kind === 'status') return 'status';
+  if (row.quest_instance_id) return 'quest';
+  if (row.crow_phase !== undefined) return 'crow';
+  if (row.sight) return 'sight';
+  return KIND_ROUTES.find((kind) => kind === row.job.kind) ?? 'npc';
+}
+
 // size: allow 44, one run_job dispatch over every job kind (row FD1 adds reaction and its joins)
 export const decideAt = (
   world: World,
@@ -72,30 +85,28 @@ export const decideAt = (
     const row = world.state.jobs?.[payload.job_id];
     if (row?.status !== 'pending' && !(row && at !== undefined && at > row.due_time))
       return rejected('invalid_state');
-    if (row.water_generation !== undefined)
-      return expiry(world, command, payload.job_id, row, mint);
-    if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
-    if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
-    if (row.job.kind === 'status')
+    const route = jobRoute(row);
+    if (route === 'water') return expiry(world, command, payload.job_id, row, mint);
+    if (route === 'round') return roundSequence(world, command, payload.job_id, row, mint, steps);
+    if (route === 'bleed') return runBleed(world, command, payload.job_id, row, mint);
+    if (route === 'status')
       return runStatus(world, command, payload.job_id, row, mint, at, tick, queue);
-    if (row.quest_instance_id) {
+    if (route === 'quest') {
       const d = world.cartridge.quests?.[refString(row.job)]?.deadline;
       return d && !d.fact
         ? expire(world, command, payload.job_id, row, mint)
         : deadlineJob(world, payload.job_id, row);
     }
-    if (row.crow_phase !== undefined)
+    if (route === 'crow')
       return runCrow(world, command, payload.job_id, row, crowBinding(world, payload.job_id), mint);
-    if (row.sight) return runSight(world, payload.job_id, row, steps);
-    if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
-    if (row.job.kind === 'population')
-      return runPopulation(world, command, payload.job_id, row, mint, at);
-    if (row.job.kind === 'replenish')
+    if (route === 'sight') return runSight(world, payload.job_id, row, steps);
+    if (route === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
+    if (route === 'population') return runPopulation(world, command, payload.job_id, row, mint, at);
+    if (route === 'replenish')
       return runReplenish(world, payload.job_id, row, mint, steps, at ?? row.due_time);
-    if (row.job.kind === 'wage')
-      return runWage(world, payload.job_id, row, mint, at ?? row.due_time);
-    if (row.job.kind === 'order') return orderReady(world, payload.job_id, row, mint, steps, at);
-    if (row.job.kind === 'reaction')
+    if (route === 'wage') return runWage(world, payload.job_id, row, mint, at ?? row.due_time);
+    if (route === 'order') return orderReady(world, payload.job_id, row, mint, steps, at);
+    if (route === 'reaction')
       return runDelayed(world, command, payload.job_id, row, mint, steps, joins); // FD1
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
   }

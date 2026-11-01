@@ -7,6 +7,7 @@ import { createRequire, registerHooks } from 'node:module';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { presenter } from './presenter.ts';
 import { group } from './model.ts';
+import { fadeStub } from './__tests__/fade-stub.ts';
 import {
   bundle,
   entity,
@@ -17,6 +18,7 @@ const require = createRequire(import.meta.url),
   ts = require('typescript');
 registerHooks({
   resolve(specifier, context, next) {
+    if (specifier === './fade.ts') return fadeStub;
     if (specifier === 'react') return { url: 'test:riddle-react', shortCircuit: true };
     if (specifier === 'react-native') return { url: 'test:riddle-native', shortCircuit: true };
     return next(specifier, context);
@@ -48,6 +50,7 @@ registerHooks({
   },
 });
 const { NpcPage } = await import('./Npc.tsx');
+const { opacity } = await import('./tokens.ts');
 const words = (e: any): string =>
   Array.isArray(e)
     ? e.map(words).join('')
@@ -135,6 +138,14 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
   const used = (label: string) =>
     draw().find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === label)!.props
       .disabled;
+  const faded = (label: string) =>
+    Object.assign(
+      {},
+      ...[
+        draw().find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === label)!.props
+          .style,
+      ].flat(),
+    ).opacity;
   const initial = text();
   assert.ok(initial.indexOf('A sphinx.') < initial.indexOf(prompt));
   assert.ok(initial.indexOf(prompt) < initial.indexOf('Choose letters to answer.'));
@@ -148,11 +159,13 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
   assert.ok(text().includes('EE'));
   // A used tile keeps its place, disabled; a second pick of it does not add a letter.
   assert.equal(used('E, tile 2'), true);
+  assert.equal(faded('E, tile 2'), opacity.disabled);
   tap('E, tile 2');
   assert.ok(!text().includes('EEE'));
   tap('Backspace');
   assert.ok(text().includes('E'));
   assert.equal(used('E, tile 5'), false);
+  assert.equal(faded('E, tile 5'), 1);
   tap('Clear');
   assert.ok(!labels().includes('Submit'));
   for (const label of ['E, tile 2', 'D, tile 4', 'I, tile 3', 'T, tile 1']) tap(label);

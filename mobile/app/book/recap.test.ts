@@ -76,6 +76,7 @@ test('a three-hour absence logs one collapsed recap entry at the end, counts by 
   // A press in place logs after the entry, which stays; a room change drops it.
   b.tap('A pebble, open');
   b.tap('Take a pebble');
+  b.tap(`${LABEL.awayRecap}, show`); // the detail page unmounted the room page: closed again
   shown = b.text();
   assert.equal(count(shown, LABEL.awayRecap), 1);
   assert.equal(shown[shown.indexOf(LABEL.awayRecap) + 7], 'You take a pebble.');

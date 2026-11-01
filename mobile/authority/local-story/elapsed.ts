@@ -60,11 +60,15 @@ function metadata(s: Story, row: Checkpoint): ElapsedStatus {
   return READY;
 }
 
+/** Catch-up cannot settle this save on any retry, unlike a storage failure, which may clear. */
+export class CatchUpRefusedError extends Error {}
+
 function boundary(s: Story, target: number): number {
   let until = target;
   for (const [id, job] of Object.entries(s.world.state.jobs ?? {})) {
     if (job.status !== 'pending') continue;
-    if (job.due_time <= s.world.state.clock) throw new Error('already-due job; recovery required');
+    if (job.due_time <= s.world.state.clock)
+      throw new CatchUpRefusedError('already-due job; recovery required');
     // The calendar job (toolbox row W25) runs in whichever step passes it, once: never a stop.
     // Nor is a saturated tick the kernel will fold (mechanics.md, W8 Catch-up).
     if (job.job.kind !== CLOCK_JOB && !folds(s.world, id as JobId, job))
@@ -133,7 +137,9 @@ export class ClockDriver {
       row,
     );
     if (reply.kind === 'pending') return { kind: 'pending' };
-    if (reply.kind !== 'saved') throw new Error(`elapsed delivery refused: ${reply.kind}`);
+    if (reply.kind === 'fault') return { kind: 'fault', code: reply.code }; // debt retained
+    if (reply.kind !== 'saved')
+      throw new CatchUpRefusedError(`elapsed delivery refused: ${reply.kind}`);
     const decision =
       reply.decision as unknown as import('../../../kernel/ts/src/contracts.gen.ts').DecisionResult;
     if (decision.kind === 'fault') return { kind: 'fault', code: decision.code };
