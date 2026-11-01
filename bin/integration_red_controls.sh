@@ -191,6 +191,13 @@ mt
 printf 'a.txt\ty=1\ty=2\na.txt\ty=1\ty=3\n' > m.tsv
 rc=0; capped sh "$bin/mutate.sh" m.tsv "cat > /dev/null; grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
 [ "$rc" = 0 ] && [ "$(wc -l < out)" -eq 2 ] || bad "mutate stdin-reader: exit $rc, $(wc -l < out) result lines, want 0 and 2"
+# Break (loka-vduxr.15): no per-mutant limit, so a hung test ran for hours. The full command sleeps past
+# the limit and would then pass (SURVIVED); the limit must kill it and its child, reporting red.
+mt
+printf 'a.txt\ty=1\ty=2\n' > m.tsv
+rc=0; MUTATE_MUTANT_SECONDS=1 capped sh "$bin/mutate.sh" m.tsv "sleep 1234; grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
+[ "$rc" = 0 ] && [ "$(cut -f1 out)" = 'red-full timeout' ] || { bad "mutate hung mutant: exit $rc, want 0 and 'red-full timeout'"; cat out; }
+! pgrep -f 'sleep 1234' > /dev/null || { bad 'mutate hung mutant: child left running'; kill $(pgrep -f 'sleep 1234'); }
 mt
 printf 'a.txt\ty=1\ty=2\n' > m.tsv
 rc=0; capped sh "$bin/mutate.sh" m.tsv "grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
@@ -215,7 +222,7 @@ rc=0; MUTATE_REBUILD='! grep -q y=9 a.txt && cp a.txt b.txt' capped sh "$bin/mut
 printf 'a.txt\tx=1\tx=2\n' > m.tsv; rc=0; MUTATE_REBUILD=false capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
 [ "$rc" = 1 ] && grep -q '^red-rebuild RESTORE-FAIL' out || { bad "mutate rebuild-after-restore fails: exit $rc, want 1 and RESTORE-FAIL"; cat out; }
 # Break: a sweep stopped mid-mutant restores the source but leaves b.txt built from the mutant.
-printf 'a.txt\tx=1\tx=2\tkill $PPID\n' > m.tsv; rc=0; MUTATE_REBUILD='cp a.txt b.txt' capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
+printf 'a.txt\tx=1\tx=2\tkill $(ps -o ppid= -p $PPID)\n' > m.tsv; rc=0; MUTATE_REBUILD='cp a.txt b.txt' capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
 [ "$rc" = 130 ] && grep -q '^x=1$' b.txt || { bad "mutate interrupted: exit $rc, want 130 and b.txt rebuilt from the restored a.txt"; cat out; }
 # Break: no time budget (a sweep runs past MUTATE_MINUTES), or a timeboxed sweep exits 0/1 as a clean pass.
 mt

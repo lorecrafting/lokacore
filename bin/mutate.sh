@@ -11,7 +11,9 @@
 # (results already in the table stand; the tree is restored as usual). Exit 3 is not a clean pass;
 # an exit 1 failure takes precedence over it. MUTATE_MINUTES must be digits without a leading zero
 # (sh reads 08 as bad octal); 0 is valid (every mutant TIMEBOX); unset or empty means 30; else exit 2.
-# ponytail: checked between mutants only, so one slow mutant can overrun the budget; upgrade if that bites.
+# MUTATE_MUTANT_SECONDS (default 600) caps each test command (loka-vduxr.15: a hung mutant ran 3 hours at
+# 100% CPU): past it the command's whole process group is killed and the mutant counts red, `red-... timeout`.
+# The budget above is still checked between mutants only; one mutant now overruns it by at most this cap.
 # Results: red-narrow, red-full, SURVIVED (all green; exit stays 0, the table is the report).
 # MUTATE_REBUILD=<command> runs after each apply and again after each restore, for tests that read a
 # derived file (loka-958g; e.g. bin/regen_hash_fixture.sh for a compiled fixture). A failed rebuild
@@ -20,7 +22,16 @@ set -u
 [ $# -eq 2 ] && [ -f "$1" ] || { echo "usage: $0 <mutants-file> <full-test-command>" >&2; exit 2; }
 list=$1 full=$2 rebuild=${MUTATE_REBUILD-}
 case ${MUTATE_MINUTES:-30} in *[!0-9]*|0?*) echo "usage: MUTATE_MINUTES must be a whole number of minutes, got '$MUTATE_MINUTES'" >&2; exit 2 ;; esac
+case ${MUTATE_MUTANT_SECONDS:-600} in *[!0-9]*|0*) echo "usage: MUTATE_MUTANT_SECONDS must be a positive whole number, got '$MUTATE_MUTANT_SECONDS'" >&2; exit 2 ;; esac
 tmp=$(mktemp -d)
+hung=
+# perl: macOS has no timeout(1). The child leads its own process group so a kill takes its children too.
+lim() {
+  perl -e '$p = fork; if (!$p) { setpgrp(0, 0); exec "sh", "-c", $ARGV[1]; exit 127 }
+    $SIG{ALRM} = sub { kill "KILL", -$p; waitpid $p, 0; exit 124 }; alarm $ARGV[0]; waitpid $p, 0; exit($? ? ($? >> 8 || 1) : 0)' \
+    "${MUTATE_MUTANT_SECONDS:-600}" "$1" > /dev/null 2>&1 < /dev/null
+  r=$?; [ "$r" != 124 ] || hung=" timeout"; return $r
+}
 cur=
 trap '[ -z "$cur" ] || { cp "$tmp/orig" "$cur"; [ -z "$rebuild" ] || sh -c "$rebuild" > /dev/null 2>&1 < /dev/null; }; rm -rf "$tmp"' EXIT
 trap 'exit 130' INT TERM
@@ -36,15 +47,15 @@ while IFS= read -r line; do
   new=$(printf '%s\n' "$line" | cut -f3) narrow=$(printf '%s\n' "$line" | cut -f4)
   if [ $(($(date +%s) - t0)) -ge "$budget" ]; then printf 'TIMEBOX\t%s\tnot run\n' "$file"; timeboxed=y; continue; fi
   cp "$file" "$tmp/orig" || { echo "FAIL	$file	not readable"; rc=1; continue; }
-  cur=$file
+  cur=$file hung=
   if ! python3 -I -c 'import sys
 f, o, n = sys.argv[1:]
 s = open(f).read()
 sys.exit(1) if s.count(o) != 1 else open(f, "w").write(s.replace(o, n))' "$file" "$old" "$new"; then
     res=APPLY-FAIL rc=1
   elif [ -n "$rebuild" ] && ! sh -c "$rebuild" > /dev/null 2>&1 < /dev/null; then res=red-rebuild
-  elif [ -n "$narrow" ] && ! sh -c "$narrow" > /dev/null 2>&1 < /dev/null; then res=red-narrow
-  elif ! sh -c "$full" > /dev/null 2>&1 < /dev/null; then res=red-full
+  elif [ -n "$narrow" ] && ! lim "$narrow"; then res=red-narrow$hung
+  elif ! lim "$full"; then res=red-full$hung
   else res=SURVIVED
   fi
   cp "$tmp/orig" "$file"

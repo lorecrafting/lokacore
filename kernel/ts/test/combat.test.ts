@@ -118,6 +118,27 @@ test('a surviving sleeper wakes before its remaining opportunity, other position
   }
 });
 
+// Breaks (loka-vduxr.15): a hit that takes nothing because the sleeper's hp sits at its floor leaves it asleep.
+test('a hit on a sleeper held at its hp floor still wakes it', () => {
+  const one = elapsed(attack(combatWorld()).world, 150);
+  const seated = positioned(one.world, 'sleeping');
+  const at = key({ kind: 'resource', resource: resourceRef(seated, 'hp'), entity_id: seated.body });
+  const spec =
+    seated.entityResourceSpecs[at] ?? seated.resourceSpecs[key(resourceRef(seated, 'hp'))];
+  const floored = {
+    ...hp(hp(seated, rat(seated), 6), seated.body, 4),
+    entityResourceSpecs: { ...seated.entityResourceSpecs, [at]: { ...spec, minimum: 4 } },
+  };
+  const next = elapsed(
+    { ...floored, state: { ...floored.state, rng: [12295, 1029, 1029, 25165824] } },
+    300,
+    4,
+  );
+  assert.equal(next.decision.kind, 'accepted');
+  assert.deepEqual(pools(next.world).slice(0, 2), [4, 4]);
+  assert.equal(positionOf(next.world, floored.character), 'standing');
+});
+
 // Breaks: <= accuracy, skipping accuracy at declared endpoints, damage draw on miss/fixed interval.
 test('accuracy20 misses on roll20; endpoint chances still draw accuracy', () => {
   for (const chance of [0, 20, 100]) {
