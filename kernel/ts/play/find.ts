@@ -21,12 +21,11 @@ function named(v: unknown, q: string, kinds = new Set<string>()) {
   return kinds;
 }
 
-const lineOf = (path: string, q: string) => {
-  const i = readFileSync(path, 'utf8')
+// 0 when the file never spells the key (say, a copy from `extends`): nothing invented.
+const lineOf = (path: string, q: string) =>
+  readFileSync(path, 'utf8')
     .split('\n')
-    .findIndex((l) => l.includes(q));
-  return i < 0 ? 1 : i + 1;
-};
+    .findIndex((l) => l.includes(q)) + 1;
 
 /** The definitions that refer to `q`, by section and short name, located in the source when a file is named for them. */
 function referrers(source: string, artifact: string, q: string, rels: string[]): Referrer[] {
@@ -45,7 +44,8 @@ function referrers(source: string, artifact: string, q: string, rels: string[]):
         // Scripted actions are authored under actions/.
         const stem = by.replace(/^scripted_actions\//, 'actions/');
         const file = rels.find((r) => r.startsWith(`${stem}.`));
-        found.push({ kind, by, ...(file && { at: `${file}:${lineOf(join(source, file), q)}` }) });
+        const line = file ? lineOf(join(source, file), q) : 0;
+        found.push({ kind, by, ...(line > 0 && { at: `${file}:${line}` }) });
       }
   }
   return found;

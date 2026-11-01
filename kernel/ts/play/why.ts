@@ -4,13 +4,7 @@
 // leaves; on demand one scripted action's or dialogue's policy. A report for authors, not a check.
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
-import type {
-  CharacterId,
-  Command,
-  DecisionResult,
-  Policy,
-  ReactionRule,
-} from '../src/contracts.gen.ts';
+import type { Command, DecisionResult, Policy, ReactionRule } from '../src/contracts.gen.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { primaryTarget } from '../src/commands/action_input.ts';
@@ -77,7 +71,12 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
         fired: said(d, (key) => ruleOf(key) === ref),
         ...(rule.when && { when: annotate(rule.when, (i) => ({ held: held(ref, i) })) }),
       })),
-    ...asked(c, on, on.now ? prefix(cartridge, trace, ordinal + 1).world : before, command),
+    ...asked(
+      c,
+      on,
+      on.now ? prefix(cartridge, trace, ordinal + 1).world : before,
+      on.now ? undefined : primaryTarget(command.payload), // the last command's is not the next one's
+    ),
   };
 }
 
@@ -121,23 +120,15 @@ const causes = (rule: ReactionRule, d: DecisionResult, before: World) =>
       ),
     }));
 
-// The policies asked for, on `before` (by default the world before the step): a scripted action's target is the command's,
+// The policies asked for, on `world` (by default the world before the step): a scripted action's target is the command's,
 // a dialogue's its authored NPC (dialogue/selection.ts:93; ponytail: not a choose row's bound
 // speaker, dialogue/shared.ts:93; read speakerOf once a fixture binds a speaker other than the npc).
-const asked = (c: Cartridge, on: Asked, before: World, command: Command) => ({
+const asked = (c: Cartridge, on: Asked, world: World, target: string | undefined) => ({
   ...(on.action !== undefined && {
-    action: policy(c.scripted_actions, on.action, before, command, () =>
-      primaryTarget(command.payload),
-    ),
+    action: policy(c.scripted_actions, on.action, world, () => target),
   }),
   ...(on.dialogue !== undefined && {
-    dialogue: policy(
-      c.dialogues,
-      on.dialogue,
-      before,
-      command,
-      (x) => before.entityIds[refString(x.npc)],
-    ),
+    dialogue: policy(c.dialogues, on.dialogue, world, (x) => world.entityIds[refString(x.npc)]),
   }),
 });
 
@@ -147,13 +138,12 @@ function policy<D extends { key: string; policy?: Policy }>(
   defs: Readonly<Record<string, D>> | undefined,
   key: string,
   world: World,
-  command: Command,
   target: (d: D) => string | undefined,
 ) {
   const [rule, d] = Object.entries(defs ?? {}).find(([, x]) => x.key === key) ?? [];
   if (!d) throw new Usage(`no definition keyed ${key}`);
   const ctx = () => ({ target: target(d) as never, steps: { n: 0 } });
-  const actor = (command.payload as { actor_id: CharacterId }).actor_id; // scripted actions' and talk's commands carry one
+  const actor = world.character; // not the last command's: `run_job` has none
   const root = d.policy;
   if (!root) return { rule };
   const at = (i: number) => {

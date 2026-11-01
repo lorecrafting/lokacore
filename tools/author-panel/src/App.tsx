@@ -84,10 +84,10 @@ function Panels({ state, send, trace, said }: Pick<ReturnType<typeof useBook>, '
           <TabsContent value="state">
             <Facts state={state} />
           </TabsContent>
-          <TabsContent value="why">
+          <TabsContent value="why" forceMount className="data-[state=inactive]:hidden">
             <Why state={state} trace={trace} />
           </TabsContent>
-          <TabsContent value="find">
+          <TabsContent value="find" forceMount className="data-[state=inactive]:hidden">
             <Find />
           </TabsContent>
         </div>

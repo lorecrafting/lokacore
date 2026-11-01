@@ -128,11 +128,17 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   await until(() => messages.at(-1)!.text['room.boathouse.description'] === undefined);
   assert.equal(messages.at(-1)!.compiled, true);
 
+  await until(
+    () => (messages.at(-1) as { lint?: string[] }).lint?.[0] === 'items/x.json: lint of rest.json',
+  );
+
   // Break: a kernel refusal has no `error:` line, so a panel reading the lines badges it compiled.
   writeFileSync(join(dir, 'refused.json'), '{"cartridge":{},"content_hash":"00"}');
   writeFileSync(which, join(dir, 'refused.json'));
   writeFileSync(join(src, 'rooms.json'), '{ }');
   await until(() => messages.at(-1)!.compiled === false);
   assert.match(messages.at(-1)!.said.join(), /kernel refuses/);
+  // Break: the lint of the last good compile still shows, as if it read the refused source.
+  assert.equal((messages.at(-1) as { lint?: string[] }).lint, undefined);
   reader.cancel();
 });

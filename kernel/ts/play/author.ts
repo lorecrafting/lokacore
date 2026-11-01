@@ -87,6 +87,9 @@ const compile = (artifact: string) =>
       stdio: ['ignore', 'pipe', 'pipe'], // a launcher may have closed stdin (EBADF otherwise)
     },
   );
+// The last lint read older source, so it goes with the failed compile.
+const notCompiled = (said: string[]) => live?.push({ said, compiled: false, lint: undefined });
+
 function build(): boolean {
   const started = performance.now();
   const tmp = mkdtempSync(join(tmpdir(), 'loka-dev-'));
@@ -99,7 +102,7 @@ function build(): boolean {
       if (!said.length) said.push(run.error?.message ?? run.stderr);
       said.push(`Not compiled; ${keeps}`);
       console.error(said.at(-1));
-      live?.push({ said, compiled: false });
+      notCompiled(said);
       return false;
     }
     const bytes = readFileSync(artifact);
@@ -110,7 +113,7 @@ function build(): boolean {
       const why = loaded.ok ? 'not in canonical artifact form' : JSON.stringify(loaded);
       said.push(`The kernel refuses the compiled cartridge: ${why}`, keeps);
       console.error(said.slice(-2).join('\n'));
-      live?.push({ said, compiled: false });
+      notCompiled(said);
       return false;
     }
     return publish(parts[1], parts[2], said, started);

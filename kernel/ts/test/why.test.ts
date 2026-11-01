@@ -149,6 +149,19 @@ test('now: a policy reads on the world after the step, a fact leaf saying its va
   assert.deepEqual(leaf(7, true), [false, -1]);
 });
 
+// Break: `now` keeps the last command's target, so "could I do this next?" answers for who was
+// just talked to (step 3 is `talk`, whose target stays in the room).
+test('now: a scripted action has no target yet', () => {
+  const c = load((c) => {
+    c.manifest.requires.capabilities.target_resolution = c.lock.capabilities.target_resolution = 1;
+    c.scripted_actions[`${S}action/coil_rope`].policy = { op: 'target_present' };
+  });
+  const present = (now?: true) =>
+    (why(c, trace, 3, { action: 'coil_rope', ...(now && { now }) }).action as any).policy.holds;
+  assert.equal(present(), true);
+  assert.equal(present(true), false);
+});
+
 // Break: an on-demand policy read on the world after the step (at 1 the quest is active after
 // accept_quest; at 2 the lantern is held after take).
 test('W5, W6: dialogue and scripted action policies read on the world before the step', () => {

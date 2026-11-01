@@ -65,6 +65,15 @@ test('a scripted action is located in actions/', (t) => {
   ]);
 });
 
+// Break: a referrer whose file never spells the key (a copy from `extends`) points at line 1.
+test('a referrer with no line for the key is not located', (t) => {
+  const { source, artifact } = tree(t);
+  writeFileSync(join(source, 'actions/k.json'), '{}\n');
+  assert.deepEqual(find(source, artifact, 'rook').refs, [
+    { kind: 'npc', by: 'scripted_actions/k' },
+  ]);
+});
+
 // Breaks: a search matching everything floods the panel; an empty search lists every line; no
 // artifact yet fails the words too.
 test('the list is capped with its total, empty asks nothing, no artifact still finds words', (t) => {
