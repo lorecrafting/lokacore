@@ -114,8 +114,9 @@ export function propose(
 // following escort (escort@1), and no later command can then fault on it. Only rows already
 // following: a start or Rejoin in this decision wrote its row, so the next decision's sweep parts it.
 function parting(p: P): Admitted | undefined {
-  const rows = p.world.state.escorts ?? {};
-  const held = Object.keys(rows).filter((actor) => rows[actor]?.status === 'following');
+  const held = Object.values(p.world.state.escorts ?? {}).flatMap((e) =>
+    e?.status === 'following' ? [e.actor_id] : [],
+  );
   if (!held.length) return;
   const at = now(p);
   if (!('cartridge' in at)) return at;
