@@ -268,3 +268,18 @@ test('a blow at an NPC with hp minimum 1 stops at 1 and the fight goes on', () =
   assert.deepEqual(seen, [1, 1, 1, 1, 1, 1, 1, 1]);
   assert.ok(living(at, rat(at)));
 });
+
+// Breaks: the blow capped only at a negative floor passes 0, so death (it fires at 0) never comes.
+test('a blow at an NPC with a negative hp minimum still kills at 0', () => {
+  const w = combatWorld();
+  const target = key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: rat(w) });
+  const spec = w.entityResourceSpecs[target]!;
+  const below = {
+    ...w,
+    entityResourceSpecs: { ...w.entityResourceSpecs, [target]: { ...spec, minimum: -5 } },
+  };
+  let at = attack(hp(below, rat(below), 1)).world;
+  for (let n = 1; n <= 8 && living(at, rat(at)); n++) at = elapsed(at, n * 150, n + 1).world;
+  assert.equal(level(at, rat(at), resourceRef(at, 'hp')), 0);
+  assert.equal(living(at, rat(at)), false);
+});

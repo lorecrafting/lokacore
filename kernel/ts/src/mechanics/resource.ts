@@ -68,9 +68,11 @@ export function resourceSpec(world: World, entity: EntityId, resource: Definitio
   return maximum === undefined ? spec : { ...spec, maximum };
 }
 
-/** What a blow can take: it saturates at the authored floor, as a spell's and a status's damage do. */
+/** What a blow can take: it stops at the authored floor, as a spell's damage does, and at 0, where death fires. */
 export function aboveFloor(world: World, entity: EntityId, resource: DefinitionRef) {
-  return level(world, entity, resource)! - resourceSpec(world, entity, resource).minimum;
+  return (
+    level(world, entity, resource)! - Math.max(0, resourceSpec(world, entity, resource).minimum)
+  );
 }
 
 /** `entity`'s current value of `resource` at the world's clock; undefined if undeclared. */
