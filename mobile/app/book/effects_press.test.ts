@@ -143,10 +143,25 @@ test('a letter tile ticks and feels the press', (t) => {
   assert.deepEqual(g.timings, [90]);
 });
 
+const statusProps = {
+  time: 10,
+  text: (s: string) => s,
+  locked: false,
+  pending: false,
+  open: () => {},
+  openCharacter: () => {},
+} as never;
+const dotView = {
+  place: { id: 'a' },
+  map: { rooms: [{ id: 'a', title: 'a', x: 0, y: 0, z: 0 }], links: [], unexplored: [] },
+} as unknown as GameView;
+
 // loka-gj82.9. Breaks: these three drop the press handlers (actions.tsx, Status.tsx, DiscoveredMap.tsx),
 // so they stop thinning on press-in; the tick and timing are the press hook's own.
 for (const [name, body] of Object.entries({
   ContinueButton: () => ContinueButton({ label: 'Go on', onPress: () => {} }),
+  Contents: () => StatusLine(statusProps),
+  Dot: () => DiscoveredMap({ view: dotView, text: (s: string) => s } as never),
 }))
   test(`${name} answers a press-in`, (t) => {
     effects(t);

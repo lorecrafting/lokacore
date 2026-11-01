@@ -83,6 +83,26 @@ test('a page turn mounts a fresh page: the old wash does not carry over', async 
   assert.equal(flat(fresh[3].props.style).transform[0].scale, 1);
 });
 
+// Breaks: a travel's riffle runs one sweep's length, cutting its five sweeps short (book-ui.md, Page life).
+test('a riffle turn runs every sweep of the one picture', async (t) => {
+  effects(t);
+  g.reducedMotion = false;
+  g.snap = async () => ({ dispose: () => {} });
+  const shell = rig(t);
+  const page = { type: 'Page', key: null, props: {} };
+  const draw = (turn: number) =>
+    shell(() =>
+      walk(PageTurn({ turn, dir: 1, paper: '#fff', riffle: true, children: page } as never)),
+    );
+  draw(0);
+  draw(1);
+  draw(1);
+  await settle();
+  draw(1);
+  draw(1);
+  assert.equal(g.timed.duration, 600);
+});
+
 // Breaks: the card curls, or draws nothing, over a picture; or the blur does not run blurFrom to
 // blurTo and let go at the end (tokens: motion.card, hand-checked below).
 test('a card over a picture blurs it, without a curl, and lets go at the end', async (t) => {
