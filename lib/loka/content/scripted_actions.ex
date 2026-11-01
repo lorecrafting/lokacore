@@ -78,6 +78,7 @@ defmodule Loka.Content.ScriptedActions do
       duplicate(rel, r, ctx),
       mismatch(rel, r),
       duration(rel, r, ctx),
+      timed_status(rel, r),
       ActionTips.check(rel, r, ctx),
       shared(rel, r, ctx.shared)
     ])
@@ -88,6 +89,14 @@ defmodule Loka.Content.ScriptedActions do
       do: [diag("INVALID_TIME_POLICY", at(rel, ["duration"]))],
       else: []
   end
+
+  # The status row would start before the action's own time.advance, which faults at runtime.
+  defp timed_status(rel, %{"duration" => d} = r) when d > 0 do
+    for {%{"op" => "status.apply"}, path} <- steps(r),
+        do: diag("SCHEMA_VIOLATION", at(rel, path), %{"why" => "duration_status"})
+  end
+
+  defp timed_status(_, _), do: []
 
   defp shared(rel, %{"check" => %{"key" => k}}, shared) do
     if k in shared, do: [diag("DUPLICATE_DEFINITION", at(rel, ["check"]))], else: []
