@@ -170,3 +170,37 @@ for (const [name, room] of [
     );
     openGame(a.db, sampler, { ...a.host, dev: true }); // the refusal is the host's, not the save's
   });
+
+// Break: `adopt` loads without the host's dev flag, so the settled cheat reads as a corrupt save.
+test('a dev cheat retried after a lost COMMIT acknowledgement replays', () => {
+  const a = sqliteHost();
+  const game = openGame(a.db, bundle, { ...a.host, dev: true });
+  const intent = cheat('dev_go_to_room', { room: ref('room', 'boar_run') }, game.view().token);
+  Object.assign(a.fault, { kind: 'lost', armed: true });
+  assert.equal(game.invoke(intent).kind, 'pending');
+  a.fault.reads = false;
+  assert.equal(answer(game.invoke(intent)), 'accepted');
+  assert.equal(game.view().view.place.title.key, 'room.boar_run.title');
+});
+
+// Break: every receive target is refused again, though a reopen proves only custody ones.
+test('a non-custody receive target is set and reopens', () => {
+  const lantern = read('protocol/fixtures/cartridge_lantern_hash.json');
+  const b = { canonical: lantern.canonical, sha256: lantern.sha256 };
+  const a = sqliteHost();
+  const game = openGame(a.db, b, { ...a.host, dev: true });
+  const fact = { ...ref('fact', 'search_plan'), cartridge_id: 'lantern_proof' };
+  const set = cheat('dev_set_fact', { fact, value: 'party_led' }, game.view().token);
+  assert.equal(answer(game.invoke(set)), 'accepted');
+  const again = openGame(a.db, b, { ...a.host, dev: true });
+  assert.match(JSON.stringify(again.facts()), /party_led/);
+});
+
+// Break: the accepted filter goes, and a cheat that changed nothing shuts a release out.
+test('a save holding only a refused cheat opens on a release', () => {
+  const a = sqliteHost();
+  const game = openGame(a.db, bundle, { ...a.host, dev: true });
+  const missing = cheat('dev_go_to_room', { room: ref('room', 'nowhere') }, game.view().token);
+  assert.equal(answer(game.invoke(missing)), 'not_found');
+  assert.ok(openGame(a.db, bundle, a.host).view().token);
+});

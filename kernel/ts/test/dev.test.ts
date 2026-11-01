@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { INSTALLED, newWorld, step, stepDev } from '../src/runtime/world.ts';
 import { loadCartridge } from '../src/index.ts';
-import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
-import type { Command } from '../src/contracts.gen.ts';
+import { bodyOf, refString, type Cartridge, type World } from '../src/runtime/decision.ts';
+import type { Command, DefinitionRef } from '../src/contracts.gen.ts';
 import { decideReplay, start } from '../play/run.ts';
 import { resolveDev } from '../src/commands/invocation.ts';
 import { fragment } from './fragment.ts';
@@ -206,8 +206,6 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
   const owned = [
     riddle(1),
     carried({ escort: {} }),
-    carried({ receive: {} }),
-    carried({ hand_over: {} }),
     { quests: { q: { deadline: { fact, trust_fact: other } } } },
     { quests: { q: { deadline: { fact: other, trust_fact: fact } } } },
     { npcs: { n: { perception: { discovered: fact } } } },
@@ -222,6 +220,33 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
     assert.equal(code(set(under(patch), 'cellar_disarmed', true)), 'invalid_state');
   assert.equal(code(set(under(riddle()), 'cellar_disarmed', true)), 'accepted');
   assert.equal(code(set(under(carried({})), 'cellar_disarmed', true)), 'accepted');
+
+  // Break: a choice is refused for carrying any item, or a custody item is let through.
+  const itemRef = ref('item', 'x');
+  const steps = [{ op: 'fact.assign', fact, value: true }];
+  const dialogue = (choice: object, quest?: string) => ({
+    quest,
+    roles: { it: { role: 'item', item: itemRef } },
+    choices: { c: choice },
+  });
+  const custody = (give: boolean, dialogues: object) => {
+    const w = under({ dialogues });
+    const entities = { ...w.entities, x: { kind: 'item', give_allowed: give } };
+    const entityIds = { ...w.entityIds, [refString(itemRef as DefinitionRef)]: 'x' };
+    return { ...w, entities, entityIds } as unknown as World;
+  };
+  const verdict = (give: boolean, dialogues: object) =>
+    code(set(custody(give, dialogues), 'cellar_disarmed', true));
+  const receive = { receive: { item: 'it' }, steps };
+  const handOver = { hand_over: { item: 'it' }, steps };
+  assert.equal(verdict(false, { d: dialogue(receive) }), 'invalid_state');
+  assert.equal(verdict(true, { d: dialogue(receive) }), 'accepted');
+  assert.equal(verdict(false, { d: dialogue(receive, 'q') }), 'accepted');
+  assert.equal(verdict(false, { d: dialogue(handOver) }), 'accepted');
+  assert.equal(
+    verdict(false, { d: dialogue({ receive: { item: 'it' } }), h: dialogue(handOver) }),
+    'invalid_state',
+  );
 });
 
 // Break: the trace replay (Why, bin/play) re-decides a preview's cheat through `step`, which refuses it.

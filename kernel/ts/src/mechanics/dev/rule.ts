@@ -38,26 +38,44 @@ type SetFact = Extract<Command['payload'], { type: 'dev_set_fact' }>;
 
 // A reopen proves each of these from its mechanic's receipts (mobile topics-save, expedition-save,
 // deadline-save, dialogue-save), so a cheated value would leave the save unopenable.
-const provenFacts = ({ topics, dialogues, npcs, quests }: World['cartridge']) => [
-  ...values(topics ?? {}).map((t) => t.fact),
-  ...values(dialogues ?? {}).flatMap((d) =>
-    values(d.choices).flatMap((c) =>
-      c.escort ||
-      c.receive ||
-      c.hand_over ||
-      (d.riddle?.wrong_limit !== undefined && c === d.choices[d.riddle.choice_id])
-        ? (c.steps ?? []).flatMap((s) => (s.op === 'fact.assign' ? [s.fact] : []))
-        : [],
+type Dialogue = NonNullable<World['cartridge']['dialogues']>[string];
+
+const provenFacts = (world: World) => {
+  const { topics, dialogues, npcs, quests } = world.cartridge;
+  const held = (d: Dialogue, transfer?: { item: string }) => {
+    const role = transfer && d.roles[transfer.item];
+    return role?.role === 'item' ? world.entityIds[refString(role.item)] : undefined;
+  };
+  // mobile dialogue-save custodyStarts: an unquested receive of a Give-restricted item.
+  const custody = values(dialogues ?? {}).flatMap((d) =>
+    d.quest
+      ? []
+      : values(d.choices).flatMap((c) => {
+          const item = held(d, c.receive);
+          const entity = item && world.entities[item];
+          return entity?.kind === 'item' && entity.give_allowed === false ? [item] : [];
+        }),
+  );
+  return [
+    ...values(topics ?? {}).map((t) => t.fact),
+    ...values(dialogues ?? {}).flatMap((d) =>
+      values(d.choices).flatMap((c) =>
+        c.escort ||
+        custody.includes(held(d, c.receive ?? c.hand_over)!) ||
+        (d.riddle?.wrong_limit !== undefined && c === d.choices[d.riddle.choice_id])
+          ? (c.steps ?? []).flatMap((s) => (s.op === 'fact.assign' ? [s.fact] : []))
+          : [],
+      ),
     ),
-  ),
-  ...values(npcs ?? {}).flatMap((n) => (n.perception ? [n.perception.discovered] : [])),
-  ...values(quests ?? {}).flatMap((q) =>
-    q.expedition ? [q.expedition.survived_fact, q.expedition.faction] : [],
-  ),
-  ...values(quests ?? {}).flatMap((q) =>
-    q.deadline?.fact ? [q.deadline.fact, q.deadline.trust_fact!] : [],
-  ),
-];
+    ...values(npcs ?? {}).flatMap((n) => (n.perception ? [n.perception.discovered] : [])),
+    ...values(quests ?? {}).flatMap((q) =>
+      q.expedition ? [q.expedition.survived_fact, q.expedition.faction] : [],
+    ),
+    ...values(quests ?? {}).flatMap((q) =>
+      q.deadline?.fact ? [q.deadline.fact, q.deadline.trust_fact!] : [],
+    ),
+  ];
+};
 
 const setFact = (world: World, payload: SetFact): ReturnType<Rule<'dev'>> => {
   const { actor_id, fact, value: to } = payload;
@@ -66,7 +84,7 @@ const setFact = (world: World, payload: SetFact): ReturnType<Rule<'dev'>> => {
   const reserved =
     (fact.key === 'position' && world.cartridge.lock.capabilities.position) ||
     values(world.cartridge.scenes ?? {}).some((s) => fact.key === `scene_${s.key}`) ||
-    provenFacts(world.cartridge).some((f) => refString(f) === refString(fact));
+    provenFacts(world).some((f) => refString(f) === refString(fact));
   if (
     reserved ||
     subjective(world, fact) ||
