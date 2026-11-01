@@ -8,17 +8,6 @@ defmodule Loka.Content.DialogueAsked do
 
   @key_max 64
 
-  @schema %{
-    "description" =>
-      "The Book dims this choice once taken; it stays usable. Lowered to the fact <dialogue>_<choice>_asked, a step that sets it and asked_when.",
-    "type" => "boolean",
-    "enum" => [true]
-  }
-
-  @doc "A source choice's properties (Source.contracts/0): `asked` in, the compiled `asked_when` out."
-  @spec source_fields(map()) :: map()
-  def source_fields(props), do: props |> Map.delete("asked_when") |> Map.put("asked", @schema)
-
   @doc "Reserves each `asked` fact (an @engine_facts module); a fact already of that name is refused."
   @spec facts(term(), map() | nil, map()) :: {term(), [map()]}
   def facts(facts, m, defs) when is_map(facts) and m != nil do
