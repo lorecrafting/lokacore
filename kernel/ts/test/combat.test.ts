@@ -12,7 +12,7 @@ import {
 } from './combat_fixture.ts';
 import { step, gameView } from '../src/index.ts';
 import { key } from '../src/foundation/compose.ts';
-import { aboveFloor, level, resourceRef } from '../src/mechanics/resource.ts';
+import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { living } from '../src/mechanics/death/shared.ts';
@@ -270,7 +270,7 @@ test('a blow at an NPC with hp minimum 1 stops at 1 and the fight goes on', () =
 });
 
 // Breaks: the blow capped only at a negative floor passes 0, so death (it fires at 0) never comes.
-test('a blow at an NPC with a negative hp minimum can take no more than down to 0', () => {
+test('a killing blow at an NPC with a negative hp minimum stops at 0', () => {
   const w = combatWorld();
   const target = key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: rat(w) });
   const spec = w.entityResourceSpecs[target]!;
@@ -278,5 +278,8 @@ test('a blow at an NPC with a negative hp minimum can take no more than down to 
     ...w,
     entityResourceSpecs: { ...w.entityResourceSpecs, [target]: { ...spec, minimum: -5 } },
   };
-  assert.equal(aboveFloor(hp(below, rat(below), 3), rat(below), resourceRef(below, 'hp')), 3);
+  let at = attack(hp(below, rat(below), 1)).world;
+  for (let n = 1; n <= 20 && living(at, rat(at)); n++) at = elapsed(at, n * 150, n + 1).world;
+  assert.equal(living(at, rat(at)), false, 'the blow kills');
+  assert.equal(level(at, rat(at), resourceRef(at, 'hp')), 0);
 });

@@ -65,7 +65,7 @@ export function runStatus(
   const visit = { ...world, state: { ...world.state, clock: now } };
   // An eaten holder's status ends silently: nothing may tick, expire or react on it (loka-pyez).
   if (world.consumed && world.state.containers[body] === world.consumed)
-    return accepted(world, 'job_ran', [...ops, ...expire(visit, body, status, row, 0)], []);
+    return accepted<never>(world, 'job_ran', [...ops, ...expire(visit, body, status, row, 0)], []);
   const expired = now >= (row.ends_at ?? Infinity);
   const due = !expired && spec.per_tick !== undefined && now >= tick;
   const { by, fatal } = due ? amount(visit, body, spec) : { by: 0, fatal: false };

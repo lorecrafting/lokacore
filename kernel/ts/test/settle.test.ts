@@ -277,3 +277,14 @@ test('kgd.159: a member in a room no plan move names fails the save loader', () 
   assert.ok(hydrate(w, JSON.parse(JSON.stringify(b.state)), true), 'the unforged save loads');
   assert.equal(hydrate(w, { ...b.state, containers: forged }, true), undefined);
 });
+
+// Breaks: a rule's npc.move with no plan and no npc moves the event's subject, a spawned member too;
+// the loader must take that room, and a move with no room must not throw there.
+test('kgd.159: a member in a room an event-subject move names reloads', () => {
+  const w = band(99, undefined, true, (c) => {
+    hour(c, 'subject', 23, [{ op: 'npc.move', room: ref('room', 'hills') }, { op: 'npc.move' }]);
+  });
+  const { w: b } = advance(w, 700);
+  const moved = { ...b.state.containers, [member(b, 3).member_id as never]: room(b, 'hills') };
+  assert.ok(hydrate(w, { ...b.state, containers: moved }, true));
+});
