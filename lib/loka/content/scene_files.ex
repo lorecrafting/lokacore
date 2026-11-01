@@ -132,7 +132,7 @@ defmodule Loka.Content.SceneFiles do
   defp visible({forms, bad}, sections, links) do
     dropped =
       Enum.reduce(links, MapSet.new(), fn l, acc ->
-        if l.choice == "" or byte_size(l.child) > @key_max or l.parent in acc,
+        if byte_size(l.child) > @key_max or l.parent in acc,
           do: MapSet.put(acc, l.child),
           else: acc
       end)

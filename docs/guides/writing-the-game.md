@@ -100,11 +100,12 @@ maud: ~
   `<key>_<choice>_asked`; do not declare it.
 - `then: branch_next` plays the dialogue `branch_next` next; `then: end` closes the talk. A choice
   with no `then` comes back to these choices, or closes the talk if it is the only choice. A nested
-  choice with no `then` goes back to the choices above it. A scene another scene's `then` leads to
+  choice with no `then` goes back to the choices above it, unless a choice here set the fact the
+  `when:` reads: then going back closes the talk, and the build warns `RETURN_CLOSED`. A scene another scene's `then` leads to
   closes after a choice with no `then`; write `then: <its own name>` to come back.
-- Choices show in the order you write them. A choice is still known by its words everywhere you
-  write: a `then`, a same-key JSON, a `once` fact. The built cartridge numbers the choices to hold
-  that order, so moving a choice line changes its id there, as rewording one does.
+- Choices show in the order you write them. A choice's id comes from its words: moving a line or
+  adding another leaves it alone, and rewording changes it. A reaction, a quest outcome and a `then`
+  name it by that id.
 - A `- ` indented under a choice's reply opens nested choices: its own dialogue, keyed
   `<key>_<choice>` (here `branching_choice_one`). The reply is what the player reads above them, so
   it must be written first, and the nested choices are shown next. Going back to a shallower `- `

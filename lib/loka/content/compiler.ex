@@ -4,7 +4,6 @@ defmodule Loka.Content.Compiler do
   alias Loka.Content.{
     Ancestries,
     Artifact,
-    ChoiceOrder,
     Resolve,
     Construction,
     Dialogues,
@@ -49,7 +48,7 @@ defmodule Loka.Content.Compiler do
 
     case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)], files) do
       {warnings, []} ->
-        {:ok, Artifact.cartridge(manifest, ChoiceOrder.lower(defs), v2, located), warnings}
+        {:ok, Artifact.cartridge(manifest, defs, v2, located), warnings}
 
       {_, errors} ->
         {:error, errors}

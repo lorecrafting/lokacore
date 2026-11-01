@@ -146,11 +146,16 @@ defmodule Loka.Content.Source do
      end, bad}
   end
 
-  # Source-only: which `then`s the writer wrote (until SceneMerge.merge), and an unsorted choice order.
+  # Source-only: which `then`s the writer wrote (until SceneMerge.merge), and an unsorted choice order as each choice's `order`.
   defp written_marks(value, lines) do
     order = for {["choices", c], _} <- lines, do: c
-    value = if order == Enum.sort(order), do: value, else: Map.put(value, "choice_order", order)
+    value = if order == Enum.sort(order), do: value, else: positioned(value, order)
     Map.put(value, :written_then, for({["choices", c, "then"], _} <- lines, do: c))
+  end
+
+  defp positioned(value, order) do
+    Enum.with_index(order, 1)
+    |> Enum.reduce(value, fn {c, i}, v -> put_in(v, ["choices", c, "order"], i) end)
   end
 
   defp checked(rel, kind, value) do
@@ -372,14 +377,6 @@ defmodule Loka.Content.Source do
   }
 
   # Source only (DialogueOnce lowers it to a fact, a step and a policy).
-  # Source only: a scene's written order, where it is not sorted (ChoiceOrder).
-  @choice_order %{
-    "description" =>
-      "The compiler's mark of a scene's written choice order; writing it is refused.",
-    "type" => "array",
-    "items" => %{"type" => "string"}
-  }
-
   @choice_once %{
     "description" =>
       "This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset.",
@@ -395,7 +392,6 @@ defmodule Loka.Content.Source do
     |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
     |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
     |> put_in(["DialogueChoice", "properties", "once"], @choice_once)
-    |> put_in(["DialogueDefinition", "properties", "choice_order"], @choice_order)
     |> update_in(["DialogueChoice", "properties"], &AskedField.source_fields/1)
     |> schedule(defs)
     |> Map.update!(

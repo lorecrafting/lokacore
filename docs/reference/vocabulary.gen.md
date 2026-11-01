@@ -786,6 +786,7 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of what the actor reads on choosing. |
 | narration_variants | [TextVariants](source-kinds.gen.md#textvariants) |  |  |
 | once | `true` |  | This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset. |
+| order | integer |  | Display position among this dialogue's choices, lowest first; a choice with none follows, and a tie or none sorts by key. The compiler writes it for a scene set in an unsorted order. |
 | patrol | object |  | A patrol transition. |
 | patrol.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |
 | patrol.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The patrol quest. |

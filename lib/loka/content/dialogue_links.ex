@@ -1,3 +1,4 @@
+# size: allow 340, every whole-cartridge dialogue link check in one graph
 defmodule Loka.Content.DialogueLinks do
   @moduledoc "A dialogue choice's policy and narration variants as roots, and its then and then_failed checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -85,7 +86,45 @@ defmodule Loka.Content.DialogueLinks do
     live_keys = for {_, d} <- live(sorted), do: d["key"]
 
     refused(sorted) ++
-      guessed(open, next, live_keys) ++ fall_through(open, sorted) ++ unused(sorted, open, next)
+      guessed(open, next, live_keys) ++
+      fall_through(open, sorted) ++ unused(sorted, open, next) ++ return_closed(sorted, next)
+  end
+
+  # A `then` target whose policy has failed closes the talk, so setting what a set's root reads closes it.
+  defp return_closed(sorted, next) do
+    by_key = Map.new(sorted, fn {_, d} -> {d["key"], d} end)
+
+    for {rel, d} <- sorted,
+        {fact, value} <- when_fact(d["policy"]),
+        closes?(set_choices(d, by_key, next), d["key"], fact, value) do
+      warning("RETURN_CLOSED", rel, ["policy"], d)
+    end
+  end
+
+  defp closes?(choices, key, fact, value) do
+    Enum.any?(choices, &(&1["then"] == key)) and Enum.any?(choices, &assigns?(&1, fact, value))
+  end
+
+  defp set_choices(d, by_key, next) do
+    nested = walk(next[d["key"]] || [], next, MapSet.new())
+    members = [d | for(k <- nested, by_key[k]["entry"] == false, do: by_key[k])]
+    Enum.flat_map(members, &Map.values(&1["choices"]))
+  end
+
+  defp when_fact(%{
+         "op" => "not",
+         "item" => %{"op" => "fact_compare", "fact" => f, "equals" => true}
+       }),
+       do: [{f, true}]
+
+  defp when_fact(%{"op" => "fact_compare", "fact" => f, "equals" => true}), do: [{f, false}]
+  defp when_fact(_), do: []
+
+  defp assigns?(choice, fact, value) do
+    Enum.any?(
+      choice["steps"] || [],
+      &(&1["op"] == "fact.assign" and &1["fact"] == fact and &1["value"] == value)
+    )
   end
 
   defp unused(sorted, open, next) do

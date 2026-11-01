@@ -91,7 +91,9 @@ export const speaks = (world: World, target: EntityId | undefined) =>
   spoken(world, target).length > 0;
 
 /** The ids of `d`'s choices, in key order. */
-export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(cmp) as Key[];
+const at = (d: DialogueDefinition, id: string) => d.choices[id as Key]?.order ?? Infinity; // both absent: NaN, so the key
+export const choiceIds = (d: DialogueDefinition) =>
+  Object.keys(d.choices).sort((a, b) => at(d, a) - at(d, b) || cmp(a, b)) as Key[];
 
 /** Whether choice `id` of `d` teaches a skill for which `p` holds (Homestead hs-14). */
 const teaches = (d: DialogueDefinition, id: Key, p: (skill: DefinitionRef) => boolean) =>

@@ -139,7 +139,6 @@ One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogue
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| choice_order | list of string |  | The compiler's mark of a scene's written choice order; writing it is refused. |
 | choices | map of [DialogueChoice](vocabulary.gen.md#choice-fields) | yes | See the type. |
 | entry | boolean |  | An optional marker: true, talk to this speaker opens this dialogue and no other of theirs but keyword ones, over the inferred entry (dialogue@1), at most one per speaker and not on a keyword dialogue; false, talk never opens it, only a `then` does. |
 | keyword | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | Toolbox row G9 (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle. |

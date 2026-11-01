@@ -361,6 +361,10 @@
         "policy": {
           "$ref": "policy.schema.json#/$defs/Policy"
         },
+        "order": {"description":"Display position among this dialogue's choices, lowest first; a choice with none follows, and a tie or none sorts by key. The compiler writes it for a scene set in an unsorted order.",
+          "type": "integer",
+          "minimum": 1
+        },
         "then": {
           "$ref": "action.schema.json#/$defs/Key"
         },

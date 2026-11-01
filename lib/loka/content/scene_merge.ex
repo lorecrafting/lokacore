@@ -48,12 +48,13 @@ defmodule Loka.Content.SceneMerge do
     words ++ keys ++ order_refused(files)
   end
 
-  @doc "A file other than a scene writing `choice_order`, the compiler's own mark; an area bundle shows its dialogues only once split."
+  @doc "A file other than a scene writing a choice's `order`, the compiler's own mark; an area bundle shows its dialogues only once split."
   @spec order_refused([entry()]) :: [{term(), [String.t()], map()}]
   def order_refused(files) do
-    for {rel, {:dialogue, _, trail}, %{"choice_order" => _}} <- files,
+    for {rel, {:dialogue, _, trail}, %{"choices" => %{} = choices}} <- files,
         not (is_binary(rel) and String.ends_with?(rel, ".scene")),
-        do: {rel, trail ++ ["choice_order"], %{"why" => "choice_order_written"}}
+        {c, %{"order" => _}} <- choices,
+        do: {rel, trail ++ ["choices", c, "order"], %{"why" => "choice_order_written"}}
   end
 
   @doc "Dialogue keys two `.scene` entries make, as `{rel, key}` of the later one: a merge would silently join them."
@@ -72,8 +73,8 @@ defmodule Loka.Content.SceneMerge do
   defp replaceable?(["choices", c, "then"], scene, key),
     do: c not in scene.written_then and scene["choices"][c]["then"] != "#{key}_#{c}"
 
-  # `choice_order` has its own refusal (order_written/1).
-  defp replaceable?(["choice_order"], _, _), do: true
+  # A choice's `order` has its own refusal (order_refused/1).
+  defp replaceable?(["choices", _, "order"], _, _), do: true
   defp replaceable?(_, _, _), do: false
 
   defp fields(d) do

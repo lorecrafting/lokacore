@@ -147,7 +147,7 @@ sage: TEXT
     talk(g);
     assert.deepEqual(g.offered(), ['ask']);
     g.choose('ask');
-    assert.deepEqual(g.offered(), ['c001_deeper', 'c002_back']);
+    assert.deepEqual(g.offered(), ['deeper', 'back']);
     g.close();
     g = s.again();
     talk(g);
@@ -355,6 +355,67 @@ test('a check branches both ways and passes to another speaker', () => {
   assert.equal(g.view().choice!.speaker_id, g.id('doubter'));
   g = fail.again();
   g.choose('shrug_doubter');
+});
+
+// Breaks: a choice written out of key order is renamed or shown by key, so its reaction misses, its
+// quest outcome's words are lost, or a save open on it no longer reopens.
+test('a scene choice written out of key order keeps its id, its place and a save', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
+  source(dir);
+  const quest = JSON.parse(readFileSync(join(dir, 'quests/errand.json'), 'utf8'));
+  quest.journal.outcomes = { told: { prose: 'OUTCOME' } };
+  writeFileSync(join(dir, 'quests/omen.json'), JSON.stringify(quest));
+  writeFileSync(
+    join(dir, 'areas/omen.json'),
+    JSON.stringify({
+      npcs: {
+        oracle: {
+          keywords: ['oracle'],
+          name: { prose: 'NPC' },
+          room_line: { prose: 'A [NPC](oracle).' },
+          description: { prose: 'NPC_TEXT' },
+          room: 'yard',
+        },
+      },
+      reactions: {
+        omen_told: {
+          on: { event: 'choice_resolved', choice: 'zed' },
+          steps: [{ op: 'quest.resolve', quest: 'omen', outcome: 'told' }],
+        },
+      },
+    }),
+  );
+  mkdirSync(join(dir, 'scenes'));
+  writeFileSync(
+    join(dir, 'scenes/omen_talk.scene'),
+    `npc: oracle
+oracle: TEXT
+- Zed
+  oracle: TEXT
+- Ask
+  oracle: TEXT
+  sets: errand_done
+`,
+  );
+  mkdirSync(join(dir, 'dialogues'), { recursive: true });
+  writeFileSync(
+    join(dir, 'dialogues/omen_talk.json'),
+    JSON.stringify({ choices: { ask: { accept: 'omen' } } }),
+  );
+  const c = compiled(dir);
+  rmSync(dir, { recursive: true });
+  const s = saved(c);
+  let g = s.now();
+  const npc = g.view().entities.find((e) => e.id === g.id('oracle'))!;
+  const talk = npc.actions.find((a) => a.label === 'action.talk')!;
+  g.go('talk', {}, [g.id('oracle')], talk.action_key);
+  assert.deepEqual(g.offered(), ['zed', 'ask']);
+  g.choose('ask');
+  g = s.again();
+  assert.deepEqual(g.offered(), ['zed', 'ask']);
+  g.choose('zed');
+  const omen = g.view().journal!.find((q) => q.state === 'resolved')!;
+  assert.equal(omen.journal, 'quest.omen.journal.outcomes.told');
 });
 
 // Breaks: a choice_resolved reaction stops reaching a step the page promises.

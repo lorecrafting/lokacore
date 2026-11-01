@@ -1,4 +1,4 @@
-# size: allow 540, every scene form shares the sampler fixture and its twin
+# size: allow 570, every scene form shares the sampler fixture and its twin
 defmodule Loka.ContentSceneBranchingTest do
   # needs, once, then and nested choices in a `.scene` (docs/system/cartridge.md, Source
   # shortcuts). Expected JSON is hand-written; `~` stands for the words.
@@ -256,11 +256,10 @@ defmodule Loka.ContentSceneBranchingTest do
     c = JSON.decode!(out)["cartridge"]
     scene = c["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]
 
-    assert Enum.sort(Map.keys(scene["choices"])) ==
-             ~w(c001_plain c002_ask c003_add c004_zed)
+    assert Map.new(scene["choices"], fn {c, o} -> {c, o["order"]} end) ==
+             %{"plain" => 1, "ask" => 2, "add" => nil, "zed" => nil}
 
-    refute is_map_key(scene, "choice_order")
-    assert scene["choices"]["c002_ask"]["then"] == "scene_ask"
+    assert scene["choices"]["ask"]["then"] == "scene_ask"
     assert is_map_key(c["dialogues"], "scene_sampler@0.0.1:dialogue/scene_ask")
     assert is_map_key(c["facts"], "scene_sampler@0.0.1:fact/scene_plain_done")
 
@@ -270,9 +269,49 @@ defmodule Loka.ContentSceneBranchingTest do
     assert Enum.sort(Map.keys(d["choices"])) == ~w(ask plain)
   end
 
-  # Break: a story point's claim or a riddle's answer choice still names the word key, which the
-  # numbered cartridge no longer has.
-  test "what points at a numbered choice follows it" do
+  # Break: adding a choice renames or renumbers its neighbours' ids, so what names them stops matching.
+  test "inserting a choice keeps every other id and shifts only positions" do
+    keys = fn body ->
+      assert {:ok, out, []} = sampler("npc: bram\nbram: ~\n" <> body)
+      d = JSON.decode!(out)["cartridge"]["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]
+      Map.new(d["choices"], fn {c, o} -> {c, o["order"]} end)
+    end
+
+    assert keys.("- Zed\n  bram: ~\n- Ask\n  bram: ~\n") == %{"zed" => 1, "ask" => 2}
+
+    assert keys.("- Zed\n  bram: ~\n- Mid\n  bram: ~\n- Ask\n  bram: ~\n") ==
+             %{"zed" => 1, "mid" => 2, "ask" => 3}
+  end
+
+  # Break: a set whose choices flip its own `when:` closes on Back with no word to the writer, or
+  # the warning fires where the talk ends anyway or the fact stays true.
+  test "RETURN_CLOSED marks a set that shuts its own way back" do
+    warned = fn head, body ->
+      assert {:ok, _, diags} = sampler("npc: bram\n#{head}\nbram: ~\n" <> body, [with_facts()])
+      for %{"code" => "RETURN_CLOSED"} = d <- diags, do: d["severity"]
+    end
+
+    sets = "- Ask\n  bram: ~\n  sets: knows_potter\n"
+    back = sets <> "  - Back\n    bram: ~\n"
+    assert warned.("when: not knows_potter", back) == ["warning"]
+    assert warned.("when: knows_potter", back) == []
+
+    assert warned.("when: not knows_potter", sets <> "  - Bye\n    bram: ~\n    then: end\n") ==
+             []
+
+    assert warned.("when: not knows_potter", "- Ask\n  bram: ~\n  - Back\n    bram: ~\n") == []
+  end
+
+  # Break: a child under a key too long stays a dialogue and draws an error of its own.
+  test "a child under a dropped link is dropped with it" do
+    long = String.duplicate("a", 70)
+    text = "npc: bram\nbram: ~\n- #{long}\n  bram: ~\n  - In\n    bram: ~\n"
+    assert {:error, diags} = sampler(text)
+    assert Enum.map(diags, & &1["data"]["why"]) == ["nested_key_long", nil]
+  end
+
+  # Break: a story point's claim or a riddle's answer choice stops naming the choice by its words.
+  test "what points at a positioned choice names its words" do
     json =
       {"dialogues/scene.json",
        %{
@@ -292,10 +331,10 @@ defmodule Loka.ContentSceneBranchingTest do
     c = JSON.decode!(out)["cartridge"]
 
     assert c["story_points"]["scene_sampler@0.0.1:story_point/tale"]["outcomes"]["told"]["choice"] ==
-             "c001_plain"
+             "plain"
 
     assert c["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]["riddle"]["choice_id"] ==
-             "c002_ask"
+             "ask"
   end
 
   # Break: the warning alone switches on the stand-in words for a refused file, so a choice with no
@@ -306,14 +345,6 @@ defmodule Loka.ContentSceneBranchingTest do
 
     assert {:error, diags} = sampler(text)
     assert Enum.any?(diags, &(&1["data"]["error"] == "missing_property"))
-  end
-
-  # Break: the number pushes a long key past the protocol's 64 characters.
-  test "a numbered key stays within 64 characters" do
-    long = String.duplicate("z", 64)
-    assert {:ok, out, _} = sampler("npc: bram\nbram: ~\n- #{long}\n  bram: ~\n- Ask\n  bram: ~\n")
-    d = JSON.decode!(out)["cartridge"]["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]
-    assert ("c001_" <> String.duplicate("z", 59)) in Map.keys(d["choices"])
   end
 
   # Break: a fact the choice above sets back is called unreachable under its own opposite `needs`.
@@ -480,8 +511,8 @@ defmodule Loka.ContentSceneBranchingTest do
 
   # Break: a JSON writing the compiler's order mark silently reorders a dialogue: beside a sorted
   # scene, on a JSON dialogue, or in an area bundle.
-  test "choice_order written outside a scene is refused", %{tmp_dir: tmp} do
-    order = ~s("choice_order": ["b", "a"])
+  test "a choice's order written outside a scene is refused", %{tmp_dir: tmp} do
+    order = ~s("choices": {"a": {"order": 1}})
     write(tmp, "scenes/s.scene", "npc: bram\nbram: ~\n- A\n  bram: ~\n- B\n  bram: ~\n")
     write(tmp, "dialogues/s.json", "{#{order}}")
     write(tmp, "scenes/u.scene", "npc: bram\nbram: ~\n- B\n  bram: ~\n- A\n  bram: ~\n")
@@ -494,10 +525,10 @@ defmodule Loka.ContentSceneBranchingTest do
     why = "choice_order_written"
 
     assert Enum.sort(got) == [
-             {why, "areas/a.dialogues.k.choice_order"},
-             {why, "dialogues/j.choice_order"},
-             {why, "dialogues/s.choice_order"},
-             {why, "dialogues/u.choice_order"}
+             {why, "areas/a.dialogues.k.choices.a.order"},
+             {why, "dialogues/j.choices.a.order"},
+             {why, "dialogues/s.choices.a.order"},
+             {why, "dialogues/u.choices.a.order"}
            ]
   end
 

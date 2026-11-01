@@ -1,4 +1,4 @@
-# size: allow 324, one row per refusal a writer can meet; the table reads together
+# size: allow 326, one row per refusal a writer can meet; the table reads together
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -58,6 +58,7 @@ defmodule Loka.Content.Explain do
          LOOP_SPEAKER | Talk opens this `then` loop at its member with the most links, so this speaker is only reached through the loop. | Give the speaker a dialogue of their own if the player should start here.
          ENTRY_INVALID | A speaker takes one `entry` dialogue, and never a keyword one. | Keep `entry: true` on one dialogue Talk can open.
          ENTRY_GUESSED | Talk opens `{target}` here only by inference: it ties another member of its loop for most links, it comes first by key with no condition, or a dialogue whose condition can fail picks it first of several it leads to. | Mark the dialogue Talk should open with `entry: true`.
+         RETURN_CLOSED | A choice in `{target}` sets the fact its `when:` reads, so going back to these choices closes the talk. | Nothing to do if that is meant; otherwise set the fact on a choice with `then: end`.
          ENTRY_UNUSED | `{target}` never opens: its speaker has an `entry` dialogue and no dialogue that opens leads here. | Link to it from one that opens, or remove it.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
          SITE_EXIT_CONFLICT | This site names direction `{field}`, where the room has no exit. | Name a direction the room has an exit in.
@@ -82,7 +83,7 @@ defmodule Loka.Content.Explain do
          unreachable | Line `{text}` may never be true here: the `when:` or a choice above it needs the opposite and this file never sets that fact, and the compiler cannot see another file or a reaction changing it. | Nothing to do if something else changes that fact; otherwise remove the line or move this choice out from under that one.
          bad_once | Line `{text}` is not `once`, or repeats it. | Write the one word `once`, one time, under the choice.
          bad_asked | Line `{text}` is not `asked`, or repeats it. | Write the one word `asked`, one time, under the choice.
-         choice_order_written | `choice_order` is the compiler's mark of a scene's written order, not a field to write. | Remove it: a scene's choices show as written, a JSON dialogue's by key.
+         choice_order_written | A choice's `order` is the compiler's mark of a scene's written order, not a field to write. | Remove it: a scene's choices show as written, a JSON dialogue's by key.
          once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
          once_key_taken | `once` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice's words.
          once_key_long | `once` here would make the fact `{key}`, longer than 64 characters. | Shorten the choice's words or the scene's key.
