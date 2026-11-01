@@ -8,8 +8,7 @@ defmodule Loka.Content.Delayed do
   import Loka.Content.Source, only: [at: 2, diag: 3]
   import Loka.Content.Refs, only: [resolve: 4]
 
-  # The fired job keeps its actor, not the subject RS-4's quest steps read (NPC no-op, trigger holder).
-  @event_bound ~w(barrier.set event.emit item.move npc.move population.suppress quest.activate quest.resolve quest.fail replenish.run)
+  alias Loka.Content.Waits
 
   @doc "Diagnostics for the reactions of `defs` and the policy `trees` (`{rel, steps, root}`)."
   @spec check(map() | nil, map(), list() | nil) :: [map()]
@@ -48,10 +47,9 @@ defmodule Loka.Content.Delayed do
       )
 
   defp refused({rel, %{"after" => _}, s, i}) do
-    if s["op"] in @event_bound or
-         (s["op"] == "status.apply" and (Map.has_key?(s, "co_present") or Map.has_key?(s, "tag"))),
-       do: [diag("SCHEMA_VIOLATION", at(rel, ["steps", i, "op"]), %{"error" => "invalid_value"})],
-       else: []
+    if Waits.event_bound?(s),
+      do: [diag("SCHEMA_VIOLATION", at(rel, ["steps", i, "op"]), %{"error" => "invalid_value"})],
+      else: []
   end
 
   defp refused(_), do: []
