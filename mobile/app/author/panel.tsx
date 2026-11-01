@@ -113,11 +113,12 @@ export function played(game: Opened | undefined) {
 
 // Moves both host clocks forward by game minutes at the cartridge's rate, so the kernel's own
 // elapsed path delivers the time (none before D11 selection).
-const canon = JSON.parse(chapter.canonical) as Canon & {
-  manifest: { time_policy?: { rate: number } };
-};
+// Lazy: App.tsx imports this module in a release too, which must not parse the chapter for it.
+type Parsed = Canon & { manifest: { time_policy?: { rate: number } } };
+let parsed: Parsed | undefined;
+const canon = () => (parsed ??= JSON.parse(chapter.canonical) as Parsed);
 function advance(minutes: number, game: Opened) {
-  const rate = canon.manifest.time_policy?.rate;
+  const rate = canon().manifest.time_policy?.rate;
   if (!rate)
     placeNote = 'This cartridge has no clock (no time_policy); there is no time to advance.';
   if (!rate || !Number.isSafeInteger(minutes) || minutes <= 0) return;
@@ -162,7 +163,7 @@ const stateOf = (game: Opened) => ({
   steps: place.steps,
   facts: game.facts(),
   quests: game.view().view.journal,
-  shown: shown(game.view().view, played(game)!.text, canon, game.entityIds(), game.roomIds()),
+  shown: shown(game.view().view, played(game)!.text, canon(), game.entityIds(), game.roomIds()),
 });
 // Alt-click (Option-click) on a Book line: the panel opens its source in the owner's editor.
 const onClick = (e: MouseEvent) => {
