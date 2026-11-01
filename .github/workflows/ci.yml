@@ -61,6 +61,7 @@ jobs:
       - run: mix compile --warnings-as-errors
       - run: elixir bin/contracts.exs --check
       - run: elixir bin/features.exs --check
+      - run: python3 bin/source_reference.py --check
       - run: mix xref graph --format cycles --fail-above 0
       - run: mix xref graph --label compile-connected --fail-above 0
       - run: mix test
