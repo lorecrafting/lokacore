@@ -236,6 +236,7 @@ export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>
  *   the answer leaves the option no row, the option goes and focus moves to the page title.
  *   Rows are inset space.lg; an unavailable row is the unavailable form.
  * - States: closed; open; open with an unavailable row; scripted actions mixed; pending.
+ * - Refs: one per card for its whole life; an animated component keeps the first it is given.
  * - Story: PickList.stories.tsx
  */
 export function PickLists(p: {
@@ -253,12 +254,12 @@ export function PickLists(p: {
   const own = useState<{ page: string; label: string }>();
   const [shown, setShown] = p.state ?? own;
   const open = shown?.page === p.page ? shown.label : undefined;
-  const option = useRef<View>(null);
+  const options = useRef<Record<string, View | null>>({});
   const all = p.lists ?? picks(p.view, p.buttons ?? [], p.page, p.text);
   const { first, sent } = useFocus(open, p.view, all);
   const close = () => {
     setShown(undefined);
-    option.current?.focus();
+    if (open) options.current[open]?.focus();
   };
   const press = (b: Button) => {
     p.press(b);
@@ -269,7 +270,7 @@ export function PickLists(p: {
   return all.map((k) => (
     <View key={k.label} style={{ gap: space.sm }}>
       <ActionCard
-        ref={k.label === open ? option : undefined}
+        ref={(v) => void (options.current[k.label] = v)}
         label={k.label}
         expanded={k.label === open}
         onPress={() => (k.label === open ? close() : setShown({ page: p.page, label: k.label }))}
