@@ -75,3 +75,62 @@ Narrow mutants on `dialogue-save.ts` against `branching_reload`, `branching_forg
 ## Disposition
 
 None yet; second opinion on this head.
+
+## Fix re-check at `82e8c0a1deeb2bf7be9a7ef7962419748cb011ff`
+
+CI by `gh run list --commit`: ci, book-e2e, graph-diff completed success. PM ruling for this round: S1-S3 and N1 are fixed here by deleting inferred custody checks; a forged custody move may load, but must not throw every launch or persist corruption.
+
+**Verdict: CHANGES REQUIRED** on F1 alone: the PM ruled N1 fixed in this PR, and part of it stays open and bricks a lawful save. F1 alone would be should-fix by severity; the ruling makes it required here.
+
+### Disposition
+
+| First round | Now | Proof (cold reopen; rows, receipts and state identical) |
+|---|---|---|
+| S1 dead giver before the take | closed | probe passes |
+| S2 dead destination after delivery | closed | probe passes |
+| S3 restricted item eaten | closed | probe passes |
+| Plain answer sharing the hand-over id | closed | probe passes |
+| Courier shape, both NPCs killed | closed | probe passes |
+| N1 two writes of one fact | **part open** | `[flag(true), flag(false)]` and two adjusts pass; assign plus adjust refused, F1 |
+| N2 `assert.throws` with no pattern | closed | `branching_reload.test.ts:238` now has `/save_corrupt/` |
+| S4 reload claim | closed | not in the PR body |
+
+### Findings
+
+**F1 should-fix, `mobile/authority/local-story/dialogue-consequences.ts:56-59`, `:79`.** A moving answer (`take`) with `[fact.assign count=1, fact.adjust +1]` or `[fact.adjust +1, fact.assign 5]` compiles and plays, then is `save_corrupt` at every later launch. The `writers` filter counts assign writers only (`assignmentOf` returns undefined for `fact.adjust`), so one assign looks like the fact's only writer, and its value is compared with the state the adjust moved. Count `fact.adjust` as a writer of its fact. Same on main. The PR body's "infers nothing about who wrote a fact" holds for `dialogue-save.ts`, not for this check it reaches through `committedDialogue`.
+
+**F2 should-fix, here or in Beads at the PM's choice, `mobile/authority/local-story/escort-save.ts:46`, `:127`.** Same class as S1 and S2, in the file this PR trimmed and listed as "not probed". The compiler accepts it: `ferry_sampler` with an escort start, `bram` given hp and attack, and combat and death settings compiled with no diagnostics. The save probes used a compiled cartridge edited to give the NPCs hp and attack: completed escort then speaker killed; completed then child killed; following then child killed. Each is a lawful kill, then `save_corrupt` for good; the same run with no death reopens. Lines are unchanged from the merge base, so deletion did not open it. I found no shipped content with such an NPC by grep. #550 (open) gives authors a way out, not a guard.
+
+**N3 nit, `mobile/authority/local-story/dialogue-save.ts:34`.** The comment says a holder cycle cannot be left to play on; `holderLoop` walks custody items only. A self-held non-custody container, in a cart with custody dialogue, hangs at first open in `kernel/ts/src/view/view.ts:210`, an unguarded walk. Forged only. `view.ts` is unchanged and the base walked only custody holders, so pre-existing by read, not run on base. Narrow the comment, or walk every item.
+
+**N4 nit, `mobile/authority/local-story/dialogue-save.ts:23`.** Dropping `!escortChoices` from the early return stays green against `branching_forged.test.ts` and `escort.test.ts` (43 pass): a forged resolved escort row in a cart with escort answers, no custody and no relation loads. Forged only, so allowed by the ruling; the clause could go, or get a pin. Present before this round.
+
+**N5 nit.** `/code-review` is reported at `1fbc8ccdd`, older than this head.
+
+### Hunt: what deletion could have opened
+
+- Lawful repeat writes reopen: fact set first then a moving answer sets it or flips it; topic known before a moving grant.
+- Forged states, none persists a throw after play: custody loop through another item and body held by a custody item are refused at open; forged fact after a moving grant, custody item in a missing holder, its row deleted, or forged back to the giver and taken again all load, play and reopen. A hand-inserted fact row was refused at first open; its key was probably malformed, so not judged further. Only the N3 hang is worse than a refusal.
+- Old saves: other `kernel_api` gives `pinned_release_missing` (`authority.ts`); bump to `1.135` at `kernel/ts/src/runtime/world.ts:108`. Read, not run.
+- #535 fold: `permanent_tick.test.ts`, `status`, `npc_status`, `derived_status` green. #541 job refusal: dropping `jobSave` turns `open_catch_up` red on the due, hour and kind cases.
+- Topic content: `priory`, `hidden_skill`, `riddle` green with `topics-save.ts` gone.
+
+### Mutants
+
+Null control: `branching_lawful, branching_forged, branching_reload, message, escort, open_catch_up, gift` 107 pass.
+
+| Mutant | Result |
+|---|---|
+| `holderLoop` returns false | `branching_forged.test.ts` hangs, killed at 90 s; caught, not by an assertion |
+| drop `if (writers.length > 1) continue` | red `a moving answer writing one fact twice reopens` |
+| skip the `movesItem` receipt check | red two tests: item set back to active, resolved take or give with no receipt |
+| drop `jobSave` in `receipt-save.ts` | `open_catch_up` red, three job cases |
+| drop `!Object.keys(escorts)` clause | red `an escort row in a world with no escort answer is refused` |
+| drop `!escortChoices` clause | green, N4 |
+
+### PR claims rerun
+
+- `scavenge_item?` refuses Give-restricted items: backed, `lib/loka/content/population.ex:195`, `:247-250`, by read.
+- "the escort clause red only after the new pin": backed for the `escorts` clause (table); the `escortChoices` clause survives.
+
+Not run: the cycle on base; a reaction writing the same fact as the answer; Elixir tests.
