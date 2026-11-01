@@ -376,7 +376,7 @@ test('a kill that also resolves a rewarding quest writes experience once and lev
 
 // Breaks: the gained line and level_reached read each write instead of the proposal's fold, so a
 // grant on top of a loss tells only its last step or re-crosses a threshold already held.
-test('folded writes: gained sums the proposal, a loss and regrant reaches no level', () => {
+test('folded writes: gained sums the proposal, a loss and regrant or no levelling reaches no level', () => {
   const w = holding(35);
   const write = (from: number, to: number) => ({
     op: 'levelling.set' as const,
@@ -390,6 +390,8 @@ test('folded writes: gained sums the proposal, a loss and regrant reaches no lev
   ]);
   const none = () => assert.fail('no event, no id');
   assert.deepEqual(levelsReached(w, [write(35, 25), write(25, 35)], {} as never, none), []);
+  const off = { ...w, cartridge: { ...content, world: {} } };
+  assert.deepEqual(levelsReached(off, [write(0, 200)], {} as never, none), []);
 });
 
 // Breaks: level_reached's subject is its character_id, not the body, so an event.emit in a level
