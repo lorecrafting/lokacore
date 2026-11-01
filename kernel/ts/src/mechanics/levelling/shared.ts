@@ -1,8 +1,15 @@
 // Toolbox row 4 (docs/system/mechanics.md experience and levelling): one levelling row per
 // character; level and unspent points are derived on read, never stored.
-import type { CharacterId, DeltaOp, DomainEvent, LevellingRow, Text } from '../../contracts.gen.ts';
+import type {
+  CharacterId,
+  DefinitionRef,
+  DeltaOp,
+  DomainEvent,
+  LevellingRow,
+  Text,
+} from '../../contracts.gen.ts';
 import { saturate } from '../../foundation/int.ts';
-import type { Mint, World } from '../../runtime/decision.ts';
+import { type Mint, type World } from '../../runtime/decision.ts';
 import type { Base } from '../fact.ts';
 
 const NONE: LevellingRow = { experience: 0, allocated: {} };
