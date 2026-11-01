@@ -158,18 +158,9 @@ function resolution(
 ) {
   const transitions = ops.filter((o) => o.op === 'quest.transition' && o.to === 'resolved');
   const q = questOf(s.world, row.actor_id, quest);
-  if (
-    !option.exchange &&
-    // An escort's Complete may name a repeatable quest, whose row a later acceptance replaces.
-    !option.escort &&
-    (!q || q[1].state !== 'resolved' || q[1].outcome !== row.choice_id)
-  )
+  if (!option.exchange && (!q || q[1].state !== 'resolved' || q[1].outcome !== row.choice_id))
     return false;
-  const instance_id = option.exchange
-    ? row.quest_instance_id
-    : option.escort
-      ? (transitions[0] as { instance_id?: string } | undefined)?.instance_id
-      : q![0];
+  const instance_id = option.exchange ? row.quest_instance_id : q![0];
   const resolved = events.filter((e) => e.payload.type === 'quest_resolved');
   return (
     transitions.length === 1 &&
