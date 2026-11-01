@@ -207,7 +207,6 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
     riddle(1),
     carried({ escort: {} }),
     { quests: { q: { deadline: { fact, trust_fact: other } } } },
-    { quests: { q: { deadline: { fact } } } },
     { quests: { q: { deadline: { fact: other, trust_fact: fact } } } },
     { npcs: { n: { perception: { discovered: fact } } } },
     { quests: { q: { expedition: { survived_fact: fact, faction: other } } } },
@@ -221,6 +220,9 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
     assert.equal(code(set(under(patch), 'cellar_disarmed', true)), 'invalid_state');
   assert.equal(code(set(under(riddle()), 'cellar_disarmed', true)), 'accepted');
   assert.equal(code(set(under(carried({})), 'cellar_disarmed', true)), 'accepted');
+  // Break: an absent optional trust_fact reaches refString and the cheat throws.
+  const noTrust = { quests: { q: { deadline: { fact: other } } } };
+  assert.equal(code(set(under(noTrust), 'cellar_disarmed', true)), 'accepted');
 
   // Break: a choice is refused for carrying any item, or a custody item is let through.
   const itemRef = ref('item', 'x');
