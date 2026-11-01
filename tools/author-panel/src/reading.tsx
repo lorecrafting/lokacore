@@ -7,6 +7,7 @@ import type { State } from './book.ts';
 import { Button } from './components/ui/button.tsx';
 import { Input } from './components/ui/input.tsx';
 import { Separator } from './components/ui/separator.tsx';
+// A value import from the Book's tree: shown.ts must keep only type imports, or the panel bundle pulls in React Native.
 import { clockWords } from '../../../mobile/app/author/shown.ts';
 import { Heading } from './sections.tsx';
 

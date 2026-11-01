@@ -3,6 +3,7 @@
 // session update, answers `trace`, and posts `line` for an Alt-clicked Book line.
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { Step as PlaceStep } from '../../../mobile/app/author/place.ts';
+import { askTrace } from './trace.ts';
 import type { shown } from '../../../mobile/app/author/shown.ts';
 
 export const BOOK = `http://localhost:${import.meta.env.VITE_LOKA_PREVIEW_PORT ?? 19006}`;
@@ -41,26 +42,12 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
       if (e.origin !== BOOK || e.data?.loka !== 'author') return;
       if (e.data.ready) send({ op: 'hello' });
       if (e.data.state) setState(e.data.state);
-      if (e.data.trace && e.data.id !== undefined) waiting.current.get(e.data.id)?.(e.data.trace); // a reply after its timeout has no waiter
+      if (e.data.trace && e.data.id !== undefined) waiting.current.get(e.data.id)?.(e.data.trace);
       if (e.data.line) setLine(e.data.line);
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
   }, [send]);
-  // A Book that stops answering must not hang Why: give up after a few seconds, in plain words.
-  const trace = () =>
-    new Promise<string[]>((resolve, reject) => {
-      const id = ++asked.current;
-      const timer = setTimeout(() => {
-        waiting.current.delete(id);
-        reject(new Error('The Book did not answer. Reload the Book, then ask again.'));
-      }, 5000);
-      waiting.current.set(id, (rows) => {
-        clearTimeout(timer);
-        waiting.current.delete(id);
-        resolve(rows);
-      });
-      send({ op: 'trace', id });
-    });
+  const trace = () => askTrace(waiting.current, (id) => send({ op: 'trace', id }), ++asked.current);
   return { state, line, send, trace };
 }
