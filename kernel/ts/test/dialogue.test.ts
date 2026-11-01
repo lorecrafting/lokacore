@@ -468,6 +468,28 @@ test('a hub conversation ends as Leave would once the speaker or the player leav
   assert.equal(gameView(after).choice, undefined);
 });
 
+// Breaks (loka-vduxr.10): a linked single-choice dialogue left out of the farewell, so a nested
+// talk's row outlives the player leaving the room; the book keeps a card no choose can accept.
+test('a nested conversation with one option ends once the player leaves', () => {
+  const linked = hub((d, c) => {
+    const keys = Object.keys(d.choices);
+    c.dialogues[`${F}:dialogue/nested`] = {
+      ...d,
+      key: 'nested',
+      choices: { [keys[0]!]: d.choices[keys[0]!] },
+    };
+    d.choices = { [keys[0]!]: { ...d.choices[keys[0]!], then: 'nested' } };
+    delete c.dialogues[`${F}:dialogue/nested`].choices[keys[0]!].then;
+  });
+  const opened = open(linked);
+  const [choice_id] = gameView(opened).choice!.choices.map((o: any) => o.choice_id);
+  const nested = ok(opened, { type: 'choose', continuation_id: C, choice_id }, 4).world;
+  assert.equal(nested.state.choices![NEXT]!.beat, 'nested');
+  const away = ok(nested, { type: 'move', direction: 'north' }, 5).world;
+  assert.equal(gameView(away).choice, undefined);
+  assert.equal(away.state.choices![NEXT]!.status, 'closed');
+});
+
 // Breaks (loka-x6t.5): a hub reopened after an answer that ends the conversation: the dialogue's
 // only choice, or a riddle's solved answer.
 test('a single-choice or riddle dialogue ends at its answer', () => {

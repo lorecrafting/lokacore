@@ -246,7 +246,7 @@ The [PM adoption](../decisions/pm-decision-m12-a-readable-2026-10-05.md) records
 Ruleless. `target_present` is true when the action's target is in reach (the `target_present` case in `mechanics/policy.ts`,
 `present` in `commands/target.ts`). `policy@1` is `all`, `any`, `not` (`holds` in `mechanics/policy.ts`). A fact is read and set at
 its one declared scope: the actor's for `player`, the world's for `instance`
-(`mechanics/fact.ts`); a `per_subject` fact also at its subject ([row W2](#entity-and-pair-facts-toolbox-row-w2)); unset means its default; `fact_compare` compares equality. The host appends a
+(`mechanics/fact.ts`); a `per_subject` fact also at its subject ([row W2](#entity-and-pair-facts-toolbox-row-w2)); unset means its default; `fact_compare` compares equality. `fact_at_least {fact, at_least}` holds when an int fact is at least the number (`FACT_TYPE_MISMATCH` on another type). The host appends a
 `fact_changed {fact, old, new}` for each `fact.assign` that changes its value, at the assign's
 causal position (`mechanics/fact.ts:108`); an unchanged assign emits nothing. Invariant `facts_typed`.
 A dialogue choice's `fact.adjust {fact, amount}` requires a declared bounded integer fact and a safe
@@ -449,7 +449,7 @@ every bound role and, when the row binds the dialogue's npc role, `speaker` (tha
 re-resolved; bound after the roles) as participants (a riddle's wrong line and a check's failure line bind the same; the Book words a line
 that is wholly one quotation as the speaker's, loka-548k), and the `story_point_reached` of a story point outcome
 whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:225`). The conversation then
-(unless the choice is [checked](#dialogue-skill-checks-toolbox-row-14), which ends it) returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
+(unless the choice is [checked](#dialogue-skill-checks-toolbox-row-14), which ends it, or names `then`, [below](#branching-dialogue)) returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
 to the person's topics; the conversation stays open until Leave the conversation): the same
 decision appends a `choice.open` of a fresh continuation (the next minted id) with the resolved row's
 source, beat, roles and choice ids, and its `choice_opened` after `choice_resolved`. The answer
@@ -482,6 +482,20 @@ rejects, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `
 of a fact the save proves by one receipt (a topic's fact, a perception `discovered` fact or a
 bounded riddle's answer fact; [save](save.md)) or an escort `start` on a choice with neither an `accept` (refused once accepted) nor a `patrol` (which ends the
 conversation) (`lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
+
+#### Branching dialogue
+
+A `DialogueChoice` may carry `policy`, `then`, `then_failed`, `narration_variants` and `narrate` steps (`loka-vduxr.10`; `mechanics/dialogue/behavior.ts`, `selection.ts`).
+
+- **`policy`.** The option is not drawn while it fails (`shown`, `selection.ts`), and the row keeps every choice id, so a save holds no list of what was shown. A `choose` of a hidden option is `invalid_state`. The check uses the world after the answer's own effects, so an answer that sets a fact hides its own option at once.
+- **`then`.** Instead of reopening, the same decision appends a `choice.open` of the named dialogue (its own minted id, roles and choice ids) and `choice_opened` after `choice_resolved`. The compiler refuses a target that does not exist or has a `keyword`, and `then` on a `patrol` choice or in a dialogue with a `quest` or `riddle` (`lib/loka/content/dialogue_links.ex`). `then: end` closes the talk after the answer, and is refused where a dialogue is keyed `end`.
+- **Links.** A dialogue some `then` names is not offered by Talk unless it starts its chain; a chain that loops enters at its first key by sort. A `then` target never reopens itself: an answer there without `then` ends the talk. A return to a parent is `then: <parent>`. When the target shows no option the talk ends after the answer, opening nothing.
+- **A check.** On a pass the choice's `then` applies; on a failure the row closes as before, the failure line stays and `then_failed` opens, if any. `then_failed` without a `check` is refused.
+- **Hand-off.** `then` may name another speaker's dialogue: the new row binds its own roles and `speaker_id`. A speaker in another room draws the compile warning `SPEAKER_ELSEWHERE`, because the proposal's farewell closes the new row in the same decision and the talk ends after the reply.
+- **`narration_variants`.** `TextVariants` on the reply: the first whose `when` holds replaces `narration`, read after the answer's effects. The narration key on the receipt is one of the choice's declared words (`dialogue-receipt.ts`).
+- **`narrate` steps.** A choice step that adds its `text` line after the reply, in step order; the key must be in the catalog.
+- **Repeats.** A linked dialogue can run again, so the [hub's repeat refusal](#dialogue-skill-checks-toolbox-row-14) applies to it however many choices it has, except a choice whose own `policy` negates a fact its own steps set (`lib/loka/content/hub.ex`).
+- **Composition record.** Consumer: the dialogue rule and the GameView. Reads: dialogue definitions, facts through `holds`, the row's roles and ids, the decision's own fact writes. Writes, save rows and fields: none new; `choice.open` of another dialogue. Events: `choice_opened` after `choice_resolved` or `check_failed`. Reused: `holds`, `opening`, `bind`, `offered`, `openable`, `blocked`, the hub, `parted`. New: optional fields, `shown`, `linked`, `leadOn`, `replies`, the `fact_at_least` leaf, the `narrate` choice step. Invariants: none new. Exceptions: none.
 
 API1.9 adds an optional authored `riddle {choice_id, answer, bank, wrong}` to a dialogue.
 The answer is 1–32 lowercase ASCII letters; the displayed bank is 1–32 uppercase ASCII

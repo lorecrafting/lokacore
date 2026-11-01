@@ -49,6 +49,7 @@ defmodule Loka.Content.Explain do
          RESERVED_FACT | The engine owns the fact name `{field}`. | Rename your fact.
          INVALID_TIME_POLICY | This needs a time policy the cartridge does not have, or does not fit it. | Fix time_policy in cartridge.json, or remove this.
          VISITS_UNRECORDED | A visits check can never pass, because nothing records visits. | Add `knowledge` under requires.capabilities in cartridge.json.
+         SPEAKER_ELSEWHERE | This `then` leads to a speaker in another room, so the talk ends as it reaches them. | Move the speaker, or end the talk here.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
          SITE_EXIT_CONFLICT | This site names direction `{field}`, where the room has no exit. | Name a direction the room has an exit in.
          invalid_type | `{field}` must be {expected}{fields_named}.

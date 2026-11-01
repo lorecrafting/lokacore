@@ -323,6 +323,43 @@ defmodule Loka.ContentFerryTest do
     assert d("OUTCOME_MISMATCH", "dialogues/bram_offer.choices.give.receive", %{}) in diags
   end
 
+  # Breaks (loka-vduxr.10): a linked single-choice dialogue escaping the rule above, since it runs
+  # again through its then; or the once gate (policy not fact, steps set it) refused all the same.
+  test "a linked receive repeats unless its own policy stops it", %{dir: dir} do
+    give = %{
+      "label" => "dialogue.bram.leave",
+      "narration" => "narration.bram.leave",
+      "then" => "bram_offer",
+      "receive" => %{"item" => "lantern", "from" => "bram"}
+    }
+
+    assign = %{"op" => "fact.assign", "fact" => "lantern_lit", "value" => true}
+    held = %{"op" => "fact_compare", "fact" => "lantern_lit", "equals" => true}
+    once = %{"policy" => %{"op" => "not", "item" => held}, "steps" => [assign]}
+
+    offer = fn choice ->
+      %{
+        "dialogues/bram_offer.json" => %{
+          "npc" => "bram",
+          "policy" => %{"op" => "all", "items" => []},
+          "prompt" => "dialogue.bram.prompt",
+          "roles" => %{
+            "bram" => %{"role" => "npc", "npc" => "bram"},
+            "lantern" => %{"role" => "item", "item" => "lantern"}
+          },
+          "choices" => %{"give" => choice}
+        }
+      }
+    end
+
+    path = "dialogues/bram_offer.choices.give.receive"
+    assert {:error, diags} = compile(dir, offer.(give))
+    assert d("OUTCOME_MISMATCH", path, %{}) in diags
+    # lantern_lit is not a fact here, so it fails on that alone, never on the repeat rule.
+    assert {:error, gated} = compile(dir, offer.(Map.merge(give, once)))
+    refute d("OUTCOME_MISMATCH", path, %{}) in gated, inspect(gated)
+  end
+
   # Breaks (23 §3: the compiler validates its triggers and capability dependencies): the compiler
   # admitting what the loader rejects (kernel/ts/test/dialogue.test.ts): two choices claiming one
   # outcome, a claim without its outcome, a dialogue without a quest (its choice repeatable),

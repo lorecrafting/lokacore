@@ -20,17 +20,24 @@ defmodule Loka.Content.DialogueLinks do
         do: {["narration_variants", i, "when"], v["when"]}
   end
 
-  @doc "A choice's narration variant words, as `{steps, key}`."
+  @doc "A choice's narration variant and narrate step words, as `{steps, key}`."
   @spec variant_texts(list(), map()) :: [{list(), String.t()}]
   def variant_texts(steps, o) do
-    for {v, i} <- Enum.with_index(Map.get(o, "narration_variants", [])),
-        do: {steps ++ ["narration_variants", i, "description"], v["description"]}
+    words(steps, o, "narration_variants", "description", fn _ -> true end) ++
+      words(steps, o, "steps", "text", &(&1["op"] == "narrate"))
+  end
+
+  defp words(steps, o, field, name, keep) do
+    for {v, i} <- Enum.with_index(Map.get(o, field, [])),
+        keep.(v),
+        key = v[name],
+        do: {steps ++ [field, i, name], key}
   end
 
   # A choice's then and then_failed: a dialogue, or `end`. A patrol leg or a quest's or riddle's
   # end closes the conversation, a keyword dialogue is reached by its word, and then_failed needs
-  # a check that can fail. A target whose speaker stands elsewhere is allowed (a warning): its
-  # options read not_present until the actor is there.
+  # a check that can fail. A target whose speaker stands elsewhere is allowed (a warning): the
+  # proposal's farewell closes the talk as soon as it opens (dialogue@1).
   @spec choice(String.t(), list(), map(), map(), map()) :: [map()]
   def choice(rel, steps, o, d, ctx) do
     orphan =
@@ -71,7 +78,7 @@ defmodule Loka.Content.DialogueLinks do
     with {_, _, from} <- resolve(d["npc"], "npc", ctx.m, ctx.defs),
          {_, _, to} <- resolve(t["npc"], "npc", ctx.m, ctx.defs),
          true <- from["room"] != to["room"] do
-      [diag("OUTCOME_MISMATCH", at(rel, path)) |> Map.put("severity", "warning")]
+      [diag("SPEAKER_ELSEWHERE", at(rel, path)) |> Map.put("severity", "warning")]
     else
       _ -> []
     end
