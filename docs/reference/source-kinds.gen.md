@@ -517,10 +517,14 @@ An acquired skill with authored display text and a policy for current qualificat
 |---|---|---|---|
 | growth | list of integer |  | Toolbox row 5 (docs/system/mechanics.md skill growth): strictly increasing use counts reaching levels 2, 3 and so on above the base; the count is the reserved player fact uses_<key>. |
 | hidden | `true` |  | Homestead hs-14 (docs/system/mechanics.md Skill trees): the skill is left out of GameView skills, and of NPC lessons, while its prerequisite fails and it is not acquired. A dialogue choice that teaches it is not offered while it is so left out. A non-hidden skill whose prerequisite or qualification reads a hidden skill, a dialogue policy that reads one, and a dialogue label on a dialogue that teaches one are refused. |
+| learned | [TextKey](source-kinds.gen.md#textkey) |  | Level-up rush (docs/system/mechanics.md Skill ranks): the authored line for acquiring this skill; GameView carries the key and the presenter tells it. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its display name. |
 | prerequisite | [Policy](vocabulary.gen.md#policy-leaves) |  | Homestead hs-11 (docs/system/mechanics.md Skill trees): read for the acquiring actor with no target; skill.acquire is refused while it fails. A skill_compare naming this skill is refused. |
 | profession | [TextKey](source-kinds.gen.md#textkey) |  | Homestead hs-14 (docs/system/book-ui.md Skill tree details): the profession heading this skill is listed under on the Character page. |
 | qualification | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
+| ranks | list of object |  | Level-up rush (docs/system/mechanics.md Skill ranks): one entry per level, ranks[i] naming level i + 1. Needs growth and exactly growth.length + 1 entries; the compiler enforces both. |
+| ranks[].name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of this rank's name. |
+| ranks[].reached | [TextKey](source-kinds.gen.md#textkey) |  | Text key of the line for reaching this rank. |
 | requirement | [TextKey](source-kinds.gen.md#textkey) | yes | Its display requirement text. |
 
 ## statuses

@@ -10223,6 +10223,10 @@
           "const": true,
           "description": "Homestead hs-14 (docs/system/mechanics.md Skill trees): the skill is left out of GameView skills, and of NPC lessons, while its prerequisite fails and it is not acquired. A dialogue choice that teaches it is not offered while it is so left out. A non-hidden skill whose prerequisite or qualification reads a hidden skill, a dialogue policy that reads one, and a dialogue label on a dialogue that teaches one are refused."
         },
+        "learned": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Level-up rush (docs/system/mechanics.md Skill ranks): the authored line for acquiring this skill; GameView carries the key and the presenter tells it."
+        },
         "name": {
           "$ref": "#/$defs/partial.TextKey",
           "description": "Text key of its display name."
@@ -10236,6 +10240,27 @@
           "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details): the profession heading this skill is listed under on the Character page."
         },
         "qualification": { "$ref": "#/$defs/partial.Policy" },
+        "ranks": {
+          "description": "Level-up rush (docs/system/mechanics.md Skill ranks): one entry per level, ranks[i] naming level i + 1. Needs growth and exactly growth.length + 1 entries; the compiler enforces both.",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Text key of this rank's name."
+              },
+              "reached": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Text key of the line for reaching this rank."
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
         "requirement": {
           "$ref": "#/$defs/partial.TextKey",
           "description": "Its display requirement text."
@@ -13193,6 +13218,10 @@
           "const": true,
           "description": "Homestead hs-14 (docs/system/mechanics.md Skill trees): the skill is left out of GameView skills, and of NPC lessons, while its prerequisite fails and it is not acquired. A dialogue choice that teaches it is not offered while it is so left out. A non-hidden skill whose prerequisite or qualification reads a hidden skill, a dialogue policy that reads one, and a dialogue label on a dialogue that teaches one are refused."
         },
+        "learned": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Level-up rush (docs/system/mechanics.md Skill ranks): the authored line for acquiring this skill; GameView carries the key and the presenter tells it."
+        },
         "name": {
           "$ref": "#/$defs/TextKey",
           "description": "Text key of its display name."
@@ -13206,6 +13235,27 @@
           "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details): the profession heading this skill is listed under on the Character page."
         },
         "qualification": { "$ref": "#/$defs/Policy" },
+        "ranks": {
+          "description": "Level-up rush (docs/system/mechanics.md Skill ranks): one entry per level, ranks[i] naming level i + 1. Needs growth and exactly growth.length + 1 entries; the compiler enforces both.",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Text key of this rank's name."
+              },
+              "reached": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Text key of the line for reaching this rank."
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
         "requirement": {
           "$ref": "#/$defs/TextKey",
           "description": "Its display requirement text."
