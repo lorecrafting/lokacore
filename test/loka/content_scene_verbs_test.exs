@@ -163,7 +163,7 @@ defmodule Loka.ContentSceneVerbsTest do
     assert [%{"data" => %{"line" => 4, "why" => "repeated_choice"}}] = diags
     {_, _, value} = List.keyfind(files, "scenes/a.scene", 0)
     assert Map.keys(value["choices"]["go"]) == ["label", "narration"]
-    refute Map.has_key?(value, "quest")
+    assert Map.keys(value) == ["choices", "npc", "prompt", "roles"]
   end
 
   @bell_steps [
