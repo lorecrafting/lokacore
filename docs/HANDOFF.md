@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #536 (loka-4hik.30); written 2026-10-31 by Claude Code (Opus 5.5), engine-track PM session. A parallel session reviews the prologue beats and files "Prologue gap: ..." children of loka-g5hh; this session owns this page. Lean default in force since #533.
+AS OF main after #536 (loka-4hik.30), #530 and #535 in fix rounds; written 2026-10-31 by Claude Code (Opus 5.5), engine-track PM session. A parallel session reviews the prologue beats and files "Prologue gap: ..." children of loka-g5hh; this session owns this page. Lean default in force since #533.
 
 ## Direction (owner 2026-10-30)
 
@@ -24,13 +24,14 @@ AS OF main after #536 (loka-4hik.30); written 2026-10-31 by Claude Code (Opus 5.
 
 ## Next, in order
 
-1. #535 loka-sgqk (engine/catch-up-fold, head 6b9077fd4, CI green, kernel_api 1.130): fresh Opus reviewer, then a required second opinion for `proposal.ts`, then merge. No review has started. The review prompt must carry the issues in its Beads notes, the tie question (same-time ties run by job id: hunger 2 direct, 1 stepwise; does "equals job-by-job" need an exception?) and the job growth (showcase month jobs 27 to 4968: expected or leak?). Developer worktree `loka-sgqk`.
-2. #530 loka-kgd.194.23 authoring tools (tools/authoring, head 1f54a3e8f, ready; confirm CI, previous head green): fresh Opus reviewer (it changes `lib/`), then merge. Open items in Beads, including `~` scene placeholders missing from `bin/loka todo`, and whether the release check catches them. The owner may try one scene first; the syntax can still move.
-3. loka-g5hh.2 level-up rush (owner, quoted: "yes we also want that wow style rush too"): design pass, then brief; with loka-ot39 and loka-x6t.59 (P1). Use the existing levels and attribute points; no skill-point pool in the prologue. Not yet a decision record.
-4. Prologue gaps as the parallel session files them.
-5. Proposed release work, awaiting the owner's three calls (store fees, iOS first, a save guarantee from launch): save migrations, loka-k3b5 off the P3 hold, resume mobile, rebuild the E1 harness and gates.
-6. Ending page and outside link (owner wants a next-chapter message and giving to a hunger charity; PM advised a website link, not a Kickstarter button, and a direct link to a named charity for the free prologue). Not filed; the owner has not decided whether the game must fund itself.
-7. Follow-ups: loka-xy1js, loka-9g1q1, loka-1b68q; loka-n4dg and loka-gj82.4 effects; loka-ewtx engine follow-ups.
+1. #535 loka-sgqk (engine/catch-up-fold, kernel_api 1.130): review 1 CHANGES REQUIRED (record 048c0a776, branch `review-535`); fix round 1 in progress. Then the same reviewer's scoped re-check, the required second opinion on the fixed head, merge. Tie and job growth ruled: not bugs; follow-up loka-qhvgq (finished rows never pruned, month-away cold open 23-29 s).
+2. #530 loka-kgd.194.23 authoring tools (tools/authoring): fix round 2 in progress for the last blocker (`bin/loka new` rerun resets written `steps`, `starters.ex:137,166`). Then the same reviewer's re-check, merge.
+3. Epic loka-vduxr authoring readiness (Fable audit in its description, owner's decisions in its notes): start after #530 merges, in order .1 to .7, plus loka-ivjq.9, loka-k3b5, loka-kgd.175. This is the priority before the downgrade: the owner builds the game with these tools. A decision record still goes in the session housekeeping PR.
+4. loka-g5hh.2 level-up rush: Fable's brief and the owner's answers are in its notes. E1 (kernel_api 1.131) after #535 merges, since both touch `proposal.ts`; B2 needs #532 and loka-gj82.4.
+5. Prologue gaps as the parallel session files them.
+6. Proposed release work, awaiting the owner's three calls (store fees, iOS first, a save guarantee from launch): save migrations, loka-k3b5 off the P3 hold, resume mobile, rebuild the E1 harness and gates.
+7. Ending page and outside link (owner wants a next-chapter message and giving to a hunger charity; PM advised a website link, not a Kickstarter button, and a direct link to a named charity for the free prologue). Not filed; the owner has not decided whether the game must fund itself.
+8. Follow-ups: loka-xy1js, loka-9g1q1, loka-1b68q; loka-n4dg and loka-gj82.4 effects; loka-ewtx engine follow-ups.
 
 `cartridges/lantern_proof` stays as host of the frozen conformance traces (PM ruling, in `docs/system/cartridge.md`); Bram stays in the samplers because literal ids and frozen fixtures pin him. Retiring the traces would need the owner.
 
@@ -46,12 +47,13 @@ loka-3rym and loka-9ack from before; new items are in the housekeeping queue: `p
 
 - P3 hold (owner 2026-10-22, quoted: "lets hold off on the p3 stuff for now"): draft #454 (before merge:
   /code-review and split lib/loka/core/compose_encounter.ex instead of its size allowance), kgd.188, 2lvx,
-  5i4c, k3b5, x6t.98, y6yg.36, the 8 P3 engine bugs, and the P3 retro items (czpp, 14oe, 70yc, 7h3v).
+  5i4c, x6t.98, the 8 P3 engine bugs, and the P3 retro items (czpp, 14oe, 70yc, 7h3v).
 - loka-x6t.126 skill-gated room depth (owner: "hold on that for now").
 
 ## Waiting on the owner
 
 - Store fees, iOS first, the save guarantee; the component kit for the authoring UI.
+- Decided 2026-10-31 ("ok go ahead with all your recs"): see loka-vduxr and loka-g5hh.2 notes.
 - The beats review; the two PM defaults in the outline (the Vowed are dozens; the other cradles stay sealed).
 - Approval of the two retro items above; condition icons (loka-x6t.63).
 
