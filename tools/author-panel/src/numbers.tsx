@@ -52,7 +52,7 @@ const Fight = ({ target }: { target: Target }) => {
       </p>
       <Cols
         rows={[
-          ['no build', 'win', 'death', 'fled', 'no end', 'rounds', 'hp left'],
+          ['no build', 'win', 'death', 'fled', 'no end (runs)', 'rounds', 'hp left'],
           ...target.cells.filter((c) => c.build === 'none').map(fightRow),
         ]}
       />

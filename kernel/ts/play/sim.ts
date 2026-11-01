@@ -43,7 +43,6 @@ function watch(c: Cartridge, opts: { seeds: number; days: number; policy?: Polic
         empty: null,
       });
       p.end = r.current;
-      p.maximum = Math.max(p.maximum, r.maximum); // a level can raise it
       p.lowest = Math.min(p.lowest, r.current);
       p.bands[r.band] ??= at;
       if (r.current <= 0) p.empty ??= at;
