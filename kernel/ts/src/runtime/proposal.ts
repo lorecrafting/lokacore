@@ -56,7 +56,7 @@ type P = {
   applied: number;
   rng: World['state']['rng'];
   narration: Text[];
-  holders: Map<string, number>; // each status holder's, reaction fact row's writer group (G3)
+  holders: Map<string, number>; // each status holder's, reaction fact row's, written pool's writer group
   // Each item the root command moved: its writer group (hs-1). ponytail: merge and joinEarlier do
   // not relabel it; pass it to their maps once a root command both moves an item and advances time.
   roots: ReadonlyMap<string, number>;
