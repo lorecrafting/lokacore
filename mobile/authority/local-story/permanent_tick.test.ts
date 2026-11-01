@@ -1,4 +1,4 @@
-// size: allow 570, every fold case shares the one compiled needs fixture and save harness
+// size: allow 590, every fold case shares the one compiled needs fixture and save harness
 // Toolbox row W8 ticking permanent status rows through real SQLite (loka-rn3b, loka-sgqk): the needs
 // sampler's needs made permanent keep an active row with a tick and job but no end across a month of
 // catch-up and a cold reopen (docs/system/save.md, Status recovery), and saturated ticks fold
@@ -321,6 +321,27 @@ test('a raise due at the same time as a floored tick stops the fold', (t) => {
   assert.equal(direct(save, 0, 82801).kind, 'saved');
   assert.equal(pool(save, 'hunger'), 2);
 });
+
+// Breaks: the fold jumps a queued sub-step that has not run yet, whose row is already complete. fed's
+// 14400 sub-step sorts after hungry's tick at the same time; job.ts's skip took it for one that ran.
+// Literals from the pre-fold direct advance (fold off): a jump leaves 3 and 9.
+for (const [until, hunger] of [
+  [28801, 1],
+  [72001, 1],
+]) {
+  test(`a fold does not jump a raise's queued sub-step (to ${until})`, (t) => {
+    const save = begin(
+      t,
+      fixture((c, status) => {
+        fed(c, status);
+        status('fed').tick_every = 7200;
+        status('thirsty').tick_every = 1e7;
+      }),
+    );
+    assert.equal(direct(save, 0, until).kind, 'saved');
+    assert.equal(pool(save, 'hunger'), hunger);
+  });
+}
 
 // Breaks: a later job lifts the horizon an earlier one set. Same raises as above; fed also ticks at
 // 80000 on thirst. A fold past 72000 misses 75600 and 79200 and leaves 4.

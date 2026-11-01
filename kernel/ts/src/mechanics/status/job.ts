@@ -134,7 +134,7 @@ export function folds(world: World, job_id: JobId, job: JobRow) {
 
 /**
  * The ticks from this one to the next: 1, or for a fold the first after the target and at or after
- * another job's next queued run. Only the drain's queue shows a job in flight: its row is complete.
+ * another job's next queued run. Only the drain's queue shows a job in flight.
  */
 function foldedTicks(
   visit: World,
@@ -146,11 +146,13 @@ function foldedTicks(
   queue?: Queue,
 ) {
   if (!queue || !folds(visit, job_id, job)) return 1;
+  const { clock } = visit.state;
+  const self = queue.findIndex(([id, { due_time }]) => id === job_id && due_time === clock);
   let horizon = target;
-  for (const [id, { due_time }] of queue) {
+  // Only what sorts after this run is still to come; a queued sub-step's row is already complete.
+  for (const [id, { due_time }] of queue.slice(self + 1)) {
     const other = visit.state.jobs?.[id];
-    if (due_time < visit.state.clock || due_time > horizon || !other) continue;
-    if (due_time === visit.state.clock && other.status !== 'pending') continue; // ran just now
+    if (due_time > horizon || !other) continue;
     if (other.job.kind !== CLOCK_JOB && !folds(visit, id as JobId, other)) horizon = due_time - 1;
   }
   return Math.max(1, Math.floor((horizon - tick) / spec.tick_every) + 1);
