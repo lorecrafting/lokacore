@@ -1,4 +1,4 @@
-# size: allow 510, every scene form shares the sampler fixture and its twin
+# size: allow 518, every scene form shares the sampler fixture and its twin
 defmodule Loka.ContentSceneBranchingTest do
   # needs, once, then and nested choices in a `.scene` (docs/system/cartridge.md, Source
   # shortcuts). Expected JSON is hand-written; `~` stands for the words.
@@ -466,15 +466,20 @@ defmodule Loka.ContentSceneBranchingTest do
     order = ~s("choice_order": ["b", "a"])
     write(tmp, "scenes/s.scene", "npc: bram\nbram: ~\n- A\n  bram: ~\n- B\n  bram: ~\n")
     write(tmp, "dialogues/s.json", "{#{order}}")
+    write(tmp, "scenes/u.scene", "npc: bram\nbram: ~\n- B\n  bram: ~\n- A\n  bram: ~\n")
+    write(tmp, "dialogues/u.json", "{#{order}}")
     write(tmp, "dialogues/j.json", ~s({"npc": "bram", #{order}}))
     write(tmp, "areas/a.json", ~s({"dialogues": {"k": {"npc": "bram", #{order}}}}))
     {_, diags} = Source.load(tmp)
-    got = for %{"data" => %{"why" => "choice_order_written"}} = d <- diags, do: d["path"]
+    got = for d <- diags, is_map_key(d["data"], "why"), do: {d["data"]["why"], d["path"]}
+
+    why = "choice_order_written"
 
     assert Enum.sort(got) == [
-             "areas/a.dialogues.k.choice_order",
-             "dialogues/j.choice_order",
-             "dialogues/s.choice_order"
+             {why, "areas/a.dialogues.k.choice_order"},
+             {why, "dialogues/j.choice_order"},
+             {why, "dialogues/s.choice_order"},
+             {why, "dialogues/u.choice_order"}
            ]
   end
 
@@ -491,6 +496,10 @@ defmodule Loka.ContentSceneBranchingTest do
 
     assert {:error, [%{"data" => %{"why" => "bad_asked"}}]} =
              sampler("npc: bram\nbram: ~\n- Go\n  asked now\n  bram: ~\n")
+
+    # A refused choice's `asked` adds nothing and does not crash on the choice that was not made.
+    twice = "npc: bram\nbram: ~\n- Go\n  bram: ~\n- Go\n  asked\n  bram: ~\n"
+    assert {:error, [_]} = sampler(twice)
 
     fact = {"facts.json", &put_in(&1, ["facts", "scene_go_asked"], bool("met_bram"))}
     go_scene = "npc: bram\nbram: ~\n- Go\n  asked\n  bram: ~\n"
