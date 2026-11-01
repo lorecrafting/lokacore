@@ -157,16 +157,17 @@ function resolution(
   quest: NonNullable<DialogueDefinition['quest']>,
 ) {
   const transitions = ops.filter((o) => o.op === 'quest.transition' && o.to === 'resolved');
+  const transition = transitions[0];
+  let instance_id =
+    option.exchange || transition?.op !== 'quest.transition'
+      ? row.quest_instance_id
+      : transition.instance_id;
   // A repeatable quest's next acceptance retires the row, so its receipts stand alone.
   if (!option.exchange && !s.world.cartridge.quests?.[refString(quest)]?.repeatable) {
     const q = questOf(s.world, row.actor_id, quest);
     if (!q || q[1].state !== 'resolved' || q[1].outcome !== row.choice_id) return false;
+    instance_id = q[0];
   }
-  const transition = transitions[0];
-  const instance_id =
-    option.exchange || transition?.op !== 'quest.transition'
-      ? row.quest_instance_id
-      : transition.instance_id;
   const resolved = events.filter((e) => e.payload.type === 'quest_resolved');
   return (
     transitions.length === 1 &&

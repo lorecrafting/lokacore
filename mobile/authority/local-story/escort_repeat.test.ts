@@ -13,6 +13,7 @@ import {
   room,
 } from '../../../kernel/ts/test/escort_fixture.ts';
 import { homeward, id, setup } from './escort_play.test.ts';
+import { openGame } from './session.ts';
 
 const fresh = genesis();
 
@@ -247,3 +248,36 @@ for (const [form, change] of Object.entries(noEscort))
     a = again(a);
     a.sql.close();
   });
+
+// Breaks: a one-time quest's skill receipt resolving another instance reopening accepted.
+test('a one-time skill choice whose receipt resolved another instance is refused', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-vduxr.23-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const change = (c: any) => {
+    noEscort.skill(c);
+    const q = c.quests[`${prefix}:quest/homeward`];
+    delete q.repeatable;
+    delete q.exchange;
+  };
+  const source = escortBundle(change);
+  const a = setup(join(dir, 'save.db'), source);
+  a.offer();
+  a.move('south', 'south');
+  a.ok('keeper_home', [id('npc', 'keeper')]);
+  a.choose('home');
+  const resolving = a.sql
+    .prepare(
+      "SELECT command_id,response FROM receipt WHERE response LIKE '%quest_resolved%' ORDER BY revision DESC",
+    )
+    .get()! as { command_id: string; response: string };
+  const { instance_id } = JSON.parse(resolving.response).delta.ops.find(
+    (o: { op: string; to?: string }) => o.op === 'quest.transition' && o.to === 'resolved',
+  );
+  a.sql.prepare('UPDATE receipt SET response=replace(response,?,?) WHERE command_id=?').run(
+    instance_id,
+    instance_id.replace(/^./, (c: string) => (c === '0' ? '1' : '0')),
+    resolving.command_id,
+  );
+  assert.throws(() => openGame(a.db, source, a.host), /save_corrupt/);
+  a.sql.close();
+});
