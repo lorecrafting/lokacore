@@ -150,7 +150,7 @@ export function cheatNote(op: Cheat['op'], reply: Reply) {
   if (reply.kind === 'saved' && reply.decision.kind === 'accepted') return '';
   const code =
     reply.kind === 'saved' && reply.decision.kind === 'rejected' && reply.decision.error.code;
-  return `${op === 'go_to_room' ? 'Go to room' : 'Set fact'} refused: ${(code && REFUSED[op][code]) || describe(reply)}.`;
+  return `${op === 'go_to_room' ? 'Go to room' : 'Set fact'} ${reply.kind === 'pending' ? 'not confirmed' : 'refused'}: ${(code && REFUSED[op][code]) || describe(reply)}.`;
 }
 
 /**

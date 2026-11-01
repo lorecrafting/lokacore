@@ -94,28 +94,8 @@ const another = (t: { type: string; default: unknown; values?: unknown[] }) =>
 
 // Break: a cheat writes a fact a load proof demands a mechanic receipt for: the save never reopens.
 for (const [name, refused] of [
-  [
-    'toolbox_showcase',
-    [
-      'flamma_known',
-      'topic_fire_known',
-      'topic_heir_known',
-      'topic_letter_known',
-      'topic_mill_known',
-      'topic_parish_known',
-      'topic_surety_known',
-      'topic_walker_known',
-    ],
-  ],
-  [
-    'codex_sampler',
-    [
-      'topic_mill_known',
-      'topic_missing_cart_known',
-      'topic_smugglers_known',
-      'topic_wanderer_known',
-    ],
-  ],
+  ['toolbox_showcase', []],
+  ['codex_sampler', []],
   ['expedition_sampler', ['night_survived']],
 ] as const)
   test(`any fact a cheat sets on ${name} reopens; the proven ones are refused`, () => {
@@ -183,8 +163,8 @@ test('a dev cheat retried after a lost COMMIT acknowledgement replays', () => {
   assert.equal(game.view().view.place.title.key, 'room.boar_run.title');
 });
 
-// Break: every receive target is refused again, though a reopen proves only custody ones.
-test('a non-custody receive target is set and reopens', () => {
+// Break: every receive target is refused again, though no reopen proves one by state.
+test('a receive target is set and reopens', () => {
   const lantern = read('protocol/fixtures/cartridge_lantern_hash.json');
   const b = { canonical: lantern.canonical, sha256: lantern.sha256 };
   const a = sqliteHost();

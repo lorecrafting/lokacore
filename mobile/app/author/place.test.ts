@@ -284,6 +284,11 @@ test('a refused cheat says why in plain words', () => {
     cheatNote('go_to_room', { kind: 'saved', decision: { kind: 'fault', code: 'x' } } as Reply),
     'Go to room refused: fault x.',
   );
+  // Break: a lost ack, which may yet commit, reads as a refusal.
+  assert.equal(
+    cheatNote('set_fact', { kind: 'pending' } as Reply),
+    'Set fact not confirmed: pending.',
+  );
 });
 
 // Break: a cheat sent mid catch-up is held by the session, lands on a later pulse and is never recorded.
