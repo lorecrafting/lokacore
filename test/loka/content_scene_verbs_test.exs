@@ -164,7 +164,8 @@ defmodule Loka.ContentSceneVerbsTest do
     {_, _, value} = List.keyfind(files, "scenes/a.scene", 0)
     assert Map.keys(value["choices"]["go"]) == ["label", "narration"]
     assert Map.keys(value) == ["choices", "npc", "prompt", "roles"]
-    assert value["prompt"] == %{"prose" => "hi"}
+    {"text.json", :text, text} = List.keyfind(files, "text.json", 0)
+    assert text["dialogue.a.prompt"] == "hi"
   end
 
   @bell_steps [
