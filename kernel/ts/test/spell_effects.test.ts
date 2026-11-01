@@ -151,16 +151,19 @@ test('flamma does nothing to an unattackable wight', () => {
 });
 
 // Breaks: an aimed spell drains an `unattackable` NPC through a status, or the guard also blocks
-// a status that does not drain, or one on an unflagged NPC (loka-w9id).
+// a status that does not drain (a gain, no tick, another resource), or one on an unflagged NPC
+// (loka-w9id).
 test('a spell lands an hp-draining status only off an unattackable NPC', () => {
-  for (const [flagged, per_tick, lands] of [
-    [true, -1, false],
-    [true, 1, true],
-    [false, -1, true],
+  for (const [flagged, key, per_tick, lands] of [
+    [true, 'hp', -1, false],
+    [true, 'hp', 1, true],
+    [true, 'hp', 0, true],
+    [true, 'mana', -1, true],
+    [false, 'hp', -1, true],
   ] as const) {
     const c = cartridge((c) => {
       const warded = c.statuses[`${P}:status/warded`];
-      warded.resource = { ...warded.resource, key: 'hp' };
+      warded.resource = { ...warded.resource, key };
       warded.per_tick = per_tick;
       success(c, 'ward').steps[0].npc = success(c, 'flamma').steps[0].npc;
       if (flagged) c.npcs[W].unattackable = true;
