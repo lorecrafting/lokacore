@@ -65,14 +65,14 @@ function Book({ frame }: { frame: RefObject<HTMLIFrameElement | null> }) {
 export default function App() {
   const frame = useRef<HTMLIFrameElement>(null);
   const book = useBook(frame);
-  const said = useDiagnostics();
+  const { said, compiled } = useDiagnostics();
   const [dark, toggle] = useTheme();
   return (
     <div className="flex h-full bg-background text-foreground max-[900px]:flex-col">
       <Book frame={frame} />
       <aside className="flex w-[400px] shrink-0 flex-col border-l max-[900px]:h-1/2 max-[900px]:w-full max-[900px]:border-t max-[900px]:border-l-0">
         <Header hash={book.state?.hash} dark={dark} toggle={toggle} />
-        <Compile said={said} state={book.state} send={book.send} />
+        <Compile said={said} compiled={compiled} state={book.state} send={book.send} />
         <Tabs defaultValue="play" className="min-h-0 flex-1 gap-0">
           <TabsList className="mx-3 mt-2 grid w-auto grid-cols-4">
             <TabsTrigger value="play">Play</TabsTrigger>
