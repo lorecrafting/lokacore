@@ -297,3 +297,4 @@ export const expeditionLine = (
       ? `Next you go ${e.direction} to ${text(e.next_title)}.`
       : `Your next checkpoint is ${text(e.next_title)}.`
     : '';
+export const ASKED = ', already chosen'; // after an asked option's label (book-ui.md)

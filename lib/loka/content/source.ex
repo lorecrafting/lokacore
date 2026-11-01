@@ -1,4 +1,4 @@
-# size: allow 441, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 435, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -17,6 +17,7 @@ defmodule Loka.Content.Source do
     Zones
   }
 
+  alias Loka.Content.{AskedField, Waits}
   alias Loka.Core.Canonical
 
   # A mistake the compiler is not sure of: it is said, and the file still lowers.
@@ -66,6 +67,7 @@ defmodule Loka.Content.Source do
     files = SceneMerge.merge(files)
     untriggered = untriggered(files)
     {files, opened} = Areas.split(files, dirs())
+    replaced = Enum.uniq(replaced ++ SceneMerge.order_refused(files))
     {files, repeats} = Areas.unique(files)
     {files, faults} = Extends.flatten(files)
     {files, located} = shortcuts(files, opened ++ repeats)
@@ -76,7 +78,8 @@ defmodule Loka.Content.Source do
     {files, clashes} = Prose.lower(files)
     {files, held} = Behaviours.expand(files)
     {files, zoned} = Zones.expand(files)
-    {files, Enum.map(faults ++ clashes ++ held ++ zoned, &bundle_diag/1)}
+    {files, waited} = Waits.lower(files)
+    {files, Enum.map(faults ++ clashes ++ held ++ zoned ++ waited, &bundle_diag/1)}
   end
 
   defp read(dir) do
@@ -249,6 +252,8 @@ defmodule Loka.Content.Source do
   defp location(rel, []), do: rel
   defp location(rel, steps), do: {rel, steps}
 
+  defp replaced(files), do: steps_over_cut(files) ++ SceneMerge.refused(files)
+
   # A merge would let `steps` in the JSON replace every word of the `.cut` beside it, silently.
   defp steps_over_cut(files) do
     for {rel, {:scene, key, _} = id, _} <- files,
@@ -256,22 +261,6 @@ defmodule Loka.Content.Source do
         {json, ^id, %{"steps" => _}} <- files,
         json != rel do
       diag("SCHEMA_VIOLATION", at(json, ["steps"]), %{"why" => "cut_steps", "key" => key})
-    end
-  end
-
-  defp words_over_scene(files) do
-    for {json, path, key} <- SceneMerge.overlap(files) do
-      data = %{"why" => "scene_overlap", "key" => key, "written" => Enum.join(path, ".")}
-      diag("SCHEMA_VIOLATION", at(json, path), data)
-    end
-  end
-
-  defp replaced(files),
-    do: steps_over_cut(files) ++ words_over_scene(files) ++ scenes_same_key(files)
-
-  defp scenes_same_key(files) do
-    for {rel, key} <- SceneMerge.same_key(files) do
-      diag("SCHEMA_VIOLATION", at(rel, []), %{"why" => "scene_key_taken", "key" => key})
     end
   end
 
@@ -373,15 +362,19 @@ defmodule Loka.Content.Source do
 
   # Source only (Dialogues.points/2 derives CompiledCartridge.story_points and strips it).
   @choice_point %{
-    "description" =>
-      "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+    "description" => "<story point>/<outcome>: the outcome this choice reaches; one per outcome.",
     "type" => "string",
     "pattern" => "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$"
   }
 
   # Source only (DialogueOnce lowers it to a fact, a step and a policy).
   # Source only: a scene's written order, where it is not sorted (ChoiceOrder).
-  @choice_order %{"type" => "array", "items" => %{"type" => "string"}}
+  @choice_order %{
+    "description" =>
+      "The compiler's mark of a scene's written choice order; writing it is refused.",
+    "type" => "array",
+    "items" => %{"type" => "string"}
+  }
 
   @choice_once %{
     "description" =>
@@ -399,6 +392,7 @@ defmodule Loka.Content.Source do
     |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
     |> put_in(["DialogueChoice", "properties", "once"], @choice_once)
     |> put_in(["DialogueDefinition", "properties", "choice_order"], @choice_order)
+    |> update_in(["DialogueChoice", "properties"], &AskedField.source_fields/1)
     |> schedule(defs)
     |> Map.update!(
       "LiquidRow",

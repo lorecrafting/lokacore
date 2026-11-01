@@ -61,6 +61,9 @@ the view's item names, two items on one line, a long name wrapping, and a page t
 log follows to its end, so the pop is seen on a full page. It does not rise under reduced motion. The
 log line stays the record.
 
+Under-ink layers (night sky, lamp glow, low-health vignette, lightning, wind flutter) are paper, not
+parts: they draw no block, hold no words and take no touch.
+
 ## World and status entry
 
 World is one current-room page ([room page anatomy](#room-page-anatomy)). Its centred title (owner, mvl8eti4yeoe: rooms centre their title; every detail page keeps a left-aligned one) remains fixed above the scrolling authored
@@ -505,7 +508,7 @@ no past conversation log on a fresh visit to the page or after Leave the convers
 history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
 answer closes the kernel choice: the choice's options sit immediately after the latest
 chronological dialogue/event entry **inside** the scrolling content; no Talk card and no other
-action card shows; the foot is a single **Leave the conversation**. Action and dialogue choice labels are bare imperatives without a trailing period (an ellipsis is not a period); a quoted spoken line keeps its punctuation. Content lint refuses an authored choice that only leaves (a Leave or Close label with no effect beyond its narration) in a talk with more than one choice; the page's own Leave control ends the talk (loka-x6t.21). A talk has one exit, the foot (owner, 2026-10-30, loka-512o): an authored choice whose whole label is the Book's **Leave** or **Close** is never drawn among the choices; Leave the conversation sends that choice itself, so its narration and effects stand. The conversation belongs to
+action card shows; the foot is a single **Leave the conversation**. An option the view marks `asked` (one already taken) keeps its card and press; its words take the note style in italic, and its accessible name adds the words.ts asked words after the label. Action and dialogue choice labels are bare imperatives without a trailing period (an ellipsis is not a period); a quoted spoken line keeps its punctuation. Content lint refuses an authored choice that only leaves (a Leave or Close label with no effect beyond its narration) in a talk with more than one choice; the page's own Leave control ends the talk (loka-x6t.21). A talk has one exit, the foot (owner, 2026-10-30, loka-512o): an authored choice whose whole label is the Book's **Leave** or **Close** is never drawn among the choices; Leave the conversation sends that choice itself, so its narration and effects stand. The conversation belongs to
 that page visit (the Book's latch, not the NPC): leaving the page any other way (Contents, Map,
 Back to World) ends it, and reopening the person shows their actions again. This supersedes the
 viewport-bottom dock. The ordinary long log remains scrollable, and newly appended results keep
@@ -765,6 +768,10 @@ value dries in the wash's colour and back, with the thud and the heavy haptic. T
 at the wash's peak, with no layout change or reflow (owner, 2026-10-31). Reduced motion halves the
 wash and removes the swell; Flashes off removes both, leaving the value, thud and haptic.
 
+**Falling.** The player's death is a committed fact from the receipt, never a view diff, a rendered line or a room name. It is one S4: pending cues clear, music and beds cut at once, and one heavy haptic is the last thing felt: in a fight the thud's own, which is never cut; outside one, the death cue's. In a fight the fatal blow's wash falls to the faint opacity and holds until the page turns (Flashes off: no peak, the hold fades in over the settle time; reduced motion: the half wash, no swell, the same hold). A death outside a fight has no wash. Waking has no chord: the page lands on the palette of the current in-game hour, because death does not move the clock, and the current room's bed returns. No palette change marks the fall. ([Designer rulings](../design/effects-batch-2-rulings.md).)
+
+**Fight music.** A fight's opening plays a stinger into a lean loop on the music bus, and beds go silent; a fight within the fight gap of the last, or a reopened one, plays the loop alone. A foe falling cuts the loop into a short fanfare, then the room's bed returns. Flight or a quiet end lets the loop fall away with no fanfare. Death cuts it (Falling). A blow dealt presses the opponent's band phrase once and plays one impact under the music; a blow that moves no band, a miss, a dodge and a block add no sound, until events can tell them apart, and never from a rendered line.
+
 **Flash limit.** At most one full-page luminance change per second, never three in any second; a
 later blow in that second keeps the value, thud and haptic, so a flurry never peaks twice in a second.
 Flashes and reduced motion are separate.
@@ -780,6 +787,32 @@ so its ink never shows over the next page. It does not curl in, so its haptic co
 skill learned or improved, in the log; a quest resolved, on its Journal title at the Journal's next
 opening, once. The Character page's level line stays gilt while points wait to be spent. No failure
 is gilt, and gilt is never the only sign. Reduced motion is a plain fade in the line's own ink.
+
+**Lamp glow.** While a flame is lit and the shown palette is dusk or dark, a glow sits at the page's
+lower outer corner, in the dark palette's action colour fading out over 40% of the page width, in
+over the palette cross-fade, out over the settle. Away from an exposed room it flickers; reduced
+motion holds it steady. It lights no sound and no haptic. It is under the ink, draws no block, takes
+no touch and is no part of the room page's anatomy.
+
+**Map ink.** A room or link new since the Map last showed draws on over the settle; silent. The
+first opening after launch draws nothing. Reduced motion: it appears.
+
+**Page life.** A new choice's answers lift in one after another, never again on a redraw; under
+reduced motion they appear together. A person arriving in the room dries in; one leaving fades, takes
+no touch while fading, then the paragraph closes; both silent. At the danger hit point band a
+vignette of the ink colour breathes at the page's edges up to the faint opacity (steady under reduced
+motion), silent. A right riddle answer stays in its place in the warning colour for a held moment,
+then settles, with one note; a wrong one sends the tiles back, silent, never gilt. On a night page
+two groups of stars twinkle in opposed phase (still under reduced motion). A dream's page carries a
+faint dusk tint. A travel, known by the sent expedition's confirmed room change, turns five quick
+sweeps over one snapshot with one riffle and a light haptic after it (one fade under reduced motion).
+Under-ink layers draw no block and take no touch.
+
+**First times.** The first pickup, first quest and first level of a playthrough are one step
+stronger: the warning colour held for a moment on the line that says so (a level draws no line in the
+Book yet, so it takes only the rest), one tier louder, one haptic step up. The view alone decides:
+empty hands and worn before a pickup, an empty journal before a quest, level 1 before a level.
+Nothing is saved for it.
 
 **Event sounds.** A sound marks what the hand did or how the player's story moved, never what the
 world did. Pressed or moved: the page turn, a pickup flick (a take that turns the page plays the flick alone,
@@ -801,8 +834,11 @@ player's build never has it.
 
 **Settings.** Sound, Music, Haptics and Flashes follow the Reading size and precede Start over, in
 that row pattern, each on by default and kept on the device, not in the save. Sound and Haptics
-preview themselves on change; Music and Flashes do not. Music governs the theme cut; Sound every other sound. Reduced motion follows the system,
+preview themselves on change; Music and Flashes do not. Music governs every piece of music: the theme cut, fight music and exploration music. Sound governs every other sound, beds and weather included. Turning either off stops what it governs at once; turning Music on again during a fight starts the loop, nothing else. Reduced motion follows the system,
 with no control of its own.
+
+A Credits row after Flashes opens a read-only child page, one line for each distinct credit in the
+sound manifest, with Back to Settings.
 
 **Queue.** One chapter or death interrupts and clears the queue. One large cue plays with one
 pending, and a third of the same key replaces the pending one. Small cues of one key coalesce into

@@ -1,5 +1,5 @@
 import * as patrol from '../patrol/shared.ts';
-import { apart, pending, shown } from './selection.ts';
+import { apart, asked, pending, shown } from './selection.ts';
 import { validAttempts } from './behavior.ts';
 import { learnable } from '../skills.ts';
 import { exchangeBlocked } from './exchange.ts';
@@ -245,7 +245,7 @@ export function choiceView(
       const short = unpaid(world, bodyOf(world, actor)!, why, lesson);
       return why
         ? { ...state, available: false, reason: { code: why, ...short } }
-        : { ...state, available: true };
+        : { ...state, available: true, ...asked(world, actor, option, speakerOf(d, row), steps) };
     }),
   };
 }

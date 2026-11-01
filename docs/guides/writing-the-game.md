@@ -96,6 +96,8 @@ maud: ~
   `policy` in `dialogues/<key>.json`.
 - `once` hides the choice after the player takes it. It makes a fact of its own,
   `<key>_<choice>_done`; do not declare it.
+- `asked` dims the choice after the player takes it; it stays usable. It makes a fact of its own,
+  `<key>_<choice>_asked`; do not declare it.
 - `then: branch_next` plays the dialogue `branch_next` next; `then: end` closes the talk. A choice
   with no `then` comes back to these choices, or closes the talk if it is the only choice. A nested
   choice with no `then` goes back to the choices above it. A scene another scene's `then` leads to
@@ -108,6 +110,12 @@ maud: ~
   it must be written first, and the nested choices are shown next. Going back to a shallower `- `
   at the same indent as an earlier choice closes what is deeper. A choice has either nested
   choices or a `then`, not both. Indent with spaces; a tab is refused.
+- A scene with nested choices is its person's `entry`, so Talk opens at its top. Their other
+  dialogues open only if it leads to them (`ENTRY_UNUSED` names the rest). A second nested scene for
+  that person is refused (`ENTRY_INVALID`): link to it with `then:` and put `"entry": false` in
+  `dialogues/<key>.json` beside it. When its `when:` fails, Talk passes on to what it leads to
+  through a choice the player could take for nothing, and is refused only if nothing further down
+  opens; a Talk with its own `name` is refused.
 - A `needs:` under a `when:` or a choice that asks the opposite, on a fact the file never sets, gets
   a warning and still compiles: the compiler cannot see another file or a reaction changing that fact.
 
@@ -115,6 +123,32 @@ A JSON of the same key may add what a scene cannot say, but it may not write a f
 already writes (the prompt, the speaker, a choice's words): the compile names the field and asks you
 to keep it in one place. A scene with nested choices cannot resolve a quest or take a keyword or
 riddle from its JSON, since those dialogues do not lead on; give that its own scene.
+
+What you can rely on when dialogues link with `then` (JSON dialogues today):
+
+- Put `"entry": true` on the dialogue Talk should open, and it opens there, whatever else leads to
+  it. A person takes one; their other dialogues stop opening, except keyword ones. Without a marker Talk infers, as below, and the
+  compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess.
+  A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
+  no marker when each but the last by key has a `when:`.
+- A person's default Talk, when a dialogue's condition fails, passes on to what that dialogue leads
+  to, in choice key order, but only through a choice the player could take for nothing: its condition
+  holds, with no check, cost or other gate. So a first meeting is an `intro` with a `when:` that links
+  to a `hub`: the first Talk opens the intro, and once the condition fails Talk opens the hub unless
+  another dialogue opens first. A locked or paid way on is skipped, and Talk is refused only when
+  nothing further down opens. A Talk with its own `name` opens its dialogue or is refused.
+- Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
+  condition holds and that has a choice to show.
+- A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the
+  member that leads to the most other dialogues; first by key on a tie, so a hub and one detail
+  open at the first key. Give the hub the most links and it is where the talk starts.
+- A `then` whose target cannot play (its condition fails, it has no choice to show, its speaker is
+  hostile, dead or gone) ends the talk
+  quietly, with no added line.
+- A plain answer, with no `then` and no check, ends the talk if a `then` anywhere leads to this dialogue. Add
+  `then` naming it to come back.
+- A dialogue nothing links to, with more than one choice, reopens after a plain answer; an answer with a check or a patrol ends the talk. If its own
+  condition stopped holding, it still reopens: its choices show unavailable and the player can leave. Leave is always there.
 
 ### Write a cutscene
 
@@ -142,6 +176,7 @@ quest names it. Take a scene whose every choice ends the quest:
 
 ```
 npc: maud
+when: door_open
 
 maud: line one
 - carry
@@ -199,7 +234,7 @@ Every kind's fields are in [source kinds](../reference/source-kinds.gen.md); ste
 
 `mise exec -- bin/loka new <kind> <name> [--from <room> <direction>] ... [cartridge dir]` (from any directory; the cartridge dir defaults to the current one, or the cartridge a `cartridge <dir>` pair just made) writes a
 compiling file for each pair on one Mix boot (name several pairs in one call; if any is refused, nothing is written), with every line a `~` placeholder, merged into the files it touches
-(it never replaces a value already there: it refuses, names the value and writes nothing),
+(it never replaces a value already there: it refuses, names the value and writes nothing; a shared `text.json` line you filled, such as `transport.unaffordable`, just stays),
 plus the capabilities it needs in `cartridge.json`; it prints what it changed, then what to fill (the list `bin/loka todo` prints) and the
 next command. `rooms <name> --from <room> <direction>` writes the exit both ways and, when `layout.json` exists, places the new room's row that way from its source. `cartridge <dir>` stands alone: run it first, then the other pairs with the dir last. A rerun leaves the file it names as you left it, and refuses when that file's steps differ. A kind that refers
 to another takes the first one you have (for a room, the entry) and refuses with the command to run first. The shapes
@@ -241,6 +276,44 @@ when you run `mix loka.compile` by hand.
 | `topics` | [`spells_sampler`](../../cartridges/spells_sampler/) | nothing (it writes its own fact) |
 | `transports` | [`fast_travel_sampler`](../../cartridges/fast_travel_sampler/) | a room, an NPC and a resource; also writes the far room and both legs |
 
+## Make something happen later
+
+A reaction's `steps` can hold a wait, in whole seconds of game time:
+
+```json
+"steps": [
+  { "op": "narrate", "text": "first_line" },
+  { "op": "wait", "seconds": 600 },
+  { "op": "narrate", "text": "second_line" }
+]
+```
+
+The compiler turns the list into delayed rules (`<rule>_wait_1`, and so on), so the game keeps no
+new state. What to expect:
+
+- `when` is read again when each part runs. If it no longer holds, that part does nothing, and so
+  does every later part it still blocks. This is the only way to cancel: nothing stops a wait because
+  the player died, left or saved. A save keeps it, and it runs after the game reopens. Write what
+  should stop it into `when`. A step can do this itself: a part that makes `when` false drops the
+  parts after it, which is a good way to end a sequence early.
+- A wait after a timed action counts from the end of the action, when the rule names it:
+  `"on": { "event": "action_completed", "action": "<key>" }`. The compiler refuses a wait on
+  `action_completed` with no `action` while the game has a timed action, and on a custom event a
+  timed action sends, when the list has two or more delayed parts. Name the action instead. A single
+  wait is allowed there; it runs right after the action if the action is longer.
+- `action_completed` never fires when the action's check fails. To follow a failure, use
+  `check_failed`, or a single wait on the failure's own event. On `check_failed` the next point
+  applies.
+- Other long moments are not known at compile: a rule on another event inside a timed action (a
+  check, a fact change), or a chain of events from one. If such a command already takes longer than
+  the wait, every part due inside it runs right after it, and their order can differ each time. Do
+  not rely on the order there.
+- After a wait a step cannot read the event that started the rule: move an NPC or item, send an
+  event, advance a quest. Put those above the first wait. `when` cannot use `subject: "subject"`.
+  A fact step on a per-subject fact needs its `npc` or `item` after a wait: without one it narrates
+  but writes nothing.
+- A `wait` works only in a reaction, not in an action, a dialogue choice or a scene.
+
 ## Keep a fight from starting
 
 An NPC without an `attack` can never be attacked, so a story NPC needs nothing and may have no `hp`.
@@ -254,7 +327,7 @@ player, not the writer.
 
 ## Cookbook
 
-Each goal names the samplers that already do it; copy their files or start with `bin/loka new`.
+Each goal names the samplers that already do it; copy their files or start with `bin/loka new`. RPG talk patterns (reminder, quest stages, turn-in, check branches, hand-off) are on the [dialogue cookbook](dialogue-cookbook.md).
 
 | Goal | Samplers |
 |---|---|

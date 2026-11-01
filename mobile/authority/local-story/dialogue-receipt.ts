@@ -139,19 +139,35 @@ function consequences(
   option: DialogueChoice,
   speaker: EntityId,
 ) {
-  const actor = row.actor_id;
   const ops = d.delta.ops.filter((o) => o.writer_group === 0);
   const events = d.events.filter((e) => e.causation_id === (command.id as string));
   if (!transferEvidence(s, command, row, option, ops, events)) return false;
   if (!assignmentEvidence(s, row, option, ops, events, speaker)) return false;
   if (!paymentEvidence(s, row, option, ops)) return false;
-  if (!escortEvidence(s, command, row, option, ops)) return false;
-  if (!source.quest) return true;
-  const q = questOf(s.world, actor, source.quest);
-  if (!option.exchange && (!q || q[1].state !== 'resolved' || q[1].outcome !== row.choice_id))
-    return false;
-  const instance_id = option.exchange ? row.quest_instance_id : q![0];
+  if (!escortEvidence(s.world, row, option, ops)) return false;
+  return !source.quest || resolution(s, row, option, ops, events, source.quest);
+}
+
+function resolution(
+  s: Story,
+  row: ChoiceRow,
+  option: DialogueChoice,
+  ops: readonly DeltaOp[],
+  events: readonly DomainEvent[],
+  quest: NonNullable<DialogueDefinition['quest']>,
+) {
   const transitions = ops.filter((o) => o.op === 'quest.transition' && o.to === 'resolved');
+  const transition = transitions[0];
+  let instance_id =
+    option.exchange || transition?.op !== 'quest.transition'
+      ? row.quest_instance_id
+      : transition.instance_id;
+  // A repeatable quest's next acceptance retires the row, so its receipts stand alone.
+  if (!option.exchange && !s.world.cartridge.quests?.[refString(quest)]?.repeatable) {
+    const q = questOf(s.world, row.actor_id, quest);
+    if (!q || q[1].state !== 'resolved' || q[1].outcome !== row.choice_id) return false;
+    instance_id = q[0];
+  }
   const resolved = events.filter((e) => e.payload.type === 'quest_resolved');
   return (
     transitions.length === 1 &&
@@ -160,10 +176,10 @@ function consequences(
     transitions[0].outcome === row.choice_id &&
     resolved.some(
       (e) =>
-        (option.exchange || (resolved.length === 1 && e.actor_id === actor)) &&
+        (option.exchange || (resolved.length === 1 && e.actor_id === row.actor_id)) &&
         same(e.payload, {
           type: 'quest_resolved',
-          quest: source.quest,
+          quest,
           instance_id,
           outcome: row.choice_id,
         }),
@@ -171,49 +187,21 @@ function consequences(
   );
 }
 
-// size: allow 42, exact authored transition binds original identity and receipt effect
+// What this receipt wrote, not the current row or quest row: a repeat quest's start replaces the one and
+// retires the other (loka-vduxr.23). The latest receipt binds the stored row (escort-save).
 function escortEvidence(
-  s: Story,
-  command: Command,
+  world: World,
   row: ChoiceRow,
   option: DialogueChoice,
   ops: readonly DeltaOp[],
 ) {
-  const effect = option.escort;
-  if (!effect) return true;
-  const escort = s.world.state.escorts?.[row.actor_id];
-  const quest = questOf(s.world, row.actor_id, effect.quest);
-  if (
-    !escort ||
-    !quest ||
-    command.payload.type !== 'choose' ||
-    escort.actor_id !== row.actor_id ||
-    escort.body_id !== bodyOf(s.world, row.actor_id) ||
-    escort.npc_id !== row.roles.find((r) => r.role === effect.npc)?.entity_id ||
-    escort.quest_instance_id !== quest[0]
-  )
-    return false;
-  const start = effect.transition === 'start';
-  if (
-    start &&
-    (escort.continuation_id !== command.payload.continuation_id ||
-      escort.choice_id !== command.payload.choice_id)
-  )
-    return false;
-  const transitions = ops.filter((o) => o.op === 'escort.transition');
   return (
-    transitions.length === 1 &&
-    same(transitions[0], {
-      op: 'escort.transition',
-      writer_group: 0,
-      actor_id: row.actor_id,
-      expected: start
-        ? null
-        : { ...escort, status: effect.transition === 'rejoin' ? 'separated' : 'following' },
-      value: { ...escort, status: effect.transition === 'complete' ? 'completed' : 'following' },
-    })
+    !option.escort ||
+    (world.state.escorts?.[row.actor_id] != null && // no command deletes it
+      ops.some((o) => o.op === 'escort.transition'))
   );
 }
+
 function transferEvidence(
   s: Story,
   command: Command,

@@ -108,7 +108,8 @@ compiles once. A failed compile prints its diagnostics and keeps the last good c
 edited cartridge has its own save; the normal preview's save is never touched. Add `?dev=1` to
 the URL for the author column: compile errors, facts, quests and flags, why an action is missing,
 checkpoints, still-to-write text and a control that advances game time through the normal
-elapsed-time path (the world credits none before the ancestry choice). The owner's walkthrough:
+elapsed-time path (the world credits none before the ancestry choice), and go to a room or set a
+fact by key (a checkpoint records and replays both). The owner's walkthrough:
 [writing the game](guides/writing-the-game.md).
 Release, test and e2e builds always use the pinned chapter
 ([`metro.config.js`](../mobile/app/metro.config.js), [`bin/loka dev`](../kernel/ts/play/author.ts)).
@@ -142,6 +143,7 @@ the toolbox showcase.
 | The same reactions on many NPCs or items | `behaviours/<name>.json` and `"behaviours": ["<name>"]` on each holder; [the fishing spoils](../cartridges/fishing_sampler/behaviours/spoils.json) on [a trout](../cartridges/fishing_sampler/items/trout_02.json) | The compiler copies the reactions per holder, with `holder` bound to it ([Source shortcuts](system/cartridge.md#source-shortcuts)). |
 | An area in one file | `areas/<name>.json`, `{"<dir>": {"<key>": definition}}`; [the speech village](../cartridges/speech_sampler/areas/village.json) | The compiler opens the bundle into ordinary definitions before anything else reads the source ([Source shortcuts](system/cartridge.md#source-shortcuts)); diagnostics name the bundle path, and the artifact is unchanged. |
 | One rule for many rooms | `"zones"` on rooms and `"zone"` on a reaction; [codex wanderer](../cartridges/codex_sampler/reactions/wanderer.json) | The compiler copies a zone rule per member room ([zones](system/cartridge.md#source-shortcuts)). |
+| A consequence that plays out over time | `{"op": "wait", "seconds": <n>}` in a reaction's `steps` | The compiler splits the list into delayed rules ([waits](system/cartridge.md#source-shortcuts)) |
 | A consequence or story presentation | `reactions/<key>.json`, a dialogue choice's `story_point`, `scenes/<key>.json`; [bell scene](../cartridges/scene_sampler/scenes/bell_rung.json) | [Reactions](system/mechanics.md#reaction1-kerneltssrcmechanicsreactionts), [chapters](system/mechanics.md#chapters-kerneltssrcviewviewts) and [scenes](system/mechanics.md#scene1-mechanicsscenerulets) have bounded, typed triggers and steps. |
 
 Put player-facing words in `text.json` and reference their keys from NPC, item and story

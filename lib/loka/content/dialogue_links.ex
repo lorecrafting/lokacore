@@ -54,14 +54,14 @@ defmodule Loka.Content.DialogueLinks do
       )
   end
 
-  # Talk enters a loop at its first key by sort (selection.ts), so every chain has an entry and
-  # plays; a member whose speaker has no entry of their own is only reached through it: a warning.
+  # Talk enters a loop with no way in at its most-linking member (selection.ts), so every chain
+  # has an entry and plays; a member whose speaker has no entry of their own is only reached through it: a warning.
   @doc "The members of a then loop whose speaker Talk only reaches through the loop, as warnings."
   @spec loops([{String.t(), map()}]) :: [map()]
   def loops(all) do
-    sorted = Enum.sort_by(all, &elem(&1, 1)["key"])
-    next = Map.new(sorted, &{elem(&1, 1)["key"], links(elem(&1, 1))})
-    speakers = sorted |> entries(next) |> MapSet.new(& &1["npc"])
+    {sorted, next} = graph(all)
+    # a keyword dialogue is spoken, so it is no way for Talk to reach its speaker
+    speakers = for({_, d} <- entries(sorted, next), !d["keyword"], do: d["npc"]) |> MapSet.new()
 
     sorted
     |> Enum.filter(&unreachable?(elem(&1, 1), speakers, next))
@@ -71,22 +71,168 @@ defmodule Loka.Content.DialogueLinks do
     )
   end
 
+  # fall_through.ts GATES: what a choice can refuse or charge when taken.
+  @gates ~w(accept availability check escort exchange hand_over lesson_payment patrol payment receive)
+  # fall_through.ts FREE_STEPS: the steps that take nothing from the player.
+  @free_steps ~w(narrate topic.grant fact.assign)
+
+  @doc "The `entry` marker's refusals, and a warning wherever Talk's entry is a guess or a dialogue is shut out."
+  @spec entry_checks([{String.t(), map()}]) :: [map()]
+  def entry_checks(all) do
+    {sorted, next} = graph(all)
+    open = entries(sorted, next)
+
+    live_keys = for {_, d} <- live(sorted), do: d["key"]
+
+    refused(sorted) ++
+      guessed(open, next, live_keys) ++ fall_through(open, sorted) ++ unused(sorted, open, next)
+  end
+
+  defp unused(sorted, open, next) do
+    played = walk(for({_, d} <- open, do: d["key"]), next, MapSet.new())
+
+    for {rel, d} <- sorted -- live(sorted), d["key"] not in played do
+      warning("ENTRY_UNUSED", rel, ["npc"], d)
+    end
+  end
+
+  defp graph(all) do
+    sorted = Enum.sort_by(all, &elem(&1, 1)["key"])
+    {sorted, Map.new(sorted, fn {_, d} -> {d["key"], links(d)} end)}
+  end
+
+  defp refused(sorted) do
+    marked = Enum.filter(sorted, &elem(&1, 1)["entry"])
+
+    for {rel, d} <- marked,
+        d["keyword"] || Enum.count(marked, &(elem(&1, 1)["npc"] == d["npc"])) > 1 do
+      diag("ENTRY_INVALID", at(rel, ["entry"]))
+    end
+  end
+
+  # A guess: a loop member tying another for most links, or a dialogue with no condition before another of
+  # its speaker's in key order, which that other never gets past. A name makes its own Talk control.
+  # As selection.ts `width`: every link counts for the ranking, one into a shut-out dialogue too, but
+  # only a dialogue that can open ties.
+  defp guessed(open, next, live_keys) do
+    talked = Enum.reject(open, fn {_, d} -> d["entry"] || d["keyword"] end)
+    looped = Enum.filter(talked, fn {_, d} -> loop_tie?(d["key"], next, live_keys) end)
+
+    for {rel, d} <- Enum.uniq(looped ++ tied(talked)) do
+      warning("ENTRY_GUESSED", rel, ["npc"], d)
+    end
+  end
+
+  # fall_through.ts `onward`: a default Talk whose condition fails opens the first dialogue of its speaker
+  # that a free choice leads to, in key order. More than one is a guess; the warning names that pick.
+  defp fall_through(open, sorted) do
+    by_key = Map.new(sorted, fn {_, d} -> {d["key"], d} end)
+
+    for {rel, d} <- open,
+        d["policy"],
+        !d["name"],
+        !d["keyword"],
+        first <- guess(d, by_key, []) do
+      warning("ENTRY_GUESSED", rel, ["npc"], %{"key" => first})
+    end
+  end
+
+  # Down a line of shut dialogues to the first with more than one way on: `[its pick]`, or `[]`.
+  defp guess(d, by_key, seen) do
+    case free_links(d, by_key) do
+      [first, _ | _] ->
+        [first]
+
+      [only] ->
+        if by_key[only]["policy"] && only not in seen,
+          do: guess(by_key[only], by_key, [only | seen]),
+          else: []
+
+      [] ->
+        []
+    end
+  end
+
+  defp free_links(d, by_key) do
+    for(
+      {_, c} <- Enum.sort(d["choices"]),
+      free?(c),
+      by_key[c["then"]]["npc"] == d["npc"],
+      do: c["then"]
+    )
+    |> Enum.uniq()
+  end
+
+  defp free?(c) do
+    not Enum.any?(@gates, &c[&1]) and Enum.all?(c["steps"] || [], &(&1["op"] in @free_steps))
+  end
+
+  defp loop_tie?(k, next, live_keys) do
+    k_width = elem(rank(k, next), 0)
+
+    Enum.any?(walk(Map.get(next, k, []), next, MapSet.new()), fn o ->
+      o != k and o in live_keys and k in walk(next[o], next, MapSet.new()) and
+        elem(rank(o, next), 0) == k_width
+    end)
+  end
+
+  defp tied(talked) do
+    talked
+    |> Enum.group_by(fn {_, d} -> d["npc"] end)
+    |> Enum.flat_map(fn {_, group} ->
+      group
+      |> Enum.reverse()
+      |> Enum.drop_while(fn {_, d} -> d["name"] end)
+      |> Enum.drop(1)
+      |> Enum.reverse()
+      |> Enum.reject(fn {_, d} -> d["policy"] end)
+      |> Enum.take(1)
+    end)
+  end
+
+  defp warning(code, rel, path, d) do
+    diag(code, at(rel, path), %{"target" => d["key"]}) |> Map.put("severity", "warning")
+  end
+
   defp unreachable?(d, speakers, next) do
     d["npc"] not in speakers and d["key"] in walk(next[d["key"]], next, MapSet.new())
   end
 
-  # selection.ts entries: the dialogues nothing links to, then the first by key of each loop left.
+  # selection.ts entries: the dialogues nothing links to or marked `entry`, then the head of each
+  # loop with no way in: the member leading to the most other dialogues, first by key on a tie.
+  # A shut-out dialogue never opens, so it is no way into what it links to.
   defp entries(sorted, next) do
+    live = for {_, d} <- live(sorted), do: d
+    roots = roots(live, next)
+    reached = walk(roots, next, MapSet.new())
+    rest = for d <- live, d["key"] not in reached, do: d["key"]
+    wanted = MapSet.new(roots ++ heads(rest, next))
+    for {_, d} = e <- sorted, d["key"] in wanted, do: e
+  end
+
+  defp roots(live, next) do
     named = next |> Map.values() |> List.flatten() |> MapSet.new()
-    all = Enum.map(sorted, &elem(&1, 1))
-    roots = Enum.reject(all, &(&1["key"] in named))
+    for d <- live, d["entry"] || d["key"] not in named, do: d["key"]
+  end
 
-    {entries, _} =
-      Enum.reduce(roots ++ all, {[], MapSet.new()}, fn d, {es, seen} ->
-        if d["key"] in seen, do: {es, seen}, else: {[d | es], walk([d["key"]], next, seen)}
+  # A speaker's marked dialogue shuts out their others, keyword ones aside.
+  defp live(sorted) do
+    claimed = for {_, d} <- sorted, d["entry"], into: MapSet.new(), do: d["npc"]
+    Enum.filter(sorted, fn {_, d} -> d["entry"] || d["keyword"] || d["npc"] not in claimed end)
+  end
+
+  defp heads(rest, next) do
+    from = Map.new(rest, &{&1, walk([&1], next, MapSet.new())})
+
+    Enum.filter(rest, fn k ->
+      Enum.all?(rest, fn o ->
+        o == k or k not in from[o] or (o in from[k] and rank(k, next) < rank(o, next))
       end)
+    end)
+  end
 
-    entries
+  defp rank(k, next) do
+    {-(next[k] |> Enum.filter(&(&1 != k and is_map_key(next, &1))) |> Enum.uniq() |> length()), k}
   end
 
   defp links(d) do

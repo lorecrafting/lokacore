@@ -1,3 +1,4 @@
+// size: allow 570, every reopen case here shares one SQLite setup() and its forged-row table
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -5,24 +6,18 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
   bundle as escortBundle,
-  entity,
   genesis,
   prefix,
   room,
 } from '../../../kernel/ts/test/escort_fixture.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
-import { presenter } from '../../app/book/presenter.ts';
 import { localSession, openGame } from './session.ts';
 import { openStory } from './authority.ts';
+import { bundle, homeward, id, setup } from './escort_play.test.ts';
 
-const bundle = escortBundle();
 const fresh = genesis();
-const id = (kind: string, name: string) => entity(fresh, kind, name);
 const startLine = 'The child joins you for the walk to Ferry Landing.';
 const rejoinLine = 'The child steps beside you again';
 const endLine = 'The child runs to the keeper.';
-const homeward = (a: ReturnType<typeof setup>) =>
-  a.view().journal.find((q) => q.quest.key === 'homeward')!;
 
 // Breaks: a malformed unrelated quest row (the cellar Lantern quest) crashes receipt recovery or
 // silently disappears from the journal instead of offering typed corruption recovery.
@@ -78,90 +73,6 @@ test('a malformed other quest after rescue selection or completion offers typed 
         },
       );
 });
-
-function setup(path = ':memory:', source = bundle) {
-  const a = elapsedHost(path, { wall: 10000, mono: 0 }, source);
-  const book = presenter(a.game);
-  a.game.subscribe(book.update);
-  const view = () => a.game.view().view;
-  const ok = (action_key: string, target_ids: string[] = [], input: object = {}) => {
-    const reply = a.game.invoke({ action_key, target_ids, input } as never);
-    assert.equal(reply.kind, 'saved', JSON.stringify(reply));
-    if (reply.kind === 'saved')
-      assert.equal(reply.decision.kind, 'accepted', JSON.stringify(reply));
-  };
-  const move = (...directions: string[]) =>
-    directions.forEach((direction) => ok('move', [], { direction }));
-  const choose = (choice_id: string, answer?: string) =>
-    ok('choose', [], {
-      choice_id,
-      continuation_id: view().choice!.continuation_id,
-      ...(answer && { answer }),
-    });
-  const accept = (dialogue: string, npc: string) => {
-    ok(dialogue, [id('npc', npc)]);
-    choose('accept');
-    if (view().choice) ok('close_choice');
-  };
-  // Two quests (the cellar Lantern quest and Homeward), then the child's escort offer.
-  const offer = () => {
-    accept('bram_offer', 'bram');
-    accept('keeper_offer', 'keeper');
-    move('north', 'north');
-    ok('child_escort', [id('npc', 'child')]);
-  };
-  const press = (npc: string) => {
-    const button = book.screen().buttons.find((b) => b.action_key === 'choose');
-    assert.ok(button);
-    book.press(button, id('npc', npc));
-  };
-  const row = (section: string, key: string) => {
-    const r = a.sql
-      .prepare('SELECT value FROM state_row WHERE section=? AND key=?')
-      .get(section, key);
-    return r && JSON.parse(r.value as string);
-  };
-  const rows = (section: string) =>
-    a.sql
-      .prepare('SELECT key,value FROM state_row WHERE section=?')
-      .all(section)
-      .map((r) => ({ key: r.key as string, value: JSON.parse(r.value as string) }));
-  const put = (section: string, key: string, value: unknown) =>
-    a.sql
-      .prepare('INSERT OR REPLACE INTO state_row VALUES (?,?,?)')
-      .run(section, key, JSON.stringify(value));
-  const fact = (key: string) => rows('facts').find((r) => JSON.parse(r.key).fact?.key === key);
-  const quest = () => rows('quests').find((r) => r.value.quest.key === 'homeward')!;
-  const escort = () => row('escorts', fresh.character);
-  const lines = (npc: string, text: string) =>
-    book
-      .screen()
-      .detail(id('npc', npc))
-      .filter((line) => typeof line === 'string' && line.includes(text));
-  const end = () => {
-    move('south', 'south');
-    ok('keeper_home', [id('npc', 'keeper')]);
-    choose('home');
-  };
-  return {
-    ...a,
-    book,
-    view,
-    ok,
-    move,
-    choose,
-    offer,
-    press,
-    row,
-    rows,
-    put,
-    fact,
-    quest,
-    escort,
-    lines,
-    end,
-  };
-}
 
 function replay(a: ReturnType<typeof setup>, choice_id: string) {
   const r = a.sql.prepare('SELECT * FROM receipt ORDER BY revision DESC LIMIT 1').get()!;
@@ -386,6 +297,112 @@ test('a completed escort reopens after the keeper dies or a reaction moves the c
   );
 });
 
+const mortal = {
+  hp: { minimum: 0, maximum: 1, start: 1, gain: 0 },
+  attack: { chance: 0, damage_min: 1, damage_max: 1 },
+};
+// Attack an NPC with one hit point and run rounds until it is gone from the view.
+function kill(a: ReturnType<typeof setup>, npc: string) {
+  a.ok('attack', [id('npc', npc)]);
+  const here = () => JSON.stringify(a.game.view().view).includes(id('npc', npc));
+  for (let i = 0; i < 100 && here(); i++) {
+    a.clock.wall += 5000;
+    a.clock.mono += 5000;
+    a.game.pulse();
+  }
+  assert.equal(here(), false);
+}
+// A reaction step fired when the player and child walk north into North Gate.
+const onGate = (step: (quest: object, npc: object) => object) =>
+  escortBundle((c) => {
+    const d = c.dialogues[`${prefix}:dialogue/keeper_home`];
+    (c.reactions ??= {})[`${prefix}:reaction/on_gate`] = {
+      key: 'on_gate',
+      on: { event: 'entity_entered_room', room: { ...d.npc, kind: 'room', key: 'north_gate' } },
+      steps: [step(d.quest, { ...d.npc, key: 'child' })],
+    };
+  });
+
+// Breaks: following escort left in a state the kernel refuses every Move on, or a save check that
+// refuses the lawful state for good. Each case plays, reopens, keeps moving and reopens again.
+for (const [name, source, act, status, child, walk] of [
+  [
+    'child killed',
+    escortBundle((c) => void Object.assign(c.npcs[`${prefix}:npc/child`], mortal)),
+    (a: ReturnType<typeof setup>) => kill(a, 'child'),
+    'separated',
+    'village_green',
+    ['south', 'north'],
+  ],
+  [
+    'keeper killed',
+    escortBundle((c) => void Object.assign(c.npcs[`${prefix}:npc/keeper`], mortal)),
+    (a: ReturnType<typeof setup>) => {
+      a.move('south', 'south');
+      kill(a, 'keeper');
+    },
+    'following',
+    'village_green',
+    ['north', 'north'],
+  ],
+  [
+    'npc.move on the child',
+    onGate((_, npc) => ({
+      op: 'npc.move',
+      npc,
+      room: { ...npc, kind: 'room', key: 'ferry_landing' },
+    })),
+    (a: ReturnType<typeof setup>) => a.move('north'),
+    'following',
+    'well_lane',
+    ['south', 'south'],
+  ],
+  [
+    'quest failed',
+    onGate((quest) => ({ op: 'quest.fail', quest, outcome: 'home' })),
+    (a: ReturnType<typeof setup>) => a.move('north'),
+    'separated',
+    'north_gate',
+    ['south', 'north'],
+  ],
+] as const) {
+  test(`a following escort reopens and keeps moving after: ${name}`, (t) => {
+    const dir = mkdtempSync(join(tmpdir(), 'loka-vduxr.23-'));
+    t.after(() => rmSync(dir, { recursive: true, force: true }));
+    const path = join(dir, 'save.db');
+    let a = setup(path, source);
+    a.offer();
+    a.choose('rescue');
+    act(a);
+    a.sql.close();
+    a = setup(path, source);
+    assert.equal(a.escort().status, status);
+    a.move(...walk);
+    assert.equal(a.row('containers', id('npc', 'child')), room(fresh, child));
+    a.sql.close();
+    setup(path, source).sql.close();
+  });
+}
+
+// Breaks: reopen refuses an NPC out of the room, Move faults on it for good, or Move teleports it.
+// No shipped mover parts a following authored NPC yet, so the row itself is placed.
+test('a following escort out of the room reopens, and the next Move leaves it and separates', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-vduxr.23-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'save.db');
+  let a = setup(path);
+  a.offer();
+  a.choose('rescue');
+  a.put('containers', id('npc', 'child'), room(fresh, 'ferry_landing'));
+  a.sql.close();
+  a = setup(path);
+  a.move('north');
+  assert.equal(a.escort().status, 'separated');
+  assert.equal(a.row('containers', id('npc', 'child')), room(fresh, 'ferry_landing'));
+  a.sql.close();
+  setup(path).sql.close();
+});
+
 // Breaks: escort save validation admits a forged binding, placement or terminal, or an unrelated
 // latest receipt hides a missing/swapped original escort or its evidence. The chapter cases (rescue
 // message removed from Vesper, branch changed to stays) are gone: they pinned chapter story content.
@@ -423,12 +440,7 @@ test('retained escort identity, physical state and own receipts reject corruptio
         }),
     ],
     [
-      'following NPC in another room',
-      false,
-      (a) => a.put('containers', id('npc', 'child'), room(fresh, 'ferry_landing')),
-    ],
-    [
-      'separated without committed death',
+      'separated row with no committed transition',
       false,
       (a) => a.put('escorts', fresh.character, { ...a.escort(), status: 'separated' }),
     ],
@@ -457,6 +469,40 @@ test('retained escort identity, physical state and own receipts reject corruptio
           .run(JSON.stringify(response), r.command_id);
       },
     ],
+    ...(
+      [
+        [
+          'a start whose continuation is another choice',
+          (a) => ({
+            continuation_id: a.rows('choices').find((r) => r.value.source.key === 'keeper_offer')!
+              .key,
+          }),
+        ],
+        ['a start whose choice is another', () => ({ choice_id: 'other' })],
+        ['a start whose NPC is another', () => ({ npc_id: id('npc', 'stranger') })],
+      ] as [string, (a: ReturnType<typeof setup>) => object][]
+    ).map(
+      ([name, patch]) =>
+        [
+          `row and start receipt both forged: ${name}`,
+          false,
+          (a: ReturnType<typeof setup>) => {
+            const value = { ...a.escort(), ...patch(a) };
+            const r = a.sql
+              .prepare(
+                "SELECT command_id,response FROM receipt WHERE json_extract(command,'$.payload.continuation_id')=?",
+              )
+              .get(a.escort().continuation_id)!;
+            const response = JSON.parse(r.response as string);
+            for (const op of response.delta.ops)
+              if (op.op === 'escort.transition') op.value = value;
+            a.sql
+              .prepare('UPDATE receipt SET response=? WHERE command_id=?')
+              .run(JSON.stringify(response), r.command_id);
+            a.put('escorts', fresh.character, value);
+          },
+        ] as [string, boolean, (a: ReturnType<typeof setup>) => void],
+    ),
     [
       'forged home terminal without turn-in',
       false,
@@ -468,11 +514,6 @@ test('retained escort identity, physical state and own receipts reject corruptio
         });
         a.put('escorts', fresh.character, { ...a.escort(), status: 'completed' });
       },
-    ],
-    [
-      'home terminal rewritten to another outcome',
-      true,
-      (a) => a.put('quests', a.quest().key, { ...a.quest().value, outcome: 'other' }),
     ],
   ];
   for (const [name, terminal, mutate] of cases)

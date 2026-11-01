@@ -31,7 +31,14 @@ function mount() {
   let i = 0;
   let deps: unknown[] | undefined;
   let cleanup: (() => void) | undefined;
-  const draw = (view: GameView, catchingUp: boolean, turn: number, resumes = 0, still = false) => {
+  const draw = (
+    view: GameView,
+    catchingUp: boolean,
+    turn: number,
+    resumes = 0,
+    still = false,
+    died?: string,
+  ) => {
     i = 0;
     const g = globalThis as any;
     g[Symbol.for('loka-book-test-state')] = (v: unknown) => [(slots[i++] ??= v), () => {}];
@@ -41,13 +48,14 @@ function mount() {
       cleanup?.();
       cleanup = f();
     };
-    useCues(view, catchingUp, turn, resumes, still);
+    useCues(view, catchingUp, turn, resumes, still, undefined, died);
   };
   return Object.assign(draw, { unmount: () => cleanup?.() });
 }
 function listen(t: { after: (f: () => void) => void }) {
   const heard: string[] = [];
-  t.after(onCue((c) => heard.push(c.name)));
+  // A fight found on a first view is the music's alone; that test listens for itself.
+  t.after(onCue((c) => void (c.resumed || heard.push(c.name))));
   return heard;
 }
 
@@ -61,6 +69,7 @@ test('a haptic due during a curl is dropped, its sound kept; after the curl it i
   t.after(() => (g.bookDevice = undefined));
   const draw = mount();
   draw(hit(20), false, 0);
+  g.bookDevice = [];
   draw(hit(15), false, 1);
   tick(motion.quick.duration);
   assert.deepEqual(g.bookDevice, [['play', 'blow']]);
@@ -155,7 +164,7 @@ test('unmounting drops the pending cue, unsubscribing stops the listener', (t) =
   const tick = clock(t);
   const heard = listen(t);
   const gone: string[] = [];
-  const off = onCue((c) => gone.push(c.name));
+  const off = onCue((c) => void (c.resumed || gone.push(c.name)));
   const draw = mount();
   draw(hit(9), false, 0);
   draw(hit(8), false, 0);
@@ -264,4 +273,48 @@ test('the Book publishes a walk, and is silent opening and reopening', (t) => {
   assert.equal(heard.length, more);
   again.unmount();
   b.unmount();
+});
+
+// Breaks: reopening on a save whose last receipt was a death replays the death; or a new death is missed.
+test('a death is an edge of the fact: a first view hears none, a later one hears it once', (t) => {
+  clock(t);
+  const heard = listen(t);
+  const draw = mount();
+  t.after(draw.unmount);
+  const room = place('p');
+  draw(room, false, 0, 0, false, 'old');
+  assert.deepEqual(heard, []);
+  draw(place('p'), false, 0, 0, false, 'new');
+  assert.deepEqual(heard, ['death']);
+  draw(place('p'), false, 0, 0, false, 'new');
+  assert.deepEqual(heard, ['death']);
+});
+
+// Breaks: fight music queues behind a chapter card, or a turn's hold, and the loop sticks after the close.
+test('a fight opening and closing reach the music past a turn hold', (t) => {
+  clock(t);
+  const heard = listen(t);
+  const draw = mount();
+  t.after(draw.unmount);
+  draw(place('p'), false, 0);
+  draw(place('p', { combat: {} }), false, 1);
+  assert.deepEqual(heard, ['combat_open']);
+  draw(place('p', { entities: [] }), false, 2);
+  assert.deepEqual(heard, ['combat_open', 'combat_close']);
+});
+
+// Breaks: a reopened fight is silent for good, plays its stinger as if new, or a first view with no fight
+// sends a close; a fight that ended while away leaves the loop running.
+test('a fight found on a first view resumes only its music', (t) => {
+  clock(t);
+  const heard: unknown[] = [];
+  t.after(onCue((c) => heard.push([c.name, c.resumed])));
+  const draw = mount();
+  t.after(draw.unmount);
+  draw(place('p'), false, 0);
+  assert.deepEqual(heard, []);
+  draw(place('p', { combat: {} }), true, 0);
+  assert.deepEqual(heard, [['combat_open', true]]);
+  draw(place('p'), true, 0);
+  assert.deepEqual(heard.at(-1), ['combat_close', true]);
 });

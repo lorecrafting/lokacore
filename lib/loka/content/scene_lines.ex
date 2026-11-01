@@ -219,6 +219,9 @@ defmodule Loka.Content.SceneLines do
   defp located({"once", n}, {cur, _} = at) when cur != nil,
     do: {[{["choices", cur, "once"], n}], at}
 
+  defp located({"asked", n}, {cur, _} = at) when cur != nil,
+    do: {[{["choices", cur, "asked"], n}], at}
+
   defp located({_, n}, {nil, _} = at), do: {[{["prompt"], n}], at}
   defp located({_, n}, {cur, _} = at), do: {[{["choices", cur, "narration"], n}], at}
 end

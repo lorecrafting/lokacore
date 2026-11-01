@@ -1,6 +1,8 @@
 defmodule Loka.Content.SceneMerge do
   @moduledoc "A scene entry and the same-key JSON beside it: the merge, and what the merge would silently lose."
 
+  alias Loka.Content.Source
+
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
   @type entry :: {String.t(), term(), term()}
 
@@ -28,9 +30,37 @@ defmodule Loka.Content.SceneMerge do
         {json, ^id, %{} = other} <- files,
         json != rel,
         path <- fields(scene),
-        not comes_back?(path, scene, key),
+        not replaceable?(path, scene, key),
         path in fields(other),
         do: {json, path, key}
+  end
+
+  @doc "The refusals a merge would otherwise hide: a sidecar over a scene's words, two scenes on one key, a written order."
+  @spec refused([entry()]) :: [map()]
+  def refused(files) do
+    words =
+      for {json, path, key} <- overlap(files) do
+        data = %{"why" => "scene_overlap", "key" => key, "written" => Enum.join(path, ".")}
+        Source.diag("SCHEMA_VIOLATION", Source.at(json, path), data)
+      end
+
+    keys =
+      for {rel, key} <- same_key(files) do
+        data = %{"why" => "scene_key_taken", "key" => key}
+        Source.diag("SCHEMA_VIOLATION", Source.at(rel, []), data)
+      end
+
+    words ++ keys ++ order_refused(files)
+  end
+
+  @doc "A file other than a scene writing `choice_order`, the compiler's own mark; an area bundle shows its dialogues only once split."
+  @spec order_refused([entry()]) :: [map()]
+  def order_refused(files) do
+    for {rel, {:dialogue, _, trail}, %{"choice_order" => _}} <- files,
+        not (is_binary(rel) and String.ends_with?(rel, ".scene")) do
+      data = %{"why" => "choice_order_written"}
+      Source.diag("SCHEMA_VIOLATION", Source.at(rel, trail ++ ["choice_order"]), data)
+    end
   end
 
   @doc "Dialogue keys two `.scene` entries make, as `{rel, key}` of the later one: a merge would silently join them."
@@ -46,10 +76,13 @@ defmodule Loka.Content.SceneMerge do
 
   # Lowering's own way back, the one `then` a JSON may replace: no `then:` line, and not the link
   # to the choice's nested set (dropping that would silently cut the set off).
-  defp comes_back?(["choices", c, "then"], scene, key),
+  defp replaceable?(["choices", c, "then"], scene, key),
     do: c not in scene.written_then and scene["choices"][c]["then"] != "#{key}_#{c}"
 
-  defp comes_back?(_, _, _), do: false
+  # Lowering's own marker: `"entry": false` beside a nested scene another `then` leads to frees it.
+  # `choice_order` has its own refusal (order_written/1).
+  defp replaceable?([field], _, _) when field in ["entry", "choice_order"], do: true
+  defp replaceable?(_, _, _), do: false
 
   defp fields(d) do
     Enum.flat_map(d, fn

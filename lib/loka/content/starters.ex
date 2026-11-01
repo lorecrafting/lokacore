@@ -8,7 +8,7 @@ defmodule Loka.Content.Starters do
   starter, before any write. Every starter adds the rows an existing layout.json lacks.
   """
   alias Loka.Content.Barriers
-  alias Loka.Content.Starters.{Parts, Templates}
+  alias Loka.Content.Starters.{Merge, Parts, Templates}
 
   @doc """
   Writes the starter; `{:ok, paths it changed}` or `{:error, one line for the author}`. `from` is
@@ -42,7 +42,7 @@ defmodule Loka.Content.Starters do
          {:ok, context} <- placed(context, dir, kind, name, from) do
       files = with_capabilities(make.(name, context), caps)
       own = if !from, do: "#{kind}/#{name}.json"
-      put(dir, with_layout(files, dir, context, name), own, hook)
+      put(dir, files |> kept_lines(dir, kind) |> with_layout(dir, context, name), own, hook)
     end
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
@@ -52,7 +52,7 @@ defmodule Loka.Content.Starters do
 
   defp with_capabilities(files, caps) do
     declared = capabilities(caps)
-    Map.update(files, "cartridge.json", declared, &merge(&1, declared))
+    Map.update(files, "cartridge.json", declared, &Merge.merge(&1, declared))
   end
 
   @doc "The kinds `write/4` knows, sorted (the guide's coverage table lists each)."
@@ -211,18 +211,29 @@ defmodule Loka.Content.Starters do
   defp capabilities(caps),
     do: %{"requires" => %{"capabilities" => Map.new(caps, &{&1, 1})}}
 
+  # A line kinds share (`transport.unaffordable`) stays as the author filled it: a second transport
+  # asks for no new words. `new text <key>` names its one line, so a rerun still refuses there.
+  defp kept_lines(%{"text.json" => new} = files, dir, kind) when kind != "text" do
+    case read(Path.join(dir, "text.json")) do
+      %{} = old -> %{files | "text.json" => Map.reject(new, fn {k, _} -> is_binary(old[k]) end)}
+      _ -> files
+    end
+  end
+
+  defp kept_lines(files, _, _), do: files
+
   # `own`, the file this starter names, is the author's once it exists: a rerun checks it, and never
   # adds back what the author removed.
   defp put(dir, files, own, hook) do
     touched =
       for {rel, new} <- files, path = Path.join(dir, rel), do: {rel, path, read(path), new}
 
-    case Enum.find_value(touched, fn {rel, _, old, new} -> clash(old, new, rel <> ":") end) do
+    case Enum.find_value(touched, fn {rel, _, old, new} -> Merge.clash(old, new, rel <> ":") end) do
       nil ->
         {:ok, touched |> Enum.reject(&authored?(&1, own)) |> write_all(hook)}
 
       at ->
-        {:error, refusal(at)}
+        {:error, refusal(at, own)}
     end
   end
 
@@ -230,19 +241,32 @@ defmodule Loka.Content.Starters do
 
   defp authored?({rel, path, _, _}, own), do: rel == own and File.exists?(path)
 
-  defp refusal(at) do
+  # `~` is the starter's stand-in, so words go back to it. Any other value only comes back outside
+  # `own`, which a rerun never writes: emptying it there would break the compile.
+  defp refusal(at, own) do
     said = "#{at} already has a value and a starter never replaces one; nothing was written"
+    other = if own == nil, do: "use another --from direction, or ", else: ""
 
-    if at =~ ": exits ",
-      do:
+    cond do
+      at =~ ": exits " ->
+        said <> ". That exit is taken: #{other}move it in both rooms' files and rerun"
+
+      own != nil and String.starts_with?(at, own <> ":") ->
         said <>
-          ". That exit is taken: use another --from direction, or move it in both rooms' files and rerun",
-      else: said
+          ". If it is words, set it to ~ and rerun; keep any other value and skip this rerun"
+
+      # A second population wants these too; deleting them orphans the first one's corpse items.
+      at =~ ": world death " ->
+        said <> ". A cartridge has one death setup: keep it and skip this starter"
+
+      true ->
+        said <> ". If it is words, set it to ~; delete any other value; then rerun"
+    end
   end
 
   # An unchanged file keeps its bytes, the author's formatting too.
   defp written({_, path, old, new}, hook) do
-    case merge(old, new) do
+    case Merge.merge(old, new) do
       ^old ->
         []
 
@@ -253,26 +277,6 @@ defmodule Loka.Content.Starters do
         [path]
     end
   end
-
-  # Where the starter would replace something: a scalar or shape that differs, or a list of rows
-  # that differs (a rerun must not restore a step the author deleted). Lists of names union, and
-  # layout's rows only grow (below).
-  defp clash(old, _, _) when old == %{}, do: nil
-  defp clash(same, same, _), do: nil
-
-  defp clash(old, new, "layout.json:") when is_list(old) and is_list(new), do: nil
-
-  defp clash(old, new, at) when is_list(old) and is_list(new) do
-    if Enum.all?(new, &is_binary/1), do: nil, else: at
-  end
-
-  defp clash(old, new, at) when is_map(old) and is_map(new) do
-    Enum.find_value(new, fn {k, v} ->
-      if is_map_key(old, k), do: clash(old[k], v, at <> " " <> k)
-    end)
-  end
-
-  defp clash(_, _, at), do: at
 
   defp read(path) do
     case File.read(path) do
@@ -286,15 +290,4 @@ defmodule Loka.Content.Starters do
         %{}
     end
   end
-
-  # Maps merge by key; a list of names unions (an npc's services); a list of rows (layout) replaces,
-  # the template having kept the rows already placed. clash/3 has refused any other difference.
-  defp merge(old, new) when is_map(old) and is_map(new),
-    do: Map.merge(old, new, fn _, a, b -> merge(a, b) end)
-
-  defp merge(old, new) when is_list(old) and is_list(new) do
-    if Enum.all?(new, &is_binary/1), do: Enum.uniq(old ++ new), else: new
-  end
-
-  defp merge(_, new), do: new
 end

@@ -145,6 +145,7 @@ defmodule Loka.ContentSceneVerbsTest do
           {"npc: maud\nwith: bram\nmaud: hi\n- Go\n  gives: bram\n", [{5, "gives_speaker"}]},
         with_placeholder: {"npc: maud\nwith: ~\nmaud: hi\n", [{2, "bad_with"}]},
         unknown_speaker: {"npc: maud\nbram: hi\n", [{2, "wrong_speaker"}]},
+        entry_header: {"npc: maud\nentry: true\nmaud: hi\n", [{2, "scene_entry"}]},
         refused_gives:
           {"npc: maud\nmaud: hi\n- Go\n- Go\n  gives: maud\n",
            [{4, "repeated_choice"}, {5, "gives_speaker"}]},
@@ -377,7 +378,7 @@ defmodule Loka.ContentSceneVerbsTest do
       "npc: maud\nmaud: ~\n- Stay\n  maud: ~\n"
     )
 
-    assert {:ok, _, []} =
+    assert {:ok, _, warned} =
              Loka.ContentSource.compile(dir, [
                {"facts.json", &update_in(&1, ["facts"], fn f -> Map.merge(f, facts) end)},
                {"npcs/maud.json", json.("npcs/bram.json")},
@@ -385,6 +386,24 @@ defmodule Loka.ContentSceneVerbsTest do
                {"items/bowl.json",
                 Map.put(json.("items/lantern.json"), "location", %{"in" => "npc", "npc" => "maud"})}
              ])
+
+    # All speak for maud, and the nested scene's marker shuts the others out; nothing else warns.
+    assert warned != [] and Enum.all?(warned, &(&1["code"] == "ENTRY_UNUSED"))
+  end
+
+  # Break: a scene's sidecar drops `entry`, so the guide's way of marking a scene does nothing.
+  test "a scene takes the entry marker from the JSON beside it" do
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+
+    File.write!(
+      Path.join(dir, "scenes/marked.scene"),
+      "npc: bram\n\nbram: one\n- a\n  bram: two\n"
+    )
+
+    File.mkdir_p!(Path.join(dir, "dialogues"))
+    File.write!(Path.join(dir, "dialogues/marked.json"), ~s({"entry": true}))
+    assert {:ok, artifact, _} = Loka.ContentSource.compile(dir, [])
+    assert artifact =~ ~s("entry":true)
   end
 
   # Break: a paragraph splits or merges wrongly, `---` lowers to anything but one await_ack before

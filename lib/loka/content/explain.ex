@@ -1,3 +1,4 @@
+# size: allow 320, one row per refusal a writer can meet; the table reads together
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -11,6 +12,9 @@ defmodule Loka.Content.Explain do
   # One row per line: key | what is wrong | what to do. A key is a code, a schema `error`, a scene
   # line's `why` or a named case. {name} is a `data` key, or `field` (the path's last step).
   @words """
+         asked_key_taken | `asked` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice.
+         asked_key_long | `asked` here would make the fact `{key}`, longer than 64 characters. | Shorten the choice's key or the dialogue's.
+         asked_on_riddle | `asked` here is on a riddle's typed answer, which the Book draws as letter tiles with no label to dim. | Remove `asked` from this choice.
          INVALID_JSON | This file is not valid JSON. | Close the bracket or quote at this point, or remove the stray comma.
          DUPLICATE_KEY | `{field}` appears twice in one object. | Keep one of them.
          UNKNOWN_FIELD | `{field}` is not a field here. | Remove it or fix its name.
@@ -50,7 +54,10 @@ defmodule Loka.Content.Explain do
          INVALID_TIME_POLICY | This needs a time policy the cartridge does not have, or does not fit it. | Fix time_policy in cartridge.json, or remove this.
          VISITS_UNRECORDED | A visits check can never pass, because nothing records visits. | Add `knowledge` under requires.capabilities in cartridge.json.
          SPEAKER_ELSEWHERE | This `then` leads to a speaker in another room, so the talk ends as it reaches them. | Move the speaker, or end the talk here.
-         LOOP_SPEAKER | Talk opens this `then` loop at its first key, so this speaker is only reached through the loop. | Give the speaker a dialogue of their own if the player should start here.
+         LOOP_SPEAKER | Talk opens this `then` loop at its member with the most links, so this speaker is only reached through the loop. | Give the speaker a dialogue of their own if the player should start here.
+         ENTRY_INVALID | A speaker takes one `entry` dialogue, and never a keyword one; a scene with nested choices is marked `entry` by itself. | Keep `entry: true` on one dialogue Talk can open; put `"entry": false` in the JSON beside a nested scene another `then` leads to.
+         ENTRY_GUESSED | Talk opens `{target}` here only by inference: it ties another member of its loop for most links, it comes first by key with no condition, or a dialogue whose condition can fail picks it first of several it leads to. | Mark the dialogue Talk should open with `entry: true`.
+         ENTRY_UNUSED | `{target}` never opens: its speaker has an `entry` dialogue and no dialogue that opens leads here. | Link to it from one that opens, or remove it.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
          SITE_EXIT_CONFLICT | This site names direction `{field}`, where the room has no exit. | Name a direction the room has an exit in.
          invalid_type | `{field}` must be {expected}{fields_named}.
@@ -61,6 +68,7 @@ defmodule Loka.Content.Explain do
          gives_speaker | Line `{text}`: a scene cannot give an item named like its speaker. | Rename the item, or write this as `dialogues/<key>.json`.
          repeated_choice | Line `{text}` repeats a choice or has no words to key it by. | Reword the choice.
          gives_outside_choice | Line `{text}`: `gives:` belongs under a choice. | Move it under a `- ` line.
+         scene_entry | Line `{text}`: a scene header takes no `entry`. | Put `{"entry": true}` in `dialogues/<key>.json` beside the scene.
          misplaced_header | Line `{text}`: `npc:` comes first, then `when:` and `with:`, before any choice. | Move it to the top of the file.
          no_npc | Line `{text}` comes before the speaker is named. | Start the file with `npc: <key>`.
          not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:`, `quest:`, `needs:`, `once` or `then:` (docs/guides/writing-the-game.md).
@@ -71,6 +79,8 @@ defmodule Loka.Content.Explain do
          needs_outside_choice | Line `{text}`: `needs:` belongs under a choice. | Move it under a `- ` line, or use `when:` for the whole scene.
          unreachable | Line `{text}` may never be true here: the `when:` or a choice above it needs the opposite and this file never sets that fact, and the compiler cannot see another file or a reaction changing it. | Nothing to do if something else changes that fact; otherwise remove the line or move this choice out from under that one.
          bad_once | Line `{text}` is not `once`. | Write the one word `once` under the choice.
+         bad_asked | Line `{text}` is not `asked`. | Write the one word `asked` under the choice.
+         choice_order_written | `choice_order` is the compiler's mark of a scene's written order, not a field to write. | Remove it: a scene's choices show as written, a JSON dialogue's by key.
          once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
          once_key_taken | `once` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice's words.
          once_key_long | `once` here would make the fact `{key}`, longer than 64 characters. | Shorten the choice's words or the scene's key.
@@ -96,6 +106,12 @@ defmodule Loka.Content.Explain do
          unattackable_engage | `{rel}` is `unattackable` and has a `disposition.engage` line, which would never play. | Remove `disposition.engage`, or remove `unattackable`.
          unattackable_foe | `{rel}` is `unattackable`, so no one can fight it, and a population's members and a death credit's NPC are there to be fought. | Remove `unattackable`, or name another NPC.
          template_schedule | `npcs/{key}` is a spawn template, so nothing it would schedule exists to walk. | Remove `daily_schedule`, or remove `spawn_template`.
+         wait_outside | `wait` only works in a reaction's `steps`. | Move these steps into a reaction, or remove `wait`.
+         wait_seconds | A `wait` takes whole `seconds` of at least 1 and nothing else, and a rule's `after` and waits add up to at most 2147483647. | Fix `seconds`.
+         wait_empty | Nothing runs after this `wait`. | Put a step after it, or remove it.
+         wait_event | This step reads the event that started the rule, and that event is gone after a `wait`. | Move the step above the first `wait`.
+         wait_inside_action | This rule can start inside a timed action, and the game cannot tell how long that action takes, so two or more waits could land in one second, in any order. | Start the rule from `action_completed` and name the `action`. That event never fires when the action's check fails: for a failure, use `check_failed` (its parts run right after the action, order not sure) or a single `wait`.
+         wait_subject | A rule with a `wait` reads `when` again when each stretch runs, and the event's `subject` is gone by then. | Read the actor instead, or split the rule by hand.
          duration_status | An action with a duration cannot apply a status. | Remove `duration`, or remove `status.apply`.
          layout_same_spot | Rooms {rooms} share the spot x {x}, y {y}, z {z}. | Give each its own x, y, z in layout.json.
          layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.
@@ -122,17 +138,48 @@ defmodule Loka.Content.Explain do
 
   def lines(diags, dir) do
     index = SourceLines.index(dir)
-    # A refused scene line leaves its part unset; "missing" would only repeat that line's error.
-    refused = for %{"path" => path, "data" => %{"why" => _}} <- diags, do: path
 
     diags
-    |> Enum.reject(
-      &(&1["data"]["error"] == "missing_property" and String.starts_with?(&1["path"], refused))
-    )
+    |> without_follow_ons()
     # Errors first: readers (the author panel) take the first line for the build's state.
     |> Enum.sort_by(&(&1["severity"] != "error"))
     |> Enum.map(&String.replace_invalid("#{&1["severity"]}: #{place(&1, index)} #{words(&1)}"))
     |> Enum.uniq()
+  end
+
+  defp without_follow_ons(diags) do
+    # A refused scene line leaves its part unset; "missing" would only repeat that line's error.
+    refused = for %{"path" => path, "data" => %{"why" => _}} <- diags, do: path
+    # A bad file name is one rename: its fields and text keys fail the same pattern.
+    named = for %{"path" => path} = d <- diags, file_name?(d), do: path
+
+    diags
+    |> Enum.reject(
+      &(&1["data"]["error"] == "pattern_mismatch" and renamed?(&1["path"], named, diags))
+    )
+    |> Enum.reject(
+      &(&1["data"]["error"] == "missing_property" and String.starts_with?(&1["path"], refused))
+    )
+  end
+
+  # Only a file's name reaches a pattern at the root: a file's content is never a bare string.
+  defp file_name?(%{"data" => %{"error" => "pattern_mismatch"}, "path" => path}),
+    do: path =~ ~r/^"[^"]*"$/
+
+  defp file_name?(_), do: false
+
+  defp renamed?(path, named, diags) do
+    Enum.any?(named, fn root ->
+      key = root |> String.trim("\"") |> Path.rootname() |> Path.basename()
+      field = String.replace_prefix(path, root <> ".", "")
+
+      # A field holds a text key built from the name when that key fails too; a top-level one always
+      # does (room_line's key ends .room). A deeper field with no such key is the author's own fault.
+      (field != path and
+         (not String.contains?(field, ".") or
+            Enum.any?(diags, &String.ends_with?(&1["path"], "." <> key <> "." <> field <> "\"]")))) or
+        (String.starts_with?(path, "text[") and String.contains?(path, "." <> key <> "."))
+    end)
   end
 
   defp words(%{"code" => code, "data" => data} = d) do
@@ -186,9 +233,8 @@ defmodule Loka.Content.Explain do
   defp entry("UNRESOLVED_REFERENCE", _),
     do: @words["unknown_ref"]
 
-  # Only a file's name reaches a pattern at the root: a file's content is never a bare string.
-  defp entry("SCHEMA_VIOLATION", %{"data" => %{"error" => error}, "path" => path}) do
-    if error == "pattern_mismatch" and path =~ ~r/^"[^"]*"$/ do
+  defp entry("SCHEMA_VIOLATION", %{"data" => %{"error" => error}} = d) do
+    if file_name?(d) do
       @words["file_name"]
     else
       {what, fix} = @words["SCHEMA_VIOLATION"]

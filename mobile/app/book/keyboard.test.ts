@@ -1,4 +1,4 @@
-// size: allow 575, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
+// size: allow 580, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
 import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -206,7 +206,8 @@ test('Book captures movement keys only on an active World page', (t) => {
       startOver: () => {},
       shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
     });
-    const bottom = book.props.children.props.children.props.children[0].props.children[1]; // after the page
+    const bottom =
+      book.props.children.props.children.props.children[0].props.children[1].props.children; // after the page, in its measured View
     const footer = bottom
       .type(bottom.props) // null: a detail page draws no status line
       ?.props.children.find((child: any) => child?.type === Footer);
@@ -269,7 +270,8 @@ test('the chapter title page leaves only Continue', () => {
     startOver: () => {},
     shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
   });
-  const bottom = book.props.children.props.children.props.children[0].props.children[1]; // after the page
+  const bottom =
+    book.props.children.props.children.props.children[0].props.children[1].props.children; // after the page, in its measured View
   const [navigation, status] = bottom.type(bottom.props).props.children;
   assert.equal(navigation, false);
   assert.equal(status.props.locked, true);

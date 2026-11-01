@@ -32290,6 +32290,65 @@
     ]
   },
   {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_go_to_room", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f" }
+    },
+    "errors": [{ "path": "/payload/room", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": {
+        "type": "dev_set_fact",
+        "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+        "fact": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "fact", "key": "wanted" },
+        "value": null
+      }
+    },
+    "errors": [{ "path": "/payload/value", "code": "invalid_type" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_go_to_room", "room": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "room", "key": "yard" } }
+    },
+    "errors": [{ "path": "/payload/actor_id", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_fact", "fact": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "fact", "key": "wanted" }, "value": true }
+    },
+    "errors": [{ "path": "/payload/actor_id", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_fact", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "value": true }
+    },
+    "errors": [{ "path": "/payload/fact", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_fact", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "fact": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "fact", "key": "wanted" } }
+    },
+    "errors": [{ "path": "/payload/value", "code": "missing_property" }]
+  },
+  {
     "name": "fact_at_least_missing",
     "contract": "Policy",
     "value": {
@@ -32466,6 +32525,35 @@
     "errors": [
       {
         "path": "/at_least",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "ChoiceOption",
+    "value": {
+      "available": true,
+      "choice_id": "ask",
+      "label": "choice.ask",
+      "asked": false
+    },
+    "errors": [
+      {
+        "path": "/asked",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.ask",
+      "narration": "narration.guard.ask",
+      "asked_when": true
+    },
+    "errors": [
+      {
+        "path": "/asked_when",
         "code": "invalid_type"
       }
     ]

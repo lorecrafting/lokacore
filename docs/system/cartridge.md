@@ -273,11 +273,12 @@ field of the op; a list names the only fields run besides `op`.
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
 `lib/loka/content/areas.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
 `lib/loka/content/behaviours.ex`, `lib/loka/content/params.ex`,
-`lib/loka/content/zones.ex`),
+`lib/loka/content/zones.ex`, `lib/loka/content/waits.ex`),
 so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
 area bundles, refuse repeated definitions, flatten `extends`, lower inline prose, expand
-behaviours, expand zone rules, refuse repeated definitions again. The artifact
-never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour or a zone;
+behaviours, expand zone rules, refuse repeated definitions again, split waits, refuse repeated
+definitions again. The artifact
+never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour, a zone or a wait;
 the loader is unchanged.
 
 **Actions with outcomes.** Every player action is `actions/<key>.json`. A file with `command`
@@ -404,6 +405,15 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
 
 [speech_sampler](../../cartridges/speech_sampler/areas/village.json) writes 21 of its 23 lines
 inline; its artifact equals the hand-keyed one byte for byte.
+
+**Waits.** One step list for a reaction that plays out over time, lowered to [FD1](mechanics.md#delayed-reactions-toolbox-row-fd1) rules.
+- A reaction's `steps` may carry `{"op": "wait", "seconds": N}`, N a whole number of logical seconds, at least 1.
+- The list is split at its waits. The first stretch keeps the rule's key; each later stretch is a sibling rule `<rule>_wait_<n>` (n from 1), with the same `on` and `when` and an `after` of the rule's own `after` plus every wait before it. A leading wait leaves no stretch before it, so the rule itself takes the `after`: `wait 600` then steps compiles to the same bytes as `after: 600` with those steps.
+- All stretches are scheduled from the same event, not chained: [FD1](mechanics.md#delayed-reactions-toolbox-row-fd1) refuses `event.emit` on a delayed rule. A list that narrates in any stretch counts as narrating in each for the silent-write lint.
+- Refused in the catalog's words at the authored step (SCHEMA_VIOLATION invalid_value): a `wait` outside a reaction's `steps` (any other definition, such as an action, a dialogue choice or a service; a `.scene` file has no way to write one); `seconds` not a whole number of at least 1, an extra field, or a running total above the `after` maximum; a `wait` with no step after it, or followed by another `wait`; a step after a wait that reads the event, the FD1 event-bound list (`wait_event`); a `when` with `subject: "subject"` (`wait_subject`).
+- **Death, leaving, saving: FD1 unchanged.** Each stretch is its own reaction job for the delivery's actor. A save holds the pending jobs and a cold reopen fires each once. Leaving the room cancels nothing, since a job is bound to its actor, not a room. Nothing about a death cancels a job, and no test pins a job firing after the actor's death. The only cancellation is `when`, read at delivery and again at fire, so an author who wants a list to stop writes that into `when`.
+- **Timed actions.** An action's events carry its start, and FD1 lands a job due inside the advance 1 s after it, in job id order (minted per command). So a list on `action_completed` naming a scripted action with a `duration` adds that duration to every stretch that has an `after`: waits count from the action's end and keep their order and spacing. The same list on `action_completed` with no `action`, while any timed scripted action exists, or on a custom event a timed action's outcome emits, is refused (`wait_inside_action`) when it has two or more delayed stretches: the duration is not known there. One delayed stretch cannot reorder, so it compiles. `action_completed` does not fire on a failed check (`scripted_action/rule.ts`), so a failure path uses `check_failed`, an event of the kind below, or one wait on the failure's own event.
+- **Known limits.** `when` is read for each stretch, so a list whose earlier step makes its own `when` false drops the later stretches; the compiler does not look for this, and a writer may use it to cancel. A list on any other event inside a long command (a check or fact change inside a timed action, a chain of events from one, a `wait` command) is not known at compile: stretches due inside the advance all land 1 s after it, and their order can differ per command. A fact step on a per-subject fact with no `npc` or `item` after a wait writes nothing, since the job has no event subject. A fault another stage finds in a later stretch (an unknown text key) names the sibling's renumbered step, under the authored file (`ponytail:` in `lib/loka/content/waits.ex`).
 
 **Zones.** One reaction for many rooms.
 - A room's source may carry `"zones": ["<Key>", ...]`; the compiler strips it from every room.
@@ -882,8 +892,9 @@ build. The author tools below are reachable only in that bundle (a production ex
   words to every source `file:line`, and each definition of the compiled artifact whose refs name that
   key; each Book line opens its source `file:line` in the owner's editor (`POST /__author/open`,
   `LOKA_EDITOR`, default `code --goto`); the game-time control, which delivers the time at once and
-  records it only when delivered; the checkpoint list; the still-to-write list. An input the session held
+  records it only when delivered; the checkpoint list; the still-to-write list; go to a room and set a fact by key (below). An input the session held
   (`pending`, `catching_up`) is recorded when it settles as accepted.
+- **Go to room, set fact** ([owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md), dev@1): the panel sends them as ordinary invocations `dev_go_to_room` and `dev_set_fact` the session decides, saves as receipts and records as steps, so a reopen and `bin/loka check` re-decide them under the fixed seed and clock and a checkpoint may hold them. Only a host with `dev` set (the preview, `bin/loka check`) reaches `stepDev`; any other host answers `unsupported_capability`, `step` answers `permission_denied`, and no cartridge action can name them. Go to room moves the body alone and is refused `invalid_state` when that would leave a world invariant wrong: already there, engaged, not standing, in water, with an escort, mount or group that would come along, on a patrol or expedition, in a modal scene or at an open choice. It runs no entry sight or arrival line. Set fact is refused `invalid_state` for a per-subject fact, a value of the wrong type or range, the value it already has, the position and scene facts, and a fact another mechanic owns. The panel states each refusal in one plain sentence.
 - **Still to write.** A text value with a line that trims to `~` is a placeholder, in JSON or in
   a scene file. The panel and
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
@@ -896,8 +907,9 @@ build. The author tools below are reachable only in that bundle (a production ex
   lowered by [Source shortcuts](#source-shortcuts) into today's dialogue or scene JSON and `text.json`
   keys before any other pass; what it cannot say stays in a JSON file of the same key. Errors name the
   scene file and line, with `data.why` for a bad line (`npc` beside it once known); the other lines
-  of the file still lower, so a fault behind a bad line reports in the same compile. `needs:` (`<fact>` or `not <fact>`), `once` and `then:` (a key or `end`) lower on a choice; a
+  of the file still lower, so a fault behind a bad line reports in the same compile. `needs:` (`<fact>` or `not <fact>`), `once`, `asked` and `then:` (a key or `end`) lower on a choice; a
   deeper `- ` under a reply lowers to the dialogue `<key>_<choice>`, whose `then` the parent takes.
+  The file's root takes `entry: true`, since its sets link back to it and inference would open the widest; a JSON beside it may set `false`.
   `once` lowers in the compile pipeline for every dialogue: the engine fact `<key>_<choice>_done`,
   a `fact.assign` step, and a policy `not` of it (under `all` beside an authored policy). A JSON of
   the same key (a nested set's included) is refused `scene_overlap` for any field the scene writes. The

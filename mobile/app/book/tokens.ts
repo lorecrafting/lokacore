@@ -127,6 +127,8 @@ export const opacity = {
   press: 0.3, // a lifted card: `line` blended into `card` (rises size.rule)
   wash: 0.18, // the blow wash at its peak, the exemption: BOOK-UI-COMPONENTS.md#design-tokens
   washStill: 0.09, // the same wash under reduced motion
+  faint: 0.06, // a held under-ink layer: low-health vignette, dream paper, the fatal wash's hold; 4.5:1 holds -- mutate-skip: uncalibrated design value
+  glow: 0.08, // the lamp at the page's hip, at its peak; 4.5:1 holds -- mutate-skip: uncalibrated design value
 };
 
 // Book motion. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion. `duration` and
@@ -150,6 +152,10 @@ export const motion = {
   }, // a status icon arriving, scaling up from `from`; the item pop rising `rise`, then held and out -- mutate-skip: uncalibrated design value
   flash: { duration: 120, easing: 'inOutQuad', out: 380, gap: 1000, swell: 1.015 }, // the blow wash; swell: the page's scale at its peak; gap: the Flash limit, a later blow keeps all but the wash -- mutate-skip: uncalibrated design value
   settle: { duration: 400, easing: 'inOutQuad', hold: 600 }, // a resolved running head retiring; hold: gilt's warning ink before it settles -- mutate-skip: uncalibrated design value
+  breathe: { duration: 2400, easing: 'inOutQuad' }, // one way of the vignette and the star groups -- mutate-skip: uncalibrated design value
+  stagger: { gap: 40, most: 8 }, // choice answers lifting in, with motion.press -- mutate-skip: uncalibrated design value
+  riffle: { sweeps: 5, duration: 120, easing: 'linear' }, // one travel's sweeps over one snapshot -- mutate-skip: uncalibrated design value
+  first: { hold: 1200 }, // gilt's hold on a first of a playthrough (ordinary: motion.settle.hold) -- mutate-skip: uncalibrated design value
   card: {
     duration: 600,
     easing: 'inOutQuad',
@@ -176,6 +182,12 @@ export const sound = {
   skillUp: { tier: 'whisper', variants: 1, gap: 30000 }, // skill improves: tone high, at most once per gap (ms) -- mutate-skip: uncalibrated design value
   questGained: { tier: 'note', variants: 1 }, // quest gained: tone low -- mutate-skip: uncalibrated design value
   chapter: { tier: 'chapter', variants: 1, haptic: 'medium' }, // the theme cut, on the music bus -- mutate-skip: uncalibrated design value
+  impact: { tier: 'note', variants: 3 }, // a blow dealt, under the music -- mutate-skip: uncalibrated design value
+  fightIn: { tier: 'chapter', variants: 1 }, // a fight's stinger, into the loop -- mutate-skip: uncalibrated design value
+  fightLoop: { tier: 'chapter', variants: 1, gap: 60000 }, // a fight within gap (ms) of the last skips the stinger -- mutate-skip: uncalibrated design value
+  riddleRight: { tier: 'note', variants: 1, haptic: 'light' }, // the note-low sample; no new file -- mutate-skip: uncalibrated design value
+  riffle: { tier: 'note', variants: 1, haptic: 'light' }, // one travel's turn -- mutate-skip: uncalibrated design value
+  fightWon: { tier: 'chapter', variants: 1, haptic: 'light' }, // a foe falling: the fanfare -- mutate-skip: uncalibrated design value
 };
 
 // Loudness targets (LUFS, uncalibrated until recorded samples are heard), voices per bus, ambience
@@ -184,6 +196,7 @@ export const mix = {
   tier: { whisper: -24, note: -18, beat: -14, chapter: -12 },
   bus: { ambience: 2, sfx: 4, ui: 2, music: 1 }, // mutate-skip: uncalibrated design value
   duck: { db: -6, duration: 300, out: 1200 },
+  dip: { db: -3 }, // music under a blow, on duck's times -- mutate-skip: uncalibrated design value
   spread: 0.04, // no reader yet: pitch spread moves to loka-gj82.8
   coalesce: 300, // small cues of one key inside this many ms are one
 };

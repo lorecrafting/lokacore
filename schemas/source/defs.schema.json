@@ -72,6 +72,7 @@
       "properties": {
         "consume": {
           "additionalProperties": false,
+          "description": "What the actor gives up on every accepted perform, failure included.",
           "properties": {
             "items": {
               "description": "The items that can be consumed.",
@@ -90,7 +91,10 @@
               "$ref": "#/$defs/TextKey",
               "description": "The refusal text shown when the actor holds too few."
             },
-            "to": { "$ref": "#/$defs/ItemLocation" }
+            "to": {
+              "$ref": "#/$defs/ItemLocation",
+              "description": "Where the consumed items go: the holder they are moved to."
+            }
           },
           "required": [
             "items",
@@ -101,9 +105,14 @@
         },
         "yield": {
           "additionalProperties": false,
+          "description": "What the actor receives unless the outcome is failure.",
           "properties": {
-            "from": { "$ref": "#/$defs/ItemLocation" },
+            "from": {
+              "$ref": "#/$defs/ItemLocation",
+              "description": "The holder the yielded item is taken from."
+            },
             "items": {
+              "description": "The items that can be yielded; one of them, directly in the holder, moves to the actor's body.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
@@ -181,14 +190,30 @@
       "additionalProperties": false,
       "description": "One authored character choice and its bounded initial effects.",
       "properties": {
-        "attribute": { "$ref": "#/$defs/DefinitionRef" },
-        "dark_sight": { "const": true },
-        "description": { "$ref": "#/$defs/TextKey" },
+        "attribute": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The attribute this choice raises at birth, by modifier."
+        },
+        "dark_sight": {
+          "const": true,
+          "description": "When true, the character sees in the dark."
+        },
+        "description": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the choice's description."
+        },
         "faction": {
           "additionalProperties": false,
+          "description": "A fact set when the choice is made.",
           "properties": {
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
-            "value": { "type": "integer" }
+            "fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The fact; it must be player-scoped."
+            },
+            "value": {
+              "description": "The value the fact is set to.",
+              "type": "integer"
+            }
           },
           "required": [
             "fact",
@@ -197,11 +222,18 @@
           "type": "object"
         },
         "modifier": {
+          "description": "Added to the attribute's starting value; at least 1.",
           "minimum": 1,
           "type": "integer"
         },
-        "name": { "$ref": "#/$defs/TextKey" },
-        "skill": { "$ref": "#/$defs/DefinitionRef" }
+        "name": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the choice's label."
+        },
+        "skill": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "A skill granted at birth, without learning; it may not have a prerequisite."
+        }
       },
       "required": [
         "name",
@@ -231,11 +263,13 @@
           "description": "Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
           "properties": {
             "chance": {
+              "description": "Percent of all attacks, sharing the accuracy draw: a hit whose draw is below this is critical, so a chance above the accuracy makes every hit critical.",
               "maximum": 100,
               "minimum": 1,
               "type": "integer"
             },
             "multiplier": {
+              "description": "Damage of a critical hit is multiplied by this (2 to 10).",
               "maximum": 10,
               "minimum": 2,
               "type": "integer"
@@ -257,11 +291,18 @@
           "minimum": 1,
           "type": "integer"
         },
-        "kind": { "$ref": "#/$defs/DamageKind" },
+        "kind": {
+          "$ref": "#/$defs/DamageKind",
+          "description": "The damage kind (cold, fire, physical or poison); the target's resistance to it reduces the damage."
+        },
         "on_positive_hit": {
           "additionalProperties": false,
+          "description": "What a hit that takes off HP also does.",
           "properties": {
-            "effect": { "$ref": "#/$defs/DefinitionRef" }
+            "effect": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The bleed applied to the player; used only when the attacker is spawned as a population hunter."
+            }
           },
           "required": [
             "effect"
@@ -305,6 +346,7 @@
       "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; the compiler checks order, cycle bounds and schedule/window hours (lib/loka/content/calendar.ex). Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
       "properties": {
         "hours_per_day": {
+          "description": "Hours in one day.",
           "minimum": 1,
           "type": "integer"
         },
@@ -316,15 +358,18 @@
           "type": "array"
         },
         "start": {
+          "description": "The logical time a new world begins at.",
           "minimum": 0,
           "type": "integer"
         },
         "subdivisions_per_hour": {
+          "description": "Parts the status line splits an hour into; must divide units_per_hour.",
           "minimum": 1,
           "type": "integer"
         },
         "tide": { "$ref": "#/$defs/CalendarCycle" },
         "units_per_hour": {
+          "description": "Logical time units in one hour; the three unit fields are given together.",
           "minimum": 1,
           "type": "integer"
         },
@@ -345,10 +390,12 @@
       "description": "An inclusive phase start within one authored solar day or lunar period.",
       "properties": {
         "at": {
+          "description": "Logical units into the solar day (or the cycle) at which this phase starts; the first cut of a cycle is 0.",
           "minimum": 0,
           "type": "integer"
         },
         "phase": {
+          "description": "The phase's name, lowercase letters, digits and underscores.",
           "pattern": "^[a-z][a-z0-9_]*$",
           "type": "string"
         }
@@ -364,10 +411,12 @@
       "description": "A repeating cycle of ordered cuts in logical time units (lunar; season and tide, toolbox row 31): the phase at time t is the last cut at or before ((t - origin) mod period); the first cut starts at 0.",
       "properties": {
         "origin": {
+          "description": "The time at which the cycle is at its start (position 0).",
           "minimum": 0,
           "type": "integer"
         },
         "period": {
+          "description": "Length of the cycle in logical units.",
           "minimum": 1,
           "type": "integer"
         },
@@ -475,6 +524,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Passes when the actor's value of the attribute is at least difficulty; draws no random number.",
           "properties": {
             "attribute": {
               "$ref": "#/$defs/DefinitionRef",
@@ -523,7 +573,10 @@
           },
           "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform. Dialogue choice: A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
           "properties": {
-            "attribute": { "$ref": "#/$defs/DefinitionRef" },
+            "attribute": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The attribute compared; give this or skill, not both."
+            },
             "failure": {
               "$ref": "#/$defs/TextKey",
               "description": "The failure branch; a dialogue choice needs it, a scripted action refuses it."
@@ -533,12 +586,18 @@
               "description": "This check's key, unique across scripted actions and dialogue choices."
             },
             "kind": { "const": "opposed" },
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "With attribute, compares against this NPC's value of the attribute instead of a rating."
+            },
             "rating": {
               "description": "The target detail's rating; a scripted action refuses it.",
               "type": "integer"
             },
-            "skill": { "$ref": "#/$defs/DefinitionRef" }
+            "skill": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The skill whose level is compared; give this or attribute, not both."
+            }
           },
           "required": [
             "key",
@@ -550,9 +609,15 @@
           "additionalProperties": false,
           "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
           "properties": {
-            "key": { "$ref": "#/$defs/Key" },
+            "key": {
+              "$ref": "#/$defs/Key",
+              "description": "This check's key, unique across scripted actions and dialogue choices."
+            },
             "kind": { "const": "track" },
-            "plan": { "$ref": "#/$defs/Key" }
+            "plan": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the population plan whose trail is looked for; passes when that trail is fresh in the actor's room."
+            }
           },
           "required": [
             "key",
@@ -581,6 +646,7 @@
         },
         "dodge": {
           "additionalProperties": false,
+          "description": "Percent chance to dodge an enemy attack that would otherwise hit; absent means no dodge.",
           "properties": {
             "chance": {
               "description": "Percent chance of dodging.",
@@ -611,9 +677,16 @@
         },
         "narration": {
           "additionalProperties": false,
+          "description": "Text keys told in combat rounds.",
           "properties": {
-            "ally_hit": { "$ref": "#/$defs/TextKey" },
-            "ally_miss": { "$ref": "#/$defs/TextKey" },
+            "ally_hit": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when an ally's strike hits."
+            },
+            "ally_miss": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when an ally's strike misses."
+            },
             "block": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when a shield blocks."
@@ -626,14 +699,26 @@
               "$ref": "#/$defs/TextKey",
               "description": "Told when an NPC falls in a combat round."
             },
-            "npc_hit": { "$ref": "#/$defs/TextKey" },
-            "npc_miss": { "$ref": "#/$defs/TextKey" },
+            "npc_hit": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when an NPC's attack hits the player."
+            },
+            "npc_miss": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when an NPC's attack misses the player."
+            },
             "player_died": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when the player falls in a combat round; also the default fall line for tick deaths."
             },
-            "player_hit": { "$ref": "#/$defs/TextKey" },
-            "player_miss": { "$ref": "#/$defs/TextKey" },
+            "player_hit": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when the player's attack hits."
+            },
+            "player_miss": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Told when the player's attack misses."
+            },
             "shot_hit": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when a ranged first strike hits. Required when any item declares weapon.ranged."
@@ -677,17 +762,23 @@
       "additionalProperties": false,
       "description": "requires (05 §3): a kernel_api range, exact rule_ir and content_schema versions (published cartridges pin them exactly), exact capability versions and required client features. protocol_version is Realm-only and not here (05 §3 'Version vocabulary').",
       "properties": {
-        "capabilities": { "$ref": "#/$defs/CapabilityVersions" },
+        "capabilities": {
+          "$ref": "#/$defs/CapabilityVersions",
+          "description": "Each capability the cartridge uses, with its version; using a feature whose capability is not listed is refused."
+        },
         "client_features": {
+          "description": "Features the app must offer; the cartridge is refused where one is missing.",
           "items": { "$ref": "#/$defs/ClientFeature" },
           "type": "array"
         },
         "content_schema": {
+          "description": "Content schema version; must equal the one the engine supports (currently 1).",
           "minimum": 1,
           "type": "integer"
         },
         "kernel_api": { "$ref": "#/$defs/KernelApiRange" },
         "rule_ir": {
+          "description": "Rule format version; must equal the one the engine supports (currently 1).",
           "minimum": 1,
           "type": "integer"
         }
@@ -923,6 +1014,7 @@
           "properties": {
             "experience": {
               "additionalProperties": false,
+              "description": "Experience lost on death; needs world.levelling.",
               "properties": {
                 "narration": {
                   "$ref": "#/$defs/TextKey",
@@ -957,13 +1049,16 @@
         },
         "restore": {
           "additionalProperties": false,
+          "description": "The values the dead body's pools are set to.",
           "properties": {
             "hp": {
+              "description": "HP after death; capped at the body's HP maximum.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
             "mv": {
+              "description": "Movement after death; capped at the body's movement maximum.",
               "maximum": 2147483647,
               "minimum": 0,
               "type": "integer"
@@ -1031,17 +1126,28 @@
       "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
       "properties": {
         "divisor": {
+          "description": "The sum of the terms is divided by this, rounded down; default 1.",
           "maximum": 2147483647,
           "minimum": 1,
           "type": "integer"
         },
         "terms": {
+          "description": "The attributes that make up the bonus; each adds per_point times (the attribute's value minus pivot).",
           "items": {
             "additionalProperties": false,
             "properties": {
-              "attribute": { "$ref": "#/$defs/DefinitionRef" },
-              "per_point": { "$ref": "#/$defs/ResourceInt" },
-              "pivot": { "$ref": "#/$defs/ResourceInt" }
+              "attribute": {
+                "$ref": "#/$defs/DefinitionRef",
+                "description": "The attribute read."
+              },
+              "per_point": {
+                "$ref": "#/$defs/ResourceInt",
+                "description": "Bonus added per point of the attribute above pivot (below it, taken away)."
+              },
+              "pivot": {
+                "$ref": "#/$defs/ResourceInt",
+                "description": "The attribute value at which this term adds nothing."
+              }
             },
             "required": [
               "attribute",
@@ -1085,12 +1191,23 @@
           "$ref": "#/$defs/DefinitionRef",
           "description": "A quest of this cartridge the choice activates."
         },
+        "asked": {
+          "description": "The Book dims this choice once taken; it stays usable. Lowered to the fact <dialogue>_<choice>_asked, a step that sets it and asked_when.",
+          "enum": [true],
+          "type": "boolean"
+        },
         "availability": {
           "additionalProperties": false,
           "description": "Time limits on offering the choice.",
           "properties": {
-            "from": { "$ref": "#/$defs/LogicalTime" },
-            "through": { "$ref": "#/$defs/LogicalTime" }
+            "from": {
+              "$ref": "#/$defs/LogicalTime",
+              "description": "First logical time the choice is offered."
+            },
+            "through": {
+              "$ref": "#/$defs/LogicalTime",
+              "description": "Last logical time the choice is offered, inclusive."
+            }
           },
           "type": "object"
         },
@@ -1269,7 +1386,7 @@
           "type": "array"
         },
         "story_point": {
-          "description": "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+          "description": "<story point>/<outcome>: the outcome this choice reaches; one per outcome.",
           "pattern": "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
           "type": "string"
         },
@@ -1286,8 +1403,12 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "An NPC of this cartridge takes this role.",
           "properties": {
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The NPC definition."
+            },
             "role": { "const": "npc" }
           },
           "required": [
@@ -1298,8 +1419,12 @@
         },
         {
           "additionalProperties": false,
+          "description": "An item of this cartridge takes this role.",
           "properties": {
-            "item": { "$ref": "#/$defs/DefinitionRef" },
+            "item": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The item definition."
+            },
             "role": { "const": "item" }
           },
           "required": [
@@ -1408,8 +1533,10 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "A lightable item that burns fuel while lit, and is refilled from a supply item.",
           "properties": {
             "capacity": {
+              "description": "The most fuel the source holds, in its unit.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
@@ -1418,22 +1545,39 @@
               "$ref": "#/$defs/Cues",
               "description": "Cues active only while this source is lit (toolbox row G6)."
             },
-            "doused": { "$ref": "#/$defs/TextKey" },
-            "ignited": { "$ref": "#/$defs/TextKey" },
+            "doused": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the line told when it is put out."
+            },
+            "ignited": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the line told when it is lit."
+            },
             "initial": {
+              "description": "Fuel it holds at the start; at most capacity.",
               "maximum": 9007199254740991,
               "minimum": 0,
               "type": "integer"
             },
             "kind": { "const": "source" },
             "rate": {
+              "description": "Fuel burned per logical time unit while lit; at least 1. It goes out when the fuel runs out.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
             },
-            "refueled": { "$ref": "#/$defs/TextKey" },
-            "supply": { "$ref": "#/$defs/DefinitionRef" },
-            "unit": { "$ref": "#/$defs/Key" }
+            "refueled": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the line told when it is refilled."
+            },
+            "supply": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The supply item that refuels it; the supply's unit must match."
+            },
+            "unit": {
+              "$ref": "#/$defs/Key",
+              "description": "The fuel's unit name; the supply must use the same one."
+            }
           },
           "required": [
             "kind",
@@ -1450,19 +1594,25 @@
         },
         {
           "additionalProperties": false,
+          "description": "An item that holds fuel for refilling sources; it is emptied by what it gives.",
           "properties": {
             "capacity": {
+              "description": "The most fuel the supply holds, in its unit.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
             },
             "initial": {
+              "description": "Fuel it holds at the start; at most capacity.",
               "maximum": 9007199254740991,
               "minimum": 0,
               "type": "integer"
             },
             "kind": { "const": "supply" },
-            "unit": { "$ref": "#/$defs/Key" }
+            "unit": {
+              "$ref": "#/$defs/Key",
+              "description": "The fuel's unit name; a source takes only a supply with the same one."
+            }
           },
           "required": [
             "kind",
@@ -1488,9 +1638,16 @@
         },
         "bed": {
           "additionalProperties": false,
+          "description": "Makes the detail a bed: resting here is offered when the entitlement fact reads true.",
           "properties": {
-            "entitlement": { "$ref": "#/$defs/DefinitionRef" },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "entitlement": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The fact that must read true for the actor before resting here is offered."
+            },
+            "title": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the title of the bed's page."
+            }
           },
           "required": [
             "title",
@@ -1508,18 +1665,30 @@
         },
         "harvest": {
           "additionalProperties": false,
+          "description": "Makes the detail a place to gather items from.",
           "properties": {
             "careful": {
               "additionalProperties": false,
+              "description": "A slower way to gather: several items at once, for a skilled actor.",
               "properties": {
-                "action": { "$ref": "#/$defs/Key" },
+                "action": {
+                  "$ref": "#/$defs/Key",
+                  "description": "The harvest action offered for it; must be a harvest action that takes a method."
+                },
                 "count": {
+                  "description": "Items gathered at once; 2 to 64, and at most the distinct items listed.",
                   "maximum": 64,
                   "minimum": 2,
                   "type": "integer"
                 },
-                "narration": { "$ref": "#/$defs/TextKey" },
-                "skill": { "$ref": "#/$defs/DefinitionRef" }
+                "narration": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Text key of the line told after a careful harvest."
+                },
+                "skill": {
+                  "$ref": "#/$defs/DefinitionRef",
+                  "description": "The skill the actor must have usable for the careful way."
+                }
               },
               "required": [
                 "skill",
@@ -1530,19 +1699,32 @@
               "type": "object"
             },
             "items": {
+              "description": "The item definitions that can be gathered; each harvest takes the ones lying in the room.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
-            "label": { "$ref": "#/$defs/TextKey" },
-            "narration": { "$ref": "#/$defs/TextKey" },
-            "title": { "$ref": "#/$defs/TextKey" },
+            "label": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the harvest action's button."
+            },
+            "narration": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the line told after an ordinary harvest (one item)."
+            },
+            "title": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the title of the harvest page."
+            },
             "tool": {
               "additionalProperties": false,
               "description": "Toolbox row 19: Harvest needs a held item whose definition declares tag.",
               "properties": {
-                "tag": { "$ref": "#/$defs/Tag" }
+                "tag": {
+                  "$ref": "#/$defs/Tag",
+                  "description": "The tag a held item must carry for the harvest to be allowed."
+                }
               },
               "required": [
                 "tag"
@@ -1558,9 +1740,13 @@
           ],
           "type": "object"
         },
-        "liquid_source": { "$ref": "#/$defs/DefinitionRef" },
+        "liquid_source": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The liquid a held vessel can be filled with at this detail."
+        },
         "notice_board": {
           "additionalProperties": false,
+          "description": "Makes the detail a board that lists other readable details of the room.",
           "properties": {
             "notices": {
               "description": "1 to 64 distinct notices, in order.",
@@ -1599,9 +1785,16 @@
         },
         "perception": {
           "additionalProperties": false,
+          "description": "Perception traits of the detail.",
           "properties": {
-            "self_luminous": { "const": true },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "self_luminous": {
+              "const": true,
+              "description": "Must be true: the detail gives light, so it is seen in a dark room."
+            },
+            "title": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the title of the detail's page."
+            }
           },
           "required": [
             "self_luminous",
@@ -1625,7 +1818,10 @@
               "$ref": "#/$defs/TextKey",
               "description": "The text read."
             },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "title": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the title of the readable's page; without it the label is shown."
+            }
           },
           "required": [
             "label",
@@ -1639,9 +1835,16 @@
         },
         "transport": {
           "additionalProperties": false,
+          "description": "Makes the detail a stop on a transport route.",
           "properties": {
-            "route": { "$ref": "#/$defs/DefinitionRef" },
-            "title": { "$ref": "#/$defs/TextKey" }
+            "route": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The transport route this stop belongs to."
+            },
+            "title": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the title of the stop's page."
+            }
           },
           "required": [
             "route",
@@ -1686,10 +1889,22 @@
       "additionalProperties": false,
       "description": "A directly held item opted into exact bleed treatment.",
       "properties": {
-        "action": { "$ref": "#/$defs/Key" },
-        "effect": { "$ref": "#/$defs/DefinitionRef" },
-        "narration": { "$ref": "#/$defs/TextKey" },
-        "skill": { "$ref": "#/$defs/DefinitionRef" }
+        "action": {
+          "$ref": "#/$defs/Key",
+          "description": "Must be bandage: the key of the action that applies it."
+        },
+        "effect": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The bleed this bandage treats."
+        },
+        "narration": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the line told when the bandage is applied."
+        },
+        "skill": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The skill the actor must have usable to bandage."
+        }
       },
       "required": [
         "effect",
@@ -1720,9 +1935,18 @@
           "minItems": 1,
           "type": "array"
         },
-        "label": { "$ref": "#/$defs/TextKey" },
-        "narration": { "$ref": "#/$defs/TextKey" },
-        "resource": { "$ref": "#/$defs/DefinitionRef" }
+        "label": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the eat action's button."
+        },
+        "narration": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the line told when it is eaten."
+        },
+        "resource": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The pool eating restores (for example hp)."
+        }
       },
       "required": [
         "resource",
@@ -1736,9 +1960,13 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "Starts lying in a room.",
           "properties": {
             "in": { "const": "room" },
-            "room": { "$ref": "#/$defs/DefinitionRef" }
+            "room": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The room it lies in."
+            }
           },
           "required": [
             "in",
@@ -1748,9 +1976,13 @@
         },
         {
           "additionalProperties": false,
+          "description": "Starts carried by an NPC.",
           "properties": {
             "in": { "const": "npc" },
-            "npc": { "$ref": "#/$defs/DefinitionRef" }
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The NPC carrying it."
+            }
           },
           "required": [
             "in",
@@ -1760,9 +1992,13 @@
         },
         {
           "additionalProperties": false,
+          "description": "Starts inside another item of this cartridge.",
           "properties": {
             "in": { "const": "item" },
-            "item": { "$ref": "#/$defs/DefinitionRef" }
+            "item": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The item that holds it."
+            }
           },
           "required": [
             "in",
@@ -1772,6 +2008,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Starts nowhere: it is a copy source only, and exists in play only once another rule makes a copy.",
           "properties": {
             "in": { "const": "template" }
           },
@@ -1787,9 +2024,18 @@
       "additionalProperties": false,
       "description": "API1.24: one explicit held-item Read, with optional declared Boolean topic grant.",
       "properties": {
-        "label": { "$ref": "#/$defs/TextKey" },
-        "text": { "$ref": "#/$defs/TextKey" },
-        "topic": { "$ref": "#/$defs/DefinitionRef" }
+        "label": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the read action's button."
+        },
+        "text": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of what the player reads."
+        },
+        "topic": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "A topic the reader learns on reading."
+        }
       },
       "required": [
         "label",
@@ -1801,8 +2047,14 @@
       "additionalProperties": false,
       "description": "The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility versions'): at_least inclusive, below exclusive, so '>=1.3 <2.0' is at_least 1.3, below 2.0.",
       "properties": {
-        "at_least": { "$ref": "#/$defs/KernelApiVersion" },
-        "below": { "$ref": "#/$defs/KernelApiVersion" }
+        "at_least": {
+          "$ref": "#/$defs/KernelApiVersion",
+          "description": "Lowest kernel API version accepted, inclusive."
+        },
+        "below": {
+          "$ref": "#/$defs/KernelApiVersion",
+          "description": "First kernel API version refused: the range stops just under it."
+        }
       },
       "required": [
         "at_least",
@@ -1961,7 +2213,10 @@
       "items": {
         "additionalProperties": false,
         "properties": {
-          "description": { "$ref": "#/$defs/TextKey" },
+          "description": {
+            "$ref": "#/$defs/TextKey",
+            "description": "Text key of the short name used while this variant applies."
+          },
           "when": { "$ref": "#/$defs/Policy" },
           "words": { "$ref": "#/$defs/NameWords" }
         },
@@ -2004,8 +2259,12 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "An NPC of this cartridge.",
           "properties": {
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The NPC definition."
+            },
             "role": { "const": "npc" }
           },
           "required": [
@@ -2016,8 +2275,12 @@
         },
         {
           "additionalProperties": false,
+          "description": "An item of this cartridge.",
           "properties": {
-            "item": { "$ref": "#/$defs/DefinitionRef" },
+            "item": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The item definition."
+            },
             "role": { "const": "item" }
           },
           "required": [
@@ -2028,6 +2291,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "The player's own body.",
           "properties": {
             "role": { "const": "actor" }
           },
@@ -2733,7 +2997,10 @@
           "items": {
             "additionalProperties": false,
             "properties": {
-              "text": { "$ref": "#/$defs/TextKey" },
+              "text": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Text key shown while this variant's condition holds."
+              },
               "when": { "$ref": "#/$defs/Policy" }
             },
             "required": [
@@ -2751,17 +3018,23 @@
         },
         "hints": {
           "additionalProperties": false,
+          "description": "Timed nudges the Journal shows as real time passes in a stage.",
           "properties": {
             "active": {
+              "description": "Hints for the active stage, earliest first.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
                   "after": {
+                    "description": "Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending.",
                     "maximum": 1440,
                     "minimum": 1,
                     "type": "integer"
                   },
-                  "text": { "$ref": "#/$defs/TextKey" }
+                  "text": {
+                    "$ref": "#/$defs/TextKey",
+                    "description": "Text key of the hint."
+                  }
                 },
                 "required": [
                   "after",
@@ -2774,15 +3047,20 @@
               "type": "array"
             },
             "objectives_met": {
+              "description": "Hints for the objectives-met stage, earliest first.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
                   "after": {
+                    "description": "Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending.",
                     "maximum": 1440,
                     "minimum": 1,
                     "type": "integer"
                   },
-                  "text": { "$ref": "#/$defs/TextKey" }
+                  "text": {
+                    "$ref": "#/$defs/TextKey",
+                    "description": "Text key of the hint."
+                  }
                 },
                 "required": [
                   "after",
@@ -2825,6 +3103,7 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "Met while the policy holds for the actor now; nothing is stored.",
           "properties": {
             "evidence": { "const": "current_state" },
             "policy": { "$ref": "#/$defs/Policy" }
@@ -2836,9 +3115,13 @@
         },
         {
           "additionalProperties": false,
+          "description": "Met when the actor acquires the named item after the quest began.",
           "properties": {
             "evidence": { "const": "post_activation_event" },
-            "item_acquired": { "$ref": "#/$defs/DefinitionRef" }
+            "item_acquired": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The item whose acquisition counts."
+            }
           },
           "required": [
             "evidence",
@@ -2848,6 +3131,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Met when the quest's patrol completes.",
           "properties": {
             "evidence": { "const": "patrol" }
           },
@@ -2858,6 +3142,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Met when the quest's expedition succeeds.",
           "properties": {
             "evidence": { "const": "expedition" }
           },
@@ -2897,111 +3182,111 @@
       "properties": {
         "air": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `air`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `air`. Negative is a weakness."
         },
         "bed": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `bed`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `bed`. Negative is a weakness."
         },
         "burnable": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `burnable`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `burnable`. Negative is a weakness."
         },
         "chasm": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `chasm`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `chasm`. Negative is a weakness."
         },
         "cold": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `cold`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to `cold` damage. Negative is a weakness."
         },
         "cool": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `cool`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `cool`. Negative is a weakness."
         },
         "cursed": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `cursed`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `cursed`. Negative is a weakness."
         },
         "exposed": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `exposed`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `exposed`. Negative is a weakness."
         },
         "fire": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `fire`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to `fire` damage. Negative is a weakness."
         },
         "forge": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `forge`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `forge`. Negative is a weakness."
         },
         "fragile": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `fragile`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `fragile`. Negative is a weakness."
         },
         "lamp": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `lamp`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `lamp`. Negative is a weakness."
         },
         "liquid_holding": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `liquid_holding`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `liquid_holding`. Negative is a weakness."
         },
         "marsh": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `marsh`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `marsh`. Negative is a weakness."
         },
         "metal": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `metal`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `metal`. Negative is a weakness."
         },
         "physical": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `physical`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to `physical` damage. Negative is a weakness."
         },
         "poison": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `poison`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to `poison` damage. Negative is a weakness."
         },
         "road": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `road`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `road`. Negative is a weakness."
         },
         "rod": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `rod`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `rod`. Negative is a weakness."
         },
         "rug": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `rug`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `rug`. Negative is a weakness."
         },
         "sharp": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `sharp`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `sharp`. Negative is a weakness."
         },
         "silver": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `silver`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `silver`. Negative is a weakness."
         },
         "warm": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `warm`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `warm`. Negative is a weakness."
         },
         "water": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `water`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `water`. Negative is a weakness."
         },
         "waterproof": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `waterproof`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `waterproof`. Negative is a weakness."
         },
         "windproof": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `windproof`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `windproof`. Negative is a weakness."
         },
         "wooden": {
           "$ref": "#/$defs/ResistancePercent",
-          "description": "Percent resistance to `wooden`, as a damage kind or the striking weapon's material tag. Negative is a weakness."
+          "description": "Percent resistance to attacks from a weapon with the material tag `wooden`. Negative is a weakness."
         }
       },
       "type": "object"
@@ -3116,10 +3401,17 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "The action acts on one detail of a room, offered only while the actor is in that room.",
           "properties": {
-            "detail": { "$ref": "#/$defs/Key" },
+            "detail": {
+              "$ref": "#/$defs/Key",
+              "description": "The detail's key in that room's details."
+            },
             "kind": { "const": "detail" },
-            "room": { "$ref": "#/$defs/DefinitionRef" }
+            "room": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The room that holds the detail."
+            }
           },
           "required": [
             "kind",
@@ -3130,6 +3422,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "The action uses a tool the actor holds on another item.",
           "properties": {
             "kind": { "const": "use" },
             "tool": { "$ref": "#/$defs/UseTool" }
@@ -3146,8 +3439,10 @@
           "properties": {
             "aimed": {
               "additionalProperties": false,
+              "description": "Makes it an aimed spell, cast at one target; without it the spell takes no target.",
               "properties": {
                 "scopes": {
+                  "description": "Where the target is looked for: the caster's room occupants, room contents or inventory.",
                   "items": {
                     "enum": [
                       "room_occupants",
@@ -3165,8 +3460,14 @@
               "type": "object"
             },
             "kind": { "const": "spell" },
-            "learned": { "$ref": "#/$defs/DefinitionRef" },
-            "word": { "$ref": "#/$defs/SpokenKeyword" }
+            "learned": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "A bool fact; the word works for a caster only while it reads true for them."
+            },
+            "word": {
+              "$ref": "#/$defs/SpokenKeyword",
+              "description": "The word the player types to cast it."
+            }
           },
           "required": [
             "kind",
@@ -3207,22 +3508,31 @@
           "description": "A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition).",
           "properties": {
             "denominator": {
+              "description": "Divides the buy price; the price is floor(buy times numerator over denominator).",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "friendly": { "const": true },
+            "friendly": {
+              "const": true,
+              "description": "Must be true: the discount applies while the shop's NPC is friendly to the actor. Give this or skill."
+            },
             "minimum": {
+              "description": "The discounted buy price is never below this.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
             "numerator": {
+              "description": "Multiplies the buy price; see denominator.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "skill": { "$ref": "#/$defs/DefinitionRef" }
+            "skill": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The discount applies while the actor has this skill usable. Give this or friendly."
+            }
           },
           "required": [
             "numerator",
@@ -3280,6 +3590,7 @@
           "description": "Toolbox row W11: sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy.",
           "properties": {
             "buy": {
+              "description": "Buy prices by count held: entry n is the price while the shopkeeper holds n of the items; one entry per item.",
               "items": {
                 "maximum": 2147483647,
                 "minimum": 1,
@@ -3290,6 +3601,7 @@
               "type": "array"
             },
             "items": {
+              "description": "The interchangeable items sold as one offer; the first is the offer's item.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 16,
               "minItems": 2,
@@ -4289,6 +4601,7 @@
           "properties": {
             "kind": { "const": "entity" },
             "scopes": {
+              "description": "Where the target is looked for: self, inventory, room_contents, room_occupants or inspectable_details.",
               "items": {
                 "enum": [
                   "self",
@@ -4356,8 +4669,12 @@
       "additionalProperties": false,
       "description": "Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play_time. Requires schedule@1. Millisecond conversion and fractional remainder belong to host M1-B. Integer type obeys loka-numeric-v1 safe range.",
       "properties": {
-        "profile": { "const": "real_elapsed" },
+        "profile": {
+          "const": "real_elapsed",
+          "description": "Must be real_elapsed: logical time follows real time."
+        },
         "rate": {
+          "description": "Logical seconds that pass per real second; at least 1.",
           "minimum": 1,
           "type": "integer"
         },
@@ -4435,27 +4752,40 @@
       "additionalProperties": false,
       "description": "D6 exact paired surface/bottom routes, usable skill, entry load/cost, absolute submersion duration and authored warning/death copy; real_elapsed content only.",
       "properties": {
-        "drowned": { "$ref": "#/$defs/TextKey" },
+        "drowned": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the line told when the character drowns."
+        },
         "duration": {
+          "description": "Logical time units a character can stay under before drowning; at least 1.",
           "minimum": 1,
           "type": "integer"
         },
         "entry_cost": {
+          "description": "Movement points paid to go under.",
           "maximum": 2147483647,
           "minimum": 0,
           "type": "integer"
         },
         "maximum_grams": {
+          "description": "The heaviest load, in grams, a character can carry and still go under.",
           "maximum": 2147483647,
           "minimum": 0,
           "type": "integer"
         },
         "routes": {
+          "description": "The surface and bottom room pairs; entering water at a surface moves to its bottom.",
           "items": {
             "additionalProperties": false,
             "properties": {
-              "bottom": { "$ref": "#/$defs/DefinitionRef" },
-              "surface": { "$ref": "#/$defs/DefinitionRef" }
+              "bottom": {
+                "$ref": "#/$defs/DefinitionRef",
+                "description": "The room under the water."
+              },
+              "surface": {
+                "$ref": "#/$defs/DefinitionRef",
+                "description": "The room above the water, where the route is entered."
+              }
             },
             "required": [
               "surface",
@@ -4467,8 +4797,14 @@
           "minItems": 1,
           "type": "array"
         },
-        "skill": { "$ref": "#/$defs/DefinitionRef" },
-        "warning": { "$ref": "#/$defs/TextKey" }
+        "skill": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The skill the character must have usable to go under."
+        },
+        "warning": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the warning shown before going under."
+        }
       },
       "required": [
         "skill",
@@ -4493,8 +4829,12 @@
           "additionalProperties": false,
           "description": "Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed.",
           "properties": {
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
+            "fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The bounded int fact that holds the weapon's durability."
+            },
             "wear": {
+              "description": "Durability each of the weapon's hits takes off.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
@@ -4510,7 +4850,10 @@
           "additionalProperties": false,
           "description": "Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee.",
           "properties": {
-            "ammo": { "$ref": "#/$defs/DefinitionRef" }
+            "ammo": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The resource pool one unit of which each shot spends."
+            }
           },
           "required": [
             "ammo"
@@ -4533,15 +4876,20 @@
       "description": "One weather of a calendar's weather table (toolbox row 31): each calendar day takes one entry with probability weight / total weight, by a hash of the world id and the day, never the authority RNG. wet: an exposed room's flame will not light (light@1 ignite). Phases are unique in the table.",
       "properties": {
         "phase": {
+          "description": "The weather's name, lowercase letters, digits and underscores; unique in the table.",
           "pattern": "^[a-z][a-z0-9_]*$",
           "type": "string"
         },
         "weight": {
+          "description": "Its chance relative to the other entries: weight over the sum of all weights; 1 to 1000.",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
-        "wet": { "type": "boolean" }
+        "wet": {
+          "description": "When true, an exposed flame will not light in this weather.",
+          "type": "boolean"
+        }
       },
       "required": [
         "phase",
@@ -4564,14 +4912,22 @@
         },
         "bell_cue": {
           "additionalProperties": false,
+          "description": "A line told in the listed rooms when the fact turns true.",
           "properties": {
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
+            "fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The bool fact whose change to true triggers the line."
+            },
             "rooms": {
+              "description": "The rooms where it is told, to anyone there.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "minItems": 1,
               "type": "array"
             },
-            "text": { "$ref": "#/$defs/TextKey" }
+            "text": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key of the line."
+            }
           },
           "required": [
             "fact",
@@ -4673,6 +5029,7 @@
             },
             "wage": {
               "additionalProperties": false,
+              "description": "Pays each group member from the player's purse on a schedule; a member who cannot be paid leaves the group.",
               "properties": {
                 "amount": {
                   "description": "How much of the resource each member is paid.",
@@ -4823,9 +5180,16 @@
             },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told after a theft.",
               "properties": {
-                "seen": { "$ref": "#/$defs/TextKey" },
-                "unseen": { "$ref": "#/$defs/TextKey" }
+                "seen": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the theft is noticed."
+                },
+                "unseen": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when nobody notices the theft."
+                }
               },
               "required": [
                 "seen",
@@ -4833,7 +5197,10 @@
               ],
               "type": "object"
             },
-            "noticed": { "$ref": "#/$defs/Key" },
+            "noticed": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the custom event emitted when a theft is seen."
+            },
             "skill": {
               "$ref": "#/$defs/DefinitionRef",
               "description": "The victim notices when the actor's level in this skill is below the victim's attribute."
@@ -4909,6 +5276,7 @@
       "properties": {
         "consume": {
           "additionalProperties": false,
+          "description": "What the actor gives up on every accepted perform, failure included.",
           "properties": {
             "items": {
               "description": "The items that can be consumed.",
@@ -4927,15 +5295,23 @@
               "$ref": "#/$defs/partial.TextKey",
               "description": "The refusal text shown when the actor holds too few."
             },
-            "to": { "$ref": "#/$defs/partial.ItemLocation" }
+            "to": {
+              "$ref": "#/$defs/partial.ItemLocation",
+              "description": "Where the consumed items go: the holder they are moved to."
+            }
           },
           "type": "object"
         },
         "yield": {
           "additionalProperties": false,
+          "description": "What the actor receives unless the outcome is failure.",
           "properties": {
-            "from": { "$ref": "#/$defs/partial.ItemLocation" },
+            "from": {
+              "$ref": "#/$defs/partial.ItemLocation",
+              "description": "The holder the yielded item is taken from."
+            },
             "items": {
+              "description": "The items that can be yielded; one of them, directly in the holder, moves to the actor's body.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
@@ -4983,11 +5359,13 @@
           "description": "Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
           "properties": {
             "chance": {
+              "description": "Percent of all attacks, sharing the accuracy draw: a hit whose draw is below this is critical, so a chance above the accuracy makes every hit critical.",
               "maximum": 100,
               "minimum": 1,
               "type": "integer"
             },
             "multiplier": {
+              "description": "Damage of a critical hit is multiplied by this (2 to 10).",
               "maximum": 10,
               "minimum": 2,
               "type": "integer"
@@ -5005,11 +5383,18 @@
           "minimum": 1,
           "type": "integer"
         },
-        "kind": { "$ref": "#/$defs/DamageKind" },
+        "kind": {
+          "$ref": "#/$defs/DamageKind",
+          "description": "The damage kind (cold, fire, physical or poison); the target's resistance to it reduces the damage."
+        },
         "on_positive_hit": {
           "additionalProperties": false,
+          "description": "What a hit that takes off HP also does.",
           "properties": {
-            "effect": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "effect": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The bleed applied to the player; used only when the attacker is spawned as a population hunter."
+            }
           },
           "type": "object"
         }
@@ -5058,6 +5443,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Passes when the actor's value of the attribute is at least difficulty; draws no random number.",
           "properties": {
             "attribute": {
               "$ref": "#/$defs/partial.DefinitionRef",
@@ -5079,7 +5465,10 @@
           "additionalProperties": false,
           "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform. Dialogue choice: A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
           "properties": {
-            "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "attribute": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The attribute compared; give this or skill, not both."
+            },
             "failure": {
               "$ref": "#/$defs/partial.TextKey",
               "description": "The failure branch; a dialogue choice needs it, a scripted action refuses it."
@@ -5089,12 +5478,18 @@
               "description": "This check's key, unique across scripted actions and dialogue choices."
             },
             "kind": { "const": "opposed" },
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "With attribute, compares against this NPC's value of the attribute instead of a rating."
+            },
             "rating": {
               "description": "The target detail's rating; a scripted action refuses it.",
               "type": "integer"
             },
-            "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "skill": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The skill whose level is compared; give this or attribute, not both."
+            }
           },
           "type": "object"
         },
@@ -5102,9 +5497,15 @@
           "additionalProperties": false,
           "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
           "properties": {
-            "key": { "$ref": "#/$defs/Key" },
+            "key": {
+              "$ref": "#/$defs/Key",
+              "description": "This check's key, unique across scripted actions and dialogue choices."
+            },
             "kind": { "const": "track" },
-            "plan": { "$ref": "#/$defs/Key" }
+            "plan": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the population plan whose trail is looked for; passes when that trail is fresh in the actor's room."
+            }
           },
           "type": "object"
         }
@@ -5228,12 +5629,23 @@
           "$ref": "#/$defs/partial.DefinitionRef",
           "description": "A quest of this cartridge the choice activates."
         },
+        "asked": {
+          "description": "The Book dims this choice once taken; it stays usable. Lowered to the fact <dialogue>_<choice>_asked, a step that sets it and asked_when.",
+          "enum": [true],
+          "type": "boolean"
+        },
         "availability": {
           "additionalProperties": false,
           "description": "Time limits on offering the choice.",
           "properties": {
-            "from": { "$ref": "#/$defs/LogicalTime" },
-            "through": { "$ref": "#/$defs/LogicalTime" }
+            "from": {
+              "$ref": "#/$defs/LogicalTime",
+              "description": "First logical time the choice is offered."
+            },
+            "through": {
+              "$ref": "#/$defs/LogicalTime",
+              "description": "Last logical time the choice is offered, inclusive."
+            }
           },
           "type": "object"
         },
@@ -5384,7 +5796,7 @@
           "type": "array"
         },
         "story_point": {
-          "description": "<story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome.",
+          "description": "<story point>/<outcome>: the outcome this choice reaches; one per outcome.",
           "pattern": "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$",
           "type": "string"
         },
@@ -5397,16 +5809,24 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "An NPC of this cartridge takes this role.",
           "properties": {
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The NPC definition."
+            },
             "role": { "const": "npc" }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "An item of this cartridge takes this role.",
           "properties": {
-            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "item": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The item definition."
+            },
             "role": { "const": "item" }
           },
           "type": "object"
@@ -5418,8 +5838,10 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "A lightable item that burns fuel while lit, and is refilled from a supply item.",
           "properties": {
             "capacity": {
+              "description": "The most fuel the source holds, in its unit.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
@@ -5428,40 +5850,63 @@
               "$ref": "#/$defs/Cues",
               "description": "Cues active only while this source is lit (toolbox row G6)."
             },
-            "doused": { "$ref": "#/$defs/partial.TextKey" },
-            "ignited": { "$ref": "#/$defs/partial.TextKey" },
+            "doused": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the line told when it is put out."
+            },
+            "ignited": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the line told when it is lit."
+            },
             "initial": {
+              "description": "Fuel it holds at the start; at most capacity.",
               "maximum": 9007199254740991,
               "minimum": 0,
               "type": "integer"
             },
             "kind": { "const": "source" },
             "rate": {
+              "description": "Fuel burned per logical time unit while lit; at least 1. It goes out when the fuel runs out.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
             },
-            "refueled": { "$ref": "#/$defs/partial.TextKey" },
-            "supply": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "unit": { "$ref": "#/$defs/Key" }
+            "refueled": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the line told when it is refilled."
+            },
+            "supply": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The supply item that refuels it; the supply's unit must match."
+            },
+            "unit": {
+              "$ref": "#/$defs/Key",
+              "description": "The fuel's unit name; the supply must use the same one."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "An item that holds fuel for refilling sources; it is emptied by what it gives.",
           "properties": {
             "capacity": {
+              "description": "The most fuel the supply holds, in its unit.",
               "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer"
             },
             "initial": {
+              "description": "Fuel it holds at the start; at most capacity.",
               "maximum": 9007199254740991,
               "minimum": 0,
               "type": "integer"
             },
             "kind": { "const": "supply" },
-            "unit": { "$ref": "#/$defs/Key" }
+            "unit": {
+              "$ref": "#/$defs/Key",
+              "description": "The fuel's unit name; a source takes only a supply with the same one."
+            }
           },
           "type": "object"
         }
@@ -5481,9 +5926,16 @@
         },
         "bed": {
           "additionalProperties": false,
+          "description": "Makes the detail a bed: resting here is offered when the entitlement fact reads true.",
           "properties": {
-            "entitlement": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "title": { "$ref": "#/$defs/partial.TextKey" }
+            "entitlement": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The fact that must read true for the actor before resting here is offered."
+            },
+            "title": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the title of the bed's page."
+            }
           },
           "type": "object"
         },
@@ -5497,44 +5949,73 @@
         },
         "harvest": {
           "additionalProperties": false,
+          "description": "Makes the detail a place to gather items from.",
           "properties": {
             "careful": {
               "additionalProperties": false,
+              "description": "A slower way to gather: several items at once, for a skilled actor.",
               "properties": {
-                "action": { "$ref": "#/$defs/Key" },
+                "action": {
+                  "$ref": "#/$defs/Key",
+                  "description": "The harvest action offered for it; must be a harvest action that takes a method."
+                },
                 "count": {
+                  "description": "Items gathered at once; 2 to 64, and at most the distinct items listed.",
                   "maximum": 64,
                   "minimum": 2,
                   "type": "integer"
                 },
-                "narration": { "$ref": "#/$defs/partial.TextKey" },
-                "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+                "narration": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Text key of the line told after a careful harvest."
+                },
+                "skill": {
+                  "$ref": "#/$defs/partial.DefinitionRef",
+                  "description": "The skill the actor must have usable for the careful way."
+                }
               },
               "type": "object"
             },
             "items": {
+              "description": "The item definitions that can be gathered; each harvest takes the ones lying in the room.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
-            "label": { "$ref": "#/$defs/partial.TextKey" },
-            "narration": { "$ref": "#/$defs/partial.TextKey" },
-            "title": { "$ref": "#/$defs/partial.TextKey" },
+            "label": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the harvest action's button."
+            },
+            "narration": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the line told after an ordinary harvest (one item)."
+            },
+            "title": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the title of the harvest page."
+            },
             "tool": {
               "additionalProperties": false,
               "description": "Toolbox row 19: Harvest needs a held item whose definition declares tag.",
               "properties": {
-                "tag": { "$ref": "#/$defs/Tag" }
+                "tag": {
+                  "$ref": "#/$defs/Tag",
+                  "description": "The tag a held item must carry for the harvest to be allowed."
+                }
               },
               "type": "object"
             }
           },
           "type": "object"
         },
-        "liquid_source": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "liquid_source": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The liquid a held vessel can be filled with at this detail."
+        },
         "notice_board": {
           "additionalProperties": false,
+          "description": "Makes the detail a board that lists other readable details of the room.",
           "properties": {
             "notices": {
               "description": "1 to 64 distinct notices, in order.",
@@ -5569,9 +6050,16 @@
         },
         "perception": {
           "additionalProperties": false,
+          "description": "Perception traits of the detail.",
           "properties": {
-            "self_luminous": { "const": true },
-            "title": { "$ref": "#/$defs/partial.TextKey" }
+            "self_luminous": {
+              "const": true,
+              "description": "Must be true: the detail gives light, so it is seen in a dark room."
+            },
+            "title": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the title of the detail's page."
+            }
           },
           "type": "object"
         },
@@ -5591,7 +6079,10 @@
               "$ref": "#/$defs/partial.TextKey",
               "description": "The text read."
             },
-            "title": { "$ref": "#/$defs/partial.TextKey" }
+            "title": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the title of the readable's page; without it the label is shown."
+            }
           },
           "type": "object"
         },
@@ -5601,9 +6092,16 @@
         },
         "transport": {
           "additionalProperties": false,
+          "description": "Makes the detail a stop on a transport route.",
           "properties": {
-            "route": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "title": { "$ref": "#/$defs/partial.TextKey" }
+            "route": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The transport route this stop belongs to."
+            },
+            "title": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key of the title of the stop's page."
+            }
           },
           "type": "object"
         },
@@ -5621,10 +6119,22 @@
       "additionalProperties": false,
       "description": "A directly held item opted into exact bleed treatment.",
       "properties": {
-        "action": { "$ref": "#/$defs/Key" },
-        "effect": { "$ref": "#/$defs/partial.DefinitionRef" },
-        "narration": { "$ref": "#/$defs/partial.TextKey" },
-        "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+        "action": {
+          "$ref": "#/$defs/Key",
+          "description": "Must be bandage: the key of the action that applies it."
+        },
+        "effect": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The bleed this bandage treats."
+        },
+        "narration": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the line told when the bandage is applied."
+        },
+        "skill": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The skill the actor must have usable to bandage."
+        }
       },
       "type": "object"
     },
@@ -5649,9 +6159,18 @@
           "minItems": 1,
           "type": "array"
         },
-        "label": { "$ref": "#/$defs/partial.TextKey" },
-        "narration": { "$ref": "#/$defs/partial.TextKey" },
-        "resource": { "$ref": "#/$defs/partial.DefinitionRef" }
+        "label": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the eat action's button."
+        },
+        "narration": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the line told when it is eaten."
+        },
+        "resource": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The pool eating restores (for example hp)."
+        }
       },
       "type": "object"
     },
@@ -5659,30 +6178,43 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "Starts lying in a room.",
           "properties": {
             "in": { "const": "room" },
-            "room": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "room": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The room it lies in."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "Starts carried by an NPC.",
           "properties": {
             "in": { "const": "npc" },
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The NPC carrying it."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "Starts inside another item of this cartridge.",
           "properties": {
             "in": { "const": "item" },
-            "item": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "item": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The item that holds it."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "Starts nowhere: it is a copy source only, and exists in play only once another rule makes a copy.",
           "properties": {
             "in": { "const": "template" }
           },
@@ -5695,9 +6227,18 @@
       "additionalProperties": false,
       "description": "API1.24: one explicit held-item Read, with optional declared Boolean topic grant.",
       "properties": {
-        "label": { "$ref": "#/$defs/partial.TextKey" },
-        "text": { "$ref": "#/$defs/partial.TextKey" },
-        "topic": { "$ref": "#/$defs/partial.DefinitionRef" }
+        "label": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the read action's button."
+        },
+        "text": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of what the player reads."
+        },
+        "topic": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "A topic the reader learns on reading."
+        }
       },
       "type": "object"
     },
@@ -5798,22 +6339,31 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "An NPC of this cartridge.",
           "properties": {
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The NPC definition."
+            },
             "role": { "const": "npc" }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "An item of this cartridge.",
           "properties": {
-            "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "item": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The item definition."
+            },
             "role": { "const": "item" }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "The player's own body.",
           "properties": {
             "role": { "const": "actor" }
           },
@@ -6328,7 +6878,10 @@
           "items": {
             "additionalProperties": false,
             "properties": {
-              "text": { "$ref": "#/$defs/TextKey" },
+              "text": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Text key shown while this variant's condition holds."
+              },
               "when": { "$ref": "#/$defs/Policy" }
             },
             "required": [
@@ -6346,17 +6899,23 @@
         },
         "hints": {
           "additionalProperties": false,
+          "description": "Timed nudges the Journal shows as real time passes in a stage.",
           "properties": {
             "active": {
+              "description": "Hints for the active stage, earliest first.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
                   "after": {
+                    "description": "Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending.",
                     "maximum": 1440,
                     "minimum": 1,
                     "type": "integer"
                   },
-                  "text": { "$ref": "#/$defs/TextKey" }
+                  "text": {
+                    "$ref": "#/$defs/TextKey",
+                    "description": "Text key of the hint."
+                  }
                 },
                 "required": [
                   "after",
@@ -6369,15 +6928,20 @@
               "type": "array"
             },
             "objectives_met": {
+              "description": "Hints for the objectives-met stage, earliest first.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
                   "after": {
+                    "description": "Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending.",
                     "maximum": 1440,
                     "minimum": 1,
                     "type": "integer"
                   },
-                  "text": { "$ref": "#/$defs/TextKey" }
+                  "text": {
+                    "$ref": "#/$defs/TextKey",
+                    "description": "Text key of the hint."
+                  }
                 },
                 "required": [
                   "after",
@@ -6413,6 +6977,7 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "Met while the policy holds for the actor now; nothing is stored.",
           "properties": {
             "evidence": { "const": "current_state" },
             "policy": { "$ref": "#/$defs/partial.Policy" }
@@ -6421,14 +6986,19 @@
         },
         {
           "additionalProperties": false,
+          "description": "Met when the actor acquires the named item after the quest began.",
           "properties": {
             "evidence": { "const": "post_activation_event" },
-            "item_acquired": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "item_acquired": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The item whose acquisition counts."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "Met when the quest's patrol completes.",
           "properties": {
             "evidence": { "const": "patrol" }
           },
@@ -6436,6 +7006,7 @@
         },
         {
           "additionalProperties": false,
+          "description": "Met when the quest's expedition succeeds.",
           "properties": {
             "evidence": { "const": "expedition" }
           },
@@ -6460,15 +7031,23 @@
       "anyOf": [
         {
           "additionalProperties": false,
+          "description": "The action acts on one detail of a room, offered only while the actor is in that room.",
           "properties": {
-            "detail": { "$ref": "#/$defs/Key" },
+            "detail": {
+              "$ref": "#/$defs/Key",
+              "description": "The detail's key in that room's details."
+            },
             "kind": { "const": "detail" },
-            "room": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "room": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The room that holds the detail."
+            }
           },
           "type": "object"
         },
         {
           "additionalProperties": false,
+          "description": "The action uses a tool the actor holds on another item.",
           "properties": {
             "kind": { "const": "use" },
             "tool": { "$ref": "#/$defs/partial.UseTool" }
@@ -6481,8 +7060,10 @@
           "properties": {
             "aimed": {
               "additionalProperties": false,
+              "description": "Makes it an aimed spell, cast at one target; without it the spell takes no target.",
               "properties": {
                 "scopes": {
+                  "description": "Where the target is looked for: the caster's room occupants, room contents or inventory.",
                   "items": {
                     "enum": [
                       "room_occupants",
@@ -6497,8 +7078,14 @@
               "type": "object"
             },
             "kind": { "const": "spell" },
-            "learned": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "word": { "$ref": "#/$defs/SpokenKeyword" }
+            "learned": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "A bool fact; the word works for a caster only while it reads true for them."
+            },
+            "word": {
+              "$ref": "#/$defs/SpokenKeyword",
+              "description": "The word the player types to cast it."
+            }
           },
           "type": "object"
         }
@@ -6518,22 +7105,31 @@
           "description": "A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition).",
           "properties": {
             "denominator": {
+              "description": "Divides the buy price; the price is floor(buy times numerator over denominator).",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "friendly": { "const": true },
+            "friendly": {
+              "const": true,
+              "description": "Must be true: the discount applies while the shop's NPC is friendly to the actor. Give this or skill."
+            },
             "minimum": {
+              "description": "The discounted buy price is never below this.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
             "numerator": {
+              "description": "Multiplies the buy price; see denominator.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "skill": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The discount applies while the actor has this skill usable. Give this or friendly."
+            }
           },
           "type": "object"
         },
@@ -7271,6 +7867,7 @@
           "properties": {
             "kind": { "const": "entity" },
             "scopes": {
+              "description": "Where the target is looked for: self, inventory, room_contents, room_occupants or inspectable_details.",
               "items": {
                 "enum": [
                   "self",
@@ -7358,8 +7955,12 @@
           "additionalProperties": false,
           "description": "Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed.",
           "properties": {
-            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "fact": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The bounded int fact that holds the weapon's durability."
+            },
             "wear": {
+              "description": "Durability each of the weapon's hits takes off.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
@@ -7371,7 +7972,10 @@
           "additionalProperties": false,
           "description": "Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee.",
           "properties": {
-            "ammo": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "ammo": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The resource pool one unit of which each shot spends."
+            }
           },
           "type": "object"
         },
@@ -7426,8 +8030,14 @@
       "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
       "properties": {
         "extends": { "$ref": "#/$defs/Key" },
-        "initial": { "$ref": "#/$defs/BarrierState" },
-        "key_item": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "initial": {
+          "$ref": "#/$defs/BarrierState",
+          "description": "The barrier's state in a fresh world."
+        },
+        "key_item": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The item whose holder may lock and unlock this barrier."
+        },
         "keywords": {
           "description": "Words a player names it by.",
           "items": { "$ref": "#/$defs/Alias" },
@@ -7435,7 +8045,10 @@
           "minItems": 1,
           "type": "array"
         },
-        "name": { "$ref": "#/$defs/partial.TextKey" },
+        "name": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the barrier's short description."
+        },
         "opens_when": {
           "$ref": "#/$defs/partial.Policy",
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
@@ -7470,11 +8083,24 @@
         },
         "narration": {
           "additionalProperties": false,
+          "description": "Text told as the bleed starts, repeats, ticks and ends.",
           "properties": {
-            "applied": { "$ref": "#/$defs/partial.TextKey" },
-            "expired": { "$ref": "#/$defs/partial.TextKey" },
-            "refreshed": { "$ref": "#/$defs/partial.TextKey" },
-            "tick": { "$ref": "#/$defs/partial.TextKey" }
+            "applied": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told when the bleed first starts on a body."
+            },
+            "expired": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told when the bleed ends by running out."
+            },
+            "refreshed": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told when the bleed is applied again while already active."
+            },
+            "tick": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told on a tick that costs hit points."
+            }
           },
           "type": "object"
         },
@@ -7493,6 +8119,7 @@
       "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, scripted action's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
       "properties": {
         "choice_order": {
+          "description": "The compiler's mark of a scene's written choice order; writing it is refused.",
           "items": { "type": "string" },
           "type": "array"
         },
@@ -7500,6 +8127,10 @@
           "additionalProperties": { "$ref": "#/$defs/partial.DialogueChoice" },
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
+        },
+        "entry": {
+          "description": "An optional marker: talk to this speaker opens this dialogue and no other of theirs but keyword ones, over the inferred entry (dialogue@1). At most one per speaker; not on a keyword dialogue.",
+          "type": "boolean"
         },
         "extends": { "$ref": "#/$defs/Key" },
         "keyword": {
@@ -7546,8 +8177,12 @@
               "$ref": "#/$defs/Key",
               "description": "The choice that takes a typed answer."
             },
-            "wrong": { "$ref": "#/$defs/partial.TextKey" },
+            "wrong": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Line told after a wrong answer."
+            },
             "wrong_limit": {
+              "description": "Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries. Needs the dialogue's quest.",
               "minimum": 1,
               "type": "integer"
             }
@@ -7686,7 +8321,10 @@
           "type": "object"
         },
         "extends": { "$ref": "#/$defs/Key" },
-        "fuel": { "$ref": "#/$defs/partial.FuelSpec" },
+        "fuel": {
+          "$ref": "#/$defs/partial.FuelSpec",
+          "description": "Makes the item a lightable fuel source that burns while lit, or a supply that refuels one."
+        },
         "give_allowed": {
           "const": false,
           "description": "API1.10: false prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal."
@@ -7915,9 +8553,16 @@
               { "$ref": "#/$defs/Key" },
               {
                 "additionalProperties": false,
+                "description": "One case of the hour: where the NPC goes, and optionally why and how.",
                 "properties": {
-                  "goal": { "$ref": "#/$defs/partial.TextKey" },
-                  "room": { "$ref": "#/$defs/partial.DefinitionRef" },
+                  "goal": {
+                    "$ref": "#/$defs/partial.TextKey",
+                    "description": "Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go."
+                  },
+                  "room": {
+                    "$ref": "#/$defs/partial.DefinitionRef",
+                    "description": "The room the NPC moves to when this case is chosen."
+                  },
                   "walks": {
                     "const": true,
                     "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
@@ -7958,9 +8603,16 @@
                     { "$ref": "#/$defs/Key" },
                     {
                       "additionalProperties": false,
+                      "description": "One case of the hour: where the NPC goes, and optionally why and how.",
                       "properties": {
-                        "goal": { "$ref": "#/$defs/TextKey" },
-                        "room": { "$ref": "#/$defs/DefinitionRef" },
+                        "goal": {
+                          "$ref": "#/$defs/TextKey",
+                          "description": "Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go."
+                        },
+                        "room": {
+                          "$ref": "#/$defs/DefinitionRef",
+                          "description": "The room the NPC moves to when this case is chosen."
+                        },
                         "walks": {
                           "const": true,
                           "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
@@ -8105,6 +8757,7 @@
         },
         "perception": {
           "additionalProperties": false,
+          "description": "Hides the NPC until a fact is true.",
           "properties": {
             "discovered": {
               "$ref": "#/$defs/partial.DefinitionRef",
@@ -8154,6 +8807,7 @@
       "description": "One fixed-slot, two-room bounded population with an owned wander and replacement job.",
       "properties": {
         "area": {
+          "description": "The two rooms members wander between. They must be different rooms joined by exits in both directions, with no barrier on either exit.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 2,
           "minItems": 2,
@@ -8191,12 +8845,18 @@
           "minimum": 1,
           "type": "integer"
         },
-        "home": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "home": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The room members are born in. It must be one of the two rooms in area, and the NPC template must sit in it."
+        },
         "hunts": {
           "const": true,
           "description": "Toolbox row W13: a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails."
         },
-        "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "item": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "Item copied into each member's hands at birth. Needed unless the plan has a scavenge block, which then forbids it."
+        },
         "member_role": {
           "description": "Origin role of each member; default hunter. Its directly held item has role loot.",
           "enum": [
@@ -8226,24 +8886,40 @@
         },
         "pack": {
           "additionalProperties": false,
+          "description": "Makes the members of this plan fight the player as a pack, with helpers and flight.",
           "properties": {
             "flight_below_percent": {
+              "description": "A member flees when its hp is below this percent of its maximum (1 to 100). Frightened members flee too.",
               "maximum": 100,
               "minimum": 1,
               "type": "integer"
             },
-            "flight_fare": { "const": 0 },
+            "flight_fare": {
+              "const": 0,
+              "description": "Must be 0. Nothing reads it."
+            },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told as the pack fights and flees.",
               "properties": {
                 "enemy_fled": {
                   "additionalProperties": { "$ref": "#/$defs/partial.TextKey" },
+                  "description": "Text key per exit direction, told when a member flees through that exit. Every direction leading out of an area room needs one.",
                   "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
                   "type": "object"
                 },
-                "helper_joined": { "$ref": "#/$defs/partial.TextKey" },
-                "pack_withdrew": { "$ref": "#/$defs/partial.TextKey" },
-                "primary_changed": { "$ref": "#/$defs/partial.TextKey" }
+                "helper_joined": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when another member joins a fight already under way."
+                },
+                "pack_withdrew": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the fight ends with no pack member left in it."
+                },
+                "primary_changed": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the member the player is fighting changes."
+                }
               },
               "type": "object"
             }
@@ -8251,29 +8927,35 @@
           "type": "object"
         },
         "replacement_delay": {
+          "description": "Clock units after a member dies before its slot is refilled. At least wander_interval.",
           "minimum": 1,
           "type": "integer"
         },
         "scavenge": {
           "additionalProperties": false,
+          "description": "Makes members carry loose items along a corridor to a nest. The plan must then have no item field.",
           "properties": {
             "corridor": {
+              "description": "Rooms a carrying member walks through, in order, ending at the nest room. It must include home, and each step needs an open exit both ways.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 16,
               "minItems": 2,
               "type": "array"
             },
             "drop_rooms": {
+              "description": "Rooms where members pick up a listed item lying on the floor. Each must be on the corridor.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 8,
               "minItems": 1,
               "type": "array"
             },
             "interval": {
+              "description": "Clock units between each step of a member's pickup or carry.",
               "minimum": 1,
               "type": "integer"
             },
             "items": {
+              "description": "Items members will pick up: loose in a room, not containers, and allowed to be given away. At most 8.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 8,
               "minItems": 1,
@@ -8281,28 +8963,50 @@
             },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told at each stage of scavenging.",
               "properties": {
-                "acquired": { "$ref": "#/$defs/partial.TextKey" },
-                "carrying": { "$ref": "#/$defs/partial.TextKey" },
-                "delivered": { "$ref": "#/$defs/partial.TextKey" },
-                "fallback": { "$ref": "#/$defs/partial.TextKey" },
-                "shoo": { "$ref": "#/$defs/partial.TextKey" }
+                "acquired": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when a member picks the item up."
+                },
+                "carrying": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Shown on a member's entry while it is carrying an item to the nest."
+                },
+                "delivered": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when a member puts the item in the nest."
+                },
+                "fallback": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when a member cannot finish (the nest is full or the way is blocked) and drops the item where it stands."
+                },
+                "shoo": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the player shoos a carrying member and it drops the item."
+                }
               },
               "type": "object"
             },
-            "nest": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "nest": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Container item in the last corridor room where members leave what they carried. It must have room left."
+            }
           },
           "type": "object"
         },
         "sight": {
           "additionalProperties": false,
+          "description": "Makes prey members flee a player who stays in their room. Only for member_role prey.",
           "properties": {
             "delay": {
+              "description": "Clock units after the player and a member are in the same room before the member flees, if the player is still there.",
               "minimum": 1,
               "type": "integer"
             },
             "narration": {
               "additionalProperties": { "$ref": "#/$defs/partial.TextKey" },
+              "description": "Text key per exit direction, told when the member flees that way. Every direction leading out of an area room needs one.",
               "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
               "type": "object"
             }
@@ -8368,28 +9072,42 @@
         },
         "exchange": {
           "additionalProperties": false,
+          "description": "Makes the quest a repeatable item-for-item swap with an NPC, run from a dialogue choice that has an exchange. Needs repeatable true, current_state evidence, and no deadline or offer.",
           "properties": {
-            "contribution": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "faction": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "contribution": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Player int fact (starts at 0) that totals the faction gain this quest has given. Its maximum caps the total."
+            },
+            "faction": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Player int fact raised by increment on each exchange. Must differ from contribution."
+            },
             "incoming": {
+              "description": "Item definitions the NPC hands to the player, held by the NPC at the start. Same length as outgoing.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "increment": {
+              "description": "Faction gain per exchange, cut short once contribution reaches its maximum. At most that maximum.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The NPC swapped with. It must be present, hold the incoming items, and be the dialogue's own NPC."
+            },
             "outgoing": {
+              "description": "Item definitions the player hands to the NPC. Must be exactly the items list of a room detail's harvest. Same length as incoming.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "quantity": {
+              "description": "How many items go each way in one exchange. At most the length of outgoing.",
               "maximum": 64,
               "minimum": 1,
               "type": "integer"
@@ -8399,23 +9117,39 @@
         },
         "expedition": {
           "additionalProperties": false,
+          "description": "Makes the quest a guarded walk along a fixed route, with a shelter stop on the way. The objective evidence must be expedition and the quest takes no offer, repeatable, deadline, exchange or patrol.",
           "properties": {
             "actions": {
               "additionalProperties": false,
+              "description": "Keys of the scripted expedition actions that offer each stage.",
               "properties": {
-                "restart": { "$ref": "#/$defs/Key" },
-                "shelter": { "$ref": "#/$defs/Key" },
-                "start": { "$ref": "#/$defs/Key" }
+                "restart": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that restarts after a failed attempt."
+                },
+                "shelter": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that takes shelter."
+                },
+                "start": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that starts the attempt."
+                }
               },
               "type": "object"
             },
-            "faction": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "faction": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Player int fact changed by faction_delta when the expedition completes."
+            },
             "faction_delta": {
+              "description": "Added to the faction fact on completion. Always negative, from -100 to -1.",
               "maximum": -1,
               "minimum": -100,
               "type": "integer"
             },
             "footprint": {
+              "description": "Rooms the attempt may stay in. Entering any other room fails the attempt. At least 2, no repeats, and it includes start_room.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 32,
               "minItems": 2,
@@ -8423,23 +9157,52 @@
             },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told as the expedition goes.",
               "properties": {
-                "completed": { "$ref": "#/$defs/partial.TextKey" },
-                "failed": { "$ref": "#/$defs/partial.TextKey" },
-                "restart": { "$ref": "#/$defs/partial.TextKey" },
-                "shelter": { "$ref": "#/$defs/partial.TextKey" },
-                "start": { "$ref": "#/$defs/partial.TextKey" }
+                "completed": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the last step is walked."
+                },
+                "failed": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the attempt fails, such as by entering a room outside footprint."
+                },
+                "restart": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when a failed attempt is restarted."
+                },
+                "shelter": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the player takes shelter."
+                },
+                "start": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the attempt starts."
+                }
               },
               "type": "object"
             },
-            "population": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "population": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Population plan (with a pack) whose hunter member, if one is in the start room, opens a fight when an attempt starts or restarts."
+            },
             "route": {
+              "description": "Steps the player must walk in order, each from one room to the next by the named exit. At least 3; the first starts at start_room and each starts where the last ended.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
-                  "direction": { "$ref": "#/$defs/Key" },
-                  "from": { "$ref": "#/$defs/DefinitionRef" },
-                  "to": { "$ref": "#/$defs/DefinitionRef" }
+                  "direction": {
+                    "$ref": "#/$defs/Key",
+                    "description": "Exit taken from the room. It must lead to the step's to room and not be hidden."
+                  },
+                  "from": {
+                    "$ref": "#/$defs/DefinitionRef",
+                    "description": "Room this step leaves."
+                  },
+                  "to": {
+                    "$ref": "#/$defs/DefinitionRef",
+                    "description": "Room this step arrives in."
+                  }
                 },
                 "required": [
                   "from",
@@ -8452,11 +9215,26 @@
               "minItems": 1,
               "type": "array"
             },
-            "shelter_detail": { "$ref": "#/$defs/Key" },
-            "shelter_room": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "start_detail": { "$ref": "#/$defs/Key" },
-            "start_room": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "survived_fact": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "shelter_detail": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the detail in shelter_room that offers shelter, once three route steps are walked."
+            },
+            "shelter_room": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Room where the player may take shelter. It must be route[2].to."
+            },
+            "start_detail": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the detail in start_room that offers start and restart."
+            },
+            "start_room": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Room where the walk begins. Its start_detail starts and restarts the attempt, and it must be in footprint."
+            },
+            "survived_fact": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Player bool fact (default false) set true when the last step is walked."
+            }
           },
           "type": "object"
         },
@@ -8486,6 +9264,7 @@
               "anyOf": [
                 {
                   "additionalProperties": false,
+                  "description": "The offer draws on a fixture in a room: the player must be in that room and see it.",
                   "properties": {
                     "detail": {
                       "$ref": "#/$defs/Key",
@@ -8501,6 +9280,7 @@
                 },
                 {
                   "additionalProperties": false,
+                  "description": "The offer draws on an NPC: the player must be in its room with it alive and in view.",
                   "properties": {
                     "kind": { "const": "npc" },
                     "npc": {
@@ -8518,32 +9298,46 @@
         },
         "patrol": {
           "additionalProperties": false,
+          "description": "Makes an NPC walk a looping route that the player follows from room to room. The quest is complete once required checkpoints are reached together.",
           "properties": {
             "checkpoints": {
+              "description": "Rooms where arriving together with the NPC counts once toward required.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "initial_cursor": {
+              "description": "Index in route of the room the NPC starts in.",
               "maximum": 63,
               "minimum": 0,
               "type": "integer"
             },
-            "narration": { "$ref": "#/$defs/partial.TextKey" },
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "narration": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key told when the patrol completes, naming the player and the NPC leader."
+            },
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The NPC who leads. It starts in route[initial_cursor], has no hp, attack or daily_schedule, and no other quest may patrol it."
+            },
             "required": {
+              "description": "How many different checkpoint rooms the player must reach with the NPC to complete the patrol.",
               "maximum": 64,
               "minimum": 1,
               "type": "integer"
             },
             "route": {
+              "description": "Rooms the NPC visits in order, looping back to the first. Each step needs an exit to the next room that is not hidden or a climb.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 2,
               "type": "array"
             },
-            "trust_fact": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "trust_fact": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Player bool fact (default false) set true when the patrol completes. No other patrol may share it."
+            }
           },
           "type": "object"
         },
@@ -8987,12 +9781,38 @@
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it."
         },
         "steps": {
-          "items": { "$ref": "#/$defs/Step" },
+          "description": "The steps in order; a `wait` splits them in time.",
+          "items": {
+            "anyOf": [
+              { "$ref": "#/$defs/Step" },
+              {
+                "additionalProperties": false,
+                "description": "Run the steps after it this many logical seconds later, as a sibling delayed rule with the same `on` and `when`; `when` is read again when they run.",
+                "properties": {
+                  "op": { "const": "wait" },
+                  "seconds": {
+                    "description": "Logical seconds, added to the rule's `after` and the waits before it.",
+                    "maximum": 2147483647,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "op",
+                  "seconds"
+                ],
+                "type": "object"
+              }
+            ]
+          },
           "type": "array"
         },
         "when": { "$ref": "#/$defs/partial.Policy" },
         "with": { "type": "object" },
-        "zone": { "$ref": "#/$defs/Key" }
+        "zone": {
+          "$ref": "#/$defs/Key",
+          "description": "A zone name: the rule becomes one copy per room listing that zone, named <rule>_<room>. Leave on.room out."
+        }
       },
       "type": "object"
     },
@@ -9001,28 +9821,38 @@
       "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
       "properties": {
         "cap": {
+          "description": "Stop moving once the destination holds this many of the items.",
           "maximum": 64,
           "minimum": 1,
           "type": "integer"
         },
         "count": {
+          "description": "The most items moved per run, lowest entity id first.",
           "maximum": 64,
           "minimum": 1,
           "type": "integer"
         },
         "every": {
+          "description": "Seconds between runs, counted from the previous due time.",
           "minimum": 1,
           "type": "integer"
         },
         "extends": { "$ref": "#/$defs/Key" },
-        "from": { "$ref": "#/$defs/partial.ItemLocation" },
+        "from": {
+          "$ref": "#/$defs/partial.ItemLocation",
+          "description": "Where the items are taken from."
+        },
         "items": {
+          "description": "The items moved on each due run.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 64,
           "minItems": 1,
           "type": "array"
         },
-        "to": { "$ref": "#/$defs/partial.ItemLocation" },
+        "to": {
+          "$ref": "#/$defs/partial.ItemLocation",
+          "description": "Where the items are put; filled until it holds cap of them."
+        },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -9363,8 +10193,14 @@
           "description": "The conserved quote resource."
         },
         "extends": { "$ref": "#/$defs/Key" },
-        "name": { "$ref": "#/$defs/partial.TextKey" },
-        "narration": { "$ref": "#/$defs/partial.TextKey" },
+        "name": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the service's name."
+        },
+        "narration": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text told when the service is used."
+        },
         "price": {
           "description": "Row kgd.70: 0 only on an entitlement with escrow, a barter.",
           "maximum": 2147483647,
@@ -9513,8 +10349,12 @@
         },
         "narration": {
           "additionalProperties": false,
+          "description": "Text told as the status is applied, ticks and ends.",
           "properties": {
-            "applied": { "$ref": "#/$defs/partial.TextKey" },
+            "applied": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told when the status is applied."
+            },
             "expired": {
               "$ref": "#/$defs/partial.TextKey",
               "description": "Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b)."
@@ -9527,7 +10367,10 @@
               "$ref": "#/$defs/partial.TextKey",
               "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name."
             },
-            "tick": { "$ref": "#/$defs/partial.TextKey" }
+            "tick": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text told on each tick of the status."
+            }
           },
           "type": "object"
         },
@@ -9542,11 +10385,13 @@
           "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick.",
           "properties": {
             "hearing": {
+              "description": "deaf: no sound cue reaches the holder.",
               "enum": [
                 "deaf"
               ]
             },
             "sight": {
+              "description": "Changes what the holder sees: blind (every room is dark), dark_sight (sees in an unlit room) or see_invisible (sees holders of an invisible status).",
               "enum": [
                 "blind",
                 "dark_sight",
@@ -9560,8 +10405,14 @@
           "additionalProperties": false,
           "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
           "properties": {
-            "attribute": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "skill": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "attribute": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The attribute whose value the seer needs; it is compared with the holder's skill level."
+            },
+            "skill": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The skill whose level the seer's attribute value must beat to see through the concealment."
+            }
           },
           "type": "object"
         },
@@ -9587,23 +10438,35 @@
       "additionalProperties": false,
       "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
       "properties": {
-        "description": { "$ref": "#/$defs/partial.TextKey" },
+        "description": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the description of the room this structure becomes."
+        },
         "extends": { "$ref": "#/$defs/Key" },
         "locks": {
           "additionalProperties": false,
+          "description": "Rules for the built room; enter is the policy a mover must meet to come in.",
           "properties": {
             "enter": { "$ref": "#/$defs/partial.Policy" }
           },
           "type": "object"
         },
         "max_per_owner": {
+          "description": "The most rooms of this structure one character may own at once; an order past it is refused.",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
-        "name": { "$ref": "#/$defs/partial.TextKey" },
-        "ruin": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "name": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key of the name of the room this structure becomes."
+        },
+        "ruin": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The status a mend cures; mending is refused unless the room has it."
+        },
         "tags": {
+          "description": "Tags the built room carries, as on a room.",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -9615,7 +10478,10 @@
           "minItems": 1,
           "type": "array"
         },
-        "weathering": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "weathering": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The status the room gets when it is raised and again when mended."
+        },
         "with": { "type": "object" }
       },
       "type": "object"
@@ -9641,7 +10507,10 @@
       "additionalProperties": false,
       "description": "Paired original boarding detail, destination, conserved fare recipient and corpse recovery rooms.",
       "properties": {
-        "action": { "$ref": "#/$defs/Key" },
+        "action": {
+          "$ref": "#/$defs/Key",
+          "description": "Key of the scripted action that boards this transport. It must be a use_transport action on inspectable details taking route and quoted_fare."
+        },
         "currency": {
           "$ref": "#/$defs/partial.DefinitionRef",
           "description": "The fare resource."
@@ -9661,8 +10530,14 @@
           "minimum": 0,
           "type": "integer"
         },
-        "name": { "$ref": "#/$defs/partial.TextKey" },
-        "narration": { "$ref": "#/$defs/partial.TextKey" },
+        "name": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key for the boarding action and its offer label."
+        },
+        "narration": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key told when the player makes the passage."
+        },
         "recipient": {
           "$ref": "#/$defs/partial.DefinitionRef",
           "description": "The conserved fare recipient."
@@ -9673,7 +10548,10 @@
           "maxItems": 64,
           "type": "array"
         },
-        "reverse": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "reverse": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The paired return transport: boards at this one's destination, goes back to its room, with the same recipient and currency."
+        },
         "room": {
           "$ref": "#/$defs/partial.DefinitionRef",
           "description": "The boarding room."
@@ -9731,8 +10609,14 @@
       "additionalProperties": false,
       "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
       "properties": {
-        "initial": { "$ref": "#/$defs/BarrierState" },
-        "key_item": { "$ref": "#/$defs/DefinitionRef" },
+        "initial": {
+          "$ref": "#/$defs/BarrierState",
+          "description": "The barrier's state in a fresh world."
+        },
+        "key_item": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The item whose holder may lock and unlock this barrier."
+        },
         "keywords": {
           "description": "Words a player names it by.",
           "items": { "$ref": "#/$defs/Alias" },
@@ -9740,7 +10624,10 @@
           "minItems": 1,
           "type": "array"
         },
-        "name": { "$ref": "#/$defs/TextKey" },
+        "name": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the barrier's short description."
+        },
         "opens_when": {
           "$ref": "#/$defs/Policy",
           "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
@@ -9778,11 +10665,24 @@
         },
         "narration": {
           "additionalProperties": false,
+          "description": "Text told as the bleed starts, repeats, ticks and ends.",
           "properties": {
-            "applied": { "$ref": "#/$defs/TextKey" },
-            "expired": { "$ref": "#/$defs/TextKey" },
-            "refreshed": { "$ref": "#/$defs/TextKey" },
-            "tick": { "$ref": "#/$defs/TextKey" }
+            "applied": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told when the bleed first starts on a body."
+            },
+            "expired": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told when the bleed ends by running out."
+            },
+            "refreshed": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told when the bleed is applied again while already active."
+            },
+            "tick": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told on a tick that costs hit points."
+            }
           },
           "required": [
             "applied",
@@ -9812,6 +10712,7 @@
       "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, scripted action's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
       "properties": {
         "choice_order": {
+          "description": "The compiler's mark of a scene's written choice order; writing it is refused.",
           "items": { "type": "string" },
           "type": "array"
         },
@@ -9819,6 +10720,10 @@
           "additionalProperties": { "$ref": "#/$defs/DialogueChoice" },
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
+        },
+        "entry": {
+          "description": "An optional marker: talk to this speaker opens this dialogue and no other of theirs but keyword ones, over the inferred entry (dialogue@1). At most one per speaker; not on a keyword dialogue.",
+          "type": "boolean"
         },
         "keyword": {
           "$ref": "#/$defs/SpokenKeyword",
@@ -9864,8 +10769,12 @@
               "$ref": "#/$defs/Key",
               "description": "The choice that takes a typed answer."
             },
-            "wrong": { "$ref": "#/$defs/TextKey" },
+            "wrong": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Line told after a wrong answer."
+            },
             "wrong_limit": {
+              "description": "Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries. Needs the dialogue's quest.",
               "minimum": 1,
               "type": "integer"
             }
@@ -10025,7 +10934,10 @@
           ],
           "type": "object"
         },
-        "fuel": { "$ref": "#/$defs/FuelSpec" },
+        "fuel": {
+          "$ref": "#/$defs/FuelSpec",
+          "description": "Makes the item a lightable fuel source that burns while lit, or a supply that refuels one."
+        },
         "give_allowed": {
           "const": false,
           "description": "API1.10: false prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal."
@@ -10268,9 +11180,16 @@
               { "$ref": "#/$defs/Key" },
               {
                 "additionalProperties": false,
+                "description": "One case of the hour: where the NPC goes, and optionally why and how.",
                 "properties": {
-                  "goal": { "$ref": "#/$defs/TextKey" },
-                  "room": { "$ref": "#/$defs/DefinitionRef" },
+                  "goal": {
+                    "$ref": "#/$defs/TextKey",
+                    "description": "Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go."
+                  },
+                  "room": {
+                    "$ref": "#/$defs/DefinitionRef",
+                    "description": "The room the NPC moves to when this case is chosen."
+                  },
                   "walks": {
                     "const": true,
                     "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
@@ -10321,9 +11240,16 @@
                     { "$ref": "#/$defs/Key" },
                     {
                       "additionalProperties": false,
+                      "description": "One case of the hour: where the NPC goes, and optionally why and how.",
                       "properties": {
-                        "goal": { "$ref": "#/$defs/TextKey" },
-                        "room": { "$ref": "#/$defs/DefinitionRef" },
+                        "goal": {
+                          "$ref": "#/$defs/TextKey",
+                          "description": "Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go."
+                        },
+                        "room": {
+                          "$ref": "#/$defs/DefinitionRef",
+                          "description": "The room the NPC moves to when this case is chosen."
+                        },
                         "walks": {
                           "const": true,
                           "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
@@ -10474,6 +11400,7 @@
         },
         "perception": {
           "additionalProperties": false,
+          "description": "Hides the NPC until a fact is true.",
           "properties": {
             "discovered": {
               "$ref": "#/$defs/DefinitionRef",
@@ -10532,6 +11459,7 @@
       "description": "One fixed-slot, two-room bounded population with an owned wander and replacement job.",
       "properties": {
         "area": {
+          "description": "The two rooms members wander between. They must be different rooms joined by exits in both directions, with no barrier on either exit.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 2,
           "minItems": 2,
@@ -10568,12 +11496,18 @@
           "minimum": 1,
           "type": "integer"
         },
-        "home": { "$ref": "#/$defs/DefinitionRef" },
+        "home": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The room members are born in. It must be one of the two rooms in area, and the NPC template must sit in it."
+        },
         "hunts": {
           "const": true,
           "description": "Toolbox row W13: a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails."
         },
-        "item": { "$ref": "#/$defs/DefinitionRef" },
+        "item": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "Item copied into each member's hands at birth. Needed unless the plan has a scavenge block, which then forbids it."
+        },
         "member_role": {
           "description": "Origin role of each member; default hunter. Its directly held item has role loot.",
           "enum": [
@@ -10603,24 +11537,40 @@
         },
         "pack": {
           "additionalProperties": false,
+          "description": "Makes the members of this plan fight the player as a pack, with helpers and flight.",
           "properties": {
             "flight_below_percent": {
+              "description": "A member flees when its hp is below this percent of its maximum (1 to 100). Frightened members flee too.",
               "maximum": 100,
               "minimum": 1,
               "type": "integer"
             },
-            "flight_fare": { "const": 0 },
+            "flight_fare": {
+              "const": 0,
+              "description": "Must be 0. Nothing reads it."
+            },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told as the pack fights and flees.",
               "properties": {
                 "enemy_fled": {
                   "additionalProperties": { "$ref": "#/$defs/TextKey" },
+                  "description": "Text key per exit direction, told when a member flees through that exit. Every direction leading out of an area room needs one.",
                   "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
                   "type": "object"
                 },
-                "helper_joined": { "$ref": "#/$defs/TextKey" },
-                "pack_withdrew": { "$ref": "#/$defs/TextKey" },
-                "primary_changed": { "$ref": "#/$defs/TextKey" }
+                "helper_joined": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when another member joins a fight already under way."
+                },
+                "pack_withdrew": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the fight ends with no pack member left in it."
+                },
+                "primary_changed": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the member the player is fighting changes."
+                }
               },
               "required": [
                 "helper_joined",
@@ -10639,29 +11589,35 @@
           "type": "object"
         },
         "replacement_delay": {
+          "description": "Clock units after a member dies before its slot is refilled. At least wander_interval.",
           "minimum": 1,
           "type": "integer"
         },
         "scavenge": {
           "additionalProperties": false,
+          "description": "Makes members carry loose items along a corridor to a nest. The plan must then have no item field.",
           "properties": {
             "corridor": {
+              "description": "Rooms a carrying member walks through, in order, ending at the nest room. It must include home, and each step needs an open exit both ways.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 16,
               "minItems": 2,
               "type": "array"
             },
             "drop_rooms": {
+              "description": "Rooms where members pick up a listed item lying on the floor. Each must be on the corridor.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 8,
               "minItems": 1,
               "type": "array"
             },
             "interval": {
+              "description": "Clock units between each step of a member's pickup or carry.",
               "minimum": 1,
               "type": "integer"
             },
             "items": {
+              "description": "Items members will pick up: loose in a room, not containers, and allowed to be given away. At most 8.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 8,
               "minItems": 1,
@@ -10669,12 +11625,28 @@
             },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told at each stage of scavenging.",
               "properties": {
-                "acquired": { "$ref": "#/$defs/TextKey" },
-                "carrying": { "$ref": "#/$defs/TextKey" },
-                "delivered": { "$ref": "#/$defs/TextKey" },
-                "fallback": { "$ref": "#/$defs/TextKey" },
-                "shoo": { "$ref": "#/$defs/TextKey" }
+                "acquired": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when a member picks the item up."
+                },
+                "carrying": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Shown on a member's entry while it is carrying an item to the nest."
+                },
+                "delivered": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when a member puts the item in the nest."
+                },
+                "fallback": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when a member cannot finish (the nest is full or the way is blocked) and drops the item where it stands."
+                },
+                "shoo": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the player shoos a carrying member and it drops the item."
+                }
               },
               "required": [
                 "carrying",
@@ -10685,7 +11657,10 @@
               ],
               "type": "object"
             },
-            "nest": { "$ref": "#/$defs/DefinitionRef" }
+            "nest": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Container item in the last corridor room where members leave what they carried. It must have room left."
+            }
           },
           "required": [
             "items",
@@ -10699,13 +11674,16 @@
         },
         "sight": {
           "additionalProperties": false,
+          "description": "Makes prey members flee a player who stays in their room. Only for member_role prey.",
           "properties": {
             "delay": {
+              "description": "Clock units after the player and a member are in the same room before the member flees, if the player is still there.",
               "minimum": 1,
               "type": "integer"
             },
             "narration": {
               "additionalProperties": { "$ref": "#/$defs/TextKey" },
+              "description": "Text key per exit direction, told when the member flees that way. Every direction leading out of an area room needs one.",
               "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
               "type": "object"
             }
@@ -10790,28 +11768,42 @@
         },
         "exchange": {
           "additionalProperties": false,
+          "description": "Makes the quest a repeatable item-for-item swap with an NPC, run from a dialogue choice that has an exchange. Needs repeatable true, current_state evidence, and no deadline or offer.",
           "properties": {
-            "contribution": { "$ref": "#/$defs/DefinitionRef" },
-            "faction": { "$ref": "#/$defs/DefinitionRef" },
+            "contribution": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Player int fact (starts at 0) that totals the faction gain this quest has given. Its maximum caps the total."
+            },
+            "faction": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Player int fact raised by increment on each exchange. Must differ from contribution."
+            },
             "incoming": {
+              "description": "Item definitions the NPC hands to the player, held by the NPC at the start. Same length as outgoing.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "increment": {
+              "description": "Faction gain per exchange, cut short once contribution reaches its maximum. At most that maximum.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The NPC swapped with. It must be present, hold the incoming items, and be the dialogue's own NPC."
+            },
             "outgoing": {
+              "description": "Item definitions the player hands to the NPC. Must be exactly the items list of a room detail's harvest. Same length as incoming.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "quantity": {
+              "description": "How many items go each way in one exchange. At most the length of outgoing.",
               "maximum": 64,
               "minimum": 1,
               "type": "integer"
@@ -10830,13 +11822,24 @@
         },
         "expedition": {
           "additionalProperties": false,
+          "description": "Makes the quest a guarded walk along a fixed route, with a shelter stop on the way. The objective evidence must be expedition and the quest takes no offer, repeatable, deadline, exchange or patrol.",
           "properties": {
             "actions": {
               "additionalProperties": false,
+              "description": "Keys of the scripted expedition actions that offer each stage.",
               "properties": {
-                "restart": { "$ref": "#/$defs/Key" },
-                "shelter": { "$ref": "#/$defs/Key" },
-                "start": { "$ref": "#/$defs/Key" }
+                "restart": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that restarts after a failed attempt."
+                },
+                "shelter": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that takes shelter."
+                },
+                "start": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that starts the attempt."
+                }
               },
               "required": [
                 "start",
@@ -10845,13 +11848,18 @@
               ],
               "type": "object"
             },
-            "faction": { "$ref": "#/$defs/DefinitionRef" },
+            "faction": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Player int fact changed by faction_delta when the expedition completes."
+            },
             "faction_delta": {
+              "description": "Added to the faction fact on completion. Always negative, from -100 to -1.",
               "maximum": -1,
               "minimum": -100,
               "type": "integer"
             },
             "footprint": {
+              "description": "Rooms the attempt may stay in. Entering any other room fails the attempt. At least 2, no repeats, and it includes start_room.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 32,
               "minItems": 2,
@@ -10859,12 +11867,28 @@
             },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told as the expedition goes.",
               "properties": {
-                "completed": { "$ref": "#/$defs/TextKey" },
-                "failed": { "$ref": "#/$defs/TextKey" },
-                "restart": { "$ref": "#/$defs/TextKey" },
-                "shelter": { "$ref": "#/$defs/TextKey" },
-                "start": { "$ref": "#/$defs/TextKey" }
+                "completed": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the last step is walked."
+                },
+                "failed": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the attempt fails, such as by entering a room outside footprint."
+                },
+                "restart": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when a failed attempt is restarted."
+                },
+                "shelter": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the player takes shelter."
+                },
+                "start": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the attempt starts."
+                }
               },
               "required": [
                 "start",
@@ -10875,14 +11899,27 @@
               ],
               "type": "object"
             },
-            "population": { "$ref": "#/$defs/DefinitionRef" },
+            "population": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Population plan (with a pack) whose hunter member, if one is in the start room, opens a fight when an attempt starts or restarts."
+            },
             "route": {
+              "description": "Steps the player must walk in order, each from one room to the next by the named exit. At least 3; the first starts at start_room and each starts where the last ended.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
-                  "direction": { "$ref": "#/$defs/Key" },
-                  "from": { "$ref": "#/$defs/DefinitionRef" },
-                  "to": { "$ref": "#/$defs/DefinitionRef" }
+                  "direction": {
+                    "$ref": "#/$defs/Key",
+                    "description": "Exit taken from the room. It must lead to the step's to room and not be hidden."
+                  },
+                  "from": {
+                    "$ref": "#/$defs/DefinitionRef",
+                    "description": "Room this step leaves."
+                  },
+                  "to": {
+                    "$ref": "#/$defs/DefinitionRef",
+                    "description": "Room this step arrives in."
+                  }
                 },
                 "required": [
                   "from",
@@ -10895,11 +11932,26 @@
               "minItems": 1,
               "type": "array"
             },
-            "shelter_detail": { "$ref": "#/$defs/Key" },
-            "shelter_room": { "$ref": "#/$defs/DefinitionRef" },
-            "start_detail": { "$ref": "#/$defs/Key" },
-            "start_room": { "$ref": "#/$defs/DefinitionRef" },
-            "survived_fact": { "$ref": "#/$defs/DefinitionRef" }
+            "shelter_detail": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the detail in shelter_room that offers shelter, once three route steps are walked."
+            },
+            "shelter_room": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Room where the player may take shelter. It must be route[2].to."
+            },
+            "start_detail": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the detail in start_room that offers start and restart."
+            },
+            "start_room": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Room where the walk begins. Its start_detail starts and restarts the attempt, and it must be in footprint."
+            },
+            "survived_fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Player bool fact (default false) set true when the last step is walked."
+            }
           },
           "required": [
             "start_room",
@@ -10942,6 +11994,7 @@
               "anyOf": [
                 {
                   "additionalProperties": false,
+                  "description": "The offer draws on a fixture in a room: the player must be in that room and see it.",
                   "properties": {
                     "detail": {
                       "$ref": "#/$defs/Key",
@@ -10962,6 +12015,7 @@
                 },
                 {
                   "additionalProperties": false,
+                  "description": "The offer draws on an NPC: the player must be in its room with it alive and in view.",
                   "properties": {
                     "kind": { "const": "npc" },
                     "npc": {
@@ -10986,32 +12040,46 @@
         },
         "patrol": {
           "additionalProperties": false,
+          "description": "Makes an NPC walk a looping route that the player follows from room to room. The quest is complete once required checkpoints are reached together.",
           "properties": {
             "checkpoints": {
+              "description": "Rooms where arriving together with the NPC counts once toward required.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "initial_cursor": {
+              "description": "Index in route of the room the NPC starts in.",
               "maximum": 63,
               "minimum": 0,
               "type": "integer"
             },
-            "narration": { "$ref": "#/$defs/TextKey" },
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "narration": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key told when the patrol completes, naming the player and the NPC leader."
+            },
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The NPC who leads. It starts in route[initial_cursor], has no hp, attack or daily_schedule, and no other quest may patrol it."
+            },
             "required": {
+              "description": "How many different checkpoint rooms the player must reach with the NPC to complete the patrol.",
               "maximum": 64,
               "minimum": 1,
               "type": "integer"
             },
             "route": {
+              "description": "Rooms the NPC visits in order, looping back to the first. Each step needs an exit to the next room that is not hidden or a climb.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 2,
               "type": "array"
             },
-            "trust_fact": { "$ref": "#/$defs/DefinitionRef" }
+            "trust_fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Player bool fact (default false) set true when the patrol completes. No other patrol may share it."
+            }
           },
           "required": [
             "npc",
@@ -11587,11 +12655,37 @@
           "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it."
         },
         "steps": {
-          "items": { "$ref": "#/$defs/Step" },
+          "description": "The steps in order; a `wait` splits them in time.",
+          "items": {
+            "anyOf": [
+              { "$ref": "#/$defs/Step" },
+              {
+                "additionalProperties": false,
+                "description": "Run the steps after it this many logical seconds later, as a sibling delayed rule with the same `on` and `when`; `when` is read again when they run.",
+                "properties": {
+                  "op": { "const": "wait" },
+                  "seconds": {
+                    "description": "Logical seconds, added to the rule's `after` and the waits before it.",
+                    "maximum": 2147483647,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "op",
+                  "seconds"
+                ],
+                "type": "object"
+              }
+            ]
+          },
           "type": "array"
         },
         "when": { "$ref": "#/$defs/Policy" },
-        "zone": { "$ref": "#/$defs/Key" }
+        "zone": {
+          "$ref": "#/$defs/Key",
+          "description": "A zone name: the rule becomes one copy per room listing that zone, named <rule>_<room>. Leave on.room out."
+        }
       },
       "required": [
         "on",
@@ -11612,27 +12706,37 @@
       "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
       "properties": {
         "cap": {
+          "description": "Stop moving once the destination holds this many of the items.",
           "maximum": 64,
           "minimum": 1,
           "type": "integer"
         },
         "count": {
+          "description": "The most items moved per run, lowest entity id first.",
           "maximum": 64,
           "minimum": 1,
           "type": "integer"
         },
         "every": {
+          "description": "Seconds between runs, counted from the previous due time.",
           "minimum": 1,
           "type": "integer"
         },
-        "from": { "$ref": "#/$defs/ItemLocation" },
+        "from": {
+          "$ref": "#/$defs/ItemLocation",
+          "description": "Where the items are taken from."
+        },
         "items": {
+          "description": "The items moved on each due run.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 64,
           "minItems": 1,
           "type": "array"
         },
-        "to": { "$ref": "#/$defs/ItemLocation" }
+        "to": {
+          "$ref": "#/$defs/ItemLocation",
+          "description": "Where the items are put; filled until it holds cap of them."
+        }
       },
       "required": [
         "items",
@@ -12048,8 +13152,14 @@
           "$ref": "#/$defs/DefinitionRef",
           "description": "The conserved quote resource."
         },
-        "name": { "$ref": "#/$defs/TextKey" },
-        "narration": { "$ref": "#/$defs/TextKey" },
+        "name": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the service's name."
+        },
+        "narration": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text told when the service is used."
+        },
         "price": {
           "description": "Row kgd.70: 0 only on an entitlement with escrow, a barter.",
           "maximum": 2147483647,
@@ -12212,8 +13322,12 @@
         },
         "narration": {
           "additionalProperties": false,
+          "description": "Text told as the status is applied, ticks and ends.",
           "properties": {
-            "applied": { "$ref": "#/$defs/TextKey" },
+            "applied": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told when the status is applied."
+            },
             "expired": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b)."
@@ -12226,7 +13340,10 @@
               "$ref": "#/$defs/TextKey",
               "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name."
             },
-            "tick": { "$ref": "#/$defs/TextKey" }
+            "tick": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text told on each tick of the status."
+            }
           },
           "required": [
             "applied",
@@ -12245,11 +13362,13 @@
           "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick.",
           "properties": {
             "hearing": {
+              "description": "deaf: no sound cue reaches the holder.",
               "enum": [
                 "deaf"
               ]
             },
             "sight": {
+              "description": "Changes what the holder sees: blind (every room is dark), dark_sight (sees in an unlit room) or see_invisible (sees holders of an invisible status).",
               "enum": [
                 "blind",
                 "dark_sight",
@@ -12263,8 +13382,14 @@
           "additionalProperties": false,
           "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
           "properties": {
-            "attribute": { "$ref": "#/$defs/DefinitionRef" },
-            "skill": { "$ref": "#/$defs/DefinitionRef" }
+            "attribute": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The attribute whose value the seer needs; it is compared with the holder's skill level."
+            },
+            "skill": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The skill whose level the seer's attribute value must beat to see through the concealment."
+            }
           },
           "required": [
             "skill",
@@ -12300,22 +13425,34 @@
       "additionalProperties": false,
       "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
       "properties": {
-        "description": { "$ref": "#/$defs/TextKey" },
+        "description": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the description of the room this structure becomes."
+        },
         "locks": {
           "additionalProperties": false,
+          "description": "Rules for the built room; enter is the policy a mover must meet to come in.",
           "properties": {
             "enter": { "$ref": "#/$defs/Policy" }
           },
           "type": "object"
         },
         "max_per_owner": {
+          "description": "The most rooms of this structure one character may own at once; an order past it is refused.",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
-        "name": { "$ref": "#/$defs/TextKey" },
-        "ruin": { "$ref": "#/$defs/DefinitionRef" },
+        "name": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key of the name of the room this structure becomes."
+        },
+        "ruin": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The status a mend cures; mending is refused unless the room has it."
+        },
         "tags": {
+          "description": "Tags the built room carries, as on a room.",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -12327,7 +13464,10 @@
           "minItems": 1,
           "type": "array"
         },
-        "weathering": { "$ref": "#/$defs/DefinitionRef" }
+        "weathering": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The status the room gets when it is raised and again when mended."
+        }
       },
       "required": [
         "name",
@@ -12358,7 +13498,10 @@
       "additionalProperties": false,
       "description": "Paired original boarding detail, destination, conserved fare recipient and corpse recovery rooms.",
       "properties": {
-        "action": { "$ref": "#/$defs/Key" },
+        "action": {
+          "$ref": "#/$defs/Key",
+          "description": "Key of the scripted action that boards this transport. It must be a use_transport action on inspectable details taking route and quoted_fare."
+        },
         "currency": {
           "$ref": "#/$defs/DefinitionRef",
           "description": "The fare resource."
@@ -12377,8 +13520,14 @@
           "minimum": 0,
           "type": "integer"
         },
-        "name": { "$ref": "#/$defs/TextKey" },
-        "narration": { "$ref": "#/$defs/TextKey" },
+        "name": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key for the boarding action and its offer label."
+        },
+        "narration": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key told when the player makes the passage."
+        },
         "recipient": {
           "$ref": "#/$defs/DefinitionRef",
           "description": "The conserved fare recipient."
@@ -12389,7 +13538,10 @@
           "maxItems": 64,
           "type": "array"
         },
-        "reverse": { "$ref": "#/$defs/DefinitionRef" },
+        "reverse": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The paired return transport: boards at this one's destination, goes back to its room, with the same recipient and currency."
+        },
         "room": {
           "$ref": "#/$defs/DefinitionRef",
           "description": "The boarding room."
@@ -12689,7 +13841,10 @@
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
         },
-        "api_version": { "$ref": "#/$defs/ApiVersion" },
+        "api_version": {
+          "$ref": "#/$defs/ApiVersion",
+          "description": "The source format family this cartridge is written in; always loka/v3."
+        },
         "calendar": { "$ref": "#/$defs/Calendar" },
         "chapters": {
           "description": "Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning.",
@@ -12697,14 +13852,21 @@
           "minItems": 1,
           "type": "array"
         },
-        "entry": { "$ref": "#/$defs/DefinitionRef" },
-        "id": { "$ref": "#/$defs/CartridgeId" },
+        "entry": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The room a fresh world puts the player's body in."
+        },
+        "id": {
+          "$ref": "#/$defs/CartridgeId",
+          "description": "The cartridge's identity; every definition key and reference carries it."
+        },
         "requires": { "$ref": "#/$defs/CompatibilityRequirements" },
         "speech": {
           "additionalProperties": false,
           "description": "Word bar S2 (speech@1): phrases, the cartridge's static say words, each a speech@1 Word, offered to every actor with no fact gate; GameView projects them as phrases. In source it is cartridge.json's speech, beside world.",
           "properties": {
             "phrases": {
+              "description": "The words every player can say, as chips in the say bar.",
               "items": { "$ref": "#/$defs/Word" },
               "minItems": 1,
               "type": "array"
@@ -12716,13 +13878,20 @@
           "type": "object"
         },
         "supported_profiles": {
+          "description": "The hosting profiles this cartridge runs under; at least one (offline_private, online_private, party, shared_area).",
           "items": { "$ref": "#/$defs/ExecutionProfile" },
           "minItems": 1,
           "type": "array"
         },
         "time_policy": { "$ref": "#/$defs/TimePolicy" },
-        "title": { "type": "string" },
-        "version": { "$ref": "#/$defs/ReleaseVersion" },
+        "title": {
+          "description": "The cartridge's name as listed for the player.",
+          "type": "string"
+        },
+        "version": {
+          "$ref": "#/$defs/ReleaseVersion",
+          "description": "The cartridge's release version, MAJOR.MINOR.PATCH."
+        },
         "world": { "$ref": "#/$defs/WorldSettings" }
       },
       "required": [

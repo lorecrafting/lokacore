@@ -109,6 +109,9 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   Tab does, and so does an arriving page's title focus after keyboard use. One document-wide rule
   (`useFocusRing`, recoloured by the Book's shown palette), never a per-component style; a device
   draws no ring.
+- **Under-ink layers.** A layer that stays under the ink (`opacity.faint`, `opacity.glow`) keeps every
+  text role at 4.5:1 at its peak in every palette it shows on. Only one shows at a time, highest first:
+  the fatal hold, the low-health vignette, the lamp glow; together they would break the 4.5:1 rule.
 - **Motion and sound.** Only the effects named in
   [Effects, sound and haptics](system/book-ui.md#effects-sound-and-haptics); no other decorative
   animation. `motion.palette` is the slow cross-fade between palettes (light
@@ -139,6 +142,8 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   rule above, for the wash's half second only: at its peak `fg` stays above 7:1 and `action` and
   `danger` above 5:1, while `dim` and `warning` dip to about 3.8:1 (opacity 0.08 would keep them
   at 4.5:1 and barely show). Combat is the only place the wash appears.
+- **Falling.** The held wash is `opacity.faint`; with Flashes off it fades in over `motion.settle`.
+- **Fight music.** Stinger `sound.fightIn`, loop `sound.fightLoop` (`gap` is the fight gap), fanfare `sound.fightWon`, blow dealt `sound.impact`. A blow taken dips music by `mix.dip` with `mix.duck`'s times. Foe falling: the loop cuts over `motion.quick`; a fall-away fades over `motion.palette`. The band press is `motion.press`.
 
 ## Component catalogue
 
@@ -165,13 +170,16 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Row` | `book/Chip.tsx` | Chip |
 | `ReadingSize` | `book/Chip.tsx` | Chip |
 | `EffectSettings` | `book/Chip.tsx` | Chip |
+| `Foe` | `book/Combat.tsx` | CombatPage |
 | `Combat` | `book/Combat.tsx` | CombatPage |
+| `CreditsPage` | `book/CreditsPage.tsx` | SectionPages |
 | `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
 | `DreamPage` | `book/DreamPage.tsx` | ChapterPages |
 | `DreamResume` | `book/DreamPage.tsx` | NoticePage |
 | `Footer` | `book/Footer.tsx` | Footer |
 | `Tip` | `book/Footer.tsx` | Tip |
 | `GiltLine` | `book/GiltLine.tsx` | LogLines |
+| `Gradient` | `book/Gradient.tsx` | UnderInk |
 | `HapticPulse` | `book/HapticPulse.tsx` | HapticPulse |
 | `ItemPop` | `book/ItemPop.tsx` | LogLines |
 | `MapDrawing` | `book/MapDrawing.tsx` | Footer |
@@ -183,6 +191,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `NpcPage` | `book/Npc.tsx` | NpcPage |
 | `NpcDetail` | `book/Npc.tsx` | NpcPage |
 | `PageTurn` | `book/PageTurn.tsx` | PageTurn |
+| `RightWord` | `book/Riddle.tsx` | Riddle |
 | `Riddle` | `book/Riddle.tsx` | Riddle |
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |
 | `RunningHead` | `book/RunningHead.tsx` | Page |
@@ -192,6 +201,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
 | `Text` | `book/Text.tsx` | Note |
+| `UnderInk` | `book/UnderInk.tsx` | UnderInk |
 | `ActionCard` | `book/actions.tsx` | ActionCard |
 | `PickLists` | `book/actions.tsx` | PickList |
 | `Cards` | `book/actions.tsx` | ActionCard |
@@ -202,7 +212,6 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Note` | `book/lines.tsx` | Note |
 | `LogLines` | `book/lines.tsx` | LogLines |
 | `AwayRecap` | `book/lines.tsx` | AwayRecap |
-| `Here` | `book/lines.tsx` | RoomPage |
 | `Heard` | `book/lines.tsx` | Heard |
 | `Fault` | `book/lines.tsx` | Live |
 | `NoticePage` | `book/notices.tsx` | NoticePage |
@@ -211,6 +220,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Page` | `book/pages.tsx` | Page |
 | `PageFoot` | `book/pages.tsx` | PageFoot |
 | `SectionTitle` | `book/pages.tsx` | Page |
+| `Here` | `book/people.tsx` | RoomPage |
 | `CharacterPage` | `book/sections.tsx` | SectionPages |
 | `AncestryPage` | `book/sections.tsx` | SectionPages |
 | `CarryingPage` | `book/sections.tsx` | SectionPages |

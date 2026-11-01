@@ -17,7 +17,7 @@ const { easing } = await import('./easing.ts');
 // once did), or an unknown name falls back silently instead of failing
 // (BOOK-UI-COMPONENTS.md#page-turn, Timing).
 test('every motion easing is a curve the driver knows; an unknown name is an error', () => {
-  for (const [token, { easing: name }] of Object.entries(motion))
-    assert.doesNotThrow(() => easing(name), token);
+  for (const [token, m] of Object.entries(motion))
+    if ('easing' in m) assert.doesNotThrow(() => easing(m.easing), token); // stagger, first: no curve
   assert.throws(() => easing('bounce'), /unknown easing bounce/);
 });

@@ -13,11 +13,13 @@ rule:
     # ponytail: this guards accidental drift, not adversarial constructions (an aliased require).
     - kind: call_expression
       has: { field: function, regex: '^(import|require)$' }
+      # UnderInk loads Skia only when a page can draw it; the test rigs and a story without CanvasKit never do.
+      not: { regex: "^import\\('\\./Gradient\\.tsx'\\)$" }
     - kind: string_fragment
       inside: { matches: module-specifier }
       any:
         - not:
-            regex: '^(react|react-native|@shopify/react-native-skia|react-native-reanimated|react-native-worklets|\./page-curl\.sksl|\./sounds/[a-z0-9-]+\.m4a|\./(book/)?(Book|Blow|GiltLine|ItemPop|RunningHead|card|cardDevice|screenReader|cueSounds|samples|Body|Chip|DreamPage|Combat|actions|Footer|haptic|HapticPulse|press|lines|MapDrawing|DiscoveredMap|glyphs|Menu|NightSky|Npc|PageTurn|Riddle|SayField|SaveError|Shelf|Status|StatusIcon|buttons|chronicle|cues|easing|item-pages|journal|joystick|labels|logs|model|notices|dreams|positions|offers|pages|pick|place|palette|fade|presenter|reading|reasons|recap|received|sections|skills|snapshot|sound|title|Text|tokens|updates|useSettings|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
+            regex: '^(react|react-native|@shopify/react-native-skia|react-native-reanimated|react-native-worklets|\./page-curl\.sksl|\./sounds/[a-z0-9-]+\.m4a|\./sounds/manifest\.json|\./(book/)?(Book|Blow|CreditsPage|Gradient|UnderInk|heldLayer|credits|people|GiltLine|ItemPop|RunningHead|card|cardDevice|screenReader|cueSounds|samples|Body|Chip|DreamPage|Combat|actions|Footer|haptic|HapticPulse|press|lines|MapDrawing|DiscoveredMap|glyphs|Menu|NightSky|Npc|PageTurn|Riddle|SayField|SaveError|Shelf|Status|StatusIcon|buttons|chronicle|cueDiff|cues|easing|item-pages|journal|joystick|labels|logs|model|notices|dreams|positions|offers|pages|pick|place|palette|fade|presenter|reading|reasons|recap|received|sections|skills|snapshot|sound|title|Text|tokens|updates|useSettings|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
         # react-native: only `import { A, B } from`, every name plain and on the list. A namespace, default,
         # `{ default as X }`, aliased or string-named import, a re-export, require() or import() is flagged.
         - regex: '^react-native$'

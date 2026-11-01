@@ -44,6 +44,14 @@ no remote map knowledge. A chapter declaring ancestries starts without a selecte
 row; [D11 selection](#d11-character-choice-selected-contract) precedes ordinary player commands
 and trusted elapsed updates; world time starts at selection.
 
+## dev@1 (`kernel/ts/src/mechanics/dev/rule.ts`)
+
+The author preview's `dev_go_to_room` and `dev_set_fact`, with their refusals, in
+[cartridge.md](cartridge.md#author-preview). `stepDev` alone reaches the rule; `step` answers
+`permission_denied`, and only a host with `dev` set calls `stepDev`. Accepted: `dev_moved`
+(`entity.transfer`, `entity_entered_room`, no line, no entry sight) or `dev_fact_set` (the fact's
+ordinary assignment). Composes `movement` for the room event.
+
 ## movement@1 (`kernel/ts/src/mechanics/movement/rule.ts`)
 
 `move {direction}`: a direction outside the six compass directions is `invalid_target`
@@ -489,11 +497,20 @@ A `DialogueChoice` may carry `policy`, `then`, `then_failed`, `narration_variant
 
 - **`policy`.** The option is not drawn while it fails (`shown`, `selection.ts`), and the row keeps every choice id, so a save holds no list of what was shown. A `choose` of a hidden option is `invalid_state`. A view reads the current world. The decision whether anything is left after an answer reads the world that answer leaves, so an answer that sets a fact or moves an item changes what is drawn at once.
 - **`then`.** Instead of reopening, the same decision appends a `choice.open` of the named dialogue (its own minted id, roles and choice ids) and `choice_opened` after `choice_resolved`. The compiler refuses a target that does not exist or has a `keyword`, `quest` or `riddle`, and `then` on a `patrol` choice or in a dialogue with a `quest` or `riddle` (`lib/loka/content/dialogue_links.ex`). `then: end` closes the talk after the answer, and is refused where a dialogue is keyed `end`.
-- **Links.** A dialogue some `then` names is not offered by Talk unless it starts its chain; a chain that loops enters at its first key by sort, so every chain plays; a loop member whose speaker has no entry of their own is only reached through the loop and draws the compile warning `LOOP_SPEAKER`. A `then` target never reopens itself: an answer there without `then` ends the talk. A return to a parent is `then: <parent>`. When the target's own `policy` fails or it shows no option the talk ends after the answer, opening nothing.
+- **Links.** A dialogue some `then` names is not offered by Talk unless it starts its chain; a loop nothing outside leads to enters at its member leading to the most other dialogues (`end`, repeats and itself not counted), first by key on a tie, so every chain plays and exactly one member of such a loop is an entry, and a loop member whose speaker has no entry of their own is only reached through the loop and draws the compile warning `LOOP_SPEAKER`. **`entry: true`** on a dialogue overrides this for its speaker: Talk opens that dialogue, even one a `then` names, and none of the speaker's others except keyword ones. **Falling through:** when no entry of the speaker opens for the default Talk (its `policy` fails or it shows no choice), marked or not, Talk tries the speaker's dialogues those entries lead to, by the same test and then what those lead to, in choice key order, and is refused only when none opens (`spokenBy`, `selection.ts`). A link counts only through a `then` on a choice the actor could take for nothing: its `policy` holds and it has no `check`, `payment`, `lesson_payment`, `availability`, `hand_over`, `receive`, `exchange`, `escort`, `patrol` or `accept`, and its steps, if any, are only `narrate`, `topic.grant` or `fact.assign`. A failed intro that freely leads to a hub therefore opens the hub unless another entry opens first. A Talk that selects one dialogue (its own `name`, or a `dialogue` ref) opens that one or is refused, and a keyword dialogue does not fall through. Two for one speaker, or one on a keyword dialogue, is the compile error `ENTRY_INVALID`. The compile warning `ENTRY_GUESSED` names an unmarked entry that ties another member of its loop for most links, or one with no `policy` ahead of another of its speaker's in key order (a dialogue with its own `name` does not count for that order), and names the fall-through target where an unnamed entry with a `policy` has more than one free link to its speaker's dialogues, or a single free link down a line of dialogues with a `policy` to one that has, and `ENTRY_UNUSED` names a dialogue a marker shuts out. Installed kernel 1.140. A `then` target never reopens itself: an answer there without `then` ends the talk. A return to a parent is `then: <parent>`. When the target's own `policy` fails or it shows no option the talk ends after the answer, opening nothing.
+- **After an answer.** An answer with a `then` opens that dialogue, or ends the talk with no line if the target's policy fails, it shows no option or its speaker is hostile (`leadOn`); a dead or absent speaker's new row the farewell closes in the same decision. An answer with a `check` or `patrol` and no `then` ends the talk. A plain answer in a dialogue some `then` names ends the talk. A plain answer in any other reopening dialogue reopens it unless no option would be drawn, and then ends the talk; its policy is not read again, so past a failed policy its options show unavailable, with their codes, beside Leave the conversation (`hub`, `behavior.ts`, pinned by the `walk_economy_jail` transcript). No state of a talk lacks a way out.
 - **A check.** On a pass the choice's `then` applies; on a failure the row closes as before, the failure line stays and `then_failed` opens, if any. `then_failed` without a `check` is refused.
 - **Hand-off.** `then` may name another speaker's dialogue: the new row binds its own roles and `speaker_id`. A speaker in another room draws the compile warning `SPEAKER_ELSEWHERE`, because the proposal's farewell closes the new row in the same decision and the talk ends after the reply.
 - **`narration_variants`.** `TextVariants` on the reply: the first whose `when` holds replaces `narration`, read before the answer's effects. The narration key on the receipt is one of the choice's declared words (`dialogue-receipt.ts`).
 - **`narrate` steps.** A choice step that adds its `text` line after the reply, in step order; the key must be in the catalog.
+- **`asked`.** A source choice's `asked: true` marks it once taken without a fact of the author's: it lowers to the player fact `<dialogue>_<choice>_asked` (a name already taken or over 64 bytes, or a riddle's typed answer, is `SCHEMA_VIOLATION`; `asked_when` itself is not a source field), a `fact.assign` on its steps and the compiled `asked_when` policy. While that holds, an available option's view carries `asked: true`; it never refuses, so the Book [dims](book-ui.md) the option and it stays usable. A failed check applies no steps, so it leaves the option unasked. The save holds only the fact.
+- **Composition record, `asked`** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: the [dialogue cookbook](../guides/dialogue-cookbook.md) and the Book's option list. Later: the first authored conversation that sets it.
+  - Reads: `holds` on the player fact, for each available option.
+  - Writes: `fact.assign` through the choice's steps. Events, jobs and save rows: none new.
+  - Reused: choice steps, the `Policy` schema, `fact_compare`, the engine-fact lowering in the compiler.
+  - New: source key `asked`, compiled `asked_when`, GameView `asked`.
+  - Missing invariant: none. Named exceptions: none.
 - **Repeats.** A linked dialogue can run again, so the [hub's repeat refusal](#dialogue-skill-checks-toolbox-row-14) applies to it however many choices it has, except a choice whose own `policy` negates a fact its own steps set (`lib/loka/content/hub.ex`).
 - **Composition record.** Consumer: the dialogue rule and the GameView. Reads: dialogue definitions, facts through `holds`, the row's roles and ids, the world the decision's own writes leave. Writes, save rows and fields: none new; `choice.open` of another dialogue. Events: `choice_opened` after `choice_resolved` or `check_failed`. Reused: `holds`, `opening`, `bind`, `offered`, `openable`, `blocked`, the hub, `parted`. New: optional fields, `shown`, `linked`, `leadOn`, `replies`, the `fact_at_least` leaf, the `narrate` choice step. Invariants: none new. Exceptions: none.
 
@@ -897,7 +914,7 @@ not earn credit. Quest acceptance/rewards are later consumers of these facts.
 
 ## escort@1
 
-A following escort skips its schedule hour and any plan or NPC move (`escorting`, loka-ynfo): it stays with the player and follows the next Move.
+A following escort skips its schedule hour and any plan or NPC move (`escorting`, loka-ynfo): it stays with the player and follows the next Move, unless a decision parted it (below).
 
 API1.11 adds one actor-keyed typed escort relation. Its immutable identity is
 `{kind: escort, actor_id, body_id, npc_id, quest_instance_id, continuation_id, choice_id}`
@@ -905,11 +922,13 @@ and its status is following/separated/completed. The continuation and choice nam
 original accepted start and bind the same authored NPC. No duplicate start or identity
 swap is legal. `escort.transition {actor_id, expected, value}` compares the complete prior
 row (null at start); the only transitions are null→following, following→separated,
-separated→following and following→completed, retaining every identity field.
+separated→following and following→completed, retaining every identity field. The one exception is
+a start on a new quest instance, which replaces a separated or completed row with a fresh identity.
 
 An authored dialogue choice may declare `escort {npc, quest, transition}` where npc is
 a bound NPC role, quest is a local quest reference and transition is start/rejoin/complete.
-Start requires no existing relation, active actor quest, original living co-located NPC
+Start requires no existing relation (or one whose quest instance a repeatable quest's acceptance
+retired: that escort has ended and the start replaces it), active actor quest, original living co-located NPC
 and ordinary dialogue policy/role admission. Rejoin requires the same separated binding,
 active quest and physical presence; complete requires following, active quest and physical
 presence. Complete must resolve that dialogue's same quest. The shared predicate guards
@@ -918,10 +937,12 @@ actor's typed relation for that quest instance and supports policy and journal s
 
 Shared Move/Flee sequence appends the bound living NPC's transfer from the player's
 actual source to the same actual destination when following. Ordinary stance, exit,
-gate, fare and Flee choice/RNG remain authoritative. Invalid escort presence is a controlled
-fault/refusal, never detachment or teleport; refused/composition-failed movement changes
+gate, fare and Flee choice/RNG remain authoritative. Refused/composition-failed movement changes
 neither. Fatal player death writes following→separated in death's existing writer group
-beside shrine return, leaving NPC custody unchanged. No independent fare, roll, pathfinding
+beside shrine return, leaving NPC custody unchanged. Whatever else ends the bond (the NPC dies or
+no longer shares the player's room, or the quest ends: resolved, failed or abandoned) writes the same
+following→separated after the decision's other writes, in its own writer group, with no event or line of
+its own; a parted NPC is never moved or teleported, and Rejoin stays the only way back. A decision that itself starts or rejoins leaves that row to the next decision's sweep. A separated row whose NPC is dead or whose quest has ended stays final until a retirement: Rejoin refuses it, and the sweep says nothing, so a quest line that should fail or change when the NPC dies is the author's to react to. Installed kernel 1.139. No independent fare, roll, pathfinding
 or after-commit write exists. Completed relations never follow subsequent movement.
 
 <a id="s2-chandlers-debt-selected-contract-pending-implementation"></a>
@@ -3300,6 +3321,8 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
   - New: the `population_count` leaf, three plan fields; no foundation change.
 
 ## Delayed reactions (toolbox row FD1)
+
+A `wait` in a reaction's `steps` is source only: it lowers to these rules ([Source shortcuts](cartridge.md#source-shortcuts)), with this section's fire and cancel rules.
 
 [Toolbox row FD1](../MECHANICS-TOOLBOX.md#ranked-toolbox) (source: `docs/rnd/depth-and-ux-2026-10-13.md` gap 1): "a consequence arrives later; a rule reads how long ago something happened". The PM brief is in Beads `loka-kgd.138` (2026-10-14). [Declarations](cartridge.md#delayed-reaction-declarations) govern it. Facts hold plain values (no write time), so the row stores a time in an int fact.
 

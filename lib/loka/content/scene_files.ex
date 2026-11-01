@@ -1,4 +1,4 @@
-# size: allow 415, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
+# size: allow 423, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
 defmodule Loka.Content.SceneFiles do
   @moduledoc """
   Scene files: `scenes/<key>.scene` (or `dialogues/<key>.scene`) is one dialogue as plain text,
@@ -14,6 +14,7 @@ defmodule Loka.Content.SceneFiles do
       needs: fact          the current choice shows only while that bool fact is true
       needs: not fact      ... only while it is false
       once                 the current choice goes away once taken (`once`, DialogueOnce lowers it)
+      asked                the current choice dims once taken (`asked`, DialogueAsked lowers it)
       then: key            the current choice's `then`: that dialogue next, or `end`
       gives: bowl          the speaker hands the current choice's taker that item (`receive`,
                            with the item role it needs)
@@ -119,7 +120,8 @@ defmodule Loka.Content.SceneFiles do
   defp comes_back({forms, bad}, key, links) do
     if Enum.any?(links, &(&1.choice != "")) do
       back = Map.new(forms[key]["choices"], fn {c, o} -> {c, Map.put_new(o, "then", key)} end)
-      {put_in(forms, [key, "choices"], back), bad}
+      # Its nested sets lead back to it, so Talk would infer the widest of them; the top opens.
+      {Map.update!(forms, key, &Map.merge(&1, %{"choices" => back, "entry" => true})), bad}
     else
       {forms, bad}
     end
@@ -201,12 +203,14 @@ defmodule Loka.Content.SceneFiles do
   defp why("then" <> _ = text, %{"npc" => _}) when text != "then", do: verb(text, "bad_then")
   defp why("then", %{"npc" => _}), do: "bad_then"
   defp why("once" <> _ = text, %{"npc" => _}), do: verb(text, "bad_once")
+  defp why("asked" <> _ = text, %{"npc" => _}), do: verb(text, "bad_asked")
   defp why("- " <> _, %{"npc" => _}), do: "repeated_choice"
   # Under a choice only the speaker's own name is refused; `refuse/4` takes the rest.
   defp why("gives: " <> _, %{"npc" => _}), do: "gives_speaker"
   defp why("npc: " <> _, %{"npc" => _}), do: "misplaced_header"
   defp why("when: " <> _, %{"npc" => _}), do: "misplaced_header"
   defp why("with: " <> _, %{"npc" => _}), do: "misplaced_header"
+  defp why("entry: " <> _, %{"npc" => _}), do: "scene_entry"
   defp why("sets: " <> _, %{"npc" => _}), do: "bad_sets"
   defp why("quest: " <> _, %{"npc" => _}), do: "bad_quest"
   defp why(_, d) when not is_map_key(d, "npc"), do: "no_npc"
@@ -218,7 +222,7 @@ defmodule Loka.Content.SceneFiles do
   # `needs_x: words` is another speaker's line, not a bad `needs`.
   defp verb(text, why) do
     cond do
-      text =~ ~r/^(needs|then|once)(:|\s)/ -> why
+      text =~ ~r/^(needs|then|once|asked)(:|\s)/ -> why
       text =~ ~r/^[^\s:]+: / -> "wrong_speaker"
       true -> "not_a_line"
     end
@@ -260,6 +264,11 @@ defmodule Loka.Content.SceneFiles do
   defp line({"once", _}, {%{"npc" => _} = d, cur, bad}) when cur != nil,
     do: {put_in(d, ["choices", cur, "once"], true), cur, bad}
 
+  defp line({"asked", _}, {%{"npc" => _} = d, :refused, bad}), do: {d, :refused, bad}
+
+  defp line({"asked", _}, {%{"npc" => _} = d, cur, bad}) when cur != nil,
+    do: {put_in(d, ["choices", cur, "asked"], true), cur, bad}
+
   # What follows a refused choice is still checked, and written nowhere.
   defp line({"gives: " <> item, _} = at, {%{"npc" => npc} = d, cur, bad}) when cur != nil do
     cond do
@@ -267,7 +276,7 @@ defmodule Loka.Content.SceneFiles do
         refuse(at, d, cur, bad)
 
       cur == :refused ->
-        {d, cur, bad}
+        {put_in(d, ["roles", item], %{"role" => "item", "item" => item}), cur, bad}
 
       true ->
         {d

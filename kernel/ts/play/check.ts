@@ -37,6 +37,7 @@ function replayed(bundled: Bundled, steps: Step[]): string | undefined {
       kernel_version: `${KERNEL_ID}@${'0'.repeat(40)}`,
       newId: () => `aaaaaaaa-0000-4000-8000-${(++id).toString().padStart(12, '0')}`, // mutate-skip: any unique id
       time: frozenClock(() => moved),
+      dev: true, // a recorded cheat replays here as in the preview
     });
     return replay(steps, game, (ms) => (moved += ms)).failed;
   } finally {

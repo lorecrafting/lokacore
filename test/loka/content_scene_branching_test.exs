@@ -1,3 +1,4 @@
+# size: allow 510, every scene form shares the sampler fixture and its twin
 defmodule Loka.ContentSceneBranchingTest do
   # needs, once, then and nested choices in a `.scene` (docs/system/cartridge.md, Source
   # shortcuts). Expected JSON is hand-written; `~` stands for the words.
@@ -72,6 +73,7 @@ defmodule Loka.ContentSceneBranchingTest do
     %{
       "npc" => "bram",
       "policy" => fact_true("met_bram"),
+      "entry" => true,
       "prompt" => prose("~"),
       "roles" => %{"bram" => npc_role(), "lantern" => %{"role" => "item", "item" => "lantern"}},
       "choices" => %{
@@ -195,7 +197,7 @@ defmodule Loka.ContentSceneBranchingTest do
     text =
       "npc: bram\nbram: ~\n- Go\n  needs: saw_lantern\n  bram: ~\n  - In\n    needs: not saw_lantern\n    bram: ~\n"
 
-    assert {:ok, out, [warned]} = sampler(text)
+    assert {:ok, out, [warned, %{"code" => "ENTRY_UNUSED"}]} = sampler(text)
     assert warned["data"]["why"] == "unreachable" and warned["data"]["line"] == 7
     assert warned["severity"] == "warning"
     dialogues = JSON.decode!(out)["cartridge"]["dialogues"]
@@ -250,7 +252,7 @@ defmodule Loka.ContentSceneBranchingTest do
     add = %{"label" => prose("~"), "narration" => prose("~")}
     json = {"dialogues/scene.json", %{"choices" => %{"zed" => add, "add" => add}}}
 
-    assert {:ok, out, []} = sampler(text, [json, with_facts()])
+    assert {:ok, out, [%{"code" => "ENTRY_UNUSED"}]} = sampler(text, [json, with_facts()])
     c = JSON.decode!(out)["cartridge"]
     scene = c["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]
 
@@ -432,6 +434,70 @@ defmodule Loka.ContentSceneBranchingTest do
     assert d["choices"]["look"]["then"] == "bram"
     assert d["choices"]["bye"]["then"] == "end"
     assert d["choices"]["ask"]["then"] == "bram_ask"
+  end
+
+  # Break: a person's second nested scene has no way to compile, or the marker leaks onto a flat one.
+  test "a second nested scene is refused until a JSON frees the one another leads to" do
+    nested = "npc: bram\nbram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n"
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+    write(dir, "scenes/scene.scene", nested <> "- On\n  then: next\n  bram: ~\n")
+    write(dir, "scenes/next.scene", nested)
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [with_facts()])
+    assert Enum.all?(diags, &(&1["code"] == "ENTRY_INVALID")) and diags != []
+    assert Enum.at(Content.explained(diags, dir), 0) =~ ~s("entry": false)
+
+    write(dir, "dialogues/next.json", ~s({"entry": false}))
+    assert {:ok, built, _} = Loka.ContentSource.compile(dir, [with_facts()])
+    dialogues = JSON.decode!(built)["cartridge"]["dialogues"]
+    assert dialogues["scene_sampler@0.0.1:dialogue/scene"]["entry"] == true
+    refute dialogues["scene_sampler@0.0.1:dialogue/next"]["entry"]
+
+    assert {:ok, flat, _} = sampler("npc: bram\nbram: ~\n- Go\n  bram: ~\n")
+
+    refute Map.has_key?(
+             JSON.decode!(flat)["cartridge"]["dialogues"]["scene_sampler@0.0.1:dialogue/scene"],
+             "entry"
+           )
+  end
+
+  # Break: a JSON writing the compiler's order mark silently reorders a dialogue: beside a sorted
+  # scene, on a JSON dialogue, or in an area bundle.
+  test "choice_order written outside a scene is refused", %{tmp_dir: tmp} do
+    order = ~s("choice_order": ["b", "a"])
+    write(tmp, "scenes/s.scene", "npc: bram\nbram: ~\n- A\n  bram: ~\n- B\n  bram: ~\n")
+    write(tmp, "dialogues/s.json", "{#{order}}")
+    write(tmp, "dialogues/j.json", ~s({"npc": "bram", #{order}}))
+    write(tmp, "areas/a.json", ~s({"dialogues": {"k": {"npc": "bram", #{order}}}}))
+    {_, diags} = Source.load(tmp)
+    got = for %{"data" => %{"why" => "choice_order_written"}} = d <- diags, do: d["path"]
+
+    assert Enum.sort(got) == [
+             "areas/a.dialogues.k.choice_order",
+             "dialogues/j.choice_order",
+             "dialogues/s.choice_order"
+           ]
+  end
+
+  # Break: `asked` reads as a reply or a bad line, or lowers to nothing the view can read.
+  test "asked under a choice lowers as the JSON field does, at its own line" do
+    assert {:ok, built, _} = sampler("npc: bram\nbram: ~\n- Go\n  asked\n  bram: ~\n")
+
+    go =
+      JSON.decode!(built)["cartridge"]["dialogues"]["scene_sampler@0.0.1:dialogue/scene"][
+        "choices"
+      ]["go"]
+
+    assert go["asked_when"] == compare("scene_go_asked")
+
+    assert {:error, [%{"data" => %{"why" => "bad_asked"}}]} =
+             sampler("npc: bram\nbram: ~\n- Go\n  asked now\n  bram: ~\n")
+
+    fact = {"facts.json", &put_in(&1, ["facts", "scene_go_asked"], bool("met_bram"))}
+    go_scene = "npc: bram\nbram: ~\n- Go\n  asked\n  bram: ~\n"
+    assert {:error, [%{"data" => %{"why" => "asked_key_taken"}} = d]} = sampler(go_scene, [fact])
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+    write(dir, "scenes/scene.scene", go_scene)
+    assert hd(Content.explained([d], dir)) =~ "scenes/scene.scene:4"
   end
 
   test "a scene with no nesting gets no then of its own" do

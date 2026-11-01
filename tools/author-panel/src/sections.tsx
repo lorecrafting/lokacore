@@ -5,6 +5,7 @@ import { ask, checkpoints, type Todo as TodoRow, todo } from './author.ts';
 import type { Line, State, Step } from './book.ts';
 import { Badge } from './components/ui/badge.tsx';
 import { Button } from './components/ui/button.tsx';
+import { GoToRoom, SetFact } from './cheats.tsx';
 import { Input } from './components/ui/input.tsx';
 import { Separator } from './components/ui/separator.tsx';
 
@@ -50,7 +51,14 @@ export function Compile({ said, compiled, lint, state, send }: { said?: string[]
   );
 }
 
-type Send = (asked: { op: 'advance'; minutes: number } | { op: 'jump'; steps: Step[] } | { op: 'drop' }) => void;
+export type Send = (
+  asked:
+    | { op: 'advance'; minutes: number }
+    | { op: 'jump'; steps: Step[] }
+    | { op: 'drop' }
+    | { op: 'go_to_room'; room: string }
+    | { op: 'set_fact'; fact: string; value: boolean | number | string },
+) => void;
 /** Game time and named checkpoints; both go through the Book's own replay path. */
 export function Play({ state, send }: { state?: State; send: Send }) {
   return (
@@ -58,6 +66,19 @@ export function Play({ state, send }: { state?: State; send: Send }) {
       <GameTime state={state} send={send} />
       <Separator />
       <Checkpoints state={state} send={send} />
+      <Separator />
+      <Cheats state={state} send={send} />
+    </div>
+  );
+}
+
+/** Go to a room or set a fact by key; ordinary commands the Book decides, recorded as steps, refused words in the place note. */
+function Cheats({ state, send }: { state?: State; send: Send }) {
+  return (
+    <div>
+      <Heading>Cheats</Heading>
+      <GoToRoom state={state} send={send} />
+      <SetFact state={state} send={send} />
     </div>
   );
 }
