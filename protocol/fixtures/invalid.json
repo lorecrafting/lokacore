@@ -32449,5 +32449,25 @@
         "code": "missing_property"
       }
     ]
+  },
+  {
+    "name": "fact_at_least_fraction",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_at_least",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "f"
+      },
+      "at_least": 1.5
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]
