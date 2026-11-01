@@ -4,6 +4,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import type { Key } from '../../../kernel/ts/src/contracts.gen.ts';
 import { compiled } from './__tests__/compiled.ts';
 import { CatchUpRefusedError } from './elapsed.ts';
 import { statusOfError } from './session.ts';
@@ -29,6 +30,8 @@ function save(t: { after: (f: () => void) => void }) {
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   return join(dir, 'save.db');
 }
+
+const south = { action_key: 'move' as Key, target_ids: [], input: { direction: 'south' as Key } };
 
 // Breaks: the wall gap is credited whole, so a year away plays a year of world time.
 test('a year closed catches up one day on reopen, records the skip, and reopens', (t) => {
@@ -114,12 +117,9 @@ test('a failed COMMIT on a catch-up turn keeps the capped horizon through a reop
   const path = save(t),
     bundle = compiled('cartridges/toolbox_showcase');
   const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
-  assert.equal(
-    a.game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'south' } }).kind,
-    'saved',
-  );
+  assert.equal(a.game.invoke(south).kind, 'saved');
   a.sql.exec(FK);
-  const horizon = checkpoint(a.sql).target + 86400;
+  const horizon = Number(checkpoint(a.sql).target) + 86400;
   a.clock.wall += YEAR;
   assert.equal(a.game.pulse('resume').kind, 'catching_up');
   const wall = a.clock.wall;
@@ -155,8 +155,8 @@ test('a return with debt still retained tops it up to one cap, not past it', (t)
   const path = save(t),
     bundle = compiled('cartridges/toolbox_showcase');
   const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
-  a.game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'south' } });
-  const start = checkpoint(a.sql).target;
+  a.game.invoke(south);
+  const start = Number(checkpoint(a.sql).target);
   a.clock.wall += YEAR;
   assert.equal(a.game.pulse('resume').kind, 'catching_up');
   const drained = a.game.view().view.time;
