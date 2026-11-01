@@ -230,7 +230,7 @@
             "kind": {
               "const": "entity"
             },
-            "scopes": {
+            "scopes": {"description":"Where the target is looked for: self, inventory, room_contents, room_occupants or inspectable_details.",
               "type": "array",
               "items": {
                 "enum": [
@@ -565,16 +565,16 @@
     "ScriptedTarget": {
       "description": "What a ScriptedAction acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the scripted action keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them.",
       "oneOf": [
-        {
+        {"description":"The action acts on one detail of a room, offered only while the actor is in that room.",
           "type": "object",
           "properties": {
             "kind": {
               "const": "detail"
             },
-            "room": {
+            "room": {"description":"The room that holds the detail.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "detail": {
+            "detail": {"description":"The detail's key in that room's details.",
               "$ref": "#/$defs/Key"
             }
           },
@@ -585,7 +585,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"The action uses a tool the actor holds on another item.",
           "type": "object",
           "properties": {
             "kind": {
@@ -608,16 +608,16 @@
             "kind": {
               "const": "spell"
             },
-            "word": {
+            "word": {"description":"The word the player types to cast it.",
               "$ref": "dialogue.schema.json#/$defs/SpokenKeyword"
             },
-            "learned": {
+            "learned": {"description":"A bool fact; the word works for a caster only while it reads true for them.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "aimed": {
+            "aimed": {"description":"Makes it an aimed spell, cast at one target; without it the spell takes no target.",
               "type": "object",
               "properties": {
-                "scopes": {
+                "scopes": {"description":"Where the target is looked for: the caster's room occupants, room contents or inventory.",
                   "type": "array",
                   "items": {
                     "enum": ["room_occupants", "room_contents", "inventory"]
@@ -1104,13 +1104,13 @@
     "NarrationParticipant": {
       "description": "An entity a scripted action's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE.",
       "oneOf": [
-        {
+        {"description":"An NPC of this cartridge.",
           "type": "object",
           "properties": {
             "role": {
               "const": "npc"
             },
-            "npc": {
+            "npc": {"description":"The NPC definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -1120,13 +1120,13 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"An item of this cartridge.",
           "type": "object",
           "properties": {
             "role": {
               "const": "item"
             },
-            "item": {
+            "item": {"description":"The item definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -1136,7 +1136,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"The player's own body.",
           "type": "object",
           "properties": {
             "role": {
@@ -1168,7 +1168,7 @@
       "description": "What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
       "type": "object",
       "properties": {
-        "consume": {
+        "consume": {"description":"What the actor gives up on every accepted perform, failure included.",
           "type": "object",
           "properties": {
             "items": {"description":"The items that can be consumed.",
@@ -1184,7 +1184,7 @@
               "minimum": 1,
               "maximum": 16
             },
-            "to": {
+            "to": {"description":"Where the consumed items go: the holder they are moved to.",
               "$ref": "entity.schema.json#/$defs/ItemLocation"
             },
             "reason": {"description":"The refusal text shown when the actor holds too few.",
@@ -1194,10 +1194,10 @@
           "required": ["items", "quantity", "to"],
           "additionalProperties": false
         },
-        "yield": {
+        "yield": {"description":"What the actor receives unless the outcome is failure.",
           "type": "object",
           "properties": {
-            "items": {
+            "items": {"description":"The items that can be yielded; one of them, directly in the holder, moves to the actor's body.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -1205,7 +1205,7 @@
               "minItems": 1,
               "maxItems": 64
             },
-            "from": {
+            "from": {"description":"The holder the yielded item is taken from.",
               "$ref": "entity.schema.json#/$defs/ItemLocation"
             }
           },

@@ -65,10 +65,10 @@
               "minItems": 1,
               "maxItems": 32
             },
-            "wrong": {
+            "wrong": {"description":"Line told after a wrong answer.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "wrong_limit": {
+            "wrong_limit": {"description":"Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries. Needs the dialogue's quest.",
               "type": "integer",
               "minimum": 1
             }
@@ -148,13 +148,13 @@
     "DialogueRole": {
       "description": "A dialogue role's participant, as action.schema.json NarrationParticipant's npc or item branch (the actor is implicit): an NPC or item of this cartridge (else UNRESOLVED_REFERENCE).",
       "oneOf": [
-        {
+        {"description":"An NPC of this cartridge takes this role.",
           "type": "object",
           "properties": {
             "role": {
               "const": "npc"
             },
-            "npc": {
+            "npc": {"description":"The NPC definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -164,13 +164,13 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"An item of this cartridge takes this role.",
           "type": "object",
           "properties": {
             "role": {
               "const": "item"
             },
-            "item": {
+            "item": {"description":"The item definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -245,10 +245,10 @@
         "availability": {"description":"Time limits on offering the choice.",
           "type": "object",
           "properties": {
-            "from": {
+            "from": {"description":"First logical time the choice is offered.",
               "$ref": "command.schema.json#/$defs/LogicalTime"
             },
-            "through": {
+            "through": {"description":"Last logical time the choice is offered, inclusive.",
               "$ref": "command.schema.json#/$defs/LogicalTime"
             }
           },
