@@ -123,3 +123,14 @@ Triage of the ten `/code-review` findings:
 8. `fall_through.ts:19`: follows the PM's rule. No action.
 9. `fall_through.ts:27`: choice keys cannot be integer-like and canonical order holds. No action.
 10. `fall_through.ts:31`: unmeasured estimate, speakers in the room only. File, low.
+
+## Fix check: head `b28db1661f8d74d36247ece3954bd3145c394b15`
+
+**Verdict: APPROVE WITH NOTES.** Blocker closed; the other nine findings are filed as loka-vduxr.27 (coordinator's report; not read in Beads). CI at this head (`gh run list --commit`): graph-diff, ci, book-e2e completed success.
+
+- `kernel/ts/src/mechanics/dialogue/selection.ts:173` now skips `d.name`. Named `guard` and plain `z_intro`, both shut: Talk opens `hub`'s line. Dropping the clause: `dialogue_branching.test.ts` 26 of 27. New shared row in `test/fixtures/dialogue_entry_cases.json`; `content_dialogue_links_test.exs` 15 green.
+- Merge `b28db1661`: `--remerge-diff` shows only `kernel_api` 1.139 to 1.140, the review index, the regenerated `.sql` stories and one resolved `mechanics.md` line. No file under `kernel/ts/src/mechanics/dialogue` or `lib/loka/content` differs from `be7698e7f`. The escort files in the merge come from main (#555).
+
+**Second opinion: required.** [Review count](../WORKFLOW.md#review-count) names protocol contracts, with no additive carve-out (the #560 ruling). This PR adds `entry` to `protocol/dialogue.schema.json` and three codes to `protocol/cartridge.schema.json`. The selection change alone would not: it alters which dialogue opens, not a contract or a save.
+
+**Small should-fix. The spec does not state the fix.** `docs/system/mechanics.md:500`, Falling through: "those entries" still reads as every entry, so an author of a named entry with a free link expects the plain Talk to follow it; the code skips it. Add "unnamed", or fix in place; no fix round.
