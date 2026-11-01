@@ -896,7 +896,11 @@ build. The author tools below are reachable only in that bundle (a production ex
   lowered by [Source shortcuts](#source-shortcuts) into today's dialogue or scene JSON and `text.json`
   keys before any other pass; what it cannot say stays in a JSON file of the same key. Errors name the
   scene file and line, with `data.why` for a bad line (`npc` beside it once known); the other lines
-  of the file still lower, so a fault behind a bad line reports in the same compile. A `gives:`
+  of the file still lower, so a fault behind a bad line reports in the same compile. `needs:` (`<fact>` or `not <fact>`), `once` and `then:` (a key or `end`) lower on a choice; a
+  deeper `- ` under a reply lowers to the dialogue `<key>_<choice>`, whose `then` the parent takes.
+  `once` lowers in the compile pipeline for every dialogue: the engine fact `<key>_<choice>_done`,
+  a `fact.assign` step, and a policy `not` of it (under `all` beside an authored policy). A JSON of
+  the same key (a nested set's included) is refused `scene_overlap` for any field the scene writes. A `gives:`
   declares its item role. A `gives:` whose item does not start with the scene's NPC is a warning
   `OUTCOME_MISMATCH` (`data.item`, `data.holder`): the choice stays hidden until play moves it there.
   Schema refusals carry hint data for those words: `valid` on `UNKNOWN_FIELD`, `expected` (and an

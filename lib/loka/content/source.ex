@@ -1,4 +1,4 @@
-# size: allow 370, the scene-file and cutscene entries, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 405, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -47,7 +47,7 @@ defmodule Loka.Content.Source do
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
     {files, diags} = read(dir)
-    replaced = steps_over_cut(files)
+    replaced = steps_over_cut(files) ++ words_over_scene(files)
     files = SceneFiles.merge(files)
     untriggered = untriggered(files)
     {files, opened} = Areas.split(files, dirs())
@@ -67,7 +67,7 @@ defmodule Loka.Content.Source do
   defp read(dir) do
     {files, diags} = dir |> SourceFiles.paths() |> Enum.map(&entry(&1, dir)) |> Enum.unzip()
 
-    {Enum.reject(files, &is_nil/1), List.flatten(diags)}
+    {files |> List.flatten() |> Enum.reject(&is_nil/1), List.flatten(diags)}
   end
 
   defp bundle_diag({code, location, data}), do: diag(code, at(location, []), data)
@@ -85,18 +85,20 @@ defmodule Loka.Content.Source do
   defp entry(rel, {:scene_file, id}, dir) do
     text = File.read!(Path.join(dir, rel))
 
-    {value, bad} =
-      if elem(id, 0) == :scene, do: CutFiles.parse(text), else: SceneFiles.parse(text)
+    {files, bad} = scene_forms(rel, id, text)
+    {_, _, value} = hd(files)
 
     diags =
-      for {n, text, why} <- bad do
+      for fault <- bad do
+        [n, text, why | key] = Tuple.to_list(fault)
         speaker = if value["npc"], do: %{"npc" => value["npc"]}, else: %{}
-        data = Map.merge(speaker, %{"line" => n, "text" => text, "why" => why})
+        named = if key == [], do: %{}, else: %{"key" => hd(key)}
+        data = Map.merge(speaker, Map.merge(named, %{"line" => n, "text" => text, "why" => why}))
         bad = diag("SCHEMA_VIOLATION", at(rel, []), data)
         if why == "cut_scene_line", do: Map.put(bad, "severity", "warning"), else: bad
       end
 
-    {{rel, id, value}, diags}
+    {files, diags}
   end
 
   defp entry(rel, kind, dir) do
@@ -104,6 +106,20 @@ defmodule Loka.Content.Source do
       {value, [], ""} -> checked(rel, kind, value)
       _ -> {{rel, kind, :invalid}, [diag("INVALID_JSON", at(rel, []))]}
     end
+  end
+
+  defp scene_forms(rel, {:scene, _, _} = id, text) do
+    {value, bad} = CutFiles.parse(text)
+    {[{rel, id, value}], bad}
+  end
+
+  # A nested set is one more dialogue, loaded under a path beside its scene (SceneFiles.rel/2).
+  defp scene_forms(rel, {:dialogue, key, []}, text) do
+    {forms, bad} = SceneFiles.parse(text, key)
+
+    {for {k, value} <- forms do
+       {if(k == key, do: rel, else: SceneFiles.rel(rel, k)), {:dialogue, k, []}, value}
+     end, bad}
   end
 
   defp checked(rel, kind, value) do
@@ -215,6 +231,13 @@ defmodule Loka.Content.Source do
     end
   end
 
+  defp words_over_scene(files) do
+    for {json, path, key} <- SceneFiles.overlap(files) do
+      data = %{"why" => "scene_overlap", "key" => key, "written" => Enum.join(path, ".")}
+      diag("SCHEMA_VIOLATION", at(json, path), data)
+    end
+  end
+
   # A `.cut` with no `on` would never start, and the schema cannot say so plainly.
   defp untriggered(files) do
     for {rel, {:scene, key, _}, value} <- files,
@@ -319,6 +342,14 @@ defmodule Loka.Content.Source do
     "pattern" => "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$"
   }
 
+  # Source only (DialogueOnce lowers it to a fact, a step and a policy).
+  @choice_once %{
+    "description" =>
+      "This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset.",
+    "type" => "boolean",
+    "enum" => [true]
+  }
+
   # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
   def contracts do
     defs = Loka.Core.Contracts.defs()
@@ -326,6 +357,7 @@ defmodule Loka.Content.Source do
     defs
     |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
     |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
+    |> put_in(["DialogueChoice", "properties", "once"], @choice_once)
     |> schedule(defs)
     |> Map.update!(
       "LiquidRow",

@@ -63,10 +63,23 @@ defmodule Loka.Content.Explain do
          gives_outside_choice | Line `{text}`: `gives:` belongs under a choice. | Move it under a `- ` line.
          misplaced_header | Line `{text}`: `npc:` comes first, then `when:` and `with:`, before any choice. | Move it to the top of the file.
          no_npc | Line `{text}` comes before the speaker is named. | Start the file with `npc: <key>`.
-         not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:` or `quest:` (docs/guides/writing-the-game.md).
+         not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:`, `quest:`, `needs:`, `once` or `then:` (docs/guides/writing-the-game.md).
          file_name | This file's name cannot be a key. | Rename it with lowercase letters, digits and underscores.
          outside_choice | Line `{text}` belongs under a choice. | Move it under a `- ` line.
-         not_yet | Line `{text}`: `needs`, `once`, `then` and nested choices are not available yet. | Remove it, or write the branch as its own scene.
+         bad_indent | Line `{text}` does not line up under a choice. | Indent with spaces: a nested `- ` goes deeper than its choice, its lines deeper still, and a choice lines up with the ones beside it.
+         bad_needs | Line `{text}` is not `needs: <fact>` or `needs: not <fact>`, or repeats a `needs:`. | Give a choice one `needs:` naming one fact by its key; `~` holds the place of words, not of a fact. Anything richer goes in `policy` in `dialogues/<key>.json`.
+         needs_outside_choice | Line `{text}`: `needs:` belongs under a choice. | Move it under a `- ` line, or use `when:` for the whole scene.
+         unreachable | Line `{text}` can never be true here: the `when:` or a choice above it needs the opposite. | Remove it, change the fact, or move this choice out from under that one.
+         bad_once | Line `{text}` is not `once`. | Write the one word `once` under the choice.
+         once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
+         once_key_long | `once` here would make the fact `{key}`, longer than 64 characters. | Shorten the choice's words or the scene's key.
+         bad_then | Line `{text}` is not `then: <key>` or `then: end`, or repeats a `then:`. | Name one dialogue by its key, or `end`; `~` holds the place of words, not of a key.
+         then_outside_choice | Line `{text}`: `then:` belongs under a choice. | Move it under a `- ` line.
+         then_and_nested | Line `{text}`: this choice already goes on to its nested choices. | Remove the `then:`, or remove the nested choices.
+         nested_key_long | Line `{text}` opens the dialogue `{key}`, longer than 64 characters. | Shorten this choice's words or the ones above it.
+         nested_no_reply | Line `{text}` has no reply above it to open on. | Add the speaker's reply under the choice above, before its first nested `- `.
+         unknown_dialogue | `then` names `{target}`, and no dialogue has that key. | Add `scenes/{target}.scene`, fix the spelling, or write `then: end`.
+         scene_overlap | `{written}` is also written in the scene `{key}`, and this file would replace it. | Remove it from this file and keep it in the scene.
          bad_sets | Line `{text}` is not `sets: <fact> [<value>]`. | A fact is a key (lowercase letters, digits, underscores); a value is `true`, `false`, a whole number or a key. `~` holds the place of words, not of these.
          bad_quest | Line `{text}` is not `quest: accept <key>` or `quest: resolve <key>`, or repeats an accept. | Write one `quest:` line per choice with one of those forms; a quest is a key (lowercase letters, digits, underscores). `~` holds the place of words, not of a key.
          resolve_not_all | Line `{text}`: `quest: resolve` needs every choice in the scene to resolve the same quest. | Add the same line under every choice, or remove it.
@@ -146,7 +159,7 @@ defmodule Loka.Content.Explain do
       else: @words["UNKNOWN_FIELD"]
   end
 
-  defp entry("UNRESOLVED_REFERENCE", %{"data" => %{"target" => t}}) do
+  defp entry("UNRESOLVED_REFERENCE", %{"path" => path, "data" => %{"target" => t}}) do
     case target(t) do
       %{"kind" => "fact"} ->
         @words["unknown_fact"]
@@ -155,7 +168,9 @@ defmodule Loka.Content.Explain do
         @words["unknown_kind"]
 
       _ ->
-        @words["UNRESOLVED_REFERENCE"]
+        if String.ends_with?(path, [".then", ".then_failed"]),
+          do: @words["unknown_dialogue"],
+          else: @words["UNRESOLVED_REFERENCE"]
     end
   end
 

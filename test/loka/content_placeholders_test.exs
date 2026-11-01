@@ -45,6 +45,8 @@ defmodule Loka.ContentPlaceholdersTest do
         in_a_reply: "elder: Asked.\n- Yes\nelder: first\nelder: ~",
         narration: "* ~\nelder: Asked.\n- Yes\nelder: Granted.",
         reply_narration: "elder: Asked.\n- Yes\n* ~",
+        nested_prompt: "elder: Asked.\n- Yes\n  elder: ~\n  - In\n    elder: Fine.",
+        nested_reply: "elder: Asked.\n- Yes\n  elder: Fine.\n  - In\n    elder: ~",
         second_speaker: "with: smith\nelder: Asked.\nsmith: ~\n- Yes\nelder: Granted."
       ] do
     test "a release compile refuses a scene's #{form}", %{tmp_dir: tmp} do

@@ -55,12 +55,19 @@ test('a scene placeholder is listed in every form the release compile refuses', 
     join(dir, 'scenes/b.scene'),
     'npc: elder\nwith: bram\n* ~\nbram:  ~\n- Go\n  sets: tally ~\n  quest: accept ~\n  sets: lit\n  * one\n',
   );
+  // Break: a `~` in a branching form (a nested reply, `needs:`, `then:`) is not listed, or `once`
+  // and a written `then:` count as prose.
+  writeFileSync(
+    join(dir, 'scenes/branch.scene'),
+    'npc: elder\nelder: Asked.\n- Go\n  needs: ~\n  once\n  elder: Fine.\n  - In\n    then: ~\n    elder: ~\n- Off\n  then: end\n  elder: Fine.\n',
+  );
   writeFileSync(join(dir, 'scenes/c.cut'), 'one\n~\n\n~\n---\n');
   writeFileSync(join(dir, 'scenes/done.scene'), 'npc: elder\nelder: All ~ written.\n');
   writeFileSync(join(dir, 'text.json'), '{"a": "one\\n ~"}');
   assert.deepEqual(todo(dir), [
     { file: 'scenes/a.scene', words: 4, placeholders: ['line 4', 'line 6'] },
     { file: 'scenes/b.scene', words: 2, placeholders: ['line 3', 'line 4', 'line 6', 'line 7'] },
+    { file: 'scenes/branch.scene', words: 6, placeholders: ['line 4', 'line 8', 'line 9'] },
     { file: 'scenes/c.cut', words: 1, placeholders: ['line 2', 'line 4'] },
     { file: 'text.json', words: 1, placeholders: ['a'] },
   ]);

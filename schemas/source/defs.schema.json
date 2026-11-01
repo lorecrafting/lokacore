@@ -1184,6 +1184,11 @@
           "description": "Text key of what the actor reads on choosing."
         },
         "narration_variants": { "$ref": "#/$defs/TextVariants" },
+        "once": {
+          "description": "This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset.",
+          "enum": [true],
+          "type": "boolean"
+        },
         "patrol": {
           "additionalProperties": false,
           "description": "A patrol transition.",
@@ -5308,6 +5313,11 @@
           "description": "Text key of what the actor reads on choosing."
         },
         "narration_variants": { "$ref": "#/$defs/TextVariants" },
+        "once": {
+          "description": "This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset.",
+          "enum": [true],
+          "type": "boolean"
+        },
         "patrol": {
           "additionalProperties": false,
           "description": "A patrol transition.",

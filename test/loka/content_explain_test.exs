@@ -1,4 +1,4 @@
-# size: allow 510, one catalog walked row by row; each row is its own small test
+# size: allow 530, one catalog walked row by row; each row is its own small test
 defmodule Loka.ContentExplainTest do
   # What an author reads from a refused compile (loka-vduxr A1, A9). Expected fragments are
   # hand-written; wording around them may move.
@@ -280,7 +280,28 @@ defmodule Loka.ContentExplainTest do
   # Break: a part written over several lines reports its last line, not where it starts.
   test "a multi-line part reports the line it starts on" do
     text = "npc: bram\nbram: one\nbram: two\nbram: three\n"
-    assert {["prompt"], 2} in Loka.Content.SceneFiles.lines(text)
+    assert [{"hi", found}] = Loka.Content.SceneLines.lines(text, "hi")
+    assert {["prompt"], 2} in found
+  end
+
+  # Break: a `needs:` naming no fact, also once wrapped under `all`, points anywhere but its line.
+  test "an unknown needs fact names its own line", %{tmp_dir: dir} do
+    text = "npc: bram\nbram: hi\n- Go\n  needs: nope\n  once\n  bram: ok\n"
+    assert dir |> scene(text) |> line_at("scenes/hi.scene:4") =~ "nope"
+  end
+
+  # Break: a missing `then` target reads as a missing text key, or points anywhere else.
+  test "then to a missing dialogue says to add the scene", %{tmp_dir: dir} do
+    text = "npc: bram\nbram: hi\n- Go\n  then: nope\n  bram: ok\n"
+    assert dir |> scene(text) |> line_at("scenes/hi.scene:4") =~ "scenes/nope.scene"
+  end
+
+  # Break: a fault in a nested dialogue reports its made-up file, not the one being written.
+  test "a fault in a nested choice names the real file and line", %{tmp_dir: dir} do
+    text = "npc: bram\nbram: hi\n- Go\n  bram: ok\n  - In\n    bram: x\n    then: nope\n"
+    lines = scene(dir, text)
+    assert line_at(lines, "scenes/hi.scene:7") =~ "nope"
+    refute Enum.any?(lines, &(&1 =~ "hi_go.scene"))
   end
 
   # Break: the item role overwrites the npc role, so a real npc is reported as missing.

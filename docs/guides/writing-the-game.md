@@ -69,7 +69,46 @@ bram: line two
 - `quest: resolve bridge_job` ends the quest, with the choice as its outcome. Every choice in the
   scene must carry the same line, or the compile refuses it.
 
-`needs`, `once`, `then` and nested choices are not available yet; the compile says so.
+A choice can also say when it shows and where it goes next:
+
+```
+npc: maud
+maud: ~
+- choice one
+  needs: met_maud
+  once
+  maud: ~
+  - nested one
+    needs: not door_open
+    maud: ~
+  - nested two
+    maud: ~
+- choice two
+  then: branch_next
+  maud: ~
+- choice three
+  then: end
+  maud: ~
+```
+
+- `needs: met_maud` shows the choice only while that true/false fact is true; `needs: not met_maud`
+  only while it is false. Anything richer (either of two facts, a number, an item) goes in a
+  `policy` in `dialogues/<key>.json`.
+- `once` hides the choice after the player takes it. It makes a fact of its own,
+  `<key>_<choice>_done`; do not declare it.
+- `then: branch_next` plays the dialogue `branch_next` next; `then: end` closes the talk. A choice
+  with no `then` also closes it, or comes back to these choices if the dialogue is a hub.
+- A `- ` indented under a choice's reply opens nested choices: its own dialogue, keyed
+  `<key>_<choice>` (here `branching_choice_one`). The reply is what the player reads above them, so
+  it must be written first, and the nested choices are shown next. Going back to a shallower `- `
+  at the same indent as an earlier choice closes what is deeper. A choice has either nested
+  choices or a `then`, not both. Indent with spaces; a tab is refused.
+- A `needs:` that can never hold, because the `when:` or a choice above asks the opposite and the
+  file never sets that fact, is refused.
+
+A JSON of the same key may add what a scene cannot say, but it may not write a field the scene
+already writes (the prompt, the speaker, a choice's words): the compile names the field and asks you
+to keep it in one place.
 
 ### Write a cutscene
 

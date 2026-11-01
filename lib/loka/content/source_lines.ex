@@ -1,7 +1,7 @@
 defmodule Loka.Content.SourceLines do
   @moduledoc "Where each source path sits: a JSON scan and a scene's own lines, for the compiler's words."
 
-  alias Loka.Content.{CutFiles, SceneFiles, Source, SourceFiles}
+  alias Loka.Content.{CutFiles, SceneFiles, SceneLines, Source, SourceFiles}
 
   @doc "Source path => `{file, line}`, or `{file, line, column}` for a file that is not valid JSON."
   @spec index(Path.t()) :: %{String.t() => tuple()}
@@ -36,9 +36,24 @@ defmodule Loka.Content.SourceLines do
   end
 
   defp scene(rel, text, acc) do
-    if(Path.extname(rel) == ".cut", do: CutFiles.lines(text), else: SceneFiles.lines(text))
-    |> Enum.reduce(Map.put(acc, Source.at(rel, []), {rel, 1}), fn {steps, n}, acc ->
-      Map.put(acc, Source.at(rel, steps), {rel, n})
+    if Path.extname(rel) == ".cut" do
+      placed(rel, rel, CutFiles.lines(text), acc)
+    else
+      sections(rel, text, Path.basename(rel, ".scene"), acc)
+    end
+  end
+
+  defp sections(rel, text, key, acc) do
+    Enum.reduce(SceneLines.lines(text, key), acc, fn {k, found}, acc ->
+      loaded = if k == key, do: rel, else: SceneFiles.rel(rel, k)
+      placed(rel, loaded, found, acc)
+    end)
+  end
+
+  # Paths read as they were loaded; lines point into the file the writer has open.
+  defp placed(rel, loaded, found, acc) do
+    Enum.reduce(found, Map.put(acc, Source.at(loaded, []), {rel, 1}), fn {steps, n}, acc ->
+      Map.put(acc, Source.at(loaded, steps), {rel, n})
     end)
   end
 

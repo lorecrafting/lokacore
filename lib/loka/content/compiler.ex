@@ -1,4 +1,4 @@
-# size: allow 376, the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
+# size: allow 377, the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -21,7 +21,7 @@ defmodule Loka.Content.Compiler do
 
   # v2 manifest settings, beside entry, calendar and world
   @v2_settings ~w(chapters ancestries alternates speech)
-  @engine_facts [Scenes, Loka.Content.Skills, Loka.Content.Trails]
+  @engine_facts [Scenes, Loka.Content.Skills, Loka.Content.Trails, Loka.Content.DialogueOnce]
   @facts_file %{
     "type" => "object",
     "properties" => %{"facts" => %{"type" => "object", "additionalProperties" => %{}}},
@@ -242,10 +242,11 @@ defmodule Loka.Content.Compiler do
     {defs, d2} = kinds(files, m)
     {facts, d5} = Enum.reduce(@engine_facts, {facts, []}, &engine_facts(&1, &2, m, defs))
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
+    defs = Loka.Content.DialogueOnce.lower(defs)
     {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5])}
   end
 
-  # The facts a module adds for its own declarations (@engine_facts: scene, skill, trail).
+  # The facts a module adds for its own declarations (@engine_facts: scene, skill, trail, once).
   defp engine_facts(mod, {facts, ds}, m, defs),
     do: with({facts, d} <- mod.facts(facts, m, defs), do: {facts, ds ++ d})
 

@@ -784,6 +784,7 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | lesson_payment.to | [Key](source-kinds.gen.md#key) | yes | The npc role paid. |
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of what the actor reads on choosing. |
 | narration_variants | [TextVariants](source-kinds.gen.md#textvariants) |  |  |
+| once | `true` |  | This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset. |
 | patrol | object |  | A patrol transition. |
 | patrol.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |
 | patrol.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The patrol quest. |
