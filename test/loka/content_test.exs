@@ -442,9 +442,13 @@ defmodule Loka.ContentTest do
     bad = source(Path.join(tmp, "bad"), %{"cartridge.json" => nil})
     missing = Path.join(tmp, "bad.json")
 
-    ExUnit.CaptureIO.capture_io(:stderr, fn ->
-      assert catch_exit(Mix.Tasks.Loka.Compile.run([bad, missing])) == {:shutdown, 1}
-    end)
+    # Break: the author's lines go nowhere, or to stdout, and a refused compile prints no reason.
+    said =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert catch_exit(Mix.Tasks.Loka.Compile.run([bad, missing])) == {:shutdown, 1}
+      end)
+
+    assert said =~ "error: "
 
     refute File.exists?(missing)
 

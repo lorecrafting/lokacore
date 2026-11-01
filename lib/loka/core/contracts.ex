@@ -88,7 +88,7 @@ defmodule Loka.Core.Contracts do
   defp errors(%{"type" => t} = s, v, path, defs) do
     if type?(t, v),
       do: keywords(s, v, path, defs),
-      else: [%{path: path, code: :invalid_type, expected: t |> List.wrap() |> Enum.join(" or ")}]
+      else: [%{path: path, code: :invalid_type, expected: t}]
   end
 
   defp errors(%{"oneOf" => _}, v, path, _) when not is_map(v),

@@ -261,7 +261,7 @@ defmodule Loka.ContentExplainTest do
   end
 
   # Break: a part written over several lines reports its last line, not where it starts.
-  test "a multi-line part reports the line it starts on", %{tmp_dir: dir} do
+  test "a multi-line part reports the line it starts on" do
     text = "npc: bram\nbram: one\nbram: two\nbram: three\n"
     assert {["prompt"], 2} in Loka.Content.SceneFiles.lines(text)
   end
@@ -327,6 +327,37 @@ defmodule Loka.ContentExplainTest do
   test "a file in an unknown folder is called a file", %{tmp_dir: dir} do
     assert dir |> said(%{"notes/todo.json" => "{}"}) |> line_at("notes/todo.json:1") =~
              "no folder"
+  end
+
+  # Break: the guess fires at the threshold, so a far name reads as a typo (jaro is exactly 0.75).
+  test "a field only near a valid name gets no guess", %{tmp_dir: dir} do
+    data = %{"valid" => "abxxxxxx"}
+    diag = %{"severity" => "error", "code" => "UNKNOWN_FIELD", "path" => "a.ab", "data" => data}
+    [line] = Explain.lines([diag], dir)
+    refute line =~ "Did you mean"
+    assert line =~ "Valid here: abxxxxxx."
+  end
+
+  # Break: array elements are counted from the wrong index, so the fault loses its line.
+  test "a bad array element names its own line", %{tmp_dir: dir} do
+    item =
+      ~s({\n  "description": #{@prose},\n  "keywords": [\n    "a",\n    1\n  ],\n  "location": {"in": "room", "room": "boathouse"},\n  "name": #{@prose}\n}\n)
+
+    assert dir |> said(%{"items/trowel.json" => item}) |> line_at("items/trowel.json:5") =~
+             "keywords"
+  end
+
+  # Break: a fault on the whole scene points past its first line.
+  test "a fault on the whole scene names line 1", %{tmp_dir: dir} do
+    assert dir
+           |> said(%{"scenes/hi.scene" => "npc: bram\n\nbram: hello\n"})
+           |> line_at("scenes/hi.scene:1")
+  end
+
+  # Break: digits fall out of a choice's key, so two different choices read as a repeat.
+  test "choices that differ by a digit are not repeats", %{tmp_dir: dir} do
+    scene = "npc: bram\n\nbram: hello\n- Take 2\n  bram: ok\n- Take 3\n  bram: ok\n"
+    refute dir |> said(%{"scenes/hi.scene" => scene}) |> Enum.join() =~ "repeats"
   end
 
   # Break: a file gone since the compile crashes the task, and every diagnostic is lost.
