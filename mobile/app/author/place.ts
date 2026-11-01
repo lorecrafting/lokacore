@@ -104,6 +104,69 @@ const describe = (reply: Reply) => {
       : d.kind;
 };
 
+/** The panel's dev-only ask (docs/system/cartridge.md#author-preview), by definition key. */
+export type Cheat =
+  | { op: 'go_to_room'; room: string }
+  | { op: 'set_fact'; fact: string; value: boolean | number | string };
+
+/** A cheat as the ordinary invocation the session decides and records. */
+export function cheatIntent(
+  cheat: Cheat,
+  { id, version }: { id: string; version: string },
+  token: string,
+): Intent {
+  const ref = (kind: string, key: string) => ({
+    cartridge_id: id,
+    cartridge_version: version,
+    kind,
+    key,
+  });
+  return {
+    action_key: cheat.op === 'go_to_room' ? 'dev_go_to_room' : 'dev_set_fact',
+    target_ids: [],
+    input:
+      cheat.op === 'go_to_room'
+        ? { room: ref('room', cheat.room) }
+        : { fact: ref('fact', cheat.fact), value: cheat.value },
+    view_freshness_token: token,
+  } as unknown as Intent;
+}
+
+const REFUSED: Record<Cheat['op'], Record<string, string>> = {
+  go_to_room: {
+    not_found: 'no such room in this cartridge',
+    invalid_state:
+      'already there, the room is underwater, or in a fight, not standing, in water, riding, escorting, leading a group, on a patrol or expedition, in a scene, at an open choice or before the ancestry choice; finish that first',
+  },
+  set_fact: {
+    not_found: 'no such fact in this cartridge',
+    invalid_state:
+      'already that value, the wrong type or range, per subject, owned by a mechanic, or the ancestry choice is still open',
+  },
+};
+
+/** The author's plain words for a cheat's reply; empty when it was accepted. */
+export function cheatNote(op: Cheat['op'], reply: Reply) {
+  if (reply.kind === 'saved' && reply.decision.kind === 'accepted') return '';
+  const code =
+    reply.kind === 'saved' && reply.decision.kind === 'rejected' && reply.decision.error.code;
+  return `${op === 'go_to_room' ? 'Go to room' : 'Set fact'} ${reply.kind === 'pending' ? 'not confirmed' : 'refused'}: ${(code && REFUSED[op][code]) || describe(reply)}.`;
+}
+
+/**
+ * Sends a cheat once the time due is delivered: a reply held for catch-up would land on a later pulse,
+ * unrecorded and after the author read it as refused. Returns the note.
+ */
+export function sendCheat(
+  game: Replayable,
+  cheat: Cheat,
+  manifest: { id: string; version: string },
+) {
+  const after = caughtUp(game);
+  if (after !== 'ready') return `Not sent, the game is still catching up: ${after}.`;
+  return cheatNote(cheat.op, game.invoke(cheatIntent(cheat, manifest, game.view().token)));
+}
+
 /** The path without the step at `index`. */
 export const dropStep = (steps: Step[], index: number) => steps.filter((_, i) => i !== index);
 

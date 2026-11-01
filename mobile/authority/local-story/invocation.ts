@@ -3,10 +3,11 @@ import { encode, decode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import {
   identify,
   resolve,
+  resolveDev,
   INTENT_DIGEST_VERSION,
   type Identified,
 } from '../../../kernel/ts/src/commands/invocation.ts';
-import { step } from '../../../kernel/ts/src/runtime/world.ts';
+import { step, stepDev } from '../../../kernel/ts/src/runtime/world.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { Reply } from './authority.ts';
 import type { ClockDriver } from './elapsed.ts';
@@ -169,11 +170,17 @@ function finish(s: Story, id: Identified): Reply {
 // A NEW invocation resolved and decided (03 §14); `timed` observes how long (11 §13) if clocked.
 function decided(s: Story, id: Identified) {
   const t0 = s.host.latency?.now();
-  const command = resolve(s.world, id);
+  // Without host.dev a dev_* key is an action no set holds: resolve answers unsupported_capability.
+  const dev =
+    s.host.dev === true &&
+    (id.invocation.action_key === 'dev_go_to_room' || id.invocation.action_key === 'dev_set_fact');
+  const command = dev ? resolveDev(s.world, id) : resolve(s.world, id);
   const next: ReturnType<typeof step> =
     'kind' in command
       ? { world: s.world, decision: command }
-      : step(s.world, command, s.revision + 1, id.invocation.action_key);
+      : dev
+        ? stepDev(s.world, command, s.revision + 1)
+        : step(s.world, command, s.revision + 1, id.invocation.action_key);
   const value = s.host.latency && Math.round((s.host.latency.now() - t0!) * 1000);
   const { kernel_version, run_id } = ids(s);
   const head = { format: 'loka-obs-v1', event: 'kernel.decision_latency', store: 'operations' };

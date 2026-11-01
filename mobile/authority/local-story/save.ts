@@ -108,9 +108,14 @@ export function settle(s: Story): Receipt | undefined {
 
 /** Memory takes the saved head, identity and world, after a commit it did not write itself. */
 export function adopt(s: Story) {
-  const saved = load(s.db, s.fresh, () => {
-    throw new Error('no save');
-  });
+  const saved = load(
+    s.db,
+    s.fresh,
+    () => {
+      throw new Error('no save');
+    },
+    s.host.dev,
+  );
   if (!saved) throw new ElapsedRecoveryError('save_corrupt', 'save corrupt');
   Object.assign(s, saved);
 }
