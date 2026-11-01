@@ -11,6 +11,7 @@ import chapter from './sounds/mus-theme-chapter-01.m4a';
 import coin from './sounds/sfx-coin-clink-01.m4a';
 import noteHigh from './sounds/sfx-harp-note-high-01.m4a';
 import noteLow from './sounds/sfx-harp-note-low-01.m4a';
+import riffle from './sounds/sfx-paper-riffle-01.m4a';
 import toneHigh from './sounds/sfx-harp-tone-high-01.m4a';
 import toneLow from './sounds/sfx-harp-tone-low-01.m4a';
 import close from './sounds/sfx-paper-close-01.m4a';
@@ -38,4 +39,6 @@ sources({
   fightLoop: [fightLoop],
   fightWon: [fightWon],
   impact: [impact1, impact2, impact3],
+  riddleRight: [noteLow],
+  riffle: [riffle],
 });

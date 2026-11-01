@@ -120,6 +120,18 @@ export const openable = (world: World, d: DialogueDefinition, ids: unknown) =>
     ),
   );
 
+/** An option's `asked` mark: never a refusal, only what the view says while its policy holds. */
+export const asked = (
+  world: World,
+  actor: CharacterId,
+  option: DialogueDefinition['choices'][string],
+  target: EntityId | undefined,
+  steps: Steps,
+) =>
+  option.asked_when && holds(world, actor, option.asked_when, { target, steps })
+    ? { asked: true as const }
+    : {};
+
 /** Those of `ids` whose own policy holds: the rest stay on the row and are not drawn (dialogue@1). */
 export const shown = (
   world: World,

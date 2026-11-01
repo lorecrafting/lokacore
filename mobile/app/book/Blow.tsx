@@ -26,6 +26,14 @@ const layer = (backgroundColor: string, style: object) => (
   <Reanimated.View style={[fill, { backgroundColor }, style]} pointerEvents="none" aria-hidden />
 );
 
+const settled = { ...never, duration: motion.settle.duration };
+const afterWash = () =>
+  withSequence(
+    ReduceMotion.Never,
+    withTiming(0, { duration, ...never }),
+    withTiming(opacity.faint, { duration: out, ...never }),
+  );
+
 /**
  * The paper under the combat page (book-ui.md, Blow wash).
  * - Use: Combat only, around a `paperless` Page.
@@ -35,7 +43,7 @@ const layer = (backgroundColor: string, style: object) => (
  * - States: at rest; washing; held after a death; reduced motion (half the wash, no swell).
  * - Story: CombatPage.stories.tsx
  */
-export function Blow({ children }: { children: ReactNode }) {
+export function Blow({ children, under }: { children: ReactNode; under?: ReactNode }) {
   const c = usePalette();
   const still = useReducedMotion();
   const wash = useSharedValue(0);
@@ -45,13 +53,7 @@ export function Blow({ children }: { children: ReactNode }) {
       onCue((cue) => {
         if (cue.name === 'death' && cue.fight)
           // Rising only as the wash falls, the two never add up past the wash's own peak.
-          held.value = cue.wash
-            ? withSequence(
-                ReduceMotion.Never,
-                withTiming(0, { duration, ...never }),
-                withTiming(opacity.faint, { duration: out, ...never }),
-              )
-            : withTiming(opacity.faint, { ...never, duration: motion.settle.duration });
+          held.value = cue.wash ? afterWash() : withTiming(opacity.faint, settled);
         if (!cue.wash || cue.name === 'death') return;
         wash.value = withSequence(
           ReduceMotion.Never,
@@ -67,10 +69,14 @@ export function Blow({ children }: { children: ReactNode }) {
     transform: [{ scale: still ? 1 : 1 + ((swell - 1) * wash.value) / opacity.wash }],
   }));
   return (
-    <View style={[grow, { backgroundColor: c.bg, overflow: 'hidden' }]}>
+    <View style={[grow, { backgroundColor: c.bg }]}>
       {layer(washInk(c), faint)}
+      {under}
       {layer(washInk(c), paper)}
-      <Reanimated.View style={[grow, page]}>{children}</Reanimated.View>
+      {/* The swell is clipped, not `under`, which reaches on below the page under the foot. */}
+      <View style={[grow, { overflow: 'hidden' }]}>
+        <Reanimated.View style={[grow, page]}>{children}</Reanimated.View>
+      </View>
     </View>
   );
 }

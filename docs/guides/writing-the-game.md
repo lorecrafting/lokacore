@@ -274,7 +274,7 @@ player, not the writer.
 
 ## Cookbook
 
-Each goal names the samplers that already do it; copy their files or start with `bin/loka new`.
+Each goal names the samplers that already do it; copy their files or start with `bin/loka new`. RPG talk patterns (reminder, quest stages, turn-in, check branches, hand-off) are on the [dialogue cookbook](dialogue-cookbook.md).
 
 | Goal | Samplers |
 |---|---|
