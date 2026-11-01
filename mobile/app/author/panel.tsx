@@ -10,6 +10,8 @@ import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
 import { listen, overlay } from './live.ts';
 import { asRefs, dropStep, replay, type Place, type Step } from './place.ts';
 
+export { frozenClock } from './place.ts';
+
 export type Opened = NonNullable<ReturnType<ReturnType<typeof localSession>['game']>>;
 /** words -> text key, filled as the Book resolves text, so a clicked line names its source. */
 const seen = new Map<string, string>();

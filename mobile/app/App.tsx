@@ -18,8 +18,15 @@ import type { Db } from '../authority/local-story/store.ts';
 import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
-import { bootPlace, devClock, played, resetPlace, skew, useAuthorPanel } from './author/panel.tsx';
-import { frozenClock } from './author/place.ts';
+import {
+  bootPlace,
+  devClock,
+  frozenClock,
+  played,
+  resetPlace,
+  skew,
+  useAuthorPanel,
+} from './author/panel.tsx';
 import { readingSize } from './book/reading.ts';
 import { LABEL } from './book/labels.ts';
 import chapter from '../../protocol/fixtures/toolbox_showcase_hash.json';
