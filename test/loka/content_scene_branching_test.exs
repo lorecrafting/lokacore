@@ -296,6 +296,24 @@ defmodule Loka.ContentSceneBranchingTest do
              "c002_ask"
   end
 
+  # Break: the warning alone switches on the stand-in words for a refused file, so a choice with no
+  # reply compiles, as `~`, instead of being refused.
+  test "a scene that only warns still needs every reply" do
+    text =
+      "npc: bram\nbram: ~\n- Go\n  needs: saw_lantern\n  bram: ~\n  - In\n    needs: not saw_lantern\n"
+
+    assert {:error, diags} = sampler(text)
+    assert Enum.any?(diags, &(&1["data"]["error"] == "missing_property"))
+  end
+
+  # Break: the number pushes a long key past the protocol's 64 characters.
+  test "a numbered key stays within 64 characters" do
+    long = String.duplicate("z", 64)
+    assert {:ok, out, _} = sampler("npc: bram\nbram: ~\n- #{long}\n  bram: ~\n- Ask\n  bram: ~\n")
+    d = JSON.decode!(out)["cartridge"]["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]
+    assert ("c001_" <> String.duplicate("z", 59)) in Map.keys(d["choices"])
+  end
+
   # Break: a fact the choice above sets back is called unreachable under its own opposite `needs`.
   test "a needs opposite one above is reachable when the file sets that fact", %{tmp_dir: tmp} do
     text =
