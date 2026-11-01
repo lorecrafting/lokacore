@@ -72,18 +72,26 @@ async function checkpoints(request: IncomingMessage, response: ServerResponse, s
 }
 
 /** `rel:line` of the first line defining `key` (`"key":`), else of the first holding `words` as a
- * JSON string (inline prose has no key in the source); undefined when neither is in `source`. */
+ * JSON string (inline prose has no key in the source), else of the scene line that says their
+ * first line (`maud: words`, `- words`); undefined when none is in `source`. */
 export function sourceOf(source: string, key: string, words?: string) {
   const all = files(source);
-  const find = (needle: string) => {
-    for (const rel of all) {
-      const i = readFileSync(join(source, rel), 'utf8')
-        .split('\n')
-        .findIndex((l) => l.includes(needle));
+  const find = (hit: (line: string) => boolean, rels = all) => {
+    for (const rel of rels) {
+      const i = readFileSync(join(source, rel), 'utf8').split('\n').findIndex(hit);
       if (i >= 0) return `${rel}:${i + 1}`;
     }
   };
-  return find(`"${key}":`) ?? (words === undefined ? undefined : find(JSON.stringify(words)));
+  const defined = find((l) => l.includes(`"${key}":`));
+  if (defined || words === undefined) return defined;
+  const first = words.split('\n')[0];
+  return (
+    find((l) => l.includes(JSON.stringify(words))) ??
+    find(
+      (l) => l.trimEnd().endsWith(`: ${first}`) || l.trim() === `- ${first}`,
+      all.filter((rel) => rel.endsWith('.scene')),
+    )
+  );
 }
 
 /** The rows of the last run in a trace table dump (a start over begins a new run; the explainer

@@ -39,3 +39,20 @@ test('placeholders by file with the words written; checkpoints and done files ar
   assert.equal(got.status, 200);
   assert.deepEqual(await got.json(), rows);
 });
+
+test('a scene placeholder is listed in every form the release compile refuses', () => {
+  // Break: todo says "Nothing left to write" over a scene the release compile refuses (scene files
+  // skipped), a `~` joined under a written line missed, or a scene's keys counted as prose.
+  const dir = mkdtempSync(join(tmpdir(), 'loka-todo-'));
+  mkdirSync(join(dir, 'scenes'));
+  writeFileSync(
+    join(dir, 'scenes/a.scene'),
+    'npc: elder\nwhen: met\nelder: Written line.\nelder:  ~\n- Take it\nelder: ~\ngives: bowl\n',
+  );
+  writeFileSync(join(dir, 'scenes/done.scene'), 'npc: elder\nelder: All ~ written.\n');
+  writeFileSync(join(dir, 'text.json'), '{"a": "one\\n ~"}');
+  assert.deepEqual(todo(dir), [
+    { file: 'scenes/a.scene', words: 4, placeholders: ['line 4', 'line 6'] },
+    { file: 'text.json', words: 1, placeholders: ['a'] },
+  ]);
+});

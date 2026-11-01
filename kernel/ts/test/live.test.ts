@@ -86,6 +86,12 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   assert.equal(sourceOf(dir, 'rooms.a.name', 'line two'), 'rooms/a.json:3');
   assert.equal(sourceOf(dir, 'room.c'), 'one.json:1');
   assert.equal(sourceOf(dir, 'room.b', 'line five'), undefined);
+  // Break: Alt-click on a scene line answers 404, since a scene holds neither `"key":` nor a JSON
+  // string; a prompt arrives joined, a choice label as itself.
+  mkdirSync(join(dir, 'scenes'));
+  writeFileSync(join(dir, 'scenes/s.scene'), 'npc: maud\nmaud: First.\nmaud: Second.\n- Take it\n');
+  assert.equal(sourceOf(dir, 'dialogue.s.prompt', 'First.\nSecond.'), 'scenes/s.scene:2');
+  assert.equal(sourceOf(dir, 'dialogue.s.label', 'Take it'), 'scenes/s.scene:4');
   const log = join(dir, 'opened');
   writeFileSync(join(dir, 'ed'), `#!/bin/sh\n[ "$1" = --goto ] && printf %s "$2" > ${log}\n`, {
     mode: 0o755,

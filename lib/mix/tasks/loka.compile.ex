@@ -44,7 +44,11 @@ defmodule Mix.Tasks.Loka.Compile do
     end
   end
 
-  # Inline prose is already lowered to text keys in the artifact, so its catalog holds every line.
-  defp placeholders(bytes),
-    do: for({key, "~"} <- Map.get(JSON.decode!(bytes)["cartridge"], "text", %{}), do: key)
+  # Inline prose and scene files are already lowered to text keys in the artifact, so its catalog
+  # holds every line in every form the tools accept (a scene joins its speaker's lines with \\n).
+  defp placeholders(bytes) do
+    for {key, text} <- Map.get(JSON.decode!(bytes)["cartridge"], "text", %{}),
+        text |> String.split("\n") |> Enum.any?(&(String.trim(&1) == "~")),
+        do: key
+  end
 end

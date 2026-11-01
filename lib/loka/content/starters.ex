@@ -3,7 +3,8 @@ defmodule Loka.Content.Starters do
   `bin/loka new <kind> <name>`: writes a compiling starter for one source kind with every line a
   `~` placeholder (docs/guides/writing-the-game.md#coverage). A starter is JSON merged into the
   files it touches, plus the capabilities it needs in cartridge.json; a kind that references
-  another (an item needs a room) takes the first existing one and refuses without it.
+  another (an item needs a room) takes the first existing one and refuses without it. A starter
+  never replaces what is there: a value that differs refuses the whole starter, before any write.
   """
   alias Loka.Content.Starters.Templates
 
@@ -15,6 +16,8 @@ defmodule Loka.Content.Starters do
       valid_name(Path.basename(path)) != :ok -> valid_name(Path.basename(path))
       true -> put(path, Templates.cartridge(Path.basename(path)))
     end
+  catch
+    {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
   end
 
   def write(dir, kind, name) do
@@ -32,6 +35,8 @@ defmodule Loka.Content.Starters do
 
       put(dir, files)
     end
+  catch
+    {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
   end
 
   @doc "The kinds `write/3` knows, sorted (the guide's coverage table lists each)."
@@ -107,25 +112,53 @@ defmodule Loka.Content.Starters do
     do: %{"requires" => %{"capabilities" => Map.new(caps, &{&1, 1})}}
 
   defp put(dir, files) do
-    paths =
-      for {rel, content} <- files, path = Path.join(dir, rel) do
-        File.mkdir_p!(Path.dirname(path))
-        File.write!(path, pretty(merge(read(path), content)))
-        path
-      end
+    touched =
+      for {rel, new} <- files, path = Path.join(dir, rel), do: {rel, path, read(path), new}
 
-    {:ok, Enum.sort(paths)}
-  end
+    case Enum.find_value(touched, fn {rel, _, old, new} -> clash(old, new, rel <> ":") end) do
+      nil ->
+        {:ok, touched |> Enum.map(&written/1) |> Enum.sort()}
 
-  defp read(path) do
-    case File.read(path) do
-      {:ok, text} -> JSON.decode!(text)
-      _ -> %{}
+      at ->
+        {:error,
+         "#{at} already has a value and a starter never replaces one; nothing was written"}
     end
   end
 
-  # Maps merge by key; a list of names unions (an npc's services); a list of rows (layout) and a
-  # scalar in the starter replace.
+  defp written({_, path, old, new}) do
+    File.mkdir_p!(Path.dirname(path))
+    File.write!(path, pretty(merge(old, new)))
+    path
+  end
+
+  # Where the starter would replace something: a scalar or shape that differs. Lists merge (below).
+  defp clash(old, _, _) when old == %{}, do: nil
+  defp clash(same, same, _), do: nil
+  defp clash(old, new, _) when is_list(old) and is_list(new), do: nil
+
+  defp clash(old, new, at) when is_map(old) and is_map(new) do
+    Enum.find_value(new, fn {k, v} ->
+      if is_map_key(old, k), do: clash(old[k], v, at <> " " <> k)
+    end)
+  end
+
+  defp clash(_, _, at), do: at
+
+  defp read(path) do
+    case File.read(path) do
+      {:ok, text} ->
+        case JSON.decode(text) do
+          {:ok, value} -> value
+          _ -> throw({:bad_json, path})
+        end
+
+      _ ->
+        %{}
+    end
+  end
+
+  # Maps merge by key; a list of names unions (an npc's services); a list of rows (layout) replaces,
+  # the template having kept the rows already placed. clash/3 has refused any other difference.
   defp merge(old, new) when is_map(old) and is_map(new),
     do: Map.merge(old, new, fn _, a, b -> merge(a, b) end)
 

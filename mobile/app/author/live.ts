@@ -16,7 +16,8 @@ export function listen(onMessage: (said: string[]) => void) {
       Object.assign(overlay, message.text);
       onMessage(message.said);
     };
-    // a 502 while the watcher restarts closes the stream for good; only a network drop retries
+    // a 502 while the watcher restarts closes the stream for good, so reopen by hand; the browser
+    // retries a network drop itself
     events.onerror = () => {
       if (events.readyState === EventSource.CLOSED) retry = setTimeout(open, 2000);
     };

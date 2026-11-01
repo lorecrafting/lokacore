@@ -2,7 +2,7 @@
 // owns it, with the words already written there (docs/system/cartridge.md#still-to-write).
 // `bin/loka todo <cartridge dir>` prints the list; the author panel's Write tab reads it over
 // live.ts `GET /todo`. The release compile's refusal is mix loka.compile's (text keys, after
-// lowering); this is the writer's list, so it reads the source as written.
+// lowering); this is the writer's list, so it reads the source as written, by the same line rule.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -32,6 +32,15 @@ function markers(value: unknown, at = '', into: Prose[] = []) {
 const catalog = (value: unknown): Prose[] =>
   Object.entries(value ?? {}).filter((e): e is Prose => typeof e[1] === 'string');
 
+// A scene's prose: each speaker line and choice label by line number, `npc:`, `when:` and `gives:`
+// being keys (lib/loka/content/scene_files.ex).
+const sceneLines = (text: string): Prose[] =>
+  text.split('\n').flatMap((raw, i): Prose[] => {
+    const said = /^(?:- |(?!npc:|when:|gives:)[^:\s]+:\s)(.*)$/.exec(raw.trim());
+    return said ? [[`line ${i + 1}`, said[1]]] : [];
+  });
+
+const blank = (line: string) => line.trim() === '~';
 const words = (text: string) => text.split(/\s+/).filter(Boolean).length;
 
 /** Each file holding a placeholder, in path order, with its placeholder paths and the word
@@ -39,19 +48,21 @@ const words = (text: string) => text.split(/\s+/).filter(Boolean).length;
 export function todo(source: string): Todo[] {
   const rows: Todo[] = [];
   for (const file of files(source)
-    .filter((rel) => rel.endsWith('.json'))
+    .filter((rel) => rel.endsWith('.json') || rel.endsWith('.scene'))
     .sort()) {
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(readFileSync(join(source, file), 'utf8'));
-    } catch {
-      continue;
-    }
-    const lines = file === 'text.json' ? catalog(parsed) : markers(parsed);
-    const placeholders = lines.filter(([, text]) => text === '~').map(([at]) => at);
+    const raw = readFileSync(join(source, file), 'utf8');
+    let lines = sceneLines(raw);
+    if (!file.endsWith('.scene'))
+      try {
+        const parsed: unknown = JSON.parse(raw);
+        lines = file === 'text.json' ? catalog(parsed) : markers(parsed);
+      } catch {
+        continue;
+      }
+    const placeholders = lines.filter(([, text]) => text.split('\n').some(blank)).map(([at]) => at);
     if (!placeholders.length) continue;
-    const written = lines.filter(([, text]) => text !== '~').map(([, text]) => words(text));
-    rows.push({ file, words: written.reduce((a, b) => a + b, 0), placeholders });
+    const written = lines.flatMap(([, text]) => text.split('\n').filter((l) => !blank(l)));
+    rows.push({ file, words: written.reduce((a, l) => a + words(l), 0), placeholders });
   }
   return rows;
 }

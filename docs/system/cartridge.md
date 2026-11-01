@@ -844,7 +844,7 @@ source tree into the artifact the web preview bundles (`mobile/app/.dev-cartridg
 loopback-only author API (`LOKA_AUTHOR_PORT`, default 19008) that the preview proxies at
 `/__author/`. Release, test and e2e bundles never set `LOKA_DEV_CARTRIDGE`; a production bundle
 with it set fails to build, and the app throws when the dev cartridge flag reaches a non-`__DEV__`
-build. The author tools below exist only in that bundle and change no protocol, save or kernel_api.
+build. The author tools below are reachable only in that bundle (a production export keeps a few dead strings) and change no protocol, save or kernel_api.
 
 - **Keep my place.** The preview records each input the Book sends that the session saved (the
   intent, its targets as definition refs `cartridge@version:kind/key`, and each dev-clock advance
@@ -870,7 +870,8 @@ build. The author tools below exist only in that bundle and change no protocol, 
   is missing or refused ([rule explainer](#rule-explainer-loka-kgd1943) on the recorded path); each Book
   line opens its source `file:line` in the owner's editor (`POST /__author/open`, `LOKA_EDITOR`,
   default `code --goto`); the game-time control; the checkpoint list; the still-to-write list.
-- **Still to write.** A text value of exactly `~` is a placeholder. The panel and
+- **Still to write.** A text value with a line that trims to `~` is a placeholder, in JSON or in
+  a scene file. The panel and
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
   word counts of what is written. A release compile refuses a cartridge with placeholders
   (`placeholder_text` at the key's path) unless `--allow-placeholders` is given.

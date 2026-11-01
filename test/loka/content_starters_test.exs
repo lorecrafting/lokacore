@@ -76,5 +76,69 @@ defmodule Loka.ContentStartersTest do
     assert Enum.find(rows, &(&1["room"] == "yard"))["x"] == 6
   end
 
+  # Break: rerunning `bin/loka new` resets hand-written prose to `~` at exit 0.
+  test "a rerun refuses over written prose and is a no-op over an untouched starter", %{
+    tmp_dir: tmp
+  } do
+    dir = Path.join(tmp, "mine")
+    {:ok, _} = Starters.write(dir, "cartridge", dir)
+    {:ok, _} = Starters.write(dir, "text", "hello")
+    {:ok, _} = Starters.write(dir, "rooms", "yard")
+    untouched = File.read!(Path.join(dir, "rooms/yard.json"))
+    assert {:ok, _} = Starters.write(dir, "rooms", "yard")
+    assert File.read!(Path.join(dir, "rooms/yard.json")) == untouched
+
+    edit(dir, "text.json", &Map.put(&1, "hello", "Handwritten"))
+    edit(dir, "rooms/yard.json", &Map.put(&1, "description", %{"prose" => "Handwritten"}))
+    assert {:error, "text.json: hello already has" <> _} = Starters.write(dir, "text", "hello")
+    assert {:error, "rooms/yard.json: description" <> _} = Starters.write(dir, "rooms", "yard")
+    assert read(dir, "text.json")["hello"] == "Handwritten"
+    assert read(dir, "rooms/yard.json")["description"] == %{"prose" => "Handwritten"}
+  end
+
+  # Break: a population replaces home's east exit, leaving a written room unreachable; a second
+  # population resets the written combat lines and breaks the compile. A refusal writes no file.
+  test "a population refuses a taken east exit and a second population, writing nothing", %{
+    tmp_dir: tmp
+  } do
+    dir = Path.join(tmp, "mine")
+    {:ok, _} = Starters.write(dir, "cartridge", dir)
+    [home] = Path.wildcard(Path.join(dir, "rooms/*.json"))
+    room = "rooms/" <> Path.basename(home)
+    written = File.read!(home)
+    edit(dir, room, &put_in(&1, ["exits"], %{"east" => %{"to" => "well"}}))
+    before = snapshot(dir)
+    assert {:error, message} = Starters.write(dir, "populations", "wolves")
+    assert message =~ "#{room}: exits east"
+    assert snapshot(dir) == before
+
+    File.write!(home, written)
+    {:ok, _} = Starters.write(dir, "populations", "wolves")
+    edit(dir, "text.json", &Map.put(&1, "combat.player_hits", "Handwritten"))
+    before = snapshot(dir)
+    assert {:error, _} = Starters.write(dir, "populations", "bears")
+    assert snapshot(dir) == before
+  end
+
+  # Break: a broken file a starter reads prints a stack trace instead of one line, and leaves the
+  # files it wrote before reaching the broken one.
+  test "a broken file refuses in one line, writing nothing", %{tmp_dir: tmp} do
+    dir = Path.join(tmp, "mine")
+    {:ok, _} = Starters.write(dir, "cartridge", dir)
+    File.write!(Path.join(dir, "text.json"), "{")
+    before = snapshot(dir)
+    assert {:error, message} = Starters.write(dir, "text", "hello")
+    assert message =~ "text.json is not valid JSON"
+    assert snapshot(dir) == before
+  end
+
+  defp edit(dir, rel, change) do
+    path = Path.join(dir, rel)
+    File.write!(path, JSON.encode!(change.(JSON.decode!(File.read!(path)))))
+  end
+
+  defp snapshot(dir),
+    do: for(p <- Path.wildcard(Path.join(dir, "**/*.json")), into: %{}, do: {p, File.read!(p)})
+
   defp read(dir, rel), do: dir |> Path.join(rel) |> File.read!() |> JSON.decode!()
 end

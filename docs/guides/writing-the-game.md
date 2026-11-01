@@ -57,7 +57,8 @@ why the action was missing or refused.
 ## Every kind of content
 
 `mise exec -- bin/loka new <kind> <name> [cartridge dir]` (from any directory; the cartridge dir defaults to the current one) writes a
-compiling file of that kind with every line a `~` placeholder, merged into the files it touches,
+compiling file of that kind with every line a `~` placeholder, merged into the files it touches
+(it never replaces a value already there: it refuses, names the value and writes nothing),
 plus the capabilities it needs in `cartridge.json`; it prints what it wrote. A kind that refers
 to another takes the first one you have and refuses with the command to run first. The shapes
 come from the samplers; the rules from the [Builders' Guide](../BUILDERS-GUIDE.md#authoring-paths-and-examples).

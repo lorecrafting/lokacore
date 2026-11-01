@@ -35,4 +35,49 @@ defmodule Loka.ContentPlaceholdersTest do
 
     assert JSON.decode!(File.read!(out))["cartridge"]["text"]["npc.elder.name"] == "~"
   end
+
+  # Break: a scene ships a literal `~` the player reads, since it lowers to a text value that is
+  # not exactly `~` (joined under a written line, or holding the extra space).
+  for {form, lines} <- [
+        joined_twice: "elder: ~\nelder: ~\n- Yes\nelder: Granted.",
+        under_written: "elder: Written line one.\nelder: ~\n- Yes\nelder: Granted.",
+        extra_space: "elder:  ~\n- Yes\nelder: Granted.",
+        in_a_reply: "elder: Asked.\n- Yes\nelder: first\nelder: ~"
+      ] do
+    test "a release compile refuses a scene's #{form}", %{tmp_dir: tmp} do
+      dir = Loka.ContentSource.copy("cartridges/speech_sampler")
+      File.mkdir_p!(Path.join(dir, "scenes"))
+
+      File.write!(
+        Path.join(dir, "scenes/still_to_write.scene"),
+        "npc: elder\n#{unquote(lines)}\n"
+      )
+
+      out = Path.join(tmp, "todo.json")
+
+      said =
+        ExUnit.CaptureIO.capture_io(:stderr, fn ->
+          assert catch_exit(Mix.Tasks.Loka.Compile.run([dir, out])) == {:shutdown, 1}
+        end)
+
+      assert said =~ "placeholder_text at text."
+      assert said =~ "still_to_write"
+      refute File.exists?(out)
+    end
+  end
+
+  # Break: the line rule over-reaches and refuses written prose that merely holds a `~`.
+  test "a `~` inside a written scene line is not a placeholder", %{tmp_dir: tmp} do
+    dir = Loka.ContentSource.copy("cartridges/speech_sampler")
+    File.mkdir_p!(Path.join(dir, "scenes"))
+
+    File.write!(
+      Path.join(dir, "scenes/still_to_write.scene"),
+      "npc: elder\nelder: About ~ ten.\n- Yes\nelder: Granted.\n"
+    )
+
+    out = Path.join(tmp, "done.json")
+    ExUnit.CaptureIO.capture_io(:stderr, fn -> Mix.Tasks.Loka.Compile.run([dir, out]) end)
+    assert File.exists?(out)
+  end
 end
