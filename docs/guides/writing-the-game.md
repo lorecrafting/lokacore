@@ -97,7 +97,9 @@ maud: ~
 - `once` hides the choice after the player takes it. It makes a fact of its own,
   `<key>_<choice>_done`; do not declare it.
 - `then: branch_next` plays the dialogue `branch_next` next; `then: end` closes the talk. A choice
-  with no `then` also closes it, or comes back to these choices if the dialogue is a hub.
+  with no `then` comes back to these choices, or closes the talk if it is the only choice. A nested
+  choice with no `then` goes back to the choices above it. A scene another scene's `then` leads to
+  closes after a choice with no `then`; write `then: <its own name>` to come back.
 - A `- ` indented under a choice's reply opens nested choices: its own dialogue, keyed
   `<key>_<choice>` (here `branching_choice_one`). The reply is what the player reads above them, so
   it must be written first, and the nested choices are shown next. Going back to a shallower `- `

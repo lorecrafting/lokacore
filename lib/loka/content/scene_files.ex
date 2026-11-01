@@ -1,4 +1,4 @@
-# size: allow 425, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
+# size: allow 440, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
 defmodule Loka.Content.SceneFiles do
   @moduledoc """
   Scene files: `scenes/<key>.scene` (or `dialogues/<key>.scene`) is one dialogue as plain text,
@@ -49,7 +49,7 @@ defmodule Loka.Content.SceneFiles do
     {sections, links, walked} = SceneLines.split(text, key)
 
     {forms, bad} = Enum.map_reduce(sections, walked, &section/2)
-    {forms, bad} = Enum.reduce(links, {Map.new(forms), bad}, &link/2) |> visible(sections, links)
+    {forms, bad} = linked(forms, bad, key, links) |> visible(sections, links)
     forms = if bad == [], do: forms, else: Enum.map(forms, fn {k, d} -> {k, filled(d)} end)
     {forms, bad |> Enum.uniq() |> speakerless() |> by_line()}
   end
@@ -91,6 +91,21 @@ defmodule Loka.Content.SceneFiles do
   defp opened(d, prompt, parent) do
     choices = Map.new(d["choices"], fn {k, o} -> {k, Map.put_new(o, "then", parent)} end)
     %{d | "choices" => choices} |> Map.put("prompt", prompt)
+  end
+
+  defp linked(forms, bad, key, links) do
+    Enum.reduce(links, {Map.new(forms), bad}, &link/2) |> comes_back(key, links)
+  end
+
+  # A then target never reopens by itself (dialogue@1) and a nested set's choices name the file's
+  # dialogue, so its own choices with no then say to come back, as a scene with no nesting does.
+  defp comes_back({forms, bad}, key, links) do
+    if Enum.any?(links, &(&1.choice != "")) do
+      back = Map.new(forms[key]["choices"], fn {c, o} -> {c, Map.put_new(o, "then", key)} end)
+      {put_in(forms, [key, "choices"], back), bad}
+    else
+      {forms, bad}
+    end
   end
 
   # The forms a link reached, file order; a child under a dropped key is dropped with it.

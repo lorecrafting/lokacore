@@ -223,4 +223,36 @@ defmodule Loka.ContentSceneBranchingTest do
              &(&1 =~ "dialogues/s.json:1" and &1 =~ "`prompt`")
            )
   end
+
+  test "a choice beside a nested set comes back, as it does in a scene with no nesting" do
+    # Break: a nested child's `then` makes the parent a then target, and such a dialogue never
+    # reopens, so a plain choice in any nesting scene would end the talk.
+    text = """
+    npc: bram
+
+    bram: ~
+    - Look
+      bram: ~
+    - Bye
+      then: end
+      bram: ~
+    - Ask
+      bram: ~
+      - Who
+        bram: ~
+    """
+
+    {[{"bram", d} | _], []} = SceneFiles.parse(text, "bram")
+
+    assert d["choices"]["look"]["then"] == "bram"
+    assert d["choices"]["bye"]["then"] == "end"
+    assert d["choices"]["ask"]["then"] == "bram_ask"
+  end
+
+  test "a scene with no nesting gets no then of its own" do
+    # Break: the coming-back line on every scene, which changes every existing compiled hash.
+    {[{"bram", d}], []} = SceneFiles.parse("npc: bram\n\nbram: ~\n- Look\n  bram: ~\n", "bram")
+
+    refute is_map_key(d["choices"]["look"], "then")
+  end
 end
