@@ -16,6 +16,8 @@ import { usePalette, washInk } from './palette.ts';
 import { motion, opacity } from './tokens.ts';
 
 const { duration, out, swell } = motion.flash;
+// Never: Reanimated would otherwise skip the half wash reduced motion keeps.
+const never = { easing: curveOf(motion.flash.easing), reduceMotion: ReduceMotion.Never };
 
 const grow = { flex: 1 }; // mutate-skip: layout
 const fill = { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 } as const; // mutate-skip: layout
@@ -41,13 +43,15 @@ export function Blow({ children }: { children: ReactNode }) {
   useEffect(
     () =>
       onCue((cue) => {
-        // Never: Reanimated would otherwise skip the half wash reduced motion keeps.
-        const never = { easing: curveOf(motion.flash.easing), reduceMotion: ReduceMotion.Never };
         if (cue.name === 'death' && cue.fight)
-          held.value = withTiming(opacity.faint, {
-            ...never,
-            duration: cue.wash ? duration : motion.settle.duration,
-          });
+          // Rising only as the wash falls, the two never add up past the wash's own peak.
+          held.value = cue.wash
+            ? withSequence(
+                ReduceMotion.Never,
+                withTiming(0, { duration, ...never }),
+                withTiming(opacity.faint, { duration: out, ...never }),
+              )
+            : withTiming(opacity.faint, { ...never, duration: motion.settle.duration });
         if (!cue.wash || cue.name === 'death') return;
         wash.value = withSequence(
           ReduceMotion.Never,

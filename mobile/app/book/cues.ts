@@ -117,7 +117,7 @@ function play(s: Queue, fired: Cue[], cue: Cue, now: number) {
 // A death waits for nothing (book-ui.md, Falling). It clears what is pending; a thud sounding plays on.
 function fall(s: Queue, death: Cue, now: number) {
   const fired: Cue[] = [];
-  const blow = s.held.find((c) => c.name === 'hp_loss');
+  const blow = s.held.filter((c) => c.name === 'hp_loss').at(-1); // the fatal one, not an older one
   s.held = [];
   s.card = false;
   s.playing = s.pending = undefined;

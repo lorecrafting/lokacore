@@ -32,7 +32,7 @@ function clock(t: any) {
   t.mock.method(performance, 'now', () => now);
   return (ms: number) => (now += ms);
 }
-const peaks = () => g.sequences.map((s: any[]) => s[1]);
+const peaks = () => g.sequences.map((s: any[]) => s[1]).filter(Boolean); // the hold's starts at 0
 
 const shrine = { place: { id: 'shrine' }, inventory: [], journal: [] } as unknown as GameView;
 function falling(t: any, reduced = false) {
@@ -48,11 +48,12 @@ function falling(t: any, reduced = false) {
 }
 
 // Breaks: the wash falls to nothing; the half wash is lost under reduced motion; a death with no peak pops
-// the hold in over the wash's time, not fading over settle.
+// the hold in over the wash's time, not fading over settle; or the hold rises under the peak and the
+// two add up past it (only the fall's time runs the hold up: .18 over 120, then .06 over 380).
 test('a fatal blow falls to the faint hold, whatever the settings say of its peak', (t) => {
   for (const [reduced, flashes, peak, over] of [
-    [false, true, [0.18], 120],
-    [true, true, [0.09], 120],
+    [false, true, [0.18], 380],
+    [true, true, [0.09], 380],
     [false, false, [], 400],
   ] as const)
     t.test(`reduced ${reduced}, flashes ${flashes}`, (s: any) => {
@@ -67,6 +68,40 @@ test('a fatal blow falls to the faint hold, whatever the settings say of its pea
       assert.equal(held(), 0.06);
       assert.equal(g.timings.at(reduced || flashes ? -1 : 0), over);
     });
+});
+
+// Breaks: an NPC's death with no line reads storage, where a fault would lose the blow's reply.
+test('a foe dying with no line reads no narration back', async (t) => {
+  effects(t);
+  const { presenter } = await import('./presenter.ts');
+  const view = { actions: [], entities: [], exits: [], ...held_view, time: 0 } as never;
+  const projection = { view, token: 'view:r:0' };
+  let pressed = false;
+  let reads = 0;
+  const p = presenter({
+    view: () => projection,
+    invoke: () => {
+      pressed = true;
+      return {
+        kind: 'saved',
+        command_id: 'kill',
+        decision: {
+          kind: 'accepted',
+          outcome: 'attacked',
+          events: [
+            { causation_id: 'kill', payload: { type: 'entity_died', victim_definition: 'npc.x' } },
+          ],
+        },
+      } as never;
+    },
+    pending: () => false,
+    pendingInvocation: () => undefined,
+    subscribe: () => () => {},
+    text: () => undefined,
+    lastNarration: () => (pressed && reads++, undefined),
+  } as never);
+  p.press({ label: 'Strike', action_key: 'attack', target_ids: [], input: {} } as never);
+  assert.equal(reads, 0);
 });
 
 // Breaks: a death outside a fight washes the world page.

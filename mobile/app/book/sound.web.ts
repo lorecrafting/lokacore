@@ -90,11 +90,14 @@ function start(name: SoundName, opts: { loop?: boolean; then?: () => void } = {}
     voices.push(stop);
     if (ducks && ducking++ === 0) duck(true);
     el.loop = !!opts.loop;
-    el.onended = el.onerror = () => {
+    // Refused or failed, it still leads on; stolen, the thief owns the bus and nothing follows.
+    const done = () => {
+      if (!voices.includes(stop)) return;
       stop();
       opts.then?.();
     };
-    void el.play().catch(stop);
+    el.onended = el.onerror = done;
+    void el.play().catch(done);
   } catch {} // a browser refusing the element is silence too
 }
 
@@ -114,6 +117,7 @@ const fade = (ms: number, then?: () => void) => {
   if (!stop) return then?.();
   ramp(tune!, 0, ms);
   fading = setTimeout(() => {
+    if (live.music[0] !== stop) return; // a new voice took the bus: it keeps it (a chapter's theme)
     stop();
     then?.();
   }, ms);
@@ -130,8 +134,8 @@ export function fight(event: 'open' | 'resume' | 'won' | 'away' | 'cut') {
     else start('fightIn', { then: () => inFight && loop() });
     return;
   }
+  if (inFight) lastFight = now; // a close with no fight playing opens no gap
   inFight = false;
-  lastFight = now;
   if (event === 'won') fade(motion.quick.duration, () => play('fightWon'));
   else if (event === 'away') fade(motion.palette.duration);
   else {

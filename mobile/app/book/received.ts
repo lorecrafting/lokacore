@@ -130,7 +130,8 @@ function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepte
   const lines = !!accepted?.narration?.length;
   // A death may have no line, and so no retained narration; the Book still falls (book-ui.md, Falling).
   const last =
-    lines || accepted?.events.some((e) => e.payload.type === 'entity_died')
+    lines ||
+    accepted?.events.some((e) => e.payload.type === 'entity_died' && !e.payload.victim_definition)
       ? savedNarration(game, s, command_id)
       : undefined;
   if (last?.died) s.died = last.command_id;

@@ -366,6 +366,36 @@ test('a fight won in silence plays its fanfare at once', async (t) => {
   assert.deepEqual(b.playing(), ['won.m4a']);
 });
 
+// Breaks: the won fade's timer plays the fanfare over a chapter theme that took the bus meanwhile.
+test('a chapter opening as a foe falls keeps its theme', async (t) => {
+  const b = await fightRig(t);
+  b.fight('resume');
+  b.fight('won');
+  b.play('chapter');
+  b.pass(160);
+  assert.deepEqual(b.playing(), ['theme.m4a']);
+});
+
+// Breaks: a refused stinger never leads on, so the whole fight has no music.
+test('a stinger the browser refuses still leads to the loop', async () => {
+  const b = await browser({ refuse: true });
+  b.gesture();
+  b.fight('open');
+  await new Promise((go) => setImmediate(go));
+  assert.deepEqual(
+    b.els.map((e) => e.url),
+    ['in.m4a', 'loop.m4a'],
+  );
+});
+
+// Breaks: a death or close with no fight playing starts the gap, and the next fight loses its stinger.
+test('a close with no fight playing leaves the next stinger', async (t) => {
+  const b = await fightRig(t);
+  b.fight('cut');
+  b.fight('open');
+  assert.deepEqual(b.playing(), ['in.m4a']);
+});
+
 // Breaks: a sound's thud is cut with the music (its bus is not the music's), or a fanfare fires after a
 // new fight began during the fade.
 test('a death spares the thud; a fight reopening during a fade drops the old voice', async (t) => {

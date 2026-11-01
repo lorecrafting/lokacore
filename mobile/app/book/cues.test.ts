@@ -448,4 +448,14 @@ test('a death clears what is pending and fires at once, past a held card', () =>
     { name: 'hp_loss', loss: 0, wash: true },
     { name: 'death', fight: true, wash: true },
   ]);
+  // Two blows held behind a turn: the thud is the fatal one's.
+  const two = step(
+    { ...QUIET, held: [{ name: 'hp_loss', loss: 1 }] },
+    [
+      { name: 'hp_loss', loss: 7 },
+      { name: 'death', fight: true },
+    ],
+    5000,
+  );
+  assert.deepEqual(two.fired[0], { name: 'hp_loss', loss: 7, wash: true });
 });
