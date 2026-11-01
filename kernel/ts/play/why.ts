@@ -15,7 +15,7 @@ import { encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { primaryTarget } from '../src/commands/action_input.ts';
 import { cmp } from '../src/foundation/validate.ts';
-import { holds } from '../src/mechanics/policy.ts';
+import { holds, read } from '../src/mechanics/policy.ts';
 import { FILTERS } from '../src/mechanics/reaction.ts';
 import { refString } from '../src/runtime/decision.ts';
 import { marked, replay } from './coverage.ts';
@@ -24,7 +24,8 @@ import { replayRecords } from './replay.ts';
 import { decideReplay, start, type Run } from './run.ts';
 
 type Trace = ReturnType<typeof replayRecords>;
-type Asked = { action?: string; dialogue?: string };
+// now: read the asked policy on the world after the step, as the author panel asks about what could be done next.
+type Asked = { action?: string; dialogue?: string; now?: true };
 const leaves = (p: Policy): Policy[] =>
   p.op === 'all' || p.op === 'any'
     ? p.items.flatMap(leaves)
@@ -76,7 +77,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
         fired: said(d, (key) => ruleOf(key) === ref),
         ...(rule.when && { when: annotate(rule.when, (i) => ({ held: held(ref, i) })) }),
       })),
-    ...asked(c, on, before, command),
+    ...asked(c, on, on.now ? prefix(cartridge, trace, ordinal + 1).world : before, command),
   };
 }
 
@@ -120,7 +121,7 @@ const causes = (rule: ReactionRule, d: DecisionResult, before: World) =>
       ),
     }));
 
-// The policies asked for, on the world before the step: a scripted action's target is the command's,
+// The policies asked for, on `before` (by default the world before the step): a scripted action's target is the command's,
 // a dialogue's its authored NPC (dialogue/selection.ts:93; ponytail: not a choose row's bound
 // speaker, dialogue/shared.ts:93; read speakerOf once a fixture binds a speaker other than the npc).
 const asked = (c: Cartridge, on: Asked, before: World, command: Command) => ({
@@ -155,7 +156,13 @@ function policy<D extends { key: string; policy?: Policy }>(
   const actor = (command.payload as { actor_id: CharacterId }).actor_id; // scripted actions' and talk's commands carry one
   const root = d.policy;
   if (!root) return { rule };
-  const at = (i: number) => ({ holds: holds(world, actor, leaves(root)[i]!, ctx()) });
+  const at = (i: number) => {
+    const leaf = leaves(root)[i]!;
+    return {
+      holds: holds(world, actor, leaf, ctx()),
+      ...(leaf.op === 'fact_compare' && { now: read(world, actor, leaf, ctx().target) ?? null }),
+    };
+  };
   return { rule, policy: annotate(root, at) };
 }
 

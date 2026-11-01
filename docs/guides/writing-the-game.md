@@ -14,7 +14,7 @@ bin/author.sh cartridges/<name>
 It starts the cartridge watcher (`bin/loka dev … --watch`), the Book preview (`mobile/app`,
 `npm run author`) and the author panel (`tools/author-panel`, installed on its first run). Open
 http://localhost:19009: the Book fills the page and the panel is the pane on the right (Compile at
-the top, then Play, State and Why; the source line at the foot). The sun/moon button switches light
+the top with its lint lines, then Play, Write, State, Why and Find; the source line at the foot). The sun/moon button switches light
 and dark. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), 19006 (Book), `LOKA_PANEL_PORT` (panel, 19009).
 
 ## Write a scene

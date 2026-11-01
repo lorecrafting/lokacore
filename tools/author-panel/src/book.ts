@@ -12,6 +12,16 @@ export type State = {
   steps: Step[];
   facts: Record<string, unknown>;
   quests: { quest: string; state: string }[];
+  shown: {
+    room: string;
+    people: string[];
+    held: string[];
+    pools: { key: string; current: number; maximum: number; band: string; tone: string }[];
+    statuses: { label: string; ends_at?: unknown }[];
+    clock: { time: unknown; calendar?: Record<string, unknown> };
+    choice?: { prompt: string; options: string[] };
+    offers: { action: string[]; dialogue: string[] };
+  };
 };
 export type Line = { key?: string; words: string };
 type Told = { loka: 'author'; ready?: true; state?: State; trace?: string[]; line?: Line };

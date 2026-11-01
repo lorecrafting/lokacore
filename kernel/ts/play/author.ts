@@ -5,7 +5,7 @@
 // inline, never export it) moves the artifact. With --watch, a change that only alters text
 // values (a `text.json` save at once, any other save after its compile) goes to the open page as
 // an overlay over the written artifact (play/live.ts): no reload, no replay.
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
@@ -19,7 +19,7 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
-import { serve, textOnly, type Canonical } from './live.ts';
+import { lintLines, serve, textOnly, type Canonical } from './live.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const out = resolve(
@@ -119,8 +119,26 @@ function build(): boolean {
   }
 }
 
+// The lint under the compile: not waited for, so a save's words and compile never wait on it; only
+// the newest run reports.
+let lints = 0;
+function lint() {
+  const mine = ++lints;
+  let stderr = '';
+  const run = spawn('mise', ['exec', '--', 'mix', 'loka.lint', source], {
+    cwd: root,
+    stdio: ['ignore', 'ignore', 'pipe'],
+  });
+  run.stderr.on('data', (chunk) => (stderr += chunk));
+  run.on('error', () => {}); // `close` follows with the failure's code
+  run.on('close', (code) => {
+    if (mine === lints) live!.push({ lint: lintLines(code, stderr) });
+  });
+}
+
 const ok = build();
 if (flag !== '--watch') process.exit(ok ? 0 : 1);
+if (ok) lint();
 let timer: ReturnType<typeof setTimeout> | undefined;
 watch(source, { recursive: true }, (_, file) => {
   if (file?.startsWith('checkpoints/')) return; // the page's own save, not content
@@ -131,7 +149,7 @@ watch(source, { recursive: true }, (_, file) => {
     // the page gets the quick words before the compile blocks this process (spawnSync)
     setImmediate(() => {
       try {
-        build();
+        if (build()) lint();
       } catch (e) {
         console.error(`Not updated: ${(e as Error).message}`);
       }

@@ -8,7 +8,8 @@ import { Platform } from 'react-native';
 import type { localSession } from '../../authority/local-story/session';
 import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
 import { listen, overlay } from './live.ts';
-import { asRefs, dropStep, replay, type Place, type Step } from './place.ts';
+import { advanced, dropStep, recording, replay, type Place, type Step } from './place.ts';
+import { shown, type Canon } from './shown.ts';
 
 export { frozenClock } from './place.ts';
 
@@ -105,26 +106,22 @@ export function played(game: Opened | undefined) {
         seen.set(words, key);
         return words;
       },
-      invoke: (intent) => {
-        const ids = game.entityIds(); // before the action eats, gives away or kills its target
-        const reply = game.invoke(intent);
-        if (reply.kind === 'saved' && reply.decision.kind === 'accepted')
-          keep({ intent: asRefs(intent, ids) });
-        return reply;
-      },
+      invoke: recording(game, keep),
     });
   return recorded.get(game)!;
 }
 
 // Moves both host clocks forward by game minutes at the cartridge's rate, so the kernel's own
 // elapsed path delivers the time (none before D11 selection).
-type Manifest = { manifest: { time_policy?: { rate: number } } };
-function advance(minutes: number) {
-  const rate = (JSON.parse(chapter.canonical) as Manifest).manifest.time_policy?.rate;
+const canon = JSON.parse(chapter.canonical) as Canon & {
+  manifest: { time_policy?: { rate: number } };
+};
+function advance(minutes: number, game: Opened) {
+  const rate = canon.manifest.time_policy?.rate;
   if (!rate || !Number.isSafeInteger(minutes) || minutes <= 0) return;
   const ms = Math.ceil((minutes * 60_000) / rate);
-  g.loka_dev_skew = skew() + ms;
-  keep({ advance: ms });
+  const stopped = advanced(ms, (by) => (g.loka_dev_skew = skew() + by), game, keep);
+  if (stopped) placeNote = stopped;
 }
 
 type Tools = {
@@ -163,6 +160,7 @@ const stateOf = (game: Opened) => ({
   steps: place.steps,
   facts: game.facts(),
   quests: game.view().view.journal,
+  shown: shown(game.view().view, played(game)!.text, canon, game.entityIds()),
 });
 // Alt-click (Option-click) on a Book line: the panel opens its source in the owner's editor.
 const onClick = (e: MouseEvent) => {
@@ -183,7 +181,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       if (!LOCAL.test(e.origin) || !e.source || !OPS.has(e.data?.op)) return;
       panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
       if (e.data.op === 'trace') return void tell({ trace: game.trace() });
-      if (e.data.op === 'advance') advance(e.data.minutes);
+      if (e.data.op === 'advance') advance(e.data.minutes, game);
       if (e.data.op === 'jump') {
         if (Array.isArray(e.data.steps)) return jumpTo(e.data.steps, latest.current); // the new game posts its state
         placeNote = 'Place: that checkpoint has no steps list; nothing changed.'; // checked before the start over wipes the save

@@ -113,7 +113,7 @@ function uninstalled(leaf: never): never {
 // fact@1's read: an entity or pair fact (toolbox row W2) at its named NPC or item, or with subject
 // target at the action's target (none without one), and an npc_pair fact (row FD4) at that
 // subject toward its `with` NPC (none without one); any other fact at its one scope.
-function read(
+export function read(
   world: World,
   actor: CharacterId,
   p: Extract<Policy, { op: 'fact_compare' | 'time_since' }>,

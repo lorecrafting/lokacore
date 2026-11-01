@@ -131,6 +131,24 @@ test('W3, W4: a broken guard names its failing leaf; rule-key order holds', () =
   });
 });
 
+// Breaks: `now` ignored, so the panel answers for the world before the last step; a fact leaf's value
+// missing or read on the wrong world; the last step (7) past the end of the replay.
+test('now: a policy reads on the world after the step, a fact leaf saying its value', () => {
+  const c = load((c) => {
+    c.scripted_actions[`${S}action/coil_rope`].policy = rung(1);
+  });
+  const leaf = (n: number, now?: true) => {
+    const { holds, now: value } = (
+      why(c, trace, n, { action: 'coil_rope', ...(now && { now }) }).action as any
+    ).policy;
+    return [holds, value];
+  };
+  assert.deepEqual(leaf(4), [false, 0]); // before the first ring
+  assert.deepEqual(leaf(4, true), [true, 1]);
+  assert.deepEqual(leaf(7), [false, 3]);
+  assert.deepEqual(leaf(7, true), [false, -1]);
+});
+
 // Break: an on-demand policy read on the world after the step (at 1 the quest is active after
 // accept_quest; at 2 the lantern is held after take).
 test('W5, W6: dialogue and scripted action policies read on the world before the step', () => {
