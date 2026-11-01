@@ -9,6 +9,7 @@ const { playCue, playRiffle } = await import('./cueSounds.ts');
 const { cuesOf, riffles } = await import('./cueDiff.ts');
 const { curlFor, useCues } = await import('./cues.ts');
 const { DiscoveredMap } = await import('./DiscoveredMap.tsx');
+const { useCueSounds } = await import('./Book.tsx');
 const { ItemPop } = await import('./ItemPop.tsx');
 const { group } = await import('./model.ts');
 const { NpcPage } = await import('./Npc.tsx');
@@ -341,4 +342,19 @@ test('a word on the last try is never gilt', (t) => {
   submit(true);
   assert.deepEqual(after(view({})), []);
   assert.equal(plays().length, 0);
+});
+
+// loka-xz76e.9. Breaks: the Book's hook keeps hearCues but drops its cleanup (Book.tsx), so a fight's
+// loop outlives the Book and plays over the new game after Start over.
+test('the Book unmounting cuts the music', (t) => {
+  effects(t);
+  const draw = rig(t);
+  const props = {
+    screen: { view: view({}), catchingUp: false },
+    flip: { turn: 0, dir: 1 },
+  } as never;
+  draw(() => (useCueSounds(props), []));
+  g.bookDevice = [];
+  draw.unmount();
+  assert.deepEqual(g.bookDevice, [['fight', 'cut']]);
 });

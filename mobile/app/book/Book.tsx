@@ -230,7 +230,7 @@ export function BookView(p: ViewProps) {
   );
 }
 
-function useCueSounds(p: ViewProps) {
+export function useCueSounds(p: ViewProps) {
   useEffect(hearCues, []); // before useCues: heard from its first cue
   const s = p.screen;
   useCues(
