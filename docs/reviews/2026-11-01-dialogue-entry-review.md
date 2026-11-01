@@ -98,3 +98,28 @@ Dispositions, run on this head:
 
 **Nit.** `dialogue_links.ex:74` cites `selection.ts GATES`; they are in `fall_through.ts`.
 **Nit.** A closed `a_buy`, listed first: warning names `a_buy`, Talk opens `z_g`. Decided only at run time; the message says "picks it first".
+
+## Final check: head `c7a15e159deffaa14cda59ba80081281be265701`
+
+**Verdict: CHANGES REQUIRED.** One logic finding. CI at this head (`gh run list --commit`): graph-diff, ci, book-e2e completed success.
+
+**Blocker. Default Talk falls through a named entry.** `kernel/ts/src/mechanics/dialogue/selection.ts:173` skips the walk only for `word` and `selected`, so a failed entry with a `name` still feeds `tried`. Run: named `guard` (shut), `go` then `a_vault`; plain `z_intro` (shut), `zz` then `hub`. Offers: `guard` unavailable, `z_intro` available. Pressing `z_intro` opens `a_vault`'s line, not `hub`. So the plain Talk reaches what the named Talk refuses, and displaces the hub of the guide's intro example. It contradicts `docs/guides/writing-the-game.md:86` ("A Talk with its own `name` opens its dialogue or is refused") and the Elixir walk, which skips named entries (`lib/loka/content/dialogue_links.ex:133`), so no warning fires. With both shut and no plain link, a raw `talk` is accepted while every offer shows unavailable. Tried: `|| d.name` on that line opens `hub`; `dialogue_branching.test.ts` stays 27 green, so nothing pins this; the fix needs a test. A named entry that holds still opens on the default Talk, as on main; not reopened.
+
+Dispositions, run on this head:
+- Costs: `resource.adjust` by -5 and by +5, and `item.move`: Talk rejected. `resource.adjust` first with a free second: second opens. `narrate`, `fact.assign`: free. Allow list, so any step outside it counts as a cost; `fact.adjust` was not run through a Talk (my shape failed the schema), only via `onward` in `dialogue_fall_through.test.ts`.
+- Red, TS (`dialogue_fall_through.test.ts`): steps always free, `item.move` free, `resource.adjust` free. These are the file's fixed op list, so a new op is free only by editing `FREE_STEPS`.
+- `dialogue_links.ex:129` warning: closed entry to closed hub with two free links now names `a_x`; fixture rows at `test/fixtures/dialogue_entry_cases.json:14-16` shared with TS. Red, Elixir: steps ignored; no recursion in `guess`. `seen` mutant not confirmed here (my run printed no result); developer lists it red.
+- PR claims rerun: `FREE_STEPS.has` to true red; `guess` empty not rerun as written; its one-link branch emptied is red.
+- `/code-review` now in the PR body.
+
+Triage of the ten `/code-review` findings:
+1. `selection.ts:173`: wrong lawful result, above.
+2. `dialogue_links.ex:156`: confirmed: `m` links to `m` and `z_y` warns with target `m`; Talk opens `z_y`, the only way on. Warning only. File.
+3. `dialogue_links.ex:131`: confirmed: two shut entries with one link each draw no warning; Talk pools them. Warning only. File.
+4. `dialogue_links.ex:141`: by reading, the depth-first walk stops at the first fork, Talk is breadth-first; can name another node. Warning only. File.
+5. `dialogue_links.ex:132`: a hub with no policy whose choices all fail draws no warning, and Talk cannot follow those choices either; no wrong result by reading. File only if `offered` filtering gives a case.
+6. `explain.ex:58`: wording of the fix. File.
+7. `fall_through.ts:5`: all ten gate fields of `DialogueChoice` are listed today; a future field would count as free. Three copies. File.
+8. `fall_through.ts:19`: follows the PM's rule. No action.
+9. `fall_through.ts:27`: choice keys cannot be integer-like and canonical order holds. No action.
+10. `fall_through.ts:31`: unmeasured estimate, speakers in the room only. File, low.
