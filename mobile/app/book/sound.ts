@@ -11,7 +11,7 @@ export const ambience = (
   _tag?: string,
   _weather?: string,
   _exposed?: boolean,
-  _quiet?: boolean,
+  _quiet?: boolean | 'woke',
 ) => {};
 export const thunder = (_muffled: boolean) => {};
 export const play = (_name: SoundName, _tier?: string) => {};
