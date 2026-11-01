@@ -273,11 +273,12 @@ field of the op; a list names the only fields run besides `op`.
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
 `lib/loka/content/areas.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
 `lib/loka/content/behaviours.ex`, `lib/loka/content/params.ex`,
-`lib/loka/content/zones.ex`),
+`lib/loka/content/zones.ex`, `lib/loka/content/waits.ex`),
 so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
 area bundles, refuse repeated definitions, flatten `extends`, lower inline prose, expand
-behaviours, expand zone rules, refuse repeated definitions again. The artifact
-never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour or a zone;
+behaviours, expand zone rules, refuse repeated definitions again, split waits, refuse repeated
+definitions again. The artifact
+never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour, a zone or a wait;
 the loader is unchanged.
 
 **Actions with outcomes.** Every player action is `actions/<key>.json`. A file with `command`
@@ -404,6 +405,14 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
 
 [speech_sampler](../../cartridges/speech_sampler/areas/village.json) writes 21 of its 23 lines
 inline; its artifact equals the hand-keyed one byte for byte.
+
+**Waits.** One step list for a reaction that plays out over time, lowered to [FD1](mechanics.md#delayed-reactions-toolbox-row-fd1) rules.
+- A reaction's `steps` may carry `{"op": "wait", "seconds": N}`, N a whole number of logical seconds, at least 1.
+- The list is split at its waits. The first stretch keeps the rule's key; each later stretch is a sibling rule `<rule>_wait_<n>` (n from 1), with the same `on` and `when` and an `after` of the rule's own `after` plus every wait before it. A leading wait leaves no stretch before it, so the rule itself takes the `after`: `wait 600` then steps compiles to the same bytes as `after: 600` with those steps.
+- All stretches are scheduled from the same event, not chained: [FD1](mechanics.md#delayed-reactions-toolbox-row-fd1) refuses `event.emit` on a delayed rule. A list that narrates in any stretch counts as narrating in each for the silent-write lint.
+- Refused in the catalog's words at the authored step (SCHEMA_VIOLATION invalid_value): a `wait` outside a reaction's `steps` (any other definition, such as an action, a dialogue choice or a service; a `.scene` file has no way to write one); `seconds` not a whole number of at least 1, an extra field, or a running total above the `after` maximum; a `wait` with no step after it, or followed by another `wait`; a step after a wait that reads the event, the FD1 event-bound list (`wait_event`); a `when` with `subject: "subject"` (`wait_subject`).
+- **Death, leaving, saving: FD1 unchanged.** Each stretch is its own reaction job for the delivery's actor. A save holds the pending jobs and a cold reopen fires each once. Leaving the room cancels nothing, since a job is bound to its actor, not a room. Nothing about a death cancels a job, and no test pins a job firing after the actor's death. The only cancellation is `when`, read at delivery and again at fire, so an author who wants a list to stop writes that into `when`.
+- **Known limits.** `when` is read for each stretch, so a list whose earlier step makes its own `when` false drops the later stretches; the compiler does not look for this. Stretches that reach the same logical second run in job order, not surely in list order: a root command's delivery inside a long advance moves every delay ending inside it to 1 s after the advance ([FD1](mechanics.md#delayed-reactions-toolbox-row-fd1)), so a wait shorter than the command's own time can lose its gap. A fault another stage finds in a later stretch (an unknown text key) names the sibling's renumbered step, under the authored file (`ponytail:` in `lib/loka/content/waits.ex`).
 
 **Zones.** One reaction for many rooms.
 - A room's source may carry `"zones": ["<Key>", ...]`; the compiler strips it from every room.

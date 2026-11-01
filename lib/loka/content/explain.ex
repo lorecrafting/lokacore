@@ -75,6 +75,11 @@ defmodule Loka.Content.Explain do
          cut_scene_line | Line `{text}` looks like a `.scene` line, but a cutscene is only paragraphs, so the player would read it as written. | Move it to a `.scene` file, or reword it if it is meant as words.
          not_utf8 | Line `{text}` is not valid UTF-8 (the odd character marks the byte). | Save the file as UTF-8.
          template_schedule | `npcs/{key}` is a spawn template, so nothing it would schedule exists to walk. | Remove `daily_schedule`, or remove `spawn_template`.
+         wait_outside | `wait` only works in a reaction's `steps`. | Move these steps into a reaction, or remove `wait`.
+         wait_seconds | A `wait` takes whole `seconds` of at least 1 and nothing else, and a rule's `after` and waits add up to at most 2147483647. | Fix `seconds`.
+         wait_empty | Nothing runs after this `wait`. | Put a step after it, or remove it.
+         wait_event | This step reads the event that started the rule, and that event is gone after a `wait`. | Move the step above the first `wait`.
+         wait_subject | A rule with a `wait` reads `when` again when each stretch runs, and the event's `subject` is gone by then. | Read the actor instead, or split the rule by hand.
          duration_status | An action with a duration cannot apply a status. | Remove `duration`, or remove `status.apply`.
          layout_same_spot | Rooms {rooms} share the spot x {x}, y {y}, z {z}. | Give each its own x, y, z in layout.json.
          layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.

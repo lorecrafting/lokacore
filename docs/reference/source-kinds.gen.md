@@ -433,7 +433,9 @@ Typed reaction owned by reaction@1. Every registered event kind can trigger; eac
 | after | integer |  | Toolbox row FD1: the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock. |
 | on | [event](vocabulary.gen.md#events) | yes | See the type. |
 | silent | `true` |  | Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it. |
-| steps | list of [Step](vocabulary.gen.md#steps) | yes | See the type. |
+| steps | list of [Step](vocabulary.gen.md#steps) or object | yes | The steps in order; a `wait` splits them in time. |
+| steps[]{op=wait} | variant |  | Run the steps after it this many logical seconds later, as a sibling delayed rule with the same `on` and `when`; `when` is read again when they run. |
+| steps[]{op=wait}.seconds | integer | yes | Logical seconds, added to the rule's `after` and the waits before it. |
 | when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | zone | [Key](source-kinds.gen.md#key) |  |  |
 

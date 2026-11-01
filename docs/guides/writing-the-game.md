@@ -196,6 +196,30 @@ when you run `mix loka.compile` by hand.
 | `topics` | [`spells_sampler`](../../cartridges/spells_sampler/) | nothing (it writes its own fact) |
 | `transports` | [`fast_travel_sampler`](../../cartridges/fast_travel_sampler/) | a room, an NPC and a resource; also writes the far room and both legs |
 
+## Make something happen later
+
+A reaction's `steps` can hold a wait, in whole seconds of game time:
+
+```json
+"steps": [
+  { "op": "narrate", "text": "first_line" },
+  { "op": "wait", "seconds": 600 },
+  { "op": "narrate", "text": "second_line" }
+]
+```
+
+The compiler turns the list into delayed rules (`<rule>_wait_1`, and so on), so the game keeps no
+new state. What to expect:
+
+- `when` is read again when each part runs. If it no longer holds, that part does nothing. This is
+  the only way to cancel: nothing stops a wait because the player died, left or saved. A save keeps
+  it, and it runs after the game reopens. Write what should stop it into `when`.
+- Time passes only when the game advances it. If the player's action already takes longer than the
+  wait, the parts run right after it, and two parts due in the same second may run in either order.
+- After a wait a step cannot read the event that started the rule: move an NPC or item, send an
+  event, advance a quest. Put those above the first wait. `when` cannot use `subject: "subject"`.
+- A `wait` works only in a reaction, not in an action, a dialogue choice or a scene.
+
 ## Cookbook
 
 Each goal names the samplers that already do it; copy their files or start with `bin/loka new`.

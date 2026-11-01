@@ -113,7 +113,8 @@ defmodule Loka.Content.SourceSchema do
   defp shortcuts("NpcDefinition", s), do: put(s, "behaviours", behaviours())
   defp shortcuts("ItemDefinition", s), do: put(s, "behaviours", behaviours())
 
-  defp shortcuts("ReactionRule", s), do: s |> put("zone", @key) |> zoned()
+  defp shortcuts("ReactionRule", s),
+    do: s |> put("zone", @key) |> zoned() |> Loka.Content.Waits.schema()
 
   defp shortcuts(_, s), do: s
 
