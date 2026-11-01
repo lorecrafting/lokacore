@@ -93,7 +93,7 @@ defmodule Loka.Content.Explain do
          wait_event | This step reads the event that started the rule, and that event is gone after a `wait`. | Move the step above the first `wait`.
          wait_inside_action | This rule can start inside a timed action, and the game cannot tell how long that action takes, so two or more waits could land in one second, in any order. | Start the rule from `action_completed` and name the `action`. That event never fires when the action's check fails: for a failure, use `check_failed` (its parts run right after the action, order not sure) or a single `wait`.
          wait_subject | A rule with a `wait` reads `when` again when each stretch runs, and the event's `subject` is gone by then. | Read the actor instead, or split the rule by hand.
-         duration_status | An action with a duration cannot apply a status. | Remove `duration`, or remove `status.apply`.
+         duration_status | An action with a duration cannot apply a status that ticks or ends. | Remove `duration`, or remove `status.apply`.
          layout_same_spot | Rooms {rooms} share the spot x {x}, y {y}, z {z}. | Give each its own x, y, z in layout.json.
          layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.
          gives_holder | `gives: {item}` hands over nothing until `{holder}` holds `{item}`: the choice stays hidden. | Set the item's location to `{"in": "npc", "npc": "{holder}"}`, or move it there in play.
