@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
 import { test } from 'node:test';
 import { reactShim } from './__tests__/react-shim.ts';
-import { color } from './tokens.ts';
+import { color, opacity } from './tokens.ts';
 
 // palette.ts's hooks outside React: one component, its state slots and effects run by hand.
 const h = globalThis as any;
@@ -40,6 +40,35 @@ test('every text role is at least 4.5:1 on bg and card in every palette', () => 
     for (const role of ['fg', 'dim', 'action', 'danger', 'warning'] as const)
       for (const paper of ['bg', 'card'] as const)
         assert.ok(contrast(p[role], p[paper]) >= 4.5, `${name}.${role} on ${paper}`);
+});
+
+// Breaks: the lightning token is raised past the two dips Design tokens allows it, or a palette or a
+// role drops under 4.5:1 unnoticed. Literal floors per palette and role, as the spec states them.
+test('lightning over the paper keeps every role at its stated contrast', () => {
+  const mix = (under: string, over: string, a: number) =>
+    '#' +
+    [1, 3, 5]
+      .map((i) => {
+        const at = (hex: string) => parseInt(hex.slice(i, i + 2), 16);
+        const v = Math.round(at(under) * (1 - a) + at(over) * a);
+        return v.toString(16).padStart(2, '0');
+      })
+      .join('');
+  const dips: Record<string, number> = {
+    'dusk.dim': 4.25,
+    'dusk.warning': 4.03,
+    'dark.warning': 3.95,
+  };
+  for (const [name, p] of Object.entries(color)) {
+    const lit = mix(p.bg, color.light.bg, opacity.afterimage);
+    assert.ok(contrast(p.fg, lit) > 7, `${name}.fg`);
+    assert.ok(contrast(p.action, lit) > 5, `${name}.action`);
+    assert.ok(contrast(p.danger, lit) > 5, `${name}.danger`);
+    for (const role of ['dim', 'warning'] as const) {
+      const floor = dips[`${name}.${role}`] ?? 4.5;
+      assert.ok(contrast(p[role], lit) >= floor - 0.005, `${name}.${role}`);
+    }
+  }
 });
 
 // Breaks (loka-x6t.86): danger drawn in the action's ink, so what is barred reads as pressable
