@@ -104,3 +104,47 @@ Scope: the fix commits, the code they touch and its direct callers.
 
 No crash on nil definitions: a cartridge with no actions and an `action_completed` reaction gives plain diagnostics.
 Not rerun here: `bin/mutate_diff.sh` (hand mutants only, scoped re-check).
+
+## Re-check at 3c2d5fafcebf909e746cfec9072d4e86e44a73fe
+
+Scope: the fix commits, the code they touch and its direct callers. PM ruling: refuse a kgd.104 path only if exactly identifiable; the rest is a documented limit and `loka-kgd.104` stays open for it.
+- Verdict: APPROVE WITH NOTES. No blocker. One logic should-fix stays open; two fix rounds are spent, so the PM rules on it ([fix rounds](../WORKFLOW.md#small-should-fix)).
+- CI at the head (`gh run list --commit`): ci success 41291132910, book-e2e success 41291132887, graph-diff success 41291136133.
+
+### Dispositions
+
+| Finding (this record; second opinion `53d0536e4`) | Proof at this head |
+|---|---|
+| `after` refused (mine 1) | Fixed. `reactions.ex:68`; dropping the check is red |
+| `when`, including a named action's (second opinion's nit) | Fixed. Dropping the check is red |
+| Own `custom` event (second opinion's should-fix) | Refused. `==` to `!=` at `reactions.ex:82` is red |
+| `fact_changed` cascade (mine 2) | Documented limit: `mechanics.md:2742`, `cartridge.md:1073`, PR body line 10. `loka-kgd.104` is OPEN |
+| `shared.ts:115` status drop (mine 3, second opinion's blocker) | Fixed. Dropping `status === 'following'` is red on `escort.test.ts` |
+| `created.ts:113` (second opinion's blocker) | Fixed. `!s.npc` to `true` is red on `settle.test.ts` |
+| `> 0` to `> 100` survived (mine 4) | Fixed. Red; the test uses duration 1 |
+| No `mutate_diff` table (mine 5) | Open nit, below |
+
+Also red: `in [nil, key]` to `== key` and to `true`, `content_faults_test.exs` at `bin/mutate.sh`. PR body's `created.ts` claim (line 22) and kgd.104 row (line 10) rerun and hold. `o["steps"]` at `reactions.ex:82` is safe: the schema requires `steps` on both outcomes.
+
+### Ruling: keep `> 0`
+
+Measured on the `spell_effects_sampler` artifact past the compiler, no `time_policy`, no regen. Status 7200, tick 3600, action duration 300: casts 1 to 11 succeed and the 12th faults at clock 3300, as the developer said. Duration 5000 faults on the first cast. The compiler cannot tell a one-shot from a recast, so `> 0` stands. It over-refuses a true one-shot (300, tick 3600, one cast writes the row and does not fault); that is not identifiable, and an `after` reaction compiles in its place.
+
+### Probes
+
+| Case | Result |
+|---|---|
+| Permanent status, no `per_tick`, duration 5000 | Compiles without the duration; with it, refused `duration_status`. Past the compiler: 20 casts, no fault, row with no job. Finding 1 |
+| Timed status, no `per_tick` (end 3600), duration 300 / 5000 | Faults at cast 12 / cast 1. Refusal correct |
+| Immune NPC, `status.apply npc`, duration 5000 | 20 casts, no fault, no row. Non-immune control faults on cast 1. Finding 2 |
+| Rat at hp -3, floor -5 | `attack` rejected `invalid_state`: `living` is false |
+| Player body at hp -3, floor -5 | First round faults `evaluator_error`. Control at hp 10, floor 0 accepted. Finding 3 |
+
+### Findings
+
+1. **Should-fix, `lib/loka/content/scripted_actions.ex:94`, `lib/loka/content/reactions.ex:63`: a path that never faults is refused.** A one-hour ritual granting a permanent blessing with no `per_tick` compiled on main and runs clean: `applyStatus` writes no job, so the advance crosses nothing. It is exactly identifiable (`status.ex:59` `permanent?` plus no `per_tick`), so it fails the ruling's converse and must-be-true 3. No sampler is hit, the message is plain, and an `after` reaction compiles instead (runtime of that with a permanent status not run). A logic change: fix it, or file it under `loka-kgd.104`.
+2. Nit, `scripted_actions.ex:94`: an immune NPC's `status.apply` is refused though it no-ops. The step is pointless, so deleting it is the author's fix. File with finding 1 or drop.
+3. Question for the PM, `kernel/ts/src/mechanics/resource.ts:72`: not a regression. Main's `round_attack.ts:77` has the same negative minimum by reading. Reachable only by authoring a player pool `start` below 0 with a negative `minimum` (`resources.ex:239` allows it; not compiled here): spell damage at or below 0 takes the death path (`spell.ts:147`), and an NPC at or below 0 is not `living`. The cause of the fault was not traced past the control.
+4. Nit: the PR body still has no `bin/mutate_diff.sh` table.
+
+Not rerun: `bin/mutate_diff.sh` (hand mutants only, scoped re-check). PR body line 41's other open items (`round_attack.ts:92`, `shared.ts:113`, `created.ts:105`) were not re-probed; they stay with the PM.
