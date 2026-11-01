@@ -142,11 +142,8 @@ test("waking spends the room's piece and keeps its bed", async () => {
   b.ambience('inn', undefined, true, 'woke');
   b.ambience('inn', undefined, true);
   assert.deepEqual(urlsOf(b.els), ['inn.m4a']);
-  b.ambience('wild', undefined, true);
-  assert.ok(
-    urlsOf(b.els).some((u) => u !== 'inn.m4a'),
-    'a later new tag still has its sound',
-  );
+  b.ambience('cave', undefined, true);
+  assert.ok(urlsOf(b.els).includes('p-cave.m4a'), 'a later new tag keeps its piece');
 });
 
 // Breaks: a piece repeats on re-entry, ignores the gap, or lowers nothing.

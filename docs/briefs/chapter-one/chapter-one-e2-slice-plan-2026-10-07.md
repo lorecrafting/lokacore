@@ -1,5 +1,7 @@
 # E2 slice plan: R9C interaction proof, `loka-e2-r9c-interaction-proof-2cv`
 
+> Reference only: agent-written brief; any story, cast or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Owner-approved 2026-10-07 ([answers](../../decisions/owner-decision-e2-plan-2026-10-07.md)); copied from the PM draft without its local path lists. The owner questions below are answered in that record.
 
 **Summary**

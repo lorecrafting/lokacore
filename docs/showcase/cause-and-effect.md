@@ -1,5 +1,7 @@
 # Showcase plan 3: cause and effect in Low Wardle
 
+> Reference only: agent-written plan; any room, NPC or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Content brief for `cartridges/toolbox_showcase` ([showcase](../SHOWCASE.md), Beads `loka-y6yg.4`, idea
 `loka-lvno`), written by Fable for an Opus developer and an Opus reviewer. Base: `main` after PR #369
 (the combat district): the build keeps the Warden's `resistances` and combat 10. Only installed

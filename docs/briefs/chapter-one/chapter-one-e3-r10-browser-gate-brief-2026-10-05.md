@@ -1,5 +1,7 @@
 # E3 — Full-chapter R10 browser content gate
 
+> Reference only: agent-written brief; any story, cast or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 > **Amendment, 2026-10-07:** E3 runs on the release-candidate certification's frozen source, after the polish phase; E1 supplies the recorder, not the final candidate freeze ([record](../../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 
 > **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.

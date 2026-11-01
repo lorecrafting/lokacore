@@ -148,7 +148,9 @@ defmodule Loka.Content.Death do
   end
 
   defp restoration(defs, d) do
+    # A refused pool has its own line; its restore amount has no numbers to be wrong against.
     for pool <- ~w(hp mv),
+        defs["resource"][pool] != :invalid,
         not restore_valid?(defs["resource"][pool], d["restore"][pool]),
         do: bad("cartridge.world.death.restore." <> pool)
   end

@@ -24,7 +24,7 @@ defmodule Loka.Content.Reactions do
     caps = m["requires"]["capabilities"]
     ctx = %{m: m, defs: defs, text: text, kinds: {caps, owners(registry, ["definitions"])}}
     ctx = Map.put(ctx, :events, {caps, owners(registry, ["events"])})
-    Enum.flat_map(all(defs), &(rule(&1, ctx) ++ timed_status(&1, ctx.defs)))
+    Enum.flat_map(all(defs), &(rule(&1, ctx) ++ timed_status(&1, ctx)))
   end
 
   @filters %{
@@ -59,18 +59,22 @@ defmodule Loka.Content.Reactions do
 
   # The action's completion or its own custom event runs inside it; the status row would start before
   # a duration's time.advance, which faults at runtime (its own steps: `Loka.Content.ScriptedActions`).
-  # Refuses only a path known to run: `after` writes a job instead, a `when` or a fact_changed may not fire.
-  defp timed_status({rel, %{"on" => on, "steps" => steps} = r}, defs) do
-    timed =
-      for {_, {_, [], %{"duration" => d} = a}} <- defs["scripted_action"] || %{}, d > 0, do: a
-
-    inside? =
-      not is_map_key(r, "after") and not is_map_key(r, "when") and
-        Enum.any?(timed, &inside?(on, &1))
-
-    for {%{"op" => "status.apply"}, i} <- Enum.with_index(steps), inside? do
+  # Refuses only a path known to run: `after` writes a job instead; a `when`, a `witness` or a fact_changed
+  # may not fire; a status.apply with no job crosses nothing.
+  defp timed_status({rel, %{"steps" => steps} = r}, %{m: m, defs: defs}) do
+    for {%{"op" => "status.apply"} = step, i} <- Enum.with_index(steps),
+        inside_timed?(r, defs),
+        not Loka.Content.Status.no_job?(step, m, defs) do
       diag("SCHEMA_VIOLATION", at(rel, ["steps", i]), %{"why" => "duration_status"})
     end
+  end
+
+  defp inside_timed?(%{"on" => on} = r, defs) do
+    not is_map_key(r, "after") and not is_map_key(r, "when") and not is_map_key(on, "witness") and
+      Enum.any?(
+        for({_, {_, [], %{"duration" => d} = a}} <- defs["scripted_action"] || %{}, d > 0, do: a),
+        &inside?(on, &1)
+      )
   end
 
   defp inside?(%{"event" => "action_completed"} = on, action),

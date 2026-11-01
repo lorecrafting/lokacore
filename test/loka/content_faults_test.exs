@@ -48,6 +48,75 @@ defmodule Loka.ContentFaultsTest do
            )
   end
 
+  # Break: the refusal keys on status.apply alone, so a step that writes no job (permanent with no
+  # per_tick, an immune NPC) is refused though it never faults; or it lets a step through that does
+  # schedule one (a timed status with no per_tick, a permanent ticker, a target not immune).
+  test "a timed action refuses exactly the status steps that schedule a job", %{tmp_dir: tmp} do
+    File.cp_r!("cartridges/spell_effects_sampler", tmp)
+
+    edit =
+      &File.write!(
+        Path.join(tmp, &1),
+        Path.join(tmp, &1) |> File.read!() |> JSON.decode!() |> &2.() |> JSON.encode!()
+      )
+
+    edit.("cartridge.json", &Map.delete(&1, "time_policy"))
+
+    edit.("resources.json", fn r ->
+      update_in(r["resources"], &Map.new(&1, fn {k, v} -> {k, Map.delete(v, "regen")} end))
+    end)
+
+    status = fn fields ->
+      edit.("statuses/warded.json", fn s ->
+        s |> Map.delete("per_tick") |> Map.merge(fields)
+      end)
+    end
+
+    cast = fn step ->
+      edit.("actions/ward.json", fn a ->
+        a
+        |> Map.put("duration", 5000)
+        |> put_in(["outcomes", "success", "steps"], [
+          Map.merge(%{"op" => "status.apply", "status" => "warded"}, step)
+        ])
+      end)
+    end
+
+    refused? = fn ->
+      case Content.compile(tmp) do
+        {:ok, _, _} -> false
+        {:error, d} -> Enum.map(d, & &1["data"]["why"]) |> Enum.member?("duration_status")
+      end
+    end
+
+    timed = %{"duration" => 7200, "fear" => true}
+    edit.("npcs/wight.json", &Map.put(&1, "immune", ["warded"]))
+
+    status.(%{"duration" => "permanent"})
+    cast.(%{})
+    assert {:ok, _, _} = Content.compile(tmp)
+
+    status.(%{"duration" => "permanent", "per_tick" => 1})
+    assert refused?.()
+
+    status.(timed)
+    assert refused?.()
+
+    cast.(%{"npc" => "wight"})
+    assert {:ok, _, _} = Content.compile(tmp)
+
+    edit.("npcs/wight.json", &Map.delete(&1, "immune"))
+    assert refused?.()
+
+    # Break: a body or status with its own line also gets "remove duration", a false next step.
+    edit.("npcs/wight.json", &Map.put(&1, "immune", 1))
+    assert not refused?.()
+    edit.("npcs/wight.json", &Map.delete(&1, "immune"))
+
+    cast.(%{"status" => "nosuch"})
+    assert not refused?.()
+  end
+
   # Break: action_completed runs inside the action, so a reaction's status row on a timed action
   # faults like the action's own step. An untimed action's reaction stays lawful.
   test "a reaction's status on a timed action's completion is refused", %{tmp_dir: tmp} do
@@ -92,7 +161,9 @@ defmodule Loka.ContentFaultsTest do
           {"named_when", ~s("on": {"event": "action_completed", "action": "ward"}, ) <> gate},
           {"any_when", any <> ", " <> gate},
           {"custom_after", custom <> ~s(, "after": 200)},
-          {"custom_when", custom <> ", " <> gate}
+          {"custom_when", custom <> ", " <> gate},
+          {"named_witness",
+           ~s("on": {"event": "action_completed", "action": "ward", "witness": "wight"})}
         ] do
       File.write!(Path.join(tmp, "reactions/#{name}.json"), "{#{fields}, #{apply}}")
     end
@@ -105,5 +176,12 @@ defmodule Loka.ContentFaultsTest do
              |> Enum.map(& &1["path"])
              |> Enum.filter(&String.starts_with?(&1, "reactions/"))
              |> Enum.sort()
+
+    # Break: a rule's status that schedules no job is refused though its step crosses nothing.
+    edit.("statuses/warded.json", fn s ->
+      s |> Map.delete("per_tick") |> Map.put("duration", "permanent")
+    end)
+
+    assert {:ok, _, _} = Content.compile(tmp)
   end
 end

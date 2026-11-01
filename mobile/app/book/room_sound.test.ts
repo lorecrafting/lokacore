@@ -85,6 +85,8 @@ test('place.sound and place.exposed reach the bed and the sky', () => {
   assert.equal(heard({ died: 'fatal', ended: fight }), false, 'the fatal card');
   assert.equal(heard({ died: 'fatal', ended: fight }), false, 'a next view on the card');
   assert.equal(heard({ died: 'fatal' }), true, 'Back to World');
+  // Breaks: waking is not told apart, so the wake room's piece plays (plan 14).
+  assert.equal(g.bed[3], 'woke', 'waking spends the piece');
   assert.equal(heard({ died: 'fatal', ended: fight }), true, 'a later fight won');
   const shown = nodes(
     BookView({

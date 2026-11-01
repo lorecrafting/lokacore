@@ -776,7 +776,7 @@ wash and removes the swell; Flashes off removes both, leaving the value, thud an
 
 **Beds.** Each room plays its tag's one loop on the ambience bus, or `wild`, or silence; the same tag across rooms carries on, a new tag cross-fades, and the background stops it. S3 and S4 sounds duck it; the paper turn does not.
 
-**Exploration music.** The first entry since launch to a tag may play its one piece, at most once in a long gap. It never loops, plays out, lowers beds by `mix.bedUnderMusic`, and only a fight, a chapter or death cuts it.
+**Exploration music.** The first entry since launch to a tag may play its one piece, at most once in a long gap. Waking in a room spends its tag's piece: only the bed returns. It never loops, plays out, lowers beds by `mix.bedUnderMusic`, and only a fight, a chapter or death cuts it.
 
 **Flash limit.** At most one full-page luminance change per second, never three in any second; a
 later blow in that second keeps the value, thud and haptic, so a flurry never peaks twice in a second.

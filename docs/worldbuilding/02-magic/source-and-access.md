@@ -1,5 +1,7 @@
 # Source and access: who can use magic and how it is learned
 
+> Reference only: agent-drafted worldbuilding text (not the owner's words). Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Status: draft. Area: [Magic and power systems](../README.md#02-magic). Canon tier: draft (owner-directed 2026-10-16).
 
 **Purpose.** Where power comes from and who may reach it: birth, study, initiation, place, bargain.

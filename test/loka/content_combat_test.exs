@@ -130,6 +130,7 @@ defmodule Loka.ContentCombatTest do
         {@manifest, Map.delete(@npc, "hp"), "SCHEMA_VIOLATION", "npcs/rat.hp"},
         {@manifest, put_in(@npc, ["hp", "start"], 7), "RESOURCE_SPEC_INVALID", "npcs/rat.hp"},
         {@manifest, put_in(@npc, ["hp", "minimum"], 7), "RESOURCE_SPEC_INVALID", "npcs/rat.hp"},
+        {@manifest, put_in(@npc, ["hp", "minimum"], -1), "BODY_BELOW_ZERO", "npcs/rat.hp"},
         {update_in(@manifest, ["world"], &Map.delete(&1, "combat")), @npc, "SCHEMA_VIOLATION",
          "npcs/rat.attack"}
       ] ++

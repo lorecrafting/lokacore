@@ -3,6 +3,7 @@ defmodule Loka.Content.Emotes do
   import Loka.Content.Source, only: [at: 2, diag: 3]
   import Loka.Content.Refs, only: [owned: 3, owners: 2]
 
+  def check(nil, _, _, _), do: []
   def check(_, _, nil, _), do: []
 
   def check(m, defs, {_, text}, registry) do

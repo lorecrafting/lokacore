@@ -107,7 +107,10 @@ defmodule Loka.Content.Services do
 
     if Enum.any?(ds, &(&1["code"] == "SCHEMA_VIOLATION")),
       do: ds,
-      else: ds ++ admitted(rel, s, m, defs, text)
+      else:
+        ds ++
+          unresolved(s["provider"], "npc", at(rel, ["provider"]), m, defs) ++
+          admitted(rel, s, m, defs, text)
   end
 
   defp admitted(rel, s, m, defs, text) do
@@ -204,7 +207,7 @@ defmodule Loka.Content.Services do
       {m["requires"]["capabilities"]["service"] == 1, []},
       {service_action?(defs["action"][s["action"]]), ["action"]},
       {declared_stock?(currency, npc, s["currency"]["key"]), ["currency"]},
-      {ref(s["key"], "service", m) in (npc["services"] || []), ["provider"]}
+      {npc == %{} or ref(s["key"], "service", m) in (npc["services"] || []), ["provider"]}
     ]
   end
 
@@ -356,7 +359,9 @@ defmodule Loka.Content.Services do
     [{held_vessel?(item, s, b) and serves?(item, liquid), ["benefit", "vessel"]}]
   end
 
-  defp declared_stock?(r, npc, key), do: finite?(r) and npc["resource_starts"][key] != nil
+  # A provider nothing defines is its own line: it has no stock to be wrong about.
+  defp declared_stock?(r, npc, key),
+    do: finite?(r) and (npc == %{} or npc["resource_starts"][key] != nil)
 
   defp held_vessel?(item, service, benefit) do
     location = item["location"]
