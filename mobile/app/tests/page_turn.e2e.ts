@@ -87,6 +87,7 @@ test('a page turn plays a bundled recording', async ({ app, screen, browser }) =
     const Real = window.Audio;
     window.Audio = function (src?: string) {
       if (src) played.push(src);
+      // mutate-skip: spy pass-through, the test reads only what the spy recorded
       return new Real(src);
     } as unknown as typeof Audio;
   });
