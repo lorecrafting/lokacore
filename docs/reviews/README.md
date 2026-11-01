@@ -18,6 +18,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Second opinion: escort separation, PR #555 (loka-vduxr.23, kernel_api 1.137)](2026-11-01-loka-vduxr.23-escort-separation-second-review.md): **APPROVE WITH NOTES**
 - [Review: dialogue cookbook and the asked marker, PR #560 (loka-vduxr.12, kernel_api 1.138)](2026-11-01-loka-vduxr.12-dialogue-patterns-review.md): **APPROVE WITH NOTES**
 - [Second review: `asked` contract, PR #560 (loka-vduxr.12)](2026-11-01-loka-vduxr.12-asked-contract-second-review.md): **APPROVE**
+- [Second opinion: away catch-up cap, PR #569 (loka-qhvgq, kernel_api 1.144)](2026-11-01-loka-qhvgq-second-review.md): **APPROVE WITH NOTES**
 - [Review: away catch-up cap, PR #569 (loka-qhvgq, kernel_api 1.144)](2026-11-01-loka-qhvgq-review.md): **CHANGES REQUIRED**
 - [Review: level-up refill, PR #566 (loka-g5hh.2.2, kernel_api 1.142)](2026-11-01-loka-g5hh.2.2-review.md): **APPROVE WITH NOTES**
 - [Level-up E2: second review (PR #566)](2026-11-01-level-up-e2-second-review.md): **APPROVE WITH NOTES**
