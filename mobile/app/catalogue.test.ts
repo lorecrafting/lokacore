@@ -96,6 +96,8 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
       'questFailed',
       'questGained',
       'chapter',
+      'impact',
+      'fightIn',
     ].map((k) => [
       `sound.${k}`,
       'reached as sound[name] in play(name); played by the cue that names it (cueSounds.ts)',

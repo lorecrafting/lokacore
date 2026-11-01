@@ -68,7 +68,7 @@ function useBlow(id: string) {
   return { struck, travel, settled };
 }
 
-export function Foe(p: {
+function Foe(p: {
   opponent: Pick<Encounter, 'name' | 'band' | 'words'> & { id: string };
   target: boolean;
   live: boolean;
