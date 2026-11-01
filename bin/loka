@@ -11,7 +11,6 @@ dev) shift; exec node "$(dirname "$0")/../kernel/ts/play/author.ts" "$@" ;;
 todo) shift; exec node "$(dirname "$0")/../kernel/ts/play/todo.ts" "$@" ;;
 new)
   shift
-  [ $# -ge 2 ] || { echo "usage: bin/loka new <kind> <name> [--from <room> <direction>] ... [cartridge dir]" >&2; exit 2; }
   caller="$PWD"
   cd "$(dirname "$0")/.." && exec mix loka.new --cwd "$caller" "$@" ;;
 *) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev <cartridge dir> [--watch] | bin/loka new <kind> <name> [--from <room> <direction>] ... [cartridge dir] | bin/loka todo <cartridge dir>" >&2; exit 2 ;;
