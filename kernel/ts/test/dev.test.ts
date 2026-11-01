@@ -207,6 +207,7 @@ test('set fact refuses every fact a reopen proves from its mechanic, and only th
     riddle(1),
     carried({ escort: {} }),
     { quests: { q: { deadline: { fact, trust_fact: other } } } },
+    { quests: { q: { deadline: { fact } } } },
     { quests: { q: { deadline: { fact: other, trust_fact: fact } } } },
     { npcs: { n: { perception: { discovered: fact } } } },
     { quests: { q: { expedition: { survived_fact: fact, faction: other } } } },

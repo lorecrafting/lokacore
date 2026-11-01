@@ -72,7 +72,9 @@ const provenFacts = (world: World) => {
       q.expedition ? [q.expedition.survived_fact, q.expedition.faction] : [],
     ),
     ...values(quests ?? {}).flatMap((q) =>
-      q.deadline?.fact ? [q.deadline.fact, q.deadline.trust_fact!] : [],
+      q.deadline?.fact
+        ? [q.deadline.fact, ...(q.deadline.trust_fact ? [q.deadline.trust_fact] : [])]
+        : [],
     ),
   ];
 };
