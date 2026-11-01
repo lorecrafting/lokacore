@@ -87,3 +87,43 @@ Reruns of PR claims: "No runtime or `kernel_api` change" is false (S3); "107 car
 | `scene_files.ex:348` | Run: `Line `asked` is not `asked`, or repeats it` above the first choice; `once` has the proper message | File (wording) |
 
 Reruns: new Elixir test 4 passed, cookbook test 11 passed at this head.
+
+## Re-check: head `0440cf678` (scoped: findings, the `order` field, open items; merged with main `bfeaeb6a5`, `kernel_api` 1.144)
+
+**Verdict: CHANGES REQUIRED** (two blockers, both a Talk refused for good with no word to the writer). CI at the full sha: `ci`, `book-e2e`, `graph-diff` completed success.
+
+Must be true: a choice keeps the id its words give, so everything that names it resolves ([mechanics.md `then`, Links](../system/mechanics.md)); it shows as written, before and after a reload; only a scene writes `order`; Talk "is refused only if nothing further down opens" for a first meeting that links on ([writing-the-game.md:116-118, :142-144](../guides/writing-the-game.md)).
+
+| Earlier | State |
+| --- | --- |
+| B1 reaction on a choice | Fixed. Written Zebra, Apple, Mango: `choice: zebra` fires |
+| B2 quest outcome | Fixed. Written Zebra, Carry: `quest_resolved` `outcome: carry` fires |
+| S1 Back under `when: not` | Resolved as the warning, below |
+| Refused choice crash | Gone, test passes; mutant red |
+| `RETURN_CLOSED` false warning | Gone: played the setter with `then: end` beside another way back, no warning; the plain case warns |
+| N3 `explain.ex:85` | Not rechecked |
+
+**`order`.** Played: shown `zebra, apple, mango`, then a sidecar's `aaa` last; the same after a cold reopen; nested set `zebra, apple`. `order` in a sidecar refused, `choice_order_written`. Story point and riddle by words: test.
+
+**Hashes.** All 107 cartridges compiled at `bfeaeb6a5` and at the head, one VM each, 0 failures; `diff -rq` lists 0. Backed, but no cartridge has a `.scene`, so this does not reach `order`.
+
+**`RETURN_CLOSED`: a warning is right.** [mechanics.md, After an answer](../system/mechanics.md) closes the talk with no line when a `then` target's policy fails, and a closed talk is a legal state; a refusal would add a second rule to that one for scene files alone. The guide (`writing-the-game.md:102-104`) now says it.
+
+### Findings
+
+- **R1 blocker** `kernel/ts/src/mechanics/dialogue/fall_through.ts:32`: `when: not sage_met`, `- Start`, nested `- Go` with `sets: sage_met`, `then: b2`. First talk plays to `b2`; second talk `available: false`, `invalid_state`, for good, no warning. The same scene with no nesting opens `c2`. The kernel keeps the letter of `entry: false`; the guide's intro linking to a hub does not survive nesting. Anything `b2` alone gives is lost once the player leaves.
+- **R2 blocker** `kernel/ts/src/mechanics/dialogue/selection.ts:179`: `when: not sage_met`, `- Hello`, `once`, `sets: sage_met`, `then: d2`. That is the first meeting of [writing-the-game.md:141-143](../guides/writing-the-game.md) ("once the condition fails Talk opens the hub") written with this slice's `once`. Second talk refused for good, no warning. The guide's "other gate" can be read to cover a spent `once`, and the kernel follows "its policy holds"; so the fault is the silence, not the kernel, the same class as `RETURN_CLOSED`. Same trap, not a guide break by itself: a lone `once` with `then` and no `when:`, `needs: not` plus `sets`, and two `once` choices (refused once both are spent).
+- Least fix for both: a compile warning where a speaker's only way to a live `then` target runs through an `entry: false` dialogue or a choice whose own step shuts it, and the guide says so. A second entry that opens clears it. A runtime change needs a spec change first.
+
+### Other open items
+
+| Item | Result | Disposition |
+| --- | --- | --- |
+| `scene_files.ex:122` | Read: a compile refusal, not a refused Talk | File |
+| `scene_files.ex:38` | Read: duplicate constant | File |
+| `action_lists.ts:109` | Read: Talk is listed only on `of`; the rows above all kept one | No risk found |
+| PR's `choice_order.ex:16` | The file is gone | Nit: fix the cite in the PR body |
+
+### Tests
+
+Mutants, importing tests, all red: `choiceIds` reversed (`dialogue.test.ts` 1 fail); numbering reversed (2); `is_map_key` guard dropped (1); `order` refusal off (1); `RETURN_CLOSED` without the way-back test (1). Base: `content_scene_branching_test.exs` 26 pass, `dialogue.test.ts` 25 pass, `dialogue_cookbook.test.ts` 12 pass, as the PR claims. No test covers either blocker. `bin/mutate_diff.sh` not rerun, by brief.
