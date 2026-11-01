@@ -11,7 +11,7 @@ const react = import.meta.resolve('react');
 registerHooks({
   resolve: (specifier, context, next) =>
     next(
-      specifier === './sound' || specifier === './haptic' ? `${specifier}.ts` : specifier,
+      ['./sound', './haptic', './samples'].includes(specifier) ? `${specifier}.ts` : specifier,
       context,
     ),
 });

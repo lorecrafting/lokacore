@@ -31,7 +31,6 @@ registerHooks({
         url: `data:text/javascript,export default ${JSON.stringify(specifier.split('/').at(-1))}`,
         shortCircuit: true,
       };
-    if (specifier === './samples') return next('./samples.ts', context);
     if (specifier === './haptic' || specifier === './book/haptic')
       return {
         url: "data:text/javascript,export const hapticsOn=(o)=>globalThis.bookDevice?.push(['haptics',o]);export const onPulse=()=>()=>{};export const haptic=(k)=>globalThis.bookDevice?.push(['haptic',k])",
