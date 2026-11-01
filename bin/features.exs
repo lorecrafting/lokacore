@@ -7,8 +7,8 @@
 # docs/features.json: spec, contracts, extra modules, fixtures, invariants, implemented_in.
 # A capability is implemented when its rule module exists, or, for one that owns no command
 # (so has no rule: kernel/ts/src/runtime/world.ts INSTALLED), when its row names implemented_in; then
-# every column is required (a transcript only when it owns a command, and modules when it has
-# no rule). It fails on a missing required cell, a row for no capability, an implemented_in
+# every column is required (a transcript only when it owns a command and its row names no
+# no_transcript reason, and modules when it has no rule). It fails on a missing required cell, a row for no capability, an implemented_in
 # without a rule module on a capability that owns a command, and a contract, invariant or path
 # that does not exist. `--check` regenerates in memory and exits 1 if the committed file
 # differs; a second argument reads the rows from that file instead (red controls).
@@ -59,7 +59,9 @@ problems =
         p <-
           [
             for(c <- required, d["implemented"], not is_map_key(row, c), do: "missing #{c}"),
-            if(d["implemented"] and not d["ruleless"] and d["transcripts"] == [],
+            if(
+              d["implemented"] and not d["ruleless"] and d["transcripts"] == [] and
+                not is_map_key(row, "no_transcript"),
               do: ["missing transcript"],
               else: []
             ),

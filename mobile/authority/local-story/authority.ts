@@ -55,6 +55,7 @@ export type Host = {
   time?: Clocks;
   latency?: { host: HostKind; now: () => number }; // ms; each NEW decision's (11 §13), else none
   random?: (words: Uint32Array) => Uint32Array;
+  dev?: boolean; // the author preview (`?dev=1`) and `bin/loka check`; a release never sets it
 };
 const SAVE_FORMAT = 'loka-save-v2';
 

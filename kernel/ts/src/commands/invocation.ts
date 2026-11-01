@@ -99,6 +99,18 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
  * step's. A quest's offer fills the quest it accepts, as a scripted action fills its key, and close_choice
  * the pending continuation it closes (commands/actions.ts resolved).
  */
+/** A dev@1 invocation as its Command (input as is); only a dev host calls this. */
+export function resolveDev(
+  world: World,
+  { invocation: i, command_id }: Identified,
+): Command | { kind: 'rejected'; error: { code: ErrorCode } } {
+  const payload = { type: i.action_key, actor_id: i.actor_id, ...i.input };
+  const command = { id: command_id, world_context_id: world.context, payload };
+  return validate('Command', command).length
+    ? rejected('unsupported_capability')
+    : (command as Command);
+}
+
 export function resolve(
   world: World,
   { invocation: i, command_id }: Identified,

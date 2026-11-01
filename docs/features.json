@@ -1,4 +1,12 @@
 {
+  "dev": {
+    "spec": "cartridge.md Author preview (owner decision 2026-10-31, A11)",
+    "contracts": ["CommandPayload", "ActionInput"],
+    "fixtures": ["protocol/fixtures/toolbox_showcase_hash.json"],
+    "invariants": ["facts_typed"],
+    "implemented_in": "loka-vduxr.6 go to room and set fact, the author preview only",
+    "no_transcript": "transcripts replay through step, which refuses dev commands"
+  },
   "speech": {
     "spec": "docs/system/mechanics.md Social verbs (toolbox row G9)",
     "contracts": ["CommandPayload", "EventPayload", "DialogueDefinition", "ReactionRule"],

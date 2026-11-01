@@ -33,7 +33,7 @@ const SEED = [1, 2, 3, 4];
 
 // The build's commit, its random source (lineage.test.ts proves the app path passes it; tests
 // without one play the template world), its ids and its clock.
-type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version' | 'random' | 'time'>;
+type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version' | 'random' | 'time' | 'dev'>;
 
 function cartridgeOf(bundled: Bundled): Cartridge {
   const artifact = `{"cartridge":${bundled.canonical},"content_hash":"${bundled.sha256}"}`;

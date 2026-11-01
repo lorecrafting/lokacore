@@ -6,6 +6,8 @@ import type { Intent, Reply } from '../../packages/game-view/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import {
   asRefs,
+  cheatIntent,
+  cheatNote,
   caughtUp,
   dropStep,
   frozenClock,
@@ -239,4 +241,44 @@ test('a step with both kinds, or an unreadable intent, stops by number', () => {
     const out = replay([bad as unknown as Step], {} as Replayable, () => {});
     assert.match(out.failed!, /^step 1: not a step/);
   }
+});
+
+// Break: the panel's keys reach the session as anything but the refs the schema takes, or a cheat
+// reads as another (wrong action key, wrong kind).
+test('a cheat is the ordinary invocation, by definition ref', () => {
+  const m = { id: 'sampler', version: '0.0.1' };
+  const ref = (kind: string, key: string) => ({
+    cartridge_id: 'sampler',
+    cartridge_version: '0.0.1',
+    kind,
+    key,
+  });
+  assert.deepEqual(cheatIntent({ op: 'go_to_room', room: 'well' }, m, 't'), {
+    action_key: 'dev_go_to_room',
+    target_ids: [],
+    input: { room: ref('room', 'well') },
+    view_freshness_token: 't',
+  });
+  assert.deepEqual(cheatIntent({ op: 'set_fact', fact: 'f', value: 2 }, m, 't'), {
+    action_key: 'dev_set_fact',
+    target_ids: [],
+    input: { fact: ref('fact', 'f'), value: 2 },
+    view_freshness_token: 't',
+  });
+});
+
+// Break: an accepted cheat shows a refusal, or a refusal comes back blank or as a bare code.
+test('a refused cheat says why in plain words', () => {
+  assert.equal(cheatNote('go_to_room', accepted), '');
+  assert.equal(
+    cheatNote('set_fact', {
+      kind: 'saved',
+      decision: { kind: 'rejected', error: { code: 'not_found' } },
+    } as Reply),
+    'Set fact refused: no such fact in this cartridge.',
+  );
+  assert.equal(
+    cheatNote('go_to_room', { kind: 'saved', decision: { kind: 'fault', code: 'x' } } as Reply),
+    'Go to room refused: fault x.',
+  );
 });
