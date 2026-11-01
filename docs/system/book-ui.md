@@ -423,7 +423,7 @@ Read. Room changes prune these routes; elapsed-only redraws retain them. Scene/c
 precedence and live action freshness apply unchanged. These local pages add no pause,
 deadline extension or persisted transcript. On cold reopen, the resolved Read target from
 the existing committed receipt restores its message once to that notice’s detail history
-and its visible detail route after the chapter Continue. A board child restores its parent
+and its visible detail route after the chapter card. A board child restores its parent
 board beneath it. This creates no command or receipt. A missing current-room target restores
 no notice route; scene/combat precedence still applies. Ordinary unclassified narration
 continues to follow the existing World recovery rule.
@@ -674,9 +674,11 @@ A declared chapter opens a title page on launch and on index change, once per pr
 A modal scene takes precedence: only its persisted current line, offered Continue and the
 [running head](../BOOK-UI-COMPONENTS.md#component-catalogue) appear;
 ordinary details, Leave/Back, Contents and position controls are hidden or disabled. A chapter
-title page shows its chapter label, title, Continue and the running head only: no Back to World, and Contents and position are
-locked as in a scene. A chapter
-title reached with a scene waits until that scene ends. Chapter Continue dismisses presentation
+title page shows its chapter label, title and the running head only: no Back to World, and Contents and position are
+locked as in a scene. It turns itself about 4 s from appearing; a tap anywhere
+skips, and its clock pauses while the app is in the background. With a screen reader active it keeps an
+explicit Continue and does not turn itself. The theme cut plays into the next page and fades there. A chapter
+title reached with a scene waits until that scene ends. Dismissing the card is presentation
 only. Same-room ordinary updates do not repeat or drop the chapter title.
 
 A once-only choice before play (the ancestry choice) sends the exact offered invocation and is

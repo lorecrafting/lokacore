@@ -1,11 +1,12 @@
 // The Contents sections (Character, Ancestry, Carrying, Map, Settings; Journal: journal.tsx) and
 // the chapter and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
-import { View } from 'react-native';
+import { useContext } from 'react';
+import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { bandPhrase, cap, conditionLine, plain, isPool, toneOf, type Thing } from './model.ts';
 import type { Button } from './presenter.ts';
-import { useCardInk } from './card.ts';
+import { cardContext, useCardInk, useCardTurn } from './card.ts';
 import { InkText, Reanimated } from './fade.ts';
 import { note, prose, usePalette, useType, type Palette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
@@ -211,43 +212,60 @@ const ruleStyle = (c: Palette) => ({
   marginTop: space.sm,
 });
 
-/**
- * The chapter title page: label, title and rule centred, then Continue.
- * - Use: a chapter's title page.
- * - Rules: label and title are one header node named by its visible text in order ("Chapter one
- *   <title>"), with the arriving focus. Nothing but Continue is pressable. The mock's `.chapter`
- *   without its fleuron, subtitle and auto-dismiss.
- * - Story: ChapterPages.stories.tsx
- */
-export function ChapterPage(p: { label: string; title: string; done: () => void }) {
+function CardMarks(p: { label: string; title: string }) {
   const c = usePalette();
   const t = useType();
   const label = useCardInk(0);
   const title = useCardInk(1);
   const rule = useCardInk(2);
   return (
-    <Page centred paperless>
-      <View style={{ alignItems: 'center', gap: space.sm }}>
-        {/* one header, named label then title, so the arriving focus reads "Chapter one" too */}
-        <View
-          accessible
-          accessibilityRole="header"
-          {...useTitleFocus()}
-          style={{ alignItems: 'center', gap: space.sm }}
-        >
-          <InkText style={[t.chapterLabel, { color: c.dim, textAlign: 'center' }, label]}>
-            {p.label}
-          </InkText>
-          <InkText style={[t.chapterTitle, { color: c.fg, textAlign: 'center' }, title]}>
-            {p.title}
-          </InkText>
-        </View>
-        <Reanimated.View style={[ruleStyle(c), rule]} />
+    <View style={{ alignItems: 'center', gap: space.sm }}>
+      {/* one header, named label then title, so the arriving focus reads "Chapter one" too */}
+      <View
+        accessible
+        accessibilityRole="header"
+        {...useTitleFocus()}
+        style={{ alignItems: 'center', gap: space.sm }}
+      >
+        <InkText style={[t.chapterLabel, { color: c.dim, textAlign: 'center' }, label]}>
+          {p.label}
+        </InkText>
+        <InkText style={[t.chapterTitle, { color: c.fg, textAlign: 'center' }, title]}>
+          {p.title}
+        </InkText>
       </View>
-      <View style={{ alignItems: 'center' }}>
-        <ContinueButton label={LABEL.continue} onPress={p.done} />
-      </View>
-    </Page>
+      <Reanimated.View style={[ruleStyle(c), rule]} />
+    </View>
+  );
+}
+
+/**
+ * The chapter title page: label, title and rule centred; it turns itself, and a tap anywhere skips.
+ * - Use: a chapter's title page.
+ * - Rules: label and title are one header node named by its visible text in order ("Chapter one
+ *   <title>"), with the arriving focus. Under a screen reader it keeps Continue and waits for it.
+ *   The mock's `.chapter` without its fleuron and subtitle.
+ * - Story: ChapterPages.stories.tsx
+ */
+export function ChapterPage(p: { label: string; title: string; done: () => void }) {
+  const overPicture = !!useContext(cardContext);
+  const { reader, turn } = useCardTurn(p.done);
+  return (
+    <Pressable
+      accessible={false}
+      focusable={false}
+      style={{ flex: 1 /* mutate-skip: layout */ }}
+      onPress={reader ? undefined : turn}
+    >
+      <Page centred paperless={overPicture}>
+        <CardMarks label={p.label} title={p.title} />
+        {reader && (
+          <View style={{ alignItems: 'center' }}>
+            <ContinueButton label={LABEL.continue} onPress={turn} />
+          </View>
+        )}
+      </Page>
+    </Pressable>
   );
 }
 

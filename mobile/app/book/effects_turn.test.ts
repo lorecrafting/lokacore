@@ -12,7 +12,7 @@ const stubs: Record<string, string> = {
     'useDerivedValue=f=>({value:f()}),useReducedMotion=()=>globalThis.reducedMotion,' +
     'useSharedValue=value=>globalThis.sharedSlot(value),Easing={bezier:()=>()=>0,linear:t=>t,' +
     'quad:t=>t,in:f=>f,out:f=>f,inOut:f=>f},' +
-    'withTiming=(v,o,done)=>{globalThis.finish=done;return v};',
+    'withTiming=(v,o,done)=>{globalThis.timed=o;globalThis.finish=done;return v};',
   'react-native-worklets': 'export const scheduleOnRN=f=>f();',
   '@shopify/react-native-skia':
     "export const Blur='Blur',Canvas='Canvas',Fill='Fill',Image='SkiaImage',ImageShader='ImageShader'," +
@@ -31,7 +31,8 @@ registerHooks({
 // By URL: polish-book stubs the './PageTurn.tsx' specifier.
 const { PageTurn } = await import(new URL('./PageTurn.tsx', import.meta.url).href);
 const { Blow } = await import('./Blow.tsx');
-const { cardContext, useCardInk } = await import('./card.ts');
+const { motion } = await import('./tokens.ts');
+const { cardContext, useCardInk, useCardTurn } = await import('./card.ts');
 
 // The tree as PageTurn returns it, inner components left unrendered.
 const walk = (e: any): any[] =>
@@ -107,6 +108,9 @@ test('a card over a picture blurs it, without a curl, and lets go at the end', a
   assert.deepEqual(at(1), { blur: 12, shown: 0 });
   // Halfway the picture is still held whole: only motion.card.out lets it go.
   assert.equal(at(0.5).shown, 1);
+  // Breaks: the blur runs and lets go 300 ms early: the card's whole duration, then `out` after it.
+  assert.equal(g.timed.duration, 900);
+  assert.ok(Math.abs(at(5 / 6).shown - 0.5) < 1e-9); // 150 ms of the 300 left
   const { x, y } = walk(rig(t)(() => blur.type({ ...blur.props, progress: { value: 0 } }))).find(
     (n) => n.type === 'SkiaImage',
   ).props;
@@ -184,4 +188,104 @@ test('a card dries mark by mark over a picture and is there at once without one'
   cardContext._currentValue = undefined;
   wait();
   assert.equal(wait(), 1);
+});
+
+// The chapter card's clock: on the mock timers, the device through react-shim's seam.
+async function card(t: any, device: object = {}) {
+  effects(t);
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  g.cardDevice = device;
+  t.after(() => (g.cardDevice = undefined));
+  const turned = { count: 0 };
+  const draw = rig(t);
+  const on = () =>
+    draw(() =>
+      useCardTurn(() => {
+        turned.count++;
+      }),
+    );
+  on();
+  await settle();
+  const hook = on();
+  return { turned, hook, draw, on, tick: (ms: number) => t.mock.timers.tick(ms) };
+}
+
+// Breaks: the card waits for ever, or turns early, or turns twice.
+test('the card turns itself once, at the token', async (t) => {
+  const { turned, tick } = await card(t);
+  tick(motion.card.auto - 1);
+  assert.equal(turned.count, 0);
+  tick(1);
+  assert.equal(turned.count, 1);
+  tick(motion.card.auto);
+  assert.equal(turned.count, 1);
+});
+
+// Breaks: the turn calls the done of the card's first render: its stale stack pops the wrong page.
+test('the card turns with the latest done', async (t) => {
+  const { draw, tick } = await card(t);
+  const calls: string[] = [];
+  draw(() => useCardTurn(() => calls.push('latest')));
+  tick(motion.card.auto);
+  assert.deepEqual(calls, ['latest']);
+});
+
+// Breaks: a tap and the clock both turn, skipping the next page too.
+test('a tap skips once and cancels the clock', async (t) => {
+  const { turned, hook, tick } = await card(t);
+  tick(10);
+  hook.turn();
+  hook.turn();
+  assert.equal(turned.count, 1);
+  assert.equal(t.mock.timers.getTimers?.()?.length ?? 0, 0);
+  tick(motion.card.auto);
+  assert.equal(turned.count, 1);
+});
+
+// Breaks: the card turns while the app is away, or restarts its clock, or a second away (inactive,
+// then background) loses more time than passed.
+test('a backgrounded card keeps the time it had left', async (t) => {
+  const device: any = {};
+  const { turned, tick } = await card(t, device);
+  tick(1000);
+  device.change(false);
+  tick(100);
+  device.change(false);
+  tick(motion.card.auto);
+  assert.equal(turned.count, 0);
+  device.change(true);
+  device.change(true);
+  tick(motion.card.auto - 1000 - 1 - 100);
+  assert.equal(turned.count, 0);
+  tick(100 + 1);
+  assert.equal(turned.count, 1);
+});
+
+// Breaks: a card opened in the background is already counting.
+test('a card opened away starts its clock on return', async (t) => {
+  const device: any = { away: true };
+  const { turned, tick } = await card(t, device);
+  tick(motion.card.auto * 2);
+  assert.equal(turned.count, 0);
+  device.change(true);
+  tick(motion.card.auto);
+  assert.equal(turned.count, 1);
+});
+
+// Breaks: a screen reader user's card leaves before it is read.
+test('with a screen reader on there is no clock', async (t) => {
+  const { turned, hook, tick } = await card(t, { reader: true });
+  assert.equal(hook.reader, true);
+  tick(motion.card.auto * 2);
+  assert.equal(turned.count, 0);
+});
+
+// Breaks: an unmounted card (a scene took over) still turns the page or keeps its listener.
+test('an unmounted card leaves no clock or listener', async (t) => {
+  const device: any = {};
+  const { turned, draw, tick } = await card(t, device);
+  draw.unmount();
+  tick(motion.card.auto);
+  assert.equal(turned.count, 0);
+  assert.equal(device.change, undefined);
 });

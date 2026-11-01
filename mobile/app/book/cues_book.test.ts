@@ -31,7 +31,7 @@ function mount() {
   let i = 0;
   let deps: unknown[] | undefined;
   let cleanup: (() => void) | undefined;
-  const draw = (view: GameView, catchingUp: boolean, turn: number, resumes = 0) => {
+  const draw = (view: GameView, catchingUp: boolean, turn: number, resumes = 0, still = false) => {
     i = 0;
     const g = globalThis as any;
     g[Symbol.for('loka-book-test-state')] = (v: unknown) => [(slots[i++] ??= v), () => {}];
@@ -41,7 +41,7 @@ function mount() {
       cleanup?.();
       cleanup = f();
     };
-    useCues(view, catchingUp, turn, resumes);
+    useCues(view, catchingUp, turn, resumes, still);
   };
   return Object.assign(draw, { unmount: () => cleanup?.() });
 }
@@ -51,32 +51,51 @@ function listen(t: { after: (f: () => void) => void }) {
   return heard;
 }
 
-// Breaks: a blow held by a page turn buzzes at its picture deadline, inside the curl (book-ui.md
-// Haptics), or a second turn lets the waiting haptic land in its own curl, or the haptic is lost.
-test('a held cue sounds at the picture deadline and is felt only after the curl', (t) => {
+// Breaks: a blow held by a page turn buzzes inside the curl (book-ui.md Haptics) or up to 660 ms
+// late, or a haptic after the curl is lost.
+test('a haptic due during a curl is dropped, its sound kept; after the curl it is felt', (t) => {
   const tick = clock(t);
   t.after(onCue(playCue));
   const g = globalThis as any;
   g.bookDevice = [];
   t.after(() => (g.bookDevice = undefined));
-  const felt = () =>
-    g.bookDevice.filter((l: string[]) => l[0] === 'haptic').map((l: string[]) => l[1]);
   const draw = mount();
   draw(hit(20), false, 0);
   draw(hit(15), false, 1);
   tick(motion.quick.duration);
   assert.deepEqual(g.bookDevice, [['play', 'blow']]);
-  tick(motion.turn.duration - 1);
-  assert.deepEqual(felt(), []);
-  draw(hit(15), false, 2); // 1 ms before the first curl's end
-  tick(1);
-  assert.deepEqual(felt(), []);
-  tick(motion.quick.duration + motion.turn.duration - 2);
-  assert.deepEqual(felt(), []);
-  tick(1, 1); // a timer landing early waits again
-  assert.deepEqual(felt(), []);
-  tick(1);
-  assert.deepEqual(felt(), ['heavy']);
+  tick(motion.turn.duration * 3);
+  assert.deepEqual(g.bookDevice, [['play', 'blow']]);
+  g.bookDevice = [];
+  draw(hit(10), false, 1);
+  assert.deepEqual(g.bookDevice, [
+    ['play', 'blow'],
+    ['haptic', 'heavy'],
+  ]);
+});
+
+// Breaks: reduced motion, which has no curl, loses its haptics; or the chapter card, which does not
+// curl in, loses the haptic of its cut.
+test('no curl, no drop: a reduced-motion turn and a chapter card keep the haptic', (t) => {
+  const tick = clock(t);
+  t.after(onCue(playCue));
+  const g = globalThis as any;
+  g.bookDevice = [];
+  t.after(() => (g.bookDevice = undefined));
+  tick(motion.quick.duration + motion.turn.duration); // past the curl of any earlier test
+  const haptics = () => g.bookDevice.filter((l: string[]) => l[0] === 'haptic');
+  const chapter = (index: number) => place('p', { chapter: { index, title: 't' } });
+  const draw = mount();
+  draw(chapter(0), false, 0);
+  draw(chapter(1), false, 1);
+  tick(motion.quick.duration);
+  assert.deepEqual(haptics(), [['haptic', 'medium']]);
+  g.bookDevice = [];
+  const still = mount();
+  still(hit(20), false, 0, 0, true);
+  still(hit(15), false, 1, 0, true);
+  tick(motion.quick.duration);
+  assert.deepEqual(haptics(), [['haptic', 'heavy']]);
 });
 
 // Breaks: opening a save plays what it holds; or nothing is ever published.

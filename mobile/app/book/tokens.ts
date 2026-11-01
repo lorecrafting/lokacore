@@ -150,7 +150,15 @@ export const motion = {
   }, // a status icon arriving, scaling up from `from`; the item pop rising `rise`, then held and out -- mutate-skip: uncalibrated design value
   flash: { duration: 120, easing: 'inOutQuad', out: 380, gap: 1000, swell: 1.015 }, // the blow wash; swell: the page's scale at its peak; gap: the Flash limit, a later blow keeps all but the wash -- mutate-skip: uncalibrated design value
   settle: { duration: 400, easing: 'inOutQuad', hold: 600 }, // a resolved running head retiring; hold: gilt's warning ink before it settles -- mutate-skip: uncalibrated design value
-  card: { duration: 600, easing: 'inOutQuad', out: 300, stagger: 120, blurFrom: 6, blurTo: 12 }, // chapter card over the leaving page's blur (Skia sigma) -- mutate-skip: uncalibrated design value
+  card: {
+    duration: 600,
+    easing: 'inOutQuad',
+    out: 300,
+    stagger: 120,
+    blurFrom: 6,
+    blurTo: 12,
+    auto: 4000,
+  }, // chapter card over the leaving page's blur (Skia sigma); auto: when it turns itself -- mutate-skip: uncalibrated design value
 };
 
 // Each sound by key: its loudness tier, its round-robin variants and the haptic it brings. Files live

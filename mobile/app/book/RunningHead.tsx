@@ -26,8 +26,8 @@ function HeadLine(p: { words?: string; style: object; view: GameView }) {
   );
   if (!p.words) return was && settles ? <HeadOut words={was} style={p.style} /> : null;
   if (was === null || was === p.words) return <Text style={p.style}>{p.words}</Text>;
-  return settles ? (
-    <HeadSettle was={was ?? ''} words={p.words} style={p.style} />
+  return settles && was ? (
+    <HeadSettle was={was} words={p.words} style={p.style} />
   ) : (
     <HeadFade was={was} words={p.words} style={p.style} />
   );

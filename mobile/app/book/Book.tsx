@@ -18,7 +18,7 @@ import {
   type Hint,
   type Page,
 } from './model.ts';
-import { usePaletteCurve } from './fade.ts';
+import { usePaletteCurve, useReducedMotion } from './fade.ts';
 import {
   PaletteContext,
   paletteOf,
@@ -225,7 +225,7 @@ export function BookView(p: ViewProps) {
 
 function useCueSounds(p: ViewProps) {
   useEffect(() => onCue(playCue), []); // before useCues: heard from its first cue
-  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn, p.resumes);
+  useCues(p.screen.view, p.screen.catchingUp, p.flip.turn, p.resumes, useReducedMotion());
 }
 
 // The footer (on the world), the status line and a press's fault.

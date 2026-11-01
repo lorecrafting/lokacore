@@ -183,7 +183,7 @@ function conversationLines(
 }
 
 // A skill the reply taught or raised narrates itself (book-ui.md Line placement, loka-lsqi).
-const skillEvents = (was: GameView, now: GameView, text: Say): DetailLine[] =>
+export const skillEvents = (was: GameView, now: GameView, text: Say): DetailLine[] =>
   (was.skills ? (now.skills ?? []) : []).flatMap((n): DetailLine[] => {
     const w = was.skills!.find((k) => k.skill.key === n.skill.key && k.skill.kind === n.skill.kind);
     const name = text(n.label);

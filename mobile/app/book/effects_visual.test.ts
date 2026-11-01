@@ -17,6 +17,7 @@ const { JournalPage } = await import('./journal.tsx');
 const { chapterCard } = await import('./Book.tsx');
 const { cardContext } = await import('./card.ts');
 const { ChapterPage } = await import('./sections.tsx');
+const { skillEvents } = await import('./received.ts');
 const { dark } = await import('./palette.ts');
 
 const g = globalThis as any;
@@ -246,6 +247,21 @@ test('a fresh gilt line starts in warning ink and settles to its colour', (t) =>
   assert.notEqual(settled, color.light.warning);
 });
 
+// Breaks: the reply's skill lines lose their gilt, so the test above guards a line nobody writes.
+test('a learned or raised skill narrates gilt', () => {
+  const skill = (acquired: boolean, level = 0) =>
+    ({
+      skills: [{ skill: { key: 'k', kind: 'skill' }, label: 'knots', acquired, level }],
+    }) as never;
+  const text = (k: unknown) => k as string;
+  assert.deepEqual(skillEvents(skill(false), skill(true), text), [
+    { text: 'You learn knots.', event: true, gilt: true },
+  ]);
+  assert.deepEqual(skillEvents(skill(true, 1), skill(true, 2), text), [
+    { text: 'Your knots improves.', event: true, gilt: true },
+  ]);
+});
+
 // Breaks: unspent points read as plain prose, or spent ones stay gilt.
 test('the Character level line is warning ink only while points wait', (t) => {
   effects(t);
@@ -378,8 +394,59 @@ test('a chapter page dries label, title, rule in that order on no paper of its o
   cardContext._currentValue = 'picture';
   const shown = rig(t)(() => nodes(ChapterPage({ label: 'one', title: 't', done: () => {} })));
   assert.deepEqual(g.delays, [0, 120, 240]);
-  const page = flat(shown.find((n) => n.props?.style?.flex !== undefined).props.style);
-  assert.deepEqual([page.flex, page.backgroundColor], [1, undefined]);
+  const fills = (drawn: any[]) =>
+    drawn.filter((n) => n.type !== 'Pressable' && flat(n.props?.style ?? {}).flex === 1);
+  const paper = (drawn: any[]) => flat(fills(drawn)[0].props.style).backgroundColor;
+  assert.equal(paper(shown), undefined);
+  // Breaks: the leaving card has no paper, so its ink lies over the next page on the turn.
+  cardContext._currentValue = undefined;
+  const leaving = rig(t)(() => nodes(ChapterPage({ label: 'one', title: 't', done: () => {} })));
+  assert.equal(paper(leaving), color.light.bg);
+});
+
+// Breaks: a screen reader user loses the explicit Continue, or a tap beside it turns the page.
+test('with a screen reader on the card keeps Continue and no tap anywhere', async (t) => {
+  effects(t);
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  t.after(() => (g.cardDevice = undefined));
+  const draw = rig(t);
+  const card = () => draw(() => nodes(ChapterPage({ label: 'one', title: 't', done: () => {} })));
+  const taps = (shown: any[]) => shown.filter((n) => n.props?.onPress);
+  const worded = (shown: any[]) => shown.filter((n) => n.type === 'Text').map(words);
+  g.cardDevice = {};
+  card();
+  await new Promise(setImmediate);
+  const sighted = card();
+  assert.equal(taps(sighted).length, 1);
+  assert.ok(!worded(sighted).includes('Continue'));
+  const draw2 = rig(t);
+  g.cardDevice = { reader: true };
+  const read = () => draw2(() => nodes(ChapterPage({ label: 'one', title: 't', done: () => {} })));
+  read();
+  await new Promise(setImmediate);
+  const shown = read();
+  assert.ok(worded(shown).includes('Continue'));
+  assert.equal(taps(shown).length, 1); // Continue's own
+  assert.equal(taps(shown)[0].props.accessible, undefined);
+});
+
+// Breaks: a buy's coin cue reaches the pop and wipes the item it just raised.
+test('a buy keeps its pop through its own coin cue', (t) => {
+  effects(t);
+  clock(t);
+  const draw = rig(t);
+  const at = (v: GameView) =>
+    draw(() => {
+      useCues(v, false, 0);
+      return nodes(ItemPop({ view: v, text: say }));
+    });
+  const purse = (n: number) => [
+    { resource: { key: 'pennies', id: 'pennies' }, current: n, maximum: 99 },
+  ];
+  at({ ...held('sack'), resources: purse(9) } as never);
+  const bought = { ...held('sack', 'rope'), resources: purse(5) } as never;
+  at(bought);
+  assert.deepEqual(popText(at(bought)), ['+ rope']);
 });
 
 // Breaks: paper and ink of one luminance read as dark, so the wash picks the dark book's colour.

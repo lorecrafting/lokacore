@@ -6,6 +6,9 @@ import { useState, type ComponentType } from 'react';
 import { View } from 'react-native';
 import { expect, waitFor } from 'storybook/test';
 import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
+import { ContinueButton } from '../book/actions.tsx';
+import { LABEL } from '../book/labels.ts';
+import { Page } from '../book/pages.tsx';
 import { ChapterPage, SettingsPage } from '../book/sections.tsx';
 import { chapterLabel } from '../book/words.ts';
 import { usePalette } from '../book/palette.ts';
@@ -27,7 +30,9 @@ function Turning({ PageTurn }: { PageTurn: ComponentType<Parameters<typeof Turn>
         {at.turn % 2 ? (
           <SettingsPage startOver={() => go(-1)} world={() => go(-1)} />
         ) : (
-          <ChapterPage label={chapterLabel(0)} title="The Missing Child" done={() => go(1)} />
+          <Page title="The Missing Child">
+            <ContinueButton label={LABEL.continue} onPress={() => go(1)} />
+          </Page>
         )}
       </PageTurn>
     </View>
@@ -73,7 +78,16 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
 };
 
 // The chapter card over the leaving page's blurred picture (book-ui.md, Chapters).
-// Breaks: the card curls, or the blur canvas outlives the card and hides it.
+// What of the heading's ancestors paints a background: the page's paper among them or not.
+const painted = (heading: HTMLElement) => {
+  let n = 0;
+  for (let at = heading.parentElement; at; at = at.parentElement)
+    if (getComputedStyle(at).backgroundColor !== 'rgba(0, 0, 0, 0)') n++;
+  return n;
+};
+
+// Breaks: the card curls, or the blur canvas outlives the card and hides it; or the settled card
+// stays without paper, so its ink lies over the next page as it leaves.
 function Carding({ PageTurn }: { PageTurn: ComponentType<Parameters<typeof Turn>[0]> }) {
   const c = usePalette();
   const [turn, setTurn] = useState(0);
@@ -101,9 +115,14 @@ export const ChapterCardBlur: StoryObj<typeof meta> = {
       await canvas.findByRole('heading', { name: /The Missing Child/ }),
     ).toBeInTheDocument();
     await waitFor(() => expect(canvasElement.querySelector('canvas')).not.toBeNull());
+    const heading = canvas.getByRole('heading', { name: /The Missing Child/ });
+    const overPicture = painted(heading);
     await waitFor(() => expect(canvasElement.querySelector('canvas')).toBeNull(), {
       timeout: 5000,
     });
     await expect(canvas.getByRole('heading', { name: /The Missing Child/ })).toBeVisible();
+    await expect(painted(canvas.getByRole('heading', { name: /The Missing Child/ }))).toBe(
+      overPicture + 1,
+    );
   },
 };

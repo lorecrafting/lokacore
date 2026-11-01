@@ -1,7 +1,7 @@
 // The book's page shell and its shared controls (the room page: Body.tsx; the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -128,7 +128,7 @@ export function Page(p: {
   children: ReactNode;
 }) {
   const c = usePalette();
-  let scroll: ScrollView | null = null; // this render's view: a ref callback, so no hook
+  const scroll = useRef<ScrollView>(null);
   const title = p.title !== undefined && (
     <Title title={p.title} fixed={p.fixedTitle} onPress={p.onTitlePress} />
   );
@@ -138,9 +138,7 @@ export function Page(p: {
         <View style={{ paddingHorizontal: space.page, paddingTop: space.xl }}>{title}</View>
       )}
       <ScrollView
-        ref={(view) => {
-          scroll = view;
-        }}
+        ref={scroll}
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: space.page,
@@ -148,7 +146,9 @@ export function Page(p: {
           gap: space.xl,
           ...(p.centred && { flexGrow: 1, justifyContent: 'center' }),
         }}
-        onContentSizeChange={() => p.scrollToEnd && scroll?.scrollToEnd({ animated: false })}
+        onContentSizeChange={() =>
+          p.scrollToEnd && scroll.current?.scrollToEnd({ animated: false })
+        }
       >
         {!p.fixedTitle && title}
         {p.children}

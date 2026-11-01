@@ -19,7 +19,7 @@ export function rig(t: After) {
   const slots: any[] = [];
   const stops = new Map<number, () => void>();
   const shared: { value: any }[] = [];
-  t.after(() => stops.forEach((stop) => stop()));
+  t.after(() => unmount());
   let at = 0; // mutate-skip: test rig, hook slot cursor
   const queued: (() => void)[] = [];
   const render = <T>(body: () => T): T => {
@@ -52,7 +52,11 @@ export function rig(t: After) {
     for (const f of queued.splice(0)) f();
     return out;
   };
-  return Object.assign(render, { shared });
+  const unmount = () => {
+    stops.forEach((stop) => stop());
+    stops.clear();
+  };
+  return Object.assign(render, { shared, unmount });
 }
 
 export const flat = (style: any) => Object.assign({}, ...[style].flat());

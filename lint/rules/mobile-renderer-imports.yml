@@ -17,7 +17,7 @@ rule:
       inside: { matches: module-specifier }
       any:
         - not:
-            regex: '^(react|react-native|@shopify/react-native-skia|react-native-reanimated|react-native-worklets|\./page-curl\.sksl|\./sounds/[a-z0-9-]+\.m4a|\./(book/)?(Book|Blow|GiltLine|ItemPop|RunningHead|card|cueSounds|samples|Body|Chip|DreamPage|Combat|actions|Footer|haptic|HapticPulse|press|lines|MapDrawing|DiscoveredMap|glyphs|Menu|NightSky|Npc|PageTurn|Riddle|SayField|SaveError|Shelf|Status|StatusIcon|buttons|chronicle|cues|easing|item-pages|journal|joystick|labels|logs|model|notices|dreams|positions|offers|pages|pick|place|palette|fade|presenter|reading|reasons|recap|received|sections|skills|snapshot|sound|title|Text|tokens|updates|useSettings|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
+            regex: '^(react|react-native|@shopify/react-native-skia|react-native-reanimated|react-native-worklets|\./page-curl\.sksl|\./sounds/[a-z0-9-]+\.m4a|\./(book/)?(Book|Blow|GiltLine|ItemPop|RunningHead|card|cardDevice|cueSounds|samples|Body|Chip|DreamPage|Combat|actions|Footer|haptic|HapticPulse|press|lines|MapDrawing|DiscoveredMap|glyphs|Menu|NightSky|Npc|PageTurn|Riddle|SayField|SaveError|Shelf|Status|StatusIcon|buttons|chronicle|cues|easing|item-pages|journal|joystick|labels|logs|model|notices|dreams|positions|offers|pages|pick|place|palette|fade|presenter|reading|reasons|recap|received|sections|skills|snapshot|sound|title|Text|tokens|updates|useSettings|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
         # react-native: only `import { A, B } from`, every name plain and on the list. A namespace, default,
         # `{ default as X }`, aliased or string-named import, a re-export, require() or import() is flagged.
         - regex: '^react-native$'
@@ -34,4 +34,4 @@ rule:
                         - kind: namespace_import
                         - { kind: identifier, inside: { kind: import_clause } }
                         - kind: import_specifier
-                          not: { regex: '^(AccessibilityInfo|Animated|Button|Easing|PanResponder|Pressable|SafeAreaView|ScrollView|Text|TextInput|View)$' }
+                          not: { regex: '^(AccessibilityInfo|Animated|AppState|Button|Easing|PanResponder|Platform|Pressable|SafeAreaView|ScrollView|Text|TextInput|View)$' }

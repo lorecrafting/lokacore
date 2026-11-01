@@ -1,7 +1,7 @@
 // Page: one shell for every page (Page's doc comment); RunningHead above it, as Body.tsx
 // draws it. Journal texts are the showcase's own (protocol/fixtures/toolbox_showcase_hash.json).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import type { ComponentProps } from 'react';
+import { type ComponentProps, useState } from 'react';
 import { View } from 'react-native';
 import { expect, fn, waitFor } from 'storybook/test';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -188,6 +188,29 @@ export const ScrollToEnd: Story = {
   play: async ({ canvas }) => {
     const last = canvas.getByText('Bram says line 30.');
     await waitFor(() => expect(inView(last)).toBe(true));
+  },
+};
+
+// Breaks: on the web ScrollView keeps its first ref callback, so a later render's Page has no view
+// and a line arriving on a full page is cut (the pop unseen).
+function Growing() {
+  const [lines, setLines] = useState(30);
+  return (
+    <Framed
+      title="Old Bram"
+      scrollToEnd
+      foot={<Control label="Say" onPress={() => setLines(lines + 5)} />}
+    >
+      <LogLines lines={Array.from({ length: lines }, (_, i) => `Bram says line ${i + 1}.`)} />
+    </Framed>
+  );
+}
+export const LogFollows: Story = {
+  render: () => <Growing />,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 30.'))).toBe(true));
+    await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 35.'))).toBe(true));
   },
 };
 

@@ -282,7 +282,10 @@ export function book(
       .map(words);
   draw();
   // actual chapter route callback; the ancestry picker shows first when the run has none yet
-  if (game.view().view.chapter && !game.view().view.ancestry_choices) tap('Continue');
+  if (game.view().view.chapter && !game.view().view.ancestry_choices)
+    draw()
+      .find((n) => n.props?.accessible === false && n.props.onPress)
+      .props.onPress();
   return {
     get p() {
       return state.get('Book:0');

@@ -129,7 +129,7 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   Status icon: `motion.pop` from scale `motion.pop.from`; expiry `motion.fade`. Item pop: rises
   `motion.pop.rise` over `motion.pop`, holds `hold`, leaves over `out` (`outEasing`). Gilt: `warning`
   for `motion.settle.hold`, then `motion.settle` to the line's colour. Running head:
-  `motion.dry` across, `motion.settle` to `dim` then out. Chapter card: `motion.card`, blur sigma
+  `motion.dry` across, `motion.settle` to `dim` then out. Chapter card: `motion.card.auto` before it turns itself, `motion.card`, blur sigma
   `blurFrom` to `blurTo`, each of label, title and rule `stagger` apart. Sound, `mix` and `haptic`
   hold levels and kinds; the sound table names each sound's haptic. Queue: small cues of one key merge
   within `mix.coalesce`; `motion.flash.gap` is the Flash limit.

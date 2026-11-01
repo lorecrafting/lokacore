@@ -92,6 +92,7 @@ function PageBody(p: BodyProps & Talk) {
   if (page?.kind === 'chapter' && view.chapter)
     return (
       <ChapterPage
+        key={view.chapter.index}
         label={chapterLabel(view.chapter.index)}
         title={text(view.chapter.title)}
         done={p.chapterDone}

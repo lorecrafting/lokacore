@@ -6,11 +6,9 @@ import { haptic, type HapticKind } from './haptic';
 import { play } from './sound';
 import { sound } from './tokens.ts';
 
-// No haptic during a page turn: it waits for the curl's end, again if another turn began.
+// No haptic during a page turn: dropped, not held, for one felt late is felt as nothing's.
 const feel = (kind: HapticKind) => {
-  const left = curlEnds - performance.now();
-  if (left > 0) setTimeout(() => feel(kind), left);
-  else haptic(kind);
+  if (performance.now() >= curlEnds) haptic(kind);
 };
 
 export const playCue = (cue: Cue) => {

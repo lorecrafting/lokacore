@@ -1,4 +1,4 @@
-// size: allow 305, the bus reads as one: cue table, view diff, severity queue, subscription
+// size: allow 315, the bus reads as one: cue table, view diff, severity queue, subscription
 // The effects cue bus (book-ui.md, Effects, sound and haptics; Queue): a pure diff of two GameViews
 // into named cues, a pure severity queue over them, and a subscription for the effects to come.
 import { useEffect, useRef } from 'react';
@@ -278,7 +278,13 @@ export const onCue = (listener: (cue: Cue) => void) => {
 
 // Feeds the queue from each new view and page turn. A first view is silent, and catch-up to its end:
 // the first view after it diffs against nothing.
-export function useCues(view: GameView, catchingUp: boolean, turn: number, resumes = 0) {
+export function useCues(
+  view: GameView,
+  catchingUp: boolean,
+  turn: number,
+  resumes = 0,
+  reduced = false,
+) {
   const queue = useRef(QUIET);
   const seen = useRef(turn);
   const back = useRef(resumes);
@@ -286,7 +292,9 @@ export function useCues(view: GameView, catchingUp: boolean, turn: number, resum
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const advance = (cues: Cue[], turned = false) => {
-      if (turned) curlEnds = performance.now() + motion.quick.duration + motion.turn.duration;
+      // No curl to feel through under reduced motion, or for a chapter card, which does not curl in.
+      if (turned && !reduced && !cues.some((cue) => cue.name === 'chapter'))
+        curlEnds = performance.now() + motion.quick.duration + motion.turn.duration;
       const { q, fired } = step(queue.current, cues, performance.now(), turned);
       queue.current = q;
       for (const cue of fired) for (const listener of listeners) listener(cue);
@@ -301,5 +309,5 @@ export function useCues(view: GameView, catchingUp: boolean, turn: number, resum
     back.current = resumes;
     settled.current = catchingUp ? undefined : view;
     return () => clearTimeout(timer);
-  }, [view, catchingUp, turn, resumes]);
+  }, [view, catchingUp, turn, resumes, reduced]);
 }
