@@ -19,7 +19,9 @@ export type Replayable = {
 };
 // refused: the game or the file said no to this step, so dropping it can help; a pending or fault reply is not that.
 export type Outcome = { done: number; failed?: string; refused?: true };
-type Pulsed = { pulse: (mode: 'active' | 'drain') => { kind: string; code?: string } };
+type Pulsed = {
+  pulse: (mode: 'active' | 'drain') => { kind: string; code?: string; message?: string };
+};
 
 /** After the dev clock moved: credit the elapsed time now, so the next replayed input is not refused as catching up. Returns how the delivery ended. */
 export function caughtUp(game: Pulsed) {
@@ -27,7 +29,8 @@ export function caughtUp(game: Pulsed) {
   let rounds = 0;
   let last = game.pulse('drain');
   while (++rounds < 1000 && last.kind === 'catching_up') last = game.pulse('drain');
-  return last.code ? `${last.kind} ${last.code}` : last.kind;
+  const why = last.code ?? last.message;
+  return why ? `${last.kind} ${why}` : last.kind;
 }
 
 const isRef = (target: string) => target.includes('@');

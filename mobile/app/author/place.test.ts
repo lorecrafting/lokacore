@@ -181,7 +181,7 @@ test('an advance that is not whole non-negative milliseconds stops before the cl
 // Break: a timed rule that faults, or a drain that never ends, passes the gate as ok.
 test('an advance whose delivery does not end ready stops the replay at that step', () => {
   const game = session({}, []).game;
-  const after = (kinds: { kind: string; code?: string }[]) => {
+  const after = (kinds: { kind: string; code?: string; message?: string }[]) => {
     const pulses = [{ kind: 'ready' }, ...kinds];
     return replay([{ advance: 5 }], game, () =>
       caughtUp({ pulse: () => pulses.shift() ?? kinds.at(-1)! }),
@@ -191,6 +191,10 @@ test('an advance whose delivery does not end ready stops the replay at that step
   assert.deepEqual(after([{ kind: 'fault', code: 'x' }]), {
     done: 0,
     failed: 'step 1 (advance 5): fault x',
+  });
+  assert.deepEqual(after([{ kind: 'error', message: 'corrupt' }]), {
+    done: 0,
+    failed: 'step 1 (advance 5): error corrupt',
   });
   assert.deepEqual(after([{ kind: 'catching_up' }]), {
     done: 0,
