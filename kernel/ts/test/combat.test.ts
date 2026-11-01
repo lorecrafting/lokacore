@@ -118,6 +118,53 @@ test('a surviving sleeper wakes before its remaining opportunity, other position
   }
 });
 
+// The rat's round on a seated body at hp 4 (rng fixed to a hit); `floor` sets the body's hp minimum,
+// `profile` overrides the rat's attack.
+function ratRound(position: 'sleeping' | 'sitting', floor: number, profile?: object) {
+  const one = elapsed(attack(combatWorld()).world, 150);
+  const seated = positioned(one.world, position);
+  const at = key({ kind: 'resource', resource: resourceRef(seated, 'hp'), entity_id: seated.body });
+  const spec =
+    seated.entityResourceSpecs[at] ?? seated.resourceSpecs[key(resourceRef(seated, 'hp'))];
+  const foe = rat(seated);
+  const w = {
+    ...hp(hp(seated, foe, 6), seated.body, 4),
+    entityResourceSpecs: { ...seated.entityResourceSpecs, [at]: { ...spec, minimum: floor } },
+    entities: {
+      ...seated.entities,
+      [foe]: { ...seated.entities[foe], ...(profile && { attack: profile }) },
+    },
+  } as typeof seated;
+  const next = elapsed({ ...w, state: { ...w.state, rng: [12295, 1029, 1029, 25165824] } }, 300, 4);
+  assert.equal(next.decision.kind, 'accepted');
+  return next.world;
+}
+
+// Breaks (loka-vduxr.15): a hit that takes nothing because the sleeper's hp sits at its floor leaves it asleep.
+test('a hit on a sleeper held at its hp floor still wakes it', () => {
+  const next = ratRound('sleeping', 4);
+  assert.deepEqual(pools(next).slice(0, 2), [4, 4]);
+  assert.equal(positionOf(next, next.character), 'standing');
+});
+
+// Breaks: a miss at the hp floor wakes the sleeper (the spec wakes on positive damage).
+test('a miss on a sleeper held at its hp floor leaves it asleep', () => {
+  const next = ratRound('sleeping', 4, { chance: 0, damage_min: 1, damage_max: 1 });
+  assert.equal(positionOf(next, next.character), 'sleeping');
+});
+
+// Breaks: a hit of 0 damage above the floor wakes the sleeper.
+test('a hit for 0 damage above the hp floor leaves the sleeper asleep', () => {
+  const next = ratRound('sleeping', 0, { chance: 100, damage_min: 0, damage_max: 0 });
+  assert.equal(positionOf(next, next.character), 'sleeping');
+});
+
+// Breaks: the floor wake is written for a target that is not asleep.
+test('a hit at the hp floor leaves a sitting body sitting', () => {
+  const next = ratRound('sitting', 4);
+  assert.equal(positionOf(next, next.character), 'sitting');
+});
+
 // Breaks: <= accuracy, skipping accuracy at declared endpoints, damage draw on miss/fixed interval.
 test('accuracy20 misses on roll20; endpoint chances still draw accuracy', () => {
   for (const chance of [0, 20, 100]) {

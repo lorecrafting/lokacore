@@ -12,6 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Second opinion: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-second-review.md): **APPROVE WITH NOTES**
 - [Review: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-review.md): **APPROVE WITH NOTES**
+- [Review: sleeper at hp floor wakes, mutate.sh per-mutant limit, PR #567 (loka-vduxr.15, kernel_api 1.142)](2026-11-01-loka-vduxr15-review.md): **APPROVE**
 - [Second opinion: scene branching, PR #557 (loka-vduxr.26, kernel_api 1.142)](2026-11-01-loka-vduxr.26-scene-branching-second-review.md): **CHANGES REQUIRED**
 - [Review: scene branching (loka-vduxr.26)](2026-11-01-loka-vduxr.26-scene-branching-review.md): **CHANGES REQUIRED**
 - [Second opinion: escort separation, PR #555 (loka-vduxr.23, kernel_api 1.137)](2026-11-01-loka-vduxr.23-escort-separation-second-review.md): **APPROVE WITH NOTES**
