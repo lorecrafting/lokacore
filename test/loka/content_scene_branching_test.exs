@@ -1,4 +1,4 @@
-# size: allow 518, every scene form shares the sampler fixture and its twin
+# size: allow 540, every scene form shares the sampler fixture and its twin
 defmodule Loka.ContentSceneBranchingTest do
   # needs, once, then and nested choices in a `.scene` (docs/system/cartridge.md, Source
   # shortcuts). Expected JSON is hand-written; `~` stands for the words.
@@ -73,7 +73,6 @@ defmodule Loka.ContentSceneBranchingTest do
     %{
       "npc" => "bram",
       "policy" => fact_true("met_bram"),
-      "entry" => true,
       "prompt" => prose("~"),
       "roles" => %{"bram" => npc_role(), "lantern" => %{"role" => "item", "item" => "lantern"}},
       "choices" => %{
@@ -98,6 +97,7 @@ defmodule Loka.ContentSceneBranchingTest do
   defp child do
     %{
       "npc" => "bram",
+      "entry" => false,
       "prompt" => "dialogue.scene.choices.ask.narration",
       "roles" => %{"bram" => npc_role()},
       "choices" => %{
@@ -197,7 +197,7 @@ defmodule Loka.ContentSceneBranchingTest do
     text =
       "npc: bram\nbram: ~\n- Go\n  needs: saw_lantern\n  bram: ~\n  - In\n    needs: not saw_lantern\n    bram: ~\n"
 
-    assert {:ok, out, [warned, %{"code" => "ENTRY_UNUSED"}]} = sampler(text)
+    assert {:ok, out, [warned]} = sampler(text)
     assert warned["data"]["why"] == "unreachable" and warned["data"]["line"] == 7
     assert warned["severity"] == "warning"
     dialogues = JSON.decode!(out)["cartridge"]["dialogues"]
@@ -252,7 +252,7 @@ defmodule Loka.ContentSceneBranchingTest do
     add = %{"label" => prose("~"), "narration" => prose("~")}
     json = {"dialogues/scene.json", %{"choices" => %{"zed" => add, "add" => add}}}
 
-    assert {:ok, out, [%{"code" => "ENTRY_UNUSED"}]} = sampler(text, [json, with_facts()])
+    assert {:ok, out, []} = sampler(text, [json, with_facts()])
     c = JSON.decode!(out)["cartridge"]
     scene = c["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]
 
@@ -436,28 +436,43 @@ defmodule Loka.ContentSceneBranchingTest do
     assert d["choices"]["ask"]["then"] == "bram_ask"
   end
 
-  # Break: a person's second nested scene has no way to compile, or the marker leaks onto a flat one.
-  test "a second nested scene is refused until a JSON frees the one another leads to" do
+  # Break: a person's second nested scene is refused or warns, the top is marked and shuts out the
+  # person's other scenes, or a set can be opened by Talk.
+  test "a person's nested scenes compile alone: sets marked, tops not" do
     nested = "npc: bram\nbram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n"
     dir = Loka.ContentSource.copy("cartridges/scene_sampler")
-    write(dir, "scenes/scene.scene", nested <> "- On\n  then: next\n  bram: ~\n")
-    write(dir, "scenes/next.scene", nested)
-    assert {:error, diags} = Loka.ContentSource.compile(dir, [with_facts()])
-    assert Enum.all?(diags, &(&1["code"] == "ENTRY_INVALID")) and diags != []
-    assert Enum.at(Content.explained(diags, dir), 0) =~ ~s("entry": false)
 
-    write(dir, "dialogues/next.json", ~s({"entry": false}))
-    assert {:ok, built, _} = Loka.ContentSource.compile(dir, [with_facts()])
+    write(
+      dir,
+      "scenes/next.scene",
+      String.replace(nested, "bram: ~\n-", "when: met_bram\nbram: ~\n-", global: false)
+    )
+
+    write(dir, "scenes/scene.scene", nested)
+    assert {:ok, built, []} = Loka.ContentSource.compile(dir, [with_facts()])
     dialogues = JSON.decode!(built)["cartridge"]["dialogues"]
-    assert dialogues["scene_sampler@0.0.1:dialogue/scene"]["entry"] == true
-    refute dialogues["scene_sampler@0.0.1:dialogue/next"]["entry"]
+    assert dialogues["scene_sampler@0.0.1:dialogue/next_go"]["entry"] == false
 
-    assert {:ok, flat, _} = sampler("npc: bram\nbram: ~\n- Go\n  bram: ~\n")
+    for key <- ~w(scene next),
+        do: refute(Map.has_key?(dialogues["scene_sampler@0.0.1:dialogue/#{key}"], "entry"))
+  end
 
-    refute Map.has_key?(
-             JSON.decode!(flat)["cartridge"]["dialogues"]["scene_sampler@0.0.1:dialogue/scene"],
-             "entry"
-           )
+  # Break: a sidecar turns a set into what Talk opens, or a shut-out top warns once per set too.
+  test "a set's marker is the scene's, and a shut-out top warns alone", %{tmp_dir: tmp} do
+    write(tmp, "scenes/s.scene", "npc: bram\nbram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n")
+    write(tmp, "dialogues/s_go.json", ~s({"entry": true}))
+    {_, diags} = Source.load(tmp)
+    assert Enum.any?(diags, &(&1["path"] =~ "s_go" and &1["path"] =~ "entry"))
+
+    nested = "npc: bram\nbram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n"
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+    write(dir, "scenes/scene.scene", nested)
+    write(dir, "scenes/next.scene", nested)
+    write(dir, "dialogues/scene.json", ~s({"entry": true}))
+    assert {:ok, _, unused} = Loka.ContentSource.compile(dir, [with_facts()])
+
+    assert Enum.sort(for w <- unused, do: {w["code"], w["data"]["target"]}) ==
+             [{"ENTRY_UNUSED", "bram"}, {"ENTRY_UNUSED", "next"}]
   end
 
   # Break: a JSON writing the compiler's order mark silently reorders a dialogue: beside a sorted

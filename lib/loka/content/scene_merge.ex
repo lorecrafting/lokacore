@@ -72,9 +72,8 @@ defmodule Loka.Content.SceneMerge do
   defp replaceable?(["choices", c, "then"], scene, key),
     do: c not in scene.written_then and scene["choices"][c]["then"] != "#{key}_#{c}"
 
-  # Lowering's own marker: `"entry": false` beside a nested scene another `then` leads to frees it.
   # `choice_order` has its own refusal (order_written/1).
-  defp replaceable?([field], _, _) when field in ["entry", "choice_order"], do: true
+  defp replaceable?(["choice_order"], _, _), do: true
   defp replaceable?(_, _, _), do: false
 
   defp fields(d) do

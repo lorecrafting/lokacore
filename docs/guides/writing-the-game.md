@@ -110,12 +110,15 @@ maud: ~
   it must be written first, and the nested choices are shown next. Going back to a shallower `- `
   at the same indent as an earlier choice closes what is deeper. A choice has either nested
   choices or a `then`, not both. Indent with spaces; a tab is refused.
-- A scene with nested choices is its person's `entry`, so Talk opens at its top. Their other
-  dialogues open only if it leads to them (`ENTRY_UNUSED` names the rest). A second nested scene for
-  that person is refused (`ENTRY_INVALID`): link to it with `then:` and put `"entry": false` in
-  `dialogues/<key>.json` beside it. When its `when:` fails, Talk passes on to what it leads to
-  through a choice the player could take for nothing, and is refused only if nothing further down
-  opens; a Talk with its own `name` is refused.
+- A person can have many scenes with nested choices, and Talk only ever opens one at its top, never
+  in the middle. It tries that person's scenes in key order and opens the first whose `when:` holds
+  and that shows a choice; when one fails, it first passes on to what it leads to through a choice
+  the player could take for nothing, and is refused only if nothing further down opens. A Talk with
+  its own `name` is refused. So name scenes in the order to try them and give each but the last a
+  `when:`, since one with no `when:` shuts out those after it (`ENTRY_GUESSED`). `when:` asks that a
+  fact is true, so the first meeting comes last: `maud_1_later` with `when: met_maud`, then
+  `maud_2_first`, whose choice sets `met_maud`. Only `"entry": true` in the JSON beside a scene makes
+  it the one that opens, shutting out the others.
 - A `needs:` under a `when:` or a choice that asks the opposite, on a fact the file never sets, gets
   a warning and still compiles: the compiler cannot see another file or a reaction changing that fact.
 

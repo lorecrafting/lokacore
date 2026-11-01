@@ -79,9 +79,9 @@ function saved(c = COOK) {
 
 const COOK = compile();
 
-// Breaks: a nested scene's sets lead back to its root, so with no marker on the root Talk opens at
-// the widest of them ("ask", with its own nested set), and the player never sees the top.
-test('a nested scene opens at its top', () => {
+// Breaks: Talk opens at the widest nested set ("ask" has more ways on than the top), a later scene is
+// shut out by the first, or a failed first scene falls through its free choice into its own set.
+test('a first meeting then a later nested scene, chosen by a fact, across a reload', () => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-cookbook-'));
   source(dir);
   const npc = {
@@ -94,28 +94,56 @@ test('a nested scene opens at its top', () => {
     join(dir, 'npcs/sage.json'),
     JSON.stringify({ ...npc, description: { prose: 'NPC_TEXT' }, room: 'yard' }),
   );
+  const facts = JSON.parse(readFileSync(join(dir, 'facts.json'), 'utf8'));
+  facts.facts.sage_met = Object.values<any>(facts.facts).find((f) => f.value_type?.type === 'bool');
+  writeFileSync(join(dir, 'facts.json'), JSON.stringify(facts));
   mkdirSync(join(dir, 'scenes'));
   writeFileSync(
-    join(dir, 'scenes/sage_talk.scene'),
+    join(dir, 'scenes/sage_2_first.scene'),
     `npc: sage
 sage: TEXT
 - Ask
   sage: TEXT
+  sets: sage_met
   - Deeper
     sage: TEXT
     - Deepest
       sage: TEXT
   - Back
     sage: TEXT
-- Other
+`,
+  );
+  writeFileSync(
+    join(dir, 'scenes/sage_1_later.scene'),
+    `npc: sage
+when: sage_met
+sage: TEXT
+- Again
   sage: TEXT
+  - More
+    sage: TEXT
 `,
   );
   const c = compiled(dir);
   rmSync(dir, { recursive: true });
-  const g = play(c, join(mkdtempSync(join(tmpdir(), 'loka-cookbook-save-')), 'save.db'));
-  g.talk('sage');
-  assert.deepEqual(g.offered(), ['ask', 'other']);
+  const s = saved(c);
+  // As the Book does: the one Talk row the view lists for the speaker.
+  const talk = (g: ReturnType<typeof s.now>) => {
+    const npc = g.view().entities.find((e) => e.id === g.id('sage'))!;
+    const talks = npc.actions.filter((a) => a.label === 'action.talk');
+    assert.equal(talks.length, 1);
+    assert.equal(talks[0]!.available, true);
+    g.go('talk', {}, [g.id('sage')], talks[0]!.action_key);
+  };
+  let g = s.now();
+  talk(g);
+  assert.deepEqual(g.offered(), ['ask']);
+  g.choose('ask');
+  assert.deepEqual(g.offered(), ['c001_deeper', 'c002_back']);
+  g.close();
+  g = s.again();
+  talk(g);
+  assert.deepEqual(g.offered(), ['again']);
 });
 
 // Breaks: an edit to the page, or a compiler warning a source shape starts to draw.

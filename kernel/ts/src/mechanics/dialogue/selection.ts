@@ -33,7 +33,7 @@ const links = (d: DialogueDefinition) =>
  * The dialogues a talk can open: those nothing leads to, then one of each loop with no way in, the
  * member leading to the most other dialogues (a hub), first by key on a tie. What an entry
  * reaches is reached by that answer, or by falling through a failed entry. A speaker's `entry: true` dialogue replaces all
- * that speaker's others except keyword ones. A failed default entry falls through (`spokenBy`).
+ * that speaker's others except keyword ones; an `entry: false` one is never a candidate, only a `then` opens it. A failed default entry falls through (`spokenBy`).
  */
 const entries = (world: World) => {
   const all = Object.values(world.cartridge.dialogues ?? {}).sort((a, b) => cmp(a.key, b.key));
@@ -49,7 +49,9 @@ const entries = (world: World) => {
   };
   const marked = new Set(all.filter((d) => d.entry).map((d) => refString(d.npc)));
   // A shut-out dialogue never opens, so it is no way into what it links to.
-  const live = all.filter((d) => d.entry || d.keyword || !marked.has(refString(d.npc)));
+  const live = all.filter(
+    (d) => d.entry !== false && (d.entry || d.keyword || !marked.has(refString(d.npc))),
+  );
   const roots = live.filter((d) => d.entry || !named.has(d.key));
   const reached = reach(roots.map((d) => d.key));
   const rest = live.filter((d) => !reached.has(d.key));

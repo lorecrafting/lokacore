@@ -909,7 +909,7 @@ build. The author tools below are reachable only in that bundle (a production ex
   scene file and line, with `data.why` for a bad line (`npc` beside it once known); the other lines
   of the file still lower, so a fault behind a bad line reports in the same compile. `needs:` (`<fact>` or `not <fact>`), `once`, `asked` and `then:` (a key or `end`) lower on a choice; a
   deeper `- ` under a reply lowers to the dialogue `<key>_<choice>`, whose `then` the parent takes.
-  The file's root takes `entry: true`, since its sets link back to it and inference would open the widest; a JSON beside it may set `false`.
+  A deeper set takes `entry: false`, since its way back makes a loop with the root and inference would open the widest; the root takes no marker, so a speaker's several nested scenes are tried by key.
   `once` lowers in the compile pipeline for every dialogue: the engine fact `<key>_<choice>_done`,
   a `fact.assign` step, and a policy `not` of it (under `all` beside an authored policy). A JSON of
   the same key (a nested set's included) is refused `scene_overlap` for any field the scene writes. The

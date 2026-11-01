@@ -108,7 +108,8 @@ defmodule Loka.Content.SceneFiles do
 
   defp opened(d, prompt, parent) do
     choices = Map.new(d["choices"], fn {k, o} -> {k, Map.put_new(o, "then", parent)} end)
-    %{d | "choices" => choices} |> Map.put("prompt", prompt)
+    # Its way back makes a loop with the top, and Talk must never open mid-conversation.
+    %{d | "choices" => choices} |> Map.merge(%{"prompt" => prompt, "entry" => false})
   end
 
   defp linked({forms, bad}, key, links) do
@@ -120,8 +121,7 @@ defmodule Loka.Content.SceneFiles do
   defp comes_back({forms, bad}, key, links) do
     if Enum.any?(links, &(&1.choice != "")) do
       back = Map.new(forms[key]["choices"], fn {c, o} -> {c, Map.put_new(o, "then", key)} end)
-      # Its nested sets lead back to it, so Talk would infer the widest of them; the top opens.
-      {Map.update!(forms, key, &Map.merge(&1, %{"choices" => back, "entry" => true})), bad}
+      {Map.update!(forms, key, &Map.put(&1, "choices", back)), bad}
     else
       {forms, bad}
     end

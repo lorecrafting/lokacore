@@ -91,7 +91,7 @@ defmodule Loka.Content.DialogueLinks do
   defp unused(sorted, open, next) do
     played = walk(for({_, d} <- open, do: d["key"]), next, MapSet.new())
 
-    for {rel, d} <- sorted -- live(sorted), d["key"] not in played do
+    for {rel, d} <- sorted -- live(sorted), d["entry"] != false, d["key"] not in played do
       warning("ENTRY_UNUSED", rel, ["npc"], d)
     end
   end
@@ -158,6 +158,7 @@ defmodule Loka.Content.DialogueLinks do
       {_, c} <- Enum.sort(d["choices"]),
       free?(c),
       by_key[c["then"]]["npc"] == d["npc"],
+      by_key[c["then"]]["entry"] != false,
       do: c["then"]
     )
     |> Enum.uniq()
@@ -215,10 +216,13 @@ defmodule Loka.Content.DialogueLinks do
     for d <- live, d["entry"] || d["key"] not in named, do: d["key"]
   end
 
-  # A speaker's marked dialogue shuts out their others, keyword ones aside.
+  # A speaker's marked dialogue shuts out their others, keyword ones aside; `entry: false` never opens by itself.
   defp live(sorted) do
     claimed = for {_, d} <- sorted, d["entry"], into: MapSet.new(), do: d["npc"]
-    Enum.filter(sorted, fn {_, d} -> d["entry"] || d["keyword"] || d["npc"] not in claimed end)
+
+    Enum.filter(sorted, fn {_, d} ->
+      d["entry"] != false && (d["entry"] || d["keyword"] || d["npc"] not in claimed)
+    end)
   end
 
   defp heads(rest, next) do

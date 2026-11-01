@@ -704,7 +704,7 @@ test('a failed default Talk opens only what a free choice leads to: the shared c
             key,
             npc: ref('npc', npc),
             choices: Object.fromEntries(made),
-            ...(entry && { entry }),
+            ...(entry !== undefined && { entry }),
             ...(label && { name: LABEL }),
             ...(closed && { policy: is('flag', true) }),
           };

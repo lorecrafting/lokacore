@@ -387,8 +387,8 @@ defmodule Loka.ContentSceneVerbsTest do
                 Map.put(json.("items/lantern.json"), "location", %{"in" => "npc", "npc" => "maud"})}
              ])
 
-    # All speak for maud, and the nested scene's marker shuts the others out; nothing else warns.
-    assert warned != [] and Enum.all?(warned, &(&1["code"] == "ENTRY_UNUSED"))
+    # All speak for maud in one cartridge, and `branching` has no `when:` before later ones of hers.
+    assert [%{"code" => "ENTRY_GUESSED", "data" => %{"target" => "branching"}}] = warned
   end
 
   # Break: a scene's sidecar drops `entry`, so the guide's way of marking a scene does nothing.
