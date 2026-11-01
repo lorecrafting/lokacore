@@ -1257,7 +1257,7 @@ Type: object.
 
 ### NpcHp
 
-Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID). Required legacy-shaped birth/save row; no position recovery.
+Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID) and no minimum or start below 0 (BODY_BELOW_ZERO). Required legacy-shaped birth/save row; no position recovery.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
