@@ -120,10 +120,11 @@ type Save = ReturnType<typeof begin>;
 /** Real catch-up: wall time passes (50 world units a second), then ClockDriver drains to `until`. */
 function drive({ s }: Save, until: number) {
   const ms = (until - Number(checkpoint(s.p.sql).target)) * 20;
+  const run = s.story.runId();
+  s.story.pulse('active', run); // session time, so the away cap does not apply
   s.p.clock.wall += ms;
   s.p.clock.mono += ms;
-  const run = s.story.runId();
-  let status = s.story.pulse('resume', run);
+  let status = s.story.pulse('active', run);
   while (status.kind === 'catching_up') status = s.story.pulse('drain', run);
   assert.equal(status.kind, 'ready');
   assert.equal(s.story.world().state.clock, until);

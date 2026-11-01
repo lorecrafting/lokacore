@@ -119,7 +119,9 @@ function opened(s: Story) {
       ? new ClockDriver(s, s.host.time, (status) => changed(status))
       : undefined;
   try {
-    driver?.pulse('resume', s.meta.run_id);
+    // With an away recap the Book must see all of the catch-up, so the gap waits for its first pulse.
+    if (!s.elapsed || !s.world.cartridge.manifest.time_policy?.recap_after_minutes)
+      driver?.pulse('resume', s.meta.run_id);
   } catch (e) {
     if (!(e instanceof CatchUpRefusedError)) throw e;
     s.behind = true; // Start over's best-effort trace catch-up still runs

@@ -5,14 +5,19 @@
 // gale, heat, drought): 5, 1, 0, 5, 4, 3, 6, so day 6 alone is rain.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
+import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 
 const bundle = compiled('cartridges/toolbox_showcase');
 const pulse = (b: Book) => (b.game as unknown as { pulse(): { kind: string } }).pulse();
 type Book = ReturnType<typeof book>;
-// `ms` of real time passes; pulses until time stops catching up.
+// `ms` of open session time passes (an active pulse, so the away cap does not apply); pulses until
+// time stops catching up.
 function away(ms: number) {
   const b = book(bundle as never);
   b.go('south');
@@ -52,4 +57,26 @@ test('two real minutes away shows no recap', () => {
       .text()
       .includes(LABEL.awayRecap),
   );
+});
+
+// Breaks: opening a save drains a head start before the Book subscribes, so the Book misses it: a
+// capped absence falls short of the threshold and Tam's lines are gone, so no recap ever shows.
+test('a year closed and a real reopen: one recap of the capped day', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-recap-reopen-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'save.db');
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle as never);
+  a.game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'south' } });
+  a.sql.close();
+  const r = elapsedHost(path, { wall: 10000 + 365 * 86_400_000, mono: 0 }, bundle as never);
+  const b = book(bundle as never, r);
+  assert.equal(b.game.view().view.time, 25200); // opening settled nothing the Book would miss
+  for (let n = 0; pulse(b).kind === 'catching_up'; n++) assert.ok(n < 100, 'never settled');
+  assert.equal(b.game.view().view.time, 111600);
+  assert.equal(b.text().filter((l) => l.startsWith(LABEL.awayRecap)).length, 1);
+  b.tap(`${LABEL.awayRecap}, show`);
+  const shown = b.text();
+  const at = shown.indexOf(LABEL.awayRecap);
+  assert.deepEqual(shown.slice(at + 1, at + 3), ['Tam arrives.', 'Tam leaves.']);
+  r.sql.close();
 });

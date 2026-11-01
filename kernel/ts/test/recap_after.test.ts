@@ -1,5 +1,6 @@
 // Toolbox row W27 on the compiled recap sampler: GameView carries the authored away recap threshold
 // in logical seconds; the loader's twin of the Elixir API floor (1.47).
+import { awayCap } from '../src/mechanics/calendar.ts';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -34,9 +35,36 @@ const view = (change?: (c: any) => void) => {
 // Breaks: the threshold is projected in real minutes or seconds, not logical seconds (30 minutes
 // at rate 50 is 90000); it shows without the field.
 test('recap_after is the authored minutes in logical seconds, absent unless authored', () => {
-  assert.equal(view().recap_after, 90000);
+  assert.equal(view((c) => (c.manifest.time_policy.away_cap_hours = 25)).recap_after, 90000);
   assert.equal(
     view((c) => delete c.manifest.time_policy.recap_after_minutes).recap_after,
     undefined,
+  );
+});
+
+// Breaks: a threshold above the away cap stays as authored, so no settlement can reach it and the
+// recap never shows (30 minutes at rate 50 is 90000; one 24-hour day is 86400).
+test('recap_after never exceeds the away cap', () => {
+  assert.equal(view().recap_after, 86400);
+});
+
+// Breaks: the default assumes a 24-hour day of 3600-second hours, not the cartridge's calendar.
+test('the away cap defaults to one calendar day, in hours when authored', () => {
+  const calendar = { units_per_hour: 60, hours_per_day: 10 };
+  const cap = (time_policy: object) =>
+    awayCap({ calendar, manifest: { time_policy } } as unknown as Parameters<typeof awayCap>[0]);
+  assert.equal(cap({}), 600);
+  assert.equal(cap({ away_cap_hours: 3 }), 180);
+});
+
+// Breaks: the threshold is the exact cap at a rate that does not divide it, but the credit rounds
+// down (one day at rate 7 credits 86399), so the recap can never fire.
+test('recap_after is reachable at a rate that does not divide the cap', () => {
+  assert.equal(
+    view((c) => {
+      c.manifest.time_policy.rate = 7;
+      c.manifest.time_policy.recap_after_minutes = 10080;
+    }).recap_after,
+    86399,
   );
 });

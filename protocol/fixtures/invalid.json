@@ -22118,6 +22118,48 @@
     ]
   },
   {
+    "contract": "TimePolicy",
+    "value": {
+      "profile": "real_elapsed",
+      "rate": 50,
+      "away_cap_hours": 0
+    },
+    "errors": [
+      {
+        "path": "/away_cap_hours",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "TimePolicy",
+    "value": {
+      "profile": "real_elapsed",
+      "rate": 50,
+      "away_cap_hours": 1.5
+    },
+    "errors": [
+      {
+        "path": "/away_cap_hours",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "TimePolicy",
+    "value": {
+      "profile": "real_elapsed",
+      "rate": 50,
+      "away_cap_hours": 169
+    },
+    "errors": [
+      {
+        "path": "/away_cap_hours",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
     "name": "schedule_cases_empty",
     "contract": "ScheduleCases",
     "value": [],

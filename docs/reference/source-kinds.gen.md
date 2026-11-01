@@ -1474,9 +1474,10 @@ Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
+| away_cap_hours | integer |  | In-game hours one absence can catch up at most; the rest of the absence is skipped, not played. Absent: one in-game day. At most seven in-game days. |
 | profile | `real_elapsed` | yes | Must be real_elapsed: logical time follows real time. |
 | rate | integer | yes | Logical seconds that pass per real second; at least 1. |
-| recap_after_minutes | integer |  | Toolbox row W27, opt-in: an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block. At most one week (10080). |
+| recap_after_minutes | integer |  | Toolbox row W27, opt-in: an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block; the away cap bounds the threshold, so a capped absence can reach it. At most one week (10080). |
 
 ### UseTool
 
