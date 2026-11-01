@@ -56,7 +56,7 @@ registerHooks({
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={announceForAccessibility(){}},Easing={},Animated={View:'View',Value:class{},timing:()=>({start:f=>globalThis[Symbol.for('loka-animation-end')]=f})},PanResponder={};",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={announceForAccessibility(){}},Easing={},Animated={View:'View',Value:class{interpolate(){return 1}},timing:()=>({start:f=>globalThis[Symbol.for('loka-animation-end')]=f})},PanResponder={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {
