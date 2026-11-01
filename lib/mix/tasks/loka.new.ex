@@ -23,16 +23,29 @@ defmodule Mix.Tasks.Loka.New do
     if pairs == [] or (dir && List.keymember?(pairs, "cartridge", 0)), do: Mix.raise(@usage)
     Enum.each(pairs, &known_kind/1)
 
-    # Each pair may read what an earlier one wrote, so they run for real; a refusal puts it all back.
-    {last, paths, _} =
-      Enum.reduce(pairs, {Path.expand(dir || ".", cwd), [], %{}}, &starter(&1, &2, cwd))
+    # Each pair may read what an earlier one wrote, so they run for real. A refusal or a raise puts
+    # back only what this run wrote (Starters tells us before each write), never anything else.
+    Process.put(:loka_new_log, [])
+
+    {last, paths} =
+      try do
+        Enum.reduce(pairs, {Path.expand(dir || ".", cwd), []}, &starter(&1, &2, cwd))
+      rescue
+        e ->
+          undo(Process.get(:loka_new_log))
+          reraise e, __STACKTRACE__
+      end
 
     report(paths, last)
   end
 
   defp report(paths, last) do
     Enum.each(paths, &IO.puts/1)
-    {todo, _} = System.cmd("node", ["kernel/ts/play/todo.ts", last])
+
+    todo =
+      if node = System.find_executable("node"),
+        do: elem(System.cmd(node, ["kernel/ts/play/todo.ts", last]), 0),
+        else: "(the list is not available: node is not on the PATH)\n"
 
     IO.puts(
       "Still to write:\n" <>
@@ -49,46 +62,39 @@ defmodule Mix.Tasks.Loka.New do
         )
   end
 
-  defp starter({"cartridge", path, from}, {_, paths, snaps}, cwd),
-    do: starter("cartridge", Path.expand(path, cwd), from, {Path.expand(path, cwd), paths, snaps})
+  defp starter({"cartridge", path, from}, {_, paths}, cwd),
+    do: starter("cartridge", Path.expand(path, cwd), from, {Path.expand(path, cwd), paths})
 
   defp starter({kind, name, from}, state, _cwd), do: starter(kind, name, from, state)
 
-  defp starter(kind, name, from, {target, paths, snaps}) do
-    snaps = Map.put_new_lazy(snaps, target, fn -> snapshot(target) end)
-
-    case Loka.Content.new(target, kind, name, from) do
+  defp starter(kind, name, from, {target, paths}) do
+    case Loka.Content.new(target, kind, name, from, &record/2) do
       {:ok, written} ->
-        {target, paths ++ written, snaps}
+        {target, paths ++ written}
 
       {:error, line} ->
-        Enum.each(snaps, &restore/1)
         Mix.raise("mix loka.new: #{line}")
     end
   end
 
-  # Every entry under a cartridge dir (a file's bytes, or :dir); :absent when it is yet to be made.
-  defp snapshot(dir) do
-    if File.dir?(dir),
-      do:
-        Map.new(
-          Path.wildcard(dir <> "/**", match_dot: true),
-          &{&1, File.dir?(&1) || File.read!(&1)}
-        ),
-      else: :absent
+  # Before a write: the path, its old bytes (nil: new), and the directories the write will make.
+  defp record(path, old) do
+    made =
+      path
+      |> Path.dirname()
+      |> Stream.iterate(&Path.dirname/1)
+      |> Enum.take_while(&(!File.dir?(&1)))
+
+    Process.put(:loka_new_log, [{path, old, made} | Process.get(:loka_new_log)])
   end
 
-  defp restore({dir, :absent}), do: File.rm_rf!(dir)
-
-  defp restore({dir, before}) do
-    for path <- Path.wildcard(dir <> "/**", match_dot: true) |> Enum.sort(:desc),
-        !is_map_key(before, path),
-        do: File.rm_rf!(path)
-
-    for {path, bytes} <- before,
-        is_binary(bytes),
-        File.read(path) != {:ok, bytes},
-        do: File.write!(path, bytes)
+  @doc false
+  # Newest first: new files go, old bytes come back, and a directory the run made goes only if empty.
+  def undo(log) do
+    for {path, old, made} <- log do
+      if old, do: File.write!(path, old), else: File.rm(path)
+      Enum.each(made, &File.rmdir/1)
+    end
   end
 
   defp plan(["--from", room, way | rest], [{"rooms", name, nil} | done]),

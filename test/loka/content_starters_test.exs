@@ -423,6 +423,30 @@ defmodule Loka.ContentStartersTest do
     end
   end
 
+  # Break: a refused call deletes what it did not write (a scene saved in the editor meanwhile)
+  # or leaves the directory it made, or loses the old bytes of a file it merged into.
+  test "undo removes only what the run wrote", %{tmp_dir: tmp} do
+    made = Path.join(tmp, "newdir")
+    File.mkdir_p!(made)
+    File.write!(Path.join(made, "mine.json"), "new")
+    File.write!(Path.join(made, "bystander.scene"), "saved by the writer")
+    File.write!(Path.join(tmp, "old.json"), "merged")
+    File.mkdir_p!(Path.join(tmp, "gone/deeper"))
+    File.write!(Path.join(tmp, "gone/deeper/f.json"), "x")
+
+    Mix.Tasks.Loka.New.undo([
+      {Path.join(tmp, "old.json"), "before", []},
+      {Path.join(made, "mine.json"), nil, [made]},
+      {Path.join(tmp, "gone/deeper/f.json"), nil,
+       [Path.join(tmp, "gone/deeper"), Path.join(tmp, "gone")]}
+    ])
+
+    assert File.read!(Path.join(tmp, "old.json")) == "before"
+    assert File.read!(Path.join(made, "bystander.scene")) == "saved by the writer"
+    refute File.exists?(Path.join(made, "mine.json"))
+    refute File.exists?(Path.join(tmp, "gone"))
+  end
+
   defp cartridge(parent) do
     dir = Path.join(parent, "mine")
     {:ok, _} = Starters.write(dir, "cartridge", dir)
