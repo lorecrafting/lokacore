@@ -45,3 +45,47 @@ Child killed, keeper killed, npc.move, quest failed, placed row: the PR's table 
 `/code-review medium` is reported, with fixes through `8348092a3` not re-reviewed. Composition record present; no capability code names content.
 
 Not done: `terminal()` on a retired completed escort played; a walkthrough; the full suite.
+
+## Re-check at 4ab5b92b4 (`4ab5b92b4d4deb0f07eb5798499a8d41940f41cd`)
+
+Fix commits only. Verdict: **CHANGES REQUIRED**. CI at this head: ci, book-e2e, graph-diff success (`gh run list --commit`); PR CLEAN.
+
+### Blocker B2: a repeatable quest's non-exchange Complete still bricks the save
+
+`mobile/authority/local-story/dialogue-receipt.ts:160-162`, reached from `escort-save.ts:49`. `resolution` reads the current quest row. After re-acceptance that row is the new active instance, so a Complete's receipt reads as uncommitted.
+
+Played on the head with a temporary test, removed afterwards: repeatable exchange quest, Complete choice without `exchange`; take coins, offer, rescue, move, `keeper_home`, choose: escort completed, quest resolved; reopen OK; `keeper_offer`, accept: quest active, escort completed; **next reopen throws `save_corrupt`** (`session.ts:94`).
+
+The compiler accepts this content (`mix test`, temporary test on `harvest_sampler`: `{:ok, []}`). `exchanges.ex` `dialogue_choices` calls `valid_choice?` only for `exchange: true` choices, so the commit message of `0ed43539d` is wrong: `valid_choice?` refuses `escort` only on the turn-in choice, and `escort.ex` `agrees?` requires the quest on the dialogue. The same fixture with `exchange: true` gets `OUTCOME_MISMATCH`, so the control is live. The start dialogue and this Complete compile together too (`{:ok, []}`; a wrong start quest gets `UNRESOLVED_REFERENCE`). B2 is B1 not closed: the same retire, reached through a file fix commit `6d2cd9c6e` touched. The comment at `escort-save.ts:19` ("The quest row is not read") is false on this path.
+
+No test covers it: `escort.test.ts:563` is the turn-in form. Required: a play, re-accept, reopen test of this form, and the fix. A trial of the fix passed the case end to end: for `option.escort`, skip the current-row check and take `instance_id` from the receipt's `quest.transition` (the remaining evidence checks bind it). Alternatively refuse `escort` on any choice of a repeatable quest's dialogue at compile, which would need the save check kept narrow and a spec line.
+
+### Dispositions
+
+- B1 (retire brick), turn-in form: fixed. Rerun: resolve, re-accept, reopen, move, restart, reopen, move: pass (`escort.test.ts:563`).
+- S1 pin collision: resolved, 1.138 against main's 1.137.
+- `proposal.ts:121` kept and pinned: deleting it fails `schedule.test.ts` "a root over a job budget names its limit".
+- Over-budget with a following escort naming `pending_jobs` before `events`: does not matter. The limit is a side value never in the result (`proposal.ts:37`), read only as trace data (`delivery.ts:68`, `invocation.ts:151`, `save.ts:135`). The fault and its kind are the same. No finding.
+
+### Refusals under `docs/lessons/storage.md:41-45`
+
+No accepted command reaches any listed refusal. The reach is `committedDialogue` under `escort-save.ts:49`, not on the developer's list (B2).
+
+- Several rows or wrong actor; body mismatch: a Story has one character, and `bodyOf` is fixed.
+- Bad shape: every write is `escort.transition`, composed.
+- NPC not an npc: entities are static; no op deletes one.
+- NPC not in a room, by reading: `containment/react.ts:97-117`, `schedule/rule.ts:150-157`, `patrol/sequence.ts:152`, `population/behavior.ts:157`, `population/settle.ts:303`, `combat/behavior.ts:100` all name rooms; `death/sequence.ts:68,195,219` moves corpse, items and the player's body, and an NPC's death leaves it placed. No null destination exists. `refused` gives `not_present` to a roomless NPC, so it cannot start.
+- No matching ChoiceRow after re-accept: resolved rows are never closed or deleted, and the rerun restarts with a new continuation.
+- Row against latest receipt, receipt without row, effect without transition: `commit.ts:50` is the only receipt writer, and `transition` emits whenever `option.escort` is set.
+
+### Narrow mutants (null control green, each reverted)
+
+| Mutant | Result |
+|---|---|
+| `proposal.ts` drop the early return | killed, `schedule.test.ts` |
+| `shared.ts:139` drop `retired` | killed, kernel escort |
+| `shared.ts:77` drop `following` | killed, kernel escort |
+| `escort-save.ts` `start?.row.choice_id` check weakened | killed, local-story escort |
+| `shared.ts:219` no parting | killed, kernel and local-story |
+
+Not done: NPC placement played beyond the first round's child-killed and `npc.move` cases; `bin/mutate_diff.sh` rerun; a non-escort non-exchange resolving choice on a repeatable quest (`resolution` serves it too, reached only through `movesItem` at `dialogue-save.ts:27`; not checked whether main behaves the same).
