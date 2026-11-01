@@ -92,12 +92,15 @@ test('Leaf keeps the sky mounted and says when it is the World', async () => {
       ...p,
     };
     const shown = (Leaf as any)(props);
-    return shown.props.children[0].props.world;
+    return shown.props.children[0].props;
   };
-  assert.equal(world({}), true);
-  assert.equal(world({ combat: {} }), false);
-  assert.equal(world({ scene: {} }), false);
-  assert.equal(world({ ancestry_choices: [] }), false);
-  assert.equal(world({}, { page: 'map' }), false);
-  assert.equal(world({}, { screen: { view: { place, exits: [] }, ended: true } }), false);
+  // Breaks: the sky is told the wrong place, so a storm draws indoors (book-ui.md, Storm; Wind).
+  assert.equal(world({ place: { id: 'p', exposed: true } }).exposed, true);
+  assert.equal(world({}).exposed, false);
+  assert.equal(world({}).world, true);
+  assert.equal(world({ combat: {} }).world, false);
+  assert.equal(world({ scene: {} }).world, false);
+  assert.equal(world({ ancestry_choices: [] }).world, false);
+  assert.equal(world({}, { page: 'map' }).world, false);
+  assert.equal(world({}, { screen: { view: { place, exits: [] }, ended: true } }).world, false);
 });

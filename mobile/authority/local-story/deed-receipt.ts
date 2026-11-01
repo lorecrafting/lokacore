@@ -6,7 +6,7 @@ import type { NarrationRow } from './narration.ts';
 // What the receipt's events say the press did (book-ui.md, Lever and latch; Impact). A lever is a
 // completed action whose outcome emits the authored `lever` event, as weather's phases are authored names.
 // A lever or latch is a press's, never what reopen shows again. A round's miss comes on the clock: the
-// presenter acts on a new receipt only, and a miss with no authored line stays silent there (no record).
+// presenter acts on a new receipt only; a lineless miss still keeps its record (narration.ts).
 export function deedOf(
   d: Accepted,
   r: NarrationRow,
@@ -30,4 +30,4 @@ export function deedOf(
   return { ...(lever && { lever }), ...(opened && { opened }), ...(missed && { missed }) };
 }
 
-const DOOR_VERBS = new Set(['open', 'close', 'lock', 'unlock']);
+const DOOR_VERBS = new Set(['open', 'unlock']); // the verbs that can show an exit

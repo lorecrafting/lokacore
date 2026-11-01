@@ -242,8 +242,12 @@ test('a receipt names the deed from its events, with no lines needed', () => {
       JSON.stringify(payload),
     );
   }
-  put({ type: 'barrier_changed', barrier: 'gate' }, 'wait');
-  assert.equal(narration(story, 'c'), undefined, 'a barrier the world moved is no deed');
+  put({ type: 'barrier_changed', barrier: 'gate' }, 'unlock');
+  assert.deepEqual(narration(story, 'c'), { command_id: 'c', lines: [], opened: true });
+  for (const verb of ['wait', 'close', 'lock']) {
+    put({ type: 'barrier_changed', barrier: 'gate' }, verb);
+    assert.equal(narration(story, 'c'), undefined, `${verb}: shows no exit`);
+  }
   const line = [{ key: 'player_miss' }];
   put({ type: 'attack_result', hit: false, attacker_id: 'body' }, 'wait', line);
   assert.deepEqual(narration(story), { command_id: 'c', lines: line, missed: true }, 'the clock');

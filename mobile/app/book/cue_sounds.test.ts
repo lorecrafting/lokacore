@@ -197,7 +197,6 @@ test('the room and deed sounds play their manifest files', () => {
   }
 });
 
-// Breaks: a lever with no line and no other event never reads its record, so it pulls in silence.
 // Breaks: a deed on the record never reaches the cues, so the latch, lever or miss stays silent.
 test('a saved record with a deed becomes the screen deed', async () => {
   const { retainedNarration } = await import('./received.ts');
@@ -223,6 +222,7 @@ test('a saved record with a deed becomes the screen deed', async () => {
   assert.equal(s.deed, undefined, 'no deed on the record');
 });
 
+// Breaks: a lever with no line and no other event never reads its record, so it pulls in silence.
 test('a lever event alone reads the record for its deed; another authored event does not', async () => {
   const { telling } = await import('./received.ts');
   const of = (key: string) => ({ payload: { type: 'custom_event', event: { key } } }) as never;

@@ -288,6 +288,7 @@ function navigation(p: BottomProps) {
   return (
     <Footer
       keyboardEnabled={!pending && !fault && !p.screen.catchingUp}
+      room={view.place.id}
       exits={view.exits}
       text={text}
       go={p.walk}

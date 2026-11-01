@@ -37,7 +37,11 @@ test('the same tag carries on; a new tag cross-fades', async (t) => {
     b.els.find((e) => e.url === 'inn.m4a' && !e.paused),
     'the old bed plays through the fade',
   );
-  t.mock.timers.tick(1000);
+  // Breaks: a new tag cuts hard rather than cross-fades (book-ui.md, Beds).
+  t.mock.timers.tick(999);
+  assert.equal(b.els.find((e) => e.url === 'inn.m4a')!.paused, false);
+  assert.ok(b.ramps.some(([to, at]) => to === 0 && at === 11));
+  t.mock.timers.tick(1);
   assert.ok(b.els.find((e) => e.url === 'inn.m4a')!.paused);
 });
 

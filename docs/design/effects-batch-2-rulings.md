@@ -4,6 +4,8 @@ Decided, one pass, for the build of G1 to G8. The epic's owner approval is the p
 
 The designer writes `tokens.ts` values on request, or the developer pastes the table below under this approval. The spec paragraphs below are approved text for the developer to paste.
 
+**As built, batch 2 C (designer sign-off on PR 558, 2026-11-01), where the text below differs and stays as history:** G2's miss sounds a whisper, read from the event (`book-ui.md`, Impact), not silence; G7's lever is the authored `lever` custom event and the latch a door verb or `action_completed`; `thunder` has no `haptic` field; `motion.bed.fade` is `motion.bed.duration`.
+
 ## Rulings that override the plan
 
 Each was checked against `tokens.ts`. The plan's values break the 4.5:1 rule (`docs/BOOK-UI-COMPONENTS.md`, Motion and sound), whose only exemption was the blow wash.

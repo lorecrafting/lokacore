@@ -126,8 +126,6 @@ type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: '
 export const telling = ({ payload: e }: Accepted['events'][number]) =>
   (e.type === 'entity_died' && !e.victim_definition) ||
   e.type === 'action_completed' ||
-  e.type === 'attack_result' ||
-  e.type === 'barrier_changed' ||
   (e.type === 'custom_event' && e.event.key === 'lever');
 
 // The receipt's retained narration, read back from storage when the reply carried any.
@@ -136,7 +134,7 @@ export function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: 
     reply.kind === 'saved' ? (reply.command_id ?? accepted?.events[0]?.causation_id) : undefined;
   const lines = !!accepted?.narration?.length;
   // A death may have no line, and so no retained narration; the Book still falls (book-ui.md, Falling).
-  // So may a miss or an opened latch: read for its record's deed only.
+  // So may a lever or a scripted action: read for its record's deed only.
   const last =
     lines || accepted?.events.some(telling) ? savedNarration(game, s, command_id) : undefined;
   if (last?.died) s.died = last.command_id;
