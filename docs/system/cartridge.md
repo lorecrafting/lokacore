@@ -882,8 +882,9 @@ build. The author tools below are reachable only in that bundle (a production ex
   words to every source `file:line`, and each definition of the compiled artifact whose refs name that
   key; each Book line opens its source `file:line` in the owner's editor (`POST /__author/open`,
   `LOKA_EDITOR`, default `code --goto`); the game-time control, which delivers the time at once and
-  records it only when delivered; the checkpoint list; the still-to-write list. An input the session held
+  records it only when delivered; the checkpoint list; the still-to-write list; go to a room and set a fact by key (below). An input the session held
   (`pending`, `catching_up`) is recorded when it settles as accepted.
+- **Go to room, set fact** ([owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md), dev@1): the panel sends them as ordinary invocations `dev_go_to_room` and `dev_set_fact` the session decides, saves as receipts and records as steps, so a reopen and `bin/loka check` re-decide them under the fixed seed and clock and a checkpoint may hold them. Only a host with `dev` set (the preview, `bin/loka check`) reaches `stepDev`; any other host answers `unsupported_capability`, `step` answers `permission_denied`, and no cartridge action can name them. Go to room moves the body alone and is refused `invalid_state` when that would leave a world invariant wrong: already there, engaged, not standing, in water, with an escort, mount or group that would come along, on a patrol or expedition, in a modal scene or at an open choice. It runs no entry sight or arrival line. Set fact is refused `invalid_state` for a per-subject fact, a value of the wrong type or range, the value it already has, the position and scene facts, and a fact another mechanic owns. The panel states each refusal in one plain sentence.
 - **Still to write.** A text value with a line that trims to `~` is a placeholder, in JSON or in
   a scene file. The panel and
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with

@@ -23,6 +23,8 @@ type Asked =
   | { op: 'advance'; minutes: number }
   | { op: 'jump'; steps: Step[] }
   | { op: 'drop' }
+  | { op: 'go_to_room'; room: string }
+  | { op: 'set_fact'; fact: string; value: boolean | number | string }
   | { op: 'trace' };
 
 export function useBook(frame: RefObject<HTMLIFrameElement | null>) {

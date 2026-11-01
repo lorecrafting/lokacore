@@ -56,6 +56,7 @@ export type Host = {
   time?: Clocks;
   latency?: { host: HostKind; now: () => number }; // ms; each NEW decision's (11 §13), else none
   random?: (words: Uint32Array) => Uint32Array;
+  dev?: boolean; // the author preview (`?dev=1`) and `bin/loka check`; a release never sets it
 };
 const SAVE_FORMAT = 'loka-save-v2';
 
@@ -99,7 +100,7 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     if (!release || (saved && saved.pin!.kernel_api !== INSTALLED.kernel_api))
       return refuse({ kind: 'pinned_release_missing' as const, pinned: saved!.pin!, installed });
     const base = saved ? pinned(release, saved.pin!) : drawn(release, host);
-    const loaded = base && load(db, base, () => first(release.content_hash, base, host));
+    const loaded = base && load(db, base, () => first(release.content_hash, base, host), host.dev);
     if (!loaded) return refuse({ kind: 'save_corrupt' as const });
     Object.assign(s, { fresh: base, ...loaded });
     s.recoveryHeader = undefined;

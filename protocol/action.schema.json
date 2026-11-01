@@ -44,6 +44,9 @@
         },
         "word": { "$ref": "#/$defs/Word" },
         "topic": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+        "room": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+        "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+        "value": { "$ref": "delta.schema.json#/$defs/FactValue" },
         "scene": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
