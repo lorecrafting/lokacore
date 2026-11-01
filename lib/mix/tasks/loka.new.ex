@@ -40,12 +40,15 @@ defmodule Mix.Tasks.Loka.New do
   end
 
   defp report(paths, last) do
-    Enum.each(paths, &IO.puts/1)
+    paths |> Enum.uniq() |> Enum.each(&IO.puts/1)
 
     todo =
-      if node = System.find_executable("node"),
-        do: elem(System.cmd(node, ["kernel/ts/play/todo.ts", last]), 0),
-        else: "(the list is not available: node is not on the PATH)\n"
+      with node when node != nil <- System.find_executable("node"),
+           {out, 0} <- System.cmd(node, ["kernel/ts/play/todo.ts", last], stderr_to_stdout: true) do
+        out
+      else
+        _ -> "(the list is not available: run bin/loka todo #{last})\n"
+      end
 
     IO.puts(
       "Still to write:\n" <>
@@ -89,6 +92,8 @@ defmodule Mix.Tasks.Loka.New do
   end
 
   @doc false
+  # ponytail: a save to a file an earlier pair merged into, between pairs, is overwritten by the
+  # undo; a run lasts seconds. Upgrade: compare the bytes now with what the starter wrote.
   # Newest first: new files go, old bytes come back, and a directory the run made goes only if empty.
   def undo(log) do
     for {path, old, made} <- log do

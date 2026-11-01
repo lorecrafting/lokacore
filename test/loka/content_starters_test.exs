@@ -423,6 +423,24 @@ defmodule Loka.ContentStartersTest do
     end
   end
 
+  # Break: a refusal after a pair merged into an author's file deletes it or leaves the merge.
+  test "a refusal restores a hand-written file an earlier pair merged into", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    mine = ~s({"name":{"prose":"A cold cellar."},"description":{"prose":"Damp."},"exits":{}})
+    File.write!(Path.join(dir, "rooms/start.json"), mine)
+
+    assert_raise Mix.Error, ~r/no rooms\/nowhere/, fn ->
+      ExUnit.CaptureIO.capture_io(fn ->
+        Mix.Tasks.Loka.New.run(
+          ~w(--cwd #{tmp} rooms yard --from start east rooms z --from nowhere east mine)
+        )
+      end)
+    end
+
+    assert File.read!(Path.join(dir, "rooms/start.json")) == mine
+    refute File.exists?(Path.join(dir, "rooms/yard.json"))
+  end
+
   # Break: a refused call deletes what it did not write (a scene saved in the editor meanwhile)
   # or leaves the directory it made, or loses the old bytes of a file it merged into.
   test "undo removes only what the run wrote", %{tmp_dir: tmp} do
