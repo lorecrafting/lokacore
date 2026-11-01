@@ -29,7 +29,7 @@ defmodule Loka.Content.SceneFiles do
     {dialogue, _, bad} =
       Enum.reduce(lines(text, :trimmed), {%{"choices" => %{}}, nil, []}, &line/2)
 
-    {dialogue, for({text, n} <- Enum.reverse(bad), do: {n, text, why(text, dialogue)})}
+    {dialogue, Enum.reverse(bad)}
   end
 
   @doc "Where each part of the lowered dialogue was written: `{steps, line}` (error locations)."
@@ -38,15 +38,15 @@ defmodule Loka.Content.SceneFiles do
     {found, _} = Enum.flat_map_reduce(lines(text, :trimmed), nil, &located/2)
 
     # A repeated part keeps its first line.
-    found |> Enum.reverse() |> Enum.uniq_by(&elem(&1, 0))
+    Enum.uniq_by(found, &elem(&1, 0))
   end
 
   defp located({"npc: " <> _, n}, cur), do: {[{["npc"], n}, {["roles"], n}], cur}
   defp located({"when: " <> _, n}, cur), do: {[{["policy"], n}], cur}
   defp located({"- " <> label, n}, _), do: {[{["choices", key(label)], n}], key(label)}
 
-  defp located({"gives: " <> _, n}, cur) when cur != nil,
-    do: {[{["choices", cur, "receive"], n}], cur}
+  defp located({"gives: " <> item, n}, cur) when cur != nil,
+    do: {[{["choices", cur, "receive"], n}, {["roles", item], n}], cur}
 
   defp located({_, n}, nil), do: {[{["prompt"], n}], nil}
   defp located({_, n}, cur), do: {[{["choices", cur, "narration"], n}], cur}
@@ -60,6 +60,7 @@ defmodule Loka.Content.SceneFiles do
   end
 
   defp why("- " <> _, %{"npc" => _}), do: "repeated_choice"
+  defp why("gives: " <> npc, %{"npc" => npc}), do: "gives_speaker"
   defp why("gives: " <> _, %{"npc" => _}), do: "gives_outside_choice"
   defp why("npc: " <> _, %{"npc" => _}), do: "misplaced_header"
   defp why("when: " <> _, %{"npc" => _}), do: "misplaced_header"
@@ -87,25 +88,32 @@ defmodule Loka.Content.SceneFiles do
     key = key(label)
 
     if key == "" or is_map_key(d["choices"], key),
-      do: {d, nil, [at | bad]},
+      do: refuse(at, d, :refused, bad),
       else: {put_in(d, ["choices", key], %{"label" => prose(label)}), key, bad}
   end
 
-  defp line({"gives: " <> item, _}, {%{"npc" => npc} = d, cur, bad}) when cur != nil,
-    do:
-      {d
-       |> put_in(["choices", cur, "receive"], %{"item" => item, "from" => npc})
-       |> put_in(["roles", item], %{"role" => "item", "item" => item}), cur, bad}
+  # What follows a refused choice belongs to it, and its own diagnostic already stops the build.
+  defp line(_, {_, :refused, _} = state), do: state
+
+  defp line({"gives: " <> item, _}, {%{"npc" => npc} = d, cur, bad})
+       when cur != nil and item != npc,
+       do:
+         {d
+          |> put_in(["choices", cur, "receive"], %{"item" => item, "from" => npc})
+          |> put_in(["roles", item], %{"role" => "item", "item" => item}), cur, bad}
 
   defp line({said, _} = at, {%{"npc" => npc} = d, cur, bad}) do
     case String.split(said, ": ", parts: 2) do
       [^npc, words] when cur == nil -> {spoken(d, ["prompt"], words), nil, bad}
       [^npc, words] -> {spoken(d, ["choices", cur, "narration"], words), cur, bad}
-      _ -> {d, cur, [at | bad]}
+      _ -> refuse(at, d, cur, bad)
     end
   end
 
-  defp line(at, {d, cur, bad}), do: {d, cur, [at | bad]}
+  defp line(at, {d, cur, bad}), do: refuse(at, d, cur, bad)
+
+  # `d` is the dialogue as of this line: a line above `npc:` is out of order, whatever follows.
+  defp refuse({text, n}, d, cur, bad), do: {d, cur, [{n, text, why(text, d)} | bad]}
 
   defp spoken(d, path, words) do
     update_in(d, path, fn

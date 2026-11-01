@@ -199,11 +199,118 @@ defmodule Loka.ContentExplainTest do
     for code <- codes do
       [line] =
         Explain.lines(
-          [%{"severity" => "error", "code" => code, "path" => "x", "data" => %{}}],
+          [%{"severity" => "error", "code" => code, "path" => "rooms/a.name", "data" => %{}}],
           dir
         )
 
-      assert line =~ ~r/^error: x: \S+ .*\.$/, line
+      assert line =~ ~r/^error: rooms\/a\.name: \S+ .*\.$/, line
     end
+  end
+
+  defp scene(dir, text, extra \\ %{}),
+    do: said(dir, Map.merge(%{"scenes/hi.scene" => text}, extra))
+
+  # Break: a reference site that passes no target prints a hole where the name goes.
+  test "a reference with no target prints no hole", %{tmp_dir: dir} do
+    diag = %{
+      "severity" => "error",
+      "code" => "UNRESOLVED_REFERENCE",
+      "path" => "a.b",
+      "data" => %{}
+    }
+
+    assert [line] = Explain.lines([diag], dir)
+    assert line =~ "names nothing"
+    refute line =~ "?"
+  end
+
+  # Break: a warning at an earlier path comes first and the author panel badges a broken build "compiled".
+  test "errors print before warnings", %{tmp_dir: dir} do
+    diag = %{"code" => "UNKNOWN_FIELD", "path" => "a.b", "data" => %{}}
+    warning = Map.put(diag, "severity", "warning")
+    error = Map.put(diag, "severity", "error")
+
+    assert ["error: " <> _, "warning: " <> _] = Explain.lines([warning, error], dir)
+  end
+
+  # Break: a mistyped `gives:` is the commonest scene typo; its role path fell back to the npc line.
+  test "a mistyped gives names its own line", %{tmp_dir: dir} do
+    text = "npc: bram\nbram: hi\n- Take it\nbram: here\ngives: tronel\n"
+    assert dir |> scene(text) |> line_at("scenes/hi.scene:5") =~ "tronel"
+  end
+
+  # Break: a part written over several lines reports its last line, not where it starts.
+  test "a multi-line part reports the line it starts on", %{tmp_dir: dir} do
+    text = "npc: bram\nbram: one\nbram: two\nbram: three\n"
+    assert {["prompt"], 2} in Loka.Content.SceneFiles.lines(text)
+  end
+
+  # Break: the item role overwrites the npc role, so a real npc is reported as missing.
+  test "gives naming the speaker says so and keeps the npc", %{tmp_dir: dir} do
+    text = "npc: bram\nbram: hi\n- Take it\nbram: here\ngives: bram\n"
+    lines = scene(dir, text)
+    assert line_at(lines, "scenes/hi.scene:5") =~ "named like its speaker"
+    refute Enum.any?(lines, &(&1 =~ "the npc `bram`"))
+  end
+
+  # Break: a bad line is judged against the finished dialogue, so a line above `npc:` blames speech.
+  test "speech above npc: says to name the speaker first", %{tmp_dir: dir} do
+    text = "bram: hi\nnpc: bram\nbram: hello\n- Take it\nbram: here\n"
+    assert dir |> scene(text) |> line_at("scenes/hi.scene:1") =~ "before the speaker is named"
+  end
+
+  # Break: lines under a duplicate choice fall to the prompt and earn a false `gives:` error.
+  test "what follows a repeated choice stays quiet", %{tmp_dir: dir} do
+    text = "npc: bram\nbram: hi\n- Take it\nbram: here\n- Take it\nbram: again\ngives: trowel\n"
+    lines = scene(dir, text)
+    assert line_at(lines, "scenes/hi.scene:5") =~ "repeats a choice"
+    refute Enum.any?(lines, &(&1 =~ "belongs under a choice"))
+  end
+
+  # Break: one typo also prints "required" errors for parts `.scene` syntax never names.
+  test "a refused line earns no missing-part errors", %{tmp_dir: dir} do
+    text = "npc: bram\nbrm: hi\n- Take it\nbram: here\n"
+    lines = scene(dir, text)
+    assert line_at(lines, "scenes/hi.scene:2") =~ "only `bram:`"
+    refute Enum.any?(lines, &(&1 =~ "is required"))
+  end
+
+  # Break: a field of the JSON half is blamed on the scene, which does not contain it.
+  test "an error in a scene's JSON half names the JSON file", %{tmp_dir: dir} do
+    text = "npc: bram\nbram: hi\n- Take it\nbram: here\n"
+    lines = scene(dir, text, %{"dialogues/hi.json" => ~s({\n  "oops": 1\n}\n)})
+    assert line_at(lines, "dialogues/hi.json:2") =~ "`oops`"
+  end
+
+  # Break: every layout violation tells the author to regenerate a hand-placed file.
+  test "a layout of the wrong type is not told to regenerate", %{tmp_dir: dir} do
+    assert dir |> said(%{"layout.json" => "{}"}) |> line_at("layout.json:1") =~ "must be an array"
+  end
+
+  # Break: the printed name is cut at a dot or loses its array.
+  test "a field is named whole", %{tmp_dir: dir} do
+    for {path, name} <- [{~s(text["a.b"]), "`a.b`"}, {"keywords[0]", "`keywords[0]`"}] do
+      diag = %{"severity" => "error", "code" => "SCHEMA_VIOLATION", "path" => path}
+
+      assert [line] = Explain.lines([Map.put(diag, "data", %{"error" => "not_in_enum"})], dir)
+      assert line =~ name
+    end
+  end
+
+  # Break: a stray file is called a bad field, though it holds no field to fix.
+  test "a file in an unknown folder is called a file", %{tmp_dir: dir} do
+    assert dir |> said(%{"notes/todo.json" => "{}"}) |> line_at("notes/todo.json:1") =~
+             "no folder"
+  end
+
+  # Break: a file gone since the compile crashes the task, and every diagnostic is lost.
+  test "a source file that cannot be read loses only its line", %{tmp_dir: dir} do
+    File.write!(Path.join(dir, "a.json"), "{}")
+    File.chmod!(Path.join(dir, "a.json"), 0)
+    diag = %{"severity" => "error", "code" => "UNKNOWN_FIELD", "path" => "a.x", "data" => %{}}
+
+    assert [line] = Explain.lines([diag], dir)
+    assert line =~ "`x`"
+    File.chmod!(Path.join(dir, "a.json"), 0o644)
   end
 end

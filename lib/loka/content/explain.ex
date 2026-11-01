@@ -129,6 +129,9 @@ defmodule Loka.Content.Explain do
     "wrong_speaker" =>
       {"Line `{text}`: only `{npc}:` may speak here (`npc: {npc}`).",
        "Change the speaker to `{npc}`, or move this into its own scene."},
+    "gives_speaker" =>
+      {"Line `{text}`: a scene cannot give an item named like its speaker.",
+       "Rename the item, or write this as `dialogues/<key>.json`."},
     "repeated_choice" =>
       {"Line `{text}` repeats a choice or has no words to key it by.", "Reword the choice."},
     "gives_outside_choice" =>
@@ -145,9 +148,21 @@ defmodule Loka.Content.Explain do
 
   @doc "Each diagnostic as its one line, against the source tree at `dir`."
   @spec lines([map()], Path.t()) :: [String.t()]
+  # mutate-skip: the empty clause only spares a clean compile the file scan; same answer
+  def lines([], _), do: []
+
   def lines(diags, dir) do
     index = SourceLines.index(dir)
-    Enum.map(diags, &"#{&1["severity"]}: #{place(&1, index)} #{words(&1)}")
+    # A refused scene line leaves its part unset; "missing" would only repeat that line's error.
+    refused = for %{"path" => path, "data" => %{"why" => _}} <- diags, do: path
+
+    diags
+    |> Enum.reject(
+      &(&1["data"]["error"] == "missing_property" and String.starts_with?(&1["path"], refused))
+    )
+    # Errors first: readers (the author panel) take the first line for the build's state.
+    |> Enum.sort_by(&(&1["severity"] != "error"))
+    |> Enum.map(&"#{&1["severity"]}: #{place(&1, index)} #{words(&1)}")
   end
 
   defp words(%{"code" => code, "data" => data} = d) do
@@ -156,7 +171,7 @@ defmodule Loka.Content.Explain do
     "#{fill(what, vars)} #{fill(fix, vars)}#{extra(code, data, vars["field"])}"
   end
 
-  defp entry("SCHEMA_VIOLATION", %{"path" => "layout"}),
+  defp entry("SCHEMA_VIOLATION", %{"path" => "layout", "data" => data}) when data == %{},
     do:
       {"layout.json must place every room once, each at its own spot, and it does not.",
        "Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms."}
@@ -176,6 +191,14 @@ defmodule Loka.Content.Explain do
       else: Map.fetch!(@catalog, d["code"])
   end
 
+  defp entry("UNKNOWN_FIELD", %{"path" => path}) do
+    if field(path) == "",
+      do:
+        {"This file is in no folder the compiler reads.",
+         "Move it into a kind's folder (docs/system/cartridge.md), or out of the cartridge."},
+      else: @catalog["UNKNOWN_FIELD"]
+  end
+
   defp entry("UNRESOLVED_REFERENCE", %{"data" => %{"target" => t}}) do
     case target(t) do
       %{"kind" => "fact"} ->
@@ -188,6 +211,9 @@ defmodule Loka.Content.Explain do
         @catalog["UNRESOLVED_REFERENCE"]
     end
   end
+
+  defp entry("UNRESOLVED_REFERENCE", _),
+    do: {"This reference names nothing that exists.", "Create it or fix the spelling."}
 
   defp entry("SCHEMA_VIOLATION", %{"data" => %{"error" => error}}) do
     {what, fix} = @catalog["SCHEMA_VIOLATION"]
@@ -207,8 +233,13 @@ defmodule Loka.Content.Explain do
     |> Map.merge(target(data["target"]))
   end
 
-  defp field(path),
-    do: List.last(Regex.run(~r/(?:\["|\.|\[|^)([^.\[\]"]+)"?\]?$/, path) || ["", ""])
+  # The path's last step as written: `a.b` of `text["a.b"]`, `keywords[0]`, `name`; "" for a bare file.
+  defp field(path) do
+    case Regex.run(~r/\["([^"]+)"\]$|(?:^|\.)([^."\[\]]+\[\d+\])$|\.([^."\[\]]+)$/, path) do
+      nil -> ""
+      match -> List.last(match)
+    end
+  end
 
   defp article(type),
     do: if(type =~ ~r/^(object|array|integer)/, do: "an #{type}", else: "a #{type}")

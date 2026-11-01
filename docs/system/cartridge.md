@@ -87,7 +87,7 @@ bar.” Reading either grants no quest, fact or reward.
 ## Compiler
 
 `mix loka.compile <source dir> <artifact path>` (`lib/mix/tasks/loka.compile.ex:12`) writes
-the artifact and prints warnings as JSON lines, or prints every diagnostic and exits 1.
+the artifact and prints warnings as plain lines, or prints every diagnostic and exits 1.
 `Loka.Content.compile/2` (`lib/loka/content.ex:38`) runs the stages on the parts earlier
 stages accepted, so one bad file hides no other diagnostic; diagnostics are unique and sorted by
 path, code, then canonical text (`:73`). The artifact is the canonical encoding of

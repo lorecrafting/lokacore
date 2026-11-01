@@ -86,7 +86,7 @@ const fresh = () => {
 
 // Breaks: the compiler warns VISITS_UNRECORDED (knowledge@1 dropped), so visits never count.
 test('the sampler compiles with no warning', () => {
-  assert.doesNotMatch(compiled, /"severity":"warning"/);
+  assert.doesNotMatch(compiled, /^warning: /m);
 });
 
 // Breaks: an ungated route (policy `all []`) lets the player ride to a post never visited.

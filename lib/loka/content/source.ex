@@ -248,7 +248,7 @@ defmodule Loka.Content.Source do
   end
 
   @doc """
-  Diagnostics for `Loka.Core.Contracts.validate/2` errors on `value`, which sits at `steps`
+  Diagnostics for `Loka.Core.Contracts.detailed/3` errors on `value`, which sits at `steps`
   of `rel`: unknown_property is UNKNOWN_FIELD with the valid names, any other code
   SCHEMA_VIOLATION (invalid_type with the expected type).
   """
