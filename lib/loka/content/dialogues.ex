@@ -322,7 +322,7 @@ defmodule Loka.Content.Dialogues do
     item = get_in(roles, [h["item"], "item"])
     npc = get_in(roles, [h["from"], "npc"])
 
-    for true <- [String.ends_with?(rel, ".scene")],
+    for true <- [is_binary(rel) and String.ends_with?(rel, ".scene")],
         {_, _, %{"location" => location}} <- [resolve(item, "item", ctx.m, ctx.defs)],
         location != %{"in" => "npc", "npc" => npc} do
       data = %{"item" => item["key"], "holder" => npc["key"]}

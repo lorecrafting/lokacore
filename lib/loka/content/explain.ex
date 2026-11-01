@@ -121,7 +121,7 @@ defmodule Loka.Content.Explain do
   end
 
   defp entry("UNKNOWN_FIELD", %{"path" => path}) do
-    if not String.contains?(path, [".", "["]),
+    if not String.contains?(path, [".", "["]) or path =~ ~r/^".*"$/,
       do: @words["stray_file"],
       else: @words["UNKNOWN_FIELD"]
   end

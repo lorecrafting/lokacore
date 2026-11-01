@@ -329,6 +329,40 @@ defmodule Loka.ContentExplainTest do
              "no folder"
   end
 
+  # Break: a stray file whose name needs quoting in the path reads as an unknown field.
+  test "a stray file with an unusual name is still called a file", %{tmp_dir: dir} do
+    lines = said(dir, %{"notes/Todo.json" => "{}", "notes/hi.scene" => "npc: bram\n"})
+    assert line_at(lines, "notes/Todo.json:1") =~ "no folder"
+    assert line_at(lines, "notes/hi.scene:1") =~ "no folder"
+  end
+
+  # Break: the holder check reads a bundled dialogue's location as a file name and the compile crashes.
+  test "a dialogue in an area bundle may receive without a scene's warning", %{tmp_dir: dir} do
+    bundle =
+      JSON.encode!(%{
+        "dialogues" => %{
+          "hi" => %{
+            "npc" => "bram",
+            "keyword" => "hi",
+            "prompt" => %{"prose" => "~"},
+            "roles" => %{
+              "bram" => %{"role" => "npc", "npc" => "bram"},
+              "t" => %{"role" => "item", "item" => "trowel"}
+            },
+            "choices" => %{
+              "c" => %{
+                "label" => %{"prose" => "~"},
+                "narration" => %{"prose" => "~"},
+                "receive" => %{"item" => "t", "from" => "bram"}
+              }
+            }
+          }
+        }
+      })
+
+    refute dir |> said(%{"areas/a.json" => bundle}) |> Enum.join() =~ "hands over nothing"
+  end
+
   # Break: the guess fires at the threshold, so a far name reads as a typo (jaro is exactly 0.75).
   test "a field only near a valid name gets no guess", %{tmp_dir: dir} do
     data = %{"valid" => "abxxxxxx"}
