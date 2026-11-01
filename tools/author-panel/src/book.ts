@@ -3,7 +3,7 @@
 // session update, answers `trace`, and posts `line` for an Alt-clicked Book line.
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { Step as PlaceStep } from '../../../mobile/app/author/place.ts';
-import { askTrace } from './trace.ts';
+import { askTrace } from './ask_trace.ts';
 import type { shown } from '../../../mobile/app/author/shown.ts';
 
 export const BOOK = `http://localhost:${import.meta.env.VITE_LOKA_PREVIEW_PORT ?? 19006}`;

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { afterEach, mock, test } from 'node:test';
-import { askTrace } from '../../../tools/author-panel/src/trace.ts';
+import { askTrace } from '../../../tools/author-panel/src/ask_trace.ts';
 
 afterEach(() => mock.timers.reset());
 
