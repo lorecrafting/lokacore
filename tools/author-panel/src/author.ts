@@ -22,12 +22,17 @@ export const todo = () => fetch('/__author/todo').then((r) => r.json() as Promis
 /** The last compile's plain-words diagnostics; `undefined` until the watcher answers. */
 export function useDiagnostics() {
   const [said, setSaid] = useState<string[]>();
+  const [compiled, setCompiled] = useState(true);
   useEffect(() => {
     let events: EventSource;
     let retry: ReturnType<typeof setTimeout> | undefined;
     const open = () => {
       events = new EventSource('/__author/events');
-      events.onmessage = (e) => setSaid((JSON.parse(e.data) as { said: string[] }).said);
+      events.onmessage = (e) => {
+        const message = JSON.parse(e.data) as { said: string[]; compiled: boolean };
+        setSaid(message.said);
+        setCompiled(message.compiled);
+      };
       // a 502 while the watcher restarts closes the stream for good; only a network drop retries
       events.onerror = () => {
         if (events.readyState === EventSource.CLOSED) retry = setTimeout(open, 2000);
@@ -39,5 +44,5 @@ export function useDiagnostics() {
       events.close();
     };
   }, []);
-  return said;
+  return { said, compiled };
 }

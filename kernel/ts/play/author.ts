@@ -63,7 +63,7 @@ function publish(canonicalText: string, sha256: string, said: string[], started:
   const canonical: Canonical = JSON.parse(canonicalText);
   const overlay = live && written ? textOnly(written, canonical) : undefined;
   if (overlay) {
-    live!.push({ text: overlay, said });
+    live!.push({ text: overlay, said, compiled: true });
     const n = Object.keys(overlay).length;
     console.log(n ? `Text updated in place: ${n} keys ${ms()}` : `Preview unchanged ${ms()}`);
     return true;
@@ -72,7 +72,7 @@ function publish(canonicalText: string, sha256: string, said: string[], started:
   writeFileSync(`${out}.tmp`, JSON.stringify({ canonical: canonicalText, sha256 }));
   renameSync(`${out}.tmp`, out); // Metro never reads half a file
   written = canonical;
-  live?.push({ text: {}, said });
+  live?.push({ text: {}, said, compiled: true });
   console.log(`Preview updated: ${sha256.slice(0, 12)} ${ms()}`);
   return true;
 }
@@ -99,7 +99,7 @@ function build(): boolean {
       if (!said.length) said.push(run.error?.message ?? run.stderr);
       said.push(`Not compiled; ${keeps}`);
       console.error(said.at(-1));
-      live?.push({ said });
+      live?.push({ said, compiled: false });
       return false;
     }
     const bytes = readFileSync(artifact);
@@ -110,7 +110,7 @@ function build(): boolean {
       const why = loaded.ok ? 'not in canonical artifact form' : JSON.stringify(loaded);
       said.push(`The kernel refuses the compiled cartridge: ${why}`, keeps);
       console.error(said.slice(-2).join('\n'));
-      live?.push({ said });
+      live?.push({ said, compiled: false });
       return false;
     }
     return publish(parts[1], parts[2], said, started);

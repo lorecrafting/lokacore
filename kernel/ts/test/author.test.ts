@@ -83,7 +83,7 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
     for (let i = 0; i < 100 && !ready(); i++) await settle(50);
     assert.ok(ready(), 'timed out');
   };
-  const messages: { text: Record<string, string>; said: string[] }[] = [];
+  const messages: { text: Record<string, string>; said: string[]; compiled: boolean }[] = [];
   const stream = await (async function connect(): Promise<Response> {
     return fetch(`http://127.0.0.1:${port}/events`).catch(() => settle(50).then(connect));
   })();
@@ -120,5 +120,13 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
     sha256: rest.sha256,
   });
   await until(() => messages.at(-1)!.text['room.boathouse.description'] === undefined);
+  assert.equal(messages.at(-1)!.compiled, true);
+
+  // Break: a kernel refusal has no `error:` line, so a panel reading the lines badges it compiled.
+  writeFileSync(join(dir, 'refused.json'), '{"cartridge":{},"content_hash":"00"}');
+  writeFileSync(which, join(dir, 'refused.json'));
+  writeFileSync(join(src, 'rooms.json'), '{ }');
+  await until(() => messages.at(-1)!.compiled === false);
+  assert.match(messages.at(-1)!.said.join(), /kernel refuses/);
   reader.cancel();
 });

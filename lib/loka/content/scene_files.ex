@@ -27,9 +27,29 @@ defmodule Loka.Content.SceneFiles do
   @spec parse(String.t()) :: {map(), [{pos_integer(), String.t(), String.t()}]}
   def parse(text) do
     {dialogue, _, bad} =
-      Enum.reduce(lines(text, :trimmed), {%{"choices" => %{}}, nil, []}, &line/2)
+      Enum.reduce(lines(text, :trimmed), {%{"choices" => %{}}, nil, []}, &readable/2)
 
-    {dialogue, Enum.reverse(bad)}
+    {if(bad == [], do: dialogue, else: filled(dialogue)), Enum.reverse(bad)}
+  end
+
+  # A bad line's own diagnostic fails the build, so stand-ins for what it left unset only keep the
+  # schema check from stopping the pass before a later fault can report.
+  defp filled(d) do
+    choices =
+      if d["choices"] == %{}, do: %{"refused" => %{"label" => prose("~")}}, else: d["choices"]
+
+    d
+    |> Map.put_new("prompt", prose("~"))
+    |> Map.put(
+      "choices",
+      Map.new(choices, fn {k, c} -> {k, Map.put_new(c, "narration", prose("~"))} end)
+    )
+  end
+
+  defp readable({text, n} = at, {d, cur, bad} = state) do
+    if String.valid?(text),
+      do: line(at, state),
+      else: {d, cur, [{n, String.replace_invalid(text), "not_utf8"} | bad]}
   end
 
   @doc "Where each part of the lowered dialogue was written: `{steps, line}` (error locations)."
@@ -92,8 +112,8 @@ defmodule Loka.Content.SceneFiles do
       else: {put_in(d, ["choices", key], %{"label" => prose(label)}), key, bad}
   end
 
-  # What follows a refused choice belongs to it, and its own diagnostic already stops the build.
-  defp line(_, {_, :refused, _} = state), do: state
+  # What follows a refused choice is still checked, and written nowhere.
+  defp line({"gives: " <> _, _}, {_, :refused, _} = state), do: state
 
   defp line({"gives: " <> item, _}, {%{"npc" => npc} = d, cur, bad})
        when cur != nil and item != npc,
@@ -104,8 +124,7 @@ defmodule Loka.Content.SceneFiles do
 
   defp line({said, _} = at, {%{"npc" => npc} = d, cur, bad}) do
     case String.split(said, ": ", parts: 2) do
-      [^npc, words] when cur == nil -> {spoken(d, ["prompt"], words), nil, bad}
-      [^npc, words] -> {spoken(d, ["choices", cur, "narration"], words), cur, bad}
+      [^npc, words] -> {said(d, cur, words), cur, bad}
       _ -> refuse(at, d, cur, bad)
     end
   end
@@ -117,6 +136,10 @@ defmodule Loka.Content.SceneFiles do
     do: {d, nil, [{n, text, "gives_outside_choice"} | bad]}
 
   defp refuse({text, n}, d, cur, bad), do: {d, cur, [{n, text, why(text, d)} | bad]}
+
+  defp said(d, :refused, _), do: d
+  defp said(d, nil, words), do: spoken(d, ["prompt"], words)
+  defp said(d, cur, words), do: spoken(d, ["choices", cur, "narration"], words)
 
   defp spoken(d, path, words) do
     update_in(d, path, fn

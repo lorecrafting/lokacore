@@ -67,7 +67,7 @@ defmodule Loka.Core.Contracts do
           :ok | {:error, [error()]}
   def validate(contract, value, defs \\ @defs) do
     with {:error, errors} <- detailed(contract, value, defs),
-         do: {:error, Enum.map(errors, &Map.drop(&1, [:expected, :allowed]))}
+         do: {:error, Enum.map(errors, &Map.drop(&1, [:hint, :allowed]))}
   end
 
   @doc """
@@ -88,13 +88,18 @@ defmodule Loka.Core.Contracts do
   defp errors(%{"type" => t} = s, v, path, defs) do
     if type?(t, v),
       do: keywords(s, v, path, defs),
-      else: [%{path: path, code: :invalid_type, expected: t}]
+      else: [%{path: path, code: :invalid_type, hint: expected(t, s)}]
   end
 
   defp errors(%{"oneOf" => _}, v, path, _) when not is_map(v),
     do: [%{path: path, code: :invalid_type}]
 
   defp errors(s, v, path, defs), do: keywords(s, v, path, defs)
+
+  defp expected(t, %{"properties" => ps}),
+    do: %{"expected" => t, "fields" => Enum.join(Map.keys(ps), ", ")}
+
+  defp expected(t, _), do: %{"expected" => t}
 
   defp keywords(s, v, path, defs) do
     Enum.flat_map(s, fn
@@ -110,7 +115,13 @@ defmodule Loka.Core.Contracts do
 
   # Each clause sees a value that `errors/4` already type-checked.
   defp keyword("$ref", name, v, path, defs), do: errors(defs[name], v, path, defs)
-  defp keyword("enum", e, v, path, _), do: check(Enum.any?(e, &(&1 === v)), path, :not_in_enum)
+
+  defp keyword("enum", e, v, path, _) do
+    if Enum.any?(e, &(&1 === v)),
+      do: [],
+      else: [%{path: path, code: :not_in_enum, hint: %{"allowed" => Enum.join(e, ", ")}}]
+  end
+
   defp keyword("const", c, v, path, _), do: check(c === v, path, :const_mismatch)
   defp keyword("minimum", n, v, path, _), do: check(v >= n, path, :below_minimum)
   defp keyword("maximum", n, v, path, _), do: check(v <= n, path, :above_maximum)

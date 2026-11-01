@@ -404,4 +404,69 @@ defmodule Loka.ContentExplainTest do
     assert line =~ "`x`"
     File.chmod!(Path.join(dir, "a.json"), 0o644)
   end
+
+  # Break: IO.puts raises on the byte and every diagnostic is lost.
+  test "a Latin-1 byte in a scene says so, on either kind of line, and prints", %{tmp_dir: dir} do
+    lines =
+      said(dir, %{"scenes/s.scene" => "npc: bram\nbram: caf\xE9\n- Ask\nthera: caf\xE9\n"})
+
+    assert Enum.all?(lines, &String.valid?/1)
+    assert line_at(lines, "scenes/s.scene:2") =~ "UTF-8"
+    assert line_at(lines, "scenes/s.scene:4") =~ "UTF-8"
+  end
+
+  # Break: a byte reaching the sentences another way crashes the printer.
+  test "a line is printable whatever the data holds", %{tmp_dir: dir} do
+    diag = %{"code" => "DUPLICATE_KEY", "severity" => "error", "path" => "a.b\xE9", "data" => %{}}
+    assert [line] = Explain.lines([diag], dir)
+    assert String.valid?(line)
+  end
+
+  # Break: lines under a refused choice wait for later compiles.
+  test "lines after a repeated choice report in one compile", %{tmp_dir: dir} do
+    scene = "npc: bram\nbram: hi\n- Ask\nbram: yes\n- Ask\nnarrator: rain\nthera: hi\n"
+    lines = said(dir, %{"scenes/s.scene" => scene})
+    for n <- 5..7, do: assert(line_at(lines, "scenes/s.scene:#{n}"))
+  end
+
+  # Break: the refused line's unset part stops the pass before references resolve (A9).
+  test "an unknown fact reports beside a refused reply, or a refused only choice", %{tmp_dir: dir} do
+    for body <- ["- Ask\nthera: yes\n", "- !!!\n"] do
+      scene = "npc: bram\nwhen: never_defined\nbram: hi\n" <> body
+      lines = said(dir, %{"scenes/s.scene" => scene})
+      assert line_at(lines, "never_defined")
+      refute Enum.any?(lines, &(&1 =~ "needs at least one"))
+    end
+  end
+
+  # Break: the hint names no shape, or no allowed value, so the author must go looking.
+  test "a wrong exit names its fields and a wrong enum its values", %{tmp_dir: dir} do
+    room = ~s({"description":#{@prose},"exits":{"north":"well"},"name":#{@prose}})
+    assert line_at(said(dir, %{"rooms/start.json" => room}), "`north`") =~ "fields: "
+
+    band = %{"at_percent" => 0, "key" => "x", "tone" => "lockd"}
+    worlded = manifest(@caps) |> JSON.decode!() |> Map.put("world", %{"bands" => [band]})
+    lines = said(dir, %{"cartridge.json" => JSON.encode!(worlded)})
+    assert line_at(lines, "`tone`") =~ "one of: "
+  end
+
+  # Break: duplicates get the rerun hint, and rerunning changes nothing.
+  test "rooms on one spot are named, without the rerun hint", %{tmp_dir: dir} do
+    layout = ~s([{"room":"boathouse","x":1,"y":2,"z":0},{"room":"start","x":1,"y":2,"z":0}])
+    assert [line | _] = said(dir, %{"layout.json" => layout}) |> Enum.filter(&(&1 =~ "layout"))
+    assert line =~ "`boathouse`, `start`"
+    assert line =~ "x 1, y 2, z 0"
+    refute line =~ "bin/loka new layout"
+  end
+
+  # Break: one fault reads as two when two diagnostics word the same.
+  test "identical lines print once", %{tmp_dir: dir} do
+    d = %{"code" => "DUPLICATE_KEY", "severity" => "error", "path" => "x.y", "data" => %{}}
+    assert length(Explain.lines([d, d], dir)) == 1
+  end
+
+  # Break: a file named outside the key pattern gets words about its fields, not its name.
+  test "a file with a bad name is told to rename", %{tmp_dir: dir} do
+    assert said(dir, %{"rooms/bad name.json" => @room}) |> line_at("bad name") =~ "Rename it"
+  end
 end

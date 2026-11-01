@@ -38,7 +38,9 @@ defmodule Loka.ContentSource do
   """
   def plain({:error, diags}) do
     {:error,
-     Enum.map(diags, fn d -> Map.update!(d, "data", &Map.drop(&1, ["valid", "expected"])) end)}
+     Enum.map(diags, fn d ->
+       Map.update!(d, "data", &Map.drop(&1, ~w(valid expected fields allowed)))
+     end)}
   end
 
   def plain(result), do: result

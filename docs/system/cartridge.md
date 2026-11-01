@@ -884,8 +884,8 @@ build. The author tools below are reachable only in that bundle (a production ex
   of the file still lower, so a fault behind a bad line reports in the same compile. A `gives:`
   declares its item role. A `gives:` whose item does not start with the scene's NPC is a warning
   `OUTCOME_MISMATCH` (`data.item`, `data.holder`): the choice stays hidden until play moves it there.
-  Schema refusals carry hint data for those words: `valid` on `UNKNOWN_FIELD`, `expected` on
-  `invalid_type`. Gate: a sampler dialogue re-expressed as a scene compiles byte-identical.
+  Schema refusals carry hint data for those words: `valid` on `UNKNOWN_FIELD`, `expected` (and an
+  object's `fields`) on `invalid_type`, `allowed` on `not_in_enum`. Gate: a sampler dialogue re-expressed as a scene compiles byte-identical.
   Rules: [owner decision](../decisions/owner-decision-handwritten-prose-2026-10-31.md).
 
 ## Development cartridges

@@ -14,7 +14,7 @@ defmodule Loka.Content.Explain do
          INVALID_JSON | This file is not valid JSON. | Close the bracket or quote at this point, or remove the stray comma.
          DUPLICATE_KEY | `{field}` appears twice in one object. | Keep one of them.
          UNKNOWN_FIELD | `{field}` is not a field here. | Remove it or fix its name.
-         SCHEMA_VIOLATION | `{field}` is not valid here. | Check it against the kind's reference in docs/system/cartridge.md.
+         SCHEMA_VIOLATION | `{field}` is not valid here. | The full shape is in schemas/source/defs.schema.json.
          MISSING_MANIFEST | There is no cartridge.json. | Run `bin/loka new cartridge <name>`, or point the tool at the cartridge's folder.
          DUPLICATE_DEFINITION | This name or key is already taken. | Rename it. If no other file uses it, it is a built-in word such as a command (look, talk).
          FACT_NAME_COLLISION | Fact `{field}` maps to the same key as another fact. | Rename one of them.
@@ -23,7 +23,7 @@ defmodule Loka.Content.Explain do
          UNREACHABLE_DETAIL | No room text ever mentions the detail `{field}`. | Link to it from the description or another detail, or remove it.
          CONTAINMENT_CYCLE | These things contain each other. | Change one location so the chain ends in a room.
          CAPACITY_EXCEEDED | This container holds {held} but has room for {capacity}. | Raise its capacity or start it with less.
-         TOUCH_LINK_MISSING | This line has no link to `{target}`, so a phone player cannot tap it. | Add a marker for it in the text.
+         TOUCH_LINK_MISSING | This line has no link to `{target}`, so a phone player cannot tap it. | Link it in the text: `[words](key)`.
          UNKNOWN_COMMAND | `{field}` names a command this cartridge may not use. | Use a command from the action reference in docs/system/cartridge.md.
          FACT_TYPE_MISMATCH | This value does not fit the fact's type. | Change the value, or the fact's type in facts.json.
          UNKNOWN_CAPABILITY | This capability does not exist. | Fix its name under requires.capabilities in cartridge.json.
@@ -51,9 +51,9 @@ defmodule Loka.Content.Explain do
          VISITS_UNRECORDED | A visits check can never pass, because nothing records visits. | Add `knowledge` under requires.capabilities in cartridge.json.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
          SITE_EXIT_CONFLICT | This site names direction `{field}`, where the room has no exit. | Name a direction the room has an exit in.
-         invalid_type | `{field}` must be {expected}.
+         invalid_type | `{field}` must be {expected}{fields_named}.
          missing_property | `{field}` is required here and is missing.
-         not_in_enum | `{field}` is not one of the allowed values.
+         not_in_enum | `{field}` must be one of: {allowed}.
          too_few_items | `{field}` needs at least one entry.
          wrong_speaker | Line `{text}`: only `{npc}:` may speak here (`npc: {npc}`). | Change the speaker to `{npc}`, or move this into its own scene.
          gives_speaker | Line `{text}`: a scene cannot give an item named like its speaker. | Rename the item, or write this as `dialogues/<key>.json`.
@@ -62,7 +62,10 @@ defmodule Loka.Content.Explain do
          misplaced_header | Line `{text}`: `npc:` comes first, then `when:`, before any speech. | Move it to the top of the file.
          no_npc | Line `{text}` comes before the speaker is named. | Start the file with `npc: <key>`.
          not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `<npc>: words`, `- choice` or `gives:` (docs/guides/writing-the-game.md).
-         layout_stale | layout.json must place every room once, each at its own spot, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.
+         file_name | This file's name cannot be a key. | Rename it with lowercase letters, digits and underscores.
+         not_utf8 | Line `{text}` is not valid UTF-8 (the odd character marks the byte). | Save the file as UTF-8.
+         layout_same_spot | Rooms {rooms} share the spot x {x}, y {y}, z {z}. | Give each its own x, y, z in layout.json.
+         layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.
          gives_holder | `gives: {item}` hands over nothing until `{holder}` holds `{item}`: the choice stays hidden. | Set the item's location to `{"in": "npc", "npc": "{holder}"}`, or move it there in play.
          gives_receive | `gives:` (`receive`) needs the `item_acquired` event, which `{capability}` owns, and the cartridge does not lock it. | Add `"{capability}": 1` under requires.capabilities in cartridge.json; the NPC must hold the item too.
          stray_file | This file is in no folder the compiler reads. | Move it into a kind's folder (docs/system/cartridge.md), or out of the cartridge.
@@ -92,7 +95,8 @@ defmodule Loka.Content.Explain do
     )
     # Errors first: readers (the author panel) take the first line for the build's state.
     |> Enum.sort_by(&(&1["severity"] != "error"))
-    |> Enum.map(&"#{&1["severity"]}: #{place(&1, index)} #{words(&1)}")
+    |> Enum.map(&String.replace_invalid("#{&1["severity"]}: #{place(&1, index)} #{words(&1)}"))
+    |> Enum.uniq()
   end
 
   defp words(%{"code" => code, "data" => data} = d) do
@@ -142,6 +146,13 @@ defmodule Loka.Content.Explain do
   defp entry("UNRESOLVED_REFERENCE", _),
     do: @words["unknown_ref"]
 
+  # Only a file's name reaches a pattern at the root: a file's content is never a bare string.
+  defp entry("SCHEMA_VIOLATION", %{
+         "data" => %{"error" => "pattern_mismatch"},
+         "path" => "\"" <> _
+       }),
+       do: @words["file_name"]
+
   defp entry("SCHEMA_VIOLATION", %{"data" => %{"error" => error}}) do
     {what, fix} = @words["SCHEMA_VIOLATION"]
     {elem(Map.get(@words, error, {what}), 0), fix}
@@ -153,6 +164,10 @@ defmodule Loka.Content.Explain do
     data
     |> Map.put("field", field(path))
     |> Map.update("expected", "the right type", &article/1)
+    |> Map.put(
+      "fields_named",
+      if(data["fields"], do: " with fields: #{data["fields"]}", else: "")
+    )
     |> Map.put(
       "capability_named",
       if(data["capability"], do: " (`#{data["capability"]}`)", else: "")

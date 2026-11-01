@@ -1,6 +1,6 @@
 defmodule Loka.Content.Layout do
   @moduledoc "Static drawing metadata; real room exits remain the only graph."
-  import Loka.Content.Source, only: [at: 2, diag: 2, ref: 3, schema: 4]
+  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, ref: 3, schema: 4]
   alias Loka.Core.Contracts
 
   def source(_, nil, _), do: {nil, []}
@@ -33,11 +33,22 @@ defmodule Loka.Content.Layout do
     keys = Enum.map(rows, & &1["room"]["key"])
 
     complete = Enum.sort(keys) == Enum.sort(Map.keys(defs["room"]))
-    coords = Enum.map(rows, &Map.take(&1, ~w(x y z)))
-    unique = Enum.uniq(coords) == coords
-    checks = if complete and unique, do: [], else: [diag("SCHEMA_VIOLATION", at(rel, []))]
+    checks = if complete, do: [], else: [diag("SCHEMA_VIOLATION", at(rel, []))]
 
-    {rows, references(rel, rows, m, defs) ++ checks ++ requirements(rel, m)}
+    {rows,
+     references(rel, rows, m, defs) ++ checks ++ same_spot(rel, rows) ++ requirements(rel, m)}
+  end
+
+  defp same_spot(rel, rows) do
+    for {spot, [_, _ | _] = shared} <- Enum.group_by(rows, &Map.take(&1, ~w(x y z))) do
+      rooms = Enum.map_join(shared, ", ", &"`#{&1["room"]["key"]}`")
+
+      diag(
+        "SCHEMA_VIOLATION",
+        at(rel, []),
+        Map.merge(spot, %{"why" => "layout_same_spot", "rooms" => rooms})
+      )
+    end
   end
 
   defp references(rel, rows, m, defs) do

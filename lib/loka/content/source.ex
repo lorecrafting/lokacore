@@ -250,7 +250,8 @@ defmodule Loka.Content.Source do
   @doc """
   Diagnostics for `Loka.Core.Contracts.detailed/3` errors on `value`, which sits at `steps`
   of `rel`: unknown_property is UNKNOWN_FIELD with the valid names, any other code
-  SCHEMA_VIOLATION (invalid_type with the expected type).
+  SCHEMA_VIOLATION (invalid_type with the expected type and an object's fields, not_in_enum with
+  the allowed values).
   """
   @spec schema(location(), steps(), term(), [map()]) :: [map()]
   def schema(rel, steps, value, errors) do
@@ -259,8 +260,7 @@ defmodule Loka.Content.Source do
 
       case e do
         %{allowed: allowed} -> diag("UNKNOWN_FIELD", path, %{"valid" => Enum.join(allowed, ", ")})
-        %{expected: t} -> diag("SCHEMA_VIOLATION", path, %{"error" => "#{code}", "expected" => t})
-        _ -> diag("SCHEMA_VIOLATION", path, %{"error" => "#{code}"})
+        _ -> diag("SCHEMA_VIOLATION", path, Map.put(e[:hint] || %{}, "error", "#{code}"))
       end
     end
   end
