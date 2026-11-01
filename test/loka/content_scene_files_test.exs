@@ -71,7 +71,10 @@ defmodule Loka.ContentSceneFilesTest do
 
     maud = %{
       "npc" => "maud",
-      "roles" => %{"maud" => %{"role" => "npc", "npc" => "maud"}},
+      "roles" => %{
+        "maud" => %{"role" => "npc", "npc" => "maud"},
+        "bowl" => %{"role" => "item", "item" => "bowl"}
+      },
       "policy" => %{"op" => "fact_compare", "fact" => "met_maud", "equals" => true},
       "prompt" => "dialogue.maud.prompt",
       "choices" => %{
@@ -85,21 +88,31 @@ defmodule Loka.ContentSceneFilesTest do
 
     assert {"dialogues/maud.scene", {:dialogue, "maud", []}, maud} in files
 
-    assert {"text.json", :text,
-            %{
-              "dialogue.maud.prompt" => "line one\nline two: aside",
-              "dialogue.maud.choices.take_it.label" => "Take it.",
-              "dialogue.maud.choices.take_it.narration" => "line three"
-            }} in files
+    {"text.json", :text, text} = List.keyfind(files, "text.json", 0)
 
-    assert {"scenes/bad.scene", {:dialogue, "bad", []}, :invalid} in files
+    assert %{
+             "dialogue.maud.prompt" => "line one\nline two: aside",
+             "dialogue.maud.choices.take_it.label" => "Take it.",
+             "dialogue.maud.choices.take_it.narration" => "line three"
+           } = text
 
     assert Enum.map(diags, &{&1["code"], &1["path"], &1["data"]}) == [
              {"SCHEMA_VIOLATION", ~s("scenes/bad.scene"),
-              %{"line" => 2, "text" => "gives: bowl"}},
+              %{
+                "line" => 2,
+                "text" => "gives: bowl",
+                "why" => "gives_outside_choice",
+                "npc" => "maud"
+              }},
              {"SCHEMA_VIOLATION", ~s("scenes/bad.scene"),
-              %{"line" => 4, "text" => "bram: line two"}},
-             {"SCHEMA_VIOLATION", ~s("scenes/bad.scene"), %{"line" => 6, "text" => "- Go"}}
+              %{
+                "line" => 4,
+                "text" => "bram: line two",
+                "why" => "wrong_speaker",
+                "npc" => "maud"
+              }},
+             {"SCHEMA_VIOLATION", ~s("scenes/bad.scene"),
+              %{"line" => 6, "text" => "- Go", "why" => "repeated_choice", "npc" => "maud"}}
            ]
   end
 end

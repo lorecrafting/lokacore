@@ -15,14 +15,13 @@ const Heading = ({ children }: { children: React.ReactNode }) => (
 );
 
 /** The last compile's diagnostics first: a writer reads the error before anything else. */
-export function Compile({ said, placeNote }: { said?: string[]; placeNote?: string }) {
-  const broken = said?.length ? said[0].startsWith('error') : false;
+export function Compile({ said, compiled, placeNote }: { said?: string[]; compiled: boolean; placeNote?: string }) {
   return (
     <section className="border-b px-3 py-2 text-sm">
       <div className="flex items-center gap-2">
         {said === undefined ? (
           <Badge variant="secondary">watcher not running</Badge>
-        ) : broken ? (
+        ) : !compiled ? (
           <Badge variant="destructive">not compiled</Badge>
         ) : (
           <Badge className="bg-emerald-600 text-white dark:bg-emerald-500">compiled</Badge>

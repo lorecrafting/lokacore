@@ -42,23 +42,6 @@ let written: Canonical | undefined = existsSync(out)
   ? JSON.parse(JSON.parse(readFileSync(out, 'utf8')).canonical)
   : undefined;
 
-// A compiler diagnostic or warning (one JSON line, mix loka.compile) in plain words.
-function plain(line: string): string {
-  try {
-    const d = JSON.parse(line) as {
-      severity?: string;
-      path?: string;
-      code?: string;
-      data?: object;
-    };
-    const data = Object.entries(d.data ?? {}).map(([k, v]) => `${k} ${JSON.stringify(v)}`);
-    const what = (d.code ?? 'unknown problem').toLowerCase().replaceAll('_', ' ');
-    return `${d.severity ?? 'error'} at ${d.path || 'the cartridge'}: ${what}${data.length ? ` (${data.join(', ')})` : ''}`;
-  } catch {
-    return line;
-  }
-}
-
 const keeps = 'the preview keeps the last good cartridge.';
 // A `text.json` save shows before its compile: the written words, overlaid with the file's.
 function quick() {
@@ -80,7 +63,7 @@ function publish(canonicalText: string, sha256: string, said: string[], started:
   const canonical: Canonical = JSON.parse(canonicalText);
   const overlay = live && written ? textOnly(written, canonical) : undefined;
   if (overlay) {
-    live!.push({ text: overlay, said });
+    live!.push({ text: overlay, said, compiled: true });
     const n = Object.keys(overlay).length;
     console.log(n ? `Text updated in place: ${n} keys ${ms()}` : `Preview unchanged ${ms()}`);
     return true;
@@ -89,7 +72,7 @@ function publish(canonicalText: string, sha256: string, said: string[], started:
   writeFileSync(`${out}.tmp`, JSON.stringify({ canonical: canonicalText, sha256 }));
   renameSync(`${out}.tmp`, out); // Metro never reads half a file
   written = canonical;
-  live?.push({ text: {}, said });
+  live?.push({ text: {}, said, compiled: true });
   console.log(`Preview updated: ${sha256.slice(0, 12)} ${ms()}`);
   return true;
 }
@@ -110,16 +93,13 @@ function build(): boolean {
   try {
     const artifact = join(tmp, 'artifact.json');
     const run = compile(artifact);
-    const said = `${run.stderr ?? ''}`
-      .split('\n')
-      .filter((l) => l.startsWith('{'))
-      .map(plain);
+    const said = `${run.stderr ?? ''}`.split('\n').filter((l) => /^(error|warning|info): /.test(l));
     for (const line of said) console.error(line);
     if (run.status !== 0) {
       if (!said.length) said.push(run.error?.message ?? run.stderr);
       said.push(`Not compiled; ${keeps}`);
       console.error(said.at(-1));
-      live?.push({ said });
+      live?.push({ said, compiled: false });
       return false;
     }
     const bytes = readFileSync(artifact);
@@ -130,7 +110,7 @@ function build(): boolean {
       const why = loaded.ok ? 'not in canonical artifact form' : JSON.stringify(loaded);
       said.push(`The kernel refuses the compiled cartridge: ${why}`, keeps);
       console.error(said.slice(-2).join('\n'));
-      live?.push({ said });
+      live?.push({ said, compiled: false });
       return false;
     }
     return publish(parts[1], parts[2], said, started);

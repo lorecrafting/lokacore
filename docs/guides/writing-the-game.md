@@ -33,8 +33,10 @@ maud: line one
   gives: bowl
 ```
 
-`when:` names a true/false fact; `gives:` hands the player that item; a choice is keyed by its
-words (`choice_one`). What the scene cannot say (a keyword, an accept, a riddle) goes in
+`when:` names a true/false fact; a choice is keyed by its words (`choice_one`). `gives:` hands
+the player that item from the scene's NPC: the NPC must hold it (`"location": {"in": "npc", "npc":
+"maud"}`, or moved there in play; otherwise the choice stays hidden and the compile warns) and
+`cartridge.json` must lock `containment`, which owns `item_acquired`. What the scene cannot say (a keyword, an accept, a riddle) goes in
 `dialogues/<key>.json` beside it. An error names the scene file and line.
 
 Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file.
@@ -48,7 +50,9 @@ are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
 ## Read an error
 
 A broken edit keeps the last good page; the panel's Compile card says what broke, as
-`error: rooms/cellar.json:12 unknown exit target "well"`. If a replay stops, the panel names the
+``error: rooms/cellar.json:12 Nothing defines the room `well`. Create it or fix the spelling.``
+Every line is `severity: file:line what is wrong, what to do`; half-written JSON also gets a column
+(`rooms/cellar.json:4:1`). If a replay stops, the panel names the
 step (`step 4 refused: talk Maud`) and the Book stays where the replay got to. Alt-click (Option-click) any
 Book line to open its source in your editor (`LOKA_EDITOR`, default `code --goto`). The panel's
 Why tab takes an action or dialogue key and explains the last recorded step: which rules fired and
@@ -66,8 +70,8 @@ come from the samplers; the rules from the [Builders' Guide](../BUILDERS-GUIDE.m
 
 Live preview is the same for every kind: a `text.json` edit reaches the page as you save; any
 other file (a shop, a structure, a population) recompiles, reloads the page and replays your
-recorded steps. An error reads as `error: <file>:<line> <what>` in the panel's Compile card;
-a compile diagnostic you run by hand reads as `CODE path` (`SCHEMA_VIOLATION rooms/well.exits`).
+recorded steps. An error reads as `error: <file>:<line> <what>` in the panel's Compile card, and the same
+when you run `mix loka.compile` by hand.
 
 | Kind | Smallest sampler | Needs first |
 |---|---|---|

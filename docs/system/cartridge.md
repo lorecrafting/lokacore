@@ -87,7 +87,7 @@ bar.” Reading either grants no quest, fact or reward.
 ## Compiler
 
 `mix loka.compile <source dir> <artifact path>` (`lib/mix/tasks/loka.compile.ex:12`) writes
-the artifact and prints warnings as JSON lines, or prints every diagnostic and exits 1.
+the artifact and prints warnings as plain lines, or prints every diagnostic and exits 1.
 `Loka.Content.compile/2` (`lib/loka/content.ex:38`) runs the stages on the parts earlier
 stages accepted, so one bad file hides no other diagnostic; diagnostics are unique and sorted by
 path, code, then canonical text (`:73`). The artifact is the canonical encoding of
@@ -866,7 +866,9 @@ build. The author tools below are reachable only in that bundle (a production ex
   watcher's rebuild skip the directory. The panel lists them; jumping to one starts the game over
   and replays it.
 - **Author panel** (`tools/author-panel`, its own web page framing the Book at `?dev=1`; nothing of it enters the app's dependencies or bundles): the last compile's diagnostics in plain words
-  (`severity: file:line message`); current facts, quests and flags from the view; why an action
+  (`severity: file:line message`, which is what `mix loka.compile` prints: one sentence and one fix
+  per diagnostic code, from `Loka.Content.Explain`, the path mapped to its line by the source JSON;
+  invalid JSON adds `:column`); current facts, quests and flags from the view; why an action
   is missing or refused ([rule explainer](#rule-explainer-loka-kgd1943) on the recorded path); each Book
   line opens its source `file:line` in the owner's editor (`POST /__author/open`, `LOKA_EDITOR`,
   default `code --goto`); the game-time control; the checkpoint list; the still-to-write list.
@@ -878,7 +880,12 @@ build. The author tools below are reachable only in that bundle (a production ex
 - **Scene files.** `scenes/*.scene` (or `dialogues/*.scene`) is a plain-text form of one dialogue
   lowered by [Source shortcuts](#source-shortcuts) into today's dialogue JSON and `text.json` keys
   before any other pass; what it cannot say stays in a JSON file of the same key. Errors name the
-  scene file and line. Gate: a sampler dialogue re-expressed as a scene compiles byte-identical.
+  scene file and line, with `data.why` for a bad line (`npc` beside it once known); the other lines
+  of the file still lower, so a fault behind a bad line reports in the same compile. A `gives:`
+  declares its item role. A `gives:` whose item does not start with the scene's NPC is a warning
+  `OUTCOME_MISMATCH` (`data.item`, `data.holder`): the choice stays hidden until play moves it there.
+  Schema refusals carry hint data for those words: `valid` on `UNKNOWN_FIELD`, `expected` (and an
+  object's `fields`) on `invalid_type`, `allowed` on `not_in_enum`. Gate: a sampler dialogue re-expressed as a scene compiles byte-identical.
   Rules: [owner decision](../decisions/owner-decision-handwritten-prose-2026-10-31.md).
 
 ## Development cartridges

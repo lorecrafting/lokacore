@@ -4,7 +4,7 @@ defmodule Loka.Content.Source do
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
-  alias Loka.Content.{Areas, Behaviours, Extends, Prose, SceneFiles, Zones}
+  alias Loka.Content.{Areas, Behaviours, Extends, Prose, SceneFiles, SourceFiles, Zones}
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -63,16 +63,7 @@ defmodule Loka.Content.Source do
   end
 
   defp read(dir) do
-    # The directory name is literal, not glob syntax.
-    {files, diags} =
-      String.replace(dir, ~r/[\[\]{}*?\\]/, "\\\\\\0")
-      |> Path.join("**/*.{json,scene}")
-      |> Path.wildcard(match_dot: true)
-      |> Enum.filter(&File.regular?/1)
-      # checkpoints/ holds the author preview's recorded paths, not content
-      |> Enum.reject(&String.starts_with?(Path.relative_to(&1, dir), "checkpoints/"))
-      |> Enum.map(&entry(Path.relative_to(&1, dir), dir))
-      |> Enum.unzip()
+    {files, diags} = dir |> SourceFiles.paths() |> Enum.map(&entry(&1, dir)) |> Enum.unzip()
 
     {Enum.reject(files, &is_nil/1), List.flatten(diags)}
   end
@@ -93,8 +84,11 @@ defmodule Loka.Content.Source do
     {value, bad} = SceneFiles.parse(File.read!(Path.join(dir, rel)))
 
     diags =
-      for {n, text} <- bad,
-          do: diag("SCHEMA_VIOLATION", at(rel, []), %{"line" => n, "text" => text})
+      for {n, text, why} <- bad do
+        speaker = if value["npc"], do: %{"npc" => value["npc"]}, else: %{}
+        data = Map.merge(speaker, %{"line" => n, "text" => text, "why" => why})
+        diag("SCHEMA_VIOLATION", at(rel, []), data)
+      end
 
     {{rel, {:dialogue, key, []}, value}, diags}
   end
@@ -254,17 +248,20 @@ defmodule Loka.Content.Source do
   end
 
   @doc """
-  Diagnostics for `Loka.Core.Contracts.validate/2` errors on `value`, which sits at `steps`
-  of `rel`: unknown_property is UNKNOWN_FIELD, any other code SCHEMA_VIOLATION.
+  Diagnostics for `Loka.Core.Contracts.detailed/3` errors on `value`, which sits at `steps`
+  of `rel`: unknown_property is UNKNOWN_FIELD with the valid names, any other code
+  SCHEMA_VIOLATION (invalid_type with the expected type and an object's fields, not_in_enum with
+  the allowed values).
   """
   @spec schema(location(), steps(), term(), [map()]) :: [map()]
   def schema(rel, steps, value, errors) do
-    for %{path: pointer, code: code} <- errors do
+    for %{path: pointer, code: code} = e <- errors do
       path = at(rel, steps ++ pointer_steps(value, pointer))
 
-      if code == :unknown_property,
-        do: diag("UNKNOWN_FIELD", path),
-        else: diag("SCHEMA_VIOLATION", path, %{"error" => Atom.to_string(code)})
+      case e do
+        %{allowed: allowed} -> diag("UNKNOWN_FIELD", path, %{"valid" => Enum.join(allowed, ", ")})
+        _ -> diag("SCHEMA_VIOLATION", path, Map.put(e[:hint] || %{}, "error", "#{code}"))
+      end
     end
   end
 

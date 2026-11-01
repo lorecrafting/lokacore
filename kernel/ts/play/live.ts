@@ -23,7 +23,7 @@ import { files, todo } from './todo.ts';
 import { why } from './why.ts';
 
 export type Canonical = { text: Record<string, string> } & Record<string, unknown>;
-export type Message = { text: Record<string, string>; said: string[] };
+export type Message = { text: Record<string, string>; said: string[]; compiled: boolean };
 
 /** The text values `next` changes against `written` when nothing else differs; else undefined. */
 export function textOnly(written: Canonical, next: Canonical): Record<string, string> | undefined {
@@ -168,7 +168,7 @@ async function post(
  * `POST /why`. */
 export function serve(port: number, source: string, artifact: string) {
   const clients = new Set<ServerResponse>();
-  let last: Message = { text: {}, said: [] };
+  let last: Message = { text: {}, said: [], compiled: true };
   const send = (client: ServerResponse) => client.write(`data: ${JSON.stringify(last)}\n\n`);
   const route = (request: IncomingMessage, response: ServerResponse) => {
     if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source);

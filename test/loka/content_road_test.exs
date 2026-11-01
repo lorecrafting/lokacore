@@ -232,7 +232,8 @@ defmodule Loka.ContentRoadTest do
     for {name, {w, b, diag}} <- cases,
         do:
           assert(
-            compile(Path.join(dir, "#{name}"), numbered(w, b)) == {:error, [diag]},
+            compile(Path.join(dir, "#{name}"), numbered(w, b)) |> Loka.ContentSource.plain() ==
+              {:error, [diag]},
             "#{name}"
           )
   end
