@@ -978,6 +978,8 @@ player_miss, npc_hit, npc_miss, player_died and npc_died. All six resolve in the
 cartridge catalog. An NPC's optional `attack` profile explicitly
 makes it attackable and supplies its own chance/damage bounds; it requires explicit HP.
 Chances are integers 0..100, damage bounds positive and ordered, multipliers positive.
+An NPC's optional `unattackable: true` overrides `attack`: no offer, no admission, no engage
+([combat@1](mechanics.md#combat1--first-live-encounter-m6-a)); with `disposition.engage` it is a compile error.
 Room `sanctuary: true` forbids admission. All new objects reject unknown fields.
 
 Optional `world.combat.target_choice: true` opts into [target choice](mechanics.md#target-choice-in-the-same-room-toolbox-row-6a)

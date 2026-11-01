@@ -16,7 +16,7 @@ import {
 } from '../runtime/decision.ts';
 import { holds } from './policy.ts';
 import { living } from './death/shared.ts';
-import { engaged, encounterId, npcRef } from './combat/shared.ts';
+import { attackable, engaged, encounterId, npcRef } from './combat/shared.ts';
 import { jobId } from './schedule/daily.ts';
 import { attacked } from './crow/behavior.ts';
 import { running } from './scene/shared.ts';
@@ -120,7 +120,10 @@ function hostileAt(
       const npc = world.entities[id] as NpcEntity;
       return (
         world.state.containers[id] === there &&
-        ((combat && npc.attack && npc.hp && npc.disposition?.engage) || // no hp, no fight (loka-xyyd)
+        ((combat &&
+          attackable(world, actor, id as EntityId) &&
+          npc.hp &&
+          npc.disposition?.engage) || // no hp, no fight (loka-xyyd)
           // An arrest skipped (a fall, or `to` is this room) lets a later fighter engage.
           (arrests &&
             npc.disposition?.arrest &&

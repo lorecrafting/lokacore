@@ -21,6 +21,7 @@ defmodule Loka.Content.Standing do
     adjusts = for {_, {rel, [], r}} <- defs["reaction"] || %{}, a <- adjusts(r), do: {rel, a}
 
     shapes(npcs) ++
+      unattackable_engage(npcs) ++
       arrests(npcs, m, defs) ++
       ints(adjusts, m, defs) ++ speakers(m, defs)
   end
@@ -37,6 +38,16 @@ defmodule Loka.Content.Standing do
 
   defp adjusts(r) do
     for {%{"op" => "fact.adjust"} = s, i} <- Enum.with_index(r["steps"] || []), do: {s, i}
+  end
+
+  # An engage line opens a fight, which an unattackable NPC never has (loka-w9id).
+  defp unattackable_engage(npcs) do
+    for {rel, %{"unattackable" => true, "disposition" => %{"engage" => _}}} <- npcs,
+        do:
+          diag("SCHEMA_VIOLATION", at(rel, ["unattackable"]), %{
+            "why" => "unattackable_engage",
+            "rel" => rel
+          })
   end
 
   defp shapes(npcs) do
