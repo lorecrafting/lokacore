@@ -137,6 +137,7 @@ export class ClockDriver {
       row,
     );
     if (reply.kind === 'pending') return { kind: 'pending' };
+    if (reply.kind === 'fault') return { kind: 'fault', code: reply.code }; // debt retained
     if (reply.kind !== 'saved')
       throw new CatchUpRefusedError(`elapsed delivery refused: ${reply.kind}`);
     const decision =
