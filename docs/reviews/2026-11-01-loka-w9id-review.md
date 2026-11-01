@@ -54,3 +54,25 @@ A save pinned to 1.134 is refused at its pin with Start over under 1.135, by con
 ## Not run
 
 `bin/mutate_diff.sh` and the full suite (brief). Explain rows and the schema key rename were not mutated by this review (PR table only).
+
+## Re-check at `f3eda121807399e8a063540ff1fcbc1698d53379`
+
+**Verdict: APPROVE WITH NOTES**, at `41cb943272b90e33c237478bf0bb63831959dfe9` (f3eda1218 plus the reviewer's test-only [small should-fix](../WORKFLOW.md#small-should-fix)). CI at f3eda1218: ci, book-e2e and graph-diff completed, success. CI at 41cb94327 when this was written: graph-diff success; ci and book-e2e in progress, not waited on.
+
+Dispositions, run on the head:
+
+- Blockers closed: a flagged NPC stays at 8 hp under aimed and named `flamma`; an aimed hp-draining status adds no row (`spell.ts:80`, `:160`).
+- NPC with hp and no `attack`: flamma takes it 8 to 4, as before. The guards read `target.unattackable` only.
+- Non-draining status (tick 0, tick +2, resource mana, plain) still lands on a flagged NPC.
+- Reactions: `effect`'s one caller is `rule.ts:277`, so a reaction's `status.apply` does not reach the guard. Guide and `mechanics.md` document it (PM ruling). Read, not run.
+- Hashes: `bin/regen.sh` at f3eda1218 exited 0 and left the tree clean. No transcript, cartridge, fixture or `contracts.gen.ts` changed since 945f07161. Focused `spell_effects`, `aimed_spells`, `fear`, `npc_status`, `transcripts` and `npm run typecheck` green.
+
+Mutants on `spell.ts` by `bin/mutate.sh`: 4 of 6 red; the `key === 'hp'` and `per_tick < 0` to `<= 0` mutants survived at f3eda1218, a blocker under reviewer step 3. Closed in place by the reviewer's push 41cb94327 (+9/-6, `spell_effects.test.ts` only, no src change): 6 of 6 red. The small-should-fix lane names should-fixes, not blockers: the PM confirms the diff has no logic change and accepts it there, or calls a fix round.
+
+Open items:
+
+- Cast at a flagged NPC: accepted, line plays, mana 10 to 9, no effect. Allowed, not a finding: the same as an hp-less NPC (10 to 9, probed) and as `lux` with nothing to light. Refusing it is new admission; it joins `loka-zmqs` item 1 (`cannot_be_hurt`, no mana).
+- `standing.ex:20`: nit. An area-bundled flagged NPC with `engage` compiles silently (reading of the `[]` pattern, shared with `shapes`, not run); the line never plays because `attackable` stays false. No state harm; follow-up.
+- `combat/shared.ts:33`: no finding. An ally with `engage` is a dead line by the same query; a compile check is optional and goes with the same follow-up.
+- `fear.test.ts:331`: no finding. The slice left `hostileAt`'s arrest branch unchanged, and flagged group members and population members are refused at compile (`combat.ex:203`, `standing.ex:56`).
+- In-play switching: not built, stated in the PR body. The issue text asks for it, so closing loka-w9id needs a follow-up issue for it; none exists yet (`br search` on "attackable", "peaceful"). `loka-zmqs` item 2 (shared `attackable`) is done by this PR: update it.
