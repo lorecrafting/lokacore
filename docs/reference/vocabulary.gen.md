@@ -753,8 +753,8 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 |---|---|---|---|
 | accept | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A quest of this cartridge the choice activates. |
 | availability | object |  | Time limits on offering the choice. |
-| availability.from | [LogicalTime](source-kinds.gen.md#logicaltime) |  |  |
-| availability.through | [LogicalTime](source-kinds.gen.md#logicaltime) |  |  |
+| availability.from | [LogicalTime](source-kinds.gen.md#logicaltime) |  | First logical time the choice is offered. |
+| availability.through | [LogicalTime](source-kinds.gen.md#logicaltime) |  | Last logical time the choice is offered, inclusive. |
 | check | [Check](source-kinds.gen.md#check) |  | An opposed check made when chosen. |
 | escort | object |  | API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest. |
 | escort.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |

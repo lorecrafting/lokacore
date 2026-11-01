@@ -1,4 +1,4 @@
-# size: allow 350, one generator translates every source contract and shortcut to JSON Schema
+# size: allow 359, one generator translates every source contract and shortcut to JSON Schema
 defmodule Loka.Content.SourceSchema do
   @moduledoc """
   JSON Schema (draft 2020-12) of each source file kind, for editors and LLM authors
@@ -113,7 +113,18 @@ defmodule Loka.Content.SourceSchema do
   defp shortcuts("NpcDefinition", s), do: put(s, "behaviours", behaviours())
   defp shortcuts("ItemDefinition", s), do: put(s, "behaviours", behaviours())
 
-  defp shortcuts("ReactionRule", s), do: s |> put("zone", @key) |> zoned()
+  defp shortcuts("ReactionRule", s),
+    do:
+      s
+      |> put(
+        "zone",
+        Map.put(
+          @key,
+          "description",
+          "A zone name: the rule becomes one copy per room listing that zone, named <rule>_<room>. Leave on.room out."
+        )
+      )
+      |> zoned()
 
   defp shortcuts(_, s), do: s
 

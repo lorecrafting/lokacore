@@ -235,6 +235,7 @@
               "type": "object",
               "properties": {
                 "phrases": {
+                  "description": "The words every player can say, as chips in the say bar.",
                   "type": "array",
                   "minItems": 1,
                   "items": {
@@ -2244,7 +2245,7 @@
         "npc": {"description":"The NPC each member is copied from.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "item": {
+        "item": {"description":"Item copied into each member's hands at birth. Needed unless the plan has a scavenge block, which then forbids it.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "corpse": {"description":"Corpse template for members; overrides world.death.npc_corpse.",
@@ -2257,10 +2258,10 @@
           ],
           "description": "Origin role of each member; default hunter. Its directly held item has role loot."
         },
-        "home": {
+        "home": {"description":"The room members are born in. It must be one of the two rooms in area, and the NPC template must sit in it.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "area": {
+        "area": {"description":"The two rooms members wander between. They must be different rooms joined by exits in both directions, with no barrier on either exit.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2291,7 +2292,7 @@
           "type": "integer",
           "minimum": 0
         },
-        "replacement_delay": {
+        "replacement_delay": {"description":"Clock units after a member dies before its slot is refilled. At least wander_interval.",
           "type": "integer",
           "minimum": 1
         },
@@ -2305,10 +2306,10 @@
           "minimum": 1,
           "maximum": 100
         },
-        "scavenge": {
+        "scavenge": {"description":"Makes members carry loose items along a corridor to a nest. The plan must then have no item field.",
           "type": "object",
           "properties": {
-            "items": {
+            "items": {"description":"Items members will pick up: loose in a room, not containers, and allowed to be given away. At most 8.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2316,7 +2317,7 @@
               "minItems": 1,
               "maxItems": 8
             },
-            "drop_rooms": {
+            "drop_rooms": {"description":"Rooms where members pick up a listed item lying on the floor. Each must be on the corridor.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2324,10 +2325,10 @@
               "minItems": 1,
               "maxItems": 8
             },
-            "nest": {
+            "nest": {"description":"Container item in the last corridor room where members leave what they carried. It must have room left.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "corridor": {
+            "corridor": {"description":"Rooms a carrying member walks through, in order, ending at the nest room. It must include home, and each step needs an open exit both ways.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2335,26 +2336,26 @@
               "minItems": 2,
               "maxItems": 16
             },
-            "interval": {
+            "interval": {"description":"Clock units between each step of a member's pickup or carry.",
               "type": "integer",
               "minimum": 1
             },
-            "narration": {
+            "narration": {"description":"Text keys told at each stage of scavenging.",
               "type": "object",
               "properties": {
-                "carrying": {
+                "carrying": {"description":"Shown on a member's entry while it is carrying an item to the nest.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "acquired": {
+                "acquired": {"description":"Told when a member picks the item up.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "delivered": {
+                "delivered": {"description":"Told when a member puts the item in the nest.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "fallback": {
+                "fallback": {"description":"Told when a member cannot finish (the nest is full or the way is blocked) and drops the item where it stands.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "shoo": {
+                "shoo": {"description":"Told when the player shoos a carrying member and it drops the item.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -2378,24 +2379,24 @@
           ],
           "additionalProperties": false
         },
-        "pack": {
+        "pack": {"description":"Makes the members of this plan fight the player as a pack, with helpers and flight.",
           "type": "object",
           "properties": {
-            "flight_below_percent": {
+            "flight_below_percent": {"description":"A member flees when its hp is below this percent of its maximum (1 to 100). Frightened members flee too.",
               "type": "integer",
               "minimum": 1,
               "maximum": 100
             },
-            "flight_fare": {
+            "flight_fare": {"description":"Must be 0. Nothing reads it.",
               "const": 0
             },
-            "narration": {
+            "narration": {"description":"Text keys told as the pack fights and flees.",
               "type": "object",
               "properties": {
-                "helper_joined": {
+                "helper_joined": {"description":"Told when another member joins a fight already under way.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "enemy_fled": {
+                "enemy_fled": {"description":"Text key per exit direction, told when a member flees through that exit. Every direction leading out of an area room needs one.",
                   "type": "object",
                   "propertyNames": {
                     "pattern": "^(north|south|east|west|up|down)$"
@@ -2404,10 +2405,10 @@
                     "$ref": "text.schema.json#/$defs/TextKey"
                   }
                 },
-                "primary_changed": {
+                "primary_changed": {"description":"Told when the member the player is fighting changes.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "pack_withdrew": {
+                "pack_withdrew": {"description":"Told when the fight ends with no pack member left in it.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -2427,14 +2428,14 @@
           ],
           "additionalProperties": false
         },
-        "sight": {
+        "sight": {"description":"Makes prey members flee a player who stays in their room. Only for member_role prey.",
           "type": "object",
           "properties": {
-            "delay": {
+            "delay": {"description":"Clock units after the player and a member are in the same room before the member flees, if the player is still there.",
               "type": "integer",
               "minimum": 1
             },
-            "narration": {
+            "narration": {"description":"Text key per exit direction, told when the member flees that way. Every direction leading out of an area room needs one.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^(north|south|east|west|up|down)$"
@@ -2579,7 +2580,7 @@
           "minimum": 1,
           "maximum": 2147483647
         },
-        "narration": {
+        "narration": {"description":"Text told as the bleed starts, repeats, ticks and ends.",
           "type": "object",
           "properties": {
             "applied": {"description":"Text told when the bleed first starts on a body.",
@@ -2778,7 +2779,7 @@
         "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "narration": {
+        "narration": {"description":"Text told as the status is applied, ticks and ends.",
           "type": "object",
           "properties": {
             "applied": {"description":"Text told when the status is applied.",

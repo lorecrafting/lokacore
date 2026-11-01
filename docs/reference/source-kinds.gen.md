@@ -104,7 +104,7 @@ An authored body bleed duration, tick cadence and HP loss.
 |---|---|---|---|
 | duration | integer | yes | How long it lasts, in seconds. |
 | hp_loss | integer | yes | HP lost per tick. |
-| narration | object | yes |  |
+| narration | object | yes | Text told as the bleed starts, repeats, ticks and ends. |
 | narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the bleed first starts on a body. |
 | narration.expired | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the bleed ends by running out. |
 | narration.refreshed | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the bleed is applied again while already active. |
@@ -119,18 +119,18 @@ A cartridge's manifest (05 §3, §20): identity, title, compatibility requiremen
 |---|---|---|---|
 | alternates | map of list of [TextKey](source-kinds.gen.md#textkey) |  | Narration variety (alternates@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG. |
 | ancestries | map of [AncestrySpec](source-kinds.gen.md#ancestryspec) |  | Authored once-only character choices (attribute@1), keyed by choice Key. |
-| api_version | [ApiVersion](source-kinds.gen.md#apiversion) | yes |  |
+| api_version | [ApiVersion](source-kinds.gen.md#apiversion) | yes | The source format family this cartridge is written in; always loka/v3. |
 | calendar | [Calendar](source-kinds.gen.md#calendar) |  | See the type. |
 | chapters | list of [Chapter](source-kinds.gen.md#chapter) |  | Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning. |
-| entry | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| id | [CartridgeId](source-kinds.gen.md#cartridgeid) | yes |  |
+| entry | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The room a fresh world puts the player's body in. |
+| id | [CartridgeId](source-kinds.gen.md#cartridgeid) | yes | The cartridge's identity; every definition key and reference carries it. |
 | requires | [CompatibilityRequirements](source-kinds.gen.md#compatibilityrequirements) | yes | See the type. |
 | speech | object |  | Word bar S2 (speech@1): phrases, the cartridge's static say words, each a speech@1 Word, offered to every actor with no fact gate; GameView projects them as phrases. In source it is cartridge.json's speech, beside world. |
-| speech.phrases | list of [Word](source-kinds.gen.md#word) | yes |  |
-| supported_profiles | list of [ExecutionProfile](source-kinds.gen.md#executionprofile) | yes |  |
+| speech.phrases | list of [Word](source-kinds.gen.md#word) | yes | The words every player can say, as chips in the say bar. |
+| supported_profiles | list of [ExecutionProfile](source-kinds.gen.md#executionprofile) | yes | The hosting profiles this cartridge runs under; at least one (offline_private, online_private, party, shared_area). |
 | time_policy | [TimePolicy](source-kinds.gen.md#timepolicy) |  | See the type. |
-| title | string | yes |  |
-| version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | yes |  |
+| title | string | yes | The cartridge's name as listed for the player. |
+| version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | yes | The cartridge's release version, MAJOR.MINOR.PATCH. |
 | world | [WorldSettings](source-kinds.gen.md#worldsettings) |  | See the type. |
 
 ## dialogues
@@ -150,8 +150,8 @@ One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogue
 | riddle.answer | string | yes | The answer that solves the riddle, compared lowercased. |
 | riddle.bank | list of string | yes | The letters an answer may use, each once per entry; an answer that does not fit is refused. |
 | riddle.choice_id | [Key](source-kinds.gen.md#key) | yes | The choice that takes a typed answer. |
-| riddle.wrong | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| riddle.wrong_limit | integer |  |  |
+| riddle.wrong | [TextKey](source-kinds.gen.md#textkey) | yes | Line told after a wrong answer. |
+| riddle.wrong_limit | integer |  | Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries. |
 | roles | map of [DialogueRole](source-kinds.gen.md#dialoguerole) | yes | Participants bound when the talk opens. |
 
 ## emotes
@@ -201,7 +201,7 @@ A portable thing (21 §8): its key; keywords, the Alias words a player names it 
 | equip.removed | [TextKey](source-kinds.gen.md#textkey) | yes | The line told when the item is removed. |
 | equip.wear | [TextKey](source-kinds.gen.md#textkey) | yes | The item's Wear label. |
 | equip.worn | [TextKey](source-kinds.gen.md#textkey) | yes | The line told when the item is worn. |
-| fuel | [FuelSpec](source-kinds.gen.md#fuelspec) |  |  |
+| fuel | [FuelSpec](source-kinds.gen.md#fuelspec) |  | Makes the item a lightable fuel source that burns while lit, or a supply that refuels one. |
 | give_allowed | `false` |  | API1.10: false prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal. |
 | identified | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row 27: a boolean fact, not per_subject; the item is identified while it reads true for the player, and GameView worn sums identified items only (needs affects). |
 | immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row G3: statuses that status.apply skips on this item's instance; each names a declared status. |
@@ -262,16 +262,16 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 | capacity | integer |  | Most items it holds. |
 | cues | [Cues](source-kinds.gen.md#cues) |  | Sense cues reaching nearby rooms from this NPC: 1 to 4 of {sense, text, range, when?}. |
 | daily_schedule | map of [Key](source-kinds.gen.md#key) or object or list of [Key](source-kinds.gen.md#key) or object |  | schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing. |
-| daily_schedule.*{walks=true} | variant |  |  |
-| daily_schedule.*{walks=true}.goal | [TextKey](source-kinds.gen.md#textkey) |  |  |
-| daily_schedule.*{walks=true}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| daily_schedule.*{walks=true} | variant |  | One case of the hour: where the NPC goes, and optionally why and how. |
+| daily_schedule.*{walks=true}.goal | [TextKey](source-kinds.gen.md#textkey) |  | Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go. |
+| daily_schedule.*{walks=true}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room the NPC moves to when this case is chosen. |
 | daily_schedule.*.cartridge_id | [CartridgeId](source-kinds.gen.md#cartridgeid) | in this form | The owning cartridge. Lowercase snake_case, at most 64 characters. |
 | daily_schedule.*.cartridge_version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | in this form | The cartridge version, MAJOR.MINOR.PATCH. |
 | daily_schedule.*.key | string | in this form | The definition's key within its kind. |
 | daily_schedule.*.kind | string | in this form | The definition's kind. |
-| daily_schedule.*[]{walks=true} | variant |  |  |
-| daily_schedule.*[]{walks=true}.goal | [TextKey](source-kinds.gen.md#textkey) |  |  |
-| daily_schedule.*[]{walks=true}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | in this form |  |
+| daily_schedule.*[]{walks=true} | variant |  | One case of the hour: where the NPC goes, and optionally why and how. |
+| daily_schedule.*[]{walks=true}.goal | [TextKey](source-kinds.gen.md#textkey) |  | Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go. |
+| daily_schedule.*[]{walks=true}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | in this form | The room the NPC moves to when this case is chosen. |
 | daily_schedule.*[]{walks=true}.when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key examine shows. |
 | description_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Description variants, its mood. |
@@ -296,7 +296,7 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 | mount.terrain | list of [Tag](source-kinds.gen.md#tag) | yes | Room tags this mount carries a rider over; a move into a room with none of them is refused. 1 to 8 unique tags. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its short description. |
 | name_variants | [NameVariants](source-kinds.gen.md#namevariants) |  | Name variants, its mood. |
-| perception | object |  |  |
+| perception | object |  | Hides the NPC until a fact is true. |
 | perception.discovered | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A fact that must be true for this NPC to be visible. |
 | resistances | [Resistances](source-kinds.gen.md#resistances) |  | See the type. |
 | resource_starts | map of [ResourceInt](source-kinds.gen.md#resourceint) |  | Starting value of each named resource. |
@@ -314,45 +314,45 @@ One fixed-slot, two-room bounded population with an owned wander and replacement
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| area | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| area | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The two rooms members wander between. They must be different rooms joined by exits in both directions, with no barrier on either exit. |
 | birth_when | [Policy](vocabulary.gen.md#policy-leaves) |  | Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler). |
 | cap | integer | yes | Most members alive at once: the number of slots. |
 | chance | integer |  | Makes the plan an encounter plan (docs/system/mechanics.md Random encounters, toolbox row 9): each wander-boundary occurrence with an eligible slot draws one uniform(100) and a roll below chance births the first eligible slot. Absent: an RNG-free ecology plan. |
 | corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for members; overrides world.death.npc_corpse. |
 | day_target | integer | yes | Members wanted by day. 0: only a population.spawn step fills the plan. |
 | floor | integer |  | Toolbox row W12: slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, from the compiler). |
-| home | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| home | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room members are born in. It must be one of the two rooms in area, and the NPC template must sit in it. |
 | hunts | `true` |  | Toolbox row W13: a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails. |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Item copied into each member's hands at birth. Needed unless the plan has a scavenge block, which then forbids it. |
 | member_role | `hunter` or `prey` |  | Origin role of each member; default hunter. Its directly held item has role loot. |
 | night_end | integer | yes | Hour night ends: night is hour >= night_start or hour < night_end. |
 | night_start | integer | yes | Hour night begins. |
 | night_target | integer | yes | Members wanted by night. 0: only a population.spawn step fills the plan. |
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC each member is copied from. |
-| pack | object |  |  |
-| pack.flight_below_percent | integer | yes |  |
-| pack.flight_fare | `0` | yes |  |
-| pack.narration | object | yes |  |
-| pack.narration.enemy_fled | map of [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| pack.narration.helper_joined | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| pack.narration.pack_withdrew | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| pack.narration.primary_changed | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| replacement_delay | integer | yes |  |
-| scavenge | object |  |  |
-| scavenge.corridor | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| scavenge.drop_rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| scavenge.interval | integer | yes |  |
-| scavenge.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| scavenge.narration | object | yes |  |
-| scavenge.narration.acquired | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| scavenge.narration.carrying | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| scavenge.narration.delivered | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| scavenge.narration.fallback | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| scavenge.narration.shoo | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| scavenge.nest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| sight | object |  |  |
-| sight.delay | integer | yes |  |
-| sight.narration | map of [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| pack | object |  | Makes the members of this plan fight the player as a pack, with helpers and flight. |
+| pack.flight_below_percent | integer | yes | A member flees when its hp is below this percent of its maximum (1 to 100). Frightened members flee too. |
+| pack.flight_fare | `0` | yes | Must be 0. Nothing reads it. |
+| pack.narration | object | yes | Text keys told as the pack fights and flees. |
+| pack.narration.enemy_fled | map of [TextKey](source-kinds.gen.md#textkey) | yes | Text key per exit direction, told when a member flees through that exit. Every direction leading out of an area room needs one. |
+| pack.narration.helper_joined | [TextKey](source-kinds.gen.md#textkey) | yes | Told when another member joins a fight already under way. |
+| pack.narration.pack_withdrew | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the fight ends with no pack member left in it. |
+| pack.narration.primary_changed | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the member the player is fighting changes. |
+| replacement_delay | integer | yes | Clock units after a member dies before its slot is refilled. At least wander_interval. |
+| scavenge | object |  | Makes members carry loose items along a corridor to a nest. The plan must then have no item field. |
+| scavenge.corridor | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Rooms a carrying member walks through, in order, ending at the nest room. It must include home, and each step needs an open exit both ways. |
+| scavenge.drop_rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Rooms where members pick up a listed item lying on the floor. Each must be on the corridor. |
+| scavenge.interval | integer | yes | Clock units between each step of a member's pickup or carry. |
+| scavenge.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Items members will pick up: loose in a room, not containers, and allowed to be given away. At most 8. |
+| scavenge.narration | object | yes | Text keys told at each stage of scavenging. |
+| scavenge.narration.acquired | [TextKey](source-kinds.gen.md#textkey) | yes | Told when a member picks the item up. |
+| scavenge.narration.carrying | [TextKey](source-kinds.gen.md#textkey) | yes | Shown on a member's entry while it is carrying an item to the nest. |
+| scavenge.narration.delivered | [TextKey](source-kinds.gen.md#textkey) | yes | Told when a member puts the item in the nest. |
+| scavenge.narration.fallback | [TextKey](source-kinds.gen.md#textkey) | yes | Told when a member cannot finish (the nest is full or the way is blocked) and drops the item where it stands. |
+| scavenge.narration.shoo | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player shoos a carrying member and it drops the item. |
+| scavenge.nest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Container item in the last corridor room where members leave what they carried. It must have room left. |
+| sight | object |  | Makes prey members flee a player who stays in their room. Only for member_role prey. |
+| sight.delay | integer | yes | Clock units after the player and a member are in the same room before the member flees, if the player is still there. |
+| sight.narration | map of [TextKey](source-kinds.gen.md#textkey) | yes | Text key per exit direction, told when the member flees that way. Every direction leading out of an area room needs one. |
 | trail | `true` |  | Toolbox row W13 (mechanics.md Tracks and trails): a member's wander step and C4 flight write the room left's trail_<key>_exit and trail_<key>_at (engine facts, per room); needs world.trails. |
 | walks | `true` |  | Toolbox row W26 (mechanics.md NPCs use doors): the wander step crosses its exit as a walking NPC does (npcPassage with walks): a closed door passes and stays closed, a locked one only for a member holding its key_item (unlocked, opened, closed and locked again); any traverse lock on the exit or enter lock on the room refuses it. |
 | wander_interval | integer | yes | Clock units between wander opportunities. |
@@ -371,38 +371,38 @@ A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in Compiled
 | deadline.outcome | [Key](source-kinds.gen.md#key) | yes | The outcome the open instance fails with, carried by quest_failed. |
 | deadline.trust_amount | integer |  | Legacy deadline: how much trust_fact changes at expiry. |
 | deadline.trust_fact | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Legacy deadline: the fact adjusted at expiry. |
-| exchange | object |  |  |
-| exchange.contribution | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| exchange.faction | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| exchange.incoming | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| exchange.increment | integer | yes |  |
-| exchange.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| exchange.outgoing | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| exchange.quantity | integer | yes |  |
-| expedition | object |  |  |
-| expedition.actions | object | yes |  |
-| expedition.actions.restart | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.actions.shelter | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.actions.start | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.faction | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.faction_delta | integer | yes |  |
-| expedition.footprint | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.narration | object | yes |  |
-| expedition.narration.completed | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| expedition.narration.failed | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| expedition.narration.restart | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| expedition.narration.shelter | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| expedition.narration.start | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| expedition.population | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.route | list of object | yes |  |
-| expedition.route[].direction | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.route[].from | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.route[].to | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.shelter_detail | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.shelter_room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.start_detail | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.start_room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.survived_fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| exchange | object |  | Makes the quest a repeatable item-for-item swap with an NPC, run from a dialogue choice that has an exchange. Needs repeatable true, current_state evidence, and no deadline or offer. |
+| exchange.contribution | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Player int fact (starts at 0) that totals the faction gain this quest has given. Its maximum caps the total. |
+| exchange.faction | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Player int fact raised by increment on each exchange. Must differ from contribution. |
+| exchange.incoming | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Item definitions the NPC hands to the player, held by the NPC at the start. Same length as outgoing. |
+| exchange.increment | integer | yes | Faction gain per exchange, cut short once contribution reaches its maximum. At most that maximum. |
+| exchange.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC swapped with. It must be present, hold the incoming items, and be the dialogue's own NPC. |
+| exchange.outgoing | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Item definitions the player hands to the NPC. Must be exactly the items list of a room detail's harvest. Same length as incoming. |
+| exchange.quantity | integer | yes | How many items go each way in one exchange. At most the length of outgoing. |
+| expedition | object |  | Makes the quest a guarded walk along a fixed route, with a shelter stop on the way. The objective evidence must be expedition and the quest takes no offer, repeatable, deadline, exchange or patrol. |
+| expedition.actions | object | yes | Keys of the scripted expedition actions that offer each stage. |
+| expedition.actions.restart | [Key](source-kinds.gen.md#key) | yes | Action key that restarts after a failed attempt. |
+| expedition.actions.shelter | [Key](source-kinds.gen.md#key) | yes | Action key that takes shelter. |
+| expedition.actions.start | [Key](source-kinds.gen.md#key) | yes | Action key that starts the attempt. |
+| expedition.faction | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Player int fact changed by faction_delta when the expedition completes. |
+| expedition.faction_delta | integer | yes | Added to the faction fact on completion. Always negative, from -100 to -1. |
+| expedition.footprint | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Rooms the attempt may stay in. Entering any other room fails the attempt. At least 2, no repeats, and it includes start_room. |
+| expedition.narration | object | yes | Text keys told as the expedition goes. |
+| expedition.narration.completed | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the last step is walked. |
+| expedition.narration.failed | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the attempt fails, such as by entering a room outside footprint. |
+| expedition.narration.restart | [TextKey](source-kinds.gen.md#textkey) | yes | Told when a failed attempt is restarted. |
+| expedition.narration.shelter | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player takes shelter. |
+| expedition.narration.start | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the attempt starts. |
+| expedition.population | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Population plan (with a pack) whose hunter member, if one is in the start room, opens a fight when an attempt starts or restarts. |
+| expedition.route | list of object | yes | Steps the player must walk in order, each from one room to the next by the named exit. At least 3; the first starts at start_room and each starts where the last ended. |
+| expedition.route[].direction | [Key](source-kinds.gen.md#key) | yes | Exit taken from the room. It must lead to the step's to room and not be hidden. |
+| expedition.route[].from | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Room this step leaves. |
+| expedition.route[].to | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Room this step arrives in. |
+| expedition.shelter_detail | [Key](source-kinds.gen.md#key) | yes | Key of the detail in shelter_room that offers shelter, once three route steps are walked. |
+| expedition.shelter_room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Room where the player may take shelter. It must be route[2].to. |
+| expedition.start_detail | [Key](source-kinds.gen.md#key) | yes | Key of the detail in start_room that offers start and restart. |
+| expedition.start_room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Room where the walk begins. Its start_detail starts and restarts the attempt, and it must be in footprint. |
+| expedition.survived_fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Player bool fact (default false) set true when the last step is walked. |
 | journal | [QuestJournal](source-kinds.gen.md#questjournal) |  | Lifecycle journal texts. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its journal entry. |
 | objective | [QuestObjective](source-kinds.gen.md#questobjective) | yes | Its objective. |
@@ -410,19 +410,19 @@ A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in Compiled
 | offer.label | [TextKey](source-kinds.gen.md#textkey) | yes | The accept action's label. |
 | offer.policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | offer.target | object |  | The fixture or NPC the offer draws on (mechanics.md, quest@1). The offer is listed and admitted only while the target is in the actor's room, alive and seen. |
-| offer.target{kind=detail} | variant |  |  |
+| offer.target{kind=detail} | variant |  | The offer draws on a fixture in a room: the player must be in that room and see it. |
 | offer.target{kind=detail}.detail | [Key](source-kinds.gen.md#key) | yes | The detail's key in that room. |
 | offer.target{kind=detail}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding the detail. |
-| offer.target{kind=npc} | variant |  |  |
+| offer.target{kind=npc} | variant |  | The offer draws on an NPC: the player must be in its room with it alive and in view. |
 | offer.target{kind=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC the offer draws on. |
-| patrol | object |  |  |
-| patrol.checkpoints | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| patrol.initial_cursor | integer | yes |  |
-| patrol.narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| patrol.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| patrol.required | integer | yes |  |
-| patrol.route | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| patrol.trust_fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| patrol | object |  | Makes an NPC walk a looping route that the player follows from room to room. The quest is complete once required checkpoints are reached together. |
+| patrol.checkpoints | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Rooms where arriving together with the NPC counts once toward required. |
+| patrol.initial_cursor | integer | yes | Index in route of the room the NPC starts in. |
+| patrol.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key told when the patrol completes, naming the player and the NPC leader. |
+| patrol.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC who leads. It starts in route[initial_cursor], has no hp, attack or daily_schedule, and no other quest may patrol it. |
+| patrol.required | integer | yes | How many different checkpoint rooms the player must reach with the NPC to complete the patrol. |
+| patrol.route | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Rooms the NPC visits in order, looping back to the first. Each step needs an exit to the next room that is not hidden or a climb. |
+| patrol.trust_fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Player bool fact (default false) set true when the patrol completes. No other patrol may share it. |
 | repeatable | `true` |  | The quest may be taken again once resolved. |
 
 ## reactions
@@ -436,7 +436,7 @@ Typed reaction owned by reaction@1. Every registered event kind can trigger; eac
 | silent | `true` |  | Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it. |
 | steps | list of [Step](vocabulary.gen.md#steps) | yes | See the type. |
 | when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| zone | [Key](source-kinds.gen.md#key) |  |  |
+| zone | [Key](source-kinds.gen.md#key) |  | A zone name: the rule becomes one copy per room listing that zone, named <rule>_<room>. Leave on.room out. |
 
 ## replenish
 
@@ -537,7 +537,7 @@ Toolbox row 1: one authored timed status on a body. Every tick_every seconds unt
 | movement.cost_percent | integer |  | Percent of each move's fare (world.movement.cost or 1 mv, after the flee multiplier) the holding body pays, rounded down; several statuses apply in turn in definition order. |
 | movement.passes | list of `air` or `chasm` or `water` |  | Terrain tags the holding body may enter: a move into a room tagged air, chasm or water is refused invalid_state unless the body's active statuses pass each such tag. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
-| narration | object | yes |  |
+| narration | object | yes | Text told as the status is applied, ticks and ends. |
 | narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the status is applied. |
 | narration.expired | [TextKey](source-kinds.gen.md#textkey) |  | Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b). |
 | narration.observed | [TextKey](source-kinds.gen.md#textkey) |  | Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent. |
@@ -591,16 +591,16 @@ Paired original boarding detail, destination, conserved fare recipient and corps
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| action | [Key](source-kinds.gen.md#key) | yes |  |
+| action | [Key](source-kinds.gen.md#key) | yes | Key of the scripted action that boards this transport. It must be a use_transport action on inspectable details taking route and quoted_fare. |
 | currency | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fare resource. |
 | destination | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The destination. |
 | detail | [Key](source-kinds.gen.md#key) | yes | The boarding detail. |
 | fare | integer | yes | The conserved fare. |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key for the boarding action and its offer label. |
+| narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key told when the player makes the passage. |
 | recipient | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved fare recipient. |
 | recovery_rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The corpse recovery rooms. |
-| reverse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| reverse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The paired return transport: boards at this one's destination, goes back to its room, with the same recipient and currency. |
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The boarding room. |
 
 ## Shared types
@@ -1606,104 +1606,9 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 
 ## Fields without a meaning
 
-99 fields.
+4 fields.
 
 - `attributes: attributes`
 - `behaviours: params`
 - `behaviours: reactions`
-- `bleeds: narration`
-- `cartridge: api_version`
-- `cartridge: entry`
-- `cartridge: id`
-- `cartridge: speech.phrases`
-- `cartridge: supported_profiles`
-- `cartridge: title`
-- `cartridge: version`
-- `choice: availability.from`
-- `choice: availability.through`
-- `dialogues: riddle.wrong`
-- `dialogues: riddle.wrong_limit`
-- `items: fuel`
-- `npcs: daily_schedule.*[]{walks=true}`
-- `npcs: daily_schedule.*[]{walks=true}.goal`
-- `npcs: daily_schedule.*[]{walks=true}.room`
-- `npcs: daily_schedule.*{walks=true}`
-- `npcs: daily_schedule.*{walks=true}.goal`
-- `npcs: daily_schedule.*{walks=true}.room`
-- `npcs: perception`
-- `populations: area`
-- `populations: home`
-- `populations: item`
-- `populations: pack`
-- `populations: pack.flight_below_percent`
-- `populations: pack.flight_fare`
-- `populations: pack.narration`
-- `populations: pack.narration.enemy_fled`
-- `populations: pack.narration.helper_joined`
-- `populations: pack.narration.pack_withdrew`
-- `populations: pack.narration.primary_changed`
-- `populations: replacement_delay`
-- `populations: scavenge`
-- `populations: scavenge.corridor`
-- `populations: scavenge.drop_rooms`
-- `populations: scavenge.interval`
-- `populations: scavenge.items`
-- `populations: scavenge.narration`
-- `populations: scavenge.narration.acquired`
-- `populations: scavenge.narration.carrying`
-- `populations: scavenge.narration.delivered`
-- `populations: scavenge.narration.fallback`
-- `populations: scavenge.narration.shoo`
-- `populations: scavenge.nest`
-- `populations: sight`
-- `populations: sight.delay`
-- `populations: sight.narration`
-- `quests: exchange`
-- `quests: exchange.contribution`
-- `quests: exchange.faction`
-- `quests: exchange.incoming`
-- `quests: exchange.increment`
-- `quests: exchange.npc`
-- `quests: exchange.outgoing`
-- `quests: exchange.quantity`
-- `quests: expedition`
-- `quests: expedition.actions`
-- `quests: expedition.actions.restart`
-- `quests: expedition.actions.shelter`
-- `quests: expedition.actions.start`
-- `quests: expedition.faction`
-- `quests: expedition.faction_delta`
-- `quests: expedition.footprint`
-- `quests: expedition.narration`
-- `quests: expedition.narration.completed`
-- `quests: expedition.narration.failed`
-- `quests: expedition.narration.restart`
-- `quests: expedition.narration.shelter`
-- `quests: expedition.narration.start`
-- `quests: expedition.population`
-- `quests: expedition.route`
-- `quests: expedition.route[].direction`
-- `quests: expedition.route[].from`
-- `quests: expedition.route[].to`
-- `quests: expedition.shelter_detail`
-- `quests: expedition.shelter_room`
-- `quests: expedition.start_detail`
-- `quests: expedition.start_room`
-- `quests: expedition.survived_fact`
-- `quests: offer.target{kind=detail}`
-- `quests: offer.target{kind=npc}`
-- `quests: patrol`
-- `quests: patrol.checkpoints`
-- `quests: patrol.initial_cursor`
-- `quests: patrol.narration`
-- `quests: patrol.npc`
-- `quests: patrol.required`
-- `quests: patrol.route`
-- `quests: patrol.trust_fact`
-- `reactions: zone`
 - `resources: resources`
-- `statuses: narration`
-- `transports: action`
-- `transports: name`
-- `transports: narration`
-- `transports: reverse`

@@ -255,7 +255,7 @@
           "description": "Only explicitly authored receptacles hold items. Absence is false; capacity and barrier require this field.",
           "const": true
         },
-        "fuel": {
+        "fuel": {"description":"Makes the item a lightable fuel source that burns while lit, or a supply that refuels one.",
           "$ref": "#/$defs/FuelSpec"
         },
         "weapon": {
@@ -680,7 +680,7 @@
         "shop": {
           "$ref": "entity.schema.json#/$defs/Shop"
         },
-        "perception": {
+        "perception": {"description":"Hides the NPC until a fact is true.",
           "type": "object",
           "properties": {
             "discovered": {"description":"A fact that must be true for this NPC to be visible.",
@@ -904,15 +904,18 @@
       "description": "Toolbox row W10: the cases of one conditional schedule hour, tried in order when the hour's job runs: the first whose when holds (an absent when holds; read with the player as the actor, the NPC as the target and the clock at the job's due time) names the room. A walks case moves only along a path (toolbox row W26). A case's optional goal is narration shown when the NPC leaves the player's room by that case.",
       "type": "array",
       "items": {
+        "description": "One case of the hour: where the NPC goes, and optionally why and how.",
         "type": "object",
         "properties": {
           "when": {
             "$ref": "policy.schema.json#/$defs/Policy"
           },
           "room": {
+            "description": "The room the NPC moves to when this case is chosen.",
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
           },
           "goal": {
+            "description": "Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go.",
             "$ref": "text.schema.json#/$defs/TextKey"
           },
           "walks": {

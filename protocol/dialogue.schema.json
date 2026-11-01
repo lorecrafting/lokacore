@@ -65,10 +65,10 @@
               "minItems": 1,
               "maxItems": 32
             },
-            "wrong": {
+            "wrong": {"description":"Line told after a wrong answer.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "wrong_limit": {
+            "wrong_limit": {"description":"Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries.",
               "type": "integer",
               "minimum": 1
             }
@@ -245,10 +245,10 @@
         "availability": {"description":"Time limits on offering the choice.",
           "type": "object",
           "properties": {
-            "from": {
+            "from": {"description":"First logical time the choice is offered.",
               "$ref": "command.schema.json#/$defs/LogicalTime"
             },
-            "through": {
+            "through": {"description":"Last logical time the choice is offered, inclusive.",
               "$ref": "command.schema.json#/$defs/LogicalTime"
             }
           },

@@ -1195,8 +1195,14 @@
           "additionalProperties": false,
           "description": "Time limits on offering the choice.",
           "properties": {
-            "from": { "$ref": "#/$defs/LogicalTime" },
-            "through": { "$ref": "#/$defs/LogicalTime" }
+            "from": {
+              "$ref": "#/$defs/LogicalTime",
+              "description": "First logical time the choice is offered."
+            },
+            "through": {
+              "$ref": "#/$defs/LogicalTime",
+              "description": "Last logical time the choice is offered, inclusive."
+            }
           },
           "type": "object"
         },
@@ -5586,8 +5592,14 @@
           "additionalProperties": false,
           "description": "Time limits on offering the choice.",
           "properties": {
-            "from": { "$ref": "#/$defs/LogicalTime" },
-            "through": { "$ref": "#/$defs/LogicalTime" }
+            "from": {
+              "$ref": "#/$defs/LogicalTime",
+              "description": "First logical time the choice is offered."
+            },
+            "through": {
+              "$ref": "#/$defs/LogicalTime",
+              "description": "Last logical time the choice is offered, inclusive."
+            }
           },
           "type": "object"
         },
@@ -7994,6 +8006,7 @@
         },
         "narration": {
           "additionalProperties": false,
+          "description": "Text told as the bleed starts, repeats, ticks and ends.",
           "properties": {
             "applied": {
               "$ref": "#/$defs/partial.TextKey",
@@ -8078,8 +8091,12 @@
               "$ref": "#/$defs/Key",
               "description": "The choice that takes a typed answer."
             },
-            "wrong": { "$ref": "#/$defs/partial.TextKey" },
+            "wrong": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Line told after a wrong answer."
+            },
             "wrong_limit": {
+              "description": "Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries.",
               "minimum": 1,
               "type": "integer"
             }
@@ -8218,7 +8235,10 @@
           "type": "object"
         },
         "extends": { "$ref": "#/$defs/Key" },
-        "fuel": { "$ref": "#/$defs/partial.FuelSpec" },
+        "fuel": {
+          "$ref": "#/$defs/partial.FuelSpec",
+          "description": "Makes the item a lightable fuel source that burns while lit, or a supply that refuels one."
+        },
         "give_allowed": {
           "const": false,
           "description": "API1.10: false prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal."
@@ -8447,9 +8467,16 @@
               { "$ref": "#/$defs/Key" },
               {
                 "additionalProperties": false,
+                "description": "One case of the hour: where the NPC goes, and optionally why and how.",
                 "properties": {
-                  "goal": { "$ref": "#/$defs/partial.TextKey" },
-                  "room": { "$ref": "#/$defs/partial.DefinitionRef" },
+                  "goal": {
+                    "$ref": "#/$defs/partial.TextKey",
+                    "description": "Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go."
+                  },
+                  "room": {
+                    "$ref": "#/$defs/partial.DefinitionRef",
+                    "description": "The room the NPC moves to when this case is chosen."
+                  },
                   "walks": {
                     "const": true,
                     "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
@@ -8490,9 +8517,16 @@
                     { "$ref": "#/$defs/Key" },
                     {
                       "additionalProperties": false,
+                      "description": "One case of the hour: where the NPC goes, and optionally why and how.",
                       "properties": {
-                        "goal": { "$ref": "#/$defs/TextKey" },
-                        "room": { "$ref": "#/$defs/DefinitionRef" },
+                        "goal": {
+                          "$ref": "#/$defs/TextKey",
+                          "description": "Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go."
+                        },
+                        "room": {
+                          "$ref": "#/$defs/DefinitionRef",
+                          "description": "The room the NPC moves to when this case is chosen."
+                        },
                         "walks": {
                           "const": true,
                           "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
@@ -8637,6 +8671,7 @@
         },
         "perception": {
           "additionalProperties": false,
+          "description": "Hides the NPC until a fact is true.",
           "properties": {
             "discovered": {
               "$ref": "#/$defs/partial.DefinitionRef",
@@ -8686,6 +8721,7 @@
       "description": "One fixed-slot, two-room bounded population with an owned wander and replacement job.",
       "properties": {
         "area": {
+          "description": "The two rooms members wander between. They must be different rooms joined by exits in both directions, with no barrier on either exit.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 2,
           "minItems": 2,
@@ -8723,12 +8759,18 @@
           "minimum": 1,
           "type": "integer"
         },
-        "home": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "home": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The room members are born in. It must be one of the two rooms in area, and the NPC template must sit in it."
+        },
         "hunts": {
           "const": true,
           "description": "Toolbox row W13: a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails."
         },
-        "item": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "item": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "Item copied into each member's hands at birth. Needed unless the plan has a scavenge block, which then forbids it."
+        },
         "member_role": {
           "description": "Origin role of each member; default hunter. Its directly held item has role loot.",
           "enum": [
@@ -8758,24 +8800,40 @@
         },
         "pack": {
           "additionalProperties": false,
+          "description": "Makes the members of this plan fight the player as a pack, with helpers and flight.",
           "properties": {
             "flight_below_percent": {
+              "description": "A member flees when its hp is below this percent of its maximum (1 to 100). Frightened members flee too.",
               "maximum": 100,
               "minimum": 1,
               "type": "integer"
             },
-            "flight_fare": { "const": 0 },
+            "flight_fare": {
+              "const": 0,
+              "description": "Must be 0. Nothing reads it."
+            },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told as the pack fights and flees.",
               "properties": {
                 "enemy_fled": {
                   "additionalProperties": { "$ref": "#/$defs/partial.TextKey" },
+                  "description": "Text key per exit direction, told when a member flees through that exit. Every direction leading out of an area room needs one.",
                   "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
                   "type": "object"
                 },
-                "helper_joined": { "$ref": "#/$defs/partial.TextKey" },
-                "pack_withdrew": { "$ref": "#/$defs/partial.TextKey" },
-                "primary_changed": { "$ref": "#/$defs/partial.TextKey" }
+                "helper_joined": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when another member joins a fight already under way."
+                },
+                "pack_withdrew": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the fight ends with no pack member left in it."
+                },
+                "primary_changed": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the member the player is fighting changes."
+                }
               },
               "type": "object"
             }
@@ -8783,29 +8841,35 @@
           "type": "object"
         },
         "replacement_delay": {
+          "description": "Clock units after a member dies before its slot is refilled. At least wander_interval.",
           "minimum": 1,
           "type": "integer"
         },
         "scavenge": {
           "additionalProperties": false,
+          "description": "Makes members carry loose items along a corridor to a nest. The plan must then have no item field.",
           "properties": {
             "corridor": {
+              "description": "Rooms a carrying member walks through, in order, ending at the nest room. It must include home, and each step needs an open exit both ways.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 16,
               "minItems": 2,
               "type": "array"
             },
             "drop_rooms": {
+              "description": "Rooms where members pick up a listed item lying on the floor. Each must be on the corridor.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 8,
               "minItems": 1,
               "type": "array"
             },
             "interval": {
+              "description": "Clock units between each step of a member's pickup or carry.",
               "minimum": 1,
               "type": "integer"
             },
             "items": {
+              "description": "Items members will pick up: loose in a room, not containers, and allowed to be given away. At most 8.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 8,
               "minItems": 1,
@@ -8813,28 +8877,50 @@
             },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told at each stage of scavenging.",
               "properties": {
-                "acquired": { "$ref": "#/$defs/partial.TextKey" },
-                "carrying": { "$ref": "#/$defs/partial.TextKey" },
-                "delivered": { "$ref": "#/$defs/partial.TextKey" },
-                "fallback": { "$ref": "#/$defs/partial.TextKey" },
-                "shoo": { "$ref": "#/$defs/partial.TextKey" }
+                "acquired": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when a member picks the item up."
+                },
+                "carrying": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Shown on a member's entry while it is carrying an item to the nest."
+                },
+                "delivered": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when a member puts the item in the nest."
+                },
+                "fallback": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when a member cannot finish (the nest is full or the way is blocked) and drops the item where it stands."
+                },
+                "shoo": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the player shoos a carrying member and it drops the item."
+                }
               },
               "type": "object"
             },
-            "nest": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "nest": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Container item in the last corridor room where members leave what they carried. It must have room left."
+            }
           },
           "type": "object"
         },
         "sight": {
           "additionalProperties": false,
+          "description": "Makes prey members flee a player who stays in their room. Only for member_role prey.",
           "properties": {
             "delay": {
+              "description": "Clock units after the player and a member are in the same room before the member flees, if the player is still there.",
               "minimum": 1,
               "type": "integer"
             },
             "narration": {
               "additionalProperties": { "$ref": "#/$defs/partial.TextKey" },
+              "description": "Text key per exit direction, told when the member flees that way. Every direction leading out of an area room needs one.",
               "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
               "type": "object"
             }
@@ -8900,28 +8986,42 @@
         },
         "exchange": {
           "additionalProperties": false,
+          "description": "Makes the quest a repeatable item-for-item swap with an NPC, run from a dialogue choice that has an exchange. Needs repeatable true, current_state evidence, and no deadline or offer.",
           "properties": {
-            "contribution": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "faction": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "contribution": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Player int fact (starts at 0) that totals the faction gain this quest has given. Its maximum caps the total."
+            },
+            "faction": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Player int fact raised by increment on each exchange. Must differ from contribution."
+            },
             "incoming": {
+              "description": "Item definitions the NPC hands to the player, held by the NPC at the start. Same length as outgoing.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "increment": {
+              "description": "Faction gain per exchange, cut short once contribution reaches its maximum. At most that maximum.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The NPC swapped with. It must be present, hold the incoming items, and be the dialogue's own NPC."
+            },
             "outgoing": {
+              "description": "Item definitions the player hands to the NPC. Must be exactly the items list of a room detail's harvest. Same length as incoming.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "quantity": {
+              "description": "How many items go each way in one exchange. At most the length of outgoing.",
               "maximum": 64,
               "minimum": 1,
               "type": "integer"
@@ -8931,23 +9031,39 @@
         },
         "expedition": {
           "additionalProperties": false,
+          "description": "Makes the quest a guarded walk along a fixed route, with a shelter stop on the way. The objective evidence must be expedition and the quest takes no offer, repeatable, deadline, exchange or patrol.",
           "properties": {
             "actions": {
               "additionalProperties": false,
+              "description": "Keys of the scripted expedition actions that offer each stage.",
               "properties": {
-                "restart": { "$ref": "#/$defs/Key" },
-                "shelter": { "$ref": "#/$defs/Key" },
-                "start": { "$ref": "#/$defs/Key" }
+                "restart": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that restarts after a failed attempt."
+                },
+                "shelter": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that takes shelter."
+                },
+                "start": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that starts the attempt."
+                }
               },
               "type": "object"
             },
-            "faction": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "faction": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Player int fact changed by faction_delta when the expedition completes."
+            },
             "faction_delta": {
+              "description": "Added to the faction fact on completion. Always negative, from -100 to -1.",
               "maximum": -1,
               "minimum": -100,
               "type": "integer"
             },
             "footprint": {
+              "description": "Rooms the attempt may stay in. Entering any other room fails the attempt. At least 2, no repeats, and it includes start_room.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 32,
               "minItems": 2,
@@ -8955,23 +9071,52 @@
             },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told as the expedition goes.",
               "properties": {
-                "completed": { "$ref": "#/$defs/partial.TextKey" },
-                "failed": { "$ref": "#/$defs/partial.TextKey" },
-                "restart": { "$ref": "#/$defs/partial.TextKey" },
-                "shelter": { "$ref": "#/$defs/partial.TextKey" },
-                "start": { "$ref": "#/$defs/partial.TextKey" }
+                "completed": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the last step is walked."
+                },
+                "failed": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the attempt fails, such as by entering a room outside footprint."
+                },
+                "restart": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when a failed attempt is restarted."
+                },
+                "shelter": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the player takes shelter."
+                },
+                "start": {
+                  "$ref": "#/$defs/partial.TextKey",
+                  "description": "Told when the attempt starts."
+                }
               },
               "type": "object"
             },
-            "population": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "population": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Population plan (with a pack) whose hunter member, if one is in the start room, opens a fight when an attempt starts or restarts."
+            },
             "route": {
+              "description": "Steps the player must walk in order, each from one room to the next by the named exit. At least 3; the first starts at start_room and each starts where the last ended.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
-                  "direction": { "$ref": "#/$defs/Key" },
-                  "from": { "$ref": "#/$defs/DefinitionRef" },
-                  "to": { "$ref": "#/$defs/DefinitionRef" }
+                  "direction": {
+                    "$ref": "#/$defs/Key",
+                    "description": "Exit taken from the room. It must lead to the step's to room and not be hidden."
+                  },
+                  "from": {
+                    "$ref": "#/$defs/DefinitionRef",
+                    "description": "Room this step leaves."
+                  },
+                  "to": {
+                    "$ref": "#/$defs/DefinitionRef",
+                    "description": "Room this step arrives in."
+                  }
                 },
                 "required": [
                   "from",
@@ -8984,11 +9129,26 @@
               "minItems": 1,
               "type": "array"
             },
-            "shelter_detail": { "$ref": "#/$defs/Key" },
-            "shelter_room": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "start_detail": { "$ref": "#/$defs/Key" },
-            "start_room": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "survived_fact": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "shelter_detail": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the detail in shelter_room that offers shelter, once three route steps are walked."
+            },
+            "shelter_room": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Room where the player may take shelter. It must be route[2].to."
+            },
+            "start_detail": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the detail in start_room that offers start and restart."
+            },
+            "start_room": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Room where the walk begins. Its start_detail starts and restarts the attempt, and it must be in footprint."
+            },
+            "survived_fact": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Player bool fact (default false) set true when the last step is walked."
+            }
           },
           "type": "object"
         },
@@ -9018,6 +9178,7 @@
               "anyOf": [
                 {
                   "additionalProperties": false,
+                  "description": "The offer draws on a fixture in a room: the player must be in that room and see it.",
                   "properties": {
                     "detail": {
                       "$ref": "#/$defs/Key",
@@ -9033,6 +9194,7 @@
                 },
                 {
                   "additionalProperties": false,
+                  "description": "The offer draws on an NPC: the player must be in its room with it alive and in view.",
                   "properties": {
                     "kind": { "const": "npc" },
                     "npc": {
@@ -9050,32 +9212,46 @@
         },
         "patrol": {
           "additionalProperties": false,
+          "description": "Makes an NPC walk a looping route that the player follows from room to room. The quest is complete once required checkpoints are reached together.",
           "properties": {
             "checkpoints": {
+              "description": "Rooms where arriving together with the NPC counts once toward required.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "initial_cursor": {
+              "description": "Index in route of the room the NPC starts in.",
               "maximum": 63,
               "minimum": 0,
               "type": "integer"
             },
-            "narration": { "$ref": "#/$defs/partial.TextKey" },
-            "npc": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "narration": {
+              "$ref": "#/$defs/partial.TextKey",
+              "description": "Text key told when the patrol completes, naming the player and the NPC leader."
+            },
+            "npc": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The NPC who leads. It starts in route[initial_cursor], has no hp, attack or daily_schedule, and no other quest may patrol it."
+            },
             "required": {
+              "description": "How many different checkpoint rooms the player must reach with the NPC to complete the patrol.",
               "maximum": 64,
               "minimum": 1,
               "type": "integer"
             },
             "route": {
+              "description": "Rooms the NPC visits in order, looping back to the first. Each step needs an exit to the next room that is not hidden or a climb.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 2,
               "type": "array"
             },
-            "trust_fact": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "trust_fact": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Player bool fact (default false) set true when the patrol completes. No other patrol may share it."
+            }
           },
           "type": "object"
         },
@@ -9524,7 +9700,10 @@
         },
         "when": { "$ref": "#/$defs/partial.Policy" },
         "with": { "type": "object" },
-        "zone": { "$ref": "#/$defs/Key" }
+        "zone": {
+          "$ref": "#/$defs/Key",
+          "description": "A zone name: the rule becomes one copy per room listing that zone, named <rule>_<room>. Leave on.room out."
+        }
       },
       "type": "object"
     },
@@ -10061,6 +10240,7 @@
         },
         "narration": {
           "additionalProperties": false,
+          "description": "Text told as the status is applied, ticks and ends.",
           "properties": {
             "applied": {
               "$ref": "#/$defs/partial.TextKey",
@@ -10218,7 +10398,10 @@
       "additionalProperties": false,
       "description": "Paired original boarding detail, destination, conserved fare recipient and corpse recovery rooms.",
       "properties": {
-        "action": { "$ref": "#/$defs/Key" },
+        "action": {
+          "$ref": "#/$defs/Key",
+          "description": "Key of the scripted action that boards this transport. It must be a use_transport action on inspectable details taking route and quoted_fare."
+        },
         "currency": {
           "$ref": "#/$defs/partial.DefinitionRef",
           "description": "The fare resource."
@@ -10238,8 +10421,14 @@
           "minimum": 0,
           "type": "integer"
         },
-        "name": { "$ref": "#/$defs/partial.TextKey" },
-        "narration": { "$ref": "#/$defs/partial.TextKey" },
+        "name": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key for the boarding action and its offer label."
+        },
+        "narration": {
+          "$ref": "#/$defs/partial.TextKey",
+          "description": "Text key told when the player makes the passage."
+        },
         "recipient": {
           "$ref": "#/$defs/partial.DefinitionRef",
           "description": "The conserved fare recipient."
@@ -10250,7 +10439,10 @@
           "maxItems": 64,
           "type": "array"
         },
-        "reverse": { "$ref": "#/$defs/partial.DefinitionRef" },
+        "reverse": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "The paired return transport: boards at this one's destination, goes back to its room, with the same recipient and currency."
+        },
         "room": {
           "$ref": "#/$defs/partial.DefinitionRef",
           "description": "The boarding room."
@@ -10364,6 +10556,7 @@
         },
         "narration": {
           "additionalProperties": false,
+          "description": "Text told as the bleed starts, repeats, ticks and ends.",
           "properties": {
             "applied": {
               "$ref": "#/$defs/TextKey",
@@ -10458,8 +10651,12 @@
               "$ref": "#/$defs/Key",
               "description": "The choice that takes a typed answer."
             },
-            "wrong": { "$ref": "#/$defs/TextKey" },
+            "wrong": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Line told after a wrong answer."
+            },
             "wrong_limit": {
+              "description": "Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries.",
               "minimum": 1,
               "type": "integer"
             }
@@ -10619,7 +10816,10 @@
           ],
           "type": "object"
         },
-        "fuel": { "$ref": "#/$defs/FuelSpec" },
+        "fuel": {
+          "$ref": "#/$defs/FuelSpec",
+          "description": "Makes the item a lightable fuel source that burns while lit, or a supply that refuels one."
+        },
         "give_allowed": {
           "const": false,
           "description": "API1.10: false prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal."
@@ -10862,9 +11062,16 @@
               { "$ref": "#/$defs/Key" },
               {
                 "additionalProperties": false,
+                "description": "One case of the hour: where the NPC goes, and optionally why and how.",
                 "properties": {
-                  "goal": { "$ref": "#/$defs/TextKey" },
-                  "room": { "$ref": "#/$defs/DefinitionRef" },
+                  "goal": {
+                    "$ref": "#/$defs/TextKey",
+                    "description": "Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go."
+                  },
+                  "room": {
+                    "$ref": "#/$defs/DefinitionRef",
+                    "description": "The room the NPC moves to when this case is chosen."
+                  },
                   "walks": {
                     "const": true,
                     "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
@@ -10915,9 +11122,16 @@
                     { "$ref": "#/$defs/Key" },
                     {
                       "additionalProperties": false,
+                      "description": "One case of the hour: where the NPC goes, and optionally why and how.",
                       "properties": {
-                        "goal": { "$ref": "#/$defs/TextKey" },
-                        "room": { "$ref": "#/$defs/DefinitionRef" },
+                        "goal": {
+                          "$ref": "#/$defs/TextKey",
+                          "description": "Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go."
+                        },
+                        "room": {
+                          "$ref": "#/$defs/DefinitionRef",
+                          "description": "The room the NPC moves to when this case is chosen."
+                        },
                         "walks": {
                           "const": true,
                           "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
@@ -11068,6 +11282,7 @@
         },
         "perception": {
           "additionalProperties": false,
+          "description": "Hides the NPC until a fact is true.",
           "properties": {
             "discovered": {
               "$ref": "#/$defs/DefinitionRef",
@@ -11126,6 +11341,7 @@
       "description": "One fixed-slot, two-room bounded population with an owned wander and replacement job.",
       "properties": {
         "area": {
+          "description": "The two rooms members wander between. They must be different rooms joined by exits in both directions, with no barrier on either exit.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 2,
           "minItems": 2,
@@ -11162,12 +11378,18 @@
           "minimum": 1,
           "type": "integer"
         },
-        "home": { "$ref": "#/$defs/DefinitionRef" },
+        "home": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The room members are born in. It must be one of the two rooms in area, and the NPC template must sit in it."
+        },
         "hunts": {
           "const": true,
           "description": "Toolbox row W13: a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails."
         },
-        "item": { "$ref": "#/$defs/DefinitionRef" },
+        "item": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "Item copied into each member's hands at birth. Needed unless the plan has a scavenge block, which then forbids it."
+        },
         "member_role": {
           "description": "Origin role of each member; default hunter. Its directly held item has role loot.",
           "enum": [
@@ -11197,24 +11419,40 @@
         },
         "pack": {
           "additionalProperties": false,
+          "description": "Makes the members of this plan fight the player as a pack, with helpers and flight.",
           "properties": {
             "flight_below_percent": {
+              "description": "A member flees when its hp is below this percent of its maximum (1 to 100). Frightened members flee too.",
               "maximum": 100,
               "minimum": 1,
               "type": "integer"
             },
-            "flight_fare": { "const": 0 },
+            "flight_fare": {
+              "const": 0,
+              "description": "Must be 0. Nothing reads it."
+            },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told as the pack fights and flees.",
               "properties": {
                 "enemy_fled": {
                   "additionalProperties": { "$ref": "#/$defs/TextKey" },
+                  "description": "Text key per exit direction, told when a member flees through that exit. Every direction leading out of an area room needs one.",
                   "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
                   "type": "object"
                 },
-                "helper_joined": { "$ref": "#/$defs/TextKey" },
-                "pack_withdrew": { "$ref": "#/$defs/TextKey" },
-                "primary_changed": { "$ref": "#/$defs/TextKey" }
+                "helper_joined": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when another member joins a fight already under way."
+                },
+                "pack_withdrew": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the fight ends with no pack member left in it."
+                },
+                "primary_changed": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the member the player is fighting changes."
+                }
               },
               "required": [
                 "helper_joined",
@@ -11233,29 +11471,35 @@
           "type": "object"
         },
         "replacement_delay": {
+          "description": "Clock units after a member dies before its slot is refilled. At least wander_interval.",
           "minimum": 1,
           "type": "integer"
         },
         "scavenge": {
           "additionalProperties": false,
+          "description": "Makes members carry loose items along a corridor to a nest. The plan must then have no item field.",
           "properties": {
             "corridor": {
+              "description": "Rooms a carrying member walks through, in order, ending at the nest room. It must include home, and each step needs an open exit both ways.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 16,
               "minItems": 2,
               "type": "array"
             },
             "drop_rooms": {
+              "description": "Rooms where members pick up a listed item lying on the floor. Each must be on the corridor.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 8,
               "minItems": 1,
               "type": "array"
             },
             "interval": {
+              "description": "Clock units between each step of a member's pickup or carry.",
               "minimum": 1,
               "type": "integer"
             },
             "items": {
+              "description": "Items members will pick up: loose in a room, not containers, and allowed to be given away. At most 8.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 8,
               "minItems": 1,
@@ -11263,12 +11507,28 @@
             },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told at each stage of scavenging.",
               "properties": {
-                "acquired": { "$ref": "#/$defs/TextKey" },
-                "carrying": { "$ref": "#/$defs/TextKey" },
-                "delivered": { "$ref": "#/$defs/TextKey" },
-                "fallback": { "$ref": "#/$defs/TextKey" },
-                "shoo": { "$ref": "#/$defs/TextKey" }
+                "acquired": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when a member picks the item up."
+                },
+                "carrying": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Shown on a member's entry while it is carrying an item to the nest."
+                },
+                "delivered": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when a member puts the item in the nest."
+                },
+                "fallback": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when a member cannot finish (the nest is full or the way is blocked) and drops the item where it stands."
+                },
+                "shoo": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the player shoos a carrying member and it drops the item."
+                }
               },
               "required": [
                 "carrying",
@@ -11279,7 +11539,10 @@
               ],
               "type": "object"
             },
-            "nest": { "$ref": "#/$defs/DefinitionRef" }
+            "nest": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Container item in the last corridor room where members leave what they carried. It must have room left."
+            }
           },
           "required": [
             "items",
@@ -11293,13 +11556,16 @@
         },
         "sight": {
           "additionalProperties": false,
+          "description": "Makes prey members flee a player who stays in their room. Only for member_role prey.",
           "properties": {
             "delay": {
+              "description": "Clock units after the player and a member are in the same room before the member flees, if the player is still there.",
               "minimum": 1,
               "type": "integer"
             },
             "narration": {
               "additionalProperties": { "$ref": "#/$defs/TextKey" },
+              "description": "Text key per exit direction, told when the member flees that way. Every direction leading out of an area room needs one.",
               "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
               "type": "object"
             }
@@ -11384,28 +11650,42 @@
         },
         "exchange": {
           "additionalProperties": false,
+          "description": "Makes the quest a repeatable item-for-item swap with an NPC, run from a dialogue choice that has an exchange. Needs repeatable true, current_state evidence, and no deadline or offer.",
           "properties": {
-            "contribution": { "$ref": "#/$defs/DefinitionRef" },
-            "faction": { "$ref": "#/$defs/DefinitionRef" },
+            "contribution": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Player int fact (starts at 0) that totals the faction gain this quest has given. Its maximum caps the total."
+            },
+            "faction": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Player int fact raised by increment on each exchange. Must differ from contribution."
+            },
             "incoming": {
+              "description": "Item definitions the NPC hands to the player, held by the NPC at the start. Same length as outgoing.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "increment": {
+              "description": "Faction gain per exchange, cut short once contribution reaches its maximum. At most that maximum.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The NPC swapped with. It must be present, hold the incoming items, and be the dialogue's own NPC."
+            },
             "outgoing": {
+              "description": "Item definitions the player hands to the NPC. Must be exactly the items list of a room detail's harvest. Same length as incoming.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "quantity": {
+              "description": "How many items go each way in one exchange. At most the length of outgoing.",
               "maximum": 64,
               "minimum": 1,
               "type": "integer"
@@ -11424,13 +11704,24 @@
         },
         "expedition": {
           "additionalProperties": false,
+          "description": "Makes the quest a guarded walk along a fixed route, with a shelter stop on the way. The objective evidence must be expedition and the quest takes no offer, repeatable, deadline, exchange or patrol.",
           "properties": {
             "actions": {
               "additionalProperties": false,
+              "description": "Keys of the scripted expedition actions that offer each stage.",
               "properties": {
-                "restart": { "$ref": "#/$defs/Key" },
-                "shelter": { "$ref": "#/$defs/Key" },
-                "start": { "$ref": "#/$defs/Key" }
+                "restart": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that restarts after a failed attempt."
+                },
+                "shelter": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that takes shelter."
+                },
+                "start": {
+                  "$ref": "#/$defs/Key",
+                  "description": "Action key that starts the attempt."
+                }
               },
               "required": [
                 "start",
@@ -11439,13 +11730,18 @@
               ],
               "type": "object"
             },
-            "faction": { "$ref": "#/$defs/DefinitionRef" },
+            "faction": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Player int fact changed by faction_delta when the expedition completes."
+            },
             "faction_delta": {
+              "description": "Added to the faction fact on completion. Always negative, from -100 to -1.",
               "maximum": -1,
               "minimum": -100,
               "type": "integer"
             },
             "footprint": {
+              "description": "Rooms the attempt may stay in. Entering any other room fails the attempt. At least 2, no repeats, and it includes start_room.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 32,
               "minItems": 2,
@@ -11453,12 +11749,28 @@
             },
             "narration": {
               "additionalProperties": false,
+              "description": "Text keys told as the expedition goes.",
               "properties": {
-                "completed": { "$ref": "#/$defs/TextKey" },
-                "failed": { "$ref": "#/$defs/TextKey" },
-                "restart": { "$ref": "#/$defs/TextKey" },
-                "shelter": { "$ref": "#/$defs/TextKey" },
-                "start": { "$ref": "#/$defs/TextKey" }
+                "completed": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the last step is walked."
+                },
+                "failed": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the attempt fails, such as by entering a room outside footprint."
+                },
+                "restart": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when a failed attempt is restarted."
+                },
+                "shelter": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the player takes shelter."
+                },
+                "start": {
+                  "$ref": "#/$defs/TextKey",
+                  "description": "Told when the attempt starts."
+                }
               },
               "required": [
                 "start",
@@ -11469,14 +11781,27 @@
               ],
               "type": "object"
             },
-            "population": { "$ref": "#/$defs/DefinitionRef" },
+            "population": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Population plan (with a pack) whose hunter member, if one is in the start room, opens a fight when an attempt starts or restarts."
+            },
             "route": {
+              "description": "Steps the player must walk in order, each from one room to the next by the named exit. At least 3; the first starts at start_room and each starts where the last ended.",
               "items": {
                 "additionalProperties": false,
                 "properties": {
-                  "direction": { "$ref": "#/$defs/Key" },
-                  "from": { "$ref": "#/$defs/DefinitionRef" },
-                  "to": { "$ref": "#/$defs/DefinitionRef" }
+                  "direction": {
+                    "$ref": "#/$defs/Key",
+                    "description": "Exit taken from the room. It must lead to the step's to room and not be hidden."
+                  },
+                  "from": {
+                    "$ref": "#/$defs/DefinitionRef",
+                    "description": "Room this step leaves."
+                  },
+                  "to": {
+                    "$ref": "#/$defs/DefinitionRef",
+                    "description": "Room this step arrives in."
+                  }
                 },
                 "required": [
                   "from",
@@ -11489,11 +11814,26 @@
               "minItems": 1,
               "type": "array"
             },
-            "shelter_detail": { "$ref": "#/$defs/Key" },
-            "shelter_room": { "$ref": "#/$defs/DefinitionRef" },
-            "start_detail": { "$ref": "#/$defs/Key" },
-            "start_room": { "$ref": "#/$defs/DefinitionRef" },
-            "survived_fact": { "$ref": "#/$defs/DefinitionRef" }
+            "shelter_detail": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the detail in shelter_room that offers shelter, once three route steps are walked."
+            },
+            "shelter_room": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Room where the player may take shelter. It must be route[2].to."
+            },
+            "start_detail": {
+              "$ref": "#/$defs/Key",
+              "description": "Key of the detail in start_room that offers start and restart."
+            },
+            "start_room": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Room where the walk begins. Its start_detail starts and restarts the attempt, and it must be in footprint."
+            },
+            "survived_fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Player bool fact (default false) set true when the last step is walked."
+            }
           },
           "required": [
             "start_room",
@@ -11536,6 +11876,7 @@
               "anyOf": [
                 {
                   "additionalProperties": false,
+                  "description": "The offer draws on a fixture in a room: the player must be in that room and see it.",
                   "properties": {
                     "detail": {
                       "$ref": "#/$defs/Key",
@@ -11556,6 +11897,7 @@
                 },
                 {
                   "additionalProperties": false,
+                  "description": "The offer draws on an NPC: the player must be in its room with it alive and in view.",
                   "properties": {
                     "kind": { "const": "npc" },
                     "npc": {
@@ -11580,32 +11922,46 @@
         },
         "patrol": {
           "additionalProperties": false,
+          "description": "Makes an NPC walk a looping route that the player follows from room to room. The quest is complete once required checkpoints are reached together.",
           "properties": {
             "checkpoints": {
+              "description": "Rooms where arriving together with the NPC counts once toward required.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 1,
               "type": "array"
             },
             "initial_cursor": {
+              "description": "Index in route of the room the NPC starts in.",
               "maximum": 63,
               "minimum": 0,
               "type": "integer"
             },
-            "narration": { "$ref": "#/$defs/TextKey" },
-            "npc": { "$ref": "#/$defs/DefinitionRef" },
+            "narration": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Text key told when the patrol completes, naming the player and the NPC leader."
+            },
+            "npc": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The NPC who leads. It starts in route[initial_cursor], has no hp, attack or daily_schedule, and no other quest may patrol it."
+            },
             "required": {
+              "description": "How many different checkpoint rooms the player must reach with the NPC to complete the patrol.",
               "maximum": 64,
               "minimum": 1,
               "type": "integer"
             },
             "route": {
+              "description": "Rooms the NPC visits in order, looping back to the first. Each step needs an exit to the next room that is not hidden or a climb.",
               "items": { "$ref": "#/$defs/DefinitionRef" },
               "maxItems": 64,
               "minItems": 2,
               "type": "array"
             },
-            "trust_fact": { "$ref": "#/$defs/DefinitionRef" }
+            "trust_fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Player bool fact (default false) set true when the patrol completes. No other patrol may share it."
+            }
           },
           "required": [
             "npc",
@@ -12185,7 +12541,10 @@
           "type": "array"
         },
         "when": { "$ref": "#/$defs/Policy" },
-        "zone": { "$ref": "#/$defs/Key" }
+        "zone": {
+          "$ref": "#/$defs/Key",
+          "description": "A zone name: the rule becomes one copy per room listing that zone, named <rule>_<room>. Leave on.room out."
+        }
       },
       "required": [
         "on",
@@ -12822,6 +13181,7 @@
         },
         "narration": {
           "additionalProperties": false,
+          "description": "Text told as the status is applied, ticks and ends.",
           "properties": {
             "applied": {
               "$ref": "#/$defs/TextKey",
@@ -12997,7 +13357,10 @@
       "additionalProperties": false,
       "description": "Paired original boarding detail, destination, conserved fare recipient and corpse recovery rooms.",
       "properties": {
-        "action": { "$ref": "#/$defs/Key" },
+        "action": {
+          "$ref": "#/$defs/Key",
+          "description": "Key of the scripted action that boards this transport. It must be a use_transport action on inspectable details taking route and quoted_fare."
+        },
         "currency": {
           "$ref": "#/$defs/DefinitionRef",
           "description": "The fare resource."
@@ -13016,8 +13379,14 @@
           "minimum": 0,
           "type": "integer"
         },
-        "name": { "$ref": "#/$defs/TextKey" },
-        "narration": { "$ref": "#/$defs/TextKey" },
+        "name": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key for the boarding action and its offer label."
+        },
+        "narration": {
+          "$ref": "#/$defs/TextKey",
+          "description": "Text key told when the player makes the passage."
+        },
         "recipient": {
           "$ref": "#/$defs/DefinitionRef",
           "description": "The conserved fare recipient."
@@ -13028,7 +13397,10 @@
           "maxItems": 64,
           "type": "array"
         },
-        "reverse": { "$ref": "#/$defs/DefinitionRef" },
+        "reverse": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The paired return transport: boards at this one's destination, goes back to its room, with the same recipient and currency."
+        },
         "room": {
           "$ref": "#/$defs/DefinitionRef",
           "description": "The boarding room."
@@ -13328,7 +13700,10 @@
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
         },
-        "api_version": { "$ref": "#/$defs/ApiVersion" },
+        "api_version": {
+          "$ref": "#/$defs/ApiVersion",
+          "description": "The source format family this cartridge is written in; always loka/v3."
+        },
         "calendar": { "$ref": "#/$defs/Calendar" },
         "chapters": {
           "description": "Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning.",
@@ -13336,14 +13711,21 @@
           "minItems": 1,
           "type": "array"
         },
-        "entry": { "$ref": "#/$defs/DefinitionRef" },
-        "id": { "$ref": "#/$defs/CartridgeId" },
+        "entry": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "The room a fresh world puts the player's body in."
+        },
+        "id": {
+          "$ref": "#/$defs/CartridgeId",
+          "description": "The cartridge's identity; every definition key and reference carries it."
+        },
         "requires": { "$ref": "#/$defs/CompatibilityRequirements" },
         "speech": {
           "additionalProperties": false,
           "description": "Word bar S2 (speech@1): phrases, the cartridge's static say words, each a speech@1 Word, offered to every actor with no fact gate; GameView projects them as phrases. In source it is cartridge.json's speech, beside world.",
           "properties": {
             "phrases": {
+              "description": "The words every player can say, as chips in the say bar.",
               "items": { "$ref": "#/$defs/Word" },
               "minItems": 1,
               "type": "array"
@@ -13355,13 +13737,20 @@
           "type": "object"
         },
         "supported_profiles": {
+          "description": "The hosting profiles this cartridge runs under; at least one (offline_private, online_private, party, shared_area).",
           "items": { "$ref": "#/$defs/ExecutionProfile" },
           "minItems": 1,
           "type": "array"
         },
         "time_policy": { "$ref": "#/$defs/TimePolicy" },
-        "title": { "type": "string" },
-        "version": { "$ref": "#/$defs/ReleaseVersion" },
+        "title": {
+          "description": "The cartridge's name as listed for the player.",
+          "type": "string"
+        },
+        "version": {
+          "$ref": "#/$defs/ReleaseVersion",
+          "description": "The cartridge's release version, MAJOR.MINOR.PATCH."
+        },
         "world": { "$ref": "#/$defs/WorldSettings" }
       },
       "required": [
