@@ -9934,6 +9934,10 @@
           },
           "type": "object"
         },
+        "sound": {
+          "$ref": "#/$defs/Key",
+          "description": "Its sound bed tag, projected as place.sound: the host plays that tag's bed and exploration piece. The cartridge owns the names; a tag with no file plays the wild bed."
+        },
         "tags": {
           "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice.",
           "items": { "$ref": "#/$defs/Tag" },
@@ -12822,6 +12826,10 @@
             "structures"
           ],
           "type": "object"
+        },
+        "sound": {
+          "$ref": "#/$defs/Key",
+          "description": "Its sound bed tag, projected as place.sound: the host plays that tag's bed and exploration piece. The cartridge owns the names; a tag with no file plays the wild bed."
         },
         "tags": {
           "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice.",

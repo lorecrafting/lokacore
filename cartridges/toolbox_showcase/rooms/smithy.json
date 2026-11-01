@@ -1,6 +1,7 @@
 {
   "name": "room.smithy.title",
   "description": "room.smithy.description",
+  "sound": "forge",
   "exits": {
     "north": {
       "to": "the_fold"

@@ -1,6 +1,7 @@
 {
   "name": "room.crossroads_inn.title",
   "description": "room.crossroads_inn.description",
+  "sound": "inn",
   "exits": {
     "north": {
       "to": "fell_gate"

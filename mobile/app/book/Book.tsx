@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
-import { Combat } from './Combat.tsx';
 import { Footer } from './Footer.tsx';
 import { StatusLine } from './Status.tsx';
 import {
@@ -29,14 +28,13 @@ import {
   type Palette,
 } from './palette.ts';
 import type { Effects, Reading } from './reading.ts';
-import { useCues } from './cues.ts';
 import { riffles } from './cueDiff.ts';
-import { hearCues, playRiffle, playTurn } from './cueSounds.ts';
+import { useCueSounds } from './useCueSounds.ts';
+import { Leaf } from './Leaf.tsx';
 import { useSettings, type SettingStores } from './useSettings.ts';
 import { color, size, space } from './tokens.ts';
 import { Fault, Heard } from './lines.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
-import { Body } from './Body.tsx';
 import { footContext } from './UnderInk.tsx';
 import { NightSky } from './NightSky.tsx';
 import { LABEL } from './labels.ts';
@@ -202,7 +200,7 @@ const routes = (p: ViewProps, g: ReturnType<typeof group>) => ({
  */
 export function BookView(p: ViewProps) {
   const [foot, setFoot] = useState(0);
-  useCueSounds(p);
+  useCueSounds(p.screen, p.flip.turn, p.resumes, p.flip.riffle);
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
@@ -214,16 +212,7 @@ export function BookView(p: ViewProps) {
           <View style={{ flex: 1, maxWidth: size.column }}>
             <footContext.Provider value={foot}>
               <PageTurn {...p.flip} paper={p.palette.bg} card={chapterCard(p.screen, page)}>
-                {p.screen.view.combat || p.screen.ended ? (
-                  <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
-                ) : (
-                  <Body
-                    {...ctx}
-                    page={page}
-                    talkOn={p.talkOn ?? (() => {})}
-                    chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
-                  />
-                )}
+                <Leaf {...ctx} page={page} />
               </PageTurn>
             </footContext.Provider>
             <View onLayout={(e) => setFoot(e.nativeEvent.layout.height)}>
@@ -236,20 +225,6 @@ export function BookView(p: ViewProps) {
         </SafeAreaView>
       </TypeContext>
     </PaletteContext>
-  );
-}
-
-export function useCueSounds(p: ViewProps) {
-  useEffect(hearCues, []); // before useCues: heard from its first cue
-  const s = p.screen;
-  useCues(
-    s.view,
-    s.catchingUp,
-    p.flip.turn,
-    p.resumes,
-    useReducedMotion(),
-    p.flip.riffle ? playRiffle : playTurn,
-    s.died,
   );
 }
 
@@ -324,6 +299,7 @@ function navigation(p: BottomProps) {
   return (
     <Footer
       keyboardEnabled={!pending && !fault && !p.screen.catchingUp}
+      room={view.place.id}
       exits={view.exits}
       text={text}
       go={p.walk}

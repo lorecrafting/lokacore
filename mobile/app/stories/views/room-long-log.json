@@ -246,7 +246,8 @@
    },
    "description": {
     "key": "room.crossroads_inn.description"
-   }
+   },
+   "sound": "inn"
   },
   "exits": [
    {

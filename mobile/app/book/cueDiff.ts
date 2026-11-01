@@ -1,5 +1,5 @@
 // The pure diff of two GameViews into named cues (book-ui.md, Effects, sound and haptics; Queue).
-import type { GameView } from '../../packages/game-view/session.ts';
+import type { GameView, NarrationRecord } from '../../packages/game-view/session.ts';
 import type { Cue, CueName } from './cues.ts';
 
 const amount = (v: GameView, key: string) =>
@@ -145,6 +145,18 @@ function statusCues(now: GameView, was: GameView) {
   ];
 }
 
+// Only a press's own events (the record's), so a barrier the world moved is silent; the record tells them apart.
+function deedCues(now: GameView, was: GameView, deed?: NarrationRecord): Cue[] {
+  if (!deed) return [];
+  const usable = (v: GameView) => v.exits.filter((e) => e.available).map((e) => e.direction);
+  const newly = usable(now).some((d) => !usable(was).includes(d));
+  return [
+    ...(deed.missed ? [{ name: 'miss' } as const] : []),
+    ...(deed.lever ? [{ name: 'lever' } as const] : []),
+    ...(deed.opened && newly && now.place.id === was.place.id ? [{ name: 'latch' } as const] : []),
+  ];
+}
+
 /** What changed from `was` to `now`, the story's first. No `was` (a first view, a catch-up) is silent. */
 // A move by travel, on a plain page: its turn riffles (book-ui.md, Page life). A chapter card takes the page.
 // A press that killed (a due job can) arrives by death, not by travel.
@@ -156,17 +168,24 @@ export const riffles = (command: string | undefined, was: GameView, now: GameVie
   !now.scene &&
   (!now.chapter || was.chapter?.index === now.chapter.index);
 
-export function cuesOf(now: GameView, was: GameView | undefined, died = false): Cue[] {
+export function cuesOf(
+  now: GameView,
+  was: GameView | undefined,
+  died = false,
+  deed?: NarrationRecord,
+): Cue[] {
   if (!was) return [];
   const chapter = now.chapter && was.chapter?.index !== now.chapter.index;
   const level = was.levelling && (now.levelling?.level ?? 0) > was.levelling.level;
+  const combat = combatCues(now, was, died);
   return [
     ...(chapter ? [{ name: 'chapter' } as const] : []),
     ...(level
       ? [{ name: 'level', ...(was.levelling!.level === 1 && { first: true as const }) } as const]
       : []),
     ...questCues(now, was),
-    ...combatCues(now, was, died),
+    ...combat,
+    ...deedCues(now, was, deed),
     ...skillCues(now, was),
     ...itemCues(now, was),
     ...statusCues(now, was),

@@ -37,6 +37,7 @@ export const screenFrom = (
   return {
     view: saved.view,
     died: undefined,
+    deed: undefined,
     text,
     label,
     buttons: buttonsOf(saved.view, label, text),

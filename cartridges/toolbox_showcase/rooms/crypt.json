@@ -1,6 +1,7 @@
 {
   "name": "room.crypt.title",
   "description": "room.crypt.description",
+  "sound": "crypt",
   "dark_description": "room.crypt.dark",
   "exits": {
     "up": {

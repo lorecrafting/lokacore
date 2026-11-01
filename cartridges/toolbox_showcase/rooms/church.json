@@ -1,6 +1,7 @@
 {
   "name": "room.church.title",
   "description": "room.church.description",
+  "sound": "church",
   "exits": {
     "east": {
       "to": "village_green"

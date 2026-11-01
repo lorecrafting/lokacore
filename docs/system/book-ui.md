@@ -682,7 +682,7 @@ ordinary details, Leave/Back, Contents and position controls are hidden or disab
 title page shows its chapter label, title and the running head only: no Back to World, and Contents and position are
 locked as in a scene. It turns itself about 4 s from appearing; a tap anywhere
 skips, and its clock pauses while the app is in the background. With a screen reader active it keeps an
-explicit Continue and does not turn itself. The theme cut plays into the next page; its fade is baked into the recording for now. A chapter
+explicit Continue and does not turn itself. The theme cut plays into the next page; it fades out as it ends. A chapter
 title reached with a scene waits until that scene ends. Dismissing the card is presentation
 only. Same-room ordinary updates do not repeat or drop the chapter title.
 
@@ -719,6 +719,8 @@ the permitted Start over (loka-x6t.25).
 [words](../../mobile/app/book/words.ts) owns the sentences. Those
 boundaries live in [session](../../mobile/packages/game-view/session.ts),
 [app](../../mobile/app/App.tsx) and [save error](../../mobile/app/SaveError.tsx).
+
+A cartridge's ending is its last scene, then its last declared chapter's title page; the Book adds no ending page and no words of its own.
 
 ## Text clarity
 
@@ -770,7 +772,11 @@ wash and removes the swell; Flashes off removes both, leaving the value, thud an
 
 **Falling.** The player's death is a committed fact from the receipt, never a view diff, a rendered line or a room name. It is one S4: pending cues clear, music and beds cut at once, and one heavy haptic is the last thing felt: in a fight the thud's own, which is never cut; outside one, the death cue's. In a fight the fatal blow's wash falls to the faint opacity and holds until the page turns (Flashes off: no peak, the hold fades in over the settle time; reduced motion: the half wash, no swell, the same hold). A death outside a fight has no wash. Waking has no chord: the page lands on the palette of the current in-game hour, because death does not move the clock, and the current room's bed returns. No palette change marks the fall. ([Designer rulings](../design/effects-batch-2-rulings.md).)
 
-**Fight music.** A fight's opening plays a stinger into a lean loop on the music bus, and beds go silent; a fight within the fight gap of the last, or a reopened one, plays the loop alone. A foe falling cuts the loop into a short fanfare, then the room's bed returns. Flight or a quiet end lets the loop fall away with no fanfare. Death cuts it (Falling). A blow dealt presses the opponent's band phrase once and plays one impact under the music; a blow that moves no band, a miss, a dodge and a block add no sound, until events can tell them apart, and never from a rendered line.
+**Fight music.** A fight's opening plays a stinger into a lean loop on the music bus, and beds go silent; a fight within the fight gap of the last, or a reopened one, plays the loop alone. A foe falling cuts the loop into a short fanfare, then the room's bed returns. Flight or a quiet end lets the loop fall away with no fanfare. Death cuts it (Falling). A blow dealt presses the opponent's band phrase once and plays one impact under the music; the player's own miss, read from the receipt's attack event, plays one whisper; a blow that moves no band, a dodge and a block add no sound, until events can tell them apart, and never from a rendered line.
+
+**Beds.** Each room plays its tag's one loop on the ambience bus, or `wild`, or silence; the same tag across rooms carries on, a new tag cross-fades, and the background stops it. S3 and S4 sounds duck it; the paper turn does not.
+
+**Exploration music.** The first entry since launch to a tag may play its one piece, at most once in a long gap. It never loops, plays out, lowers beds by `mix.bedUnderMusic`, and only a fight, a chapter or death cuts it.
 
 **Flash limit.** At most one full-page luminance change per second, never three in any second; a
 later blow in that second keeps the value, thud and haptic, so a flurry never peaks twice in a second.
@@ -844,6 +850,12 @@ sound manifest, with Back to Settings.
 pending, and a third of the same key replaces the pending one. Small cues of one key coalesce into
 one. A page turn cancels the leaving page's effects; the arriving page's start after its picture
 deadline. A merged cue fires once.
+
+**Storm.** On an exposed World page in a storm, at random 20 to 60 s apart and never within the Flash limit's gap of a wash, an under-ink layer of the light palette's paper rises and leaves; thunder follows 1 to 3 s after, with a heavy haptic only on a room entry's first. Reduced motion or Flashes off keep the thunder and draw no light. Indoors there is no light and the thunder and weather layer pass through `mix.muffle`, no haptic.
+
+**Wind.** On an exposed World page, on the change to wind and once per room entry, the top outer corner's paper lifts twice; no ink moves, nothing under reduced motion.
+
+**Lever and latch.** A lever's completion is one clunk and a medium haptic, without page motion. An exit newly shown dries in the Footer, with a latch and a light haptic only when the player's own action opened it. Both read the event, never a label. A lever is a cartridge's authored custom event with the key `lever`.
 
 ## Future boundaries
 

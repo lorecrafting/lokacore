@@ -204,7 +204,7 @@ export function RoomPage(p: {
   const t = useType();
   const look = p.g.look;
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <View style={{ flex: 1 }}>
       <UnderInk view={p.view} />
       <PageShell
         paperless
