@@ -7,7 +7,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 
 const { playCue, playRiffle } = await import('./cueSounds.ts');
 const { cuesOf, riffles } = await import('./cueDiff.ts');
-const { curlFor, useCues } = await import('./cues.ts');
+const { curlFor, QUIET, step, useCues } = await import('./cues.ts');
 const { DiscoveredMap } = await import('./DiscoveredMap.tsx');
 const { useCueSounds } = await import('./Book.tsx');
 const { ItemPop } = await import('./ItemPop.tsx');
@@ -16,6 +16,7 @@ const { NpcPage } = await import('./Npc.tsx');
 const { Here } = await import('./people.tsx');
 const { Riddle, RightWord } = await import('./Riddle.tsx');
 const { RunningHead } = await import('./RunningHead.tsx');
+const { UnderInk } = await import('./UnderInk.tsx');
 const { color, motion } = await import('./tokens.ts');
 
 const g = globalThis as any;
@@ -144,10 +145,10 @@ test('a riffle sounds once at once and its light haptic lands after the curl', (
   curlFor(100);
   playRiffle();
   const length = motion.quick.duration + motion.riffle.sweeps * motion.riffle.duration;
-  now += length - 1;
   t.mock.timers.tick(length - 1);
   assert.deepEqual(felt(), ['light']);
-  now += 1;
+  // The clock a hair behind the timer, as real timers run: the curl gate would drop it.
+  now += length - 1;
   t.mock.timers.tick(1);
   assert.deepEqual(felt(), ['light', 'light']);
 });
@@ -178,6 +179,25 @@ test('the map draws on only what is new since it last showed', (t) => {
   assert.deepEqual(open(three, true).timings, [], 'reduced motion: it appears');
 });
 
+// Breaks: a level step redraws ink: each level mounts its marks anew, so the draw would replay.
+test('a level step ends the ink: what it mounts appears', (t) => {
+  effects(t);
+  const at = (id: string, z: number) => ({ ...room(id, z), z });
+  const first = rig(t);
+  first(() => nodes(DiscoveredMap({ view: mapOf([at('s0', 0)]), text: say })));
+  first.unmount();
+  effects(t);
+  const shell = rig(t);
+  const v = mapOf([at('s0', 0), at('s1', 0), at('s2', 1)]);
+  const page = () => shell(() => nodes(DiscoveredMap({ view: v, text: say })));
+  page()
+    .find((n) => n.props?.accessibilityLabel === 'Next map level')
+    .props.onPress();
+  assert.deepEqual(g.timings, [motion.settle.duration], 'the new room on this level draws');
+  page();
+  assert.deepEqual(g.timings, [motion.settle.duration], 'the one a level up does not');
+});
+
 const button = (id: string) => ({
   action_key: 'choose',
   command: 'choose',
@@ -186,7 +206,7 @@ const button = (id: string) => ({
   label: id,
   token: id,
 });
-function talk(t: any, continuation: string, n: number, reduced = false) {
+function talk(t: any, continuation: string, n: number, reduced = false, waiting = () => false) {
   effects(t, reduced);
   const ids = Array.from({ length: n }, (_, i) => `c${i}`);
   const v = view({
@@ -207,6 +227,7 @@ function talk(t: any, continuation: string, n: number, reduced = false) {
           text: say,
           g: group(buttons),
           press: (b) => pressed.push(b),
+          pending: waiting(),
           log: [],
           leave: () => {},
           open: () => {},
@@ -237,10 +258,13 @@ test('a new choice lifts its answers apart, capped, and never again', (t) => {
   assert.deepEqual([g.delays, g.timings], [[], []], 'reduced motion: together');
 });
 
-// Breaks: the others stay pressable or lit once an answer is chosen, or the chosen one fades too.
-test('choosing an answer fades the others, which take no touch', (t) => {
-  const { page, pressed } = talk(t, 'k3', 3);
-  page();
+// Breaks: the others stay pressable or lit once an answer is chosen, the chosen one fades too, or
+// a refusal (no reply pending, the same view) leaves them gone.
+test('choosing an answer fades the others while its reply is pending', (t) => {
+  let waiting = true;
+  const { page, pressed } = talk(t, 'k3', 3, false, () => waiting);
+  const off0 = page().filter((n) => n.props?.pointerEvents === 'none');
+  assert.equal(off0.length, 0, 'none chosen yet: another press pending fades nothing');
   g.timings.length = 0;
   page()
     .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'c1')
@@ -250,6 +274,8 @@ test('choosing an answer fades the others, which take no touch', (t) => {
   assert.deepEqual(g.timings, [motion.fade.duration, motion.fade.duration], 'two others');
   const off = shown.filter((n) => n.props?.pointerEvents === 'none');
   assert.equal(off.length, 2);
+  waiting = false;
+  assert.equal(page().filter((n) => n.props?.pointerEvents === 'none').length, 0, 'they return');
 });
 
 const npc = (id: string) => ({ id, kind: 'npc', name: id });
@@ -310,7 +336,7 @@ function riddleRig(t: any, id: string) {
   const after = (v: GameView, choice?: GameView['choice']) =>
     word(() => nodes(RightWord({ view: v, choice })));
   const plays = () => g.bookDevice.filter((d: any[]) => d[0] === 'play' && d[1] === 'riddleRight');
-  return { submit, after, plays };
+  return { submit, after, plays, word };
 }
 
 // Breaks: a right word is not gilt, plays no sound, stays past its view or replays on a redraw.
@@ -324,6 +350,20 @@ test('a right riddle word shows gilt once, with its sound, and leaves at the nex
   assert.equal(after(v).length > 0, true, 'a redraw of the same view keeps it');
   assert.equal(plays().length, 1);
   assert.deepEqual(after(view({})), []);
+});
+
+// Breaks: an answer that also left the NPC page gilds a word on the next person's page.
+test('a right word sent as the page closes never shows on a later page', (t) => {
+  const { submit, after, plays, word } = riddleRig(t, 'r4');
+  after(view({}));
+  submit();
+  word.unmount();
+  const later = rig(t);
+  assert.deepEqual(
+    later(() => nodes(RightWord({ view: view({}) }))),
+    [],
+  );
+  assert.equal(plays().length, 0);
 });
 
 // Breaks: a wrong answer turns gilt (book-ui.md Gilt rule) or the tiles snap back at once.
@@ -357,4 +397,31 @@ test('the Book unmounting cuts the music', (t) => {
   g.bookDevice = [];
   draw.unmount();
   assert.deepEqual(g.bookDevice, [['fight', 'cut']]);
+});
+
+// Breaks: a layer unmounts as it ends, so low health cuts out instead of fading (book-ui.md).
+test('the vignette stays drawn while it fades out', (t) => {
+  effects(t);
+  g.CanvasKit = {};
+  t.after(() => delete g.CanvasKit);
+  const shell = rig(t);
+  const layers = (v: GameView) =>
+    shell(() => nodes(UnderInk({ view: v }))).filter((n) => n.props?.['aria-hidden']).length;
+  assert.equal(layers(view({})), 0, 'nothing before it is needed');
+  const low = view({ resources: [{ resource: { key: 'hp' }, tone: 'danger' }] });
+  assert.equal(layers(low), 1);
+  assert.equal(layers(view({})), 1);
+});
+
+// Breaks: a first arriving after another of its key, in one hold, loses its stronger moment.
+test('cues gathered from one hold keep a later first', () => {
+  const { fired } = step(
+    QUIET,
+    [
+      { name: 'pickup', ids: ['a'] },
+      { name: 'pickup', ids: ['b'], first: true },
+    ],
+    10_000,
+  );
+  assert.equal(named(fired, 'pickup')?.first, true);
 });

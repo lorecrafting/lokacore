@@ -43,6 +43,7 @@ function Word({ word }: { word: string }) {
  * - Story: Riddle.stories.tsx
  */
 export function RightWord(p: { view: GameView; choice?: GameView['choice'] }) {
+  useEffect(() => () => void (sent = undefined), []); // leaving the page ends it: no later page shows it
   if (!sent) return null;
   if (!sent.at) {
     if (p.choice?.riddle?.choice_id === sent.id)

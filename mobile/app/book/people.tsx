@@ -14,6 +14,7 @@ import { subject } from './words.ts';
 type Person = GameView['entities'][number];
 const has = (group: Person[], id: string) => group.some((e) => e.id === id);
 
+// ponytail: a plural link goes by its first member's id; one of several leaving fades or not by that.
 // Who came into or is going from the room since the last draw. A change of room says nothing.
 function usePeople(view: GameView) {
   const npcs = view.entities.filter((e) => e.kind === 'npc');

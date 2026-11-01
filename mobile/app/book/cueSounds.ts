@@ -21,7 +21,7 @@ const riffleLength = motion.quick.duration + motion.riffle.sweeps * motion.riffl
 // One sound for the whole riffle, felt once it has landed (under reduced motion no curl: at once).
 export const playRiffle = () => {
   play('riffle');
-  const land = () => feel(sound.riffle.haptic as HapticKind);
+  const land = () => haptic(sound.riffle.haptic as HapticKind); // past feel's gate: this riffle holds it
   if (performance.now() >= curlEnds) return land();
   curlFor(riffleLength);
   setTimeout(land, riffleLength);

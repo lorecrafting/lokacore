@@ -88,9 +88,10 @@ const gathered = (cues: Cue[]) =>
   cues.reduce<Cue[]>((out, cue) => {
     const i = CUES[cue.name].s === 2 ? out.findIndex((o) => o.name === cue.name) : -1;
     if (i < 0) return [...out, cue];
-    const { silent, ...first } = out[i]!;
-    const ids = [...(first.ids ?? []), ...(cue.ids ?? [])];
-    out[i] = silent && cue.silent ? { ...first, ids, silent } : { ...first, ids };
+    const { silent, ...rest } = out[i]!;
+    const merged = { ...rest, ...(cue.first && { first: true as const }) };
+    const ids = [...(rest.ids ?? []), ...(cue.ids ?? [])];
+    out[i] = silent && cue.silent ? { ...merged, ids, silent } : { ...merged, ids };
     return out;
   }, []);
 

@@ -1,6 +1,6 @@
 // The page's held under-ink layers (book-ui.md, Room page anatomy): the lamp glow and the low-health
 // vignette, one at a time with the fatal hold above them (heldLayer.ts).
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { onCue } from './cues.ts';
 import {
@@ -80,10 +80,14 @@ function useLayers(view: GameView, paper: string) {
 export function UnderInk({ view }: { view: GameView }) {
   const c = usePalette();
   const { glowStyle, edgeStyle } = useLayers(view, c.bg);
+  // Once drawn a layer stays, at no opacity, so it can fade out over the settle.
+  const drawn = useRef({ lit: false, low: false }).current;
+  drawn.lit ||= lampLit(view, c.bg);
+  drawn.low ||= lowHealth(view);
   if (!canDraw()) return null;
   return (
     <>
-      {lampLit(view, c.bg) && (
+      {drawn.lit && (
         <Layer style={glowStyle}>
           <Gradient
             shape={({ width, height }) => ({
@@ -95,7 +99,7 @@ export function UnderInk({ view }: { view: GameView }) {
           />
         </Layer>
       )}
-      {lowHealth(view) && (
+      {drawn.low && (
         <Layer style={edgeStyle}>
           <Gradient
             shape={({ width, height }) => ({

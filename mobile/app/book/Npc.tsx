@@ -1,6 +1,6 @@
-// size: allow 312, the talk page with its answers' lift, keeping the page's parts together
+// size: allow 314, the talk page with its answers' lift, keeping the page's parts together
 // The NPC page: conversation, choices, skills, shop and services, Look, with the existing book controls.
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -52,6 +52,7 @@ function Choice(p: {
   text: Say;
   g: Grouped;
   press: (b: Button) => void;
+  pending?: boolean;
 }) {
   const c = usePalette();
   const t = useType();
@@ -60,9 +61,8 @@ function Choice(p: {
     lifted = p.choice.continuation_id;
     return isNew;
   });
-  const [chosen, setChosen] = useState<Button>();
-  useEffect(() => setChosen(undefined), [p.view]); // a refusal brings the others back
-  const pick = (b: Button) => (setChosen(b), p.press(b));
+  const [chosen, setChosen] = useState<string>();
+  const left = (id: string) => !!p.pending && !!chosen && chosen !== id; // a refusal brings them back
   const answer = (id: string) =>
     p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
   return (
@@ -91,9 +91,9 @@ function Choice(p: {
             </Answer>
           );
         return (
-          <Answer key={o.choice_id} at={at} fresh={fresh} left={!!chosen && chosen !== b}>
+          <Answer key={o.choice_id} at={at} fresh={fresh} left={left(o.choice_id)}>
             {b ? (
-              <ActionCard b={b} press={pick} />
+              <ActionCard b={b} press={(x) => (setChosen(o.choice_id), p.press(x))} />
             ) : (
               <ActionCard label={p.text(o.label)} reason={why(o, p.text)} />
             )}
@@ -117,6 +117,7 @@ type NpcProps = {
   text: Say;
   g: Grouped;
   press: (b: Button) => void;
+  pending?: boolean;
   log: DetailLine[];
   leave: () => void;
   talking?: boolean; // the Book's latch: answered here and not yet left (Book holds it)
@@ -298,6 +299,7 @@ export function NpcDetail(p: {
       g={p.g}
       log={log}
       press={(b) => p.press(b, id)}
+      pending={p.screen.pending}
       leave={p.world}
       open={(thing) => p.open({ kind: 'thing', id: thing })}
       shelf={() => p.open({ kind: 'shelf', id })}

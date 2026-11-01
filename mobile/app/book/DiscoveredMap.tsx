@@ -26,6 +26,7 @@ const AIM: Record<string, At> = {
   up: { x: Math.SQRT1_2, y: -Math.SQRT1_2 },
   down: { x: Math.SQRT1_2, y: Math.SQRT1_2 },
 };
+// ponytail: Start over keeps this set, so a replay's rooms appear without ink; reset it if asked.
 // What this Map has shown since launch: the first opening draws nothing on, a reload replays nothing.
 let shown: Set<string> | undefined;
 const linkOf = (l: Drawn['links'][number]) => `${l.from}:${l.direction}`;
@@ -69,7 +70,7 @@ export function DiscoveredMap({ view, text }: Props) {
   const current = map.rooms.find((r) => r.id === view.place.id);
   const [level, setLevel] = useState(current?.z ?? 0);
   const [caption, setCaption] = useState<string | null>(null);
-  const [fresh] = useState(() => inkNew(map));
+  const [fresh] = useState(() => inkNew(map)); // a level step clears it: its marks remount
   const levels = [...new Set(map.rooms.map((r) => r.z))].sort((a, b) => a - b);
   const rooms = map.rooms.filter((r) => r.z === level);
   const { at, box } = spread(rooms);
@@ -86,7 +87,7 @@ export function DiscoveredMap({ view, text }: Props) {
   );
   return (
     <View>
-      {levelBar(c, t, level, levels, (next) => (setLevel(next), setCaption(null)))}
+      {levelBar(c, t, level, levels, (next) => (fresh.clear(), setLevel(next), setCaption(null)))}
       <Follow x={current?.z === level ? at(current).x - CELL / 2 - MARGIN : undefined}>
         <View style={box}>
           {lines(c, map, rooms, at, fresh)}
