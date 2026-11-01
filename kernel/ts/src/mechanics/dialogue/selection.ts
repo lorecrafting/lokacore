@@ -22,9 +22,41 @@ import { living } from '../death/shared.ts';
 import { disposition } from '../disposition.ts';
 import { concealed } from '../skills.ts';
 
+/** The dialogues `d`'s answers lead to. */
+const links = (d: DialogueDefinition) =>
+  Object.values(d.choices)
+    .flatMap((c) => [c.then, c.then_failed] as (string | undefined)[])
+    .filter((k): k is string => !!k);
+
+/**
+ * The dialogues a talk can open: those nothing leads to, then the first by key of each cycle left
+ * (a nested answer returns to its parent, so a root may be named too); everything an entry reaches
+ * is reached only by that answer.
+ */
+const entries = (world: World) => {
+  const all = Object.values(world.cartridge.dialogues ?? {}).sort((a, b) => cmp(a.key, b.key));
+  const next = new Map<string, string[]>(all.map((d) => [d.key, links(d)]));
+  const named = new Set(all.flatMap(links));
+  const reached = new Set<string>();
+  const walk = (key: string) => {
+    if (reached.has(key)) return;
+    reached.add(key);
+    next.get(key)?.forEach(walk);
+  };
+  return [...all.filter((d) => !named.has(d.key)), ...all].filter((d) => {
+    if (reached.has(d.key)) return false;
+    walk(d.key);
+    return true;
+  });
+};
+
+/** Whether some answer's `then` or `then_failed` names `d`: such a dialogue never reopens itself. */
+export const linked = (world: World, d: Pick<DialogueDefinition, 'key'>) =>
+  Object.values(world.cartridge.dialogues ?? {}).some((o) => links(o).includes(d.key));
+
 /** The dialogues whose speaker is `target`, in key order (a speaker may have several). */
 const spoken = (world: World, target: EntityId | undefined) =>
-  Object.values(world.cartridge.dialogues ?? {})
+  entries(world)
     .filter(
       (d) =>
         target !== undefined &&
@@ -69,6 +101,16 @@ export const openable = (world: World, d: DialogueDefinition, ids: unknown) =>
     ),
   );
 
+/** Those of `ids` whose own policy holds: the rest stay on the row and are not drawn (dialogue@1). */
+export const shown = (
+  world: World,
+  actor: CharacterId,
+  d: DialogueDefinition,
+  ids: readonly Key[],
+  target: EntityId | undefined,
+  steps: Steps,
+) => ids.filter((id) => holds(world, actor, d.choices[id]!.policy, { target, steps }));
+
 /**
  * The dialogue `actor`'s talk to `target` opens: the first of `target`'s dialogues, in key order,
  * whose own policy holds and that offers a choice (hs-14), if any; none while `target` is hostile
@@ -91,7 +133,7 @@ export const spokenBy = (
           d.keyword === word &&
           (!selected || world.cartridge.dialogues?.[refString(selected)] === d) &&
           holds(world, actor, d.policy, { target, steps }) &&
-          offered(world, actor, d, steps).length > 0,
+          shown(world, actor, d, offered(world, actor, d, steps), target, steps).length > 0,
       );
 
 /**
@@ -115,7 +157,7 @@ export const talkRefused = (
  */
 export function talks(world: World, actor: CharacterId): [string, Offered][] {
   const here = world.state.containers[bodyOf(world, actor)!];
-  const talked = Object.values(world.cartridge.dialogues ?? {}).filter((d) => !d.keyword); // row G9
+  const talked = entries(world).filter((d) => !d.keyword); // row G9
   return talked.flatMap(({ key, npc, policy, name: label }) => {
     const speaker = world.entityIds[refString(npc)]!;
     if (!living(world, speaker) || world.state.containers[speaker] !== here) return [];
@@ -165,10 +207,13 @@ export const apart = (world: World, npc: EntityId, body: EntityId | undefined) =
 
 /**
  * Whether a dialogue returns to its hub after an answer (dialogue@1): it resolves no quest, declares
- * no riddle and has several choices (the hub, its separation close and the compiler's once-only check).
+ * no riddle and has several choices or a choice that leads on (the hub, its separation close and the compiler's once-only check).
  */
 export const reopens = (d: Pick<DialogueDefinition, 'quest' | 'riddle' | 'choices'>) =>
-  !d.quest && !d.riddle && Object.keys(d.choices).length > 1;
+  !d.quest &&
+  !d.riddle &&
+  (Object.keys(d.choices).length > 1 ||
+    Object.values(d.choices).some((c) => c.then || c.then_failed));
 
 const dialogue = (world: World, row: ChoiceRow) =>
   world.cartridge.dialogues![refString(row.source)]!;
@@ -200,7 +245,7 @@ export const parted = (world: World) =>
     .filter(
       ([, c]) =>
         open(c) &&
-        reopens(dialogue(world, c)) &&
+        (reopens(dialogue(world, c)) || linked(world, dialogue(world, c))) &&
         apart(world, speaker(world, c), bodyOf(world, c.actor_id)),
     )
     .map(([id]) => id as ContinuationId)

@@ -44,6 +44,14 @@ no remote map knowledge. A chapter declaring ancestries starts without a selecte
 row; [D11 selection](#d11-character-choice-selected-contract) precedes ordinary player commands
 and trusted elapsed updates; world time starts at selection.
 
+## dev@1 (`kernel/ts/src/mechanics/dev/rule.ts`)
+
+The author preview's `dev_go_to_room` and `dev_set_fact`, with their refusals, in
+[cartridge.md](cartridge.md#author-preview). `stepDev` alone reaches the rule; `step` answers
+`permission_denied`, and only a host with `dev` set calls `stepDev`. Accepted: `dev_moved`
+(`entity.transfer`, `entity_entered_room`, no line, no entry sight) or `dev_fact_set` (the fact's
+ordinary assignment). Composes `movement` for the room event.
+
 ## movement@1 (`kernel/ts/src/mechanics/movement/rule.ts`)
 
 `move {direction}`: a direction outside the six compass directions is `invalid_target`
@@ -246,7 +254,7 @@ The [PM adoption](../decisions/pm-decision-m12-a-readable-2026-10-05.md) records
 Ruleless. `target_present` is true when the action's target is in reach (the `target_present` case in `mechanics/policy.ts`,
 `present` in `commands/target.ts`). `policy@1` is `all`, `any`, `not` (`holds` in `mechanics/policy.ts`). A fact is read and set at
 its one declared scope: the actor's for `player`, the world's for `instance`
-(`mechanics/fact.ts`); a `per_subject` fact also at its subject ([row W2](#entity-and-pair-facts-toolbox-row-w2)); unset means its default; `fact_compare` compares equality. The host appends a
+(`mechanics/fact.ts`); a `per_subject` fact also at its subject ([row W2](#entity-and-pair-facts-toolbox-row-w2)); unset means its default; `fact_compare` compares equality. `fact_at_least {fact, at_least}` holds when an int fact is at least the number (`FACT_TYPE_MISMATCH` on another type). The host appends a
 `fact_changed {fact, old, new}` for each `fact.assign` that changes its value, at the assign's
 causal position (`mechanics/fact.ts:108`); an unchanged assign emits nothing. Invariant `facts_typed`.
 A dialogue choice's `fact.adjust {fact, amount}` requires a declared bounded integer fact and a safe
@@ -449,7 +457,7 @@ every bound role and, when the row binds the dialogue's npc role, `speaker` (tha
 re-resolved; bound after the roles) as participants (a riddle's wrong line and a check's failure line bind the same; the Book words a line
 that is wholly one quotation as the speaker's, loka-548k), and the `story_point_reached` of a story point outcome
 whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:225`). The conversation then
-(unless the choice is [checked](#dialogue-skill-checks-toolbox-row-14), which ends it) returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
+(unless the choice is [checked](#dialogue-skill-checks-toolbox-row-14), which ends it, or names `then`, [below](#branching-dialogue)) returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
 to the person's topics; the conversation stays open until Leave the conversation): the same
 decision appends a `choice.open` of a fresh continuation (the next minted id) with the resolved row's
 source, beat, roles and choice ids, and its `choice_opened` after `choice_resolved`. The answer
@@ -482,6 +490,20 @@ rejects, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `
 of a fact the save proves by one receipt (a topic's fact, a perception `discovered` fact or a
 bounded riddle's answer fact; [save](save.md)) or an escort `start` on a choice with neither an `accept` (refused once accepted) nor a `patrol` (which ends the
 conversation) (`lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
+
+#### Branching dialogue
+
+A `DialogueChoice` may carry `policy`, `then`, `then_failed`, `narration_variants` and `narrate` steps (`loka-vduxr.10`; `mechanics/dialogue/behavior.ts`, `selection.ts`).
+
+- **`policy`.** The option is not drawn while it fails (`shown`, `selection.ts`), and the row keeps every choice id, so a save holds no list of what was shown. A `choose` of a hidden option is `invalid_state`. A view reads the current world. The decision whether anything is left after an answer reads the world that answer leaves, so an answer that sets a fact or moves an item changes what is drawn at once.
+- **`then`.** Instead of reopening, the same decision appends a `choice.open` of the named dialogue (its own minted id, roles and choice ids) and `choice_opened` after `choice_resolved`. The compiler refuses a target that does not exist or has a `keyword`, `quest` or `riddle`, and `then` on a `patrol` choice or in a dialogue with a `quest` or `riddle` (`lib/loka/content/dialogue_links.ex`). `then: end` closes the talk after the answer, and is refused where a dialogue is keyed `end`.
+- **Links.** A dialogue some `then` names is not offered by Talk unless it starts its chain; a chain that loops enters at its first key by sort, so every chain plays; a loop member whose speaker has no entry of their own is only reached through the loop and draws the compile warning `LOOP_SPEAKER`. A `then` target never reopens itself: an answer there without `then` ends the talk. A return to a parent is `then: <parent>`. When the target's own `policy` fails or it shows no option the talk ends after the answer, opening nothing.
+- **A check.** On a pass the choice's `then` applies; on a failure the row closes as before, the failure line stays and `then_failed` opens, if any. `then_failed` without a `check` is refused.
+- **Hand-off.** `then` may name another speaker's dialogue: the new row binds its own roles and `speaker_id`. A speaker in another room draws the compile warning `SPEAKER_ELSEWHERE`, because the proposal's farewell closes the new row in the same decision and the talk ends after the reply.
+- **`narration_variants`.** `TextVariants` on the reply: the first whose `when` holds replaces `narration`, read before the answer's effects. The narration key on the receipt is one of the choice's declared words (`dialogue-receipt.ts`).
+- **`narrate` steps.** A choice step that adds its `text` line after the reply, in step order; the key must be in the catalog.
+- **Repeats.** A linked dialogue can run again, so the [hub's repeat refusal](#dialogue-skill-checks-toolbox-row-14) applies to it however many choices it has, except a choice whose own `policy` negates a fact its own steps set (`lib/loka/content/hub.ex`).
+- **Composition record.** Consumer: the dialogue rule and the GameView. Reads: dialogue definitions, facts through `holds`, the row's roles and ids, the world the decision's own writes leave. Writes, save rows and fields: none new; `choice.open` of another dialogue. Events: `choice_opened` after `choice_resolved` or `check_failed`. Reused: `holds`, `opening`, `bind`, `offered`, `openable`, `blocked`, the hub, `parted`. New: optional fields, `shown`, `linked`, `leadOn`, `replies`, the `fact_at_least` leaf, the `narrate` choice step. Invariants: none new. Exceptions: none.
 
 API1.9 adds an optional authored `riddle {choice_id, answer, bank, wrong}` to a dialogue.
 The answer is 1–32 lowercase ASCII letters; the displayed bank is 1–32 uppercase ASCII
@@ -804,8 +826,27 @@ without hp never engages (`hostileAt`), so no round ever targets a body with no 
 (loka-xyyd, after the #515 ruling "no hp, no band"). Composition record: consumer Attack
 and the GameView Attack offer; reads the NPC definition's `hp`; writes, events, jobs and save
 rows: none new; reused `attackRefused`, `hostileAt` and the RefusalCause route; new: the
-`cannot_be_hurt` cause, a generic name a later protection flag (loka-w9id) reuses. Installed
+`cannot_be_hurt` cause. Installed
 kernel 1.126.
+
+An NPC with `unattackable: true` (loka-w9id) can never be fought, whatever else it carries. One
+query, `attackable` in `kernel/ts/src/mechanics/combat/shared.ts` (an NPC with an `attack`, not
+`unattackable`, not an ally or group member), decides it for three readers: Attack's admission
+(`attackRefused`: resolved command `attack`, action key `attack`, target ids `[npc]`, refused
+`invalid_target` with no cause), the GameView (`combatOffered`: the Attack offer is absent), and
+the entry engage (`hostileAt`: neither a flagged NPC nor a companion opens a fight; an arrest is
+not a fight and still applies). `attackRefused` also guards the spell fight-back and the expedition, unchanged. A player's spell
+reads the flag itself, not `attackable`, because an NPC with hp and no `attack` stays hittable: no damage
+and no hp-draining status on a flagged NPC (`spell.ts`). A reaction's status still lands: the flag stops
+the player, not the writer. The
+kernel adds no refusal words. A peaceful room is the existing room `sanctuary: true`, not a second
+key: it refuses Attack `invalid_state`, its offer stays listed unavailable, and nothing engages on
+entry. Composition record: consumer the owner's prologue NPCs and companions; reads the NPC
+definition's `unattackable`, an optional key that is absent from existing content; writes, events, jobs and save rows: none new; reused `ally`,
+`attackRefused`, `combatOffered`, `hostileAt`, `sanctuary`; new: the key and the `attackable`
+query. An aimed damage spell (`damage` in `scripted_action/spell.ts`) still reads only `hp`. An
+`unattackable` NPC with `disposition.engage`, as a population's member or as a death credit's NPC is a
+compile error. Installed kernel 1.136.
 
 A round's blow stops at the target's authored hp floor, or at 0 under a negative floor, where death
 fires; a floored foe stays alive and the fight goes on, as under a spell's damage (`aboveFloor`,
@@ -2455,7 +2496,7 @@ Beads `loka-3w3q` (designer ruling 2026-10-22) and [declarations](cartridge.md#d
 - **Shape.** A fact declaring `per_subject: true` has one value per subject, an NPC, item or detail: an **entity fact** (`scopes: ["instance"]`, one value per thing) or a **pair fact** (`scopes: ["player"]`, one value per thing and character). The row names them scopes; they are stored as the existing scope plus the subject's `subject_id`, the identity `ScopedFact` and the fact `MutationTarget` already carry, because 03 §6 closes `StateScope` at player, party, instance and realm (pinned by `test/loka/core/contracts_test.exs`, "FactSpec scopes are exactly the StateScope kinds"). A G7 grant is a pair fact on the thing and the grantee.
 - **Subject.** `targetOf` (`kernel/ts/src/mechanics/fact.ts`) gives a fact's target; a `per_subject` fact read or set without a subject throws `KernelError` (the decision faults `evaluator_error`), never a shared row; the loader's site walk keeps such reads and writes out of content. Writers name the subject by context, as `status.apply` does: a dialogue's `fact.assign` and `fact.adjust` write at the speaker (the row's bound NPC role that is the dialogue's `npc`); a scripted action's `fact.assign` at the scripted action's target; a reaction's `fact.assign` at its named `npc`'s or `item`'s authored instance, else at the event's subject (the reaction@1 table) when that is an NPC, item or detail, and with no such subject the step writes nothing (an entrant player's body is never a subject). `fact_compare` reads one at exactly one of `npc`, `item` (that instance) or `subject: "target"` (the action's target; in a dialogue's policy the speaker); without a target it is false, like `status_active`, so `subject: "target"` is useful only where a policy has one (an action, a dialogue, an entity's own variant); the loader refuses it in a reaction's `when`, a quest, a barrier or a skill qualification (FACT_SCOPE_UNSUPPORTED). `fact_changed` carries the subject as `subject_id`, so a reaction on it sees the thing.
 - **Rows.** Only changed facts have rows: the `facts` section, keyed by the canonical fact target text, now with `subject_id` for these facts ([save](save.md#entity-and-pair-fact-recovery)); a stranger NPC has no row and reads the default. Memory is bounded by declaration ([trap 7](../MECHANICS-TOOLBOX.md#traps)): one value per declared fact per subject that a writer reached.
-- **Limits.** Save recovery checks a dialogue receipt's `fact.assign` and `fact_changed` at the speaker (`mobile/authority/local-story/dialogue-consequences.ts`), but reconciles some choices' facts by fact alone, with no subject: escort, receive and hand_over (`dialogue-save.ts`), a riddle answer with a `wrong_limit` (`topics-save.ts`) and every choice of a dialogue whose quest has a legacy deadline `fact` (`deadline-receipts.ts`); a `per_subject` fact is not written there (FACT_SCOPE_UNSUPPORTED); a reaction's `fact.adjust` came with [row 15](#standing-and-disposition-toolbox-rows-15-and-g11); a reaction's `when` still has no target.
+- **Limits.** Save recovery checks a dialogue receipt's `fact.assign` and `fact_changed` at the speaker (`mobile/authority/local-story/dialogue-consequences.ts`), and compares the fact alone, with no subject, for a riddle answer with a `wrong_limit` and every choice of a dialogue whose quest has a legacy deadline `fact` (`deadline-receipts.ts`); a `per_subject` fact is not written there (FACT_SCOPE_UNSUPPORTED); a reaction's `fact.adjust` came with [row 15](#standing-and-disposition-toolbox-rows-15-and-g11); a reaction's `when` still has no target.
 - **Book.** Nothing new: these facts show only through authored dialogue, variants and later prices and dispositions ([trap 8](../MECHANICS-TOOLBOX.md#traps)).
 - **Sampler.** `cartridges/scoped_facts_sampler`: the smith, the miller and a stranger in a square; each dialogue's `greet` adds 1 to the pair fact `times_met` and `help` 1 to `trust` (-3 to 3). Greet the smith twice and help her once, greet the miller once: the smith reads met 2, trust 1; the miller met 1, trust 0; the stranger met 0, trust 0, with no row. Giving the smith the apple sets the entity fact `fed` on her (the `item_acquired` holder), not on the miller.
 - **Composition record.** Consumer: dialogue, reactions, scripted actions and every policy site; rows 15, G11, W3, G7 next. Reads: fact rows. Writes: `fact.assign` with its optional `subject_id` (no new delta op), `fact_changed` with `subject_id`. Jobs: none. Save rows: the existing `facts` section, with a subject in the key. Reused: `ScopedFact` and fact `MutationTarget` identity, `fact.adjust`'s bounded lowering, the reaction subject table, short-reference expansion and `LeafRefs`, FACT_SCOPE_UNSUPPORTED. New: `FactSpec.per_subject`, `fact_compare`'s `subject`/`npc`/`item`, a reaction `fact.assign`'s `npc`/`item`, `targetOf`, the loader's site walk and the save check `facts-save.ts`; no foundation change.
@@ -3792,7 +3833,7 @@ Homestead hs-8 (Beads `loka-x6t.31`); the Book form is in [book-ui.md](book-ui.m
 [Toolbox row 35](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#standing-and-disposition-declarations) govern it; the PM brief is in Beads `loka-kgd.165` (2026-10-16). PM rulings: the trial is a narrated arrest followed by authored dialogue, with no scene and no served sentence; a move makes one relocation at most.
 
 - **Declaration.** An NPC's [disposition](#standing-and-disposition-toolbox-rows-15-and-g11) may declare `arrest {to, narration}`: `to` a room, `narration` a TextKey. It needs `hostile` and no `engage`.
-- **Reader.** G11's entry check (`hostileAt` in `kernel/ts/src/mechanics/disposition.ts`) finds the first living, unengaged, hostile NPC in EntityId order that has an arrest, or (only when the cartridge declares combat) an `attack` and an `engage` line. The sanctuary, scene and concealment rules stay as they are.
+- **Reader.** G11's entry check (`hostileAt` in `kernel/ts/src/mechanics/disposition.ts`) finds the first living, unengaged, hostile NPC in EntityId order that has an arrest, or (only when the cartridge declares combat) is `attackable` (combat@1) and has an `engage` line. The sanctuary, scene and concealment rules stay as they are.
 - **Effect.** When an ordinary move or a Sleep finds an arresting NPC, the same proposal does these things (`engage`): it transfers the body from the room to `to`, ends an active escort (escort's `separate`), cures every concealment on the body as an engagement does ([row 16](#sneak-and-hide-toolbox-row-16)), says `narration` and emits one `entity_entered_room` for `to`, after the move's own event. There is no encounter, job or draw. When the room entered is `to` itself, nothing happens.
 - **Known limits.** A move that ends in a fall arrests no one (`ponytail:` in `kernel/ts/src/mechanics/movement/sequence.ts`). The move's own room is not recorded as visited, because knowledge records the actor's last room once and the arrest moves the body on. The trail shows the move but not the relocation. An NPC that walks in on the player, or a disposition that turns hostile while the player stands in the room, arrests no one (G11's limit). A group member, and a ridden mount, stays in the room entered (the member stays in the group; the rider is on foot in the cell until they meet the horse again); an arrested sleeper stays asleep. No test covers an escort ended by an arrest. A move that writes a water row or opens an encounter (an expedition's hound), and a Sleep while the body holds a water row or is in an open encounter, arrest no one, since both stay pinned to the room. The arrest does not undo the move's patrol progress, so content puts no arresting NPC in a patrol room (not refused at load). An arrest that does not apply (a fall, a water or encounter write, or `to` is the room entered) lets the next hostile fighter in EntityId order engage.
 - **Opt-in.** An `arrest` is optional. An arrest without `hostile`, or one that also has `engage`, is SCHEMA_VIOLATION at the disposition. A `to` that names no room or a `narration` with no text is UNRESOLVED_REFERENCE. Every refusal is the compiler's (`lib/loka/content/standing.ex`). Chapter 1 declares none.

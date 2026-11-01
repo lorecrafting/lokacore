@@ -49,6 +49,8 @@ defmodule Loka.Content.Explain do
          RESERVED_FACT | The engine owns the fact name `{field}`. | Rename your fact.
          INVALID_TIME_POLICY | This needs a time policy the cartridge does not have, or does not fit it. | Fix time_policy in cartridge.json, or remove this.
          VISITS_UNRECORDED | A visits check can never pass, because nothing records visits. | Add `knowledge` under requires.capabilities in cartridge.json.
+         SPEAKER_ELSEWHERE | This `then` leads to a speaker in another room, so the talk ends as it reaches them. | Move the speaker, or end the talk here.
+         LOOP_SPEAKER | Talk opens this `then` loop at its first key, so this speaker is only reached through the loop. | Give the speaker a dialogue of their own if the player should start here.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
          SITE_EXIT_CONFLICT | This site names direction `{field}`, where the room has no exit. | Name a direction the room has an exit in.
          invalid_type | `{field}` must be {expected}{fields_named}.
@@ -74,11 +76,14 @@ defmodule Loka.Content.Explain do
          cut_steps | `steps` here would replace every word of `scenes/{key}.cut`. | Remove `steps` and keep the words in the `.cut`, or delete the `.cut`.
          cut_scene_line | Line `{text}` looks like a `.scene` line, but a cutscene is only paragraphs, so the player would read it as written. | Move it to a `.scene` file, or reword it if it is meant as words.
          not_utf8 | Line `{text}` is not valid UTF-8 (the odd character marks the byte). | Save the file as UTF-8.
+         unattackable_engage | `{rel}` is `unattackable` and has a `disposition.engage` line, which would never play. | Remove `disposition.engage`, or remove `unattackable`.
+         unattackable_foe | `{rel}` is `unattackable`, so no one can fight it, and a population's members and a death credit's NPC are there to be fought. | Remove `unattackable`, or name another NPC.
          template_schedule | `npcs/{key}` is a spawn template, so nothing it would schedule exists to walk. | Remove `daily_schedule`, or remove `spawn_template`.
          wait_outside | `wait` only works in a reaction's `steps`. | Move these steps into a reaction, or remove `wait`.
          wait_seconds | A `wait` takes whole `seconds` of at least 1 and nothing else, and a rule's `after` and waits add up to at most 2147483647. | Fix `seconds`.
          wait_empty | Nothing runs after this `wait`. | Put a step after it, or remove it.
          wait_event | This step reads the event that started the rule, and that event is gone after a `wait`. | Move the step above the first `wait`.
+         wait_inside_action | This rule can start inside a timed action, and the game cannot tell how long that action takes, so the waits would all land in one second. | Start the rule from `action_completed` and name the `action`.
          wait_subject | A rule with a `wait` reads `when` again when each stretch runs, and the event's `subject` is gone by then. | Read the actor instead, or split the rule by hand.
          duration_status | An action with a duration cannot apply a status. | Remove `duration`, or remove `status.apply`.
          layout_same_spot | Rooms {rooms} share the spot x {x}, y {y}, z {z}. | Give each its own x, y, z in layout.json.
@@ -103,17 +108,48 @@ defmodule Loka.Content.Explain do
 
   def lines(diags, dir) do
     index = SourceLines.index(dir)
-    # A refused scene line leaves its part unset; "missing" would only repeat that line's error.
-    refused = for %{"path" => path, "data" => %{"why" => _}} <- diags, do: path
 
     diags
-    |> Enum.reject(
-      &(&1["data"]["error"] == "missing_property" and String.starts_with?(&1["path"], refused))
-    )
+    |> without_follow_ons()
     # Errors first: readers (the author panel) take the first line for the build's state.
     |> Enum.sort_by(&(&1["severity"] != "error"))
     |> Enum.map(&String.replace_invalid("#{&1["severity"]}: #{place(&1, index)} #{words(&1)}"))
     |> Enum.uniq()
+  end
+
+  defp without_follow_ons(diags) do
+    # A refused scene line leaves its part unset; "missing" would only repeat that line's error.
+    refused = for %{"path" => path, "data" => %{"why" => _}} <- diags, do: path
+    # A bad file name is one rename: its fields and text keys fail the same pattern.
+    named = for %{"path" => path} = d <- diags, file_name?(d), do: path
+
+    diags
+    |> Enum.reject(
+      &(&1["data"]["error"] == "pattern_mismatch" and renamed?(&1["path"], named, diags))
+    )
+    |> Enum.reject(
+      &(&1["data"]["error"] == "missing_property" and String.starts_with?(&1["path"], refused))
+    )
+  end
+
+  # Only a file's name reaches a pattern at the root: a file's content is never a bare string.
+  defp file_name?(%{"data" => %{"error" => "pattern_mismatch"}, "path" => path}),
+    do: path =~ ~r/^"[^"]*"$/
+
+  defp file_name?(_), do: false
+
+  defp renamed?(path, named, diags) do
+    Enum.any?(named, fn root ->
+      key = root |> String.trim("\"") |> Path.rootname() |> Path.basename()
+      field = String.replace_prefix(path, root <> ".", "")
+
+      # A field holds a text key built from the name when that key fails too; a top-level one always
+      # does (room_line's key ends .room). A deeper field with no such key is the author's own fault.
+      (field != path and
+         (not String.contains?(field, ".") or
+            Enum.any?(diags, &String.ends_with?(&1["path"], "." <> key <> "." <> field <> "\"]")))) or
+        (String.starts_with?(path, "text[") and String.contains?(path, "." <> key <> "."))
+    end)
   end
 
   defp words(%{"code" => code, "data" => data} = d) do
@@ -163,9 +199,8 @@ defmodule Loka.Content.Explain do
   defp entry("UNRESOLVED_REFERENCE", _),
     do: @words["unknown_ref"]
 
-  # Only a file's name reaches a pattern at the root: a file's content is never a bare string.
-  defp entry("SCHEMA_VIOLATION", %{"data" => %{"error" => error}, "path" => path}) do
-    if error == "pattern_mismatch" and path =~ ~r/^"[^"]*"$/ do
+  defp entry("SCHEMA_VIOLATION", %{"data" => %{"error" => error}} = d) do
+    if file_name?(d) do
       @words["file_name"]
     else
       {what, fix} = @words["SCHEMA_VIOLATION"]

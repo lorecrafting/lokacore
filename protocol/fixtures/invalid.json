@@ -32288,5 +32288,245 @@
         "code": "pattern_mismatch"
       }
     ]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_go_to_room", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f" }
+    },
+    "errors": [{ "path": "/payload/room", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": {
+        "type": "dev_set_fact",
+        "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+        "fact": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "fact", "key": "wanted" },
+        "value": null
+      }
+    },
+    "errors": [{ "path": "/payload/value", "code": "invalid_type" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_go_to_room", "room": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "room", "key": "yard" } }
+    },
+    "errors": [{ "path": "/payload/actor_id", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_fact", "fact": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "fact", "key": "wanted" }, "value": true }
+    },
+    "errors": [{ "path": "/payload/actor_id", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_fact", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "value": true }
+    },
+    "errors": [{ "path": "/payload/fact", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_fact", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "fact": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "fact", "key": "wanted" } }
+    },
+    "errors": [{ "path": "/payload/value", "code": "missing_property" }]
+  },
+  {
+    "name": "fact_at_least_missing",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_at_least"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      },
+      {
+        "path": "/fact",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "fact_at_least_too_big_unknown",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_at_least",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "f"
+      },
+      "at_least": 2147483648,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "fact_at_least_too_small",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_at_least",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "f"
+      },
+      "at_least": -2147483649
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "fact_at_least_not_integer",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_at_least",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "f"
+      },
+      "at_least": "1"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_choice_then_not_key",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "then": "Not A Key"
+    },
+    "errors": [
+      {
+        "path": "/then",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_choice_then_failed_not_key",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "then_failed": "Not A Key"
+    },
+    "errors": [
+      {
+        "path": "/then_failed",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_choice_policy_unknown_op",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "policy": {
+        "op": "nope"
+      }
+    },
+    "errors": [
+      {
+        "path": "/policy/op",
+        "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_choice_variants_not_list",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "narration_variants": {}
+    },
+    "errors": [
+      {
+        "path": "/narration_variants",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_choice_variant_entry_empty",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "narration_variants": [
+        {}
+      ]
+    },
+    "errors": [
+      {
+        "path": "/narration_variants/0/description",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "fact_at_least_fraction",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_at_least",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "f"
+      },
+      "at_least": 1.5
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]

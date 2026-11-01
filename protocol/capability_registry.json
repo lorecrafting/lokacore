@@ -1,5 +1,17 @@
 [
   {
+    "key": "dev",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [
+      "dev_go_to_room",
+      "dev_set_fact"
+    ],
+    "definitions": [],
+    "events": []
+  },
+  {
     "key": "movement",
     "version": 1,
     "portability": "portable",
@@ -131,6 +143,7 @@
     ],
     "policies": [
       "fact_compare",
+      "fact_at_least",
       "time_since"
     ]
   },

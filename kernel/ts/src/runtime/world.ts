@@ -42,6 +42,7 @@ import * as movement from '../mechanics/movement/rule.ts';
 import * as position from '../mechanics/position/rule.ts';
 import * as readable from '../mechanics/readable/rule.ts';
 import * as quest from '../mechanics/quest/rule.ts';
+import * as dev from '../mechanics/dev/rule.ts';
 import * as scene from '../mechanics/scene/rule.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { admit, adopt, ownerOf, type Actor, type Stepped } from './proposal.ts';
@@ -74,6 +75,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   position: position.decide,
   scene: scene.decide,
   readable: readable.decide,
+  dev: dev.decide,
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements
@@ -105,7 +107,7 @@ const RULELESS = [
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
-  kernel_api: '1.134',
+  kernel_api: '1.137',
   capabilities: Object.fromEntries([...Object.keys(RULES), ...RULELESS].map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,
@@ -128,7 +130,8 @@ export function step(
   // fault or throw and refuse a valid save (fails closed); upgrade: action_key in the receipt row.
   action?: Key,
 ): Stepped {
-  if (command.payload.type === 'elapsed') return { decision: rejected('permission_denied'), world };
+  if (command.payload.type === 'elapsed' || command.payload.type.startsWith('dev_'))
+    return { decision: rejected('permission_denied'), world };
   if (command.payload.type !== 'choose_ancestry' && needsAncestry(world, world.character))
     return { decision: rejected('invalid_state'), world };
   const owner = ownerOf(CAPABILITY_OWNERS.command, command.payload.type) ?? '';
@@ -180,6 +183,17 @@ export function stepElapsed(world: World, command: Command, revision: number): S
   if (owner !== 'schedule' || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
     return reject('unsupported_capability');
   return evaluated(world, command, owner, RULES.schedule as unknown as AnyRule, revision, { n: 0 });
+}
+
+/** The author preview's dev@1 commands; a host calls this only when it says `dev`, never a release. */
+export function stepDev(world: World, command: Command, revision: number): Stepped {
+  const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
+  if (validate('Command', command).length || !command.payload.type.startsWith('dev_'))
+    return reject('permission_denied');
+  const bad = identity(world, command);
+  if (bad) return reject(bad);
+  if (needsAncestry(world, world.character)) return reject('invalid_state');
+  return evaluated(world, command, 'dev', RULES.dev as unknown as AnyRule, revision, { n: 0 });
 }
 
 function identity(world: World, command: Command): ErrorCode | undefined {

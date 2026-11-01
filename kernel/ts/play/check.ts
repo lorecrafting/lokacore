@@ -3,9 +3,7 @@
 // session through the preview's own replay(), with no Book and so no prompt. Prints one line per
 // checkpoint, `ok` or the first refused step, and exits 1 if any failed. No `random` in the host
 // and the frozen clock: the same seed and time as the preview, so a run repeats there.
-import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { frozenClock, replay, type Step } from '../../../mobile/app/author/place.ts';
@@ -15,28 +13,7 @@ import {
   type Bundled,
 } from '../../../mobile/authority/local-story/session.ts';
 import type { Db } from '../../../mobile/authority/local-story/store.ts';
-
-const root = resolve(import.meta.dirname, '../../..');
-
-/** The compiled artifact as the app's {canonical, sha256}, or the compiler's words. */
-function compiled(source: string): Bundled | string {
-  const tmp = mkdtempSync(join(tmpdir(), 'loka-check-'));
-  try {
-    const artifact = join(tmp, 'artifact.json');
-    const run = spawnSync(
-      'mise',
-      ['exec', '--', 'mix', 'loka.compile', source, artifact, '--allow-placeholders'],
-      { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }, // as play/author.ts
-    );
-    if (run.status !== 0) return `${run.stderr || run.error?.message || 'compile failed'}`.trim();
-    const parts = /^\{"cartridge":(.*),"content_hash":"([0-9a-f]{64})"\}$/s.exec(
-      readFileSync(artifact, 'utf8'),
-    );
-    return parts ? { canonical: parts[1]!, sha256: parts[2]! } : 'not in canonical artifact form';
-  } finally {
-    rmSync(tmp, { recursive: true, force: true });
-  }
-}
+import { compiled } from './compiled.ts';
 
 /** A save in memory on the same SQLite the tests' host uses. */
 function memory(sql: DatabaseSync): Db {
@@ -60,6 +37,7 @@ function replayed(bundled: Bundled, steps: Step[]): string | undefined {
       kernel_version: `${KERNEL_ID}@${'0'.repeat(40)}`,
       newId: () => `aaaaaaaa-0000-4000-8000-${(++id).toString().padStart(12, '0')}`, // mutate-skip: any unique id
       time: frozenClock(() => moved),
+      dev: true, // a recorded cheat replays here as in the preview
     });
     return replay(steps, game, (ms) => (moved += ms)).failed;
   } finally {

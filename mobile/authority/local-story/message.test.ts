@@ -268,25 +268,6 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
         a.put('choices', b, r);
       },
     ],
-    ['branch fact reset', false, (a) => a.put('facts', a.fact('branch')!.key, 'unselected')],
-    [
-      'branch fact deleted',
-      false,
-      (a) => {
-        a.sql
-          .prepare("DELETE FROM state_row WHERE section='facts' AND key=?")
-          .run(a.fact('branch')!.key);
-      },
-    ],
-    ['message back with the courier', false, (a) => a.put('containers', message, courier)],
-    [
-      'message nested in NPC-held container',
-      false,
-      (a) => {
-        a.put('containers', message, satchel);
-        a.put('containers', satchel, courier);
-      },
-    ],
     [
       'malformed receipt command JSON',
       false,
@@ -347,8 +328,6 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
           .run(JSON.stringify(response), r.command_id);
       },
     ],
-    ['terminal delivered fact reset', true, (a) => a.put('facts', a.fact('delivered')!.key, false)],
-    ['terminal message returned to actor', true, (a) => a.put('containers', message, fresh.body)],
     [
       'terminal quest reopened',
       true,
@@ -382,6 +361,58 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
           a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(),
           before,
         );
+      } finally {
+        a.sql.close();
+      }
+    });
+});
+
+// Breaks: reload inferring who wrote a fact or moved the message from state. A reaction, a theft or
+// a death reaches each of these lawfully, so each loads, plays and reopens with its state kept.
+test('a moved message or rewritten fact loads and keeps playing', async (t) => {
+  const moved: [string, boolean, (a: ReturnType<typeof setup>) => void][] = [
+    ['branch fact reset', false, (a) => a.put('facts', a.fact('branch')!.key, 'unselected')],
+    [
+      'branch fact deleted',
+      false,
+      (a) => {
+        a.sql
+          .prepare("DELETE FROM state_row WHERE section='facts' AND key=?")
+          .run(a.fact('branch')!.key);
+      },
+    ],
+    ['message back with the courier', false, (a) => a.put('containers', message, courier)],
+    [
+      'message nested in NPC-held container',
+      false,
+      (a) => {
+        a.put('containers', message, satchel);
+        a.put('containers', satchel, courier);
+      },
+    ],
+    ['terminal delivered fact reset', true, (a) => a.put('facts', a.fact('delivered')!.key, false)],
+    ['terminal message returned to actor', true, (a) => a.put('containers', message, fresh.body)],
+  ];
+  for (const [name, terminal, mutate] of moved)
+    await t.test(name, () => {
+      const a = setup();
+      try {
+        a.offer();
+        a.choose('carry');
+        if (terminal) {
+          a.terminal();
+          a.choose('deliver');
+        }
+        a.ok('look');
+        mutate(a);
+        const holder = a.row('containers', message);
+        const game = openGame(a.db, b, a.host);
+        assert.equal(
+          game.invoke({ action_key: 'look', target_ids: [], input: {} } as never).kind,
+          'saved',
+        );
+        openGame(a.db, b, a.host);
+        assert.equal(a.row('containers', message), holder);
       } finally {
         a.sql.close();
       }
@@ -430,26 +461,20 @@ test('failed and lost branch/terminal COMMIT keep narration and custody behind c
     }
 });
 
-// Breaks: a forged terminal quest row before receiving the message bypasses handoff validation,
-// showing delivery while leaving the branch, delivered fact and original custody untouched.
-test('terminal quest without a message branch refuses reopen and requires explicit Start over', (t) => {
+// Breaks: a resolved quest refused for lacking a message branch, when a reaction resolving it under
+// the hand-over id leaves exactly this state.
+test('a quest resolved with no message branch loads, keeps its row and needs no Start over', (t) => {
   const a = setup();
   t.after(() => a.sql.close());
   assert.deepEqual(openGame(a.db, b, a.host).view().view.journal, []);
   a.ok('lantern');
   assert.equal(openGame(a.db, b, a.host).view().view.journal[0].state, 'active');
   const q = a.rows('quests').find((r) => r.value.quest.key === 'lantern')!;
-  const forged = { ...q.value, state: 'resolved', outcome: 'deliver' };
-  a.put('quests', q.key, forged);
+  const resolved = { ...q.value, state: 'resolved', outcome: 'deliver' };
+  a.put('quests', q.key, resolved);
   const session = localSession(() => a.db, assert.fail, b, a.host);
-  assert.equal(session.game(), undefined);
-  assert.equal(session.failed()?.kind, 'save_corrupt');
-  assert.equal(session.failed()?.startOver, true);
-  assert.deepEqual(a.row('quests', q.key), forged);
-  assert.equal(a.row('containers', message), courier);
-  assert.equal(a.fact('branch'), undefined);
-  assert.equal(a.fact('delivered'), undefined);
-  assert.equal(session.startOver(), undefined);
   assert.equal(session.failed(), undefined);
-  assert.deepEqual(session.game()!.view().view.journal, []);
+  assert.ok(session.game());
+  assert.deepEqual(a.row('quests', q.key), resolved);
+  assert.equal(a.row('containers', message), courier);
 });

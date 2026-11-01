@@ -5,9 +5,11 @@ defmodule Loka.ContentWaitTest do
   @raid "cartridges/raid_sampler"
   @rule "reactions/aftershock.json"
   @ref "raid_sampler@0.0.1:reaction/"
+  @echo "fishing_sampler@0.0.1:reaction/echo"
 
   defp adjust(n), do: %{"op" => "fact.adjust", "fact" => "aftershocks", "amount" => n}
   defp wait(n), do: %{"op" => "wait", "seconds" => n}
+  defp nar, do: %{"op" => "narrate", "text" => "narration.fish.bite"}
   defp steps(list), do: fn r -> r |> Map.delete("after") |> Map.put("steps", list) end
 
   setup_all do
@@ -158,6 +160,54 @@ defmodule Loka.ContentWaitTest do
                {@rule, steps([adjust(1), wait(5), adjust(2)])},
                {"reactions/aftershock_wait_1.json", existing}
              ])
+  end
+
+  describe "a timed action (fish, 60 s)" do
+    setup do
+      %{dir: Loka.ContentSource.copy("cartridges/fishing_sampler")}
+    end
+
+    defp rule(on, list),
+      do: {"reactions/echo.json", %{"on" => on, "silent" => true, "steps" => list}}
+
+    @completed %{"event" => "action_completed"}
+
+    # Breaks: waits of 10 and 10 after the action land in one second, in job id order (FD1), so
+    # the pacing the writer asked for is lost; the first stretch must stay immediate.
+    test "a wait on its named completion counts from its end", %{dir: dir} do
+      on = Map.put(@completed, "action", "fish")
+      rules = reactions(dir, [rule(on, [nar(), wait(10), nar(), wait(10), nar()])])
+
+      assert {nil, 70, 80} =
+               {rules[@echo]["after"], rules[@echo <> "_wait_1"]["after"],
+                rules[@echo <> "_wait_2"]["after"]}
+    end
+
+    # Breaks: the duration is added on a rule that names another action.
+    test "another action's completion keeps the plain wait", %{dir: dir} do
+      fish = dir |> Path.join("actions/fish.json") |> File.read!() |> Jason.decode!()
+
+      outcomes = Map.delete(fish["outcomes"], "failure")
+
+      untimed =
+        fish
+        |> Map.drop(["duration", "check"])
+        |> Map.merge(%{"aliases" => ["other"], "outcomes" => outcomes})
+
+      other = {"actions/other.json", untimed}
+      on = Map.put(@completed, "action", "other")
+      rules = reactions(dir, [other, rule(on, [nar(), wait(10), nar()])])
+      assert rules[@echo <> "_wait_1"]["after"] == 10
+    end
+
+    # Breaks: the rule compiles and its waits collapse: no duration is known for it.
+    test "an unnamed completion or the action's own event is refused", %{dir: dir} do
+      for on <- [@completed, %{"event" => "custom_event", "custom" => "bite"}] do
+        assert {"reactions/echo.on", "wait_inside_action"} in refused(dir, [
+                 rule(on, [nar(), wait(10), nar()])
+               ])
+      end
+    end
   end
 
   # Breaks: a stretch with no line of its own trips the silent-write lint although the list says

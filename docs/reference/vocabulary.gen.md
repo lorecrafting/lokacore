@@ -521,6 +521,19 @@ The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The perceiving NPC. |
 | sense | `sound` or `smell` or `heat` | yes | The sense. |
 
+### `fact_at_least`
+
+An int fact's value, read as fact_compare reads it, is at least at_least (a dialogue's relationship or count gate). Owned by fact@1.
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| at_least | integer | yes |  |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| subject | `target` |  |  |
+| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+
 ### `time_since`
 
 Toolbox row FD1: the world clock minus the int fact's value (as fact_compare reads it, at its named NPC or item) is at least at_least; a fact never stamped holds its default. Owned by fact@1.
@@ -747,14 +760,14 @@ The scene format is in [Writing the game](../guides/writing-the-game.md).
 
 ## Choice fields
 
-One option of a dialogue (06 §17, §43): label and narration its text keys; steps, its effects in order (Steps of the dialogue choice context, docs/system/cartridge.md Steps and checks; a fact.assign sets a declared fact of the cartridge at the one scope it allows, a value of its type, as a scripted action's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14): check (step.schema.json Check, kind opposed), an opposed check made when the choice is chosen; a checked choice carries only label, narration, steps, availability and check, in a dialogue with no quest and no riddle, and its steps grant no skill (else OUTCOME_MISMATCH at its check).
+One option of a dialogue (06 §17, §43): label and narration its text keys; steps, its effects in order (Steps of the dialogue choice context, docs/system/cartridge.md Steps and checks; a fact.assign sets a declared fact of the cartridge at the one scope it allows, a value of its type, as a scripted action's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14): check (step.schema.json Check, kind opposed), an opposed check made when the choice is chosen; a checked choice carries only label, narration, narration_variants, steps, availability, check, policy, then and then_failed, in a dialogue with no quest and no riddle, and its steps grant no skill (else OUTCOME_MISMATCH at its check). policy, the option's own condition, read with the speaker as target at the view, the choose and the talk: while it fails the option is not drawn and its choose is invalid_state. then, the key of a dialogue (of any speaker) that the accepted answer opens next as the conversation's new row, or end, which ends the conversation; a dialogue reached this way is no talk of its own and never reopens itself. then_failed, the same for a failed check; refused without check. narration_variants, words read instead of narration by the first when that holds before the answer's writes.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | accept | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A quest of this cartridge the choice activates. |
 | availability | object |  | Time limits on offering the choice. |
-| availability.from | [LogicalTime](source-kinds.gen.md#logicaltime) |  |  |
-| availability.through | [LogicalTime](source-kinds.gen.md#logicaltime) |  |  |
+| availability.from | [LogicalTime](source-kinds.gen.md#logicaltime) |  | First logical time the choice is offered. |
+| availability.through | [LogicalTime](source-kinds.gen.md#logicaltime) |  | Last logical time the choice is offered, inclusive. |
 | check | [Check](source-kinds.gen.md#check) |  | An opposed check made when chosen. |
 | escort | object |  | API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest. |
 | escort.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |
@@ -770,6 +783,7 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | lesson_payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource paid. |
 | lesson_payment.to | [Key](source-kinds.gen.md#key) | yes | The npc role paid. |
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of what the actor reads on choosing. |
+| narration_variants | [TextVariants](source-kinds.gen.md#textvariants) |  |  |
 | patrol | object |  | A patrol transition. |
 | patrol.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |
 | patrol.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The patrol quest. |
@@ -778,8 +792,11 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | payment.amount | integer | yes | How much. |
 | payment.from | [Key](source-kinds.gen.md#key) | yes | The paying npc role. |
 | payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource paid. |
+| policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | receive | object |  | The bound NPC-held item transferred to the actor. |
 | receive.from | [Key](source-kinds.gen.md#key) | yes | The npc role holding it. |
 | receive.item | [Key](source-kinds.gen.md#key) | yes | The bound item transferred. |
 | steps | list of [Step](vocabulary.gen.md#steps) |  | See the type. |
 | story_point | string |  | <story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome. |
+| then | [Key](source-kinds.gen.md#key) |  |  |
+| then_failed | [Key](source-kinds.gen.md#key) |  |  |

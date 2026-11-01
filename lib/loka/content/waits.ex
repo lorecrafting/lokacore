@@ -28,30 +28,42 @@ defmodule Loka.Content.Waits do
   @doc "Every reaction with a wait replaced by its rules; any other `wait` step is refused."
   @spec lower([entry()]) :: {[entry()], [fault()]}
   def lower(files) do
-    {files, refused} = files |> Enum.map(&file/1) |> Enum.unzip()
+    timed = timed(files)
+    {files, refused} = files |> Enum.map(&file(&1, timed)) |> Enum.unzip()
     {files, repeats} = Areas.unique(List.flatten(files))
     {files, List.flatten(refused) ++ repeats}
   end
 
-  # A text catalog's keys are the author's words, not steps.
-  defp file({"text.json", _, _} = file), do: {[file], []}
-
-  defp file({rel, {:reaction, _, at} = id, %{"steps" => steps} = rule} = file)
-       when is_list(steps) do
-    if Enum.any?(steps, &wait?/1) and lowerable?(rule) do
-      case faults(steps, rule, rel, at) do
-        [] -> {rules(rel, id, rule), []}
-        faults -> {[{rel, id, :invalid}], faults}
-      end
-    else
-      {[file], []}
-    end
+  # `{key, duration, outcomes}` of each scripted action that advances time.
+  defp timed(files) do
+    for {_, {:action, key, _}, %{"duration" => d} = a} <- files,
+        is_integer(d),
+        d > 0,
+        not is_map_key(a, "command"),
+        do: {key, d, a["outcomes"]}
   end
 
-  defp file({rel, kind, value} = file) do
+  # A text catalog's keys are the author's words, not steps.
+  defp file({"text.json", _, _} = file, _), do: {[file], []}
+
+  defp file({rel, {:reaction, _, _} = id, %{"steps" => steps} = rule} = file, timed)
+       when is_list(steps) do
+    if Enum.any?(steps, &wait?/1) and lowerable?(rule),
+      do: lowered(rel, id, rule, timed),
+      else: {[file], []}
+  end
+
+  defp file({rel, kind, value} = file, _) do
     case misplaced(value, []) do
       [] -> {[file], []}
       paths -> {[{rel, kind, :invalid}], Enum.map(paths, &fault(rel, at(kind) ++ &1, "outside"))}
+    end
+  end
+
+  defp lowered(rel, {:reaction, _, at} = id, rule, timed) do
+    case faults(rule["steps"], rule, rel, at) ++ inside_action(rule["on"], timed, rel, at) do
+      [] -> {rules(rel, id, rule, lead(rule["on"], timed)), []}
+      faults -> {[{rel, id, :invalid}], faults}
     end
   end
 
@@ -118,6 +130,39 @@ defmodule Loka.Content.Waits do
     end
   end
 
+  # The action's events carry its start, and a job due inside its advance lands 1 s after it (FD1),
+  # in job id order: without its duration every wait shorter than the action lands in one second.
+  defp lead(%{"event" => "action_completed", "action" => action}, timed) do
+    Enum.find_value(timed, 0, fn {key, d, _} -> if key == action, do: d end)
+  end
+
+  defp lead(_, _), do: 0
+
+  # Which action, and so how long, is known only for action_completed naming it.
+  defp inside_action(%{"event" => "action_completed"} = on, [_ | _], rel, at)
+       when not is_map_key(on, "action"),
+       do: [fault(rel, at ++ ["on"], "inside_action")]
+
+  defp inside_action(%{"event" => "custom_event", "custom" => custom}, timed, rel, at) do
+    if Enum.any?(timed, fn {_, _, outcomes} -> emits?(outcomes, custom) end),
+      do: [fault(rel, at ++ ["on"], "inside_action")],
+      else: []
+  end
+
+  defp inside_action(_, _, _, _), do: []
+
+  defp emits?(%{} = outcomes, custom) do
+    Enum.any?(outcomes, fn
+      {_, %{"steps" => steps}} when is_list(steps) ->
+        Enum.any?(steps, &match?(%{"event" => ^custom}, &1))
+
+      _ ->
+        false
+    end)
+  end
+
+  defp emits?(_, _), do: false
+
   # At fire the event's subject is gone and `subject` would read the actor's body instead.
   defp subjects(%{"subject" => "subject"}, path), do: [path ++ ["subject"]]
 
@@ -130,7 +175,7 @@ defmodule Loka.Content.Waits do
 
   defp subjects(_, _), do: []
 
-  defp rules(rel, {:reaction, key, at}, rule) do
+  defp rules(rel, {:reaction, key, at}, rule, lead) do
     # The list narrates as a whole, so a stretch with no line of its own is not a silent write.
     told = Enum.any?(rule["steps"], &(&1["op"] == "narrate"))
     shared = if told, do: Map.put(rule, "silent", true), else: rule
@@ -140,7 +185,7 @@ defmodule Loka.Content.Waits do
     |> Enum.with_index()
     |> Enum.map(fn {{total, steps}, n} ->
       value = %{shared | "steps" => steps}
-      value = if total > 0, do: Map.put(value, "after", total), else: value
+      value = if total > 0, do: Map.put(value, "after", total + lead), else: value
       {rel, {:reaction, if(n == 0, do: key, else: "#{key}_wait_#{n}"), at}, value}
     end)
   end

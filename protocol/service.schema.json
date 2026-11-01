@@ -15,10 +15,10 @@
         "action": {"description":"The provider action.",
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of the service's name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "narration": {
+        "narration": {"description":"Text told when the service is used.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "currency": {"description":"The conserved quote resource.",

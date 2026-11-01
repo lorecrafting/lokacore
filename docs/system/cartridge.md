@@ -412,7 +412,8 @@ inline; its artifact equals the hand-keyed one byte for byte.
 - All stretches are scheduled from the same event, not chained: [FD1](mechanics.md#delayed-reactions-toolbox-row-fd1) refuses `event.emit` on a delayed rule. A list that narrates in any stretch counts as narrating in each for the silent-write lint.
 - Refused in the catalog's words at the authored step (SCHEMA_VIOLATION invalid_value): a `wait` outside a reaction's `steps` (any other definition, such as an action, a dialogue choice or a service; a `.scene` file has no way to write one); `seconds` not a whole number of at least 1, an extra field, or a running total above the `after` maximum; a `wait` with no step after it, or followed by another `wait`; a step after a wait that reads the event, the FD1 event-bound list (`wait_event`); a `when` with `subject: "subject"` (`wait_subject`).
 - **Death, leaving, saving: FD1 unchanged.** Each stretch is its own reaction job for the delivery's actor. A save holds the pending jobs and a cold reopen fires each once. Leaving the room cancels nothing, since a job is bound to its actor, not a room. Nothing about a death cancels a job, and no test pins a job firing after the actor's death. The only cancellation is `when`, read at delivery and again at fire, so an author who wants a list to stop writes that into `when`.
-- **Known limits.** `when` is read for each stretch, so a list whose earlier step makes its own `when` false drops the later stretches; the compiler does not look for this. Stretches that reach the same logical second run in job order, not surely in list order: a root command's delivery inside a long advance moves every delay ending inside it to 1 s after the advance ([FD1](mechanics.md#delayed-reactions-toolbox-row-fd1)), so a wait shorter than the command's own time can lose its gap. A fault another stage finds in a later stretch (an unknown text key) names the sibling's renumbered step, under the authored file (`ponytail:` in `lib/loka/content/waits.ex`).
+- **Timed actions.** An action's events carry its start, and FD1 lands a job due inside the advance 1 s after it, in job id order (minted per command). So a list on `action_completed` naming a scripted action with a `duration` adds that duration to every stretch that has an `after`: waits count from the action's end and keep their order and spacing. The same list on `action_completed` with no `action`, while any timed scripted action exists, or on a custom event a timed action's outcome emits, is refused (`wait_inside_action`): the duration is not known there.
+- **Known limits.** `when` is read for each stretch, so a list whose earlier step makes its own `when` false drops the later stretches; the compiler does not look for this, and a writer may use it to cancel. A list on any other event inside a long command (a check or fact change inside a timed action, a chain of events from one, a `wait` command) is not known at compile: stretches due inside the advance all land 1 s after it, and their order can differ per command. A fact step on a per-subject fact with no `npc` or `item` after a wait writes nothing, since the job has no event subject. A fault another stage finds in a later stretch (an unknown text key) names the sibling's renumbered step, under the authored file (`ponytail:` in `lib/loka/content/waits.ex`).
 
 **Zones.** One reaction for many rooms.
 - A room's source may carry `"zones": ["<Key>", ...]`; the compiler strips it from every room.
@@ -855,6 +856,7 @@ loopback-only author API (`LOKA_AUTHOR_PORT`, default 19008) that the preview pr
 with it set fails to build, and the app throws when the dev cartridge flag reaches a non-`__DEV__`
 build. The author tools below are reachable only in that bundle (a production export keeps a few dead strings) and change no protocol, save or kernel_api.
 
+- **Numbers.** The panel's Numbers tab and `bin/loka sim <cartridge dir>` ([`sim.ts`](../../kernel/ts/play/sim.ts)) report, read-only: each pool over game hours under the [measured-flows](#measured-flows-balance-tool-2) worker, XP per level with the kills that pay for it, and the [fight matrix](#fight-matrix-and-encounter-rating-balance-tool-7) (`GET /__author/numbers`). Each report runs in a child process killed at a limit; one that does not finish says so. Nothing is written to the source tree.
 - **Keep my place.** The preview records each input the Book sends that the session saved (the
   intent, its targets as definition refs `cartridge@version:kind/key`, and each dev-clock advance
   in milliseconds) under the artifact's hash. After a reload into a different hash it replays the
@@ -890,8 +892,9 @@ build. The author tools below are reachable only in that bundle (a production ex
   words to every source `file:line`, and each definition of the compiled artifact whose refs name that
   key; each Book line opens its source `file:line` in the owner's editor (`POST /__author/open`,
   `LOKA_EDITOR`, default `code --goto`); the game-time control, which delivers the time at once and
-  records it only when delivered; the checkpoint list; the still-to-write list. An input the session held
+  records it only when delivered; the checkpoint list; the still-to-write list; go to a room and set a fact by key (below). An input the session held
   (`pending`, `catching_up`) is recorded when it settles as accepted.
+- **Go to room, set fact** ([owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md), dev@1): the panel sends them as ordinary invocations `dev_go_to_room` and `dev_set_fact` the session decides, saves as receipts and records as steps, so a reopen and `bin/loka check` re-decide them under the fixed seed and clock and a checkpoint may hold them. Only a host with `dev` set (the preview, `bin/loka check`) reaches `stepDev`; any other host answers `unsupported_capability`, `step` answers `permission_denied`, and no cartridge action can name them. Go to room moves the body alone and is refused `invalid_state` when that would leave a world invariant wrong: already there, engaged, not standing, in water, with an escort, mount or group that would come along, on a patrol or expedition, in a modal scene or at an open choice. It runs no entry sight or arrival line. Set fact is refused `invalid_state` for a per-subject fact, a value of the wrong type or range, the value it already has, the position and scene facts, and a fact another mechanic owns. The panel states each refusal in one plain sentence.
 - **Still to write.** A text value with a line that trims to `~` is a placeholder, in JSON or in
   a scene file. The panel and
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
@@ -994,6 +997,8 @@ player_miss, npc_hit, npc_miss, player_died and npc_died. All six resolve in the
 cartridge catalog. An NPC's optional `attack` profile explicitly
 makes it attackable and supplies its own chance/damage bounds; it requires explicit HP.
 Chances are integers 0..100, damage bounds positive and ordered, multipliers positive.
+An NPC's optional `unattackable: true` overrides `attack`: no offer, no admission, no engage
+([combat@1](mechanics.md#combat1--first-live-encounter-m6-a)); with `disposition.engage` it is a compile error.
 Room `sanctuary: true` forbids admission. All new objects reject unknown fields.
 
 Optional `world.combat.target_choice: true` opts into [target choice](mechanics.md#target-choice-in-the-same-room-toolbox-row-6a)

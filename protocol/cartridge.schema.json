@@ -235,6 +235,7 @@
               "type": "object",
               "properties": {
                 "phrases": {
+                  "description": "The words every player can say, as chips in the say bar.",
                   "type": "array",
                   "minItems": 1,
                   "items": {
@@ -880,29 +881,29 @@
       ],
       "type": "object",
       "properties": {
-        "name": {
+        "name": {"description":"Text key of the choice's label.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description": {
+        "description": {"description":"Text key of the choice's description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "attribute": {
+        "attribute": {"description":"The attribute this choice raises at birth, by modifier.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "modifier": {
+        "modifier": {"description":"Added to the attribute's starting value; at least 1.",
           "type": "integer",
           "minimum": 1
         },
-        "skill": {
+        "skill": {"description":"A skill granted at birth, without learning; it may not have a prerequisite.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "faction": {
+        "faction": {"description":"A fact set when the choice is made.",
           "type": "object",
           "properties": {
-            "fact": {
+            "fact": {"description":"The fact; it must be player-scoped.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "value": {
+            "value": {"description":"The value the fact is set to.",
               "type": "integer"
             }
           },
@@ -912,7 +913,7 @@
           ],
           "additionalProperties": false
         },
-        "dark_sight": {
+        "dark_sight": {"description":"When true, the character sees in the dark.",
           "const": true
         }
       },
@@ -951,19 +952,19 @@
       "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; the compiler checks order, cycle bounds and schedule/window hours (lib/loka/content/calendar.ex). Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
       "type": "object",
       "properties": {
-        "start": {
+        "start": {"description":"The logical time a new world begins at.",
           "type": "integer",
           "minimum": 0
         },
-        "units_per_hour": {
+        "units_per_hour": {"description":"Logical time units in one hour; the three unit fields are given together.",
           "type": "integer",
           "minimum": 1
         },
-        "hours_per_day": {
+        "hours_per_day": {"description":"Hours in one day.",
           "type": "integer",
           "minimum": 1
         },
-        "subdivisions_per_hour": {
+        "subdivisions_per_hour": {"description":"Parts the status line splits an hour into; must divide units_per_hour.",
           "type": "integer",
           "minimum": 1
         },
@@ -1033,11 +1034,11 @@
       "description": "A repeating cycle of ordered cuts in logical time units (lunar; season and tide, toolbox row 31): the phase at time t is the last cut at or before ((t - origin) mod period); the first cut starts at 0.",
       "type": "object",
       "properties": {
-        "period": {
+        "period": {"description":"Length of the cycle in logical units.",
           "type": "integer",
           "minimum": 1
         },
-        "origin": {
+        "origin": {"description":"The time at which the cycle is at its start (position 0).",
           "type": "integer",
           "minimum": 0
         },
@@ -1076,16 +1077,16 @@
       "description": "One weather of a calendar's weather table (toolbox row 31): each calendar day takes one entry with probability weight / total weight, by a hash of the world id and the day, never the authority RNG. wet: an exposed room's flame will not light (light@1 ignite). Phases are unique in the table.",
       "type": "object",
       "properties": {
-        "phase": {
+        "phase": {"description":"The weather's name, lowercase letters, digits and underscores; unique in the table.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*$"
         },
-        "weight": {
+        "weight": {"description":"Its chance relative to the other entries: weight over the sum of all weights; 1 to 1000.",
           "type": "integer",
           "minimum": 1,
           "maximum": 1000
         },
-        "wet": {
+        "wet": {"description":"When true, an exposed flame will not light in this weather.",
           "type": "boolean"
         }
       },
@@ -1106,11 +1107,11 @@
       "description": "An inclusive phase start within one authored solar day or lunar period.",
       "type": "object",
       "properties": {
-        "at": {
+        "at": {"description":"Logical units into the solar day (or the cycle) at which this phase starts; the first cut of a cycle is 0.",
           "type": "integer",
           "minimum": 0
         },
-        "phase": {
+        "phase": {"description":"The phase's name, lowercase letters, digits and underscores.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*$"
         }
@@ -1178,7 +1179,9 @@
         "INVALID_TIME_POLICY",
         "VISITS_UNRECORDED",
         "HOSTILE_QUEST_SPEAKER",
-        "SITE_EXIT_CONFLICT"
+        "SITE_EXIT_CONFLICT",
+        "SPEAKER_ELSEWHERE",
+        "LOOP_SPEAKER"
       ],
       "examples": [
         "UNRESOLVED_REFERENCE",
@@ -1187,7 +1190,7 @@
       ]
     },
     "Diagnostic": {
-      "description": "A structured diagnostic (08 §6; 05 §8: every compile stage emits them). severity is error, which fails the build, except for a warning (TOUCH_LINK_MISSING, VISITS_UNRECORDED, HOSTILE_QUEST_SPEAKER), which the compiler reports beside the artifact. message_key is diagnostics. followed by the code in lowercase; data carries the code's facts as strings and integers; suggested_capabilities lists capability pins that would fix it (the key@version form requires uses), possibly none. A list of diagnostics is in one deterministic order (05 §8, CAR-04): by path, then code, comparing UTF-8 bytes, then by the canonical encoding of the whole diagnostic; an identical diagnostic appears once.",
+      "description": "A structured diagnostic (08 §6; 05 §8: every compile stage emits them). severity is error, which fails the build, except for a warning (TOUCH_LINK_MISSING, VISITS_UNRECORDED, HOSTILE_QUEST_SPEAKER, SPEAKER_ELSEWHERE), which the compiler reports beside the artifact. message_key is diagnostics. followed by the code in lowercase; data carries the code's facts as strings and integers; suggested_capabilities lists capability pins that would fix it (the key@version form requires uses), possibly none. A list of diagnostics is in one deterministic order (05 §8, CAR-04): by path, then code, comparing UTF-8 bytes, then by the canonical encoding of the whole diagnostic; an identical diagnostic appears once.",
       "type": "object",
       "properties": {
         "severity": {
@@ -1442,20 +1445,20 @@
         "water": {
           "$ref": "water.schema.json#/$defs/WaterSettings"
         },
-        "bell_cue": {
+        "bell_cue": {"description":"A line told in the listed rooms when the fact turns true.",
           "type": "object",
           "properties": {
-            "fact": {
+            "fact": {"description":"The bool fact whose change to true triggers the line.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "rooms": {
+            "rooms": {"description":"The rooms where it is told, to anyone there.",
               "type": "array",
               "minItems": 1,
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               }
             },
-            "text": {
+            "text": {"description":"Text key of the line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -1479,7 +1482,7 @@
             "fight": {"description":"A bool pair fact, read at each NPC: the hireling order to fight.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "wage": {
+            "wage": {"description":"Pays each group member from the player's purse on a schedule; a member who cannot be paid leaves the group.",
               "type": "object",
               "properties": {
                 "resource": {"description":"The conserved resource paid.",
@@ -1572,16 +1575,16 @@
             "stolen": {"description":"The per_subject instance bool fact set true on a stolen item.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "noticed": {
+            "noticed": {"description":"Key of the custom event emitted when a theft is seen.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "narration": {
+            "narration": {"description":"Text keys told after a theft.",
               "type": "object",
               "properties": {
-                "seen": {
+                "seen": {"description":"Told when the theft is noticed.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "unseen": {
+                "unseen": {"description":"Told when nobody notices the theft.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -1694,19 +1697,19 @@
       "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
       "type": "object",
       "properties": {
-        "terms": {
+        "terms": {"description":"The attributes that make up the bonus; each adds per_point times (the attribute's value minus pivot).",
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
             "properties": {
-              "attribute": {
+              "attribute": {"description":"The attribute read.",
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               },
-              "per_point": {
+              "per_point": {"description":"Bonus added per point of the attribute above pivot (below it, taken away).",
                 "$ref": "resource.schema.json#/$defs/ResourceInt"
               },
-              "pivot": {
+              "pivot": {"description":"The attribute value at which this term adds nothing.",
                 "$ref": "resource.schema.json#/$defs/ResourceInt"
               }
             },
@@ -1718,7 +1721,7 @@
             "additionalProperties": false
           }
         },
-        "divisor": {
+        "divisor": {"description":"The sum of the terms is divided by this, rounded down; default 1.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
@@ -1758,15 +1761,15 @@
         "shrine": {"description":"The room a dead player's body returns to.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "restore": {
+        "restore": {"description":"The values the dead body's pools are set to.",
           "type": "object",
           "properties": {
-            "hp": {
+            "hp": {"description":"HP after death; capped at the body's HP maximum.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
             },
-            "mv": {
+            "mv": {"description":"Movement after death; capped at the body's movement maximum.",
               "type": "integer",
               "minimum": 0,
               "maximum": 2147483647
@@ -1782,7 +1785,7 @@
           "type": "object",
           "description": "What a player's death costs (toolbox row 47). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
           "properties": {
-            "experience": {
+            "experience": {"description":"Experience lost on death; needs world.levelling.",
               "type": "object",
               "properties": {
                 "percent": {"description":"The body loses floor(experience * percent / 100), never below its current level's threshold.",
@@ -1876,25 +1879,25 @@
           "type": "integer",
           "minimum": 1
         },
-        "narration": {
+        "narration": {"description":"Text keys told in combat rounds.",
           "type": "object",
           "properties": {
-            "player_hit": {
+            "player_hit": {"description":"Told when the player's attack hits.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_miss": {
+            "player_miss": {"description":"Told when the player's attack misses.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_hit": {
+            "npc_hit": {"description":"Told when an NPC's attack hits the player.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_miss": {
+            "npc_miss": {"description":"Told when an NPC's attack misses the player.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_hit": {
+            "ally_hit": {"description":"Told when an ally's strike hits.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_miss": {
+            "ally_miss": {"description":"Told when an ally's strike misses.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "shot_hit": {"description":"Told when a ranged first strike hits. Required when any item declares weapon.ranged.",
@@ -1926,7 +1929,7 @@
           ],
           "additionalProperties": false
         },
-        "dodge": {
+        "dodge": {"description":"Percent chance to dodge an enemy attack that would otherwise hit; absent means no dodge.",
           "type": "object",
           "properties": {
             "skill": {"description":"The skill that must be usable for a dodge.",
@@ -2192,7 +2195,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "items": {
+        "items": {"description":"The items moved on each due run.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2200,23 +2203,23 @@
           "minItems": 1,
           "maxItems": 64
         },
-        "from": {
+        "from": {"description":"Where the items are taken from.",
           "$ref": "entity.schema.json#/$defs/ItemLocation"
         },
-        "to": {
+        "to": {"description":"Where the items are put; filled until it holds cap of them.",
           "$ref": "entity.schema.json#/$defs/ItemLocation"
         },
-        "cap": {
+        "cap": {"description":"Stop moving once the destination holds this many of the items.",
           "type": "integer",
           "minimum": 1,
           "maximum": 64
         },
-        "count": {
+        "count": {"description":"The most items moved per run, lowest entity id first.",
           "type": "integer",
           "minimum": 1,
           "maximum": 64
         },
-        "every": {
+        "every": {"description":"Seconds between runs, counted from the previous due time.",
           "type": "integer",
           "minimum": 1
         }
@@ -2244,7 +2247,7 @@
         "npc": {"description":"The NPC each member is copied from.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "item": {
+        "item": {"description":"Item copied into each member's hands at birth. Needed unless the plan has a scavenge block, which then forbids it.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "corpse": {"description":"Corpse template for members; overrides world.death.npc_corpse.",
@@ -2257,10 +2260,10 @@
           ],
           "description": "Origin role of each member; default hunter. Its directly held item has role loot."
         },
-        "home": {
+        "home": {"description":"The room members are born in. It must be one of the two rooms in area, and the NPC template must sit in it.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "area": {
+        "area": {"description":"The two rooms members wander between. They must be different rooms joined by exits in both directions, with no barrier on either exit.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2291,7 +2294,7 @@
           "type": "integer",
           "minimum": 0
         },
-        "replacement_delay": {
+        "replacement_delay": {"description":"Clock units after a member dies before its slot is refilled. At least wander_interval.",
           "type": "integer",
           "minimum": 1
         },
@@ -2305,10 +2308,10 @@
           "minimum": 1,
           "maximum": 100
         },
-        "scavenge": {
+        "scavenge": {"description":"Makes members carry loose items along a corridor to a nest. The plan must then have no item field.",
           "type": "object",
           "properties": {
-            "items": {
+            "items": {"description":"Items members will pick up: loose in a room, not containers, and allowed to be given away. At most 8.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2316,7 +2319,7 @@
               "minItems": 1,
               "maxItems": 8
             },
-            "drop_rooms": {
+            "drop_rooms": {"description":"Rooms where members pick up a listed item lying on the floor. Each must be on the corridor.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2324,10 +2327,10 @@
               "minItems": 1,
               "maxItems": 8
             },
-            "nest": {
+            "nest": {"description":"Container item in the last corridor room where members leave what they carried. It must have room left.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "corridor": {
+            "corridor": {"description":"Rooms a carrying member walks through, in order, ending at the nest room. It must include home, and each step needs an open exit both ways.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2335,26 +2338,26 @@
               "minItems": 2,
               "maxItems": 16
             },
-            "interval": {
+            "interval": {"description":"Clock units between each step of a member's pickup or carry.",
               "type": "integer",
               "minimum": 1
             },
-            "narration": {
+            "narration": {"description":"Text keys told at each stage of scavenging.",
               "type": "object",
               "properties": {
-                "carrying": {
+                "carrying": {"description":"Shown on a member's entry while it is carrying an item to the nest.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "acquired": {
+                "acquired": {"description":"Told when a member picks the item up.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "delivered": {
+                "delivered": {"description":"Told when a member puts the item in the nest.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "fallback": {
+                "fallback": {"description":"Told when a member cannot finish (the nest is full or the way is blocked) and drops the item where it stands.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "shoo": {
+                "shoo": {"description":"Told when the player shoos a carrying member and it drops the item.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -2378,24 +2381,24 @@
           ],
           "additionalProperties": false
         },
-        "pack": {
+        "pack": {"description":"Makes the members of this plan fight the player as a pack, with helpers and flight.",
           "type": "object",
           "properties": {
-            "flight_below_percent": {
+            "flight_below_percent": {"description":"A member flees when its hp is below this percent of its maximum (1 to 100). Frightened members flee too.",
               "type": "integer",
               "minimum": 1,
               "maximum": 100
             },
-            "flight_fare": {
+            "flight_fare": {"description":"Must be 0. Nothing reads it.",
               "const": 0
             },
-            "narration": {
+            "narration": {"description":"Text keys told as the pack fights and flees.",
               "type": "object",
               "properties": {
-                "helper_joined": {
+                "helper_joined": {"description":"Told when another member joins a fight already under way.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "enemy_fled": {
+                "enemy_fled": {"description":"Text key per exit direction, told when a member flees through that exit. Every direction leading out of an area room needs one.",
                   "type": "object",
                   "propertyNames": {
                     "pattern": "^(north|south|east|west|up|down)$"
@@ -2404,10 +2407,10 @@
                     "$ref": "text.schema.json#/$defs/TextKey"
                   }
                 },
-                "primary_changed": {
+                "primary_changed": {"description":"Told when the member the player is fighting changes.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "pack_withdrew": {
+                "pack_withdrew": {"description":"Told when the fight ends with no pack member left in it.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -2427,14 +2430,14 @@
           ],
           "additionalProperties": false
         },
-        "sight": {
+        "sight": {"description":"Makes prey members flee a player who stays in their room. Only for member_role prey.",
           "type": "object",
           "properties": {
-            "delay": {
+            "delay": {"description":"Clock units after the player and a member are in the same room before the member flees, if the player is still there.",
               "type": "integer",
               "minimum": 1
             },
-            "narration": {
+            "narration": {"description":"Text key per exit direction, told when the member flees that way. Every direction leading out of an area room needs one.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^(north|south|east|west|up|down)$"
@@ -2579,19 +2582,19 @@
           "minimum": 1,
           "maximum": 2147483647
         },
-        "narration": {
+        "narration": {"description":"Text told as the bleed starts, repeats, ticks and ends.",
           "type": "object",
           "properties": {
-            "applied": {
+            "applied": {"description":"Text told when the bleed first starts on a body.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "refreshed": {
+            "refreshed": {"description":"Text told when the bleed is applied again while already active.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "tick": {
+            "tick": {"description":"Text told on a tick that costs hit points.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "expired": {
+            "expired": {"description":"Text told when the bleed ends by running out.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -2620,10 +2623,10 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of the name of the room this structure becomes.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description": {
+        "description": {"description":"Text key of the description of the room this structure becomes.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "variants": {
@@ -2634,7 +2637,7 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "tags": {
+        "tags": {"description":"Tags the built room carries, as on a room.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -2642,7 +2645,7 @@
             "$ref": "entity.schema.json#/$defs/Tag"
           }
         },
-        "locks": {
+        "locks": {"description":"Rules for the built room; enter is the policy a mover must meet to come in.",
           "type": "object",
           "properties": {
             "enter": {
@@ -2651,15 +2654,15 @@
           },
           "additionalProperties": false
         },
-        "max_per_owner": {
+        "max_per_owner": {"description":"The most rooms of this structure one character may own at once; an order past it is refused.",
           "type": "integer",
           "minimum": 1,
           "maximum": 1000
         },
-        "weathering": {
+        "weathering": {"description":"The status the room gets when it is raised and again when mended.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "ruin": {
+        "ruin": {"description":"The status a mend cures; mending is refused unless the room has it.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -2778,13 +2781,13 @@
         "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "narration": {
+        "narration": {"description":"Text told as the status is applied, ticks and ends.",
           "type": "object",
           "properties": {
-            "applied": {
+            "applied": {"description":"Text told when the status is applied.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "tick": {
+            "tick": {"description":"Text told on each tick of the status.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "expired": {
@@ -2881,14 +2884,14 @@
         "perception": {
           "type": "object",
           "properties": {
-            "sight": {
+            "sight": {"description":"Changes what the holder sees: blind (every room is dark), dark_sight (sees in an unlit room) or see_invisible (sees holders of an invisible status).",
               "enum": [
                 "blind",
                 "dark_sight",
                 "see_invisible"
               ]
             },
-            "hearing": {
+            "hearing": {"description":"deaf: no sound cue reaches the holder.",
               "enum": [
                 "deaf"
               ]
@@ -2907,10 +2910,10 @@
         "pierced_by": {
           "type": "object",
           "properties": {
-            "skill": {
+            "skill": {"description":"The skill whose level the seer's attribute value must beat to see through the concealment.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "attribute": {
+            "attribute": {"description":"The attribute whose value the seer needs; it is compared with the holder's skill level.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },

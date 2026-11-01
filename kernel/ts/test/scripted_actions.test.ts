@@ -407,10 +407,8 @@ test("an entity target in the action's scope is admitted", () => {
   assert.deepEqual(step(occupants, look(SATCHEL), 0).decision, refused); // an item is no occupant
 });
 
-// Row FD1, a root delivery: ring_bell's action_completed is stamped at 0, before its 60 s
-// advance. Breaks: the delay is not clamped past the advance, so the job due at 30 faults the
-// command (nonfuture_job), or it is clamped later than 61.
-test('FD1: a delayed rule on a 60 s scripted action, after 30, is due at 61', () => {
+// Row FD1, a root delivery: ring_bell's action_completed is stamped at 0, before its 60 s advance.
+const rungAfter = (...afters: number[]) => {
   const w = world((c) => {
     c.manifest.requires.kernel_api.at_least = '1.90';
     c.manifest.requires.capabilities.reaction = c.lock.capabilities.reaction = 1;
@@ -423,17 +421,36 @@ test('FD1: a delayed rule on a 60 s scripted action, after 30, is due at 61', ()
       value_type: { default: 0, type: 'int' },
       version: 1,
     };
-    c.reactions = {
-      'recipe_sampler@0.0.1:reaction/echo': {
-        key: 'echo',
-        on: { event: 'action_completed', action: 'ring_bell' },
-        after: 30,
-        steps: [{ op: 'fact.stamp', fact }],
-      },
-    };
+    c.reactions = Object.fromEntries(
+      afters.map((after, i) => [
+        `recipe_sampler@0.0.1:reaction/echo${i}`,
+        {
+          key: `echo${i}`,
+          on: { event: 'action_completed', action: 'ring_bell' },
+          after,
+          steps: [{ op: 'fact.stamp', fact }],
+        },
+      ]),
+    );
   });
   const { decision, world: rung } = step(w, ring(), 0);
   assert.equal(decision.kind, 'accepted', JSON.stringify(decision));
-  const jobs = Object.values(rung.state.jobs ?? {}).map((j) => [j.due_time, j.status]);
-  assert.deepEqual([rung.state.clock, jobs], [60, [[61, 'pending']]]);
+  return [
+    rung.state.clock,
+    Object.values(rung.state.jobs ?? {})
+      .map((j) => j.due_time)
+      .sort(),
+  ];
+};
+
+// Breaks: the delay is not clamped past the advance, so the job due at 30 faults the command
+// (nonfuture_job), or it is clamped later than 61.
+test('FD1: a delayed rule on a 60 s scripted action, after 30, is due at 61', () => {
+  assert.deepEqual(rungAfter(30), [60, [61]]);
+});
+
+// Breaks: the compile-time `wait` lowering (Loka.Content.Waits) adds the duration so waits keep
+// their spacing; a clamp of a delay ending past the advance would collapse them again.
+test('FD1: delays past a 60 s action keep their spacing', () => {
+  assert.deepEqual(rungAfter(70, 80), [60, [70, 80]]);
 });

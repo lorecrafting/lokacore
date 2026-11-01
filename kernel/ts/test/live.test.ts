@@ -1,6 +1,7 @@
 // Fast loop: only a change confined to text values travels as an overlay; anything structural
 // does not (docs/system/cartridge.md#author-preview).
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
@@ -13,7 +14,8 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { lastRun, lintLines, serve, sourceOf, textOnly } from '../play/live.ts';
+import { ROOT } from '../play/obs.ts';
+import { lastRun, limited, lintLines, serve, sourceOf, textOnly } from '../play/live.ts';
 
 const was = { format: 1, rooms: { a: { name: 'room.a' } }, text: { 'room.a': 'line one' } };
 
@@ -211,4 +213,46 @@ test('find is served from the source and artifact the watcher was given', async 
     total: 1,
     refs: [],
   });
+});
+
+test('GET /numbers: reports on the dev artifact', async (t) => {
+  // Break: handing the dev {canonical, sha256} form to the reports, which refuse it.
+  const dir = mkdtempSync(join(tmpdir(), 'loka-live-'));
+  const port = 20000 + Math.floor(Math.random() * 20000);
+  const artifact = join(dir, 'dev.json');
+  const server = serve(port, dir, artifact);
+  t.after(() => {
+    server.close();
+    rmSync(dir, { recursive: true, force: true });
+  });
+  const url = `http://127.0.0.1:${port}/numbers`;
+  execFileSync('mix', ['loka.compile', 'cartridges/needs_sampler', join(dir, 'c.json')], {
+    cwd: ROOT,
+    stdio: 'pipe',
+  });
+  const [, canonical, sha256] = /^\{"cartridge":(.*),"content_hash":"(.*)"\}$/s.exec(
+    readFileSync(join(dir, 'c.json'), 'utf8'),
+  )!;
+  writeFileSync(artifact, JSON.stringify({ canonical, sha256 }));
+  const told = (await (await fetch(url)).json()) as {
+    hash: string;
+    pacing: { report: { levels: null; pools: { pools: { pool: string; empty: unknown }[] } } };
+    fights: { report: { targets: unknown[] } };
+  };
+  assert.equal(told.hash, sha256);
+  assert.equal(told.pacing.report.levels, null);
+  const hunger = told.pacing.report.pools.pools.find((p) => p.pool.endsWith('resource/hunger'));
+  assert.deepEqual(hunger?.empty, { seeds: 4, hour: 10 });
+  assert.deepEqual(told.fights.report.targets, []);
+});
+
+test('limited: a report past its limit is killed and says so; a failing one gives its words', async () => {
+  // Break: no kill, so a slow cartridge hangs the panel; or a failure shown as an empty report.
+  const slow = await limited(['-e', 'setTimeout(() => {}, 9000)'], 1);
+  assert.ok('why' in slow && /^timed out after 1 s/.test(slow.why), JSON.stringify(slow));
+  const bad = await limited(['-e', 'console.error("no such foe"); process.exit(1)'], 5);
+  assert.deepEqual(bad, { why: 'no such foe' });
+  // Break: a report that prints something else throws in the callback and takes the watcher down.
+  const garbled = await limited(['-e', 'console.log("x")'], 5);
+  assert.ok('why' in garbled && /^not a report/.test(garbled.why), JSON.stringify(garbled));
 });
