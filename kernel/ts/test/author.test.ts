@@ -26,7 +26,7 @@ writeFileSync(good, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}
 // environment is fixed at spawn, names the artifact to copy in the file $STUB_WHICH.
 writeFileSync(
   join(dir, 'mise'),
-  '#!/bin/sh\n[ "$4" = loka.lint ] && { echo "items/x.json: lint of $(basename "$(cat "$STUB_WHICH")")" >&2; exit 1; }\n[ -n "$STUB_ERR" ] && { echo "$STUB_ERR" >&2; exit 1; }\n' +
+  '#!/bin/sh\n[ "$4" = loka.lint ] && { [ -f "$STUB_WHICH.slow" ] && sleep 1; echo "items/x.json: lint of $(basename "$(cat "$STUB_WHICH")")" >&2; exit 1; }\n[ -n "$STUB_ERR" ] && { echo "$STUB_ERR" >&2; exit 1; }\n' +
     '[ -n "$STUB_WHICH" ] && STUB_ART=$(cat "$STUB_WHICH")\ncp "$STUB_ART" "$6"\n',
 );
 chmodSync(join(dir, 'mise'), 0o755);
@@ -140,5 +140,22 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   assert.match(messages.at(-1)!.said.join(), /kernel refuses/);
   // Break: the lint of the last good compile still shows, as if it read the refused source.
   assert.equal((messages.at(-1) as { lint?: string[] }).lint, undefined);
+
+  // Break: a lint still running when a save's compile fails reports afterwards, so the findings of
+  // the source that no longer compiles show as the current ones.
+  writeFileSync(`${which}.slow`, '');
+  writeFileSync(which, join(dir, 'rest.json'));
+  const before = messages.length;
+  writeFileSync(join(src, 'rooms.json'), '{  }');
+  await until(() => messages.length > before && messages.at(-1)!.compiled === true);
+  const seen = messages.length;
+  writeFileSync(which, join(dir, 'refused.json'));
+  writeFileSync(join(src, 'rooms.json'), '{   }');
+  await until(() => messages.length > seen && messages.at(-1)!.compiled === false);
+  await settle(1500); // the slow lint ends
+  assert.deepEqual(
+    messages.slice(seen).filter((m) => (m as { lint?: string[] }).lint),
+    [],
+  );
   reader.cancel();
 });

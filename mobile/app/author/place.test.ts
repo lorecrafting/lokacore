@@ -10,6 +10,7 @@ import {
   cheatIntent,
   cheatNote,
   sendCheat,
+  steps,
   caughtUp,
   dropStep,
   frozenClock,
@@ -303,6 +304,24 @@ test('a cheat waits for the time due and is not sent while it is undelivered', (
   assert.equal(sent.length, 0);
   assert.equal(sendCheat(game, { op: 'go_to_room', room: 'well' }, m), '');
   assert.equal(sent.length, 1);
+});
+
+// Break: an accepted cheat blanks the note saying why the replay stopped.
+test('an accepted cheat keeps the stop note; a refused one replaces it', () => {
+  const { game } = session({}, [accepted]);
+  const m = { id: 'c', version: '1' };
+  const cheat = { op: 'go_to_room', room: 'well' } as const;
+  assert.equal(sendCheat(game, cheat, m, 'Place: stopped'), 'Place: stopped');
+  const stuck = { ...game, pulse: () => ({ kind: 'catching_up' }) };
+  assert.equal(
+    sendCheat(stuck, cheat, m, 'Place: stopped'),
+    'Not sent, the game is still catching up: catching_up.',
+  );
+});
+
+// Break: "1 steps".
+test('steps is singular for one', () => {
+  assert.deepEqual([steps(0), steps(1), steps(2)], ['0 steps', '1 step', '2 steps']);
 });
 
 // A session that holds: `pending` until told otherwise; `pulsed` is what a pulse delivers.

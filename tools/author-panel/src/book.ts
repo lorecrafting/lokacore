@@ -46,9 +46,18 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
   }, [send]);
+  // A Book that stops answering must not hang Why: give up after a few seconds, in plain words.
   const trace = () =>
-    new Promise<string[]>((resolve) => {
-      waiting.current.push(resolve);
+    new Promise<string[]>((resolve, reject) => {
+      const give = (rows: string[]) => {
+        clearTimeout(timer);
+        resolve(rows);
+      };
+      const timer = setTimeout(() => {
+        waiting.current = waiting.current.filter((w) => w !== give);
+        reject(new Error('The Book did not answer. Reload the Book, then ask again.'));
+      }, 5000);
+      waiting.current.push(give);
       send({ op: 'trace' });
     });
   return { state, line, send, trace };

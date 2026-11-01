@@ -155,16 +155,18 @@ export function cheatNote(op: Cheat['op'], reply: Reply) {
 
 /**
  * Sends a cheat once the time due is delivered: a reply held for catch-up would land on a later pulse,
- * unrecorded and after the author read it as refused. Returns the note.
+ * unrecorded and after the author read it as refused. Returns the note: `kept` (a stop note still true of
+ * the path) when the cheat was accepted, so a cheat does not hide why the replay stopped.
  */
 export function sendCheat(
   game: Replayable,
   cheat: Cheat,
   manifest: { id: string; version: string },
+  kept = '',
 ) {
   const after = caughtUp(game);
   if (after !== 'ready') return `Not sent, the game is still catching up: ${after}.`;
-  return cheatNote(cheat.op, game.invoke(cheatIntent(cheat, manifest, game.view().token)));
+  return cheatNote(cheat.op, game.invoke(cheatIntent(cheat, manifest, game.view().token))) || kept;
 }
 
 /** The path without the step at `index`. */
@@ -230,3 +232,6 @@ export function replay(steps: Step[], game: Replayable, moveClock: (ms: number) 
   }
   return { done: steps.length };
 }
+
+/** "1 step", "2 steps". */
+export const steps = (n: number) => `${n} ${n === 1 ? 'step' : 'steps'}`;

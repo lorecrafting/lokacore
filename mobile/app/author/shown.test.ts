@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { shown, type Canon } from './shown.ts';
+import { clockWords, shown, type Canon } from './shown.ts';
 
 const ref = (kind: string, key: string) => ({
   cartridge_id: 'c',
@@ -78,4 +78,16 @@ test('offers are this room: its details, any tool or spell, and the dialogues of
     action: ['here', 'tool'],
     dialogue: ['with_maud'],
   });
+});
+
+// Breaks: raw seconds on the clock; a calendar's sky left out; minutes unpadded.
+test('the clock reads in words', () => {
+  assert.equal(clockWords({ time: 3725 }), '1h 02m');
+  assert.equal(
+    clockWords({
+      time: 0,
+      calendar: { day: 3, hour: 14, subdivision: 0, season: 'autumn', weather: 'rain' },
+    }),
+    'day 3, hour 14, autumn, rain',
+  );
 });

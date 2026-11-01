@@ -7,6 +7,7 @@ import type { State } from './book.ts';
 import { Button } from './components/ui/button.tsx';
 import { Input } from './components/ui/input.tsx';
 import { Separator } from './components/ui/separator.tsx';
+import { clockWords } from '../../../mobile/app/author/shown.ts';
 import { Heading } from './sections.tsx';
 
 const Rows = ({ title, rows }: { title: string; rows: [string, string][] }) => (
@@ -49,7 +50,7 @@ export function Facts({ state }: { state?: State }) {
       <Listed title="Statuses" items={shown.statuses.map((s) => s.label)} />
       <div>
         <Heading>Clock</Heading>
-        <p className="font-mono text-xs">{JSON.stringify(shown.clock.calendar ?? shown.clock.time)}</p>
+        <p className="font-mono text-xs">{clockWords(shown.clock)}</p>
       </div>
       {shown.choice ? <Listed title={`Choice: ${shown.choice.prompt}`} items={shown.choice.options} /> : null}
       <Separator />
@@ -85,7 +86,12 @@ export function Why({ state, trace }: { state?: State; trace: () => Promise<stri
   const at = JSON.stringify(state);
   const told = answer?.at === at ? answer : undefined; // true of the world it was asked on, no other
   const why = async (on: 'action' | 'dialogue', key: string) => {
-    const rows = await trace();
+    let rows: string[];
+    try {
+      rows = await trace();
+    } catch (err) {
+      return setTold({ at, key, error: (err as Error).message });
+    }
     ask('why', { trace: rows, [on]: key }).then(
       (r) => setTold(r.ok ? { at, key, report: r.told as Told } : { at, key, error: String(r.told) }),
       (err: Error) => setTold({ at, key, error: err.message }),

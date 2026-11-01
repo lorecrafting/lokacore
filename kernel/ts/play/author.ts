@@ -123,7 +123,8 @@ function build(): boolean {
 }
 
 // The lint under the compile: not waited for, so a save's words and compile never wait on it; only
-// the newest run reports.
+// the newest run reports, and a save that follows (whether its compile passes or not) retires the
+// one in flight, so the last good source's findings never show after a failed compile.
 let lints = 0;
 function lint() {
   const mine = ++lints;
@@ -148,6 +149,7 @@ watch(source, { recursive: true }, (_, file) => {
   clearTimeout(timer);
   // one build for an editor's burst of writes; a thrown build must not end the watch
   timer = setTimeout(() => {
+    lints++;
     quick();
     // the page gets the quick words before the compile blocks this process (spawnSync)
     setImmediate(() => {
