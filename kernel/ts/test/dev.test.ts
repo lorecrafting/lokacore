@@ -182,3 +182,12 @@ test('a cheat invocation with targets does not resolve', () => {
     error: { code: 'unsupported_capability' },
   });
 });
+
+// Break: a per-subject fact has no one value to set; the cheat would throw, a fault, not a refusal.
+test('set fact refuses a per-subject fact', () => {
+  const w = fresh();
+  const at = 'toolbox_showcase@0.0.1:fact/cellar_disarmed';
+  const facts = { ...w.cartridge.facts, [at]: { ...w.cartridge.facts[at]!, per_subject: true } };
+  const subjects = { ...w, cartridge: { ...w.cartridge, facts } } as World;
+  assert.equal(code(set(subjects, 'cellar_disarmed', true)), 'invalid_state');
+});
