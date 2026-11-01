@@ -263,7 +263,7 @@
           "description": "Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
           "properties": {
             "chance": {
-              "description": "Percent; a hit whose accuracy draw is below this is a critical hit.",
+              "description": "Percent of all attacks, sharing the accuracy draw: a hit whose draw is below this is critical, so a chance above the accuracy makes every hit critical.",
               "maximum": 100,
               "minimum": 1,
               "type": "integer"
@@ -646,7 +646,7 @@
         },
         "dodge": {
           "additionalProperties": false,
-          "description": "The player's chance to dodge an NPC's attack; absent means no dodge.",
+          "description": "Percent chance to dodge an enemy attack that would otherwise hit; absent means no dodge.",
           "properties": {
             "chance": {
               "description": "Percent chance of dodging.",
@@ -5312,7 +5312,7 @@
           "description": "Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
           "properties": {
             "chance": {
-              "description": "Percent; a hit whose accuracy draw is below this is a critical hit.",
+              "description": "Percent of all attacks, sharing the accuracy draw: a hit whose draw is below this is critical, so a chance above the accuracy makes every hit critical.",
               "maximum": 100,
               "minimum": 1,
               "type": "integer"

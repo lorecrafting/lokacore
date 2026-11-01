@@ -1926,7 +1926,7 @@
           ],
           "additionalProperties": false
         },
-        "dodge": {"description":"The player's chance to dodge an NPC's attack; absent means no dodge.",
+        "dodge": {"description":"Percent chance to dodge an enemy attack that would otherwise hit; absent means no dodge.",
           "type": "object",
           "properties": {
             "skill": {"description":"The skill that must be usable for a dodge.",

@@ -690,7 +690,7 @@ Cartridge-owned hit chance and positive damage bounds. Compiler and loader enfor
 |---|---|---|---|
 | chance | integer | yes | Percent chance an attack is accurate; a defense can still prevent the hit. |
 | crit | object |  | Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances. |
-| crit.chance | integer | yes | Percent; a hit whose accuracy draw is below this is a critical hit. |
+| crit.chance | integer | yes | Percent of all attacks, sharing the accuracy draw: a hit whose draw is below this is critical, so a chance above the accuracy makes every hit critical. |
 | crit.multiplier | integer | yes | Damage of a critical hit is multiplied by this (2 to 10). |
 | damage_max | integer | yes | Most positive damage; at least damage_min. |
 | damage_min | integer | yes | Least positive damage. |
@@ -822,7 +822,7 @@ Cartridge-owned attack profile, round interval, position multipliers and combat 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | allies | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Authored NPCs that fight beside the player (docs/system/mechanics.md, toolbox row 6b, narration ally_hit and ally_miss): the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player. |
-| dodge | object |  | The player's chance to dodge an NPC's attack; absent means no dodge. |
+| dodge | object |  | Percent chance to dodge an enemy attack that would otherwise hit; absent means no dodge. |
 | dodge.chance | integer | yes | Percent chance of dodging. |
 | dodge.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill that must be usable for a dodge. |
 | flee_multiplier | integer | yes | Multiplies the move cost of a body that is engaged. |
