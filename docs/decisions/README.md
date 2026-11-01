@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-11-01 [Owner decision: away catch-up is capped](owner-decision-away-catch-up-cap-2026-11-01.md)
 - 2026-10-31 [Owner decision: authoring readiness and level-up](owner-decision-authoring-readiness-2026-10-31.md): dev-only tools in the author preview, checkpoints as the content gate, the level-up moment.
 - 2026-10-31 [Owner decision: every word the player reads is hand-written; a lowered prose scene format](owner-decision-handwritten-prose-2026-10-31.md)
 - 2026-10-31 [Owner decision: lean workflow for the Pro plan](owner-decision-lean-workflow-2026-10-31.md): one session works directly; independent review only for engine changes.

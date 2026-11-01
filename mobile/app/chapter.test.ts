@@ -14,6 +14,7 @@ import { checkpoint, elapsedHost } from '../authority/local-story/__tests__/elap
 import { localSession, openGame } from '../authority/local-story/session.ts';
 import type { Db } from '../authority/local-story/store.ts';
 import { LABEL } from './book/labels.ts';
+import { hidePulses, tickPulse } from './clock-tick.ts';
 import { webDb } from './sqlite-web.ts';
 
 // The pinned app: no author preview, so App mounts the Book alone (author/panel.tsx).
@@ -112,6 +113,7 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     'expo-sqlite/kv-store': {},
     '../authority/local-story/session': { localSession, KERNEL_ID: 'loka-kernel' },
     './sqlite-web.ts': { webDb },
+    './clock-tick': { hidePulses, tickPulse },
     './book/Book.tsx': {},
     './book/model.ts': { hint: () => ({}) },
     './book/reading.ts': { readingSize: () => ({}), effectStores: () => ({}) },
@@ -301,6 +303,7 @@ function appHost() {
     'expo-sqlite/kv-store': {},
     '../authority/local-story/session': { localSession, KERNEL_ID: 'loka-kernel' },
     './sqlite-web.ts': { webDb },
+    './clock-tick': { hidePulses, tickPulse },
     './book/Book.tsx': { default: 'Book' },
     './book/model.ts': { hint: () => ({}) },
     './book/reading.ts': { readingSize: () => ({}), effectStores: () => ({}) },
@@ -391,6 +394,24 @@ test('actual App pause and resume preserve 9ms plus 11ms as exactly one logical 
     assert.deepEqual(checkpoint(h.sql), { wall_ms: 10020, remainder: 0, target: 25201 });
     h.change('active');
     assert.deepEqual(checkpoint(h.sql), { wall_ms: 10020, remainder: 0, target: 25201 });
+  } finally {
+    h.close();
+  }
+});
+
+// Breaks: App's hide skips the stall check, or a resume leaves no tick for a stall before the first one.
+test('actual App caps a hide after a stall before the first tick at one in-game day', () => {
+  const h = appHost();
+  try {
+    h.next();
+    h.change('background');
+    h.change('active');
+    const start = checkpoint(h.sql).target;
+    const year = 365 * 86400 * 1000;
+    h.clock.wall += year;
+    h.clock.mono += year;
+    h.change('background');
+    assert.equal(checkpoint(h.sql).target - start, 86400);
   } finally {
     h.close();
   }

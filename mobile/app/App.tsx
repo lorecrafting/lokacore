@@ -2,6 +2,7 @@
 // expo-sqlite, or the screen for a save that does not open. The shell owns every phone-only API
 // (SQLite, fonts, Alert, the key-value store) and injects them; the logic is in
 // authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
+import { hidePulses, tickPulse } from './clock-tick';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, AppState, PixelRatio, Platform, View } from 'react-native';
 import { getRandomValues, randomUUID } from 'expo-crypto';
@@ -127,6 +128,8 @@ type Clock = {
   draining: boolean;
   booked: boolean; // the Book has subscribed, so it sees the catch-up (away recap, book-ui.md)
   timer?: ReturnType<typeof setTimeout>;
+  ticked?: number;
+  stalled?: boolean;
   cleanup: () => void;
 };
 const current = (c: Clock) => session?.game() === c.game && g.loka_clock_cleanup === c.cleanup;
@@ -143,7 +146,7 @@ function tick(c: Clock) {
   if (!current(c) || !c.active) return;
   const held = c.game.pendingInvocation(),
     draining = c.draining;
-  const status = c.game.pulse(draining ? 'drain' : 'active');
+  const status = c.game.pulse(tickPulse(c, performance.now()));
   if (!current(c) || !c.active) return;
   if (status.kind !== 'ready' && status.kind !== 'catching_up') return cancel(c);
   c.draining = status.kind === 'catching_up';
@@ -151,6 +154,7 @@ function tick(c: Clock) {
 }
 function resume(c: Clock) {
   if (!current(c) || !c.active || !c.booked) return;
+  c.ticked = performance.now(); // a stall before the first tick must still read as one
   const status = c.game.pulse('resume');
   if (!current(c) || !c.active) return;
   c.draining = status.kind === 'catching_up';
@@ -159,11 +163,14 @@ function resume(c: Clock) {
 }
 function transition(c: Clock, active: boolean) {
   if (!current(c) || c.active === active) return;
+  const hide = hidePulses(c, performance.now());
   c.active = active;
   c.draining = false;
+  c.ticked = undefined; // this transition's own pulse settles the gap
+  c.stalled = false;
   cancel(c);
   if (active) resume(c);
-  else c.game.pulse('pause');
+  else for (const pulse of hide) if (current(c)) c.game.pulse(pulse);
 }
 
 type Recovery = { notify?: (healthy: boolean) => void; booked?: boolean; onBooked?: () => void };

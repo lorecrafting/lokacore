@@ -726,7 +726,7 @@
    "season": "spring",
    "tide": "high"
   },
-  "recap_after": 90000,
+  "recap_after": 86400,
   "resources": [
    {
     "resource": {

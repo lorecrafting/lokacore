@@ -4,7 +4,7 @@ import type {
   ElapsedStatus,
   Projection,
 } from '../../packages/game-view/session.ts';
-import type { Pulse } from './elapsed.ts';
+import { CatchUpRefusedError, type Pulse } from './elapsed.ts';
 // The local TypeScript implementation of GameSession (packages/game-view/session.ts): a bundled
 // cartridge played through the real local authority. It allocates invocation ids and the actor,
 // resends an unconfirmed attempt unchanged, and owns open and Start over. It says nothing in words:
@@ -223,11 +223,9 @@ function attemptStory(
 const statusOfError = (e: unknown): ElapsedStatus =>
   e instanceof ElapsedRecoveryError && e.kind === 'stale_view'
     ? { kind: 'replaced' }
-    : {
-        kind: 'error',
-        message: (e as Error).message,
-        ...(e instanceof ElapsedRecoveryError ? { reason: 'save_corrupt' as const } : {}),
-      };
+    : e instanceof ElapsedRecoveryError || e instanceof CatchUpRefusedError
+      ? { kind: 'error', reason: 'save_corrupt', message: e.message }
+      : { kind: 'error', message: (e as Error).message };
 
 const statusOf = (reply: Reply): ElapsedStatus =>
   reply.kind === 'pending' || reply.kind === 'catching_up'
