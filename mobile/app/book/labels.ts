@@ -97,7 +97,6 @@ export const LABEL = {
   noWayOut: 'No way out is known.',
   nothingWritten: 'Nothing written yet.',
   currentPlace: (place: string) => `Current place: ${place}`,
-  riddleTries: (count: number, limit: number) => `${count} / ${limit} wrong answers this sitting.`,
   // A Map drawing's open dot: its caption and its accessible name.
   unexplored: 'Unexplored',
   unexploredExit: (direction: string, from: string) =>

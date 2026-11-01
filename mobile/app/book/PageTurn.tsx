@@ -11,6 +11,7 @@ import {
   useState,
   type Dispatch,
   type ReactNode,
+  type Ref,
   type SetStateAction,
 } from 'react';
 import { View } from 'react-native';
@@ -78,7 +79,6 @@ type SetLeaving = Dispatch<SetStateAction<Leaving | undefined>>;
  * - States: turning; settled; reduced motion (cross-fade).
  * - Story: PageTurn.stories.tsx
  */
-// size: allow 55, the leaving page, the arriving page and the contexts they read
 export function PageTurn(p: Props) {
   const reduced = useReducedMotion();
   const [size, setSize] = useState<Size>({ width: 0, height: 0 });
@@ -89,12 +89,7 @@ export function PageTurn(p: Props) {
   const drawn = leaving?.image && { image: leaving.image, dir: leaving.dir, size, progress };
   const sweeps = leaving?.riffle ? motion.riffle.sweeps : 1;
   const context = !card || !leaving ? undefined : leaving.image ? 'picture' : 'waiting';
-  // The same bound as curlEnds and a riffle's length, known here at the arriving page's first render.
-  const curl =
-    leaving && !card && !reduced
-      ? motion.quick.duration +
-        (leaving.riffle ? sweeps * motion.riffle.duration : motion.turn.duration)
-      : 0;
+  const curl = leaving && !card && !reduced ? curlLength(sweeps, leaving.riffle) : 0;
   // An arriving page's title takes focus only after a turn (title.ts titleFocus).
   const titles = useRef(titleFocus()).current;
   titles.turned = p.turn > 0;
@@ -111,19 +106,8 @@ export function PageTurn(p: Props) {
           >
             {card && drawn && <CardBlur {...drawn} />}
             {[
-              <Animated.View
-                key={p.turn}
-                ref={page(p.turn)}
-                collapsable={false}
-                style={{ flex: 1 }}
-              >
-                {p.children}
-              </Animated.View>,
-              leaving && !leaving.image && (
-                <Animated.View key={leaving.turn} {...over} style={[over.style, fade]}>
-                  {leaving.page}
-                </Animated.View>
-              ),
+              arrivingPage(p.turn, page(p.turn), p.children),
+              leaving && !leaving.image && leavingPage(leaving, fade),
             ]}
             {!card && drawn && <Curl {...drawn} paper={p.paper} sweeps={sweeps} />}
           </View>
@@ -132,6 +116,22 @@ export function PageTurn(p: Props) {
     </titleContext.Provider>
   );
 }
+
+// The same bound as curlEnds and a riffle's length, known here at the arriving page's first render.
+const curlLength = (sweeps: number, riffle?: boolean) =>
+  motion.quick.duration + (riffle ? sweeps * motion.riffle.duration : motion.turn.duration);
+
+const arrivingPage = (turn: number, ref: Ref<never>, children: ReactNode) => (
+  <Animated.View key={turn} ref={ref} collapsable={false} style={{ flex: 1 }}>
+    {children}
+  </Animated.View>
+);
+
+const leavingPage = (l: { turn: number; page: ReactNode }, fade: object) => (
+  <Animated.View key={l.turn} {...over} style={[over.style, fade]}>
+    {l.page}
+  </Animated.View>
+);
 
 const timingOf = (pictured: boolean, reduced: boolean, card: boolean, riffle?: boolean) =>
   pictured

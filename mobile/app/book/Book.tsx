@@ -182,6 +182,15 @@ export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][nu
   page?.kind === 'chapter' &&
   !!s.view.chapter;
 
+const routes = (p: ViewProps, g: ReturnType<typeof group>) => ({
+  ...p,
+  g,
+  open: (page: Page) => p.go([...p.stack, page], 1),
+  walk: (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button),
+  world: () => p.go([], -1),
+  back: () => p.go(p.stack.slice(0, -1), -1),
+});
+
 /**
  * The Book's frame: page turn, body, footer, status icons and status line, and the fault, pending
  * and catching-up states.
@@ -191,21 +200,13 @@ export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][nu
  * - States: fault; pending; catching up.
  * - Story: RecoveryPages.stories.tsx
  */
-// size: allow 46, the one tree of page, measured foot and sky
 export function BookView(p: ViewProps) {
   const [foot, setFoot] = useState(0);
   useCueSounds(p);
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
-  const ctx = {
-    ...p,
-    g,
-    open: (page: Page) => p.go([...p.stack, page], 1),
-    walk: (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button),
-    world: () => p.go([], -1),
-    back: () => p.go(p.stack.slice(0, -1), -1),
-  };
+  const ctx = routes(p, g);
   return (
     <PaletteContext value={p.palette}>
       <TypeContext value={p.reading?.type ?? shown}>
