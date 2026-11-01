@@ -1181,7 +1181,10 @@
         "HOSTILE_QUEST_SPEAKER",
         "SITE_EXIT_CONFLICT",
         "SPEAKER_ELSEWHERE",
-        "LOOP_SPEAKER"
+        "LOOP_SPEAKER",
+        "ENTRY_INVALID",
+        "ENTRY_GUESSED",
+        "ENTRY_UNUSED"
       ],
       "examples": [
         "UNRESOLVED_REFERENCE",

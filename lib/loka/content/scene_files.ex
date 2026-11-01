@@ -161,6 +161,7 @@ defmodule Loka.Content.SceneFiles do
   defp why("npc: " <> _, %{"npc" => _}), do: "misplaced_header"
   defp why("when: " <> _, %{"npc" => _}), do: "misplaced_header"
   defp why("with: " <> _, %{"npc" => _}), do: "misplaced_header"
+  defp why("entry: " <> _, %{"npc" => _}), do: "scene_entry"
   defp why("sets: " <> _, %{"npc" => _}), do: "bad_sets"
   defp why("quest: " <> _, %{"npc" => _}), do: "bad_quest"
   defp why(_, d) when not is_map_key(d, "npc"), do: "no_npc"

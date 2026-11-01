@@ -21,6 +21,7 @@ import { holds } from '../policy.ts';
 import { living } from '../death/shared.ts';
 import { disposition } from '../disposition.ts';
 import { concealed } from '../skills.ts';
+import { onward } from './fall_through.ts';
 
 /** The dialogues `d`'s answers lead to. */
 const links = (d: DialogueDefinition) =>
@@ -29,25 +30,43 @@ const links = (d: DialogueDefinition) =>
     .filter((k): k is string => !!k);
 
 /**
- * The dialogues a talk can open: those nothing leads to, then the first by key of each cycle left
- * (a nested answer returns to its parent, so a root may be named too); everything an entry reaches
- * is reached only by that answer.
+ * The dialogues a talk can open: those nothing leads to, then one of each loop with no way in, the
+ * member leading to the most other dialogues (a hub), first by key on a tie. What an entry
+ * reaches is reached by that answer, or by falling through a failed entry. A speaker's `entry: true` dialogue replaces all
+ * that speaker's others except keyword ones. A failed default entry falls through (`spokenBy`).
  */
 const entries = (world: World) => {
   const all = Object.values(world.cartridge.dialogues ?? {}).sort((a, b) => cmp(a.key, b.key));
   const next = new Map<string, string[]>(all.map((d) => [d.key, links(d)]));
   const named = new Set(all.flatMap(links));
-  const reached = new Set<string>();
-  const walk = (key: string) => {
-    if (reached.has(key)) return;
-    reached.add(key);
-    next.get(key)?.forEach(walk);
+  const reach = (keys: string[], seen = new Set<string>()) => {
+    for (const key of keys) {
+      if (seen.has(key)) continue;
+      seen.add(key);
+      reach(next.get(key) ?? [], seen);
+    }
+    return seen;
   };
-  return [...all.filter((d) => !named.has(d.key)), ...all].filter((d) => {
-    if (reached.has(d.key)) return false;
-    walk(d.key);
-    return true;
-  });
+  const marked = new Set(all.filter((d) => d.entry).map((d) => refString(d.npc)));
+  // A shut-out dialogue never opens, so it is no way into what it links to.
+  const live = all.filter((d) => d.entry || d.keyword || !marked.has(refString(d.npc)));
+  const roots = live.filter((d) => d.entry || !named.has(d.key));
+  const reached = reach(roots.map((d) => d.key));
+  const rest = live.filter((d) => !reached.has(d.key));
+  const from = new Map(rest.map((d) => [d.key, reach([d.key])]));
+  const width = (key: string) =>
+    new Set(next.get(key)!.filter((k) => k !== key && next.has(k))).size;
+  const beats = (a: string, b: string) =>
+    width(a) > width(b) || (width(a) === width(b) && cmp(a, b) < 0);
+  const heads = rest.filter(({ key }) =>
+    rest.every(
+      (o) =>
+        o.key === key ||
+        !from.get(o.key)!.has(key) ||
+        (from.get(key)!.has(o.key) && beats(key, o.key)),
+    ),
+  );
+  return [...roots, ...heads];
 };
 
 /** Whether some answer's `then` or `then_failed` names `d`: such a dialogue never reopens itself. */
@@ -125,8 +144,9 @@ export const shown = (
 
 /**
  * The dialogue `actor`'s talk to `target` opens: the first of `target`'s dialogues, in key order,
- * whose own policy holds and that offers a choice (hs-14), if any; none while `target` is hostile
- * to `actor` (toolbox row G11).
+ * whose own policy holds and that offers a choice (hs-14), else, for the default Talk, the first
+ * such of the dialogues the failed ones lead to freely (`onward`); none while `target` is hostile
+ * to `actor` (toolbox row G11). A talk that selects one dialogue opens that one or nothing.
  * A talk never opens a keyword dialogue; a say or whisper of `word` opens only one keyed by it
  * (speech@1, row G9). Each policy leaf it evaluates adds one to `steps` (04 §5.4).
  */
@@ -137,16 +157,26 @@ export const spokenBy = (
   steps: Steps = { n: 0 },
   selected?: DefinitionRef,
   word?: string,
-) =>
-  disposition(world, actor, target, steps) === 'hostile'
-    ? undefined
-    : spoken(world, target).find(
-        (d) =>
-          d.keyword === word &&
-          (!selected || world.cartridge.dialogues?.[refString(selected)] === d) &&
-          holds(world, actor, d.policy, { target, steps }) &&
-          shown(world, actor, d, offered(world, actor, d, steps), target, steps).length > 0,
-      );
+) => {
+  if (disposition(world, actor, target, steps) === 'hostile') return undefined;
+  const tried = spoken(world, target).filter(
+    (d) =>
+      d.keyword === word && (!selected || world.cartridge.dialogues?.[refString(selected)] === d),
+  );
+  // grows as it runs: every entry first, then what the failed ones lead to
+  for (const d of tried) {
+    if (
+      holds(world, actor, d.policy, { target, steps }) &&
+      shown(world, actor, d, offered(world, actor, d, steps), target, steps).length > 0
+    )
+      return d;
+    if (word !== undefined || selected || d.name) continue;
+    for (const { choice, to } of onward(world, d))
+      if (holds(world, actor, choice.policy, { target, steps }) && !tried.includes(to))
+        tried.push(to);
+  }
+  return undefined;
+};
 
 /**
  * Whether `target`'s dialogues refuse `actor`'s talk now, no policy of theirs holding or the actor
@@ -170,7 +200,8 @@ export const talkRefused = (
 export function talks(world: World, actor: CharacterId): [string, Offered][] {
   const here = world.state.containers[bodyOf(world, actor)!];
   const talked = entries(world).filter((d) => !d.keyword); // row G9
-  return talked.flatMap(({ key, npc, policy, name: label }) => {
+  return talked.flatMap((d) => {
+    const { key, npc, policy, name: label } = d;
     const speaker = world.entityIds[refString(npc)]!;
     if (!living(world, speaker) || world.state.containers[speaker] !== here) return [];
     const target = { kind: 'entity', scopes: ['room_occupants'] } as const;
@@ -180,7 +211,8 @@ export function talks(world: World, actor: CharacterId): [string, Offered][] {
       target,
       input: [],
       priority: 0,
-      policy,
+      // a failed policy with somewhere to fall through to is not the talk's refusal: spokenBy decides
+      ...(onward(world, d).length ? {} : { policy }),
     };
     return [
       [

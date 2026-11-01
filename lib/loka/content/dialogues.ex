@@ -40,6 +40,7 @@ defmodule Loka.Content.Dialogues do
   defp wide(defs, settings, ctx),
     do:
       Loka.Content.DialogueLinks.loops(all(defs)) ++
+        Loka.Content.DialogueLinks.entry_checks(all(defs)) ++
         Loka.Content.Keywords.check(defs, ctx.events) ++
         story_points(defs, ctx) ++ chapters(Map.get(settings, "chapters", []), ctx)
 
