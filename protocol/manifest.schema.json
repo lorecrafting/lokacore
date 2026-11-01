@@ -55,10 +55,10 @@
       "description": "The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility versions'): at_least inclusive, below exclusive, so '>=1.3 <2.0' is at_least 1.3, below 2.0.",
       "type": "object",
       "properties": {
-        "at_least": {
+        "at_least": {"description":"Lowest kernel API version accepted, inclusive.",
           "$ref": "#/$defs/KernelApiVersion"
         },
-        "below": {
+        "below": {"description":"First kernel API version refused: the range stops just under it.",
           "$ref": "#/$defs/KernelApiVersion"
         }
       },
@@ -81,18 +81,18 @@
         "kernel_api": {
           "$ref": "#/$defs/KernelApiRange"
         },
-        "rule_ir": {
+        "rule_ir": {"description":"Rule format version; must equal the one the engine supports (currently 1).",
           "type": "integer",
           "minimum": 1
         },
-        "content_schema": {
+        "content_schema": {"description":"Content schema version; must equal the one the engine supports (currently 1).",
           "type": "integer",
           "minimum": 1
         },
-        "capabilities": {
+        "capabilities": {"description":"Each capability the cartridge uses, with its version; using a feature whose capability is not listed is refused.",
           "$ref": "capability.schema.json#/$defs/CapabilityVersions"
         },
-        "client_features": {
+        "client_features": {"description":"Features the app must offer; the cartridge is refused where one is missing.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/ClientFeature"
@@ -144,21 +144,26 @@
       "type": "object",
       "properties": {
         "api_version": {
+          "description": "The source format family this cartridge is written in; always loka/v3.",
           "$ref": "#/$defs/ApiVersion"
         },
         "id": {
+          "description": "The cartridge's identity; every definition key and reference carries it.",
           "$ref": "identity.schema.json#/$defs/CartridgeId"
         },
         "version": {
+          "description": "The cartridge's release version, MAJOR.MINOR.PATCH.",
           "$ref": "identity.schema.json#/$defs/ReleaseVersion"
         },
         "title": {
+          "description": "The cartridge's name as listed for the player.",
           "type": "string"
         },
         "requires": {
           "$ref": "#/$defs/CompatibilityRequirements"
         },
         "supported_profiles": {
+          "description": "The hosting profiles this cartridge runs under; at least one (offline_private, online_private, party, shared_area).",
           "type": "array",
           "items": {
             "$ref": "#/$defs/ExecutionProfile"
@@ -249,10 +254,10 @@
       "description": "Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play_time. Requires schedule@1. Millisecond conversion and fractional remainder belong to host M1-B. Integer type obeys loka-numeric-v1 safe range.",
       "type": "object",
       "properties": {
-        "profile": {
+        "profile": {"description":"Must be real_elapsed: logical time follows real time.",
           "const": "real_elapsed"
         },
-        "rate": {
+        "rate": {"description":"Logical seconds that pass per real second; at least 1.",
           "type": "integer",
           "minimum": 1
         },

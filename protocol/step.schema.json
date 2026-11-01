@@ -994,7 +994,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Passes when the actor's value of the attribute is at least difficulty; draws no random number.",
           "type": "object",
           "properties": {
             "key": {"description":"This check's key, unique across scripted actions and dialogue choices.",
@@ -1028,13 +1028,13 @@
             "kind": {
               "const": "opposed"
             },
-            "skill": {
+            "skill": {"description":"The skill whose level is compared; give this or attribute, not both.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "attribute": {
+            "attribute": {"description":"The attribute compared; give this or skill, not both.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "npc": {
+            "npc": {"description":"With attribute, compares against this NPC's value of the attribute instead of a rating.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "rating": {"description":"The target detail's rating; a scripted action refuses it.",
@@ -1063,13 +1063,13 @@
           "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
           "type": "object",
           "properties": {
-            "key": {
+            "key": {"description":"This check's key, unique across scripted actions and dialogue choices.",
               "$ref": "action.schema.json#/$defs/Key"
             },
             "kind": {
               "const": "track"
             },
-            "plan": {
+            "plan": {"description":"Key of the population plan whose trail is looked for; passes when that trail is fresh in the actor's room.",
               "$ref": "action.schema.json#/$defs/Key"
             }
           },
