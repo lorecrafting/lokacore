@@ -118,6 +118,13 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
     body: JSON.stringify({ key: 'room.a' }),
   });
   assert.equal(foreign.status, 403);
+  // Break: the Origin check also refuses the author's own page, served from 127.0.0.1
+  const own = await fetch(`http://127.0.0.1:${port}/open`, {
+    method: 'POST',
+    headers: { origin: 'http://127.0.0.1:8081' },
+    body: JSON.stringify({ key: 'room.a' }),
+  });
+  assert.equal(own.status, 200);
   // the explainer takes one run: a start over's earlier rows are not sent to it
   const run = (id: string) => `{"data":{},"event":"trace.run","ids":{"run_id":"${id}"}}`;
   const step = (id: string) => `{"data":{},"event":"trace.command","ids":{"run_id":"${id}"}}`;
@@ -142,4 +149,14 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   assert.equal(told.status, 200, await told.clone().text());
   const { reactions } = (await told.json()) as { reactions: { rule: string; fired: number }[] };
   assert.equal(reactions.find((r) => r.rule.endsWith('reaction/bell_after'))?.fired, 1);
+  // Break: an artifact the kernel will not load reaches the explainer, not its own diagnostic
+  writeFileSync(join(dir, 'bad.json'), '{"canonical":"{}","sha256":"x"}');
+  const refused = serve(port + 2, dir, join(dir, 'bad.json'));
+  t.after(() => refused.close());
+  const unloaded = await fetch(`http://127.0.0.1:${port + 2}/why`, {
+    method: 'POST',
+    body: JSON.stringify({ trace: [run('a')] }),
+  });
+  assert.equal(unloaded.status, 400);
+  assert.match((await unloaded.json()) as string, /"code":"UNKNOWN_FORMAT"/);
 });

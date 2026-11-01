@@ -75,6 +75,18 @@ test('a choice replays against the continuation this run issued', () => {
   assert.deepEqual(sent[0]!.input, { choice_id: 'go', continuation_id: 'c2' });
 });
 
+test('a step gains a continuation only when it had one and a choice is open', () => {
+  // Break: `&&` to `||`: a plain step sent during a choice gains a continuation, and a recorded
+  // continuation with no choice open reads view.choice of undefined and throws.
+  const open = session({}, [accepted], 'c2');
+  replay([{ intent: intent([], { choice_id: 'go' }) }], open.game, () => {});
+  assert.deepEqual(open.sent[0]!.input, { choice_id: 'go' });
+  const closed = session({}, [refused]);
+  const out = replay([{ intent: intent([], { continuation_id: 'c1' }) }], closed.game, () => {});
+  assert.match(out.failed!, /not_here/);
+  assert.deepEqual(closed.sent[0]!.input, { continuation_id: 'c1' });
+});
+
 // Breaks: a replayed advance only drains (a drain never captures the moved clocks), so the world
 // clock stays put and the next replayed input is refused as catching up, or the loop stops early.
 test('an advance step credits the moved dev clock before the next input', () => {
@@ -93,4 +105,39 @@ test('an advance step credits the moved dev clock before the next input', () => 
   } finally {
     a.sql.close();
   }
+});
+
+test('a long advance delivers all its time and stops draining when caught up', () => {
+  // Break: the drain loop dropped or stopped early: one active pulse delivers 648000 ms of these
+  // 43200000 (ten real days at rate 50) and pending() is false either way, so a replay reads green.
+  const a = elapsedHost();
+  try {
+    assert.equal(
+      a.game.invoke({ action_key: 'look' as never, target_ids: [], input: {} }).kind,
+      'saved',
+    );
+    const before = a.game.view().view.time;
+    a.clock.wall += 864_000_000;
+    a.clock.mono += 864_000_000;
+    caughtUp(a.game);
+    assert.equal(a.game.view().view.time, before + 43_200_000);
+    assert.equal(a.game.pending(), false);
+  } finally {
+    a.sql.close();
+  }
+});
+
+test('the drain loop gives up at 1000 rounds and stops on the first other reply', () => {
+  // Break: a session stuck catching up hangs the page (no bound, or a different one); the loop
+  // keeps pulsing after it has caught up.
+  const pulsing = (kinds: (round: number) => string) => {
+    const modes: string[] = [];
+    caughtUp({ pulse: (mode) => ({ kind: kinds(modes.push(mode)) }) });
+    return modes;
+  };
+  assert.equal(pulsing(() => 'catching_up').length, 1001);
+  assert.deepEqual(
+    pulsing((n) => (n < 3 ? 'catching_up' : 'idle')),
+    ['active', 'drain', 'drain'],
+  );
 });
