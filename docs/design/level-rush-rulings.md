@@ -1,6 +1,6 @@
 # Level-up rush: design rulings for B1 to B3
 
-Decided, one pass, for `loka-g5hh.2`, `loka-ot39`, `loka-x6t.59` and `loka-xpk3n`. The owner approved the shape on 2026-10-31 (design note on `loka-g5hh.2`); this record settles what that left open. It reuses the effects epic and adds one token and one view field. The spec paragraphs at the end are approved text for each slice's developer to paste, because `book-ui.md` describes what is built.
+Decided, one pass, for `loka-g5hh.2`, `loka-ot39`, `loka-x6t.59` and `loka-xpk3n`. The owner approved the shape on 2026-10-31 (design note on `loka-g5hh.2`); this record settles what that left open. It reuses the effects epic and adds one token, one view field and one refusal cause. The spec paragraphs at the end are approved text for each slice's developer to paste, because `book-ui.md` describes what is built.
 
 All player words come from authored keys. Nothing here adds any. The composed lines already in `received.ts` stay only as fallbacks for cartridges that author nothing.
 
@@ -52,7 +52,7 @@ No card. In one reply: the level line in gilt, the `level` sound and medium hapt
 | Death in the same reply | Falling unchanged: no level wash |
 | Page turn during it | Ends it, as for the blow wash. Accepted |
 
-**Contrast.** Same half-second exemption as the blow wash, extended by name. At .18 on `bg`, worst across palettes: `fg` 8.1, `action` 5.2, `danger` 5.5, `dim` 4.15, `warning` 4.0. Over a held layer, worst: `fg` 7.1, `action` and `danger` 4.8, `dim` 3.8, `warning` 3.6. At `washStill` on bare `bg`, `dim` and `warning` hold 4.5; over a held layer `dim` falls to 4.3 and `warning` to 4.15. Text on cards is unaffected. The held-layer figures treat each layer as uniform at its peak, in an accent colour: an estimate, since the real layers are gradients. No new opacity token.
+**Contrast.** Same half-second exemption as the blow wash, extended by name. At .18 on `bg`, worst across palettes: `fg` 8.1, `action` 5.2, `danger` 5.5, `dim` 4.15, `warning` 4.0. Over a held layer, worst: `fg` 7.1, `action` 4.7, `danger` 4.8, `dim` 3.75, `warning` 3.6. At `washStill` on bare `bg`, `dim` and `warning` hold 4.5; over a held layer `dim` falls to 4.2 and `warning` to 4.1. Text on cards is unaffected. The held-layer figures treat the vignette (`fg` at `opacity.faint`) and the glow (`color.dark.action` at `opacity.glow`) as uniform at their peak: a worst case, since both are gradients. No new opacity token.
 
 **Gilding the level line needs one engine field.** `level_up` is a cartridge-chosen key and the Book cannot read `world.levelling`; rendered words must never identify it. B2 adds `level_up` (a TextKey) to the view's `levelling` in `levellingView` (`kernel/ts/src/view/skills.ts:72`) and its schema, and the Book gilds the line whose key equals it. The `gained` line stays plain.
 
@@ -139,7 +139,7 @@ Per the ruling.
 
 - `world.levelling.gained`, with `{amount}`, and `world.levelling.level_up`. It has no `{level}` binding.
 - A `narrate` line in each `on {event: level_reached, level: N}` reaction, naming that level's ability. That is the "named new ability" of the rush, and it is content, not Book.
-- Each skill's `learned`, and each rank's `name` and `reached`. A rank with no `reached` on a taught skill falls back to the composed line, so author all of them for the prologue.
+- Each skill's `learned`, and each rank's `name` and `reached`. A rank with no `reached` on a taught skill falls back to the composed line, so author all of them for the prologue. On a skill with `learned`, rank 1's `reached` shows only if rank 1 comes by practice before the teach; a skill only ever taught never shows it.
 
 **Authoring note.** Do not grant a level on the same press as a chapter; the card takes its sound and wash.
 
@@ -172,7 +172,7 @@ Flash limit: unchanged in substance; "a later blow" becomes "a later blow or lev
 
 `docs/BOOK-UI-COMPONENTS.md:141`, replace "Combat is the only place the wash appears." with
 
-> The level wash shares this exemption for its half second, in `warning`: at its peak `fg` stays above 7:1, `action` and `danger` above 4.5:1, while `dim` dips to about 3.8:1 and `warning` to about 3.6:1 over a held layer.
+> The level wash shares this exemption for its half second, in `warning`: at its peak `fg` stays above 7:1, `action` and `danger` above 4.5:1, while `dim` dips to about 3.75:1 and `warning` to about 3.6:1 over a held layer.
 
 `docs/system/mechanics.md`, levelling view: add `level_up`.
 
