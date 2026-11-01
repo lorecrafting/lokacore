@@ -45,7 +45,7 @@ export const questCues = (now: GameView, was: GameView) => {
   return [
     ...named('quest_resolved', quests('resolved')),
     ...named('quest_fail', quests('failed')),
-    ...named('quest_on', quests('active', true)),
+    ...named('quest_on', quests('active', true), was.journal.length ? undefined : { first: true }),
   ];
 };
 
@@ -110,7 +110,10 @@ function itemCues(now: GameView, was: GameView): Cue[] {
   const got = now.inventory.filter((e) => !held.has(e.id)).map((e) => e.id);
   const pennies = moved(now, was, 'pennies');
   return [
-    ...named('pickup', got, pennies < 0 ? { silent: true } : undefined),
+    ...named('pickup', got, {
+      ...(pennies < 0 && { silent: true as const }),
+      ...(!held.size && { first: true as const }),
+    }),
     ...(pennies ? [{ name: 'coin' } as const] : []),
   ];
 }
@@ -157,6 +160,16 @@ function deedCues(now: GameView, was: GameView, combat: Cue[], deed?: NarrationR
 }
 
 /** What changed from `was` to `now`, the story's first. No `was` (a first view, a catch-up) is silent. */
+// A move by travel, on a plain page: its turn riffles (book-ui.md, Page life). A chapter card takes the page.
+// A press that killed (a due job can) arrives by death, not by travel.
+export const riffles = (command: string | undefined, was: GameView, now: GameView, died = false) =>
+  !died &&
+  command === 'expedition' &&
+  was.place.id !== now.place.id &&
+  !now.combat &&
+  !now.scene &&
+  (!now.chapter || was.chapter?.index === now.chapter.index);
+
 export function cuesOf(
   now: GameView,
   was: GameView | undefined,
@@ -169,7 +182,9 @@ export function cuesOf(
   const combat = combatCues(now, was, died);
   return [
     ...(chapter ? [{ name: 'chapter' } as const] : []),
-    ...(level ? [{ name: 'level' } as const] : []),
+    ...(level
+      ? [{ name: 'level', ...(was.levelling!.level === 1 && { first: true as const }) } as const]
+      : []),
     ...questCues(now, was),
     ...combat,
     ...deedCues(now, was, combat, deed),

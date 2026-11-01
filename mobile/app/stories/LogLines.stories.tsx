@@ -9,7 +9,7 @@ import { ItemPop } from '../book/ItemPop.tsx';
 import { GiltLine } from '../book/GiltLine.tsx';
 import { LogLines } from '../book/lines.tsx';
 import { usePalette, useType } from '../book/palette.ts';
-import { size } from '../book/tokens.ts';
+import { motion, size } from '../book/tokens.ts';
 import { Control } from '../book/pages.tsx';
 import type { DetailLine } from '../book/logs.ts';
 import { markDrawn } from '../book/logs.ts';
@@ -153,6 +153,10 @@ export const ItemPopTwoItems: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
     // Hidden from assistive tech, so found by its words rather than its role.
     await expect(await canvas.findByText('+ sack, + rope')).toBeInTheDocument();
+    // Axe reads the settled page: a pop mid-fade measures a contrast no one reads.
+    await waitFor(() => expect(canvas.queryByText('+ sack, + rope')).toBeNull(), {
+      timeout: motion.pop.duration + motion.pop.hold + motion.pop.out + 1000,
+    });
   },
 };
 

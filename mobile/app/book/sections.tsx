@@ -188,18 +188,20 @@ export function MapPage(p: { view: GameView; text: Say } & Home) {
 }
 
 /**
- * Settings: the Reading size first, then Sound, Music, Haptics and Flashes, then Start over.
+ * Settings: the Reading size first, then Sound, Music, Haptics and Flashes, then Credits, then
+ * Start over.
  * - Use: Contents.
  * - Rules: `startOver` asks first: it destroys the save (10 §31; the shell's confirm).
  * - Story: SectionPages.stories.tsx
  */
 export function SettingsPage(
-  p: { startOver: () => void; reading?: Reading; effects?: Effects } & Home,
+  p: { startOver: () => void; credits?: () => void; reading?: Reading; effects?: Effects } & Home,
 ) {
   return (
     <Page title={LABEL.settings} foot={home(p)}>
       {p.reading && <ReadingSize {...p.reading} />}
       {p.effects && <EffectSettings {...p.effects} />}
+      {p.credits && <Control label={LABEL.credits} onPress={p.credits} />}
       <Control label={LABEL.startOver} onPress={p.startOver} />
     </Page>
   );

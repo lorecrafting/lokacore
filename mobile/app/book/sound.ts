@@ -14,6 +14,6 @@ export const ambience = (
   _quiet?: boolean,
 ) => {};
 export const thunder = (_muffled: boolean) => {};
-export const play = (_name: SoundName) => {};
+export const play = (_name: SoundName, _tier?: string) => {};
 export const fight = (_event: 'open' | 'resume' | 'won' | 'away' | 'cut') => {};
 export const setMuted = (_group: 'sound' | 'music', _muted: boolean) => {};

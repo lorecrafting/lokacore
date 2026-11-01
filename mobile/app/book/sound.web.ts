@@ -75,7 +75,7 @@ const duck = (on: boolean) => {
   ramp(audio!.music, amp(on ? mix.dip.db : 0), ms);
 };
 
-export const play = (name: SoundName) => start(name);
+export const play = (name: SoundName, tier?: string) => start(name, { tier });
 
 type Voice = { stop: () => void; level: GainNode };
 type VoiceOpts = {
@@ -83,6 +83,7 @@ type VoiceOpts = {
   then?: () => void;
   fadeIn?: number; // ms, from silence
   muffled?: boolean; // through mix.muffle
+  tier?: string; // louder than its own, once (a first time)
 };
 
 function start(name: SoundName, opts: VoiceOpts = {}) {
@@ -111,8 +112,8 @@ function wire(node: AudioNode, bus: Bus, muffled?: boolean) {
   return level;
 }
 
-const dbOf = (name: SoundName, muffled?: boolean) =>
-  amp(mix.tier[sound[name].tier as keyof typeof mix.tier] + (muffled ? mix.muffle.db : 0));
+const dbOf = (tier: string, muffled?: boolean) =>
+  amp(mix.tier[tier as keyof typeof mix.tier] + (muffled ? mix.muffle.db : 0));
 
 function lowerBeds(name: 'chapter' | 'explore') {
   heard = name;
@@ -145,7 +146,7 @@ function voice(name: SoundName, file: string, opts: VoiceOpts): Voice | undefine
     const voices = live[bus];
     const el = new Audio(file);
     const node = audio.ctx.createMediaElementSource(el);
-    const db = dbOf(name, opts.muffled);
+    const db = dbOf(opts.tier ?? sound[name].tier, opts.muffled);
     const level = wire(node, bus, opts.muffled);
     level.gain.value = opts.fadeIn ? 0 : db;
     if (voices.length >= mix.bus[bus]) voices[0]!(); // the oldest is stolen, once its heir exists
@@ -179,9 +180,8 @@ function voice(name: SoundName, file: string, opts: VoiceOpts): Voice | undefine
   } catch {} // a browser refusing the element is silence too
 }
 
-// A room's sound (book-ui.md, Beds; Storm): one bed by tag, one weather layer, each cross-fading on a
-// change, and an exploration piece on entering a tag new since launch. Nothing while a fight plays,
-// in the background, or with Sound off. A tag with no file plays `wild`; no `wild` is silence.
+// A room's sound (book-ui.md, Beds; Storm): one bed by tag (no file: `wild`; no `wild`: silence), one
+// weather layer, each cross-fading, and a piece on entering a tag new since launch. Nothing in a fight, away or muted.
 type Held = { key: string; voice: Voice };
 type Room = { tag: string; weather?: string; exposed: boolean };
 let room: Room | undefined;

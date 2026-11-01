@@ -43,6 +43,7 @@ export type Cue = {
   fight?: boolean; // death: in a fight
   end?: 'fell' | 'fled' | 'quiet'; // combat_close
   resumed?: true; // combat_open, combat_close: found on a first view, nothing happening now
+  first?: true; // pickup, quest_on, level: the playthrough's first (book-ui.md, First times)
 };
 
 export const soundOf = (cue: Cue): SoundName | undefined =>
@@ -90,9 +91,10 @@ const gathered = (cues: Cue[]) =>
   cues.reduce<Cue[]>((out, cue) => {
     const i = CUES[cue.name].s === 2 ? out.findIndex((o) => o.name === cue.name) : -1;
     if (i < 0) return [...out, cue];
-    const { silent, ...first } = out[i]!;
-    const ids = [...(first.ids ?? []), ...(cue.ids ?? [])];
-    out[i] = silent && cue.silent ? { ...first, ids, silent } : { ...first, ids };
+    const { silent, ...rest } = out[i]!;
+    const merged = { ...rest, ...(cue.first && { first: true as const }) };
+    const ids = [...(rest.ids ?? []), ...(cue.ids ?? [])];
+    out[i] = silent && cue.silent ? { ...merged, ids, silent } : { ...merged, ids };
     return out;
   }, []);
 
@@ -186,6 +188,7 @@ const send = (cue: Cue) => {
 // One action, one paper sound (owner, 2026-10-31): a take's flick stands for its page turn.
 const flicks = (cue: Cue) => cue.name === 'pickup' && !cue.silent;
 export let curlEnds = -Infinity; // at the latest: a curl starts by the picture deadline
+export const curlFor = (ms: number) => void (curlEnds = performance.now() + ms); // a riffle's length
 export const onCue = (listener: (cue: Cue) => void) => {
   listeners.add(listener);
   return () => void listeners.delete(listener);

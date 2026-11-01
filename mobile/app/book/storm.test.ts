@@ -1,12 +1,15 @@
 // Storm and Wind on the real component: what a strike draws, and when (book-ui.md, Storm; Wind).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { effects, rig } from './__tests__/hook-rig.ts';
+import { effects, flat, rig } from './__tests__/hook-rig.ts';
 import { nodes } from './__tests__/polish-book.test.ts';
+import type { GameView } from '../../packages/game-view/session.ts';
 
 const { flashesOn, lightFell, QUIET, step } = await import('./cues.ts');
 const { Storm } = await import('./Storm.tsx');
-const { motion } = await import('./tokens.ts');
+const { color, motion, opacity } = await import('./tokens.ts');
+const { UnderInk } = await import('./UnderInk.tsx');
+const PaletteContext = (await import('./palette.ts')).PaletteContext as any;
 
 const g = globalThis as any;
 const SKY = { exposed: true, room: 'r', world: true, turn: 0 };
@@ -103,4 +106,54 @@ test('Leaf keeps the sky mounted and says when it is the World', async () => {
   assert.equal(world({ ancestry_choices: [] }).world, false);
   assert.equal(world({}, { page: 'map' }).world, false);
   assert.equal(world({}, { screen: { view: { place, exits: [] }, ended: true } }).world, false);
+});
+
+// Breaks: a strike leaves the held layer up, so the afterimage's contrast exemption is untrue, or it
+// comes back by a cut (book-ui.md, Lightning; rulings, One held layer).
+test('the light cuts the held layer, which returns over the settle after the strike', (t) => {
+  const was = PaletteContext._currentValue;
+  PaletteContext._currentValue = { ...was, bg: color.dark.bg };
+  g.CanvasKit = {};
+  t.after(() => {
+    PaletteContext._currentValue = was;
+    delete g.CanvasKit;
+  });
+  const { struck } = sky(t, 'storm');
+  const under = rig(t);
+  const lit = {
+    place: { id: 'p', exposed: true },
+    inventory: [{ fuel: { lit: true } }],
+    equipment: [],
+    entities: [],
+    resources: [],
+  } as unknown as GameView;
+  const glow = () =>
+    flat(
+      nodes(under(() => UnderInk({ view: lit }))).find((n) => n.props?.['aria-hidden'])!.props
+        .style,
+    ).opacity;
+  glow();
+  assert.equal(glow(), opacity.glow, 'held before the strike');
+  const cut = under.shared.at(-1)!;
+  const writes: number[] = [];
+  let value = cut.value;
+  Object.defineProperty(cut, 'value', {
+    get: () => value,
+    set: (v) => writes.push((value = v)),
+  });
+  g.timings.length = 0;
+  g.delays.length = 0;
+  assert.equal(struck(), true);
+  assert.deepEqual(writes, [0, 1], 'off at once, then back');
+  assert.ok(
+    g.delays.includes(motion.afterimage.duration + motion.afterimage.out),
+    'waits out the strike',
+  );
+  assert.ok(g.timings.includes(motion.settle.duration), 'returns over the settle');
+  value = 0;
+  assert.equal(glow(), 0, 'the cut reaches the drawn glow');
+  under.unmount();
+  writes.length = 0;
+  struck();
+  assert.deepEqual(writes, [], 'an unmounted layer stops listening');
 });

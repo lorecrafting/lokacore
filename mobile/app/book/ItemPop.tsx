@@ -22,6 +22,7 @@ const { duration, hold, out, rise } = motion.pop;
 
 function usePop() {
   const [ids, setIds] = useState<string[]>();
+  const [first, setFirst] = useState(false);
   const up = useSharedValue(0);
   const gone = useSharedValue(0);
   useEffect(
@@ -29,6 +30,7 @@ function usePop() {
       onCue((cue) => {
         if (cue.name !== 'pickup') return;
         setIds(cue.ids);
+        setFirst(!!cue.first);
         up.value = 0;
         // Never: under reduced motion it still appears and leaves; it only does not rise.
         const reduceMotion = ReduceMotion.Never;
@@ -46,14 +48,15 @@ function usePop() {
     const timer = setTimeout(() => setIds(undefined), duration + hold + out);
     return () => clearTimeout(timer);
   }, [ids]);
-  return { ids, up, gone };
+  return { ids, first, up, gone };
 }
 
 /**
  * What a pickup or a buy just added, under the log's last line (book-ui.md, Room page anatomy).
  * - Use: inside a plain View with LogLines, on the World page and the shop; a page turn drops it.
  * - Rules: reserves no layout, is not in the record, is hidden from assistive tech (the log line
- *   says it); the words are the view's item names. Reduced motion: it does not rise.
+ *   says it); the words are the view's item names. The first pickup's name is in `warning`.
+ *   Reduced motion: it does not rise.
  * - States: one item; two on one line; none.
  * - Story: LogLines.stories.tsx
  */
@@ -61,13 +64,13 @@ export function ItemPop(p: { view: GameView; text: (key: string) => string }) {
   const c = usePalette();
   const t = useType();
   const still = useReducedMotion();
-  const { ids, up, gone } = usePop();
+  const { ids, first, up, gone } = usePop();
   const place = useAnimatedStyle(() => ({
     opacity: up.value * (1 - gone.value),
     transform: [{ translateY: still ? 0 : rise * (1 - up.value) }],
   }));
   const ink = useAnimatedStyle(() => ({
-    color: interpolateColor(up.value, [0, 1], [c.dim, c.action]),
+    color: interpolateColor(up.value, [0, 1], [c.dim, first ? c.warning : c.action]),
   }));
   const names = (ids ?? []).flatMap((id) => {
     const item = p.view.inventory.find((e) => e.id === id);

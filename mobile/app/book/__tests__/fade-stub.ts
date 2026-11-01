@@ -11,6 +11,6 @@ export const fadeStub = {
     'FadeOut={duration:()=>({reduceMotion:()=>undefined})},' +
     'interpolateColor=(v,r,o)=>(v>r[0]?o[1]:o[0]),withDelay=(d,v)=>(globalThis.delays?.push(d),v),withSequence=(...v)=>(globalThis.sequences?.push(v),v.at(-1));' +
     'globalThis.requestAnimationFrame??=()=>0;globalThis.cancelAnimationFrame??=()=>{};export const ' +
-    'useSharedValue=value=>globalThis.sharedSlot?.(value)??{value},withTiming=(v,o)=>(globalThis.timings?.push(o.duration),v)',
+    'useSharedValue=value=>globalThis.sharedSlot?.(value)??{value},withRepeat=v=>v,withTiming=(v,o)=>(globalThis.timings?.push(o.duration),v)',
   shortCircuit: true,
 };

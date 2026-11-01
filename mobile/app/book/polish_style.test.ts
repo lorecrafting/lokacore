@@ -106,7 +106,7 @@ test('a readable notice the description links is a prose link and no World line'
 // dropped or loses its text, a plural group is not one link, opens a later member, says "is", or
 // counts 10 as a word.
 test('the room sentence shows bare names, shares an article per run and collapses plurals', async () => {
-  const { Here } = await import('./lines.tsx');
+  const { Here } = await import('./people.tsx');
   const SAY: Record<string, string> = {
     crow: 'crow',
     crows: 'crows',
@@ -128,7 +128,11 @@ test('the room sentence shows bare names, shares an article per run and collapse
   const opened: string[] = [];
   const said = (entities: object[]) => {
     const drawn = nodes(
-      Here({ view: { entities } as any, text: (k) => SAY[k] ?? k, open: (id) => opened.push(id) }),
+      Here({
+        view: { place: { id: 'r' }, entities } as any,
+        text: (k) => SAY[k] ?? k,
+        open: (id) => opened.push(id),
+      }),
     );
     return drawn
       .filter(
@@ -183,7 +187,7 @@ test('the room sentence shows bare names, shares an article per run and collapse
   opened.length = 0;
   const [sentence] = nodes(
     Here({
-      view: { entities: crows(2) } as any,
+      view: { place: { id: 'r' }, entities: crows(2) } as any,
       text: (k) => SAY[k] ?? k,
       open: (id) => opened.push(id),
     }),

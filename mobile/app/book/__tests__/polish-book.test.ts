@@ -22,7 +22,7 @@ registerHooks({
     // Metro picks the platform file; here each device module records what the Book tells it.
     if (specifier === './sound')
       return {
-        url: "data:text/javascript,export const setMuted=(g,m)=>globalThis.bookDevice?.push([g,m]);export const play=(n)=>globalThis.bookDevice?.push(['play',n]);export const fight=(e)=>globalThis.bookDevice?.push(['fight',e]);export const ambience=()=>{};export const thunder=()=>{};export const sources=(s,r)=>{globalThis.bookSamples=s;globalThis.bookRooms=r}",
+        url: "data:text/javascript,export const setMuted=(g,m)=>globalThis.bookDevice?.push([g,m]);export const play=(n,tier)=>globalThis.bookDevice?.push(tier?['play',n,tier]:['play',n]);export const fight=(e)=>globalThis.bookDevice?.push(['fight',e]);export const ambience=()=>{};export const thunder=()=>{};export const sources=(s,r)=>{globalThis.bookSamples=s;globalThis.bookRooms=r}",
         shortCircuit: true,
       };
     // Metro and Vite give an audio file's URL; here its name.
@@ -56,7 +56,7 @@ registerHooks({
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={announceForAccessibility(){}},Easing={},Animated={View:'View',Value:class{},timing:()=>({start:f=>globalThis[Symbol.for('loka-animation-end')]=f})},PanResponder={};",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={announceForAccessibility(){}},Easing={},Animated={View:'View',Value:class{interpolate(){return 1}},timing:()=>({start:f=>globalThis[Symbol.for('loka-animation-end')]=f})},PanResponder={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {

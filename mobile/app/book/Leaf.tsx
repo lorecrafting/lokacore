@@ -1,8 +1,10 @@
-// What the turning page holds: Combat, or the sky and the Body.
+// What the turning page holds: the paper, then Combat, or the sky and the Body.
 import type { ComponentProps } from 'react';
 import { Body } from './Body.tsx';
+import { View } from 'react-native';
 import { Combat } from './Combat.tsx';
 import type { Page } from './model.ts';
+import { usePalette } from './palette.ts';
 import { Storm } from './Storm.tsx';
 
 type Props = Omit<ComponentProps<typeof Body>, 'talkOn' | 'chapterDone'> & {
@@ -14,16 +16,17 @@ type Props = Omit<ComponentProps<typeof Body>, 'talkOn' | 'chapterDone'> & {
 /**
  * The inside of the page turn.
  * - Use: BookView, as PageTurn's child.
- * - Rules: an ended fight stays on Combat. Anything but a bare World page draws no sky.
+ * - Rules: an ended fight stays on Combat. Anything but a bare World page draws no sky. The paper
+ *   is here, under the sky; the World page draws none of its own.
  * - States: Combat; World.
  * - Story: CombatPage.stories.tsx
  */
 export function Leaf(p: Props) {
   const v = p.screen.view;
   const fight = v.combat || p.screen.ended;
+  const c = usePalette();
   return (
-    <>
-      {/* lamp flicker (PR B glow) switches on with place.exposed: on merge, read it there */}
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Storm
         weather={v.calendar_status?.weather}
         exposed={!!v.place?.exposed}
@@ -40,6 +43,6 @@ export function Leaf(p: Props) {
           chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
         />
       )}
-    </>
+    </View>
   );
 }

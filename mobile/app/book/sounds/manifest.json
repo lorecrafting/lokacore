@@ -261,7 +261,7 @@
     "credit": "'Hunted' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au (edited: cut and looped)",
     "human_made_evidence": "Upload by the named composer; his library lists it as his own composition; no AI marking on the page.",
     "edited": "cut 32 s to 97.5 s of the source, the last 2 s crossfaded into 30 s to 32 s so it loops, mono AAC 96k",
-    "replace_note": "Cut not auditioned; level peak-normalised only, not calibrated. Owner to listen, then replace or keep. No in-app credit surface yet."
+    "replace_note": "Cut not auditioned; level peak-normalised only, not calibrated. Owner to listen, then replace or keep."
   },
   {
     "file": "mus-fight-stinger-01.m4a",
@@ -273,7 +273,7 @@
     "credit": "'Monomyth - The Fall' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au (edited: cut)",
     "human_made_evidence": "Upload by the named composer; his library lists it as his own composition; no AI marking on the page.",
     "edited": "cut 1 s to 5 s of the source, 1.5 s fade out, mono AAC 96k",
-    "replace_note": "Cut not auditioned; level peak-normalised only, not calibrated. Owner to listen, then replace or keep. No in-app credit surface yet."
+    "replace_note": "Cut not auditioned; level peak-normalised only, not calibrated. Owner to listen, then replace or keep."
   },
   {
     "file": "mus-fight-won-01.m4a",
@@ -285,7 +285,7 @@
     "credit": "'Clarion' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au (edited: cut)",
     "human_made_evidence": "Upload by the named composer; his library lists it as his own composition; no AI marking on the page.",
     "edited": "cut 176.8 s to 181.8 s of the source, 1.5 s fade out, mono AAC 96k",
-    "replace_note": "Cut not auditioned; level peak-normalised only, not calibrated. Owner to listen, then replace or keep. No in-app credit surface yet."
+    "replace_note": "Cut not auditioned; level peak-normalised only, not calibrated. Owner to listen, then replace or keep."
   },
   {
     "file": "mus-theme-chapter-01.m4a",
@@ -297,7 +297,7 @@
     "credit": "'Memories Of Stone' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au (edited: cut)",
     "human_made_evidence": "Upload by the named composer; his library lists it as his own composition; no AI marking on the page.",
     "edited": "cut 0.8 s to 12.4 s of the source, 2 s fade out, mono AAC 96k",
-    "replace_note": "Cut not auditioned; level peak-normalised only, not calibrated. Owner to listen, then replace or keep. No in-app credit surface yet."
+    "replace_note": "Cut not auditioned; level peak-normalised only, not calibrated. Owner to listen, then replace or keep."
   },
   {
     "file": "sfx-coin-clink-01.m4a",
@@ -442,6 +442,18 @@
     "human_made_evidence": "Upload dated 2012, a book closed in a sound room; no AI marking on the page.",
     "edited": "cut 0 s to 0.7 s of the source, peak-normalised, mono AAC",
     "replace_note": "Cut not auditioned; level peak-normalised only, not calibrated. Owner to listen, then replace or keep. Cut from the public HQ preview: the original download needs a login."
+  },
+  {
+    "file": "sfx-paper-riffle-01.m4a",
+    "status": "placeholder",
+    "used_for": "the pages riffling on an expedition's travel",
+    "author": "jackthemurray",
+    "source_url": "https://freesound.org/people/jackthemurray/sounds/429403/",
+    "licence": "CC0",
+    "credit": null,
+    "human_made_evidence": "Freesound upload by the named recordist, flipping or fanning through a book; no AI marking on the page.",
+    "edited": "cut 1.00 s to 1.65 s of the source, 0.1 s fade out, mono AAC 96k",
+    "replace_note": "Cut from the public HQ preview: the original download needs a login. Cut not auditioned; level peak-normalised only, not calibrated. Owner to listen, then replace or keep."
   },
   {
     "file": "sfx-paper-thud-01.m4a",

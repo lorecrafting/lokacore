@@ -253,4 +253,17 @@ test('one action, one paper sound', (t) => {
     ]),
     ['pickup'],
   );
+  // loka-gj82.10: a buy's flick is silent, so the turn keeps its own paper sound.
+  const purse = (ids: string[], pennies: number): GameView =>
+    ({
+      ...held(ids),
+      resources: [{ resource: { key: 'pennies' }, current: pennies, maximum: 99 }],
+    }) as unknown as GameView;
+  assert.deepEqual(
+    played([
+      [purse(['sack'], 9), 0],
+      [purse(['sack', 'rope'], 6), 1],
+    ]),
+    ['pageTurn', 'coin'],
+  );
 });

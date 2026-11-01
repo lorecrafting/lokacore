@@ -13,6 +13,7 @@ import {
 } from './fade.ts';
 import type { SharedValue } from 'react-native-reanimated';
 import { haptic } from './haptic';
+import { cutHeld } from './heldLayer.ts';
 import { thunder } from './sound';
 import { stormClock, windEntry } from './stormClock.ts';
 import { color, motion, opacity, space } from './tokens.ts';
@@ -44,6 +45,7 @@ export function Storm(p: Sky) {
 const strike = (light: SharedValue<number>) => () => {
   const { duration, easing, out, outEasing } = motion.afterimage;
   lightFell(performance.now());
+  cutHeld();
   light.value = withSequence(
     ReduceMotion.Never,
     withTiming(opacity.afterimage, { duration, easing: curveOf(easing), ...never }),

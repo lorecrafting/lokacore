@@ -128,7 +128,8 @@ export const opacity = {
   afterimage: 0.12, // Storm's light, the second exemption: BOOK-UI-COMPONENTS.md#design-tokens -- mutate-skip: uncalibrated design value
   wash: 0.18, // the blow wash at its peak, the exemption: BOOK-UI-COMPONENTS.md#design-tokens
   washStill: 0.09, // the same wash under reduced motion
-  faint: 0.06, // the fatal blow's wash, held until the page turns -- mutate-skip: uncalibrated design value
+  faint: 0.06, // a held under-ink layer: low-health vignette, dream paper, the fatal wash's hold; 4.5:1 holds -- mutate-skip: uncalibrated design value
+  glow: 0.08, // the lamp at the page's hip, at its peak; 4.5:1 holds -- mutate-skip: uncalibrated design value
 };
 
 // Book motion. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion. `duration` and
@@ -161,7 +162,12 @@ export const motion = {
     thunder: [1000, 3000],
   }, // Storm's light -- mutate-skip: uncalibrated design value
   flutter: { duration: 600, easing: 'inOutQuad', lift: space.xs, times: 2 }, // Wind's corner paper -- mutate-skip: uncalibrated design value
+  flicker: { min: 80, max: 140, depth: 0.08 }, // the lamp's random step (ms) and share of opacity.glow; the peak is opacity.glow -- mutate-skip: uncalibrated design value
   settle: { duration: 400, easing: 'inOutQuad', hold: 600 }, // a resolved running head retiring; hold: gilt's warning ink before it settles -- mutate-skip: uncalibrated design value
+  breathe: { duration: 2400, easing: 'inOutQuad' }, // one way of the vignette and the star groups -- mutate-skip: uncalibrated design value
+  stagger: { gap: 40, most: 8 }, // choice answers lifting in, with motion.press -- mutate-skip: uncalibrated design value
+  riffle: { sweeps: 5, duration: 120, easing: 'linear' }, // one travel's sweeps over one snapshot -- mutate-skip: uncalibrated design value
+  first: { hold: 1200 }, // gilt's hold on a first of a playthrough (ordinary: motion.settle.hold) -- mutate-skip: uncalibrated design value
   card: {
     duration: 600,
     easing: 'inOutQuad',
@@ -198,6 +204,8 @@ export const sound = {
   impact: { tier: 'note', variants: 3 }, // a blow dealt, under the music -- mutate-skip: uncalibrated design value
   fightIn: { tier: 'chapter', variants: 1 }, // a fight's stinger, into the loop -- mutate-skip: uncalibrated design value
   fightLoop: { tier: 'chapter', variants: 1, gap: 60000 }, // a fight within gap (ms) of the last skips the stinger -- mutate-skip: uncalibrated design value
+  riddleRight: { tier: 'note', variants: 1, haptic: 'light' }, // the note-low sample; no new file -- mutate-skip: uncalibrated design value
+  riffle: { tier: 'note', variants: 1, haptic: 'light' }, // one travel's turn -- mutate-skip: uncalibrated design value
   fightWon: { tier: 'chapter', variants: 1, haptic: 'light' }, // a foe falling: the fanfare -- mutate-skip: uncalibrated design value
 };
 

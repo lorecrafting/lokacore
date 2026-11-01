@@ -1,7 +1,7 @@
 // The night sky over the page. RN Animated only (Footer's precedent), so node tests load it.
 import { useEffect, useState } from 'react';
 import { Animated, Easing, View } from 'react-native';
-import { useReducedMotion } from './fade.ts';
+import { curveOf, useReducedMotion } from './fade.ts';
 import { motion, nightSky, size } from './tokens.ts';
 
 // A drawing, not spacing (the catalogue's map exemption): the mock's meteor, 315 px/s down-left
@@ -56,6 +56,8 @@ export function meteors(box: { width: number; height: number }, show: (s: Streak
   };
 }
 
+// Two groups in opposed phase: each star's own opacity, carried from 1 to .6 of it by its group.
+const low = 0.6; // mutate-skip: uncalibrated design value
 const starViews = field.map((s, i) => (
   <View
     key={i}
@@ -72,49 +74,81 @@ const starViews = field.map((s, i) => (
   />
 ));
 
+const groups = [starViews.filter((_, i) => i % 2 === 0), starViews.filter((_, i) => i % 2 === 1)];
+
+function useTwinkle(still: boolean) {
+  const [phase] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    if (still) return;
+    const to = (toValue: number) =>
+      Animated.timing(phase, {
+        toValue,
+        duration: motion.breathe.duration,
+        easing: curveOf(motion.breathe.easing),
+        useNativeDriver: true,
+      });
+    const loop = Animated.loop(Animated.sequence([to(1), to(0)]));
+    loop.start();
+    return () => loop.stop();
+  }, [still, phase]);
+  return [
+    phase.interpolate({ inputRange: [0, 1], outputRange: [1, low] }),
+    phase.interpolate({ inputRange: [0, 1], outputRange: [low, 1] }),
+  ];
+}
+
+function Meteor({ falling }: { falling: Streak }) {
+  const along = (from: number, by: number) =>
+    falling.k.interpolate({ inputRange: [0, 1], outputRange: [from, from + by] });
+  return (
+    <Animated.View
+      style={{
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: streak.tail,
+        height: size.rule,
+        backgroundColor: nightSky.star,
+        transformOrigin: '0% 50%',
+        opacity: along(0.9, -0.9),
+        transform: [
+          { translateX: along(falling.x, streak.dx) },
+          { translateY: along(falling.y, streak.dy) },
+          { rotate: streak.angle },
+        ],
+      }}
+    />
+  );
+}
+
 /**
  * Faint fixed stars and, on average every 9 s, one shooting star over the whole Book.
  * - Use: while the shown palette is `dark`.
  * - Rules: decoration, never information; takes no touch, focus or screen-reader node. The star
  *   field is a drawing: the same sky every night.
- * - States: night; reduced motion (stars only).
+ * - States: night (two star groups twinkle in opposed phase); reduced motion (still stars only).
  * - Story: NightSky.stories.tsx
  */
 export function NightSky() {
   const reduced = useReducedMotion();
   const [box, setBox] = useState({ width: 0, height: 0 });
   const [falling, setFalling] = useState<Streak>();
+  const twinkle = useTwinkle(reduced);
   useEffect(
     () => (reduced || !box.width ? undefined : meteors(box, setFalling)),
     [reduced, box.width, box.height],
   );
-  const along = (from: number, by: number) =>
-    falling!.k.interpolate({ inputRange: [0, 1], outputRange: [from, from + by] });
   return (
     <View
       {...over}
       onLayout={({ nativeEvent: { layout: l } }) => setBox({ width: l.width, height: l.height })}
     >
-      {starViews}
-      {falling && !reduced && (
-        <Animated.View
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            width: streak.tail,
-            height: size.rule,
-            backgroundColor: nightSky.star,
-            transformOrigin: '0% 50%',
-            opacity: along(0.9, -0.9),
-            transform: [
-              { translateX: along(falling.x, streak.dx) },
-              { translateY: along(falling.y, streak.dy) },
-              { rotate: streak.angle },
-            ],
-          }}
-        />
-      )}
+      {groups.map((stars, i) => (
+        <Animated.View key={i} style={[over.style, !reduced && { opacity: twinkle[i] }]}>
+          {stars}
+        </Animated.View>
+      ))}
+      {falling && !reduced && <Meteor falling={falling} />}
     </View>
   );
 }
