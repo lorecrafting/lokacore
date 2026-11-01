@@ -8,16 +8,7 @@ import { Platform } from 'react-native';
 import type { localSession } from '../../authority/local-story/session';
 import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
 import { listen, overlay } from './live.ts';
-import {
-  asRefs,
-  cheatIntent,
-  cheatNote,
-  dropStep,
-  replay,
-  type Cheat,
-  type Place,
-  type Step,
-} from './place.ts';
+import { asRefs, dropStep, replay, sendCheat, type Cheat, type Place, type Step } from './place.ts';
 
 export { frozenClock } from './place.ts';
 
@@ -187,10 +178,7 @@ function askCheat(game: Opened, cheat: Cheat) {
   const { manifest } = JSON.parse(chapter.canonical) as {
     manifest: { id: string; version: string };
   };
-  placeNote = cheatNote(
-    cheat.op,
-    played(game)!.invoke(cheatIntent(cheat, manifest, game.view().token)),
-  );
+  placeNote = sendCheat(played(game)!, cheat, manifest);
 }
 /** Serves the author panel page for `game` while mounted; App calls it only in the author preview. */
 export function useAuthorPanel(tools: Tools, game: Opened | undefined) {

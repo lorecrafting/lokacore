@@ -110,6 +110,20 @@ export function cheatNote(op: Cheat['op'], reply: Reply) {
   return `${op === 'go_to_room' ? 'Go to room' : 'Set fact'} refused: ${(code && REFUSED[op][code]) || describe(reply)}.`;
 }
 
+/**
+ * Sends a cheat once the time due is delivered: a reply held for catch-up would land on a later pulse,
+ * unrecorded and after the author read it as refused. Returns the note.
+ */
+export function sendCheat(
+  game: Replayable,
+  cheat: Cheat,
+  manifest: { id: string; version: string },
+) {
+  const after = caughtUp(game);
+  if (after !== 'ready') return `Not sent, the game is still catching up: ${after}.`;
+  return cheatNote(cheat.op, game.invoke(cheatIntent(cheat, manifest, game.view().token)));
+}
+
 /** The path without the step at `index`. */
 export const dropStep = (steps: Step[], index: number) => steps.filter((_, i) => i !== index);
 

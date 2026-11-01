@@ -5,6 +5,8 @@ import { INSTALLED, newWorld, step, stepDev } from '../src/runtime/world.ts';
 import { loadCartridge } from '../src/index.ts';
 import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import type { Command } from '../src/contracts.gen.ts';
+import { decideReplay, start } from '../play/run.ts';
+import { resolveDev } from '../src/commands/invocation.ts';
 import { fragment } from './fragment.ts';
 import { read } from './read.ts';
 
@@ -40,9 +42,6 @@ const body = (w: World) => bodyOf(w, w.character)!;
 const sat = (w: World) => step(w, cmd(w, { type: 'sit' }), 1).world;
 
 const patched = (w: World, state: object) => ({ ...w, state: { ...w.state, ...state } }) as World;
-// The key `set fact` writes for a player-scoped fact, read from an accepted write.
-const FACT_KEY = (w: World, key: string) =>
-  Object.keys(set(w, 'wanted', true).world.state.facts!)[0]!.replace('wanted', key);
 
 // Break: `step`, the path every other host and transcript takes, reaches the dev rule.
 test('the ordinary step refuses both cheats', () => {
@@ -89,7 +88,12 @@ const held: Record<string, (w: World) => World> = {
     patched(w, {
       choices: { c: { actor_id: w.character, status: 'pending', source: { kind: 'dialogue' } } },
     }),
-  'in a modal scene': (w) => patched(w, { facts: { [FACT_KEY(w, 'scene_letter_read')]: 1 } }),
+  'in a modal scene': (w) =>
+    patched(w, {
+      facts: {
+        [`{"fact":{"cartridge_id":"toolbox_showcase","cartridge_version":"0.0.1","key":"scene_letter_read","kind":"fact"},"kind":"fact","scope":{"character_id":"${w.character}","kind":"player"}}`]: 1,
+      },
+    }),
 };
 for (const [name, hold] of Object.entries(held))
   test(`go to room refuses while ${name}`, () => {
@@ -130,6 +134,9 @@ test('set fact stores the value', () => {
   const w = fresh();
   const out = set(w, 'cellar_disarmed', true);
   assert.equal(code(out), 'accepted');
+  assert.deepEqual(out.world.state.facts, {
+    '{"fact":{"cartridge_id":"toolbox_showcase","cartridge_version":"0.0.1","key":"cellar_disarmed","kind":"fact"},"kind":"fact","scope":{"kind":"instance","world_context_id":"0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"}}': true,
+  });
   assert.equal(code(set(out.world, 'cellar_disarmed', true)), 'invalid_state'); // already that value
 });
 
@@ -141,4 +148,37 @@ test('set fact refuses unknown, ill-typed, reserved and owned facts', () => {
   assert.equal(code(set(w, 'position', 'sitting')), 'invalid_state');
   assert.equal(code(set(w, 'scene_letter_read', 1)), 'invalid_state');
   assert.equal(code(set(w, 'skill_blade', true)), 'invalid_state'); // the skills mechanic owns it
+});
+
+// Break: the trace replay (Why, bin/play) re-decides a preview's cheat through `step`, which refuses it.
+test('a trace replay re-decides a cheat', () => {
+  const w = fresh();
+  const r = start(w.cartridge, 'h', 'r', w.context, [1, 2, 3, 4], 'v');
+  const { decision } = decideReplay(
+    r,
+    cmd(r.world, { type: 'dev_set_fact', fact: ref('fact', 'cellar_disarmed'), value: true }),
+  );
+  assert.equal(decision.kind, 'accepted');
+});
+
+// Break: a hand-edited step's targets, which a cheat has no slot for, are dropped silently.
+test('a cheat invocation with targets does not resolve', () => {
+  const w = fresh();
+  const invocation = {
+    invocation_id: 'i',
+    actor_id: w.character,
+    action_key: 'dev_go_to_room',
+    target_ids: [],
+    input: { room: ref('room', 'boar_run') },
+  };
+  const id = { invocation, command_id: 'e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b' } as never;
+  const bad = {
+    invocation: { ...invocation, target_ids: ['x'] },
+    command_id: 'e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b',
+  } as never;
+  assert.equal('payload' in resolveDev(w, id), true);
+  assert.deepEqual(resolveDev(w, bad), {
+    kind: 'rejected',
+    error: { code: 'unsupported_capability' },
+  });
 });

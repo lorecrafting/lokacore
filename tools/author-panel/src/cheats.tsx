@@ -15,7 +15,12 @@ export function GoToRoom({ state, send }: { state?: State; send: Send }) {
         send({ op: 'go_to_room', room });
       }}
     >
-      <Input aria-label="Room key" placeholder="room key" value={room} onChange={(e) => setRoom(e.target.value)} />
+      <Input
+        aria-label="Room key"
+        placeholder="room key"
+        value={room}
+        onChange={(e) => setRoom(e.target.value)}
+      />
       <Button type="submit" variant="secondary" disabled={!state || !room}>
         Go to room
       </Button>
@@ -28,9 +33,12 @@ export function SetFact({ state, send }: { state?: State; send: Send }) {
   const [value, setValue] = useState('');
   const typedValue = () => {
     try {
-      return JSON.parse(value) as boolean | number; // true, false or a number; anything else is an enum's word
+      const parsed: unknown = JSON.parse(value); // true, false, a number or a "quoted" string
+      return ['boolean', 'number', 'string'].includes(typeof parsed)
+        ? (parsed as boolean | number | string)
+        : value;
     } catch {
-      return value;
+      return value; // a bare word is an enum's or a string's
     }
   };
   return (
@@ -41,8 +49,18 @@ export function SetFact({ state, send }: { state?: State; send: Send }) {
         send({ op: 'set_fact', fact, value: typedValue() });
       }}
     >
-      <Input aria-label="Fact key" placeholder="fact key" value={fact} onChange={(e) => setFact(e.target.value)} />
-      <Input aria-label="Fact value" placeholder="value" value={value} onChange={(e) => setValue(e.target.value)} />
+      <Input
+        aria-label="Fact key"
+        placeholder="fact key"
+        value={fact}
+        onChange={(e) => setFact(e.target.value)}
+      />
+      <Input
+        aria-label="Fact value"
+        placeholder="value"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
       <Button type="submit" variant="secondary" disabled={!state || !fact || !value}>
         Set fact
       </Button>

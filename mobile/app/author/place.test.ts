@@ -8,6 +8,7 @@ import {
   asRefs,
   cheatIntent,
   cheatNote,
+  sendCheat,
   caughtUp,
   dropStep,
   frozenClock,
@@ -281,4 +282,18 @@ test('a refused cheat says why in plain words', () => {
     cheatNote('go_to_room', { kind: 'saved', decision: { kind: 'fault', code: 'x' } } as Reply),
     'Go to room refused: fault x.',
   );
+});
+
+// Break: a cheat sent mid catch-up is held by the session, lands on a later pulse and is never recorded.
+test('a cheat waits for the time due and is not sent while it is undelivered', () => {
+  const { game, sent } = session({}, [accepted]);
+  const m = { id: 'c', version: '1' };
+  const stuck = { ...game, pulse: () => ({ kind: 'catching_up' }) };
+  assert.equal(
+    sendCheat(stuck, { op: 'go_to_room', room: 'well' }, m),
+    'Not sent, the game is still catching up: catching_up.',
+  );
+  assert.equal(sent.length, 0);
+  assert.equal(sendCheat(game, { op: 'go_to_room', room: 'well' }, m), '');
+  assert.equal(sent.length, 1);
 });

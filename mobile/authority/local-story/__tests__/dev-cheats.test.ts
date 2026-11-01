@@ -16,6 +16,11 @@ const ref = (kind: string, key: string) => ({
 });
 const cheat = (action_key: string, input: object, token: string) =>
   ({ action_key, target_ids: [], input, view_freshness_token: token }) as unknown as Intent;
+// A fact row's key is its canonical target JSON; the instance scope carries a per-game context id.
+const disarmed = (facts: Record<string, unknown>) =>
+  Object.keys(facts)
+    .filter((k) => k.includes('"key":"cellar_disarmed"'))
+    .map((k) => facts[k]);
 const answer = (r: Reply) =>
   r.kind === 'saved' && r.decision.kind === 'rejected'
     ? r.decision.error.code
@@ -46,7 +51,7 @@ test('a host without dev refuses both cheats and the world stays', () => {
     'unsupported_capability',
   );
   assert.equal(game.view().view.place.id, room);
-  assert.equal(game.facts()['toolbox_showcase@0.0.1:fact/cellar_disarmed'], undefined);
+  assert.deepEqual(disarmed(game.facts()), []);
 });
 
 // Break: reopen re-decides a dev receipt through `step`, which refuses it: the save would not open.
@@ -75,5 +80,5 @@ test('a dev host decides both cheats and a reopen holds them', () => {
   );
   const again = openGame(a.db, bundle, { ...a.host, dev: true });
   assert.equal(again.view().view.place.title.key, 'room.boar_run.title');
-  assert.equal(Object.values(again.facts()).includes(true), true);
+  assert.deepEqual(disarmed(again.facts()), [true]);
 });
