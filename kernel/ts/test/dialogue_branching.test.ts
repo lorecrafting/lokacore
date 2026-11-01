@@ -694,7 +694,7 @@ test('a failed default Talk opens only what a free choice leads to: the shared c
         const model = c.dialogues[`${P}:dialogue/guard`];
         delete c.dialogues[`${P}:dialogue/guard`];
         c.npcs[`${P}:npc/other`] = { ...structuredClone(c.npcs[`${P}:npc/guard`]), key: 'other' };
-        for (const { key, npc, choices, entry, closed } of dialogues) {
+        for (const { key, npc, choices, entry, closed, name: label } of dialogues) {
           const made = Object.entries<any>(choices).map(([id, { gate, ...rest }]) => [
             id,
             { ...plain(), ...gates[gate], ...rest },
@@ -705,6 +705,7 @@ test('a failed default Talk opens only what a free choice leads to: the shared c
             npc: ref('npc', npc),
             choices: Object.fromEntries(made),
             ...(entry && { entry }),
+            ...(label && { name: LABEL }),
             ...(closed && { policy: is('flag', true) }),
           };
         }
