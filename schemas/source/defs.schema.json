@@ -994,9 +994,16 @@
           "additionalProperties": false,
           "description": "API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest.",
           "properties": {
-            "npc": { "$ref": "#/$defs/Key" },
-            "quest": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/Key",
+              "description": "A bound NPC role."
+            },
+            "quest": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The escort quest."
+            },
             "transition": {
+              "description": "The transition made.",
               "enum": [
                 "start",
                 "rejoin",
@@ -1019,8 +1026,14 @@
           "additionalProperties": false,
           "description": "The item role the actor gives to an npc role.",
           "properties": {
-            "item": { "$ref": "#/$defs/Key" },
-            "to": { "$ref": "#/$defs/Key" }
+            "item": {
+              "$ref": "#/$defs/Key",
+              "description": "The item role given."
+            },
+            "to": {
+              "$ref": "#/$defs/Key",
+              "description": "The npc role receiving it."
+            }
           },
           "required": [
             "item",
@@ -1034,15 +1047,22 @@
         },
         "lesson_payment": {
           "additionalProperties": false,
-          "description": "Coins the actor pays for a lesson.",
+          "description": "An amount of a resource the actor pays for a lesson.",
           "properties": {
             "amount": {
+              "description": "How much.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "resource": { "$ref": "#/$defs/DefinitionRef" },
-            "to": { "$ref": "#/$defs/Key" }
+            "resource": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The resource paid."
+            },
+            "to": {
+              "$ref": "#/$defs/Key",
+              "description": "The npc role paid."
+            }
           },
           "required": [
             "to",
@@ -1059,9 +1079,16 @@
           "additionalProperties": false,
           "description": "A patrol transition.",
           "properties": {
-            "npc": { "$ref": "#/$defs/Key" },
-            "quest": { "$ref": "#/$defs/DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/Key",
+              "description": "A bound NPC role."
+            },
+            "quest": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The patrol quest."
+            },
             "transition": {
+              "description": "The transition made.",
               "enum": [
                 "start",
                 "continue",
@@ -1079,15 +1106,22 @@
         },
         "payment": {
           "additionalProperties": false,
-          "description": "Coins paid to the actor by an NPC role.",
+          "description": "An amount of a resource paid to the actor by an NPC role.",
           "properties": {
             "amount": {
+              "description": "How much.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "from": { "$ref": "#/$defs/Key" },
-            "resource": { "$ref": "#/$defs/DefinitionRef" }
+            "from": {
+              "$ref": "#/$defs/Key",
+              "description": "The paying npc role."
+            },
+            "resource": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "The resource paid."
+            }
           },
           "required": [
             "from",
@@ -1100,8 +1134,14 @@
           "additionalProperties": false,
           "description": "The bound NPC-held item transferred to the actor.",
           "properties": {
-            "from": { "$ref": "#/$defs/Key" },
-            "item": { "$ref": "#/$defs/Key" }
+            "from": {
+              "$ref": "#/$defs/Key",
+              "description": "The npc role holding it."
+            },
+            "item": {
+              "$ref": "#/$defs/Key",
+              "description": "The bound item transferred."
+            }
           },
           "required": [
             "item",
@@ -3314,7 +3354,10 @@
               "description": "The NPC to move; else the event's subject when it is an NPC."
             },
             "op": { "const": "npc.move" },
-            "plan": { "$ref": "#/$defs/DefinitionRef" },
+            "plan": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "Moves every living member of this population plan instead; never with npc, room required."
+            },
             "room": {
               "$ref": "#/$defs/DefinitionRef",
               "description": "The destination; else the event's room."
@@ -3561,7 +3604,10 @@
               ],
               "type": "object"
             },
-            "fact": { "$ref": "#/$defs/DefinitionRef" },
+            "fact": {
+              "$ref": "#/$defs/DefinitionRef",
+              "description": "With escrow, makes a commission: true from the order until the job raises the room."
+            },
             "op": { "const": "build" },
             "site": {
               "$ref": "#/$defs/DefinitionRef",
@@ -4794,9 +4840,16 @@
           "additionalProperties": false,
           "description": "API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest.",
           "properties": {
-            "npc": { "$ref": "#/$defs/Key" },
-            "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/Key",
+              "description": "A bound NPC role."
+            },
+            "quest": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The escort quest."
+            },
             "transition": {
+              "description": "The transition made.",
               "enum": [
                 "start",
                 "rejoin",
@@ -4814,8 +4867,14 @@
           "additionalProperties": false,
           "description": "The item role the actor gives to an npc role.",
           "properties": {
-            "item": { "$ref": "#/$defs/Key" },
-            "to": { "$ref": "#/$defs/Key" }
+            "item": {
+              "$ref": "#/$defs/Key",
+              "description": "The item role given."
+            },
+            "to": {
+              "$ref": "#/$defs/Key",
+              "description": "The npc role receiving it."
+            }
           },
           "type": "object"
         },
@@ -4825,15 +4884,22 @@
         },
         "lesson_payment": {
           "additionalProperties": false,
-          "description": "Coins the actor pays for a lesson.",
+          "description": "An amount of a resource the actor pays for a lesson.",
           "properties": {
             "amount": {
+              "description": "How much.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "resource": { "$ref": "#/$defs/partial.DefinitionRef" },
-            "to": { "$ref": "#/$defs/Key" }
+            "resource": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The resource paid."
+            },
+            "to": {
+              "$ref": "#/$defs/Key",
+              "description": "The npc role paid."
+            }
           },
           "type": "object"
         },
@@ -4845,9 +4911,16 @@
           "additionalProperties": false,
           "description": "A patrol transition.",
           "properties": {
-            "npc": { "$ref": "#/$defs/Key" },
-            "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "npc": {
+              "$ref": "#/$defs/Key",
+              "description": "A bound NPC role."
+            },
+            "quest": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The patrol quest."
+            },
             "transition": {
+              "description": "The transition made.",
               "enum": [
                 "start",
                 "continue",
@@ -4860,15 +4933,22 @@
         },
         "payment": {
           "additionalProperties": false,
-          "description": "Coins paid to the actor by an NPC role.",
+          "description": "An amount of a resource paid to the actor by an NPC role.",
           "properties": {
             "amount": {
+              "description": "How much.",
               "maximum": 2147483647,
               "minimum": 1,
               "type": "integer"
             },
-            "from": { "$ref": "#/$defs/Key" },
-            "resource": { "$ref": "#/$defs/partial.DefinitionRef" }
+            "from": {
+              "$ref": "#/$defs/Key",
+              "description": "The paying npc role."
+            },
+            "resource": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "The resource paid."
+            }
           },
           "type": "object"
         },
@@ -4876,8 +4956,14 @@
           "additionalProperties": false,
           "description": "The bound NPC-held item transferred to the actor.",
           "properties": {
-            "from": { "$ref": "#/$defs/Key" },
-            "item": { "$ref": "#/$defs/Key" }
+            "from": {
+              "$ref": "#/$defs/Key",
+              "description": "The npc role holding it."
+            },
+            "item": {
+              "$ref": "#/$defs/Key",
+              "description": "The bound item transferred."
+            }
           },
           "type": "object"
         },
@@ -6221,7 +6307,10 @@
               "description": "The NPC to move; else the event's subject when it is an NPC."
             },
             "op": { "const": "npc.move" },
-            "plan": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "plan": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "Moves every living member of this population plan instead; never with npc, room required."
+            },
             "room": {
               "$ref": "#/$defs/partial.DefinitionRef",
               "description": "The destination; else the event's room."
@@ -6414,7 +6503,10 @@
               },
               "type": "object"
             },
-            "fact": { "$ref": "#/$defs/partial.DefinitionRef" },
+            "fact": {
+              "$ref": "#/$defs/partial.DefinitionRef",
+              "description": "With escrow, makes a commission: true from the order until the job raises the room."
+            },
             "op": { "const": "build" },
             "site": {
               "$ref": "#/$defs/partial.DefinitionRef",

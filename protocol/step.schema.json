@@ -304,7 +304,7 @@
             "npc": {"description":"The NPC to move; else the event's subject when it is an NPC.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "plan": {
+            "plan": {"description":"Moves every living member of this population plan instead; never with npc, room required.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "room": {"description":"The destination; else the event's room.",
@@ -518,7 +518,7 @@
             "site": {"description":"The site room.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "fact": {
+            "fact": {"description":"With escrow, makes a commission: true from the order until the job raises the room.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "escrow": {

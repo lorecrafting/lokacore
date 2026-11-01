@@ -111,7 +111,7 @@ Toolbox row FD5 (loka-kgd.22): jumps the named NPC (else the event's subject whe
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC to move; else the event's subject when it is an NPC. |
-| plan | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| plan | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Moves every living member of this population plan instead; never with npc, room required. |
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The destination; else the event's room. |
 
 ### `population.spawn`
@@ -205,7 +205,7 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 | escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions accepted as payment. |
 | escrow.quantity | integer | yes | How many of them move. |
 | escrow.ready_after | integer | yes | Seconds until the order job raises the room. |
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) |  | With escrow, makes a commission: true from the order until the job raises the room. |
 | site | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The site room. |
 | structure | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The structure to raise. |
 
@@ -749,29 +749,29 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | availability.through | [LogicalTime](source-kinds.gen.md#logicaltime) |  |  |
 | check | [Check](source-kinds.gen.md#check) |  | An opposed check made when chosen. |
 | escort | object |  | API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest. |
-| escort.npc | [Key](source-kinds.gen.md#key) | yes |  |
-| escort.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| escort.transition | `start` or `rejoin` or `complete` | yes |  |
+| escort.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |
+| escort.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The escort quest. |
+| escort.transition | `start` or `rejoin` or `complete` | yes | The transition made. |
 | exchange | `True` |  | A quest item exchange. |
 | hand_over | object |  | The item role the actor gives to an npc role. |
-| hand_over.item | [Key](source-kinds.gen.md#key) | yes |  |
-| hand_over.to | [Key](source-kinds.gen.md#key) | yes |  |
+| hand_over.item | [Key](source-kinds.gen.md#key) | yes | The item role given. |
+| hand_over.to | [Key](source-kinds.gen.md#key) | yes | The npc role receiving it. |
 | label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the option. |
-| lesson_payment | object |  | Coins the actor pays for a lesson. |
-| lesson_payment.amount | integer | yes |  |
-| lesson_payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| lesson_payment.to | [Key](source-kinds.gen.md#key) | yes |  |
+| lesson_payment | object |  | An amount of a resource the actor pays for a lesson. |
+| lesson_payment.amount | integer | yes | How much. |
+| lesson_payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource paid. |
+| lesson_payment.to | [Key](source-kinds.gen.md#key) | yes | The npc role paid. |
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of what the actor reads on choosing. |
 | patrol | object |  | A patrol transition. |
-| patrol.npc | [Key](source-kinds.gen.md#key) | yes |  |
-| patrol.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| patrol.transition | `start` or `continue` or `rejoin` or `restart` | yes |  |
-| payment | object |  | Coins paid to the actor by an NPC role. |
-| payment.amount | integer | yes |  |
-| payment.from | [Key](source-kinds.gen.md#key) | yes |  |
-| payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| patrol.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |
+| patrol.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The patrol quest. |
+| patrol.transition | `start` or `continue` or `rejoin` or `restart` | yes | The transition made. |
+| payment | object |  | An amount of a resource paid to the actor by an NPC role. |
+| payment.amount | integer | yes | How much. |
+| payment.from | [Key](source-kinds.gen.md#key) | yes | The paying npc role. |
+| payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource paid. |
 | receive | object |  | The bound NPC-held item transferred to the actor. |
-| receive.from | [Key](source-kinds.gen.md#key) | yes |  |
-| receive.item | [Key](source-kinds.gen.md#key) | yes |  |
+| receive.from | [Key](source-kinds.gen.md#key) | yes | The npc role holding it. |
+| receive.item | [Key](source-kinds.gen.md#key) | yes | The bound item transferred. |
 | steps | list of [Step](vocabulary.gen.md#steps) |  | See the type. |
 | story_point | string |  | <story point>/<outcome>: the story point outcome this choice reaches; one choice per outcome. |

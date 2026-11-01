@@ -1483,7 +1483,7 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 
 ## Fields without a meaning
 
-461 fields.
+443 fields.
 
 - `ActionCraft: consume`
 - `ActionCraft: consume.items`
@@ -1753,22 +1753,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `cartridge: version`
 - `choice: availability.from`
 - `choice: availability.through`
-- `choice: escort.npc`
-- `choice: escort.quest`
-- `choice: escort.transition`
-- `choice: hand_over.item`
-- `choice: hand_over.to`
-- `choice: lesson_payment.amount`
-- `choice: lesson_payment.resource`
-- `choice: lesson_payment.to`
-- `choice: patrol.npc`
-- `choice: patrol.quest`
-- `choice: patrol.transition`
-- `choice: payment.amount`
-- `choice: payment.from`
-- `choice: payment.resource`
-- `choice: receive.from`
-- `choice: receive.item`
 - `dialogues: riddle.answer`
 - `dialogues: riddle.bank`
 - `dialogues: riddle.choice_id`
@@ -1933,8 +1917,6 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `statuses: perception.sight`
 - `statuses: pierced_by.attribute`
 - `statuses: pierced_by.skill`
-- `steps build: fact`
-- `steps npc.move: plan`
 - `structures: description`
 - `structures: locks`
 - `structures: max_per_owner`
