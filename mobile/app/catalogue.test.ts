@@ -17,6 +17,7 @@ const EXEMPT: Record<string, string> = {
   'book/StatusIcon.tsx:Tooltip':
     'the status icon tip, shown through the StatusIcon Held and Focused stories',
   'book/Chip.tsx:Row': 'a titled chip row, shown through Chip ReadingSize',
+  'book/Combat.tsx:Foe': 'one line of the fight block, shown through the Combat stories',
   'book/MapDrawing.tsx:MapDrawing': 'a drawing, shown through the map pages',
   'book/lines.tsx:Fault': 'a press that threw; reached live only, no story throws one',
 };
@@ -89,13 +90,14 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
     [
       'pickup',
       'coin',
-      'blow',
       'level',
       'skillNew',
       'questDone',
       'questFailed',
       'questGained',
       'chapter',
+      'impact',
+      'fightIn',
     ].map((k) => [
       `sound.${k}`,
       'reached as sound[name] in play(name); played by the cue that names it (cueSounds.ts)',

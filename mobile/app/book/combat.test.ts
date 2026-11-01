@@ -86,7 +86,7 @@ test('a foe with name words reads definite, one line per foe', () => {
     ],
   });
   assert.deepEqual(
-    lines.filter((l) => / — /.test(l)),
+    lines.filter((l) => /^\S.* — /.test(l)), // the band phrase is also a nested Text of its own
     [
       'the goblin (your target) — hurt',
       'the goblin — ready',

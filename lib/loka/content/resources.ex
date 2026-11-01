@@ -204,34 +204,43 @@ defmodule Loka.Content.Resources do
     collect(rel, "resources", results)
   end
 
-  # {key => {rel, steps, spec} | :invalid, diagnostics} of each key's {:ok, spec} | {:error, ds}.
+  # {key => {rel, steps, spec} | :invalid, diagnostics} of each key's {:ok, spec} | {:error, ds},
+  # or {:error, ds, spec} for a fault that leaves the spec usable.
   defp collect(rel, name, results) do
     {Map.new(results, fn
        {k, {:ok, s}} -> {k, {rel, [name, k], s}}
+       {k, {:error, _, s}} -> {k, {rel, [name, k], s}}
        {k, _} -> {k, :invalid}
-     end), for({_, {:error, ds}} <- results, d <- ds, do: d)}
+     end), for({_, r} <- results, elem(r, 0) == :error, d <- elem(r, 1), do: d)}
   end
 
   defp spec(rel, k, fields) do
     value = @defaults |> Map.get(k, %{}) |> Map.merge(fields) |> Map.put("key", k)
 
-    ordered = start_in_bounds?(value)
+    diags = diags(rel, ["resources", k], fields, value)
 
-    case diags(rel, ["resources", k], fields, value) do
-      [] ->
-        cond do
-          not ordered ->
-            {:error, [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k]))]}
+    # A band's tone changes no number: the pool stays usable, so nothing naming it also fails.
+    if Enum.all?(diags, &(&1["path"] =~ ~r/\.bands\[\d+\]\.tone$/)) do
+      case {diags, number_faults(rel, k, value)} do
+        {[], []} -> {:ok, value}
+        {_, []} -> {:error, diags, value}
+        {_, faults} -> {:error, diags ++ faults}
+      end
+    else
+      {:error, diags}
+    end
+  end
 
-          not residual_bound?(value) ->
-            {:error, [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k, "regen"]))]}
+  defp number_faults(rel, k, value) do
+    cond do
+      not start_in_bounds?(value) ->
+        [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k]))]
 
-          true ->
-            {:ok, value}
-        end
+      not residual_bound?(value) ->
+        [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k, "regen"]))]
 
-      diags ->
-        {:error, diags}
+      true ->
+        []
     end
   end
 

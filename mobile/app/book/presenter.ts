@@ -104,6 +104,7 @@ function narrate(
   const [lines, combat] = narrationLines(last, now, text, false, was);
   s.combatLog.push(...combat);
   s.narrationId = last.command_id;
+  if (last.died) s.died = last.command_id;
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
@@ -256,6 +257,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
   }));
   return {
     view,
+    died: s.died,
     text,
     label,
     buttons,

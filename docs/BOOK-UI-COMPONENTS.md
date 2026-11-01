@@ -139,6 +139,8 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   rule above, for the wash's half second only: at its peak `fg` stays above 7:1 and `action` and
   `danger` above 5:1, while `dim` and `warning` dip to about 3.8:1 (opacity 0.08 would keep them
   at 4.5:1 and barely show). Combat is the only place the wash appears.
+- **Falling.** The held wash is `opacity.faint`; with Flashes off it fades in over `motion.settle`.
+- **Fight music.** Stinger `sound.fightIn`, loop `sound.fightLoop` (`gap` is the fight gap), fanfare `sound.fightWon`, blow dealt `sound.impact`. A blow taken dips music by `mix.dip` with `mix.duck`'s times. Foe falling: the loop cuts over `motion.quick`; a fall-away fades over `motion.palette`. The band press is `motion.press`.
 
 ## Component catalogue
 
@@ -165,6 +167,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Row` | `book/Chip.tsx` | Chip |
 | `ReadingSize` | `book/Chip.tsx` | Chip |
 | `EffectSettings` | `book/Chip.tsx` | Chip |
+| `Foe` | `book/Combat.tsx` | CombatPage |
 | `Combat` | `book/Combat.tsx` | CombatPage |
 | `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
 | `DreamPage` | `book/DreamPage.tsx` | ChapterPages |
