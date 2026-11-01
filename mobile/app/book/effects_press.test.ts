@@ -6,7 +6,7 @@ import { nodes } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
 const { ActionCard } = await import('./actions.tsx');
-const { Said } = await import('./Footer.tsx');
+const { saidLabel } = await import('./Footer.tsx');
 const { Chip } = await import('./Chip.tsx');
 const { useCues } = await import('./cues.ts');
 const { Fault, LogLines } = await import('./lines.tsx');
@@ -328,8 +328,8 @@ test('status icons key by label and count; only the held icon lets go of its tip
 // Breaks: an exit's name shows on no direction, or labels the empty one; its press-in lags or runs long.
 test('the footer says a lit direction, pressing in; nothing with no words', (t) => {
   effects(t);
-  assert.equal(Said({ text: '', side: 'left' } as never), false);
-  const shown = rig(t)(() => nodes(Said({ text: 'North', side: 'left' } as never)));
+  assert.equal(saidLabel('', 'left'), false);
+  const shown = rig(t)(() => nodes(saidLabel('North', 'left')));
   assert.ok(shown.some((n) => n.props?.children === 'North'));
   assert.deepEqual(g.delays, []);
   assert.deepEqual(g.timings, [90]);

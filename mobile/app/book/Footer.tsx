@@ -96,7 +96,7 @@ export function Footer(p: Props) {
           {...pan.panHandlers}
         >
           <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
-          <Said text={said} side={sideOf(lit)} />
+          {saidLabel(said, sideOf(lit))}
         </View>
         <View style={rule(c)} />
       </View>
@@ -202,7 +202,7 @@ export function Tip({ dismiss }: { dismiss: () => void }) {
 
 // The lit exit's name (and why it is closed), or a closed exit's reason after release, on the side
 // opposite the drag (joystick.ts `sideOf`, placed by `SPOT`).
-export function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
+export function saidLabel(text: string, side: keyof typeof SPOT) {
   return text !== '' && <SaidLabel key={text} text={text} side={side} />;
 }
 
