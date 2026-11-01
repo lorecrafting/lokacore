@@ -47,7 +47,8 @@ export function assignmentEvidence(
   speaker: EntityId,
 ) {
   for (const step of option.steps ?? []) {
-    if (step.op === 'fact.adjust') continue;
+    // Neither sets a fact outright: an adjust is a delta and a narrate only speaks.
+    if (step.op === 'fact.adjust' || step.op === 'narrate') continue;
     const assignment = assignmentOf(s, step);
     if (!assignment) return false;
     const matching = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, assignment.fact));

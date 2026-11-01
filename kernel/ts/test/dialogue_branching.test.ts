@@ -397,14 +397,18 @@ test('a hand-off to a hostile speaker ends the talk after the reply', () => {
   assert.equal(g.view(), undefined);
 });
 
-// Breaks: a narrate step refused or dropped; its line before the choice's reply.
+// Breaks: a narrate step refused or dropped; its line before the reply; two lines reversed.
 test('a narrate step adds its line after the reply', () => {
-  const g = play(content({ a: plain({ steps: [{ op: 'narrate', text: FAILED }] }) }));
+  const steps = [
+    { op: 'narrate', text: FAILED },
+    { op: 'narrate', text: LABEL },
+  ];
+  const g = play(content({ a: plain({ steps }) }));
   g.opened();
   const d = g.choose('a');
   assert.deepEqual(
     d.narration.map((n: any) => n.key),
-    [SAID, FAILED],
+    [SAID, FAILED, LABEL],
   );
 });
 

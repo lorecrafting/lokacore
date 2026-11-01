@@ -163,11 +163,11 @@ test('a talk saved after a failed check reopens at then_failed', (t) => {
   coldReopen(path, c);
 });
 
-// Breaks: a non-quest hand_over of a Give-restricted item read as a corrupt custody path, so an
-// ordinary answer makes the next load save_corrupt for good (dialogue-save.ts).
-test('a save reopens after a Give-restricted item is handed back outside a quest', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-branching-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
+const line = { label: LABEL, narration: SAID };
+const flag = (value: boolean) => ({ op: 'fact.assign', fact: 'gate_open', value });
+
+// The sampler with a Give-restricted token on the guard and the given dialogues beside guard.json.
+function withToken(dialogues: Record<string, object>, quests: Record<string, object> = {}) {
   const src = mkdtempSync(join(tmpdir(), 'loka-branching-src-'));
   cpSync(fileURLToPath(new URL('../../../cartridges/persuade_sampler', import.meta.url)), src, {
     recursive: true,
@@ -184,44 +184,165 @@ test('a save reopens after a Give-restricted item is handed back outside a quest
       give_allowed: false,
     }),
   );
-  const talk = (choices: object) => ({
-    ...talkTo(choices),
-    roles: { guard: { role: 'npc', npc: 'guard' }, token: { role: 'item', item: 'token' } },
-  });
-  const line = { label: LABEL, narration: SAID };
-  writeFileSync(
-    join(src, 'dialogues/guard.json'),
-    JSON.stringify({
-      ...talk({ take: { ...line, receive: { item: 'token', from: 'guard' } } }),
-      policy: { op: 'not', item: { op: 'has_item', item: 'token' } },
-    }),
-  );
-  writeFileSync(
-    join(src, 'dialogues/back.json'),
-    JSON.stringify({
-      ...talk({ give: { ...line, hand_over: { item: 'token', to: 'guard' } } }),
-      policy: { op: 'has_item', item: 'token' },
-    }),
-  );
+  for (const [name, d] of Object.entries(dialogues))
+    writeFileSync(join(src, `dialogues/${name}.json`), JSON.stringify(d));
+  if (Object.keys(quests).length) {
+    mkdirSync(join(src, 'quests'));
+    const manifest = JSON.parse(readFileSync(join(src, 'cartridge.json'), 'utf8'));
+    manifest.requires.capabilities.quest = 1;
+    writeFileSync(join(src, 'cartridge.json'), JSON.stringify(manifest));
+  }
+  for (const [name, q] of Object.entries(quests))
+    writeFileSync(join(src, `quests/${name}.json`), JSON.stringify(q));
   const c = compiled(src);
   rmSync(src, { recursive: true });
-  const path = join(dir, 'give.db');
-  const g = run(path, c);
+  return c;
+}
+
+const tokenTalk = (choices: object, has: boolean) => ({
+  ...talkTo(choices),
+  roles: { guard: { role: 'npc', npc: 'guard' }, token: { role: 'item', item: 'token' } },
+  policy: has
+    ? { op: 'has_item', item: 'token' }
+    : { op: 'not', item: { op: 'has_item', item: 'token' } },
+});
+const take = (extra: object = {}) =>
+  tokenTalk({ take: { ...line, receive: { item: 'token', from: 'guard' }, ...extra } }, false);
+const give = (extra: object = {}) =>
+  tokenTalk({ give: { ...line, hand_over: { item: 'token', to: 'guard' }, ...extra } }, true);
+
+function reopened(c: ReturnType<typeof compiled>, play: (g: ReturnType<typeof run>) => void) {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-branching-'));
+  try {
+    const path = join(dir, 'save.db');
+    const g = run(path, c);
+    play(g);
+    g.sql.close();
+    coldReopen(path, c);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const takeGive = (g: ReturnType<typeof run>) => {
   g.choose('take');
   g.talk('back');
   g.choose('give');
-  assert.equal(g.at(), undefined);
-  // The next talk gives it again: the second receive holds on reload too.
-  const again = join(dir, 'again.db');
-  const h = run(again, c);
-  h.choose('take');
-  h.talk('back');
-  h.choose('give');
-  h.talk();
-  h.choose('take');
-  assert.equal(h.at(), undefined);
-  g.sql.close();
-  h.sql.close();
-  coldReopen(path, c);
-  coldReopen(again, c);
+};
+
+// Breaks: a non-quest hand_over of a Give-restricted item read as a corrupt custody path, so an
+// ordinary answer makes the next load save_corrupt for good (dialogue-save.ts).
+test('a save reopens after a Give-restricted item is handed back and taken again', () => {
+  const c = withToken({ guard: take(), back: give() });
+  reopened(c, takeGive);
+  reopened(c, (g) => {
+    takeGive(g);
+    g.talk();
+    g.choose('take');
+    assert.equal(g.at(), undefined);
+  });
+});
+
+// Breaks: a take and a give-back read as disagreeing because they set one fact differently.
+test('a save reopens after a take sets a fact and the give clears it', () => {
+  reopened(
+    withToken({ guard: take({ steps: [flag(true)] }), back: give({ steps: [flag(false)] }) }),
+    takeGive,
+  );
+});
+
+// Breaks: receipt evidence failing on a narrate step, which sets no fact, on a saved custody answer.
+test('a save reopens after a narrate step on a Give-restricted receive', () => {
+  reopened(withToken({ guard: take({ steps: [{ op: 'narrate', text: SAID }] }) }), (g) => {
+    g.choose('take');
+  });
+});
+
+// Breaks: learning a skill with a narrate step refused at reload as an assignment without evidence.
+test('a save reopens after a narrate step on a skill.acquire answer', () => {
+  const steps = [
+    { op: 'skill.acquire', skill: 'intimidate' },
+    { op: 'narrate', text: SAID },
+  ];
+  reopened(withToken({ guard: talkTo({ learn: { ...line, steps } }) }), (g) => g.choose('learn'));
+});
+
+// Breaks: walking the hand-overs in dialogue key order, so a give (a_back) then a retake then a
+// quest hand_over (z_q) reads as a second completion and refuses the lawful save.
+test('a save reopens after a retake and a quest hand_over', () => {
+  const quest = {
+    name: LABEL,
+    objective: { evidence: 'current_state', policy: { op: 'has_item', item: 'token' } },
+    journal: {
+      active: LABEL,
+      objectives_met: LABEL,
+      resolved: LABEL,
+      failed: LABEL,
+      abandoned: LABEL,
+    },
+  };
+  const open = { op: 'fact_compare', fact: 'gate_open', equals: true };
+  const accepted = { op: 'quest_state', quest: 'job', state: 'active' };
+  const c = withToken(
+    {
+      guard: take(),
+      a_back: {
+        ...give({ steps: [flag(true)] }),
+        policy: {
+          op: 'all',
+          items: [
+            { op: 'has_item', item: 'token' },
+            { op: 'not', item: open },
+          ],
+        },
+      },
+      b_offer: {
+        ...talkTo({ job: { ...line, accept: 'job' } }),
+        policy: { op: 'all', items: [open, { op: 'not', item: accepted }] },
+      },
+      z_q: {
+        ...give(),
+        quest: 'job',
+        policy: { op: 'all', items: [{ op: 'has_item', item: 'token' }, open] },
+      },
+    },
+    { job: quest },
+  );
+  reopened(c, (g) => {
+    g.choose('take');
+    g.talk('a_back');
+    g.choose('give');
+    g.talk('b_offer');
+    g.choose('job');
+    g.talk();
+    g.choose('take');
+    g.talk('z_q');
+    g.choose('give');
+    assert.equal(g.at(), undefined);
+  });
+});
+
+// Breaks: the row's own receipt going unchecked, so a save claiming a Give-restricted item moved
+// with no committed answer behind it loads.
+test('a resolved take or give with no receipt is refused at reload', () => {
+  const c = withToken({ guard: take(), back: give() });
+  for (const [plays, gone] of [
+    [1, 'take'],
+    [3, 'give'],
+  ] as const) {
+    const dir = mkdtempSync(join(tmpdir(), 'loka-branching-'));
+    const path = join(dir, 'save.db');
+    const g = run(path, c);
+    g.choose('take');
+    if (plays === 3) {
+      g.talk('back');
+      g.choose('give');
+    }
+    const receipts = g.sql.prepare('SELECT command_id, command FROM receipt').all();
+    const row = receipts.find((r) => JSON.parse(String(r.command)).payload.choice_id === gone)!;
+    g.sql.prepare('DELETE FROM receipt WHERE command_id = ?').run(row.command_id as string);
+    g.sql.close();
+    assert.throws(() => coldReopen(path, c));
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

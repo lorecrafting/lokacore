@@ -1173,7 +1173,8 @@
         "VISITS_UNRECORDED",
         "HOSTILE_QUEST_SPEAKER",
         "SITE_EXIT_CONFLICT",
-        "SPEAKER_ELSEWHERE"
+        "SPEAKER_ELSEWHERE",
+        "LOOP_SPEAKER"
       ],
       "examples": [
         "UNRESOLVED_REFERENCE",

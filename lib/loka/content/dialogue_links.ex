@@ -54,9 +54,9 @@ defmodule Loka.Content.DialogueLinks do
       )
   end
 
-  # Talk enters a loop no root reaches at its first key by sort (selection.ts), so a member whose
-  # speaker has no entry of their own could never be talked to: refused, not silent.
-  @doc "The members of a then loop whose speaker Talk could not reach, as errors."
+  # Talk enters a loop at its first key by sort (selection.ts), so every chain has an entry and
+  # plays; a member whose speaker has no entry of their own is only reached through it: a warning.
+  @doc "The members of a then loop whose speaker Talk only reaches through the loop, as warnings."
   @spec loops([{String.t(), map()}]) :: [map()]
   def loops(all) do
     sorted = Enum.sort_by(all, &elem(&1, 1)["key"])
@@ -65,7 +65,10 @@ defmodule Loka.Content.DialogueLinks do
 
     sorted
     |> Enum.filter(&unreachable?(elem(&1, 1), speakers, next))
-    |> Enum.map(&diag("OUTCOME_MISMATCH", at(elem(&1, 0), ["npc"])))
+    |> Enum.map(
+      &(diag("LOOP_SPEAKER", at(elem(&1, 0), ["npc"]))
+        |> Map.put("severity", "warning"))
+    )
   end
 
   defp unreachable?(d, speakers, next) do

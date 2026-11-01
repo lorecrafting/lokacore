@@ -35,16 +35,19 @@ defmodule Loka.ContentDialogueLinksTest do
     assert want in codes(diags), inspect({want, diags})
   end
 
-  # Breaks: a two-speaker loop compiling though Talk enters it only at its first key, so the other
-  # speaker is rejected in play; or that refusal reaching a speaker with an entry of their own.
-  test "a then loop refuses a speaker Talk cannot reach", %{dir: dir} do
+  # Breaks: a root, hand-off, return chain refused though it plays; its speaker's missing entry
+  # not warned; or that warning reaching a speaker with an entry of their own.
+  test "a then loop compiles and warns of a speaker Talk only reaches through it", %{dir: dir} do
     to = fn key -> %{"x" => %{"label" => @label, "narration" => @said, "then" => key}} end
     captain = {"dialogues/a_captain.json", talk("guard", %{"choices" => to.("z_loop")})}
     other = Map.put(talk("guard", %{"choices" => to.("a_captain")}), "npc", "second")
     other = Map.put(other, "roles", %{"second" => %{"role" => "npc", "npc" => "second"}})
     loop = {"dialogues/z_loop.json", other}
     npc = {"npcs/second.json", second_npc()}
-    refused(dir, [captain, loop, npc], {"OUTCOME_MISMATCH", "dialogues/z_loop.npc"})
+    warning = {"warning", "LOOP_SPEAKER", "dialogues/z_loop.npc"}
+    seen = &Enum.map(&1, fn d -> {d["severity"], d["code"], d["path"]} end)
+    assert {:ok, _, warnings} = Loka.ContentSource.compile(dir, [captain, loop, npc])
+    assert warning in seen.(warnings), inspect(warnings)
 
     own = Map.put(talk("guard"), "npc", "second")
 
@@ -52,7 +55,8 @@ defmodule Loka.ContentDialogueLinksTest do
       {"dialogues/b_second.json",
        Map.put(own, "roles", %{"second" => %{"role" => "npc", "npc" => "second"}})}
 
-    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [captain, loop, npc, own])
+    assert {:ok, _, warnings} = Loka.ContentSource.compile(dir, [captain, loop, npc, own])
+    refute warning in seen.(warnings), inspect(warnings)
   end
 
   # Breaks: a link rule dropped, so a then the runtime cannot follow compiles and fails at play.

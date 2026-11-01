@@ -7,6 +7,7 @@ import {
   bundle as escortBundle,
   entity,
   genesis,
+  prefix,
   room,
 } from '../../../kernel/ts/test/escort_fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
@@ -78,8 +79,8 @@ test('a malformed other quest after rescue selection or completion offers typed 
       );
 });
 
-function setup(path = ':memory:') {
-  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+function setup(path = ':memory:', source = bundle) {
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, source);
   const book = presenter(a.game);
   a.game.subscribe(book.update);
   const view = () => a.game.view().view;
@@ -185,6 +186,27 @@ function replay(a: ReturnType<typeof setup>, choice_id: string) {
   );
   assert.deepEqual(a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), before);
 }
+
+// Breaks: a narrate step on the escort answer read as a save-changing assignment the row cannot
+// show, so every reopen after the answer is save_corrupt.
+test('a save reopens after an escort answer with a narrate step', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-escort-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'save.db');
+  const narrated = escortBundle((c) =>
+    c.dialogues[`${prefix}:dialogue/child_escort`].choices.rescue.steps.push({
+      op: 'narrate',
+      text: 'narration.accept',
+    }),
+  );
+  let a = setup(path, narrated);
+  a.offer();
+  a.choose('rescue');
+  a.sql.close();
+  a = setup(path, narrated);
+  assert.equal(a.escort()!.status, 'following');
+  a.sql.close();
+});
 
 // Breaks: an escort row is lost/rejected at reopen or reconciliation, a lawful separated save is
 // rejected, or start/Rejoin/terminal receipts restore to the wrong NPC after their pending row ends.

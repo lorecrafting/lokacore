@@ -268,25 +268,6 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
         a.put('choices', b, r);
       },
     ],
-    ['branch fact reset', false, (a) => a.put('facts', a.fact('branch')!.key, 'unselected')],
-    [
-      'branch fact deleted',
-      false,
-      (a) => {
-        a.sql
-          .prepare("DELETE FROM state_row WHERE section='facts' AND key=?")
-          .run(a.fact('branch')!.key);
-      },
-    ],
-    ['message back with the courier', false, (a) => a.put('containers', message, courier)],
-    [
-      'message nested in NPC-held container',
-      false,
-      (a) => {
-        a.put('containers', message, satchel);
-        a.put('containers', satchel, courier);
-      },
-    ],
     [
       'malformed receipt command JSON',
       false,
@@ -347,8 +328,6 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
           .run(JSON.stringify(response), r.command_id);
       },
     ],
-    ['terminal delivered fact reset', true, (a) => a.put('facts', a.fact('delivered')!.key, false)],
-    ['terminal message returned to actor', true, (a) => a.put('containers', message, fresh.body)],
     [
       'terminal quest reopened',
       true,
@@ -430,26 +409,26 @@ test('failed and lost branch/terminal COMMIT keep narration and custody behind c
     }
 });
 
-// Breaks: a forged terminal quest row before receiving the message bypasses handoff validation,
-// showing delivery while leaving the branch, delivered fact and original custody untouched.
-test('terminal quest without a message branch refuses reopen and requires explicit Start over', (t) => {
-  const a = setup();
-  t.after(() => a.sql.close());
-  assert.deepEqual(openGame(a.db, b, a.host).view().view.journal, []);
-  a.ok('lantern');
-  assert.equal(openGame(a.db, b, a.host).view().view.journal[0].state, 'active');
-  const q = a.rows('quests').find((r) => r.value.quest.key === 'lantern')!;
-  const forged = { ...q.value, state: 'resolved', outcome: 'deliver' };
-  a.put('quests', q.key, forged);
-  const session = localSession(() => a.db, assert.fail, b, a.host);
-  assert.equal(session.game(), undefined);
-  assert.equal(session.failed()?.kind, 'save_corrupt');
-  assert.equal(session.failed()?.startOver, true);
-  assert.deepEqual(a.row('quests', q.key), forged);
-  assert.equal(a.row('containers', message), courier);
-  assert.equal(a.fact('branch'), undefined);
-  assert.equal(a.fact('delivered'), undefined);
-  assert.equal(session.startOver(), undefined);
-  assert.equal(session.failed(), undefined);
-  assert.deepEqual(session.game()!.view().view.journal, []);
+// Breaks: reload inferring history from facts and holders again, which refused lawful saves
+// (loka-vduxr.10): a row and its receipt are what reload checks, so these forgeries load.
+test('a save with an edited fact or holder reopens', (t) => {
+  const edits: [boolean, (a: ReturnType<typeof setup>) => void][] = [
+    [false, (a) => a.put('facts', a.fact('branch')!.key, 'unselected')],
+    [false, (a) => a.put('containers', message, courier)],
+    [true, (a) => a.put('facts', a.fact('delivered')!.key, false)],
+    [true, (a) => a.put('containers', message, fresh.body)],
+  ];
+  for (const [terminal, edit] of edits) {
+    const a = setup();
+    t.after(() => a.sql.close());
+    a.offer();
+    a.choose('carry');
+    if (terminal) {
+      a.terminal();
+      a.choose('deliver');
+    }
+    a.ok('look');
+    edit(a);
+    assert.doesNotThrow(() => openGame(a.db, b, a.host));
+  }
 });
