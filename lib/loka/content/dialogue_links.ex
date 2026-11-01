@@ -71,17 +71,20 @@ defmodule Loka.Content.DialogueLinks do
     )
   end
 
+  # selection.ts GATES: what a choice can refuse or charge when taken.
+  @gates ~w(accept availability check escort exchange hand_over lesson_payment patrol payment receive)
+
   @doc "The `entry` marker's refusals, and a warning wherever Talk's entry is a guess or a dialogue is shut out."
   @spec entry_checks([{String.t(), map()}]) :: [map()]
   def entry_checks(all) do
     {sorted, next} = graph(all)
     open = entries(sorted, next)
 
-    refused(sorted) ++
-      guessed(open, Map.take(next, live_keys(sorted))) ++ unused(sorted, open, next)
-  end
+    live_keys = for {_, d} <- live(sorted), do: d["key"]
 
-  defp live_keys(sorted), do: for({_, d} <- live(sorted), do: d["key"])
+    refused(sorted) ++
+      guessed(open, next, live_keys) ++ fall_through(open, sorted) ++ unused(sorted, open, next)
+  end
 
   defp unused(sorted, open, next) do
     played = walk(for({_, d} <- open, do: d["key"]), next, MapSet.new())
@@ -107,21 +110,51 @@ defmodule Loka.Content.DialogueLinks do
 
   # A guess: a loop member tying another for most links, or a dialogue with no condition before another of
   # its speaker's in key order, which that other never gets past. A name makes its own Talk control.
-  # A shut-out dialogue never plays, so `next` here holds only those that do.
-  defp guessed(open, next) do
+  # As selection.ts `width`: every link counts for the ranking, one into a shut-out dialogue too, but
+  # only a dialogue that can open ties.
+  defp guessed(open, next, live_keys) do
     talked = Enum.reject(open, fn {_, d} -> d["entry"] || d["keyword"] end)
-    looped = Enum.filter(talked, fn {_, d} -> loop_tie?(d["key"], next) end)
+    looped = Enum.filter(talked, fn {_, d} -> loop_tie?(d["key"], next, live_keys) end)
 
     for {rel, d} <- Enum.uniq(looped ++ tied(talked)) do
       warning("ENTRY_GUESSED", rel, ["npc"], d)
     end
   end
 
-  defp loop_tie?(k, next) do
+  # fall_through.ts `onward`: a default Talk whose condition fails opens the first dialogue of its speaker
+  # that a free choice leads to, in key order. More than one is a guess; the warning names that pick.
+  defp fall_through(open, sorted) do
+    speakers = Map.new(sorted, fn {_, d} -> {d["key"], d["npc"]} end)
+
+    for {rel, d} <- open,
+        d["policy"],
+        !d["name"],
+        !d["keyword"],
+        [first, _ | _] <- [free_links(d, speakers)] do
+      warning("ENTRY_GUESSED", rel, ["npc"], %{"key" => first})
+    end
+  end
+
+  defp free_links(d, speakers) do
+    for(
+      {_, c} <- Enum.sort(d["choices"]),
+      free?(c),
+      speakers[c["then"]] == d["npc"],
+      do: c["then"]
+    )
+    |> Enum.uniq()
+  end
+
+  defp free?(c) do
+    not Enum.any?(@gates, &c[&1]) and
+      not Enum.any?(c["steps"] || [], &(&1["op"] == "skill.acquire"))
+  end
+
+  defp loop_tie?(k, next, live_keys) do
     k_width = elem(rank(k, next), 0)
 
     Enum.any?(walk(Map.get(next, k, []), next, MapSet.new()), fn o ->
-      o != k and is_map_key(next, o) and k in walk(next[o], next, MapSet.new()) and
+      o != k and o in live_keys and k in walk(next[o], next, MapSet.new()) and
         elem(rank(o, next), 0) == k_width
     end)
   end

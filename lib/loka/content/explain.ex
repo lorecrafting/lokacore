@@ -52,7 +52,7 @@ defmodule Loka.Content.Explain do
          SPEAKER_ELSEWHERE | This `then` leads to a speaker in another room, so the talk ends as it reaches them. | Move the speaker, or end the talk here.
          LOOP_SPEAKER | Talk opens this `then` loop at its member with the most links, so this speaker is only reached through the loop. | Give the speaker a dialogue of their own if the player should start here.
          ENTRY_INVALID | A speaker takes one `entry` dialogue, and never a keyword one. | Keep `entry: true` on one dialogue Talk can open.
-         ENTRY_GUESSED | Talk opens `{target}` here only by inference: it ties another member of its loop for most links, or it comes first by key with no condition. | Mark the dialogue Talk should open with `entry: true`.
+         ENTRY_GUESSED | Talk opens `{target}` here only by inference: it ties another member of its loop for most links, it comes first by key with no condition, or a dialogue whose condition can fail picks it first of several it leads to. | Mark the dialogue Talk should open with `entry: true`.
          ENTRY_UNUSED | `{target}` never opens: its speaker has an `entry` dialogue and no dialogue that opens leads here. | Link to it from one that opens, or remove it.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
          SITE_EXIT_CONFLICT | This site names direction `{field}`, where the room has no exit. | Name a direction the room has an exit in.

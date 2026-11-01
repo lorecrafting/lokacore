@@ -1,4 +1,4 @@
-// size: allow 690, every branching rule's pins beside the one play harness
+// size: allow 750, every branching rule's pins beside the one play harness
 // loka-vduxr.10 on the compiled persuade sampler: per-choice conditions, links between dialogues,
 // a check's two ways on, the hand-off, narrate steps, int fact thresholds and narration variants.
 import { decide } from '../src/mechanics/dialogue/rule.ts';
@@ -16,6 +16,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { hydrate } from '../src/runtime/created.ts';
+import { spokenBy } from '../src/mechanics/dialogue/selection.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-branching-'));
@@ -637,13 +638,6 @@ test('Talk falls through a failed entry to what it leads to, in link order', () 
   }
   const closed = { policy: is('flag', true) };
   const links = { x: plain({ then: 'z_b' }), y: plain({ then: 'a_c' }) };
-  const order = play(
-    content(links, { a_c: { c: plain() }, z_b: { b: plain() } }, (c) =>
-      Object.assign(c.dialogues[`${P}:dialogue/guard`], closed),
-    ),
-  );
-  order.opened();
-  assert.deepEqual(order.ids(), ['b']);
   const nowhere = play(
     content(intro, { hub: { ask: { ...plain(), policy: is('flag', true) } } }, (c) =>
       Object.assign(c.dialogues[`${P}:dialogue/guard`], closed),
@@ -665,7 +659,7 @@ test('Talk falls through a failed entry to what it leads to, in link order', () 
 
 // Breaks: the marker loses to the first key or to a dialogue nothing leads to, or a failed marker
 // falls back to the speaker's other dialogue.
-test('entry: true opens the marked dialogue over inference and refuses when its policy fails', () => {
+test('entry: true opens the marked dialogue over inference and refuses when nothing opens', () => {
   const mark = (edit: object) => (c: any) =>
     Object.assign(c.dialogues[`${P}:dialogue/guard`], edit);
   const back = { to: plain({ then: 'guard' }) };
@@ -680,6 +674,76 @@ test('entry: true opens the marked dialogue over inference and refuses when its 
   const shut = mark({ entry: true, policy: is('flag', true) });
   assert.equal(
     play(content({ on: plain() }, { a_leaf: { bye: plain() } }, shut)).talk().kind,
+    'rejected',
+  );
+});
+
+// Breaks: a fall-through passes a check, a payment or a failed choice policy for free, follows
+// then_failed or another speaker's link, or the compile warning and Talk disagree (the same file
+// runs through content_dialogue_links_test.exs).
+test('a failed default Talk opens only what a free choice leads to: the shared cases', () => {
+  const file = new URL('../../../test/fixtures/dialogue_entry_cases.json', import.meta.url);
+  const gates: Record<string, object> = {
+    check: checked({}),
+    payment: { payment: { from: 'guard', resource: ref('resource', 'pennies'), amount: 1 } },
+    policy: { policy: is('flag', true) },
+  };
+  for (const { name, dialogues, opens } of JSON.parse(readFileSync(file, 'utf8'))) {
+    const g = play(
+      content({}, {}, (c) => {
+        const model = c.dialogues[`${P}:dialogue/guard`];
+        delete c.dialogues[`${P}:dialogue/guard`];
+        c.npcs[`${P}:npc/other`] = { ...structuredClone(c.npcs[`${P}:npc/guard`]), key: 'other' };
+        for (const { key, npc, choices, entry, closed } of dialogues) {
+          const made = Object.entries<any>(choices).map(([id, { gate, ...rest }]) => [
+            id,
+            { ...plain(), ...gates[gate], ...rest },
+          ]);
+          c.dialogues[`${P}:dialogue/${key}`] = {
+            ...structuredClone(model),
+            key,
+            npc: ref('npc', npc),
+            choices: Object.fromEntries(made),
+            ...(entry && { entry }),
+            ...(closed && { policy: is('flag', true) }),
+          };
+        }
+      }),
+    );
+    const guard = g.world().entityIds[`${P}:npc/guard`]!;
+    const offers = gameView(g.world()).entities!.find((e) => e.id === guard)!.actions ?? [];
+    assert.equal(
+      offers.some((a: any) => a.available),
+      opens !== null,
+      name,
+    );
+    assert.equal(g.talk().kind, opens === null ? 'rejected' : 'accepted', name);
+    assert.equal(spokenBy(g.world(), g.world().character, guard)?.key, opens ?? undefined, name);
+  }
+});
+
+// Breaks: a keyword dialogue falls through on the word, or a Talk that selects one dialogue goes
+// elsewhere when that dialogue fails.
+test('a say and a named Talk do not fall through', () => {
+  const shut = (extra: object) =>
+    play(
+      content({ go: plain({ then: 'hub' }) }, { hub: { ask: plain() } }, (c) =>
+        Object.assign(c.dialogues[`${P}:dialogue/guard`], { policy: is('flag', true) }, extra),
+      ),
+    );
+  const said = shut({ keyword: 'w' });
+  const guard = said.world().entityIds[`${P}:npc/guard`];
+  assert.equal(
+    spokenBy(said.world(), said.world().character, guard, { n: 0 }, undefined, 'w'),
+    undefined,
+  );
+  const named = shut({ name: LABEL });
+  const offer = gameView(named.world())
+    .entities!.find((e) => e.id === guard)!
+    .actions!.find((a: any) => a.action_key === 'guard');
+  assert.equal(offer?.available, false);
+  assert.equal(
+    named.send({ type: 'talk', target_id: guard, dialogue: ref('dialogue', 'guard') }).kind,
     'rejected',
   );
 });

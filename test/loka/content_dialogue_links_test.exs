@@ -316,6 +316,53 @@ defmodule Loka.ContentDialogueLinksTest do
      Map.merge(%{"key" => key, "npc" => npc, "choices" => choices}, extra)}
   end
 
+  # Breaks: the warning names a target Talk would not open, misses a closed hub or misranks a loop
+  # against selection.ts. The same file runs through dialogue_branching.test.ts.
+  test "the shared entry cases warn of what Talk opens" do
+    cases = "test/fixtures/dialogue_entry_cases.json" |> File.read!() |> Jason.decode!()
+
+    for %{"name" => name, "dialogues" => dialogues, "warned" => warned} <- cases do
+      all =
+        for d <- dialogues do
+          {"dialogues/#{d["key"]}.json",
+           d
+           |> Map.update!("choices", &Map.new(&1, fn {id, c} -> {id, source_gate(c)} end))
+           |> Map.merge(if d["closed"], do: %{"policy" => %{}}, else: %{})}
+        end
+
+      targets = for {_, "ENTRY_GUESSED", _, target} <- entry_findings(all), do: target
+      assert targets == warned, name
+    end
+
+    named = %{"policy" => %{}, "name" => "n"}
+    leaves = [d("a_x", "a"), d("z_y", "a")]
+    assert entry_findings([d("g", "a", ["a_x", "z_y"], named) | leaves]) == []
+
+    # Breaks: a choice that can refuse or charge when taken counts as a way on.
+    free = %{"then" => "z_y"}
+
+    for gate <- [
+          %{"accept" => %{}},
+          %{"availability" => %{}},
+          %{"check" => %{}},
+          %{"escort" => %{}},
+          %{"exchange" => %{}},
+          %{"hand_over" => %{}},
+          %{"lesson_payment" => %{}},
+          %{"patrol" => %{}},
+          %{"payment" => %{}},
+          %{"receive" => %{}},
+          %{"steps" => [%{"op" => "skill.acquire"}]}
+        ] do
+      choices = %{"a" => Map.put(gate, "then", "a_x"), "b" => free}
+      g = d("g", "a", [], %{"policy" => %{}, "choices" => choices})
+      assert entry_findings([g | leaves]) == [], inspect(gate)
+    end
+  end
+
+  defp source_gate(%{"gate" => gate} = c), do: c |> Map.delete("gate") |> Map.put(gate, %{})
+  defp source_gate(c), do: c
+
   defp entry_findings(all) do
     for x <- Loka.Content.DialogueLinks.entry_checks(all),
         do: {x["severity"], x["code"], x["path"], x["data"]["target"]}

@@ -78,9 +78,12 @@ What you can rely on when dialogues link with `then` (JSON dialogues today):
   compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess.
   A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
   no marker when each but the last by key has a `when:`.
-- A dialogue with a condition that fails passes Talk on to what it leads to. So a first meeting is
-  an `intro` with a `when:` that links to a `hub`: the first Talk opens the intro, and every Talk
-  once the condition fails opens the hub. Talk is refused only when nothing further down opens.
+- A person's default Talk, when a dialogue's condition fails, passes on to what that dialogue leads
+  to, in choice key order, but only through a choice the player could take for nothing: its condition
+  holds, with no check, cost or other gate. So a first meeting is an `intro` with a `when:` that links
+  to a `hub`: the first Talk opens the intro, and once the condition fails Talk opens the hub unless
+  another dialogue opens first. A locked or paid way on is skipped, and Talk is refused only when
+  nothing further down opens. A Talk with its own `name` opens its dialogue or is refused.
 - Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
   condition holds and that has a choice to show.
 - A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the
