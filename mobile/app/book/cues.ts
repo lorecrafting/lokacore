@@ -172,7 +172,7 @@ export type Queue = {
   playing?: Cue;
   until: number; // when `playing` or the card ends
   pending?: Cue;
-  merged: Partial<Record<CueName, number>>; // when each S2 last fired
+  merged: Record<string, number>; // when each S2 last fired
   toned: number; // when skill_up last sounded
   washed: number; // when an hp_loss last washed
   held: Cue[]; // the arriving page's, until its picture deadline
@@ -190,12 +190,12 @@ export const QUIET: Queue = {
 
 // An S3 holds for the severity's 500 ms budget, which the blow wash fills.
 const BEAT = motion.flash.duration + motion.flash.out;
-
 // An S2: coalesced by key; a cue already fired gains no ids, so effects read the first view's.
 // skill_up past its limit keeps its gilt and loses its tone.
 function small(s: Queue, cue: Cue, now: number): Cue[] {
-  if (now - (s.merged[cue.name] ?? -Infinity) < mix.coalesce) return [];
-  s.merged[cue.name] = now;
+  const key = cue.silent ? `${cue.name} silent` : cue.name; // a silent one never swallows a heard one
+  if (now - (s.merged[key] ?? -Infinity) < mix.coalesce) return [];
+  s.merged[key] = now;
   if (cue.name !== 'skill_up') return [cue];
   if (now - s.toned < sound.skillUp.gap) return [{ ...cue, silent: true }];
   s.toned = now;

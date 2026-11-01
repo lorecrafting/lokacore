@@ -197,6 +197,12 @@ test('coalescing is by key', () => {
   assert.deepEqual(names(step(a.q, [{ name: 'pickup' }], 1000).fired), ['pickup']);
 });
 
+// Breaks: a silent buff swallows the debuff's tick arriving just after it.
+test('a silent small cue does not merge a heard one', () => {
+  const a = step(QUIET, [{ name: 'status_in', silent: true }], 1000);
+  assert.deepEqual(names(step(a.q, [{ name: 'status_in' }], 1100).fired), ['status_in']);
+});
+
 // Breaks: S1 is rate limited.
 test('whisper cues are free', () => {
   const place: Cue = { name: 'place' };
