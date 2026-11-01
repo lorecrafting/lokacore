@@ -66,6 +66,10 @@ defmodule Loka.Content.Combat do
         do: bad(at("cartridge.json", path ++ ["narration", field]))
       )
 
+  # An ally only strikes the opponent, so its engage line never plays (loka-w9id).
+  defp ally({_, _, %{"attack" => _, "disposition" => %{"engage" => _}}}, path),
+    do: [Map.put(diag("ALLY_ENGAGE_UNUSED", path, %{}), "severity", "warning")]
+
   defp ally({_, _, %{"attack" => _} = npc}, path),
     do: if(npc["spawn_template"], do: [bad(path)], else: [])
 
