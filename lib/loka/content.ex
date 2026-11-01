@@ -61,6 +61,9 @@ defmodule Loka.Content do
           {:ok, [Path.t()]} | {:error, String.t()}
   defdelegate new(dir, kind, name, from), to: Loka.Content.Starters, as: :write
 
+  @doc "The kinds `new/4` knows."
+  defdelegate kinds(), to: Loka.Content.Starters
+
   @doc "The source JSON Schema files, name => text (Loka.Content.SourceSchema)."
   @spec source_schema() :: %{String.t() => binary()}
   defdelegate source_schema(), to: Loka.Content.SourceSchema, as: :files

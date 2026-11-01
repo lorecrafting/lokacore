@@ -53,10 +53,14 @@ defmodule Loka.Content.Starters do
   defp valid_name(name, kind \\ nil) do
     pattern = if kind == "text", do: ~r/^[a-z][a-z0-9_.]{0,63}$/, else: ~r/^[a-z][a-z0-9_]{0,63}$/
 
-    if name =~ pattern,
+    # scenes and topics also write <name>_quest or <name>_known, under the same 64.
+    room = if kind in ~w(scenes topics), do: 58, else: 64
+
+    if name =~ pattern and String.length(name) <= room,
       do: :ok,
       else:
-        {:error, "a name is lowercase letters, digits and _, 64 at most (got #{inspect(name)})"}
+        {:error,
+         "a name is lowercase letters, digits and _, #{room} at most (got #{inspect(name)})"}
   end
 
   defp in_cartridge(dir) do
@@ -74,7 +78,7 @@ defmodule Loka.Content.Starters do
   # scanned), plus every room, bundled ones too, for layout's completeness check.
   defp context(dir, needs) do
     room_list = rooms(dir)
-    entry = read(Path.join(dir, "cartridge.json"))["entry"]
+    entry = with %{"entry" => e} <- read(Path.join(dir, "cartridge.json")), do: e
 
     start = %{
       "room_list" => room_list,
@@ -83,9 +87,12 @@ defmodule Loka.Content.Starters do
     }
 
     Enum.reduce_while(needs, {:ok, start}, fn kind, {:ok, acc} ->
-      case first(dir, kind) do
-        nil -> {:halt, {:error, "no #{kind} yet: bin/loka new #{kind} <name> first"}}
-        key -> {:cont, {:ok, Map.put(acc, kind, key)}}
+      case first(dir, kind, start["entry"]) do
+        nil ->
+          {:halt, {:error, "no #{missing(kind)} yet: bin/loka new #{missing(kind)} <name> first"}}
+
+        key ->
+          {:cont, {:ok, Map.put(acc, kind, key)}}
       end
     end)
   end
@@ -96,6 +103,9 @@ defmodule Loka.Content.Starters do
     back = Barriers.opposite(way)
 
     cond do
+      valid_name(room) != :ok ->
+        valid_name(room)
+
       !back ->
         {:error, "--from: a direction is north, south, east, west, up or down (got #{way})"}
 
@@ -145,19 +155,23 @@ defmodule Loka.Content.Starters do
   end
 
   @single ~w(facts resources attributes)
-  defp first(dir, kind) when kind in @single do
+  defp first(dir, kind, _) when kind in @single do
     case read(Path.join(dir, "#{kind}.json")) do
       %{^kind => defs} when map_size(defs) > 0 -> defs |> Map.keys() |> Enum.min()
       _ -> nil
     end
   end
 
-  # A template that writes into the room's file takes the entry only when it has one.
-  defp first(dir, kind) do
+  # "entry" is a room reference, bundled or not; "rooms" is a room with its own file to merge into.
+  defp first(dir, "entry", entry), do: entry || first(dir, "rooms", entry)
+
+  defp first(dir, kind, entry) do
     keys = for p <- Path.wildcard(Path.join([dir, kind, "*.json"])), do: Path.basename(p, ".json")
-    entry = read(Path.join(dir, "cartridge.json"))["entry"]
     if kind == "rooms" and entry in keys, do: entry, else: List.first(keys)
   end
+
+  defp missing("entry"), do: "rooms"
+  defp missing(kind), do: kind
 
   defp capabilities(caps),
     do: %{"requires" => %{"capabilities" => Map.new(caps, &{&1, 1})}}

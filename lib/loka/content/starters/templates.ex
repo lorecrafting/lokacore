@@ -21,17 +21,17 @@ defmodule Loka.Content.Starters.Templates do
   defp kind("dialogues"), do: {~w(dialogue), ~w(npcs), &dialogue/2}
   defp kind("emotes"), do: {~w(emote), [], file("emotes", %{"others" => p()})}
   defp kind("facts"), do: {~w(fact), [], single("facts", fact())}
-  defp kind("items"), do: {~w(containment), ~w(rooms), &item/2}
+  defp kind("items"), do: {~w(containment), ~w(entry), &item/2}
   defp kind("layout"), do: {~w(knowledge), ~w(rooms), &layout/2}
   defp kind("liquids"), do: {~w(liquid food), [], &liquid/2}
-  defp kind("npcs"), do: {~w(containment), ~w(rooms), &npc/2}
+  defp kind("npcs"), do: {~w(containment), ~w(entry), &npc/2}
 
   defp kind("populations"),
     do: {~w(population calendar combat schedule death position), ~w(rooms), &World.population/2}
 
   defp kind("quests"), do: {~w(quest), ~w(items), &quest/2}
   defp kind("reactions"), do: {~w(reaction narration), ~w(items), &reaction/2}
-  defp kind("replenish"), do: {[], ~w(items rooms npcs), &replenish/2}
+  defp kind("replenish"), do: {[], ~w(items entry npcs), &replenish/2}
   defp kind("resources"), do: {~w(resource), [], single("resources", resource())}
   defp kind("rooms"), do: {~w(movement), [], &new_room/2}
   defp kind("scenes"), do: {~w(scene quest), ~w(items), &scene/2}
@@ -97,14 +97,13 @@ defmodule Loka.Content.Starters.Templates do
 
   defp new_room(name, _), do: %{"rooms/#{name}.json" => room()}
 
-  # The entry when it is a room here, even one in an area bundle.
   defp item(name, c),
     do: %{
-      "items/#{name}.json" => Map.put(thing(name), "location", in_room(c["entry"] || c["rooms"]))
+      "items/#{name}.json" => Map.put(thing(name), "location", in_room(c["entry"]))
     }
 
   defp npc(name, c),
-    do: %{"npcs/#{name}.json" => Map.put(thing(name), "room", c["entry"] || c["rooms"])}
+    do: %{"npcs/#{name}.json" => Map.put(thing(name), "room", c["entry"])}
 
   defp liquid(name, _),
     do: %{
@@ -192,7 +191,7 @@ defmodule Loka.Content.Starters.Templates do
     body = %{
       "items" => [c["items"]],
       "from" => %{"in" => "npc", "npc" => c["npcs"]},
-      "to" => in_room(c["rooms"]),
+      "to" => in_room(c["entry"]),
       "cap" => 1,
       "count" => 1,
       "every" => 3600

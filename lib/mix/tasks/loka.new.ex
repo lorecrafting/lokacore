@@ -20,6 +20,13 @@ defmodule Mix.Tasks.Loka.New do
   defp new(args, cwd) do
     {pairs, dir} = plan(args, [])
     if pairs == [], do: Mix.raise(@usage)
+    # Before any write: a surplus argument reads as a kind, and the pairs before it would land.
+    for {kind, _, _} <- pairs, kind not in Loka.Content.kinds() do
+      Mix.raise(
+        "mix loka.new: unknown kind #{inspect(kind)}; one of: #{Enum.join(Loka.Content.kinds(), " ")}"
+      )
+    end
+
     last = Enum.reduce(pairs, Path.expand(dir, cwd), &starter(&1, &2, cwd))
     IO.puts("Fill the ~ lines (bin/loka todo #{last}), then run: bin/loka dev #{last} --watch")
   end

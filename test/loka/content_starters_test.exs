@@ -252,7 +252,30 @@ defmodule Loka.ContentStartersTest do
     assert Starters.write(dir, "rooms", "x", {"marsh", "east"}) ==
              {:error, "--from: no rooms/marsh.json"}
 
+    outside = Path.join(tmp, "victim.json")
+    File.write!(outside, "{}")
+
+    assert {:error, "a name is lowercase" <> _} =
+             Starters.write(dir, "rooms", "x", {"../../victim", "east"})
+
+    assert File.read!(outside) == "{}"
     assert snapshot(dir) == before
+  end
+
+  # Breaks: a name that passes alone but whose derived quest or fact key overflows the 64 limit,
+  # a starter that reports success on a cartridge that then fails to compile.
+  test "scenes and topics leave room for their derived key", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    {:ok, _} = Starters.write(dir, "items", "lamp")
+    long = String.duplicate("a", 58)
+    {:ok, _} = Starters.write(dir, "topics", long)
+    {:ok, _} = Starters.write(dir, "scenes", long)
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+
+    for kind <- ~w(topics scenes) do
+      assert {:error, "a name is lowercase letters, digits and _, 58 at most" <> _} =
+               Starters.write(dir, kind, long <> "a")
+    end
   end
 
   # Breaks: a hand-placed row flattened by the automatic rows, a layout.json appearing in a
@@ -303,6 +326,20 @@ defmodule Loka.ContentStartersTest do
     assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
+  # Breaks: a room reference demanding a plain room file when the only room is the bundled entry.
+  test "items and npcs land in a bundled entry with no plain room", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    edit(dir, "cartridge.json", &Map.put(&1, "entry", "marsh"))
+    File.rm!(Path.join(dir, "rooms/start.json"))
+    {:ok, _} = Starters.write(dir, "items", "rope")
+    {:ok, _} = Starters.write(dir, "npcs", "thera")
+    assert read(dir, "items/rope.json")["location"]["room"] == "marsh"
+    assert read(dir, "npcs/thera.json")["room"] == "marsh"
+    {:ok, _} = Starters.write(dir, "replenish", "more")
+    assert read(dir, "replenish/more.json")["to"]["room"] == "marsh"
+  end
+
   # Breaks: the second pair lost, --from read as a pair, a relative path resolved against the
   # repo instead of the caller, no next step, or a refused pair undoing the one before it.
   test "the task takes several pairs and ends with the next step", %{tmp_dir: tmp} do
@@ -331,6 +368,14 @@ defmodule Loka.ContentStartersTest do
                      Mix.Tasks.Loka.New.run(~w(--cwd #{tmp} items lamp shop x mine))
                    end)
                  end
+
+    refute File.exists?(Path.join(dir, "items/lamp.json"))
+
+    assert_raise Mix.Error, "mix loka.new: --from: no rooms/nowhere.json", fn ->
+      ExUnit.CaptureIO.capture_io(fn ->
+        Mix.Tasks.Loka.New.run(~w(--cwd #{tmp} items lamp rooms x --from nowhere east mine))
+      end)
+    end
 
     assert File.exists?(Path.join(dir, "items/lamp.json"))
 
