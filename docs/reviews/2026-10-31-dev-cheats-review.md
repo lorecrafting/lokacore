@@ -3,7 +3,7 @@
 - PR [#546](https://github.com/lorecrafting/lokacore/pull/546) `engine/dev-cheats` at `ee67c06338d9941f95e647b3f53deb7ea7854b48`, diff `origin/main...ee67c0633`.
 - Governing: `br show loka-vduxr.6`; [cartridge.md](../system/cartridge.md#author-preview) Author preview; [mechanics.md](../system/mechanics.md) dev@1; [composition](../system/architecture.md#building-mechanics-by-composition).
 - Reviewer: independent; authored none of the work.
-- Verdict: **CHANGES REQUIRED** at `ee67c0633`: one blocker, two should-fix, two nits.
+- Verdict: **APPROVE WITH NOTES** at `8695092c2` (final re-check below); first review **CHANGES REQUIRED** at `ee67c0633`: one blocker, two should-fix, two nits.
 
 ## Must be true (written before reading the diff)
 
@@ -94,3 +94,44 @@ PR claims rerun: "`test/dev.test.ts`: 20 pass": now 22, R4. "`invocation.ts:96` 
 CI at `393cbc928`: graph-diff, ci, book-e2e completed success.
 
 Not run: `bin/mutate_diff.sh` (the brief asked for narrow mutants); go-to-room sweep (fix did not touch it; first review ran it).
+
+## Final re-check at `8695092c2a543caa046704149f3aad4e9a287507`
+
+Scope: `b51d918eb`, `1f6a8fcb3`, `8695092c2` and three items from the developer's self-review. Verdict **APPROVE WITH NOTES** for this exact head only; a rebase needs the list below. CI at this head per `gh run list --commit`: graph-diff, ci, book-e2e completed success.
+
+### Dispositions
+
+| Item | State | Proof |
+| --- | --- | --- |
+| Lost-ack retry, `save.ts:111` | Fixed | Fault probe: `dev_set_fact`, lost COMMIT answers `pending`; retry `saved`, replay, accepted; dev reopen opens; release open `save_corrupt` |
+| `rule.ts:46` custody targets only | Fixed | Reads the same as `dialogue-save.ts` `custodyStarts` and `checkAssignments`. Sweep: `search_plan` (6 cartridges) and `inn_cellar_cleared` accepted, reopen OK |
+| `wild_standing` refused | Accepted | Sweep: `invalid_state`, reopen OK |
+| `receipt-save.ts:22` accepted only | Fixed | Rejected extras on a release host, then a clean move: reopen opens at the same place |
+| PR body | Fixed | Reran `dev.test.ts`: 22 pass; `dev-cheats` + `place`: 27 pass. Cite `run.ts:75` is the `dev_` branch |
+| Absent `trust_fact`, `rule.ts:73` | Fixed | Mutant back to `!` goes red |
+
+Sweep: every fact of 107 compiled cartridges, fresh game, one cheat, dev reopen: 131 accepted, 187 `invalid_state`, one `fault`, no `save_corrupt`. `hello_sampler` `village_arrived` still throws at open, untraced, as in the previous round; `green_sampler` `bell_up` is the `fault`.
+
+### Self-review items
+
+- `mobile/app/author/place.ts:110`: **nit**. A `pending` reply reads "Go to room refused: pending." though the COMMIT may have landed. Failure: on a lost ack only, dev panel only; the retry replays correctly. Belongs in loka-vduxr.17.
+- `kernel/ts/src/runtime/world.ts:189`: **none**. `stepDev` skips the lock-capability check `stepElapsed` makes. No cartridge locks dev (`toolbox_showcase` has no `dev` in its lock, cheat accepted on a dev host), so the check would break the cheat. Callers: `invocation.ts:182` behind `host.dev`, `receipt-history.ts:37` behind the release gate, `play/run.ts:76`. No release path.
+- `protocol/action.schema.json:47`: **none**, one behaviour note. Run on a release host: `move` with extra `room`, or `fact` and `value`, and `dev_go_to_room`, `dev_set_fact`, each answer `saved`, rejected `unsupported_capability`, revision and place unchanged, one receipt row added. Before this PR the same extras would fail shape validation with no row (from the schema; main not run). A hand-built invocation only, same as `topic` or `word` today; no offered action sends them. Unknown keys still answer `invalid` with no row.
+
+### Mutants
+
+Null: `dev.test.ts` 22 pass, `dev-cheats.test.ts` 10 pass. Each goes red: adopt without `dev`; `1=1` for accepted in `DEV_RECEIPT`; custody term `false`; `give_allowed` check `true`; `d.quest` check `false`; `trust_fact` `!`; `c.receive` without `hand_over`.
+
+Not run: `bin/mutate_diff.sh`, full suites, book UI. A first mutant shell hung on my own stray `cat`, no mutant applied; stopped by PID, rerun.
+
+### Second opinion
+
+Required: `docs/WORKFLOW.md` Review count, the PR changes a protocol schema and save checks. Run it on the rebased head so it covers the trimmed rule.
+
+### Re-check after rebasing on #544
+
+1. `#544` deletes `topics-save.ts` and its `dialogue-save.ts` no longer infers who wrote a fact, so `rule.ts:43-80` refuses facts that nothing proves. Each kept term needs a live reopen proof on the rebased tree; topic and dialogue custody terms and `held`, `custody` should go unless one remains. Keep `c.escort` when trimming that clause: `escortSave` survives on #544. Expedition, deadline, riddle and perception terms: check each against its save file.
+2. Rerun the set-then-reopen sweep: no `save_corrupt`, and every newly accepted fact reopens. A term cut too far shows as `save_corrupt`; one left in shows as a refusal with no proof behind it.
+3. Tests that pin the custody refusal in `dev.test.ts` must change with the rule; rerun narrow mutants on what remains.
+4. `#544`'s new dialogue reopen path keeps the `dev` flag; `receipt-history.ts` gate still refuses an accepted cheat on release.
+5. `ActionInput` and `kernel_api` (now 1.133 here, 1.135 taken by #550, #544 next), capability lock and frozen fixture regenerated, not hand-merged.
