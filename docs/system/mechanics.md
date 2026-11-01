@@ -859,7 +859,7 @@ compile error. Installed kernel 1.136.
 
 A round's blow stops at the target's authored hp floor, or at 0 under a negative floor, where death
 fires; a floored foe stays alive and the fight goes on, as under a spell's damage (`aboveFloor`,
-loka-2lvx).
+loka-2lvx). A body already below 0 takes nothing and the round runs (loka-vduxr.21).
 It creates an encounter and its first round job at now + the authored interval; it does
 not attack immediately, advance time or draw RNG. The encounter pins character, body,
 NPC, room, round and current job. While the encounter is open, the final shared
@@ -869,7 +869,7 @@ later adds only its exact bandage treatment. This blocks repeated Attack, direct
 Move, dialogue/choices, other inventory/equipment/doors, Wait, scripted actions and Sit/Rest/Sleep, including
 aliases and raw commands. Closure restores ordinary actions from state; reopening derives the
 same restriction. This focused mode leaves actor-free scheduled rounds and their existing
-nonstanding/wake semantics intact. A body already below 0 takes nothing and the round runs (loka-vduxr.21).
+nonstanding/wake semantics intact.
 
 Rounds follow the frozen [first-encounter oracles](../spec/conformance/first-encounter.md).
 Odd rounds give the player the first opportunity; even rounds give the NPC the first.
