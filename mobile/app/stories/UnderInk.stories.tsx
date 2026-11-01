@@ -1,11 +1,11 @@
 // The held layers on their own, on the paper they sit on. CanvasKit loads first (App.web.tsx),
-// served locally; without it UnderInk draws nothing. Gradient stays lazy here too: Skia reads
-// CanvasKit once, at import.
+// served locally; without it UnderInk draws nothing.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
 import { expect, waitFor } from 'storybook/test';
 import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import type { GameView } from '../../packages/game-view/session.ts';
+import type Gradient from '../book/Gradient.tsx'; // type only: Skia reads CanvasKit once, at import
 import { UnderInk } from '../book/UnderInk.tsx';
 import { PaletteContext, usePalette } from '../book/palette.ts';
 import { color, size } from '../book/tokens.ts';
