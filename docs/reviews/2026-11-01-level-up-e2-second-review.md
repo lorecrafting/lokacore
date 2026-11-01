@@ -43,3 +43,29 @@
 ## Not checked
 
 NPC-subject level event; non-hp regen pools (both PR-listed open items). The death refill was run with an `entity_died` rule, not a pack round.
+
+## Re-check at 68bc1582e3436f316555f8ddf3415bae1d74432b
+
+Scoped to the fix commits (`git diff 9d29ad1a5 HEAD`). Verdict: **APPROVE WITH NOTES**. CI at this head: ci, book-e2e and graph-diff completed success.
+
+| Finding | Disposition | Proof |
+|---|---|---|
+| B1 same-due refill and bleed tick fault `conflicting_write` | Fixed | The first-round probe at due 65250 is now accepted with refill 1 to 10, then tick 10 to 9. `pooled` (`kernel/ts/src/mechanics/resource.ts`) takes the pool's group, else the body's holder, else its own, and holds the body, so `statusGroup` joins. Both job orders save and reopen in `refill_same_due.test.ts`. |
+| S1 refill overrides the death's return | Fixed | Probe: ops 10 to 0, 0 to 3; hp stays 3, also at +1 s. Tests cover level_two, an attack_result rule and a delayed rule, each reopened at every prefix; a refill due later in the advance still raises the return. |
+| S2 negative `by` | Fixed | `REACTION_DRAINS_BODY` at `lib/loka/content/reactions.ex:160`. `by` 0 compiles. A behaviour's rule is refused too (probe, `behaviours/spoils.reactions.take.steps[1].by`). The negative `by` in shipped content, `furnish_sampler/actions/temper.json:27`, is an action, which the check does not cover. |
+
+Mutants, singly, narrow suite `levelling.test.ts` plus `refill_same_due.test.ts`: the null control survived; red for dropping the body holder from the chain, dropping the pool holder, removing the holder write, removing the death check, `logical_time` check to `true`, `poolWriters(joins.ops, holders)` to `holders`, `position: Infinity` to 0, `by < 0` to `<= 0` and to `< -1`.
+
+Findings:
+
+- nit: PR #566 body, `/code-review` section lines 37-38, still lists the fixed refill and death items as Open at `shared.ts`, a file the code has left. Update it in the fix round.
+
+Writer groups, by reading: bleed (`bleed/job.ts:150`), status (`status/job.ts:72`), rounds and the death sequence hold the body; player-initiated root writes are found by `poolWriters`.
+
+Questions, not blocking:
+
+- `kernel/ts/src/mechanics/water/expiry.ts:24` holds no body, so by reading a refill that writes at a drowning's due, ahead of it, would leave the water job in a fresh group and fault `conflicting_write`, and repeat. Not reproduced: a probe of 59 command ids with a delayed rule due with the water job, all accepted, 26 with the other job first, never produced a refill op. `docs/system/mechanics.md:2148` discloses the class. Is that disclosure enough here?
+- `kernel/ts/src/mechanics/escort/job.ts:57` is the same shape, for a refill of a purse pool; read only.
+- A death and a refill at one clock split across two stored proposals by a budget stop: `events` covers one proposal, so could the refill miss the death? Reasoned only.
+
+Not checked: the full `bin/mutate_diff.sh`, by the brief.
