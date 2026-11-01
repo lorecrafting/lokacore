@@ -43,13 +43,19 @@ export const resetPlace = () => {
   place.steps = [];
   delete place.stopped;
   refused = undefined;
+  placeNote = '';
   savePlace();
 };
 /** This load must replay the saved path, on a fresh game: a hash seen before keeps its old save (an edit undone). */
 export const placeDue = () =>
   place.hash !== chapter.sha256 && place.stopped?.hash !== chapter.sha256;
 export function restorePlace(game: Opened | undefined) {
-  if (!game || place.hash === chapter.sha256) return;
+  if (!game) return;
+  if (place.hash === chapter.sha256) {
+    // an edit undone: a stop recorded for that edit no longer describes the path
+    delete place.stopped;
+    return savePlace();
+  }
   if (place.stopped?.hash === chapter.sha256) {
     // this save holds the path up to the stop: replaying would re-send those steps
     ({ at: refused, note: placeNote } = place.stopped);

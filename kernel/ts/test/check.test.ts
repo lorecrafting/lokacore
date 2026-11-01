@@ -82,7 +82,7 @@ test('an edit that refuses a step names it and exits 1; each checkpoint still re
     out:
       'a_empty: not replayed (a checkpoint is {"steps": [...]} with at least one step)\n' +
       'a_no_steps: not replayed (a checkpoint is {"steps": [...]} with at least one step)\n' +
-      'a_odd_step: step 1: not a step (needs advance or intent)\n' +
+      'a_odd_step: step 1: not a step (needs advance or intent, not both)\n' +
       'b_back_clock: step 1 (advance -1): not whole milliseconds\n' +
       'to_the_boathouse: ok\n' +
       'to_the_well: step 1 (move north): rejected not_found\n',

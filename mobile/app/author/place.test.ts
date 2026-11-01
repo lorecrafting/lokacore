@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Intent, Reply } from '../../packages/game-view/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
-import { asRefs, caughtUp, dropStep, replay, type Replayable, type Step } from './place.ts';
+import { asRefs, caughtUp, dropStep, frozenClock, replay, type Replayable, type Step } from './place.ts';
 
 const NPC = 'sampler@0.0.1:npc/maud';
 const intent = (target_ids: string[], input = {}) =>
@@ -218,4 +218,12 @@ test('the frozen clock moves wall and monotonic together, and only when told', (
   const [wall, mono] = [clock.wall(), clock.monotonic()];
   moved = 600;
   assert.deepEqual([clock.wall() - wall, clock.monotonic() - mono], [600, 600]);
+});
+
+test('a step with both kinds, or an unreadable intent, stops by number', () => {
+  // Break: an intent skipped beside an advance passes the gate; a missing input throws with no step number.
+  for (const bad of [{ advance: 0, intent: intent([]) }, { intent: {} }]) {
+    const out = replay([bad as unknown as Step], {} as Replayable, () => {});
+    assert.match(out.failed!, /^step 1: not a step/);
+  }
 });

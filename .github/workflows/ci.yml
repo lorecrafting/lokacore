@@ -180,7 +180,7 @@ jobs:
           printf '#!/bin/sh\nshift 2\nexec "$@"\n' > "$RUNNER_TEMP/bin/mise"
           chmod +x "$RUNNER_TEMP/bin/mise"
           export PATH="$RUNNER_TEMP/bin:$PATH"
-          for d in cartridges/*/checkpoints; do bin/loka check "${d%/checkpoints}"; done
+          rc=0; for d in cartridges/*/checkpoints; do bin/loka check "${d%/checkpoints}" || rc=1; done; exit $rc
       - run: bin/kernel_red_controls.sh
       - run: node bin/check_ts_size.mjs # loads typescript from kernel/ts
       - run: bin/ts_size_red_controls.sh

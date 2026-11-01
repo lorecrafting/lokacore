@@ -92,8 +92,9 @@ const createSession = (open: () => Db) =>
       latency:
         Platform.OS === 'web' ? undefined : { host: 'hermes_ios', now: () => performance.now() },
       kernel_version,
-      // The dev cartridge plays the one seed and frozen clock of `bin/loka check` (no random: the template world).
-      ...(devCartridge
+      // The author preview plays the one seed and frozen clock of `bin/loka check` (no random: the
+      // template world); only its dev clock can move them, so any other dev build keeps real time.
+      ...(devClock
         ? { time: frozenClock(skew) }
         : {
             random: getRandomValues,
@@ -232,8 +233,8 @@ function useWebSession() {
     let live = true;
     g.loka_web_opening.then((opened) => {
       session = opened;
-      if (devClock && placeDue()) opened.startOver();
-      if (devClock) restorePlace(opened.game());
+      // A start over refused keeps the old save, which a replay must not run over.
+      if (devClock && !(placeDue() && opened.startOver())) restorePlace(opened.game());
       if (live) redrawBoot((n) => n + 1);
     });
     return () => {
