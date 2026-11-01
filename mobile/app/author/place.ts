@@ -42,13 +42,16 @@ const describe = (reply: Reply) => {
       : d.kind;
 };
 
-/** Sends the steps in order; the first the session does not save and accept stops the replay, named. */
 /** The path without the step at `index`. */
 export const dropStep = (steps: Step[], index: number) => steps.filter((_, i) => i !== index);
 
+/** Sends the steps in order; the first the session does not save and accept stops the replay, named. */
 export function replay(steps: Step[], game: Replayable, advance: (ms: number) => void): Outcome {
   for (const [i, step] of steps.entries()) {
     if ('advance' in step) {
+      // a hand-edited checkpoint: the preview and the check throw this as one malformed step
+      if (!Number.isSafeInteger(step.advance) || step.advance < 0)
+        throw new Error(`advance ${step.advance} is not whole milliseconds`);
       advance(step.advance);
       continue;
     }

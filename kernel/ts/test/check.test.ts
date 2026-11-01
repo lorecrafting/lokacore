@@ -64,6 +64,7 @@ test('an edit that refuses a step names it and exits 1; each checkpoint still re
   delete data.exits['north'];
   writeFileSync(room, JSON.stringify(data));
   write(dir, 'a_no_steps.json', '{}');
+  write(dir, 'a_empty.json', '{"steps":[]}');
   write(dir, 'b_back_clock.json', '{"steps":[{"advance":-1}]}');
   write(
     dir,
@@ -73,8 +74,9 @@ test('an edit that refuses a step names it and exits 1; each checkpoint still re
   assert.deepEqual(await run(dir), {
     code: 1,
     out:
-      'a_no_steps: malformed (a checkpoint is {"steps": [...]})\n' +
-      'b_back_clock: malformed (advance -1 is not whole milliseconds)\n' +
+      'a_empty: not replayed (a checkpoint is {"steps": [...]} with at least one step)\n' +
+      'a_no_steps: not replayed (a checkpoint is {"steps": [...]} with at least one step)\n' +
+      'b_back_clock: not replayed (advance -1 is not whole milliseconds)\n' +
       'to_the_boathouse: ok\n' +
       'to_the_well: step 1 (move): rejected not_found\n',
   });

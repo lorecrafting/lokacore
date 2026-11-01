@@ -50,7 +50,9 @@ are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
 `bin/loka check cartridges/<name>` compiles the cartridge and replays every checkpoint from a fresh
 start, with no Book. It prints `<checkpoint>: ok`, or the first step the game refused and why, and
 exits 1 if any failed. Run it after an edit, and save a checkpoint at each beat you want to keep
-working: CI runs it for every cartridge with a `checkpoints/` folder.
+working: CI runs it for every cartridge with a `checkpoints/` folder. It always plays one fixed
+seed, while the preview draws a seed per save, so a step that hangs on a chance roll can differ
+between them.
 
 When you jump to a checkpoint and an edit has made one of its steps impossible, the panel names the
 step and offers **drop this step and continue**. It starts over and replays the path without that step. Save under the same name to

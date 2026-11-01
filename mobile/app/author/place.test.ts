@@ -154,3 +154,17 @@ test('dropping the refused step removes that step, counting the advances before 
   assert.equal(done, 2);
   assert.deepEqual(dropStep(steps, done), [steps[0], steps[1], steps[3]]);
 });
+
+// Break: a hand-edited advance reaches the clock, moving it backward or turning it into a string,
+// in the preview as in the check; or a zero advance, which is whole, is refused.
+test('an advance that is not whole non-negative milliseconds throws before the clock', () => {
+  const clock: number[] = [];
+  const replayAdvance = (advance: unknown) =>
+    replay([{ advance } as Step], session({}, []).game, (ms) => clock.push(ms));
+  assert.throws(() => replayAdvance(-1), /^Error: advance -1 is not whole milliseconds$/);
+  assert.throws(() => replayAdvance('5'), /^Error: advance 5 is not whole milliseconds$/);
+  assert.throws(() => replayAdvance(1.5), /^Error: advance 1.5 is not whole milliseconds$/);
+  assert.deepEqual(clock, []);
+  assert.deepEqual(replayAdvance(0), { done: 1 });
+  assert.deepEqual(clock, [0]);
+});

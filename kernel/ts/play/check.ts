@@ -8,7 +8,6 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { fileURLToPath } from 'node:url';
 import { caughtUp, replay, type Step } from '../../../mobile/app/author/place.ts';
 import {
   KERNEL_ID,
@@ -52,7 +51,7 @@ function memory(sql: DatabaseSync): Db {
 }
 
 /** `undefined` when the whole path is accepted, else why it stopped. */
-export function replayed(bundled: Bundled, steps: Step[]): string | undefined {
+function replayed(bundled: Bundled, steps: Step[]): string | undefined {
   const sql = new DatabaseSync(':memory:');
   const clock = { wall: 10_000, mono: 0 }; // mutate-skip: any start reads the same; only the deltas matter
   let id = 0;
@@ -64,8 +63,6 @@ export function replayed(bundled: Bundled, steps: Step[]): string | undefined {
       time: { wall: () => clock.wall, monotonic: () => clock.mono },
     });
     return replay(steps, game, (ms) => {
-      if (!Number.isSafeInteger(ms) || ms < 0)
-        throw new Error(`advance ${ms} is not whole milliseconds`);
       clock.wall += ms;
       clock.mono += ms;
       caughtUp(game);
@@ -76,7 +73,7 @@ export function replayed(bundled: Bundled, steps: Step[]): string | undefined {
 }
 
 /** The report's lines and whether every checkpoint passed. */
-export function check(source: string): { lines: string[]; ok: boolean } {
+function check(source: string): { lines: string[]; ok: boolean } {
   const dir = join(source, 'checkpoints');
   const names = existsSync(dir)
     ? readdirSync(dir)
@@ -91,10 +88,11 @@ export function check(source: string): { lines: string[]; ok: boolean } {
     let why: string | undefined;
     try {
       const { steps } = JSON.parse(readFileSync(join(dir, file), 'utf8')) as { steps: Step[] };
-      if (!Array.isArray(steps)) throw new Error('a checkpoint is {"steps": [...]}');
+      if (!Array.isArray(steps) || !steps.length)
+        throw new Error('a checkpoint is {"steps": [...]} with at least one step');
       why = replayed(bundled, steps);
     } catch (e) {
-      why = `malformed (${(e as Error).message})`;
+      why = `not replayed (${(e as Error).message})`;
     }
     if (why) ok = false;
     return `${file.slice(0, -5)}: ${why ?? 'ok'}`;
@@ -102,13 +100,11 @@ export function check(source: string): { lines: string[]; ok: boolean } {
   return { lines, ok };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const [dir, ...rest] = process.argv.slice(2);
-  if (!dir || rest.length) {
-    console.error('usage: bin/loka check <cartridge dir>');
-    process.exit(2);
-  }
-  const { lines, ok } = check(resolve(dir));
-  for (const line of lines) console.log(line);
-  process.exit(ok ? 0 : 1);
+const [dir, ...rest] = process.argv.slice(2);
+if (!dir || rest.length) {
+  console.error('usage: bin/loka check <cartridge dir>');
+  process.exit(2);
 }
+const { lines, ok } = check(resolve(dir));
+for (const line of lines) console.log(line);
+process.exit(ok ? 0 : 1);

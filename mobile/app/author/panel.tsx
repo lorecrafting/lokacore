@@ -116,6 +116,7 @@ function jumpTo(steps: Step[], { session, startOver }: Tools) {
   if (!game || game === before) return; // a refused start over keeps this game and its place
   place.hash = ''; // not this artifact's path yet: restorePlace replays it
   place.steps = steps;
+  savePlace(); // a refused replay returns unsaved: a reload must still hold this path, not the empty one
   restorePlace(game);
 }
 
