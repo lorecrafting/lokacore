@@ -106,7 +106,7 @@ function Checkpoints({ state, send }: { state?: State; send: Send }) {
         }}
       >
         <Input aria-label="Checkpoint name" placeholder="name" value={name} onChange={(e) => setName(e.target.value)} />
-        <Button type="submit" disabled={!named || !state}>
+        <Button type="submit" disabled={!named || !state?.steps.length}>
           Save
         </Button>
       </form>

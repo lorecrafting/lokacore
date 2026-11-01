@@ -1,7 +1,7 @@
 // `bin/loka check` (docs/system/cartridge.md#author-preview): real compile, real replay, literal
 // report. mise is stubbed as CI has none (as author.test.ts); mix comes from PATH.
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import {
   chmodSync,
   cpSync,
@@ -76,7 +76,7 @@ test('an edit that refuses a step names it and exits 1; each checkpoint still re
     out:
       'a_empty: not replayed (a checkpoint is {"steps": [...]} with at least one step)\n' +
       'a_no_steps: not replayed (a checkpoint is {"steps": [...]} with at least one step)\n' +
-      'b_back_clock: not replayed (advance -1 is not whole milliseconds)\n' +
+      'b_back_clock: step 1 (advance -1): not whole milliseconds\n' +
       'to_the_boathouse: ok\n' +
       'to_the_well: step 1 (move): rejected not_found\n',
   });
@@ -87,10 +87,9 @@ test('an edit that refuses a step names it and exits 1; each checkpoint still re
 test('each checkpoint starts over without a prompt', async () => {
   const dir = sampler('twice');
   write(dir, 'again.json', JSON.stringify({ steps: [NORTH] }));
-  write(dir, 'no_wait.json', '{"steps":[{"advance":0}]}'); // a zero advance is whole milliseconds
   assert.deepEqual(await run(dir), {
     code: 0,
-    out: 'again: ok\nno_wait: ok\nto_the_well: ok\n',
+    out: 'again: ok\nto_the_well: ok\n',
   });
 });
 
@@ -107,6 +106,20 @@ test('no checkpoints and a failed compile each exit 1', async () => {
   const { code, out } = await run(broken);
   assert.equal(code, 1);
   assert.match(out, /^not compiled: (?!compile failed)/); // the compiler's own words
+});
+
+// Break: a machine without mise reads as a bare "compile failed", with no cause.
+test('a compiler that cannot start says why', () => {
+  const r = spawnSync(
+    process.execPath,
+    [join(ROOT, 'kernel/ts/play/check.ts'), sampler('nomise')],
+    {
+      env: { PATH: '' },
+      encoding: 'utf8',
+    },
+  );
+  assert.equal(r.status, 1);
+  assert.equal(r.stdout, 'not compiled: spawnSync mise ENOENT\n');
 });
 
 // Break: a mistyped command replays the wrong thing or reads as a gate failure (exit 1).

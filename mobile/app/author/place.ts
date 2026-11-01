@@ -5,21 +5,29 @@
 import type { EntityId, GameView, Intent, Reply } from '../../packages/game-view/session.ts';
 
 export type Step = { intent: Intent } | { advance: number }; // advance: dev-clock milliseconds
-export type Place = { hash: string; steps: Step[] };
+// stopped: a replay stopped under this artifact; its save already holds the path up to there.
+export type Place = {
+  hash: string;
+  steps: Step[];
+  stopped?: { hash: string; at?: number; note: string };
+};
 type Ids = Readonly<Record<string, string>>; // definition ref -> entity id
 export type Replayable = {
   view: () => { view: Pick<GameView, 'choice'>; token: string };
   invoke: (intent: Intent) => Reply;
   entityIds: () => Ids;
 };
-export type Outcome = { done: number; failed?: string };
-type Pulsed = { pulse: (mode: 'active' | 'drain') => { kind: string } };
+// refused: the game or the file said no to this step, so dropping it can help; a pending or fault reply is not that.
+export type Outcome = { done: number; failed?: string; refused?: true };
+type Pulsed = { pulse: (mode: 'active' | 'drain') => { kind: string; code?: string } };
 
-/** After the dev clock moved: credit the elapsed time now, so the next replayed input is not refused as catching up. */
+/** After the dev clock moved: credit the elapsed time now, so the next replayed input is not refused as catching up. Returns how the delivery ended. */
 export function caughtUp(game: Pulsed) {
   game.pulse('active'); // a drain never captures the clocks (elapsed.ts pulse); an active pulse does
   let rounds = 0;
-  while (rounds++ < 1000 && game.pulse('drain').kind === 'catching_up');
+  let last = game.pulse('drain');
+  while (++rounds < 1000 && last.kind === 'catching_up') last = game.pulse('drain');
+  return last.code ? `${last.kind} ${last.code}` : last.kind;
 }
 
 const isRef = (target: string) => target.includes('@');
@@ -46,19 +54,21 @@ const describe = (reply: Reply) => {
 export const dropStep = (steps: Step[], index: number) => steps.filter((_, i) => i !== index);
 
 /** Sends the steps in order; the first the session does not save and accept stops the replay, named. */
-export function replay(steps: Step[], game: Replayable, advance: (ms: number) => void): Outcome {
+export function replay(steps: Step[], game: Replayable, advance: (ms: number) => string): Outcome {
   for (const [i, step] of steps.entries()) {
     if ('advance' in step) {
-      // a hand-edited checkpoint: the preview and the check throw this as one malformed step
+      const name = `step ${i + 1} (advance ${step.advance})`;
       if (!Number.isSafeInteger(step.advance) || step.advance < 0)
-        throw new Error(`advance ${step.advance} is not whole milliseconds`);
-      advance(step.advance);
+        return { done: i, failed: `${name}: not whole milliseconds`, refused: true };
+      const after = advance(step.advance);
+      if (after !== 'ready') return { done: i, failed: `${name}: ${after}` };
       continue;
     }
     const ids = game.entityIds();
     const name = `step ${i + 1} (${[step.intent.action_key, ...step.intent.target_ids].join(' ')})`;
     const missing = step.intent.target_ids.find((t) => isRef(t) && !(t in ids));
-    if (missing) return { done: i, failed: `${name}: no ${missing} in this cartridge` };
+    if (missing)
+      return { done: i, failed: `${name}: no ${missing} in this cartridge`, refused: true };
     const { view, token } = game.view();
     // A choice names its continuation, which this run issued afresh.
     const input =
@@ -72,7 +82,11 @@ export function replay(steps: Step[], game: Replayable, advance: (ms: number) =>
       view_freshness_token: token,
     });
     if (reply.kind !== 'saved' || reply.decision.kind !== 'accepted')
-      return { done: i, failed: `${name}: ${describe(reply)}` };
+      return {
+        done: i,
+        failed: `${name}: ${describe(reply)}`,
+        ...(reply.kind === 'saved' && reply.decision.kind === 'rejected' && { refused: true }),
+      };
   }
   return { done: steps.length };
 }

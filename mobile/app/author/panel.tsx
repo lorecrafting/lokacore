@@ -41,28 +41,34 @@ const keep = (step: Step) => {
 export const resetPlace = () => {
   place.hash = chapter.sha256;
   place.steps = [];
+  delete place.stopped;
   refused = undefined;
   savePlace();
 };
 export function restorePlace(game: Opened | undefined) {
   if (!game || place.hash === chapter.sha256) return;
+  if (place.stopped?.hash === chapter.sha256) {
+    // this save holds the path up to the stop: replaying would re-send those steps
+    ({ at: refused, note: placeNote } = place.stopped);
+    return;
+  }
   let outcome: ReturnType<typeof replay>;
-  let threw = false;
   try {
     outcome = replay(place.steps, game, (ms) => {
       g.loka_dev_skew = skew() + ms;
-      caughtUp(game);
+      return caughtUp(game);
     });
   } catch (e) {
     // a hand-edited checkpoint or stale place with a malformed step must not stop the boot
-    threw = true;
     outcome = { done: 0, failed: `malformed step (${(e as Error).message})` };
   }
   const { done, failed } = outcome;
   if (failed) {
-    if (!threw) refused = done;
+    refused = outcome.refused && done;
     placeNote = `Place: ${failed}; stopped after ${done} of ${place.steps.length} steps. Mend the edit, or Start over to record afresh.`;
     console.warn(placeNote);
+    place.stopped = { hash: chapter.sha256, at: refused, note: placeNote };
+    savePlace();
     return;
   }
   placeNote = `Place: replayed ${done} steps`;
@@ -116,7 +122,6 @@ function jumpTo(steps: Step[], { session, startOver }: Tools) {
   if (!game || game === before) return; // a refused start over keeps this game and its place
   place.hash = ''; // not this artifact's path yet: restorePlace replays it
   place.steps = steps;
-  savePlace(); // a refused replay returns unsaved: a reload must still hold this path, not the empty one
   restorePlace(game);
 }
 
@@ -161,7 +166,10 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
       if (e.data.op === 'trace') return void tell({ trace: game.trace() });
       if (e.data.op === 'advance') advance(e.data.minutes);
-      if (e.data.op === 'jump') return jumpTo(e.data.steps, latest.current); // the new game posts its state
+      if (e.data.op === 'jump') {
+        if (Array.isArray(e.data.steps)) return jumpTo(e.data.steps, latest.current); // the new game posts its state
+        placeNote = 'Place: that checkpoint has no steps list; nothing changed.'; // checked before the start over wipes the save
+      }
       if (e.data.op === 'drop' && refused !== undefined)
         return jumpTo(dropStep(place.steps, refused), latest.current);
       state();

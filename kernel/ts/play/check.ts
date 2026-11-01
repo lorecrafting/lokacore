@@ -28,7 +28,7 @@ function compiled(source: string): Bundled | string {
       ['exec', '--', 'mix', 'loka.compile', source, artifact, '--allow-placeholders'],
       { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }, // as play/author.ts
     );
-    if (run.status !== 0) return `${run.stderr || 'compile failed'}`.trim();
+    if (run.status !== 0) return `${run.stderr || run.error?.message || 'compile failed'}`.trim();
     const parts = /^\{"cartridge":(.*),"content_hash":"([0-9a-f]{64})"\}$/s.exec(
       readFileSync(artifact, 'utf8'),
     );
@@ -64,7 +64,7 @@ function replayed(bundled: Bundled, steps: Step[]): string | undefined {
     return replay(steps, game, (ms) => {
       clock.wall += ms;
       clock.mono += ms;
-      caughtUp(game);
+      return caughtUp(game);
     }).failed;
   } finally {
     sql.close();

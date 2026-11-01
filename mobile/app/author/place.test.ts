@@ -35,7 +35,7 @@ test('a target follows its ref into a cartridge where the entity has a new id', 
   assert.deepEqual(step.intent.target_ids, [NPC]);
   const { game, sent } = session({ [NPC]: 'b1' }, [accepted]);
   assert.deepEqual(
-    replay([step], game, () => {}),
+    replay([step], game, () => 'ready'),
     { done: 1 },
   );
   assert.equal(sent[0]!.target_ids[0], 'b1');
@@ -52,7 +52,7 @@ test('a refused step stops the replay, named by ordinal, and later steps are not
   ];
   const advanced: number[] = [];
   const { game, sent } = session({ [NPC]: 'b1' }, [accepted, refused]);
-  const out = replay(steps, game, (ms) => advanced.push(ms));
+  const out = replay(steps, game, (ms) => (advanced.push(ms), 'ready'));
   assert.equal(out.done, 2);
   assert.match(out.failed!, /^step 3 \(talk .*not_here/);
   assert.equal(sent.length, 2);
@@ -62,7 +62,7 @@ test('a refused step stops the replay, named by ordinal, and later steps are not
 test('a target the edited cartridge no longer defines stops the replay before any send', () => {
   // Break: sending the ref string as an entity id and letting the kernel fault on it.
   const { game, sent } = session({}, [accepted]);
-  const out = replay([{ intent: intent([NPC]) }], game, () => {});
+  const out = replay([{ intent: intent([NPC]) }], game, () => 'ready');
   assert.equal(out.done, 0);
   assert.match(out.failed!, /step 1 .*no sampler@0.0.1:npc\/maud/);
   assert.equal(sent.length, 0);
@@ -71,7 +71,7 @@ test('a target the edited cartridge no longer defines stops the replay before an
 test('a choice replays against the continuation this run issued', () => {
   // Break: sending the recorded continuation id, which the fresh run never opened.
   const { game, sent } = session({}, [accepted], 'c2');
-  replay([{ intent: intent([], { choice_id: 'go', continuation_id: 'c1' }) }], game, () => {});
+  replay([{ intent: intent([], { choice_id: 'go', continuation_id: 'c1' }) }], game, () => 'ready');
   assert.deepEqual(sent[0]!.input, { choice_id: 'go', continuation_id: 'c2' });
 });
 
@@ -79,10 +79,14 @@ test('a step gains a continuation only when it had one and a choice is open', ()
   // Break: `&&` to `||`: a plain step sent during a choice gains a continuation, and a recorded
   // continuation with no choice open reads view.choice of undefined and throws.
   const open = session({}, [accepted], 'c2');
-  replay([{ intent: intent([], { choice_id: 'go' }) }], open.game, () => {});
+  replay([{ intent: intent([], { choice_id: 'go' }) }], open.game, () => 'ready');
   assert.deepEqual(open.sent[0]!.input, { choice_id: 'go' });
   const closed = session({}, [refused]);
-  const out = replay([{ intent: intent([], { continuation_id: 'c1' }) }], closed.game, () => {});
+  const out = replay(
+    [{ intent: intent([], { continuation_id: 'c1' }) }],
+    closed.game,
+    () => 'ready',
+  );
   assert.match(out.failed!, /not_here/);
   assert.deepEqual(closed.sent[0]!.input, { continuation_id: 'c1' });
 });
@@ -150,21 +154,56 @@ test('dropping the refused step removes that step, counting the advances before 
     { intent: intent([NPC]) },
     { intent: intent([]) },
   ];
-  const { done } = replay(steps, session({ [NPC]: 'id' }, [accepted, refused]).game, () => {});
+  const { done } = replay(steps, session({ [NPC]: 'id' }, [accepted, refused]).game, () => 'ready');
   assert.equal(done, 2);
   assert.deepEqual(dropStep(steps, done), [steps[0], steps[1], steps[3]]);
 });
 
 // Break: a hand-edited advance reaches the clock, moving it backward or turning it into a string,
 // in the preview as in the check; or a zero advance, which is whole, is refused.
-test('an advance that is not whole non-negative milliseconds throws before the clock', () => {
+test('an advance that is not whole non-negative milliseconds stops before the clock, droppable', () => {
   const clock: number[] = [];
   const replayAdvance = (advance: unknown) =>
-    replay([{ advance } as Step], session({}, []).game, (ms) => clock.push(ms));
-  assert.throws(() => replayAdvance(-1), /^Error: advance -1 is not whole milliseconds$/);
-  assert.throws(() => replayAdvance('5'), /^Error: advance 5 is not whole milliseconds$/);
-  assert.throws(() => replayAdvance(1.5), /^Error: advance 1.5 is not whole milliseconds$/);
+    replay([{ advance } as Step], session({}, []).game, (ms) => (clock.push(ms), 'ready'));
+  const stopped = (shown: unknown) => ({
+    done: 0,
+    failed: `step 1 (advance ${shown}): not whole milliseconds`,
+    refused: true,
+  });
+  assert.deepEqual(replayAdvance(-1), stopped(-1));
+  assert.deepEqual(replayAdvance('5'), stopped('5'));
+  assert.deepEqual(replayAdvance(1.5), stopped(1.5));
   assert.deepEqual(clock, []);
   assert.deepEqual(replayAdvance(0), { done: 1 });
   assert.deepEqual(clock, [0]);
+});
+
+// Break: a timed rule that faults, or a drain that never ends, passes the gate as ok.
+test('an advance whose delivery does not end ready stops the replay at that step', () => {
+  const game = session({}, []).game;
+  const after = (kinds: { kind: string; code?: string }[]) => {
+    const pulses = [{ kind: 'ready' }, ...kinds];
+    return replay([{ advance: 5 }], game, () =>
+      caughtUp({ pulse: () => pulses.shift() ?? kinds.at(-1)! }),
+    );
+  };
+  assert.deepEqual(after([{ kind: 'ready' }]), { done: 1 });
+  assert.deepEqual(after([{ kind: 'fault', code: 'x' }]), {
+    done: 0,
+    failed: 'step 1 (advance 5): fault x',
+  });
+  assert.deepEqual(after([{ kind: 'catching_up' }]), {
+    done: 0,
+    failed: 'step 1 (advance 5): catching_up',
+  });
+});
+
+// Break: the panel offers to drop a valid step that only caught a pending reply or a fault.
+test('only a step the game refused is marked refused', () => {
+  const once = (reply: unknown, ids: Record<string, string> = { [NPC]: 'b1' }) =>
+    replay([{ intent: intent([NPC]) }], session(ids, [reply as Reply]).game, () => 'ready').refused;
+  assert.equal(once(refused), true);
+  assert.equal(once(refused, {}), true); // the edit removed the target
+  assert.equal(once({ kind: 'catching_up' }), undefined);
+  assert.equal(once({ kind: 'saved', decision: { kind: 'fault', code: 'x' } }), undefined);
 });
