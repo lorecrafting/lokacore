@@ -10,9 +10,9 @@ import type {
   Reply,
 } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
-import { emoteSentence, lineSentence } from '../../packages/game-view/line_words.ts';
+import { emoteSentence, fillSlots, lineSentence } from '../../packages/game-view/line_words.ts';
 import { things } from './item-pages.ts';
-import { fillSlots, levelWords } from './pick.ts';
+import { levelWords } from './pick.ts';
 import { AT } from './labels.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action

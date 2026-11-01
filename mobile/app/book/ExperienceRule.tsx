@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import {
+  curveOf,
   interpolateColor,
   Reanimated,
   ReduceMotion,
@@ -24,6 +25,7 @@ export type ExperienceRuleProps = {
   drawn: RuleDrawn;
 };
 
+const dryCurve = curveOf(motion.dry.easing);
 const CUT = 0; // the turn to `warning` has no width
 const reduceMotion = ReduceMotion.Never; // the hold is a colour, so each timing decides for itself
 const fraction = ({ experience, from, next }: NonNullable<GameView['levelling']>) =>
@@ -52,7 +54,7 @@ export function ExperienceRule(p: ExperienceRuleProps) {
     p.drawn.current = { level, at };
     if (!last || (last.level === level && last.at === at)) return;
     const duration = still ? 0 : motion.dry.duration;
-    const move = (to: number) => withTiming(to, { duration, reduceMotion });
+    const move = (to: number) => withTiming(to, { duration, easing: dryCurve, reduceMotion });
     if (level > last.level) {
       fill.value = withSequence(
         reduceMotion,

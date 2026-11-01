@@ -110,13 +110,3 @@ export function picks(v: GameView, buttons: Button[], id: string, text: (key: st
     };
   });
 }
-
-// An authored line fills its bound slots; an unbound brace stays as written (level-rush rulings).
-export const fillSlots = (
-  said: string,
-  bindings: Record<string, unknown> | undefined,
-  word: (v: unknown) => string,
-) =>
-  said.replace(/\{(\w+)\}/g, (slot, k: string) =>
-    bindings?.[k] === undefined ? slot : word(bindings[k]),
-  );
