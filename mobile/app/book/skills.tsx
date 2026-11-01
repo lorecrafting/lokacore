@@ -5,7 +5,7 @@ import { amountWords, liquidWords } from './pick.ts';
 import { castWords, commandOf } from './buttons.ts';
 import { Fragment } from 'react';
 import { Text } from './Text.tsx';
-import { SectionTitle } from './pages.tsx';
+import { home, type Home, Page, SectionTitle } from './pages.tsx';
 import { Note } from './lines.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { Thing } from './model.ts';
@@ -19,7 +19,7 @@ const learned = (s: NonNullable<GameView['skills']>[number], text: (key: string)
   s.qualified ? 'learned' : `learned, unqualified. ${text(s.requirement)}`;
 
 /**
- * The Character page's topics, attributes and skills.
+ * The Character page's topics and attributes.
  * - Use: CharacterPage only.
  * - Story: SectionPages.stories.tsx
  */
@@ -39,6 +39,29 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
           {a.worn ? ` (${a.worn > 0 ? '+' : ''}${a.worn} worn)` : ''}
         </Text>
       ))}
+    </>
+  );
+}
+
+// A profession box is drawn even unacquired (book-ui.md Skill tree details), so it counts as known.
+const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired || !!s.profession;
+
+/**
+ * Plain skills, professions, then Spells: each spell word castable here as an ActionCard
+ * `<word>, cast` (an accepted cast turns to World with its line), each refused here in its unavailable
+ * form (book-ui.md, Unavailable actions), and each aimed spell's Cast on… list (book-ui.md, Skill tree
+ * details; Word bar). One Note when there is none of them.
+ * - Use: Contents.
+ * - Rules: no status line; its only actions are the Spells block's casts.
+ * - Story: SectionPages.stories.tsx
+ */
+export function SkillsPage(p: Parameters<typeof spells>[0] & Home) {
+  const c = usePalette();
+  const t = useType();
+  const words = spells(p);
+  return (
+    <Page title={LABEL.skills} foot={home(p)}>
+      {!p.view?.skills?.some(knownSkill) && !words && <Note>{LABEL.nothingKnown}</Note>}
       {p.view?.skills
         ?.filter((s) => s.acquired && !s.profession)
         .map((s) => (
@@ -46,14 +69,16 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
             {p.text(s.label)} — {learned(s, p.text)}
           </Text>
         ))}
-    </>
+      <Professions view={p.view} text={p.text} />
+      {words}
+    </Page>
   );
 }
 
 /**
  * Each profession in first-listed order, acquired boxes as body text, unacquired as a Note
  * (book-ui.md, Skill tree details).
- * - Use: CharacterPage only.
+ * - Use: SkillsPage only.
  * - Story: SectionPages.stories.tsx
  */
 export function Professions(p: { view?: GameView; text: (key: string) => string }) {
@@ -193,7 +218,7 @@ export function spells(p: {
       ))}
       {p.view && p.press && aimed.length > 0 && (
         <PickLists
-          page="character"
+          page="skills"
           view={p.view}
           buttons={aimed}
           text={p.text}
@@ -225,7 +250,7 @@ export const npcSkills = (
         ),
     )
     .map((s) => {
-      const locked = s.locked && !s.acquired; // learned reads first, as on the Character page
+      const locked = s.locked && !s.acquired; // learned reads first, as on the Skills page
       return (
         <Text key={s.skill.key} style={note(c, t)}>
           {locked

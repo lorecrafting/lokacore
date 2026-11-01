@@ -88,7 +88,7 @@ test('spell words: refused ones list their reason under Spells; lux casts there 
   const b = book(spells as never);
   const spellsBlock = (refused: string) => {
     b.tap(CONTENTS);
-    b.tap('Character');
+    b.tap(LABEL.skills);
     b.refuse(`${refused}, cast`);
     const t = b.text();
     b.tap(LABEL.backToContents);
@@ -112,7 +112,7 @@ test('spell words: refused ones list their reason under Spells; lux casts there 
   b.tap('Gather ash');
   b.tap(LABEL.leave);
   b.tap(CONTENTS);
-  b.tap('Character');
+  b.tap(LABEL.skills);
   b.refuse('ward, cast'); // still refused: never the castable card
   b.tap('lux, cast');
   assert.ok(b.labels().includes('hearth, open'), 'back on World');

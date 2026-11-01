@@ -48,7 +48,7 @@ x6t.29 "1 doses" (waits on loka-6qi plurals), x6t.98 lock check Chrome-only (on 
 - Known: x6t.69 (spell chips in a fight), loka-6qi (pack plurals), x6t.26 (death outside combat lines).
 
 ## 8. Sections: Character, Journal, Carrying, Settings
-- pages-sections--journal, --carrying-empty, --carrying-held, --character-unknown, --character-full, --character-points-to-spend, --contents, --settings, --journal-lore, --journal-lore-away, --journal-lore-refused, --journal-chronicle, --journal-chronicle-days, --ancestry
+- pages-sections--journal, --carrying-empty, --carrying-held, --character-unknown, --character-full, --character-points-to-spend, --skills, --skills-empty, --contents, --settings, --journal-lore, --journal-lore-away, --journal-lore-refused, --journal-chronicle, --journal-chronicle-days, --ancestry
 - book-chip--available, --unavailable, --pending, --chosen, --reading-size-row
 - Look at: section headings, empty states, chip states in Settings.
 - Known: x6t.56 (lore shown twice on Character), x6t.57.

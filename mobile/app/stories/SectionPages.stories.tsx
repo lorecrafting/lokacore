@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn, userEvent, waitFor, type Mock } from 'storybook/test';
 import { ContentsPage } from '../book/Menu.tsx';
-import { Professions, RaiseCards, SkillDetails } from '../book/skills.tsx';
+import { Professions, RaiseCards, SkillDetails, SkillsPage } from '../book/skills.tsx';
 import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
 import { CreditsPage } from '../book/CreditsPage.tsx';
 import { JournalPage } from '../book/journal.tsx';
@@ -12,6 +12,7 @@ import CarryingEmptyView from './views/carrying-empty.json';
 import CarryingHeldView from './views/carrying-held.json';
 import CharacterUnknownView from './views/character-unknown.json';
 import CharacterFullView from './views/character-full.json';
+import SkillsFullView from './views/skills-full.json';
 import ContentsView from './views/contents.json';
 import SettingsView from './views/settings.json';
 
@@ -23,6 +24,7 @@ const meta: Meta = {
     CarryingPage,
     CharacterPage,
     SkillDetails,
+    SkillsPage,
     Professions,
     RaiseCards,
     ContentsPage,
@@ -57,9 +59,18 @@ export const CharacterPointsToSpend: StoryObj = {
   }),
   name: 'Character with points to spend',
 };
+export const Skills: StoryObj = { ...pageStory(SkillsFullView), name: 'Skills' };
+// A view with no skill and no spell word. Breaks: a blank page, or the Note beside real rows.
+export const SkillsEmpty: StoryObj = {
+  ...pageStory({
+    ...SkillsFullView,
+    view: { ...SkillsFullView.view, skills: [] },
+  }),
+  name: 'Skills, nothing known',
+};
 // An aimed spell (loka-x6t.109.5): the Spells block draws a Cast on… list of its targets, never a
 // Spells-section line. Breaks: the list is missing, or the spell shows as `lux, cast: …`.
-const sword = CharacterFullView.view.inventory[0]!;
+const sword = SkillsFullView.view.inventory[0]!;
 const lux = {
   action_key: 'lux',
   command: 'cast',
@@ -68,15 +79,15 @@ const lux = {
   target_ids: [sword.id],
   available: true,
 };
-export const CharacterAimedSpell: StoryObj = {
+export const SkillsAimedSpell: StoryObj = {
   ...pageStory({
-    ...CharacterFullView,
+    ...SkillsFullView,
     view: {
-      ...CharacterFullView.view,
+      ...SkillsFullView.view,
       inventory: [{ ...sword, actions: [...sword.actions, lux] }],
     },
   }),
-  name: 'Character with an aimed spell',
+  name: 'Skills with an aimed spell',
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Lux, cast on…' }));
     await expect(
@@ -87,18 +98,18 @@ export const CharacterAimedSpell: StoryObj = {
 };
 // Spell words cast from Spells (book-ui.md, Word bar; loka-evzt): a castable word is a card, a
 // refused one its unavailable line. Breaks: no card, or the refused word reads as castable.
-export const CharacterSpells: StoryObj = {
+export const SkillsSpells: StoryObj = {
   ...pageStory({
-    ...CharacterFullView,
+    ...SkillsFullView,
     view: {
-      ...CharacterFullView.view,
+      ...SkillsFullView.view,
       spell_words: [
         { word: 'lux', available: true },
         { word: 'ward', available: false, reason: { code: 'invalid_state' } },
       ],
     },
   }),
-  name: 'Character with spell words',
+  name: 'Skills with spell words',
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('button', { name: 'lux, cast' })).not.toHaveAttribute(
       'aria-disabled',
@@ -122,7 +133,7 @@ export const ContentsEntries: StoryObj<{ open: Mock; world: Mock }> = {
       await userEvent.click(document.elementFromPoint(left + 4, bottom - 2)!);
     }
     await expect(args.open.mock.calls).toEqual(
-      ['character', 'carrying', 'map', 'journal', 'settings'].map((k) => [k]),
+      ['character', 'skills', 'carrying', 'map', 'journal', 'settings'].map((k) => [k]),
     );
   },
 };

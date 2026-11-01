@@ -12,7 +12,7 @@ import { note, prose, usePalette, useType, type Palette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { EffectSettings, ReadingSize } from './Chip.tsx';
 import type { Effects, Reading } from './reading.ts';
-import { levelLine, Professions, RaiseCards, SkillDetails, spells, xpLine } from './skills.tsx';
+import { levelLine, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
 import { size, space } from './tokens.ts';
 import { ActionCard, ContinueButton } from './actions.tsx';
 import { EntityLine, Note } from './lines.tsx';
@@ -26,9 +26,6 @@ type Carrying = Home & {
   text: Say;
   open: (id: string) => void;
 };
-
-// A profession box is drawn even unacquired (book-ui.md Skill tree details), so it counts as known.
-const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired || !!s.profession;
 
 type Character = { view?: GameView; text: Say; pending?: boolean } & Home &
   Pick<GameView, 'resources' | 'position'> &
@@ -45,10 +42,7 @@ function LevelLine({ levelling }: { levelling: NonNullable<GameView['levelling']
 }
 
 /**
- * The Character section: attributes, skills, professions, the Raise cards, then Spells: each
- * spell word castable here as an ActionCard `<word>, cast` (an accepted cast turns to World with its
- * line), each refused here in its unavailable form (book-ui.md, Unavailable actions), and each aimed
- * spell's Cast on… list (book-ui.md, Skill tree details; Word bar); no Spells when none is.
+ * The Character section: attributes, resources, xp and the Raise cards.
  * - Use: Contents, and the status pools when only pennies show.
  * - Story: SectionPages.stories.tsx
  */
@@ -60,7 +54,7 @@ export function CharacterPage(p: Character) {
   const position = p.position ?? p.view?.position;
   const levelling = p.view?.levelling;
   const name = p.view?.actor_name;
-  const known = resources.length || p.view?.attributes?.length || p.view?.skills?.some(knownSkill);
+  const known = resources.length || p.view?.attributes?.length;
   return (
     <Page title={LABEL.character} foot={home(p)}>
       {!known && !name && <Note>{LABEL.nothingKnown}</Note>}
@@ -83,9 +77,7 @@ export function CharacterPage(p: Character) {
         </Text>
       ))}
       {levelling && <Text style={prose(c, t)}>{xpLine(levelling)}</Text>}
-      <Professions view={p.view} text={p.text} />
       <RaiseCards {...p} />
-      {spells(p)}
     </Page>
   );
 }

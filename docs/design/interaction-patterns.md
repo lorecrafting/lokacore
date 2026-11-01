@@ -109,18 +109,18 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### Sections (Contents)
 
-- Order: Contents lists exactly Character, Inventory, Map, Journal, Settings; each section ends
-  with "Back to World". Character: resources, levelling and Raise cards, skills and professions,
-  Spells (refused words with reasons). Journal: quests, then Lore. Settings: Reading size,
+- Order: Contents lists exactly Character, Skills, Inventory, Map, Journal, Settings; each section
+  ends with "Back to World". Character: resources, levelling and Raise cards. Skills: skills and
+  professions, Spells (refused words with reasons). Journal: quests, then Lore. Settings: Reading size,
   Sound, Music, Haptics, Flashes, Credits, Start over. Credits opens a child page of Settings listing
   each non-null `credit` in `mobile/app/book/sounds/manifest.json`; it is not a Contents section.
-- Never appears: a sixth section without an owner decision; game actions other than Raise and
+- Never appears: a further section without an owner decision; game actions other than Raise and
   aimed spells; a status line.
 - Source: [World and status entry](../system/book-ui.md#world-and-status-entry),
   [Levelling details](../system/book-ui.md#levelling-details), [Lore details](../system/book-ui.md#lore-details),
   [Skill tree details](../system/book-ui.md#skill-tree-details).
-- Enforcement: `mobile/app/catalogue.test.ts` (every component listed); none yet for the fixed
-  Contents list.
+- Enforcement: `mobile/app/catalogue.test.ts` (every component listed); `mobile/app/book/polish.test.ts`
+  (the fixed Contents list).
 
 ## 2. Where actions live
 
@@ -341,7 +341,7 @@ Conflicts (code or spec contradicts a pattern above):
 
 Gaps (no pattern or no check yet):
 
-- Fixed Contents list and "no Chip inside a page": needs filing (one render test each).
+- "No Chip inside a page": needs filing (one render test).
 - Label-in-name prefix rule: needs filing (one accessibility-name test).
 - Device Back on a pick list: loka-x6t.113. Whisper hidden until loka-x6t.115. Wider sale lists:
   loka-x6t.117. NPC conditions page: loka-x6t.70.
