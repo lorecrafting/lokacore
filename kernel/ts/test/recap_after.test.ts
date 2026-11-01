@@ -55,3 +55,15 @@ test('the away cap defaults to one calendar day, in hours when authored', () => 
   assert.equal(cap({}), 600);
   assert.equal(cap({ away_cap_hours: 3 }), 180);
 });
+
+// Breaks: the threshold is the exact cap at a rate that does not divide it, but the credit rounds
+// down (one day at rate 7 credits 86399), so the recap can never fire.
+test('recap_after is reachable at a rate that does not divide the cap', () => {
+  assert.equal(
+    view((c) => {
+      c.manifest.time_policy.rate = 7;
+      c.manifest.time_policy.recap_after_minutes = 10080;
+    }).recap_after,
+    86399,
+  );
+});

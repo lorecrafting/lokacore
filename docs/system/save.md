@@ -267,7 +267,15 @@ seconds converted to real milliseconds at `rate`, rounded down (`ClockDriver.cap
 no job comes due and no receipt or job row exists for it. The capture records it only by moving `wall_ms`
 to the sampled wall clock while `target` rises by the capped credit, in the same checkpoint write as any
 other capture. So a crash or failed COMMIT recomputes at most one capped credit from the durable row, and
-replay, which reads receipts and samples no clock, is unchanged. Retained target debt is not trimmed.
+replay, which reads receipts and samples no clock, is unchanged. The credit tops retained target debt up
+to the cap, so debt from gaps never exceeds it and repeated returns before a drain ends add nothing; it
+never trims debt.
+
+Opening a save with an authored `recap_after_minutes` and a checkpoint row does not pulse: the gap is
+captured and drained by the first pulse, after the Book has subscribed, so the away recap holds every line
+of the capped stretch. Without a recap threshold, opening drains one turn as before. The recap's span is
+the logical time caught up, at most the cap, and its threshold is clamped to the credit (`view/time.ts`),
+so any absence past the cap shows one recap of the capped stretch, whatever the real length.
 
 Active monotonic samples are never capped: a long open session is unaffected and a save grows with time
 actually played. Closed app or hidden tab: a capped wall gap on open or resume. A timer stalled for over

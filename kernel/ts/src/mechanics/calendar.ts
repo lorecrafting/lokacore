@@ -18,6 +18,10 @@ export function awayCap(cartridge: Cartridge) {
   return (cartridge.manifest.time_policy?.away_cap_hours ?? hours) * hour;
 }
 
+// The cap in whole real milliseconds, as the host credits it: rounded down at a rate that does not divide it.
+export const awayCapMs = (cartridge: Cartridge) =>
+  Math.floor((awayCap(cartridge) * 1000) / cartridge.manifest.time_policy!.rate);
+
 export function hourOf(cartridge: Cartridge, time: number): number {
   const { hour, hours } = units(cartridge);
   return Math.floor(time / hour) % hours;

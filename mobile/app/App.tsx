@@ -129,6 +129,7 @@ type Clock = {
   booked: boolean; // the Book has subscribed, so it sees the catch-up (away recap, book-ui.md)
   timer?: ReturnType<typeof setTimeout>;
   ticked?: number;
+  stalled?: boolean;
   cleanup: () => void;
 };
 const current = (c: Clock) => session?.game() === c.game && g.loka_clock_cleanup === c.cleanup;
@@ -145,9 +146,7 @@ function tick(c: Clock) {
   if (!current(c) || !c.active) return;
   const held = c.game.pendingInvocation(),
     draining = c.draining;
-  const now = performance.now();
-  const status = c.game.pulse(tickPulse(draining, now - (c.ticked ?? now)));
-  c.ticked = now;
+  const status = c.game.pulse(tickPulse(c, performance.now()));
   if (!current(c) || !c.active) return;
   if (status.kind !== 'ready' && status.kind !== 'catching_up') return cancel(c);
   c.draining = status.kind === 'catching_up';
@@ -165,6 +164,8 @@ function transition(c: Clock, active: boolean) {
   if (!current(c) || c.active === active) return;
   c.active = active;
   c.draining = false;
+  c.ticked = undefined; // this transition's own pulse settles the gap
+  c.stalled = false;
   cancel(c);
   if (active) resume(c);
   else c.game.pulse('pause');

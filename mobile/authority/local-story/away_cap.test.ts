@@ -146,3 +146,21 @@ test('a device clock moved backward while closed credits nothing and rebases', (
   assert.deepEqual(checkpoint(a.sql), { wall_ms: 10000, remainder: 0, target: START });
   a.sql.close();
 });
+
+// Breaks: each return adds another cap on top of retained debt, so repeated short visits grow the
+// catch-up without bound.
+test('a return with debt still retained tops it up to one cap, not past it', (t) => {
+  const path = save(t),
+    bundle = compiled('cartridges/toolbox_showcase');
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  a.game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'south' } });
+  const start = checkpoint(a.sql).target;
+  a.clock.wall += YEAR;
+  assert.equal(a.game.pulse('resume').kind, 'catching_up');
+  const drained = a.game.view().view.time;
+  assert.equal(drained, start + 57600); // one drain turn of the 86400 owed
+  a.clock.wall += YEAR;
+  a.game.pulse('resume');
+  assert.equal(checkpoint(a.sql).target, drained + 86400);
+  a.sql.close();
+});

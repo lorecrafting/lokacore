@@ -4679,7 +4679,7 @@
           "type": "integer"
         },
         "recap_after_minutes": {
-          "description": "Toolbox row W27, opt-in: an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block. At most one week (10080).",
+          "description": "Toolbox row W27, opt-in: an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block; the away cap bounds the threshold, so a capped absence can reach it. At most one week (10080).",
           "maximum": 10080,
           "minimum": 1,
           "type": "integer"
