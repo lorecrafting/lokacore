@@ -1,5 +1,5 @@
-// Forged branching saves through real SQLite: each is refused at reload, or loads, plays one action
-// and reopens with the literal state below (dialogue-save.ts).
+// Forged branching saves through real SQLite: each is refused at reload for a broken row or receipt,
+// or loads, plays one action and reopens with the literal state below (dialogue-save.ts).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
@@ -11,9 +11,7 @@ import {
   retakeQuest,
   retakePlay,
   withToken,
-  talkTo,
   quest,
-  line,
   survives,
   refused,
   put,
@@ -89,27 +87,6 @@ test('a one-way quest forged declined keeps playing', () => {
   );
 });
 
-// Breaks: the terminal row check reaching only one-way items, so a quest forged resolved as its
-// hand-over answer, with no such answer saved, loads in either shape.
-test('a quest forged resolved as its hand-over answer is refused', () => {
-  const asGive = (g: Play) => {
-    const [key, q] = quests(g);
-    put(g.sql, 'quests', key, { ...q, state: 'resolved', outcome: 'give' });
-  };
-  refused(oneWay(), (g) => (g.choose('take'), accept(g)), asGive);
-  refused(
-    retakeQuest(),
-    (g) => {
-      g.choose('take');
-      g.talk('a_back');
-      g.choose('give');
-      g.talk('b_offer');
-      g.choose('job');
-    },
-    asGive,
-  );
-});
-
 // Breaks: an answered quest set back to active loading on a two-way item (general load checks).
 test('a two-way item whose answered quest is set back to active is refused', () => {
   refused(retakeQuest(), retakePlay, (g) => {
@@ -119,18 +96,33 @@ test('a two-way item whose answered quest is set back to active is refused', () 
   });
 });
 
-// Breaks: a two-way item's holder chain not reaching a room or NPC. Each action on the item is then
-// rejected for good and the bad row is saved again, so the item is lost.
-test('a two-way item held by nothing, by itself, or with no row is refused', () => {
+// Breaks: a holder pointing at nothing, or no holder row, throwing at the next answer or reopen.
+test('a two-way item held by nothing or with no row keeps playing', () => {
   const c = () => withToken({ guard: take(), back: give() });
   const taken = (g: Play) => g.choose('take');
   const token = (g: Play) => g.fresh.entityIds[TOKEN]!;
-  refused(c(), taken, (g) => put(g.sql, 'containers', token(g), 'no-such-holder'));
-  refused(c(), taken, (g) => put(g.sql, 'containers', token(g), token(g)));
-  refused(c(), taken, (g) => {
-    const row = g.sql.prepare('DELETE FROM state_row WHERE section=? AND key=?');
-    assert.equal(row.run('containers', token(g)).changes, 1);
-  });
+  const plays = (edit: (g: Play) => void, kept: (g: Play) => void) =>
+    survives(c(), taken, edit, (g) => g.talk(), kept);
+  plays(
+    (g) => put(g.sql, 'containers', token(g), 'no-such-holder'),
+    (g) => assert.equal(holder(g), 'no-such-holder'),
+  );
+  plays(
+    (g) => {
+      const row = g.sql.prepare('DELETE FROM state_row WHERE section=? AND key=?');
+      assert.equal(row.run('containers', token(g)).changes, 1);
+    },
+    (g) => assert.equal(holder(g), undefined),
+  );
+});
+
+// Breaks: a holder cycle reaching the kernel's holder walks, which never return, so launch hangs.
+test('a two-way item held by itself is refused', () => {
+  refused(
+    withToken({ guard: take(), back: give() }),
+    (g) => g.choose('take'),
+    (g) => put(g.sql, 'containers', g.fresh.entityIds[TOKEN]!, g.fresh.entityIds[TOKEN]!),
+  );
 });
 
 // A second row and receipt for an answer already saved, so only the count can refuse it.
@@ -162,88 +154,24 @@ const answeredTwice = (g: Play, choice: string, swaps: [string, string][] = []) 
     .run(...(Object.values(values) as string[]));
 };
 
-// Breaks: a one-way item's answers not being counted, so one answer saved twice loads.
-test('a one-way answer saved twice is refused', () => {
-  const taken = (g: Play) => g.choose('take');
-  const delivered = (g: Play) => {
-    g.choose('take');
-    accept(g);
-    g.talk('z_q');
-    g.choose('give');
-  };
-  refused(oneWay(), taken, (g) => {
-    answeredTwice(g, 'take');
-    // Back on its giver, so the holder check would pass the two takes.
-    const rows = g.sql.prepare('SELECT value FROM state_row WHERE section=?').all('choices');
-    const giver = JSON.parse(String(rows[0].value)).roles.find(
-      (r: { role: string }) => r.role === 'guard',
-    );
-    put(g.sql, 'containers', g.fresh.entityIds[TOKEN]!, giver.entity_id);
-  });
-  refused(oneWay(), delivered, (g) => answeredTwice(g, 'give'));
-});
-
-// Breaks: two hand-over answers both counting for one item, each with its own resolved quest.
-test('a one-way item handed over by two quests is refused', () => {
-  const second = {
-    ...talkTo({
-      give_too: { ...line, hand_over: { item: 'token', to: 'clerk' }, steps: [flag(false)] },
-    }),
-    roles: {
-      guard: { role: 'npc', npc: 'guard' },
-      clerk: { role: 'npc', npc: 'clerk' },
-      token: { role: 'item', item: 'token' },
-    },
-    quest: 'job_too',
-    policy: { op: 'quest_state', quest: 'job_too', state: 'active' },
-  };
-  refused(
-    oneWay({ z_too: second }, { job_too: quest }),
-    (g) => {
-      g.choose('take');
-      accept(g);
-      g.talk('z_q');
-      g.choose('give');
-    },
-    (g) => {
-      const [key, q] = quests(g);
-      const QUEST = '55555555-5555-8666-8777-888888888888';
-      const row = { ...q, quest: { ...q.quest, key: 'job_too' }, outcome: 'give_too' };
-      g.sql
-        .prepare('INSERT INTO state_row(section, key, value) VALUES (?, ?, ?)')
-        .run('quests', QUEST, JSON.stringify(row));
-      answeredTwice(g, 'give', [
-        [key, QUEST],
-        ['"job"', '"job_too"'],
-        ['"z_q"', '"z_too"'],
-        ['"decline",', ''],
-        ['"give"', '"give_too"'],
-      ]);
-    },
+// Breaks: a duplicate answer row and receipt throwing at the next action or reopen.
+test('a one-way answer saved twice keeps playing', () => {
+  survives(
+    oneWay(),
+    (g) => g.choose('take'),
+    (g) => answeredTwice(g, 'take'),
+    (g) => g.go('drop', {}, [g.fresh.entityIds[TOKEN]!]),
+    (g) => assert.equal(holder(g), g.story.world().state.containers[g.fresh.body]),
   );
 });
 
-// Breaks: a one-way item off its giver with no take behind it loading: moved with no answers, or
-// delivered with the take's row removed.
-test('a one-way item moved with no take is refused', () => {
-  refused(
+// Breaks: a one-way item off its giver with no answer behind it throwing at the next action or reopen.
+test('a one-way item moved with no take keeps playing', () => {
+  survives(
     oneWay(),
     () => {},
     (g) => put(g.sql, 'containers', g.fresh.entityIds[TOKEN]!, g.fresh.body),
-  );
-  refused(
-    oneWay(),
-    (g) => {
-      g.choose('take');
-      accept(g);
-      g.talk('z_q');
-      g.choose('give');
-    },
-    (g) => {
-      const rows = g.sql.prepare('SELECT key, value FROM state_row WHERE section=?').all('choices');
-      const row = rows.find((r) => JSON.parse(String(r.value)).choice_id === 'take')!;
-      const gone = g.sql.prepare('DELETE FROM state_row WHERE section=? AND key=?');
-      assert.equal(gone.run('choices', row.key).changes, 1);
-    },
+    (g) => g.go('drop', {}, [g.fresh.entityIds[TOKEN]!]),
+    (g) => assert.equal(holder(g), g.story.world().state.containers[g.fresh.body]),
   );
 });

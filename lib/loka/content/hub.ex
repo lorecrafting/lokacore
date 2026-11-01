@@ -11,8 +11,8 @@ defmodule Loka.Content.Hub do
   import Loka.Content.Source, only: [diag: 2, at: 2]
 
   @doc """
-  The fact keys mobile/authority/local-story/topics-save.ts proves by exactly one receipt (by
-  key): topic facts, perception discoveries and bounded riddles' answer assignments.
+  The one-write fact keys (by key): topic facts, perception discoveries and bounded riddles'
+  answer assignments. Save recovery no longer proves them by receipt (loka-vduxr.10).
   """
   @spec proven(map()) :: MapSet.t()
   def proven(defs) do

@@ -39,7 +39,12 @@ export const talkTo = (choices: object) => ({
 
 // The guard's charisma decides the opposed check: 5 loses to the player's 6, 99 beats it.
 
-export function run(path: string, c: ReturnType<typeof compiled>, first = 0) {
+export function run(
+  path: string,
+  c: ReturnType<typeof compiled>,
+  first = 0,
+  clock = { wall: 10000, mono: 0 },
+) {
   const l = loadCartridge(
     new TextEncoder().encode(`{"cartridge":${c.canonical},"content_hash":"${c.sha256}"}`),
     INSTALLED,
@@ -50,7 +55,7 @@ export function run(path: string, c: ReturnType<typeof compiled>, first = 0) {
     '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
     [1, 2, 3, 4],
   );
-  const p = elapsedHost(path, undefined, c);
+  const p = elapsedHost(path, clock, c);
   const story = openStory(p.db, [{ fresh, content_hash: c.sha256 }], p.host);
   if (story.kind !== 'open') throw new Error(JSON.stringify(story));
   let n = first;
@@ -103,7 +108,11 @@ export const line = { label: LABEL, narration: SAID };
 export const flag = (value: boolean) => ({ op: 'fact.assign', fact: 'gate_open', value });
 
 // The sampler with a Give-restricted token on the guard and the given dialogues beside guard.json.
-export function withToken(dialogues: Record<string, object>, quests: Record<string, object> = {}) {
+export function withToken(
+  dialogues: Record<string, object>,
+  quests: Record<string, object> = {},
+  edit: (src: string) => void = () => {},
+) {
   const src = mkdtempSync(join(tmpdir(), 'loka-branching-src-'));
   cpSync(fileURLToPath(new URL('../../../../cartridges/persuade_sampler', import.meta.url)), src, {
     recursive: true,
@@ -131,6 +140,96 @@ export function withToken(dialogues: Record<string, object>, quests: Record<stri
   }
   for (const [name, q] of Object.entries(quests))
     writeFileSync(join(src, `quests/${name}.json`), JSON.stringify(q));
+  edit(src);
+  const c = compiled(src);
+  rmSync(src, { recursive: true });
+  return c;
+}
+
+const readJson = (path: string) => JSON.parse(readFileSync(path, 'utf8'));
+// Adds whole files (a path under the cartridge to its JSON) and merges facts and capabilities.
+export const adding =
+  (files: Record<string, object>, facts: object = {}, capabilities: object = {}) =>
+  (src: string) => {
+    for (const [name, body] of Object.entries(files)) {
+      mkdirSync(join(src, name, '..'), { recursive: true });
+      writeFileSync(join(src, name), JSON.stringify(body));
+    }
+    const f = readJson(join(src, 'facts.json'));
+    writeFileSync(
+      join(src, 'facts.json'),
+      JSON.stringify({ ...f, facts: { ...f.facts, ...facts } }),
+    );
+    const m = readJson(join(src, 'cartridge.json'));
+    Object.assign(m.requires.capabilities, capabilities);
+    writeFileSync(join(src, 'cartridge.json'), JSON.stringify(m));
+  };
+
+// The guard and token moved onto the shoo sampler's world, which has combat and food, under the
+// persuade sampler's id so the play helpers' refs still resolve.
+export function withWorld(
+  dialogues: Record<string, object>,
+  quests: Record<string, object> = {},
+  edit: (src: string) => void = () => {},
+) {
+  const src = mkdtempSync(join(tmpdir(), 'loka-branching-src-'));
+  cpSync(fileURLToPath(new URL('../../../../cartridges/shoo_sampler', import.meta.url)), src, {
+    recursive: true,
+  });
+  rmSync(join(src, 'transcripts'), { recursive: true });
+  const m = readJson(join(src, 'cartridge.json'));
+  m.id = 'persuade_sampler';
+  m.entry = 'green';
+  Object.assign(m.requires.capabilities, {
+    dialogue: 1,
+    food: 1,
+    ...(Object.keys(quests).length ? { quest: 1 } : {}),
+  });
+  writeFileSync(join(src, 'cartridge.json'), JSON.stringify(m));
+  const npc = (name: string) => ({
+    keywords: [name],
+    name: LABEL,
+    room_line: LABEL,
+    description: LABEL,
+    room: 'green',
+    hp: { minimum: 0, maximum: 1, start: 1, gain: 0 },
+    attack: { chance: 0, damage_min: 1, damage_max: 1 },
+  });
+  const text = readJson(join(src, 'text.json'));
+  writeFileSync(
+    join(src, 'text.json'),
+    JSON.stringify({ ...text, [LABEL]: 'x', [SAID]: 'x', 'dialogue.guard.prompt': 'x' }),
+  );
+  rmSync(join(src, 'populations/crow.json'));
+  rmSync(join(src, 'items/old_coin.json'));
+  const quest_files = Object.entries(quests).map(([k, q]) => [`quests/${k}.json`, q]);
+  const dialogue_files = Object.entries(dialogues).map(([k, d]) => [`dialogues/${k}.json`, d]);
+  adding(
+    {
+      'npcs/guard.json': npc('guard'),
+      'npcs/clerk.json': npc('clerk'),
+      'items/token.json': {
+        keywords: ['token'],
+        name: LABEL,
+        room_line: LABEL,
+        description: LABEL,
+        location: { in: 'npc', npc: 'guard' },
+        give_allowed: false,
+        mass_grams: 10,
+        edible: { resource: 'mv', amount: 2, label: LABEL, narration: SAID },
+      },
+      ...Object.fromEntries([...quest_files, ...dialogue_files]),
+    },
+    {
+      gate_open: {
+        version: 1,
+        value_type: { type: 'bool', default: false },
+        scopes: ['instance'],
+        meaning: 'x',
+      },
+    },
+  )(src);
+  edit(src);
   const c = compiled(src);
   rmSync(src, { recursive: true });
   return c;

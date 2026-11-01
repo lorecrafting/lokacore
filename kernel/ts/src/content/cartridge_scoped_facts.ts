@@ -23,9 +23,9 @@ const GROUP = ['member', 'stay', 'fight']
   .map((k) => `.cartridge.world.group.${k}`)
   .concat('.cartridge.world.theft.stolen', '.cartridge.world.mount.riding');
 // Choices whose facts save recovery reconciles by fact alone, with no subject: escort, receive
-// and hand_over (mobile dialogue-save), a riddle answer with a wrong_limit (topics-save) and a
-// dialogue of a legacy deadline quest (deadline-receipts); other choices' receipts are checked
-// at the speaker (dialogue-consequences).
+// and hand_over (mobile dialogue-save), a riddle answer with a wrong_limit and a dialogue of a
+// legacy deadline quest (deadline-receipts); other choices' receipts are checked at the speaker
+// (dialogue-consequences).
 const BOUND = ['escort', 'receive', 'hand_over'];
 // Definitions whose policies are read with no action target (reaction when, quest offer, objective
 // and journal, barrier opens_when, skill qualification, a room or exit lock): subject "target"

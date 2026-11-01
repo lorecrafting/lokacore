@@ -33,7 +33,7 @@ export function escortSave(world: World, db: Db, scope: string, rows: [string, C
   const entries = Object.entries(world.state.escorts ?? {});
   if (!entries.length) {
     if (selected.length) invalid();
-    return new Set<string>();
+    return;
   }
   if (entries.length !== 1) invalid();
   const [actor, escort] = entries[0];
@@ -57,7 +57,7 @@ export function escortSave(world: World, db: Db, scope: string, rows: [string, C
       invalid();
     committedDialogue(world, db, scope, s.id);
   }
-  return terminal(world, escort, selected);
+  terminal(world, escort, selected);
 }
 
 // A separated row needs its fatal transition; later walking back is not a rejoin.
@@ -128,7 +128,7 @@ function terminal(world: World, escort: EscortRelation, selected: Selection[]) {
       world.state.containers[speaker] !== world.state.containers[escort.npc_id]
     )
       invalid();
-    return new Set([refString(quest!.quest)]);
+    return;
   }
   if (
     completed.length ||
@@ -137,5 +137,4 @@ function terminal(world: World, escort: EscortRelation, selected: Selection[]) {
       world.state.containers[escort.body_id] !== world.state.containers[escort.npc_id])
   )
     invalid();
-  return new Set<string>();
 }

@@ -235,7 +235,7 @@ test('a resolved take or give with no receipt is refused at reload', () => {
     const row = receipts.find((r) => JSON.parse(String(r.command)).payload.choice_id === gone)!;
     g.sql.prepare('DELETE FROM receipt WHERE command_id = ?').run(row.command_id as string);
     g.sql.close();
-    assert.throws(() => coldReopen(path, c));
+    assert.throws(() => coldReopen(path, c), /save_corrupt/);
     rmSync(dir, { recursive: true, force: true });
   }
 });

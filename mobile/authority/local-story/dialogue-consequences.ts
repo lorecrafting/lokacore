@@ -52,6 +52,11 @@ export function assignmentEvidence(
     const assignment = assignmentOf(s, step);
     if (!assignment) return false;
     const matching = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, assignment.fact));
+    // Two steps writing one fact leave no single op to compare; the kernel folded them.
+    const writers = (option.steps ?? []).filter(
+      (other) => other.op !== 'narrate' && same(assignmentOf(s, other)?.fact, assignment.fact),
+    );
+    if (writers.length > 1) continue;
     const op = matching[0];
     // An entity or pair fact's subject is the speaker (row W2), from the definition, not the receipt.
     const { kind: _, ...target } = targetOf(s.world, row.actor_id, assignment.fact, speaker);
