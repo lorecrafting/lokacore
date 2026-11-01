@@ -199,25 +199,20 @@ test('a dialogue row that does not bind is refused', async (t) => {
     put(g.sql, 'choices', id, { ...value, ...change(value) });
   };
   const c = withToken({ guard: take(), back: give() });
+  // An open row: a resolved one is also caught by its receipt, hiding these clauses.
   const cases: [string, (r: any, g: Play) => object][] = [
     ['actor', (_, g) => ({ actor_id: g.fresh.entityIds[TOKEN] })],
     ['beat', () => ({ beat: 'back' })],
     ['bindings', (r) => ({ roles: r.roles.filter((b: any) => b.role !== 'token') })],
     ['attempts', () => ({ attempts: 1 })],
+    ['choice on an open row', () => ({ choice_id: 'take' })],
   ];
   for (const [name, change] of cases)
     await t.test(name, () =>
       refused(
         c,
-        (g) => g.choose('take'),
+        () => {},
         (g) => forge(g, (r) => change(r, g)),
       ),
     );
-  await t.test('open row with a choice', () =>
-    refused(
-      c,
-      () => {},
-      (g) => forge(g, () => ({ choice_id: 'take' })),
-    ),
-  );
 });
