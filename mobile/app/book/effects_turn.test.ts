@@ -33,6 +33,7 @@ const { PageTurn } = await import(new URL('./PageTurn.tsx', import.meta.url).hre
 const { Blow } = await import('./Blow.tsx');
 const { motion } = await import('./tokens.ts');
 const { cardContext, useCardInk, useCardTurn } = await import('./card.ts');
+const { curlContext } = await import('./press.ts');
 
 // The tree as PageTurn returns it, inner components left unrendered.
 const walk = (e: any): any[] =>
@@ -80,7 +81,7 @@ test('a page turn mounts a fresh page: the old wash does not carry over', async 
   const second = keyed(await go(1))[0].key;
   const fresh = blow(second);
   assert.equal(flat(fresh[2].props.style).opacity, 0);
-  assert.equal(flat(fresh[3].props.style).transform[0].scale, 1);
+  assert.equal(flat(fresh[4].props.style).transform[0].scale, 1);
 });
 
 // Breaks: a travel's riffle runs one sweep's length, cutting its five sweeps short (book-ui.md, Page life).
@@ -309,4 +310,36 @@ test('an unmounted card leaves no clock or listener', async (t) => {
   tick(motion.card.auto);
   assert.equal(turned.count, 0);
   assert.equal(device.change, undefined);
+});
+
+// Breaks: an arriving page's ink runs from mount under the curl (book-ui.md), or waits with no curl over it.
+test('an arriving page waits for its curl: a riffle longer, a card or reduced motion not at all', (t) => {
+  const waited = (riffle: boolean, card: boolean, reduced: boolean) => {
+    effects(t, reduced);
+    g.snap = () => new Promise(() => {});
+    const shell = rig(t);
+    const draw = (turn: number) =>
+      shell(() =>
+        walk(
+          PageTurn({
+            turn,
+            dir: 1,
+            riffle,
+            paper: '#fff',
+            card,
+            children: { type: 'Page', key: null, props: {} },
+          }),
+        ),
+      );
+    draw(0);
+    draw(1);
+    const tree = draw(1);
+    shell.unmount();
+    return tree.find((n) => n.type === curlContext.Provider).props.value;
+  };
+  const q = motion.quick.duration;
+  assert.equal(waited(false, false, false), q + motion.turn.duration);
+  assert.equal(waited(true, false, false), q + motion.riffle.sweeps * motion.riffle.duration);
+  assert.equal(waited(false, true, false), 0);
+  assert.equal(waited(false, false, true), 0);
 });

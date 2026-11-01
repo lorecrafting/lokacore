@@ -1,6 +1,6 @@
 // The press and ink-drying effects' one pair of hooks (book-ui.md, Effects, sound and haptics): on the
 // UI thread through shared values, no per-frame JS. Tokens only.
-import { useEffect } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import {
   curveOf,
   interpolateColor,
@@ -84,6 +84,9 @@ export function useDrying(lag = 0, duration: number = motion.dry.duration) {
   return dry;
 }
 
+/** How long a page arriving now waits for the curl over it to end: ink that dries unseen is lost. */
+export const curlContext = createContext(0);
+
 /**
  * From nothing to whole on mount when `fresh`, after `lag` (an answer lifting, a map line drawing on);
  * otherwise, and under reduced motion, whole from the start.
@@ -91,6 +94,7 @@ export function useDrying(lag = 0, duration: number = motion.dry.duration) {
 export function useDrawn(fresh: boolean, timing: { duration: number; easing: string }, lag = 0) {
   const still = useReducedMotion();
   const drawn = useSharedValue(fresh && !still ? 0 : 1);
+  const wait = useContext(curlContext) + lag;
   useEffect(() => {
     if (!fresh || still) return;
     const to = withTiming(1, {
@@ -98,7 +102,7 @@ export function useDrawn(fresh: boolean, timing: { duration: number; easing: str
       easing: curveOf(timing.easing as never),
       reduceMotion,
     });
-    drawn.value = lag ? withDelay(lag, to, reduceMotion) : to;
+    drawn.value = wait ? withDelay(wait, to, reduceMotion) : to;
   }, []); // eslint-disable-line
   return drawn;
 }

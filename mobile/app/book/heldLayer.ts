@@ -14,6 +14,6 @@ export const lowHealth = (view: GameView) =>
 // Any row of the view carrying a lit flame, held or in the room, on a paper dark enough to show it.
 export const lampLit = (view: GameView, paper: string) =>
   (paper === color.dusk.bg || paper === color.dark.bg) &&
-  [...view.inventory, ...(view.equipment ?? []), ...view.entities].some(
-    (row) => 'fuel' in row && row.fuel?.lit,
+  [...view.inventory, ...(view.equipment ?? []).map((s) => s.item), ...view.entities].some(
+    (row) => row && 'fuel' in row && row.fuel?.lit,
   );

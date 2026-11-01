@@ -39,8 +39,12 @@ const flame = (lit: boolean) => ({ id: 'lamp', fuel: { remaining: 5, capacity: 9
 // Breaks: a lamp on the floor, or an unlit one, or daylight deciding the glow wrongly.
 test('a lit flame anywhere in the view shows on dusk and dark only', () => {
   const on = color.dusk.bg;
-  for (const row of ['inventory', 'equipment', 'entities'])
+  for (const row of ['inventory', 'entities'])
     assert.ok(lampLit(view({ [row]: [flame(true)] }), on), row);
+  const worn = (lit: boolean) =>
+    view({ equipment: [{ slot: 'hand' }, { slot: 'light', item: flame(lit) }] });
+  assert.ok(lampLit(worn(true), on), 'worn in the light slot');
+  assert.ok(!lampLit(worn(false), on));
   assert.ok(lampLit(view({ inventory: [flame(true)] }), color.dark.bg));
   assert.ok(!lampLit(view({ inventory: [flame(false)] }), on));
   assert.ok(!lampLit(view({ inventory: [flame(true)] }), color.light.bg));

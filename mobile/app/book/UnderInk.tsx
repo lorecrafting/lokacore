@@ -1,6 +1,6 @@
 // The page's held under-ink layers (book-ui.md, Room page anatomy): the lamp glow and the low-health
 // vignette, one at a time with the fatal hold above them (heldLayer.ts).
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { createContext, lazy, Suspense, useContext, useEffect, useRef, useState } from 'react';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { onCue } from './cues.ts';
 import {
@@ -28,9 +28,13 @@ const breathe = { duration: motion.breathe.duration, easing: curveOf(motion.brea
 // A page turn remounts the page: a layer already showing stays at its value and never fades in again.
 let shown: HeldLayer;
 
+/** The foot's height below the page: a layer reaches on under the transparent foot to the Book's edge. */
+export const footContext = createContext(0);
+
 function Layer(p: { style: object; children: React.ReactNode }) {
+  const foot = useContext(footContext);
   return (
-    <Reanimated.View style={[fill, p.style]} pointerEvents="none" aria-hidden>
+    <Reanimated.View style={[fill, { bottom: -foot }, p.style]} pointerEvents="none" aria-hidden>
       <Suspense>{p.children}</Suspense>
     </Reanimated.View>
   );

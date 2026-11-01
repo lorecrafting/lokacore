@@ -35,6 +35,7 @@ const layer = (backgroundColor: string, style: object) => (
  * - States: at rest; washing; held after a death; reduced motion (half the wash, no swell).
  * - Story: CombatPage.stories.tsx
  */
+// size: allow 45, the two washes share one cue listener
 export function Blow({ children, under }: { children: ReactNode; under?: ReactNode }) {
   const c = usePalette();
   const still = useReducedMotion();
@@ -67,11 +68,14 @@ export function Blow({ children, under }: { children: ReactNode; under?: ReactNo
     transform: [{ scale: still ? 1 : 1 + ((swell - 1) * wash.value) / opacity.wash }],
   }));
   return (
-    <View style={[grow, { backgroundColor: c.bg, overflow: 'hidden' }]}>
+    <View style={[grow, { backgroundColor: c.bg }]}>
       {layer(washInk(c), faint)}
       {under}
       {layer(washInk(c), paper)}
-      <Reanimated.View style={[grow, page]}>{children}</Reanimated.View>
+      {/* The swell is clipped, not `under`, which reaches on below the page under the foot. */}
+      <View style={[grow, { overflow: 'hidden' }]}>
+        <Reanimated.View style={[grow, page]}>{children}</Reanimated.View>
+      </View>
     </View>
   );
 }

@@ -147,7 +147,9 @@ function statusCues(now: GameView, was: GameView) {
 
 /** What changed from `was` to `now`, the story's first. No `was` (a first view, a catch-up) is silent. */
 // A move by travel, on a plain page: its turn riffles (book-ui.md, Page life). A chapter card takes the page.
-export const riffles = (command: string | undefined, was: GameView, now: GameView) =>
+// A press that killed (a due job can) arrives by death, not by travel.
+export const riffles = (command: string | undefined, was: GameView, now: GameView, died = false) =>
+  !died &&
   command === 'expedition' &&
   was.place.id !== now.place.id &&
   !now.combat &&

@@ -1,4 +1,4 @@
-// size: allow 330, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
+// size: allow 340, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Book draws GameView through its presenter; App injects the shell.
 import { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, View } from 'react-native';
@@ -37,6 +37,7 @@ import { color, size, space } from './tokens.ts';
 import { Fault, Heard } from './lines.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { Body } from './Body.tsx';
+import { footContext } from './UnderInk.tsx';
 import { NightSky } from './NightSky.tsx';
 import { LABEL } from './labels.ts';
 import { HapticPulse } from './HapticPulse.tsx';
@@ -67,12 +68,13 @@ export type BookProps = {
   startOver: () => string | undefined; // a start over that failed and kept the game: why
 };
 
-function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?: string) {
+export function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?: string) {
   const restoring =
     s.restoreInvocation.current === p.game.pendingInvocation()
       ? s.restoreInvocation.current
       : undefined;
   const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
+  const fell = pr.screen().died;
   pr.press(b, detail);
   if (stale && !pr.recovered()) return s.redraw((n) => n + 1);
   const after = pr.screen(),
@@ -102,7 +104,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
     s.redraw((n) => n + 1);
   else {
     s.setStack(next);
-    const riffle = riffles(b.command, before.view, after.view);
+    const riffle = riffles(b.command, before.view, after.view, fell !== after.died);
     s.setFlip((f) => ({ turn: f.turn + 1, dir: 1, riffle }));
   }
 }
@@ -189,7 +191,9 @@ export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][nu
  * - States: fault; pending; catching up.
  * - Story: RecoveryPages.stories.tsx
  */
+// size: allow 46, the one tree of page, measured foot and sky
 export function BookView(p: ViewProps) {
+  const [foot, setFoot] = useState(0);
   useCueSounds(p);
   const shown = useType();
   const g = group(p.screen.buttons);
@@ -207,19 +211,23 @@ export function BookView(p: ViewProps) {
       <TypeContext value={p.reading?.type ?? shown}>
         <SafeAreaView style={{ ...frame, backgroundColor: p.palette.bg }}>
           <View style={{ flex: 1, maxWidth: size.column }}>
-            <PageTurn {...p.flip} paper={p.palette.bg} card={chapterCard(p.screen, page)}>
-              {p.screen.view.combat || p.screen.ended ? (
-                <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
-              ) : (
-                <Body
-                  {...ctx}
-                  page={page}
-                  talkOn={p.talkOn ?? (() => {})}
-                  chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
-                />
-              )}
-            </PageTurn>
-            <Bottom {...ctx} page={page} />
+            <footContext.Provider value={foot}>
+              <PageTurn {...p.flip} paper={p.palette.bg} card={chapterCard(p.screen, page)}>
+                {p.screen.view.combat || p.screen.ended ? (
+                  <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
+                ) : (
+                  <Body
+                    {...ctx}
+                    page={page}
+                    talkOn={p.talkOn ?? (() => {})}
+                    chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
+                  />
+                )}
+              </PageTurn>
+            </footContext.Provider>
+            <View onLayout={(e) => setFoot(e.nativeEvent.layout.height)}>
+              <Bottom {...ctx} page={page} />
+            </View>
             <Heard said={p.screen.said} />
             <HapticPulse />
           </View>

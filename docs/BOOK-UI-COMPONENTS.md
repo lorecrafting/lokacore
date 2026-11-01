@@ -161,15 +161,16 @@ a new component needs a real consumer, its comment and its line here in the same
 
 | Component | File | Story |
 |---|---|---|
-| `Blow` | `book/Blow.tsx` | CombatPage |
+| `Blow` | `book/Blow.tsx` | undefined |
 | `Body` | `book/Body.tsx` | RoomPage |
 | `RoomPage` | `book/Body.tsx` | RoomPage |
 | `Book` | `book/Book.tsx` | Live |
-| `BookView` | `book/Book.tsx` | RecoveryPages |
+| `BookView` | `book/Book.tsx` | undefined |
 | `Chip` | `book/Chip.tsx` | Chip |
 | `Row` | `book/Chip.tsx` | Chip |
 | `ReadingSize` | `book/Chip.tsx` | Chip |
 | `EffectSettings` | `book/Chip.tsx` | Chip |
+| `Choice` | `book/Choice.tsx` | undefined |
 | `Foe` | `book/Combat.tsx` | CombatPage |
 | `Combat` | `book/Combat.tsx` | CombatPage |
 | `CreditsPage` | `book/CreditsPage.tsx` | SectionPages |
@@ -190,7 +191,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `NightSky` | `book/NightSky.tsx` | NightSky |
 | `NpcPage` | `book/Npc.tsx` | NpcPage |
 | `NpcDetail` | `book/Npc.tsx` | NpcPage |
-| `PageTurn` | `book/PageTurn.tsx` | PageTurn |
+| `PageTurn` | `book/PageTurn.tsx` | undefined |
 | `RightWord` | `book/Riddle.tsx` | Riddle |
 | `Riddle` | `book/Riddle.tsx` | Riddle |
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |

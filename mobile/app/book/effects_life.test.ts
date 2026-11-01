@@ -5,7 +5,7 @@ import { effects, flat, rig } from './__tests__/hook-rig.ts';
 import { nodes } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
-const { playCue, playRiffle } = await import('./cueSounds.ts');
+const { playCue, playRiddleRight, playRiffle } = await import('./cueSounds.ts');
 const { cuesOf, riffles } = await import('./cueDiff.ts');
 const { curlFor, QUIET, step, useCues } = await import('./cues.ts');
 const { DiscoveredMap } = await import('./DiscoveredMap.tsx');
@@ -124,6 +124,7 @@ test('only a travel that moves, on a plain page, riffles', () => {
   assert.equal(riffles('expedition', was, there), true);
   assert.equal(riffles('move', was, there), false);
   assert.equal(riffles('expedition', was, was), false);
+  assert.equal(riffles('expedition', was, there, true), false, 'a death arrival');
   assert.equal(riffles('expedition', was, view({ place: { id: 'q' }, combat: { on: 1 } })), false);
   assert.equal(riffles('expedition', was, view({ place: { id: 'q' }, scene: { id: 's' } })), false);
   const card = view({ place: { id: 'q' }, chapter: { index: 2 } });
@@ -150,8 +151,12 @@ test('a riffle sounds once at once and its light haptic lands after the curl', (
   const length = motion.quick.duration + motion.riffle.sweeps * motion.riffle.duration;
   t.mock.timers.tick(length - 1);
   assert.deepEqual(felt(), ['light']);
+  // The gate holds the whole riffle, past the shorter curl it found.
+  now += 200;
+  playRiddleRight();
+  assert.deepEqual(felt(), ['light']);
   // The clock a hair behind the timer, as real timers run: the curl gate would drop it.
-  now += length - 1;
+  now += length - 201;
   t.mock.timers.tick(1);
   assert.deepEqual(felt(), ['light', 'light']);
 });
