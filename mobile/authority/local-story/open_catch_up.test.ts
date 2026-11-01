@@ -64,6 +64,24 @@ const FORGED: [string, (sql: DatabaseSync, receipt: Record<string, never>) => vo
         .run(),
   ],
   [
+    'a pending job has a fractional due time (the delivery is invalid)',
+    (sql) =>
+      void sql
+        .prepare(
+          `UPDATE state_row SET value = json_set(value, '$.due_time', 65000.5, '$.job.kind', 'order') WHERE section = 'jobs'`,
+        )
+        .run(),
+  ],
+  [
+    'a pending NPC job is due past safe integers',
+    (sql) =>
+      void sql
+        .prepare(
+          `UPDATE state_row SET value = json_set(value, '$.due_time', 1e300) WHERE section = 'jobs'`,
+        )
+        .run(),
+  ],
+  [
     'a pending NPC job is due at an hour its schedule does not have',
     (sql) =>
       void sql
@@ -235,4 +253,21 @@ test('a wage row the kernel advanced loads', () => {
   const again = launch(path, undefined, { wall: 90000, mono: 0 }, b);
   assert.equal(again.session.game()!.view().view.time, 64800 + 4000);
   again.sql.close();
+});
+
+// Breaks: load refusing or throwing on a number it can't encode when the row's handler can still run.
+test('a due time past safe integers on a runnable kind never comes due: the save opens and plays', () => {
+  const { path } = saved();
+  const raw = new DatabaseSync(path);
+  raw.exec(
+    `UPDATE state_row SET value = json_set(value, '$.due_time', 1e300, '$.job.kind', 'order') WHERE section = 'jobs'`,
+  );
+  raw.close();
+  const a = launch(path);
+  assert.equal(a.session.game()!.view().view.time, 65300);
+  assert.equal(
+    a.session.game()!.invoke({ action_key: 'look' as never, target_ids: [], input: {} }).kind,
+    'saved',
+  );
+  a.sql.close();
 });

@@ -15,9 +15,18 @@ function runnable(world: World, row: Job) {
   return true;
 }
 
+/** `same` encodes; a number canonical JSON refuses is not the fresh row, so it is a changed one. */
+function changed(row: Job, fresh: Job | undefined) {
+  try {
+    return !same(row, fresh);
+  } catch {
+    return true;
+  }
+}
+
 /** A job no handler can run is a damaged save (schedule/rule.ts decideAt's dispatch). */
 export function jobSave(fresh: World, world: World) {
   for (const [id, row] of Object.entries(world.state.jobs ?? {}))
-    if (!same(row, fresh.state.jobs?.[id]) && !runnable(world, row))
+    if (changed(row, fresh.state.jobs?.[id]) && !runnable(world, row))
       throw new SyntaxError('malformed JSON: unrunnable job');
 }
