@@ -196,6 +196,17 @@ when you run `mix loka.compile` by hand.
 | `topics` | [`spells_sampler`](../../cartridges/spells_sampler/) | nothing (it writes its own fact) |
 | `transports` | [`fast_travel_sampler`](../../cartridges/fast_travel_sampler/) | a room, an NPC and a resource; also writes the far room and both legs |
 
+## Keep a fight from starting
+
+An NPC without an `attack` can never be attacked, so a story NPC needs nothing and may have no `hp`.
+To keep the profile but protect the NPC, add `"unattackable": true` to `npcs/<name>.json`: the
+player sees no Attack, and it never starts a fight. Companions (`world.combat.allies`, or in the
+player's group) get the same without the flag, but a spell still hurts them unless they carry it. For a whole room, add `"sanctuary": true` to the
+room: nothing engages on entry and Attack is refused, though an attackable NPC there still shows
+Attack greyed out. A player's spell neither damages an `unattackable` NPC nor puts an hp-draining status on it. A
+status you apply through a reaction still lands and ticks, as authored story: the flag stops the
+player, not the writer.
+
 ## Cookbook
 
 Each goal names the samplers that already do it; copy their files or start with `bin/loka new`.
