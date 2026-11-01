@@ -17,7 +17,7 @@ export type State = {
   shown: ReturnType<typeof shown>;
 };
 export type Line = { key?: string; words: string };
-type Told = { loka: 'author'; ready?: true; state?: State; trace?: string[]; line?: Line };
+type Told = { loka: 'author'; ready?: true; state?: State; trace?: string[]; id?: number; line?: Line };
 type Asked =
   | { op: 'hello' }
   | { op: 'advance'; minutes: number }
@@ -25,12 +25,13 @@ type Asked =
   | { op: 'drop' }
   | { op: 'go_to_room'; room: string }
   | { op: 'set_fact'; fact: string; value: boolean | number | string }
-  | { op: 'trace' };
+  | { op: 'trace'; id: number };
 
 export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
   const [state, setState] = useState<State>();
   const [line, setLine] = useState<Line>();
-  const waiting = useRef<((rows: string[]) => void)[]>([]);
+  const waiting = useRef(new Map<number, (rows: string[]) => void>());
+  const asked = useRef(0);
   const send = useCallback(
     (asked: Asked) => frame.current?.contentWindow?.postMessage(asked, BOOK),
     [frame],
@@ -40,7 +41,7 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
       if (e.origin !== BOOK || e.data?.loka !== 'author') return;
       if (e.data.ready) send({ op: 'hello' });
       if (e.data.state) setState(e.data.state);
-      if (e.data.trace) waiting.current.shift()?.(e.data.trace);
+      if (e.data.trace && e.data.id !== undefined) waiting.current.get(e.data.id)?.(e.data.trace); // a reply after its timeout has no waiter
       if (e.data.line) setLine(e.data.line);
     };
     window.addEventListener('message', onMessage);
@@ -49,16 +50,17 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
   // A Book that stops answering must not hang Why: give up after a few seconds, in plain words.
   const trace = () =>
     new Promise<string[]>((resolve, reject) => {
-      const give = (rows: string[]) => {
-        clearTimeout(timer);
-        resolve(rows);
-      };
+      const id = ++asked.current;
       const timer = setTimeout(() => {
-        waiting.current = waiting.current.filter((w) => w !== give);
+        waiting.current.delete(id);
         reject(new Error('The Book did not answer. Reload the Book, then ask again.'));
       }, 5000);
-      waiting.current.push(give);
-      send({ op: 'trace' });
+      waiting.current.set(id, (rows) => {
+        clearTimeout(timer);
+        waiting.current.delete(id);
+        resolve(rows);
+      });
+      send({ op: 'trace', id });
     });
   return { state, line, send, trace };
 }

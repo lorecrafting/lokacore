@@ -10,6 +10,7 @@ rm -f "mobile/app/${LOKA_DEV_CARTRIDGE:-.dev-cartridge/current.json}" # a stale 
 mise exec -- bin/loka dev "$1" --watch &
 watcher=$!
 # Metro refuses to start before the first good compile has written the artifact: wait for it, and stop if the watcher dies.
+echo "Waiting for the first good compile: the preview and the panel start once it compiles; the watcher's errors print here."
 until [ -f "mobile/app/${LOKA_DEV_CARTRIDGE:-.dev-cartridge/current.json}" ]; do
   kill -0 "$watcher" 2>/dev/null || { echo "The watcher stopped before the first good compile: fix what it printed above." >&2; exit 1; }
   sleep 1

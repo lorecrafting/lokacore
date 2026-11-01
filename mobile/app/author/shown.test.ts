@@ -90,4 +90,7 @@ test('the clock reads in words', () => {
     }),
     'day 3, hour 14, autumn, rain',
   );
+  // Break: a calendar without day or hour printing "undefined".
+  const partial = { subdivision: 0, season: 'autumn' } as GameView['calendar_status'];
+  assert.equal(clockWords({ time: 3725, calendar: partial }), '1h 02m');
 });
