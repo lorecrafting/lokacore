@@ -46,6 +46,7 @@ export type Page =
         | 'carrying'
         | 'map'
         | 'settings'
+        | 'credits'
         | 'chapter'
         | 'combat';
     }
@@ -58,7 +59,7 @@ export const npcPage = (page: Page | undefined, view: GameView) =>
 
 // A detail page (owner pick mvlrlvappy4w), Contents and its sections (loka-8lpm) draw no status line.
 const DETAIL =
-  'thing board notice dialogue shelf sale inside contents character carrying map journal settings';
+  'thing board notice dialogue shelf sale inside contents character carrying map journal settings credits';
 export const detailPage = (page: Page | undefined) => DETAIL.split(' ').includes(page?.kind ?? '');
 
 export { nextPosition, POSITION_ACTIONS } from './positions.ts';

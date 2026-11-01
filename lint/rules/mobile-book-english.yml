@@ -14,6 +14,7 @@ ignores:
   - mobile/app/book/DreamPage.tsx
   - mobile/app/book/Footer.tsx
   - mobile/app/book/lines.tsx
+  - mobile/app/book/people.tsx
   - mobile/app/book/notices.tsx
   - mobile/app/book/Npc.tsx
   - mobile/app/book/Riddle.tsx

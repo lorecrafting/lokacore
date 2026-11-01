@@ -1,5 +1,6 @@
+// size: allow 317, the talk page with its answers' lift, keeping the page's parts together
 // The NPC page: conversation, choices, skills, shop and services, Look, with the existing book controls.
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -10,9 +11,11 @@ import { ActionCard, Cards, PickLists } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
-import { Riddle } from './Riddle.tsx';
+import { Reanimated, useAnimatedStyle } from './fade.ts';
+import { useDrawn, useFading } from './press.ts';
+import { Riddle, RightWord } from './Riddle.tsx';
 import { npcSkills } from './skills.tsx';
-import { space } from './tokens.ts';
+import { space, motion, size } from './tokens.ts';
 import { picks } from './pick.ts';
 import { purse } from './Shelf.tsx';
 import { LABEL } from './labels.ts';
@@ -24,15 +27,45 @@ type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
 // The pending choice (06 §43): the prompt, each answer (an unavailable one with its reason, not
 // pressable), inside the full NPC/conversation detail page.
+// The continuation last lifted: a redraw or a return to the page never lifts its answers again.
+let lifted: string | undefined;
+
+function Answer(p: { at: number; fresh: boolean; left: boolean; children: ReactNode }) {
+  const lag = Math.min(p.at, motion.stagger.most - 1) * motion.stagger.gap;
+  const drawn = useDrawn(p.fresh, motion.press, lag);
+  const fading = useFading(p.left);
+  const lift = useAnimatedStyle(() => ({
+    opacity: drawn.value,
+    transform: [{ translateY: (1 - drawn.value) * size.rule }],
+  }));
+  return (
+    <Reanimated.View style={lift} pointerEvents={p.left ? 'none' : 'auto'}>
+      <Reanimated.View style={fading}>{p.children}</Reanimated.View>
+    </Reanimated.View>
+  );
+}
+
+// size: allow 60, the answers' lift and fade share the choice's state
 function Choice(p: {
   view: GameView;
   choice: NonNullable<GameView['choice']>;
   text: Say;
   g: Grouped;
   press: (b: Button) => void;
+  pending?: boolean;
 }) {
   const c = usePalette();
   const t = useType();
+  const [fresh] = useState(() => {
+    const isNew = lifted !== p.choice.continuation_id;
+    lifted = p.choice.continuation_id;
+    return isNew;
+  });
+  const [chosen, setChosen] = useState<string>();
+  useEffect(() => {
+    if (!p.pending) setChosen(undefined);
+  }, [p.pending]);
+  const left = (id: string) => !!p.pending && !!chosen && chosen !== id; // a refusal brings them back
   const answer = (id: string) =>
     p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
   return (
@@ -44,21 +77,31 @@ function Choice(p: {
         </Text>
       )}
       {absent(p.view) !== '' && <Text style={note(c, t)}>{absent(p.view)}</Text>}
-      {p.choice.choices.map((o) => {
+      {p.choice.choices.map((o, at) => {
         const b = answer(o.choice_id);
         if (b && b === exit(p.g)) return null; // the foot's Leave the conversation sends it
         const riddle = p.choice.riddle;
         if (b && riddle?.choice_id === o.choice_id)
           return (
-            <Riddle
-              key={`${p.choice.continuation_id}:${p.choice.speaker_id}:${riddle.bank.join('')}`}
-              bank={riddle.bank}
-              button={b}
-              press={p.press}
-            />
+            <Answer key={o.choice_id} at={at} fresh={fresh} left={false}>
+              <Riddle
+                key={`${p.choice.continuation_id}:${p.choice.speaker_id}:${riddle.bank.join('')}`}
+                bank={riddle.bank}
+                button={b}
+                press={p.press}
+                lastTry={riddle.attempts?.count === (riddle.attempts?.limit ?? 0) - 1}
+              />
+            </Answer>
           );
-        if (b) return <ActionCard key={o.choice_id} b={b} press={p.press} />;
-        return <ActionCard key={o.choice_id} label={p.text(o.label)} reason={why(o, p.text)} />;
+        return (
+          <Answer key={o.choice_id} at={at} fresh={fresh} left={left(o.choice_id)}>
+            {b ? (
+              <ActionCard b={b} press={(x) => (setChosen(o.choice_id), p.press(x))} />
+            ) : (
+              <ActionCard label={p.text(o.label)} reason={why(o, p.text)} />
+            )}
+          </Answer>
+        );
       })}
     </View>
   );
@@ -77,6 +120,7 @@ type NpcProps = {
   text: Say;
   g: Grouped;
   press: (b: Button) => void;
+  pending?: boolean;
   log: DetailLine[];
   leave: () => void;
   talking?: boolean; // the Book's latch: answered here and not yet left (Book holds it)
@@ -91,7 +135,8 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  * A person's detail and conversation in the detail-page order (book-ui.md, NPC dialogue and
  * action details).
  * - Use: an NPC route.
- * - Rules: the description, state notes and this visit's history, then one ordered list of Action
+ * - Rules: a new choice's answers lift in `motion.stagger.gap` apart, once.
+ *   The description, state notes and this visit's history, then one ordered list of Action
  *   cards (owner picks mvlrlvappy4w, mvlymuams73l): one Talk card reading `Talk`, its accessible
  *   name the offer's own label (the first available talk; with none, no card and no filler
  *   line), Trade (opens the shop page), Use an item… and Cast a spell…, Take and other acts,
@@ -130,7 +175,8 @@ export function NpcPage(p: NpcProps) {
           {enemy.refusal ? p.text(enemy.refusal) : hostileRefusal(cap(p.text(enemy.name)))}
         </Note>
       )}
-      {choice && <Choice {...p} press={answer} choice={choice} />}
+      <RightWord view={p.view} choice={choice} pending={p.pending} />
+      {choice && <Choice key={choice.continuation_id} {...p} press={answer} choice={choice} />}
       {!talk && <Offered {...p} actions={actions} enemy={!!enemy} services={services} />}
       {!talk && p.npc && p.look && (
         <Cards>
@@ -256,6 +302,7 @@ export function NpcDetail(p: {
       g={p.g}
       log={log}
       press={(b) => p.press(b, id)}
+      pending={p.screen.pending}
       leave={p.world}
       open={(thing) => p.open({ kind: 'thing', id: thing })}
       shelf={() => p.open({ kind: 'shelf', id })}

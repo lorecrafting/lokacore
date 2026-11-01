@@ -219,12 +219,12 @@ for (const settlement of ['pulse', 'title press'])
       assert.deepEqual(draw().props.stack, [{ kind: 'chapter' }]);
       if (settlement === 'title press') {
         const chapter = BookView(draw().props).props.children.props.children.props.children[0].props
-          .children[0].props.children;
+          .children[0].props.children.props.children;
         chapter.props.chapterDone();
         assert.deepEqual(draw().props.stack, []);
         a.fault.reads = false;
         const world = BookView(draw().props).props.children.props.children.props.children[0].props
-          .children[0].props.children;
+          .children[0].props.children.props.children;
         nodes(world)
           .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Study, look')!
           .props.onPress();
@@ -235,7 +235,7 @@ for (const settlement of ['pulse', 'title press'])
         const settled = draw();
         assert.equal(settled.props.stack.at(-1).kind, 'chapter');
         const chapter = BookView(settled.props).props.children.props.children.props.children[0]
-          .props.children[0].props.children;
+          .props.children[0].props.children.props.children;
         chapter.props.chapterDone();
       }
       assert.equal(draw().props.screen.detail(book).length, 1);
