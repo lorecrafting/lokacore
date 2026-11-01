@@ -1274,6 +1274,8 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 Author rule: an NPC with `disposition.hostile` refuses every dialogue while hostile, so give a quest's accept, hand-over, receive and escort to a speaker who cannot turn hostile, or make that betrayal the design. The compiler warns (HOSTILE_QUEST_SPEAKER, severity warning, at `dialogues/<key>.npc`) when such an NPC speaks a dialogue with a choice carrying `accept`, `hand_over`, `receive` or `escort`; the build succeeds and the loader does not check it.
 
+Author rule: an NPC listed in `world.combat.allies` only ever strikes the opponent, so a `disposition.engage` line on it never plays. The compiler warns (ALLY_ENGAGE_UNUSED, severity warning, at `cartridge.json` `world.combat.allies[i]`); the build succeeds. To clear it, remove `disposition` (a `hostile` attacker without `engage` fails SCHEMA_VIOLATION), or set `unattackable: true` and remove `engage`.
+
 ## Rumour declarations
 
 [Rumour by co-presence](mechanics.md#rumour-by-co-presence-toolbox-row-w3) adds one optional reaction trigger filter, `npc` on `entity_entered_room` (a short key the compiler expands, `Loka.Content.Reactions.filters/0`). An unresolved `npc` is UNRESOLVED_REFERENCE at `reactions/<key>.on.npc`, and a spawn template there, which has no instance to enter, is SCHEMA_VIOLATION `invalid_value`. Example (`cartridges/rumour_sampler/reactions/tells_innkeeper.json`): `{"on": {"event": "entity_entered_room", "room": "inn", "npc": "ada"}, "when": {"op": "fact_compare", "fact": "knows_mill", "npc": "ada", "equals": true}, "steps": [{"op": "fact.assign", "fact": "knows_mill", "npc": "innkeeper", "value": true}]}`.
@@ -1287,7 +1289,7 @@ Author rule: an NPC with `disposition.hostile` refuses every dialogue while host
 
 The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `time_policy.recap_after_minutes` in `cartridge.json` (`TimePolicy.recap_after_minutes`, an integer from 1 to 10080, real minutes, the maximum a safety bound). The schema refuses a value out of range or not an integer. `cartridges/recap_sampler` is the sampler. A cartridge without the field keeps its bytes, hash and behavior.
 
-The optional `time_policy.away_cap_hours` (an integer of at least 1, in-game hours) sets the [away cap](save.md#durable-elapsed-sessions), the most world time one absence catches up. Absent, it is one in-game day of the cartridge's calendar.
+The optional `time_policy.away_cap_hours` (an integer from 1 to 168, in-game hours, the maximum a safety bound) sets the [away cap](save.md#durable-elapsed-sessions), the most world time one absence catches up. Absent, it is one in-game day of the cartridge's calendar.
 
 ## Speech declarations
 

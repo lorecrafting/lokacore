@@ -66,11 +66,17 @@ defmodule Loka.Content.Combat do
         do: bad(at("cartridge.json", path ++ ["narration", field]))
       )
 
+  # An ally only strikes the opponent, so its engage line never plays (loka-w9id).
   defp ally({_, _, %{"attack" => _} = npc}, path),
-    do: if(npc["spawn_template"], do: [bad(path)], else: [])
+    do: engage_unused(npc, path) ++ if(npc["spawn_template"], do: [bad(path)], else: [])
 
   defp ally({_, _, _}, path), do: [bad(path)]
   defp ally(_, _), do: []
+
+  defp engage_unused(%{"disposition" => %{"engage" => _}}, path),
+    do: [Map.put(diag("ALLY_ENGAGE_UNUSED", path, %{}), "severity", "warning")]
+
+  defp engage_unused(_, _), do: []
 
   # Toolbox rows G8 and 22a: the group's member, stay and fight facts are bool pair facts;
   # members strike as allies, so combat needs the ally

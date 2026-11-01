@@ -4665,7 +4665,8 @@
       "description": "Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play_time. Requires schedule@1. Millisecond conversion and fractional remainder belong to host M1-B. Integer type obeys loka-numeric-v1 safe range.",
       "properties": {
         "away_cap_hours": {
-          "description": "In-game hours one absence can catch up at most; the rest of the absence is skipped, not played. Absent: one in-game day.",
+          "description": "In-game hours one absence can catch up at most; the rest of the absence is skipped, not played. Absent: one in-game day. At most seven in-game days.",
+          "maximum": 168,
           "minimum": 1,
           "type": "integer"
         },

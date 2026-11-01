@@ -15,6 +15,7 @@ import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { dark } from '../src/mechanics/light/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
+import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { ctx } from './harness.ts';
 
@@ -171,6 +172,24 @@ test('a spell lands an hp-draining status only off an unattackable NPC', () => {
     const warded = cast(crypt(true, c), 'ward');
     assert.equal(types(warded).includes('status_applied'), lands);
   }
+});
+
+// Breaks: a reaction's hp-draining status stops landing on an `unattackable` NPC (the player-spell
+// guard moved into the shared status step), so authored story can no longer hurt a protected NPC
+// (docs/guides/writing-the-game.md: "the flag stops the player, not the writer").
+test('a reaction lands an hp-draining status on an unattackable NPC', () => {
+  const c = cartridge((c) => {
+    const warded = c.statuses[`${P}:status/warded`];
+    warded.resource = { ...warded.resource, key: 'hp' };
+    warded.per_tick = -1;
+    c.npcs[W].unattackable = true;
+    const rule = c.reactions[`${P}:reaction/ward_landed`];
+    rule.steps = [
+      { op: 'status.apply', status: rule.on.status, npc: success(c, 'flamma').steps[0].npc },
+    ];
+  });
+  const w = ok(cast(crypt(true, c), 'ward'));
+  assert.equal(activeStatuses(w, w.entityIds[W]!).length, 1);
 });
 
 // Breaks: a spell's damage skips the target's status resistances (SR5): 4 hp, not 2.
