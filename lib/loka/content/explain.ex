@@ -168,7 +168,12 @@ defmodule Loka.Content.Explain do
   defp words(%{"code" => code, "data" => data} = d) do
     {what, fix} = entry(code, d)
     vars = vars(d)
-    "#{fill(what, vars)} #{fill(fix, vars)}#{extra(code, data, vars["field"])}"
+    # A root-level fault has no field to name: the file itself is at fault.
+    String.replace(
+      "#{fill(what, vars)} #{fill(fix, vars)}#{extra(code, data, vars["field"])}",
+      "`` ",
+      "This file "
+    )
   end
 
   defp entry("SCHEMA_VIOLATION", %{"path" => "layout", "data" => data}) when data == %{},
@@ -186,13 +191,13 @@ defmodule Loka.Content.Explain do
   defp entry("UNDECLARED_CAPABILITY", %{"path" => path, "data" => %{"capability" => _}} = d) do
     if String.ends_with?(path, ".receive"),
       do:
-        {"`gives:` needs the `item_acquired` event, which `{capability}` owns, and the cartridge does not lock it.",
+        {"`gives:` (`receive`) needs the `item_acquired` event, which `{capability}` owns, and the cartridge does not lock it.",
          "Add `\"{capability}\": 1` under requires.capabilities in cartridge.json; the NPC must hold the item too."},
       else: Map.fetch!(@catalog, d["code"])
   end
 
   defp entry("UNKNOWN_FIELD", %{"path" => path}) do
-    if field(path) == "",
+    if not String.contains?(path, [".", "["]),
       do:
         {"This file is in no folder the compiler reads.",
          "Move it into a kind's folder (docs/system/cartridge.md), or out of the cartridge."},
@@ -235,7 +240,10 @@ defmodule Loka.Content.Explain do
 
   # The path's last step as written: `a.b` of `text["a.b"]`, `keywords[0]`, `name`; "" for a bare file.
   defp field(path) do
-    case Regex.run(~r/\["([^"]+)"\]$|(?:^|\.)([^."\[\]]+\[\d+\])$|\.([^."\[\]]+)$/, path) do
+    case Regex.run(
+           ~r/\["([^"]+)"\]$|(?:^|\.)([^."\[\]]+(?:\[\d+\])+)$|\.([^."\[\]]+)$|(\[\d+\])$/,
+           path
+         ) do
       nil -> ""
       match -> List.last(match)
     end
@@ -246,6 +254,8 @@ defmodule Loka.Content.Explain do
 
   # A long-form reference reads as its kind and key; a bare target is a text key or role name.
   defp target(nil), do: %{}
+  # A site can pass the authored value itself, when the file gave a non-string there.
+  defp target(t) when not is_binary(t), do: %{"target" => JSON.encode!(t)}
 
   defp target(t) do
     case Regex.run(~r{^[^:]+:(\w+)/(.+)$}, t) do

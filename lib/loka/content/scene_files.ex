@@ -60,8 +60,8 @@ defmodule Loka.Content.SceneFiles do
   end
 
   defp why("- " <> _, %{"npc" => _}), do: "repeated_choice"
-  defp why("gives: " <> npc, %{"npc" => npc}), do: "gives_speaker"
-  defp why("gives: " <> _, %{"npc" => _}), do: "gives_outside_choice"
+  # Under a choice only the speaker's own name is refused; `refuse/4` takes the rest.
+  defp why("gives: " <> _, %{"npc" => _}), do: "gives_speaker"
   defp why("npc: " <> _, %{"npc" => _}), do: "misplaced_header"
   defp why("when: " <> _, %{"npc" => _}), do: "misplaced_header"
   defp why(_, d) when not is_map_key(d, "npc"), do: "no_npc"
@@ -113,6 +113,9 @@ defmodule Loka.Content.SceneFiles do
   defp line(at, {d, cur, bad}), do: refuse(at, d, cur, bad)
 
   # `d` is the dialogue as of this line: a line above `npc:` is out of order, whatever follows.
+  defp refuse({"gives: " <> _ = text, n}, %{"npc" => _} = d, nil, bad),
+    do: {d, nil, [{n, text, "gives_outside_choice"} | bad]}
+
   defp refuse({text, n}, d, cur, bad), do: {d, cur, [{n, text, why(text, d)} | bad]}
 
   defp spoken(d, path, words) do

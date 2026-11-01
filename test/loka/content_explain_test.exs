@@ -233,6 +233,27 @@ defmodule Loka.ContentExplainTest do
     assert ["error: " <> _, "warning: " <> _] = Explain.lines([warning, error], dir)
   end
 
+  # Break: a non-string reference crashes the printer and every diagnostic is lost.
+  test "a reference that is not a string still prints", %{tmp_dir: dir} do
+    data = %{"target" => %{"a" => 1}}
+
+    diag = %{
+      "severity" => "error",
+      "code" => "UNRESOLVED_REFERENCE",
+      "path" => "a.b",
+      "data" => data
+    }
+
+    assert [line] = Explain.lines([diag], dir)
+    assert line =~ ~s({"a":1})
+  end
+
+  # Break: a `gives:` above any choice is told to rename its item, then fails again on the same line.
+  test "the speaker's name in gives above a choice says move it", %{tmp_dir: dir} do
+    text = "npc: bram\nbram: hi\ngives: bram\n- Take it\nbram: here\n"
+    assert dir |> scene(text) |> line_at("scenes/hi.scene:3") =~ "belongs under a choice"
+  end
+
   # Break: a mistyped `gives:` is the commonest scene typo; its role path fell back to the npc line.
   test "a mistyped gives names its own line", %{tmp_dir: dir} do
     text = "npc: bram\nbram: hi\n- Take it\nbram: here\ngives: tronel\n"
@@ -284,12 +305,17 @@ defmodule Loka.ContentExplainTest do
 
   # Break: every layout violation tells the author to regenerate a hand-placed file.
   test "a layout of the wrong type is not told to regenerate", %{tmp_dir: dir} do
-    assert dir |> said(%{"layout.json" => "{}"}) |> line_at("layout.json:1") =~ "must be an array"
+    assert dir |> said(%{"layout.json" => "{}"}) |> line_at("layout.json:1") =~
+             "This file must be an array"
   end
 
   # Break: the printed name is cut at a dot or loses its array.
   test "a field is named whole", %{tmp_dir: dir} do
-    for {path, name} <- [{~s(text["a.b"]), "`a.b`"}, {"keywords[0]", "`keywords[0]`"}] do
+    for {path, name} <- [
+          {~s(text["a.b"]), "`a.b`"},
+          {"keywords[0]", "`keywords[0]`"},
+          {~s(text["x"][0]), "`[0]`"}
+        ] do
       diag = %{"severity" => "error", "code" => "SCHEMA_VIOLATION", "path" => path}
 
       assert [line] = Explain.lines([Map.put(diag, "data", %{"error" => "not_in_enum"})], dir)
