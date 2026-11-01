@@ -813,7 +813,10 @@ query, `attackable` in `kernel/ts/src/mechanics/combat/shared.ts` (an NPC with a
 (`attackRefused`: resolved command `attack`, action key `attack`, target ids `[npc]`, refused
 `invalid_target` with no cause), the GameView (`combatOffered`: the Attack offer is absent), and
 the entry engage (`hostileAt`: neither a flagged NPC nor a companion opens a fight; an arrest is
-not a fight and still applies). `attackRefused` also guards the spell fight-back and the expedition, unchanged. The
+not a fight and still applies). `attackRefused` also guards the spell fight-back and the expedition, unchanged. A player's spell
+reads the flag itself, not `attackable`, because an NPC with hp and no `attack` stays hittable: no damage
+and no hp-draining status on a flagged NPC (`spell.ts`). A reaction's status still lands: the flag stops
+the player, not the writer. The
 kernel adds no refusal words. A peaceful room is the existing room `sanctuary: true`, not a second
 key: it refuses Attack `invalid_state`, its offer stays listed unavailable, and nothing engages on
 entry. Composition record: consumer the owner's prologue NPCs and companions; reads the NPC

@@ -203,7 +203,9 @@ To keep the profile but protect the NPC, add `"unattackable": true` to `npcs/<na
 player sees no Attack, and it never starts a fight. Companions (`world.combat.allies`, or in the
 player's group) are the same without the flag. For a whole room, add `"sanctuary": true` to the
 room: nothing engages on entry and Attack is refused, though an attackable NPC there still shows
-Attack greyed out. A damage spell aimed at an `unattackable` NPC with `hp` still hurts it.
+Attack greyed out. A player's spell neither damages an `unattackable` NPC nor puts an hp-draining status on it. A
+status you apply through a reaction still lands and ticks, as authored story: the flag stops the
+player, not the writer.
 
 ## Cookbook
 
