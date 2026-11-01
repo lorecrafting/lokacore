@@ -158,6 +158,8 @@ defmodule Loka.ContentLintTest do
 
     assert Lint.findings(talk.(%{"label" => "l", "narration" => "n"})) == bad
     assert Lint.findings(talk.(%{"label" => "c"})) == bad
+    # an asked mark does nothing of its own, so it does not make an exit a real choice
+    assert Lint.findings(talk.(%{"label" => "l", "asked" => true})) == bad
     # only a label that starts with Leave or Close is an exit
     assert Lint.findings(talk.(%{"label" => "w"})) == []
     # a single-choice talk keeps its own Leave

@@ -502,6 +502,14 @@ A `DialogueChoice` may carry `policy`, `then`, `then_failed`, `narration_variant
 - **Hand-off.** `then` may name another speaker's dialogue: the new row binds its own roles and `speaker_id`. A speaker in another room draws the compile warning `SPEAKER_ELSEWHERE`, because the proposal's farewell closes the new row in the same decision and the talk ends after the reply.
 - **`narration_variants`.** `TextVariants` on the reply: the first whose `when` holds replaces `narration`, read before the answer's effects. The narration key on the receipt is one of the choice's declared words (`dialogue-receipt.ts`).
 - **`narrate` steps.** A choice step that adds its `text` line after the reply, in step order; the key must be in the catalog.
+- **`asked`.** A source choice's `asked: true` marks it once taken without a fact of the author's: it lowers to the player fact `<dialogue>_<choice>_asked` (a name already taken or over 64 bytes, or a riddle's typed answer, is `SCHEMA_VIOLATION`; `asked_when` itself is not a source field), a `fact.assign` on its steps and the compiled `asked_when` policy. While that holds, an available option's view carries `asked: true`; it never refuses, so the Book [dims](book-ui.md) the option and it stays usable. A failed check applies no steps, so it leaves the option unasked. The save holds only the fact.
+- **Composition record, `asked`** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: the [dialogue cookbook](../guides/dialogue-cookbook.md) and the Book's option list. Later: the first authored conversation that sets it.
+  - Reads: `holds` on the player fact, for each available option.
+  - Writes: `fact.assign` through the choice's steps. Events, jobs and save rows: none new.
+  - Reused: choice steps, the `Policy` schema, `fact_compare`, the engine-fact lowering in the compiler.
+  - New: source key `asked`, compiled `asked_when`, GameView `asked`.
+  - Missing invariant: none. Named exceptions: none.
 - **Repeats.** A linked dialogue can run again, so the [hub's repeat refusal](#dialogue-skill-checks-toolbox-row-14) applies to it however many choices it has, except a choice whose own `policy` negates a fact its own steps set (`lib/loka/content/hub.ex`).
 - **Composition record.** Consumer: the dialogue rule and the GameView. Reads: dialogue definitions, facts through `holds`, the row's roles and ids, the world the decision's own writes leave. Writes, save rows and fields: none new; `choice.open` of another dialogue. Events: `choice_opened` after `choice_resolved` or `check_failed`. Reused: `holds`, `opening`, `bind`, `offered`, `openable`, `blocked`, the hub, `parted`. New: optional fields, `shown`, `linked`, `leadOn`, `replies`, the `fact_at_least` leaf, the `narrate` choice step. Invariants: none new. Exceptions: none.
 

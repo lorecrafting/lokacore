@@ -32528,5 +32528,34 @@
         "code": "invalid_type"
       }
     ]
+  },
+  {
+    "contract": "ChoiceOption",
+    "value": {
+      "available": true,
+      "choice_id": "ask",
+      "label": "choice.ask",
+      "asked": false
+    },
+    "errors": [
+      {
+        "path": "/asked",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.ask",
+      "narration": "narration.guard.ask",
+      "asked_when": true
+    },
+    "errors": [
+      {
+        "path": "/asked_when",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]

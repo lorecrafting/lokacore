@@ -365,6 +365,10 @@
         },
         "narration_variants": {
           "$ref": "entity.schema.json#/$defs/TextVariants"
+        },
+        "asked_when": {
+          "description": "While it holds, the view marks this option asked; it never refuses the choice. Lowered from a source choice's `asked: true`.",
+          "$ref": "policy.schema.json#/$defs/Policy"
         }
       },
       "required": [
