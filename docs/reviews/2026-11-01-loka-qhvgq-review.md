@@ -61,3 +61,36 @@ Claims rerun: PR numbers rows, closed month and year (25 receipts, 327,680 B, co
 ## Not checked
 
 No device or browser run; timing is node sqlite, not the web analogue. No wall-clock sleep behaviour. Developer's measurement script not located; numbers reproduced by my own probe.
+
+## Re-check at f8569bb922c40f7ff1a33c0776c8f5db5b270d9a (`kernel_api` 1.145)
+
+Scoped to the findings above, the fix commit `ba78d36e1` and the test fixes in the merge `f8569bb92`. CI at this head: ci, book-e2e, graph-diff completed success.
+
+**Verdict: CHANGES REQUIRED.** One blocker, one test; the fix logic holds.
+
+**Blocker:** `mobile/app/App.tsx:166` and `:173` (and the `c.ticked` line at `:157`) have no test. Two mutants stay green over `chapter.test.ts`, `clock-tick.test.ts`, `away_cap.test.ts`, `recap.test.ts`, `elapsed-resume.test.ts`: forcing `['pause']`, and deleting `c.ticked = performance.now()` from `resume`. The second was not in the developer's report. Failure scenario: either regression returns a hide after a stall to uncapped credit, and the next open replays the whole gap, the bug this PR exists to fix. A green suite is a blocker under the review brief. `hidePulses` and the away-cap test call the helper directly, so neither reaches the wiring. The cost is small: `appHost` already drives the actual App. This scratch test passes at the head, and fails on each mutant (forced pause: `1576800000 !== 86400`):
+
+    const h = appHost();
+    h.next(); h.change('background'); h.change('active');
+    const start = checkpoint(h.sql).target;
+    h.clock.wall += YEAR; h.clock.mono += YEAR;
+    h.change('background');
+    assert.equal(checkpoint(h.sql).target - start, 86400);
+
+Dispositions:
+
+| finding | state | proof |
+|---|---|---|
+| no maximum | fixed | 168 in `protocol/manifest.schema.json:274` and `schemas/source/defs.schema.json:4669`; compile accepts 168, refuses 169 |
+| no invalid rows | fixed | rows 0, 1.5, 169 with `below_minimum`, `invalid_type`, `above_maximum`; dropping the maximum from both schemas turns `contracts_test.exs` red (9 to 8 of 9) |
+| stalled hide | logic fixed, wiring untested | swapped order red (2 tests); dropped `c.stalled` with `>=` red |
+| refused pulse | fixed | `recap.test.ts` real route; dropping `CatchUpRefusedError` in `session.ts` red |
+| weak `notEqual` | fixed | `away_cap.test.ts` now expects `catching_up` |
+| PR body pin | fixed | body and `kernel/ts/src/runtime/world.ts:110` say 1.145 |
+| daily returns | open | owner ruling or follow-up bead; not re-examined |
+
+Test values are derived, not fitted. In `elapsed-resume.test.ts` the day is 3600 x 20 = 72000 units, the schedule hours are 6 and 19, and the start is 64800. The boundaries are 68400, 93600, 140400 and so on, so the 16th is 597600. The cap is 168 x 3600 = 604800, so the target is 669600, with 18 boundaries in range; the drain limit mutant `n < 17` turns it red. Remainder 50 is the 1 ms pre-gap capture at rate 50. A 24-hour day fits at most 7 x 2 = 14 boundaries, so the calendar change is forced. `chapter.test.ts` passes the real `hidePulses` to the module stub; no expected value changed.
+
+Timing: `bin/away_timing.ts 168` runs and reports 169 turns, 1,593,856 B, as the PR says; 3.07 s at load 13-16. Consistent with the PR's 1.8-1.9 s at load 6 and 3.39 s under `nice`; a quiet run was not reproduced, so the 3 s bound has little margin.
+
+Not checked: device or browser; whether `performance.now` advances across sleep, on which the hide fix depends; the rest of the merge.
