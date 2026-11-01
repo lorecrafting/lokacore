@@ -1,4 +1,4 @@
-# size: allow 660, every scene form shares the sampler fixture and its twin
+# size: allow 668, every scene form shares the sampler fixture and its twin
 defmodule Loka.ContentSceneBranchingTest do
   # needs, once, then and nested choices in a `.scene` (docs/system/cartridge.md, Source
   # shortcuts). Expected JSON is hand-written; `~` stands for the words.
@@ -374,6 +374,16 @@ defmodule Loka.ContentSceneBranchingTest do
     assert warned.(head <> "- Go\n  bram: ~\n  sets: knows_potter\n  then: h1\n") == []
     assert warned.(head <> spent <> lasting) == []
     assert warned.("bram: ~\n" <> spent) == []
+  end
+
+  # Break: the warning fires on a speaker whose other Talk still opens, so nothing is refused.
+  test "FALL_THROUGH_SPENT stays quiet beside a second Talk" do
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+    spent = "npc: bram\nwhen: not knows_potter\nbram: ~\n- Go\n  bram: ~\n  once\n  then: h1\n"
+    write(dir, "scenes/scene.scene", spent)
+    write(dir, "scenes/h1.scene", "npc: bram\nbram: ~\n- Bye\n  bram: ~\n")
+    assert {:ok, _, diags} = Loka.ContentSource.compile(dir, [with_facts()])
+    refute "FALL_THROUGH_SPENT" in Enum.map(diags, & &1["code"])
   end
 
   # Break: a refused choice in an out-of-order list crashes the compile before its error reaches the writer.
