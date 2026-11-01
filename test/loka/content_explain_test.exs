@@ -210,6 +210,12 @@ defmodule Loka.ContentExplainTest do
   defp scene(dir, text, extra \\ %{}),
     do: said(dir, Map.merge(%{"scenes/hi.scene" => text}, extra))
 
+  # Break: a resolve's bad quest points at the prompt, not the line that names it.
+  test "a resolve's bad quest names its own line", %{tmp_dir: dir} do
+    lines = scene(dir, "npc: bram\nbram: hi\n- Go\n  quest: resolve none\n  bram: ok\n")
+    assert line_at(lines, "scenes/hi.scene:4") =~ "none"
+  end
+
   # Break: a reference site that passes no target prints a hole where the name goes.
   test "a reference with no target prints no hole", %{tmp_dir: dir} do
     diag = %{

@@ -55,7 +55,7 @@ defmodule Loka.Content.CutFiles do
     {Enum.reverse(found), bad}
   end
 
-  defp paragraph({"---", _}, {found, _, bad}), do: {found, nil, bad}
+  defp paragraph({"---", _}, acc), do: acc
 
   defp paragraph({line, n}, {found, last, bad}) do
     cond do

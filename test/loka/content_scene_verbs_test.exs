@@ -4,7 +4,7 @@ defmodule Loka.ContentSceneVerbsTest do
   use ExUnit.Case, async: true
 
   alias Loka.Content
-  alias Loka.Content.Source
+  alias Loka.Content.{Source, SourceLines}
 
   @moduletag :tmp_dir
 
@@ -28,6 +28,7 @@ defmodule Loka.ContentSceneVerbsTest do
       sets: mood calm
       sets: count 3
       sets: lit false
+      sets: bar true
       quest: accept bridge_job
       bram: line three
       * He nods.
@@ -53,7 +54,8 @@ defmodule Loka.ContentSceneVerbsTest do
                     %{"op" => "fact.assign", "fact" => "door_open", "value" => true},
                     %{"op" => "fact.assign", "fact" => "mood", "value" => "calm"},
                     %{"op" => "fact.assign", "fact" => "count", "value" => 3},
-                    %{"op" => "fact.assign", "fact" => "lit", "value" => false}
+                    %{"op" => "fact.assign", "fact" => "lit", "value" => false},
+                    %{"op" => "fact.assign", "fact" => "bar", "value" => true}
                   ]
                 },
                 "stay" => %{"label" => "dialogue.a.choices.stay.label"}
@@ -98,6 +100,7 @@ defmodule Loka.ContentSceneVerbsTest do
         once: {"npc: maud\nmaud: hi\n- Go\n  once\n", [{4, "not_yet"}]},
         then: {"npc: maud\nmaud: hi\n- Go\n  then: x\n", [{4, "not_yet"}]},
         nested: {"npc: maud\nmaud: hi\n- Go\n  - In\n    maud: x\n- Out\n", [{4, "not_yet"}]},
+        nested_holds: {"npc: maud\nmaud: hi\n- Go\n  - In\n    sets: a\n", [{4, "not_yet"}]},
         sets_many: {"npc: maud\nmaud: hi\n- Go\n  sets: a b c\n", [{4, "bad_sets"}]},
         sets_outside: {"npc: maud\nsets: a\nmaud: hi\n- Go\n", [{2, "outside_choice"}]},
         quest_outside: {"npc: maud\nquest: accept a\nmaud: hi\n", [{2, "outside_choice"}]},
@@ -239,6 +242,22 @@ defmodule Loka.ContentSceneVerbsTest do
       said = diags |> Content.explained(tmp) |> Enum.find(&(&1 =~ "scenes/a.cut:#{n}"))
       assert said && not (said =~ why)
     end
+  end
+
+  # Break: a fault in a paragraph or the JSON half of a cutscene points at the wrong file or line.
+  test "a cutscene's parts keep their own file and line", %{tmp_dir: tmp} do
+    write(tmp, "scenes/a.cut", "one\n\ntwo\n---\n")
+    write(tmp, "scenes/a.json", ~s({"control": "modal"}))
+    index = SourceLines.index(tmp)
+    assert index[Source.at("scenes/a.cut", ["steps", 1, "text"])] == {"scenes/a.cut", 3}
+    assert index[Source.at("scenes/a.cut", ["control"])] == {"scenes/a.json", 1}
+  end
+
+  # Break: the trigger check, meant for `.cut` files, also refuses a JSON scene.
+  test "a JSON scene with no trigger is not told to add one", %{tmp_dir: tmp} do
+    write(tmp, "scenes/a.json", ~s({"control": "modal", "steps": [{"type": "end"}]}))
+    {_, diags} = Source.load(tmp)
+    assert for(%{"data" => %{"why" => "cut_no_trigger"}} = d <- diags, do: d) == []
   end
 
   # Break: a cutscene with no trigger compiles, never plays and nobody hears why.
