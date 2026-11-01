@@ -102,7 +102,7 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
 }
 
 // The plan's area, or a room a plan or event-subject move names: a move may take a member out (loka-kgd.159).
-function homeRoom(world: World, plan: DefinitionRef, room: EntityId | undefined) {
+export function homeRoom(world: World, plan: DefinitionRef, room: EntityId | undefined) {
   return (
     world.populationSpecs[key(plan)]!.plan.area.some((r) => world.roomIds[refString(r)] === room) ||
     Object.values(world.cartridge.reactions ?? {}).some((rule) =>

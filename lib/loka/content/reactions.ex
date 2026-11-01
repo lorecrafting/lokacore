@@ -57,12 +57,29 @@ defmodule Loka.Content.Reactions do
       steps(rel, Enum.with_index(r["steps"]), on, ctx)
   end
 
+  # action_completed runs inside the action; its status row would start before a duration's own
+  # time.advance, which faults at runtime (the action's own steps: `Loka.Content.ScriptedActions`).
+  defp timed_status(rel, steps, %{"event" => "action_completed"} = on, defs) do
+    timed? =
+      Enum.any?(
+        for({_, {_, [], a}} <- defs["scripted_action"], do: a),
+        &(is_number(&1["duration"]) and &1["duration"] > 0 and on["action"] in [nil, &1["key"]])
+      )
+
+    for {%{"op" => "status.apply"}, i} <- steps, timed? do
+      diag("SCHEMA_VIOLATION", at(rel, ["steps", i]), %{"why" => "duration_status"})
+    end
+  end
+
+  defp timed_status(_, _, _, _), do: []
+
   # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
   # moved.
   defp steps(rel, steps, on, ctx) do
     runs = for {%{"op" => "replenish.run", "replenish" => k}, i} <- steps, do: {k, i}
 
     Enum.flat_map(steps, &consequence(rel, &1, on, ctx)) ++
+      timed_status(rel, steps, on, ctx.defs) ++
       for {{k, i}, n} <- Enum.with_index(runs),
           Enum.any?(Enum.take(runs, n), &(elem(&1, 0) == k)),
           do: diag("DUPLICATE_DEFINITION", at(rel, ["steps", i, "replenish"]))

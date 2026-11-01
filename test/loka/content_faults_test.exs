@@ -47,4 +47,53 @@ defmodule Loka.ContentFaultsTest do
              &(&1 =~ "An action with a duration cannot apply a status")
            )
   end
+
+  # Break: action_completed runs inside the action, so a reaction's status row on a timed action
+  # faults like the action's own step. An untimed action's reaction stays lawful.
+  test "a reaction's status on a timed action's completion is refused", %{tmp_dir: tmp} do
+    File.cp_r!("cartridges/spell_effects_sampler", tmp)
+
+    edit = fn name, change ->
+      path = Path.join(tmp, name)
+      File.write!(path, path |> File.read!() |> JSON.decode!() |> change.() |> JSON.encode!())
+    end
+
+    edit.("cartridge.json", &Map.delete(&1, "time_policy"))
+
+    edit.("resources.json", fn r ->
+      update_in(r["resources"], &Map.new(&1, fn {k, v} -> {k, Map.delete(v, "regen")} end))
+    end)
+
+    # The status moves to the reactions below; the action's own step is refused first otherwise.
+    edit.("actions/ward.json", fn a ->
+      a
+      |> Map.put("duration", 300)
+      |> put_in(["outcomes", "success", "steps"], [
+        %{"op" => "fact.assign", "fact" => "ward_landed", "value" => true}
+      ])
+    end)
+
+    apply = ~s({"op": "status.apply", "status": "warded"})
+
+    for {name, on} <- [
+          {"named", ~s({"event": "action_completed", "action": "ward"})},
+          {"any", ~s({"event": "action_completed"})},
+          {"other_action", ~s({"event": "action_completed", "action": "lux"})},
+          {"other_event", ~s({"event": "status_applied"})}
+        ] do
+      File.write!(
+        Path.join(tmp, "reactions/#{name}.json"),
+        ~s({"on": #{on}, "steps": [#{apply}]})
+      )
+    end
+
+    {:error, diags} = Content.compile(tmp)
+
+    assert ["reactions/any.steps[0]", "reactions/named.steps[0]"] =
+             diags
+             |> Enum.filter(&(&1["data"]["why"] == "duration_status"))
+             |> Enum.map(& &1["path"])
+             |> Enum.filter(&String.starts_with?(&1, "reactions/"))
+             |> Enum.sort()
+  end
 end

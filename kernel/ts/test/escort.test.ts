@@ -369,12 +369,18 @@ test('Rejoin refuses a relation whose original accepted choice names a different
 test('a following escort ignores its schedule hour and still follows the next Move', () => {
   const a = setup((c) => {
     c.npcs[`${prefix}:npc/child`].daily_schedule = { '20': ref('room', 'village_green') };
+    c.npcs[`${prefix}:npc/stranger`].daily_schedule = { '20': ref('room', 'well_lane') };
   });
   a.ready();
   a.choose('rescue');
   a.move('south');
   const hour = elapsed(a.world(), 72000, 100);
   assert.equal(hour.decision.kind, 'accepted', JSON.stringify(hour.decision));
+  // Only the escort's own NPC holds still: another's hour still walks it.
+  assert.equal(
+    hour.world.state.containers[entity(hour.world, 'npc', 'stranger')],
+    room(hour.world, 'well_lane'),
+  );
   assert.equal(
     hour.world.state.containers[entity(hour.world, 'npc', 'child')],
     room(hour.world, 'well_lane'),
