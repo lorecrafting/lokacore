@@ -18,6 +18,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: lawful escort parting, PR #555 (loka-vduxr.23, kernel_api 1.137)](2026-11-01-escort-separation-review.md): **APPROVE WITH NOTES**
 - [Second opinion: effects batch 2 PR C, room sound, exposed, deeds, and a live play (loka-xz76e.6, kernel_api 1.138)](2026-11-01-effects-batch-2-c-second-review.md): **CHANGES REQUIRED**
 - [Review: effects batch 2 PR C, room beds, music, storm, wind, lever, latch, ending (loka-xz76e.6, kernel_api 1.138)](2026-11-01-effects-batch-2-c-review.md): **APPROVE WITH NOTES**
+- [Second opinion: dialogue entry contract and in-progress play, PR #556 (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-second-review.md): **APPROVE WITH NOTES**
+- [Review: dialogue entry (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-review.md): **APPROVE WITH NOTES**
 - [Dev cheats: second opinion (PR #546, loka-vduxr.6)](2026-11-01-dev-cheats-second-review.md): **APPROVE**
 - [Second-opinion review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-review.md): **APPROVE WITH NOTES**

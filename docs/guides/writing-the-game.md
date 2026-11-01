@@ -71,6 +71,32 @@ bram: line two
 
 `needs`, `once`, `then` and nested choices are not available yet; the compile says so.
 
+What you can rely on when dialogues link with `then` (JSON dialogues today):
+
+- Put `"entry": true` on the dialogue Talk should open, and it opens there, whatever else leads to
+  it. A person takes one; their other dialogues stop opening, except keyword ones. Without a marker Talk infers, as below, and the
+  compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess.
+  A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
+  no marker when each but the last by key has a `when:`.
+- A person's default Talk, when a dialogue's condition fails, passes on to what that dialogue leads
+  to, in choice key order, but only through a choice the player could take for nothing: its condition
+  holds, with no check, cost or other gate. So a first meeting is an `intro` with a `when:` that links
+  to a `hub`: the first Talk opens the intro, and once the condition fails Talk opens the hub unless
+  another dialogue opens first. A locked or paid way on is skipped, and Talk is refused only when
+  nothing further down opens. A Talk with its own `name` opens its dialogue or is refused.
+- Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
+  condition holds and that has a choice to show.
+- A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the
+  member that leads to the most other dialogues; first by key on a tie, so a hub and one detail
+  open at the first key. Give the hub the most links and it is where the talk starts.
+- A `then` whose target cannot play (its condition fails, it has no choice to show, its speaker is
+  hostile, dead or gone) ends the talk
+  quietly, with no added line.
+- A plain answer, with no `then` and no check, ends the talk if a `then` anywhere leads to this dialogue. Add
+  `then` naming it to come back.
+- A dialogue nothing links to, with more than one choice, reopens after a plain answer; an answer with a check or a patrol ends the talk. If its own
+  condition stopped holding, it still reopens: its choices show unavailable and the player can leave. Leave is always there.
+
 ### Write a cutscene
 
 `scenes/<key>.cut` is a scene the player reads through, with no choices. Each paragraph is one page,
@@ -97,6 +123,7 @@ quest names it. Take a scene whose every choice ends the quest:
 
 ```
 npc: maud
+when: door_open
 
 maud: line one
 - carry

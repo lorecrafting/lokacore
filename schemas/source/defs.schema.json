@@ -8113,6 +8113,10 @@
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
         },
+        "entry": {
+          "description": "An optional marker: talk to this speaker opens this dialogue and no other of theirs but keyword ones, over the inferred entry (dialogue@1). At most one per speaker; not on a keyword dialogue.",
+          "type": "boolean"
+        },
         "extends": { "$ref": "#/$defs/Key" },
         "keyword": {
           "$ref": "#/$defs/SpokenKeyword",
@@ -10700,6 +10704,10 @@
           "additionalProperties": { "$ref": "#/$defs/DialogueChoice" },
           "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
           "type": "object"
+        },
+        "entry": {
+          "description": "An optional marker: talk to this speaker opens this dialogue and no other of theirs but keyword ones, over the inferred entry (dialogue@1). At most one per speaker; not on a keyword dialogue.",
+          "type": "boolean"
         },
         "keyword": {
           "$ref": "#/$defs/SpokenKeyword",

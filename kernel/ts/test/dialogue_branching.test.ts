@@ -1,4 +1,4 @@
-// size: allow 545, every branching rule's pins beside the one play harness
+// size: allow 750, every branching rule's pins beside the one play harness
 // loka-vduxr.10 on the compiled persuade sampler: per-choice conditions, links between dialogues,
 // a check's two ways on, the hand-off, narrate steps, int fact thresholds and narration variants.
 import { decide } from '../src/mechanics/dialogue/rule.ts';
@@ -15,6 +15,8 @@ import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { hydrate } from '../src/runtime/created.ts';
+import { spokenBy } from '../src/mechanics/dialogue/selection.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-branching-'));
@@ -101,7 +103,11 @@ function play(c: unknown) {
   const choose = (choice_id: string) =>
     send({ type: 'choose', continuation_id: view().continuation_id, choice_id });
   const ids = () => view()?.choices.map((o: any) => o.choice_id);
-  return { send, talk, opened, choose, ids, view, world: () => w };
+  // a reload holds only what the save holds: the state, as JSON
+  const reload = () => {
+    w = hydrate(w, JSON.parse(JSON.stringify(w.state)), true)!;
+  };
+  return { send, talk, opened, choose, ids, view, reload, world: () => w };
 }
 const ops = (d: any) => d.delta.ops.map((o: any) => o.op);
 const events = (d: any) => d.events.map((e: any) => [e.position, e.payload.type]);
@@ -221,12 +227,13 @@ test('a then target is not talked to and never reopens itself; then: end ends th
       c.dialogues[`${P}:dialogue/guard`].policy = is('flag', true);
     }),
   );
-  assert.deepEqual(only.talk(), { kind: 'rejected', error: { code: 'invalid_state' } });
+  only.opened(); // falls through the failed root to what it leads to
+  assert.deepEqual(only.ids(), ['x']);
 });
 
 // Breaks: a looped pair leaves no way in, a later key of the cycle entered, or the walk back
 // from the child reopening at the wrong dialogue.
-test('a then cycle enters at its first key and its members hand on to each other', () => {
+test('a then cycle with a tie enters at its first key and its members hand on to each other', () => {
   const g = play(
     content({ out: plain({ then: 'zzz' }) }, { zzz: { ret: plain({ then: 'guard' }) } }),
   );
@@ -539,4 +546,205 @@ test('a then_failed reads the practice its own failure just gave', () => {
   not.opened();
   not.choose('c');
   assert.equal(not.view(), undefined);
+});
+
+// Breaks: Talk opens a loop at its first key by sort, so the leaf sorted before the hub opens and
+// the hub never plays.
+test('Talk opens a loop with no way in at its member leading to the most dialogues', () => {
+  const g = play(
+    content(
+      { to_leaf: plain({ then: 'a_leaf' }), to_detail: plain({ then: 'detail' }) },
+      { a_leaf: { bye: plain({ then: 'end' }) }, detail: { back: plain({ then: 'guard' }) } },
+    ),
+  );
+  g.opened();
+  assert.deepEqual(g.ids(), ['to_detail', 'to_leaf']);
+});
+
+// Each row breaks one part of the rule: `end` or a repeated target counted as a link, a tie going
+// to the last key, or a wider loop downstream of the entry offered as a second entry.
+test('Talk picks one member of a loop by distinct links, then key', () => {
+  const to = (...keys: string[]) =>
+    Object.fromEntries(keys.map((k, i) => [`c${i}_${k}`, plain({ then: k })]));
+  const rows: [string, object, Record<string, object>, string[]][] = [
+    ['end is no link', to('z_other'), { z_other: to('end', 'guard') }, ['c0_z_other']],
+    ['a repeat is no link', to('z_other'), { z_other: to('guard', 'guard') }, ['c0_z_other']],
+    [
+      'a link to itself is no link',
+      to('a_x', 'z_y'),
+      { a_x: to('a_x', 'guard'), z_y: to('end') },
+      ['c0_a_x', 'c1_z_y'],
+    ],
+    ['a tie goes to the first key', to('a_other'), { a_other: to('guard') }, ['c0_guard']],
+    [
+      'a loop downstream is no entry',
+      to('a_up', 'b_low'),
+      {
+        a_up: to('guard'),
+        b_low: to('c_x', 'd_x', 'e_x'),
+        c_x: to('b_low'),
+        d_x: to('end'),
+        e_x: to('end'),
+      },
+      ['c0_a_up', 'c1_b_low'],
+    ],
+  ];
+  for (const [name, choices, more, opens] of rows) {
+    const g = play(content(choices, more));
+    g.opened();
+    assert.deepEqual(g.ids(), opens, name);
+  }
+});
+
+// Breaks: the marker only beats inference for its own speaker's chain: another speaker's root leading
+// to the marked hub hides it, so Talk to that speaker finds nothing.
+test('entry: true opens a hub another speaker leads to', () => {
+  const g = play(
+    content({ on: plain() }, { z_intro: { go: plain({ then: 'guard' }) } }, (c) => {
+      c.dialogues[`${P}:dialogue/guard`].entry = true;
+      c.dialogues[`${P}:dialogue/z_intro`].npc = ref('npc', 'other');
+      c.npcs[`${P}:npc/other`] = { ...structuredClone(c.npcs[`${P}:npc/guard`]), key: 'other' };
+    }),
+  );
+  g.opened();
+  assert.deepEqual(g.ids(), ['on']);
+});
+
+// Breaks: a failed intro refuses Talk for good, the offer or the rule stops at it, the walk leaves the
+// speaker or ignores link order, a keyword failure falls through, a failed marker gives up, or failed
+// dialogues that lead to each other never finish.
+test('Talk falls through a failed entry to what it leads to, in link order', () => {
+  const met = is('flag', false);
+  const intro = { go: plain({ then: 'hub', steps: [set('flag')] }) };
+  const hub = { ask: plain({ then: 'hub' }), bye: plain({ then: 'end' }) };
+  const shape = (extra: object) =>
+    content(intro, { hub }, (c) =>
+      Object.assign(c.dialogues[`${P}:dialogue/guard`], { policy: met, ...extra }),
+    );
+  for (const extra of [{}, { entry: true }]) {
+    const g = play(shape(extra));
+    g.opened();
+    assert.deepEqual(g.ids(), ['go']);
+    assert.equal(g.choose('go').kind, 'accepted');
+    assert.deepEqual(g.ids(), ['ask', 'bye']);
+    g.choose('bye');
+    g.reload();
+    const npc = gameView(g.world()).entities!.find(
+      (e) => e.id === g.world().entityIds[`${P}:npc/guard`],
+    );
+    assert.equal(npc!.actions!.find((a: any) => a.action_key === 'guard')?.available, true);
+    g.opened();
+    assert.deepEqual(g.ids(), ['ask', 'bye']);
+  }
+  const closed = { policy: is('flag', true) };
+  const links = { x: plain({ then: 'z_b' }), y: plain({ then: 'a_c' }) };
+  const nowhere = play(
+    content(intro, { hub: { ask: { ...plain(), policy: is('flag', true) } } }, (c) =>
+      Object.assign(c.dialogues[`${P}:dialogue/guard`], closed),
+    ),
+  );
+  assert.equal(nowhere.talk().kind, 'rejected');
+  const circle = play(
+    content(
+      links,
+      { z_b: { b: plain({ then: 'guard' }) }, a_c: { c: plain({ then: 'guard' }) } },
+      (c) => {
+        for (const k of ['guard', 'z_b', 'a_c'])
+          Object.assign(c.dialogues[`${P}:dialogue/${k}`], closed);
+      },
+    ),
+  );
+  assert.equal(circle.talk().kind, 'rejected');
+});
+
+// Breaks: the marker loses to the first key or to a dialogue nothing leads to, or a failed marker
+// falls back to the speaker's other dialogue.
+test('entry: true opens the marked dialogue over inference and refuses when nothing opens', () => {
+  const mark = (edit: object) => (c: any) =>
+    Object.assign(c.dialogues[`${P}:dialogue/guard`], edit);
+  const back = { to: plain({ then: 'guard' }) };
+  const hub = content({ on: plain({ then: 'a_x' }) }, { a_x: back }, mark({ entry: true }));
+  const tie = play(hub);
+  tie.opened();
+  assert.deepEqual(tie.ids(), ['on']);
+  const leaf = { a_leaf: { bye: plain() }, a_x: back };
+  const over = play(content({ on: plain({ then: 'a_x' }) }, leaf, mark({ entry: true })));
+  over.opened();
+  assert.deepEqual(over.ids(), ['on']);
+  const shut = mark({ entry: true, policy: is('flag', true) });
+  assert.equal(
+    play(content({ on: plain() }, { a_leaf: { bye: plain() } }, shut)).talk().kind,
+    'rejected',
+  );
+});
+
+// Breaks: a fall-through passes a check, a payment or a failed choice policy for free, follows
+// then_failed or another speaker's link, or the compile warning and Talk disagree (the same file
+// runs through content_dialogue_links_test.exs).
+test('a failed default Talk opens only what a free choice leads to: the shared cases', () => {
+  const file = new URL('../../../test/fixtures/dialogue_entry_cases.json', import.meta.url);
+  const gates: Record<string, object> = {
+    check: checked({}),
+    payment: { payment: { from: 'guard', resource: ref('resource', 'pennies'), amount: 1 } },
+    policy: { policy: is('flag', true) },
+  };
+  for (const { name, dialogues, opens } of JSON.parse(readFileSync(file, 'utf8'))) {
+    const g = play(
+      content({}, {}, (c) => {
+        const model = c.dialogues[`${P}:dialogue/guard`];
+        delete c.dialogues[`${P}:dialogue/guard`];
+        c.npcs[`${P}:npc/other`] = { ...structuredClone(c.npcs[`${P}:npc/guard`]), key: 'other' };
+        for (const { key, npc, choices, entry, closed, name: label } of dialogues) {
+          const made = Object.entries<any>(choices).map(([id, { gate, ...rest }]) => [
+            id,
+            { ...plain(), ...gates[gate], ...rest },
+          ]);
+          c.dialogues[`${P}:dialogue/${key}`] = {
+            ...structuredClone(model),
+            key,
+            npc: ref('npc', npc),
+            choices: Object.fromEntries(made),
+            ...(entry && { entry }),
+            ...(label && { name: LABEL }),
+            ...(closed && { policy: is('flag', true) }),
+          };
+        }
+      }),
+    );
+    const guard = g.world().entityIds[`${P}:npc/guard`]!;
+    const offers = gameView(g.world()).entities!.find((e) => e.id === guard)!.actions ?? [];
+    assert.equal(
+      offers.some((a: any) => a.available),
+      opens !== null,
+      name,
+    );
+    assert.equal(g.talk().kind, opens === null ? 'rejected' : 'accepted', name);
+    assert.equal(spokenBy(g.world(), g.world().character, guard)?.key, opens ?? undefined, name);
+  }
+});
+
+// Breaks: a keyword dialogue falls through on the word, or a Talk that selects one dialogue goes
+// elsewhere when that dialogue fails.
+test('a say and a named Talk do not fall through', () => {
+  const shut = (extra: object) =>
+    play(
+      content({ go: plain({ then: 'hub' }) }, { hub: { ask: plain() } }, (c) =>
+        Object.assign(c.dialogues[`${P}:dialogue/guard`], { policy: is('flag', true) }, extra),
+      ),
+    );
+  const said = shut({ keyword: 'w' });
+  const guard = said.world().entityIds[`${P}:npc/guard`];
+  assert.equal(
+    spokenBy(said.world(), said.world().character, guard, { n: 0 }, undefined, 'w'),
+    undefined,
+  );
+  const named = shut({ name: LABEL });
+  const offer = gameView(named.world())
+    .entities!.find((e) => e.id === guard)!
+    .actions!.find((a: any) => a.action_key === 'guard');
+  assert.equal(offer?.available, false);
+  assert.equal(
+    named.send({ type: 'talk', target_id: guard, dialogue: ref('dialogue', 'guard') }).kind,
+    'rejected',
+  );
 });
