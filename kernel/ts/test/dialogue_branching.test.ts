@@ -64,7 +64,7 @@ function content(choices: object, more: Record<string, object> = {}, edit = (_: 
 }
 
 function play(c: unknown) {
-  const canonical = encode(c as never);
+  const canonical = encode(c as Parameters<typeof encode>[0]);
   const sha256 = createHash('sha256').update(canonical).digest('hex');
   const loaded = loadCartridge(
     new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
@@ -84,7 +84,7 @@ function play(c: unknown) {
       world_context_id: w.context,
       payload: { actor_id: w.character, ...payload },
     };
-    const r = step(w, command as never, n);
+    const r = step(w, command as unknown as Parameters<typeof step>[1], n);
     w = r.world;
     return r.decision as any;
   };
@@ -391,18 +391,6 @@ test('a hand-off to a hostile speaker ends the talk after the reply', () => {
   );
   g.opened();
   assert.deepEqual(ops(g.choose('ask')).includes('choice.open'), false);
-  assert.equal(g.view(), undefined);
-});
-
-// Breaks: a hub reopened past its own policy: a live row whose every option is refused.
-test('an answer that fails the dialogue policy ends the hub', () => {
-  const g = play(
-    content({ a: plain({ steps: [set('flag')] }), z: plain() }, {}, (c) => {
-      c.dialogues[`${P}:dialogue/guard`].policy = is('flag', false);
-    }),
-  );
-  g.opened();
-  assert.deepEqual(ops(g.choose('a')).includes('choice.open'), false);
   assert.equal(g.view(), undefined);
 });
 

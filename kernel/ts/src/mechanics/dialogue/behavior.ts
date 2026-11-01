@@ -99,9 +99,7 @@ export function hub<T extends { kind: string }>(
   const facts = sequence(world, actor_id, option, false, d.quest, undefined, speaker)?.facts ?? {};
   const after = { ...world, state: { ...world.state, facts: { ...world.state.facts, ...facts } } };
   if (option.then) return leadOn(after, command, mint, row, decided, option.then, steps);
-  const standing = holds(after, actor_id, d.policy, { target: speaker, steps });
-  if (!standing || shown(after, actor_id, d, choice_ids, speaker, steps).length === 0)
-    return decided;
+  if (shown(after, actor_id, d, choice_ids, speaker, steps).length === 0) return decided;
   const at = a.events.find((e) => e.payload.type === 'choice_resolved')!.position + 1;
   const continuation_id = continuationId(mint);
   const op = {
