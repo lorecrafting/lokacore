@@ -1,4 +1,4 @@
-// size: allow 590, every fold case shares the one compiled needs fixture and save harness
+// size: allow 600, every fold case shares the one compiled needs fixture and save harness
 // Toolbox row W8 ticking permanent status rows through real SQLite (loka-rn3b, loka-sgqk): the needs
 // sampler's needs made permanent keep an active row with a tick and job but no end across a month of
 // catch-up and a cold reopen (docs/system/save.md, Status recovery), and saturated ticks fold
@@ -342,6 +342,21 @@ for (const [until, hunger] of [
     assert.equal(pool(save, 'hunger'), hunger);
   });
 }
+
+// Breaks: a run ahead of this one limits the fold. thirsty's 72000 tick has run by hungry's 75600 tick,
+// which then folds past the target. Ticks: hungry 3600, 72000, 75600; thirsty 72000. Counting it
+// again adds hungry at 79200 to 100800.
+test('a job that already ran does not limit a later fold', (t) => {
+  const save = begin(
+    t,
+    fixture((c, status) => {
+      c.resources[ID('resource', 'hunger')].start = 0;
+      status('thirsty').tick_every = 72000;
+    }),
+  );
+  assert.equal(direct(save, 0, 100000).kind, 'saved');
+  assert.equal(events(save, 'status_ticked').length, 4);
+});
 
 // Breaks: a later job lifts the horizon an earlier one set. Same raises as above; fed also ticks at
 // 80000 on thirst. A fold past 72000 misses 75600 and 79200 and leaves 4.
