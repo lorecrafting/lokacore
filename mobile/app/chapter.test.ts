@@ -14,7 +14,7 @@ import { checkpoint, elapsedHost } from '../authority/local-story/__tests__/elap
 import { localSession, openGame } from '../authority/local-story/session.ts';
 import type { Db } from '../authority/local-story/store.ts';
 import { LABEL } from './book/labels.ts';
-import { tickPulse } from './clock-tick.ts';
+import { hidePulses, tickPulse } from './clock-tick.ts';
 import { webDb } from './sqlite-web.ts';
 
 // The pinned app: no author preview, so App mounts the Book alone (author/panel.tsx).
@@ -113,7 +113,7 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     'expo-sqlite/kv-store': {},
     '../authority/local-story/session': { localSession, KERNEL_ID: 'loka-kernel' },
     './sqlite-web.ts': { webDb },
-    './clock-tick': { tickPulse },
+    './clock-tick': { hidePulses, tickPulse },
     './book/Book.tsx': {},
     './book/model.ts': { hint: () => ({}) },
     './book/reading.ts': { readingSize: () => ({}), effectStores: () => ({}) },
@@ -303,7 +303,7 @@ function appHost() {
     'expo-sqlite/kv-store': {},
     '../authority/local-story/session': { localSession, KERNEL_ID: 'loka-kernel' },
     './sqlite-web.ts': { webDb },
-    './clock-tick': { tickPulse },
+    './clock-tick': { hidePulses, tickPulse },
     './book/Book.tsx': { default: 'Book' },
     './book/model.ts': { hint: () => ({}) },
     './book/reading.ts': { readingSize: () => ({}), effectStores: () => ({}) },

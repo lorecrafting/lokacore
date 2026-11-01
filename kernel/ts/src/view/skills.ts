@@ -51,15 +51,19 @@ function skillView(
   if (concealed(world, actor, skill, steps)) return [];
   const locked = s.prerequisite && !holds(world, actor, s.prerequisite, { steps });
   const st = status(world, actor, skill, steps);
+  const at = s.growth ? level(world, actor, skill) : 0;
+  const rank = s.ranks?.[at - 1]; // none at level 0
   return [
     {
       skill,
       label: s.name,
       requirement: s.requirement,
       ...st,
-      ...(s.growth && { level: level(world, actor, skill) }),
+      ...(s.growth && { level: at }),
       ...(s.prerequisite && { locked: locked! }),
       ...(s.profession && { profession: s.profession }),
+      ...(s.learned && { learned: s.learned }),
+      ...(rank && { rank: { label: rank.name, ...(rank.reached && { reached: rank.reached }) } }),
     },
   ];
 }

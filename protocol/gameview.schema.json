@@ -2504,6 +2504,26 @@
         "profession": {
           "$ref": "text.schema.json#/$defs/TextKey",
           "description": "Homestead hs-14: present only when the skill names a profession heading."
+        },
+        "learned": {
+          "$ref": "text.schema.json#/$defs/TextKey",
+          "description": "Level-up rush: present when the skill declares a learned line, acquired or not."
+        },
+        "rank": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "reached": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false,
+          "description": "Level-up rush: the current level's rank, present when the skill declares ranks and its level is at least 1; reached only when that rank declares a line."
         }
       },
       "required": [
