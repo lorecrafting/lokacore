@@ -217,3 +217,28 @@ Must be true: ([save](../system/save.md#escort-and-alternate-return-recovery), P
 Claims rerun: `lib/loka/content/population.ex:250` `scavenge_item?` refuses Give-restricted items, as cited; `why` and `why_words` 15 pass, as stated.
 
 Not run: `bin/mutate_diff.sh` this round (narrow sample, as briefed); the `npc.move` and completed-child E1 cases on main; attempts, open-row and actor mutants on main; Elixir and TypeScript rule comparison.
+
+## Fix re-check at 90479353b
+
+Scoped to Fable's ruling (`f38c486b3`, `0f31231ef`, `fe993754f`), commit `90479353b27b6da007ddbe1ed9d84928d8789599`. CI at that sha: `graph-diff`, `ci`, `book-e2e` all completed success. **Verdict: APPROVE WITH NOTES.** No new problem from this round.
+
+Must be true ([principle](../lessons/storage.md)): a lawful completed escort and a moving answer with assign plus adjust reopen and play on; the row clauses each refuse alone.
+
+| Item | Result |
+| --- | --- |
+| F1 | `mobile/authority/local-story/dialogue-consequences.ts:57`; old filter restored: `a moving answer writing one fact twice reopens` red |
+| E1 `:127`, `:128` | Deleted. Each restored: `a completed escort reopens after the keeper dies or a reaction moves the child` red. Keeper killed, reopened, then moves accepted and reopens again (probe) |
+| `:46`, `:135`, `:136-137` | Stay, filed as `loka-vduxr.23`, not blocking per the ruling. Completed child killed stays refused until then; the issue's deletion of `:46` covers it |
+| S1 | Done: `docs/system/save.md:437,546,1067`, `docs/system/mechanics.md:2472` |
+| S2 | Actor, beat, bindings, attempts, open-row choice: each removed, its own subtest of `a dialogue row that does not bind is refused` red. `openable` removed: `branching_forged.test.ts` stays green; outside S2, other files not run |
+
+### Open items in the PR body
+
+- should-fix, follow-up, wrong lawful result: `kernel/ts/src/mechanics/dialogue/selection.ts:44`, `lib/loka/content/dialogue_links.ex` `entries`. Probe: `main` links to `a_leaf` and `detail`, `detail` has `then: main`. Talk opens `a_leaf` with only `leave`, so `main` and `detail` never play. With no leaf, Talk opens `detail`, not `main`. `LOOP_SPEAKER` warns only across speakers; compile refuses nothing, and a return to a parent is the documented shape. No shipped cartridge reached in this check. Not from this round: file before `.scene` lowering.
+- The others give no wrong lawful play (read only): `lib/loka/content/hub.ex:66` and `dialogue_links.ex:83` are compile checks; `dialogue-save.ts:32` and `dialogue-receipt.ts:85` are forged only; `cartridge_scoped_facts.ts:25`, `Hub.proven` stale; `selection.ts:36` cost.
+
+### `holderLoop` test
+
+Acceptable in CI: with the check removed the test spins synchronously, and the mobile job's `timeout-minutes: 15` (`.github/workflows/ci.yml:202`) turns it red with no test named. `--test-timeout` does not bound it: run at 20000 ms it was still spinning at 150 s, and killing the runner left the child at full CPU. Same-file runners with 0, 45000 and 60000 were found alive from others' runs (PIDs 43292, 60635, 77772; not stopped, not mine). Local runs need a kill by PID.
+
+Not run: `bin/mutate_diff.sh`; `hub.ex`, `dialogue_links.ex:83` by probe; Elixir and TypeScript entries compared by reading.
