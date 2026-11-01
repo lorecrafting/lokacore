@@ -68,7 +68,14 @@ function useBlow(id: string) {
   return { struck, travel, settled };
 }
 
-function Foe(p: {
+/**
+ * One opponent's line in the fight block (book-ui.md, Live combat response; Fight music).
+ * - Use: Combat only; exported for its tests.
+ * - Rules: name, then a band phrase a blow dealt presses once; a foe's fall settles the line to dim.
+ * - States: at rest; struck; settled; no band for a hidden member.
+ * - Story: CombatPage.stories.tsx
+ */
+export function Foe(p: {
   opponent: Pick<Encounter, 'name' | 'band' | 'words'> & { id: string };
   target: boolean;
   live: boolean;

@@ -36,6 +36,7 @@ export const screenFrom = (
   const { text, label } = sayers({ text: (key: string) => words[key] ?? table[key] } as Game);
   return {
     view: saved.view,
+    died: undefined,
     text,
     label,
     buttons: buttonsOf(saved.view, label, text),
