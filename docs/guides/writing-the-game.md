@@ -71,6 +71,20 @@ bram: line two
 
 `needs`, `once`, `then` and nested choices are not available yet; the compile says so.
 
+What you can rely on when dialogues link with `then` (JSON dialogues today):
+
+- Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
+  condition holds and that has a choice to show.
+- A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the
+  member that leads to the most different dialogues; first by key on a tie. Give the hub the most
+  links and it is where the talk starts.
+- A `then` whose target cannot play (its condition fails, it has no choice to show) ends the talk
+  quietly, with no added line.
+- A plain answer, with no `then`, ends the talk if a `then` anywhere leads to this dialogue. Add
+  `then` naming it to come back.
+- A dialogue nothing links to, with more than one choice, reopens after a plain answer. If its own
+  condition stopped holding, it still reopens: its choices show unavailable and the player can leave. Leave is always there.
+
 ### Write a cutscene
 
 `scenes/<key>.cut` is a scene the player reads through, with no choices. Each paragraph is one page,

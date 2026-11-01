@@ -59,6 +59,30 @@ defmodule Loka.ContentDialogueLinksTest do
     refute warning in seen.(warnings), inspect(warnings)
   end
 
+  # Breaks: the compiler enters a loop at its first key by sort while Talk enters at the hub, so
+  # the speaker of a leaf sorted first counts as reachable and its warning is lost.
+  test "the loop warning enters a loop at the hub Talk opens", %{dir: dir} do
+    to = fn keys ->
+      Map.new(keys, &{"to_" <> &1, %{"label" => @label, "narration" => @said, "then" => &1}})
+    end
+
+    roles = %{"second" => %{"role" => "npc", "npc" => "second"}}
+    leaf = talk("guard", %{"choices" => to.(["z_detail"]), "npc" => "second", "roles" => roles})
+
+    files = [
+      {"dialogues/a_leaf.json", leaf},
+      {"dialogues/m_hub.json", talk("guard", %{"choices" => to.(["a_leaf", "z_detail"])})},
+      {"dialogues/z_detail.json", talk("guard", %{"choices" => to.(["m_hub"])})},
+      {"npcs/second.json", second_npc()}
+    ]
+
+    assert {:ok, _, warnings} = Loka.ContentSource.compile(dir, files)
+
+    assert for(%{"code" => "LOOP_SPEAKER", "path" => p} <- warnings, do: p) == [
+             "dialogues/a_leaf.npc"
+           ]
+  end
+
   # Breaks: a link rule dropped, so a then the runtime cannot follow compiles and fails at play.
   test "then and then_failed refuse what cannot be followed", %{dir: dir} do
     child = {"dialogues/child.json", talk("guard")}

@@ -29,25 +29,38 @@ const links = (d: DialogueDefinition) =>
     .filter((k): k is string => !!k);
 
 /**
- * The dialogues a talk can open: those nothing leads to, then the first by key of each cycle left
- * (a nested answer returns to its parent, so a root may be named too); everything an entry reaches
- * is reached only by that answer.
+ * The dialogues a talk can open: those nothing leads to, then one of each loop with no way in, the
+ * member leading to the most different dialogues (a hub), first by key on a tie. Everything an
+ * entry reaches is reached only by that answer.
  */
 const entries = (world: World) => {
   const all = Object.values(world.cartridge.dialogues ?? {}).sort((a, b) => cmp(a.key, b.key));
   const next = new Map<string, string[]>(all.map((d) => [d.key, links(d)]));
   const named = new Set(all.flatMap(links));
-  const reached = new Set<string>();
-  const walk = (key: string) => {
-    if (reached.has(key)) return;
-    reached.add(key);
-    next.get(key)?.forEach(walk);
+  const reach = (keys: string[], seen = new Set<string>()) => {
+    for (const key of keys) {
+      if (seen.has(key)) continue;
+      seen.add(key);
+      reach(next.get(key) ?? [], seen);
+    }
+    return seen;
   };
-  return [...all.filter((d) => !named.has(d.key)), ...all].filter((d) => {
-    if (reached.has(d.key)) return false;
-    walk(d.key);
-    return true;
-  });
+  const roots = all.filter((d) => !named.has(d.key));
+  const reached = reach(roots.map((d) => d.key));
+  const rest = all.filter((d) => !reached.has(d.key));
+  const from = new Map(rest.map((d) => [d.key, reach([d.key])]));
+  const width = (key: string) => new Set(next.get(key)!.filter((k) => next.has(k))).size;
+  const beats = (a: string, b: string) =>
+    width(a) > width(b) || (width(a) === width(b) && cmp(a, b) < 0);
+  const heads = rest.filter(({ key }) =>
+    rest.every(
+      (o) =>
+        o.key === key ||
+        !from.get(o.key)!.has(key) ||
+        (from.get(key)!.has(o.key) && beats(key, o.key)),
+    ),
+  );
+  return [...roots, ...heads];
 };
 
 /** Whether some answer's `then` or `then_failed` names `d`: such a dialogue never reopens itself. */

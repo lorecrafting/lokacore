@@ -1,4 +1,4 @@
-// size: allow 545, every branching rule's pins beside the one play harness
+// size: allow 590, every branching rule's pins beside the one play harness
 // loka-vduxr.10 on the compiled persuade sampler: per-choice conditions, links between dialogues,
 // a check's two ways on, the hand-off, narrate steps, int fact thresholds and narration variants.
 import { decide } from '../src/mechanics/dialogue/rule.ts';
@@ -539,4 +539,46 @@ test('a then_failed reads the practice its own failure just gave', () => {
   not.opened();
   not.choose('c');
   assert.equal(not.view(), undefined);
+});
+
+// Breaks: Talk opens a loop at its first key by sort, so the leaf sorted before the hub opens and
+// the hub never plays.
+test('Talk opens a loop with no way in at its member leading to the most dialogues', () => {
+  const g = play(
+    content(
+      { to_leaf: plain({ then: 'a_leaf' }), to_detail: plain({ then: 'detail' }) },
+      { a_leaf: { bye: plain({ then: 'end' }) }, detail: { back: plain({ then: 'guard' }) } },
+    ),
+  );
+  g.opened();
+  assert.deepEqual(g.ids(), ['to_detail', 'to_leaf']);
+});
+
+// Each row breaks one part of the rule: `end` or a repeated target counted as a link, a tie going
+// to the last key, or a wider loop downstream of the entry offered as a second entry.
+test('Talk picks one member of a loop by distinct links, then key', () => {
+  const to = (...keys: string[]) =>
+    Object.fromEntries(keys.map((k, i) => [`c${i}_${k}`, plain({ then: k })]));
+  const rows: [string, object, object, string[]][] = [
+    ['end is no link', to('z_other'), { z_other: to('end', 'guard') }, ['c0_z_other']],
+    ['a repeat is no link', to('z_other'), { z_other: to('guard', 'guard') }, ['c0_z_other']],
+    ['a tie goes to the first key', to('a_other'), { a_other: to('guard') }, ['c0_guard']],
+    [
+      'a loop downstream is no entry',
+      to('a_up', 'b_low'),
+      {
+        a_up: to('guard'),
+        b_low: to('c_x', 'd_x', 'e_x'),
+        c_x: to('b_low'),
+        d_x: to('end'),
+        e_x: to('end'),
+      },
+      ['c0_a_up', 'c1_b_low'],
+    ],
+  ];
+  for (const [name, choices, more, opens] of rows) {
+    const g = play(content(choices, more));
+    g.opened();
+    assert.deepEqual(g.ids(), opens, name);
+  }
 });

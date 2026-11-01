@@ -54,8 +54,8 @@ defmodule Loka.Content.DialogueLinks do
       )
   end
 
-  # Talk enters a loop at its first key by sort (selection.ts), so every chain has an entry and
-  # plays; a member whose speaker has no entry of their own is only reached through it: a warning.
+  # Talk enters a loop with no way in at its most-linking member (selection.ts), so every chain
+  # has an entry and plays; a member whose speaker has no entry of their own is only reached through it: a warning.
   @doc "The members of a then loop whose speaker Talk only reaches through the loop, as warnings."
   @spec loops([{String.t(), map()}]) :: [map()]
   def loops(all) do
@@ -75,18 +75,28 @@ defmodule Loka.Content.DialogueLinks do
     d["npc"] not in speakers and d["key"] in walk(next[d["key"]], next, MapSet.new())
   end
 
-  # selection.ts entries: the dialogues nothing links to, then the first by key of each loop left.
+  # selection.ts entries: the dialogues nothing links to, then the head of each loop with no way
+  # in: the member leading to the most different dialogues, first by key on a tie.
   defp entries(sorted, next) do
     named = next |> Map.values() |> List.flatten() |> MapSet.new()
-    all = Enum.map(sorted, &elem(&1, 1))
-    roots = Enum.reject(all, &(&1["key"] in named))
+    roots = Enum.filter(Map.keys(next), &(&1 not in named))
+    reached = walk(roots, next, MapSet.new())
+    wanted = MapSet.new(roots ++ heads(Enum.reject(Map.keys(next), &(&1 in reached)), next))
+    for {_, d} <- sorted, d["key"] in wanted, do: d
+  end
 
-    {entries, _} =
-      Enum.reduce(roots ++ all, {[], MapSet.new()}, fn d, {es, seen} ->
-        if d["key"] in seen, do: {es, seen}, else: {[d | es], walk([d["key"]], next, seen)}
+  defp heads(rest, next) do
+    from = Map.new(rest, &{&1, walk([&1], next, MapSet.new())})
+
+    Enum.filter(rest, fn k ->
+      Enum.all?(rest, fn o ->
+        o == k or k not in from[o] or (o in from[k] and rank(k, next) < rank(o, next))
       end)
+    end)
+  end
 
-    entries
+  defp rank(k, next) do
+    {-(next[k] |> Enum.filter(&is_map_key(next, &1)) |> Enum.uniq() |> length()), k}
   end
 
   defp links(d) do
