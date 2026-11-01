@@ -851,7 +851,7 @@ build. The author tools below are reachable only in that bundle (a production ex
   in milliseconds) under the artifact's hash. After a reload into a different hash it replays the
   path through the normal command path, one step at a time; the first step the session does not
   save and accept stops the replay and is named by its ordinal and reply. Nothing writes state directly.
-  The dev cartridge plays one fixed seed on a frozen clock that moves only with the dev clock, as
+  The dev cartridge plays one fixed seed; at `?dev=1`, on a frozen clock that moves only with the dev clock, as
   `bin/loka check` does, so a recording replays alike in both; a release is untouched.
 - **Fast loop.** A `text.json` save is pushed to the open page as a text overlay before its
   compile and shows at once: no compile, reload or replay. The compile still runs after it and
@@ -872,10 +872,17 @@ build. The author tools below are reachable only in that bundle (a production ex
 - **Author panel** (`tools/author-panel`, its own web page framing the Book at `?dev=1`; nothing of it enters the app's dependencies or bundles): the last compile's diagnostics in plain words
   (`severity: file:line message`, which is what `mix loka.compile` prints: one sentence and one fix
   per diagnostic code, from `Loka.Content.Explain`, the path mapped to its line by the source JSON;
-  invalid JSON adds `:column`); current facts, quests and flags from the view; why an action
-  is missing or refused ([rule explainer](#rule-explainer-loka-kgd1943) on the recorded path); each Book
-  line opens its source `file:line` in the owner's editor (`POST /__author/open`, `LOKA_EDITOR`,
-  default `code --goto`); the game-time control; the checkpoint list; the still-to-write list.
+  invalid JSON adds `:column`), and under them the lint findings (`mix loka.lint`, run after each
+  successful compile; a lint that could not run says so); the game state from the view (room, people,
+  held items, pools with their bands, statuses, clock, pending choice, facts and quests); why a
+  scripted action or dialogue is missing or refused, offered from the current room rather than typed and
+  answered in sentences (`fact met_thera is false; needs true`; [rule explainer](#rule-explainer-loka-kgd1943)
+  on the recorded path, its policy read on the world as it stands after the last step); find (`GET /__author/find?q=`): a key or
+  words to every source `file:line`, and each definition of the compiled artifact whose refs name that
+  key; each Book line opens its source `file:line` in the owner's editor (`POST /__author/open`,
+  `LOKA_EDITOR`, default `code --goto`); the game-time control, which delivers the time at once and
+  records it only when delivered; the checkpoint list; the still-to-write list. An input the session held
+  (`pending`, `catching_up`) is recorded when it settles as accepted.
 - **Still to write.** A text value with a line that trims to `~` is a placeholder, in JSON or in
   a scene file. The panel and
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with

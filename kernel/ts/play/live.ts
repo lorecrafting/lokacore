@@ -20,10 +20,24 @@ import { join } from 'node:path';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { replayRecords } from './replay.ts';
 import { files, todo } from './todo.ts';
+import { find } from './find.ts';
 import { why } from './why.ts';
+import { sentences } from './why_words.ts';
 
 export type Canonical = { text: Record<string, string> } & Record<string, unknown>;
-export type Message = { text: Record<string, string>; said: string[]; compiled: boolean };
+export type Message = {
+  text: Record<string, string>;
+  said: string[];
+  compiled: boolean;
+  lint?: string[];
+};
+
+/** `mix loka.lint`'s findings (`rel: words`, on stderr) from its exit and stderr; a lint that did not run says so. */
+export function lintLines(code: number | null, stderr: string) {
+  if (code === 0) return [];
+  const found = stderr.split('\n').filter((l) => /^[\w./-]+: /.test(l));
+  return code === 1 && found.length ? found : [`lint failed (exit ${code})`];
+}
 
 /** The text values `next` changes against `written` when nothing else differs; else undefined. */
 export function textOnly(written: Canonical, next: Canonical): Record<string, string> | undefined {
@@ -119,7 +133,13 @@ function explain(artifact: string, rows: string[], on: Asked) {
     const path = join(tmp, 'trace.jsonl');
     writeFileSync(path, `${run.join('\n')}\n`);
     const trace = replayRecords(path, sha256);
-    return why(loaded.cartridge as Cartridge, trace, trace.entries.length, on);
+    if (!trace.entries.length) throw new Error('Take a step in the Book first.');
+    const report = why(loaded.cartridge as Cartridge, trace, trace.entries.length, {
+      ...on,
+      now: true,
+    });
+    const told = on.action !== undefined ? report.action : report.dialogue;
+    return { ...report, lines: sentences(told) };
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
@@ -166,7 +186,7 @@ async function post(
 }
 
 /** Serves `GET /events` (each client gets the current message on connect and every push after),
- * the checkpoint routes over `source`, `GET /todo` (todo.ts) and the column's `POST /open` and
+ * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts) and the column's `POST /open` and
  * `POST /why`. */
 export function serve(port: number, source: string, artifact: string) {
   const clients = new Set<ServerResponse>();
@@ -175,6 +195,10 @@ export function serve(port: number, source: string, artifact: string) {
   const route = (request: IncomingMessage, response: ServerResponse) => {
     if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source);
     if (request.url === '/todo') return json(response, 200, todo(source));
+    if (request.url?.startsWith('/find?')) {
+      const q = new URL(request.url, 'http://x').searchParams.get('q') ?? '';
+      return json(response, 200, find(source, artifact, q));
+    }
     if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
       return post(request, response, source, artifact);
     if (request.url !== '/events') return response.writeHead(404).end();
