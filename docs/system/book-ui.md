@@ -57,8 +57,9 @@ Book still draws it, the passage names the Beads item that removes it.
 
 One exception (owner, 2026-10-31): the `+ item` pop, one aria-hidden transient under the log's last
 line after a pickup or a buy, reserving no layout, not in the record, in the small type. Its words are
-the view's item names, two items on one line, and a page turn removes it. It does not rise under
-reduced motion. The log line stays the record.
+the view's item names, two items on one line, a long name wrapping, and a page turn removes it. The
+log follows to its end, so the pop is seen on a full page. It does not rise under reduced motion. The
+log line stays the record.
 
 ## World and status entry
 
@@ -758,16 +759,23 @@ out, and the next dries in; a failed one fades through secondary ink, then out.
 **Blow wash.** A hit point loss during combat washes the paper once under the ink, and the hit point
 value dries in the wash's colour and back, with the thud and the heavy haptic. The page swells 1.5%
 at the wash's peak, with no layout change or reflow (owner, 2026-10-31). Reduced motion halves the
-wash and removes the swell; Flashes off removes both, leaving the value, thud and haptic. A blow
-inside the Flash limit moves the value and the thud alone: a flurry never peaks twice in a second.
+wash and removes the swell; Flashes off removes both, leaving the value, thud and haptic.
 
 **Flash limit.** At most one full-page luminance change per second, never three in any second; a
-later blow in that second keeps the value, thud and haptic. Flashes and reduced motion are separate.
+later blow in that second keeps the value, thud and haptic, so a flurry never peaks twice in a second.
+Flashes and reduced motion are separate.
 
 **Chapter card.** Over the leaving page's picture, blurred, the card's label, title and rule dry in
 one after another. The theme cut plays with the medium haptic. With no picture (reduced motion, a
 failed or late snapshot) there is no blur and the label, title and rule appear together; the cut
 stays. Only a chapter index change plays this, once as [Chapters](#chapters-scenes-and-recovery) says.
+The card goes without its paper only while that picture lies under it; leaving, it has its own paper,
+so its ink never shows over the next page. It does not curl in, so its haptic comes with the cut.
+
+**Gilt.** A line that marks the player's own gain arrives gilded and settles to its own ink: a
+skill learned or improved, in the log; a quest resolved, on its Journal title at the Journal's next
+opening, once. The Character page's level line stays gilt while points wait to be spent. No failure
+is gilt, and gilt is never the only sign. Reduced motion is a plain fade in the line's own ink.
 
 **Event sounds.** A sound marks what the hand did or how the player's story moved, never what the
 world did. Pressed or moved: the page turn, a pickup flick (a buy plays coin instead, so one purchase
@@ -779,8 +787,9 @@ rumour and reputation, a new map room, a generic narrated event, saves, loading,
 states, senses, status ticks and expiry, and an NPC's background life.
 
 **Haptics.** The kind for each event sits in the catalogue's tokens; refused and unavailable give
-warning, a save error or fault gives error once. Never two within the shortest gap, none during a
-page turn. Reduced motion leaves them on. Web uses the browser's vibration where supported, the
+warning, a save error or fault gives error once. Never two within the shortest gap. A haptic due
+during a curl is dropped, not held: its sound has already played, and a buzz after the curl reads as
+a second event. Reduced motion leaves them on. Web uses the browser's vibration where supported, the
 device build is a silent stub until mobile resumes, and no device proof is required before then.
 A preview or Storybook build also marks each haptic with a pulse: a ring round the Book column,
 outside the page turn, naming the kind, taking no touch or focus and hidden from screen readers. A
