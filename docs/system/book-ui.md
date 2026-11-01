@@ -144,7 +144,7 @@ the scrolling body, with status beneath it, inside the existing safe area.
 A projected Read place action keeps its exact detail target and authored label and follows
 the canonical [notice-detail rules](#notice-board-details).
 
-The enabled status/resources tap opens Contents. It lists exactly **Character**, **Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
+The enabled status/resources tap opens Contents. It lists exactly **Character**, **Skills**, **Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
 row. Character shows existing projected resources and position, without unrelated index links.
 Inventory separates held items from worn slots; Journal uses projected quest text;
 Settings retains Start over and its confirmation/error handling, and holds the
@@ -624,12 +624,12 @@ The option is an Action card that sends nothing: a press opens its list in the p
 
 A row press (or Enter on a focused row) sends that pair under [live action freshness](#live-action-freshness); nothing sends while an action is pending, and the list stays as it is. A confirmed accepted pick closes the detail page back to World and adds the receipt's authored narration to the World log once; without narration the Book writes one line from [`words.ts`](../../mobile/app/book/words.ts) with the original projected names: **You give an apple to the farmer.** (Give), **You douse the cart with the bucket.** (a use pair: the scripted action's authored label, first letter lowercased, then target and tool), **You cast lux on the cart.** (a spell). The existing [Announcements](#announcements) region reads it; the list adds no live region of its own. A refused pick keeps the page, closes the list, returns focus to the option, and the refusal shows as a refused line in that page's history; a stale pick redraws and nothing acts. An item the pick consumes follows the [consumed-item](#item-details-and-takedrop) line rule, which already ends in World. Put keeps its concrete pair button.
 
-**Aimed spells off the target's page** (owner 2026-10-23, loka-x6t.109.5; PM approved as built 2026-10-23). The Character page's Spells block draws one pick option per aimed spell the GameView offers on some target, labelled with the spell's label and **Cast on…** ("Flamma, cast on…"); its rows are that spell's targets, labelled with each target's projected name, a refused one an [unavailable](#unavailable-actions) row (`The lantern`), and an accepted pick turns to World with its line as above. During a live fight each foe line on the Combat page draws that foe's **Cast a spell…** option; an accepted pick stays on Combat while the fight goes on, and its narration goes to the combat log, never the World log. When the foe dies its option goes with it. Open item: with two foes, the two options read alike (the foe's name is in each row's accessible name, not the option's).
+**Aimed spells off the target's page** (owner 2026-10-23, loka-x6t.109.5; PM approved as built 2026-10-23). The Skills page's Spells block draws one pick option per aimed spell the GameView offers on some target, labelled with the spell's label and **Cast on…** ("Flamma, cast on…"); its rows are that spell's targets, labelled with each target's projected name, a refused one an [unavailable](#unavailable-actions) row (`The lantern`), and an accepted pick turns to World with its line as above. During a live fight each foe line on the Combat page draws that foe's **Cast a spell…** option; an accepted pick stays on Combat while the fight goes on, and its narration goes to the combat log, never the World log. When the foe dies its option goes with it. Open item: with two foes, the two options read alike (the foe's name is in each row's accessible name, not the option's).
 
 **Equipment and skills.** A weapon's or shield's page shows its projected slot, attack or block
 figures ("2–4 damage", or "2 damage" when the two are equal) and skill requirement, read from the projection, never renderer literals or inferred
 names; a carried weapon is visibly distinct from a wielded one, and a description grants no use.
-How Character shows learned skills is the [skill tree rule](#skill-tree-details).
+How the Skills page shows learned skills is the [skill tree rule](#skill-tree-details).
 A worn item a curse holds on keeps Remove in its list as an [unavailable card](#unavailable-actions)
 whose press shows the engine's reason as its sentence; the Book never hides it.
 An item's authored `equip` words name its Wear and Remove buttons and their lines ("Wield the
@@ -1047,13 +1047,13 @@ while the GameView offers `say` or `shout` (owner, loka-evzt 2026-10-30, paraphr
 conversation icon until the online Realm). Whisper is hidden on every page until loka-x6t.115
 (owner pick mvlrlvappy4w, 2026-10-23).
 
-A spell word is cast from the Character page. While `cast` is offered, its **Spells** section
+A spell word is cast from the Skills page. While `cast` is offered, its **Spells** section
 (under that section title) lists each learned untargeted spell word of the GameView's
 `spell_words` as an [ActionCard](../BOOK-UI-COMPONENTS.md) `word, cast` (`lux, cast`), the
 castable ones first, then each refused one in its [unavailable](#unavailable-actions) form; an
 unlearned word is never listed; no word, no Spells section. A press sends the GameView's wordless
 twin of Cast with that word; an accepted cast turns to World, where its line lands
-([Line placement](#line-placement)), as an aimed pick does; a refused press stays on Character.
+([Line placement](#line-placement)), as an aimed pick does; a refused press stays on Skills.
 An aimed spell (cartridge `aimed`, loka-x6t.109) is never a Spells line: the GameView offers it
 on each admitted target's entry (`command: cast`, `target_ids: [target]`) and the Book lists it in
 that page's **Cast a spell…** pick list ([World](#world-and-status-entry), owner 2026-10-23).
@@ -1071,6 +1071,6 @@ word anywhere; only its writer sees it.
 
 ## Skill tree details
 
-Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified. <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified. <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws as an [unavailable card](#unavailable-actions), never dropped (pass-1 R2); locked as a Note "Carving — locked. <requirement>"; any other unacquired box as a Note "Joinery — not learned. <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing. After the Raise cards comes the [Spells](#word-bar) section, while a spell word is refused.
+On the Skills page, skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified. <requirement>" (pass-1 H3). After them, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified. <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws as an [unavailable card](#unavailable-actions), never dropped (pass-1 R2); locked as a Note "Carving — locked. <requirement>"; any other unacquired box as a Note "Joinery — not learned. <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing. After the professions comes the [Spells](#word-bar) section, while a spell word is refused. With no skill, profession or Spells section the page draws one Note, the same line Character draws when nothing is known. It opens from Contents, returns as Journal does and draws no status line; the status icon still opens Character.
 
 An NPC's lesson line names the teacher while the skill is open to learn: "Aldous teaches Blade." while its projected `qualified` is true, else "Aldous teaches Blade. <requirement>". A locked skill reads "You cannot learn Blade yet. <requirement>"; a learned one "You know Blade." with no requirement (nothing is left to meet, pass-2), or while unqualified "You know Blade but cannot use it yet. <requirement>"; the reply that taught it adds the narrated event "You learn Blade." in place (loka-x6t.24; second-person prose, never a colon label, loka-lsqi).

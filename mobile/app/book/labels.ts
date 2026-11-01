@@ -44,7 +44,7 @@ export const LABEL = {
   notHere: 'Not here',
   // The away recap's heading (toolbox row W27; wording pending designer, loka-x6t.14).
   awayRecap: 'While you were away',
-  // The word field's sends (the Realm's room speech, loka-evzt); the Character page's Spells.
+  // The word field's sends (the Realm's room speech, loka-evzt); the Skills page's Spells.
   say: 'Say',
   shout: 'Shout',
   cast: 'Cast',
@@ -71,7 +71,7 @@ export const LABEL = {
   giveAnItem: 'Give an item…',
   giveTo: 'Give to…',
   castASpell: 'Cast a spell…',
-  castOn: 'Cast on…', // a Character Spells line's list of the aimed spell's targets (loka-x6t.109.5)
+  castOn: 'Cast on…', // a Skills page Spells line's list of the aimed spell's targets (loka-x6t.109.5)
   // The NPC page's Talk and shop cards, the shop page's Sell card (owner picks mvlrlvappy4w, mvlymuams73l).
   talk: 'Talk',
   trade: 'Trade',
@@ -82,6 +82,7 @@ export const LABEL = {
   // Page titles and the Contents lines (Menu.tsx, sections.tsx, journal.tsx; loka-x6t.61).
   contents: 'Contents',
   character: 'Character',
+  skills: 'Skills',
   map: 'Map',
   journal: 'Journal',
   settings: 'Settings',

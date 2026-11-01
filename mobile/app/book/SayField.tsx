@@ -47,7 +47,7 @@ type SayProps = { pending: boolean; sends: Send[]; words?: readonly string[]; cl
  * to 32 characters, no autocorrect or autocapitalize), then one Control per send, then a Chip
  * per known word.
  * - Use: none in single-player (owner, loka-evzt): kept for the Realm's room speech (Say, Shout,
- *   each only while offered; the known phrases). Spells cast from the Character page's Spells.
+ *   each only while offered; the known phrases). Spells cast from the Skills page's Spells.
  *   The NPC page has no Whisper until loka-x6t.115.
  * - Rules: a press sends the typed word with that button's action and closes; Enter sends the
  *   first. A word chip only fills the field (named by its word), never sends. A word that is not

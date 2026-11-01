@@ -83,21 +83,21 @@ test('a foe line casts on the Combat page, into its log, until the foe dies', (t
   assert.ok(!b.labels().includes('Cast a spell…'), 'the dead wight has no list');
 });
 
-// Breaks: no Cast on… on Character, a pick that stays on Character or loses its line, a refused
+// Breaks: no Cast on… on Skills, a pick that stays on Skills or loses its line, a refused
 // row without its reason, or a Spells-section line for an aimed spell.
-test("Character's Cast on… lists a spell's targets; the pick turns to World with its line", (t) => {
+test("Skills' Cast on… lists a spell's targets; the pick turns to World with its line", (t) => {
   const b = book(cartridge(1) as never);
   t.after(() => b.sql.close());
   b.tap('lantern, open');
   b.tap('Take the lantern');
-  const character = () => (b.tap(/opens Contents/), b.tap('Character, open'));
-  character();
+  const skills = () => (b.tap(/opens Contents/), b.tap('Skills, open'));
+  skills();
   assert.ok(!b.text().some((l) => /, cast:/.test(l)), 'no Spells-section line');
   b.tap('Lux, cast on…');
   b.tap('The lantern, cast lux on the lantern');
   assert.ok(b.labels().includes('The crypt, look'), 'back on World');
   assert.ok(b.text().includes('You speak lux and the ash flares.'));
-  character();
+  skills();
   b.tap('Lux, cast on…');
   b.refuse('The lantern');
   assert.match(b.text().join('\n'), /The lantern\s+You can't do that—need 1 ash\./);

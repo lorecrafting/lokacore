@@ -412,7 +412,7 @@ with that sense and source; unknown whether `CueView` names the bell: verify, el
 
 ### 3.13 Spells, identify, curses, durability, fire (29a/b, 27, 28, 21, W22)
 
-**Cast** (a spell word chosen from the Character page's Spells section or the "Cast a spell…" pick list): S3,
+**Cast** (a spell word chosen from the Skills page's Spells section or the "Cast a spell…" pick list): S3,
 the word's chip *presses* and the page *flicks* (the pickup's rise-and-settle applied to the whole page content,
 3 px); sound *paper* flick at tier note; haptic *medium*. The spell's effect then fires its own entry (a blow,
 a status, a light). Why: the owner rejected handwriting and ink run; the cast is the hand on the page. P2.

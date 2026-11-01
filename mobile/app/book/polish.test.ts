@@ -209,11 +209,12 @@ test('room is focused, the Map offers no Go, and every detail returns to the wor
   );
   h.tap('Back to World');
   const status = () => h.labels().some((l) => CONTENTS.test(l));
-  const sections = ['Character', LABEL.inventory, 'Map', 'Journal', 'Settings'];
+  // Breaks: Contents loses, adds or reorders a section (book-ui.md, World and status entry).
+  const sections = ['Character', 'Skills', 'Inventory', 'Map', 'Journal', 'Settings'];
   for (const section of sections) {
     h.tap(CONTENTS);
     assert.deepEqual(
-      h.labels().filter((label) => sections.some((s) => label === `${s}, open`)),
+      h.labels().filter((label) => label.endsWith(', open')),
       sections.map((s) => `${s}, open`),
     );
     assert.ok(h.text().includes('Contents'));

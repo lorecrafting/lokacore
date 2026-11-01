@@ -233,6 +233,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `ChapterPage` | `book/sections.tsx` | ChapterPages |
 | `ScenePage` | `book/sections.tsx` | ChapterPages |
 | `SkillDetails` | `book/skills.tsx` | SectionPages |
+| `SkillsPage` | `book/skills.tsx` | SectionPages |
 | `Professions` | `book/skills.tsx` | SectionPages |
 | `RaiseCards` | `book/skills.tsx` | SectionPages |
 | `ItemDetails` | `book/skills.tsx` | ItemPage |

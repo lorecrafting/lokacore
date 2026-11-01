@@ -29,6 +29,7 @@ import {
   ScenePage,
   SettingsPage,
 } from './sections.tsx';
+import { SkillsPage } from './skills.tsx';
 import { CreditsPage } from './CreditsPage.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
@@ -138,17 +139,16 @@ function sectionPage(p: BodyProps, page: Page) {
   };
   if (page.kind === 'contents')
     return <ContentsPage open={(kind: Section) => p.open({ kind })} world={p.world} />;
-  if (page.kind === 'character')
-    return (
-      <CharacterPage
-        view={view}
-        text={text}
-        {...home}
-        buttons={p.screen.buttons}
-        press={p.press}
-        pending={p.screen.pending}
-      />
-    );
+  const sheet = {
+    view,
+    text,
+    ...home,
+    buttons: p.screen.buttons,
+    press: p.press,
+    pending: p.screen.pending,
+  };
+  if (page.kind === 'character') return <CharacterPage {...sheet} />;
+  if (page.kind === 'skills') return <SkillsPage {...sheet} />;
   if (page.kind === 'map') return <MapPage view={view} text={text} {...home} />;
   if (page.kind === 'credits') return <CreditsPage back={p.back} />;
   if (page.kind === 'settings') return <SettingsRoute {...p} {...home} />;
