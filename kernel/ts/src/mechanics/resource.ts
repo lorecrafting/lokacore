@@ -68,11 +68,10 @@ export function resourceSpec(world: World, entity: EntityId, resource: Definitio
   return maximum === undefined ? spec : { ...spec, maximum };
 }
 
-/** What a blow can take: it stops at the authored floor, as a spell's damage does, and at 0, where death fires. */
+/** What a blow can take: it stops at the authored floor, as a spell's damage does, and at 0, where death fires; a body already below takes nothing. */
 export function aboveFloor(world: World, entity: EntityId, resource: DefinitionRef) {
-  return (
-    level(world, entity, resource)! - Math.max(0, resourceSpec(world, entity, resource).minimum)
-  );
+  const floor = Math.max(0, resourceSpec(world, entity, resource).minimum);
+  return Math.max(0, level(world, entity, resource)! - floor);
 }
 
 /** `entity`'s current value of `resource` at the world's clock; undefined if undeclared. */

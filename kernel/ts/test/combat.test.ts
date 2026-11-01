@@ -12,7 +12,7 @@ import {
 } from './combat_fixture.ts';
 import { step, gameView } from '../src/index.ts';
 import { key } from '../src/foundation/compose.ts';
-import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { level, resourceRef, resourceSpec } from '../src/mechanics/resource.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { living } from '../src/mechanics/death/shared.ts';
@@ -302,4 +302,20 @@ test('a killing blow at an NPC with a negative hp minimum stops at 0', () => {
 
   assert.equal(Math.max(...losses), 1);
   assert.equal(level(at, rat(at), resourceRef(at, 'hp')), 0);
+});
+
+// Break: a body already below 0 on a negative floor gives aboveFloor a negative room, so the round's
+// loss goes negative and faults evaluator_error instead of leaving hp where it is (loka-vduxr.21).
+test('a blow on a player below 0 takes nothing and the round runs', () => {
+  const w = combatWorld();
+  const pool = resourceRef(w, 'hp');
+  const spec = resourceSpec(w, w.body, pool);
+  const below = hp(
+    { ...w, entityResourceSpecs: { ...w.entityResourceSpecs, [w.body]: { ...spec, minimum: -5 } } },
+    w.body,
+    -3,
+  );
+  const round = elapsed(attack(below).world, 150, 2);
+  assert.equal(round.decision.kind, 'accepted', JSON.stringify(round.decision));
+  assert.equal(level(round.world, round.world.body, pool), -3);
 });

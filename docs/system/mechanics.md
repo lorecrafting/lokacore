@@ -869,7 +869,7 @@ later adds only its exact bandage treatment. This blocks repeated Attack, direct
 Move, dialogue/choices, other inventory/equipment/doors, Wait, scripted actions and Sit/Rest/Sleep, including
 aliases and raw commands. Closure restores ordinary actions from state; reopening derives the
 same restriction. This focused mode leaves actor-free scheduled rounds and their existing
-nonstanding/wake semantics intact.
+nonstanding/wake semantics intact. A body already below 0 takes nothing and the round runs (loka-vduxr.21).
 
 Rounds follow the frozen [first-encounter oracles](../spec/conformance/first-encounter.md).
 Odd rounds give the player the first opportunity; even rounds give the NPC the first.
