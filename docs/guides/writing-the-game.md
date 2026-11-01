@@ -56,11 +56,12 @@ why the action was missing or refused.
 
 ## Every kind of content
 
-`mise exec -- bin/loka new <kind> <name> [cartridge dir]` (from any directory; the cartridge dir defaults to the current one) writes a
-compiling file of that kind with every line a `~` placeholder, merged into the files it touches
+`mise exec -- bin/loka new <kind> <name> [--from <room> <direction>] ... [cartridge dir]` (from any directory; the cartridge dir defaults to the current one, or the cartridge a `cartridge <dir>` pair just made) writes a
+compiling file for each pair (the pairs before a refusal stay written), with every line a `~` placeholder, merged into the files it touches
 (it never replaces a value already there: it refuses, names the value and writes nothing),
-plus the capabilities it needs in `cartridge.json`; it prints what it wrote. A kind that refers
-to another takes the first one you have and refuses with the command to run first. The shapes
+plus the capabilities it needs in `cartridge.json`; it prints what it changed, then what to fill and the
+next command. `rooms <name> --from <room> <direction>` writes the exit both ways and, when `layout.json` exists, places the new room's row that way from its source. `cartridge <dir>` stands alone: run it first, then the other pairs with the dir last. A rerun leaves the file it names as you left it, and refuses when that file's steps differ. A kind that refers
+to another takes the first one you have (for a room, the entry) and refuses with the command to run first. The shapes
 come from the samplers; the rules from the [Builders' Guide](../BUILDERS-GUIDE.md#authoring-paths-and-examples).
 
 Live preview is the same for every kind: a `text.json` edit reaches the page as you save; any
@@ -81,22 +82,22 @@ a compile diagnostic you run by hand reads as `CODE path` (`SCHEMA_VIOLATION roo
 | `emotes` | [`emote_sampler`](../../cartridges/emote_sampler/) | nothing |
 | `facts` | [`shoo_sampler`](../../cartridges/shoo_sampler/) | nothing |
 | `items` | [`quest_sampler`](../../cartridges/quest_sampler/) | a room |
-| `layout` | [`identity_sampler`](../../cartridges/identity_sampler/) | rooms; lists every room afresh, so run it again after adding rooms |
+| `layout` | [`identity_sampler`](../../cartridges/identity_sampler/) | rooms; every later `bin/loka new` adds the rows of rooms it lacks |
 | `liquids` | [`buffs_sampler`](../../cartridges/buffs_sampler/) | nothing |
 | `npcs` | [`access_sampler`](../../cartridges/access_sampler/) | a room |
-| `populations` | [`boss_sampler`](../../cartridges/boss_sampler/) | a room; also writes the NPC, corpses, loot item, `hp`/`mv` resources, calendar, combat and death settings the engine requires |
+| `populations` | [`boss_sampler`](../../cartridges/boss_sampler/) | a room whose east exit is free, one population per cartridge; also writes the NPC, corpses, loot item, `hp`/`mv` resources, calendar, combat and death settings the engine requires |
 | `quests` | [`chapters_sampler`](../../cartridges/chapters_sampler/) | an item (the objective is to hold it) |
 | `reactions` | [`scars_sampler`](../../cartridges/scars_sampler/) | an item |
 | `replenish` | [`decay_sampler`](../../cartridges/decay_sampler/) | an item, a room and an NPC |
 | `resources` | [`affects_sampler`](../../cartridges/affects_sampler/) | nothing |
 | `rooms` | [`rooms_sampler`](../../cartridges/rooms_sampler/) | nothing |
-| `scenes` | [`scene_sampler`](../../cartridges/scene_sampler/) | a quest |
+| `scenes` | [`scene_sampler`](../../cartridges/scene_sampler/) | an item (it writes its own quest) |
 | `services` | [`durability_sampler`](../../cartridges/durability_sampler/) | an NPC and a resource (the currency); also writes the `use_service` action and the service text keys |
 | `skills` | [`damage_sampler`](../../cartridges/damage_sampler/) | nothing |
 | `statuses` | [`pen_sampler`](../../cartridges/pen_sampler/) | a resource |
 | `structures` | [`craft_sampler`](../../cartridges/craft_sampler/) | nothing |
 | `text` | [`speech_sampler`](../../cartridges/speech_sampler/) | nothing: `text.json` key `<name>` |
-| `topics` | [`spells_sampler`](../../cartridges/spells_sampler/) | a fact |
+| `topics` | [`spells_sampler`](../../cartridges/spells_sampler/) | nothing (it writes its own fact) |
 | `transports` | [`fast_travel_sampler`](../../cartridges/fast_travel_sampler/) | a room, an NPC and a resource; also writes the far room and both legs |
 
 ## Cookbook
