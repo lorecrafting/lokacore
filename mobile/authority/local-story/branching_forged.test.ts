@@ -193,25 +193,30 @@ test('an escort row in a world with no escort answer is refused', () => {
 // Breaks: a dropped clause in checkRow: a row bound to another actor, beat or item, a forged attempt
 // count, or a choice on a row still open, each loading and moving the wrong thing.
 test('a dialogue row that does not bind is refused', async (t) => {
-  const row = (g: Play) => Object.entries(g.story.world().state.choices!)[0]!;
+  const row = (g: Play) =>
+    Object.entries(g.story.world().state.choices!).find(([, r]) => r.status === 'pending')!;
   const forge = (g: Play, change: (r: any) => object) => {
     const [id, value] = row(g);
     put(g.sql, 'choices', id, { ...value, ...change(value) });
   };
-  const c = withToken({ guard: take(), back: give() });
-  // An open row: a resolved one is also caught by its receipt, hiding these clauses.
+  const linked = withToken({
+    guard: talkTo({ chat: { ...line, then: 'back' } }),
+    back: talkTo({ leave: line }),
+    z_take: take(),
+  });
+  // A row a hand-off opened: a resolved row or a talk's row is also caught by its receipt.
   const cases: [string, (r: any, g: Play) => object][] = [
     ['actor', (_, g) => ({ actor_id: g.fresh.entityIds[TOKEN] })],
-    ['beat', () => ({ beat: 'back' })],
-    ['bindings', (r) => ({ roles: r.roles.filter((b: any) => b.role !== 'token') })],
+    ['beat', () => ({ beat: 'guard' })],
+    ['bindings', (r) => ({ roles: r.roles.filter((b: any) => b.role !== 'guard') })],
     ['attempts', () => ({ attempts: 1 })],
-    ['choice on an open row', () => ({ choice_id: 'take' })],
+    ['choice on an open row', () => ({ choice_id: 'leave' })],
   ];
   for (const [name, change] of cases)
     await t.test(name, () =>
       refused(
-        c,
-        () => {},
+        linked,
+        (g) => g.choose('chat'),
         (g) => forge(g, (r) => change(r, g)),
       ),
     );
