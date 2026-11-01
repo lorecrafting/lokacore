@@ -46,3 +46,36 @@ Elixir failure (warnings only, `entries` does not drive Talk there): `z_intro` t
 ## Disposition
 
 Open until the blocker's two tests land and each is shown red under its mutant.
+
+## Re-check: head `f64e073736638fc8ebf58eda311ccec89019cb46`
+
+Verdict: **CHANGES REQUIRED**. CI at this head (`gh run list --commit`): ci, book-e2e, graph-diff completed, success.
+
+Must hold under the PM's ruling (a root or marked entry whose condition fails falls through to what it leads to, in link order): intro then hub across reload; a fall-through never runs what a choice guards; it ends; the compile warning says what Talk opens.
+
+**Blocker. The fall-through walks past choice gates.** `kernel/ts/src/mechanics/dialogue/selection.ts:72`, through `links`: every `then` and `then_failed`, ignoring the choice's policy and check. Guard's intro `when:` fails, Talk opens at once, no warning:
+hidden `a_pay` to `secret` opens `secret`; `a_persuade` `then: win` opens `win` with no roll; `then_failed: angry` alone opens `angry` with no failed check. A paid choice's target goes the same way, by reading. Failure: a reward node the writer put behind a check is free. PM to rule: does "what it leads to" include a gated, paid or checked target? The ruling did not say, and a reward opened for nothing is the failure either way; my reading is to follow only a choice the player could take for nothing (plain `then`, policy holding).
+
+**Blocker. Two mutants survive what a test says it catches.** `kernel/ts/test/dialogue_branching.test.ts:612`. Against all six dialogue and speech test files, 76 pass under each.
+Remove the same-speaker filter (`selection.ts:76`): green; a failed entry whose only link is another speaker's dialogue is then accepted and opens that dialogue (rejected at head). Remove `word === undefined` (`selection.ts:168`): green; a failed keyword dialogue then opens `hub` on the word, not `undefined`.
+
+**Should-fix. A named entry opens something else under its own label.** `selection.ts:207`. Failed `name: dialogue.guard.persuade`, press with its `dialogue` ref: offered available, opens the hub. Refused before. The name is a promise to the player; a press that selects one dialogue should not fall through.
+
+**Should-fix. The warning does not say what Talk opens.** `lib/loka/content/dialogue_links.ex:111`. A hub with `when:` and links `a_buy`, `z_g`, marked or not: full compile accepts it with no entry or link warning; Talk opens `a_buy`, mid-conversation. A writer closing a shop with a condition gets a detail page. Warn with the target when a conditional entry has more than one same-speaker link.
+Second divergence, `dialogue_links.ex:81`: the guess ranks over live dialogues, TS `width` (`selection.ts:57`) over all. `p` to `q`, shut `x`; `q` to `p`, live `r`: TS tie, `p` opens, no warning. `p` to `q`, shut `x`; `q` to `p`: clear in TS, ENTRY_GUESSED on `p`, a false warning. TS is the truth: the compile accepts a link into a shut-out dialogue and that link plays (`g.choose` opened it), so the comment at `dialogue_links.ex:110` is false and the ranking must count it.
+
+**Nit.** `/code-review` result missing from the PR body (0 matches).
+**Nit.** "Link order" is choice key order, not written order: `z` then `a` opens `a`'s target. The guide does not say so.
+**Nit.** `docs/guides/writing-the-game.md:81`: "every Talk once the condition fails opens the hub" is false beside another passing root (opens `z_other`).
+**Nit.** Test title `dialogue_branching.test.ts:668` still says "refuses when its policy fails"; now only with nowhere to go.
+
+Answers:
+- Intro then hub across reload: first Talk intro, afterward hub; holds in the developer's test, null control green, offer mutant red.
+- Loop: none. `tried.includes` bounds the walk; `circle` case rejected.
+- Two available Talks: both unnamed, neither press carries a `dialogue`, both open `z_other`. Book's `talkOf` (`mobile/app/book/offers.ts:125`) shows one card. Accept, same as two passing roots.
+- Size allow 690: agree, under the 750 cap with one harness. The fixes may need up to 750 or a new file.
+- Entry-wins mutants: both of mine red (`entry: true opens a hub another speaker leads to`; `another speaker's root leading to a marked hub draws no LOOP_SPEAKER`). Also red: link order, offer keeps policy, `Map.take`, width compare.
+- Round 1 nits: `kernel_api` body fixed; scene `entry` message fixed; clear hub warning fixed except the case above.
+- Shipped content: no `then` in any `cartridges/*/dialogues/*.json`, so nothing changes today.
+
+Not run: full suite under mutants; `bin/mutate_diff.sh` (hand mutants at this round, per the scope); the Book screen itself.
