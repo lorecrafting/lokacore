@@ -92,6 +92,11 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   writeFileSync(join(dir, 'scenes/s.scene'), 'npc: maud\nmaud: First.\nmaud: Second.\n- Take it\n');
   assert.equal(sourceOf(dir, 'dialogue.s.prompt', 'First.\nSecond.'), 'scenes/s.scene:2');
   assert.equal(sourceOf(dir, 'dialogue.s.label', 'Take it'), 'scenes/s.scene:4');
+  // Break: Alt-click on narration or a cutscene paragraph answers 404.
+  writeFileSync(join(dir, 'scenes/n.scene'), 'npc: maud\n* Rain falls.\n');
+  writeFileSync(join(dir, 'scenes/c.cut'), 'Bell one.\nBell two.\n---\n');
+  assert.equal(sourceOf(dir, 'dialogue.n.prompt', 'Rain falls.'), 'scenes/n.scene:2');
+  assert.equal(sourceOf(dir, 'scene.c.steps.0.text', 'Bell one.\nBell two.'), 'scenes/c.cut:1');
   const log = join(dir, 'opened');
   writeFileSync(join(dir, 'ed'), `#!/bin/sh\n[ "$1" = --goto ] && printf %s "$2" > ${log}\n`, {
     mode: 0o755,

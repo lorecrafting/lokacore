@@ -877,9 +877,11 @@ build. The author tools below are reachable only in that bundle (a production ex
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
   word counts of what is written. A release compile refuses a cartridge with placeholders
   (`placeholder_text` at the key's path) unless `--allow-placeholders` is given.
-- **Scene files.** `scenes/*.scene` (or `dialogues/*.scene`) is a plain-text form of one dialogue
-  lowered by [Source shortcuts](#source-shortcuts) into today's dialogue JSON and `text.json` keys
-  before any other pass; what it cannot say stays in a JSON file of the same key. Errors name the
+- **Scene files.** `scenes/*.scene` (or `dialogues/*.scene`) is a plain-text form of one dialogue,
+  and `scenes/*.cut` of one modal scene's steps (its `on` and `control` come from `scenes/<key>.json`,
+  refused when missing),
+  lowered by [Source shortcuts](#source-shortcuts) into today's dialogue or scene JSON and `text.json`
+  keys before any other pass; what it cannot say stays in a JSON file of the same key. Errors name the
   scene file and line, with `data.why` for a bad line (`npc` beside it once known); the other lines
   of the file still lower, so a fault behind a bad line reports in the same compile. A `gives:`
   declares its item role. A `gives:` whose item does not start with the scene's NPC is a warning

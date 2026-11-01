@@ -32,12 +32,21 @@ function markers(value: unknown, at = '', into: Prose[] = []) {
 const catalog = (value: unknown): Prose[] =>
   Object.entries(value ?? {}).filter((e): e is Prose => typeof e[1] === 'string');
 
-// A scene's prose: each speaker line and choice label by line number, `npc:`, `when:` and `gives:`
-// being keys (lib/loka/content/scene_files.ex).
+// A scene's prose: each speaker line, narration line and choice label by line number, `npc:`,
+// `when:`, `with:`, `gives:`, `sets:` and `quest:` being keys (lib/loka/content/scene_files.ex).
 const sceneLines = (text: string): Prose[] =>
   text.split('\n').flatMap((raw, i): Prose[] => {
-    const said = /^(?:- |(?!npc:|when:|gives:)[^:\s]+:\s)(.*)$/.exec(raw.trim());
+    const said = /^(?:- |\* |(?!npc:|when:|with:|gives:|sets:|quest:)[^:\s]+:\s)(.*)$/.exec(
+      raw.trim(),
+    );
     return said ? [[`line ${i + 1}`, said[1]]] : [];
+  });
+
+// A cutscene's prose: every line but the `---` that closes it.
+const cutLines = (text: string): Prose[] =>
+  text.split('\n').flatMap((raw, i): Prose[] => {
+    const line = raw.trim();
+    return line && line !== '---' ? [[`line ${i + 1}`, line]] : [];
   });
 
 const blank = (line: string) => line.trim() === '~';
@@ -48,11 +57,11 @@ const words = (text: string) => text.split(/\s+/).filter(Boolean).length;
 export function todo(source: string): Todo[] {
   const rows: Todo[] = [];
   for (const file of files(source)
-    .filter((rel) => rel.endsWith('.json') || rel.endsWith('.scene'))
+    .filter((rel) => /\.(json|scene|cut)$/.test(rel))
     .sort()) {
     const raw = readFileSync(join(source, file), 'utf8');
-    let lines = sceneLines(raw);
-    if (!file.endsWith('.scene'))
+    let lines = file.endsWith('.cut') ? cutLines(raw) : sceneLines(raw);
+    if (file.endsWith('.json'))
       try {
         const parsed: unknown = JSON.parse(raw);
         lines = file === 'text.json' ? catalog(parsed) : markers(parsed);

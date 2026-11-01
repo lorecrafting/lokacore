@@ -55,14 +55,22 @@ defmodule Loka.Content.Explain do
          missing_property | `{field}` is required here and is missing.
          not_in_enum | `{field}` must be one of: {allowed}.
          too_few_items | `{field}` needs at least one entry.
-         wrong_speaker | Line `{text}`: only `{npc}:` may speak here (`npc: {npc}`). | Change the speaker to `{npc}`, or move this into its own scene.
+         wrong_speaker | Line `{text}`: only `{npc}:` may speak here (`npc: {npc}`). | Change the speaker to `{npc}`, add `with: <npc>` at the top, or move this into its own scene.
          gives_speaker | Line `{text}`: a scene cannot give an item named like its speaker. | Rename the item, or write this as `dialogues/<key>.json`.
          repeated_choice | Line `{text}` repeats a choice or has no words to key it by. | Reword the choice.
          gives_outside_choice | Line `{text}`: `gives:` belongs under a choice. | Move it under a `- ` line.
-         misplaced_header | Line `{text}`: `npc:` comes first, then `when:`, before any speech. | Move it to the top of the file.
+         misplaced_header | Line `{text}`: `npc:` comes first, then `when:` and `with:`, before any choice. | Move it to the top of the file.
          no_npc | Line `{text}` comes before the speaker is named. | Start the file with `npc: <key>`.
-         not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `<npc>: words`, `- choice` or `gives:` (docs/guides/writing-the-game.md).
+         not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:` or `quest:` (docs/guides/writing-the-game.md).
          file_name | This file's name cannot be a key. | Rename it with lowercase letters, digits and underscores.
+         outside_choice | Line `{text}` belongs under a choice. | Move it under a `- ` line.
+         not_yet | Line `{text}`: `needs`, `once`, `then` and nested choices are not available yet. | Remove it, or write the branch as its own scene.
+         bad_sets | Line `{text}` is not `sets: <fact> [<value>]`. | Name one fact, and at most one value.
+         bad_quest | Line `{text}` is not `quest: accept <key>` or `quest: resolve <key>`, or repeats an accept. | Write one `quest:` line per choice with one of those forms.
+         resolve_not_all | Line `{text}`: `quest: resolve` needs every choice in the scene to resolve the same quest. | Add the same line under every choice, or remove it.
+         bad_with | Line `{text}` is not `with: <npc>`. | Name one NPC per `with:` line.
+         cut_end | Line `{text}`: a cutscene is paragraphs, then one `---` as its last line. | Keep one `---`, at the end, under at least one paragraph.
+         cut_no_trigger | This cutscene has nothing to start it. | Add `scenes/{key}.json` beside it with `on` (what starts it) and `"control": "modal"`.
          not_utf8 | Line `{text}` is not valid UTF-8 (the odd character marks the byte). | Save the file as UTF-8.
          layout_same_spot | Rooms {rooms} share the spot x {x}, y {y}, z {z}. | Give each its own x, y, z in layout.json.
          layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.

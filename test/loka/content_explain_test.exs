@@ -288,6 +288,18 @@ defmodule Loka.ContentExplainTest do
     refute Enum.any?(lines, &(&1 =~ "belongs under a choice"))
   end
 
+  # Break: a reference a verb lowered to points at the wrong line (every `sets:` at the first).
+  test "a verb's bad reference names its own line", %{tmp_dir: dir} do
+    text =
+      "npc: bram\nwith: nobody\nbram: hi\n- Go\n  sets: gone\n  sets: lost\n  quest: accept none\n  bram: ok\n"
+
+    lines = scene(dir, text)
+    assert line_at(lines, "scenes/hi.scene:2") =~ "nobody"
+    assert line_at(lines, "scenes/hi.scene:5") =~ "gone"
+    assert line_at(lines, "scenes/hi.scene:6") =~ "lost"
+    assert line_at(lines, "scenes/hi.scene:7") =~ "none"
+  end
+
   # Break: one typo also prints "required" errors for parts `.scene` syntax never names.
   test "a refused line earns no missing-part errors", %{tmp_dir: dir} do
     text = "npc: bram\nbrm: hi\n- Take it\nbram: here\n"

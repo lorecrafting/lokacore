@@ -88,8 +88,10 @@ export function sourceOf(source: string, key: string, words?: string) {
   return (
     find((l) => l.includes(JSON.stringify(words))) ??
     find(
-      (l) => l.trimEnd().endsWith(`: ${first}`) || l.trim() === `- ${first}`,
-      all.filter((rel) => rel.endsWith('.scene')),
+      (l) =>
+        l.trimEnd().endsWith(`: ${first}`) ||
+        [`- ${first}`, `* ${first}`, first].includes(l.trim()),
+      all.filter((rel) => /\.(scene|cut)$/.test(rel)),
     )
   );
 }

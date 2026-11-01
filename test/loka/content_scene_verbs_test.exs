@@ -1,0 +1,253 @@
+defmodule Loka.ContentSceneVerbsTest do
+  # The verbs `.scene` and `.cut` lower to today's JSON (docs/system/cartridge.md, Source
+  # shortcuts). Expected JSON is hand-written, and a bad form names its file and line.
+  use ExUnit.Case, async: true
+
+  alias Loka.Content
+  alias Loka.Content.Source
+
+  @moduletag :tmp_dir
+
+  defp write(tmp, rel, text) do
+    File.mkdir_p!(Path.dirname(Path.join(tmp, rel)))
+    File.write!(Path.join(tmp, rel), text)
+  end
+
+  # Break: a verb lowers to another shape or a wrong value type, its steps reorder, a narration or
+  # second speaker's line is dropped or not joined, or `with:` is not an npc role.
+  test "with, narration, second speaker, sets and quest accept lower to JSON", %{tmp_dir: tmp} do
+    write(tmp, "scenes/a.scene", """
+    npc: maud
+    with: bram
+
+    * Rain falls.
+    maud: line one
+    bram: line two
+    - Go on
+      sets: door_open
+      sets: mood calm
+      sets: count 3
+      sets: lit false
+      quest: accept bridge_job
+      bram: line three
+      * He nods.
+    - Stay
+    """)
+
+    {files, []} = Source.load(tmp)
+
+    assert {"scenes/a.scene", {:dialogue, "a", []},
+            %{
+              "npc" => "maud",
+              "roles" => %{
+                "maud" => %{"role" => "npc", "npc" => "maud"},
+                "bram" => %{"role" => "npc", "npc" => "bram"}
+              },
+              "prompt" => "dialogue.a.prompt",
+              "choices" => %{
+                "go_on" => %{
+                  "label" => "dialogue.a.choices.go_on.label",
+                  "narration" => "dialogue.a.choices.go_on.narration",
+                  "accept" => "bridge_job",
+                  "steps" => [
+                    %{"op" => "fact.assign", "fact" => "door_open", "value" => true},
+                    %{"op" => "fact.assign", "fact" => "mood", "value" => "calm"},
+                    %{"op" => "fact.assign", "fact" => "count", "value" => 3},
+                    %{"op" => "fact.assign", "fact" => "lit", "value" => false}
+                  ]
+                },
+                "stay" => %{"label" => "dialogue.a.choices.stay.label"}
+              }
+            }} in files
+
+    {"text.json", :text, text} = List.keyfind(files, "text.json", 0)
+    assert text["dialogue.a.prompt"] == "Rain falls.\nline one\nline two"
+    assert text["dialogue.a.choices.go_on.narration"] == "line three\nHe nods."
+  end
+
+  # Break: `quest: resolve` lowers onto the choice, or the dialogue loses its `quest`.
+  test "quest: resolve on every choice is the dialogue's quest", %{tmp_dir: tmp} do
+    write(tmp, "scenes/a.scene", """
+    npc: maud
+    maud: hi
+    - Yes
+      quest: resolve job
+    - No
+      quest: resolve job
+    """)
+
+    {files, []} = Source.load(tmp)
+
+    assert {"scenes/a.scene", {:dialogue, "a", []},
+            %{
+              "npc" => "maud",
+              "roles" => %{"maud" => %{"role" => "npc", "npc" => "maud"}},
+              "prompt" => "dialogue.a.prompt",
+              "quest" => "job",
+              "choices" => %{
+                "yes" => %{"label" => "dialogue.a.choices.yes.label"},
+                "no" => %{"label" => "dialogue.a.choices.no.label"}
+              }
+            }} in files
+  end
+
+  # Break: a bad form lowers silently, is reported as another fault or on another line, or its
+  # row is missing from the plain catalog (the raw `why` reaches the writer).
+  for {name, body, want} <- [
+        needs: {"npc: maud\nneeds: met\nmaud: hi\n- Go\n", [{2, "not_yet"}]},
+        once: {"npc: maud\nmaud: hi\n- Go\n  once\n", [{4, "not_yet"}]},
+        then: {"npc: maud\nmaud: hi\n- Go\n  then: x\n", [{4, "not_yet"}]},
+        nested: {"npc: maud\nmaud: hi\n- Go\n  - In\n    maud: x\n- Out\n", [{4, "not_yet"}]},
+        sets_many: {"npc: maud\nmaud: hi\n- Go\n  sets: a b c\n", [{4, "bad_sets"}]},
+        sets_outside: {"npc: maud\nsets: a\nmaud: hi\n- Go\n", [{2, "outside_choice"}]},
+        quest_outside: {"npc: maud\nquest: accept a\nmaud: hi\n", [{2, "outside_choice"}]},
+        quest_form: {"npc: maud\nmaud: hi\n- Go\n  quest: start a\n", [{4, "bad_quest"}]},
+        quest_twice:
+          {"npc: maud\nmaud: hi\n- Go\n  quest: accept a\n  quest: accept b\n",
+           [{5, "bad_quest"}]},
+        resolve_some:
+          {"npc: maud\nmaud: hi\n- A\n  quest: resolve j\n- B\n", [{4, "resolve_not_all"}]},
+        resolve_mixed:
+          {"npc: maud\nmaud: hi\n- A\n  quest: resolve j\n- B\n  quest: resolve k\n",
+           [{4, "resolve_not_all"}, {6, "resolve_not_all"}]},
+        with_two: {"npc: maud\nwith: a b\nmaud: hi\n", [{2, "bad_with"}]},
+        with_late: {"npc: maud\nmaud: hi\n- Go\n  with: bram\n", [{4, "misplaced_header"}]},
+        gives_second_speaker:
+          {"npc: maud\nwith: bram\nmaud: hi\n- Go\n  gives: bram\n", [{5, "gives_speaker"}]},
+        unknown_speaker: {"npc: maud\nbram: hi\n", [{2, "wrong_speaker"}]},
+        refused_gives:
+          {"npc: maud\nmaud: hi\n- Go\n- Go\n  gives: maud\n",
+           [{4, "repeated_choice"}, {5, "gives_speaker"}]},
+        refused_sets:
+          {"npc: maud\nmaud: hi\n- Go\n- Go\n  sets: a b c\n",
+           [{4, "repeated_choice"}, {5, "bad_sets"}]},
+        refused_quest:
+          {"npc: maud\nmaud: hi\n- Go\n- Go\n  quest: start a\n",
+           [{4, "repeated_choice"}, {5, "bad_quest"}]},
+        latin1_npc: {"npc: caf\xE9\nmaud: hi\n- Go\n", [{1, "not_utf8"}]}
+      ] do
+    test "a bad scene form: #{name}", %{tmp_dir: tmp} do
+      write(tmp, "scenes/a.scene", unquote(body))
+      {_, diags} = Source.load(tmp)
+      got = Enum.map(diags, &{&1["data"]["line"], &1["data"]["why"]})
+      assert got == unquote(want)
+
+      lines = Content.explained(diags, tmp)
+
+      for {n, why} <- got do
+        said = Enum.find(lines, &String.contains?(&1, "scenes/a.scene:#{n}"))
+        assert said, "nothing at line #{n}: #{inspect(lines)}"
+        refute said =~ why
+      end
+    end
+  end
+
+  # Break: a refused choice's verbs leak onto another choice, or a resolve under it counts.
+  test "a valid verb under a refused choice is written nowhere", %{tmp_dir: tmp} do
+    write(tmp, "scenes/a.scene", """
+    npc: maud
+    maud: hi
+    - Go
+    - Go
+      sets: a
+      quest: accept b
+      quest: resolve c
+    """)
+
+    {files, diags} = Source.load(tmp)
+    assert [%{"data" => %{"line" => 4, "why" => "repeated_choice"}}] = diags
+    {_, _, value} = List.keyfind(files, "scenes/a.scene", 0)
+    assert Map.keys(value["choices"]["go"]) == ["label", "narration"]
+    refute Map.has_key?(value, "quest")
+  end
+
+  @bell_steps [
+    %{"type" => "narrate", "text" => %{"prose" => "The bell rings."}},
+    %{"type" => "narrate", "text" => %{"prose" => "The fen answers.\nThe fox stills."}},
+    %{"type" => "await_ack"},
+    %{"type" => "end"}
+  ]
+  @bell_on %{"on" => %{"story_point" => "lantern_resolved", "outcome" => "carry"}}
+
+  # Breaks (gate): a cutscene's lowering differs in any byte from the scene JSON it stands for, or
+  # its same-key JSON file (`on`, `control`) is not merged over it.
+  test "a sampler scene as a cutscene compiles byte-identical to its JSON form" do
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+    head = Map.put(@bell_on, "control", "modal")
+    unkeyed = fn text -> Map.reject(text, fn {k, _} -> k =~ "scene.bell_rung." end) end
+
+    assert {:ok, bytes, []} =
+             Loka.ContentSource.compile(dir, [
+               {"text.json", unkeyed},
+               {"scenes/bell_rung.json", Map.put(head, "steps", @bell_steps)}
+             ])
+
+    assert bytes =~ "The fen answers."
+
+    File.write!(
+      Path.join(dir, "scenes/bell_rung.cut"),
+      "The bell rings.\n\nThe fen answers.\nThe fox stills.\n\n---\n"
+    )
+
+    assert Loka.ContentSource.compile(dir, [
+             {"text.json", unkeyed},
+             {"scenes/bell_rung.json", head}
+           ]) == {:ok, bytes, []}
+  end
+
+  # Break: a paragraph splits or merges wrongly, `---` lowers to anything but one await_ack before
+  # end, or the prose is not keyed by its step.
+  test "a cutscene lowers to one narrate per paragraph, await_ack, end", %{tmp_dir: tmp} do
+    write(tmp, "scenes/a.cut", "one\ntwo\n\n\nthree\n---\n")
+    write(tmp, "scenes/a.json", ~s({"control": "modal", "on": {"quest": "q"}}))
+    {files, []} = Source.load(tmp)
+
+    assert {"scenes/a.cut", {:scene, "a", []},
+            %{
+              "control" => "modal",
+              "on" => %{"quest" => "q"},
+              "steps" => [
+                %{"type" => "narrate", "text" => "scene.a.steps.0.text"},
+                %{"type" => "narrate", "text" => "scene.a.steps.1.text"},
+                %{"type" => "await_ack"},
+                %{"type" => "end"}
+              ]
+            }} in files
+
+    {"text.json", :text, text} = List.keyfind(files, "text.json", 0)
+    assert text["scene.a.steps.0.text"] == "one\ntwo"
+    assert text["scene.a.steps.1.text"] == "three"
+  end
+
+  # Break: a malformed file passes, or the fault lands on another line, or a follow-on from the
+  # order check or the missing trigger joins it in words the writer cannot act on.
+  for {name, body, want} <- [
+        no_close: {"one\n\ntwo\n", [{3, "cut_end"}]},
+        early: {"one\n---\ntwo\n---\n", [{2, "cut_end"}]},
+        twice: {"one\n---\n---\n", [{2, "cut_end"}]},
+        only_close: {"\n---\n", [{2, "cut_end"}]},
+        empty: {"", [{1, "cut_end"}]},
+        latin1: {"caf\xE9\n---\n", [{1, "not_utf8"}]}
+      ] do
+    test "a bad cutscene: #{name}", %{tmp_dir: tmp} do
+      write(tmp, "scenes/a.cut", unquote(body))
+      write(tmp, "scenes/a.json", ~s({"control": "modal", "on": {"quest": "q"}}))
+      {_, diags} = Source.load(tmp)
+      got = Enum.map(diags, &{&1["data"]["line"], &1["data"]["why"]})
+      assert got == unquote(want)
+      [{n, why} | _] = got
+      said = diags |> Content.explained(tmp) |> Enum.find(&(&1 =~ "scenes/a.cut:#{n}"))
+      assert said && not (said =~ why)
+    end
+  end
+
+  # Break: a cutscene with no trigger compiles, never plays and nobody hears why.
+  test "a cutscene with nothing to start it says what to add", %{tmp_dir: tmp} do
+    write(tmp, "scenes/a.cut", "one\n---\n")
+    {_, diags} = Source.load(tmp)
+    assert [%{"code" => "SCHEMA_VIOLATION", "data" => %{"why" => "cut_no_trigger"}}] = diags
+    [said] = Content.explained(diags, tmp)
+    assert said =~ "scenes/a.cut:1"
+    assert said =~ "scenes/a.json"
+  end
+end
