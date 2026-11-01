@@ -1,5 +1,7 @@
 # Structure of the cosmos
 
+> Reference only: agent-drafted worldbuilding text (not the owner's words). Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Status: draft. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Canon tier: draft (owner-directed 2026-10-16).
 
 **Purpose.** What exists at the largest scale: one world or many, planes, the shape of the heavens, and what lies beyond.

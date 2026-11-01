@@ -1,5 +1,7 @@
 # Showcase plan 4: the Homestead district
 
+> Reference only: agent-written plan; any room, NPC or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 District brief for `cartridges/toolbox_showcase` ([showcase](../SHOWCASE.md), Beads `loka-y6yg.19`),
 written by Fable for an Opus developer and an Opus reviewer. Base: `main` after PR #403 (Homestead
 batches A and B merged in #402 and its predecessor; the toolbox table still reads `in progress` for
