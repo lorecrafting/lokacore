@@ -12,3 +12,9 @@ export function tickPulse(c: Ticks, now: number) {
   c.stalled = false;
   return resume ? ('resume' as const) : ('active' as const);
 }
+
+// A hide can be the first code to run after a stall; only a resume capture can cap that gap.
+export const hidePulses = (c: Ticks, now: number) =>
+  c.stalled || now - (c.ticked ?? now) > STALLED_MS
+    ? (['resume', 'pause'] as const)
+    : (['pause'] as const);

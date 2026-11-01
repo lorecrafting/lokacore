@@ -5,9 +5,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import type { Key } from '../../../kernel/ts/src/contracts.gen.ts';
+import { hidePulses } from '../../app/clock-tick.ts';
 import { compiled } from './__tests__/compiled.ts';
-import { CatchUpRefusedError } from './elapsed.ts';
-import { statusOfError } from './session.ts';
 import {
   checkpoint,
   coldReopen,
@@ -177,7 +176,7 @@ test('a return with more debt than the cap credits nothing and keeps the debt', 
   a.game.pulse();
   assert.equal(checkpoint(a.sql).target, start + 259200);
   a.clock.wall += YEAR;
-  assert.notEqual(a.game.pulse('resume').kind, 'error');
+  assert.equal(a.game.pulse('resume').kind, 'catching_up');
   assert.equal(checkpoint(a.sql).target, start + 259200);
   a.sql.close();
 });
@@ -197,9 +196,13 @@ test('debt rounds up against the cap at a rate that does not divide a second', (
   a.sql.close();
 });
 
-// Breaks: a recap save defers its catch-up past open, so a refused delivery arrives on a pulse as a
-// plain error with no Start over, where opening would have said save_corrupt.
-test('a catch-up refused on a pulse reads as save_corrupt', () => {
-  const status = statusOfError(new CatchUpRefusedError('elapsed delivery refused: x'));
-  assert.equal(status.kind === 'error' && status.reason, 'save_corrupt');
+// Breaks: a hide that is the first code after a stall pauses alone, crediting the year uncapped.
+test('a hide after a stall is capped; the pause then settles with nothing more to credit', (t) => {
+  const a = elapsedHost(save(t), { wall: 10000, mono: 0 }, elapsedBundle());
+  a.game.pulse();
+  a.clock.wall += YEAR;
+  a.clock.mono += YEAR;
+  for (const pulse of hidePulses({ ticked: 0 }, YEAR)) a.game.pulse(pulse);
+  assert.equal(checkpoint(a.sql).target, START + 86400);
+  a.sql.close();
 });

@@ -220,7 +220,7 @@ function attemptStory(
       : { kind: 'save_corrupt', message: e.message };
   }
 }
-export const statusOfError = (e: unknown): ElapsedStatus =>
+const statusOfError = (e: unknown): ElapsedStatus =>
   e instanceof ElapsedRecoveryError && e.kind === 'stale_view'
     ? { kind: 'replaced' }
     : e instanceof ElapsedRecoveryError || e instanceof CatchUpRefusedError
