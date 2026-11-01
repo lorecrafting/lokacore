@@ -24,7 +24,7 @@ defmodule Loka.Content.Reactions do
     caps = m["requires"]["capabilities"]
     ctx = %{m: m, defs: defs, text: text, kinds: {caps, owners(registry, ["definitions"])}}
     ctx = Map.put(ctx, :events, {caps, owners(registry, ["events"])})
-    Enum.flat_map(all(defs), &rule(&1, ctx))
+    Enum.flat_map(all(defs), &(rule(&1, ctx) ++ timed_status(&1, ctx.defs)))
   end
 
   @filters %{
@@ -57,21 +57,34 @@ defmodule Loka.Content.Reactions do
       steps(rel, Enum.with_index(r["steps"]), on, ctx)
   end
 
-  # action_completed runs inside the action; its status row would start before a duration's own
-  # time.advance, which faults at runtime (the action's own steps: `Loka.Content.ScriptedActions`).
-  defp timed_status(rel, steps, %{"event" => "action_completed"} = on, defs) do
-    timed? =
-      Enum.any?(
-        for({_, {_, [], a}} <- defs["scripted_action"], do: a),
-        &(is_number(&1["duration"]) and &1["duration"] > 0 and on["action"] in [nil, &1["key"]])
-      )
+  # The action's completion or its own custom event runs inside it; the status row would start before
+  # a duration's time.advance, which faults at runtime (its own steps: `Loka.Content.ScriptedActions`).
+  # Refuses only a path known to run: `after` writes a job instead, and a fact_changed may not fire.
+  defp timed_status({rel, %{"on" => on, "steps" => steps} = r}, defs) do
+    timed =
+      for {_, {_, [], %{"duration" => d} = a}} <- defs["scripted_action"] || %{}, d > 0, do: a
 
-    for {%{"op" => "status.apply"}, i} <- steps, timed? do
+    inside? = not is_map_key(r, "after") and Enum.any?(timed, &inside?(on, r, &1))
+
+    for {%{"op" => "status.apply"}, i} <- Enum.with_index(steps), inside? do
       diag("SCHEMA_VIOLATION", at(rel, ["steps", i]), %{"why" => "duration_status"})
     end
   end
 
-  defp timed_status(_, _, _, _), do: []
+  defp inside?(%{"event" => "action_completed"} = on, r, action),
+    do: on["action"] == action["key"] or (on["action"] == nil and not is_map_key(r, "when"))
+
+  defp inside?(%{"event" => "custom_event", "custom" => custom}, r, action) do
+    not is_map_key(r, "when") and
+      Enum.any?(
+        action["outcomes"],
+        fn {_, o} ->
+          Enum.any?(o["steps"], &(&1["event"] == custom))
+        end
+      )
+  end
+
+  defp inside?(_, _, _), do: false
 
   # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
   # moved.
@@ -79,7 +92,6 @@ defmodule Loka.Content.Reactions do
     runs = for {%{"op" => "replenish.run", "replenish" => k}, i} <- steps, do: {k, i}
 
     Enum.flat_map(steps, &consequence(rel, &1, on, ctx)) ++
-      timed_status(rel, steps, on, ctx.defs) ++
       for {{k, i}, n} <- Enum.with_index(runs),
           Enum.any?(Enum.take(runs, n), &(elem(&1, 0) == k)),
           do: diag("DUPLICATE_DEFINITION", at(rel, ["steps", i, "replenish"]))

@@ -400,3 +400,20 @@ test('a following escort ignores its schedule hour and still follows the next Mo
     room(moved.world, 'ferry_landing'),
   );
 });
+
+// Breaks: a separated escort's NPC still counts as escorting, so its schedule hour never walks it.
+test('a separated escort walks its schedule hour', () => {
+  const a = setup((c) => {
+    c.npcs[`${prefix}:npc/child`].daily_schedule = { '20': ref('room', 'village_green') };
+  });
+  a.ready();
+  a.choose('rescue');
+  fallInCellar(a);
+  assert.equal(relation(a.world()).status, 'separated');
+  const hour = elapsed(a.world(), 72000, 200);
+  assert.equal(hour.decision.kind, 'accepted', JSON.stringify(hour.decision));
+  assert.equal(
+    hour.world.state.containers[entity(hour.world, 'npc', 'child')],
+    room(hour.world, 'village_green'),
+  );
+});

@@ -35,7 +35,7 @@ defmodule Loka.ContentFaultsTest do
       update_in(r["resources"], &Map.new(&1, fn {k, v} -> {k, Map.delete(v, "regen")} end))
     end)
 
-    edit.("actions/ward.json", &Map.put(&1, "duration", 300))
+    edit.("actions/ward.json", &Map.put(&1, "duration", 1))
 
     {:error, diags} = Content.compile(tmp)
 
@@ -67,29 +67,38 @@ defmodule Loka.ContentFaultsTest do
     # The status moves to the reactions below; the action's own step is refused first otherwise.
     edit.("actions/ward.json", fn a ->
       a
-      |> Map.put("duration", 300)
+      |> Map.put("duration", 1)
       |> put_in(["outcomes", "success", "steps"], [
-        %{"op" => "fact.assign", "fact" => "ward_landed", "value" => true}
+        %{"op" => "fact.assign", "fact" => "ward_landed", "value" => true},
+        %{"op" => "event.emit", "event" => "warding"}
       ])
     end)
 
-    apply = ~s({"op": "status.apply", "status": "warded"})
+    any = ~s("on": {"event": "action_completed"})
+    custom = ~s("on": {"event": "custom_event", "custom": "warding"})
+    gate = ~s("when": {"op": "npc_present", "npc": "wight"})
+    apply = ~s("steps": [{"op": "status.apply", "status": "warded"}])
 
-    for {name, on} <- [
-          {"named", ~s({"event": "action_completed", "action": "ward"})},
-          {"any", ~s({"event": "action_completed"})},
-          {"other_action", ~s({"event": "action_completed", "action": "lux"})},
-          {"other_event", ~s({"event": "status_applied"})}
+    # The first three are known to run inside the action; the rest may not, or run after it.
+    for {name, fields} <- [
+          {"named", ~s("on": {"event": "action_completed", "action": "ward"})},
+          {"any", any},
+          {"custom", custom},
+          {"other_action", ~s("on": {"event": "action_completed", "action": "lux"})},
+          {"other_custom", ~s("on": {"event": "custom_event", "custom": "other"})},
+          {"other_event", ~s("on": {"event": "status_applied"})},
+          {"fact", ~s("on": {"event": "fact_changed", "fact": "ward_landed"})},
+          {"any_after", any <> ~s(, "after": 200)},
+          {"any_when", any <> ", " <> gate},
+          {"custom_after", custom <> ~s(, "after": 200)},
+          {"custom_when", custom <> ", " <> gate}
         ] do
-      File.write!(
-        Path.join(tmp, "reactions/#{name}.json"),
-        ~s({"on": #{on}, "steps": [#{apply}]})
-      )
+      File.write!(Path.join(tmp, "reactions/#{name}.json"), "{#{fields}, #{apply}}")
     end
 
     {:error, diags} = Content.compile(tmp)
 
-    assert ["reactions/any.steps[0]", "reactions/named.steps[0]"] =
+    assert ["reactions/any.steps[0]", "reactions/custom.steps[0]", "reactions/named.steps[0]"] =
              diags
              |> Enum.filter(&(&1["data"]["why"] == "duration_status"))
              |> Enum.map(& &1["path"])
