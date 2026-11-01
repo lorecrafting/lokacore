@@ -82,10 +82,10 @@ Shared mutable state for one logical door or gate (21 §5 Barrier), owned by bar
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| initial | [BarrierState](source-kinds.gen.md#barrierstate) | yes |  |
-| key_item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| initial | [BarrierState](source-kinds.gen.md#barrierstate) | yes | The barrier's state in a fresh world. |
+| key_item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item whose holder may lock and unlock this barrier. |
 | keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the barrier's short description. |
 | opens_when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected. |
 | tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1). |
 
@@ -104,11 +104,11 @@ An authored body bleed duration, tick cadence and HP loss.
 |---|---|---|---|
 | duration | integer | yes | How long it lasts, in seconds. |
 | hp_loss | integer | yes | HP lost per tick. |
-| narration | object | yes |  |
-| narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration.expired | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration.refreshed | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration.tick | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| narration | object | yes | Text told as the bleed starts, repeats, ticks and ends. |
+| narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the bleed first starts on a body. |
+| narration.expired | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the bleed ends by running out. |
+| narration.refreshed | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the bleed is applied again while already active. |
+| narration.tick | [TextKey](source-kinds.gen.md#textkey) | yes | Text told on a tick that costs hit points. |
 | tick_every | integer | yes | Seconds between ticks. |
 
 ## cartridge
@@ -119,18 +119,18 @@ A cartridge's manifest (05 §3, §20): identity, title, compatibility requiremen
 |---|---|---|---|
 | alternates | map of list of [TextKey](source-kinds.gen.md#textkey) |  | Narration variety (alternates@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG. |
 | ancestries | map of [AncestrySpec](source-kinds.gen.md#ancestryspec) |  | Authored once-only character choices (attribute@1), keyed by choice Key. |
-| api_version | [ApiVersion](source-kinds.gen.md#apiversion) | yes |  |
+| api_version | [ApiVersion](source-kinds.gen.md#apiversion) | yes | The source format family this cartridge is written in; always loka/v3. |
 | calendar | [Calendar](source-kinds.gen.md#calendar) |  | See the type. |
 | chapters | list of [Chapter](source-kinds.gen.md#chapter) |  | Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning. |
-| entry | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| id | [CartridgeId](source-kinds.gen.md#cartridgeid) | yes |  |
+| entry | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The room a fresh world puts the player's body in. |
+| id | [CartridgeId](source-kinds.gen.md#cartridgeid) | yes | The cartridge's identity; every definition key and reference carries it. |
 | requires | [CompatibilityRequirements](source-kinds.gen.md#compatibilityrequirements) | yes | See the type. |
 | speech | object |  | Word bar S2 (speech@1): phrases, the cartridge's static say words, each a speech@1 Word, offered to every actor with no fact gate; GameView projects them as phrases. In source it is cartridge.json's speech, beside world. |
-| speech.phrases | list of [Word](source-kinds.gen.md#word) | yes |  |
-| supported_profiles | list of [ExecutionProfile](source-kinds.gen.md#executionprofile) | yes |  |
+| speech.phrases | list of [Word](source-kinds.gen.md#word) | yes | The words every player can say, as chips in the say bar. |
+| supported_profiles | list of [ExecutionProfile](source-kinds.gen.md#executionprofile) | yes | The hosting profiles this cartridge runs under; at least one (offline_private, online_private, party, shared_area). |
 | time_policy | [TimePolicy](source-kinds.gen.md#timepolicy) |  | See the type. |
-| title | string | yes |  |
-| version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | yes |  |
+| title | string | yes | The cartridge's name as listed for the player. |
+| version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | yes | The cartridge's release version, MAJOR.MINOR.PATCH. |
 | world | [WorldSettings](source-kinds.gen.md#worldsettings) |  | See the type. |
 
 ## dialogues
@@ -150,8 +150,8 @@ One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogue
 | riddle.answer | string | yes | The answer that solves the riddle, compared lowercased. |
 | riddle.bank | list of string | yes | The letters an answer may use, each once per entry; an answer that does not fit is refused. |
 | riddle.choice_id | [Key](source-kinds.gen.md#key) | yes | The choice that takes a typed answer. |
-| riddle.wrong | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| riddle.wrong_limit | integer |  |  |
+| riddle.wrong | [TextKey](source-kinds.gen.md#textkey) | yes | Line told after a wrong answer. |
+| riddle.wrong_limit | integer |  | Wrong answers allowed; the last one closes the choice for good. Leave out for unlimited tries. Needs the dialogue's quest. |
 | roles | map of [DialogueRole](source-kinds.gen.md#dialoguerole) | yes | Participants bound when the talk opens. |
 
 ## emotes
@@ -201,7 +201,7 @@ A portable thing (21 §8): its key; keywords, the Alias words a player names it 
 | equip.removed | [TextKey](source-kinds.gen.md#textkey) | yes | The line told when the item is removed. |
 | equip.wear | [TextKey](source-kinds.gen.md#textkey) | yes | The item's Wear label. |
 | equip.worn | [TextKey](source-kinds.gen.md#textkey) | yes | The line told when the item is worn. |
-| fuel | [FuelSpec](source-kinds.gen.md#fuelspec) |  |  |
+| fuel | [FuelSpec](source-kinds.gen.md#fuelspec) |  | Makes the item a lightable fuel source that burns while lit, or a supply that refuels one. |
 | give_allowed | `false` |  | API1.10: false prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal. |
 | identified | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row 27: a boolean fact, not per_subject; the item is identified while it reads true for the player, and GameView worn sums identified items only (needs affects). |
 | immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row G3: statuses that status.apply skips on this item's instance; each names a declared status. |
@@ -262,16 +262,16 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 | capacity | integer |  | Most items it holds. |
 | cues | [Cues](source-kinds.gen.md#cues) |  | Sense cues reaching nearby rooms from this NPC: 1 to 4 of {sense, text, range, when?}. |
 | daily_schedule | map of [Key](source-kinds.gen.md#key) or object or list of [Key](source-kinds.gen.md#key) or object |  | schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing. |
-| daily_schedule.*{walks=true} | variant |  |  |
-| daily_schedule.*{walks=true}.goal | [TextKey](source-kinds.gen.md#textkey) |  |  |
-| daily_schedule.*{walks=true}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| daily_schedule.*{walks=true} | variant |  | One case of the hour: where the NPC goes, and optionally why and how. |
+| daily_schedule.*{walks=true}.goal | [TextKey](source-kinds.gen.md#textkey) |  | Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go. |
+| daily_schedule.*{walks=true}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room the NPC moves to when this case is chosen. |
 | daily_schedule.*.cartridge_id | [CartridgeId](source-kinds.gen.md#cartridgeid) | in this form | The owning cartridge. Lowercase snake_case, at most 64 characters. |
 | daily_schedule.*.cartridge_version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | in this form | The cartridge version, MAJOR.MINOR.PATCH. |
 | daily_schedule.*.key | string | in this form | The definition's key within its kind. |
 | daily_schedule.*.kind | string | in this form | The definition's kind. |
-| daily_schedule.*[]{walks=true} | variant |  |  |
-| daily_schedule.*[]{walks=true}.goal | [TextKey](source-kinds.gen.md#textkey) |  |  |
-| daily_schedule.*[]{walks=true}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | in this form |  |
+| daily_schedule.*[]{walks=true} | variant |  | One case of the hour: where the NPC goes, and optionally why and how. |
+| daily_schedule.*[]{walks=true}.goal | [TextKey](source-kinds.gen.md#textkey) |  | Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go. |
+| daily_schedule.*[]{walks=true}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | in this form | The room the NPC moves to when this case is chosen. |
 | daily_schedule.*[]{walks=true}.when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key examine shows. |
 | description_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Description variants, its mood. |
@@ -296,7 +296,7 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 | mount.terrain | list of [Tag](source-kinds.gen.md#tag) | yes | Room tags this mount carries a rider over; a move into a room with none of them is refused. 1 to 8 unique tags. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its short description. |
 | name_variants | [NameVariants](source-kinds.gen.md#namevariants) |  | Name variants, its mood. |
-| perception | object |  |  |
+| perception | object |  | Hides the NPC until a fact is true. |
 | perception.discovered | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A fact that must be true for this NPC to be visible. |
 | resistances | [Resistances](source-kinds.gen.md#resistances) |  | See the type. |
 | resource_starts | map of [ResourceInt](source-kinds.gen.md#resourceint) |  | Starting value of each named resource. |
@@ -314,45 +314,45 @@ One fixed-slot, two-room bounded population with an owned wander and replacement
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| area | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| area | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The two rooms members wander between. They must be different rooms joined by exits in both directions, with no barrier on either exit. |
 | birth_when | [Policy](vocabulary.gen.md#policy-leaves) |  | Toolbox row W12: while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, from the compiler). |
 | cap | integer | yes | Most members alive at once: the number of slots. |
 | chance | integer |  | Makes the plan an encounter plan (docs/system/mechanics.md Random encounters, toolbox row 9): each wander-boundary occurrence with an eligible slot draws one uniform(100) and a roll below chance births the first eligible slot. Absent: an RNG-free ecology plan. |
 | corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for members; overrides world.death.npc_corpse. |
 | day_target | integer | yes | Members wanted by day. 0: only a population.spawn step fills the plan. |
 | floor | integer |  | Toolbox row W12: slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, from the compiler). |
-| home | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| home | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room members are born in. It must be one of the two rooms in area, and the NPC template must sit in it. |
 | hunts | `true` |  | Toolbox row W13: a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails. |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Item copied into each member's hands at birth. Needed unless the plan has a scavenge block, which then forbids it. |
 | member_role | `hunter` or `prey` |  | Origin role of each member; default hunter. Its directly held item has role loot. |
 | night_end | integer | yes | Hour night ends: night is hour >= night_start or hour < night_end. |
 | night_start | integer | yes | Hour night begins. |
 | night_target | integer | yes | Members wanted by night. 0: only a population.spawn step fills the plan. |
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC each member is copied from. |
-| pack | object |  |  |
-| pack.flight_below_percent | integer | yes |  |
-| pack.flight_fare | `0` | yes |  |
-| pack.narration | object | yes |  |
-| pack.narration.enemy_fled | map of [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| pack.narration.helper_joined | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| pack.narration.pack_withdrew | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| pack.narration.primary_changed | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| replacement_delay | integer | yes |  |
-| scavenge | object |  |  |
-| scavenge.corridor | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| scavenge.drop_rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| scavenge.interval | integer | yes |  |
-| scavenge.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| scavenge.narration | object | yes |  |
-| scavenge.narration.acquired | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| scavenge.narration.carrying | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| scavenge.narration.delivered | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| scavenge.narration.fallback | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| scavenge.narration.shoo | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| scavenge.nest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| sight | object |  |  |
-| sight.delay | integer | yes |  |
-| sight.narration | map of [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| pack | object |  | Makes the members of this plan fight the player as a pack, with helpers and flight. |
+| pack.flight_below_percent | integer | yes | A member flees when its hp is below this percent of its maximum (1 to 100). Frightened members flee too. |
+| pack.flight_fare | `0` | yes | Must be 0. Nothing reads it. |
+| pack.narration | object | yes | Text keys told as the pack fights and flees. |
+| pack.narration.enemy_fled | map of [TextKey](source-kinds.gen.md#textkey) | yes | Text key per exit direction, told when a member flees through that exit. Every direction leading out of an area room needs one. |
+| pack.narration.helper_joined | [TextKey](source-kinds.gen.md#textkey) | yes | Told when another member joins a fight already under way. |
+| pack.narration.pack_withdrew | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the fight ends with no pack member left in it. |
+| pack.narration.primary_changed | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the member the player is fighting changes. |
+| replacement_delay | integer | yes | Clock units after a member dies before its slot is refilled. At least wander_interval. |
+| scavenge | object |  | Makes members carry loose items along a corridor to a nest. The plan must then have no item field. |
+| scavenge.corridor | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Rooms a carrying member walks through, in order, ending at the nest room. It must include home, and each step needs an open exit both ways. |
+| scavenge.drop_rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Rooms where members pick up a listed item lying on the floor. Each must be on the corridor. |
+| scavenge.interval | integer | yes | Clock units between each step of a member's pickup or carry. |
+| scavenge.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Items members will pick up: loose in a room, not containers, and allowed to be given away. At most 8. |
+| scavenge.narration | object | yes | Text keys told at each stage of scavenging. |
+| scavenge.narration.acquired | [TextKey](source-kinds.gen.md#textkey) | yes | Told when a member picks the item up. |
+| scavenge.narration.carrying | [TextKey](source-kinds.gen.md#textkey) | yes | Shown on a member's entry while it is carrying an item to the nest. |
+| scavenge.narration.delivered | [TextKey](source-kinds.gen.md#textkey) | yes | Told when a member puts the item in the nest. |
+| scavenge.narration.fallback | [TextKey](source-kinds.gen.md#textkey) | yes | Told when a member cannot finish (the nest is full or the way is blocked) and drops the item where it stands. |
+| scavenge.narration.shoo | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player shoos a carrying member and it drops the item. |
+| scavenge.nest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Container item in the last corridor room where members leave what they carried. It must have room left. |
+| sight | object |  | Makes prey members flee a player who stays in their room. Only for member_role prey. |
+| sight.delay | integer | yes | Clock units after the player and a member are in the same room before the member flees, if the player is still there. |
+| sight.narration | map of [TextKey](source-kinds.gen.md#textkey) | yes | Text key per exit direction, told when the member flees that way. Every direction leading out of an area room needs one. |
 | trail | `true` |  | Toolbox row W13 (mechanics.md Tracks and trails): a member's wander step and C4 flight write the room left's trail_<key>_exit and trail_<key>_at (engine facts, per room); needs world.trails. |
 | walks | `true` |  | Toolbox row W26 (mechanics.md NPCs use doors): the wander step crosses its exit as a walking NPC does (npcPassage with walks): a closed door passes and stays closed, a locked one only for a member holding its key_item (unlocked, opened, closed and locked again); any traverse lock on the exit or enter lock on the room refuses it. |
 | wander_interval | integer | yes | Clock units between wander opportunities. |
@@ -371,38 +371,38 @@ A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in Compiled
 | deadline.outcome | [Key](source-kinds.gen.md#key) | yes | The outcome the open instance fails with, carried by quest_failed. |
 | deadline.trust_amount | integer |  | Legacy deadline: how much trust_fact changes at expiry. |
 | deadline.trust_fact | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Legacy deadline: the fact adjusted at expiry. |
-| exchange | object |  |  |
-| exchange.contribution | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| exchange.faction | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| exchange.incoming | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| exchange.increment | integer | yes |  |
-| exchange.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| exchange.outgoing | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| exchange.quantity | integer | yes |  |
-| expedition | object |  |  |
-| expedition.actions | object | yes |  |
-| expedition.actions.restart | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.actions.shelter | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.actions.start | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.faction | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.faction_delta | integer | yes |  |
-| expedition.footprint | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.narration | object | yes |  |
-| expedition.narration.completed | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| expedition.narration.failed | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| expedition.narration.restart | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| expedition.narration.shelter | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| expedition.narration.start | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| expedition.population | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.route | list of object | yes |  |
-| expedition.route[].direction | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.route[].from | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.route[].to | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.shelter_detail | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.shelter_room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.start_detail | [Key](source-kinds.gen.md#key) | yes |  |
-| expedition.start_room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| expedition.survived_fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| exchange | object |  | Makes the quest a repeatable item-for-item swap with an NPC, run from a dialogue choice that has an exchange. Needs repeatable true, current_state evidence, and no deadline or offer. |
+| exchange.contribution | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Player int fact (starts at 0) that totals the faction gain this quest has given. Its maximum caps the total. |
+| exchange.faction | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Player int fact raised by increment on each exchange. Must differ from contribution. |
+| exchange.incoming | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Item definitions the NPC hands to the player, held by the NPC at the start. Same length as outgoing. |
+| exchange.increment | integer | yes | Faction gain per exchange, cut short once contribution reaches its maximum. At most that maximum. |
+| exchange.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC swapped with. It must be present, hold the incoming items, and be the dialogue's own NPC. |
+| exchange.outgoing | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Item definitions the player hands to the NPC. Must be exactly the items list of a room detail's harvest. Same length as incoming. |
+| exchange.quantity | integer | yes | How many items go each way in one exchange. At most the length of outgoing. |
+| expedition | object |  | Makes the quest a guarded walk along a fixed route, with a shelter stop on the way. The objective evidence must be expedition and the quest takes no offer, repeatable, deadline, exchange or patrol. |
+| expedition.actions | object | yes | Keys of the scripted expedition actions that offer each stage. |
+| expedition.actions.restart | [Key](source-kinds.gen.md#key) | yes | Action key that restarts after a failed attempt. |
+| expedition.actions.shelter | [Key](source-kinds.gen.md#key) | yes | Action key that takes shelter. |
+| expedition.actions.start | [Key](source-kinds.gen.md#key) | yes | Action key that starts the attempt. |
+| expedition.faction | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Player int fact changed by faction_delta when the expedition completes. |
+| expedition.faction_delta | integer | yes | Added to the faction fact on completion. Always negative, from -100 to -1. |
+| expedition.footprint | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Rooms the attempt may stay in. Entering any other room fails the attempt. At least 2, no repeats, and it includes start_room. |
+| expedition.narration | object | yes | Text keys told as the expedition goes. |
+| expedition.narration.completed | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the last step is walked. |
+| expedition.narration.failed | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the attempt fails, such as by entering a room outside footprint. |
+| expedition.narration.restart | [TextKey](source-kinds.gen.md#textkey) | yes | Told when a failed attempt is restarted. |
+| expedition.narration.shelter | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player takes shelter. |
+| expedition.narration.start | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the attempt starts. |
+| expedition.population | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Population plan (with a pack) whose hunter member, if one is in the start room, opens a fight when an attempt starts or restarts. |
+| expedition.route | list of object | yes | Steps the player must walk in order, each from one room to the next by the named exit. At least 3; the first starts at start_room and each starts where the last ended. |
+| expedition.route[].direction | [Key](source-kinds.gen.md#key) | yes | Exit taken from the room. It must lead to the step's to room and not be hidden. |
+| expedition.route[].from | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Room this step leaves. |
+| expedition.route[].to | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Room this step arrives in. |
+| expedition.shelter_detail | [Key](source-kinds.gen.md#key) | yes | Key of the detail in shelter_room that offers shelter, once three route steps are walked. |
+| expedition.shelter_room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Room where the player may take shelter. It must be route[2].to. |
+| expedition.start_detail | [Key](source-kinds.gen.md#key) | yes | Key of the detail in start_room that offers start and restart. |
+| expedition.start_room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Room where the walk begins. Its start_detail starts and restarts the attempt, and it must be in footprint. |
+| expedition.survived_fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Player bool fact (default false) set true when the last step is walked. |
 | journal | [QuestJournal](source-kinds.gen.md#questjournal) |  | Lifecycle journal texts. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its journal entry. |
 | objective | [QuestObjective](source-kinds.gen.md#questobjective) | yes | Its objective. |
@@ -410,19 +410,19 @@ A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in Compiled
 | offer.label | [TextKey](source-kinds.gen.md#textkey) | yes | The accept action's label. |
 | offer.policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | offer.target | object |  | The fixture or NPC the offer draws on (mechanics.md, quest@1). The offer is listed and admitted only while the target is in the actor's room, alive and seen. |
-| offer.target{kind=detail} | variant |  |  |
+| offer.target{kind=detail} | variant |  | The offer draws on a fixture in a room: the player must be in that room and see it. |
 | offer.target{kind=detail}.detail | [Key](source-kinds.gen.md#key) | yes | The detail's key in that room. |
 | offer.target{kind=detail}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding the detail. |
-| offer.target{kind=npc} | variant |  |  |
+| offer.target{kind=npc} | variant |  | The offer draws on an NPC: the player must be in its room with it alive and in view. |
 | offer.target{kind=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC the offer draws on. |
-| patrol | object |  |  |
-| patrol.checkpoints | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| patrol.initial_cursor | integer | yes |  |
-| patrol.narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| patrol.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| patrol.required | integer | yes |  |
-| patrol.route | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| patrol.trust_fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| patrol | object |  | Makes an NPC walk a looping route that the player follows from room to room. The quest is complete once required checkpoints are reached together. |
+| patrol.checkpoints | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Rooms where arriving together with the NPC counts once toward required. |
+| patrol.initial_cursor | integer | yes | Index in route of the room the NPC starts in. |
+| patrol.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key told when the patrol completes, naming the player and the NPC leader. |
+| patrol.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC who leads. It starts in route[initial_cursor], has no hp, attack or daily_schedule, and no other quest may patrol it. |
+| patrol.required | integer | yes | How many different checkpoint rooms the player must reach with the NPC to complete the patrol. |
+| patrol.route | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Rooms the NPC visits in order, looping back to the first. Each step needs an exit to the next room that is not hidden or a climb. |
+| patrol.trust_fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Player bool fact (default false) set true when the patrol completes. No other patrol may share it. |
 | repeatable | `true` |  | The quest may be taken again once resolved. |
 
 ## reactions
@@ -436,7 +436,7 @@ Typed reaction owned by reaction@1. Every registered event kind can trigger; eac
 | silent | `true` |  | Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it. |
 | steps | list of [Step](vocabulary.gen.md#steps) | yes | See the type. |
 | when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| zone | [Key](source-kinds.gen.md#key) |  |  |
+| zone | [Key](source-kinds.gen.md#key) |  | A zone name: the rule becomes one copy per room listing that zone, named <rule>_<room>. Leave on.room out. |
 
 ## replenish
 
@@ -444,12 +444,12 @@ One replenish entry (docs/system/cartridge.md Replenish declarations): each due 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| cap | integer | yes |  |
-| count | integer | yes |  |
-| every | integer | yes |  |
-| from | [ItemLocation](source-kinds.gen.md#itemlocation) | yes |  |
-| items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| to | [ItemLocation](source-kinds.gen.md#itemlocation) | yes |  |
+| cap | integer | yes | Stop moving once the destination holds this many of the items. |
+| count | integer | yes | The most items moved per run, lowest entity id first. |
+| every | integer | yes | Seconds between runs, counted from the previous due time. |
+| from | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | Where the items are taken from. |
+| items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The items moved on each due run. |
+| to | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | Where the items are put; filled until it holds cap of them. |
 
 ## resources
 
@@ -500,8 +500,8 @@ Exact original-provider action and conserved quote with one typed immediate bene
 | action | [Key](source-kinds.gen.md#key) | yes | The provider action. |
 | benefit | [Step](vocabulary.gen.md#steps) | yes | Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S5, a build, mend or raze of a site's room. One Step whose op is one of these 11 (C3 D5; the compiler refuses any other op, SCHEMA_VIOLATION invalid_value at benefit.op). |
 | currency | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved quote resource. |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the service's name. |
+| narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the service is used. |
 | price | integer | yes | Row kgd.70: 0 only on an entitlement with escrow, a barter. |
 | provider | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The original provider NPC. |
 
@@ -537,19 +537,19 @@ Toolbox row 1: one authored timed status on a body. Every tick_every seconds unt
 | movement.cost_percent | integer |  | Percent of each move's fare (world.movement.cost or 1 mv, after the flee multiplier) the holding body pays, rounded down; several statuses apply in turn in definition order. |
 | movement.passes | list of `air` or `chasm` or `water` |  | Terrain tags the holding body may enter: a move into a room tagged air, chasm or water is refused invalid_state unless the body's active statuses pass each such tag. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
-| narration | object | yes |  |
-| narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| narration | object | yes | Text told as the status is applied, ticks and ends. |
+| narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the status is applied. |
 | narration.expired | [TextKey](source-kinds.gen.md#textkey) |  | Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b). |
 | narration.observed | [TextKey](source-kinds.gen.md#textkey) |  | Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent. |
 | narration.skipped | [TextKey](source-kinds.gen.md#textkey) |  | Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name. |
-| narration.tick | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| narration.tick | [TextKey](source-kinds.gen.md#textkey) | yes | Text told on each tick of the status. |
 | per_tick | integer |  | Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION). |
 | perception | object |  | Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick. |
-| perception.hearing | `deaf` |  |  |
-| perception.sight | `blind` or `dark_sight` or `see_invisible` |  |  |
+| perception.hearing | `deaf` |  | deaf: no sound cue reaches the holder. |
+| perception.sight | `blind` or `dark_sight` or `see_invisible` |  | Changes what the holder sees: blind (every room is dark), dark_sight (sees in an unlit room) or see_invisible (sees holders of an invisible status). |
 | pierced_by | object |  | Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it. |
-| pierced_by.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| pierced_by.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| pierced_by.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The attribute whose value the seer needs; it is compared with the holder's skill level. |
+| pierced_by.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill whose level the seer's attribute value must beat to see through the concealment. |
 | resistances | [Resistances](source-kinds.gen.md#resistances) |  | Status reader 5: while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick. |
 | resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The pool per_tick changes. |
 | tick_every | integer | yes | Seconds between ticks. |
@@ -560,15 +560,15 @@ Built rooms S1 (construction@1; cartridge.md Structure and site declarations): o
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| locks | object |  |  |
+| description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the description of the room this structure becomes. |
+| locks | object |  | Rules for the built room; enter is the policy a mover must meet to come in. |
 | locks.enter | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| max_per_owner | integer |  |  |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| ruin | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| tags | list of [Tag](source-kinds.gen.md#tag) |  |  |
+| max_per_owner | integer |  | The most rooms of this structure one character may own at once; an order past it is refused. |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the name of the room this structure becomes. |
+| ruin | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The status a mend cures; mending is refused unless the room has it. |
+| tags | list of [Tag](source-kinds.gen.md#tag) |  | Tags the built room carries, as on a room. |
 | variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | See the type. |
-| weathering | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| weathering | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The status the room gets when it is raised and again when mended. |
 
 ## text
 
@@ -591,16 +591,16 @@ Paired original boarding detail, destination, conserved fare recipient and corps
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| action | [Key](source-kinds.gen.md#key) | yes |  |
+| action | [Key](source-kinds.gen.md#key) | yes | Key of the scripted action that boards this transport. It must be a use_transport action on inspectable details taking route and quoted_fare. |
 | currency | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fare resource. |
 | destination | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The destination. |
 | detail | [Key](source-kinds.gen.md#key) | yes | The boarding detail. |
 | fare | integer | yes | The conserved fare. |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key for the boarding action and its offer label. |
+| narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key told when the player makes the passage. |
 | recipient | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved fare recipient. |
 | recovery_rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The corpse recovery rooms. |
-| reverse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| reverse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The paired return transport: boards at this one's destination, goes back to its room, with the same recipient and currency. |
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The boarding room. |
 
 ## Shared types
@@ -629,14 +629,14 @@ What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| consume | object | one of a group |  |
+| consume | object | one of a group | What the actor gives up on every accepted perform, failure included. |
 | consume.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The items that can be consumed. |
 | consume.quantity | integer | yes | How many of them are consumed. |
 | consume.reason | [TextKey](source-kinds.gen.md#textkey) |  | The refusal text shown when the actor holds too few. |
-| consume.to | [ItemLocation](source-kinds.gen.md#itemlocation) | yes |  |
-| yield | object | one of a group |  |
-| yield.from | [ItemLocation](source-kinds.gen.md#itemlocation) | yes |  |
-| yield.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| consume.to | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | Where the consumed items go: the holder they are moved to. |
+| yield | object | one of a group | What the actor receives unless the outcome is failure. |
+| yield.from | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | The holder the yielded item is taken from. |
+| yield.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The items that can be yielded; one of them, directly in the holder, moves to the actor's body. |
 
 ### ActionInputParameter
 
@@ -666,15 +666,15 @@ One authored character choice and its bounded initial effects.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| dark_sight | `true` |  |  |
-| description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| faction | object |  |  |
-| faction.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| faction.value | integer | yes |  |
-| modifier | integer | yes |  |
-| name | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| skill | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The attribute this choice raises at birth, by modifier. |
+| dark_sight | `true` |  | When true, the character sees in the dark. |
+| description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the choice's description. |
+| faction | object |  | A fact set when the choice is made. |
+| faction.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fact; it must be player-scoped. |
+| faction.value | integer | yes | The value the fact is set to. |
+| modifier | integer | yes | Added to the attribute's starting value; at least 1. |
+| name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the choice's label. |
+| skill | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A skill granted at birth, without learning; it may not have a prerequisite. |
 
 ### ApiVersion
 
@@ -690,13 +690,13 @@ Cartridge-owned hit chance and positive damage bounds. Compiler and loader enfor
 |---|---|---|---|
 | chance | integer | yes | Percent chance an attack is accurate; a defense can still prevent the hit. |
 | crit | object |  | Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances. |
-| crit.chance | integer | yes |  |
-| crit.multiplier | integer | yes |  |
+| crit.chance | integer | yes | Percent of all attacks, sharing the accuracy draw: a hit whose draw is below this is critical, so a chance above the accuracy makes every hit critical. |
+| crit.multiplier | integer | yes | Damage of a critical hit is multiplied by this (2 to 10). |
 | damage_max | integer | yes | Most positive damage; at least damage_min. |
 | damage_min | integer | yes | Least positive damage. |
-| kind | [DamageKind](source-kinds.gen.md#damagekind) |  |  |
-| on_positive_hit | object |  |  |
-| on_positive_hit.effect | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| kind | [DamageKind](source-kinds.gen.md#damagekind) |  | The damage kind (cold, fire, physical or poison); the target's resistance to it reduces the damage. |
+| on_positive_hit | object |  | What a hit that takes off HP also does. |
+| on_positive_hit.effect | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bleed applied to the player; used only when the attacker is spawned as a population hunter. |
 
 ### BandTable
 
@@ -722,14 +722,14 @@ calendar@1: authored logical units per hour, hours per day, displayed subdivisio
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| hours_per_day | integer |  |  |
+| hours_per_day | integer |  | Hours in one day. |
 | lunar | [CalendarCycle](source-kinds.gen.md#calendarcycle) |  | See the type. |
 | season | [CalendarCycle](source-kinds.gen.md#calendarcycle) |  | See the type. |
 | solar | list of [CalendarCut](source-kinds.gen.md#calendarcut) |  | See the type. |
-| start | integer | yes |  |
-| subdivisions_per_hour | integer |  |  |
+| start | integer | yes | The logical time a new world begins at. |
+| subdivisions_per_hour | integer |  | Parts the status line splits an hour into; must divide units_per_hour. |
 | tide | [CalendarCycle](source-kinds.gen.md#calendarcycle) |  | See the type. |
-| units_per_hour | integer |  |  |
+| units_per_hour | integer |  | Logical time units in one hour; the three unit fields are given together. |
 | weather | list of [WeatherEntry](source-kinds.gen.md#weatherentry) |  | See the type. |
 
 ### CalendarCut
@@ -738,8 +738,8 @@ An inclusive phase start within one authored solar day or lunar period.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at | integer | yes |  |
-| phase | string | yes |  |
+| at | integer | yes | Logical units into the solar day (or the cycle) at which this phase starts; the first cut of a cycle is 0. |
+| phase | string | yes | The phase's name, lowercase letters, digits and underscores. |
 
 ### CalendarCycle
 
@@ -747,8 +747,8 @@ A repeating cycle of ordered cuts in logical time units (lunar; season and tide,
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| origin | integer | yes |  |
-| period | integer | yes |  |
+| origin | integer | yes | The time at which the cycle is at its start (position 0). |
+| period | integer | yes | Length of the cycle in logical units. |
 | phases | list of [CalendarCut](source-kinds.gen.md#calendarcut) | yes | See the type. |
 
 ### CapabilityVersion
@@ -794,20 +794,20 @@ Type: object.
 | {kind=threshold}.difficulty | [ResourceInt](source-kinds.gen.md#resourceint) | yes | Passes when the resource is at least this. |
 | {kind=threshold}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
 | {kind=threshold}.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The body's resource, read at admission before costs. |
-| {kind=attribute_threshold} | variant |  |  |
+| {kind=attribute_threshold} | variant |  | Passes when the actor's value of the attribute is at least difficulty; draws no random number. |
 | {kind=attribute_threshold}.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The actor's attribute compared. |
 | {kind=attribute_threshold}.difficulty | integer | yes | The value compared against. |
 | {kind=attribute_threshold}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
 | {kind=opposed} | variant |  | An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform. Dialogue choice: A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed. |
-| {kind=opposed}.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group |  |
+| {kind=opposed}.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group | The attribute compared; give this or skill, not both. |
 | {kind=opposed}.failure | [TextKey](source-kinds.gen.md#textkey) |  | The failure branch; a dialogue choice needs it, a scripted action refuses it. |
 | {kind=opposed}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
-| {kind=opposed}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| {kind=opposed}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | With attribute, compares against this NPC's value of the attribute instead of a rating. |
 | {kind=opposed}.rating | integer |  | The target detail's rating; a scripted action refuses it. |
-| {kind=opposed}.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group |  |
+| {kind=opposed}.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group | The skill whose level is compared; give this or attribute, not both. |
 | {kind=track} | variant |  | A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>]. |
-| {kind=track}.key | [Key](source-kinds.gen.md#key) | yes |  |
-| {kind=track}.plan | [Key](source-kinds.gen.md#key) | yes |  |
+| {kind=track}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
+| {kind=track}.plan | [Key](source-kinds.gen.md#key) | yes | Key of the population plan whose trail is looked for; passes when that trail is fresh in the actor's room. |
 
 ### ClientFeature
 
@@ -822,22 +822,22 @@ Cartridge-owned attack profile, round interval, position multipliers and combat 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | allies | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Authored NPCs that fight beside the player (docs/system/mechanics.md, toolbox row 6b, narration ally_hit and ally_miss): the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player. |
-| dodge | object |  |  |
+| dodge | object |  | Percent chance to dodge an enemy attack that would otherwise hit; absent means no dodge. |
 | dodge.chance | integer | yes | Percent chance of dodging. |
 | dodge.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill that must be usable for a dodge. |
 | flee_multiplier | integer | yes | Multiplies the move cost of a body that is engaged. |
 | interval | integer | yes | Clock units between combat rounds. |
-| narration | object | yes |  |
-| narration.ally_hit | [TextKey](source-kinds.gen.md#textkey) |  |  |
-| narration.ally_miss | [TextKey](source-kinds.gen.md#textkey) |  |  |
+| narration | object | yes | Text keys told in combat rounds. |
+| narration.ally_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told when an ally's strike hits. |
+| narration.ally_miss | [TextKey](source-kinds.gen.md#textkey) |  | Told when an ally's strike misses. |
 | narration.block | [TextKey](source-kinds.gen.md#textkey) |  | Told when a shield blocks. |
 | narration.dodge | [TextKey](source-kinds.gen.md#textkey) |  | Told when the player dodges. |
 | narration.npc_died | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC falls in a combat round. |
-| narration.npc_hit | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration.npc_miss | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| narration.npc_hit | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC's attack hits the player. |
+| narration.npc_miss | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC's attack misses the player. |
 | narration.player_died | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player falls in a combat round; also the default fall line for tick deaths. |
-| narration.player_hit | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration.player_miss | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| narration.player_hit | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player's attack hits. |
+| narration.player_miss | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player's attack misses. |
 | narration.shot_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told when a ranged first strike hits. Required when any item declares weapon.ranged. |
 | narration.shot_miss | [TextKey](source-kinds.gen.md#textkey) |  | Told when a ranged first strike misses. Required when any item declares weapon.ranged. |
 | player_attack | [AttackProfile](source-kinds.gen.md#attackprofile) | yes | See the type. |
@@ -850,11 +850,11 @@ requires (05 §3): a kernel_api range, exact rule_ir and content_schema versions
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| capabilities | [CapabilityVersions](source-kinds.gen.md#capabilityversions) | yes |  |
-| client_features | list of [ClientFeature](source-kinds.gen.md#clientfeature) | yes |  |
-| content_schema | integer | yes |  |
+| capabilities | [CapabilityVersions](source-kinds.gen.md#capabilityversions) | yes | Each capability the cartridge uses, with its version; using a feature whose capability is not listed is refused. |
+| client_features | list of [ClientFeature](source-kinds.gen.md#clientfeature) | yes | Features the app must offer; the cartridge is refused where one is missing. |
+| content_schema | integer | yes | Content schema version; must equal the one the engine supports (currently 1). |
 | kernel_api | [KernelApiRange](source-kinds.gen.md#kernelapirange) | yes | See the type. |
-| rule_ir | integer | yes |  |
+| rule_ir | integer | yes | Rule format version; must equal the one the engine supports (currently 1). |
 
 ### ConditionBand
 
@@ -932,14 +932,14 @@ Fixed corpse templates, same-body return room and pool restoration; requires dea
 | narration.woke | [TextKey](source-kinds.gen.md#textkey) |  | Told once after every player death, after the penalty line. |
 | npc_corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for an NPC, unless its population names its own. |
 | penalty | object |  | What a player's death costs (toolbox row 47). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body. |
-| penalty.experience | object |  |  |
+| penalty.experience | object |  | Experience lost on death; needs world.levelling. |
 | penalty.experience.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Told once when experience is lost. |
 | penalty.experience.percent | integer | yes | The body loses floor(experience * percent / 100), never below its current level's threshold. |
 | penalty.items | `corpse` or `kept` |  | corpse (the default) moves what the body held into the corpse; kept leaves it on the body. |
 | player_corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for a player. |
-| restore | object | yes |  |
-| restore.hp | integer | yes |  |
-| restore.mv | integer | yes |  |
+| restore | object | yes | The values the dead body's pools are set to. |
+| restore.hp | integer | yes | HP after death; capped at the body's HP maximum. |
+| restore.mv | integer | yes | Movement after death; capped at the body's movement maximum. |
 | shrine | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room a dead player's body returns to. |
 
 ### DefinitionRef
@@ -959,11 +959,11 @@ One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum o
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| divisor | integer |  |  |
-| terms | list of object | yes |  |
-| terms[].attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| terms[].per_point | [ResourceInt](source-kinds.gen.md#resourceint) | yes |  |
-| terms[].pivot | [ResourceInt](source-kinds.gen.md#resourceint) | yes |  |
+| divisor | integer |  | The sum of the terms is divided by this, rounded down; default 1. |
+| terms | list of object | yes | The attributes that make up the bonus; each adds per_point times (the attribute's value minus pivot). |
+| terms[].attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The attribute read. |
+| terms[].per_point | [ResourceInt](source-kinds.gen.md#resourceint) | yes | Bonus added per point of the attribute above pivot (below it, taken away). |
+| terms[].pivot | [ResourceInt](source-kinds.gen.md#resourceint) | yes | The attribute value at which this term adds nothing. |
 
 ### DescriptionVariant
 
@@ -982,10 +982,10 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {role=npc} | variant |  |  |
-| {role=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {role=item} | variant |  |  |
-| {role=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| {role=npc} | variant |  | An NPC of this cartridge takes this role. |
+| {role=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC definition. |
+| {role=item} | variant |  | An item of this cartridge takes this role. |
+| {role=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definition. |
 
 ### EscortStatus
 
@@ -1031,20 +1031,20 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {kind=source} | variant |  |  |
-| {kind=source}.capacity | integer | yes |  |
+| {kind=source} | variant |  | A lightable item that burns fuel while lit, and is refilled from a supply item. |
+| {kind=source}.capacity | integer | yes | The most fuel the source holds, in its unit. |
 | {kind=source}.cues | [Cues](source-kinds.gen.md#cues) |  | Cues active only while this source is lit (toolbox row G6). |
-| {kind=source}.doused | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| {kind=source}.ignited | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| {kind=source}.initial | integer | yes |  |
-| {kind=source}.rate | integer | yes |  |
-| {kind=source}.refueled | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| {kind=source}.supply | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {kind=source}.unit | [Key](source-kinds.gen.md#key) | yes |  |
-| {kind=supply} | variant |  |  |
-| {kind=supply}.capacity | integer | yes |  |
-| {kind=supply}.initial | integer | yes |  |
-| {kind=supply}.unit | [Key](source-kinds.gen.md#key) | yes |  |
+| {kind=source}.doused | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is put out. |
+| {kind=source}.ignited | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is lit. |
+| {kind=source}.initial | integer | yes | Fuel it holds at the start; at most capacity. |
+| {kind=source}.rate | integer | yes | Fuel burned per logical time unit while lit; at least 1. It goes out when the fuel runs out. |
+| {kind=source}.refueled | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is refilled. |
+| {kind=source}.supply | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The supply item that refuels it; the supply's unit must match. |
+| {kind=source}.unit | [Key](source-kinds.gen.md#key) | yes | The fuel's unit name; the supply must use the same one. |
+| {kind=supply} | variant |  | An item that holds fuel for refilling sources; it is emptied by what it gives. |
+| {kind=supply}.capacity | integer | yes | The most fuel the supply holds, in its unit. |
+| {kind=supply}.initial | integer | yes | Fuel it holds at the start; at most capacity. |
+| {kind=supply}.unit | [Key](source-kinds.gen.md#key) | yes | The fuel's unit name; a source takes only a supply with the same one. |
 
 ### InspectableDetail
 
@@ -1053,41 +1053,41 @@ A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a p
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | aliases | list of [Alias](source-kinds.gen.md#alias) | yes | The words a player names it by; the first also names an ambiguous lookup. |
-| bed | object |  |  |
-| bed.entitlement | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| bed.title | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| bed | object |  | Makes the detail a bed: resting here is offered when the entitlement fact reads true. |
+| bed.entitlement | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fact that must read true for the actor before resting here is offered. |
+| bed.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the bed's page. |
 | cues | [Cues](source-kinds.gen.md#cues) |  | Sense cues reaching nearby rooms from this detail: 1 to 4 of {sense, text, range, when?}. |
 | description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key examine shows. |
-| harvest | object |  |  |
-| harvest.careful | object |  |  |
-| harvest.careful.action | [Key](source-kinds.gen.md#key) | yes |  |
-| harvest.careful.count | integer | yes |  |
-| harvest.careful.narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| harvest.careful.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| harvest.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| harvest.label | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| harvest.narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| harvest.title | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| harvest | object |  | Makes the detail a place to gather items from. |
+| harvest.careful | object |  | A slower way to gather: several items at once, for a skilled actor. |
+| harvest.careful.action | [Key](source-kinds.gen.md#key) | yes | The harvest action offered for it; must be a harvest action that takes a method. |
+| harvest.careful.count | integer | yes | Items gathered at once; 2 to 64, and at most the distinct items listed. |
+| harvest.careful.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told after a careful harvest. |
+| harvest.careful.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill the actor must have usable for the careful way. |
+| harvest.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions that can be gathered; each harvest takes the ones lying in the room. |
+| harvest.label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the harvest action's button. |
+| harvest.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told after an ordinary harvest (one item). |
+| harvest.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the harvest page. |
 | harvest.tool | object |  | Toolbox row 19: Harvest needs a held item whose definition declares tag. |
-| harvest.tool.tag | [Tag](source-kinds.gen.md#tag) | yes |  |
-| liquid_source | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| notice_board | object |  |  |
+| harvest.tool.tag | [Tag](source-kinds.gen.md#tag) | yes | The tag a held item must carry for the harvest to be allowed. |
+| liquid_source | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The liquid a held vessel can be filled with at this detail. |
+| notice_board | object |  | Makes the detail a board that lists other readable details of the room. |
 | notice_board.notices | list of object | yes | 1 to 64 distinct notices, in order. |
 | notice_board.notices[].detail | [Key](source-kinds.gen.md#key) | yes | A readable detail in the same room. |
 | notice_board.notices[].title | [TextKey](source-kinds.gen.md#textkey) | yes | The notice's title on the board. |
 | notice_board.title | [TextKey](source-kinds.gen.md#textkey) | yes | The board's title. |
-| perception | object |  |  |
-| perception.self_luminous | `true` | yes |  |
-| perception.title | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| perception | object |  | Perception traits of the detail. |
+| perception.self_luminous | `true` | yes | Must be true: the detail gives light, so it is seen in a dark room. |
+| perception.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the detail's page. |
 | rating | integer |  | Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed scripted action check against this detail must reach. |
 | readable | object |  | Optional readable@1 prose and its place-action label (docs/system/mechanics.md readable@1); both keys resolve in the text catalog. |
 | readable.label | [TextKey](source-kinds.gen.md#textkey) | yes | The read action's label. |
 | readable.text | [TextKey](source-kinds.gen.md#textkey) | yes | The text read. |
-| readable.title | [TextKey](source-kinds.gen.md#textkey) |  |  |
+| readable.title | [TextKey](source-kinds.gen.md#textkey) |  | Text key of the title of the readable's page; without it the label is shown. |
 | title | [TextKey](source-kinds.gen.md#textkey) |  | Optional page title the Book shows for this detail (loka-x6t.120; docs/system/mechanics.md inspectable_detail@1): it resolves in the text catalog (UNRESOLVED_REFERENCE); without it a page falls back to its kind's title or the description. |
-| transport | object |  |  |
-| transport.route | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| transport.title | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| transport | object |  | Makes the detail a stop on a transport route. |
+| transport.route | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The transport route this stop belongs to. |
+| transport.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the stop's page. |
 | variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | Description variants; first match wins. |
 
 ### ItemAffect
@@ -1105,10 +1105,10 @@ A directly held item opted into exact bleed treatment.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| action | [Key](source-kinds.gen.md#key) | yes |  |
-| effect | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| action | [Key](source-kinds.gen.md#key) | yes | Must be bandage: the key of the action that applies it. |
+| effect | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bleed this bandage treats. |
+| narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when the bandage is applied. |
+| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill the actor must have usable to bandage. |
 
 ### ItemEdible
 
@@ -1119,9 +1119,9 @@ D4 held-food metadata; a complete original item grants capped recovery when Eat 
 | amount | integer | yes | Positive integer; the canonical numeric profile supplies the safe-integer upper limit. |
 | applies | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row hs-5: statuses Eat applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute. |
 | cures | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses (toolbox row 1) this food ends when eaten; eating is allowed at the pool maximum while one of them is active. |
-| label | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| narration | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the eat action's button. |
+| narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is eaten. |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The pool eating restores (for example hp). |
 
 ### ItemLocation
 
@@ -1131,13 +1131,13 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {in=room} | variant |  |  |
-| {in=room}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {in=npc} | variant |  |  |
-| {in=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {in=item} | variant |  |  |
-| {in=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {in=template} | variant |  |  |
+| {in=room} | variant |  | Starts lying in a room. |
+| {in=room}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room it lies in. |
+| {in=npc} | variant |  | Starts carried by an NPC. |
+| {in=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC carrying it. |
+| {in=item} | variant |  | Starts inside another item of this cartridge. |
+| {in=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item that holds it. |
+| {in=template} | variant |  | Starts nowhere: it is a copy source only, and exists in play only once another rule makes a copy. |
 
 ### ItemReadable
 
@@ -1145,9 +1145,9 @@ API1.24: one explicit held-item Read, with optional declared Boolean topic grant
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| label | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| topic | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the read action's button. |
+| text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of what the player reads. |
+| topic | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A topic the reader learns on reading. |
 
 ### KernelApiRange
 
@@ -1155,8 +1155,8 @@ The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility v
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | [KernelApiVersion](source-kinds.gen.md#kernelapiversion) | yes |  |
-| below | [KernelApiVersion](source-kinds.gen.md#kernelapiversion) | yes |  |
+| at_least | [KernelApiVersion](source-kinds.gen.md#kernelapiversion) | yes | Lowest kernel API version accepted, inclusive. |
+| below | [KernelApiVersion](source-kinds.gen.md#kernelapiversion) | yes | First kernel API version refused: the range stops just under it. |
 
 ### KernelApiVersion
 
@@ -1223,7 +1223,7 @@ Toolbox row W6: variants of an item's or NPC's short name (TextVariants), each o
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| [].description | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| [].description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the short name used while this variant applies. |
 | [].when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | [].words | [NameWords](source-kinds.gen.md#namewords) |  | See the type. |
 
@@ -1245,11 +1245,11 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {role=npc} | variant |  |  |
-| {role=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {role=item} | variant |  |  |
-| {role=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {role=actor} | variant |  |  |
+| {role=npc} | variant |  | An NPC of this cartridge. |
+| {role=npc}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC definition. |
+| {role=item} | variant |  | An item of this cartridge. |
+| {role=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definition. |
+| {role=actor} | variant |  | The player's own body. |
 
 ### NpcHp
 
@@ -1271,16 +1271,16 @@ Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15,
 | abandoned | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once abandoned. |
 | active | [TextKey](source-kinds.gen.md#textkey) | yes | Text key while active. |
 | active_variants | list of object |  | Checked in order for active quests. |
-| active_variants[].text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| active_variants[].text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key shown while this variant's condition holds. |
 | active_variants[].when | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
 | failed | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once failed. |
-| hints | object |  |  |
-| hints.active | list of object |  |  |
-| hints.active[].after | integer | yes |  |
-| hints.active[].text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| hints.objectives_met | list of object |  |  |
-| hints.objectives_met[].after | integer | yes |  |
-| hints.objectives_met[].text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| hints | object |  | Timed nudges the Journal shows as real time passes in a stage. |
+| hints.active | list of object |  | Hints for the active stage, earliest first. |
+| hints.active[].after | integer | yes | Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending. |
+| hints.active[].text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the hint. |
+| hints.objectives_met | list of object |  | Hints for the objectives-met stage, earliest first. |
+| hints.objectives_met[].after | integer | yes | Real minutes since the stage began, scaled by time_policy.rate (no hint shows without one); 1 to 1440, strictly ascending. |
+| hints.objectives_met[].text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the hint. |
 | objectives_met | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once objectives are met. |
 | outcomes | map of [TextKey](source-kinds.gen.md#textkey) |  | Overrides terminal text by outcome key. |
 | resolved | [TextKey](source-kinds.gen.md#textkey) | yes | Text key once resolved. |
@@ -1293,12 +1293,12 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {evidence=current_state} | variant |  |  |
+| {evidence=current_state} | variant |  | Met while the policy holds for the actor now; nothing is stored. |
 | {evidence=current_state}.policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
-| {evidence=post_activation_event} | variant |  |  |
-| {evidence=post_activation_event}.item_acquired | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {evidence=patrol} | variant |  |  |
-| {evidence=expedition} | variant |  |  |
+| {evidence=post_activation_event} | variant |  | Met when the actor acquires the named item after the quest began. |
+| {evidence=post_activation_event}.item_acquired | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item whose acquisition counts. |
+| {evidence=patrol} | variant |  | Met when the quest's patrol completes. |
+| {evidence=expedition} | variant |  | Met when the quest's expedition succeeds. |
 
 ### QuestState
 
@@ -1324,33 +1324,33 @@ Toolbox row G2 (docs/system/mechanics.md damage model): an NPC's percent resista
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| air | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `air`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| bed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `bed`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| burnable | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `burnable`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| chasm | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `chasm`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| cold | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `cold`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| cool | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `cool`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| cursed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `cursed`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| exposed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `exposed`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| fire | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `fire`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| forge | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `forge`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| fragile | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `fragile`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| lamp | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `lamp`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| liquid_holding | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `liquid_holding`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| marsh | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `marsh`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| metal | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `metal`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| physical | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `physical`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| poison | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `poison`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| road | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `road`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| rod | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `rod`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| rug | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `rug`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| sharp | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `sharp`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| silver | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `silver`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| warm | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `warm`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| water | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `water`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| waterproof | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `waterproof`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| windproof | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `windproof`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
-| wooden | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `wooden`, as a damage kind or the striking weapon's material tag. Negative is a weakness. |
+| air | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `air`. Negative is a weakness. |
+| bed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `bed`. Negative is a weakness. |
+| burnable | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `burnable`. Negative is a weakness. |
+| chasm | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `chasm`. Negative is a weakness. |
+| cold | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `cold` damage. Negative is a weakness. |
+| cool | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `cool`. Negative is a weakness. |
+| cursed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `cursed`. Negative is a weakness. |
+| exposed | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `exposed`. Negative is a weakness. |
+| fire | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `fire` damage. Negative is a weakness. |
+| forge | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `forge`. Negative is a weakness. |
+| fragile | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `fragile`. Negative is a weakness. |
+| lamp | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `lamp`. Negative is a weakness. |
+| liquid_holding | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `liquid_holding`. Negative is a weakness. |
+| marsh | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `marsh`. Negative is a weakness. |
+| metal | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `metal`. Negative is a weakness. |
+| physical | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `physical` damage. Negative is a weakness. |
+| poison | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to `poison` damage. Negative is a weakness. |
+| road | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `road`. Negative is a weakness. |
+| rod | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `rod`. Negative is a weakness. |
+| rug | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `rug`. Negative is a weakness. |
+| sharp | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `sharp`. Negative is a weakness. |
+| silver | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `silver`. Negative is a weakness. |
+| warm | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `warm`. Negative is a weakness. |
+| water | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `water`. Negative is a weakness. |
+| waterproof | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `waterproof`. Negative is a weakness. |
+| windproof | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `windproof`. Negative is a weakness. |
+| wooden | [ResistancePercent](source-kinds.gen.md#resistancepercent) |  | Percent resistance to attacks from a weapon with the material tag `wooden`. Negative is a weakness. |
 
 ### ResourceInt
 
@@ -1366,16 +1366,16 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {kind=detail} | variant |  |  |
-| {kind=detail}.detail | [Key](source-kinds.gen.md#key) | yes |  |
-| {kind=detail}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {kind=use} | variant |  |  |
+| {kind=detail} | variant |  | The action acts on one detail of a room, offered only while the actor is in that room. |
+| {kind=detail}.detail | [Key](source-kinds.gen.md#key) | yes | The detail's key in that room's details. |
+| {kind=detail}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room that holds the detail. |
+| {kind=use} | variant |  | The action uses a tool the actor holds on another item. |
 | {kind=use}.tool | [UseTool](source-kinds.gen.md#usetool) | yes | See the type. |
 | {kind=spell} | variant |  | Toolbox row 29a (word bar S2): a spell, cast only by the cast command typing its word (no other spell scripted action has it), never offered by key or performed; it acts on the caster's body. With aimed (loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it. |
-| {kind=spell}.aimed | object |  |  |
-| {kind=spell}.aimed.scopes | list of `room_occupants` or `room_contents` or `inventory` | yes |  |
-| {kind=spell}.learned | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| {kind=spell}.word | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) | yes |  |
+| {kind=spell}.aimed | object |  | Makes it an aimed spell, cast at one target; without it the spell takes no target. |
+| {kind=spell}.aimed.scopes | list of `room_occupants` or `room_contents` or `inventory` | yes | Where the target is looked for: the caster's room occupants, room contents or inventory. |
+| {kind=spell}.learned | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A bool fact; the word works for a caster only while it reads true for them. |
+| {kind=spell}.word | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) | yes | The word the player types to cast it. |
 
 ### Shop
 
@@ -1385,11 +1385,11 @@ A finite NPC shop: conserved resource, exact authored item offers and committed 
 |---|---|---|---|
 | bought | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the purchase narration. |
 | buy_discount | object |  | A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition). |
-| buy_discount.denominator | integer | yes |  |
-| buy_discount.friendly | `true` | one of a group |  |
-| buy_discount.minimum | integer | yes |  |
-| buy_discount.numerator | integer | yes |  |
-| buy_discount.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group |  |
+| buy_discount.denominator | integer | yes | Divides the buy price; the price is floor(buy times numerator over denominator). |
+| buy_discount.friendly | `true` | one of a group | Must be true: the discount applies while the shop's NPC is friendly to the actor. Give this or skill. |
+| buy_discount.minimum | integer | yes | The discounted buy price is never below this. |
+| buy_discount.numerator | integer | yes | Multiplies the buy price; see denominator. |
+| buy_discount.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group | The discount applies while the actor has this skill usable. Give this or friendly. |
 | offers | list of [ShopOffer](source-kinds.gen.md#shopoffer) | yes | The exact item offers. |
 | resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved resource prices are paid in. |
 | sold | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the sale narration. |
@@ -1404,8 +1404,8 @@ One exact authored shop item definition with its positive buy and sell prices; c
 | item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definition offered. |
 | sell | integer | yes | Its positive sell price. |
 | stock | object |  | Toolbox row W11: sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy. |
-| stock.buy | list of integer | yes |  |
-| stock.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| stock.buy | list of integer | yes | Buy prices by count held: entry n is the price while the shopkeeper holds n of the items; one entry per item. |
+| stock.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The interchangeable items sold as one offer; the first is the offer's item. |
 | stolen | `true` |  | Toolbox row 34: this shopkeeper is a fence; sell takes only an instance whose world.theft stolen fact is true, and a shop without it only one whose fact is false. Never on a stock offer. |
 
 ### SlotKey
@@ -1436,7 +1436,7 @@ Type: object.
 |---|---|---|---|
 | {kind=none} | variant |  | The action takes no target. |
 | {kind=entity} | variant |  | One entity from the listed scopes. |
-| {kind=entity}.scopes | list of `self` or `inventory` or `room_contents` or `room_occupants` or `inspectable_details` | yes |  |
+| {kind=entity}.scopes | list of `self` or `inventory` or `room_contents` or `room_occupants` or `inspectable_details` | yes | Where the target is looked for: self, inventory, room_contents, room_occupants or inspectable_details. |
 
 ### TextCatalog
 
@@ -1466,8 +1466,8 @@ Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| profile | `real_elapsed` | yes |  |
-| rate | integer | yes |  |
+| profile | `real_elapsed` | yes | Must be real_elapsed: logical time follows real time. |
+| rate | integer | yes | Logical seconds that pass per real second; at least 1. |
 | recap_after_minutes | integer |  | Toolbox row W27, opt-in: an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block. At most one week (10080). |
 
 ### UseTool
@@ -1495,15 +1495,15 @@ D6 exact paired surface/bottom routes, usable skill, entry load/cost, absolute s
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| drowned | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| duration | integer | yes |  |
-| entry_cost | integer | yes |  |
-| maximum_grams | integer | yes |  |
-| routes | list of object | yes |  |
-| routes[].bottom | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| routes[].surface | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| warning | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| drowned | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when the character drowns. |
+| duration | integer | yes | Logical time units a character can stay under before drowning; at least 1. |
+| entry_cost | integer | yes | Movement points paid to go under. |
+| maximum_grams | integer | yes | The heaviest load, in grams, a character can carry and still go under. |
+| routes | list of object | yes | The surface and bottom room pairs; entering water at a surface moves to its bottom. |
+| routes[].bottom | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room under the water. |
+| routes[].surface | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room above the water, where the route is entered. |
+| skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill the character must have usable to go under. |
+| warning | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the warning shown before going under. |
 
 ### WeaponProfile
 
@@ -1513,10 +1513,10 @@ An equipped weapon's required skill and authored attack profile.
 |---|---|---|---|
 | attack | [AttackProfile](source-kinds.gen.md#attackprofile) | yes | Its attack profile. |
 | durability | object |  | Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed. |
-| durability.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| durability.wear | integer | yes |  |
+| durability.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bounded int fact that holds the weapon's durability. |
+| durability.wear | integer | yes | Durability each of the weapon's hits takes off. |
 | ranged | object |  | Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee. |
-| ranged.ammo | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| ranged.ammo | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource pool one unit of which each shot spends. |
 | skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The required skill. |
 
 ### WeatherEntry
@@ -1525,9 +1525,9 @@ One weather of a calendar's weather table (toolbox row 31): each calendar day ta
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| phase | string | yes |  |
-| weight | integer | yes |  |
-| wet | boolean |  |  |
+| phase | string | yes | The weather's name, lowercase letters, digits and underscores; unique in the table. |
+| weight | integer | yes | Its chance relative to the other entries: weight over the sum of all weights; 1 to 1000. |
+| wet | boolean |  | When true, an exposed flame will not light in this weather. |
 
 ### Word
 
@@ -1542,10 +1542,10 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | bands | [BandTable](source-kinds.gen.md#bandtable) |  | The condition band table of every pool without its own. Default: the engine's table. |
-| bell_cue | object |  |  |
-| bell_cue.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| bell_cue.rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| bell_cue.text | [TextKey](source-kinds.gen.md#textkey) | yes |  |
+| bell_cue | object |  | A line told in the listed rooms when the fact turns true. |
+| bell_cue.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bool fact whose change to true triggers the line. |
+| bell_cue.rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The rooms where it is told, to anyone there. |
+| bell_cue.text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line. |
 | carry | object |  | Opts into the voluntary Take ceiling (docs/system/mechanics.md containment@1); every item must author mass_grams. No engine default. |
 | carry.max_grams | integer | yes | The Take ceiling, in grams. |
 | combat | [CombatSettings](source-kinds.gen.md#combatsettings) |  | See the type. |
@@ -1565,7 +1565,7 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 | group.fight | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A bool pair fact, read at each NPC: the hireling order to fight. |
 | group.member | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A bool pair fact, read at each NPC: this NPC is in the player's group. |
 | group.stay | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A bool pair fact, read at each NPC: the hireling order to stay. |
-| group.wage | object |  |  |
+| group.wage | object |  | Pays each group member from the player's purse on a schedule; a member who cannot be paid leaves the group. |
 | group.wage.amount | integer | yes | How much of the resource each member is paid. |
 | group.wage.every | integer | yes | Clock units between payments. |
 | group.wage.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved resource paid. |
@@ -1587,10 +1587,10 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 | movement.terrain | map of integer |  | Terrain movement costs (row 43a; docs/system/mechanics.md, Terrain movement costs): a room tag to the percent a move into a room carrying it scales the fare by, applied after status cost_percent, in the room's authored tag order, rounded down each step. The key pattern repeats the entity.schema.json Tag enum, so a Tag added there is refused here until this list follows (fail closed). |
 | theft | object |  | Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen. |
 | theft.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The victim's attribute compared with the actor's skill level. Absent: 0. |
-| theft.narration | object | yes |  |
-| theft.narration.seen | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| theft.narration.unseen | [TextKey](source-kinds.gen.md#textkey) | yes |  |
-| theft.noticed | [Key](source-kinds.gen.md#key) | yes |  |
+| theft.narration | object | yes | Text keys told after a theft. |
+| theft.narration.seen | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the theft is noticed. |
+| theft.narration.unseen | [TextKey](source-kinds.gen.md#textkey) | yes | Told when nobody notices the theft. |
+| theft.noticed | [Key](source-kinds.gen.md#key) | yes | Key of the custom event emitted when a theft is seen. |
 | theft.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The victim notices when the actor's level in this skill is below the victim's attribute. |
 | theft.stolen | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The per_subject instance bool fact set true on a stolen item. |
 | trails | object |  | Toolbox row W13 (mechanics.md Tracks and trails): a trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses. |
@@ -1606,315 +1606,18 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 
 ## Fields without a meaning
 
-310 fields.
+13 fields.
 
-- `ActionCraft: consume`
-- `ActionCraft: consume.to`
-- `ActionCraft: yield`
-- `ActionCraft: yield.from`
-- `ActionCraft: yield.items`
-- `AncestrySpec: attribute`
-- `AncestrySpec: dark_sight`
-- `AncestrySpec: description`
-- `AncestrySpec: faction`
-- `AncestrySpec: faction.fact`
-- `AncestrySpec: faction.value`
-- `AncestrySpec: modifier`
-- `AncestrySpec: name`
-- `AncestrySpec: skill`
-- `AttackProfile: crit.chance`
-- `AttackProfile: crit.multiplier`
-- `AttackProfile: kind`
-- `AttackProfile: on_positive_hit`
-- `AttackProfile: on_positive_hit.effect`
-- `Calendar: hours_per_day`
-- `Calendar: start`
-- `Calendar: subdivisions_per_hour`
-- `Calendar: units_per_hour`
-- `CalendarCut: at`
-- `CalendarCut: phase`
-- `CalendarCycle: origin`
-- `CalendarCycle: period`
-- `Check: {kind=attribute_threshold}`
-- `Check: {kind=opposed}.attribute`
-- `Check: {kind=opposed}.npc`
-- `Check: {kind=opposed}.skill`
-- `Check: {kind=track}.key`
-- `Check: {kind=track}.plan`
-- `CombatSettings: dodge`
-- `CombatSettings: narration`
-- `CombatSettings: narration.ally_hit`
-- `CombatSettings: narration.ally_miss`
-- `CombatSettings: narration.npc_hit`
-- `CombatSettings: narration.npc_miss`
-- `CombatSettings: narration.player_hit`
-- `CombatSettings: narration.player_miss`
-- `CompatibilityRequirements: capabilities`
-- `CompatibilityRequirements: client_features`
-- `CompatibilityRequirements: content_schema`
-- `CompatibilityRequirements: rule_ir`
-- `DeathSettings: penalty.experience`
-- `DeathSettings: restore`
-- `DeathSettings: restore.hp`
-- `DeathSettings: restore.mv`
-- `DerivedStat: divisor`
-- `DerivedStat: terms`
-- `DerivedStat: terms[].attribute`
-- `DerivedStat: terms[].per_point`
-- `DerivedStat: terms[].pivot`
-- `DialogueRole: {role=item}`
-- `DialogueRole: {role=item}.item`
-- `DialogueRole: {role=npc}`
-- `DialogueRole: {role=npc}.npc`
-- `FuelSpec: {kind=source}`
-- `FuelSpec: {kind=source}.capacity`
-- `FuelSpec: {kind=source}.doused`
-- `FuelSpec: {kind=source}.ignited`
-- `FuelSpec: {kind=source}.initial`
-- `FuelSpec: {kind=source}.rate`
-- `FuelSpec: {kind=source}.refueled`
-- `FuelSpec: {kind=source}.supply`
-- `FuelSpec: {kind=source}.unit`
-- `FuelSpec: {kind=supply}`
-- `FuelSpec: {kind=supply}.capacity`
-- `FuelSpec: {kind=supply}.initial`
-- `FuelSpec: {kind=supply}.unit`
-- `InspectableDetail: bed`
-- `InspectableDetail: bed.entitlement`
-- `InspectableDetail: bed.title`
-- `InspectableDetail: harvest`
-- `InspectableDetail: harvest.careful`
-- `InspectableDetail: harvest.careful.action`
-- `InspectableDetail: harvest.careful.count`
-- `InspectableDetail: harvest.careful.narration`
-- `InspectableDetail: harvest.careful.skill`
-- `InspectableDetail: harvest.items`
-- `InspectableDetail: harvest.label`
-- `InspectableDetail: harvest.narration`
-- `InspectableDetail: harvest.title`
-- `InspectableDetail: harvest.tool.tag`
-- `InspectableDetail: liquid_source`
-- `InspectableDetail: notice_board`
-- `InspectableDetail: perception`
-- `InspectableDetail: perception.self_luminous`
-- `InspectableDetail: perception.title`
-- `InspectableDetail: readable.title`
-- `InspectableDetail: transport`
-- `InspectableDetail: transport.route`
-- `InspectableDetail: transport.title`
-- `ItemBandage: action`
-- `ItemBandage: effect`
-- `ItemBandage: narration`
-- `ItemBandage: skill`
-- `ItemEdible: label`
-- `ItemEdible: narration`
-- `ItemEdible: resource`
-- `ItemLocation: {in=item}`
-- `ItemLocation: {in=item}.item`
-- `ItemLocation: {in=npc}`
-- `ItemLocation: {in=npc}.npc`
-- `ItemLocation: {in=room}`
-- `ItemLocation: {in=room}.room`
-- `ItemLocation: {in=template}`
-- `ItemReadable: label`
-- `ItemReadable: text`
-- `ItemReadable: topic`
-- `KernelApiRange: at_least`
-- `KernelApiRange: below`
-- `NameVariants: [].description`
-- `NarrationParticipant: {role=actor}`
-- `NarrationParticipant: {role=item}`
-- `NarrationParticipant: {role=item}.item`
-- `NarrationParticipant: {role=npc}`
-- `NarrationParticipant: {role=npc}.npc`
-- `QuestJournal: active_variants[].text`
-- `QuestJournal: hints`
-- `QuestJournal: hints.active`
-- `QuestJournal: hints.active[].after`
-- `QuestJournal: hints.active[].text`
-- `QuestJournal: hints.objectives_met`
-- `QuestJournal: hints.objectives_met[].after`
-- `QuestJournal: hints.objectives_met[].text`
-- `QuestObjective: {evidence=current_state}`
-- `QuestObjective: {evidence=expedition}`
-- `QuestObjective: {evidence=patrol}`
-- `QuestObjective: {evidence=post_activation_event}`
-- `QuestObjective: {evidence=post_activation_event}.item_acquired`
-- `ScriptedTarget: {kind=detail}`
-- `ScriptedTarget: {kind=detail}.detail`
-- `ScriptedTarget: {kind=detail}.room`
-- `ScriptedTarget: {kind=spell}.aimed`
-- `ScriptedTarget: {kind=spell}.aimed.scopes`
-- `ScriptedTarget: {kind=spell}.learned`
-- `ScriptedTarget: {kind=spell}.word`
-- `ScriptedTarget: {kind=use}`
-- `Shop: buy_discount.denominator`
-- `Shop: buy_discount.friendly`
-- `Shop: buy_discount.minimum`
-- `Shop: buy_discount.numerator`
-- `Shop: buy_discount.skill`
-- `ShopOffer: stock.buy`
-- `ShopOffer: stock.items`
-- `TargetSpec: {kind=entity}.scopes`
-- `TimePolicy: profile`
-- `TimePolicy: rate`
-- `WaterSettings: drowned`
-- `WaterSettings: duration`
-- `WaterSettings: entry_cost`
-- `WaterSettings: maximum_grams`
-- `WaterSettings: routes`
-- `WaterSettings: routes[].bottom`
-- `WaterSettings: routes[].surface`
-- `WaterSettings: skill`
-- `WaterSettings: warning`
-- `WeaponProfile: durability.fact`
-- `WeaponProfile: durability.wear`
-- `WeaponProfile: ranged.ammo`
-- `WeatherEntry: phase`
-- `WeatherEntry: weight`
-- `WeatherEntry: wet`
-- `WorldSettings: bell_cue`
-- `WorldSettings: bell_cue.fact`
-- `WorldSettings: bell_cue.rooms`
-- `WorldSettings: bell_cue.text`
-- `WorldSettings: group.wage`
-- `WorldSettings: theft.narration`
-- `WorldSettings: theft.narration.seen`
-- `WorldSettings: theft.narration.unseen`
-- `WorldSettings: theft.noticed`
 - `attributes: attributes`
-- `barriers: initial`
-- `barriers: key_item`
-- `barriers: name`
 - `behaviours: params`
 - `behaviours: reactions`
-- `bleeds: narration`
-- `bleeds: narration.applied`
-- `bleeds: narration.expired`
-- `bleeds: narration.refreshed`
-- `bleeds: narration.tick`
-- `cartridge: api_version`
-- `cartridge: entry`
-- `cartridge: id`
-- `cartridge: speech.phrases`
-- `cartridge: supported_profiles`
-- `cartridge: title`
-- `cartridge: version`
-- `choice: availability.from`
-- `choice: availability.through`
 - `choice: narration_variants`
 - `choice: then`
 - `choice: then_failed`
-- `dialogues: riddle.wrong`
-- `dialogues: riddle.wrong_limit`
-- `items: fuel`
-- `npcs: daily_schedule.*[]{walks=true}`
-- `npcs: daily_schedule.*[]{walks=true}.goal`
-- `npcs: daily_schedule.*[]{walks=true}.room`
-- `npcs: daily_schedule.*{walks=true}`
-- `npcs: daily_schedule.*{walks=true}.goal`
-- `npcs: daily_schedule.*{walks=true}.room`
-- `npcs: perception`
 - `policy fact_at_least: at_least`
 - `policy fact_at_least: fact`
 - `policy fact_at_least: item`
 - `policy fact_at_least: npc`
 - `policy fact_at_least: subject`
 - `policy fact_at_least: with`
-- `populations: area`
-- `populations: home`
-- `populations: item`
-- `populations: pack`
-- `populations: pack.flight_below_percent`
-- `populations: pack.flight_fare`
-- `populations: pack.narration`
-- `populations: pack.narration.enemy_fled`
-- `populations: pack.narration.helper_joined`
-- `populations: pack.narration.pack_withdrew`
-- `populations: pack.narration.primary_changed`
-- `populations: replacement_delay`
-- `populations: scavenge`
-- `populations: scavenge.corridor`
-- `populations: scavenge.drop_rooms`
-- `populations: scavenge.interval`
-- `populations: scavenge.items`
-- `populations: scavenge.narration`
-- `populations: scavenge.narration.acquired`
-- `populations: scavenge.narration.carrying`
-- `populations: scavenge.narration.delivered`
-- `populations: scavenge.narration.fallback`
-- `populations: scavenge.narration.shoo`
-- `populations: scavenge.nest`
-- `populations: sight`
-- `populations: sight.delay`
-- `populations: sight.narration`
-- `quests: exchange`
-- `quests: exchange.contribution`
-- `quests: exchange.faction`
-- `quests: exchange.incoming`
-- `quests: exchange.increment`
-- `quests: exchange.npc`
-- `quests: exchange.outgoing`
-- `quests: exchange.quantity`
-- `quests: expedition`
-- `quests: expedition.actions`
-- `quests: expedition.actions.restart`
-- `quests: expedition.actions.shelter`
-- `quests: expedition.actions.start`
-- `quests: expedition.faction`
-- `quests: expedition.faction_delta`
-- `quests: expedition.footprint`
-- `quests: expedition.narration`
-- `quests: expedition.narration.completed`
-- `quests: expedition.narration.failed`
-- `quests: expedition.narration.restart`
-- `quests: expedition.narration.shelter`
-- `quests: expedition.narration.start`
-- `quests: expedition.population`
-- `quests: expedition.route`
-- `quests: expedition.route[].direction`
-- `quests: expedition.route[].from`
-- `quests: expedition.route[].to`
-- `quests: expedition.shelter_detail`
-- `quests: expedition.shelter_room`
-- `quests: expedition.start_detail`
-- `quests: expedition.start_room`
-- `quests: expedition.survived_fact`
-- `quests: offer.target{kind=detail}`
-- `quests: offer.target{kind=npc}`
-- `quests: patrol`
-- `quests: patrol.checkpoints`
-- `quests: patrol.initial_cursor`
-- `quests: patrol.narration`
-- `quests: patrol.npc`
-- `quests: patrol.required`
-- `quests: patrol.route`
-- `quests: patrol.trust_fact`
-- `reactions: zone`
-- `replenish: cap`
-- `replenish: count`
-- `replenish: every`
-- `replenish: from`
-- `replenish: items`
-- `replenish: to`
 - `resources: resources`
-- `services: name`
-- `services: narration`
-- `statuses: narration`
-- `statuses: narration.applied`
-- `statuses: narration.tick`
-- `statuses: perception.hearing`
-- `statuses: perception.sight`
-- `statuses: pierced_by.attribute`
-- `statuses: pierced_by.skill`
-- `structures: description`
-- `structures: locks`
-- `structures: max_per_owner`
-- `structures: name`
-- `structures: ruin`
-- `structures: tags`
-- `structures: weathering`
-- `transports: action`
-- `transports: name`
-- `transports: narration`
-- `transports: reverse`

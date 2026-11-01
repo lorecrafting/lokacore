@@ -1,4 +1,4 @@
-# size: allow 376, the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
+# size: allow 378, the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -175,7 +175,10 @@ defmodule Loka.Content.Compiler do
     v2 = get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties"])
 
     defs["CartridgeManifest"]
-    |> put_in(["properties", "entry"], %{"$ref" => "DefinitionRef"})
+    |> put_in(["properties", "entry"], %{
+      "description" => "The room a fresh world puts the player's body in.",
+      "$ref" => "DefinitionRef"
+    })
     |> put_in(["properties", "calendar"], %{"$ref" => "Calendar"})
     |> put_in(["properties", "world"], %{"$ref" => "WorldSettings"})
     |> Map.update!("properties", &Map.merge(&1, Map.take(v2, @v2_settings)))
