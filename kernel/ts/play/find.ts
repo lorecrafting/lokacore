@@ -15,7 +15,7 @@ function named(v: unknown, q: string, kinds = new Set<string>()) {
   if (Array.isArray(v)) v.forEach((x) => named(x, q, kinds));
   else if (v && typeof v === 'object') {
     if (isRef(v)) {
-      if (v.key === q) kinds.add(v.kind);
+      if (v.key.toLowerCase() === q) kinds.add(v.kind);
     } else Object.values(v).forEach((x) => named(x, q, kinds));
   }
   return kinds;
@@ -25,10 +25,11 @@ function named(v: unknown, q: string, kinds = new Set<string>()) {
 const lineOf = (path: string, q: string) =>
   readFileSync(path, 'utf8')
     .split('\n')
-    .findIndex((l) => l.includes(q)) + 1;
+    .findIndex((l) => l.toLowerCase().includes(q)) + 1;
 
 /** The definitions that refer to `q`, by section and short name, located in the source when a file is named for them. */
-function referrers(source: string, artifact: string, q: string, rels: string[]): Referrer[] {
+function referrers(source: string, artifact: string, query: string, rels: string[]): Referrer[] {
+  const q = query.toLowerCase(); // `named` and `lineOf` take it lowered
   if (!existsSync(artifact)) return [];
   const { canonical } = JSON.parse(readFileSync(artifact, 'utf8')) as { canonical: string };
   const { text, manifest, lock, ...cartridge } = JSON.parse(canonical) as Record<string, unknown>;

@@ -57,6 +57,15 @@ test('a key lists the definitions whose refs name it, located when a file is nam
   ]);
 });
 
+// Break: a key typed in capitals finds the words but none of the definitions that use it.
+test('a key in any case lists its referrers, located', (t) => {
+  const { source, artifact } = tree(t);
+  assert.deepEqual(find(source, artifact, 'MAUD').refs, [
+    { kind: 'npc', by: 'quests/q', at: 'quests/q.json:2' },
+    { kind: 'npc', by: 'world' },
+  ]);
+});
+
 // Breaks: a scripted action, authored under actions/, listed with no file:line.
 test('a scripted action is located in actions/', (t) => {
   const { source, artifact } = tree(t);

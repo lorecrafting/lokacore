@@ -50,3 +50,19 @@ export function shown(
     },
   };
 }
+
+/** The clock in words: the calendar's day, hour and sky, else the logical time (seconds) as hours and minutes. */
+export function clockWords({
+  time,
+  calendar,
+}: {
+  time: number;
+  calendar?: GameView['calendar_status'];
+}) {
+  if (calendar?.day === undefined || calendar.hour === undefined)
+    return `${Math.floor(time / 3600)}h ${String(Math.floor((time % 3600) / 60)).padStart(2, '0')}m`;
+  const { day, hour, season, solar, lunar, tide, weather } = calendar;
+  return [`day ${day}, hour ${hour}`, season, solar, lunar, tide, weather]
+    .filter(Boolean)
+    .join(', ');
+}
