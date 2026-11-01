@@ -126,7 +126,7 @@ defmodule Loka.Content.Waits do
 
   defp rules(rel, {:reaction, key, at}, rule) do
     # The list narrates as a whole, so a stretch with no line of its own is not a silent write.
-    told = rule["silent"] == true or Enum.any?(rule["steps"], &(&1["op"] == "narrate"))
+    told = Enum.any?(rule["steps"], &(&1["op"] == "narrate"))
     shared = if told, do: Map.put(rule, "silent", true), else: rule
 
     rule["steps"]

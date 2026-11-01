@@ -77,6 +77,7 @@ defmodule Loka.ContentWaitTest do
   test "a list that cannot lower is refused at the authored step", %{dir: dir} do
     bound = %{"op" => "event.emit", "event" => "x"}
     co = %{"op" => "status.apply", "status" => "x", "co_present" => true}
+    tag = %{"op" => "status.apply", "status" => "x"}
     subject = %{"op" => "status_active", "status" => "x", "subject" => "subject"}
 
     for {list, want} <- [
@@ -94,7 +95,9 @@ defmodule Loka.ContentWaitTest do
           {[wait(5), wait(5), adjust(1)], {"reactions/aftershock.steps[0]", "wait_empty"}},
           {[adjust(1), wait(5), adjust(2), bound],
            {"reactions/aftershock.steps[3].op", "wait_event"}},
-          {[wait(5), co], {"reactions/aftershock.steps[1].op", "wait_event"}}
+          {[wait(5), co], {"reactions/aftershock.steps[1].op", "wait_event"}},
+          {[wait(5), Map.put(tag, "tag", "x")],
+           {"reactions/aftershock.steps[1].op", "wait_event"}}
         ] do
       assert refused(dir, [{@rule, steps(list)}]) == [want]
     end
@@ -123,6 +126,12 @@ defmodule Loka.ContentWaitTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, [{"actions/stall.json", action}])
     assert [line] = Loka.Content.Explain.lines(diags, dir) |> Enum.filter(&(&1 =~ "stall"))
     assert line =~ "`wait` only works in a reaction's `steps`"
+  end
+
+  # Breaks: a text key `op` holding the word "wait" is read as a misplaced step.
+  test "a text catalog's words are not steps", %{dir: dir} do
+    assert {:ok, _, _} =
+             Loka.ContentSource.compile(dir, [{"text.json", &Map.put(&1, "op", "wait")}])
   end
 
   # Breaks: an authored rule already named like a generated one is silently replaced.
