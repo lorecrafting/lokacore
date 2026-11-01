@@ -69,7 +69,7 @@ defmodule Loka.Content.Explain do
          bad_indent | Line `{text}` does not line up under a choice. | Indent with spaces: a nested `- ` goes deeper than its choice, its lines deeper still, and a choice lines up with the ones beside it.
          bad_needs | Line `{text}` is not `needs: <fact>` or `needs: not <fact>`, or repeats a `needs:`. | Give a choice one `needs:` naming one fact by its key; `~` holds the place of words, not of a fact. Anything richer goes in `policy` in `dialogues/<key>.json`.
          needs_outside_choice | Line `{text}`: `needs:` belongs under a choice. | Move it under a `- ` line, or use `when:` for the whole scene.
-         unreachable | Line `{text}` can never be true here: the `when:` or a choice above it needs the opposite. | Remove it, change the fact, or move this choice out from under that one.
+         unreachable | Line `{text}` may never be true here: the `when:` or a choice above it needs the opposite and this file never sets that fact, and the compiler cannot see another file or a reaction changing it. | Nothing to do if something else changes that fact; otherwise remove the line or move this choice out from under that one.
          bad_once | Line `{text}` is not `once`. | Write the one word `once` under the choice.
          once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
          once_key_taken | `once` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice's words.
@@ -101,6 +101,9 @@ defmodule Loka.Content.Explain do
          layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.
          gives_holder | `gives: {item}` hands over nothing until `{holder}` holds `{item}`: the choice stays hidden. | Set the item's location to `{"in": "npc", "npc": "{holder}"}`, or move it there in play.
          gives_receive | `gives:` (`receive`) needs the `item_acquired` event, which `{capability}` owns, and the cartridge does not lock it. | Add `"{capability}": 1` under requires.capabilities in cartridge.json; the NPC must hold the item too.
+         gift_repeats | Picking this choice gives or starts something, and the dialogue can come back to it, so the player could take it again. | Add `once` under the choice in a scene; in JSON, gate it on a fact its steps set.
+         then_into | A `then` cannot lead to `{target}`, which has a `{part}`: that dialogue only opens its own way. | Remove the `then`, or remove `{part}` from `{target}`.
+         then_out_of | A `then` cannot leave from here: `{part}` already decides where this goes next. | Remove the `then`, or remove the `{part}`.
          stray_file | This file is in no folder the compiler reads. | Move it into a kind's folder (docs/system/cartridge.md), or out of the cartridge.
          unknown_fact | Nothing defines the fact `{target}`. | Add it to facts.json or fix the spelling.
          unknown_kind | Nothing defines the {kind} `{target}`. | Create it or fix the spelling.
@@ -147,6 +150,8 @@ defmodule Loka.Content.Explain do
     do: @words["layout_stale"]
 
   defp entry("SCHEMA_VIOLATION", %{"data" => %{"why" => why}}), do: @words[why]
+
+  defp entry("OUTCOME_MISMATCH", %{"data" => %{"why" => why}}), do: @words[why]
 
   defp entry("OUTCOME_MISMATCH", %{"data" => %{"holder" => _}}),
     do: @words["gives_holder"]

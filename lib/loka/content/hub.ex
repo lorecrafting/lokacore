@@ -8,7 +8,7 @@ defmodule Loka.Content.Hub do
   hand_over cannot repeat: the NPC keeps the item. Nor can a choice whose own policy negates a fact
   its own steps set.
   """
-  import Loka.Content.Source, only: [diag: 2, at: 2]
+  import Loka.Content.Source, only: [diag: 3, at: 2]
 
   @doc """
   The one-write fact keys (by key): topic facts, perception discoveries and bounded riddles'
@@ -46,7 +46,11 @@ defmodule Loka.Content.Hub do
   def choice(rel, steps, o, d, %{proven: proven, targets: targets}) do
     if repeats?(d, targets) and
          not Enum.any?([d["quest"], d["riddle"], o["accept"], o["patrol"]]) and not self_gated?(o),
-       do: for(f <- repeatable(o, proven), do: diag("OUTCOME_MISMATCH", at(rel, steps ++ f))),
+       do:
+         for(
+           f <- repeatable(o, proven),
+           do: diag("OUTCOME_MISMATCH", at(rel, steps ++ f), %{"why" => "gift_repeats"})
+         ),
        else: []
   end
 

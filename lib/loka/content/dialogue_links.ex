@@ -99,8 +99,17 @@ defmodule Loka.Content.DialogueLinks do
     end)
   end
 
-  defp unlinkable?(t, o, d) do
-    Enum.any?([t["keyword"], t["quest"], t["riddle"], o["patrol"], d["quest"], d["riddle"]])
+  # Why a `then` cannot go there, in data for the writer's sentence; nil when it can.
+  defp unlinkable(t, o, d) do
+    into = Enum.find(~w(keyword quest riddle), &t[&1])
+    out = Enum.find(~w(quest riddle), &d[&1])
+
+    cond do
+      into -> %{"why" => "then_into", "target" => t["key"], "part" => into}
+      o["patrol"] -> %{"why" => "then_out_of", "part" => "patrol"}
+      out -> %{"why" => "then_out_of", "part" => out}
+      true -> nil
+    end
   end
 
   defp link(rel, path, target, o, d, ctx) do
@@ -117,9 +126,10 @@ defmodule Loka.Content.DialogueLinks do
         [diag("UNRESOLVED_REFERENCE", at(rel, path), %{"target" => target})]
 
       {_, t} ->
-        if unlinkable?(t, o, d),
-          do: [diag("OUTCOME_MISMATCH", at(rel, path))],
-          else: elsewhere(rel, path, t, d, ctx)
+        case unlinkable(t, o, d) do
+          nil -> elsewhere(rel, path, t, d, ctx)
+          data -> [diag("OUTCOME_MISMATCH", at(rel, path), data)]
+        end
     end
   end
 

@@ -189,6 +189,57 @@ defmodule Loka.ContentSceneBranchingTest do
     assert JSON.encode!(diags) =~ "bad_indent"
   end
 
+  # Break: a `needs:` opposite the one above is refused, or lowers empty, though another file may
+  # flip the fact and the two-file twin plays; or the warning stops saying so, or `when:` is missed.
+  test "a needs opposite one above warns, names what it cannot see and lowers" do
+    text =
+      "npc: bram\nbram: ~\n- Go\n  needs: saw_lantern\n  bram: ~\n  - In\n    needs: not saw_lantern\n    bram: ~\n"
+
+    assert {:ok, out, [warned]} = sampler(text)
+    assert warned["data"]["why"] == "unreachable" and warned["data"]["line"] == 7
+    assert warned["severity"] == "warning"
+    dialogues = JSON.decode!(out)["cartridge"]["dialogues"]
+    child = dialogues["scene_sampler@0.0.1:dialogue/scene_go"]
+
+    assert child["choices"]["in"]["policy"]["op"] == "not"
+
+    assert child["choices"]["in"]["narration"] != nil
+
+    assert hd(Content.explained([warned], "/x")) =~ "cannot see another file or a reaction"
+
+    top = "npc: bram\nwhen: saw_lantern\nbram: ~\n- Go\n  needs: not saw_lantern\n  bram: ~\n"
+    assert {:ok, _, [%{"severity" => "warning", "data" => %{"line" => 5}}]} = sampler(top)
+  end
+
+  # Break: a sidecar silently replaces a written `then` (self, parent or another), or the link down
+  # to a nested set, while lowering's own way back stays replaceable (the test above).
+  test "a sidecar then over a written one or a nested link is refused", %{tmp_dir: tmp} do
+    refused = fn text, rel, choice ->
+      write(tmp, "scenes/s.scene", text)
+      write(tmp, rel, JSON.encode!(%{"choices" => %{choice => %{"then" => "end"}}}))
+      {_, diags} = Source.load(tmp)
+      File.rm!(Path.join(tmp, rel))
+      for d <- diags, do: {d["path"], d["data"]["why"]}
+    end
+
+    head = "npc: bram\nbram: ~\n"
+    other = refused.(head <> "- Go\n  bram: ~\n  then: s_ta\n", "dialogues/s.json", "go")
+    assert other == [{"dialogues/s.choices.go.then", "scene_overlap"}]
+    own = refused.(head <> "- Go\n  bram: ~\n  then: s\n", "dialogues/s.json", "go")
+    assert own == [{"dialogues/s.choices.go.then", "scene_overlap"}]
+    link = refused.(head <> "- Go\n  bram: ~\n  - In\n    bram: ~\n", "dialogues/s.json", "go")
+    assert link == [{"dialogues/s.choices.go.then", "scene_overlap"}]
+
+    parent =
+      refused.(
+        head <> "- Go\n  bram: ~\n  - In\n    bram: ~\n    then: s\n",
+        "dialogues/s_go.json",
+        "in"
+      )
+
+    assert parent == [{"dialogues/s_go.choices.in.then", "scene_overlap"}]
+  end
+
   # Break: a fact the choice above sets back is called unreachable under its own opposite `needs`.
   test "a needs opposite one above is reachable when the file sets that fact", %{tmp_dir: tmp} do
     text =
@@ -220,6 +271,8 @@ defmodule Loka.ContentSceneBranchingTest do
     head = "npc: bram\nbram: ~\n- Stay\n  bram: ~\n- Take\n  bram: ~\n  gives: lantern\n"
     assert {:ok, _, _} = sampler(head <> "  once\n")
     assert {:ok, _, _} = sampler(head <> "  once\n  needs: saw_lantern\n")
+    assert {:error, diags} = sampler(head)
+    assert Enum.any?(Content.explained(diags, "/x"), &(&1 =~ "Add `once` under the choice"))
     assert {:error, [%{"code" => "OUTCOME_MISMATCH"}]} = sampler(head)
   end
 

@@ -11,6 +11,8 @@ defmodule Loka.Content.SceneMerge do
       Enum.split_with(files, fn {rel, _, _} -> String.ends_with?(rel, [".scene", ".cut"]) end)
 
     Enum.reduce(scenes, rest, fn {rel, id, value}, acc ->
+      value = if is_map(value), do: Map.delete(value, :written_then), else: value
+
       case List.keytake(acc, id, 1) do
         {{_, _, json}, acc} -> acc ++ [{rel, id, deep(value, json)}]
         nil -> acc ++ [{rel, id, value}]
@@ -42,10 +44,10 @@ defmodule Loka.Content.SceneMerge do
     for {rel, {:dialogue, key, _}} <- scenes -- Enum.uniq_by(scenes, &elem(&1, 1)), do: {rel, key}
   end
 
-  # ponytail: a `then` to itself or a parent is what lowering writes, so a written one is not told
-  # apart and a sidecar `then` wins over it; carry written-or-not on the form if that bites.
+  # Lowering's own way back, the one `then` a JSON may replace: no `then:` line, and not the link
+  # to the choice's nested set (dropping that would silently cut the set off).
   defp comes_back?(["choices", c, "then"], scene, key),
-    do: String.starts_with?(key, scene["choices"][c]["then"])
+    do: c not in scene.written_then and scene["choices"][c]["then"] != "#{key}_#{c}"
 
   defp comes_back?(_, _, _), do: false
 

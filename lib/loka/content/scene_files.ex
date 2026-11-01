@@ -52,7 +52,7 @@ defmodule Loka.Content.SceneFiles do
       |> linked(key, links)
       |> visible(sections, links)
 
-    forms = if bad == [], do: forms, else: Enum.map(forms, fn {k, d} -> {k, filled(d)} end)
+    forms = if refused?(bad), do: Enum.map(forms, fn {k, d} -> {k, filled(d)} end), else: forms
     {forms, bad |> Enum.uniq() |> speakerless() |> by_line()}
   end
 
@@ -173,6 +173,9 @@ defmodule Loka.Content.SceneFiles do
 
   # A bad line's own diagnostic fails the build, so stand-ins for what it left unset only keep the
   # schema check from stopping the pass before a later fault can report.
+  # `unreachable` is a warning (Source): the file still lowers as written.
+  defp refused?(bad), do: Enum.any?(bad, &(elem(&1, 2) != "unreachable"))
+
   defp filled(d) do
     choices =
       if d["choices"] == %{}, do: %{"refused" => %{"label" => prose("~")}}, else: d["choices"]

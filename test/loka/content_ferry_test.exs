@@ -320,7 +320,10 @@ defmodule Loka.ContentFerryTest do
     }
 
     assert {:error, diags} = compile(dir, files)
-    assert d("OUTCOME_MISMATCH", "dialogues/bram_offer.choices.give.receive", %{}) in diags
+
+    assert d("OUTCOME_MISMATCH", "dialogues/bram_offer.choices.give.receive", %{
+             "why" => "gift_repeats"
+           }) in diags
   end
 
   # Breaks (loka-vduxr.10): a linked single-choice dialogue escaping the rule above, since it runs
@@ -354,7 +357,7 @@ defmodule Loka.ContentFerryTest do
 
     path = "dialogues/bram_offer.choices.give.receive"
     assert {:error, diags} = compile(dir, offer.(give))
-    assert d("OUTCOME_MISMATCH", path, %{}) in diags
+    assert d("OUTCOME_MISMATCH", path, %{"why" => "gift_repeats"}) in diags
 
     other = fn choices ->
       %{
@@ -372,19 +375,19 @@ defmodule Loka.ContentFerryTest do
     lead = other.(%{"go" => Map.put(plain, "then", "bram_offer")})
     linked = Map.put(offer.(Map.delete(give, "then")), "dialogues/bram_lead.json", lead)
     assert {:error, reached} = compile(dir, linked)
-    assert d("OUTCOME_MISMATCH", path, %{}) in reached
+    assert d("OUTCOME_MISMATCH", path, %{"why" => "gift_repeats"}) in reached
     # An answer that leads on keeps the talk going, so its own dialogue counts as linked.
     onward = offer.(Map.put(give, "then", "bram_far"))
     far = Map.put(onward, "dialogues/bram_far.json", other.(%{"bye" => plain}))
     assert {:error, led} = compile(dir, far)
-    assert d("OUTCOME_MISMATCH", path, %{}) in led
+    assert d("OUTCOME_MISMATCH", path, %{"why" => "gift_repeats"}) in led
     # lantern_lit is not a fact here, so it fails on that alone, never on the repeat rule.
     assert {:error, gated} = compile(dir, offer.(Map.merge(give, once)))
-    refute d("OUTCOME_MISMATCH", path, %{}) in gated, inspect(gated)
+    refute d("OUTCOME_MISMATCH", path, %{"why" => "gift_repeats"}) in gated, inspect(gated)
     # A gate reading another holder never closes for this speaker.
     elsewhere = put_in(once, ~w(policy item), Map.put(held, "subject", "target"))
     assert {:error, open} = compile(dir, offer.(Map.merge(give, elsewhere)))
-    assert d("OUTCOME_MISMATCH", path, %{}) in open
+    assert d("OUTCOME_MISMATCH", path, %{"why" => "gift_repeats"}) in open
   end
 
   # Breaks (23 §3: the compiler validates its triggers and capability dependencies): the compiler

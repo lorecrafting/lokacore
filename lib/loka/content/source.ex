@@ -1,4 +1,4 @@
-# size: allow 425, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 435, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -11,12 +11,16 @@ defmodule Loka.Content.Source do
     Extends,
     Prose,
     SceneFiles,
+    SceneLines,
     SceneMerge,
     SourceFiles,
     Zones
   }
 
   alias Loka.Core.Canonical
+
+  # A mistake the compiler is not sure of: it is said, and the file still lowers.
+  @warned_lines ["cut_scene_line", "unreachable"]
 
   @type steps :: [String.t() | non_neg_integer()]
   @typedoc "A source file, or a definition inside an area bundle: `{bundle rel, [dir, key]}`."
@@ -105,8 +109,7 @@ defmodule Loka.Content.Source do
         speaker = if value["npc"], do: %{"npc" => value["npc"]}, else: %{}
         named = if key == [], do: %{}, else: %{"key" => hd(key)}
         data = Map.merge(speaker, Map.merge(named, %{"line" => n, "text" => text, "why" => why}))
-        bad = diag("SCHEMA_VIOLATION", at(rel, []), data)
-        if why == "cut_scene_line", do: Map.put(bad, "severity", "warning"), else: bad
+        line_diag(at(rel, []), data, why in @warned_lines)
       end
 
     {files, diags}
@@ -119,6 +122,11 @@ defmodule Loka.Content.Source do
     end
   end
 
+  defp line_diag(path, data, true), do: path |> line_diag(data, false) |> warning()
+  defp line_diag(path, data, false), do: diag("SCHEMA_VIOLATION", path, data)
+
+  defp warning(diag), do: Map.put(diag, "severity", "warning")
+
   defp scene_forms(rel, {:scene, _, _} = id, text) do
     {value, bad} = CutFiles.parse(text)
     {[{rel, id, value}], bad}
@@ -127,8 +135,12 @@ defmodule Loka.Content.Source do
   # A nested set is one more dialogue, loaded under a path beside its scene (SceneFiles.rel/2).
   defp scene_forms(rel, {:dialogue, key, []}, text) do
     {forms, bad} = SceneFiles.parse(text, key)
+    written = Map.new(SceneLines.lines(text, key))
 
+    # Source-only until SceneMerge.merge: which `then`s the writer wrote, not lowering.
     {for {k, value} <- forms do
+       then = for {["choices", c, "then"], _} <- Map.get(written, k, []), do: c
+       value = Map.put(value, :written_then, then)
        {if(k == key, do: rel, else: SceneFiles.rel(rel, k)), {:dialogue, k, []}, value}
      end, bad}
   end

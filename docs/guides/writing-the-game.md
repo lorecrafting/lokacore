@@ -105,8 +105,8 @@ maud: ~
   it must be written first, and the nested choices are shown next. Going back to a shallower `- `
   at the same indent as an earlier choice closes what is deeper. A choice has either nested
   choices or a `then`, not both. Indent with spaces; a tab is refused.
-- A `needs:` that can never hold, because the `when:` or a choice above asks the opposite and the
-  file never sets that fact, is refused.
+- A `needs:` under a `when:` or a choice that asks the opposite, on a fact the file never sets, gets
+  a warning and still compiles: the compiler cannot see another file or a reaction changing that fact.
 
 A JSON of the same key may add what a scene cannot say, but it may not write a field the scene
 already writes (the prompt, the speaker, a choice's words): the compile names the field and asks you

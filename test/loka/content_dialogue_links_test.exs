@@ -59,6 +59,23 @@ defmodule Loka.ContentDialogueLinksTest do
     refute warning in seen.(warnings), inspect(warnings)
   end
 
+  # Break: a refused `then` gets the generic outcome line that names no field to remove, or names
+  # the wrong side: the target's keyword, or this dialogue's own quest.
+  test "a refused then names the part in its way", %{dir: dir} do
+    said = fn changes ->
+      assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
+      [d] = for d <- diags, d["path"] == @at <> "then", do: d
+      hd(Loka.Content.explained([d], dir))
+    end
+
+    worded = {"dialogues/child.json", talk("guard", %{"keyword" => "gate"})}
+    assert said.([worded, {@guard, field("then", "child")}]) =~ "remove `keyword` from `child`"
+
+    child = {"dialogues/child.json", talk("guard")}
+    quest = {@guard, &Map.put(field("then", "child").(&1), "quest", "any")}
+    assert said.([child, quest]) =~ "remove the `quest`"
+  end
+
   # Breaks: a link rule dropped, so a then the runtime cannot follow compiles and fails at play.
   test "then and then_failed refuse what cannot be followed", %{dir: dir} do
     child = {"dialogues/child.json", talk("guard")}

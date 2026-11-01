@@ -121,11 +121,6 @@ defmodule Loka.ContentSceneVerbsTest do
         indent_body:
           {"npc: maud\nmaud: hi\n- Go\n  maud: x\n  - In\n  sets: a\n", [{6, "bad_indent"}]},
         indent_tab: {"npc: maud\nmaud: hi\n- Go\n\tmaud: x\n", [{4, "bad_indent"}]},
-        unreachable_when:
-          {"npc: maud\nwhen: a\nmaud: hi\n- Go\n  needs: not a\n", [{5, "unreachable"}]},
-        unreachable_nested:
-          {"npc: maud\nmaud: hi\n- Go\n  needs: a\n  maud: x\n  - In\n    needs: not a\n",
-           [{7, "unreachable"}]},
         nested_key_taken:
           {"npc: maud\nmaud: hi\n- Go In\n  maud: x\n  - A\n- Go\n  maud: x\n  - In\n    maud: y\n    - B\n",
            [{10, "nested_key_taken"}]},
