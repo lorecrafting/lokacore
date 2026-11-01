@@ -8672,6 +8672,10 @@
           "const": true,
           "description": "Not placed in a fresh world; used as a population template."
         },
+        "unattackable": {
+          "description": "loka-w9id: this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile.",
+          "type": "boolean"
+        },
         "with": { "type": "object" },
         "words": { "$ref": "#/$defs/partial.NameWords" }
       },
@@ -11101,6 +11105,10 @@
         "spawn_template": {
           "const": true,
           "description": "Not placed in a fresh world; used as a population template."
+        },
+        "unattackable": {
+          "description": "loka-w9id: this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile.",
+          "type": "boolean"
         },
         "words": { "$ref": "#/$defs/NameWords" }
       },

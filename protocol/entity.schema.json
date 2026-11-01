@@ -670,6 +670,10 @@
             "$ref": "resource.schema.json#/$defs/ResourceInt"
           }
         },
+        "unattackable": {
+          "description": "loka-w9id: this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile.",
+          "type": "boolean"
+        },
         "attack": {
           "$ref": "entity.schema.json#/$defs/AttackProfile"
         },

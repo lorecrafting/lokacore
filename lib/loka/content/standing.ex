@@ -2,7 +2,7 @@ defmodule Loka.Content.Standing do
   @moduledoc """
   Toolbox rows 15 and G11: a reaction's fact.adjust names a bounded int fact (FACT_TYPE_MISMATCH);
   an NPC's disposition is on an authored NPC, with an engage line exactly when it is hostile and
-  has an attack (SCHEMA_VIOLATION). Row 35: an arrest instead of the engage line needs
+  has an attack and is not `unattackable` (SCHEMA_VIOLATION). Row 35: an arrest instead of the engage line needs
   `hostile` and no `engage` (SCHEMA_VIOLATION) and a room to move the body to
   (UNRESOLVED_REFERENCE).
   The conditions and the engage text are
@@ -21,6 +21,7 @@ defmodule Loka.Content.Standing do
     adjusts = for {_, {rel, [], r}} <- defs["reaction"] || %{}, a <- adjusts(r), do: {rel, a}
 
     shapes(npcs) ++
+      unattackable(npcs, m, defs) ++
       arrests(npcs, m, defs) ++
       ints(adjusts, m, defs) ++ speakers(m, defs)
   end
@@ -39,6 +40,28 @@ defmodule Loka.Content.Standing do
     for {%{"op" => "fact.adjust"} = s, i} <- Enum.with_index(r["steps"] || []), do: {s, i}
   end
 
+  defp unattackable(npcs, m, defs), do: unattackable_engage(npcs) ++ unattackable_members(m, defs)
+
+  # An engage line opens a fight, which an unattackable NPC never has (loka-w9id).
+  defp unattackable_engage(npcs) do
+    for {rel, %{"unattackable" => true, "disposition" => %{"engage" => _}}} <- npcs,
+        do:
+          diag("SCHEMA_VIOLATION", at(rel, ["unattackable"]), %{
+            "why" => "unattackable_engage",
+            "rel" => rel
+          })
+  end
+
+  # A population's members are there to be fought, which an unattackable NPC never is.
+  defp unattackable_members(m, defs) do
+    for {_, {rel, steps, %{"npc" => npc}}} <- defs["population"] || %{},
+        {npc_rel, _, %{"unattackable" => true}} <- [Refs.resolve(npc, "npc", m, defs)],
+        do: unattackable_foe(at(rel, steps ++ ["npc"]), npc_rel)
+  end
+
+  def unattackable_foe(path, rel),
+    do: diag("SCHEMA_VIOLATION", path, %{"why" => "unattackable_foe", "rel" => rel})
+
   defp shapes(npcs) do
     for {rel, %{"disposition" => d} = n} <- npcs,
         n["spawn_template"] || bad?(d, n) ||
@@ -47,6 +70,9 @@ defmodule Loka.Content.Standing do
   end
 
   defp bad?(%{"arrest" => _} = d, _), do: not is_map_key(d, "hostile") or is_map_key(d, "engage")
+
+  # An unattackable NPC never engages: an engage line has its own diagnostic, none is required.
+  defp bad?(_, %{"unattackable" => true}), do: false
 
   defp bad?(d, n),
     do: is_map_key(d, "engage") != (is_map_key(d, "hostile") and is_map_key(n, "attack"))

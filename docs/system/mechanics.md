@@ -804,8 +804,27 @@ without hp never engages (`hostileAt`), so no round ever targets a body with no 
 (loka-xyyd, after the #515 ruling "no hp, no band"). Composition record: consumer Attack
 and the GameView Attack offer; reads the NPC definition's `hp`; writes, events, jobs and save
 rows: none new; reused `attackRefused`, `hostileAt` and the RefusalCause route; new: the
-`cannot_be_hurt` cause, a generic name a later protection flag (loka-w9id) reuses. Installed
+`cannot_be_hurt` cause. Installed
 kernel 1.126.
+
+An NPC with `unattackable: true` (loka-w9id) can never be fought, whatever else it carries. One
+query, `attackable` in `kernel/ts/src/mechanics/combat/shared.ts` (an NPC with an `attack`, not
+`unattackable`, not an ally or group member), decides it for three readers: Attack's admission
+(`attackRefused`: resolved command `attack`, action key `attack`, target ids `[npc]`, refused
+`invalid_target` with no cause), the GameView (`combatOffered`: the Attack offer is absent), and
+the entry engage (`hostileAt`: neither a flagged NPC nor a companion opens a fight; an arrest is
+not a fight and still applies). `attackRefused` also guards the spell fight-back and the expedition, unchanged. A player's spell
+reads the flag itself, not `attackable`, because an NPC with hp and no `attack` stays hittable: no damage
+and no hp-draining status on a flagged NPC (`spell.ts`). A reaction's status still lands: the flag stops
+the player, not the writer. The
+kernel adds no refusal words. A peaceful room is the existing room `sanctuary: true`, not a second
+key: it refuses Attack `invalid_state`, its offer stays listed unavailable, and nothing engages on
+entry. Composition record: consumer the owner's prologue NPCs and companions; reads the NPC
+definition's `unattackable`, an optional key that is absent from existing content; writes, events, jobs and save rows: none new; reused `ally`,
+`attackRefused`, `combatOffered`, `hostileAt`, `sanctuary`; new: the key and the `attackable`
+query. An aimed damage spell (`damage` in `scripted_action/spell.ts`) still reads only `hp`. An
+`unattackable` NPC with `disposition.engage`, as a population's member or as a death credit's NPC is a
+compile error. Installed kernel 1.135.
 
 A round's blow stops at the target's authored hp floor, or at 0 under a negative floor, where death
 fires; a floored foe stays alive and the fight goes on, as under a spell's damage (`aboveFloor`,
@@ -3790,7 +3809,7 @@ Homestead hs-8 (Beads `loka-x6t.31`); the Book form is in [book-ui.md](book-ui.m
 [Toolbox row 35](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#standing-and-disposition-declarations) govern it; the PM brief is in Beads `loka-kgd.165` (2026-10-16). PM rulings: the trial is a narrated arrest followed by authored dialogue, with no scene and no served sentence; a move makes one relocation at most.
 
 - **Declaration.** An NPC's [disposition](#standing-and-disposition-toolbox-rows-15-and-g11) may declare `arrest {to, narration}`: `to` a room, `narration` a TextKey. It needs `hostile` and no `engage`.
-- **Reader.** G11's entry check (`hostileAt` in `kernel/ts/src/mechanics/disposition.ts`) finds the first living, unengaged, hostile NPC in EntityId order that has an arrest, or (only when the cartridge declares combat) an `attack` and an `engage` line. The sanctuary, scene and concealment rules stay as they are.
+- **Reader.** G11's entry check (`hostileAt` in `kernel/ts/src/mechanics/disposition.ts`) finds the first living, unengaged, hostile NPC in EntityId order that has an arrest, or (only when the cartridge declares combat) is `attackable` (combat@1) and has an `engage` line. The sanctuary, scene and concealment rules stay as they are.
 - **Effect.** When an ordinary move or a Sleep finds an arresting NPC, the same proposal does these things (`engage`): it transfers the body from the room to `to`, ends an active escort (escort's `separate`), cures every concealment on the body as an engagement does ([row 16](#sneak-and-hide-toolbox-row-16)), says `narration` and emits one `entity_entered_room` for `to`, after the move's own event. There is no encounter, job or draw. When the room entered is `to` itself, nothing happens.
 - **Known limits.** A move that ends in a fall arrests no one (`ponytail:` in `kernel/ts/src/mechanics/movement/sequence.ts`). The move's own room is not recorded as visited, because knowledge records the actor's last room once and the arrest moves the body on. The trail shows the move but not the relocation. An NPC that walks in on the player, or a disposition that turns hostile while the player stands in the room, arrests no one (G11's limit). A group member, and a ridden mount, stays in the room entered (the member stays in the group; the rider is on foot in the cell until they meet the horse again); an arrested sleeper stays asleep. No test covers an escort ended by an arrest. A move that writes a water row or opens an encounter (an expedition's hound), and a Sleep while the body holds a water row or is in an open encounter, arrest no one, since both stay pinned to the room. The arrest does not undo the move's patrol progress, so content puts no arresting NPC in a patrol room (not refused at load). An arrest that does not apply (a fall, a water or encounter write, or `to` is the room entered) lets the next hostile fighter in EntityId order engage.
 - **Opt-in.** An `arrest` is optional. An arrest without `hostile`, or one that also has `engage`, is SCHEMA_VIOLATION at the disposition. A `to` that names no room or a `narration` with no text is UNRESOLVED_REFERENCE. Every refusal is the compiler's (`lib/loka/content/standing.ex`). Chapter 1 declares none.
