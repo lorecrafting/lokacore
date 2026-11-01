@@ -110,7 +110,8 @@ maud: ~
 
 A JSON of the same key may add what a scene cannot say, but it may not write a field the scene
 already writes (the prompt, the speaker, a choice's words): the compile names the field and asks you
-to keep it in one place.
+to keep it in one place. A scene with nested choices cannot resolve a quest or take a keyword or
+riddle from its JSON, since those dialogues do not lead on; give that its own scene.
 
 ### Write a cutscene
 

@@ -2,7 +2,7 @@ defmodule Loka.Content.CutFiles do
   @moduledoc """
   Cutscene files: `scenes/<key>.cut` is one modal scene's steps as plain text: a narrate per
   paragraph, a last `---` as its await_ack, then end. `on` and `control` come from
-  `scenes/<key>.json`, merged over it (SceneFiles.merge/1). Lowering only: no runtime reads one.
+  `scenes/<key>.json`, merged over it (SceneMerge.merge/1). Lowering only: no runtime reads one.
   """
 
   @doc "A `.cut` file's text as its scene steps, with its bad lines (SceneFiles.parse/1's form)."

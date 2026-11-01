@@ -1,4 +1,4 @@
-# size: allow 440, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
+# size: allow 415, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
 defmodule Loka.Content.SceneFiles do
   @moduledoc """
   Scene files: `scenes/<key>.scene` (or `dialogues/<key>.scene`) is one dialogue as plain text,
@@ -35,9 +35,6 @@ defmodule Loka.Content.SceneFiles do
 
   @key_max 64
 
-  @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
-  @type entry :: {String.t(), term(), term()}
-
   @doc """
   The dialogue `text` of file key `key` as its JSON forms (itself first, then one per nested set), with every bad `{line, text, why}` (`why` keys
   Loka.Content.Explain's scene sentences). Bad lines are left out of the form, so the same compile
@@ -48,10 +45,30 @@ defmodule Loka.Content.SceneFiles do
   def parse(text, key) do
     {sections, links, walked} = SceneLines.split(text, key)
 
-    {forms, bad} = Enum.map_reduce(sections, walked, &section/2)
-    {forms, bad} = linked(forms, bad, key, links) |> visible(sections, links)
+    {forms, bad} =
+      sections
+      |> Enum.map_reduce(walked, &section/2)
+      |> unresolved(sections, links)
+      |> linked(key, links)
+      |> visible(sections, links)
+
     forms = if bad == [], do: forms, else: Enum.map(forms, fn {k, d} -> {k, filled(d)} end)
     {forms, bad |> Enum.uniq() |> speakerless() |> by_line()}
+  end
+
+  # A dialogue with a `quest` takes no `then` (dialogue_links.ex), and nesting needs one.
+  defp unresolved({forms, bad}, sections, links) do
+    if Enum.any?(links, &(&1.choice != "")) do
+      marks =
+        for {_, ls} <- sections,
+            {"quest: resolve " <> _ = t, n} <- ls,
+            do: {n, t, "resolve_nested"}
+
+      kept = Enum.reject(bad, &(elem(&1, 2) == "resolve_not_all"))
+      {Enum.map(forms, fn {k, d} -> {k, Map.delete(d, "quest")} end), marks ++ kept}
+    else
+      {forms, bad}
+    end
   end
 
   defp section({k, lines}, bad) do
@@ -93,7 +110,7 @@ defmodule Loka.Content.SceneFiles do
     %{d | "choices" => choices} |> Map.put("prompt", prompt)
   end
 
-  defp linked(forms, bad, key, links) do
+  defp linked({forms, bad}, key, links) do
     Enum.reduce(links, {Map.new(forms), bad}, &link/2) |> comes_back(key, links)
   end
 
@@ -391,42 +408,4 @@ defmodule Loka.Content.SceneFiles do
   end
 
   defp prose(words), do: %{"prose" => words}
-
-  @doc "Each scene entry (rel `*.scene` or `*.cut`) with its same-key JSON file merged over it, as one entry."
-  @spec merge([entry()]) :: [entry()]
-  def merge(files) do
-    {scenes, rest} =
-      Enum.split_with(files, fn {rel, _, _} -> String.ends_with?(rel, [".scene", ".cut"]) end)
-
-    Enum.reduce(scenes, rest, fn {rel, id, value}, acc ->
-      case List.keytake(acc, id, 1) do
-        {{_, _, json}, acc} -> acc ++ [{rel, id, deep(value, json)}]
-        nil -> acc ++ [{rel, id, value}]
-      end
-    end)
-  end
-
-  @doc "What a same-key JSON file writes over a scene, as `{json rel, path, key}`: it would silently replace the scene's words."
-  @spec overlap([entry()]) :: [{String.t(), [String.t()], String.t()}]
-  def overlap(files) do
-    for {rel, {:dialogue, key, _} = id, %{} = scene} <- files,
-        String.ends_with?(rel, ".scene"),
-        {json, ^id, %{} = other} <- files,
-        json != rel,
-        path <- fields(scene),
-        path in fields(other),
-        do: {json, path, key}
-  end
-
-  defp fields(d) do
-    Enum.flat_map(d, fn
-      {"roles", %{} = roles} -> for r <- Map.keys(roles), do: ["roles", r]
-      {"choices", %{} = cs} -> for {c, %{} = o} <- cs, f <- Map.keys(o), do: ["choices", c, f]
-      {field, _} -> [[field]]
-    end)
-  end
-
-  # An `:invalid` JSON side (its own diagnostic already fails the build) is not merged.
-  defp deep(%{} = scene, %{} = json), do: Map.merge(scene, json, fn _, a, b -> deep(a, b) end)
-  defp deep(_, json), do: json
 end

@@ -1,10 +1,21 @@
-# size: allow 405, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 425, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
   in the `Diagnostic.path` grammar (protocol/cartridge.schema.json); steps are names and indexes.
   """
-  alias Loka.Content.{Areas, Behaviours, CutFiles, Extends, Prose, SceneFiles, SourceFiles, Zones}
+  alias Loka.Content.{
+    Areas,
+    Behaviours,
+    CutFiles,
+    Extends,
+    Prose,
+    SceneFiles,
+    SceneMerge,
+    SourceFiles,
+    Zones
+  }
+
   alias Loka.Core.Canonical
 
   @type steps :: [String.t() | non_neg_integer()]
@@ -47,8 +58,8 @@ defmodule Loka.Content.Source do
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
     {files, diags} = read(dir)
-    replaced = steps_over_cut(files) ++ words_over_scene(files)
-    files = SceneFiles.merge(files)
+    replaced = replaced(files)
+    files = SceneMerge.merge(files)
     untriggered = untriggered(files)
     {files, opened} = Areas.split(files, dirs())
     {files, repeats} = Areas.unique(files)
@@ -232,9 +243,18 @@ defmodule Loka.Content.Source do
   end
 
   defp words_over_scene(files) do
-    for {json, path, key} <- SceneFiles.overlap(files) do
+    for {json, path, key} <- SceneMerge.overlap(files) do
       data = %{"why" => "scene_overlap", "key" => key, "written" => Enum.join(path, ".")}
       diag("SCHEMA_VIOLATION", at(json, path), data)
+    end
+  end
+
+  defp replaced(files),
+    do: steps_over_cut(files) ++ words_over_scene(files) ++ scenes_same_key(files)
+
+  defp scenes_same_key(files) do
+    for {rel, key} <- SceneMerge.same_key(files) do
+      diag("SCHEMA_VIOLATION", at(rel, []), %{"why" => "scene_key_taken", "key" => key})
     end
   end
 

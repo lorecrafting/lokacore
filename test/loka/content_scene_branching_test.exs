@@ -156,6 +156,31 @@ defmodule Loka.ContentSceneBranchingTest do
     assert {_, %{"value_type" => %{"default" => false}}} = done
   end
 
+  # Break: a real scene file and a nested set of the same key are silently merged.
+  test "a scene file with the key of another's nested set is refused", %{tmp_dir: tmp} do
+    write(tmp, "scenes/s.scene", "npc: bram\nbram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n")
+    write(tmp, "scenes/s_go.scene", "npc: bram\nbram: ~\n- Out\n")
+    {_, diags} = Source.load(tmp)
+    assert [%{"data" => %{"why" => "scene_key_taken", "key" => "s_go"}}] = diags
+  end
+
+  # Break: a `then` the scene never wrote is refused as "also written in the scene".
+  test "a sidecar then on a choice with no written then is not an overlap" do
+    json = {"dialogues/scene.json", %{"choices" => %{"look" => %{"then" => "end"}}}}
+    text = "npc: bram\nbram: ~\n- Look\n  bram: ~\n- Go\n  bram: ~\n  - In\n    bram: ~\n"
+    assert {:ok, out, _} = sampler(text, [json])
+    scene = JSON.decode!(out)["cartridge"]["dialogues"]["scene_sampler@0.0.1:dialogue/scene"]
+    assert scene["choices"]["look"]["then"] == "end"
+  end
+
+  # Break: a refused line's bytes reach the diagnostic data and crash a JSON encoder.
+  test "a badly indented latin-1 line leaves valid text in the diagnostic", %{tmp_dir: tmp} do
+    write(tmp, "scenes/s.scene", "npc: bram\nbram: ~\n  - A\n- Caf\xE9\n")
+    {_, diags} = Source.load(tmp)
+    assert diags != []
+    assert JSON.encode!(diags) =~ "bad_indent"
+  end
+
   # Break: a fact the choice above sets back is called unreachable under its own opposite `needs`.
   test "a needs opposite one above is reachable when the file sets that fact", %{tmp_dir: tmp} do
     text =
@@ -205,7 +230,14 @@ defmodule Loka.ContentSceneBranchingTest do
 
     fact = {"facts.json", &put_in(&1, ["facts", "scene_go_done"], bool("met_bram"))}
     go = "npc: bram\nbram: ~\n- Go\n  once\n  bram: ~\n"
-    assert {:error, [%{"code" => "RESERVED_FACT"}]} = sampler(go, [fact])
+    assert {:error, [%{"data" => %{"why" => "once_key_taken"}}]} = sampler(go, [fact])
+
+    # Two `once` choices that make one fact: scene's go_in and the nested go > in.
+    two =
+      "npc: bram\nbram: ~\n- Go In\n  once\n  bram: ~\n- Go\n  bram: ~\n  - In\n    once\n    bram: ~\n"
+
+    assert {:error, [%{"data" => %{"why" => "once_key_taken", "key" => "scene_go_in_done"}}]} =
+             sampler(two)
   end
 
   # Break: a nested key over Key 64 reaches the schema as a bare key error, or its lines vanish.

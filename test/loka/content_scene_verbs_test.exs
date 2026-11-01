@@ -126,6 +126,12 @@ defmodule Loka.ContentSceneVerbsTest do
         unreachable_nested:
           {"npc: maud\nmaud: hi\n- Go\n  needs: a\n  maud: x\n  - In\n    needs: not a\n",
            [{7, "unreachable"}]},
+        nested_key_taken:
+          {"npc: maud\nmaud: hi\n- Go In\n  maud: x\n  - A\n- Go\n  maud: x\n  - In\n    maud: y\n    - B\n",
+           [{10, "nested_key_taken"}]},
+        resolve_nested:
+          {"npc: maud\nmaud: hi\n- A\n  quest: resolve j\n  maud: x\n  - In\n",
+           [{4, "resolve_nested"}]},
         sets_many: {"npc: maud\nmaud: hi\n- Go\n  sets: a b c\n", [{4, "bad_sets"}]},
         sets_outside: {"npc: maud\nsets: a\nmaud: hi\n- Go\n", [{2, "outside_choice"}]},
         quest_outside: {"npc: maud\nquest: accept a\nmaud: hi\n", [{2, "outside_choice"}]},

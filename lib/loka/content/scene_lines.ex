@@ -24,7 +24,18 @@ defmodule Loka.Content.SceneLines do
     s = walk(text, key)
     # A repeated choice is refused by the fold; its children stay one set here.
     links = s.links |> Enum.reverse() |> Enum.uniq_by(& &1.child)
-    {sections(key, Enum.reverse(s.lines), links), links, s.bad}
+    {sections(key, Enum.reverse(s.lines), links), links, taken(s.links) ++ s.bad}
+  end
+
+  # Two different choices whose words make one child key would share its lines.
+  defp taken(links) do
+    links = Enum.reverse(links)
+    firsts = Enum.uniq_by(links, & &1.child)
+
+    for %{n: n, text: text, child: child} = l <- links,
+        first = Enum.find(firsts, &(&1.child == child)),
+        {l.parent, l.choice} != {first.parent, first.choice},
+        do: {n, text, "nested_key_taken", child}
   end
 
   defp walk(text, key) do
@@ -86,7 +97,7 @@ defmodule Loka.Content.SceneLines do
     end
   end
 
-  defp bad(s, n, text, why), do: %{s | bad: [{n, text, why} | s.bad]}
+  defp bad(s, n, text, why), do: %{s | bad: [{n, String.replace_invalid(text), why} | s.bad]}
 
   defp emit(s, k, text, n), do: %{s | lines: [{k, text, n} | s.lines]}
 

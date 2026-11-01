@@ -72,11 +72,15 @@ defmodule Loka.Content.Explain do
          unreachable | Line `{text}` can never be true here: the `when:` or a choice above it needs the opposite. | Remove it, change the fact, or move this choice out from under that one.
          bad_once | Line `{text}` is not `once`. | Write the one word `once` under the choice.
          once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
+         once_key_taken | `once` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice's words.
          once_key_long | `once` here would make the fact `{key}`, longer than 64 characters. | Shorten the choice's words or the scene's key.
          bad_then | Line `{text}` is not `then: <key>` or `then: end`, or repeats a `then:`. | Name one dialogue by its key, or `end`; `~` holds the place of words, not of a key.
          then_outside_choice | Line `{text}`: `then:` belongs under a choice. | Move it under a `- ` line.
          then_and_nested | Line `{text}`: this choice already goes on to its nested choices. | Remove the `then:`, or remove the nested choices.
          nested_key_long | Line `{text}` opens the dialogue `{key}`, longer than 64 characters. | Shorten this choice's words or the ones above it.
+         nested_key_taken | Line `{text}` opens the dialogue `{key}`, and another choice in this scene already does. | Change the words of one of the two choices.
+         scene_key_taken | Two scenes make the dialogue `{key}`. | Rename the scene file, or the nested choice that opens it.
+         resolve_nested | Line `{text}`: a scene with nested choices cannot resolve a quest. | Give the resolve its own scene, and lead to it with `then:`.
          nested_no_reply | Line `{text}` has no reply above it to open on. | Add the speaker's reply under the choice above, before its first nested `- `.
          unknown_dialogue | `then` names `{target}`, and no dialogue has that key. | Add `scenes/{target}.scene`, fix the spelling, or write `then: end`.
          scene_overlap | `{written}` is also written in the scene `{key}`, and this file would replace it. | Remove it from this file and keep it in the scene.

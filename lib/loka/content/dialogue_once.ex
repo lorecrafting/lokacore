@@ -4,11 +4,11 @@ defmodule Loka.Content.DialogueOnce do
   `fact.assign` of it on the choice's steps and a policy that needs it unset. Never in the
   artifact, so a lowered choice is what Hub's self-gated check reads.
   """
-  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
+  import Loka.Content.Source, only: [diag: 3, at: 2]
 
   @key_max 64
 
-  @doc "Reserves each `once` fact (an @engine_facts module): a fact already of that name is RESERVED_FACT at the `once`."
+  @doc "Reserves each `once` fact (an @engine_facts module): a fact already of that name is refused at the `once`."
   @spec facts(term(), map() | nil, map()) :: {term(), [map()]}
   def facts(facts, m, defs) when is_map(facts) and m != nil do
     Enum.reduce(onces(defs), {facts, []}, &reserve/2)
@@ -26,7 +26,8 @@ defmodule Loka.Content.DialogueOnce do
   defp reserve({k, c, rel, steps}, {acc, ds}) do
     name = name(k, c)
     site = at(rel, steps ++ ["choices", c, "once"])
-    taken = if is_map_key(acc, name), do: [diag("RESERVED_FACT", site)], else: []
+    data = %{"why" => "once_key_taken", "key" => name}
+    taken = if is_map_key(acc, name), do: [diag("SCHEMA_VIOLATION", site, data)], else: []
 
     long =
       if byte_size(name) > @key_max,
