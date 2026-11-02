@@ -111,6 +111,7 @@ export const size = {
   card: 48, // action card minimum height
   rule: 1, // hairline
   speechBar: 2,
+  experienceRule: 2, // the rule under the status row (owner, 2026-10-31)
   minimap: 56, // the endpaper map at rest
   footerRule: 92, // each hairline beside the minimap
   focus: 2, // the web keyboard focus ring: its outline width and its offset
