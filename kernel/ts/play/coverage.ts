@@ -76,7 +76,7 @@ export function coverage(c: Cartridge, traces: Trace[]) {
     try {
       replay(cartridge, t, (before, d, n) => {
         if (d.kind !== 'accepted') return;
-        // closing() (mechanics/death/lines.ts:22) cuts narration to 64 lines: a cut marker is unknown
+        // closing() (mechanics/death/lines.ts:28) cuts narration to 64 lines: a cut marker is unknown
         if ((d.narration?.length ?? 0) >= 64)
           throw new Error(`narration cap reached at ordinal ${n}`);
         for (const n of d.narration ?? []) seen.add(ruleOf(n.key) ?? '');

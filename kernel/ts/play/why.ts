@@ -83,7 +83,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
 // Step `ordinal` (`e`) decided on a copy of `r` (replay advances the Run it is given) with `cart`.
 function step(r: Run, cart: Cartridge, e: Trace['entries'][number], ordinal: number) {
   const d = replayEntry({ ...r, world: { ...r.world, cartridge: cart } }, e).decision;
-  // closing() (mechanics/death/lines.ts:22) cuts narration to 64 lines: a cut marker is unknown
+  // closing() (mechanics/death/lines.ts:28) cuts narration to 64 lines: a cut marker is unknown
   if (d.kind === 'accepted' && (d.narration?.length ?? 0) >= 64)
     throw new Error(`narration cap reached at ordinal ${ordinal}`);
   return d;

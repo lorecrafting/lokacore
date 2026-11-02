@@ -318,3 +318,54 @@ test('a fight found on a first view resumes only its music', (t) => {
   draw(place('p'), true, 0);
   assert.deepEqual(heard.at(-1), ['combat_close', true]);
 });
+
+// Breaks: a kill that levels buzzes the fight-won pulse (and, inside the 100 ms gap, loses the
+// level's), the fanfare plays over the level note (book-ui.md, A level is never dropped), or a fanfare still
+// waiting plays over the next fight.
+test('a kill that levels feels the level, and the fanfare waits out the settle hold', (t) => {
+  const tick = clock(t);
+  t.after(onCue(playCue));
+  const g = globalThis as any;
+  t.after(() => (g.bookDevice = undefined));
+  tick(motion.quick.duration + motion.turn.duration); // past the curl of any earlier test
+  const fought = (level: number, entities: unknown[], combat?: unknown) =>
+    place('p', { combat, entities, levelling: { level } });
+  const wolf = (level: number) => fought(level, [{ id: 'wolf' }], { opponent_id: 'wolf' });
+  const felt = () => g.bookDevice.filter((d: string[]) => d[0] !== 'play');
+  const draw = mount();
+  t.after(draw.unmount);
+  draw(wolf(1), false, 0);
+  g.bookDevice = [];
+  draw(fought(2, []), false, 0);
+  assert.deepEqual(felt(), [['haptic', 'heavy']]);
+  tick(motion.settle.hold - 1);
+  assert.deepEqual(felt(), [['haptic', 'heavy']]);
+  tick(1);
+  assert.deepEqual(felt(), [
+    ['haptic', 'heavy'],
+    ['fight', 'won'],
+  ]);
+  draw(wolf(2), false, 0);
+  g.bookDevice = [];
+  draw(fought(3, []), false, 0);
+  draw(wolf(3), false, 0);
+  tick(motion.settle.hold * 2);
+  assert.deepEqual(felt(), [
+    ['haptic', 'medium'],
+    ['fight', 'open'],
+    ['haptic', 'medium'],
+  ]);
+  // A level note held behind a blow: the hold runs from the note, not from the fall.
+  const won = () => felt().filter((d: string[]) => d[0] === 'fight' && d[1] === 'won');
+  g.bookDevice = [];
+  playCue({ name: 'combat_close', end: 'fell', levelled: true });
+  tick(motion.settle.hold - 100);
+  playCue({ name: 'level' });
+  tick(motion.settle.hold - 1);
+  assert.deepEqual(won(), []);
+  tick(1);
+  assert.deepEqual(won(), [['fight', 'won']]);
+  playCue({ name: 'level' }); // a later level with no kill plays no fanfare
+  tick(motion.settle.hold);
+  assert.deepEqual(won(), [['fight', 'won']]);
+});

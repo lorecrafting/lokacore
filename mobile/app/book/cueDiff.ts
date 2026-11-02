@@ -69,7 +69,7 @@ const FIGHT_ENDS = (now: GameView, was: GameView) =>
       ? 'fell'
       : 'quiet';
 
-function combatCues(now: GameView, was: GameView, died: boolean) {
+function combatCues(now: GameView, was: GameView, died: boolean, levelled: boolean) {
   const out: Cue[] = [];
   // Status ticks are silent (owner rule), so only a fall in combat beyond them is a blow (plan 3.3).
   // ponytail: the last tick of a status that just ended still thuds; the view no longer shows it.
@@ -79,7 +79,12 @@ function combatCues(now: GameView, was: GameView, died: boolean) {
     out.push({ name: 'hp_loss', loss: Math.max(loss, 0) });
   if (died) return [...out, { name: 'death', fight: !!was.combat } as const];
   if (!was.combat && now.combat) out.push({ name: 'combat_open' });
-  if (was.combat && !now.combat) out.push({ name: 'combat_close', end: FIGHT_ENDS(now, was) });
+  if (was.combat && !now.combat)
+    out.push({
+      name: 'combat_close',
+      end: FIGHT_ENDS(now, was),
+      ...(levelled && { levelled: true }),
+    });
   return [...out, ...dealtCues(now, was)];
 }
 
@@ -164,8 +169,8 @@ export function cuesOf(
 ): Cue[] {
   if (!was) return [];
   const chapter = now.chapter && was.chapter?.index !== now.chapter.index;
-  const level = was.levelling && (now.levelling?.level ?? 0) > was.levelling.level;
-  const combat = combatCues(now, was, died);
+  const level = !!was.levelling && (now.levelling?.level ?? 0) > was.levelling.level;
+  const combat = combatCues(now, was, died, level);
   return [
     ...(chapter ? [{ name: 'chapter' } as const] : []),
     ...(level

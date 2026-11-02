@@ -22,12 +22,14 @@ import type {
   DeltaOp,
   DomainEvent,
   Key,
+  Text,
   ReactionRule,
 } from '../src/contracts.gen.ts';
 import { key } from '../src/foundation/compose.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { levelsReached, levelUp, oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
+import { closing, levelAt } from '../src/mechanics/death/lines.ts';
 import { type Joins, runDelayed } from '../src/mechanics/delayed.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { gameView } from '../src/view/view.ts';
@@ -314,11 +316,12 @@ test('a level-up refill after a bite in the killing round joins the round', () =
 // rule runs in a later proposal or not at all, or the gained line follows the level-up line.
 test('the third kill places level_reached after the death and its rule fires in the proposal', () => {
   const { third } = cull();
-  assert.deepEqual(lines(third).slice(-2), [
+  // The level line explains the level rule's, so it reads first (book-ui.md, A level is never dropped).
+  assert.deepEqual(lines(third).slice(-3), [
     { key: GAINED, bindings: { amount: 10 } },
     { key: LEVEL_UP },
+    { key: 'levelling.level_two' },
   ]);
-  assert.ok(narration(third).includes('levelling.level_two'));
   const all = events(third);
   const reached = all.filter((e) => e.payload.type === 'level_reached');
   const character_id = third.world.character;
@@ -373,13 +376,11 @@ test('one grant crossing two thresholds gives two events in order and one line',
   assert.deepEqual(levels(r), [2, 3]);
   const keys = narration(r);
   assert.equal(keys.filter((k) => k === LEVEL_UP).length, 1);
-  assert.deepEqual(
-    keys.filter((k) => k.startsWith('levelling.level_t')),
-    ['levelling.level_two', 'levelling.level_three'],
-  );
-  assert.deepEqual(lines(r).slice(-2), [
+  assert.deepEqual(lines(r).slice(-4), [
     { key: GAINED, bindings: { amount: 71 } },
     { key: LEVEL_UP },
+    { key: 'levelling.level_two' },
+    { key: 'levelling.level_three' },
   ]);
 });
 
@@ -628,4 +629,30 @@ test('an unchanged fact write takes no position', () => {
   assert.equal(ran?.kind, 'accepted');
   const [emitted] = (ran as unknown as { events: { position: number }[] }).events;
   assert.equal(emitted!.position, 1);
+});
+
+// Breaks: a level no rule answers, or another character's, pins the actor's level lines mid-receipt
+// ahead of later lines; or a death's penalty line jumps ahead of the death's own lines.
+test('level lines move up only for an answered level of the actor; a penalty line stays last', () => {
+  const w = holding(50);
+  const reached = (character_id: string) =>
+    ({ payload: { type: 'level_reached', character_id, level: 2 } }) as unknown as DomainEvent;
+  assert.equal(levelAt(w, w.character, reached(w.character), 3), 3);
+  assert.equal(levelAt(w, w.character, reached('someone'), 3), undefined);
+  const bare = holding(50, { ...content, reactions: {} });
+  assert.equal(levelAt(bare, w.character, reached(w.character), 3), undefined);
+  const death = { penalty: { experience: { narration: 'lost' } } };
+  const dying = {
+    ...w,
+    cartridge: { ...content, world: { ...content.world, death } },
+  } as unknown as World;
+  const fall: DeltaOp = {
+    op: 'levelling.set',
+    writer_group: 1,
+    character_id: w.character,
+    expected: { experience: 50, allocated: {} },
+    value: { experience: 45, allocated: {} },
+  };
+  const own = [{ key: 'tick' }, { key: 'died' }] as Text[];
+  assert.deepEqual(closing(dying, w.character, [fall], [], own, 0), [...own, { key: 'lost' }]);
 });

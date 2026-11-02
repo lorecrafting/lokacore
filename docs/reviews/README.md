@@ -31,6 +31,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: away catch-up cap, PR #569 (loka-qhvgq, kernel_api 1.144)](2026-11-01-loka-qhvgq-review.md): **CHANGES REQUIRED**
 - [Review: level-up refill, PR #566 (loka-g5hh.2.2, kernel_api 1.142)](2026-11-01-loka-g5hh.2.2-review.md): **APPROVE WITH NOTES**
 - [Level-up E2: second review (PR #566)](2026-11-01-level-up-e2-second-review.md): **APPROVE WITH NOTES**
+- [Review: level rush, PR #582](2026-11-01-level-rush-review.md): **APPROVE WITH NOTES**
 - [Second review: fast cold open, PR #574 (loka-vduxr.34)](2026-11-01-fast-open-second-review.md): **APPROVE WITH NOTES**
 - [Review: open a save without replaying its receipts, PR #574 (loka-vduxr.34)](2026-11-01-fast-open-review.md): **APPROVE WITH NOTES**
 - [Review: lawful escort parting, PR #555 (loka-vduxr.23, kernel_api 1.137)](2026-11-01-escort-separation-review.md): **APPROVE WITH NOTES**
