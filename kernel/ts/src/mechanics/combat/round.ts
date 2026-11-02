@@ -110,7 +110,7 @@ export function roundSequence(
   ordinaryRound(world, command, job, row, encounter_id, r, close, mint);
   if (r.ops.some((op) => op.op === 'encounter.close'))
     r.ops.push(...crowSettled(prefix(world, r.ops, job.due_time), row.npc_id, mint));
-  const narration = told(world, row, job, r);
+  const narration = told(world, row, r);
 
   const timed = r.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: job.due_time } : op));
   return accepted(world, 'job_ran', timed, r.events, narration, r.rng);

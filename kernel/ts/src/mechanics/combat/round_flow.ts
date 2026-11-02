@@ -92,7 +92,7 @@ function selectedFrom(present: readonly EntityId[], cursor: EntityId) {
 
 function packResult(world: World, row: EncounterRow, job: JobRow, r: Round) {
   const timed = r.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: job.due_time } : op));
-  return accepted(world, 'job_ran', timed, r.events, told(world, row, job, r), r.rng);
+  return accepted(world, 'job_ran', timed, r.events, told(world, row, r), r.rng);
 }
 
 function packTurns({
@@ -223,7 +223,7 @@ export function successor(
 }
 
 /** A round's lines (loka-kgd.197 names, tiers and the foe's condition when declared), then its notes. */
-export function told(world: World, row: EncounterRow, job: JobRow, r: Round): Text[] {
+export function told(world: World, row: EncounterRow, r: Round): Text[] {
   const combat = world.cartridge.world!.combat!;
   const words = combat.narration;
   const hp = resourceRef(world, 'hp');
@@ -254,10 +254,11 @@ export function told(world: World, row: EncounterRow, job: JobRow, r: Round): Te
       ...named(e.attacker_id, e.target_id),
     };
   });
-  const state = condition(world, job, r);
+  const state = condition(world, row, r);
   if (state) {
     const died = r.events.findIndex((e) => e.payload.type === 'entity_died');
-    lines.splice(died < 0 ? lines.length : died, 0, { key: state.text, ...named(null, state.foe) });
+    const target = describeEntity(world, row.character_id, state.foe, 'short', r.steps) as TextKey;
+    lines.splice(died < 0 ? lines.length : died, 0, { key: state.text, bindings: { target } });
   }
   return [...lines, ...r.notes];
 }
@@ -276,16 +277,20 @@ function naming(world: World, row: EncounterRow, r: Round) {
   };
 }
 
-// The player's current foe's condition row after a round with an attack; a dead foe sits at its
-// minimum, below every cut (at_percent >= 1), so it gets none.
-function condition(world: World, job: JobRow, r: Round) {
+// The condition row, after a round with an attack, of the foe the player struck (else the round's
+// starting foe), not a pack's next member; a dead foe sits at its minimum, below every cut
+// (at_percent >= 1), so it gets none.
+function condition(world: World, row: EncounterRow, r: Round) {
   const rows = world.cartridge.world!.combat!.conditions;
   if (!rows || !r.events.some((e) => e.payload.type === 'attack_result')) return undefined;
   const end = prefix(world, r.ops, r.due_time);
-  const foe = end.state.encounters![job.encounter_id!].npc_id;
+  const struck = r.events
+    .map((e) => e.payload)
+    .find((e) => e.type === 'attack_result' && e.attacker_id === row.body_id);
+  const foe = struck?.type === 'attack_result' ? struck.target_id : row.npc_id;
   const hp = resourceRef(end, 'hp');
   const { minimum, maximum } = resourceSpec(end, foe, hp);
   const current = level(end, foe, hp)!;
-  const row = rows.find((c) => 100 * (current - minimum) >= c.at_percent * (maximum - minimum));
-  return row && { text: row.text, foe };
+  const cut = rows.find((c) => 100 * (current - minimum) >= c.at_percent * (maximum - minimum));
+  return cut && { text: cut.text, foe };
 }

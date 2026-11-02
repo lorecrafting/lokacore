@@ -340,7 +340,7 @@ function assertFlight(x: World) {
   assert.deepEqual(r1.lines, [
     'combat.goblin_joined',
     'combat.player_hit_30', // 2 of A's 6 hp; A then flees on its turn
-    'combat.condition_100', // B's, the new foe's
+    'combat.condition_50', // A's, the foe struck: 4 of 6 (400 >= 50 × 6, 400 < 75 × 6), not B's
     'combat.goblin_fled_south',
     'combat.goblin_targeted',
   ]);

@@ -138,9 +138,9 @@ test('a killing first blow closes the fight with no successor and no condition',
 });
 
 // Breaks (mechanics.md "First round at Attack"): a save accepts a missing job on a row other than
-// a closed round-1 row of an initiative world, refuses a live row's own job, or keeps a closed
-// row whose job still waits.
-test('a save lets only a closed round-1 row with initiative lack its job', () => {
+// a closed round-1 row, refuses that row once the cartridge drops initiative, refuses a live row's
+// own job, or keeps a closed row whose job still waits.
+test('a save lets only a closed round-1 row lack its job, with or without initiative', () => {
   const fatal = attack(
     sampler((c) => (c.player_attack.damage_min = c.player_attack.damage_max = 10)),
   ).w;
@@ -160,12 +160,13 @@ test('a save lets only a closed round-1 row with initiative lack its job', () =>
       edited(live, (_row, job) => (job.encounter_id = 'ffffffff-1970-4970-8970-000000000001')),
       edited(live, (row) => (row.status = 'closed')),
     ],
-    [true, false, false, false, false, false],
+    [true, false, true, false, false, false],
   );
 });
 
 // Breaks: an opted-out cartridge draws at Attack, loses its scheduled round 1 or the odd/even
-// order, or gains bindings; tiers and conditions still apply without initiative.
+// order, or binds a strike line; tiers and conditions still apply without initiative, and the
+// condition line still binds {target} (no literal braces).
 test('without initiative Attack only schedules; tiers and conditions still apply', () => {
   const { before, w, d, lines } = attack(sampler((c) => delete c.initiative));
   assert.deepEqual([w.state.rng, lines], [before.state.rng, []]);
@@ -177,7 +178,7 @@ test('without initiative Attack only schedules; tiers and conditions still apply
   assert.deepEqual(one.lines, [
     { key: key('player_hit_25') },
     { key: key('npc_hit') },
-    { key: key('condition_50') },
+    { key: key('condition_50'), bindings: { target: GOBLIN } },
   ]);
   const two = round(one.w);
   assert.deepEqual(

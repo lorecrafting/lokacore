@@ -353,8 +353,10 @@ test('combat 9: in the pit the player turns on the second goblin; each kill pays
   );
   const hps = (x: World) => [hp(x, a), hp(x, b), pool(x, 'hp')];
   assert.deepEqual(hps(joined.world), [3, 6, 5]); // round 1 strikes A at the Attack
-  const unswitched = wait(joined.world, start + 150).world;
+  const { world: unswitched, lines } = wait(joined.world, start + 150);
   assert.deepEqual([hp(unswitched, a), hp(unswitched, b)], [0, 6]);
+  // A, the foe struck, died (3 of 6): no condition line, and not B's (6 of 6, condition_100)
+  assert.ok(!lines.some((l) => l.startsWith('combat.condition')), lines.join());
   const r1 = wait(turned.world, start + 150).world;
   assert.deepEqual(hps(r1), [3, 3, 4]);
   const r2 = wait(seeded(r1, FOE_FIRST), start + 300).world; // B strikes, then falls
