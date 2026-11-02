@@ -24,9 +24,10 @@ defmodule Loka.ContentPlaceholdersTest do
         assert catch_exit(Mix.Tasks.Loka.Compile.run([dir, out])) == {:shutdown, 1}
       end)
 
-    assert said =~ "placeholder_text at text.dialogue.elder_ward.thank\n"
-    assert said =~ "placeholder_text at text.npc.elder.name\n"
-    refute said =~ "narration.elder_ward.thank"
+    # Each file was rewritten on one line, so both keys sit on line 1 of the file that wrote them.
+    assert [_, _] = String.split(said, "\n", trim: true)
+    assert said =~ ~r/^error: text\.json:1 .*`~`/m
+    assert said =~ ~r/^error: areas\/village\.json:1 .*`~`/m
     refute File.exists?(out)
 
     ExUnit.CaptureIO.capture_io(:stderr, fn ->
@@ -38,16 +39,18 @@ defmodule Loka.ContentPlaceholdersTest do
 
   # Break: a scene ships a literal `~` the player reads, since it lowers to a text value that is
   # not exactly `~` (joined under a written line, or holding the extra space).
-  for {form, lines} <- [
-        joined_twice: "elder: ~\nelder: ~\n- Yes\nelder: Granted.",
-        under_written: "elder: Written line one.\nelder: ~\n- Yes\nelder: Granted.",
-        extra_space: "elder:  ~\n- Yes\nelder: Granted.",
-        in_a_reply: "elder: Asked.\n- Yes\nelder: first\nelder: ~",
-        narration: "* ~\nelder: Asked.\n- Yes\nelder: Granted.",
-        reply_narration: "elder: Asked.\n- Yes\n* ~",
-        nested_prompt: "elder: Asked.\n- Yes\n  elder: ~\n  - In\n    elder: Fine.",
-        nested_reply: "elder: Asked.\n- Yes\n  elder: Fine.\n  - In\n    elder: ~",
-        second_speaker: "with: smith\nelder: Asked.\nsmith: ~\n- Yes\nelder: Granted."
+  # The line after `:` is where the block holding the `~` starts (`npc: elder` is line 1).
+  for {form, lines, at} <- [
+        {:joined_twice, "elder: ~\nelder: ~\n- Yes\nelder: Granted.", 2},
+        {:under_written, "elder: Written line one.\nelder: ~\n- Yes\nelder: Granted.", 2},
+        {:extra_space, "elder:  ~\n- Yes\nelder: Granted.", 2},
+        {:in_a_reply, "elder: Asked.\n- Yes\nelder: first\nelder: ~", 4},
+        {:narration, "* ~\nelder: Asked.\n- Yes\nelder: Granted.", 2},
+        {:reply_narration, "elder: Asked.\n- Yes\n* ~", 4},
+        {:nested_prompt, "elder: Asked.\n- Yes\n  elder: ~\n  - In\n    elder: Fine.", 4},
+        {:nested_reply, "elder: Asked.\n- Yes\n  elder: Fine.\n  - In\n    elder: ~", 6},
+        {:second_speaker, "with: smith\nelder: Asked.\nsmith: ~\n- Yes\nelder: Granted.", 3},
+        {:choice, "elder: Asked.\n- ~\nelder: Granted.", 3}
       ] do
     test "a release compile refuses a scene's #{form}", %{tmp_dir: tmp} do
       dir = Loka.ContentSource.copy("cartridges/speech_sampler")
@@ -65,8 +68,7 @@ defmodule Loka.ContentPlaceholdersTest do
           assert catch_exit(Mix.Tasks.Loka.Compile.run([dir, out])) == {:shutdown, 1}
         end)
 
-      assert said =~ "placeholder_text at text."
-      assert said =~ "still_to_write"
+      assert said =~ ~r/^error: scenes\/still_to_write\.scene:#{unquote(at)} .*`~`/
       refute File.exists?(out)
     end
   end
@@ -89,7 +91,7 @@ defmodule Loka.ContentPlaceholdersTest do
         assert catch_exit(Mix.Tasks.Loka.Compile.run([dir, out])) == {:shutdown, 1}
       end)
 
-    assert said =~ "placeholder_text at text.scene.bell_rung.steps.1.text"
+    assert said =~ ~r/^error: scenes\/bell_rung\.cut:3 .*`~`/
     refute File.exists?(out)
   end
 

@@ -1,5 +1,8 @@
 # Builder's guide: authoring Loka today
 
+Writing a cartridge by hand? Start at [writing the game](guides/writing-the-game.md). This page is
+the agents' reference: source shortcuts, mechanics by kind, compile and coverage checks.
+
 Loka currently has a file-based builder workflow. You write JSON source, compile it into a
 versioned [cartridge](system/glossary.md), and play or replay the result. The compiler and
 loader validate content before a world starts. A visual Builder app, live editing and arbitrary builder spawning are
@@ -70,49 +73,12 @@ capability locks, references, placements and capacities, dialogue/quest links, t
 and other content relationships ([compiler checks](system/cartridge.md#compiler)). A
 compiled artifact is checked again when loaded ([loader](system/cartridge.md#artifact-and-loader)).
 
-## Validate while writing
-
-`schemas/source/` has a JSON Schema for each source file kind ([source schema](system/cartridge.md#source-schema)),
-so an editor flags a misspelled field or a malformed shortcut as you type. In VS Code, map them
-in the workspace `settings.json`:
-
-```json
-"json.schemas": [
-  { "fileMatch": ["cartridges/*/rooms/*.json"], "url": "./schemas/source/rooms.schema.json" },
-  { "fileMatch": ["cartridges/*/text.json"], "url": "./schemas/source/text.schema.json" }
-]
-```
-
-Add one entry per directory or root file you edit; the schema file is named after it. Do not put
-`$schema` in a source file: the compiler refuses it as `UNKNOWN_FIELD`. The compiler is still
-the judge; the schemas do not check references.
-
-For reading, not editing: [source kinds](reference/source-kinds.gen.md) has every kind's fields,
-types, required-ness and meaning; [vocabulary](reference/vocabulary.gen.md) has the step ops, policy
-leaves, events and choice fields. Both are generated from the schemas.
-
 ## Preview an edit
 
-To see a cartridge in the Book on the web, compile it into the author preview, then, in a second
-terminal, start the preview once (from `mobile/app`, `npm run author`; it serves
-http://localhost:19006):
-
-```sh
-mise exec -- bin/loka dev cartridges/cellar_sampler --watch
-```
-
-Each save of a source file recompiles it. A text-only edit shows in the open page at once; any
-other edit reloads the page and replays your inputs so far, stopping at the first step the edit
-broke and naming it ([author preview](system/cartridge.md#author-preview)). Without `--watch` it
-compiles once. A failed compile prints its diagnostics and keeps the last good cartridge. Each
-edited cartridge has its own save; the normal preview's save is never touched. Add `?dev=1` to
-the URL for the author column: compile errors, facts, quests and flags, why an action is missing,
-checkpoints, still-to-write text and a control that advances game time through the normal
-elapsed-time path (the world credits none before the ancestry choice), and go to a room or set a
-fact by key (a checkpoint records and replays both). The owner's walkthrough:
-[writing the game](guides/writing-the-game.md).
-Release, test and e2e builds always use the pinned chapter
-([`metro.config.js`](../mobile/app/metro.config.js), [`bin/loka dev`](../kernel/ts/play/author.ts)).
+The writer's loop (watcher, Book preview, panel) is in [writing the game](guides/writing-the-game.md);
+its rules are the [author preview](system/cartridge.md#author-preview). Release, test and e2e builds
+always use the pinned chapter ([`metro.config.js`](../mobile/app/metro.config.js),
+[`bin/loka dev`](../kernel/ts/play/author.ts)).
 
 The same compiled cartridge runs headless and in a scripted browser walk, so a sampler
 ([toolbox](MECHANICS-TOOLBOX.md)) is checked without a fixture of its own:
@@ -169,33 +135,10 @@ shared GameView. Consult the
 [capability map](features.gen.md) for the current installed list and
 [mechanics](system/mechanics.md) for exact behavior.
 
-The chapter already uses combat and same-body death/return; its remaining story and
-mechanics work is tracked in the [completion plan](archive/MISSING-CHILD-PLAN.md). Current
-quests have one objective, evidenced by
+Current quests have one objective, evidenced by
 a current-state policy or a post-activation item-acquired event. Dialogues have bounded
 choices rather than an arbitrary dialogue graph, and scenes
 support authored narration/acknowledgement steps. There is no general live
 spawner or respawn system: the five cellar rats are five authored static NPC definitions.
-These limits matter when planning a new chapter or a Builder UI.
 
-## Carry lessons into another story
-
-Use the [active mechanics specification](system/mechanics.md) and [examples above](#authoring-paths-and-examples)
-for current behavior. The [review records](reviews/README.md) retain each PR's findings
-and fixes; the [mechanics](lessons/mechanics.md), [storage](lessons/storage.md) and
-[contract](lessons/contracts.md) lessons explain failures that apply beyond one chapter.
-Compiler and loader checks, contract fixtures and regression tests enforce reusable
-rules. A review record preserves the investigation but is not an executable guard.
 Before a district or area plan, read the [area authoring checklist](guides/area-authoring.md).
-When another story needs a missing mechanic, add it for that real consumer, amend
-the active specification and test the failure before updating this guide.
-
-## Builder app direction
-
-The first useful visual builder could edit the same source files, show compiler diagnostics,
-and launch a preview using the existing terminal or local Story authority. The current
-`Loka.Builder` module is a boundary placeholder, so workspace storage, editing APIs,
-live preview controls, certification and publishing still require implementation
-([planned authoring work](system/future.md#authoring-and-certification)). Live spawning
-would additionally need persisted entity identity, one-to-many NPC lookup and the normal
-transactional decision path; the [glossary](system/glossary.md) marks it as planned.

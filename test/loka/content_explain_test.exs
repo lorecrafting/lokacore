@@ -1,4 +1,4 @@
-# size: allow 545, one catalog walked row by row; each row is its own small test
+# size: allow 580, one catalog walked row by row; each row is its own small test
 defmodule Loka.ContentExplainTest do
   # What an author reads from a refused compile (loka-vduxr A1, A9). Expected fragments are
   # hand-written; wording around them may move.
@@ -214,6 +214,43 @@ defmodule Loka.ContentExplainTest do
 
   defp scene(dir, text, extra \\ %{}),
     do: said(dir, Map.merge(%{"scenes/hi.scene" => text}, extra))
+
+  # Break: a scene with nothing said before its first choice prints a bare schema path, or loses
+  # whose words are missing.
+  test "a scene with no prompt says who must speak first, at npc:", %{tmp_dir: dir} do
+    assert dir |> scene("npc: bram\n- Go\n  bram: ok\n") |> line_at("scenes/hi.scene:1") =~
+             "bram says nothing"
+  end
+
+  # Break: `when:` or `needs:` on a number fact reads as the JSON mismatch (an `equals` the writer
+  # never wrote), or the two point at each other's line, or the fact and its type go unnamed,
+  # or a `sets:` line in a choice is told about `needs:`, or a dotted fact (`pouch.gold`) loses its type.
+  test "when: and needs: on a number fact name the fact and its type", %{tmp_dir: dir} do
+    facts =
+      ~s({"facts":{"coins":{"version":1,"meaning":"m","scopes":["player"],"value_type":{"type":"int","default":0,"minimum":0,"maximum":9}},"pouch.gold":{"version":1,"meaning":"m","scopes":["player"],"value_type":{"type":"int","default":0}}}})
+
+    lines =
+      scene(
+        dir,
+        "npc: bram\nwhen: coins\nbram: hi\n- Go\n  needs: coins\n  sets: coins\n  bram: ok\n- Pay\n  needs: pouch_gold\n  bram: ok\n",
+        %{
+          "facts.json" => facts
+        }
+      )
+
+    assert line_at(lines, "scenes/hi.scene:2") =~ ~r/`when:`.*`coins` is a number/
+    assert line_at(lines, "scenes/hi.scene:5") =~ ~r/`needs:`.*`coins` is a number/
+    refute line_at(lines, "scenes/hi.scene:6") =~ "`needs:`"
+    assert line_at(lines, "scenes/hi.scene:9") =~ ~r/`needs:`.*`pouch_gold` is a number/
+  end
+
+  # Break: a file that cannot be read still lets the rest compile, so the writer also gets
+  # errors only its missing contents caused (maud, in the broken file, holds the chest's key).
+  test "half-written JSON stops the compile with only its own error" do
+    dir = Loka.ContentSource.copy("cartridges/cellar_sampler")
+    File.write!(Path.join(dir, "npcs/maud.json"), "{")
+    assert {:error, [%{"code" => "INVALID_JSON", "path" => "npcs/maud"}]} = Content.compile(dir)
+  end
 
   # Break: a refused `sets:` takes a step index, so the next one's fault cites the refused line.
   test "a fault after a refused sets names its own line", %{tmp_dir: dir} do

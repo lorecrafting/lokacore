@@ -1,4 +1,4 @@
-# size: allow 439, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 447, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, a JSON supplying a scene prompt, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -63,6 +63,7 @@ defmodule Loka.Content.Source do
   @spec load(Path.t()) :: {[{String.t(), file(), term()}], [map()]}
   def load(dir) do
     {files, diags} = read(dir)
+
     replaced = replaced(files)
     files = SceneMerge.merge(files)
     untriggered = untriggered(files)
@@ -85,7 +86,9 @@ defmodule Loka.Content.Source do
   defp read(dir) do
     {files, diags} = dir |> SourceFiles.paths() |> Enum.map(&entry(&1, dir)) |> Enum.unzip()
 
-    {files |> List.flatten() |> Enum.reject(&is_nil/1), List.flatten(diags)}
+    files = files |> List.flatten() |> Enum.reject(&is_nil/1)
+    diags = List.flatten(diags)
+    {files, diags -- supplied(files, diags)}
   end
 
   defp bundle_diag({code, location, data}), do: diag(code, at(location, []), data)
@@ -129,6 +132,14 @@ defmodule Loka.Content.Source do
   defp line_diag(path, data, false), do: diag("SCHEMA_VIOLATION", path, data)
 
   defp warning(diag), do: Map.put(diag, "severity", "warning")
+
+  # What a same-key JSON writes is not missing from its scene (SceneMerge.supplied/1).
+  defp supplied(files, diags) do
+    for {rel, why} <- SceneMerge.supplied(files),
+        %{"data" => %{"why" => ^why}} = d <- diags,
+        d["path"] == at(rel, []),
+        do: d
+  end
 
   defp scene_forms(rel, {:scene, _, _} = id, text) do
     {value, bad} = CutFiles.parse(text)

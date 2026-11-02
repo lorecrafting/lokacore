@@ -1,4 +1,4 @@
-# size: allow 432, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
+# size: allow 450, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
 defmodule Loka.Content.SceneFiles do
   @moduledoc """
   Scene files: `scenes/<key>.scene` (or `dialogues/<key>.scene`) is one dialogue as plain text,
@@ -56,7 +56,24 @@ defmodule Loka.Content.SceneFiles do
       |> visible(sections, links)
 
     forms = if refused?(bad), do: Enum.map(forms, fn {k, d} -> {k, filled(d)} end), else: forms
+    # Not filled: the same-key JSON may still supply them (Source.supplied/2).
+    bad = unwritten(forms, sections, bad)
     {forms, bad |> Enum.uniq() |> speakerless() |> by_line()}
+  end
+
+  # With no bad line to blame, a scene missing its first words or its choices is said at `npc:`.
+  defp unwritten([{_, d} | _], [{_, lines} | _], bad) do
+    if refused?(bad), do: bad, else: unwritten(d, lines) ++ bad
+  end
+
+  defp unwritten(d, lines) do
+    for {"npc: " <> _ = text, n} <- lines,
+        {why, missing?} <- [
+          {"no_prompt", not is_map_key(d, "prompt")},
+          {"no_choices", d["choices"] == %{}}
+        ],
+        missing?,
+        do: {n, text, why}
   end
 
   # A dialogue with a `quest` takes no `then` (dialogue_links.ex), and nesting needs one.
@@ -250,8 +267,8 @@ defmodule Loka.Content.SceneFiles do
       else: {put_in(d, ["roles", npc], %{"role" => "npc", "npc" => npc}), nil, bad}
   end
 
-  defp line({"- " <> label, _} = at, {%{"npc" => _} = d, _, bad}) do
-    key = SceneLines.key(label)
+  defp line({"- " <> label, n} = at, {%{"npc" => _} = d, _, bad}) do
+    key = SceneLines.choice_key(label, n)
 
     if key == "" or is_map_key(d["choices"], key),
       do: refuse(at, d, :refused, bad),
