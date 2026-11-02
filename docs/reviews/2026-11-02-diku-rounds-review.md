@@ -47,3 +47,20 @@
 76 mutants (47 run): red-narrow 14, SURVIVED 6, NO-TESTS 26, NOT-UNIQUE 3, TIMEBOX 27 (unrun: rule.ts:84, saved.ts:35-45, invariants_creation.ts:270, combat.ex:45/46/67, compose.ex:227, line_words.ts:104/106). Matches the handback on credit.ts:123, round.ts:66/84 SURVIVED and round_flow NO-TESTS. round.ts:84 disposition (writer_group) accepted. rule.ts:59/61 SURVIVED in the finder; the handback claims hand rows red, not rerun by me. For round_flow I hand-ran only the tier and condition `101` mutants (both survive); the other round_flow rows rest on the handback's hand runs (18 red, 5 survived).
 
 **Verdict: CHANGES REQUIRED.**
+
+## Fix re-check (head `bd66b2e86`)
+
+Scope: the dispositions and the code and direct callers they touched. Hand mutants on the six focused files (base 59/0) and the composition fixtures:
+
+1. Condition foe (`round_flow.ts:283-293`, `told` :257-262): fixed. `row` is the round's starting row. Reverting to the post-round foe makes 3 tests fail. `showcase_combat` combat 9 and `showcase_traps.test.ts:343` now pin A's line, not B's.
+2. 101-hp cuts (`diku.test.ts` new test): fixed. `101 *` at the tier and condition cuts each fail 1 test. The arithmetic (300 < 303, >= 202; 9800 < 9898, >= 9797) is independent of the code.
+3. `credit.ts:123`: fixed. `true` fails 1 test (the `wait` root case).
+4. `{target}` always bound: fixed. Reverting to `named()` fails 1 test.
+5. `saved.ts:35` without initiative (PM ruling): fixed. Re-adding the initiative clause fails 1 test.
+6. `rule.ts:61` dispute: accepted. `openingRound` -> `roundSequence` returns `accepted(...)` on every path; the guard only narrows `Decision`. The `mutate-skip` is justified.
+
+`occurrence` round-1 only (`compose_rows.ts:15`, `compose_job.ex:9`, callers `creation`, `invariants_creation`, `invariants_pack`, `compose` in both kernels): kernel parity holds. Restoring the plain clock fallback fails `c4_pack_composition` in TS (1) and Elixir (2). Noted, not a finding: compose cannot see initiative.
+
+CI at `bd66b2e86` (`gh run list --commit`): ci completed/success, book-e2e completed/success.
+
+**Verdict: APPROVE.**
