@@ -193,6 +193,49 @@ defmodule Loka.ContentStartersFreshTest do
              Starters.write(dir, "rooms", "lane", {long <> "a", "east"})
   end
 
+  # Breaks: a scene starter whose file fails the dev compile, passes a release build with its `~`,
+  # writes for a missing NPC or over a file, misses a bundled NPC, or survives a failed run.
+  test "a scene starter compiles in dev, refuses in release and never overwrites", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    follow(dir, "npcs", "maud")
+    assert {:ok, _} = Starters.write(dir, "scene", "greet", "maud")
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+
+    out = Path.join(tmp, "out.json")
+
+    said =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert catch_exit(Mix.Tasks.Loka.Compile.run([dir, out])) == {:shutdown, 1}
+      end)
+
+    assert said =~ ~r/^error: scenes\/greet\.scene:\d+ .*`~`/m
+    refute File.exists?(out)
+
+    before = File.read!(Path.join(dir, "scenes/greet.scene"))
+
+    assert {:error, "scenes/greet.scene exists" <> _} =
+             Starters.write(dir, "scene", "greet", "maud")
+
+    assert File.read!(Path.join(dir, "scenes/greet.scene")) == before
+
+    assert {:error, "no NPC nobody: bin/loka new npcs nobody first"} =
+             Starters.write(dir, "scene", "hello", "nobody")
+
+    refute File.exists?(Path.join(dir, "scenes/hello.scene"))
+
+    File.mkdir_p!(Path.join(dir, "areas"))
+    File.write!(Path.join(dir, "areas/yard.json"), JSON.encode!(%{"npcs" => %{"ada" => %{}}}))
+    assert {:ok, _} = Starters.write(dir, "scene", "ada_talk", "ada")
+
+    assert_raise Mix.Error, ~r/no rooms\/nowhere/, fn ->
+      ExUnit.CaptureIO.capture_io(fn ->
+        Mix.Tasks.Loka.New.run(~w(--cwd #{tmp} scene maud later rooms x --from nowhere east mine))
+      end)
+    end
+
+    refute File.exists?(Path.join(dir, "scenes/later.scene"))
+  end
+
   # Runs a starter, first running each starter its refusals name.
   defp follow(dir, kind, name) do
     case Starters.write(dir, kind, name) do

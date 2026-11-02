@@ -302,6 +302,7 @@ when you run `mix loka.compile` by hand.
 | `replenish` | [`decay_sampler`](../../cartridges/decay_sampler/) | an item, a room and an NPC |
 | `resources` | [`affects_sampler`](../../cartridges/affects_sampler/) | nothing |
 | `rooms` | [`rooms_sampler`](../../cartridges/rooms_sampler/) | nothing |
+| `scene` | [`identity_sampler`](../../cartridges/identity_sampler/scenes/stranger_talk.scene) | an NPC, file or bundled: `bin/loka new scene <npc> <key>` writes `scenes/<key>.scene` (one line, one `- ~` choice and its reply) and refuses over an existing one |
 | `services` | [`durability_sampler`](../../cartridges/durability_sampler/) | an NPC and a resource (the currency); also writes the `use_service` action and the service text keys |
 | `skills` | [`damage_sampler`](../../cartridges/damage_sampler/) | nothing |
 | `statuses` | [`pen_sampler`](../../cartridges/pen_sampler/) | a resource |
