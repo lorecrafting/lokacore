@@ -11,6 +11,7 @@ import {
   positioned,
 } from './combat_fixture.ts';
 import { step, gameView } from '../src/index.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
@@ -218,6 +219,37 @@ test('production hour-boundary recovery precedes damage and Flee preserves the r
 });
 
 // Breaks: raw target bypass, repeat/switch Attack allocation, or Attack advertised on noncombat NPC.
+// Breaks: a sanctuary refusal stays bare, so the Book greys what it should hide, or a seated player
+// is refused for standing first and the card appears then vanishes on standing; or a seated
+// player outside a sanctuary is told sanctuary and loses a card they could bring back by standing.
+test('a sanctuary refuses Attack with its cause, sitting or standing; a seat elsewhere stays bare', () => {
+  const w = combatWorld();
+  const calm = (x: typeof w) => ({
+    ...x,
+    rooms: {
+      ...x.rooms,
+      [room(x, 'lantern_cellar')]: { ...x.rooms[room(x, 'lantern_cellar')], sanctuary: true },
+    },
+  });
+  const seated = step(w, command(w, { type: 'sit', actor_id: w.character }), 1).world;
+  const sanctuary = { code: 'invalid_state', cause: 'sanctuary' };
+  for (const [before, reason] of [
+    [calm(w), sanctuary],
+    [calm(seated), sanctuary],
+    [seated, { code: 'invalid_state' }],
+  ] as const) {
+    const view = gameView(before);
+    assert.deepEqual(validate('GameView', view), []);
+    const offer = view.entities
+      .find((e) => e.id === rat(w))!
+      .actions.find((a) => a.action_key === 'attack')!;
+    assert.deepEqual([offer.available, 'reason' in offer && offer.reason], [false, reason]);
+    const out = attack(before);
+    assert.ok(out.decision.kind === 'rejected');
+    assert.deepEqual(out.decision.error, reason);
+  }
+});
+
 test('admission refuses absent, dead, sanctuary, nonstanding and already engaged participants', () => {
   const w = combatWorld();
   const seated = step(w, command(w, { type: 'sit', actor_id: w.character }), 1).world;

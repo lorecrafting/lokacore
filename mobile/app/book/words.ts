@@ -111,12 +111,12 @@ export const doorSentence = (x: { direction: string; door?: { state: string } })
     : undefined;
 export const refusedSentence = ({ code, cause }: Refusal) =>
   (cause && SENTENCE[cause]) ?? SENTENCE[code];
-// The word of each RefusalCause (protocol/error.schema.json; book/reasons.test.ts): it names the
-// one reason a shared code stands for, so it goes before the code's word.
+// Each RefusalCause's word (protocol/error.schema.json; book/reasons.test.ts), ahead of its code's word.
 const CAUSE: Record<string, string> = {
   not_standing: 'not standing',
   cursed: 'it will not come off',
   cannot_be_hurt: 'cannot be hurt',
+  sanctuary: 'sanctuary', // the cause's name; hidden, so read only by a stale press's log line
 };
 export const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);

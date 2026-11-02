@@ -228,7 +228,7 @@ a [shop line](#npc-dialogue-and-action-details) not afforded, a blocked exit, a 
 [Action card](../BOOK-UI-COMPONENTS.md) reading its plain label, never `label: reason`. A permanent
 refusal, one the player cannot change, hides its card: its reason is on the hidden list beside
 `reasonSentence` ([reasons.ts](../../mobile/app/book/reasons.ts), `hides`; today an Attack on a person who
-cannot be hurt), and the card returns as its ordinary card once the action turns available. A worn
+cannot be hurt, or any Attack in a sanctuary), and the card returns as its ordinary card once the action turns available. A worn
 item's Take (`not_present`) stays hidden as before. The shown card is
 exposed as disabled, stays focusable and pressable, and carries its reason sentence as its hint; once
 pressed its accessible name is its shown text, the label then the reason sentence (label in name), and the

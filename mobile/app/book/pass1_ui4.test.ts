@@ -230,6 +230,7 @@ test('an unavailable card hides for a permanent refusal and shows for a changeab
   const { ActionCard } = await import('./actions.tsx');
   const card = (reason: string) => ActionCard({ label: 'Attack', reason });
   assert.equal(card('cannot be hurt'), null);
+  assert.equal(card('sanctuary'), null);
   assert.notEqual(card('too heavy'), null);
 });
 
