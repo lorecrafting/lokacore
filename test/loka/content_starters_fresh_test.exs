@@ -232,10 +232,11 @@ defmodule Loka.ContentStartersFreshTest do
     assert {:error, "dialogues/hi.json exists" <> _} = Starters.write(dir, "scene", "hi", "maud")
     refute File.exists?(Path.join(dir, "scenes/hi.scene"))
 
-    # An NPC key may run to 64 characters, past the starters' own 32.
-    long = String.duplicate("n", 40)
-    File.cp!(Path.join(dir, "npcs/maud.json"), Path.join(dir, "npcs/#{long}.json"))
-    assert {:ok, _} = Starters.write(dir, "scene", "long_talk", long)
+    # An NPC key runs from 1 to 64 characters, past the starters' own 32.
+    for npc <- ["b", String.duplicate("n", 40)] do
+      File.cp!(Path.join(dir, "npcs/maud.json"), Path.join(dir, "npcs/#{npc}.json"))
+      assert {:ok, _} = Starters.write(dir, "scene", "talk_#{byte_size(npc)}", npc)
+    end
 
     File.mkdir_p!(Path.join(dir, "areas"))
     File.write!(Path.join(dir, "areas/yard.json"), JSON.encode!(%{"npcs" => %{"ada" => %{}}}))
