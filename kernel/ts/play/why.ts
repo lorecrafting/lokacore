@@ -45,9 +45,9 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
     throw new Usage(`ordinal ${ordinal} is not in 1..${entries.length}`);
   const { cartridge, ruleOf } = marked(c);
   const r = prefix(cartridge, trace, ordinal);
-  const { data, ids } = entries[ordinal - 1]!;
+  const command: Command = entries[ordinal - 1]!.data.command;
   const before = r.world;
-  const decide = (cart: Cartridge) => step(r, cart, data.command, ordinal, ids.revision);
+  const decide = (cart: Cartridge) => step(r, cart, command, ordinal);
   const d = decide(cartridge);
   const rules = cartridge.reactions ?? {};
   const probe = `coverage.m${Object.keys(rules).length}`; // no rule's, and never authored (marked)
@@ -61,7 +61,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
   };
   return {
     ordinal,
-    command: data.command.payload.type,
+    command: command.payload.type,
     outcome: d.kind === 'accepted' ? d.outcome : d.kind,
     reactions: Object.entries(rules)
       .sort(([, a], [, b]) => cmp(a.key, b.key))
@@ -75,14 +75,14 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
       c,
       on,
       on.now ? prefix(cartridge, trace, ordinal + 1).world : before,
-      on.now ? null : primaryTarget(data.command.payload), // the last command's is not the next one's
+      on.now ? null : primaryTarget(command.payload), // the last command's is not the next one's
     ),
   };
 }
 
 // Step `ordinal` decided on a copy of `r` (decideReplay advances the Run it is given) with `cart`.
-function step(r: Run, cart: Cartridge, command: Command, ordinal: number, at: number) {
-  const d = decideReplay({ ...r, world: { ...r.world, cartridge: cart } }, command, at).decision;
+function step(r: Run, cart: Cartridge, command: Command, ordinal: number) {
+  const d = decideReplay({ ...r, world: { ...r.world, cartridge: cart } }, command).decision;
   // closing() (mechanics/death/lines.ts:22) cuts narration to 64 lines: a cut marker is unknown
   if (d.kind === 'accepted' && (d.narration?.length ?? 0) >= 64)
     throw new Error(`narration cap reached at ordinal ${ordinal}`);
@@ -101,7 +101,7 @@ function prefix(cartridge: Cartridge, trace: Trace, ordinal: number) {
     head.ids.seed,
     head.ids.kernel_version,
   );
-  for (const e of entries.slice(0, ordinal - 1)) decideReplay(r, e.data.command, e.ids.revision);
+  for (const e of entries.slice(0, ordinal - 1)) decideReplay(r, e.data.command);
   return r;
 }
 

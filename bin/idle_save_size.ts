@@ -40,7 +40,7 @@ const eventful = decisions.filter((d) => d.delta.ops.length > 1 || d.events.leng
 const tables = a.sql
   .prepare(
     `SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
-      AND name NOT IN ('receipt', 'trace', 'elapsed', 'meta') ORDER BY name`,
+      AND name NOT IN ('receipt', 'trace', 'elapsed') ORDER BY name`,
   )
   .all() as { name: string }[];
 const sha = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');

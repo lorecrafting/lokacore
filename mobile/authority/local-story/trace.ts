@@ -161,9 +161,9 @@ function missed(db: Db, ids: RunIds, skip: string): boolean {
   if (full(db, ids.run_id)) return true; // never read the receipts a capped run dropped
   // A death between a coalesced tick's COMMIT and its trace write left the entry it absorbed.
   db.runSync(
-    `DELETE FROM trace WHERE json_extract(record, '$.ids.run_id') = ?
-      AND command_id IN (SELECT command_id FROM trace WHERE commit_state = 'committed')
-      AND command_id NOT IN (SELECT command_id FROM receipt)`,
+    `DELETE FROM trace WHERE command_id IN (SELECT command_id FROM trace WHERE commit_state = 'committed')
+      AND command_id NOT IN (SELECT command_id FROM receipt)
+      AND json_extract(record, '$.ids.run_id') = ?`,
     ids.run_id,
   );
   type Row = { command: string; response: string; revision: number };

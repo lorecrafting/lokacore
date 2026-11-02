@@ -222,10 +222,10 @@ ADR-075 §4, derived, never authority (`trace.ts:1`): a `trace.run` header per r
 and one `trace.command` entry per committed command (decision compacted to outcome, delta
 digest and RNG state; the commit outcome and committed events), written after the gameplay
 transaction in its own; a write failure is swallowed and caught up later from the receipts
-(`:120`). A coalesced tick's entry replaces the one it absorbed, in the trace transaction; after a
-death between the two commits, catch-up removes the entry whose receipt is gone. Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
+(`:124`). A coalesced tick's entry replaces the one it absorbed, in the trace transaction; after a
+death between the two commits, catch-up removes the entry whose receipt is gone. Cap 5000 rows (`:81`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
-newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:130`) and, when the
+newest 1000 records (`:76`): `evaluation.budget_exceeded` (`save.ts:130`) and, when the
 host supplies a clock, each NEW decision's `kernel.decision_latency` (`mobile/authority/local-story/invocation.ts:177`).
 
 ## The session controller and the phone

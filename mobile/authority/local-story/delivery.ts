@@ -54,7 +54,7 @@ export function elapsed(s: Story, evidence: Elapsed, checkpoint?: Checkpoint): R
       return { kind: 'conflict' };
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
-  return commitElapsed(s, command, digest, checkpoint ?? extended(s, evidence.until), !!checkpoint);
+  return commitElapsed(s, command, checkpoint ?? extended(s, evidence.until), !!checkpoint);
 }
 
 const extended = (s: Story, until: number) =>
@@ -87,13 +87,7 @@ export function coalesced(idle: Story['idle'], tick: Command, d: DecisionResult)
   return { command, decision, replaces: prior.id };
 }
 
-function commitElapsed(
-  s: Story,
-  tick: Command,
-  tickDigest: string,
-  checkpoint?: Checkpoint,
-  driver = false,
-): Reply {
+function commitElapsed(s: Story, tick: Command, checkpoint?: Checkpoint, driver = false): Reply {
   const next = stepElapsed(s.world, tick, s.revision + 1);
   const merged = driver ? coalesced(s.idle, tick, next.decision) : undefined;
   const { command, decision: d, replaces } = merged ?? { command: tick, decision: next.decision };
@@ -115,7 +109,7 @@ function commitElapsed(
       command_id: command.id,
       actor_id: s.world.character,
       intent_digest_version: ELAPSED_INTENT,
-      intent_digest: merged ? hash(command as never) : tickDigest,
+      intent_digest: hash(command as never),
       command: command as never,
       revision: d.kind === 'accepted' ? s.revision + 1 : s.revision,
       response: d as never,

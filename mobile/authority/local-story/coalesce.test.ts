@@ -48,7 +48,7 @@ function world(sql: DatabaseSync) {
   const names = sql
     .prepare(
       `SELECT name FROM sqlite_master WHERE type = 'table'
-        AND name NOT IN ('receipt', 'trace', 'elapsed', 'meta') AND name NOT LIKE 'sqlite_%'`,
+        AND name NOT IN ('receipt', 'trace', 'elapsed') AND name NOT LIKE 'sqlite_%'`,
     )
     .all() as { name: string }[];
   return names.map(({ name }) => [
@@ -280,37 +280,60 @@ test('a trusted elapsed receipt is never merged either way, and its retry replay
   a.sql.close();
 });
 
-// Breaks: a save whose receipts' revisions repeat, or skip before a row that changed the world,
-// passing the check of saved rows against receipts. Each forge moves one row of a lawful save.
-const FORGED: [string, string][] = [
-  ['a repeated revision', 'UPDATE receipt SET revision = 3 WHERE rowid = 1'],
-  ['a gap before a move', 'UPDATE receipt SET revision = 1 WHERE rowid = 1'],
-];
-for (const [name, forge] of FORGED)
-  test(`receiptHistory refuses ${name}`, (t) => {
-    const path = save(t),
-      bundle = compiled('cartridges/toolbox_showcase');
-    const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
-    tick(a);
-    tick(a);
-    assert.equal(a.game.invoke(south).kind, 'saved');
-    assert.deepEqual(
-      a.sql
-        .prepare('SELECT revision FROM receipt ORDER BY rowid')
-        .all()
-        .map((r: any) => r.revision),
-      [2, 3], // the two ticks became one row at the newest revision, then the move
-    );
-    a.sql.close();
-    const { db, sql } = elapsedHost(path, undefined, bundle);
-    const fresh = newWorld(cartridgeOf(bundle), CONTEXT as never, SEED as never);
-    const saved = load(db, fresh, () => assert.fail('the save exists'), true)!;
-    const check = () => receiptHistory(fresh, saved.world, db, saved.meta, saved.revision);
-    check();
-    sql.exec(forge);
-    assert.throws(check);
+// Reopens the save at `path` and checks its receipts against its rows, up to `head`.
+function history(
+  path: string,
+  bundle: ReturnType<typeof elapsedBundle>,
+  forge?: string,
+  head?: number,
+) {
+  const { db, sql } = elapsedHost(path, undefined, bundle);
+  const fresh = newWorld(cartridgeOf(bundle), CONTEXT as never, SEED as never);
+  const saved = load(db, fresh, () => assert.fail('the save exists'), true)!;
+  try {
+    if (forge) sql.exec(forge);
+    receiptHistory(fresh, saved.world, db, saved.meta, head ?? saved.revision);
+  } finally {
     sql.close();
-  });
+  }
+}
+
+// Breaks: a revision gap passing before a row that changed the world; only a coalesced tick's may.
+test('receiptHistory takes a gap before a tick and refuses one before a move', (t) => {
+  const path = save(t),
+    bundle = compiled('cartridges/toolbox_showcase');
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  tick(a);
+  tick(a);
+  assert.equal(a.game.invoke(south).kind, 'saved');
+  const revisions = a.sql.prepare('SELECT revision FROM receipt ORDER BY rowid').all();
+  assert.deepEqual(
+    revisions.map((r) => r.revision),
+    [2, 3],
+  ); // two ticks became one row, then the move
+  a.sql.close();
+  history(path, bundle);
+  assert.throws(() => history(path, bundle, 'UPDATE receipt SET revision = 1 WHERE rowid = 1'));
+});
+
+// Breaks: two clock-only rows sharing a revision passing: each gap's row must still move it forward.
+test('receiptHistory refuses two ticks at one revision', (t) => {
+  const path = save(t),
+    bundle = elapsedBundle();
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  tick(a);
+  a.sql.close();
+  const b = elapsedHost(path, { wall: 11000, mono: 0 }, bundle); // a reopen never merges
+  tick(b);
+  const revisions = b.sql.prepare('SELECT revision FROM receipt ORDER BY rowid').all();
+  assert.deepEqual(
+    revisions.map((r) => r.revision),
+    [1, 2],
+  );
+  b.sql.close();
+  history(path, bundle);
+  assert.throws(() => history(path, bundle, 'UPDATE receipt SET revision = 1 WHERE rowid = 2', 1));
+});
 
 // Breaks: a row that did more than move the clock passing as a coalesced one, whose revision gap
 // and merge are lawful only because nothing else changed.
