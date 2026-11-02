@@ -52,3 +52,13 @@ My own narrow mutants:
 - Ally `{attacker}` dropped: survives (S1).
 
 PR claims rerun: the CI run IDs match; `combat.ex:181` is `one_shot`'s `n > 1`.
+
+## Re-check: fix round 1 (head `04ec85e70`, commits `3ce9a82d8` and `04ec85e70`)
+
+**Verdict: APPROVE.** CI on the head is green, as the coordinator reported; I did not rerun `gh run list` for this head.
+
+- **B1: withdrawn.** The owner overruled ruling (a) on 2026-11-02: every declared swing rolls and the hp loss is capped. `mechanics.md:2889` now says so. No code changed. Combat 9 matches the ruling (A at 3 hp, swings of 2 and 3, loss capped at 3).
+- **S1: fixed.** `showcase_combat.test.ts:162` now pins Gil's `ally_volley_one` bindings. The new `said` field in `showcase_fixture.ts:64` is additive; existing callers of `act` still read `lines`. Red control: dropping the ally's `{attacker}` at `round_flow.ts:254` fails 1 of 14 tests.
+- **S2: fixed.** I checked the `combat-district.md` steps 4, 5, 6, 8 and 9 and the tilt_yard paragraph against the combat 9 pins (`[3,6,5]`, `[3,3,4]`, `[3,0,3]`, `[0,0,3]`). They agree.
+- **N1: fixed.** The Sampler bullet at `mechanics.md:2896` now links to the combat district instead of repeating it.
+- **Budget case: holds.** In `combat.test.ts:333`, moving `r.budget +=` after the loop fails 1 of 16 tests.
