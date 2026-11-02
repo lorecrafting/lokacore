@@ -90,7 +90,10 @@ defmodule Loka.ContentScriptedActionsTest do
          "target" => "recipe_sampler@0.0.1:fact/bell_tolled"
        })},
       {scripted(seq, [%{"op" => "fact.assign", "fact" => "chapel_bell_rung", "value" => "yes"}]),
-       d("FACT_TYPE_MISMATCH", "actions/ring_bell.outcomes.success.steps[0].value")}
+       d("FACT_TYPE_MISMATCH", "actions/ring_bell.outcomes.success.steps[0].value", %{
+         "fact" => "chapel_bell_rung",
+         "type" => "bool"
+       })}
     ]
 
     for {r, diag} <- cases,

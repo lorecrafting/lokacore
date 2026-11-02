@@ -115,4 +115,31 @@ defmodule Loka.ContentSceneFilesTest do
               %{"line" => 6, "text" => "- Go", "why" => "repeated_choice", "npc" => "maud"}}
            ]
   end
+
+  # Breaks: two `- ~` choices share one key (one is lost, or refused as a repeat), or a `- ~`
+  # is refused in dev; a scene with no words before its first choice, or with no choice, lowers
+  # silently and fails later at a dialogue path with no line.
+  test "`- ~` choices keep apart; a missing prompt or choice is named at npc:", %{tmp_dir: tmp} do
+    File.mkdir_p!(Path.join(tmp, "scenes"))
+
+    File.write!(
+      Path.join(tmp, "scenes/todo.scene"),
+      "npc: maud\nmaud: ~\n- ~\n  maud: ~\n- ~\n  maud: ~\n"
+    )
+
+    File.write!(Path.join(tmp, "scenes/mute.scene"), "npc: maud\n- Go\n  maud: ok\n")
+    File.write!(Path.join(tmp, "scenes/shut.scene"), "\nnpc: maud\nmaud: hello\n")
+
+    {files, diags} = Source.load(tmp)
+
+    {_, _, todo} = List.keyfind(files, "scenes/todo.scene", 0)
+    assert Map.keys(todo["choices"]) == ["todo_3", "todo_5"]
+
+    assert Enum.map(diags, &{&1["path"], &1["data"]}) == [
+             {~s("scenes/mute.scene"),
+              %{"line" => 1, "text" => "npc: maud", "why" => "no_prompt", "npc" => "maud"}},
+             {~s("scenes/shut.scene"),
+              %{"line" => 2, "text" => "npc: maud", "why" => "no_choices", "npc" => "maud"}}
+           ]
+  end
 end

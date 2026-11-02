@@ -4,7 +4,7 @@ defmodule Loka.Content.Refs do
   06 §21): who owns a command, policy op, definition kind or event (capability_registry.json),
   UNDECLARED_CAPABILITY, and UNRESOLVED_REFERENCE and FACT_TYPE_MISMATCH for a reference field.
   """
-  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2]
+  import Loka.Content.Source, only: [diag: 3, diag: 4, at: 2]
   alias Loka.Core.Contracts
 
   @doc """
@@ -55,14 +55,14 @@ defmodule Loka.Content.Refs do
         [diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [field]), %{"target" => s})]
 
       {_, _, %{"value_type" => t}} ->
-        mistyped(rel, steps, n, t)
+        mistyped(rel, steps, n, ref["key"], t)
 
       _ ->
         []
     end
   end
 
-  defp mistyped(rel, steps, n, t) do
+  defp mistyped(rel, steps, n, fact, t) do
     for {v, ok?} <- [
           {"value", &typed?(&1, t)},
           {"equals", &typed?(&1, t)},
@@ -70,7 +70,8 @@ defmodule Loka.Content.Refs do
         ],
         is_map_key(n, v),
         not ok?.(n[v]),
-        do: diag("FACT_TYPE_MISMATCH", at(rel, steps ++ [v]))
+        do:
+          diag("FACT_TYPE_MISMATCH", at(rel, steps ++ [v]), %{"fact" => fact, "type" => t["type"]})
   end
 
   @doc """

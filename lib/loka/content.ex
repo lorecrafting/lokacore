@@ -56,6 +56,62 @@ defmodule Loka.Content do
     end
   end
 
+  @doc """
+  The release check (docs/system/cartridge.md, Still to write): one `placeholder_text` per text
+  key of artifact `bytes` with a line that trims to `~`, at the path of the source under `dir`
+  that wrote it (an inline word's file, else `text.json`), for `explained/2`.
+  """
+  @spec placeholders(binary(), Path.t()) :: [map()]
+  def placeholders(bytes, dir) do
+    keys =
+      for {key, text} <- Map.get(JSON.decode!(bytes)["cartridge"], "text", %{}),
+          text |> String.split("\n") |> Enum.any?(&(String.trim(&1) == "~")),
+          into: MapSet.new(),
+          do: key
+
+    written = written(keys, dir)
+
+    for key <- Enum.sort(keys),
+        do: %{
+          "severity" => "error",
+          "code" => "placeholder_text",
+          "path" => Map.get(written, key, Source.at("text.json", [key])),
+          "data" => %{}
+        }
+  end
+
+  # Each inline word's generated key, at the source path that wrote it (text.json keys stay out).
+  defp written(keys, dir) do
+    inline = MapSet.difference(keys, catalog(dir))
+    # Lowering left each inline word's generated key where the word was written.
+    {files, _} = if inline == MapSet.new(), do: {[], []}, else: Source.load(dir)
+
+    for {rel, kind, value} <- Enum.reverse(files),
+        {key, steps} <- leaves(value, []),
+        key in inline,
+        into: %{},
+        do: {key, Source.at(rel, inside(kind) ++ steps)}
+  end
+
+  defp catalog(dir) do
+    case File.read(Path.join(dir, "text.json")) do
+      {:ok, text} -> text |> JSON.decode!() |> Map.keys() |> MapSet.new()
+      _ -> MapSet.new()
+    end
+  end
+
+  defp leaves(v, at) when is_binary(v), do: [{v, at}]
+  defp leaves(v, at) when is_map(v), do: Enum.flat_map(v, fn {k, x} -> leaves(x, at ++ [k]) end)
+
+  defp leaves(v, at) when is_list(v),
+    do: v |> Enum.with_index() |> Enum.flat_map(fn {x, i} -> leaves(x, at ++ [i]) end)
+
+  defp leaves(_, _), do: []
+
+  # A bundled definition sits at its steps inside the bundle file.
+  defp inside({_, _, steps}) when is_list(steps), do: steps
+  defp inside(_), do: []
+
   @doc "The author-time lint findings for a story cartridge source (Loka.Content.Lint)."
   @spec lint(Path.t()) :: [String.t()]
   defdelegate lint(dir), to: Loka.Content.Lint, as: :run
@@ -83,10 +139,17 @@ defmodule Loka.Content do
     artifact
   end
 
+  # An undecodable file's definitions are missing, so every other fault would follow from it.
   defp compiled(files, diags, registry) do
-    case Compiler.compile(files, diags, registry) do
-      {:ok, cartridge, warnings} -> {:ok, cartridge, sorted(warnings)}
-      {:error, ds} -> {:error, sorted(ds)}
+    case Enum.filter(diags, &(&1["code"] == "INVALID_JSON")) do
+      [] ->
+        case Compiler.compile(files, diags, registry) do
+          {:ok, cartridge, warnings} -> {:ok, cartridge, sorted(warnings)}
+          {:error, ds} -> {:error, sorted(ds)}
+        end
+
+      undecodable ->
+        {:error, sorted(undecodable)}
     end
   end
 

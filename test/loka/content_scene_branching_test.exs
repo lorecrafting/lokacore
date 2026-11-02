@@ -373,7 +373,7 @@ defmodule Loka.ContentSceneBranchingTest do
 
   # Break: a refused choice in an out-of-order list crashes the compile before its error reaches the writer.
   test "a refused choice among unsorted ones reports its line" do
-    assert {:error, [_ | _]} = sampler("npc: bram\nbram: ~\n- zebra\n  bram: ~\n- ~\n  bram: ~\n")
+    assert {:error, [_ | _]} = sampler("npc: bram\nbram: ~\n- zebra\n  bram: ~\n- !\n  bram: ~\n")
   end
 
   # Break: a child under a key too long stays a dialogue and draws an error of its own.

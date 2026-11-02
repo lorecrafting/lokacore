@@ -312,10 +312,11 @@ of the [Source layout](#source-layout) table. `text` and `facts` stay in their r
 - A prototype may live in a bundle: bundles open before `extends` resolves.
 - `mix loka.lint` names a bundled definition by its definition address, `<dir>/<key>.json`
   (`reactions/elder_hears.json: ...`), not by the bundle file.
-- A bundle that fails to decode adds nothing; its `INVALID_JSON` fails the build. While any
-  bundle is refused (undecodable, not an object, or with an unknown or non-object member), every
-  `UNRESOLVED_REFERENCE` is held back, since its definitions are missing; the other diagnostics
-  stand.
+- Any source file that fails to decode (`INVALID_JSON`, bundle or not) stops the compile after
+  loading: only the decode errors report, since the definitions that file holds are missing and
+  every other error would follow from that. While any bundle is refused (not an object, or with an
+  unknown or non-object member), every `UNRESOLVED_REFERENCE` is held back the same way; the other
+  diagnostics stand.
 - An `actions/` file refused at load or by its `extends` holds back every other file's
   `UNRESOLVED_REFERENCE` the same way until it is fixed (its kind is unknown); its own stand.
 
@@ -904,7 +905,8 @@ build. The author tools below are reachable only in that bundle (a production ex
   a scene file. The panel and
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
   word counts of what is written. A release compile refuses a cartridge with placeholders
-  (`placeholder_text` at the key's path) unless `--allow-placeholders` is given.
+  unless `--allow-placeholders` is given: one `placeholder_text` per key, at the source file and
+  line that wrote it (the scene or JSON file of an inline word, else `text.json`).
 - **Scene files.** `scenes/*.scene` (or `dialogues/*.scene`) is a plain-text form of one dialogue,
   and `scenes/*.cut` of one modal scene's steps (its `on` and `control` come from `scenes/<key>.json`,
   refused when missing, as is `steps` in that JSON, which would replace the words; a scene-format
@@ -912,7 +914,11 @@ build. The author tools below are reachable only in that bundle (a production ex
   lowered by [Source shortcuts](#source-shortcuts) into today's dialogue or scene JSON and `text.json`
   keys before any other pass; what it cannot say stays in a JSON file of the same key. Errors name the
   scene file and line, with `data.why` for a bad line (`npc` beside it once known); the other lines
-  of the file still lower, so a fault behind a bad line reports in the same compile. `needs:` (`<fact>` or `not <fact>`), `once`, `once: sitting` (`sitting`), `asked` and `then:` (a key or `end`) lower on a choice; a
+  of the file still lower, so a fault behind a bad line reports in the same compile. When no other
+  line is bad, a top set with no words before its first choice is `why: no_prompt` and one with no
+  `- ` choice `why: no_choices`, both at its `npc:` line. A `when:` or `needs:` naming a fact that
+  is not a bool is `FACT_TYPE_MISMATCH` with `data.fact` and `data.type`. A choice `- ~` is a placeholder choice: it has no words to key it by, so its key is
+  `todo_<n>`, `n` its line in the file, and two stay distinct; a release compile refuses it like any `~`. `needs:` (`<fact>` or `not <fact>`), `once`, `once: sitting` (`sitting`), `asked` and `then:` (a key or `end`) lower on a choice; a
   deeper `- ` under a reply lowers to the dialogue `<key>_<choice>`, whose `then` the parent takes.
   A deeper set takes `entry: false`, since its way back makes a loop with the root and inference would open the widest; the root takes no marker, so a speaker's several nested scenes are tried by key.
   `once` lowers in the compile pipeline for every dialogue: the engine fact `<key>_<choice>_done`,
