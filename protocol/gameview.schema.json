@@ -1369,13 +1369,17 @@
             "unspent": {
               "type": "integer",
               "minimum": 0
+            },
+            "level_up": {
+              "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
           "required": [
             "level",
             "experience",
             "from",
-            "unspent"
+            "unspent",
+            "level_up"
           ],
           "additionalProperties": false
         },

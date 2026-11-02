@@ -190,6 +190,7 @@ test('a death at 50 lowers experience to 45 once, keeps the spent point, and sur
     from: 30,
     next: 100,
     unspent: 0,
+    level_up: 'levelling.level_up',
   });
   assert.deepEqual(levelling(die(hall(50)).world), {
     level: 2,
@@ -197,6 +198,7 @@ test('a death at 50 lowers experience to 45 once, keeps the spent point, and sur
     from: 30,
     next: 100,
     unspent: 1,
+    level_up: 'levelling.level_up',
   });
 });
 

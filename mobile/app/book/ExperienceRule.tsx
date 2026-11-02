@@ -20,15 +20,17 @@ import { motion, size } from './tokens.ts';
 /** What the rule last drew: kept by its caller, since the status line unmounts on a detail page. */
 export type RuleDrawn = { current?: { level: number; at: number } };
 
+type Levelling = Omit<NonNullable<GameView['levelling']>, 'level_up'>;
+
 export type ExperienceRuleProps = {
-  levelling: NonNullable<GameView['levelling']>;
+  levelling: Levelling;
   drawn: RuleDrawn;
 };
 
 const dryCurve = curveOf(motion.dry.easing);
 const CUT = 0; // the turn to `warning` has no width
 const reduceMotion = ReduceMotion.Never; // the hold is a colour, so each timing decides for itself
-const fraction = ({ experience, from, next }: NonNullable<GameView['levelling']>) =>
+const fraction = ({ experience, from, next }: Levelling) =>
   next === undefined ? 1 : (experience - from) / (next - from);
 
 /**

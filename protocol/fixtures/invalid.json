@@ -18662,6 +18662,7 @@
       "inventory": [],
       "journal": [],
       "levelling": {
+        "level_up": "levelling.level_up",
         "level": 0,
         "experience": 0,
         "next": 30,
@@ -18696,6 +18697,7 @@
       "inventory": [],
       "journal": [],
       "levelling": {
+        "level_up": "levelling.level_up",
         "level": 1,
         "experience": -1,
         "next": 30,
@@ -18730,6 +18732,7 @@
       "inventory": [],
       "journal": [],
       "levelling": {
+        "level_up": "levelling.level_up",
         "level": 1,
         "experience": 0,
         "next": 0,
@@ -18764,6 +18767,7 @@
       "inventory": [],
       "journal": [],
       "levelling": {
+        "level_up": "levelling.level_up",
         "level": 1,
         "experience": 0,
         "next": 30,
@@ -18798,6 +18802,7 @@
       "inventory": [],
       "journal": [],
       "levelling": {
+        "level_up": "levelling.level_up",
         "experience": 0,
         "next": 30,
         "unspent": 0,
@@ -18831,6 +18836,7 @@
       "inventory": [],
       "journal": [],
       "levelling": {
+        "level_up": "levelling.level_up",
         "level": 1,
         "next": 30,
         "unspent": 0,
@@ -18864,6 +18870,7 @@
       "inventory": [],
       "journal": [],
       "levelling": {
+        "level_up": "levelling.level_up",
         "level": 1,
         "experience": 0,
         "next": 30,
@@ -32256,6 +32263,7 @@
       "time": 0,
       "journal": [],
       "levelling": {
+        "level_up": "levelling.level_up",
         "level": 1,
         "experience": 0,
         "unspent": 0
@@ -32288,6 +32296,7 @@
       "time": 0,
       "journal": [],
       "levelling": {
+        "level_up": "levelling.level_up",
         "level": 1,
         "experience": 0,
         "from": -1,

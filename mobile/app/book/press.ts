@@ -121,10 +121,10 @@ export function useFading(gone: boolean) {
  * Gilt from mount (a level or quest line, a skill learned): `warning` ink held, then settling to
  * `to`; reduced motion: `useDry`'s cross-fade, a hold having nothing to settle from.
  */
-export function useGilt(to: string) {
+export function useGilt(to: string, hold: number = motion.settle.hold) {
   const still = useReducedMotion();
   const { warning } = usePalette();
-  const dry = useDrying(motion.settle.hold, motion.settle.duration);
+  const dry = useDrying(hold, motion.settle.duration);
   return useAnimatedStyle(() =>
     still ? { opacity: dry.value } : { color: interpolateColor(dry.value, [0, 1], [warning, to]) },
   );

@@ -87,7 +87,8 @@
    "experience": 0,
    "from": 0,
    "next": 30,
-   "unspent": 0
+   "unspent": 0,
+   "level_up": "levelling.level_up"
   },
   "skills": [
    {
