@@ -314,11 +314,12 @@ test('a level-up refill after a bite in the killing round joins the round', () =
 // rule runs in a later proposal or not at all, or the gained line follows the level-up line.
 test('the third kill places level_reached after the death and its rule fires in the proposal', () => {
   const { third } = cull();
-  assert.deepEqual(lines(third).slice(-2), [
+  // The level line explains the level rule's, so it reads first (book-ui.md, Level wash).
+  assert.deepEqual(lines(third).slice(-3), [
     { key: GAINED, bindings: { amount: 10 } },
     { key: LEVEL_UP },
+    { key: 'levelling.level_two' },
   ]);
-  assert.ok(narration(third).includes('levelling.level_two'));
   const all = events(third);
   const reached = all.filter((e) => e.payload.type === 'level_reached');
   const character_id = third.world.character;
@@ -373,13 +374,11 @@ test('one grant crossing two thresholds gives two events in order and one line',
   assert.deepEqual(levels(r), [2, 3]);
   const keys = narration(r);
   assert.equal(keys.filter((k) => k === LEVEL_UP).length, 1);
-  assert.deepEqual(
-    keys.filter((k) => k.startsWith('levelling.level_t')),
-    ['levelling.level_two', 'levelling.level_three'],
-  );
-  assert.deepEqual(lines(r).slice(-2), [
+  assert.deepEqual(lines(r).slice(-4), [
     { key: GAINED, bindings: { amount: 71 } },
     { key: LEVEL_UP },
+    { key: 'levelling.level_two' },
+    { key: 'levelling.level_three' },
   ]);
 });
 

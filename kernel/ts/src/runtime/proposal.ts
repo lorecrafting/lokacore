@@ -57,6 +57,7 @@ type P = {
   applied: number;
   rng: World['state']['rng'];
   narration: Text[];
+  levelAt?: number; // the narration's length when the first level_reached was delivered
   holders: Map<string, number>; // each status holder's, reaction fact row's, written pool's writer group
   // Each item the root command moved: its writer group (hs-1). ponytail: merge and joinEarlier do
   // not relabel it; pass it to their maps once a root command both moves an item and advances time.
@@ -99,7 +100,7 @@ export function propose(
   failed ??= farewell(p, () => now(p)) ?? parting(p);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
-  p.narration = closing(world, command.payload.actor_id, ops, p.events, p.narration);
+  p.narration = closing(world, command.payload.actor_id, ops, p.events, p.narration, p.levelAt);
   return {
     decision: {
       ...root,
@@ -193,6 +194,7 @@ const cause = (p: P, logical_time: number, id: string) => ({
 });
 
 function creditDelivery(p: P, next: Queued): Admitted | undefined {
+  if (next.cause.payload.type === 'level_reached') p.levelAt ??= p.narration.length;
   if (next.cause.payload.type !== 'entity_died') return;
   const at = now(p);
   if (!('cartridge' in at)) return at;
