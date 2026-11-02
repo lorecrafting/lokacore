@@ -79,11 +79,7 @@ defmodule Loka.ContentGreenTest do
       {rule(
          "ring",
          &put_in(&1, ["steps"], [%{"op" => "fact.assign", "fact" => "bell_up", "value" => 1}])
-       ),
-       d("FACT_TYPE_MISMATCH", "reactions/ring.steps[0].value", %{
-         "fact" => "bell_up",
-         "type" => "bool"
-       })},
+       ), d("FACT_TYPE_MISMATCH", "reactions/ring.steps[0].value", %{})},
       # C3 D7: event.emit's custom_event is scripted_action@1's, which green does not declare.
       {rule(
          "ring",

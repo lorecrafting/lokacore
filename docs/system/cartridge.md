@@ -916,9 +916,9 @@ build. The author tools below are reachable only in that bundle (a production ex
   scene file and line, with `data.why` for a bad line (`npc` beside it once known); the other lines
   of the file still lower, so a fault behind a bad line reports in the same compile. When no other
   line is bad, a top set with no words before its first choice is `why: no_prompt` and one with no
-  `- ` choice `why: no_choices`, both at its `npc:` line. A `when:` or `needs:` naming a fact that
-  is not a bool is `FACT_TYPE_MISMATCH` with `data.fact` and `data.type`. A choice `- ~` is a placeholder choice: it has no words to key it by, so its key is
-  `todo_<n>`, `n` its line in the file, and two stay distinct; a release compile refuses it like any `~`. `needs:` (`<fact>` or `not <fact>`), `once`, `once: sitting` (`sitting`), `asked` and `then:` (a key or `end`) lower on a choice; a
+  `- ` choice `why: no_choices`, both at its `npc:` line, unless its same-key JSON writes that field. A `when:` or `needs:` naming a fact that
+  is not a bool is `FACT_TYPE_MISMATCH`; Explain names the fact (last on its line) and its `facts.json` type. A choice `- ~` is a placeholder choice: it has no words to key it by, so its key is
+  `todo__<n>`, `n` its line in the file (a label never slugs to a double `_`), and two stay distinct; a release compile refuses it like any `~`. `needs:` (`<fact>` or `not <fact>`), `once`, `once: sitting` (`sitting`), `asked` and `then:` (a key or `end`) lower on a choice; a
   deeper `- ` under a reply lowers to the dialogue `<key>_<choice>`, whose `then` the parent takes.
   A deeper set takes `entry: false`, since its way back makes a loop with the root and inference would open the widest; the root takes no marker, so a speaker's several nested scenes are tried by key.
   `once` lowers in the compile pipeline for every dialogue: the engine fact `<key>_<choice>_done`,

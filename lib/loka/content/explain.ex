@@ -1,4 +1,4 @@
-# size: allow 360, one row per refusal a writer can meet; the table reads together
+# size: allow 390, one row per refusal a writer can meet; the table reads together
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -160,12 +160,41 @@ defmodule Loka.Content.Explain do
     index = SourceLines.index(dir)
 
     diags
+    |> Enum.map(&scene_fact(&1, index, dir))
     |> without_follow_ons()
     # Errors first: readers (the author panel) take the first line for the build's state.
     |> Enum.sort_by(&(&1["severity"] != "error"))
     |> Enum.map(&String.replace_invalid("#{&1["severity"]}: #{place(&1, index)} #{words(&1)}"))
     |> Enum.uniq()
   end
+
+  # A scene's `when:` or `needs:` names its fact last on its line; facts.json gives its type.
+  defp scene_fact(%{"code" => "FACT_TYPE_MISMATCH", "path" => path} = d, index, dir) do
+    with {file, n} <- index[prefix(path, index)],
+         true <- String.ends_with?(file, ".scene"),
+         {:ok, facts} <- facts(dir) do
+      fact = last_word(Path.join(dir, file), n)
+      words = %{"fact" => fact, "type" => get_in(facts, ["facts", fact, "value_type", "type"])}
+      Map.update(d, "data", words, &Map.merge(&1, words))
+    else
+      _ -> d
+    end
+  end
+
+  defp scene_fact(d, _, _), do: d
+
+  defp facts(dir) do
+    with {:ok, text} <- File.read(Path.join(dir, "facts.json")), do: JSON.decode(text)
+  end
+
+  defp last_word(file, n),
+    do:
+      file
+      |> File.read!()
+      |> String.split("\n")
+      |> Enum.at(n - 1)
+      |> String.split()
+      |> List.last()
 
   defp without_follow_ons(diags) do
     # A refused scene line leaves its part unset; "missing" would only repeat that line's error.

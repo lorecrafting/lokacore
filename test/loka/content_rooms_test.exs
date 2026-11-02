@@ -385,10 +385,7 @@ defmodule Loka.ContentRoomsTest do
                 d("UNRESOLVED_REFERENCE", "rooms/b.variants[0].description", %{
                   "target" => "d.gone"
                 }),
-                d("FACT_TYPE_MISMATCH", "rooms/b.variants[1].when.equals", %{
-                  "fact" => "bell",
-                  "type" => "bool"
-                })
+                d("FACT_TYPE_MISMATCH", "rooms/b.variants[1].when.equals")
               ]}
   end
 

@@ -1,4 +1,3 @@
-# size: allow 505, one sampler dialogue broken case by case against the compiler
 defmodule Loka.ContentFerryTest do
   # The calendar start and an NPC's daily schedule in the compiler (Early R7/R8 S;
   # cartridge.schema.json Calendar, entity.schema.json NpcDefinition daily_schedule). Expected
@@ -229,11 +228,7 @@ defmodule Loka.ContentFerryTest do
        ), unresolved.(".choices.carry.steps[0].fact", missing.("fact"))},
       {dialogue(
          &update_in(&1, ~w(choices carry steps), fn [s] -> [%{s | "value" => "lost"}] end)
-       ),
-       d("FACT_TYPE_MISMATCH", at <> ".choices.carry.steps[0].value", %{
-         "fact" => "search_plan",
-         "type" => "enum"
-       })},
+       ), d("FACT_TYPE_MISMATCH", at <> ".choices.carry.steps[0].value", %{})},
       {dialogue(&put_in(&1, ~w(roles actor), %{"role" => "npc", "npc" => "bram"})),
        d("DUPLICATE_DEFINITION", at <> ".roles.actor", %{})},
       {dialogue(&put_in(&1, ~w(roles speaker), %{"role" => "npc", "npc" => "bram"})),

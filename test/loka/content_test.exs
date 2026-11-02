@@ -271,10 +271,7 @@ defmodule Loka.ContentTest do
                "actions/q.json" => act(bad),
                "cartridge.json" => manifest(["requires", "capabilities"], caps)
              }) == [
-               d("FACT_TYPE_MISMATCH", "actions/p.policy.items[0].equals", %{
-                 "fact" => "a_b",
-                 "type" => "bool"
-               }),
+               d("FACT_TYPE_MISMATCH", "actions/p.policy.items[0].equals"),
                d("UNRESOLVED_REFERENCE", "actions/p.policy.items[1].item.item", %{
                  "target" => "c@1.0.0:item/a_b"
                }),
@@ -312,14 +309,8 @@ defmodule Loka.ContentTest do
                "actions/q.json" => act(compare.("e", "y")),
                "actions/r.json" => act(compare.("e", "x"))
              }) == [
-               d("FACT_TYPE_MISMATCH", "actions/p.policy.equals", %{
-                 "fact" => "a_b",
-                 "type" => "bool"
-               }),
-               d("FACT_TYPE_MISMATCH", "actions/q.policy.equals", %{
-                 "fact" => "e",
-                 "type" => "enum"
-               })
+               d("FACT_TYPE_MISMATCH", "actions/p.policy.equals"),
+               d("FACT_TYPE_MISMATCH", "actions/q.policy.equals")
              ]
     end
 
