@@ -141,3 +141,4 @@ choices rather than an arbitrary dialogue graph, and scenes
 support authored narration/acknowledgement steps. There is no general live
 spawner or respawn system: the five cellar rats are five authored static NPC definitions.
 
+Before a district or area plan, read the [area authoring checklist](guides/area-authoring.md).

@@ -14,6 +14,7 @@ test('drops each noisy entry with its continuation lines and keeps the rest', ()
     'Require cycles are allowed, but can result in uninitialized values.',
     'Web  WARN  Using synchronous SQLite operations can cause significant performance impact.',
     'Web  WARN  props.pointerEvents is deprecated. Use style.pointerEvents',
+    'Error: unprefixed failure',
     'Web  WARN  Something real',
     'its explanation',
     'Web  ERROR  Compile failed',
@@ -21,6 +22,7 @@ test('drops each noisy entry with its continuation lines and keeps the rest', ()
   const keep = quiet();
   assert.deepEqual(lines.filter(keep), [
     lines[0],
+    'Error: unprefixed failure',
     'Web  WARN  Something real',
     'its explanation',
     'Web  ERROR  Compile failed',

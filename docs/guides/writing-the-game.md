@@ -6,7 +6,7 @@ tool behaviour: [author preview](../system/cartridge.md#author-preview).
 ## The short way: a first meeting, then a hub
 
 The committed [`stranger_talk.scene`](../../cartridges/identity_sampler/scenes/stranger_talk.scene)
-is a stranger who tells you their name. Split it into two files in `cartridges/<name>/scenes/`:
+is a stranger who tells you their name. In your own cartridge (not `identity_sampler`, which keeps `stranger_talk`), write two files in `scenes/` instead:
 the first meeting, which sets the fact `knows_name` (declared in `facts.json`), and the scene Talk
 opens from then on, where the player comes back to the same choices.
 
