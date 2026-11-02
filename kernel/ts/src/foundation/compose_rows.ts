@@ -9,6 +9,13 @@ export const get = (o: Json | undefined, k: string): Json | undefined =>
     ? (o as Obj)[k]
     : undefined;
 export const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
+// An encounter's round occurs at its job's due time; an Attack's opening round (loka-kgd.197)
+// runs on a job never scheduled, at the current clock.
+export function occurrence(state: State, op: { job_id: string }) {
+  const job = section(state, 'jobs')[op.job_id];
+  return job ? get(job, 'due_time') : state.clock;
+}
+
 export const containment = (e: string): MutationTarget =>
   ({ kind: 'containment', entity_id: e }) as MutationTarget;
 // size: allow 48, closed row-target dispatch includes actor-owned knowledge, status, levelling and built rows

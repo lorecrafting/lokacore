@@ -4,7 +4,7 @@ defmodule Loka.Core.InvariantsPack do
 
   def advance?(op, row, %{state: state} = ctx) do
     ids = op["active_ids"]
-    ctx = Map.put(ctx, :due, get_in(state, ["jobs", op["job_id"], "due_time"]))
+    ctx = Map.put(ctx, :due, Compose.occurrence(state, op["job_id"]))
 
     is_list(ids) and ids != [] and ids == Enum.sort(Enum.uniq(ids)) and
       Enum.all?(ids, &(&1 in row["active_ids"])) and
