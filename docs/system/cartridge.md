@@ -269,7 +269,7 @@ field of the op; a list names the only fields run besides `op`.
 | `skill.acquire`, `topic.grant` | | | | all | |
 | `entitlement`, `meal`, `drink`, `repair`, `claim`, `cancel`, `deposit`, `withdraw`, `mend`, `raze` | | | | | all |
 
-`end_talk` closes the delivery actor's open conversation; the compiler admits it only on a player's own act (`choice_resolved`, `choice_opened`, `check_passed`, `check_failed`, `action_completed`, `quest_resolved`, `scene_ended`, `story_point_reached`; `end_talk_event`), since any other event's delivery may fall past an NPC subject to whoever acted, or to the tick's root.
+`end_talk` closes the delivery actor's open conversation; the compiler admits it only on a player's own act (`choice_resolved`, `choice_opened`, `check_passed`, `check_failed`, `action_completed`, `story_point_reached`; `end_talk_event`), since any other event's delivery may fall past an NPC subject to whoever acted, or to the tick's root.
 
 ### Source shortcuts
 

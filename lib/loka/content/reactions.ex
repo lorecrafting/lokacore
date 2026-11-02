@@ -133,7 +133,7 @@ defmodule Loka.Content.Reactions do
 
   # A subject-bound event delivers to its subject, or past an NPC subject to the doer or the root
   # actor; a tick's event has only the root. Only a player's own act names whose talk to close.
-  @own_acts ~w(action_completed check_failed check_passed choice_opened choice_resolved quest_resolved scene_ended story_point_reached)
+  @own_acts ~w(action_completed check_failed check_passed choice_opened choice_resolved story_point_reached)
   defp consequence(rel, {%{"op" => "end_talk"}, i}, on, _) do
     if on["event"] in @own_acts,
       do: [],

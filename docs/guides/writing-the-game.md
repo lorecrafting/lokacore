@@ -222,7 +222,7 @@ are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
 
 ## Cut a talk short
 
-A reaction's `end_talk` step closes the open talk of the player who acted, as if they had left. The rule's `on` must be that player's own act (`choice_resolved`, `choice_opened`, `check_passed`, `check_failed`, `action_completed`, `quest_resolved`, `scene_ended` or `story_point_reached`); the build refuses anything else. Nothing else
+A reaction's `end_talk` step closes the open talk of the player who acted, as if they had left. The rule's `on` must be that player's own act (`choice_resolved`, `choice_opened`, `check_passed`, `check_failed`, `action_completed` or `story_point_reached`); the build refuses anything else. Nothing else
 changes, and with no talk open it does nothing. Put the words in a `narrate` step before it:
 `reactions/<key>.json`:
 
