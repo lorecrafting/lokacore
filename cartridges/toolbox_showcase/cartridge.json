@@ -5,7 +5,7 @@
   "title": "Toolbox Showcase",
   "requires": {
     "kernel_api": {
-      "at_least": "1.150",
+      "at_least": "1.151",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -213,6 +213,8 @@
     "death": {
       "player_corpse": "player_corpse",
       "npc_corpse": "npc_corpse",
+      "npc_corpse_decay": 15000,
+      "player_corpse_decay": 90000,
       "shrine": "crossroads_inn",
       "narration": {
         "woke": "death.woke"

@@ -18,6 +18,7 @@ import { died as crowDied } from '../crow/behavior.ts';
 import { clearBleed } from '../bleed/shared.ts';
 import { clearStatuses } from '../status/shared.ts';
 import { lose } from '../levelling/shared.ts';
+import { decayJob } from './job.ts';
 
 type DeathEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'entity_died' }>;
@@ -47,13 +48,12 @@ export function deathSequence(
 ) {
   validateFatal(world, fatal);
   const { loss, owner_id } = fatal;
-  const victim_id = loss.entity_id;
+  const { entity_id: victim_id, writer_group } = loss;
   const player = owner_id !== null;
   const room_id = world.state.containers[victim_id];
   const id = mint() as DomainEvent['id'];
   const corpse_id = mint() as EntityId;
   const definition = corpseDefinition(world, victim_id, player);
-  const writer_group = loss.writer_group;
   const ops: DeltaOp[] = [
     {
       op: 'entity.create',
@@ -71,6 +71,7 @@ export function deathSequence(
       source_id: null,
       destination_id: room_id,
     },
+    ...decayJob(world, corpse_id, player, writer_group, mint), // mints the third id
   ];
   const drops = rollDrops(world, victim_id, rng);
   ops.push(...transferRoots(world, victim_id, corpse_id, player, writer_group, drops.kept));
@@ -152,7 +153,7 @@ function populationLoss(world: World, loss: Loss): DeltaOp[] {
 
 function validateFatal(world: World, fatal: Fatal) {
   const { loss, owner_id, killer_id, credited_character_id } = fatal;
-  const victim_id = loss.entity_id;
+  const { entity_id: victim_id, writer_group } = loss;
   const settings = world.cartridge.world?.death;
   const player = owner_id !== null && bodyOf(world, owner_id) === victim_id;
   const npc = world.entities[victim_id];

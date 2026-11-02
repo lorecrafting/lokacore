@@ -1,3 +1,4 @@
+// size: allow 304, corpse names bind their victim (loka-kgd.203)
 // The app's own words for the kernel's codes (R6P Polish): what an accepted outcome says in the log
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
@@ -10,7 +11,12 @@ import type {
   Reply,
 } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
-import { emoteSentence, fillSlots, lineSentence } from '../../packages/game-view/line_words.ts';
+import {
+  emoteSentence,
+  fillSlots,
+  lineSentence,
+  victimWords,
+} from '../../packages/game-view/line_words.ts';
 import { things } from './item-pages.ts';
 import { levelWords } from './pick.ts';
 import { AT, UNAUTHORED } from './labels.ts';
@@ -164,9 +170,9 @@ export const withoutHeading = <T extends { key: string }>(lines: readonly T[], v
 
 // A known NPC's or visible entity's name, worded.
 const nameOf = (view: GameView, id: unknown, text: Say) => {
-  const name =
-    view.known_npcs?.find((n) => n.id === id)?.name ?? view.entities.find((n) => n.id === id)?.name;
-  return name && text(name);
+  const e = view.entities.find((n) => n.id === id);
+  const name = view.known_npcs?.find((n) => n.id === id)?.name ?? e?.name;
+  return name && victimWords(text, e ?? {}, name);
 };
 
 // One narration line's words: an engine key from the shared table (packages/game-view/line_words.ts), in the

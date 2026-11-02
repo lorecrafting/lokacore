@@ -1073,6 +1073,11 @@
           "$ref": "#/$defs/DefinitionRef",
           "description": "Corpse template for an NPC, unless its population names its own."
         },
+        "npc_corpse_decay": {
+          "description": "Logical units from an NPC's death until its corpse decays: direct items spill to the room, the corpse leaves play. Omitted: never.",
+          "minimum": 1,
+          "type": "integer"
+        },
         "penalty": {
           "additionalProperties": false,
           "description": "What a player's death costs (toolbox row 47). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
@@ -1111,6 +1116,11 @@
         "player_corpse": {
           "$ref": "#/$defs/DefinitionRef",
           "description": "Corpse template for a player."
+        },
+        "player_corpse_decay": {
+          "description": "Logical units from a player's death until the corpse decays, as npc_corpse_decay.",
+          "minimum": 1,
+          "type": "integer"
         },
         "restore": {
           "additionalProperties": false,

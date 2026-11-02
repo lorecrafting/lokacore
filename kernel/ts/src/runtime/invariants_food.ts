@@ -9,8 +9,14 @@ export function foodTransferValid(op: Record<string, any>, state: Record<string,
     (op.consumption === 'bandaged' && destination?.kind !== 'consumed')
   )
     return false;
+  // death@1 decay: a death-created corpse leaves its room for the consumed holder.
+  const decayed =
+    op.consumption === undefined &&
+    state.created?.[op.entity_id]?.origin?.kind === 'death' &&
+    source?.kind === 'room';
   return (
     destination?.kind !== 'consumed' ||
+    decayed ||
     (known[op.entity_id]?.kind === 'item' &&
       (op.consumption === 'bandaged'
         ? known[op.entity_id]?.bandage === true

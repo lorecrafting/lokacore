@@ -949,12 +949,14 @@ Fixed corpse templates, same-body return room and pool restoration; requires dea
 | narration.player_died | [TextKey](source-kinds.gen.md#textkey) |  | The fall line a bleed or status tick death tells after its tick line. |
 | narration.woke | [TextKey](source-kinds.gen.md#textkey) |  | Told once after every player death, after the penalty line. |
 | npc_corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for an NPC, unless its population names its own. |
+| npc_corpse_decay | integer |  | Logical units from an NPC's death until its corpse decays: direct items spill to the room, the corpse leaves play. Omitted: never. |
 | penalty | object |  | What a player's death costs (toolbox row 47). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body. |
 | penalty.experience | object |  | Experience lost on death; needs world.levelling. |
 | penalty.experience.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Told once when experience is lost. |
 | penalty.experience.percent | integer | yes | The body loses floor(experience * percent / 100), never below its current level's threshold. |
 | penalty.items | `corpse` or `kept` |  | corpse (the default) moves what the body held into the corpse; kept leaves it on the body. |
 | player_corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for a player. |
+| player_corpse_decay | integer |  | Logical units from a player's death until the corpse decays, as npc_corpse_decay. |
 | restore | object | yes | The values the dead body's pools are set to. |
 | restore.hp | integer | yes | HP after death; capped at the body's HP maximum. |
 | restore.mv | integer | yes | Movement after death; capped at the body's movement maximum. |

@@ -6,6 +6,7 @@ import type { Button, DetailLine, presenter } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 import { ActionCard, Cards, PickLists } from './actions.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { victimWords } from '../../packages/game-view/line_words.ts';
 import { EntityLine, LogLines, Note } from './lines.tsx';
 import { carries } from './people.tsx';
 import { Text } from './Text.tsx';
@@ -174,7 +175,7 @@ export function InsidePage(p: {
   const [c, t] = [usePalette(), useType()];
   const thing = things(view).find((e) => e.id === p.id);
   const open = (id: string) => p.open({ kind: 'thing', id });
-  const name = thing ? cap(text(thing.name)) : LABEL.item;
+  const name = thing ? cap(victimWords(text, thing, thing.name)) : LABEL.item;
   // A container's own buttons, as its item page offers them: Put into as cards, its Close as the foot.
   const own = thing?.kind === 'npc' ? [] : (p.g?.on(p.id) ?? []);
   const press = (b: Button) => p.press?.(b, p.id);
@@ -218,7 +219,9 @@ function lookAt(p: {
   const { view, text } = p.screen;
   return (
     <>
-      {thing.description && <Text style={prose(c, t)}>{plain(text(thing.description))}</Text>}
+      {thing.description && (
+        <Text style={prose(c, t)}>{plain(victimWords(text, thing, thing.description))}</Text>
+      )}
       {'band' in thing && thing.band && (
         <Text style={prose(c, t)}>
           {LABEL.looksToBe(name, bandPhrase({ band: thing.band }, text))}
