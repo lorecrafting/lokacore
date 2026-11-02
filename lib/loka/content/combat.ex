@@ -165,14 +165,28 @@ defmodule Loka.Content.Combat do
   # Toolbox row 17: a ranged weapon names a known ammo pool, and its shots need their narration.
   defp shots(combat, m, defs) do
     ranged =
-      for {_, {rel, _, %{"weapon" => %{"ranged" => r}}}} <- defs["item"] || %{}, do: {rel, r}
+      for {_, {rel, _, %{"weapon" => %{"ranged" => r} = w}}} <- defs["item"] || %{},
+          do: {rel, r, w["attack"]}
 
     for(
-      {rel, r} <- ranged,
-      error <- reference(rel, ["weapon", "ranged"], {"ammo", "resource"}, r, m, defs),
+      {rel, r, attack} <- ranged,
+      error <-
+        reference(rel, ["weapon", "ranged"], {"ammo", "resource"}, r, m, defs) ++
+          one_shot(rel, attack),
       do: error
     ) ++ if(ranged == [], do: [], else: ranged_requirements(combat))
   end
+
+  # Swings (loka-kgd.200): a shot is one swing; its ammo and lines tell one blow.
+  defp one_shot(rel, %{"attacks" => n}) when n > 1,
+    do: [
+      diag("SCHEMA_VIOLATION", at(rel, ["weapon", "attack", "attacks"]), %{
+        "error" => "invalid_value",
+        "why" => "ranged_swings"
+      })
+    ]
+
+  defp one_shot(_, _), do: []
 
   defp ranged_requirements(combat) do
     for(

@@ -1915,6 +1915,33 @@
             "shot_miss": {"description":"Told when a ranged first strike misses. Required when any item declares weapon.ranged.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
+            "player_volley": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "player_volley_all": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "player_volley_one": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "npc_volley": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "npc_volley_all": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "npc_volley_one": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "ally_volley": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "ally_volley_all": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "ally_volley_one": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
             "player_died": {"description":"Told when the player falls in a combat round; also the default fall line for tick deaths.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },

@@ -20,6 +20,8 @@ import { check } from '../src/runtime/invariants.ts';
 import { encountersValid } from '../src/mechanics/combat/saved.ts';
 import { cartridgeOf, cmd, ctx, eid, reload } from './harness.ts';
 import type { RngState } from '../src/contracts.gen.ts';
+import type { Round } from '../src/mechanics/combat/round.ts';
+import { swings } from '../src/mechanics/combat/swings.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-diku-sampler-'));
 let artifact: Uint8Array;
@@ -208,4 +210,73 @@ test('without initiative Attack only schedules; tiers and conditions still apply
     two.lines.map((l) => l.key),
     [key('npc_hit'), key('player_hit_25'), key('condition_1')],
   );
+});
+
+// Swings (loka-kgd.200, mechanics.md "Swings"), from [1, 2, 3, 4]: initiative 11520 % 2 = 0 (the
+// player first), then hit rolls 0, 5927040 % 100 = 40 and 70819200 % 100 = 0, against chance 30.
+const swinging = (player: object, goblin?: object) =>
+  reload(base, (c) => {
+    Object.assign(c.world.combat.player_attack, player);
+    Object.assign(c.npcs[`${S}:npc/goblin`].attack, goblin);
+  });
+// Breaks: one hit roll for every swing, the damages not summed or not applied once, the tier read
+// from one swing (3 of 10 is the 25 tier; the 6 total is the 50), the summary line after the strike
+// line, a wrong key for 2 of 3 or 2 of 2, or the goblin's summary without its name.
+test('three swings at 30 hit, miss, hit: a summary, then the 50 tier of the 6 total', () => {
+  const content = swinging({ chance: 30, attacks: 3 }, { attacks: 2 });
+  assert.ok(content.ok, JSON.stringify(content));
+  const { w, lines } = attack(content.cartridge as Cartridge);
+  assert.deepEqual([hp(w, goblin(w)), hp(w, w.body)], [4, 6]);
+  assert.deepEqual(lines, [
+    { key: key('player_volley'), bindings: { count: 3, hits: 2 } },
+    { key: key('player_hit_50'), bindings: { target: GOBLIN } },
+    { key: key('npc_volley_all'), bindings: { attacker: GOBLIN, count: 2, hits: 2 } },
+    { key: key('npc_hit'), bindings: { attacker: GOBLIN } },
+    { key: key('condition_1'), bindings: { target: GOBLIN } },
+  ]);
+});
+
+// Breaks: 1 of 2 not told by the _one key, or a summary (or a hit line) when no swing hit.
+test('one hit of two tells the _one summary; no hit tells only the miss line', () => {
+  const told = (chance: number) => {
+    const content = swinging({ chance, attacks: 2 });
+    assert.ok(content.ok, JSON.stringify(content));
+    return attack(content.cartridge as Cartridge).lines.map((l) => [l.key, l.bindings]);
+  };
+  assert.deepEqual(told(30).slice(0, 2), [
+    [key('player_volley_one'), { count: 2, hits: 1 }],
+    [key('player_hit_25'), { target: GOBLIN }],
+  ]);
+  assert.deepEqual(told(0).slice(0, 2), [
+    [key('player_miss'), { target: GOBLIN }],
+    [key('npc_hit'), { attacker: GOBLIN }],
+  ]);
+});
+
+// Breaks: the budget stays eight: initiative, five player swings and four goblin swings spend ten
+// draws (sure hits, fixed damage, no defense), a fault under the fixed budget.
+test('swings grow the round budget past eight draws', () => {
+  const content = swinging({ damage_min: 1, damage_max: 1, attacks: 5 }, { attacks: 4 });
+  assert.ok(content.ok, JSON.stringify(content));
+  const { w, lines } = attack(content.cartridge as Cartridge);
+  assert.deepEqual([hp(w, goblin(w)), hp(w, w.body)], [5, 2]);
+  assert.deepEqual(
+    lines.map((l) => l.key),
+    [
+      key('player_volley_all'),
+      key('player_hit_50'),
+      key('npc_volley_all'),
+      key('npc_hit_50'),
+      key('condition_50'),
+    ],
+  );
+});
+
+// Breaks: an opportunity of n swings grows the budget other than by 4 × (n − 1) (mechanics.md
+// "Swings"); three unhit swings spend three draws and touch no world state.
+test('three swings grow the budget by eight', () => {
+  const r = { rng: [1, 2, 3, 4], draws: 0, budget: 8 } as unknown as Round;
+  const profile = { chance: 0, damage_min: 1, damage_max: 1, attacks: 3 };
+  const out = swings(undefined as never, undefined as never, 'x' as never, profile, false, r);
+  assert.deepEqual([out.hits, r.draws, r.budget], [0, 3, 16]);
 });
