@@ -70,3 +70,32 @@ Red: no `s.idle` clear in save; no receipt delete in commit; `ops` without merge
 Merged-id UNIQUE collision with an earlier refused trusted id: my probe did not trigger it, and it needs a trusted caller production does not have. Away cap: read, not probed with a capped gap.
 
 Verdict: CHANGES REQUIRED
+
+## Re-check at bcd32c621 (fix commits ea7bc636c, bcd32c621 only)
+
+Must hold: a fault closes a span; the forged tie test can fail; a kill loses only idle clock; the trace still reconstructs in commit order; author tools answer for the world the player is in ([save.md, Coalesced ticks](../system/save.md)).
+
+Blockers from the first round:
+
+- Blocker 1, fixed. Mutant on the `invocation.ts` clear is red. The `delivery.ts:95-100` clear survives: no fixture faults a driver tick. A fault keeps clock and state, so a later tick has the same `from`; a clean retry needs the same world to pass over a different span, and a longer span does at least as much work. No failing case constructed; defensive, mirrors the tested clear and save.md's "a fault". Not blocking.
+- Blocker 2, fixed. `receipt-history.ts:41` `<=` to `<` turns the forged tie test red.
+
+New findings:
+
+- **Blocker 3.** `mobile/authority/local-story/session.ts:105`, reached from `mobile/app/author/panel.tsx:204`: the Why panel is false during an idle tail. Ferry `elapsedBundle` at rate 50, `coil_rope` gated `time_since` on an int fact (default 0), `at_least` 64860, 10 ticks. Head: live clock 64925 (gate open), 2 trace rows ending at 64812, Why `holds: false`. Base: 11 rows ending at 64925, `holds: true`. Through `game.trace()` with 12 `active` pulses, the production path: head 2 rows, `holds: false`; one `look` later 3 rows, `holds: true`; base `holds: true` both times. So the lag is the cause. An author waiting on a timed gate is told it is shut until the next command, against `kernel/ts/play/why.ts:21` ("what could be done next"). save.md's "replayable prefix" covers the file, not this answer. Hour-based `time_window` told the truth on the same fixture, because the crossing tick wrote a row. Fix: the author `trace()` catches up before it reads, with a test that is red without it.
+- Nit. PR body line 45 says `coalesce.test.ts` 16 pass; 23 pass at head.
+
+Questions answered:
+
+- A kill loses only idle clock. SIGKILL matrix green; red on each of: no `s.behind` at `authority.ts:116`, no `s.behind` in `traceAfter`, no committed-first return, no `authority.ts:131` catch-up, prune disabled.
+- The resume-tick fix is sound: `s.behind` at open orders the merged entry before the resume tick; the recap path catches up at `authority.ts:131`. Only `store.ts:221` and `commit.ts:51` delete receipts, so the prune hits absorbed ids only.
+- Reconstruction: ferry trace with a refused move, reopened, reads elapsed 64800-64875, move, elapsed 64875-64887, in commit order.
+- `bin/idle_save_size.ts`: 14,550 commits, 705,536 B, 101 receipts, eventful hash `7834de38` as in the first round.
+
+"Replay differs" dispute: both sides are partly right. Idle-only ferry traces replay identically under both tools. With a refused move, head and base traces both differ under both tools, at that move: recorded commit `committed`, replay `unavailable / not_applicable`. Coverage and Why throw there too. It predates this PR and is not charged to it; for the PM to file.
+
+Not checked: `sky` leaves and an hour crossing with no event, which read the same clock.
+
+CI at bcd32c621: graph-diff, book-e2e, ci all completed success.
+
+Verdict: CHANGES REQUIRED
