@@ -153,7 +153,7 @@ function populationLoss(world: World, loss: Loss): DeltaOp[] {
 
 function validateFatal(world: World, fatal: Fatal) {
   const { loss, owner_id, killer_id, credited_character_id } = fatal;
-  const { entity_id: victim_id, writer_group } = loss;
+  const victim_id = loss.entity_id;
   const settings = world.cartridge.world?.death;
   const player = owner_id !== null && bodyOf(world, owner_id) === victim_id;
   const npc = world.entities[victim_id];
