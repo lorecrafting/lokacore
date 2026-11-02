@@ -50,7 +50,8 @@ const greyTalk = (a: Host) => {
   return [{ action_key: 'bram', target_ids: [bram!.id], input: {} }];
 };
 
-// Breaks: replay rebuilds a stored rejection as commit unavailable, so a host's refused move differs.
+// Breaks: replay rebuilds a stored rejection as commit unavailable, so a host's refused move
+// differs; or replay copies the recorded commit instead of rebuilding it, so a forged one passes.
 test('a refused move replays identically, and a forged revision on it still differs', (t) => {
   const p = played(t, () => [...barred(), look]);
   assert.equal(decision(p.replies[0]), 'rejected');
