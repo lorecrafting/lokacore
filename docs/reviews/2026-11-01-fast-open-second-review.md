@@ -89,3 +89,18 @@ Fix: take `TypeError` out of `unreadable`. Refuse the shapes at the readers: `de
 Not checked at this re-check: `0ed83f5d5`, other loaders' wrong shapes, a held torch with no fuel row.
 
 **Verdict: CHANGES REQUIRED.**
+
+## Final check of `60f485efd` (`TypeError` narrowing only)
+
+CI at this head (`gh run list --commit`): graph-diff, ci, book-e2e success.
+
+- The should-fix is resolved. `TypeError` is out of `unreadable` (`store.ts:186`). Shapes refuse at `deer-save.ts:26`, `skills-save.ts:53` and `receipt-history.ts:67`.
+- Planted `(undefined as any).bug` in `load` on a lawful save: no game, `startOver=false`, the real message, receipt, state and head rows byte-identical.
+- Mutants, all red: `TypeError` back in `unreadable`; each `readableOps` check removed; `:67` back to `return` (including `smoke.test.ts`).
+- `smoke.test.ts:237` ruling holds. `commit.ts:35` validates `DecisionResult` before the only `INSERT INTO receipt`, inside one transaction, and nothing updates a receipt, so neither ordinary play nor a crash writes that shape. A contract change bumps `kernel_api`, and the pin refuses that save first. That bump is a rule, not a check I found enforced: a tightened schema without a bump would offer Start over on a lawful save. Probe: `save corrupt`, rows byte-identical after the settle and after a further press.
+
+Nit: `docs/system/save.md:46` says a `TypeError` is never read as a bad save, but `session.ts:68-70` still refuses on any `gameView` throw, with Start over. By reading; it predates this PR. A bug in the first-screen build can still offer the wipe. Reword the sentence, or decide that path separately.
+
+Open: the owner's answer on the wider loss is the PM's to record.
+
+**Verdict: APPROVE WITH NOTES.**
