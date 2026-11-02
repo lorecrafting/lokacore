@@ -38,13 +38,19 @@ export const linked = (label: string, link: string) => {
       ];
 };
 
-// The unavailable form: its own component, so its pressed state is the card's alone. The state
-// keeps the label and reason it was pressed on, so a changed card starts unpressed. Its name is the
-// shown text, then the rest of `name`, which starts with the label (label in name). Once pressed the
-// name holds the reason, so the hint drops it: read once either way.
-// With `send` the press goes to the engine and the log's line reads the sentence (book-ui.md, Live announcements).
 // ponytail: announceForAccessibility is a no-op on web, where the card's own polite region reads the
 // sentence; where native maps aria-live too, it may be read twice (Footer.tsx, check on device).
+/**
+ * The unavailable form: its own component, so its pressed state is the card's alone.
+ * - Use: ActionCard only; exported from its own file.
+ * - Rules: the state keeps the label and reason it was pressed on, so a changed card starts
+ *   unpressed. Its name is the shown text, then the rest of `name`, which starts with the label
+ *   (label in name). Once pressed the name holds the reason, so the hint drops it: read once either
+ *   way. With `send` the press goes to the engine and the log's line reads the sentence (book-ui.md,
+ *   Live announcements).
+ * - States: at rest; pressed, with its reason; dried reason.
+ * - Story: ActionCard.stories.tsx
+ */
 export function Unavailable(p: Refusal) {
   const c = usePalette();
   const sentence = reasonSentence(p.reason);
