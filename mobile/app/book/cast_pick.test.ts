@@ -1,5 +1,5 @@
 // Aimed spells in the Book (loka-x6t.109.5, book-ui.md Word bar): a Cast a spell… list on each
-// target's page, a Cast on… list per spell on Character, and one under each live foe's line.
+// target's page, a Cast on… list per spell on Skills, and one under each live foe's line.
 import assert from 'node:assert/strict';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

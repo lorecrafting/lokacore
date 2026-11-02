@@ -61,7 +61,7 @@ export const CharacterPointsToSpend: StoryObj = {
 // The same real view, one page along: Skills draws what Character no longer does.
 const SkillsFullView = { ...CharacterFullView, stack: [{ kind: 'contents' }, { kind: 'skills' }] };
 export const Skills: StoryObj = { ...pageStory(SkillsFullView), name: 'Skills' };
-// A view with no skill and no spell word. Breaks: a blank page, or the Note beside real rows.
+// A view with no skill and no spell word: the one Note.
 export const SkillsEmpty: StoryObj = {
   ...pageStory({
     ...SkillsFullView,

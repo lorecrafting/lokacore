@@ -27,7 +27,7 @@ type Carrying = Home & {
   open: (id: string) => void;
 };
 
-type Character = { view?: GameView; text: Say; pending?: boolean } & Home &
+type Character = { view?: GameView; text: Say } & Home &
   Pick<GameView, 'resources' | 'position'> &
   Parameters<typeof RaiseCards>[0];
 

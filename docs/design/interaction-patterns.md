@@ -110,7 +110,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 ### Sections (Contents)
 
 - Order: Contents lists exactly Character, Skills, Inventory, Map, Journal, Settings; each section
-  ends with "Back to World". Character: resources, levelling and Raise cards. Skills: skills and
+  ends with Back to Contents when opened from Contents, else "Back to World". Character: resources, levelling and Raise cards. Skills: skills and
   professions, Spells (refused words with reasons). Journal: quests, then Lore. Settings: Reading size,
   Sound, Music, Haptics, Flashes, Credits, Start over. Credits opens a child page of Settings listing
   each non-null `credit` in `mobile/app/book/sounds/manifest.json`; it is not a Contents section.

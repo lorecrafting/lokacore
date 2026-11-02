@@ -145,10 +145,9 @@ function sectionPage(p: BodyProps, page: Page) {
     ...home,
     buttons: p.screen.buttons,
     press: p.press,
-    pending: p.screen.pending,
   };
   if (page.kind === 'character') return <CharacterPage {...sheet} />;
-  if (page.kind === 'skills') return <SkillsPage {...sheet} />;
+  if (page.kind === 'skills') return <SkillsPage {...sheet} pending={p.screen.pending} />;
   if (page.kind === 'map') return <MapPage view={view} text={text} {...home} />;
   if (page.kind === 'credits') return <CreditsPage back={p.back} />;
   if (page.kind === 'settings') return <SettingsRoute {...p} {...home} />;
