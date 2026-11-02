@@ -10,7 +10,7 @@ const invalid = (): never => {
 };
 
 /** The durable job is justified by its exact checked entry or population transfer receipt.
- * receiptRecovery first replays all population receipts; that kernel owns cross-mechanic groups.
+ * Opening does not replay receipts; the kernel owns cross-mechanic groups.
  */
 export function deerSave(world: World, db: Db, meta: Meta) {
   const jobs = world.state.jobs ?? {};

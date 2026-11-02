@@ -1,29 +1,13 @@
-// Repeat exchanges retain only the latest quest row; existing receipts prove their historical revisions.
-import { receiptHistory } from './receipt-history.ts';
+// Repeat exchanges retain only the latest quest row, so a deadline's terminal fact cannot be read
+// against the default or the current value (deadline-receipts.ts).
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
-import type { Db, Meta } from './store.ts';
 
-/** Reuse the kernel's exact admission/lowering at each original revision, including unrelated custody/faction changes. */
-export function exchangeSave(
-  fresh: World,
-  saved: World,
-  db: Db,
-  meta: Meta,
-  revision: number,
-  historyChecked: boolean,
-): boolean {
-  if (
-    !Object.values(saved.cartridge.items ?? {}).some((i) => i.readable) &&
-    !Object.values(saved.cartridge.quests ?? {}).some((q) => q.patrol) &&
-    !Object.values(saved.cartridge.quests ?? {}).some((q) => q.exchange) &&
-    !Object.values(saved.details).some((d) => d.harvest?.careful) &&
-    !Object.values(saved.entities).some(
-      (e) => e.kind === 'npc' && (e.shop?.buy_discount || e.shop?.offers.some((o) => o.stock)),
-    ) &&
-    !Object.keys(fresh.fuelSpecs).length &&
-    saved.state.fuel === undefined
-  )
-    return false;
-  if (!historyChecked) receiptHistory(fresh, saved, db, meta, revision);
-  return true;
-}
+export const repeatExchanges = (fresh: World, saved: World) =>
+  Object.values(saved.cartridge.items ?? {}).some((i) => i.readable) ||
+  Object.values(saved.cartridge.quests ?? {}).some((q) => q.patrol || q.exchange) ||
+  Object.values(saved.details).some((d) => d.harvest?.careful) ||
+  Object.values(saved.entities).some(
+    (e) => e.kind === 'npc' && (e.shop?.buy_discount || e.shop?.offers.some((o) => o.stock)),
+  ) ||
+  Object.keys(fresh.fuelSpecs).length > 0 ||
+  saved.state.fuel !== undefined;

@@ -1,11 +1,9 @@
 // Vessel rows retain exact historical quantity and custody through ordinary receipts.
-import { receiptHistory } from './receipt-history.ts';
 import { liquidRowValid } from '../../../kernel/ts/src/foundation/compose_liquid.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
-import type { Db, Meta } from './store.ts';
 
-export function liquidSave(fresh: World, world: World, db: Db, meta: Meta, revision: number) {
+export function liquidSave(fresh: World, world: World) {
   const expected = Object.keys(fresh.liquidSpecs ?? {}),
     actual = Object.keys(world.state.liquids ?? {});
   if (
@@ -17,16 +15,4 @@ export function liquidSave(fresh: World, world: World, db: Db, meta: Meta, revis
     )
   )
     throw new SyntaxError('malformed JSON: inconsistent vessel rows');
-  if (
-    !fresh.cartridge.lock.capabilities.knowledge &&
-    !fresh.cartridge.world?.water &&
-    !expected.length &&
-    !Object.keys(fresh.cartridge.services ?? {}).length &&
-    !Object.keys(fresh.cartridge.transports ?? {}).length &&
-    !Object.keys(fresh.populationSpecs ?? {}).length &&
-    !fresh.consumed
-  )
-    return false;
-  receiptHistory(fresh, world, db, meta, revision);
-  return true;
 }

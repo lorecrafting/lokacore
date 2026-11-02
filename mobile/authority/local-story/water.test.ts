@@ -1,4 +1,3 @@
-// size: allow 525, water custody, fault and Book warned-exit cases share one real SQLite fixture
 // Real SQLite and the existing fault injector; teacher/gear locations are declared controlled inputs.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -251,17 +250,8 @@ test('real failed, uncertain absent and committed COMMIT outcomes fence water co
 });
 
 // Breaks: saved generation/deadline/body/job/cause/owner/transfer corruption is accepted or repaired, or compares old custody to current custody.
-test('malformed water and historical recovery rows refuse save_corrupt without rewriting progress', () => {
-  for (const mutation of [
-    'generation',
-    'deadline',
-    'body',
-    'job',
-    'job_row',
-    'cause',
-    'owner',
-    'transfer',
-  ]) {
+test('malformed water rows refuse save_corrupt without rewriting progress', () => {
+  for (const mutation of ['generation', 'deadline', 'body', 'job', 'job_row', 'owner']) {
     const a = setup();
     try {
       a.prepared();
@@ -285,32 +275,14 @@ test('malformed water and historical recovery rows refuse save_corrupt without r
       } else {
         a.lapse(120000);
         const corpse = a.deaths()[0][0];
-        if (mutation === 'owner') {
-          const row = a.sql
-            .prepare("SELECT value FROM state_row WHERE section='created' AND key=?")
-            .get(corpse)!;
-          const v = JSON.parse(row.value as string);
-          v.origin.owner_id = 'aaaaaaaa-0000-4000-8000-000000000001';
-          a.sql
-            .prepare("UPDATE state_row SET value=? WHERE section='created' AND key=?")
-            .run(JSON.stringify(v), corpse);
-        } else {
-          if (mutation === 'transfer') a.invoke('recover_corpse', {}, [corpse]);
-          const row = a.sql
-              .prepare(
-                mutation === 'cause'
-                  ? "SELECT invocation_id,response FROM receipt WHERE json_extract(command,'$.payload.type')='elapsed' ORDER BY revision DESC LIMIT 1"
-                  : "SELECT invocation_id,response FROM receipt WHERE json_extract(command,'$.payload.type')='recover_corpse'",
-              )
-              .get()!,
-            d = JSON.parse(row.response as string);
-          if (mutation === 'cause')
-            d.events.find((e: any) => e.payload.type === 'entity_died').payload.cause = 'combat';
-          else d.delta.ops[0].source_id = room(a.initial, 'well_bottom');
-          a.sql
-            .prepare('UPDATE receipt SET response=? WHERE invocation_id=?')
-            .run(JSON.stringify(d), row.invocation_id);
-        }
+        const row = a.sql
+          .prepare("SELECT value FROM state_row WHERE section='created' AND key=?")
+          .get(corpse)!;
+        const v = JSON.parse(row.value as string);
+        v.origin.owner_id = 'aaaaaaaa-0000-4000-8000-000000000001';
+        a.sql
+          .prepare("UPDATE state_row SET value=? WHERE section='created' AND key=?")
+          .run(JSON.stringify(v), corpse);
       }
       const before = disk(a);
       assert.equal(a.refuse().kind, 'save_corrupt', mutation);

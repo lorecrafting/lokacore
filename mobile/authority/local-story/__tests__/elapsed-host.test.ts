@@ -1,10 +1,13 @@
 // Controlled host clocks and real rollback-journal SQLite for elapsed integration regressions.
+import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { encode } from '../../../../kernel/ts/src/foundation/canonical.ts';
 import { read } from '../../../../kernel/ts/test/read.ts';
-import { openGame } from '../session.ts';
-import type { Db } from '../store.ts';
+import { newWorld } from '../../../../kernel/ts/src/index.ts';
+import { receiptHistory } from '../receipt-history.ts';
+import { cartridgeOf, CONTEXT, openGame, SEED } from '../session.ts';
+import { load, type Db } from '../store.ts';
 
 export function elapsedBundle(policy: object = {}, calendar: object = {}) {
   const c = structuredClone(read('protocol/fixtures/cartridge_ferry_hash.json').value);
@@ -83,13 +86,18 @@ export function elapsedHost(
 
 // Cold-reopens the save file at `path` on a fresh connection through openGame, the app's launch
 // path (its refusal, e.g. save_corrupt, throws); each sampler save file gets one call after its
-// last scripted move (loka-dgl6). The caller's committed connection may stay open.
+// last scripted move (loka-dgl6). The caller's committed connection may stay open. A launch no
+// longer replays receipts, so this does: determinism stays covered for every sampler.
 export function coldReopen(
   path: string,
   bundle: ReturnType<typeof elapsedBundle>,
   kernel_version?: string,
 ) {
-  elapsedHost(path, undefined, bundle, kernel_version).sql.close();
+  const { db, sql } = elapsedHost(path, undefined, bundle, kernel_version);
+  const fresh = newWorld(cartridgeOf(bundle), CONTEXT as never, SEED as never);
+  const saved = load(db, fresh, () => assert.fail('the save exists'), true)!;
+  receiptHistory(fresh, saved.world, db, saved.meta, saved.revision);
+  sql.close();
 }
 
 export const checkpoint = (sql: DatabaseSync) => ({

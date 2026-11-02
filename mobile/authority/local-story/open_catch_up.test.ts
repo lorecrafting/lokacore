@@ -47,7 +47,13 @@ const FORGED: [string, (sql: DatabaseSync, receipt: Record<string, never>) => vo
   [
     'the catch-up command already has a receipt of another intent (a conflict)',
     (sql, receipt) => {
-      const row = { ...receipt, intent_digest: 'x'.repeat(64) };
+      // A rejection at revision 0: its command id collides, and no accepted row outruns the head.
+      const row = {
+        ...receipt,
+        revision: 0,
+        intent_digest: 'x'.repeat(64),
+        response: JSON.stringify({ kind: 'rejected' }),
+      };
       const columns = Object.keys(row);
       sql
         .prepare(`INSERT INTO receipt (${columns}) VALUES (${columns.map(() => '?')})`)
@@ -152,8 +158,8 @@ test('a refusal on the second step keeps the first step, and the next launch cha
   assert.deepEqual(
     kept.map((r) => ({ ...r })),
     [
+      { command_id: second.command_id, revision: 0 },
       { command_id: first.command_id, revision: 1 },
-      { command_id: second.command_id, revision: second.revision },
     ],
   );
   a.sql.close();

@@ -143,65 +143,27 @@ test('room-before-Rest, meal, partial/empty ale reopen and exact retries preserv
 });
 
 // Breaks: bounded forged entitlement/stock/ale or altered service/payment/benefit receipts pass current-value checks.
-test('forged bounded service rows and swapped/omitted historical service evidence refuse without repair', (t) => {
-  for (const mutation of [
-    'entitlement',
-    'meals',
-    'ale',
-    'service',
-    'provider',
-    'quote',
-    'payment',
-    'stock',
-    'benefit',
-  ]) {
+test('a service receipt that no longer binds, and an unearned entitlement row, refuse without repair', (t) => {
+  for (const mutation of ['service', 'provider', 'quote', 'payment']) {
     const a = setup();
     try {
       a.invoke('kitchen_room');
       a.invoke('kitchen_meal');
       a.invoke('kitchen_ale');
-      if (mutation === 'entitlement')
-        a.sql
-          .prepare(
-            "UPDATE state_row SET value='false' WHERE section='facts' AND key LIKE '%bed_paid%'",
-          )
-          .run();
-      else if (mutation === 'meals')
-        a.sql
-          .prepare("UPDATE state_row SET value=? WHERE section='resources' AND key=?")
-          .run(
-            JSON.stringify({ value: 4, at: 0 }),
-            resourceKey(a.initial, entity(a.initial, 'npc', 'cook'), 'meal_stock'),
-          );
-      else if (mutation === 'ale')
-        a.sql
-          .prepare("UPDATE state_row SET value=? WHERE section='liquids' AND key=?")
-          .run(
-            JSON.stringify({ kind: ref('liquid', 'draught'), quantity: 4 }),
-            entity(a.initial, 'item', 'kitchen_cask'),
-          );
-      else {
-        const row = a.sql
-          .prepare(
-            "SELECT invocation_id,command,response FROM receipt WHERE json_extract(command,'$.payload.service.key')='kitchen_meal'",
-          )
-          .get()!;
-        const command = JSON.parse(row.command as string),
-          decision = JSON.parse(row.response as string);
-        if (mutation === 'service') command.payload.service.key = 'kitchen_room';
-        if (mutation === 'provider') command.payload.provider_id = entity(a.initial, 'npc', 'hob');
-        if (mutation === 'quote') command.payload.quoted_price = 1;
-        if (mutation === 'payment') decision.delta.ops.shift();
-        if (mutation === 'stock')
-          decision.delta.ops = decision.delta.ops.filter(
-            (o: any) => o.resource?.key !== 'meal_stock',
-          );
-        if (mutation === 'benefit')
-          decision.delta.ops = decision.delta.ops.filter((o: any) => o.resource?.key !== 'mv');
-        a.sql
-          .prepare('UPDATE receipt SET command=?,response=? WHERE invocation_id=?')
-          .run(JSON.stringify(command), JSON.stringify(decision), row.invocation_id);
-      }
+      const row = a.sql
+        .prepare(
+          "SELECT invocation_id,command,response FROM receipt WHERE json_extract(command,'$.payload.service.key')='kitchen_meal'",
+        )
+        .get()!;
+      const command = JSON.parse(row.command as string),
+        decision = JSON.parse(row.response as string);
+      if (mutation === 'service') command.payload.service.key = 'kitchen_room';
+      if (mutation === 'provider') command.payload.provider_id = entity(a.initial, 'npc', 'hob');
+      if (mutation === 'quote') command.payload.quoted_price = 1;
+      if (mutation === 'payment') decision.delta.ops.shift();
+      a.sql
+        .prepare('UPDATE receipt SET command=?,response=? WHERE invocation_id=?')
+        .run(JSON.stringify(command), JSON.stringify(decision), row.invocation_id);
       const before = disk(a);
       assert.equal(a.refuse().kind, 'save_corrupt', mutation);
       assert.deepEqual(disk(a), before, mutation);
