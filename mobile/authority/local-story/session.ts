@@ -73,7 +73,7 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>)
     if (last?.lines.some((t) => typeof (t as { key?: unknown } | null)?.key !== 'string'))
       throw new Error('malformed JSON: a narration line without a key');
   } catch (e) {
-    if (!unreadable(e)) throw e; // I/O may leave an intact save
+    if (!unreadable(e)) throw e; // I/O or a bug of ours may leave an intact save
     throw refusal(e);
   }
 }

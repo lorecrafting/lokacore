@@ -43,8 +43,13 @@ export function receiptHistory(fresh: World, saved: World, db: Db, meta: Meta, r
   if (previous !== revision || !same(world.state, saved.state)) invalid();
 }
 
+/** Loaders read ops of every accepted receipt without a schema pass, which would slow the open. */
+export function readableOps(ops: unknown) {
+  return Array.isArray(ops) && ops.every((o) => typeof o?.op === 'string');
+}
+
 /** The head agrees with the newest receipt: what a cold open keeps of a replay, at the cost of one row.
- * A response that is no decision stays a conflict at its replay (03 section 14). */
+ * A response that is no decision refuses here: its next reader would trip on it as if on a bug of ours. */
 export function newestReceipt(world: World, db: Db, meta: Meta, revision: number) {
   const scope = `story/${meta.lineage_id}/${world.character}`;
   const newest = db.getFirstSync<{ revision: number | null }>(
@@ -59,7 +64,8 @@ export function newestReceipt(world: World, db: Db, meta: Meta, revision: number
   if (!row) return;
   boundCommand(row, world, meta);
   const decision: DecisionResult = JSON.parse(row.response);
-  if (validate('DecisionResult', decision).length || decision.kind !== 'accepted') return;
+  if (validate('DecisionResult', decision).length) invalid();
+  if (decision.kind !== 'accepted') return;
   const times = [
     ...decision.events.map((e) => e.logical_time),
     ...decision.delta.ops.flatMap((o) => (o.op === 'time.advance' ? [o.to] : [])),

@@ -41,7 +41,7 @@ export function chronicle(s: Story): ChronicleEntry[] {
           milestone: d.events.some((e) => e.payload.type === 'story_point_reached'),
         });
     } catch (e) {
-      if (!unreadable(e)) throw e; // an edited older receipt opens; the Journal shows the rest
+      if (!unreadable(e) && !(e instanceof TypeError)) throw e; // an edited older receipt opens; the Journal shows the rest
     }
   }
   return entries;

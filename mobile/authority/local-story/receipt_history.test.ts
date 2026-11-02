@@ -7,6 +7,7 @@ import { coldReopen, elapsedBundle, elapsedHost } from './__tests__/elapsed-host
 import { localSession } from './session.ts';
 import { bundle as deerBundle } from '../../../kernel/ts/test/deer_fixture.ts';
 import { bundle as patrolBundle } from '../../../kernel/ts/test/patrol_fixture.ts';
+import { practicalHost } from './__tests__/practical-host.ts';
 
 // Breaks: the test replay kept by coldReopen stops comparing a replayed decision with the stored one,
 // so every sampler's determinism cover passes vacuously. Open itself accepts the same forgery.
@@ -23,7 +24,7 @@ test('coldReopen replays a lawful save and refuses a receipt its replay does not
   a.sql
     .prepare('UPDATE receipt SET response=? WHERE invocation_id=?')
     .run(
-      JSON.stringify({ ...JSON.parse(row.response as string), narration: [] }),
+      JSON.stringify({ ...JSON.parse(row.response as string), outcome: 'edited' }),
       row.invocation_id as string,
     );
   assert.throws(() => coldReopen(path, bundle), /malformed JSON/);
@@ -103,6 +104,63 @@ for (const [name, at, bundle, directions] of [
     assert.equal(s.failed()?.startOver, true);
     assert.equal(s.startOver(), undefined);
     assert.ok(s.game());
+  });
+
+// Breaks: a shape a loader or narration trips on strands the player on a fault with no way forward.
+test('a null op in any receipt opens or offers Start over', (t) => {
+  for (const [bundle, directions] of [
+    [patrolBundle(), ['north', 'north']],
+    [deerBundle, ['south', 'south', 'west']],
+  ] as const) {
+    const count = played(t, bundle, [...directions]).receipts.length;
+    for (let i = 0; i < count; i++) {
+      const { edit, session } = played(t, bundle, [...directions]);
+      edit(i, (d) => ({ ...d, delta: { ...d.delta, ops: [null] } }));
+      const s = session();
+      assert.ok(s.game() || s.failed()?.startOver, `receipt ${i}: ${s.failed()?.message}`);
+    }
+  }
+});
+
+// Breaks: the skills loader trips on an older receipt's null op: a plain fault, not a refusal.
+test('a null op in an older receipt of a world with skills refuses as corrupt', (t) => {
+  const a = practicalHost();
+  t.after(() => a.sql.close());
+  for (const direction of ['east', 'west']) a.invoke('move', [], { direction });
+  const first = a.sql.prepare('SELECT command_id, response FROM receipt ORDER BY revision').get()!;
+  a.sql
+    .prepare('UPDATE receipt SET response=? WHERE command_id=?')
+    .run(
+      JSON.stringify({ ...JSON.parse(first.response as string), delta: { ops: [null] } }),
+      first.command_id as string,
+    );
+  assert.throws(() => a.reopen(), /save_corrupt/);
+});
+
+// Breaks: a bug of ours reading a lawful save offers Start over, and confirming wipes what an update would open.
+for (const [name, method, sql] of [
+  ['load', 'getAllSync', /FROM receipt/],
+  [
+    'the narration read',
+    'getFirstSync',
+    /SELECT revision, command_id, command, response FROM receipt WHERE scope = ?/,
+  ],
+] as const)
+  test(`a TypeError in ${name} on a lawful save is a plain fault with the bytes kept`, (t) => {
+    const { a, session } = played(t);
+    const bytes = () => JSON.stringify(a.sql.prepare('SELECT * FROM receipt').all());
+    const before = bytes();
+    const real = a.db[method].bind(a.db) as (...v: unknown[]) => unknown;
+    t.mock.method(a.db, method, (q: string, ...v: unknown[]) => {
+      if (sql.test(q)) throw new TypeError('planted');
+      return real(q, ...v);
+    });
+    const s = session();
+    assert.equal(s.game(), undefined);
+    assert.equal(s.failed()?.message, 'planted');
+    assert.equal(s.failed()?.startOver, false);
+    t.mock.restoreAll();
+    assert.equal(bytes(), before);
   });
 
 // Breaks: an older receipt no loader reads opens, then the Journal's read throws in render: no boundary.
