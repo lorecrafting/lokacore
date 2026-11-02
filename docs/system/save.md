@@ -92,7 +92,11 @@ digest, the resolved Command (null for a rejection before one existed), the revi
 for a rejection) and the DecisionResult. Replay (`mobile/authority/local-story/invocation.ts:50`): a known invocation id
 with the same digest version, a response that validates as a DecisionResult and the same
 intent digest replays `{saved, replay: true}` at its revision without deciding again; any
-other known id is `conflict`. A fault gets no receipt (`:174`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
+other known id is `conflict`. A fault gets no receipt (`:174`). The one exception to a receipt
+staying is a [coalesced tick](#durable-elapsed-sessions)'s clock-only row, which the next such tick replaces: the
+absorbed id stops being known, so retrying that original span decides anew and stores a refused
+receipt, not a replay. No production caller repeats a driver span (`elapsed.ts:142` starts each
+at the current clock). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
 Lantern traces and the 11 adverse cases). The latter projects kernel values onto the traces'
 vocabulary by the R6P P4b mapping ([archived ROADMAP](../archive/ROADMAP.md), R6P row) as
 changed by Quest from dialogue: action `activate` is gone; action `talk` with no target is the
@@ -113,7 +117,7 @@ storage unchanged.
 
 `commit` (`commit.ts:27`) writes in one transaction: pending story point reports, and for an
 accepted decision the head (revision, clock, RNG) and the state rows its delta targets wrote,
-then always the receipt. Before `BEGIN` it validates the receipt's response as a DecisionResult,
+then always the receipt, first deleting the row a coalesced tick replaces (`commit.ts:50`). Before `BEGIN` it validates the receipt's response as a DecisionResult,
 the same schema check reopen applies, and throws with nothing written when it is not one
 (loka-kgd.191). `transaction` (`transaction.ts:21`) is `BEGIN IMMEDIATE` … `COMMIT`: true once
 committed; a failed write rolls back and throws; a failed COMMIT, or a ROLLBACK that leaves the
@@ -222,9 +226,10 @@ ADR-075 §4, derived, never authority (`trace.ts:1`): a `trace.run` header per r
 and one `trace.command` entry per committed command (decision compacted to outcome, delta
 digest and RNG state; the commit outcome and committed events), written after the gameplay
 transaction in its own; a write failure is swallowed and caught up later from the receipts
-(`:120`). Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
+(`:124`). A coalesced tick's entry replaces the one it absorbed, in the trace transaction; after a
+death between the two commits, catch-up removes the entry whose receipt is gone. Cap 5000 rows (`:81`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
-newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:130`) and, when the
+newest 1000 records (`:76`): `evaluation.budget_exceeded` (`save.ts:130`) and, when the
 host supplies a clock, each NEW decision's `kernel.decision_latency` (`mobile/authority/local-story/invocation.ts:177`).
 
 ## The session controller and the phone
@@ -276,6 +281,20 @@ pins stay refused; no save is retargeted. A managed elapsed session without cloc
 Accounting uses exact checked integer arithmetic, retaining fractions and existing target debt.
 Active monotonic samples are floored absolute milliseconds; resume credits positive wall gaps
 once and durably rebases negative gaps without rewind.
+
+**Coalesced ticks.** A driver tick whose decision only moved the clock (accepted `elapsed`, one
+`time.advance` op, no events, effects or narration) replaces the newest receipt in the same transaction
+when this process wrote that receipt from such a tick too, for the same run and context, ending where the
+tick starts, with the same RNG (`coalesced` in `delivery.ts`). Anything else in between, a reopen, a
+fault or a failed COMMIT, inserts as before, so a save gains at most one such row per launch or event. The stored row is what one tick over the whole span decides: its span,
+its `elapsedCommandId`, its digest and op, so an hour of idle costs a row per due job or command, not
+per tick. Rows that carry anything are never touched, so the Chronicle and the narration read the same
+receipts. The head revision still moves per tick (`opened_revision`, view tokens and redraws depend on
+it), so accepted receipts may skip revisions, only before a clock-only row. A trusted `story.elapsed`
+receipt is never absorbed, so its retry replays. An absorbed tick is one write transaction: it writes
+no trace entry, and the next trace write, author `trace()` read or reopen catches up (`traceAfter`,
+`trace`, `catchUp`), which drops the absorbed entry and writes the merged one in commit order. Until
+then the stored trace is a replayable prefix.
 
 **Away cap ([owner ruling](../decisions/owner-decision-away-catch-up-cap-2026-11-01.md)).** A wall-gap
 credit (the first capture after open, and every resume) is at most `manifest.time_policy.away_cap_hours`

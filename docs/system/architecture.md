@@ -257,7 +257,8 @@ World, SQLite handle or elapsed entry.
 
 The App owns one AppState listener and one `setTimeout` chain per current Game, registered
 before the font-loading return. Active entry requests resume; catching-up debt yields to the
-next host turn, and ready active sampling uses a 250ms host responsiveness cadence. The first
+next host turn, and ready active sampling uses a 250ms host responsiveness cadence; a tick that
+only moves the clock [extends the newest receipt](save.md#durable-elapsed-sessions). The first
 inactive transition cancels wakeups and requests pause once, without unbounded draining.
 There is no background-execution promise: resume accounts absence from the durable wall anchor.
 Cleanup and Game/session identity invalidate old callbacks; the authority additionally checks

@@ -293,7 +293,9 @@ function replay(path: string | undefined) {
   shown(r);
   const out =
     header(r) +
-    entries.map((e) => played(r, e.data.command, decideReplay(r, e.data.command), false)).join('');
+    entries
+      .map((e) => played(r, e.data.command, decideReplay(r, e.data.command, e.ids.revision), false))
+      .join('');
   if (out !== file) fail(`replay differs from ${path}`);
   process.stdout.write(`replay: ${entries.length} commands identical\n`);
 }

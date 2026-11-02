@@ -459,7 +459,8 @@ run and elapsed payload run before any drawing/execution,
 and selects stepElapsed only on the replay entry. Ordinary commands stay on player step;
 measured=false grants no authority. Generic traces without elapsed keep independent CLI or
 simulator run identity. No clock is sampled. Capped prefixes/nonfresh/fault-rich segment limits
-remain; byte-identical replay and derived receipt recovery remain required.
+remain; byte-identical replay and derived receipt recovery remain required. Each entry is decided at
+its recorded revision: a host's [coalesced ticks](save.md#durable-elapsed-sessions) leave gaps.
 See [save](save.md#durable-elapsed-sessions).
 
 ## Durable corpse creation (M5-B)

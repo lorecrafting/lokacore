@@ -147,6 +147,7 @@ function finish(s: Story, id: Identified): Reply {
     if (!('kind' in command)) traceAfter(s, command, d, at, states);
   };
   if (d.kind === 'fault') {
+    s.idle = undefined; // a fault closes a coalesced span (save.md)
     trace(s.revision, 'unavailable');
     if (next.limit) observe(s.db, budget(s, command_id, next.limit));
     reservations.delete(s);

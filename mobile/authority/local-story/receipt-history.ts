@@ -20,6 +20,16 @@ const invalid = (): never => {
   throw new SyntaxError('malformed JSON: inconsistent accepted history');
 };
 
+/** An elapsed decision whose only change is the clock: all a coalesced receipt may hold. */
+export const onlyClock = (d: DecisionResult): d is Extract<DecisionResult, { kind: 'accepted' }> =>
+  d.kind === 'accepted' &&
+  d.outcome === 'elapsed' &&
+  d.delta.ops.length === 1 &&
+  d.delta.ops[0].op === 'time.advance' &&
+  !d.events.length &&
+  !d.effects.length &&
+  !d.narration?.length;
+
 export function receiptHistory(fresh: World, saved: World, db: Db, meta: Meta, revision: number) {
   if (!Number.isSafeInteger(revision) || revision < 0) invalid();
   let world = { ...fresh, state: { ...fresh.state, rng: meta.seed as World['state']['rng'] } },
@@ -28,8 +38,9 @@ export function receiptHistory(fresh: World, saved: World, db: Db, meta: Meta, r
     `SELECT invocation_id,command_id,actor_id,command,response,revision FROM receipt WHERE scope=? AND json_extract(response,'$.kind')='accepted' ORDER BY revision`,
     `story/${meta.lineage_id}/${saved.character}`,
   )) {
-    if (row.revision !== previous + 1 || row.revision > revision) invalid();
+    if (row.revision <= previous) invalid();
     const { command, decision } = acceptedReceipt(row, saved, meta);
+    if (row.revision !== previous + 1 && !onlyClock(decision)) invalid(); // coalesced ticks' gap
     const replayed =
       command.payload.type === 'elapsed'
         ? stepElapsed(world, command, row.revision)
