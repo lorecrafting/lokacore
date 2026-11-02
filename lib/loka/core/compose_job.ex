@@ -3,11 +3,12 @@ defmodule Loka.Core.ComposeJob do
 
   @doc """
   An encounter round's occurrence clock: its job's due time; an Attack's opening round
-  (loka-kgd.197) runs on a job never scheduled, at the current clock.
+  (loka-kgd.197) runs on a job never scheduled, at the current clock. A pack round's expected row
+  names its round; a later round's missing job has no occurrence (nil, a refusal).
   """
-  def occurrence(state, job_id) do
+  def occurrence(state, %{"job_id" => job_id} = op) do
     case get_in(state, ["jobs", job_id]) do
-      nil -> state["clock"]
+      nil -> if get_in(op, ["expected", "round"]) == 1, do: state["clock"]
       job -> job["due_time"]
     end
   end

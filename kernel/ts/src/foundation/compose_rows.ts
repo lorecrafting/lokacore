@@ -10,10 +10,11 @@ export const get = (o: Json | undefined, k: string): Json | undefined =>
     : undefined;
 export const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
 // An encounter's round occurs at its job's due time; an Attack's opening round (loka-kgd.197)
-// runs on a job never scheduled, at the current clock.
-export function occurrence(state: State, op: { job_id: string }) {
+// runs on a job never scheduled, at the current clock. A pack round's expected row names its round;
+// a later round's missing job has no occurrence (a refusal).
+export function occurrence(state: State, op: { job_id: string; expected?: { round?: number } }) {
   const job = section(state, 'jobs')[op.job_id];
-  return job ? get(job, 'due_time') : state.clock;
+  return job ? get(job, 'due_time') : op.expected?.round === 1 ? state.clock : undefined;
 }
 
 export const containment = (e: string): MutationTarget =>
