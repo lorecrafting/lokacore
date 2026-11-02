@@ -231,7 +231,7 @@ function answer(
   if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
   if (d.kind === 'rejected') {
-    const authored = d.error.message && text(d.error.message.key);
+    const authored = d.error.message && message(d.error.message, text);
     // a refused line, as a refused drag (model.ts `refused`); prose, no colon (Line placement)
     const fallback = refusedSentence(d.error) ?? `You can't do that—${reasonOf(d.error)}.`;
     return { kind: 'refused', reason: reasonOf(d.error), text: authored ?? fallback };
