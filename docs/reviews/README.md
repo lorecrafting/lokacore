@@ -41,7 +41,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: dialogue entry (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-review.md): **APPROVE WITH NOTES**
 - [Dev cheats: second opinion (PR #546, loka-vduxr.6)](2026-11-01-dev-cheats-second-review.md): **APPROVE**
 - [Second review: coalesced clock-only receipts, PR #578 (loka-vduxr.37)](2026-11-01-coalesce-elapsed-second-review.md): **APPROVE WITH NOTES**
-- [Review: clock-only ticks extend one receipt, PR #578 (loka-vduxr.37)](2026-11-01-coalesce-elapsed-review.md): **CHANGES REQUIRED**
+- [Review: clock-only ticks extend one receipt, PR #578 (loka-vduxr.37)](2026-11-01-coalesce-elapsed-review.md): **APPROVE WITH NOTES**
 - [Second-opinion review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-review.md): **APPROVE WITH NOTES**
 - [Second review: cartridge fault batch, PR #545 (loka-vduxr.7, save behaviour)](2026-10-31-loka-vduxr.7-cartridge-faults-second-review.md): **APPROVE WITH NOTES**
