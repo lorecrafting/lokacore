@@ -72,10 +72,17 @@ function skillView(
 function levellingView(world: World, actor: CharacterId) {
   const l = levelling(world, actor);
   const level_up = world.cartridge.world?.levelling?.level_up;
-  if (!l || !level_up) return {};
+  if (!l) return {};
   const { level, experience, from, next, unspent } = l;
   return {
-    levelling: { level, experience, from, ...(next !== undefined && { next }), unspent, level_up },
+    levelling: {
+      level,
+      experience,
+      from,
+      ...(next !== undefined && { next }),
+      unspent,
+      ...(level_up && { level_up }),
+    },
   };
 }
 

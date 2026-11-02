@@ -1378,8 +1378,7 @@
             "level",
             "experience",
             "from",
-            "unspent",
-            "level_up"
+            "unspent"
           ],
           "additionalProperties": false
         },
