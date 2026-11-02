@@ -150,7 +150,7 @@ const { combat: closed, ...afterView } = CombatOneFoeView.view;
 export const Death: StoryObj = {
   ...pageStory(
     { ...CombatOneFoeView, view: afterView },
-    { ended: closed, died: 'fatal', fell: true },
+    { ended: closed as never, died: 'fatal', fell: true },
   ),
   decorators: [(Story) => <Falls>{Story()}</Falls>],
   name: 'Death',
