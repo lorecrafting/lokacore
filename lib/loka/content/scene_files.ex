@@ -1,4 +1,4 @@
-# size: allow 448, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
+# size: allow 450, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
 defmodule Loka.Content.SceneFiles do
   @moduledoc """
   Scene files: `scenes/<key>.scene` (or `dialogues/<key>.scene`) is one dialogue as plain text,
@@ -55,8 +55,9 @@ defmodule Loka.Content.SceneFiles do
       |> linked(key, links)
       |> visible(sections, links)
 
-    bad = unwritten(forms, sections, bad)
     forms = if refused?(bad), do: Enum.map(forms, fn {k, d} -> {k, filled(d)} end), else: forms
+    # Not filled: the same-key JSON may still supply them (Source.supplied/2).
+    bad = unwritten(forms, sections, bad)
     {forms, bad |> Enum.uniq() |> speakerless() |> by_line()}
   end
 

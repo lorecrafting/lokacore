@@ -118,7 +118,8 @@ defmodule Loka.ContentSceneFilesTest do
 
   # Breaks: two `- ~` choices share one key (one is lost, or refused as a repeat), or a `- ~`
   # is refused in dev; a scene with no words before its first choice, or with no choice, lowers
-  # silently and fails later at a dialogue path with no line.
+  # silently and fails later at a dialogue path with no line; or one whose same-key JSON supplies
+  # them is refused, or told the JSON overwrites words the scene never wrote.
   test "`- ~` choices keep apart; a missing prompt or choice is named at npc:", %{tmp_dir: tmp} do
     File.mkdir_p!(Path.join(tmp, "scenes"))
 
@@ -129,6 +130,16 @@ defmodule Loka.ContentSceneFilesTest do
 
     File.write!(Path.join(tmp, "scenes/mute.scene"), "npc: maud\n- Go\n  maud: ok\n")
     File.write!(Path.join(tmp, "scenes/shut.scene"), "\nnpc: maud\nmaud: hello\n")
+    # The same-key JSON supplies what lent and kept leave out: neither is refused, nor an overlap.
+    File.write!(Path.join(tmp, "scenes/lent.scene"), "npc: maud\n- Go\n  maud: ok\n")
+    File.write!(Path.join(tmp, "scenes/kept.scene"), "npc: maud\nmaud: hello\n")
+    File.mkdir_p!(Path.join(tmp, "dialogues"))
+    File.write!(Path.join(tmp, "dialogues/lent.json"), ~s({"prompt":{"prose":"Well?"}}))
+
+    File.write!(
+      Path.join(tmp, "dialogues/kept.json"),
+      ~s({"choices":{"go":{"label":{"prose":"Go"},"narration":{"prose":"Off."}}}})
+    )
 
     {files, diags} = Source.load(tmp)
 
