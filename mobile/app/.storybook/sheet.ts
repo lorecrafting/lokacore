@@ -55,7 +55,7 @@ try {
     (e) => e.type === 'story' && e.title !== 'Live',
   );
   rmSync(out, { recursive: true, force: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ channel: 'chrome' });
   // The preview's verdict per story: storyFinished's status, or the first error.
   const watch = () => {
     const w = window as never as {

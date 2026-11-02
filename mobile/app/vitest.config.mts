@@ -16,7 +16,8 @@ export default defineConfig({
     browser: {
       enabled: true,
       headless: true,
-      provider: playwright(),
+      // Stable Google Chrome: Playwright's bundled Chromium lags Chrome's security fixes (loka-kknxt).
+      provider: playwright({ launchOptions: { channel: 'chrome' } }),
       instances: [{ browser: 'chromium' }],
     },
   },

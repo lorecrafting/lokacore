@@ -72,7 +72,7 @@ try {
     )
       break;
   }
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ channel: 'chrome' });
   try {
     const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
     const story = 'book-entityline--item';
