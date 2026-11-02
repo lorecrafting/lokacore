@@ -176,16 +176,16 @@ test('held Read survives the authored 68350 to 68400 pulse with authority freshn
   assert.equal(a.game.view().view.time, 68350);
   const control = a.button('Read the plaque');
   const token = control.token;
-  const count = receipts(a.sql);
   a.clock.wall += 1000;
   a.clock.mono += 1000;
   assert.equal(a.game.pulse().kind, 'ready');
   assert.equal(a.game.view().view.time, 68400);
+  const count = receipts(a.sql); // the tick above extended the newest receipt
   assert.notEqual(a.game.view().token, token);
   assert.equal(a.game.invoke(intentOf(control)).kind, 'stale_view');
   const before = a.state();
   a.book.press(control);
-  assert.equal(receipts(a.sql), count + 2);
+  assert.equal(receipts(a.sql), count + 1);
   assert.equal(a.book.screen().detail(plaque).at(-1), PLAQUE);
   assert.equal(a.book.screen().view.time, 68400);
   assert.deepEqual(a.state(), before);
