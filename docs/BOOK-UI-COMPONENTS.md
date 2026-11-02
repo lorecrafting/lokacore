@@ -211,6 +211,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
 | `Storm` | `book/Storm.tsx` | Storm |
 | `Text` | `book/Text.tsx` | Note |
+| `Unavailable` | `book/Unavailable.tsx` | ActionCard |
 | `UnderInk` | `book/UnderInk.tsx` | UnderInk |
 | `ActionCard` | `book/actions.tsx` | ActionCard |
 | `PickLists` | `book/actions.tsx` | PickList |

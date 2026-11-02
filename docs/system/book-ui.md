@@ -228,12 +228,12 @@ a [shop line](#npc-dialogue-and-action-details) not afforded, a blocked exit, a 
 [Action card](../BOOK-UI-COMPONENTS.md) reading its plain label, never `label: reason`. A permanent
 refusal, one the player cannot change, hides its card: its reason is on the hidden list beside
 `reasonSentence` ([reasons.ts](../../mobile/app/book/reasons.ts), `hides`; today an Attack on a person who
-cannot be hurt), and the card returns as its ordinary card once the action turns available. A worn
+cannot be hurt), and the card returns as its ordinary card once the action turns available. An Attack in a sanctuary is the deliberate exception (owner, 2026-11-01): the player cannot change it, but it teaches a rule of the world and a vanishing core verb can look like a bug, so on an attackable NPC's page, sitting or standing, the card stays gray with one authored sentence, the text key `combat.sanctuary`, the same for every sanctuary, as its hint and its logged refusal. A worn
 item's Take (`not_present`) stays hidden as before. The shown card is
 exposed as disabled, stays focusable and pressable, and carries its reason sentence as its hint; once
 pressed its accessible name is its shown text, the label then the reason sentence (label in name), and the
 hint is dropped, so the reason is read once.
-A press sends nothing to the engine: the card grays (the Note style) and shows the reason beneath
+A press sends nothing to the engine (a sanctuary's Attack excepted, so its refusal is logged): the card grays (the Note style) and shows the reason beneath
 the label as one sentence (`reasonSentence`:
 `It's too heavy to carry.`, `You can't afford it.`, `You can't do that here.`, with no reason
 `You can't do that.`, otherwise the [novel-prose](#line-placement) fallback), which its own polite region reads once. The card follows
@@ -739,7 +739,7 @@ form on every press; its " (N times)" count is visual only ([line placement](#li
 reads "<reason>, <sentence>". History, redraws, page turns and a reopen are never read again. A
 repeated line is read again. Condition changes arrive as log narration, so they are read the same
 way. The region is text only, so motion settings do not apply to it. The one exception is an
-[unavailable card](#unavailable-actions)'s own polite region: its press sends nothing and writes no log line, so it reads its sentence there.
+[unavailable card](#unavailable-actions)'s own polite region: its press sends nothing and writes no log line, so it reads its sentence there. A sanctuary's gray Attack alone sends its press: the engine refuses it, the world does not change, and the refused line in the log tells the player and is read, not the card's region.
 
 ## Effects, sound and haptics
 

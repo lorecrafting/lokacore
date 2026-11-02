@@ -16,6 +16,9 @@ HOLDERS = {
     "reward_storage_hash": ["player_corpse", "rat_corpse", "reward_chest", "trunk"],
 }
 
+# Text keys the frozen input predates (loka-g5hh.2.9).
+TEXT = {"cartridge_sampler_hash": {"combat.sanctuary": "Placeholder for combat.sanctuary."}}
+
 def keep(o, n):  # n's content in o's key order (new keys last), so a rerun rewrites nothing
     if isinstance(o, dict) and isinstance(n, dict):
         return {k: keep(o[k], n[k]) if k in o else n[k] for k in [*(k for k in o if k in n), *(k for k in n if k not in o)]}
@@ -30,6 +33,7 @@ for name, holders in HOLDERS.items():
     for holder in holders:
         item = next(i for i in value["items"].values() if i["key"] == holder)
         item["container"] = True
+    value["text"].update(TEXT.get(name, {}))
     canonical = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     fixture.update(description="Current controlled receptacle derivative of " + name + "; literal holder list in test/loka/cartridge_containers_hash.py; historical input remains frozen.", value=value, canonical=canonical, sha256=hashlib.sha256(canonical.encode()).hexdigest())
     out = path.with_name("containers_" + path.name)
