@@ -155,7 +155,10 @@ export const Death: StoryObj = {
   decorators: [(Story) => <Falls>{Story()}</Falls>],
   name: 'Death',
   play: async ({ canvas, canvasElement }) => {
-    await expect(canvas.getByRole('button', { name: 'Let go' })).toBeVisible();
+    // the foot fades in (useDry), so wait for it
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Let go' })).toBeVisible(), {
+      timeout: 3000,
+    });
     await expect(canvas.queryByRole('button', { name: 'Back to World' })).toBeNull();
     const layers = () => [...canvasElement.querySelectorAll('[aria-hidden="true"]')];
     const at = (e: Element) => Number(getComputedStyle(e).opacity);
