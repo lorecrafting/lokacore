@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { clockWords, shown, type Canon } from './shown.ts';
+import { clockWords, factRows, shown, type Canon } from './shown.ts';
 
 const ref = (kind: string, key: string) => ({
   cartridge_id: 'c',
@@ -93,4 +93,37 @@ test('the clock reads in words', () => {
   // Break: a calendar without day or hour printing "undefined".
   const partial = { subdivision: 0, season: 'autumn' } as GameView['calendar_status'];
   assert.equal(clockWords({ time: 3725, calendar: partial }), '1h 02m');
+});
+
+// Breaks: a held fact matched by short key across cartridges (an extended cartridge's same key);
+// two subjects' rows of one fact collapsed into one; an unset declared fact dropped or shown
+// without its default; a held fact nothing declares lost.
+test('facts: every declared one by short key, unset at its default, each held row kept', () => {
+  const held = (c: string, key: string, subject_id?: string) =>
+    JSON.stringify({
+      fact: { ...ref('fact', key), cartridge_id: c },
+      scope: { kind: 'player' },
+      subject_id,
+    });
+  const declared = {
+    'c@1:fact/met': { key: 'met', value_type: { default: false } },
+    'base@1:fact/met': { key: 'met', value_type: { default: 0 } },
+  };
+  const rows = factRows(
+    {
+      [held('c', 'gone')]: 'x',
+      [held('base', 'met', 'npc1')]: 2,
+      [held('base', 'met', 'npc2')]: 7,
+    },
+    declared,
+  );
+  assert.deepEqual(
+    rows.map(({ id, key, value, set }) => [id, key, value, set]),
+    [
+      ['c@1:fact/met', 'met', false, false],
+      ['base@1:fact/met', 'met (npc1)', 2, true],
+      ['base@1:fact/met', 'met (npc2)', 7, true],
+      ['c@1:fact/gone', 'gone', 'x', true],
+    ],
+  );
 });

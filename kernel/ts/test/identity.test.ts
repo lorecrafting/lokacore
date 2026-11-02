@@ -95,7 +95,7 @@ test('the stranger is unnamed until it gives its name', () => {
   assert.deepEqual(names(w, 'stranger'), ['npc.stranger.short', 'npc.stranger.short']);
   w = play(w, { type: 'talk', target_id: npc(w, 'stranger') }).w;
   const [continuation_id] = pending(w, w.character)!;
-  const r = play(w, { type: 'choose', choice_id: 'ask_name', continuation_id });
+  const r = play(w, { type: 'choose', choice_id: 'ask_their_name', continuation_id });
   const changed = r.d.events.find((e: any) => e.payload.type === 'fact_changed')!.payload as any;
   assert.equal(changed.subject_id, npc(w, 'stranger'));
   assert.deepEqual(names(r.w, 'stranger'), [

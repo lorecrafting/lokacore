@@ -11,7 +11,7 @@ import { Input } from './components/ui/input.tsx';
 import { Separator } from './components/ui/separator.tsx';
 
 export const Heading = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+  <h2 className="mb-2 flex items-center gap-1.5 font-caps text-xs tracking-caps text-muted-foreground">
     {children}
   </h2>
 );
@@ -27,7 +27,7 @@ export function Compile({ said, compiled, lint, state, send }: { said?: string[]
         ) : !compiled ? (
           <Badge variant="destructive">not compiled</Badge>
         ) : (
-          <Badge className="bg-emerald-600 text-white dark:bg-emerald-500">compiled</Badge>
+          <Badge variant="outline">compiled</Badge>
         )}
         {placeNote ? <span className="truncate text-muted-foreground" title={placeNote}>{placeNote}</span> : null}
       </div>
@@ -42,9 +42,15 @@ export function Compile({ said, compiled, lint, state, send }: { said?: string[]
         </pre>
       ) : null}
       {lint === undefined ? null : lint.length ? (
-        <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-xs">
-          {lint.join('\n')}
-        </pre>
+        // Folded: lint notes are advice, and an open list pushed the tabs below the fold.
+        <details className="mt-1 text-xs text-muted-foreground">
+          <summary className="cursor-pointer">
+            {lint.length} lint {lint.length === 1 ? 'note' : 'notes'}
+          </summary>
+          <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-xs text-foreground">
+            {lint.join('\n')}
+          </pre>
+        </details>
       ) : (
         <p className="mt-1 text-xs text-muted-foreground">lint clean</p>
       )}
@@ -138,6 +144,9 @@ function Checkpoints({ state, send }: { state?: State; send: Send }) {
           Save
         </Button>
       </form>
+      {name && !named ? (
+        <p className="mt-1 text-xs text-destructive">A name is up to 64 lower-case letters, digits, - and _, starting with a letter or digit.</p>
+      ) : null}
       {note ? <p className="mt-1 text-xs text-destructive">{note}</p> : null}
       <CheckpointList names={names} jump={jump} />
     </div>

@@ -11,6 +11,7 @@ import {
   type Target,
 } from '../../../kernel/ts/play/numbers.ts';
 import { numbers } from './author.ts';
+import { shortName } from '../../../mobile/app/author/shown.ts';
 import { Button } from './components/ui/button.tsx';
 import { Heading } from './sections.tsx';
 
@@ -32,7 +33,9 @@ const Cols = ({ rows }: { rows: string[][] }) => (
 
 const Fight = ({ target }: { target: Target }) => (
   <div>
-    <p className="font-mono text-xs break-all">{target.target}</p>
+    <p className="font-mono text-xs" title={target.target}>
+      {shortName(target.target)}
+    </p>
     <p className="text-muted-foreground text-xs">{verdict(target)}</p>
     <Cols
       rows={[
@@ -55,7 +58,9 @@ const Pools = ({ report }: { report: PoolsReport }) => {
       </p>
       {report.pools.map((p) => (
         <div key={p.pool}>
-          <p className="font-mono text-xs break-all">{p.pool}</p>
+          <p className="font-mono text-xs" title={p.pool}>
+            {shortName(p.pool)}
+          </p>
           <p className="text-xs">
             {p.start} to {p.end}, lowest {p.lowest}, max {p.maximum}.{' '}
             {p.empty
@@ -81,7 +86,7 @@ const Levels = ({ rows }: { rows: LevelRows }) =>
           String(r.experience),
           String(r.step),
           String(r.points),
-          r.kills.map((k) => `${k.npc}: ${k.needed ?? 'no XP'}`).join(', ') || 'no kill pays XP',
+          r.kills.map((k) => `${shortName(k.npc)}: ${k.needed ?? 'no XP'}`).join(', ') || 'no kill pays XP',
         ]),
       ]}
     />

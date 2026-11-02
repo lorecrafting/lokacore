@@ -7,6 +7,7 @@ type Ref = { cartridge_id: string; cartridge_version: string; kind: string; key:
 export type Canon = {
   scripted_actions?: Record<string, { key: string; target?: { kind: string; room?: Ref } }>;
   dialogues?: Record<string, { key: string; npc: Ref }>;
+  facts?: Record<string, { key: string; value_type: { default?: unknown } }>;
 };
 const refString = (r: Ref) => `${r.cartridge_id}@${r.cartridge_version}:${r.kind}/${r.key}`;
 
@@ -65,4 +66,25 @@ export function clockWords({
   return [`day ${day}, hour ${hour}`, season, solar, lunar, tide, weather]
     .filter(Boolean)
     .join(', ');
+}
+
+/** `cellar_sampler@0.0.11:resource/hp` as `hp`: the name a writer typed. */
+export const shortName = (id: string) => id.slice(id.indexOf('/') + 1);
+
+/** Every held fact row by its short key (a per-subject one also names its subject), each declared fact
+ * never held at its declared default, then held rows nothing declares. Held rows are keyed by JSON
+ * `{fact: Ref, scope, subject_id?, with_id?}`; `id` is the full fact id, `row` keeps them apart. */
+export function factRows(held: Readonly<Record<string, unknown>>, declared: Canon['facts'] = {}) {
+  const rows = Object.entries(held).map(([row, value]) => {
+    const k = JSON.parse(row) as { fact: Ref; subject_id?: string; with_id?: string };
+    const id = refString(k.fact);
+    const of = [k.subject_id, k.with_id].filter(Boolean).join(', ');
+    return { row, id, key: of ? `${k.fact.key} (${of})` : k.fact.key, value, set: true };
+  });
+  const order = Object.keys(declared);
+  const rank = (id: string) => (order.includes(id) ? order.indexOf(id) : order.length);
+  for (const [id, f] of Object.entries(declared))
+    if (!rows.some((r) => r.id === id))
+      rows.push({ row: id, id, key: f.key, value: f.value_type.default, set: false });
+  return rows.sort((a, b) => rank(a.id) - rank(b.id));
 }

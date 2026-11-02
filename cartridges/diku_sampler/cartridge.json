@@ -5,7 +5,7 @@
   "title": "Diku Sampler",
   "requires": {
     "kernel_api": {
-      "at_least": "1.67",
+      "at_least": "1.150",
       "below": "2.0"
     },
     "content_schema": 1,

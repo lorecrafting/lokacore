@@ -4,17 +4,18 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { Step as PlaceStep } from '../../../mobile/app/author/place.ts';
 import { askTrace } from './ask_trace.ts';
-import type { shown } from '../../../mobile/app/author/shown.ts';
+import type { factRows, shown } from '../../../mobile/app/author/shown.ts';
 
 export const BOOK = `http://localhost:${import.meta.env.VITE_LOKA_PREVIEW_PORT ?? 19006}`;
 export type Step = PlaceStep;
 // The real shapes, so a field the page renders wrongly fails tsc here (a hand copy once called a Ref a string).
 export type State = {
   hash: string;
+  title: string;
   placeNote: string;
   refused?: number;
   steps: Step[];
-  facts: Record<string, unknown>;
+  facts: ReturnType<typeof factRows>;
   shown: ReturnType<typeof shown>;
 };
 export type Line = { key?: string; words: string };

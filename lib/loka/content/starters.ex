@@ -41,7 +41,7 @@ defmodule Loka.Content.Starters do
          {:ok, context} <- context(dir, needs),
          {:ok, context} <- placed(context, dir, kind, name, from) do
       files = with_capabilities(make.(name, context), caps)
-      own = if !from, do: "#{kind}/#{name}.json"
+      own = if !from, do: "#{dir_of(kind)}/#{name}.json"
       put(dir, files |> kept_lines(dir, kind) |> with_layout(dir, context, name), own, hook)
     end
   catch
@@ -54,6 +54,10 @@ defmodule Loka.Content.Starters do
     declared = capabilities(caps)
     Map.update(files, "cartridge.json", declared, &Merge.merge(&1, declared))
   end
+
+  # A cutscene is a `scenes/` file; `scene` would name the writer's `.scene` format.
+  defp dir_of("cutscene"), do: "scenes"
+  defp dir_of(kind), do: kind
 
   @doc "The kinds `write/4` knows, sorted (the guide's coverage table lists each)."
   def kinds, do: ["cartridge" | Map.keys(Templates.kinds())] |> Enum.sort()

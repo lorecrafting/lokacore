@@ -20,7 +20,7 @@ import {
   type Place,
   type Step,
 } from './place.ts';
-import { shown, type Canon } from './shown.ts';
+import { factRows, shown, type Canon } from './shown.ts';
 
 export { frozenClock } from './place.ts';
 
@@ -125,7 +125,7 @@ export function played(game: Opened | undefined) {
 // Moves both host clocks forward by game minutes at the cartridge's rate, so the kernel's own
 // elapsed path delivers the time (none before D11 selection).
 // Lazy: App.tsx imports this module in a release too, which must not parse the chapter for it.
-type Parsed = Canon & { manifest: { time_policy?: { rate: number } } };
+type Parsed = Canon & { manifest: { title: string; time_policy?: { rate: number } } };
 let parsed: Parsed | undefined;
 const canon = () => (parsed ??= JSON.parse(chapter.canonical) as Parsed);
 function advance(minutes: number, game: Opened) {
@@ -170,10 +170,11 @@ let panel: { to: Window; origin: string } | undefined;
 const tell = (sent: object) => panel?.to.postMessage({ loka: 'author', ...sent }, panel.origin);
 const stateOf = (game: Opened) => ({
   hash: chapter.sha256,
+  title: canon().manifest.title,
   placeNote,
   refused,
   steps: place.steps,
-  facts: game.facts(),
+  facts: factRows(game.facts(), canon().facts),
   shown: shown(game.view().view, played(game)!.text, canon(), game.entityIds(), game.roomIds()),
 });
 // Alt-click (Option-click) on a Book line: the panel opens its source in the owner's editor.
