@@ -58,12 +58,12 @@ test('credit delivery rejects counterfeit attribution and missing fatal/corpse p
   assert.deepEqual(deathCredit(unrun, event, delta.ops, events, opener), []);
   // Under initiative only an Attack root opens: a wait naming the death's cause does not.
   const combat = { ...world.cartridge.world!.combat, initiative: true };
-  const diku = {
+  const diku: typeof world = {
     ...unrun,
     cartridge: { ...world.cartridge, world: { ...world.cartridge.world!, combat } },
   };
-  assert.equal(deathCredit(diku as never, event, delta.ops, events, opener).length, 1);
-  assert.deepEqual(deathCredit(diku as never, event, delta.ops, events, root), []);
+  assert.equal(deathCredit(diku, event, delta.ops, events, opener).length, 1);
+  assert.deepEqual(deathCredit(diku, event, delta.ops, events, root), []);
   assert.deepEqual(deathCredit(world, event, delta.ops, [], root), []); // no attack_result, no cast
   const noLoss = delta.ops.map((o) => (o.op === 'resource.adjust' ? { ...o, from: 0 } : o));
   assert.deepEqual(deathCredit(world, event, noLoss, events, root), []);
