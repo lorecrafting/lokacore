@@ -780,7 +780,7 @@ wash and removes the swell; Flashes off removes both, leaving the value, thud an
 
 **Level wash.** A level washes the paper once under the ink in the gilt colour, on whatever page shows, with no swell. It covers what `Page` draws, foot included; the running head and status row sit outside `Page` and stay unwashed, on every page. It shares the Flash limit with the blow wash; when both land together the level has it and the blow keeps value, thud and haptic. Reduced motion halves it; Flashes off removes it, leaving the gilt line, sound, haptic and experience rule.
 
-**A level is never dropped.** A level arriving while an S3 plays takes the pending slot from any other S3. A level in the same view as a foe falling leads: its note and haptic come first, the fight-won haptic yields, and the fanfare waits out the settle hold. The engine's level line comes before a `level_reached` reaction's own line, so an ability is named after the level that opened it.
+**A level is never dropped.** A level arriving while an S3 plays takes the pending slot from any other S3. A level in the same view as a foe falling leads: its note and haptic come first, the fight-won haptic yields, and the fanfare waits out the settle hold. The engine's level line comes before a `level_reached` reaction's own line, so an ability is named after the level that opened it. Not yet built: a chapter card or a page turn in the same beat still drops a pending level, and a page curl can drop its haptic.
 
 **Flash limit.** At most one full-page luminance change per second, never three in any second; a
 later blow or level in that second keeps the value, thud and haptic, so a flurry never peaks twice in a second.
