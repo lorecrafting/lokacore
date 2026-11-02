@@ -17,9 +17,10 @@ import { commandOf, other } from './buttons.ts';
 import { LABEL } from './labels.ts';
 type Say = (key: string) => string;
 
-export type Section = 'character' | 'carrying' | 'map' | 'journal' | 'settings';
+export type Section = 'character' | 'skills' | 'carrying' | 'map' | 'journal' | 'settings';
 const SECTIONS: [Section, string][] = [
   ['character', LABEL.character],
+  ['skills', LABEL.skills],
   ['carrying', LABEL.inventory],
   ['map', LABEL.map],
   ['journal', LABEL.journal],
