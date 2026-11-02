@@ -1,4 +1,4 @@
-# size: allow 415, scene-triggered chapter point refs join dialogue trigger checks
+# size: allow 425, scene-triggered chapter point refs join dialogue trigger checks
 defmodule Loka.Content.Dialogues do
   @moduledoc "Compiled dialogue roles, consequences, riddle and chapter trigger checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -136,12 +136,24 @@ defmodule Loka.Content.Dialogues do
   # point's marker fact story_point_<key> fits a Key (key at most 52).
   defp story_points(defs, ctx) do
     for {_, {rel, steps, p}} <- defs["story_point"],
-        d <- owned(at(rel, steps), "story_point_reached", ctx.events) ++ outcomes(p, ctx),
+        d <-
+          owned(at(rel, steps), "story_point_reached", ctx.events) ++
+            outcomes(p, at(rel, steps), ctx),
         do: d
   end
 
-  defp outcomes(p, ctx) do
-    for {_, t} <- p["outcomes"], {true, d} <- [site(t, p["key"], ctx)], do: d
+  defp outcomes(p, path, ctx) do
+    case for {_, t} <- p["outcomes"], {true, d} <- [site(t, p["key"], ctx)], do: d do
+      [] -> forked(p, path, ctx)
+      refused -> refused
+    end
+  end
+
+  # With no quest to end them, each outcome's `once` choice stays open after the other is taken.
+  defp forked(p, path, ctx) do
+    if map_size(p["outcomes"]) > 1 and Enum.any?(Map.values(p["outcomes"]), &questless?(&1, ctx)),
+      do: [diag("OUTCOME_MISMATCH", path, %{"why" => "story_point_two_outcomes"})],
+      else: []
   end
 
   defp site(%{"scene" => s}, key, ctx) do

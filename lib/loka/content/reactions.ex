@@ -1,3 +1,4 @@
+# size: allow 305, one clause per reaction op; the consequence table reads together
 defmodule Loka.Content.Reactions do
   @moduledoc """
   Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14):
@@ -128,6 +129,15 @@ defmodule Loka.Content.Reactions do
       _ ->
         []
     end
+  end
+
+  # A subject-bound event delivers to its subject, or past an NPC subject to the doer or the root
+  # actor; a tick's event has only the root. Only a player's own act names whose talk to close.
+  @own_acts ~w(action_completed check_failed check_passed choice_opened choice_resolved quest_resolved scene_ended story_point_reached)
+  defp consequence(rel, {%{"op" => "end_talk"}, i}, on, _) do
+    if on["event"] in @own_acts,
+      do: [],
+      else: [diag("OUTCOME_MISMATCH", at(rel, ["steps", i, "op"]), %{"why" => "end_talk_event"})]
   end
 
   # loka-kgd.150.2: only a trigger whose subject resolves to a character activates.

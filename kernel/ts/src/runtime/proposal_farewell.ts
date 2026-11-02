@@ -6,11 +6,17 @@ import { anyPending as pending, parted } from '../mechanics/dialogue/selection.t
 
 // end_talk closes a row its own proposal may have opened: one writer group per continuation.
 export function closedByOpener(ops: readonly DeltaOp[], own: readonly DeltaOp[]) {
+  const opened = openers(ops);
   return own.map((o) => {
-    if (o.op !== 'choice.close') return o;
-    const open = ops.find((p) => p.op === 'choice.open' && p.continuation_id === o.continuation_id);
-    return open ? { ...o, writer_group: open.writer_group } : o;
+    const writer_group = o.op === 'choice.close' ? opened.get(o.continuation_id) : undefined;
+    return writer_group === undefined ? o : { ...o, writer_group };
   });
+}
+
+function openers(ops: readonly DeltaOp[]) {
+  const opened = new Map<string, number>();
+  for (const o of ops) if (o.op === 'choice.open') opened.set(o.continuation_id, o.writer_group);
+  return opened;
 }
 
 // dialogue@1: each conversation whose actor and speaker no longer share a room once the proposal
@@ -20,8 +26,7 @@ export function farewell(
   p: { world: World; ops: DeltaOp[]; group: number },
   now: () => World | Admitted,
 ): Admitted | undefined {
-  const opened = new Map<string, number>();
-  for (const o of p.ops) if (o.op === 'choice.open') opened.set(o.continuation_id, o.writer_group);
+  const opened = openers(p.ops);
   if (!opened.size && !pending(p.world)) return;
   const at = now();
   if (!('cartridge' in at)) return at;

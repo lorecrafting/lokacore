@@ -130,6 +130,37 @@ defmodule Loka.ContentDialogueSittingTest do
     assert Enum.any?(b, &(&1["code"] == "DUPLICATE_DEFINITION")), inspect(b)
   end
 
+  # Breaks: a rule on an event about someone else closes the acting player's talk instead.
+  test "end_talk is refused on an event that is not the player's own act", %{dir: dir} do
+    caps = {"cartridge.json", &put_in(&1, ["requires", "capabilities", "reaction"], 1)}
+
+    for on <- [%{"event" => "spoken"}, %{"event" => "clock_hour"}] do
+      rule = %{"on" => on, "steps" => [%{"op" => "end_talk"}]}
+      refusal(dir, [caps, {"reactions/cut.json", rule}], "end_talk_event")
+    end
+  end
+
+  # Breaks: the guide's example stops compiling, or the guide stops showing it.
+  test "the guide's end_talk example compiles as written", %{dir: dir} do
+    guide = File.read!("docs/guides/writing-the-game.md")
+    [_, section] = String.split(guide, "## Cut a talk short\n")
+    [_, fence] = Regex.run(~r/^```json\n(.*?)^```$/ms, section)
+    caps = {"cartridge.json", &put_in(&1, ["requires", "capabilities", "reaction"], 1)}
+    line = {"text.json", &put_in(&1, ["narration.maud_talk.cut_short"], "x")}
+    rule = {"reactions/cut.json", JSON.decode!(fence)}
+    assert {:ok, bytes, _} = Loka.ContentSource.compile(dir, [caps, line, rule])
+    assert bytes =~ ~s("op":"end_talk")
+  end
+
+  # Breaks: two outcomes of a quest-less point build, so one player reaches the point twice.
+  test "a story point with no quest takes one outcome", %{dir: dir} do
+    point = fn o -> Map.merge(@plain, %{"story_point" => "met/" <> o, "once" => true}) end
+    two = choices(%{"a" => point.("a"), "b" => point.("b"), "c" => @plain})
+    refusal(dir, [two], "story_point_two_outcomes")
+    one = choices(%{"a" => point.("a"), "c" => @plain})
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [one])
+  end
+
   # Breaks: the line lowers to the wrong field or to `once`, both lines on one choice pass, or the
   # line outside a choice is not refused.
   test "`once: sitting` lowers to sitting and refuses its neighbours" do
@@ -151,5 +182,13 @@ defmodule Loka.ContentDialogueSittingTest do
       assert {:error, diags} = Loka.ContentSource.compile(dir, [])
       assert Enum.any?(why(diags), &(&1 in ["bad_once", "once_outside_choice"])), inspect(diags)
     end
+
+    # Linked rows carry no memory: the row a nested list opens never comes back on itself.
+    nested =
+      "- Stay\n  elder: words\n  - On\n    once: sitting\n    elder: words\n  - Off\n    elder: words\n"
+
+    File.write!(file, scene.(nested <> "- Go\n  elder: words\n"))
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [])
+    assert "sitting_no_return" in why(diags), inspect(diags)
   end
 end

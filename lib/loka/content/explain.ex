@@ -1,4 +1,4 @@
-# size: allow 333, one row per refusal a writer can meet; the table reads together
+# size: allow 335, one row per refusal a writer can meet; the table reads together
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -127,6 +127,8 @@ defmodule Loka.Content.Explain do
          sitting_no_return | A `sitting` choice only goes away when the talk comes back to these choices, and this choice or dialogue never does: it has a `then`, a story point, a `once`, a check or a patrol, a quest or riddle, is the only choice, is a `then` target, or sits in a scene with nested choices. | Remove `sitting`, or move the choice to a dialogue nothing leads to.
          chapter_no_quest | A chapter counts its story point by a dialogue's quest, and this choice's dialogue has no quest, so the chapter would never come. | Give the dialogue a `quest`, or point the chapter at a story point reached by a quest or a scene.
          story_point_repeats | This choice has no quest to end it, so the player could reach the story point again on every Talk. | Add `once` under the choice in a scene; in JSON, `"once": true`.
+         story_point_two_outcomes | This story point has two outcomes on choices with no quest, so taking one leaves the other open and the point could come twice. | Give the dialogue a `quest` that ends it, or give the point one outcome.
+         end_talk_event | `end_talk` closes the talk of the player who acted, and this event may have no such player: it may be about an NPC or come with the clock. | React to `choice_resolved`, `choice_opened`, `check_passed`, `check_failed`, `action_completed`, `quest_resolved`, `scene_ended` or `story_point_reached`.
          story_point_then | An answer that reaches a story point ends the talk, so it cannot also have a `then` or lead to nested choices. | Remove the `then`, or put the story point on a choice that has none.
          gift_repeats | Picking this choice gives or starts something, and the dialogue can come back to it, so the player could take it again. | Add `once` under the choice in a scene; in JSON, gate it on a fact its steps set.
          then_into | A `then` cannot lead to `{target}`, which has a `{part}`: that dialogue only opens its own way. | Remove the `then`, or remove `{part}` from `{target}`.

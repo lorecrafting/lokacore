@@ -185,7 +185,7 @@ A `.cut` file cannot say what starts it, and a cutscene with no trigger never pl
 
 `bridge_done` is a story point, and it has no file of its own: a choice names it. Any choice with no
 `then` may, with or without a quest; reaching the point ends the talk, so the cutscene never plays
-over open choices. Without a quest, write `once` under it, or the build refuses it. Take a scene
+over open choices. Without a quest, write `once` under it and give the point one outcome, or the build refuses it. Take a scene
 whose every choice ends the quest:
 
 ```
@@ -208,7 +208,7 @@ and add `dialogues/<key>.json` beside it, with the point and the outcome this ch
 ```
 
 To start it from an ordinary choice, leave the `quest:` lines out and write `once` under the
-choice: with no quest to end it, the build refuses a choice that could reach the point twice.
+choice: with no quest to end it, the build refuses a choice that could reach the point twice, and a second outcome of that point.
 
 Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file. A `~`
 holds the place of words only: in a `sets:` or `quest:` line it is listed too, but the compile
@@ -222,7 +222,7 @@ are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
 
 ## Cut a talk short
 
-A reaction's `end_talk` step closes the open talk of whoever the event is about, as if they had left: react to the player's own act, not to someone else's arrival. Nothing else
+A reaction's `end_talk` step closes the open talk of the player who acted, as if they had left. The rule's `on` must be that player's own act (`choice_resolved`, `choice_opened`, `check_passed`, `check_failed`, `action_completed`, `quest_resolved`, `scene_ended` or `story_point_reached`); the build refuses anything else. Nothing else
 changes, and with no talk open it does nothing. Put the words in a `narrate` step before it:
 `reactions/<key>.json`:
 
