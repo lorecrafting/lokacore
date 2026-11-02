@@ -292,8 +292,9 @@ per tick. Rows that carry anything are never touched, so the Chronicle and the n
 receipts. The head revision still moves per tick (`opened_revision`, view tokens and redraws depend on
 it), so accepted receipts may skip revisions, only before a clock-only row. A trusted `story.elapsed`
 receipt is never absorbed, so its retry replays. An absorbed tick is one write transaction: it writes
-no trace entry, and the next trace write or reopen catches up (`traceAfter`, `catchUp`), which drops the
-absorbed entry and writes the merged one in commit order. Until then the trace is a replayable prefix.
+no trace entry, and the next trace write, author `trace()` read or reopen catches up (`traceAfter`,
+`trace`, `catchUp`), which drops the absorbed entry and writes the merged one in commit order. Until
+then the stored trace is a replayable prefix.
 
 **Away cap ([owner ruling](../decisions/owner-decision-away-catch-up-cap-2026-11-01.md)).** A wall-gap
 credit (the first capture after open, and every resume) is at most `manifest.time_policy.away_cap_hours`

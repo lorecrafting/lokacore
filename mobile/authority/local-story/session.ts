@@ -97,12 +97,11 @@ export function openGame(db: Db, bundled: Bundled, host: HostPart) {
 }
 const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
 type Open = Extract<ReturnType<typeof openStory>, { kind: 'open' }>;
-const TRACE_ROWS = 'SELECT record FROM trace ORDER BY rowid'; // the author column replays these
-const authorTools = (story: Open, db: Db) => ({
+const authorTools = (story: Open) => ({
   entityIds: () => story.world().entityIds,
   roomIds: () => story.world().roomIds,
   facts: () => story.world().state.facts ?? {},
-  trace: () => db.getAllSync<{ record: string }>(TRACE_ROWS).map((r) => r.record),
+  trace: () => story.trace(), // the author column replays these
 });
 function managedGame(story: Open, cartridge: Cartridge, db: Db) {
   const held: SessionAttempt = { catching: false, sent: lastId(db) };
@@ -135,7 +134,7 @@ function managedGame(story: Open, cartridge: Cartridge, db: Db) {
   return Object.assign(game, {
     newGame: story.newGame,
     pulse: pulseOf(story, projection, before, emit, pending, attempt),
-    ...authorTools(story, db),
+    ...authorTools(story),
   });
 }
 

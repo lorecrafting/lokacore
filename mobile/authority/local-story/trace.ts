@@ -179,6 +179,9 @@ function missed(db: Db, ids: RunIds, skip: string): boolean {
 }
 
 const TRACE = 'INSERT INTO trace VALUES (?, ?, ?, ?)';
+const TRACE_ROWS = 'SELECT record FROM trace ORDER BY rowid';
+export const traceRows = (db: Db) =>
+  db.getAllSync<{ record: string }>(TRACE_ROWS).map((r) => r.record);
 const NONE = { state: 'unavailable', reason: 'not_applicable' };
 const SAVED = { state: 'unavailable', reason: 'not_collected' }; // from the saved state (ADR-075)
 const FRESH = { state: 'fresh' }; // from the world `context` starts with
