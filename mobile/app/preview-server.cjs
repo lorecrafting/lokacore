@@ -4,6 +4,8 @@ const http = require('node:http');
 const net = require('node:net');
 const { execFileSync, spawn } = require('node:child_process');
 const path = require('node:path');
+const readline = require('node:readline');
+const { quiet } = require('./quiet-metro.cjs');
 
 const previewPort = Number(process.env.LOKA_PREVIEW_PORT || 19006);
 // LOKA_METRO_PORT=0 (the e2e configs): ask the OS for a free port, so concurrent runs never share one.
@@ -27,8 +29,12 @@ const expo = spawn(
     '--port',
     String(metroPort),
   ],
-  { cwd: __dirname, stdio: 'inherit', env: { ...process.env, EXPO_NO_TELEMETRY: '1' } },
+  { cwd: __dirname, stdio: ['inherit', 'pipe', 'pipe'], env: { ...process.env, EXPO_NO_TELEMETRY: '1' } },
 );
+for (const [from, to] of [[expo.stdout, process.stdout], [expo.stderr, process.stderr]]) {
+  const keep = quiet();
+  readline.createInterface({ input: from }).on('line', (line) => keep(line) && to.write(`${line}\n`));
+}
 
 // `/__author/*` goes to `bin/loka dev --watch`'s live stream (kernel/ts/play/live.ts).
 const authorPort = Number(process.env.LOKA_AUTHOR_PORT || 19008);
