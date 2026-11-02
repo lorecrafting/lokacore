@@ -60,3 +60,32 @@ Fix: `op?.op` or `invalid()` on a non-object, plus one test.
 Real device backup and restore; full mutation run; downgrade on a real device (pin refusal read in `authority.ts:101`, not run).
 
 **Verdict: CHANGES REQUIRED.**
+
+## Re-check of `66490e74b` (scoped to the findings above)
+
+CI at this head (`gh run list --commit`): graph-diff, book-e2e success; ci failure, one test (`a ranked row reads its rank in place of the level`, not in this fix). The branch has since moved to `0ed83f5d5`, which was not reviewed.
+
+Dispositions:
+
+- State comparison blocker: fixed. Removing `!same(world.state, saved.state)` fails `coldReopen refuses saved rows its replay does not produce`.
+- Mutants, all red on `receipt_history.test.ts`: remove the head check at `receipt-history.ts:54`; drop `TypeError` from `unreadable`; rethrow in `chronicle.ts`; old classification at `session.ts:76`.
+- Disclosure: fixed in `save.md`, the decision record and `lessons/storage.md`. They state the bug and stale-page loss. The record says the owner was told, and does not claim acceptance, which is accurate. Open: "no objection so far" is not an owner answer; the PM records the answer.
+- Stranded player: fixed, but the fix is too broad (below).
+- The nits on `storage.md` and "dev tooling" are fixed.
+
+### Should-fix: a code bug on a lawful save now offers to wipe it
+
+`mobile/authority/local-story/store.ts:185`, used at `store.ts:132` and `session.ts:76`. Probe: `(undefined as any).bug` planted in `load` on a lawful save. This head reports `save_corrupt`, `startOver=true`, message `save_corrupt`, so the cause is lost. With `TypeError` removed from `unreadable`: untyped fault, `startOver=false`, the real message, and the save kept until a fixed update.
+
+Failure: a release with a loader TypeError on a shape CI did not play tells every affected player the save is damaged and offers the one irreversible button. The stranding this replaces takes an edited receipt; this one takes only our own bug. A wrong "corrupt" is the worse error. `session.ts:68-70` already refuses on any `gameView` throw, but that predates this PR and is no reason to widen.
+
+Fix: take `TypeError` out of `unreadable`. Refuse the shapes at the readers: `deer-save.ts:27` calls `invalid()` on a non-object op or wraps only its row walk, and the newest receipt's `narration` read refuses when `newestReceipt`'s `validate` fails (`receipt-history.ts:62`). Update the `save.md` sentence. `chronicle.ts:44` destroys nothing, so its catch may stay, though a bug there silently drops Journal entries.
+
+### Patrol and light rows: no concern
+
+- Patrol run through `localSession` on a file: lawful rows open at each stage. `cursor=99` refuses at each. `cursor=5` refuses while the validated stage requires it and opens after a move, then plays with no throw or hang. A missing patrol row opens too. This is the disclosed price and meets the reopen principle, since the kernel neither throws nor hangs. The refused stages are row validation, not a promise.
+- Light with no fuel row: open, view and `look` run; `ignite` reached `not_owned`, as it does with the rows present. A held torch was not run; `mechanics/light/shared.ts:46` returns `precondition_failed` on a missing row, by reading, so that torch cannot be lit again. Same price.
+
+Not checked at this re-check: `0ed83f5d5`, other loaders' wrong shapes, a held torch with no fuel row.
+
+**Verdict: CHANGES REQUIRED.**
