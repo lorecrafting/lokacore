@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Second review: writer follow-ups, PR #568 (loka-vduxr.27, .22, .28)](2026-11-01-writer-followups-second-review.md): **CHANGES REQUIRED**
+- [Review: trace refused replay, PR #580 (loka-vduxr.41)](2026-11-01-trace-refused-replay-review.md): **CHANGES REQUIRED**
 - [Second review: skill ranks, PR #570 (loka-g5hh.2.3)](2026-11-01-skill-ranks-second-review.md): **APPROVE WITH NOTES**
 - [Review: skill ranks, PR #570 (loka-g5hh.2.3)](2026-11-01-skill-ranks-review.md): **APPROVE WITH NOTES**
 - [Sanctuary refusal cause: second-opinion contract review](2026-11-01-sanctuary-refusal-second-review.md): **CHANGES REQUIRED**
