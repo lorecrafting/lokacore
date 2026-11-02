@@ -280,14 +280,14 @@ once and durably rebases negative gaps without rewind.
 
 **Coalesced ticks.** A driver tick whose decision only moved the clock (accepted `elapsed`, one
 `time.advance` op, no events, effects or narration) replaces the newest receipt in the same transaction
-when that receipt is such a decision too, for the same run and context, ending where the tick starts,
-with the same RNG (`coalesced` in `delivery.ts`); anything else in between, or a row that does not parse
-or validate, inserts as before. The stored row is what one tick over the whole span decides: its span,
+when this process wrote that receipt from such a tick too, for the same run and context, ending where the
+tick starts, with the same RNG (`coalesced` in `delivery.ts`). Anything else in between, a reopen or an
+unknown or failed COMMIT inserts as before, so a save gains at most one such row per launch or event. The stored row is what one tick over the whole span decides: its span,
 its `elapsedCommandId`, its digest and op, so an hour of idle costs a row per due job or command, not
 per tick. Rows that carry anything are never touched, so the Chronicle and the narration read the same
 receipts. The head revision still moves per tick (`opened_revision`, view tokens and redraws depend on
-it), so accepted receipts may skip revisions, only before a clock-only row. The trusted `story.elapsed`
-entry never coalesces.
+it), so accepted receipts may skip revisions, only before a clock-only row. A trusted `story.elapsed`
+receipt is never absorbed, so its retry replays.
 
 **Away cap ([owner ruling](../decisions/owner-decision-away-catch-up-cap-2026-11-01.md)).** A wall-gap
 credit (the first capture after open, and every resume) is at most `manifest.time_policy.away_cap_hours`

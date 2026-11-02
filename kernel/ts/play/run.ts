@@ -70,7 +70,7 @@ export function decide(r: Run, command: Command, measured = true) {
  * revision it was decided against; a host's coalesced ticks leave gaps (save.md).
  */
 export function decideReplay(r: Run, command: Command, at = r.revision) {
-  r.revision = at;
+  if (command.payload.type === 'elapsed' && at > r.revision) r.revision = at;
   if (command.payload.type === 'elapsed' && command.payload.run_id !== r.ids.run_id)
     throw new Error('elapsed run differs from trace header');
   const next =

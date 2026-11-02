@@ -1,6 +1,6 @@
 // The local Story authority's in-memory story and the save of one NEW attempt (03 §§14-15):
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
-import type { DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Host, Release, Reply } from './authority.ts';
 import { commit, type Captured } from './commit.ts';
@@ -27,6 +27,8 @@ export type Story = {
   // The fence of a new game whose COMMIT outcome is unknown, and its run.
   game?: { fence: () => undefined; run_id: string } | undefined;
   elapsed?: Checkpoint;
+  // This process's newest receipt, when a clock-only driver tick: what the next tick may extend.
+  idle?: { command: Command; rng: string } | undefined;
   corruptFile?: boolean; // actual SQLite corruption while opening, never an invented identity
   recoveryHeader?: { format: string; run_id?: string } | null;
   beforeWorld?: World;
@@ -49,25 +51,25 @@ export function save(
   checkpoint?: Checkpoint,
   replaces?: string,
 ): Reply {
-  const at = r.revision;
+  s.idle = undefined;
   let committed: boolean;
   try {
     committed = commit(s.db, next.world, next.decision, r, reports, checkpoint, replaces);
   } catch (e) {
     if (e instanceof ElapsedRecoveryError) block(s, e);
-    trace(at, 'failed');
+    trace(r.revision, 'failed');
     throw e;
   }
   if (committed) {
-    [s.world, s.revision] = [next.world, at];
+    [s.world, s.revision] = [next.world, r.revision];
     if (checkpoint) s.elapsed = checkpoint;
-    trace(at, 'committed');
-    return { kind: 'saved', replay: false, revision: at, decision: r.response };
+    trace(r.revision, 'committed');
+    return { kind: 'saved', replay: false, revision: r.revision, decision: r.response };
   }
   s.fence = () => {
     const got = reconciled(s, r, checkpoint);
     if (got) adopt(s);
-    trace(at, 'unknown', got ? 'committed' : 'failed');
+    trace(r.revision, 'unknown', got ? 'committed' : 'failed');
     return got;
   };
   let settled: Receipt | undefined;

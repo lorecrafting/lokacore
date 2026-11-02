@@ -10,8 +10,11 @@ import type { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
 import { replay as replayCoverage } from '../../../kernel/ts/play/coverage.ts';
 import { replayRecords } from '../../../kernel/ts/play/replay.ts';
-import { cartridgeOf } from './session.ts';
+import { newWorld } from '../../../kernel/ts/src/index.ts';
+import { cartridgeOf, CONTEXT, SEED } from './session.ts';
 import { compiled } from './__tests__/compiled.ts';
+import { coalesced } from './delivery.ts';
+import { openStory } from './authority.ts';
 import { coldReopen, elapsedBundle, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const START = 64800; // elapsedBundle's calendar start
@@ -163,7 +166,7 @@ test('a command splits the idle spans, and the phone trace replays byte for byte
 
 // Breaks: a failed COMMIT deletes the prior receipt or adopts the merge; a lost acknowledgement
 // looks up the tick's own id, misses the merged row and answers that nothing was saved.
-test('failed and lost COMMITs on a merging tick keep one lawful receipt', (t) => {
+test('failed and lost COMMITs on a merging tick keep lawful receipts', (t) => {
   const path = save(t),
     bundle = elapsedBundle();
   const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
@@ -175,50 +178,73 @@ test('failed and lost COMMITs on a merging tick keep one lawful receipt', (t) =>
   a.sql.close();
   const b = elapsedHost(path, { wall: 10500, mono: 500 }, bundle);
   assert.equal(tick(b), 'ready');
-  assert.deepEqual(spans(b.sql), [[START, START + 37]]);
+  assert.deepEqual(spans(b.sql), [
+    [START, START + 12],
+    [START + 12, START + 37],
+  ]);
   b.fault.kind = 'lost';
   b.fault.armed = true;
   assert.equal(tick(b), 'pending');
-  assert.deepEqual(spans(b.sql), [[START, START + 50]]);
+  assert.deepEqual(spans(b.sql), [
+    [START, START + 12],
+    [START + 12, START + 50],
+  ]);
   b.sql.close();
   const c = elapsedHost(path, { wall: 11000, mono: 0 }, bundle);
   assert.equal(tick(c), 'ready');
-  assert.deepEqual(spans(c.sql), [[START, START + 62]]);
+  assert.deepEqual(spans(c.sql), [
+    [START, START + 12],
+    [START + 12, START + 50],
+    [START + 50, START + 62],
+  ]);
   c.sql.close();
   coldReopen(path, bundle);
 });
 
-// Breaks: a tick absorbed into a row it must not extend, or a throw on a newest row nothing vetted
-// (a cold open does not replay; a code bug here would stop a lawful save).
-const FORGED: [string, (command: any, response: any) => void][] = [
+// Breaks: a tick merged into a span it does not continue: time, RNG or identity would be rewritten.
+const IDLE: [string, (c: any, idle: any) => void][] = [
   ['another run', (c) => (c.payload.run_id = 'other')],
   ['a span ending elsewhere', (c) => (c.payload.until -= 1)],
-  ['a command that fails its contract', (c) => delete c.payload.from],
-  ['a command id not its row', (c) => (c.id = `${c.id}x`)],
   ['another context', (c) => (c.world_context_id = 'other')],
-  ['another RNG', (_, r) => (r.rng = { ...r.rng, counter: 999 })],
-  ['an event', (_, r) => r.events.push({})],
+  ['another RNG', (_, idle) => (idle.rng = 'other')],
 ];
-for (const [name, forge] of FORGED)
-  test(`a newest row with ${name} is not extended`, (t) => {
-    const a = elapsedHost(save(t), { wall: 10000, mono: 0 }, elapsedBundle());
-    tick(a);
-    const [[command, response]] = rows(a.sql) as [[string, string]];
-    const [c, r] = [JSON.parse(command), JSON.parse(response)];
-    forge(c, r);
-    a.sql
-      .prepare('UPDATE receipt SET command = ?, response = ?')
-      .run(JSON.stringify(c), JSON.stringify(r));
-    assert.equal(tick(a), 'ready');
-    assert.equal(rows(a.sql).length, 2);
-    a.sql.close();
+for (const [name, forge] of IDLE)
+  test(`a tick does not extend ${name}`, () => {
+    const prior = {
+      id: 'p',
+      world_context_id: 'w',
+      payload: { type: 'elapsed', run_id: 'r', from: 0, until: 10 },
+    };
+    const tick = { ...prior, id: 't', payload: { ...prior.payload, from: 10, until: 20 } };
+    const d = {
+      kind: 'accepted',
+      outcome: 'elapsed',
+      delta: { ops: [{ op: 'time.advance', from: 10, to: 20 }] },
+      events: [],
+      effects: [],
+      rng: { counter: 1 },
+    };
+    const idle = { command: prior, rng: '{"counter":1}' };
+    assert.equal(
+      (coalesced(idle as never, tick as never, d as never)?.command.payload as any).from,
+      0,
+    );
+    forge(prior, idle);
+    assert.equal(coalesced(idle as never, tick as never, d as never), undefined);
   });
-test('a newest row that does not parse is not extended and does not stop the tick', (t) => {
-  const a = elapsedHost(save(t), { wall: 10000, mono: 0 }, elapsedBundle());
-  tick(a);
-  a.sql.exec(`UPDATE receipt SET response = '{'`);
-  assert.equal(tick(a), 'ready');
-  assert.equal(rows(a.sql).length, 2);
+
+// Breaks: a driver tick swallowing a trusted story.elapsed receipt, whose retry must still replay.
+test('a trusted elapsed receipt is not absorbed by the next, and its retry replays', (t) => {
+  const bundle = elapsedBundle();
+  const a = elapsedHost(save(t), { wall: 10000, mono: 0 }, bundle);
+  const fresh = newWorld(cartridgeOf(bundle), CONTEXT as never, SEED as never);
+  const story = openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host);
+  if (story.kind !== 'open') throw new Error(story.kind);
+  const first = { expected_run_id: story.runId(), from: START, until: START + 10 };
+  assert.equal(story.elapsed(first).kind, 'saved');
+  assert.equal(story.elapsed({ ...first, from: START + 10, until: START + 20 }).kind, 'saved');
+  const again = story.elapsed(first);
+  assert.equal(again.kind === 'saved' && again.replay, true);
   a.sql.close();
 });
 
@@ -226,7 +252,7 @@ test('a newest row that does not parse is not extended and does not stop the tic
 // orphan trace entry for a receipt that was replaced; reopen offers Start over on a lawful save.
 for (const n of [1, 2])
   for (const when of ['before', 'after'])
-    test(`SIGKILL ${when} COMMIT ${n} of a merging tick reopens and merges on`, (t) => {
+    test(`SIGKILL ${when} COMMIT ${n} of a merging tick reopens with lawful rows`, (t) => {
       const path = save(t),
         bundle = elapsedBundle();
       const args = [fileURLToPath(import.meta.url), 'kill', path, String(n), when];
@@ -234,11 +260,16 @@ for (const n of [1, 2])
       assert.equal(child.signal, 'SIGKILL', String(child.stderr));
       const a = elapsedHost(path, { wall: 11000, mono: 0 }, bundle);
       assert.equal(tick(a), 'ready'); // 1250 ms in all at 50 per 1000 ms: 62 units
-      assert.deepEqual(spans(a.sql), [[START, START + 62]]);
+      const cut = n === 1 && when === 'before' ? START + 37 : START + 50; // what the child had saved
+      const lawful = [
+        [START, cut],
+        [cut, START + 62],
+      ];
+      assert.deepEqual(spans(a.sql), lawful);
       const entries = traced(a.sql).slice(1);
       assert.deepEqual(
         entries.map((e) => [e.command.payload.from, e.command.payload.until]),
-        [[START, START + 62]],
+        lawful,
       );
       a.sql.close();
       coldReopen(path, bundle);

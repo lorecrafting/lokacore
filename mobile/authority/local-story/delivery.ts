@@ -61,35 +61,22 @@ const extended = (s: Story, until: number) =>
   s.elapsed && { ...s.elapsed, target: Math.max(s.elapsed.target, until) };
 
 /**
- * A driver tick that only moved the clock, as one receipt with the newest one when that also only
- * moved the clock and ends where this tick starts (save.md, Durable elapsed sessions).
+ * A driver tick that only moved the clock, as one receipt with this session's previous such tick
+ * when that is still the newest receipt and ends where this one starts (save.md, Coalesced ticks).
  */
-function coalesced(s: Story, tick: Command, d: DecisionResult) {
-  if (!onlyClock(d) || tick.payload.type !== 'elapsed') return undefined;
-  const row = s.db.getFirstSync<{ command_id: string; command: string; response: string }>(
-    'SELECT command_id, command, response FROM receipt WHERE scope = ? ORDER BY rowid DESC LIMIT 1',
-    scope(s),
-  );
-  if (!row) return undefined;
-  let prior: Command, was: DecisionResult;
-  try {
-    [prior, was] = [JSON.parse(row.command), JSON.parse(row.response)];
-  } catch {
-    return undefined; // a row nothing vetted (no replay at open) is never a reason to refuse a tick
-  }
+export function coalesced(idle: Story['idle'], tick: Command, d: DecisionResult) {
+  if (!idle || !onlyClock(d) || tick.payload.type !== 'elapsed') return undefined;
+  const prior = idle.command;
   if (
-    validate('Command', prior).length ||
-    validate('DecisionResult', was).length ||
     prior.payload.type !== 'elapsed' ||
-    prior.id !== row.command_id ||
     prior.world_context_id !== tick.world_context_id ||
     prior.payload.run_id !== tick.payload.run_id ||
     prior.payload.until !== tick.payload.from ||
-    !onlyClock(was) ||
-    encode(was.rng as never) !== encode(d.rng as never)
+    idle.rng !== encode(d.rng as never)
   )
     return undefined;
-  const { run_id, from, until } = { ...tick.payload, from: prior.payload.from };
+  const { run_id, until } = tick.payload;
+  const { from } = prior.payload;
   const command = {
     ...tick,
     id: elapsedCommandId(run_id, tick.world_context_id, from, until),
@@ -97,7 +84,7 @@ function coalesced(s: Story, tick: Command, d: DecisionResult) {
   } as Command;
   const ops = d.delta.ops.map((op) => ({ ...op, from }));
   const decision = { ...d, delta: { ...d.delta, ops } } as DecisionResult;
-  return { command, decision, replaces: row.command_id };
+  return { command, decision, replaces: prior.id };
 }
 
 function commitElapsed(
@@ -108,9 +95,8 @@ function commitElapsed(
   driver = false,
 ): Reply {
   const next = stepElapsed(s.world, tick, s.revision + 1);
-  const merged = driver ? coalesced(s, tick, next.decision) : undefined;
+  const merged = driver ? coalesced(s.idle, tick, next.decision) : undefined;
   const { command, decision: d, replaces } = merged ?? { command: tick, decision: next.decision };
-  const digest = merged ? hash(command as never) : tickDigest;
   const trace: Trace = (at, ...states) => traceAfter(s, command, d, at, states, replaces);
   if (d.kind === 'fault') {
     trace(s.revision, 'unavailable');
@@ -118,7 +104,7 @@ function commitElapsed(
     return { kind: 'fault', code: d.code };
   }
   if (d.kind === 'accepted' && d.effects.length) throw new Error('effect outbox not built');
-  return save(
+  const reply = save(
     s,
     next,
     trace,
@@ -129,7 +115,7 @@ function commitElapsed(
       command_id: command.id,
       actor_id: s.world.character,
       intent_digest_version: ELAPSED_INTENT,
-      intent_digest: digest,
+      intent_digest: merged ? hash(command as never) : tickDigest,
       command: command as never,
       revision: d.kind === 'accepted' ? s.revision + 1 : s.revision,
       response: d as never,
@@ -137,6 +123,9 @@ function commitElapsed(
     d.kind === 'accepted' ? checkpoint : undefined,
     replaces,
   );
+  if (driver && onlyClock(d) && reply.kind === 'saved')
+    s.idle = { command, rng: encode(d.rng as never) };
+  return reply;
 }
 
 export function checkRun(s: Story) {
