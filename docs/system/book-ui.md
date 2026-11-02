@@ -778,8 +778,10 @@ wash and removes the swell; Flashes off removes both, leaving the value, thud an
 
 **Exploration music.** The first entry since launch to a tag may play its one piece, at most once in a long gap. Waking in a room spends its tag's piece: only the bed returns. It never loops, plays out, lowers beds by `mix.bedUnderMusic`, and only a fight, a chapter or death cuts it.
 
+**Level wash.** A level washes the paper once under the ink in the gilt colour, on whatever page shows, with no swell. It shares the Flash limit with the blow wash; when both land together the level has it and the blow keeps value, thud and haptic. Reduced motion halves it; Flashes off removes it, leaving the gilt line, sound, haptic and experience rule.
+
 **Flash limit.** At most one full-page luminance change per second, never three in any second; a
-later blow in that second keeps the value, thud and haptic, so a flurry never peaks twice in a second.
+later blow or level in that second keeps the value, thud and haptic, so a flurry never peaks twice in a second.
 Flashes and reduced motion are separate.
 
 **Chapter card.** Over the leaving page's picture, blurred, the card's label, title and rule dry in
@@ -790,7 +792,7 @@ The card goes without its paper only while that picture lies under it; leaving, 
 so its ink never shows over the next page. It does not curl in, so its haptic comes with the cut.
 
 **Gilt.** A line that marks the player's own gain arrives gilded and settles to its own ink: a
-skill learned or improved, in the log; a quest resolved, on its Journal title at the Journal's next
+skill learned or improved, or a level, recognised by `levelling.level_up` and never by its words, in the log; a quest resolved, on its Journal title at the Journal's next
 opening, once. The Character page's level line stays gilt while points wait to be spent. No failure
 is gilt, and gilt is never the only sign. Reduced motion is a plain fade in the line's own ink.
 
@@ -815,8 +817,7 @@ sweeps over one snapshot with one riffle and a light haptic after it (one fade u
 Under-ink layers draw no block and take no touch.
 
 **First times.** The first pickup, first quest and first level of a playthrough are one step
-stronger: the warning colour held for a moment on the line that says so (a level draws no line in the
-Book yet, so it takes only the rest), one tier louder, one haptic step up. The view alone decides:
+stronger: the warning colour held for a moment on the line that says so, one tier louder, one haptic step up. The view alone decides:
 empty hands and worn before a pickup, an empty journal before a quest, level 1 before a level.
 Nothing is saved for it.
 
@@ -1010,9 +1011,9 @@ One row per mechanic whose Book rendering is a short rule: worn affects, display
 
 ## Levelling details
 
-The level-up rush is ruled and not yet built: [level-rush-rulings](../design/level-rush-rulings.md).
+The level-up rush is ruled in [level-rush-rulings](../design/level-rush-rulings.md).
 
-GameView `levelling` carries `{level, experience, from, next, unspent}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`from` the threshold of the current level, `next` absent at the top level; the `gained` line is a Log line like the level-up line), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page, except the experience rule: a thin rule under the status row, no number and not read aloud (owner, 2026-10-31). It fills on a gain and falls with no flash on a loss. A level, one or more, runs it to full, holds it gilt, then returns it to the new fraction. Reduced motion cuts its width. A launch's first draw does not animate; returning from a page without the status line runs it from the value last drawn. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows as the foot's **save not confirmed** line, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
+GameView `levelling` carries `{level, experience, from, next, unspent, level_up}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`from` the threshold of the current level, `next` absent at the top level; the `gained` line is a Log line like the level-up line), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page, except the experience rule: a thin rule under the status row, no number and not read aloud (owner, 2026-10-31). It fills on a gain and falls with no flash on a loss. A level, one or more, runs it to full, holds it gilt, then returns it to the new fraction. Reduced motion cuts its width. A launch's first draw does not animate; returning from a page without the status line runs it from the value last drawn. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows as the foot's **save not confirmed** line, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
 
 ## Lore details
 

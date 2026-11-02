@@ -43,7 +43,13 @@ export const rendered = (
   withoutHeading(
     (last?.lines ?? []).filter((_, i) => !!last?.combat_lines?.includes(i) === combat),
     view,
-  ).map((line) => fullLine(line, text, view, was));
+  ).map((line): DetailLine => {
+    const words = fullLine(line, text, view, was);
+    // By its key, never its words: a cartridge chooses both (book-ui.md, Gilt).
+    return line.key === view.levelling?.level_up
+      ? { text: words, level: true, first: was?.levelling?.level === 1 }
+      : words;
+  });
 
 // A refused line (a barred exit) leads with its reason tag (LogLines's doc comment); a quiet line
 // keeps its structured identity and count, `text` with " (N times)" once merged (logLines); an away
@@ -51,6 +57,7 @@ export const rendered = (
 export type DetailLine =
   | string
   | { text: string; event: true; gilt?: true }
+  | { text: string; level: true; first: boolean }
   | { kind: 'refused'; reason: string; text: string }
   | { quiet: string; plain: string; times: number; text: string }
   | { recap: string[]; text: string };

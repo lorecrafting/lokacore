@@ -4,6 +4,7 @@ import { LINE_WORDS } from '../../packages/game-view/line_words.ts';
 import type { ChronicleEntry, GameView } from '../../packages/game-view/session.ts';
 import { rendered } from './logs.ts';
 import { grouped, type RecapLine } from './recap.ts';
+import { lineText } from './words.ts';
 
 export type ChronicleDay = { day: number; lines: RecapLine[]; milestones: Set<string> };
 
@@ -19,7 +20,7 @@ export function days(
 ) {
   const out: (Omit<ChronicleDay, 'lines'> & { lines: string[] })[] = [];
   for (const e of entries)
-    for (const line of rendered(story(e.record), view, text, false)) {
+    for (const line of rendered(story(e.record), view, text, false).map(lineText)) {
       let d = out.at(-1);
       if (d?.day !== e.day) out.push((d = { day: e.day, lines: [], milestones: new Set() }));
       d.lines.push(line);

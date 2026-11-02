@@ -44,7 +44,7 @@ const view = (w: World) => {
   assert.deepEqual(validate('GameView', v), []);
   return v;
 };
-const two = { level: 2, from: 30, next: 100 };
+const two = { level: 2, from: 30, next: 100, level_up: 'levelling.level_up' };
 const words = (w: World) => view(w).spell_words;
 const chip = (w: World, key: string) => view(w).actions.find((a) => a.action_key === key);
 const pools = (w: World) =>

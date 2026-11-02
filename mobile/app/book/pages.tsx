@@ -6,6 +6,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { InkText, Reanimated, useAnimatedStyle } from './fade.ts';
+import { LevelWash } from './LevelWash.tsx';
 import { plain, type Pool } from './model.ts';
 import { useDrying, useInk, usePress, useThin } from './press.ts';
 import { tapBleed } from './reading.ts';
@@ -107,6 +108,17 @@ export function Control(p: {
   );
 }
 
+type PageProps = {
+  title?: string;
+  fixedTitle?: boolean;
+  onTitlePress?: () => void;
+  scrollToEnd?: boolean;
+  centred?: boolean; // centres the blocks vertically: the save error, the chapter card
+  paperless?: boolean; // its owner paints the paper, with something on it under the ink
+  foot?: ReactNode;
+  children: ReactNode;
+};
+
 /**
  * One shell for every page: the title, the blocks, and the PageFoot.
  * - Use: every page.
@@ -117,16 +129,7 @@ export function Control(p: {
  * - States: scrolling title; fixed title; no title; centred (no game behind it).
  * - Story: Page.stories.tsx
  */
-export function Page(p: {
-  title?: string;
-  fixedTitle?: boolean;
-  onTitlePress?: () => void;
-  scrollToEnd?: boolean;
-  centred?: boolean; // centres the blocks vertically: the save error, the chapter card
-  paperless?: boolean; // its owner paints the paper, with something on it under the ink
-  foot?: ReactNode;
-  children: ReactNode;
-}) {
+export function Page(p: PageProps) {
   const c = usePalette();
   const scroll = useRef<ScrollView>(null);
   const title = p.title !== undefined && (
@@ -134,6 +137,7 @@ export function Page(p: {
   );
   return (
     <View style={{ flex: 1, backgroundColor: p.paperless ? undefined : c.bg }}>
+      <LevelWash />
       {p.fixedTitle && (
         <View style={{ paddingHorizontal: space.page, paddingTop: space.xl }}>{title}</View>
       )}

@@ -58,7 +58,7 @@ export type Queue = {
   pending?: Cue;
   merged: Record<string, number>; // when each S2 last fired
   toned: number; // when skill_up last sounded
-  washed: number; // when an hp_loss last washed
+  washed: number; // when a blow or a level last washed
   held: Cue[]; // the arriving page's, until its picture deadline
   heldUntil: number;
 };
@@ -113,11 +113,12 @@ const holdCard = (q: Queue, now: number): Queue => ({
  */
 function play(s: Queue, fired: Cue[], cue: Cue, now: number) {
   const clear = now - Math.max(s.washed, struck) >= motion.flash.gap;
-  const wash = flashes && cue.name === 'hp_loss' && clear;
+  const washes = cue.name === 'hp_loss' || cue.name === 'level';
+  const wash = flashes && washes && clear;
   if (wash) s.washed = now;
   s.playing = cue;
   s.until = now + BEAT;
-  fired.push(cue.name === 'hp_loss' ? { ...cue, wash } : cue);
+  fired.push(washes ? { ...cue, wash } : cue);
 }
 
 // A death waits for nothing (book-ui.md, Falling). It clears what is pending; a thud sounding plays on.
@@ -166,7 +167,7 @@ export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
 }
 
 let flashes = true;
-/** The Flashes setting: off, no blow is a wash; the rest of the cue stays. */
+/** The Flashes setting: off, no blow or level is a wash; the rest of the cue stays. */
 export const flashesOn = (on: boolean) => void (flashes = on);
 export const flashesShown = () => flashes;
 let struck = -Infinity;
