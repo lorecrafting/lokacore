@@ -218,7 +218,7 @@ test('production hour-boundary recovery precedes damage and Flee preserves the r
   });
 });
 
-// Breaks: a sanctuary refusal stays bare, so the Book greys what it should hide, or a seated player
+// Breaks: a sanctuary refusal stays bare, so the Book cannot grey it with its sentence, or a seated player
 // is refused for standing first and the card appears then vanishes on standing; or a seated
 // player outside a sanctuary is told sanctuary and loses a card they could bring back by standing.
 test('a sanctuary refuses Attack with its cause, sitting or standing; a seat elsewhere stays bare', () => {
@@ -231,7 +231,11 @@ test('a sanctuary refuses Attack with its cause, sitting or standing; a seat els
     },
   });
   const seated = step(w, command(w, { type: 'sit', actor_id: w.character }), 1).world;
-  const sanctuary = { code: 'invalid_state', cause: 'sanctuary' };
+  const sanctuary = {
+    code: 'invalid_state',
+    cause: 'sanctuary',
+    message: { key: 'combat.sanctuary' },
+  };
   for (const [before, reason] of [
     [calm(w), sanctuary],
     [calm(seated), sanctuary],

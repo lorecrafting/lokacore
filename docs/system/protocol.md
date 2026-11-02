@@ -715,7 +715,7 @@ stands for, so a client can tell the player. `not_standing` is a move while the 
 standing (`invalid_state`, position@1); `cursed` is a remove a curse holds on (`invalid_state`,
 equipment@1, loka-x6t.38); `cannot_be_hurt` is an Attack on an NPC that cannot be hurt, today one
 with no hp of its own (`invalid_target`, combat@1, loka-xyyd); `sanctuary` is an Attack in a sanctuary
-room (`invalid_state`, combat@1, loka-g5hh.2.9). The code stays the contract; a
+room (`invalid_state`, combat@1, loka-g5hh.2.9), whose error and offer also carry `message {key: "combat.sanctuary"}`, one line for every sanctuary. The code stays the contract; a
 reader that does not know `cause` reads the code alone, and a value without it stays valid.
 The actual bed is an inspectable detail with `bed {title, entitlement}`; its
 local projection emits ordinary targetless Rest and never changes raw Rest admission.

@@ -9,6 +9,7 @@ import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.
 import { book, nodes, words } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 import { group } from './model.ts';
+import { reason, replyLine } from './words.ts';
 import { presenter } from './presenter.ts';
 
 // Nell's shop on the showcase's village green, the player holding 10 pennies (resources.json start;
@@ -230,8 +231,40 @@ test('an unavailable card hides for a permanent refusal and shows for a changeab
   const { ActionCard } = await import('./actions.tsx');
   const card = (reason: string) => ActionCard({ label: 'Attack', reason });
   assert.equal(card('cannot be hurt'), null);
-  assert.equal(card('sanctuary'), null);
+  assert.notEqual(card(reason('sanctuary', 'sanctuary')), null); // the exception: it teaches a rule
   assert.notEqual(card('too heavy'), null);
+});
+
+// Breaks: the NPC page drops a sanctuary's grey Attack or its sentence, widens grey to an ordinary
+// refusal, or draws a card for one who cannot be hurt; or the logged refusal loses the sentence.
+test('an Attack in a sanctuary is grey with its one sentence, on the page and in the log', async () => {
+  const { NpcPage } = await import('./Npc.tsx');
+  (globalThis as any)[Symbol.for('loka-book-test-state')] ??= (v: unknown) => [v, () => {}];
+  const v = nellView();
+  const nell = v.entities.find((e) => e.shop)!;
+  const text = (k: string) => (k === 'combat.sanctuary' ? 'Placeholder sentence.' : k);
+  const attackOf = (reason: object) => {
+    const offer = { ...action('attack', { available: false, reason }), target_ids: [nell.id] };
+    const view = {
+      ...v,
+      entities: v.entities.map((e) => (e === nell ? { ...e, actions: [offer] } : e)),
+    } as GameView;
+    const s = screenOf(view);
+    const npc = s.view.entities.find((e) => e.id === nell.id);
+    const page = { ...s, text, npc, g: group(s.buttons), press() {}, leave() {}, open() {} };
+    return nodes(NpcPage(page as never) as never)
+      .map((n) => (n.props as { accessibilityHint?: string }).accessibilityHint)
+      .filter(Boolean);
+  };
+  const message = { key: 'combat.sanctuary' };
+  const sanctuary = { code: 'invalid_state', cause: 'sanctuary', message };
+  assert.deepEqual(attackOf(sanctuary), ['Placeholder sentence.']);
+  assert.deepEqual(attackOf({ code: 'invalid_state' }), []);
+  assert.deepEqual(attackOf({ code: 'invalid_target', cause: 'cannot_be_hurt' }), []);
+  const reply = { kind: 'saved', decision: { kind: 'rejected', error: sanctuary } } as const;
+  assert.deepEqual(replyLine(reply as never, text, v), [
+    { kind: 'refused', reason: 'sanctuary', text: 'Placeholder sentence.' },
+  ]);
 });
 
 // Breaks: the World log's refused line brings back its boxed reason chip (a Text of its own), or

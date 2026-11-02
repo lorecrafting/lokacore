@@ -15,5 +15,5 @@ const said = (r: string) =>
   (/^[A-Z]/.test(r) ? r : `You can't do that—${r}`).replace(/[.!?]?$/, (m) => m || '.');
 export const reasonSentence = (r = '') => SAID[r] ?? said(r);
 // A permanent refusal hides its card; the player cannot change it (book-ui.md, Unavailable actions).
-const HIDDEN = ['cannot_be_hurt', 'sanctuary'].map((k) => reason(k, k));
+const HIDDEN = ['cannot_be_hurt'].map((k) => reason(k, k));
 export const hides = (r = '') => HIDDEN.includes(r);

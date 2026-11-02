@@ -74,6 +74,9 @@
         },
         "cause": {
           "$ref": "#/$defs/RefusalCause"
+        },
+        "message": {
+          "$ref": "text.schema.json#/$defs/Text"
         }
       },
       "required": [

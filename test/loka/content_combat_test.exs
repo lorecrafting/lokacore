@@ -68,7 +68,7 @@ defmodule Loka.ContentCombatTest do
             {"rooms/shrine.json",
              %{"name" => "t", "description" => "t", "exits" => %{}, "sanctuary" => true}},
             {"facts.json", %{"facts" => %{"rat_dead" => fact}}},
-            {"text.json", %{"t" => "Test"}}
+            {"text.json", %{"t" => "Test", "combat.sanctuary" => "Test"}}
           ] ++
             (for name <- ~w(body_corpse rat_corpse) do
                {"items/" <> name <> ".json",
@@ -86,6 +86,18 @@ defmodule Loka.ContentCombatTest do
       File.mkdir_p!(Path.dirname(path))
       File.write!(path, JSON.encode!(value))
     end
+  end
+
+  # Breaks: a sanctuary compiles without its one line, and the Book shows the raw key.
+  test "a sanctuary in a combat cartridge needs combat.sanctuary", %{tmp_dir: dir} do
+    source(dir)
+    File.write!(Path.join(dir, "text.json"), JSON.encode!(%{"t" => "Test"}))
+    assert {:error, ds} = Loka.Content.compile(dir)
+
+    assert Enum.any?(
+             ds,
+             &(&1["code"] == "UNRESOLVED_REFERENCE" and &1["path"] == "rooms/shrine.sanctuary")
+           )
   end
 
   # Breaks: a new reference field bypasses source expansion and emits an unusable artifact.
