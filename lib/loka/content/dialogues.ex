@@ -168,7 +168,7 @@ defmodule Loka.Content.Dialogues do
     cond do
       o["sitting"] -> "sitting_no_return"
       o["then"] not in [nil, "end"] or is_map_key(o, "then_failed") -> "story_point_then"
-      d["quest"] || o["once"] || Loka.Content.Hub.self_gated?(o) -> nil
+      d["quest"] || Loka.Content.Hub.self_gated?(o) -> nil
       true -> "story_point_repeats"
     end
   end
