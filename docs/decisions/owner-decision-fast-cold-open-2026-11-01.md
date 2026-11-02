@@ -16,8 +16,8 @@ is an accepted price.
 4. A state row or older receipt that still parses now opens, whoever wrote it. The owner's words named
    hand edits; the price is wider: wrong rows from a kernel or writer bug persist instead of refusing
    (tests' `coldReopen` is the only catch, before ship), and a stale page from a bad restore can open
-   and save the next action on the wrong state. The owner has been told, with the recommendation to
-   accept (second review, 2026-11-01). A row that ordinary play or a crash could produce is still
+   and save the next action on the wrong state. The PM told the owner, recommending acceptance; the
+   owner has not objected and has not explicitly confirmed (2026-11-01). A row that ordinary play or a crash could produce is still
    handled by the [reopen principle](../lessons/storage.md).
 5. Commerce recovery no longer validates every receipt; it reads only the rows it needs.
 
