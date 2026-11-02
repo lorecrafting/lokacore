@@ -7,6 +7,8 @@ defmodule Loka.ContentStartersTest do
                 |> Path.wildcard()
                 |> Enum.map(&Path.basename(&1, ".schema.json"))
                 |> List.delete("defs")
+                # The JSON `scenes/` starter is `cutscene`, so `scene` can name the `.scene` format.
+                |> Enum.map(&if(&1 == "scenes", do: "cutscene", else: &1))
   @guide File.read!("docs/guides/writing-the-game.md")
 
   # Breaks: a source kind the owner cannot start from the tools, or one the guide's coverage
@@ -105,7 +107,7 @@ defmodule Loka.ContentStartersTest do
     {:ok, _} = Starters.write(dir, "quests", "errand")
     written = [%{"type" => "narrate", "text" => "Handwritten"}]
 
-    for {kind, rel} <- [{"reactions", "reactions/mine.json"}, {"scenes", "scenes/mine.json"}] do
+    for {kind, rel} <- [{"reactions", "reactions/mine.json"}, {"cutscene", "scenes/mine.json"}] do
       {:ok, _} = Starters.write(dir, kind, "mine")
       edit(dir, rel, &Map.put(&1, "steps", written))
       assert {:error, ^rel <> ": steps already has" <> _} = Starters.write(dir, kind, "mine")
@@ -199,7 +201,7 @@ defmodule Loka.ContentStartersTest do
   # Breaks: the compile's DUPLICATE_DEFINITION on a shared scene quest or topic fact, or the
   # layout missing the new room of a second rooms, areas or transports.
   test "a second starter of a kind under a new name compiles", %{tmp_dir: tmp} do
-    for kind <- ~w(scenes topics rooms areas transports) do
+    for kind <- ~w(cutscene topics rooms areas transports) do
       dir = cartridge(Path.join(tmp, kind))
       for k <- ~w(items npcs resources layout), do: {:ok, _} = Starters.write(dir, k, "my_#{k}")
       {:ok, _} = Starters.write(dir, kind, "one")
@@ -241,7 +243,7 @@ defmodule Loka.ContentStartersTest do
     assert {:error, "a name is lowercase letters, digits and _, 64 at most" <> _} =
              Starters.write(dir, "text", String.duplicate("a", 65))
 
-    for kind <- ~w(scenes topics actions services transports populations rooms items) do
+    for kind <- ~w(cutscene topics actions services transports populations rooms items) do
       assert {:error, "a name" <> _} =
                Starters.write(dir, kind, String.pad_trailing(kind, 33, "b"))
 
