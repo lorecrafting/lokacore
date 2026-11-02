@@ -6,6 +6,8 @@ import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { dreamBundle } from './__tests__/dream-host.test.ts';
+import { entity, fresh, ref } from '../../../kernel/ts/test/dream_fixture.ts';
 
 const tool = (name: string) => new URL(`../../../kernel/ts/play/${name}`, import.meta.url).pathname;
 
@@ -84,4 +86,59 @@ test('coverage credits a refused talk nothing, and Why says rejected and answers
   };
   assert.equal(why(2).outcome, 'rejected');
   assert.equal(why(3).outcome, 'looked');
+});
+
+// Breaks: Why's prefix walk replays a coalesced tick without its recorded revision, so a dream
+// choose naming the host's expected revision answers rejected though the host resolved it.
+test('Why resolves a dream choice reached through idle real-elapsed ticks as the host did', (t) => {
+  const change = (c: any) => {
+    c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
+    c.scripted_actions = {}; // real_elapsed refuses the fixture's turn-timed coil_rope
+  };
+  const a = elapsedHost(':memory:', undefined, dreamBundle(change)),
+    folder = mkdtempSync(join(tmpdir(), 'loka-dream-'));
+  t.after(() => (a.sql.close(), rmSync(folder, { recursive: true })));
+  const dream = () => a.game.view().view.notices!.find((n) => n.bed)!.dream!;
+  const invoke = (action_key: string, input: object, target_ids: string[] = []) => {
+    for (let i = 0; i < 3; i++) ((a.clock.wall += 750), (a.clock.mono += 750), a.game.pulse());
+    const r = a.game.invoke({ action_key, target_ids, input } as never);
+    assert.equal(decision(r), 'accepted', JSON.stringify(r));
+  };
+  const maud = entity(fresh(change), 'npc', 'maud');
+  invoke('rent_room', { service: ref('service', 'bed_room'), quoted_price: 3 }, [maud]);
+  invoke('move', { direction: 'up' });
+  invoke('rest', {});
+  for (let i = 0; i < 3; i++) {
+    const d = dream();
+    invoke(d.action!.action_key, { scene: d.scene, line: d.index });
+  }
+  const c = dream().choice!,
+    o = c.choices.find((o) => o.choice_id === 'follow_fox')!;
+  invoke(o.action_key!, {
+    continuation_id: c.continuation_id,
+    choice_id: 'follow_fox',
+    dream: o.dream,
+  });
+  const artifact = join(folder, 'cartridge.json'),
+    path = join(folder, 'trace.jsonl'),
+    rows = a.sql
+      .prepare('SELECT record FROM trace ORDER BY rowid')
+      .all()
+      .map((r) => r.record as string);
+  writeFileSync(
+    artifact,
+    `{"cartridge":${a.bundle.canonical},"content_hash":"${a.bundle.sha256}"}`,
+  );
+  writeFileSync(path, rows.join('\n') + '\n');
+  const why = spawnSync(
+    process.execPath,
+    [tool('why.ts'), artifact, path, String(rows.length - 1)],
+    {
+      encoding: 'utf8',
+    },
+  );
+  assert.equal(why.status, 0, why.stderr);
+  const out = JSON.parse(why.stdout);
+  assert.equal(out.command, 'choose');
+  assert.equal(out.outcome, 'choice_resolved');
 });
