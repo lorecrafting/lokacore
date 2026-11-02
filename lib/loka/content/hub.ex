@@ -52,7 +52,6 @@ defmodule Loka.Content.Hub do
     ends =
       Enum.any?([
         o["then"],
-        o["once"],
         self_gated?(o),
         o["then_failed"],
         o["check"],
