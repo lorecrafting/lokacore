@@ -3,7 +3,7 @@
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
 import { cast, comings, lineText, lineWords, replyLine, spoken, used } from './words.ts';
 import { things } from './item-pages.ts';
-import { skillChanges } from './cueDiff.ts';
+import { skillChanges } from './skillChange.ts';
 import {
   arrived,
   closing,
