@@ -213,8 +213,11 @@ defmodule Loka.ContentStartersFreshTest do
 
     before = File.read!(Path.join(dir, "scenes/greet.scene"))
 
-    assert {:error, "scenes/greet.scene exists" <> _} =
+    assert {:error, "scenes/greet.scene exists: a starter never replaces it"} =
              Starters.write(dir, "scene", "greet", "maud")
+
+    assert {:error, "a name is lowercase" <> _} = Starters.write(dir, "scene", "../up", "maud")
+    refute File.exists?(Path.join(dir, "up.scene"))
 
     assert File.read!(Path.join(dir, "scenes/greet.scene")) == before
 
