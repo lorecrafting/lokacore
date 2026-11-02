@@ -15,7 +15,7 @@ import { refString } from '../src/runtime/decision.ts';
 import { marked, replay } from './coverage.ts';
 import { ROOT } from './obs.ts';
 import { replayRecords } from './replay.ts';
-import { decideReplay, start, type Run } from './run.ts';
+import { replayEntry, start, type Run } from './run.ts';
 
 type Trace = ReturnType<typeof replayRecords>;
 // now: read the asked policy on the world after the step, as the author panel asks about what could be done next.
@@ -47,7 +47,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
   const r = prefix(cartridge, trace, ordinal);
   const command: Command = entries[ordinal - 1]!.data.command;
   const before = r.world;
-  const decide = (cart: Cartridge) => step(r, cart, command, ordinal);
+  const decide = (cart: Cartridge) => step(r, cart, entries[ordinal - 1]!, ordinal);
   const d = decide(cartridge);
   const rules = cartridge.reactions ?? {};
   const probe = `coverage.m${Object.keys(rules).length}`; // no rule's, and never authored (marked)
@@ -80,9 +80,9 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
   };
 }
 
-// Step `ordinal` decided on a copy of `r` (decideReplay advances the Run it is given) with `cart`.
-function step(r: Run, cart: Cartridge, command: Command, ordinal: number) {
-  const d = decideReplay({ ...r, world: { ...r.world, cartridge: cart } }, command).decision;
+// Step `ordinal` (`e`) decided on a copy of `r` (replay advances the Run it is given) with `cart`.
+function step(r: Run, cart: Cartridge, e: Trace['entries'][number], ordinal: number) {
+  const d = replayEntry({ ...r, world: { ...r.world, cartridge: cart } }, e).decision;
   // closing() (mechanics/death/lines.ts:28) cuts narration to 64 lines: a cut marker is unknown
   if (d.kind === 'accepted' && (d.narration?.length ?? 0) >= 64)
     throw new Error(`narration cap reached at ordinal ${ordinal}`);
@@ -101,7 +101,7 @@ function prefix(cartridge: Cartridge, trace: Trace, ordinal: number) {
     head.ids.seed,
     head.ids.kernel_version,
   );
-  for (const e of entries.slice(0, ordinal - 1)) decideReplay(r, e.data.command);
+  for (const e of entries.slice(0, ordinal - 1)) replayEntry(r, e);
   return r;
 }
 

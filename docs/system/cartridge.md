@@ -762,7 +762,8 @@ Beads `loka-kgd.194.2` ([design audit](../rnd/design-audit-abilities-authoring-2
 findings 16 and 23, approach F, plan phase 4) lists the definitions that no example transcript
 exercises. `node kernel/ts/play/coverage.ts <artifact> [<transcript.jsonl> ...]` replays each
 transcript (by default `cartridges/<manifest id>/transcripts/*.jsonl`, sorted) against the
-artifact. It loads and refuses as `reach.ts` above (the loader diagnostic on stderr, exit 1), exits
+artifact; a refused entry recorded `committed` replays in that form and exercises nothing. It loads
+and refuses as `reach.ts` above (the loader diagnostic on stderr, exit 1), exits
 1 when a transcript does not replay byte for byte (`<transcript>: replay differs at ordinal <n>`,
 the path relative to the repository) or when a replayed decision reaches the 64-line narration cap
 (`<transcript>: narration cap reached at ordinal <n>`: a cut marker would report a fired rule as
@@ -802,7 +803,8 @@ loads and refuses as `reach.ts` above (exit 1). It reads the transcript with its
 on the marked copy of Transcript coverage above, comparing each line with the recording; a
 difference exits 1 (`<transcript>: replay differs at ordinal <n>`, the path relative to the
 repository). Step `<ordinal>` itself is decided, never compared, so an edited rule can be
-explained. Exit 2: wrong arguments, both flags, an ordinal that is not an integer in
+explained; a refused step answers `outcome: rejected`, each reaction `fired: 0` with no causes.
+Exit 2: wrong arguments, both flags, an ordinal that is not an integer in
 1..entries, or a `--action`/`--dialogue` key no definition has. Otherwise it prints one canonical
 JSON document. Nothing is committed or checked in CI; only its unit test runs.
 
