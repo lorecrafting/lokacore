@@ -7,7 +7,6 @@ import { elapsed } from './c5_bleed_fixture.ts';
 import { compose } from '../src/foundation/compose.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { gameView } from '../src/view/view.ts';
-import { decayJob } from '../src/mechanics/death/job.ts';
 import type { World } from '../src/runtime/decision.ts';
 import type { EntityId, JobId } from '../src/contracts.gen.ts';
 
@@ -59,11 +58,25 @@ test('no npc_corpse_decay schedules no job', () => {
   );
 });
 
-// Breaks: a player corpse that takes the NPC delay.
-test('a player corpse decays at 90000', () => {
+// Breaks: a player corpse that takes the NPC delay, or an owned corpse whose spill faults.
+test('an owned player corpse decays at 90000 and spills its items', () => {
   const world = showcase.genesis();
-  const [op] = decayJob(world, world.body, true, 0, () => '00000000-0000-4000-8000-0000000000aa');
-  assert.equal(op && 'due_time' in op && op.due_time, 25200 + 90000);
+  const [ear] = Object.entries(world.state.created!).find(
+    ([, e]) => e.origin.kind === 'spawned' && e.origin.role === 'loot',
+  )!;
+  // fatal() names the cellar sampler's rat as the player's killer; the showcase's goblin stands in.
+  world.entityIds['cellar_sampler@0.0.8:npc/cellar_rat_1'] = world.state.containers[ear]!;
+  world.state.containers[ear] = world.body;
+  const room = world.state.containers[world.body]!;
+  const after = (fatal(world).next as unknown as { world: World }).world;
+  const [corpse] = Object.entries(after.state.created!).find(
+    ([, e]) => e.origin.kind === 'death' && e.origin.victim_id === world.body,
+  )!;
+  assert.equal(after.state.containers[ear], corpse);
+  assert.equal(jobOf(after, corpse)?.due_time, 25200 + 90000);
+  const late = elapsed(after, 25200 + 90000, 2).world;
+  assert.equal(late.state.containers[ear], room);
+  assert.equal(late.state.containers[corpse], world.consumed);
 });
 
 // Breaks: a decay binding that admits another job's keys, or a decay kind with no corpse.

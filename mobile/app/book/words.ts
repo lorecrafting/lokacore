@@ -1,4 +1,4 @@
-// size: allow 304, corpse names bind their victim (loka-kgd.203)
+// size: allow 307, corpse names bind their victim (loka-kgd.203)
 // The app's own words for the kernel's codes (R6P Polish): what an accepted outcome says in the log
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
@@ -192,7 +192,10 @@ export const lineWords = (
     id === undefined ? undefined : nameOf(view, id, text) || (was && nameOf(was, id, text));
   const id = t.participants?.actor;
   const actor = named(id);
-  const word = (v: unknown) => text(String(v));
+  // A corpse participant's short (`put ... in the corpse of {victim}`) names its victim.
+  const cast = Object.values(t.participants ?? {});
+  const word = (v: unknown) =>
+    victimWords(text, view.entities.find((e) => e.name === v && cast.includes(e.id)) ?? {}, `${v}`);
   const told =
     (actor && emoteSentence(t, view.emotes, word, actor)) ||
     lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);

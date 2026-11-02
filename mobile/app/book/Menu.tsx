@@ -84,7 +84,11 @@ const inside = (p: { thing?: Thing; contents: Thing[]; text: Say; open: (id: str
       <SectionTitle>{LABEL.inside}</SectionTitle>
       <View>
         {p.contents.map((e) => (
-          <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
+          <EntityLine
+            key={e.id}
+            name={cap(victimWords(p.text, e, e.name))}
+            onPress={() => p.open(e.id)}
+          />
         ))}
       </View>
     </>
@@ -116,7 +120,7 @@ export function ThingPage(p: {
 }) {
   return (
     <Page
-      title={p.thing ? cap(p.text(p.thing.name)) : LABEL.item}
+      title={p.thing ? cap(victimWords(p.text, p.thing, p.thing.name)) : LABEL.item}
       foot={<Control label={LABEL.leave} onPress={p.leave} />}
     >
       <ItemDetails thing={p.thing} text={p.text} />

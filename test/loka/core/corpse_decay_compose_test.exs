@@ -65,6 +65,38 @@ defmodule Loka.Core.CorpseDecayComposeTest do
     )
   end
 
+  # Breaks: a decay job bound by a nil corpse, or by the corpse and another job's key, that the
+  # composer or the independent guard admits.
+  test "a decay job binds a corpse and nothing else" do
+    corpse = "a0000000-0000-4000-8000-000000000001"
+
+    job = %{
+      "cartridge_id" => "c",
+      "cartridge_version" => "1.0.0",
+      "kind" => "decay",
+      "key" => "corpse"
+    }
+
+    op = %{
+      "op" => "job.schedule",
+      "writer_group" => 0,
+      "job_id" => "b0000000-0000-4000-8000-000000000001",
+      "job" => job,
+      "due_time" => 200,
+      "corpse_id" => corpse
+    }
+
+    state = %{"clock" => 100}
+    %{"changes" => _} = bound = Compose.compose(state, %{"ops" => [op]})
+    check = fn o -> %{"state" => state, "delta" => %{"ops" => [o]}, "result" => bound} end
+    assert Invariants.check("delta_preconditions_hold", check.(op))
+
+    for o <- [%{op | "corpse_id" => nil}, Map.put(op, "encounter_id", corpse)] do
+      assert %{"fault" => _} = Compose.compose(state, %{"ops" => [o]}), inspect(o)
+      refute Invariants.check("delta_preconditions_hold", check.(o)), inspect(o)
+    end
+  end
+
   defp agree(dir, ids, cases, expected) do
     input = Path.join(dir, "cases.json")
     File.write!(input, JSON.encode!(%{"ids" => ids, "cases" => cases}))

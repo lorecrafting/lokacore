@@ -7,6 +7,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { things } from './item-pages.ts';
 import type { Button } from './presenter.ts';
 import { lower } from './words.ts';
+import { victimWords } from '../../packages/game-view/line_words.ts';
 
 export type Row = { b: Button; label: string; name: string; note?: string } | Refused;
 type Refused = { label: string; reason: string };
@@ -76,7 +77,7 @@ const option = (b: Button, id: string) =>
 
 export function picks(v: GameView, buttons: Button[], id: string, text: (key: string) => string) {
   const all = new Map<string, Thing>(things(v).map((e) => [e.id, e]));
-  const name = (i: string) => text(all.get(i)?.name ?? '');
+  const name = (i: string) => victimWords(text, all.get(i) ?? {}, all.get(i)?.name ?? '');
   const lists = new Map<string, Button[]>();
   for (const b of buttons.filter((b) => b.pick)) {
     lists.set(option(b, id), [...(lists.get(option(b, id)) ?? []), b]);
