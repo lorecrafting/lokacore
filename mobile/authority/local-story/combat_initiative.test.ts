@@ -89,7 +89,14 @@ test('a round-1 initiative Attack, fatal or not, survives failed COMMIT, lost ac
       if (kind === 'lost') assert.equal(encode(durable as never), committed);
       outcomes[kind] = committed;
       const w = story.world();
-      assert.notDeepEqual(w.state.rng, old.state.rng); // round 1 drew at Attack
+      // From [1, 2, 3, 4] the initiative draw puts the player first; fixed damage draws none, so
+      // round 1 is initiative + player roll (+ the living rat's roll): numeric-vectors.json
+      // rng_steps[1] (fatal) or rng_steps[2], drawn once at Attack whatever the fault.
+      assert.deepEqual(old.state.rng, [1, 2, 3, 4]);
+      assert.deepEqual(
+        w.state.rng,
+        fatal ? [12295, 1029, 1029, 25165824] : [25179138, 12295, 540162, 2107404],
+      );
       assert.equal(level(w, rat(w), resourceRef(w, 'hp')), fatal ? 0 : 5);
       assert.equal(level(w, w.body, resourceRef(w, 'hp')), fatal ? 10 : 9);
       const [row] = Object.values(w.state.encounters!);
