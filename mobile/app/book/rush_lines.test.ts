@@ -7,7 +7,7 @@ import { skillEvents } from './received.ts';
 import { lineWords } from './words.ts';
 import { words } from './__tests__/polish-book.test.ts';
 
-const { Professions, SkillDetails } = await import('./skills.tsx');
+const { Professions, SkillsPage } = await import('./skills.tsx');
 
 const base = {
   actor_id: 'a',
@@ -101,7 +101,7 @@ test('a ranked row reads its rank in place of the level', () => {
   assert.doesNotMatch(profession(row(rank)), /level 2/);
   assert.match(profession(row({})), /label, level 2 — /);
   assert.match(
-    words(SkillDetails({ view: view(s(true, 2, rank)), text: say }) as never),
+    words(SkillsPage({ view: view(s(true, 2, rank)), text: say, world: () => {} }) as never),
     /label — r — /,
   );
 });
