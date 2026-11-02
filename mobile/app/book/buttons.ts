@@ -154,7 +154,7 @@ export const knownWords = (v: GameView) => [
   ]),
 ];
 // Say, shout, cast and each whisper without a word: the live twins of every typed word
-// (actionContext): the Realm's word field, the Character page's spell cards and the NPC page's Whisper send them.
+// (actionContext): the Realm's word field, the Skills page's spell cards and the NPC page's Whisper send them.
 function wordButtons(v: GameView, text: Say): Press[] {
   if (wordless(v)) return [];
   const offered = (key: string) => v.actions.some((a) => a.action_key === key && a.available);
