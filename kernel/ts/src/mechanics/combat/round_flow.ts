@@ -244,10 +244,8 @@ export function told(world: World, row: EncounterRow, job: JobRow, r: Round): Te
       };
     const s = striker(e.attacker_id);
     const max = resourceSpec(world, e.target_id, hp).maximum;
-    const tier =
-      e.hit && e.loss > 0
-        ? combat.tiers?.find((t) => t[`${s}_hit`] && 100 * e.loss >= t.at_percent * max)
-        : undefined;
+    // a miss or a fully resisted hit loses 0, below every cut (at_percent >= 1)
+    const tier = combat.tiers?.find((t) => t[`${s}_hit`] && 100 * e.loss >= t.at_percent * max);
     return {
       key:
         'prevented_by' in e && e.prevented_by
@@ -278,13 +276,13 @@ function naming(world: World, row: EncounterRow, r: Round) {
   };
 }
 
-// The player's current foe's condition row after a round with an attack; none once it is dead.
+// The player's current foe's condition row after a round with an attack; a dead foe sits at its
+// minimum, below every cut (at_percent >= 1), so it gets none.
 function condition(world: World, job: JobRow, r: Round) {
   const rows = world.cartridge.world!.combat!.conditions;
   if (!rows || !r.events.some((e) => e.payload.type === 'attack_result')) return undefined;
   const end = prefix(world, r.ops, r.due_time);
   const foe = end.state.encounters![job.encounter_id!].npc_id;
-  if (!living(end, foe)) return undefined;
   const hp = resourceRef(end, 'hp');
   const { minimum, maximum } = resourceSpec(end, foe, hp);
   const current = level(end, foe, hp)!;

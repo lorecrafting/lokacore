@@ -137,6 +137,33 @@ test('a killing first blow closes the fight with no successor and no condition',
   ]);
 });
 
+// Breaks (mechanics.md "First round at Attack"): a save accepts a missing job on a row other than
+// a closed round-1 row of an initiative world, refuses a live row's own job, or keeps a closed
+// row whose job still waits.
+test('a save lets only a closed round-1 row with initiative lack its job', () => {
+  const fatal = attack(
+    sampler((c) => (c.player_attack.damage_min = c.player_attack.damage_max = 10)),
+  ).w;
+  const live = attack(sampler()).w;
+  const edited = (w: World, edit: (row: any, job: any, w: any) => void) => {
+    const copy = structuredClone(w);
+    const [row] = Object.values(copy.state.encounters!);
+    edit(row, copy.state.jobs?.[row!.job_id], copy);
+    return encountersValid(copy);
+  };
+  assert.deepEqual(
+    [
+      encountersValid(live),
+      edited(fatal, (row) => (row.round = 2)),
+      edited(fatal, (_row, _job, w) => delete w.cartridge.world.combat.initiative),
+      edited(fatal, (row) => (row.status = 'open')),
+      edited(live, (_row, job) => (job.encounter_id = 'ffffffff-1970-4970-8970-000000000001')),
+      edited(live, (row) => (row.status = 'closed')),
+    ],
+    [true, false, false, false, false, false],
+  );
+});
+
 // Breaks: an opted-out cartridge draws at Attack, loses its scheduled round 1 or the odd/even
 // order, or gains bindings; tiers and conditions still apply without initiative.
 test('without initiative Attack only schedules; tiers and conditions still apply', () => {
