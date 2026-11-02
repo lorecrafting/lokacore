@@ -5,7 +5,7 @@
   "title": "Diku Sampler",
   "requires": {
     "kernel_api": {
-      "at_least": "1.150",
+      "at_least": "1.151",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -75,7 +75,13 @@
         "npc_hit": "combat.npc_hit",
         "npc_miss": "combat.npc_miss",
         "player_died": "combat.player_died",
-        "npc_died": "combat.npc_died"
+        "npc_died": "combat.npc_died",
+        "player_volley": "combat.player_volley",
+        "player_volley_all": "combat.player_volley_all",
+        "player_volley_one": "combat.player_volley_one",
+        "npc_volley": "combat.npc_volley",
+        "npc_volley_all": "combat.npc_volley_all",
+        "npc_volley_one": "combat.npc_volley_one"
       },
       "initiative": true,
       "tiers": [

@@ -1023,7 +1023,7 @@ rate 50).
 
 `world.combat` requires combat@1, schedule@1, death@1, valid `world.death`
 corpse/shrine settings. It owns
-`player_attack {chance, damage_min, damage_max}`, positive `interval`,
+`player_attack {chance, damage_min, damage_max, attacks?}` ([swings](#swing-declarations)), positive `interval`,
 `sleep_multiplier` and `flee_multiplier`, and `narration` text keys for player_hit,
 player_miss, npc_hit, npc_miss, player_died and npc_died. All six resolve in the
 cartridge catalog. An NPC's optional `attack` profile explicitly
@@ -1208,6 +1208,10 @@ A room's optional `sound` (`RoomDefinition`, a `Key` the cartridge names) is its
 - `world.combat.conditions`: a non-empty list of `{at_percent, text}` (both required), ordered and bounded as `tiers`; `text` resolves in the catalog (UNRESOLVED_REFERENCE at `.cartridge.world.combat.conditions[i].text`), told after each round for the player's foe with a `{target}` binding.
 
 A cartridge without them keeps its bytes, hash and behavior. `cartridges/diku_sampler` is the sampler; `cartridges/toolbox_showcase` declares all three.
+
+## Swing declarations
+
+[Swings](mechanics.md#swings-loka-kgd200) read an optional `attacks` on every attack profile (`protocol/entity.schema.json` `AttackProfile`): `world.combat.player_attack`, an item's `weapon.attack` and an NPC's `attack`. It is an integer 1..10 (the schema refuses others), default 1. A weapon that declares `ranged` with `attacks` above 1 is SCHEMA_VIOLATION at its `weapon.attack.attacks` (`ranged_swings`). Nine optional `world.combat.narration` TextKeys tell the summary line: `player_volley`, `player_volley_all`, `player_volley_one`, and the same for `npc_` and `ally_`; each resolves in the catalog (UNRESOLVED_REFERENCE at `.cartridge.world.combat.narration.<key>`), and its words may use `{count}` and `{hits}`, and for `npc_` and `ally_` `{attacker}`. A missing key tells no summary line. A cartridge without them keeps its bytes, hash and behavior. `cartridges/diku_sampler` declares the six player and npc keys; `cartridges/toolbox_showcase` declares all nine.
 
 ## Skill growth and rating declarations
 

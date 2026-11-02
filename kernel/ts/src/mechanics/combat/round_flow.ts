@@ -19,6 +19,7 @@ import { standing } from '../position/shared.ts';
 import { ally, allyOf, npcRef, participantsPresent } from './shared.ts';
 import { afraid, eligible, flight, next, packPlan } from './behavior.ts';
 import { attack, playerFirst, prefix } from './round_attack.ts';
+import { volleyLine } from './swings.ts';
 import { statusAllows } from '../status/bars.ts';
 import type { CombatEvent, Round } from './round.ts';
 
@@ -222,45 +223,51 @@ export function successor(
   ];
 }
 
+const striker = (world: World, row: EncounterRow, r: Round, attacker: EntityId) =>
+  attacker === row.body_id
+    ? r.shot
+      ? 'shot'
+      : 'player'
+    : ally(world, row.character_id, attacker)
+      ? 'ally'
+      : 'npc';
+
 /** A round's lines (loka-kgd.197 names, tiers and the foe's condition when declared), then its notes. */
 export function told(world: World, row: EncounterRow, r: Round): Text[] {
   const combat = world.cartridge.world!.combat!;
   const words = combat.narration;
   const hp = resourceRef(world, 'hp');
   const named = naming(world, row, r);
-  const striker = (attacker: EntityId) =>
-    attacker === row.body_id
-      ? r.shot
-        ? 'shot'
-        : 'player'
-      : ally(world, row.character_id, attacker)
-        ? 'ally'
-        : 'npc';
-  const lines: Text[] = r.events.map(({ payload: e }) => {
+  const lines: Text[][] = r.events.map(({ payload: e }, i) => {
     if (e.type === 'entity_died')
-      return {
-        key: words[e.victim_id === row.body_id ? 'player_died' : 'npc_died'],
-        ...named(e.killer_id, e.victim_id),
-      };
-    const s = striker(e.attacker_id);
+      return [
+        {
+          key: words[e.victim_id === row.body_id ? 'player_died' : 'npc_died'],
+          ...named(e.killer_id, e.victim_id),
+        },
+      ];
+    const s = striker(world, row, r, e.attacker_id);
     const max = resourceSpec(world, e.target_id, hp).maximum;
     // a miss or a fully resisted hit loses 0, below every cut (at_percent >= 1)
     const tier = combat.tiers?.find((t) => t[`${s}_hit`] && 100 * e.loss >= t.at_percent * max);
-    return {
-      key:
-        'prevented_by' in e && e.prevented_by
-          ? words[e.prevented_by]!
-          : (tier?.[`${s}_hit`] ?? words[`${s}_${e.hit ? 'hit' : 'miss'}`]!),
-      ...named(e.attacker_id, e.target_id),
-    };
+    return [
+      ...volleyLine(words, s, r.volleys?.[i], named(e.attacker_id, null)),
+      {
+        key:
+          'prevented_by' in e && e.prevented_by
+            ? words[e.prevented_by]!
+            : (tier?.[`${s}_hit`] ?? words[`${s}_${e.hit ? 'hit' : 'miss'}`]!),
+        ...named(e.attacker_id, e.target_id),
+      },
+    ];
   });
   const state = condition(world, row, r);
   if (state) {
     const died = r.events.findIndex((e) => e.payload.type === 'entity_died');
     const target = describeEntity(world, row.character_id, state.foe, 'short', r.steps) as TextKey;
-    lines.splice(died < 0 ? lines.length : died, 0, { key: state.text, bindings: { target } });
+    lines.splice(died < 0 ? lines.length : died, 0, [{ key: state.text, bindings: { target } }]);
   }
-  return [...lines, ...r.notes];
+  return [...lines.flat(), ...r.notes];
 }
 
 // Diku rounds (loka-kgd.197): a line's {attacker}/{target} bind each non-player participant's short name.

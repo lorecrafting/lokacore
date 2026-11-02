@@ -37,12 +37,16 @@ export type Round = {
   events: CombatEvent[];
   rng: RngState;
   draws: number;
+  /** Raw draws the round may spend: eight, grown by each multi-swing opportunity (swings.ts). */
+  budget: number;
   position: number;
   steps: { n: number };
   due_time: number;
   notes: Text[];
   /** Toolbox row 17: the player's opportunity this round was a shot; the foe's is skipped. */
   shot?: boolean;
+  /** loka-kgd.200: a multi-swing attack's swing and hit counts, by its index in `events`. */
+  volleys?: Record<number, { count: number; hits: number }>;
 };
 
 /** Current encounter occurrence only; an obsolete callback has no gameplay result. */
@@ -85,6 +89,7 @@ export function roundSequence(
     events: [],
     rng: world.state.rng,
     draws: 0,
+    budget: 8,
     position: 0,
     steps,
     due_time: job.due_time,
@@ -111,7 +116,6 @@ export function roundSequence(
   if (r.ops.some((op) => op.op === 'encounter.close'))
     r.ops.push(...crowSettled(prefix(world, r.ops, job.due_time), row.npc_id, mint));
   const narration = told(world, row, r);
-
   const timed = r.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: job.due_time } : op));
   return accepted(world, 'job_ran', timed, r.events, narration, r.rng);
 }

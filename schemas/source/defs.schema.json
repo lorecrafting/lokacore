@@ -252,6 +252,12 @@
       "additionalProperties": false,
       "description": "Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max.",
       "properties": {
+        "attacks": {
+          "description": "Swings (loka-kgd.200): how many swings one opportunity makes, each rolled on its own, their damage summed (1 to 10; default 1).",
+          "maximum": 10,
+          "minimum": 1,
+          "type": "integer"
+        },
         "chance": {
           "description": "Percent chance an attack is accurate; a defense can still prevent the hit.",
           "maximum": 100,
@@ -716,6 +722,18 @@
               "$ref": "#/$defs/TextKey",
               "description": "Told when an ally's strike misses."
             },
+            "ally_volley": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line."
+            },
+            "ally_volley_all": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line."
+            },
+            "ally_volley_one": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line."
+            },
             "block": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when a shield blocks."
@@ -736,6 +754,18 @@
               "$ref": "#/$defs/TextKey",
               "description": "Told when an NPC's attack misses the player."
             },
+            "npc_volley": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line."
+            },
+            "npc_volley_all": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line."
+            },
+            "npc_volley_one": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line."
+            },
             "player_died": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when the player falls in a combat round; also the default fall line for tick deaths."
@@ -747,6 +777,18 @@
             "player_miss": {
               "$ref": "#/$defs/TextKey",
               "description": "Told when the player's attack misses."
+            },
+            "player_volley": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line."
+            },
+            "player_volley_all": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line."
+            },
+            "player_volley_one": {
+              "$ref": "#/$defs/TextKey",
+              "description": "Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line."
             },
             "shot_hit": {
               "$ref": "#/$defs/TextKey",
@@ -5449,6 +5491,12 @@
       "additionalProperties": false,
       "description": "Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max.",
       "properties": {
+        "attacks": {
+          "description": "Swings (loka-kgd.200): how many swings one opportunity makes, each rolled on its own, their damage summed (1 to 10; default 1).",
+          "maximum": 10,
+          "minimum": 1,
+          "type": "integer"
+        },
         "chance": {
           "description": "Percent chance an attack is accurate; a defense can still prevent the hit.",
           "maximum": 100,

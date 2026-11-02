@@ -58,7 +58,12 @@ export function act(w: World, p: object) {
     n,
   );
   const narration = r.decision.kind === 'accepted' ? (r.decision.narration ?? []) : [];
-  return { decision: r.decision, world: r.world, lines: narration.map((l) => l.key as string) };
+  return {
+    decision: r.decision,
+    world: r.world,
+    said: narration,
+    lines: narration.map((l) => l.key as string),
+  };
 }
 /** An accepted command's world and narration keys. */
 export function play(w: World, p: object) {
@@ -137,9 +142,12 @@ export const seeded = (w: World, rng: number[]): World => ({
 // rng_steps[3].state the raw 2031721883 (1, the foe first).
 export const PLAYER_FIRST = [1, 2, 3, 4];
 export const FOE_FIRST = [27274249, 25704967, 31982592, 12605441];
-// rng_steps[2].state: raws 70819200 (initiative 0, the player first) and 2031721883 (roll 83 >= 50,
-// the unarmed blow misses); the foe's roll draws what follows.
+// rng_steps[2].state: raws 70819200 (initiative 0, the player first), then rolls 83 and 92 (>= 50,
+// both unarmed swings miss); the foe's rolls draw what follows.
 export const MISS = [25179138, 12295, 540162, 2107404];
+// [1, 2, 3, 4] 36 draws on: initiative 784076025 mod 2 = 1 (the foe first), then rolls 58, 49, 19
+// (damage raw 3477619602, even), 69 and 10 (damage raw 1107844762, even) (loka-kgd.200).
+export const ROUND_2 = [2256594098, 2480927130, 1951874349, 913923744];
 /** Rounds every 150 s until `target`, each seeded MISS: the unarmed player never lands a blow. */
 export function missing(w: World, target: number) {
   const lines: string[] = [];

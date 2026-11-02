@@ -5,7 +5,7 @@
   "title": "Toolbox Showcase",
   "requires": {
     "kernel_api": {
-      "at_least": "1.151",
+      "at_least": "1.152",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -228,7 +228,8 @@
       "player_attack": {
         "chance": 50,
         "damage_min": 1,
-        "damage_max": 1
+        "damage_max": 1,
+        "attacks": 2
       },
       "interval": 150,
       "sleep_multiplier": 2,
@@ -241,7 +242,16 @@
         "player_died": "combat.player_died",
         "npc_died": "combat.npc_died",
         "ally_hit": "combat.ally_hit",
-        "ally_miss": "combat.ally_miss"
+        "ally_miss": "combat.ally_miss",
+        "player_volley": "combat.player_volley",
+        "player_volley_all": "combat.player_volley_all",
+        "player_volley_one": "combat.player_volley_one",
+        "npc_volley": "combat.npc_volley",
+        "npc_volley_all": "combat.npc_volley_all",
+        "npc_volley_one": "combat.npc_volley_one",
+        "ally_volley": "combat.ally_volley",
+        "ally_volley_all": "combat.ally_volley_all",
+        "ally_volley_one": "combat.ally_volley_one"
       },
       "allies": [
         "gil"

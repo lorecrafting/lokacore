@@ -13,9 +13,10 @@
     "gain": 0
   },
   "attack": {
-    "chance": 100,
+    "chance": 50,
     "damage_min": 1,
-    "damage_max": 1
+    "damage_max": 1,
+    "attacks": 2
   },
   "description_variants": [
     {
