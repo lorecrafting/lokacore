@@ -42,7 +42,7 @@ No card. In one reply: the level line in gilt, the `level` sound and medium hapt
 | Point | Ruling |
 |---|---|
 | Wash | `warning`, `opacity.wash` under the ink over `motion.flash`. Reduced motion `opacity.washStill`. **No swell**: the swell reads as impact |
-| Where | Any page showing when the cue plays, not just Combat. Experience can arrive from a kill, a conversation or an `experience.grant` reaction. A new `LevelWash` is the first child of the `Page` root (`pages.tsx:136`): above `UnderInk` and `Blow`'s layers, below the ink, on paperless pages or not. Opaque cards and the footer stay unwashed, as the blow wash leaves them |
+| Where | Any page showing when the cue plays, not just Combat. Experience can arrive from a kill, a conversation or an `experience.grant` reaction. A new `LevelWash` is the first child of the `Page` root (`pages.tsx:136`): above `UnderInk` and `Blow`'s layers, below the ink, on paperless pages or not. Opaque cards stay unwashed. `Page`'s foot is washed; the running head and status row are outside `Page` and are not (design pass, 2026-11-01) |
 | Clock | One Flash limit. In `play` (`cues.ts:115`) `level` takes `wash` like `hp_loss`, gated by Flashes, `motion.flash.gap` and `s.washed`. Storm already keeps its gap from any `cue.wash` |
 | Hit and level together | The level wins. `cuesOf` already lists it first; the blow follows one beat later with `wash: false`, keeping value, thud and haptic. A blow washed under a second before: the level has no wash, and keeps everything else |
 | `Blow` | Must answer `hp_loss` only. It reads `cue.wash` from any cue today (`Blow.tsx:57`), so a level in a fight would wash `danger` and swell |
