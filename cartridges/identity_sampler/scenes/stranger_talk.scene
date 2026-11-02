@@ -1,0 +1,6 @@
+npc: stranger
+
+* The stranger waits.
+- Ask their name
+  sets: knows_name
+  * "Tamsin," they say.
