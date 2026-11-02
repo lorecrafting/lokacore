@@ -222,7 +222,8 @@ ADR-075 §4, derived, never authority (`trace.ts:1`): a `trace.run` header per r
 and one `trace.command` entry per committed command (decision compacted to outcome, delta
 digest and RNG state; the commit outcome and committed events), written after the gameplay
 transaction in its own; a write failure is swallowed and caught up later from the receipts
-(`:120`). Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
+(`:120`). A coalesced tick's entry replaces the one it absorbed, in the trace transaction; after a
+death between the two commits, catch-up removes the entry whose receipt is gone. Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
 newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:130`) and, when the
 host supplies a clock, each NEW decision's `kernel.decision_latency` (`mobile/authority/local-story/invocation.ts:177`).
@@ -276,6 +277,17 @@ pins stay refused; no save is retargeted. A managed elapsed session without cloc
 Accounting uses exact checked integer arithmetic, retaining fractions and existing target debt.
 Active monotonic samples are floored absolute milliseconds; resume credits positive wall gaps
 once and durably rebases negative gaps without rewind.
+
+**Coalesced ticks.** A driver tick whose decision only moved the clock (accepted `elapsed`, one
+`time.advance` op, no events, effects or narration) replaces the newest receipt in the same transaction
+when that receipt is such a decision too, for the same run and context, ending where the tick starts,
+with the same RNG (`coalesced` in `delivery.ts`); anything else in between, or a row that does not parse
+or validate, inserts as before. The stored row is what one tick over the whole span decides: its span,
+its `elapsedCommandId`, its digest and op, so an hour of idle costs a row per due job or command, not
+per tick. Rows that carry anything are never touched, so the Chronicle and the narration read the same
+receipts. The head revision still moves per tick (`opened_revision`, view tokens and redraws depend on
+it), so accepted receipts may skip revisions, only before a clock-only row. The trusted `story.elapsed`
+entry never coalesces.
 
 **Away cap ([owner ruling](../decisions/owner-decision-away-catch-up-cap-2026-11-01.md)).** A wall-gap
 credit (the first capture after open, and every resume) is at most `manifest.time_policy.away_cap_hours`

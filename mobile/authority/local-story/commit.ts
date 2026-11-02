@@ -31,6 +31,7 @@ export function commit(
   r: Receipt,
   reports: Captured[],
   elapsed?: Checkpoint,
+  replaces?: string, // the receipt `r` absorbs: a coalesced tick (delivery.ts)
 ): boolean {
   const invalid = validate('DecisionResult', r.response);
   if (invalid.length)
@@ -46,6 +47,8 @@ export function commit(
         encode(c.report as never),
       );
     if (decision.kind === 'accepted') writeDelta(db, next, decision, r.revision);
+    if (replaces)
+      db.runSync('DELETE FROM receipt WHERE scope = ? AND invocation_id = ?', r.scope, replaces);
     db.runSync(
       'INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       r.scope,

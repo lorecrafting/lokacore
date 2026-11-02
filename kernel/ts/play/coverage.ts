@@ -61,7 +61,7 @@ export function replay(
   for (const e of entries) {
     if (e.data.ordinal === upTo) return;
     const before = r.world;
-    const { trace: t, decision } = decideReplay(r, e.data.command);
+    const { trace: t, decision } = decideReplay(r, e.data.command, e.ids.revision);
     if (line(t) !== `${recorded[r.ordinal]}\n`) throw differs(r.ordinal);
     each?.(before, decision, r.ordinal);
   }

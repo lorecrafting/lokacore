@@ -39,6 +39,7 @@ export type Story = {
 };
 
 /** Commits a NEW attempt's decision, then adopts it; the reply never claims an unknown save. */
+// An unknown COMMIT is traced once settled, with its follow-up; a process that dies while fenced traces neither.
 export function save(
   s: Story,
   next: { world: World; decision: DecisionResult },
@@ -46,11 +47,12 @@ export function save(
   reports: Captured[],
   r: Receipt,
   checkpoint?: Checkpoint,
+  replaces?: string,
 ): Reply {
   const at = r.revision;
   let committed: boolean;
   try {
-    committed = commit(s.db, next.world, next.decision, r, reports, checkpoint);
+    committed = commit(s.db, next.world, next.decision, r, reports, checkpoint, replaces);
   } catch (e) {
     if (e instanceof ElapsedRecoveryError) block(s, e);
     trace(at, 'failed');
@@ -65,7 +67,6 @@ export function save(
   s.fence = () => {
     const got = reconciled(s, r, checkpoint);
     if (got) adopt(s);
-    // Traced once settled, with its follow-up; a process that dies while fenced traces neither.
     trace(at, 'unknown', got ? 'committed' : 'failed');
     return got;
   };
