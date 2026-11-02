@@ -120,6 +120,29 @@ test('a 1 on the initiative draw lets the goblin strike first', () => {
   );
 });
 
+// Breaks: a tier or condition cut scaled other than by 100 (e.g. 101 × loss): a 3-hp hit on a
+// 101-hp goblin is 300 < 3 × 101 but >= 2 × 101; its 98 left is 9800 < 98 × 101 but >= 97 × 101.
+test('a cut compares 100 × hp with at_percent × hp range, both sides, on a 101-hp foe', () => {
+  const big = reload(base, (c) => {
+    c.npcs[`${S}:npc/goblin`].hp = { minimum: 0, maximum: 101, start: 101, gain: 0 };
+    c.world.combat.tiers = [
+      { at_percent: 3, player_hit: key('player_hit_50') },
+      { at_percent: 2, player_hit: key('player_hit_25') },
+    ];
+    c.world.combat.conditions = [
+      { at_percent: 98, text: key('condition_100') },
+      { at_percent: 97, text: key('condition_50') },
+    ];
+  });
+  assert.ok(big.ok, JSON.stringify(big));
+  const { w, lines } = attack(big.cartridge as Cartridge);
+  assert.equal(hp(w, goblin(w)), 98);
+  assert.deepEqual(
+    lines.map((l) => l.key),
+    [key('player_hit_25'), key('npc_hit'), key('condition_50')],
+  );
+});
+
 // Breaks: a fatal round 1 schedules a successor, the dead foe gets a condition line or strikes,
 // the full-hp tier (100 × 10 >= 50 × 10) is missed, the death line loses its name, or a save
 // refuses the closed row whose round-1 job was never scheduled.

@@ -58,7 +58,7 @@ function engage(
   const opened = [...open, ...attacked(world, payload.target_id, encounter_id)];
   if (world.cartridge.world!.combat!.initiative) {
     const round = openingRound(world, opened, command, job_id, job, encounter_id, mint, steps);
-    if (round.kind !== 'accepted') return round;
+    if (round.kind !== 'accepted') return round; // mutate-skip: type narrowing; a round accepts or throws
     return accepted(
       world,
       'engaged',
