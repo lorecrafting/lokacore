@@ -985,6 +985,12 @@
         "kind": {"description":"The damage kind (cold, fire, physical or poison); the target's resistance to it reduces the damage.",
           "$ref": "entity.schema.json#/$defs/DamageKind"
         },
+        "attacks": {
+          "description": "Swings (loka-kgd.200): how many swings one opportunity makes, each rolled on its own, their damage summed (1 to 10; default 1).",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
         "crit": {
           "description": "Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
           "type": "object",

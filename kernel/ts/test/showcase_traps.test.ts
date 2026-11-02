@@ -33,8 +33,9 @@ import {
   talk,
   wait,
   where,
-  FOE_FIRST,
+  MISS,
   PLAYER_FIRST,
+  ROUND_2,
   seeded,
 } from './showcase_fixture.ts';
 
@@ -47,11 +48,7 @@ const poisoned = (w: World) => {
 };
 const outcome = (w: World, action: string) => {
   const r = act(w, { type: 'perform', action });
-  return {
-    world: r.world,
-    lines: r.lines,
-    out: r.decision.kind === 'accepted' && r.decision.outcome,
-  };
+  return { ...r, out: r.decision.kind === 'accepted' && r.decision.outcome };
 };
 const flagstones = (w: World) => describe(w, w.character, w.details[detail(w, 'flagstones')]);
 const exits = (w: World) =>
@@ -328,17 +325,19 @@ const afraidEnds = (x: World, e: string) =>
   activeStatuses(x, e as never).find((s) => s.spec.key === 'afraid')?.row.ends_at;
 /** Attack `target` (round 1, the player first), then round 2 (the foe first); each round's lines. */
 function flight(x: World, target: string) {
-  const r1 = play(seeded(x, PLAYER_FIRST), { type: 'attack', target_id: target });
-  const r2 = wait(seeded(r1.world, FOE_FIRST), r1.world.state.clock + 150);
+  const r1 = play(seeded(x, MISS), { type: 'attack', target_id: target });
+  const r2 = wait(seeded(r1.world, ROUND_2), r1.world.state.clock + 150);
   return { r1, r2 };
 }
-/** The pack in the den, afraid, flees south one goblin a round; no hit on the player; the
- * plate (disarmed or not) poisons no goblin. */
+/** The pack in the den, afraid, flees south one goblin a round; no hit on the player; the plate
+ * (disarmed or not) poisons no goblin. Round 1: the sword's 83 and 92 miss, 34 hits for 2; calm A
+ * rolls 97, 4 (1 hit). Round 2: calm A rolls 58, 49 (1 hit); the sword's 19, 10 hit for 1, 69 misses. */
 function assertFlight(x: World) {
   const [a, b] = goblinsIn(x, 'chief_den');
   const { r1, r2 } = flight(x, a!);
   assert.deepEqual(r1.lines, [
     'combat.goblin_joined',
+    'combat.player_volley_one',
     'combat.player_hit_30', // 2 of A's 6 hp; A then flees on its turn
     'combat.condition_50', // A's, the foe struck: 4 of 6 (400 >= 50 × 6, 400 < 75 × 6), not B's
     'combat.goblin_fled_south',
@@ -420,6 +419,7 @@ test('traps 8 wounded: a calm goblin struck to 1 of 6 hp flees, to 2 of 6 stands
 test('traps 9: the chief falls to one blow; its fall frightens the pack, which then flees', () => {
   const r1 = play(seeded(den, PLAYER_FIRST), { type: 'attack', target_id: npc(den, 'chief') });
   assert.deepEqual(r1.lines, [
+    'combat.player_volley', // initiative 0; the sword's 0 and 0 hit for 1 + 0 and 1 + 1, 92 misses
     'combat.player_hit_100', // 2 of the chief's 2 hp
     'combat.npc_died',
     'narration.afraid.applied',

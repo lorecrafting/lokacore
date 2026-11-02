@@ -328,27 +328,34 @@ test('admission refuses absent, dead, sanctuary, nonstanding and already engaged
 // Independent Python xoshiro calculation: accuracy3019873350; next seven raws all reject bound2147483649:
 // 2778870678,3218504330,2184986130,3037241175,3032836435,3141722952,3972115460.
 // Ninth raw1913555854 would accept, so resetting the per-call budget incorrectly commits.
+// Two swings (budget 12): raw 9 is the first damage, raw 10 (57 < 75) the second hit, raw 11
+// (913228479) its damage: 11 draws commit; growing the budget after the swings faults at raw 9.
 test('eight raw draws including damage rejections exhaust the whole round atomically', () => {
   const w = combatWorld();
   const settings = w.cartridge.world!.combat!;
-  const controlled = {
-    ...w,
-    cartridge: {
-      ...w.cartridge,
-      world: {
-        ...w.cartridge.world,
-        combat: {
-          ...settings,
-          player_attack: { chance: 75, damage_min: 1, damage_max: 2147483649 },
+  for (const [attacks, kind] of [
+    [1, 'fault'],
+    [2, 'accepted'],
+  ] as const) {
+    const controlled = {
+      ...w,
+      cartridge: {
+        ...w.cartridge,
+        world: {
+          ...w.cartridge.world,
+          combat: {
+            ...settings,
+            player_attack: { chance: 75, damage_min: 1, damage_max: 2147483649, attacks },
+          },
         },
       },
-    },
-    state: { ...w.state, rng: [3116826059, 1870624627, 1508195160, 4130000286] },
-  };
-  const begun = attack(controlled).world;
-  const next = elapsed(begun, 150);
-  assert.equal(next.decision.kind, 'fault');
-  assert.equal(next.world, begun);
+      state: { ...w.state, rng: [3116826059, 1870624627, 1508195160, 4130000286] },
+    };
+    const begun = attack(controlled).world;
+    const next = elapsed(begun, 150);
+    assert.equal(next.decision.kind, kind);
+    if (kind === 'fault') assert.equal(next.world, begun);
+  }
 });
 
 // Breaks (loka-2lvx): a blow past an NPC's authored hp floor writes a level below its minimum and the

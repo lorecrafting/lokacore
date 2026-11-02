@@ -13,9 +13,10 @@
     "gain": 0
   },
   "attack": {
-    "chance": 100,
-    "damage_min": 2,
-    "damage_max": 2
+    "chance": 60,
+    "damage_min": 1,
+    "damage_max": 3,
+    "attacks": 2
   },
   "drops": [
     {

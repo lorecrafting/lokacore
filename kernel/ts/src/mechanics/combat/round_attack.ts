@@ -1,10 +1,8 @@
-// size: allow 305, one round's attack, draws and injury, plus Diku rounds' initiative draw (loka-kgd.197)
+// One round's attack and injury, plus Diku rounds' initiative draw (loka-kgd.197); swings.ts rolls the blows.
 import { status } from '../skills.ts';
 import type {
-  AttackProfile,
   DefinitionRef,
   DerivedStat,
-  Tag,
   WorldSettings,
   Command,
   DeltaOp,
@@ -18,17 +16,17 @@ import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { apply } from '../../runtime/apply.ts';
 import { add, mul, saturate } from '../../foundation/int.ts';
 import { KernelError } from '../../foundation/error.ts';
-import { uniformCounted } from '../../foundation/rng.ts';
 import { aboveFloor, adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
 import { deathSequence } from '../death/sequence.ts';
 import { derived, npcValue } from '../attribute/shared.ts';
 import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
-import { fact, positionOf, standing } from '../position/shared.ts';
+import { fact, positionOf } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import { equipped } from '../lookups.ts';
-import { broken, wear, type Worn } from './durability.ts';
+import { broken, wear } from './durability.ts';
+import { draw, swings, type Profile } from './swings.ts';
 import type { CombatEvent, Round } from './round.ts';
-import { ally, lastOpponent, resisted } from './shared.ts';
+import { ally, lastOpponent } from './shared.ts';
 import { barring } from '../status/bars.ts';
 
 export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.clock): World {
@@ -40,22 +38,14 @@ export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.
 }
 
 // Row 6b: an ally strikes the player's target, last; a round whose rejected draws left fewer
-// than two of its eight (hit, damage) skips the ally's turn (two left can still exhaust the
-// budget on a rejected hit draw; mechanics.md row 6b states the limit).
-const allyFits = (r: Round) => r.draws <= 6;
+// than two of its budget (hit, damage) skips the ally's turn (two left can still exhaust the
+// budget on a rejected hit draw; mechanics.md row 6b and Swings state the limit).
+const allyFits = (r: Round) => r.draws <= r.budget - 2;
 
 /** Diku rounds (loka-kgd.197): one uniform(2) a round, 0 the player's side first; else odd rounds. */
 export const playerFirst = (world: World, row: EncounterRow, r: Round) =>
   world.cartridge.world!.combat!.initiative ? draw(r, 2) === 0 : row.round % 2 === 1;
 
-function draw(r: Round, bound: number) {
-  const [value, rng, spent] = uniformCounted(r.rng, bound, 8 - r.draws);
-  r.rng = rng;
-  r.draws += spent;
-  return value;
-}
-
-// size: allow 42, the row 21 wear call sits between the attack event and the injury
 export function attack(
   world: World,
   command: Pick<Command, 'id'>,
@@ -72,12 +62,9 @@ export function attack(
   const target_id = foe ? row.body_id : row.npc_id;
   const profile = attackProfile(world, row, attacker_id, player, r);
   if (profile.ammo) shoot(world, row, profile.ammo, r);
-  const roll = draw(r, 100);
-  const accurate = roll < profile.chance;
-  const prevented_by = accurate && foe ? defend(world, row, r) : undefined;
-  const hit = accurate && !prevented_by;
+  const { count, hits, damage, prevented_by } = swings(world, row, target_id, profile, foe, r);
+  const hit = hits > 0;
   const sleeping = foe && positionOf(world, row.character_id) === 'sleeping';
-  const damage = hit ? dealt(world, target_id, profile, roll, damageRoll(r, profile)) : 0;
   const loss = Math.min(
     aboveFloor(world, target_id, resourceRef(world, 'hp')),
     mul(damage, sleeping ? world.cartridge.world!.combat!.sleep_multiplier : 1),
@@ -93,6 +80,7 @@ export function attack(
       ...(prevented_by && { prevented_by }),
     }),
   );
+  if (count > 1 && hit) (r.volleys ??= {})[r.events.length - 1] = { count, hits };
   if (hit && profile.worn) wear(world, row, profile.worn, r);
   if (!loss && damage > 0 && sleeping) wake(prefix(world, [], r.due_time), row, r); // a blow at the hp floor takes nothing, yet still wakes
   if (!loss) return;
@@ -116,25 +104,6 @@ function skipped(world: World, attacker: EntityId, player: boolean, r: Round) {
 function shoot(world: World, row: EncounterRow, ammo: DefinitionRef, r: Round) {
   r.ops.push({ ...adjust(world, row.body_id, ammo, -1, {}).op, at: r.due_time });
   r.shot = true;
-}
-
-function damageRoll(r: Round, profile: AttackProfile) {
-  return add(
-    profile.damage_min,
-    profile.damage_min === profile.damage_max
-      ? 0
-      : draw(r, add(profile.damage_max - profile.damage_min, 1)),
-  );
-}
-
-// Toolbox row G2: a critical hit is the hit draw below crit.chance (no extra draw: an NPC attack
-// may already spend hit, dodge, block and damage of the round's 8). Order: the crit multiplier,
-// then the target's resistances, its NPC definition's and (status reader 5) its active statuses'
-// summed before the one clamp; attack() then applies the sleep multiplier and the HP cap.
-function dealt(world: World, target: EntityId, profile: Profile, roll: number, damage: number) {
-  const crit =
-    profile.crit && roll < profile.crit.chance ? mul(damage, profile.crit.multiplier) : damage;
-  return resisted(world, target, [profile.kind, ...(profile.tags ?? [])], crit);
 }
 
 function attackEvent(
@@ -230,10 +199,6 @@ function wake(at: World, row: EncounterRow, r: Round) {
   r.position = wake.position;
 }
 
-// `ammo`: the pool a row 17 shot spends, set only on the player's shot profile; `worn`: the
-// wielded weapon a row 21 hit wears, set only on its own durable attack.
-type Profile = AttackProfile & { tags?: readonly Tag[]; ammo?: DefinitionRef; worn?: Worn };
-
 function attackProfile(
   world: World,
   row: EncounterRow,
@@ -287,17 +252,4 @@ function bonused(
     damage_min: Math.max(0, saturate(base.damage_min + damage)),
     damage_max: Math.max(0, saturate(base.damage_max + damage)),
   };
-}
-
-function defend(world: World, row: EncounterRow, r: Round): 'dodge' | 'block' | undefined {
-  if (!standing(world, row.character_id)) return;
-  const dodge = world.cartridge.world!.combat!.dodge;
-  if (
-    dodge &&
-    status(world, row.character_id, dodge.skill, r.steps).usable &&
-    draw(r, 100) < dodge.chance
-  )
-    return 'dodge';
-  const shield = equipped(world, row.body_id, 'off_hand')?.item;
-  if (shield?.block_chance !== undefined && draw(r, 100) < shield.block_chance) return 'block';
 }

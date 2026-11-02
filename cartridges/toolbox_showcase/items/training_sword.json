@@ -15,10 +15,11 @@
   "weapon": {
     "skill": "blade",
     "attack": {
-      "chance": 100,
-      "damage_min": 2,
+      "chance": 60,
+      "damage_min": 1,
       "damage_max": 2,
-      "kind": "physical"
+      "kind": "physical",
+      "attacks": 3
     }
   },
   "tags": [

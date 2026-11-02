@@ -19654,6 +19654,36 @@
       "chance": 75,
       "damage_min": 1,
       "damage_max": 2,
+      "attacks": 0
+    },
+    "errors": [
+      {
+        "path": "/attacks",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "attacks": 11
+    },
+    "errors": [
+      {
+        "path": "/attacks",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
       "crit": {
         "chance": 101,
         "multiplier": 2
