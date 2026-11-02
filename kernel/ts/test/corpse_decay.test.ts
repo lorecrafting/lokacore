@@ -4,11 +4,11 @@ import { test } from 'node:test';
 import { fragment } from './fragment.ts';
 import { fatal } from './death_fixture.ts';
 import { elapsed } from './c5_bleed_fixture.ts';
-import { compose } from '../src/foundation/compose.ts';
+import { compose, type State } from '../src/foundation/compose.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { gameView } from '../src/view/view.ts';
 import type { World } from '../src/runtime/decision.ts';
-import type { EntityId, JobId } from '../src/contracts.gen.ts';
+import type { DeltaOp, EntityId, JobId } from '../src/contracts.gen.ts';
 
 const showcase = fragment('protocol/fixtures/toolbox_showcase_hash.json');
 
@@ -92,7 +92,7 @@ test('a decay job binds its corpse and nothing else', () => {
     corpse_id: corpse as EntityId,
   } as const;
   const faulted = (o: object) =>
-    'fault' in (compose(world.state as never, { ops: [o as never] }) as object);
+    'fault' in (compose(world.state as unknown as State, { ops: [o as DeltaOp] }) as object);
   assert.equal(faulted(op), false);
   assert.equal(faulted({ ...op, actor_id: world.character }), true);
   const { corpse_id: _, ...unbound } = op;
