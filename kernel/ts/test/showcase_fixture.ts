@@ -131,7 +131,7 @@ export const attack = (w: World, who: string) => fight(w, who).world;
 /** `w` with its RNG at a numeric-vectors.json state (docs/spec/conformance). */
 export const seeded = (w: World, rng: number[]): World => ({
   ...w,
-  state: { ...w.state, rng: rng as never },
+  state: { ...w.state, rng: rng as World['state']['rng'] },
 });
 // Initiative is the next raw mod 2: from [1, 2, 3, 4] the raw 11520 (0, the player first); from
 // rng_steps[3].state the raw 2031721883 (1, the foe first).

@@ -30,6 +30,8 @@ function base(c: any, start = 64800, wander_interval = 3600) {
   combat.interval = 5;
   combat.player_attack = { chance: 100, damage_min: 1, damage_max: 1 };
   delete combat.allies;
+  // these rows pin the alternating order and plain lines, not Diku rounds (loka-kgd.197)
+  for (const k of ['initiative', 'tiers', 'conditions']) delete combat[k];
 }
 
 /** The controlled goblins as a plain population: no pack block, 150-second combat rounds. */
