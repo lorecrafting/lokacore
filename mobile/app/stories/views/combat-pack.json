@@ -286,7 +286,7 @@
     "bare": "npc.goblin.bare",
     "plural": "npc.goblin.plural"
    },
-   "band": "ready",
+   "band": "hurt",
    "active_opponents": [
     {
      "id": "dae37be6-777f-8cc2-9150-358c305d326e",
@@ -296,7 +296,7 @@
       "bare": "npc.goblin.bare",
       "plural": "npc.goblin.plural"
      },
-     "band": "ready"
+     "band": "hurt"
     },
     {
      "id": "fb3908f6-f602-82da-b5c6-e6ea6e1ed23b",
@@ -412,7 +412,7 @@
       }
      }
     ],
-    "band": "ready",
+    "band": "hurt",
     "contents": [
      {
       "id": "7b72a594-271c-8c13-93f9-9268c2d98f40",
@@ -521,10 +521,10 @@
      "kind": "resource",
      "key": "hp"
     },
-    "current": 10,
+    "current": 9,
     "maximum": 10,
-    "band": "ready",
-    "tone": "normal"
+    "band": "hurt",
+    "tone": "warning"
    },
    {
     "resource": {
@@ -595,10 +595,16 @@
  ],
  "log": [
   "You arrive from the north.",
-  "Another goblin joins the fight."
+  "Another goblin joins the fight.",
+  "You hit a goblin.",
+  "A goblin hits you.",
+  "A goblin has some cuts."
  ],
  "combatLog": [
-  "Another goblin joins the fight."
+  "Another goblin joins the fight.",
+  "You hit a goblin.",
+  "A goblin hits you.",
+  "A goblin has some cuts."
  ],
  "details": {}
 }

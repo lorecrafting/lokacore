@@ -305,11 +305,10 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   Barrier `toll_gate` `opens_when fact_compare warden_lets_pass true`; reaction `gate_lifted` on
   `fact_changed warden_lets_pass` (when true) opens it with `barrier.set` (row W22), so the pass
   opens the gate (loka-y6yg.13).
-  The manifest's `world.combat.player_attack` is `chance 0`: the engagement holds and neither side
-  lands a hit, so waiting it out never kills the Warden and the talk path to `toll_gate` stays open
-  (flee, mend the standing, talk). A later weapon, `hit_chance` term or combat district that lets
-  the player hit must keep the Warden alive another way; `showcase_social.test.ts` social 2-3 fails
-  otherwise.
+  The manifest's `world.combat.player_attack` was `chance 0`, so waiting it out never killed the
+  Warden. Diku rounds (Beads `loka-kgd.197`) raised it to 50: the unarmed blow can now kill him, so
+  social 2-3 seeds each round to a miss and the talk path to `toll_gate` (flee, mend the standing,
+  talk) holds only if the player flees in time ([combat district](combat-district.md#the-worldcombat-constraint)).
 - **Tam**: `room: warden_gate`; `daily_schedule` 10 `mill`, 11 `[{when: sky {weather: rain},
   room: church, goal: "Tam makes for the church porch out of the rain."}, village_green]`,
   15 `warden_gate` (`schedule_sampler/npcs/maud.json`).
@@ -373,7 +372,7 @@ world whose day 1 is rain (Tam visits the mill every day, so on a later day Nell
 |---|---|---|---|
 | 1 | Read `sign_social`; buy bread from Nell. | Costs 4; standing 0, Nell wary. | disposition x commerce x dialogue |
 | 2 | Talk to the Reeve: `help`. | Standing 1; Nell friendly; bread now 2; Nell's shelf shows the price. | disposition x commerce x dialogue |
-| 3 | Talk to the Reeve: `wrong` twice. | Standing -1 then -2 (clamped); Nell refuses to trade and to talk (`invalid_state`, the shelf's reason); walking east the Warden's engage line opens an encounter (hp 5, chance 0: no damage; Flee or wait; the combat district owns the rest). | disposition x commerce x dialogue |
+| 3 | Talk to the Reeve: `wrong` twice. | Standing -1 then -2 (clamped); Nell refuses to trade and to talk (`invalid_state`, the shelf's reason); walking east the Warden's engage line opens an encounter (hp 5; the Warden's chance 0 deals no damage; Flee or wait; the combat district owns the rest). | disposition x commerce x dialogue |
 | 4 | Fresh world: give the Warden the apple; `wrong` twice; walk east. | Warden trust 1, so no engagement; Nell still hostile. Give Nell the apple instead in another run: her trust 1, the gift reaction names no NPC and lands on whoever holds it. | |
 | 5 | Fresh world: Talk to the Warden: `lean`. | Failure line, conversation closes, intimidate use 1 (level 1). Talk again: `lean` passes (1 ≥ 1), use 2 (level 2), `warden_lets_pass` true; `toll_gate` swings open (no Open step). (`reason` passes at once: cha 6 ≥ 5.) | rumour x dialogue check x codex (the practice half) |
 | 6 | East; `pick_strongbox`. | First pick fails (level 0 < 1), second passes; the lid opens; take `mill_ledger`, read it: Lore lists "The mill". | pick x force x skill growth |

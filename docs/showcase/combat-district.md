@@ -28,17 +28,19 @@ changes this district makes, both scheduled by plan 1:
 
 ## The `world.combat` constraint
 
-The cartridge has one `world.combat` block and the social district needs `player_attack.chance 0`
-so the Warden can never be killed (`showcase_social.test.ts` social 2-3). The combat district keeps
-that block unchanged and makes the player dangerous another way, with two belts and braces:
+The cartridge has one `world.combat` block. The social district was built on `player_attack.chance 0`
+so the Warden could never be killed; Diku rounds (Beads `loka-kgd.197`) raised it to 50, so an
+unarmed blow (1 + str - 10, not resisted) can now kill him in a long wait: `showcase_social.test.ts`
+social 2-3 seeds each round to a miss, and `walk_social_standing` flees before he falls. The combat
+district makes the player dangerous with two belts and braces:
 
 1. **The player hits only with a wielded weapon.** The attack profile that strikes is the usable
    wielded weapon's, else `player_attack` ([row 2](../system/mechanics.md#stats-derived-from-attributes-toolbox-row-2);
    [C1](../system/mechanics.md#c1-training-and-armed-defense-selected-contract)). Aldous's lesson
    acquires the `blade` skill and hands over the `training_sword` (`weapon.attack` chance 100,
    damage 2, `kind: physical`; `damage_sampler/items/iron_sword.json`, C1's
-   `tobin_swords.json` `skill.acquire` + `receive`). Unarmed, in every district, the player still
-   lands nothing. No `world.derived.hit_chance` table: it would lift the unarmed chance too.
+   `tobin_swords.json` `skill.acquire` + `receive`). Unarmed, the player lands half the time (chance
+   50). No `world.derived.hit_chance` table: it would lift the unarmed chance too.
 2. **The Warden resists `physical` 100** (`resistances`, [row G2](../system/mechanics.md#damage-kinds-resistances-and-critical-hits-toolbox-row-g2)):
    a sword hit on him is `hit: true, loss: 0`, narrated as a hit, before and after crits and the
    derived damage bonus (order: damage, crit, resistance). The engagement holds, Flee and the talk
@@ -46,7 +48,7 @@ that block unchanged and makes the player dangerous another way, with two belts 
 
 `world.derived.damage` (str, per_point 1, pivot 10, divisor 1; `levelling_sampler/cartridge.json`)
 is added: it changes both damage bounds of whichever profile strikes, so a Raise or `might` bites
-harder with the sword and changes nothing unarmed (chance 0 never deals the unarmed 1).
+harder with the sword and unarmed alike.
 
 ## Manifest changes
 
@@ -164,8 +166,9 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 
 ### Guided loop and expected outcomes
 
-Any day: no combat room is exposed and nothing here reads the sky. Every attack is chance 100 or 0,
-so no step but the purse drop depends on the seed. The player carries the inn's `waterskin` from
+Any day: no combat room is exposed and nothing here reads the sky. Every attack but the unarmed one
+(chance 50) is chance 100; initiative and the unarmed roll are seeded per round in the tests
+(`kernel/ts/test/showcase_fixture.ts` `seeded`), and the walk `walk_combat` follows the start seed. The player carries the inn's `waterskin` from
 step 1. Times are relative to the Attack that opens each fight (rounds at +150, +300, ...; odd
 rounds player first, even rounds opponent first, the ally after both). Moves cost 1 mv (the engine
 default) and Flee 2, so mv is below 100 from step 1 on; no step pins an mv value.
@@ -177,7 +180,7 @@ default) and Flee 2, so mv is below 100 from step 1 on; no step pins an mv value
 | 3 | Shout a warning (the yard gate's card). In a separate branch, the inn. | The inn offers no such card; after the shout `gil_warned` is true and the card is refused (`invalid_state`), and Gil's description in `gate_yard` reads the warned variant. The fact never resets, hence the branch. | offered action x facts x variants |
 | 4 | West; Attack the raider; round 1. | Player hits 2 (raider 1); the raider hits (hp 9); Gil hits 1 and the raider dies: `entity_died` with Gil as killer and the player credited; `raider_slain` true; `bounty` resolves `done` in the same proposal; experience 10 + 20 = 30, level 2, one `level_up` line last, 1 unspent; the raider's corpse is public and empty; Talk to Aldous then opens `aldous_yard` (Leave only). (Gil's own blow emits `attack_result`; `boar_gore` does not fire: no boar here.) | allies x kill credit x quest x levelling |
 | 5 | Raise `str`. | str 11, unspent 0, no Raise offered; the sword's derived damage is 3 (2 + floor(1 x (11 - 10) / 1)). | levelling x derived damage |
-| 6 | Remove the sword (held, not wielded); east, north to the run; Attack the boar unarmed; five rounds. | In the run the cue has no direction. Round 1: the player's blow misses (chance 0); the boar hits 2: hp 7, `bleeding` and `gored` applied lines; the Character page shows Bleeding (with its tick) and Gored (no time, no tick); the bleeding's smell cue shows from the player's own room. Rounds 2 to 5: hp 5, 3, 1, 0 at +750 (the last loss clamped to 1); no bleed tick falls before it (+1050). `player_died`; the encounter closes; the body is in `crossroads_inn` at hp 10, mv 100, standing; `gored` is still active (W8) and `bleeding` is gone (the return clears every other status); experience 30, level 2, str 11 unchanged (no penalty: row 47 is later); the player corpse in the run holds the sword and the waterskin; the boar is at 8. | combat x death; scars x death; statuses x death; levelling x death |
+| 6 | Remove the sword (held, not wielded); east, north to the run; Attack the boar unarmed; five rounds. | In the run the cue has no direction. Round 1: the player's blow misses (chance 50; the pin seeds every round to a miss); the boar hits 2: hp 7, `bleeding` and `gored` applied lines; the Character page shows Bleeding (with its tick) and Gored (no time, no tick); the bleeding's smell cue shows from the player's own room. Rounds 2 to 5: hp 5, 3, 1, 0 at +750 (the last loss clamped to 1); no bleed tick falls before it (+1050). `player_died`; the encounter closes; the body is in `crossroads_inn` at hp 10, mv 100, standing; `gored` is still active (W8) and `bleeding` is gone (the return clears every other status); experience 30, level 2, str 11 unchanged (no penalty: row 47 is later); the player corpse in the run holds the sword and the waterskin; the boar is at 8. | combat x death; scars x death; statuses x death; levelling x death |
 | 7 | Back to the run; take the sword and the waterskin from the corpse; wield the sword. | Both Takes succeed (owner's corpse); the boar is passive outside combat (no hostile disposition). The corpse stays, empty. | death x containment |
 | 8 | Attack the boar (sword, damage 3); three rounds. | Round 1: boar 5; the boar hits 2 (hp 8, `bleeding` applied again, generation 2, its line; `gored` already active, nothing written, no line). Round 2 (boar first): hp 6; boar 2. Round 3: boar 0 before it strikes: `npc_died`, experience 60 (no level: 100 not reached), drops rolled after the round's draws: the corpse holds `tusk` (chance 100) and, by seed, `purse`. `cues` no longer lists the grunt. At str 10 the same fight is four rounds and four strikes (hp 2). Eat the `poultice`: `bleeding` ends with no tick, mv +1, `gored` stays. Variant without it: ticks at +1050 (hp 5) and +1950 (hp 4), expiry at +2100 (the round-2 refresh). Take the tusk. | combat x loot x levelling; bleed status x cure x immune; senses cues x combat |
 | 9 | South to the pit (hp 6, sword, str 11); Attack goblin A (the lower id); Attack goblin B; four rounds. | The first Attack admits both goblins (`helper_joined` line); the second writes `encounter.target` (`primary_changed` line), no round. Round 1: B 3, A strikes (hp 5). Round 2: B strikes (4), B dies at the player's blow: experience 70 (every pack kill pays, Beads `loka-lpq6`), the encounter holds on A. Round 3: A 3, A strikes (3). Round 4: A strikes (2), A dies: the encounter closes, experience 80. Without the switch the first blow would have landed on A. | target choice x pack x kill credit |
@@ -216,6 +219,13 @@ Steps 1 to 10 and the sandbox pack are built and pinned by `kernel/ts/test/showc
 - The poultice is a room item in `drill_yard` ("by the bench"); no item location names a detail.
 - `tilt_boar` has no cue: at range 1 it would be heard in `gate_yard`, against step 1.
 - `combat.npc_hit` and `combat.npc_miss` no longer name the Warden's cudgel (every foe uses them).
+- `walk_combat` (re-recorded for Diku rounds, Beads `loka-kgd.197`): Raise `str` comes after the
+  death, not before step 6. At str 11 the unarmed blow (2, chance 50) kills the boar in four rounds
+  from the start seed and the player never dies; at str 10 (1 a blow) the boar kills the player in
+  round 5, so the walk keeps the death, the corpse and the return. The sword then kills the boar (3
+  hp left) in round 1, and the pit closes in three rounds.
+- `walk_social_standing`: the player flees after six rounds, not ten; from the start seed the
+  seventh round's unarmed blow kills the Warden.
 
 ## The pack and Beads `loka-6ql4`
 

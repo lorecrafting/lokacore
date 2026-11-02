@@ -644,6 +644,31 @@
           "minItems": 1,
           "type": "array"
         },
+        "conditions": {
+          "description": "Condition lines (docs/system/mechanics.md, Diku rounds), highest at_percent first: after each round, the first row the player's living foe's hp reaches is told, binding {target}.",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "at_percent": {
+                "description": "The percent of the foe's hp range it must reach.",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "text": {
+                "$ref": "#/$defs/TextKey",
+                "description": "The line told, binding {target}."
+              }
+            },
+            "required": [
+              "at_percent",
+              "text"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
         "dodge": {
           "additionalProperties": false,
           "description": "Percent chance to dodge an enemy attack that would otherwise hit; absent means no dodge.",
@@ -669,6 +694,10 @@
           "description": "Multiplies the move cost of a body that is engaged.",
           "minimum": 1,
           "type": "integer"
+        },
+        "initiative": {
+          "const": true,
+          "description": "Opts into Diku rounds (docs/system/mechanics.md, Diku rounds): each round draws initiative for which side strikes first, Attack resolves round 1 at once, and the combat narration binds {attacker} and {target}."
         },
         "interval": {
           "description": "Clock units between combat rounds.",
@@ -747,6 +776,42 @@
         "target_choice": {
           "const": true,
           "description": "Opts into target choice (docs/system/mechanics.md, toolbox row 6a): during a roster encounter the player's attack on another present active member makes it the primary the player strikes."
+        },
+        "tiers": {
+          "description": "Damage tiers (docs/system/mechanics.md, Diku rounds), highest at_percent first: a hit whose hp loss reaches at_percent of the target's hp maximum is told with the first such tier's key for that perspective instead of the plain hit key.",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "ally_hit": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Told for the ally's hit at this tier."
+              },
+              "at_percent": {
+                "description": "The percent of the target's hp maximum a hit's loss must reach.",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "npc_hit": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Told for the foe's hit at this tier."
+              },
+              "player_hit": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Told for the player's hit at this tier."
+              },
+              "shot_hit": {
+                "$ref": "#/$defs/TextKey",
+                "description": "Told for a ranged first strike's hit at this tier."
+              }
+            },
+            "required": [
+              "at_percent"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
         }
       },
       "required": [

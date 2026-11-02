@@ -74,13 +74,22 @@ const hp = (w: World, e: string) => level(w, e as never, resourceRef(w, 'hp'));
 const key = (k: string) => `combat.${k}`;
 const ops = (d: any) => d.delta.ops.map((o: { op: string }) => o.op);
 
-// Breaks: Attack only schedules round 1 (no blows, no RNG), the proposal carries a job.complete
+// Breaks: Attack only schedules round 1 (no blows, no RNG), draws other than three, the proposal carries a job.complete
 // (invariant job_complete_owned_by_run), round 2 is not at clock + interval, the odd/even rule
 // orders round 1, a line lacks its name, the tier or condition is missing or misplaced.
 test('Attack strikes round 1 at once, player first, and names, tiers and conditions it', () => {
   const { before, w, d, lines } = attack(sampler());
   const g = goblin(w);
   assert.deepEqual([hp(w, g), hp(w, w.body)], [7, 8]);
+  // Three raw draws (initiative, both accuracy rolls; fixed damage draws none): the state after
+  // numeric-vectors.json rng_steps[2] from [1, 2, 3, 4].
+  assert.deepEqual(
+    [before.state.rng, w.state.rng],
+    [
+      [1, 2, 3, 4],
+      [25179138, 12295, 540162, 2107404],
+    ],
+  );
   assert.ok(!ops(d).includes('job.complete'));
   assert.ok(check('job_complete_owned_by_run', { decision: d, before: before.state }));
   const jobs = d.delta.ops.filter((o: { op: string }) => o.op === 'job.schedule');

@@ -52,6 +52,10 @@ test('credit delivery rejects counterfeit attribution and missing fatal/corpse p
   assert.deepEqual(deathCredit(world, event, delta.ops, [], { ...cast, id: 'x' as never }), []);
   assert.equal(deathCredit(world, event, delta.ops, [], cast).length, 1);
   assert.deepEqual(deathCredit(world, event, [], events, root), []);
+  // Diku's opening path (loka-kgd.197) skips the job check only under initiative: none here.
+  const unrun = { ...world, state: { ...world.state, jobs: {} } };
+  const opener = { ...root, payload: { ...root.payload, type: 'attack' } };
+  assert.deepEqual(deathCredit(unrun, event, delta.ops, events, opener), []);
   assert.deepEqual(deathCredit(world, event, delta.ops, [], root), []); // no attack_result, no cast
   const noLoss = delta.ops.map((o) => (o.op === 'resource.adjust' ? { ...o, from: 0 } : o));
   assert.deepEqual(deathCredit(world, event, noLoss, events, root), []);

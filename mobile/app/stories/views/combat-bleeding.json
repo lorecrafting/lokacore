@@ -285,14 +285,14 @@
     "article": "the",
     "bare": "npc.boar.bare"
    },
-   "band": "ready"
+   "band": "hurt"
   },
   "conditions": [
    {
     "label": "condition.bleeding",
     "ends_at": 27150,
     "duration": 1800,
-    "next_tick_at": 26250,
+    "next_tick_at": 26100,
     "resource": "hp",
     "per_tick": -1,
     "tick_every": 900,
@@ -400,7 +400,7 @@
     "description": "npc.boar.description",
     "kind": "npc",
     "actions": [],
-    "band": "ready",
+    "band": "hurt",
     "contents": [
      {
       "id": "84596f20-3ba6-865a-b243-8ccbae9fc4fb",
@@ -483,7 +483,7 @@
      "kind": "resource",
      "key": "hp"
     },
-    "current": 8,
+    "current": 6,
     "maximum": 10,
     "band": "hurt",
     "tone": "warning"
@@ -558,15 +558,23 @@
  "log": [
   "You arrive from the south.",
   "a boar grunting",
+  "You hit the boar.",
+  "The boar hits you hard.",
+  "The boar has some cuts.",
   "The tusk opens a wound; you are bleeding.",
   "The tusk leaves a scar that will not fade.",
-  "You miss.",
-  "The blow catches you.",
-  "the iron smell of your own blood"
+  "the iron smell of your own blood",
+  "The boar hits you hard.",
+  "The boar has some cuts.",
+  "You miss the boar."
  ],
  "combatLog": [
-  "You miss.",
-  "The blow catches you."
+  "You hit the boar.",
+  "The boar hits you hard.",
+  "The boar has some cuts.",
+  "The tusk opens a wound; you are bleeding.",
+  "The tusk leaves a scar that will not fade.",
+  "You miss the boar."
  ],
  "details": {}
 }
