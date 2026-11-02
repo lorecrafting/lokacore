@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import type { group } from './model.ts';
 import { ActionCard, Cards, PickLists, type Shown } from './actions.tsx';
+import { picks } from './pick.ts';
 import { commandOf } from './buttons.ts';
 import { LogLines } from './lines.tsx';
 import { LABEL } from './labels.ts';
@@ -29,11 +30,34 @@ type Props = {
   world: () => void;
 };
 
-// A live fight's response cards, each foe's Cast a spell… last.
+type Foe = { name: string; words?: { bare: string; article?: string } };
+// A foe as its projected name, definite with name words ("the goblin"); a proper name stays bare.
+const named = (o: Foe, text: (key: string) => string) =>
+  o.words ? `${o.words.article ? `${LABEL.the} ` : ''}${text(o.words.bare)}` : text(o.name);
+
+// A foe's pick lists, its Cast a spell… option naming it.
+const foeLists = (
+  view: Parameters<typeof picks>[0],
+  casts: Button[],
+  o: Foe & { id: string },
+  text: (key: string) => string,
+) =>
+  picks(
+    view,
+    casts.filter((b) => b.detail_id === o.id),
+    o.id,
+    text,
+  ).map((k) =>
+    k.label === LABEL.castASpell ? { ...k, label: LABEL.castASpellOn(named(o, text)) } : k,
+  );
+
+// A live fight's response cards, each foe's Cast a spell on it… last. ponytail: two foes of one
+// name read alike (book-ui.md, Aimed spells off the target's page).
 function Responses(p: Props & { shown: Shown }) {
   const { view, text } = p.screen;
   const casts = p.screen.buttons.filter((b) => commandOf(b) === 'cast');
-  const foes = view.combat!.active_opponents?.map((o) => o.id) ?? [view.combat!.opponent_id];
+  const c = view.combat!;
+  const foes = c.active_opponents ?? [{ ...c, id: c.opponent_id }];
   const stand = p.g.position.find((b) => b.action_key === 'stand');
   return (
     <Cards>
@@ -46,12 +70,12 @@ function Responses(p: Props & { shown: Shown }) {
         <ActionCard key={b.target_ids[0]} b={b} press={p.press} />
       ))}
       {/* a pick keeps the combat page (loka-x6t.109.5) */}
-      {foes.map((id) => (
+      {foes.map((o) => (
         <PickLists
-          key={id}
-          page={id}
+          key={o.id}
+          page={o.id}
           view={view}
-          buttons={casts.filter((b) => b.detail_id === id)}
+          lists={foeLists(view, casts, o, text)}
           text={text}
           press={p.press}
           pending={p.screen.pending}
@@ -66,7 +90,7 @@ function Responses(p: Props & { shown: Shown }) {
  * The combat foreground (book-ui.md, Live combat response).
  * - Use: while a fight is on, and its closed page until the foot is pressed.
  * - Rules: the page opens with its log (no foe or band line above it, owner 2026-11-02), then the
- *   response cards, each live foe's Cast a spell… last; no PageFoot. The page follows its newest
+ *   response cards, each live foe's Cast a spell on it… last; no PageFoot. The page follows its newest
  *   line; each round's lines (one receipt) are one block, a block gap between rounds. A closed
  *   fight has one foot control: Back to World, or Let go when the player fell in it (Falling).
  * - States: one foe; pack; bleeding; rounds; death (held red, Let go, no countdown).

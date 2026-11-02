@@ -72,15 +72,15 @@ test("a foe's list casts on the Combat page, into its log, until the foe dies", 
   b.tap('wight, open');
   b.tap('Attack a wight');
   assert.ok(!b.labels().includes('Lux, cast on…'), "only the foe's own spells in its list");
-  b.tap('Cast a spell…');
+  b.tap('Cast a spell on the wight…'); // named by the foe, with no foe line above it
   b.tap('Flamma, cast flamma on a wight'); // the wight lives: the fight goes on
   assert.ok(b.game.view().view.combat && b.text().includes('Combat'), 'still the Combat page');
   assert.ok(b.p.screen().combatLog.includes(FLAMMA));
   assert.ok(b.p.screen().log.includes(FLAMMA), 'the room log is the full record, combat too');
-  b.tap('Cast a spell…');
+  b.tap('Cast a spell on the wight…');
   b.tap('Flamma, cast flamma on a wight');
   assert.ok(b.labels().includes('Back to World'), 'the closed fight keeps its page');
-  assert.ok(!b.labels().includes('Cast a spell…'), 'the dead wight has no list');
+  assert.ok(!b.labels().includes('Cast a spell on the wight…'), 'the dead wight has no list');
 });
 
 // Breaks: no Cast on… on Skills, a pick that stays on Skills or loses its line, a refused
@@ -116,7 +116,8 @@ test("opening a second foe's Cast a spell… closes the first", (t) => {
   t.after(() => b.sql.close());
   b.tap('two goblins, open');
   b.tap(/^Attack/);
-  const options = () => b.draw().filter((n) => n.props?.accessibilityLabel === 'Cast a spell…');
+  const options = () =>
+    b.draw().filter((n) => n.props?.accessibilityLabel === 'Cast a spell on the goblin…');
   assert.equal(options().length, 2, b.labels().join(' | '));
   options()[0].props.onPress();
   options()[1].props.onPress();

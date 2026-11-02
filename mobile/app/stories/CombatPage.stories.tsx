@@ -58,7 +58,8 @@ export const Rounds: StoryObj = {
     await expect(between).toBeGreaterThan(within);
   },
 };
-// Each live foe draws its Cast a spell… list among the cards (loka-x6t.109.5). Breaks: no list.
+// Each live foe draws its Cast a spell on it… list among the cards (loka-x6t.109.5). Breaks: no list,
+// or an option that names no foe.
 const boar = CombatOneFoeView.view.entities[0]!;
 const flamma = {
   action_key: 'flamma',
@@ -75,7 +76,7 @@ export const FoeCast: StoryObj = {
   }),
   name: 'Foe with Cast a spell…',
   play: async ({ canvas, userEvent }) => {
-    await userEvent.click(canvas.getByRole('button', { name: 'Cast a spell…' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Cast a spell on the boar…' }));
     await expect(canvas.getByRole('button', { name: /^Flamma, cast flamma on/ })).toBeVisible();
   },
 };

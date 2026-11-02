@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { heldLayer, lampLit, lowHealth } from './heldLayer.ts';
 import { contrast, mixInk, washInk } from './palette.ts';
-import { color, opacity } from './tokens.ts';
+import { color, opacity, size, space } from './tokens.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
 // Breaks: two layers at once, or the order inverted, so a lamp hides the fatal hold.
@@ -30,6 +30,21 @@ test('every text role holds 4.5:1 over every under-ink layer at its peak', () =>
         assert.ok(ratio >= 4.5, `${name}.${role} over ${layer}: ${ratio.toFixed(2)}`);
       }
   }
+});
+
+// The fatal hold's rim is a blur of standard deviation half its width (CSS box-shadow): its share at
+// the page margin, at most φ(x)/x past x deviations from each edge, twice in a corner.
+const x = space.page / (size.bloodshot / 2);
+const rim = (2 * opacity.bloodshot * Math.exp((-x * x) / 2)) / (x * Math.sqrt(2 * Math.PI));
+
+// Breaks: the bloodshot rim widened or deepened until it reaches the ink at the page margins.
+test('every text role holds 4.5:1 at the page margin over the fatal hold and its rim', () => {
+  for (const [name, p] of Object.entries(color))
+    for (const role of ['fg', 'dim', 'action', 'danger', 'warning'] as const) {
+      const under = mixInk(mixInk(p.bg, washInk(p), opacity.fatal), washInk(p), rim);
+      const ratio = contrast(p[role], under);
+      assert.ok(ratio >= 4.5, `${name}.${role} at the margin: ${ratio.toFixed(2)}`);
+    }
 });
 
 const view = (over: object) =>

@@ -118,6 +118,7 @@ export const size = {
   chapterRule: 80, // the chapter card's short rule (the mock's `.chapter i`)
   statusIcon: 28, // a status icon's disc, inside a size.touch box
   unseen: 1, // a box a screen reader reads and the eye cannot see (the live region)
+  bloodshot: 16, // the fatal hold's feathered edge: its blur, gone before the page margins' ink -- mutate-skip: uncalibrated design value
   column: 768, // the Book's widest page column (tablet width), centred on a desktop; a phone fills the screen
 };
 
@@ -131,6 +132,7 @@ export const opacity = {
   washStill: 0.09, // the same wash under reduced motion
   faint: 0.06, // a held under-ink layer: low-health vignette, dream paper; 4.5:1 holds -- mutate-skip: uncalibrated design value
   fatal: 0.075, // the fatal blow's held red: the most light's dim and warning bear at 4.5:1 -- mutate-skip: uncalibrated design value
+  bloodshot: 1, // the fatal hold's edges at the screen's rim, feathered in over size.bloodshot -- mutate-skip: uncalibrated design value
   glow: 0.08, // the lamp at the page's hip, at its peak; 4.5:1 holds -- mutate-skip: uncalibrated design value
 };
 
