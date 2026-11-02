@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { lineWords } from './words.ts';
 import { picks } from './pick.ts';
+import { buttonsOf } from './buttons.ts';
 
 const TEXT: Record<string, string> = {
   'item.put': 'You put {item} in {container}.',
@@ -48,4 +49,14 @@ test('a pick on a corpse names its victim', () => {
   const v = { ...view, inventory: [{ id: 'can', name: 'an oilcan' }] } as unknown as GameView;
   const [row] = picks(v, [button], 'c1', say)[0]!.rows;
   assert.equal(row && 'b' in row && row.name, 'An oilcan, oil the corpse of a goblin');
+});
+
+// Breaks: a held thing's card that names its corpse destination by the raw `{victim}`.
+test('a put into a corpse card names its victim', () => {
+  const put = { label: 'Put', action_key: 'put', command: 'put', target_ids: ['ear', 'c1'] };
+  const ear = { id: 'ear', name: 'item.ear', actions: [{ ...put, available: true, input: [] }] };
+  const entities = view.entities.map((e) => ({ ...e, actions: [] }));
+  const v = { ...view, entities, inventory: [ear] } as unknown as GameView;
+  const labels = buttonsOf(v, say, say).map((b) => b.label);
+  assert.ok(labels.includes('Put an ear in the corpse of a goblin'), labels.join(' | '));
 });

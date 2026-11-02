@@ -6,6 +6,8 @@ import { fatal } from './death_fixture.ts';
 import { elapsed } from './c5_bleed_fixture.ts';
 import { compose, type State } from '../src/foundation/compose.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { check } from '../src/runtime/invariants.ts';
+import { base } from '../src/runtime/apply.ts';
 import { gameView } from '../src/view/view.ts';
 import type { World } from '../src/runtime/decision.ts';
 import type { DeltaOp, EntityId, JobId } from '../src/contracts.gen.ts';
@@ -82,7 +84,7 @@ test('an owned player corpse decays at 90000 and spills its items', () => {
 
 // Breaks: a decay binding that admits another job's keys, or a decay kind with no corpse.
 test('a decay job binds its corpse and nothing else', () => {
-  const { world, corpse } = died();
+  const { world, corpse, room } = died();
   const op = {
     op: 'job.schedule',
     writer_group: 0,
@@ -91,12 +93,34 @@ test('a decay job binds its corpse and nothing else', () => {
     due_time: 50000,
     corpse_id: corpse as EntityId,
   } as const;
-  const faulted = (o: object) =>
-    'fault' in (compose(world.state as unknown as State, { ops: [o as DeltaOp] }) as object);
+  // The invariant restates compose independently, so each verdict must agree with it.
+  const faulted = (o: object, state = base(world) as unknown as State) => {
+    const result = compose(state, { ops: [o as DeltaOp] }) as object;
+    assert.ok(check('delta_preconditions_hold', { state, delta: { ops: [o] }, result }));
+    return 'fault' in result;
+  };
   assert.equal(faulted(op), false);
   assert.equal(faulted({ ...op, actor_id: world.character }), true);
   const { corpse_id: _, ...unbound } = op;
   assert.equal(faulted(unbound), true);
+  // A compose that accepted the unbound job: the invariant alone must refuse it.
+  const state = base(world) as unknown as State;
+  const fake = compose(state, { ops: [op] }) as { changes: { value: object }[] };
+  const { corpse_id: _c, ...row } = fake.changes[0]!.value as { corpse_id: string };
+  fake.changes[0]!.value = row;
+  assert.equal(
+    check('delta_preconditions_hold', { state, delta: { ops: [unbound] }, result: fake }),
+    false,
+  );
+  const rot = { op: 'entity.transfer', writer_group: 0, entity_id: corpse, source_id: room };
+  const gone = { ...rot, destination_id: world.consumed };
+  assert.equal(faulted(gone), false);
+  assert.equal(faulted({ ...gone, entity_id: world.body }), true); // not death-created
+  const carried = {
+    ...base(world),
+    containers: { ...world.state.containers, [corpse]: world.body },
+  };
+  assert.equal(faulted({ ...gone, source_id: world.body }, carried as unknown as State), true);
 });
 
 // Breaks: a corpse view without its victim, or a victim field the GameView schema refuses.
