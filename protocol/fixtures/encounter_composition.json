@@ -2365,6 +2365,208 @@
       }
     },
     {
+      "id": "npc-schedule-refuses-sight",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "npc",
+            "key": "wolf"
+          },
+          "due_time": 20,
+          "sight": {
+            "member_id": "00000002-0000-4000-8000-000000000000",
+            "player_id": "00000001-0000-4000-8000-000000000000",
+            "slot": 1,
+            "generation": 1,
+            "seen_at": 0,
+            "cause_kind": "player_entry",
+            "cause_id": "00000009-0000-4000-8000-000000000000",
+            "source_id": null,
+            "destination_id": "00000003-0000-4000-8000-000000000000"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "00000007-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "npc",
+                "key": "wolf"
+              },
+              "due_time": 20,
+              "status": "pending",
+              "sight": {
+                "member_id": "00000002-0000-4000-8000-000000000000",
+                "player_id": "00000001-0000-4000-8000-000000000000",
+                "slot": 1,
+                "generation": 1,
+                "seen_at": 0,
+                "cause_kind": "player_entry",
+                "cause_id": "00000009-0000-4000-8000-000000000000",
+                "source_id": null,
+                "destination_id": "00000003-0000-4000-8000-000000000000"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "population-schedule-keeps-sight",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "population",
+            "key": "wolf"
+          },
+          "due_time": 20,
+          "sight": {
+            "member_id": "00000002-0000-4000-8000-000000000000",
+            "player_id": "00000001-0000-4000-8000-000000000000",
+            "slot": 1,
+            "generation": 1,
+            "seen_at": 0,
+            "cause_kind": "player_entry",
+            "cause_id": "00000009-0000-4000-8000-000000000000",
+            "source_id": null,
+            "destination_id": "00000003-0000-4000-8000-000000000000"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "population",
+                "key": "wolf"
+              },
+              "due_time": 20,
+              "status": "pending",
+              "sight": {
+                "member_id": "00000002-0000-4000-8000-000000000000",
+                "player_id": "00000001-0000-4000-8000-000000000000",
+                "slot": 1,
+                "generation": 1,
+                "seen_at": 0,
+                "cause_kind": "player_entry",
+                "cause_id": "00000009-0000-4000-8000-000000000000",
+                "source_id": null,
+                "destination_id": "00000003-0000-4000-8000-000000000000"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "encounter-population-refuses-sight",
+      "state": "open",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "population",
+            "key": "wolf"
+          },
+          "due_time": 20,
+          "encounter_id": "00000006-0000-4000-8000-000000000000",
+          "sight": {
+            "member_id": "00000002-0000-4000-8000-000000000000",
+            "player_id": "00000001-0000-4000-8000-000000000000",
+            "slot": 1,
+            "generation": 1,
+            "seen_at": 0,
+            "cause_kind": "player_entry",
+            "cause_id": "00000009-0000-4000-8000-000000000000",
+            "source_id": null,
+            "destination_id": "00000003-0000-4000-8000-000000000000"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "00000007-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "population",
+                "key": "wolf"
+              },
+              "due_time": 20,
+              "status": "pending",
+              "encounter_id": "00000006-0000-4000-8000-000000000000",
+              "sight": {
+                "member_id": "00000002-0000-4000-8000-000000000000",
+                "player_id": "00000001-0000-4000-8000-000000000000",
+                "slot": 1,
+                "generation": 1,
+                "seen_at": 0,
+                "cause_kind": "player_entry",
+                "cause_id": "00000009-0000-4000-8000-000000000000",
+                "source_id": null,
+                "destination_id": "00000003-0000-4000-8000-000000000000"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "id": "reaction-schedule-refuses-quest",
       "state": "base",
       "ops": [

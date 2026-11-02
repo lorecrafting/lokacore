@@ -1,3 +1,4 @@
+# size: allow 310, job bindings mirror TS bindingValid, including its sight rule (loka-kgd.153)
 defmodule Loka.Core.ComposeEncounter do
   @moduledoc "Portable encounter and bound-job lifecycle over composition's current rows."
   alias Loka.Core.Int
@@ -207,7 +208,7 @@ defmodule Loka.Core.ComposeEncounter do
         {:ok,
          Map.take(
            op,
-           ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id bleed_body_id bleed_generation crow_member_id crow_generation crow_phase)
+           ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id bleed_body_id bleed_generation crow_member_id crow_generation crow_phase sight)
          )
          |> Map.put("status", "pending")}
     end
@@ -277,14 +278,20 @@ defmodule Loka.Core.ComposeEncounter do
   end
 
   defp other_binding?(op) do
+    # A sight binding belongs only to an unbound population job (TS bindingValid).
+    (op["sight"] == nil or
+       (get_in(op, ["job", "kind"]) == "population" and op["encounter_id"] == nil)) and
+      other_owner_binding?(op)
+  end
+
+  defp other_owner_binding?(op) do
     case {op["quest_instance_id"] != nil, op["water_generation"] != nil, op["actor_id"] != nil,
           op["water_body_id"] != nil} do
       {false, false, false, false} ->
         get_in(op, ["job", "kind"]) != "reaction"
 
       {false, false, true, false} ->
-        get_in(op, ["job", "kind"]) in ["reaction", "order"] and
-          [op["encounter_id"], op["sight"]] == [nil, nil]
+        get_in(op, ["job", "kind"]) in ["reaction", "order"] and op["encounter_id"] == nil
 
       {true, false, true, false} ->
         get_in(op, ["job", "kind"]) == "quest" and op["encounter_id"] == nil
