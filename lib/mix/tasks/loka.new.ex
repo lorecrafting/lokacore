@@ -1,7 +1,8 @@
 defmodule Mix.Tasks.Loka.New do
   @shortdoc "Writes compiling starters of source kinds into a cartridge"
   @moduledoc """
-  `mix loka.new [--cwd <dir>] <kind> <name> [--from <room> <direction>] ... [cartridge dir]`: writes
+  `mix loka.new [--cwd <dir>] <kind> <name> [--from <room> <direction>] ... [cartridge dir]`
+  (`scene <npc> <key>` for a pair's scene): writes
   each pair's starter (every line a `~` placeholder) into the cartridge (default `.`; a `cartridge
   <dir>` pair makes one and targets it for the pairs after it), prints each file it wrote and ends
   with what to fill (`bin/loka todo`'s list) and the next command. `--from` follows a `rooms` pair;
@@ -11,7 +12,7 @@ defmodule Mix.Tasks.Loka.New do
   use Mix.Task
   use Boundary, top_level?: true, deps: [Loka.Content, Mix]
 
-  @usage "usage: mix loka.new <kind> <name> [--from <room> <direction>] ... [cartridge dir]"
+  @usage "usage: mix loka.new <kind> <name> [--from <room> <direction>] ... [cartridge dir] (scene <npc> <key>)"
 
   @impl Mix.Task
   def run(["--cwd", cwd | args]), do: new(args, cwd)
@@ -63,11 +64,12 @@ defmodule Mix.Tasks.Loka.New do
 
   # Before any write: a surplus argument reads as a kind.
   defp known_kind({kind, _, _}) do
-    if kind not in Loka.Content.kinds(),
+    # `scene` is no source schema kind: Starters.kinds/0 lists those.
+    kinds = Enum.sort(["scene" | Loka.Content.kinds()])
+
+    if kind not in kinds,
       do:
-        Mix.raise(
-          "mix loka.new: unknown kind #{inspect(kind)}; one of: #{Enum.join(Loka.Content.kinds(), " ")}"
-        )
+        Mix.raise("mix loka.new: unknown kind #{inspect(kind)}; one of: #{Enum.join(kinds, " ")}")
   end
 
   defp starter({"cartridge", path, from}, {_, paths}, cwd),
@@ -111,6 +113,9 @@ defmodule Mix.Tasks.Loka.New do
     do: plan(rest, [{"rooms", name, {room, way}} | done])
 
   defp plan(["--" <> _ | _], _), do: Mix.raise(@usage)
+  defp plan(["scene", npc, key | rest], done), do: plan(rest, [{"scene", key, npc} | done])
+  # A lone trailing `scene` stays a cartridge dir.
+  defp plan(["scene", _], _), do: Mix.raise(@usage)
   defp plan([kind, name | rest], done), do: plan(rest, [{kind, name, nil} | done])
   defp plan(rest, done), do: {Enum.reverse(done), List.first(rest)}
 end

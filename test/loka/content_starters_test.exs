@@ -403,8 +403,7 @@ defmodule Loka.ContentStartersTest do
            )
 
     assert_raise Mix.Error,
-                 "mix loka.new: unknown kind \"shop\"; one of: " <>
-                   Enum.join(Starters.kinds(), " "),
+                 ~r/^mix loka.new: unknown kind "shop"; one of: actions .* rooms scene services /,
                  fn ->
                    ExUnit.CaptureIO.capture_io(fn ->
                      Mix.Tasks.Loka.New.run(~w(--cwd #{tmp} items lamp shop x mine))

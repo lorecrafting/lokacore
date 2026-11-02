@@ -63,7 +63,7 @@ defmodule Loka.Content.Starters do
   def kinds, do: ["cartridge" | Map.keys(Templates.kinds())] |> Enum.sort()
 
   # A text key may be dotted (`service.unaffordable`); every other name is a file or map key.
-  defp valid_name(name, kind \\ nil) do
+  def valid_name(name, kind \\ nil) do
     pattern = if kind == "text", do: ~r/^[a-z][a-z0-9_.]{0,63}$/, else: ~r/^[a-z][a-z0-9_]{0,63}$/
 
     # A template derives longer keys and text paths from the name; 32 leaves them all under theirs.
@@ -76,7 +76,7 @@ defmodule Loka.Content.Starters do
          "a name is lowercase letters, digits and _, #{room} at most (got #{inspect(name)})"}
   end
 
-  defp in_cartridge(dir) do
+  def in_cartridge(dir) do
     if File.exists?(Path.join(dir, "cartridge.json")),
       do: :ok,
       else: {:error, "no cartridge.json in #{dir}: bin/loka new cartridge <dir> first"}
@@ -228,7 +228,7 @@ defmodule Loka.Content.Starters do
 
   # `own`, the file this starter names, is the author's once it exists: a rerun checks it, and never
   # adds back what the author removed.
-  defp put(dir, files, own, hook) do
+  def put(dir, files, own, hook) do
     touched =
       for {rel, new} <- files, path = Path.join(dir, rel), do: {rel, path, read(path), new}
 
@@ -283,7 +283,7 @@ defmodule Loka.Content.Starters do
     end
   end
 
-  defp read(path) do
+  def read(path) do
     case File.read(path) do
       {:ok, text} ->
         case JSON.decode(text) do
