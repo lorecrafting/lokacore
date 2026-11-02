@@ -254,7 +254,9 @@ What you can rely on when dialogues link with `then` (JSON dialogues today):
 
 Play to the moment you want to work on, then in the panel's Play tab type a name under Checkpoints and
 Save. Later, pick it from the list: the game starts over and replays to that point. Checkpoints
-are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
+are files in `cartridges/<name>/checkpoints/`, committed with the cartridge. The same tab's Game
+time moves the clock on by minutes (the world credits none before the ancestry choice), and its
+Cheats go to a room or set a fact by key; a checkpoint records and replays both.
 
 ## Cut a talk short
 
