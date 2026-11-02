@@ -210,7 +210,17 @@ and add `dialogues/<key>.json` beside it, with the point and the outcome this ch
 To start it from an ordinary choice, leave the `quest:` lines out and write `once` under the
 choice: with no quest to end it, the build refuses a choice that could reach the point twice.
 
-### Cut a talk short
+Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file. A `~`
+holds the place of words only: in a `sets:` or `quest:` line it is listed too, but the compile
+refuses it until you write the key.
+
+## Jump to a beat
+
+Play to the moment you want to work on, then in the panel's Play tab type a name under Checkpoints and
+Save. Later, pick it from the list: the game starts over and replays to that point. Checkpoints
+are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
+
+## Cut a talk short
 
 A reaction's `end_talk` step closes the open talk of whoever the event is about, as if they had left: react to the player's own act, not to someone else's arrival. Nothing else
 changes, and with no talk open it does nothing. Put the words in a `narrate` step before it:
@@ -225,16 +235,6 @@ changes, and with no talk open it does nothing. Put the words in a `narrate` ste
   ]
 }
 ```
-
-Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file. A `~`
-holds the place of words only: in a `sets:` or `quest:` line it is listed too, but the compile
-refuses it until you write the key.
-
-## Jump to a beat
-
-Play to the moment you want to work on, then in the panel's Play tab type a name under Checkpoints and
-Save. Later, pick it from the list: the game starts over and replays to that point. Checkpoints
-are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
 
 ## Test your checkpoints
 
