@@ -117,9 +117,9 @@ defmodule Loka.Content do
   defdelegate lint(dir), to: Loka.Content.Lint, as: :run
 
   @doc "Writes a compiling starter of one source kind into a cartridge (Loka.Content.Starters)."
-  @spec new(Path.t(), String.t(), String.t(), {String.t(), String.t()} | nil) ::
+  @spec new(Path.t(), String.t(), String.t(), {String.t(), String.t()} | String.t() | nil) ::
           {:ok, [Path.t()]} | {:error, String.t()}
-  defdelegate new(dir, kind, name, from), to: Loka.Content.Starters, as: :write
+  def new(dir, kind, name, from), do: new(dir, kind, name, from, fn _, _ -> :ok end)
 
   @doc """
   `new/4` calling `before_write.(path, old bytes or nil)` before each file it writes; `scene`'s
