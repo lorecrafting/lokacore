@@ -41,8 +41,7 @@ test('all, any and not answer from their leaves, indented under them', () => {
       [1, true, 'any one of these'],
       [2, false, 'fact b is 2; needs 1'],
       [2, true, 'fact a is 1; needs 1'],
-      [1, false, 'not this'],
-      [2, true, 'fact a is 1; needs 1'],
+      [1, false, 'fact a is 1; needs not 1'],
     ],
   );
   assert.equal(sentences({ policy: { op: 'any', items: [no] } })[0]!.ok, false);
@@ -50,11 +49,42 @@ test('all, any and not answer from their leaves, indented under them', () => {
   assert.equal(sentences({ policy: { op: 'not', item: no } })[0]!.ok, true);
 });
 
+// Breaks: a met `not` reads as a red child under a green header (the scene's `when: not met_maud`);
+// a negated branch keeps its operator, so not(any) reads as any with red leaves; not(not x) is not x.
+test('a not folds into its leaves: the polarity flips, the branch swaps, a double not cancels', () => {
+  const unmet = fact('met_maud', true, false, false);
+  const rowsOf = (policy: object) => sentences({ policy }).map((r) => [r.depth, r.ok, r.text]);
+  const [only, ...rest] = rowsOf({ op: 'not', item: unmet });
+  assert.deepEqual(rest, []);
+  assert.deepEqual(only!.slice(0, 2), [0, true]);
+  assert.match(only![2] as string, /met_maud.*needs not true/);
+  assert.deepEqual(
+    rowsOf({ op: 'not', item: { op: 'any', items: [unmet, fact('b', 1, 2, false)] } }).map((r) =>
+      r.slice(0, 2),
+    ),
+    [
+      [0, true],
+      [1, true],
+      [1, true],
+    ],
+  );
+  assert.equal(rowsOf({ op: 'not', item: { op: 'any', items: [unmet] } })[0]![2], 'all of these');
+  assert.equal(
+    rowsOf({ op: 'not', item: { op: 'all', items: [unmet] } })[0]![2],
+    'any one of these',
+  );
+  assert.deepEqual(rowsOf({ op: 'not', item: { op: 'not', item: unmet } }), rowsOf(unmet));
+});
+
 // Break: a definition with no policy reads as refused, or throws.
 test('a leaf the report did not annotate does not count as holding', () => {
   // Break: only an explicit false fails, so an unread leaf reads as met.
   assert.deepEqual(sentences({ policy: { op: 'light_off' } }), [
     { text: 'the light is off', ok: false, depth: 0 },
+  ]);
+  // Break: a negation turns the unread leaf green, or drops its `not`.
+  assert.deepEqual(sentences({ policy: { op: 'not', item: { op: 'light_off' } } }), [
+    { text: 'not: the light is off', ok: false, depth: 0 },
   ]);
 });
 

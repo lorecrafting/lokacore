@@ -34,11 +34,20 @@ function session(ids: Record<string, string>, replies: Reply[], choice?: string)
   const sent: Intent[] = [];
   const game: Replayable = {
     view: () => ({
-      view: choice ? { choice: { continuation_id: choice as never } } : {},
+      view: choice
+        ? {
+            choice: {
+              continuation_id: choice,
+              choices: [{ choice_id: 'go', label: 'l.go' }],
+            } as never,
+          }
+        : {},
       token: 't9',
     }),
     invoke: (i) => (sent.push(i), replies[sent.length - 1]!),
     entityIds: () => ids,
+    text: (key) => ({ 'l.go': 'go on' })[key],
+    dialogueOf: (c) => (c === choice ? 'maud_hello' : undefined),
     pulse: () => ({ kind: 'ready' }),
   };
   return { game, sent };
@@ -100,6 +109,33 @@ test('a step gains a continuation only when it had one and a choice is open', ()
   const out = replay([{ intent: intent([], { continuation_id: 'c1' }) }], closed.game, () => {});
   assert.match(out.failed!, /not_here/);
   assert.deepEqual(closed.sent[0]!.input, { continuation_id: 'c1' });
+});
+
+test('a refused choice the open choice no longer offers is named with its dialogue and the offers now', () => {
+  // Break: the old `rejected invalid_state` note, which names neither the edited choice nor its dialogue.
+  const { game } = session({}, [refused], 'c2');
+  const out = replay(
+    [{ intent: intent([], { choice_id: 'say_hello', continuation_id: 'c1' }) }],
+    game,
+    () => {},
+  );
+  for (const named of ['say_hello', 'maud_hello', 'go on'])
+    assert.ok(out.failed!.includes(named), out.failed);
+  assert.equal(out.refused, true);
+});
+
+test("a choice still offered, a step that is not a choice, or a fault keeps the game's own note", () => {
+  // Breaks: dropping the offered check, the choice_id check, or the rejected check calls these gone.
+  const fault = { kind: 'saved', decision: { kind: 'fault', code: 'boom' } } as unknown as Reply;
+  for (const [input, reply, note] of [
+    [{ choice_id: 'go', continuation_id: 'c1' }, refused, /not_here/],
+    [{}, refused, /not_here/],
+    [{ choice_id: 'say_hello', continuation_id: 'c1' }, fault, /fault/],
+  ] as const) {
+    const out = replay([{ intent: intent([], input) }], session({}, [reply], 'c2').game, () => {});
+    assert.match(out.failed!, note);
+    assert.doesNotMatch(out.failed!, /not offered/);
+  }
 });
 
 // Breaks: a replayed advance only drains (a drain never captures the moved clocks), so the world
