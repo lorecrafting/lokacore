@@ -1,4 +1,4 @@
-# size: allow 400, every whole-cartridge dialogue link check in one graph
+# size: allow 412, every whole-cartridge dialogue link check in one graph
 defmodule Loka.Content.DialogueLinks do
   @moduledoc "A dialogue choice's policy and narration variants as roots, and its then and then_failed checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -83,13 +83,24 @@ defmodule Loka.Content.DialogueLinks do
     {sorted, next} = graph(all)
     open = entries(sorted, next)
 
-    live_keys = for {_, d} <- live(sorted), do: d["key"]
-
     refused(sorted) ++
-      guessed(open, next, live_keys) ++
+      guessed(open, next, live_keys(sorted)) ++
       fall_through(open, sorted) ++
       unused(sorted, open, next) ++
-      return_closed(sorted, next) ++ fall_through_spent(open, sorted)
+      return_closed(sorted, next) ++
+      fall_through_spent(open, sorted) ++ sitting_spent(sorted)
+  end
+
+  defp live_keys(sorted), do: for({_, d} <- live(sorted), do: d["key"])
+
+  # A hub whose every choice leaves it: the last answer closes the talk, with nothing left to pick.
+  defp sitting_spent(sorted) do
+    for {rel, d} <- sorted,
+        choices = Map.values(d["choices"]),
+        Enum.any?(choices, & &1["sitting"]),
+        Enum.all?(choices, &(&1["sitting"] || Loka.Content.Hub.self_gated?(&1))) do
+      warning("SITTING_SPENT", rel, ["choices"], d)
+    end
   end
 
   # A speaker's only Talk whose every free way on shuts itself once taken: Talk is refused for good.

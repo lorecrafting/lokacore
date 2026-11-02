@@ -1,4 +1,4 @@
-# size: allow 375, scene-triggered chapter point refs join dialogue trigger checks
+# size: allow 440, scene-triggered chapter point refs join dialogue trigger checks
 defmodule Loka.Content.Dialogues do
   @moduledoc "Compiled dialogue roles, consequences, riddle and chapter trigger checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -89,15 +89,36 @@ defmodule Loka.Content.Dialogues do
       counted =
         if is_map_key(c, "outcome"), do: [outcomes[c["outcome"]]], else: Map.values(outcomes)
 
-      if Enum.any?(counted, &ambiguous?(&1, ctx)),
-        do: [diag("OUTCOME_MISMATCH", at("cartridge.json", steps ++ ["story_point"]))],
-        else: []
+      uncountable(counted, at("cartridge.json", steps ++ ["story_point"]), ctx)
+    end
+  end
+
+  defp uncountable(counted, path, ctx) do
+    cond do
+      Enum.any?(counted, &ambiguous?(&1, ctx)) ->
+        [diag("OUTCOME_MISMATCH", path)]
+
+      Enum.any?(counted, &questless?(&1, ctx)) ->
+        [diag("OUTCOME_MISMATCH", path, %{"why" => "chapter_no_quest"})]
+
+      true ->
+        []
     end
   end
 
   defp ambiguous?(t, ctx) do
     if is_map_key(t, "scene"), do: false, else: dialogue_ambiguous?(t, ctx)
   end
+
+  # view/quest_journal.ts counts a chapter by the dialogue's quest; a choice without one never would.
+  defp questless?(%{"dialogue" => r}, ctx) do
+    match?(
+      {_, _, %{"choices" => _} = d} when not is_map_key(d, "quest"),
+      resolve(r, "dialogue", ctx.m, ctx.defs)
+    )
+  end
+
+  defp questless?(_, _), do: false
 
   defp dialogue_ambiguous?(t, ctx) do
     case resolve(t["dialogue"], "dialogue", ctx.m, ctx.defs) do
@@ -111,17 +132,47 @@ defmodule Loka.Content.Dialogues do
     end
   end
 
-  # dialogue@1 owns story_point_reached; a choice's dialogue resolves a quest; a scene-reached
+  # dialogue@1 owns story_point_reached; a choice that reaches one ends the talk; a scene-reached
   # point's marker fact story_point_<key> fits a Key (key at most 52).
   defp story_points(defs, ctx) do
     for {_, {rel, steps, p}} <- defs["story_point"],
-        d <- owned(at(rel, steps), "story_point_reached", ctx.events) ++ outcomes(p, ctx),
+        d <-
+          owned(at(rel, steps), "story_point_reached", ctx.events) ++
+            outcomes(p, at(rel, steps), ctx),
         do: d
   end
 
-  defp outcomes(p, ctx) do
-    for {_, t} <- p["outcomes"], {true, d} <- [site(t, p["key"], ctx)], do: d
+  defp outcomes(p, path, ctx) do
+    case for {_, t} <- p["outcomes"], {true, d} <- [site(t, p["key"], ctx)], do: d do
+      [] -> forked(p, path, ctx)
+      refused -> refused
+    end
   end
+
+  # With no quest to end them, an outcome's choice stays open after another is taken, unless all
+  # of them gate on one fact their steps set and no step of the dialogue sets back.
+  defp forked(p, path, ctx) do
+    outcomes = Map.values(p["outcomes"])
+
+    if map_size(p["outcomes"]) > 1 and Enum.any?(outcomes, &questless?(&1, ctx)) and
+         Enum.reduce(Enum.map(outcomes, &gates(&1, ctx)), &MapSet.intersection/2) == MapSet.new(),
+       do: [diag("OUTCOME_MISMATCH", path, %{"why" => "story_point_two_outcomes"})],
+       else: []
+  end
+
+  defp gates(%{"dialogue" => r, "choice" => c}, ctx) do
+    case resolve(r, "dialogue", ctx.m, ctx.defs) do
+      {_, _, d} ->
+        Loka.Content.Hub.self_gates(get_in(d, ["choices", c]) || %{})
+        |> Enum.reject(&Loka.Content.Hub.reopens?(d, &1))
+        |> MapSet.new()
+
+      _ ->
+        MapSet.new()
+    end
+  end
+
+  defp gates(_, _), do: MapSet.new()
 
   defp site(%{"scene" => s}, key, ctx) do
     {rel, steps, _} = resolve(s, "scene", ctx.m, ctx.defs)
@@ -133,8 +184,23 @@ defmodule Loka.Content.Dialogues do
   defp site(%{"dialogue" => r, "choice" => c}, _, ctx) do
     {rel, steps, d} = resolve(r, "dialogue", ctx.m, ctx.defs)
 
-    {not is_map_key(d, "quest"),
-     diag("OUTCOME_MISMATCH", at(rel, steps ++ ["choices", c, "story_point"]))}
+    o = get_in(d, ["choices", c]) || %{}
+
+    why = point_refusal(o, d)
+
+    {why != nil,
+     diag("OUTCOME_MISMATCH", at(rel, steps ++ ["choices", c, "story_point"]), %{"why" => why})}
+  end
+
+  # The hub's own check never sees these: choice story points are gone by the time it runs. A quest
+  # resolves once; a choice with no quest could reach its point again on every Talk.
+  defp point_refusal(o, d) do
+    cond do
+      o["sitting"] -> "sitting_no_return"
+      o["then"] not in [nil, "end"] or is_map_key(o, "then_failed") -> "story_point_then"
+      d["quest"] || Loka.Content.Hub.self_gated?(o) -> nil
+      true -> "story_point_repeats"
+    end
   end
 
   @doc """

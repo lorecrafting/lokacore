@@ -28,7 +28,7 @@ These rules hold across every kind:
   picks (a dialogue or scene choice, a quest offer) has a `label`.
 - A policy is its condition tree, and it is optional: an absent gate always holds, and an absent trigger (`disposition.hostile`, `friendly`) never fires.
 - A story point is `story_point: "<key>/<outcome>"` on the dialogue choice that reaches it (a
-  scene's `on_end` may also claim one); there is no story point file.
+  scene's `on_end` may also claim one); there is no story point file. Reaching one ends the talk.
 - One `steps` list serves reactions, scripted action outcomes and dialogue choices; a service's `benefit`
   is one Step whose `op` the service context runs ([steps and checks](system/cartridge.md#steps-and-checks)).
 - A dialogue choice's terms (`accept`, `hand_over`, `payment`, `patrol`) are fields; its effects are `steps`.

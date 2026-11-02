@@ -1,4 +1,4 @@
-# size: allow 328, one row per refusal a writer can meet; the table reads together
+# size: allow 335, one row per refusal a writer can meet; the table reads together
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -61,6 +61,7 @@ defmodule Loka.Content.Explain do
          ENTRY_GUESSED | Talk opens `{target}` here only by inference: it ties another member of its loop for most links, it comes first by key with no condition, or the dialogues with a condition that can fail lead to several, and it is the first of them. | Mark the dialogue Talk should open with `entry: true`, or leave one way on.
          RETURN_CLOSED | A choice in `{target}` sets the fact its `when:` reads, so going back to these choices closes the talk. | Nothing to do if that is meant; otherwise set the fact on a choice with `then: end`.
          FALL_THROUGH_SPENT | `{target}` has a `when:`, and its only free way on shuts itself once taken (`once`, or `needs:` of the fact it sets), so once it is taken and the `when:` fails, the speaker's Talk is refused. | Add a free choice that leads on and can always be taken, or a second dialogue for Talk to open.
+         SITTING_SPENT | Every choice in `{target}` goes away once taken, so the last answer closes the talk until the next Talk. | Nothing to do if that is meant; otherwise add a choice with no `once` that stays.
          ENTRY_UNUSED | `{target}` never opens: its speaker has an `entry` dialogue and no dialogue that opens leads here. | Link to it from one that opens, or remove it.
          ALLY_ENGAGE_UNUSED | This ally has a `disposition.engage` line, and an ally only strikes the opponent, so the line never plays. | Remove the engage line and the `hostile` rule with it (a hostile attacker needs `engage` unless it is `unattackable: true`), or keep `hostile` and set `unattackable: true` before removing engage.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
@@ -84,7 +85,7 @@ defmodule Loka.Content.Explain do
          bad_needs | Line `{text}` is not `needs: <fact>` or `needs: not <fact>`, or repeats a `needs:`. | Give a choice one `needs:` naming one fact by its key; `~` holds the place of words, not of a fact. Anything richer goes in `policy` in `dialogues/<key>.json`.
          needs_outside_choice | Line `{text}`: `needs:` belongs under a choice. | Move it under a `- ` line, or use `when:` for the whole scene.
          unreachable | Line `{text}` may never be true here: the `when:` or a choice above it needs the opposite and this file never sets that fact, and the compiler cannot see another file or a reaction changing it. | Nothing to do if something else changes that fact; otherwise remove the line or move this choice out from under that one.
-         bad_once | Line `{text}` is not `once`, or repeats it. | Write the one word `once`, one time, under the choice.
+         bad_once | Line `{text}` is not `once` or `once: sitting`, or repeats one. | Write one of them, one time, under the choice.
          bad_asked | Line `{text}` is not `asked`, or repeats it. | Write the one word `asked`, one time, under the choice.
          choice_order_written | A choice's `order` is the compiler's mark of a scene's written order, not a field to write. | Remove it: a scene's choices show as written, a JSON dialogue's by key.
          once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
@@ -123,6 +124,12 @@ defmodule Loka.Content.Explain do
          layout_stale | layout.json must place every room exactly once, and it does not. | Run `bin/loka new layout layout <cartridge dir>` again, then place the new rooms.
          gives_holder | `gives: {item}` hands over nothing until `{holder}` holds `{item}`: the choice stays hidden. | Set the item's location to `{"in": "npc", "npc": "{holder}"}`, or move it there in play.
          gives_receive | `gives:` (`receive`) needs the `item_acquired` event, which `{capability}` owns, and the cartridge does not lock it. | Add `"{capability}": 1` under requires.capabilities in cartridge.json; the NPC must hold the item too.
+         sitting_no_return | A `sitting` choice only goes away when the talk comes back to these choices, and this choice or dialogue never does: it has a `then`, a story point, a `once`, a check or a patrol, a quest or riddle, is the only choice, is a `then` target, or sits in a scene with nested choices. | Remove `sitting`, or move the choice to a dialogue nothing leads to.
+         chapter_no_quest | A chapter counts its story point by a dialogue's quest, and this choice's dialogue has no quest, so the chapter would never come. | Give the dialogue a `quest`, or point the chapter at a story point reached by a quest or a scene.
+         story_point_repeats | This choice has no quest to end it, so the player could reach the story point again on every Talk. | Add `once` under the choice in a scene; in JSON, `"once": true`, or a policy `equals false` on a fact the choice's steps set to true.
+         story_point_two_outcomes | This story point has two outcomes on choices with no quest, so taking one leaves the other open and the point could come twice. | Give the dialogue a `quest` that ends it, give every outcome's choice a policy `equals false` on one fact its steps set to true and no step of the dialogue sets back, or give the point one outcome.
+         end_talk_event | `end_talk` closes the talk of the player who acted, and this event may have no such player: it may be about an NPC or come with the clock. | React to `choice_resolved`, `choice_opened`, `check_passed`, `check_failed`, `action_completed` or `story_point_reached`.
+         story_point_then | An answer that reaches a story point ends the talk, so it cannot also have a `then` or lead to nested choices. | Remove the `then`, or put the story point on a choice that has none.
          gift_repeats | Picking this choice gives or starts something, and the dialogue can come back to it, so the player could take it again. | Add `once` under the choice in a scene; in JSON, gate it on a fact its steps set.
          then_into | A `then` cannot lead to `{target}`, which has a `{part}`: that dialogue only opens its own way. | Remove the `then`, or remove `{part}` from `{target}`.
          then_out_of | A `then` cannot leave from here: `{part}` already decides where this goes next. | Remove the `then`, or remove the `{part}`.

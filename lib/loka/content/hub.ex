@@ -44,6 +44,32 @@ defmodule Loka.Content.Hub do
 
   @spec choice(String.t(), list(), map(), map(), map()) :: [map()]
   def choice(rel, steps, o, d, %{proven: proven, targets: targets}) do
+    sitting(rel, steps, o, d, targets) ++ gifts(rel, steps, o, d, proven, targets)
+  end
+
+  # mechanics/dialogue/behavior.ts `hub`: only a plain answer of a dialogue that reopens comes back.
+  defp sitting(rel, steps, %{"sitting" => true} = o, d, targets) do
+    ends =
+      Enum.any?([
+        o["then"],
+        self_gated?(o),
+        o["check"],
+        o["patrol"],
+        d["quest"],
+        d["riddle"]
+      ]) or
+        map_size(d["choices"]) == 1 or MapSet.member?(targets, d["key"])
+
+    if ends,
+      do: [
+        diag("OUTCOME_MISMATCH", at(rel, steps ++ ["sitting"]), %{"why" => "sitting_no_return"})
+      ],
+      else: []
+  end
+
+  defp sitting(_, _, _, _, _), do: []
+
+  defp gifts(rel, steps, o, d, proven, targets) do
     if repeats?(d, targets) and
          not Enum.any?([d["quest"], d["riddle"], o["accept"], o["patrol"]]) and not self_gated?(o),
        do:
@@ -59,26 +85,43 @@ defmodule Loka.Content.Hub do
       Enum.any?(choices, fn {_, c} -> is_map_key(c, "then") or is_map_key(c, "then_failed") end)
   end
 
-  # The lowered `once`: the policy's condition (alone or under `all`) that a fact its steps set
-  # does not yet hold that value.
-  defp self_gated?(%{"policy" => policy, "steps" => steps}) do
+  # The lowered `once`: the policy's condition (alone or under `all`) on a fact its steps last set
+  # to a value the condition rules out: `not` around `equals v`, or `equals w` with w other than v.
+  @doc "Whether a choice's own steps hide it for good (the lowered `once`)."
+  @spec self_gated?(map()) :: boolean()
+  def self_gated?(o), do: self_gates(o) != []
+
+  @doc "Each `{fact key, value}` a choice's policy refuses once its own steps have set it."
+  @spec self_gates(map()) :: [{String.t(), term()}]
+  def self_gates(%{"policy" => policy, "steps" => steps}) do
     conditions = if policy["op"] == "all", do: policy["items"], else: [policy]
 
-    Enum.any?(conditions, fn
-      %{"op" => "not", "item" => %{"op" => "fact_compare", "fact" => f, "equals" => v} = leaf} ->
+    for {closes?, %{"fact" => f, "equals" => w} = leaf} <- Enum.map(conditions, &gate/1),
         # A leaf reading another holder (subject, npc, with) never sees the step's write.
-        Map.take(leaf, ~w(subject npc with)) == %{} and
-          Enum.any?(
-            steps,
-            &(match?(%{"op" => "fact.assign", "value" => ^v}, &1) and key(&1["fact"]) == key(f))
-          )
-
-      _ ->
-        false
-    end)
+        Map.take(leaf, ~w(subject npc with)) == %{},
+        %{"op" => "fact.assign", "value" => v} <- last_write(steps, key(f)),
+        closes?.(v, w),
+        do: {key(f), v}
   end
 
-  defp self_gated?(_), do: false
+  def self_gates(_), do: []
+
+  @doc "Whether a step of any choice of the dialogue writes the gate's fact to another value."
+  @spec reopens?(map(), {String.t(), term()}) :: boolean()
+  def reopens?(dialogue, {f, v}) do
+    Enum.any?(
+      for(c <- Map.values(dialogue["choices"]), s <- c["steps"] || [], writes?(s, f), do: s),
+      &(not match?(%{"op" => "fact.assign", "value" => ^v}, &1))
+    )
+  end
+
+  defp gate(%{"op" => "not", "item" => %{"op" => "fact_compare"} = leaf}), do: {&==/2, leaf}
+  defp gate(%{"op" => "fact_compare"} = leaf), do: {&!=/2, leaf}
+  defp gate(_), do: nil
+
+  defp last_write(steps, f), do: steps |> Enum.filter(&writes?(&1, f)) |> Enum.take(-1)
+
+  defp writes?(step, f), do: match?("fact." <> _, step["op"]) and key(step["fact"]) == f
 
   defp repeatable(o, proven) do
     receive = if is_map_key(o, "receive"), do: [["receive"]], else: []

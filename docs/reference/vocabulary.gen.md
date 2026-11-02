@@ -96,6 +96,12 @@ Add amount experience to the acting character's levelling row (toolbox row 4), s
 |---|---|---|---|
 | amount | integer | yes | Experience to add. |
 
+### `end_talk`
+
+End the acting character's open conversation as Leave would (one choice.close, no event, no line); with none open, nothing.
+
+Type: object.
+
 ### `item.move`
 
 Toolbox row 41 (decay): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.
@@ -799,6 +805,7 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | receive | object |  | The bound NPC-held item transferred to the actor. |
 | receive.from | [Key](source-kinds.gen.md#key) | yes | The npc role holding it. |
 | receive.item | [Key](source-kinds.gen.md#key) | yes | The bound item transferred. |
+| sitting | `true` |  | Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest. |
 | steps | list of [Step](vocabulary.gen.md#steps) |  | See the type. |
 | story_point | string |  | <story point>/<outcome>: the outcome this choice reaches; one per outcome. |
 | then | [Key](source-kinds.gen.md#key) |  |  |

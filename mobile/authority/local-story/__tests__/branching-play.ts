@@ -250,6 +250,7 @@ export const give = (extra: object = {}) =>
 export function reopened(
   c: ReturnType<typeof compiled>,
   play: (g: ReturnType<typeof run>) => void,
+  next?: (g: ReturnType<typeof run>) => void,
 ) {
   const dir = mkdtempSync(join(tmpdir(), 'loka-branching-'));
   try {
@@ -258,6 +259,11 @@ export function reopened(
     play(g);
     g.sql.close();
     coldReopen(path, c);
+    if (next) {
+      const again = run(path, c, 100);
+      next(again);
+      again.sql.close();
+    }
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

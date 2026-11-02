@@ -104,8 +104,8 @@ export const offered = (world: World, actor: CharacterId, d: DialogueDefinition,
 
 /**
  * Whether a saved row's `ids` are ones an opening of `d` can write: `choiceIds(d)` in order, never
- * empty, less only choices that `skill.acquire` a hidden skill with a prerequisite (hs-14; the save
- * checks, static because the actor has moved on since the opening).
+ * empty, less only `sitting` choices and ones that `skill.acquire` a hidden skill with a
+ * prerequisite (hs-14; the save checks, static because the actor has moved on).
  */
 export const openable = (world: World, d: DialogueDefinition, ids: unknown) =>
   Array.isArray(ids) &&
@@ -115,11 +115,12 @@ export const openable = (world: World, d: DialogueDefinition, ids: unknown) =>
     choiceIds(d).filter(
       (id) =>
         ids.includes(id) ||
-        !teaches(d, id, (k) => {
-          // as `concealed` (skills.ts): a hidden skill with no prerequisite is never left out
-          const skill = world.cartridge.skills?.[refString(k)];
-          return !!skill?.hidden && !!skill.prerequisite;
-        }),
+        (!d.choices[id as Key]?.sitting &&
+          !teaches(d, id, (k) => {
+            // as `concealed` (skills.ts): a hidden skill with no prerequisite is never left out
+            const skill = world.cartridge.skills?.[refString(k)];
+            return !!skill?.hidden && !!skill.prerequisite;
+          })),
     ),
   );
 
@@ -274,13 +275,10 @@ export const talking = (world: World, actor: CharacterId, target: EntityId | und
   return !!row && speaker(world, row[1]) === target;
 };
 
-/**
- * The Leave of `actor`'s open conversation, if any (dialogue@1): a talk to another speaker or the
- * dream's Continue ends it first, in the same decision.
- */
-export const leave = (world: World, actor: CharacterId) => {
+/** `actor`'s Leave of an open talk, if any (dialogue@1): also what a new talk or dream runs first. */
+export const leave = (world: World, actor: CharacterId, writer_group = 0) => {
   const row = pending(world, actor);
-  return row ? [{ op: 'choice.close', writer_group: 0, continuation_id: row[0] } as const] : [];
+  return row ? [{ op: 'choice.close', writer_group, continuation_id: row[0] } as const] : [];
 };
 
 /**
