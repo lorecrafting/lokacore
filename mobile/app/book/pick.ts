@@ -66,7 +66,7 @@ const state = (e: Thing | undefined, text: (key: string) => string) =>
   e?.state ? cap(e.state) : e?.liquid && liquidWords(e.liquid, text);
 
 // The option a pair is listed under on page `id`. A spell: one list of spells on its target's page,
-// elsewhere (Character) one list per spell.
+// elsewhere (Skills) one list per spell.
 const option = (b: Button, id: string) =>
   commandOf(b) !== 'cast'
     ? OPTION[commandOf(b) === 'give' ? 'give' : 'use'][b.target_ids.indexOf(id)]!
