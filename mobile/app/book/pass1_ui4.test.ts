@@ -244,6 +244,7 @@ test('an Attack in a sanctuary is grey with its one sentence, on the page and in
   const v = nellView();
   const nell = v.entities.find((e) => e.shop)!;
   const text = (k: string) => (k === 'combat.sanctuary' ? 'Placeholder sentence.' : k);
+  const sent: unknown[] = [];
   const attackOf = (reason: object, npcFields: object = {}) => {
     const offer = { ...action('attack', { available: false, reason }), target_ids: [nell.id] };
     const view = {
@@ -252,14 +253,18 @@ test('an Attack in a sanctuary is grey with its one sentence, on the page and in
     } as GameView;
     const s = screenOf(view, text);
     const npc = s.view.entities.find((e) => e.id === nell.id);
-    const page = { ...s, text, npc, g: group(s.buttons), press() {}, leave() {}, open() {} };
-    return nodes(NpcPage(page as never) as never)
-      .map((n) => (n.props as { accessibilityHint?: string }).accessibilityHint)
-      .filter(Boolean);
+    const press = (b: unknown) => sent.push(b);
+    const page = { ...s, text, npc, g: group(s.buttons), press, leave() {}, open() {} };
+    const greys = nodes(NpcPage(page as never) as never).filter(
+      (n) => (n.props as { accessibilityHint?: string }).accessibilityHint,
+    );
+    for (const n of greys) (n.props as { onPress(): void }).onPress();
+    return greys.map((n) => (n.props as { accessibilityHint: string }).accessibilityHint);
   };
   const message = { key: 'combat.sanctuary' };
   const sanctuary = { code: 'invalid_state', cause: 'sanctuary', message };
   assert.deepEqual(attackOf(sanctuary), ['Placeholder sentence.']);
+  assert.equal(sent.length, 1); // its press goes to the engine, which logs the refusal
   assert.deepEqual(attackOf(sanctuary, { hostile: true }), ['Placeholder sentence.']);
   assert.deepEqual(attackOf({ code: 'invalid_state' }), []);
   assert.deepEqual(attackOf({ code: 'invalid_target', cause: 'cannot_be_hurt' }), []);
@@ -267,6 +272,22 @@ test('an Attack in a sanctuary is grey with its one sentence, on the page and in
   assert.deepEqual(replyLine(reply as never, text, v), [
     { kind: 'refused', reason: 'sanctuary', text: 'Placeholder sentence.' },
   ]);
+});
+
+// Breaks: a sent card's live region reads the sentence as the log's line does, so it is heard twice.
+test('a pressed grey card speaks its reason itself only when nothing was sent', async () => {
+  const { Unavailable } = await import('./Unavailable.tsx');
+  const hook = Symbol.for('loka-book-test-state');
+  const before = (globalThis as any)[hook];
+  (globalThis as any)[hook] = () => ['L\nS.', () => {}];
+  const region = (send?: () => void) =>
+    words(
+      nodes(Unavailable({ label: 'L', reason: 'S.', send }) as never).find(
+        (n) => (n.props as Record<string, unknown>)['aria-live'] === 'polite',
+      )!,
+    );
+  assert.deepEqual([region(), region(() => {})], ['S.', '']);
+  (globalThis as any)[hook] = before;
 });
 
 // Breaks: the card reads its label key, or a press stays silent, or touches the world; or a cartridge
