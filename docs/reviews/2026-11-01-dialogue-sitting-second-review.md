@@ -44,4 +44,26 @@ Blockers 1 and 2 share a test gap: `kernel/ts/test/dialogue_sitting.test.ts` use
 
 `bin/regen.sh` stopped locally at the story views (`react` missing from cloned deps) with no tree change before that point; story views rest on green CI. No full `bin/mutate_diff.sh`, by brief. `end_talk` on `check_passed`/`check_failed` against a bounded riddle not run. Book UI not in scope.
 
-Final verdict: CHANGES REQUIRED
+Round 1: changes required.
+
+## Re-check at 53af400730c105654ef79019e626b7204aef3748
+
+Scoped to my three blockers and `forked`. CI at this head by `gh run list`: ci, book-e2e, graph-diff success.
+
+**Blockers 1 and 2: fixed.** `dialogue_end_talk_save.test.ts` runs each shape through `coldReopen`: end_talk on `choice_opened` (a plain talk and a bounded riddle), a second op on `choice_opened`, and end_talk on `action_completed` over a bounded riddle with a miss. The riddle helper then sends a next command, accepted; the plain-talk `choice_opened` test stops at the reopen, so it proves no next command. Scratch probes, `coldReopen` plus an accepted next command each time, no throw or hang: plain talk after `choice_opened` closes (next `talk`) or edits (next `choose`), reopened again after it; three sittings closed at open; two bounded sittings with misses, closed by `coil_rope`; a right answer with end_talk on `choice_resolved`.
+
+Ordinary play kept: attempt count, limit close, resolved status, row and receipt agreement, quest binding, own-row `choose` actor. `kernel/ts/test/riddle.test.ts`, `dream.test.ts`, `escort_repeat.test.ts` green here; `mobile/app/book/riddle.test.ts` cannot load locally (`react` missing), rests on CI. `riddle_wrong` emits no events, so no reaction can close a row on a miss.
+
+Mutants of `riddle-save.ts`, all red: `prior` back to `opened_revision`; other-op refusal restored; one-event check restored; non-choose closer limited to talk, continue, close_choice.
+
+**Blocker 3: fixed.** `hub.ex` with `d["riddle"]` or `o["patrol"]` as `nil`: both red.
+
+**Should-fix: `forked` can still double fire.** `lib/loka/content/dialogues.ex:154`, `lib/loka/content/hub.ex:103`. Both compiled, played and reopened, and reached outcomes `a` and `b`:
+- A third choice with `gate_open := false`: choose a, c, b.
+- Choice a with steps `[gate_open := true, gate_open := false]`: `self_gates` accepts any matching assign, not the last.
+
+Any other writer of the fact resets it the same way. The test "a story point with no quest takes one outcome" states the rule that this breaks. No save is harmed. Remedy: take the last assign of the fact, and refuse a shared gate whose fact another step sets to another value. Single-outcome `point_refusal` shares the reset gap, and it predates this slice. That is why this does not block: `point_refusal` already accepts `self_gated?` as once for single-outcome points, and the remedy holds `forked` to that standard. Sound otherwise: a lowered `once` has its own fact and is refused; a per-subject fact read with no subject is refused (`FACT_SCOPE_UNSUPPORTED`); a step's `subject` is refused; a failed check applies no steps and no point. `forked` mutants (rule off; any gate suffices): red.
+
+**Nit: `dialogue_end_talk_save.test.ts:161`.** The unbounded test also passes on the pre-fix `riddle-save.ts`, so its "Breaks" comment describes no regression that the fix removed.
+
+Final verdict: APPROVE WITH NOTES
