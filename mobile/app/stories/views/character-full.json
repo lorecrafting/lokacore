@@ -597,9 +597,10 @@
     "slot": "wield",
     "weapon": {
      "attack": {
-      "chance": 100,
+      "attacks": 3,
+      "chance": 60,
       "damage_max": 2,
-      "damage_min": 2,
+      "damage_min": 1,
       "kind": "physical"
      },
      "skill": {

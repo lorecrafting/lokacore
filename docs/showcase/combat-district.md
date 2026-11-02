@@ -37,10 +37,10 @@ district makes the player dangerous with two belts and braces:
 1. **The player hits only with a wielded weapon.** The attack profile that strikes is the usable
    wielded weapon's, else `player_attack` ([row 2](../system/mechanics.md#stats-derived-from-attributes-toolbox-row-2);
    [C1](../system/mechanics.md#c1-training-and-armed-defense-selected-contract)). Aldous's lesson
-   acquires the `blade` skill and hands over the `training_sword` (`weapon.attack` chance 100,
-   damage 2, `kind: physical`; `damage_sampler/items/iron_sword.json`, C1's
-   `tobin_swords.json` `skill.acquire` + `receive`). Unarmed, the player lands half the time (chance
-   50). No `world.derived.hit_chance` table: it would lift the unarmed chance too.
+   acquires the `blade` skill and hands over the `training_sword` (`weapon.attack` 3 swings
+   at chance 60, damage 1..2, `kind: physical`; `damage_sampler/items/iron_sword.json`, C1's
+   `tobin_swords.json` `skill.acquire` + `receive`). Unarmed, the player makes 2 swings at chance 50,
+   damage 1 ([Swings](../system/mechanics.md#swings-loka-kgd200), Beads `loka-kgd.200`). No `world.derived.hit_chance` table: it would lift the unarmed chance too.
 2. **The Warden resists `physical` 100** (`resistances`, [row G2](../system/mechanics.md#damage-kinds-resistances-and-critical-hits-toolbox-row-g2)):
    a sword hit on him is `hit: true, loss: 0`, narrated as a hit, before and after crits and the
    derived damage bonus (order: damage, crit, resistance). The engagement holds, Flee and the talk
@@ -124,18 +124,18 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
   with `accept: bounty`, `leave`), then `aldous_yard` (policy `fact_compare raider_slain true`; its
   own prompt and `leave` only, so no bounty is offered once the raider is dead); `aldous_talk` also offers `steel` while `skill_blade` is true and `raider_slain` false
   (its narration is the answer; with two answers the talk is a hub, so `bounty` returns to it). `description_variants` none.
-- **The boar**: `room: boar_run`; hp 0..8 start 8 gain 0; `attack {chance 100, 2..2}`;
+- **The boar**: `room: boar_run`; hp 0..8 start 8 gain 0; `attack {attacks 2, chance 60, 1..3}`;
   `immune: [bleeding, gored]` (`npc_status_sampler/npcs/golem.json`); `drops: [{tusk, 100},
   {purse, 50}]` with `tusk` and `purse` `location {in: npc, npc: boar}` (`loot_sampler/npcs/rat.json`);
   `cues: [{sense: sound, text: cue.boar, range: 1}]` (`senses_sampler/npcs/sentry.json`; a dead
   NPC's cues are silent); `name_variants` none.
-- **Gil** (the ally): `room: gate_yard`; hp 0..10 gain 0; `attack {chance 100, 1..1}`;
+- **Gil** (the ally): `room: gate_yard`; hp 0..10 gain 0; `attack {attacks 2, chance 50, 1..1}`;
   `description_variants` on `fact_compare gil_warned true` ("Gil has his spear up; he heard you
   call."). Listed in `world.combat.allies`; never an Attack target; takes no combat damage
   ([row 6b](../system/mechanics.md#npc-vs-npc-damage-allies-and-kill-credit-toolbox-row-6b)).
-- **The raider**: `room: gate_yard`; hp 0..3 gain 0; `attack {chance 100, 1..1}`; no disposition
+- **The raider**: `room: gate_yard`; hp 0..3 gain 0; `attack {attacks 2, chance 50, 1..1}`; no disposition
   (passive until attacked; it is the death-credit NPC).
-- **Goblins**: `npcs/goblin.json` `spawn_template: true`, hp 0..6 gain 0, `attack {chance 100,
+- **Goblins**: `npcs/goblin.json` `spawn_template: true`, hp 0..6 gain 0, `attack {attacks 2, chance 50,
   1..1}`; bundle `goblins {npc: goblin, item: ear, corpse: npc_corpse}`; plan `goblins`: home
   `goblin_pit`, area `[goblin_pit, drill_yard]`, cap 2, day and night targets 2, `night_start` 20,
   `night_end` 6, `replacement_delay` 86400, `wander_interval` 8640000 (one hundred days: the pack
@@ -144,7 +144,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
   (hp 1) tries to flee north into the yard before its blow and stays there, passive. `tilt_goblins`
   is the same plan with home `tilt_yard`.
 - **Warden**: adds `resistances {physical: 100}`; nothing else changes.
-- `training_sword`: `slot: wield`, `weapon {skill: blade, attack {chance 100, 2..2, kind:
+- `training_sword`: `slot: wield`, `weapon {skill: blade, attack {attacks 3, chance 60, 1..2, kind:
   physical}}`, `tags [metal, sharp]`, 600 g, `location {in: npc, npc: aldous}`.
 - Reaction `boar_gore`: `on {event: attack_result, hit: true}`, `when any(npc_present {npc: boar},
   npc_present {npc: tilt_boar})`,
@@ -166,8 +166,10 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 
 ### Guided loop and expected outcomes
 
-Any day: no combat room is exposed and nothing here reads the sky. Every attack but the unarmed one
-(chance 50) is chance 100; initiative and the unarmed roll are seeded per round in the tests
+Any day: no combat room is exposed and nothing here reads the sky. Since [Swings](../system/mechanics.md#swings-loka-kgd200)
+(Beads `loka-kgd.200`) every attack makes 2 or 3 swings at chance 50 or 60 (see the NPCs and the
+sword above), so the per-round numbers in steps 4, 6, 8 and 9 below are the pre-swing story; the
+tests pin the seeded outcomes. Initiative and every roll are seeded per round in the tests
 (`kernel/ts/test/showcase_fixture.ts` `seeded`), and the walk `walk_combat` follows the start seed. The player carries the inn's `waterskin` from
 step 1. Times are relative to the Attack that opens each fight (rounds at +150, +300, ...; odd
 rounds player first, even rounds opponent first, the ally after both). Moves cost 1 mv (the engine
@@ -224,8 +226,13 @@ Steps 1 to 10 and the sandbox pack are built and pinned by `kernel/ts/test/showc
   from the start seed and the player never dies; at str 10 (1 a blow) the boar kills the player in
   round 5, so the walk keeps the death, the corpse and the return. The sword then kills the boar (3
   hp left) in round 1, and the pit closes in three rounds.
-- `walk_social_standing`: the player flees after six rounds, not ten; from the start seed the
-  seventh round's unarmed blow kills the Warden.
+- `walk_combat` (re-scripted for [Swings](../system/mechanics.md#swings-loka-kgd200), Beads
+  `loka-kgd.200`): the death is kept; the sword (3 swings, chance 60, 1..2) needs three rounds for
+  the boar, so its Attack runs on and the two stale waits after it are dropped. In the pit goblin A
+  flees north and B is targeted at once, so the Attack on B and two waits are dropped, and the last
+  wait runs on until both goblins have fled: the walk no longer kills a goblin.
+- `walk_social_standing` (Beads `loka-kgd.200`): the player flees after two rounds, not six; from
+  the start seed the third round's two unarmed swings kill the Warden.
 
 ## The pack and Beads `loka-6ql4`
 

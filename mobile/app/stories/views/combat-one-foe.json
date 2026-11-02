@@ -483,7 +483,7 @@
      "kind": "resource",
      "key": "hp"
     },
-    "current": 8,
+    "current": 7,
     "maximum": 10,
     "band": "hurt",
     "tone": "warning"
@@ -558,16 +558,20 @@
  "log": [
   "You arrive from the south.",
   "a boar grunting",
-  "You hit the boar.",
-  "The boar hits you hard.",
+  "You quickly attack and hit 2 times.",
+  "You hit the boar hard.",
+  "The boar quickly attacks 2 times and hits once.",
+  "The boar hits you extremely hard.",
   "The boar has some cuts.",
   "The tusk opens a wound; you are bleeding.",
   "The tusk leaves a scar that will not fade.",
   "the iron smell of your own blood"
  ],
  "combatLog": [
-  "You hit the boar.",
-  "The boar hits you hard.",
+  "You quickly attack and hit 2 times.",
+  "You hit the boar hard.",
+  "The boar quickly attacks 2 times and hits once.",
+  "The boar hits you extremely hard.",
   "The boar has some cuts.",
   "The tusk opens a wound; you are bleeding.",
   "The tusk leaves a scar that will not fade."

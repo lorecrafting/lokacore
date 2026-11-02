@@ -596,15 +596,19 @@
  "log": [
   "You arrive from the north.",
   "Another goblin joins the fight.",
-  "You hit a goblin.",
+  "You quickly attack and hit 2 times.",
+  "You hit a goblin extremely hard.",
+  "A goblin quickly attacks 2 times and hits once.",
   "A goblin hits you.",
-  "A goblin has some cuts."
+  "A goblin has many nasty wounds."
  ],
  "combatLog": [
   "Another goblin joins the fight.",
-  "You hit a goblin.",
+  "You quickly attack and hit 2 times.",
+  "You hit a goblin extremely hard.",
+  "A goblin quickly attacks 2 times and hits once.",
   "A goblin hits you.",
-  "A goblin has some cuts."
+  "A goblin has many nasty wounds."
  ],
  "details": {}
 }

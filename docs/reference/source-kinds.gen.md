@@ -696,6 +696,7 @@ Cartridge-owned hit chance and positive damage bounds. Compiler and loader enfor
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
+| attacks | integer |  | Swings (loka-kgd.200): how many swings one opportunity makes, each rolled on its own, their damage summed (1 to 10; default 1). |
 | chance | integer | yes | Percent chance an attack is accurate; a defense can still prevent the hit. |
 | crit | object |  | Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances. |
 | crit.chance | integer | yes | Percent of all attacks, sharing the accuracy draw: a hit whose draw is below this is critical, so a chance above the accuracy makes every hit critical. |
@@ -842,14 +843,23 @@ Cartridge-owned attack profile, round interval, position multipliers and combat 
 | narration | object | yes | Text keys told in combat rounds. |
 | narration.ally_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told when an ally's strike hits. |
 | narration.ally_miss | [TextKey](source-kinds.gen.md#textkey) |  | Told when an ally's strike misses. |
+| narration.ally_volley | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line. |
+| narration.ally_volley_all | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line. |
+| narration.ally_volley_one | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line. |
 | narration.block | [TextKey](source-kinds.gen.md#textkey) |  | Told when a shield blocks. |
 | narration.dodge | [TextKey](source-kinds.gen.md#textkey) |  | Told when the player dodges. |
 | narration.npc_died | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC falls in a combat round. |
 | narration.npc_hit | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC's attack hits the player. |
 | narration.npc_miss | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC's attack misses the player. |
+| narration.npc_volley | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line. |
+| narration.npc_volley_all | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line. |
+| narration.npc_volley_one | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line. |
 | narration.player_died | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player falls in a combat round; also the default fall line for tick deaths. |
 | narration.player_hit | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player's attack hits. |
 | narration.player_miss | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player's attack misses. |
+| narration.player_volley | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line. |
+| narration.player_volley_all | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line. |
+| narration.player_volley_one | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line. |
 | narration.shot_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told when a ranged first strike hits. Required when any item declares weapon.ranged. |
 | narration.shot_miss | [TextKey](source-kinds.gen.md#textkey) |  | Told when a ranged first strike misses. Required when any item declares weapon.ranged. |
 | player_attack | [AttackProfile](source-kinds.gen.md#attackprofile) | yes | See the type. |
