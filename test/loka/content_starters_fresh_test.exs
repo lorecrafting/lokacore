@@ -21,7 +21,8 @@ defmodule Loka.ContentStartersFreshTest do
     assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
-  # Breaks: a rerun at exit 0 restoring a step or a key the author removed from the file it names.
+  # Breaks: a rerun at exit 0 restoring a step or a key the author removed from the file it names
+  # (a cutscene's file included).
   test "a rerun leaves the removals in its own file alone", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
     follow(dir, "cutscene", "s")
@@ -29,6 +30,12 @@ defmodule Loka.ContentStartersFreshTest do
     before = snapshot(dir)
     assert {:error, "scenes/s.json: steps already" <> _} = Starters.write(dir, "cutscene", "s")
     assert snapshot(dir) == before
+
+    # A cutscene's own file is scenes/<name>.json, not under its kind's name.
+    follow(dir, "cutscene", "t")
+    edit(dir, "scenes/t.json", &Map.delete(&1, "control"))
+    assert {:ok, []} = Starters.write(dir, "cutscene", "t")
+    refute is_map_key(read(dir, "scenes/t.json"), "control")
 
     follow(dir, "statuses", "ill")
     edit(dir, "statuses/ill.json", &Map.delete(&1, "name"))
