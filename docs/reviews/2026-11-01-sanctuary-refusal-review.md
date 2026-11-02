@@ -63,3 +63,26 @@ Mutant K1 (hp check moved after the sanctuary check, `kernel/ts/src/mechanics/co
 | Prose | placeholder only |
 
 Not checked: a validation fixture for `GameError.message` (existing tests validate GameView only); screenshots; full mutate sweep.
+
+## Re-check at `e66581f7e4d492364234798b9f1c0ceea76d9cf0`
+
+Fix commits only. CI at this head (`gh run list --commit`): ci, book-e2e, graph-diff success.
+
+**Verdict: APPROVE WITH NOTES.**
+
+| Finding | Disposition | Proof |
+|---|---|---|
+| Blocker 1, raw label | Fixed: the card is a real `Button` (`buttons.ts`), so it takes the `label` resolver; `sanctuary.tsx` deleted | Test through the real presenter on `cellar_sampler` asserts `Attack` |
+| Blocker 2, raw key | Fixed: `UNAUTHORED` in `labels.ts`, read by `sayers.text`, so card and log share it | M1 (row removed) killed; card reads "You can't do that here.", log "Not here" |
+| Blocker 3, order | Fixed: hp-less and remote rows in `combat.test.ts` | M3 (sanctuary check above hp and presence) killed |
+| Should-fix 1, press logs | Fixed: `refused` card sends, the engine rejects, the log says it; `book-ui.md:233`, `:742` agree | M2 (no `send`) killed; probe: whole view unchanged across the press |
+| Should-fix 2, line shape | Fixed by a clause in `cartridge.md` | Read |
+| Nit, hostile | Fixed: `{ hostile: true }` row | Read |
+
+`Unavailable.tsx`: a verbatim move plus `send`, needed for the size limit. The `EXEMPT` row is true: `ActionCard.stories.tsx` exports `Unavailable`.
+
+Native double read: acceptable. The comment and the behaviour predate this PR, moved unchanged, and apply to other grey cards. A sanctuary card has neither path: with `send` it skips the announce and its region stays empty, so only the log's line is read (tested). Device check remains the existing ponytail.
+
+Nit: with no authored line the log reads `Not here`, no stop, beside the card's sentence (`labels.ts`, `combat.sanctuary` row). Only a cartridge missing the key reaches it; no player harm.
+
+Not checked: the second-opinion record's findings; a device; screenshots.
