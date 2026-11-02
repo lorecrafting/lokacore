@@ -11,6 +11,7 @@ import {
   positioned,
 } from './combat_fixture.ts';
 import { step, gameView } from '../src/index.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
@@ -215,6 +216,62 @@ test('production hour-boundary recovery precedes damage and Flee preserves the r
     rate: 18,
     remainder: 2700,
   });
+});
+
+// Breaks: a sanctuary refusal stays bare, so the Book cannot grey it with its sentence, or a seated player
+// is refused for standing first and the card appears then vanishes on standing; or a seated
+// player outside a sanctuary is told sanctuary and loses a card they could bring back by standing.
+test('a sanctuary refuses Attack with its cause, sitting or standing; a seat elsewhere stays bare', () => {
+  const w = combatWorld();
+  const calm = (x: typeof w) => ({
+    ...x,
+    rooms: {
+      ...x.rooms,
+      [room(x, 'lantern_cellar')]: { ...x.rooms[room(x, 'lantern_cellar')], sanctuary: true },
+    },
+  });
+  const seated = step(w, command(w, { type: 'sit', actor_id: w.character }), 1).world;
+  const sanctuary = {
+    code: 'invalid_state',
+    cause: 'sanctuary',
+    message: { key: 'combat.sanctuary' },
+  };
+  for (const [before, reason] of [
+    [calm(w), sanctuary],
+    [calm(seated), sanctuary],
+    [seated, { code: 'invalid_state' }],
+  ] as const) {
+    const view = gameView(before);
+    assert.deepEqual(validate('GameView', view), []);
+    const offer = view.entities
+      .find((e) => e.id === rat(w))!
+      .actions.find((a) => a.action_key === 'attack')!;
+    assert.deepEqual([offer.available, 'reason' in offer && offer.reason], [false, reason]);
+    const out = attack(before);
+    assert.ok(out.decision.kind === 'rejected');
+    assert.deepEqual(out.decision.error, reason);
+  }
+  // Breaks: the sanctuary check moves above an earlier refusal, so an hp-less person gets a grey
+  // Attack instead of no card, or a target in another room reads as this room's rule.
+  const unhurt = calm(w);
+  const { hp: _hp, ...bare } = unhurt.entities[rat(w)] as (typeof unhurt.entities)[string] & {
+    hp?: unknown;
+  };
+  const hpless = { ...unhurt, entities: { ...unhurt.entities, [rat(w)]: bare } };
+  const away = room(w, 'drowned_lantern');
+  const remote = {
+    ...w,
+    rooms: { ...w.rooms, [away]: { ...w.rooms[away], sanctuary: true } },
+    state: { ...w.state, containers: { ...w.state.containers, [w.body]: away } },
+  };
+  for (const [before, error] of [
+    [hpless, { code: 'invalid_target', cause: 'cannot_be_hurt' }],
+    [remote, { code: 'not_present' }],
+  ] as const) {
+    const out = attack(before as typeof w);
+    assert.ok(out.decision.kind === 'rejected');
+    assert.deepEqual(out.decision.error, error);
+  }
 });
 
 // Breaks: raw target bypass, repeat/switch Attack allocation, or Attack advertised on noncombat NPC.

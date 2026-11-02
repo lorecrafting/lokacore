@@ -17,7 +17,7 @@ import type { ElapsedStatus } from '../../packages/game-view/session.ts';
 import { CatchUpRefusedError, ClockDriver, type Clocks, type Pulse } from './elapsed.ts';
 import { ElapsedRecoveryError, changedRun, formatProblem } from './elapsed-store.ts';
 import { invoke, cancel } from './invocation.ts';
-import { catchUp } from './trace.ts';
+import { catchUp, traceRows } from './trace.ts';
 import { elapsed, fenced, type Elapsed } from './delivery.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
@@ -112,7 +112,14 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
   return opened(s);
 }
 
+// The rows the author column replays; absorbed ticks defer their entry, so catch up first.
+function trace(s: Story) {
+  if (s.behind) s.behind = !catchUp(s.db, ids(s), s.fresh.context);
+  return traceRows(s.db);
+}
+
 function opened(s: Story) {
+  s.behind = true; // a first resume tick's entry must follow what the last process left unwritten
   let changed = (_status: ElapsedStatus) => {};
   const driver =
     s.world.cartridge.manifest.time_policy && s.host.time
@@ -143,6 +150,7 @@ function opened(s: Story) {
     pulse: (mode: Pulse, expected: string) =>
       driver?.pulse(mode, expected) ?? { kind: 'ready' as const },
     elapsed: (evidence: Elapsed) => elapsed(s, evidence),
+    trace: () => trace(s),
     runId: () => s.meta.run_id,
     newGame: () => newGame(s),
     narration: (command_id?: string) => narration(s, command_id),

@@ -73,7 +73,8 @@ export function observe(db: Db, record: object): void {
 const OBSERVED = 1000;
 
 // ponytail: rows counted by their rowid span, O(1) per entry, which holds while rows are deleted
-// only here, oldest first (no VACUUM); about 5 MB at the entry size measured in R6 S6a.
+// here, oldest first, or as a coalesced tick's tail row, whose rowid the next insert reuses (no
+// VACUUM); about 5 MB at the entry size measured in R6 S6a.
 const CAP = 5000;
 const runOf = (record: string) => JSON.parse(record).ids.run_id as string;
 /** The trace's rows, by rowid span, and the run of its oldest row. */
@@ -155,6 +156,13 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
  */
 function missed(db: Db, ids: RunIds, skip: string): boolean {
   if (full(db, ids.run_id)) return true; // never read the receipts a capped run dropped
+  // The entry a coalesced tick absorbed: its receipt is gone, and only a catch-up writes the merge.
+  db.runSync(
+    `DELETE FROM trace WHERE command_id IN (SELECT command_id FROM trace WHERE commit_state = 'committed')
+      AND command_id NOT IN (SELECT command_id FROM receipt)
+      AND json_extract(record, '$.ids.run_id') = ?`,
+    ids.run_id,
+  );
   type Row = { command: string; response: string; revision: number };
   const missing = db.getAllSync<Row>(
     `SELECT command, response, revision FROM receipt WHERE command != 'null' AND command_id != ?
@@ -171,6 +179,9 @@ function missed(db: Db, ids: RunIds, skip: string): boolean {
 }
 
 const TRACE = 'INSERT INTO trace VALUES (?, ?, ?, ?)';
+const TRACE_ROWS = 'SELECT record FROM trace ORDER BY rowid';
+export const traceRows = (db: Db) =>
+  db.getAllSync<{ record: string }>(TRACE_ROWS).map((r) => r.record);
 const NONE = { state: 'unavailable', reason: 'not_applicable' };
 const SAVED = { state: 'unavailable', reason: 'not_collected' }; // from the saved state (ADR-075)
 const FRESH = { state: 'fresh' }; // from the world `context` starts with

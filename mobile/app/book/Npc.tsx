@@ -5,8 +5,7 @@ import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, why, type group, type Page as Route } from './model.ts';
-import type { Button, DetailLine, presenter } from './presenter.ts';
-import { cardKey } from './presenter.ts';
+import { cardKey, type Button, type DetailLine, type presenter } from './presenter.ts';
 import { ActionCard, Cards, PickLists } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
@@ -149,7 +148,7 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  *   only beside a priced service. History restarts after Leave the conversation. One exit: an
  *   authored choice labelled exactly Leave or Close is not drawn; the foot sends it (loka-512o).
  * - States: choice; a talk whose only choice is Leave; shop; services; open order; nothing to say (no line); closed conversation;
- *   cannot be hurt (no Attack card).
+ *   cannot be hurt (no Attack card); a sanctuary (grey Attack; NpcAttack.stories.tsx).
  * - Story: NpcPage.stories.tsx
  */
 export function NpcPage(p: NpcProps) {
@@ -200,7 +199,6 @@ function Offered(
     p.npc,
     p.actions.filter((b) => !['buy', 'sell'].includes(b.action_key)),
   );
-  const all = picks(p.view, rest, p.npc.id, p.text);
   const card = (b: Button) => <ActionCard key={cardKey(b)} b={b} press={p.press} />;
   const plain = rest.filter((b) => !b.pick && b.command !== 'use_service');
   const shop = !p.enemy && 'shop' in p.npc && !!p.npc.shop?.length && p.shelf;
@@ -213,7 +211,7 @@ function Offered(
       <PickLists
         {...p}
         page={p.npc.id}
-        lists={all.filter((k) => k.label !== LABEL.giveAnItem)}
+        lists={picks(p.view, rest, p.npc.id, p.text).filter((k) => k.label !== LABEL.giveAnItem)}
         state={shown}
       />
       <Cards>{plain.filter((b) => b.command !== 'ask').map(card)}</Cards>

@@ -13,12 +13,12 @@ import type { DetailLine } from './logs.ts';
 import { emoteSentence, fillSlots, lineSentence } from '../../packages/game-view/line_words.ts';
 import { things } from './item-pages.ts';
 import { levelWords } from './pick.ts';
-import { AT } from './labels.ts';
+import { AT, UNAUTHORED } from './labels.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
 export const sayers = (g: Game): { text: Say; label: Say } => ({
-  text: (key) => g.text(key) ?? (key === 'place.dark' ? "It's too dark to see..." : key),
+  text: (key) => g.text(key) ?? UNAUTHORED[key] ?? key,
   label: (key) =>
     g.text(key) ??
     key
@@ -111,12 +111,12 @@ export const doorSentence = (x: { direction: string; door?: { state: string } })
     : undefined;
 export const refusedSentence = ({ code, cause }: Refusal) =>
   (cause && SENTENCE[cause]) ?? SENTENCE[code];
-// The word of each RefusalCause (protocol/error.schema.json; book/reasons.test.ts): it names the
-// one reason a shared code stands for, so it goes before the code's word.
+// Each RefusalCause's word (protocol/error.schema.json; book/reasons.test.ts), ahead of its code's word.
 const CAUSE: Record<string, string> = {
   not_standing: 'not standing',
   cursed: 'it will not come off',
   cannot_be_hurt: 'cannot be hurt',
+  sanctuary: 'sanctuary', // the reason's word; its sentence is the message key
 };
 export const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -231,12 +231,10 @@ function answer(
   if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
   if (d.kind === 'rejected') {
-    // a refused line, as a refused drag (model.ts `refused`)
-    return {
-      kind: 'refused',
-      reason: reasonOf(d.error),
-      text: refusedSentence(d.error) ?? `You can't do that—${reasonOf(d.error)}.`, // prose, no colon (Line placement)
-    };
+    const authored = d.error.message && message(d.error.message, text);
+    // a refused line, as a refused drag (model.ts `refused`); prose, no colon (Line placement)
+    const fallback = refusedSentence(d.error) ?? `You can't do that—${reasonOf(d.error)}.`;
+    return { kind: 'refused', reason: reasonOf(d.error), text: authored ?? fallback };
   }
   if (d.kind === 'fault') return '';
   if (d.outcome === 'located' && d.location) {

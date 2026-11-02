@@ -1,6 +1,7 @@
 // Pass-1 UI4 (book-ui.md, Detail-page order; NPC details): an item page's option groups (UR), Lift
 // on an item an NPC holds (E14), no filler line on an empty page (mvlyb5x2m9i3), the purse beside a price (E15).
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
@@ -9,6 +10,7 @@ import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.
 import { book, nodes, words } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 import { group } from './model.ts';
+import { reason, replyLine } from './words.ts';
 import { presenter } from './presenter.ts';
 
 // Nell's shop on the showcase's village green, the player holding 10 pennies (resources.json start;
@@ -22,13 +24,13 @@ const nellView = () => {
   a.game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'south' } } as never);
   return a.game.view().view;
 };
-const screenOf = (view: GameView) => {
+const screenOf = (view: GameView, text: (k: string) => string | undefined = () => undefined) => {
   assert.deepEqual(validate('GameView', view), []);
   const game = {
     view: () => ({ view, token: 'view:t' }),
     pending: () => false,
     subscribe: () => () => {},
-    text: () => undefined,
+    text,
     lastNarration: () => undefined,
   } as unknown as Game;
   return presenter(game).screen();
@@ -230,7 +232,89 @@ test('an unavailable card hides for a permanent refusal and shows for a changeab
   const { ActionCard } = await import('./actions.tsx');
   const card = (reason: string) => ActionCard({ label: 'Attack', reason });
   assert.equal(card('cannot be hurt'), null);
+  assert.notEqual(card(reason('sanctuary', 'sanctuary')), null); // the exception: it teaches a rule
   assert.notEqual(card('too heavy'), null);
+});
+
+// Breaks: the NPC page drops a sanctuary's grey Attack or its sentence, widens grey to an ordinary
+// refusal, or draws a card for one who cannot be hurt; or the logged refusal loses the sentence.
+test('an Attack in a sanctuary is grey with its one sentence, on the page and in the log', async () => {
+  const { NpcPage } = await import('./Npc.tsx');
+  (globalThis as any)[Symbol.for('loka-book-test-state')] ??= (v: unknown) => [v, () => {}];
+  const v = nellView();
+  const nell = v.entities.find((e) => e.shop)!;
+  const text = (k: string) => (k === 'combat.sanctuary' ? 'Placeholder sentence.' : k);
+  const sent: unknown[] = [];
+  const attackOf = (reason: object, npcFields: object = {}) => {
+    const offer = { ...action('attack', { available: false, reason }), target_ids: [nell.id] };
+    const view = {
+      ...v,
+      entities: v.entities.map((e) => (e === nell ? { ...e, ...npcFields, actions: [offer] } : e)),
+    } as GameView;
+    const s = screenOf(view, text);
+    const npc = s.view.entities.find((e) => e.id === nell.id);
+    const press = (b: unknown) => sent.push(b);
+    const page = { ...s, text, npc, g: group(s.buttons), press, leave() {}, open() {} };
+    const greys = nodes(NpcPage(page as never) as never).filter(
+      (n) => (n.props as { accessibilityHint?: string }).accessibilityHint,
+    );
+    for (const n of greys) (n.props as { onPress(): void }).onPress();
+    return greys.map((n) => (n.props as { accessibilityHint: string }).accessibilityHint);
+  };
+  const message = { key: 'combat.sanctuary' };
+  const sanctuary = { code: 'invalid_state', cause: 'sanctuary', message };
+  assert.deepEqual(attackOf(sanctuary), ['Placeholder sentence.']);
+  assert.equal(sent.length, 1); // its press goes to the engine, which logs the refusal
+  assert.deepEqual(attackOf(sanctuary, { hostile: true }), ['Placeholder sentence.']);
+  assert.deepEqual(attackOf({ code: 'invalid_state' }), []);
+  assert.deepEqual(attackOf({ code: 'invalid_target', cause: 'cannot_be_hurt' }), []);
+  const reply = { kind: 'saved', decision: { kind: 'rejected', error: sanctuary } } as const;
+  assert.deepEqual(replyLine(reply as never, text, v), [
+    { kind: 'refused', reason: 'sanctuary', text: 'Placeholder sentence.' },
+  ]);
+});
+
+// Breaks: a sent card's live region reads the sentence as the log's line does, so it is heard twice.
+test('a pressed grey card speaks its reason itself only when nothing was sent', async () => {
+  const { Unavailable } = await import('./Unavailable.tsx');
+  const hook = Symbol.for('loka-book-test-state');
+  const before = (globalThis as any)[hook];
+  (globalThis as any)[hook] = () => ['L\nS.', () => {}];
+  const region = (send?: () => void) =>
+    words(
+      nodes(Unavailable({ label: 'L', reason: 'S.', send }) as never).find(
+        (n) => (n.props as Record<string, unknown>)['aria-live'] === 'polite',
+      )!,
+    );
+  assert.deepEqual([region(), region(() => {})], ['S.', '']);
+  (globalThis as any)[hook] = before;
+});
+
+// Breaks: the card reads its label key, or a press stays silent, or touches the world; or a cartridge
+// with no line shows the raw key on the card or in the log.
+test('a press on a sanctuary Attack logs its line and changes nothing; no line reads Not here', () => {
+  const run = (keep: boolean) => {
+    const c = JSON.parse(compiled('cartridges/cellar_sampler').canonical);
+    for (const r of Object.values<any>(c.rooms)) r.sanctuary = true;
+    c.entry.key = 'lantern_cellar';
+    if (!keep) delete c.text['combat.sanctuary'];
+    const canonical = JSON.stringify(c);
+    const sha256 = createHash('sha256').update(canonical).digest('hex');
+    const b = book({ canonical, sha256 } as never);
+    const s = b.p.screen();
+    const attack = s.buttons.find((x) => x.action_key === 'attack')!;
+    const id = attack.target_ids[0]!;
+    const hp = () => b.p.screen().view.entities.find((e) => e.id === id);
+    const before = JSON.stringify(hp());
+    b.p.press(attack, id);
+    const log = b.p.screen().detail(id).at(-1) as { text: string };
+    assert.equal(JSON.stringify(hp()), before);
+    b.sql.close();
+    return [attack.label, attack.refused, log.text];
+  };
+  const line = 'Placeholder for combat.sanctuary.';
+  assert.deepEqual(run(true), ['Attack', line, line]);
+  assert.deepEqual(run(false), ['Attack', LABEL.notHere, LABEL.notHere]);
 });
 
 // Breaks: the World log's refused line brings back its boxed reason chip (a Text of its own), or

@@ -13,8 +13,7 @@ import { comings, lineText, replyLine, sayers } from './words.ts';
 import { actionContext, buttonsOf, intentOf } from './model.ts';
 
 /**
- * A tappable action: its text and the intent it sends (the session adds id and actor), with the
- * drawn freshness token and action context, revalidated before a fresh press (Book UI).
+ * A tappable action: its text, the intent it sends, its freshness token and context (Book UI).
  */
 export type Button = {
   label: string;
@@ -25,6 +24,7 @@ export type Button = {
   detail_id?: string; // UI owner only; concrete participants retain their wire target contract
   place?: true; // a concrete target offered among GameView's place actions
   pick?: { reason?: string }; // a row of a Pick list (pick.ts); with a reason, its unavailable form
+  refused?: string; // the unavailable form, whose press still sends: the engine's refusal is logged
   token?: string; // none: no freshness check (a test's hand-made button)
   context?: string; // only projected buttons can refresh across an unchanged live update
 };

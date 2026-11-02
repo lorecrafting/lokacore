@@ -87,13 +87,15 @@ All gilt, placed as today. One shared predicate decides for both `skillEvents` a
 | Foot and routing | Follow Journal's in `Book.tsx`. Aimed spells cast from Skills. The status icon still opens Character |
 | Label | "Skills", the name the owner approved in Q3 |
 
-### Sanctuary Attack: hide
+### Sanctuary Attack: grey, one sentence
 
 The premise needs correcting: `book-ui.md` does not say sanctuary greys. [Unavailable actions](../system/book-ui.md#unavailable-actions) already hides a refusal the player cannot change. Sanctuary greys only because `attackRefused` returns a bare `invalid_state` (`combat/shared.ts:59`), shared with refusals the player can change.
 
-Ruling by `loka-3751`'s test (could the player change the outcome while standing there?): **hide**. Leaving the room removes the card anyway.
+Owner's change, 2026-11-01 (paraphrased): grey with a reason sentence, not hidden. It is a deliberate exception to the hide rule, because it teaches a rule of the world and a vanishing core verb can look like a bug. The ruling below is replaced where they differ.
 
-Needs protocol and engine, so it is its own small item, S1, outside B1 to B3: add `sanctuary` to `RefusalCause` (`protocol/error.schema.json:93`), return `{code: 'invalid_state', cause: 'sanctuary'}` before the transient checks (else a sitting player sees grey, stands, and the card vanishes), add it to `HIDDEN` in `reasons.ts`. The `loka-vduxr.22` question is answered here.
+First ruling, by `loka-3751`'s test (could the player change the outcome while standing there?): hide.
+
+Needs protocol and engine, so it is its own small item, S1, outside B1 to B3: add `sanctuary` to `RefusalCause` (`protocol/error.schema.json:93`), return `{code: 'invalid_state', cause: 'sanctuary', message: {key: 'combat.sanctuary'}}` before the transient checks, so the sentence is the same sitting or standing. It is not in `HIDDEN`. The NPC page draws it grey; every sanctuary shares that one key, with no per-place override, and the owner writes the sentence. The `loka-vduxr.22` question is answered here.
 
 ## Slices
 
@@ -132,8 +134,8 @@ Per the table. The tests named in the brief (`pass2_book.test.ts`, `practical_sk
 
 Per the ruling.
 
-- In a sanctuary the Attack card is absent, sitting or standing, and returns outside.
-- An engaged or sitting player elsewhere still sees it grey.
+- In a sanctuary the Attack card on an attackable NPC is grey, sitting or standing, with the `combat.sanctuary` sentence as its hint and logged refusal. A press does nothing to the world. It is ordinary outside.
+- An Attack refused for any other reason draws as before; an NPC who cannot be hurt has no card.
 
 ## What the owner must write
 
@@ -182,4 +184,4 @@ Flash limit: unchanged in substance; "a later blow" becomes "a later blow or lev
 
 ### S1
 
-[Unavailable actions](../system/book-ui.md#unavailable-actions), the `hides` clause: "today an Attack on a person who cannot be hurt, or any Attack in a sanctuary".
+[Unavailable actions](../system/book-ui.md#unavailable-actions), the exception after the `hides` clause: an Attack in a sanctuary stays gray with one authored sentence, and why.

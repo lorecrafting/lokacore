@@ -851,7 +851,7 @@ reads the flag itself, not `attackable`, because an NPC with hp and no `attack` 
 and no hp-draining status on a flagged NPC (`spell.ts`). A reaction's status still lands: the flag stops
 the player, not the writer. The
 kernel adds no refusal words. A peaceful room is the existing room `sanctuary: true`, not a second
-key: it refuses Attack `invalid_state`, its offer stays listed unavailable, and nothing engages on
+key: it refuses Attack `invalid_state` with cause `sanctuary`, ahead of the refusals the player could change (loka-g5hh.2.9), its offer stays listed unavailable with that reason and the message `combat.sanctuary` (the Book [grays the card](book-ui.md#unavailable-actions)), and nothing engages on
 entry. Composition record: consumer the owner's prologue NPCs and companions; reads the NPC
 definition's `unattackable`, an optional key that is absent from existing content; writes, events, jobs and save rows: none new; reused `ally`,
 `attackRefused`, `combatOffered`, `hostileAt`, `sanctuary`; new: the key and the `attackable`

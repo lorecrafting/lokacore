@@ -66,10 +66,13 @@ export function decide(r: Run, command: Command, measured = true) {
 }
 
 /**
- * Replay-only dispatch; its run was bound by the complete trace preflight. `receipted`: the entry
- * was recorded committed, so a rejection takes the form of a host that stores its receipt (ADR-075 §4).
+ * Replay-only dispatch; its run was bound by the complete trace preflight. `at`: the recorded
+ * revision it was decided against; a host's coalesced ticks leave gaps (save.md). `receipted`: the
+ * entry was recorded committed, so a rejection takes the form of a host that stores its receipt
+ * (ADR-075 §4).
  */
-export function decideReplay(r: Run, command: Command, receipted = false) {
+export function decideReplay(r: Run, command: Command, at = r.revision, receipted = false) {
+  if (command.payload.type === 'elapsed' && at > r.revision) r.revision = at;
   if (command.payload.type === 'elapsed' && command.payload.run_id !== r.ids.run_id)
     throw new Error('elapsed run differs from trace header');
   const next =
@@ -90,8 +93,10 @@ export function decideReplay(r: Run, command: Command, receipted = false) {
 }
 
 /** A trace entry replayed: recorded committed, a rejection keeps its stored receipt's form. */
-export const replayEntry = (r: Run, e: { data: { command: Command; commit: { state: string } } }) =>
-  decideReplay(r, e.data.command, e.data.commit.state === 'committed');
+export const replayEntry = (
+  r: Run,
+  e: { ids: { revision: number }; data: { command: Command; commit: { state: string } } },
+) => decideReplay(r, e.data.command, e.ids.revision, e.data.commit.state === 'committed');
 
 function evaluated(
   r: Run,

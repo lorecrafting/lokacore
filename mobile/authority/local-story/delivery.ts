@@ -1,6 +1,6 @@
 // Command delivery shared by player invocation and the narrow trusted elapsed entry (M1-A).
 // Changed rows and receipts still commit through save; no timer, wall clock or new store.
-import { hash } from '../../../kernel/ts/src/foundation/canonical.ts';
+import { encode, hash } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { elapsedCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
@@ -10,6 +10,7 @@ import { block, budget, ids, save, scope, settle, type Story, type Trace } from 
 import type { Captured } from './commit.ts';
 import { receipt, identityOf } from './store.ts';
 import { ElapsedRecoveryError, changedRun, type Checkpoint } from './elapsed-store.ts';
+import { onlyClock } from './receipt-history.ts';
 import { catchUp, observe, traceCommand, type CommitState } from './trace.ts';
 
 export type Elapsed = { expected_run_id: string; from: number; until: number };
@@ -53,23 +54,52 @@ export function elapsed(s: Story, evidence: Elapsed, checkpoint?: Checkpoint): R
       return { kind: 'conflict' };
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
-  return commitElapsed(s, command, digest, checkpoint ?? extended(s, evidence.until));
+  return commitElapsed(s, command, checkpoint ?? extended(s, evidence.until), !!checkpoint);
 }
 
 const extended = (s: Story, until: number) =>
   s.elapsed && { ...s.elapsed, target: Math.max(s.elapsed.target, until) };
 
-function commitElapsed(s: Story, command: Command, digest: string, checkpoint?: Checkpoint): Reply {
-  const next = stepElapsed(s.world, command, s.revision + 1);
-  const d = next.decision;
-  const trace: Trace = (at, ...states) => traceAfter(s, command, d, at, states);
+/**
+ * A driver tick that only moved the clock, as one receipt with this session's previous such tick
+ * when that is still the newest receipt and ends where this one starts (save.md, Coalesced ticks).
+ */
+export function coalesced(idle: Story['idle'], tick: Command, d: DecisionResult) {
+  if (!idle || !onlyClock(d) || tick.payload.type !== 'elapsed') return undefined;
+  const prior = idle.command;
+  if (
+    prior.payload.type !== 'elapsed' ||
+    prior.world_context_id !== tick.world_context_id ||
+    prior.payload.run_id !== tick.payload.run_id ||
+    prior.payload.until !== tick.payload.from ||
+    idle.rng !== encode(d.rng as never)
+  )
+    return undefined;
+  const { run_id, until } = tick.payload;
+  const { from } = prior.payload;
+  const command = {
+    ...tick,
+    id: elapsedCommandId(run_id, tick.world_context_id, from, until),
+    payload: { ...tick.payload, from },
+  } as Command;
+  const ops = d.delta.ops.map((op) => ({ ...op, from }));
+  const decision = { ...d, delta: { ...d.delta, ops } } as DecisionResult;
+  return { command, decision, replaces: prior.id };
+}
+
+function commitElapsed(s: Story, tick: Command, checkpoint?: Checkpoint, driver = false): Reply {
+  const next = stepElapsed(s.world, tick, s.revision + 1);
+  const merged = driver ? coalesced(s.idle, tick, next.decision) : undefined;
+  const { command, decision: d, replaces } = merged ?? { command: tick, decision: next.decision };
+  const trace: Trace = (at, ...states) => traceAfter(s, command, d, at, states, replaces);
   if (d.kind === 'fault') {
+    s.idle = undefined; // a fault closes the span, like every other thing between ticks
     trace(s.revision, 'unavailable');
     if (next.limit) observe(s.db, budget(s, command.id, next.limit));
     return { kind: 'fault', code: d.code };
   }
   if (d.kind === 'accepted' && d.effects.length) throw new Error('effect outbox not built');
-  return save(
+  const reply = save(
     s,
     next,
     trace,
@@ -80,13 +110,16 @@ function commitElapsed(s: Story, command: Command, digest: string, checkpoint?: 
       command_id: command.id,
       actor_id: s.world.character,
       intent_digest_version: ELAPSED_INTENT,
-      intent_digest: digest,
+      intent_digest: hash(command as never),
       command: command as never,
       revision: d.kind === 'accepted' ? s.revision + 1 : s.revision,
       response: d as never,
     },
     d.kind === 'accepted' ? checkpoint : undefined,
+    replaces,
   );
+  if (driver && onlyClock(d)) s.idle = { command, rng: encode(d.rng as never) };
+  return reply;
 }
 
 export function checkRun(s: Story) {
@@ -138,7 +171,13 @@ export function traceAfter(
   d: DecisionResult,
   at: number,
   states: CommitState[],
+  replaces?: string,
 ) {
+  // An absorbed tick writes no trace of its own: the next catch-up swaps in the merged entry.
+  if (replaces) {
+    s.behind = true;
+    if (states[0] === 'committed') return;
+  }
   if (s.behind && (s.behind = !catchUp(s.db, ids(s), s.fresh.context, command.id))) return;
   const written = traceCommand(s.db, ids(s), command, d, at, states);
   if (!written && states.includes('committed')) s.behind = true;

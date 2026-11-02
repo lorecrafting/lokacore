@@ -13,6 +13,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Second review: writer follow-ups, PR #568 (loka-vduxr.27, .22, .28)](2026-11-01-writer-followups-second-review.md): **CHANGES REQUIRED**
 - [Second review: skill ranks, PR #570 (loka-g5hh.2.3)](2026-11-01-skill-ranks-second-review.md): **APPROVE WITH NOTES**
 - [Review: skill ranks, PR #570 (loka-g5hh.2.3)](2026-11-01-skill-ranks-review.md): **APPROVE WITH NOTES**
+- [Sanctuary refusal cause: second-opinion contract review](2026-11-01-sanctuary-refusal-second-review.md): **CHANGES REQUIRED**
+- [Review: sanctuary refusal, PR #577 (loka-g5hh.2.9)](2026-11-01-sanctuary-refusal-review.md): **APPROVE WITH NOTES**
 - [Rush B2 level-up moment contract: second review](2026-11-01-rush-b2-moment-second-review.md): **APPROVE WITH NOTES**
 - [Review: level-up rush B2, the level moment, PR #575 (loka-g5hh.2.6, loka-xpk3n)](2026-11-01-rush-b2-moment-review.md): **APPROVE WITH NOTES**
 - [Second opinion: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-second-review.md): **APPROVE WITH NOTES**
@@ -38,6 +40,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Second opinion: dialogue entry contract and in-progress play, PR #556 (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-second-review.md): **APPROVE WITH NOTES**
 - [Review: dialogue entry (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-review.md): **APPROVE WITH NOTES**
 - [Dev cheats: second opinion (PR #546, loka-vduxr.6)](2026-11-01-dev-cheats-second-review.md): **APPROVE**
+- [Second review: coalesced clock-only receipts, PR #578 (loka-vduxr.37)](2026-11-01-coalesce-elapsed-second-review.md): **APPROVE WITH NOTES**
+- [Review: clock-only ticks extend one receipt, PR #578 (loka-vduxr.37)](2026-11-01-coalesce-elapsed-review.md): **CHANGES REQUIRED**
 - [Second-opinion review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-review.md): **APPROVE WITH NOTES**
 - [Second review: cartridge fault batch, PR #545 (loka-vduxr.7, save behaviour)](2026-10-31-loka-vduxr.7-cartridge-faults-second-review.md): **APPROVE WITH NOTES**
