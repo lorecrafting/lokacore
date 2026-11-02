@@ -229,12 +229,14 @@ test('a flurry of blows: one playing, the last pending, and it plays at the beat
   assert.equal(played.q.pending, undefined);
 });
 
-// Breaks: a blow displaces a level already waiting.
-test('another S3 key does not displace the pending one', () => {
+// Breaks: a level arriving while one blow plays and another waits is dropped, sound, wash and all;
+// or a later blow displaces the level waiting.
+test('a level takes the pending slot from another S3 key, and keeps it', () => {
   let r = step(QUIET, [blow(1)], 1000);
-  r = step(r.q, [{ name: 'level' }], 1100);
-  r = step(r.q, [blow(2)], 1200);
-  assert.deepEqual(r.q.pending, { name: 'level' });
+  r = step(r.q, [blow(2)], 1100);
+  r = step(r.q, [{ name: 'level' }], 1200);
+  r = step(r.q, [blow(3)], 1300);
+  assert.deepEqual(names(step(r.q, [], 1500).fired), ['level']);
 });
 
 // Breaks: a second full-page flash inside a second (book-ui.md, Flash limit), off by one either way.

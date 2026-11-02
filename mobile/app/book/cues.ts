@@ -42,6 +42,7 @@ export type Cue = {
   wash?: boolean;
   fight?: boolean; // death: in a fight
   end?: 'fell' | 'fled' | 'quiet'; // combat_close
+  levelled?: true; // combat_close: a level came with it, so its haptic yields and its fanfare waits
   resumed?: true; // combat_open, combat_close: found on a first view, nothing happening now
   first?: true; // pickup, quest_on, level: the playthrough's first (book-ui.md, First times)
 };
@@ -109,7 +110,8 @@ const holdCard = (q: Queue, now: number): Queue => ({
 /**
  * One moment of the queue: `turned` cancels the leaving page's effects, and the arriving page's cues
  * wait for its picture deadline (book-ui.md, Queue).
- * A later S3 of another key than the pending one is dropped; the diff lists the story's first.
+ * A later S3 of another key than the pending one is dropped, but a level is never dropped: it takes
+ * the slot (book-ui.md, Level wash); the diff lists the story's first.
  */
 function play(s: Queue, fired: Cue[], cue: Cue, now: number) {
   const clear = now - Math.max(s.washed, struck) >= motion.flash.gap;
@@ -160,7 +162,7 @@ export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
     if (severity === 1) fired.push(cue);
     else if (severity === 3) {
       if (!s.playing) play(s, fired, cue, now);
-      else if (!s.pending || s.pending.name === cue.name) s.pending = cue;
+      else if (!s.pending || s.pending.name === cue.name || cue.name === 'level') s.pending = cue;
     } else fired.push(...small(s, cue, now));
   }
   return { q: s, fired };
