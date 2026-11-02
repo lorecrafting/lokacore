@@ -12,6 +12,7 @@ import {
   logLines,
   narrationLines,
   quietOf,
+  fall,
   resetLogs,
   savedNarration,
   type DetailLine,
@@ -138,7 +139,7 @@ export function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: 
   // So may a lever or a scripted action: read for its record's deed only.
   const last =
     lines || accepted?.events.some(telling) ? savedNarration(game, s, command_id) : undefined;
-  if (last?.died) s.died = last.command_id;
+  if (last?.died) fall(s, last.command_id);
   if (last?.lever || last?.opened || last?.missed) s.deed = last;
   return lines && (command_id || accepted.outcome !== 'riddle_wrong') ? last : undefined;
 }

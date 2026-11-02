@@ -54,6 +54,7 @@ export const screenFrom = (
     returnDetail: undefined,
     confirmedRead: undefined,
     ended: undefined,
+    fell: false,
     ...shell,
   };
 };

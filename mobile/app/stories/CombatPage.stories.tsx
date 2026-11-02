@@ -1,6 +1,6 @@
 // C row Pages, Combat (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { expect, waitFor } from 'storybook/test';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { Blow } from '../book/Blow.tsx';
@@ -58,7 +58,7 @@ export const Rounds: StoryObj = {
     await expect(between).toBeGreaterThan(within);
   },
 };
-// A live foe's line draws its Cast a spell… list (loka-x6t.109.5). Breaks: no list on the foe line.
+// Each live foe draws its Cast a spell… list among the cards (loka-x6t.109.5). Breaks: no list.
 const boar = CombatOneFoeView.view.entities[0]!;
 const flamma = {
   action_key: 'flamma',
@@ -115,7 +115,7 @@ export const BlowWash: StoryObj = {
     await expect(frame.scrollHeight).toBe(frame.clientHeight);
   },
 };
-// A death in a fight leaves a faint wash (book-ui.md, Falling). Breaks: the wash clears after a fatal blow.
+// A death in a fight holds the red wash (book-ui.md, Falling). Breaks: the wash clears after a fatal blow.
 function Fatal() {
   const [view, setView] = useState(() => struck(5));
   const [died, setDied] = useState<string>();
@@ -134,14 +134,44 @@ function Fatal() {
     </div>
   );
 }
+// The page a fatal blow closes (owner, 2026-11-02, loka-kgd.204): blood-red held, one Let go, no
+// foe line, no countdown. The cues fall from a fight to a death beside the page, as Book's own do.
+function Falls({ children }: { children: ReactNode }) {
+  const [view, setView] = useState(() => struck(5));
+  const [died, setDied] = useState<string>();
+  useCues(view, false, 0, 0, false, undefined, died);
+  useEffect(() => {
+    setView(struck(0));
+    setDied('fatal');
+  }, []);
+  return children;
+}
+const { combat: closed, ...afterView } = CombatOneFoeView.view;
+export const Death: StoryObj = {
+  ...pageStory(
+    { ...CombatOneFoeView, view: afterView },
+    { ended: closed, died: 'fatal', fell: true },
+  ),
+  decorators: [(Story) => <Falls>{Story()}</Falls>],
+  name: 'Death',
+  play: async ({ canvas, canvasElement }) => {
+    await expect(canvas.getByRole('button', { name: 'Let go' })).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: 'Back to World' })).toBeNull();
+    const layers = () => [...canvasElement.querySelectorAll('[aria-hidden="true"]')];
+    const at = (e: Element) => Number(getComputedStyle(e).opacity);
+    await waitFor(() => expect(layers().some((e) => at(e) === opacity.fatal)).toBe(true), {
+      timeout: 3000,
+    });
+  },
+};
 export const FatalBlowHeld: StoryObj = {
   render: () => <Fatal />,
   name: 'Fatal blow held',
   play: async ({ canvas, canvasElement, userEvent }) => {
-    const faint = canvasElement.querySelector<HTMLElement>('[aria-hidden="true"]')!;
+    const held = canvasElement.querySelector<HTMLElement>('[aria-hidden="true"]')!;
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
     // Settled at its hold, so axe reads the resting colours (loka-gj82.10).
-    await waitFor(() => expect(Number(getComputedStyle(faint).opacity)).toBe(opacity.faint), {
+    await waitFor(() => expect(Number(getComputedStyle(held).opacity)).toBe(opacity.fatal), {
       timeout: 3000,
     });
   },

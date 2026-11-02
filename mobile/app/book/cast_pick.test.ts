@@ -1,5 +1,5 @@
 // Aimed spells in the Book (loka-x6t.109.5, book-ui.md Word bar): a Cast a spell… list on each
-// target's page, a Cast on… list per spell on Skills, and one under each live foe's line.
+// target's page, a Cast on… list per spell on Skills, and one per live foe among the Combat cards.
 import assert from 'node:assert/strict';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -62,16 +62,16 @@ test("the wight's Cast a spell… lists Flamma alone; the pick opens the fight",
   assert.ok(b.p.screen().combatLog.includes(FLAMMA));
 });
 
-// Breaks: a foe line with no list, a fight cast that turns to World or logs on World (book-ui.md,
-// Live combat response), another target's spell on the foe line, or a dead foe that keeps its list.
-test('a foe line casts on the Combat page, into its log, until the foe dies', (t) => {
+// Breaks: a live foe with no list, a fight cast that turns to World or logs on World (book-ui.md,
+// Live combat response), another target's spell in the foe's list, or a dead foe that keeps its list.
+test("a foe's list casts on the Combat page, into its log, until the foe dies", (t) => {
   const b = book(cartridge(1) as never);
   t.after(() => b.sql.close());
   b.tap('lantern, open');
-  b.tap('Take the lantern'); // lux is offered on the held lantern, never on the foe line
+  b.tap('Take the lantern'); // lux is offered on the held lantern, never on the foe
   b.tap('wight, open');
   b.tap('Attack a wight');
-  assert.ok(!b.labels().includes('Lux, cast on…'), "only the foe's own spells on its line");
+  assert.ok(!b.labels().includes('Lux, cast on…'), "only the foe's own spells in its list");
   b.tap('Cast a spell…');
   b.tap('Flamma, cast flamma on a wight'); // the wight lives: the fight goes on
   assert.ok(b.game.view().view.combat && b.text().includes('Combat'), 'still the Combat page');
@@ -109,7 +109,7 @@ test("Skills' Cast on… lists a spell's targets; the pick turns to World with i
   assert.match(b.text().join('\n'), /Lux\s+You can't do that—need 1 ash\./);
 });
 
-// Breaks: one list per foe line each with its own open state, so two lists open at once
+// Breaks: one list per foe each with its own open state, so two lists open at once
 // (book-ui.md Pick list: one list open at a time).
 test("opening a second foe's Cast a spell… closes the first", (t) => {
   const b = book(cartridge(0, true) as never);

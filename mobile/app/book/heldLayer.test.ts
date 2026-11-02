@@ -19,7 +19,7 @@ test('every text role holds 4.5:1 over every under-ink layer at its peak', () =>
   const roles = ['fg', 'dim', 'action', 'danger', 'warning'] as const;
   for (const [name, p] of Object.entries(color)) {
     const layers: [string, string, number][] = [
-      ['fatal', washInk(p), opacity.faint],
+      ['fatal', washInk(p), opacity.fatal],
       ['vignette', p.fg, opacity.faint],
       ['dream', color.dusk.bg, opacity.faint],
     ];

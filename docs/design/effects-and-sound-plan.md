@@ -211,9 +211,8 @@ reads the number; this is the one place the page may go red. P0. Cost M, Reanima
 1.03. Needs `new` (crit is in the narration words only; unknown whether `attack_result` marks it: not in its
 fields). P1.
 
-**Blow dealt**: S2, the opponent block's band phrase ("the raider — hurt", `Combat.tsx`) *presses* once
-when the band changes; no sound (the paper thud is reserved for the player's body); haptic none. Why: the foe's
-state is read, the player's is felt. P1. Cue: view-diff on `combat.band`.
+**Blow dealt**: no page effect since the opponent block was removed (owner 2026-11-02, loka-kgd.204); the foe's
+state is read in the log; no sound (the paper thud is reserved for the player's body); haptic none.
 
 **Miss / prevented** (`attack_result.prevented_by`): S1, the line dries. P2.
 
@@ -490,7 +489,7 @@ Speech lines dry (3.6); shop lines 3.7; "nothing to say" and closed conversation
 
 ### 4.8 Combat page (`Combat.tsx`)
 
-3.3 in full. The round log is a `LogLines`; the opponent block's band phrase presses on change; closure settles.
+3.3 in full. The round log is a `LogLines`; closure settles.
 
 ### 4.9 Sections: Character, Journal, Carrying, Map, Settings (`sections.tsx`, `journal.tsx`, `skills.tsx`, `DiscoveredMap.tsx`)
 

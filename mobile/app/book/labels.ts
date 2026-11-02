@@ -9,6 +9,7 @@ export const LABEL = {
   leaveConversation: 'Leave the conversation',
   back: 'Back',
   backToWorld: 'Back to World',
+  letGo: 'Let go', // a death's Combat page foot; owner-approved 2026-11-02 (loka-kgd.204)
   backToContents: 'Back to Contents',
   backToBoard: 'Back to board',
   backToSettings: 'Back to Settings',

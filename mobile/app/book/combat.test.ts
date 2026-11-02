@@ -31,90 +31,32 @@ const combatLines = (combat: object, extra = {}, ended = false) => {
     .map(words);
 };
 
-// Breaks: the Combat block keeps your own hunger or bleeding (read as the raider's), drops the
-// opponent's band, or shows an hp number (book-ui.md Live combat response, pass-1 C2b).
-test('a one-foe fight draws only the opponent line with its band word', () => {
-  const lines = combatLines(
-    { encounter_id: 'fight', opponent_id: 'raider', name: 'npc.raider', band: 'hurt' },
-    {
-      conditions: [{ label: 'hungry' }],
-      bleeding: { label: 'bleeding', ends_at: 300, hp_loss: 1, tick_every: 100 },
-    },
-  );
-  assert.deepEqual(
-    lines.filter((l) => /raider|hungry|Bleeding|HP|\d+ \/ \d+/.test(l)),
-    ['the raider — hurt'],
-  );
-});
-
-// Breaks: a pack repeats the primary, gives every member the primary's band, shows a band for a
-// member the player cannot see, loses the target mark or puts it after the band (book-ui.md).
-test('a pack draws each member once with its own band and none for a hidden member', () => {
-  const lines = combatLines({
-    encounter_id: 'fight',
-    opponent_id: 'a',
-    name: 'npc.hound',
-    band: 'hurt',
-    active_opponents: [
-      { id: 'a', name: 'npc.hound', band: 'hurt' },
-      { id: 'b', name: 'npc.hound', band: 'ready' },
-      { id: 'c', name: 'npc.hound' },
-    ],
-  });
-  assert.deepEqual(
-    lines.filter((l) => l.includes('hound')),
-    ['a fen hound (your target) — hurt', 'a fen hound — ready', 'a fen hound'],
-  );
-});
-
-// Breaks (loka-6qi): a foe with name words keeps its indefinite short ("a goblin"), a proper name
-// gets "the", a one-foe fight drops its words, or two same-name foes merge into one line.
-test('a foe with name words reads definite, one line per foe', () => {
-  const goblin = { bare: 'goblin', article: 'a' };
-  const one = { encounter_id: 'fight', opponent_id: 'a', name: 'npc.goblin', band: 'hurt' };
-  assert.deepEqual(
-    combatLines({ ...one, words: goblin }).filter((l) => l.includes('goblin')),
-    ['the goblin — hurt'],
-  );
-  const lines = combatLines({
-    ...one,
-    active_opponents: [
-      { id: 'a', name: 'npc.goblin', band: 'hurt', words: goblin },
-      { id: 'b', name: 'npc.goblin', band: 'ready', words: goblin },
-      { id: 'c', name: 'npc.grub', band: 'ready', words: { bare: 'Grub' } },
-      { id: 'd', name: 'npc.hound', band: 'ready' },
-    ],
-  });
-  assert.deepEqual(
-    lines.filter((l) => /^\S.* — /.test(l)), // the band phrase is also a nested Text of its own
-    [
-      'the goblin (your target) — hurt',
-      'the goblin — ready',
-      'Grub — ready',
-      'a fen hound — ready',
-    ],
-  );
-});
-
-// Breaks: a closed encounter keeps the band of its last live view (a dead foe "hurt") or the
-// target mark: its opponent block is names only, so no line carries " — " (book-ui.md, Closure).
-test('a closed encounter draws its opponents by name only', () => {
+// Breaks (owner, 2026-11-02, loka-kgd.204): a foe or band line back atop the page, or your own hunger
+// or bleeding there (book-ui.md Live combat response): the page opens with its log.
+test('the Combat page draws no foe line, band or condition of yours, live or closed', () => {
   const pack = {
     encounter_id: 'fight',
     opponent_id: 'a',
-    name: 'npc.hound',
+    name: 'npc.goblin',
     band: 'hurt',
+    words: { bare: 'goblin', article: 'a' },
     active_opponents: [
-      { id: 'a', name: 'npc.hound', band: 'hurt' },
+      { id: 'a', name: 'npc.goblin', band: 'hurt' },
       { id: 'b', name: 'npc.hound', band: 'ready' },
     ],
   };
-  const lines = combatLines(pack, {}, true);
-  assert.deepEqual(
-    lines.filter((l) => l.includes('hound')),
-    ['a fen hound', 'a fen hound'],
-  );
-  assert.ok(!lines.some((l) => l.includes(' — ')), JSON.stringify(lines));
+  const extra = {
+    conditions: [{ label: 'hungry' }],
+    bleeding: { label: 'bleeding', ends_at: 300, hp_loss: 1, tick_every: 100 },
+  };
+  for (const ended of [false, true]) {
+    const lines = combatLines(pack, extra, ended);
+    assert.deepEqual(
+      lines.filter((l) => /goblin|hound|hurt|ready|hungry|Bleeding|\d+ \/ \d+/.test(l)),
+      [],
+      JSON.stringify(lines),
+    );
+  }
 });
 
 // Break: a menu/detail hides escape, Flee invents directions, or controls sit outside the narrative scroll.
