@@ -105,7 +105,7 @@ export const BlowWash: StoryObj = {
   render: () => <Struck />,
   name: 'Blow wash',
   play: async ({ canvas, canvasElement, userEvent }) => {
-    const paper = canvasElement.querySelectorAll<HTMLElement>('[aria-hidden="true"]')[1]!;
+    const paper = canvasElement.querySelectorAll<HTMLElement>('[aria-hidden="true"]')[2]!;
     await expect(Number(getComputedStyle(paper).opacity)).toBe(0);
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
     await waitFor(() => expect(Number(getComputedStyle(paper).opacity)).toBeGreaterThan(0));
