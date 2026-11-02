@@ -1,0 +1,149 @@
+// Diku rounds (loka-kgd.197, mechanics.md "Diku rounds") on the compiled diku sampler: Attack
+// resolves round 1 at once, a uniform(2) draw orders each round, lines name the goblin, a hit's
+// loss picks a tier and the goblin's condition follows the blows. The goblin has 10 HP and a sure
+// hit for 2; the player's blow is a sure hit for 3; tiers at 50 and 25; conditions 100, 50, 1.
+// RNG oracles: numeric-vectors.json rng_steps; seed [1,2,3,4] draws 11520, 0, 5927040, 70819200,
+// so uniform(2) gives 0 (player first) in rounds 1 and 2; rng_steps[3].state draws 2031721883
+// first, uniform(2) = 1 (the goblin first). Sure hits make the other draws' values irrelevant.
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { test } from 'node:test';
+import { newWorld, step, stepElapsed } from '../src/index.ts';
+import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { elapsedCommandId } from '../src/foundation/id_source.ts';
+import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { check } from '../src/runtime/invariants.ts';
+import { cartridgeOf, ctx, reload } from './harness.ts';
+
+const scratch = mkdtempSync(join(tmpdir(), 'loka-diku-sampler-'));
+let artifact: Uint8Array;
+try {
+  const file = join(scratch, 'artifact.json');
+  execFileSync('mix', ['loka.compile', 'cartridges/diku_sampler', file, '--allow-placeholders'], {
+    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
+    stdio: 'pipe',
+  });
+  artifact = readFileSync(file);
+} finally {
+  rmSync(scratch, { recursive: true });
+}
+const S = 'diku_sampler@0.0.1';
+const GOBLIN = 'npc.goblin.short';
+const base = cartridgeOf(artifact);
+function sampler(edit?: (combat: any) => void) {
+  const r = reload(base, edit && ((c) => edit(c.world.combat)));
+  assert.ok(r.ok, JSON.stringify(r));
+  return r.cartridge as Cartridge;
+}
+
+let n = 0;
+const id = () => `eeeeeeee-1970-4970-8970-${String(++n).padStart(12, '0')}` as never;
+function decided(r: { world: World; decision: { kind: string } }) {
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  const d = r.decision as any;
+  return { w: r.world, d, lines: (d.narration ?? []) as { key: string; bindings?: object }[] };
+}
+function play(w: World, payload: object) {
+  const command = { id: id(), world_context_id: w.context, payload };
+  return decided(
+    step(w, { ...command, payload: { actor_id: w.character, ...payload } } as never, n),
+  );
+}
+/** Walk south to the goblin and attack it. */
+function attack(content: Cartridge, seed = [1, 2, 3, 4]) {
+  n = 0;
+  const w = play(newWorld(content, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), seed as never), {
+    type: 'move',
+    direction: 'south',
+  }).w;
+  return { before: w, ...play(w, { type: 'attack', target_id: goblin(w) }) };
+}
+function round(w: World) {
+  const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
+  const [from, until] = [w.state.clock, w.state.clock + 150];
+  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
+  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
+  return decided(stepElapsed(w, { ...command, world_context_id: w.context } as never, n));
+}
+const goblin = (w: World) => w.entityIds[`${S}:npc/goblin`];
+const hp = (w: World, e: string) => level(w, e as never, resourceRef(w, 'hp'));
+const key = (k: string) => `combat.${k}`;
+const ops = (d: any) => d.delta.ops.map((o: { op: string }) => o.op);
+
+// Breaks: Attack only schedules round 1 (no blows, no RNG), the proposal carries a job.complete
+// (invariant job_complete_owned_by_run), round 2 is not at clock + interval, the odd/even rule
+// orders round 1, a line lacks its name, the tier or condition is missing or misplaced.
+test('Attack strikes round 1 at once, player first, and names, tiers and conditions it', () => {
+  const { before, w, d, lines } = attack(sampler());
+  const g = goblin(w);
+  assert.deepEqual([hp(w, g), hp(w, w.body)], [7, 8]);
+  assert.ok(!ops(d).includes('job.complete'));
+  assert.ok(check('job_complete_owned_by_run', { decision: d, before: before.state }));
+  const jobs = d.delta.ops.filter((o: { op: string }) => o.op === 'job.schedule');
+  assert.deepEqual(
+    jobs.map((o: { due_time: number }) => o.due_time),
+    [before.state.clock + 150],
+  );
+  assert.deepEqual(lines, [
+    { key: key('player_hit_25'), bindings: { target: GOBLIN } },
+    { key: key('npc_hit'), bindings: { attacker: GOBLIN } },
+    { key: key('condition_50'), bindings: { target: GOBLIN } },
+  ]);
+  // 4 of 10 is below the 50 cut (400 < 500), at or above the 1 cut
+  const two = round(w);
+  assert.deepEqual([hp(two.w, g), hp(two.w, two.w.body)], [4, 6]);
+  assert.deepEqual(
+    two.lines.map((l) => l.key),
+    [key('player_hit_25'), key('npc_hit'), key('condition_1')],
+  );
+});
+
+// Breaks: initiative is not drawn (round 1 stays player first), or drawn with the wrong sense.
+test('a 1 on the initiative draw lets the goblin strike first', () => {
+  const { lines } = attack(sampler(), [27274249, 25704967, 31982592, 12605441]);
+  assert.deepEqual(
+    lines.map((l) => l.key),
+    [key('npc_hit'), key('player_hit_25'), key('condition_50')],
+  );
+});
+
+// Breaks: a fatal round 1 schedules a successor, the dead foe gets a condition line or strikes,
+// the full-hp tier (100 × 10 >= 50 × 10) is missed, the death line loses its name.
+test('a killing first blow closes the fight with no successor and no condition', () => {
+  const { w, d, lines } = attack(
+    sampler((c) => (c.player_attack.damage_min = c.player_attack.damage_max = 10)),
+  );
+  assert.equal(hp(w, goblin(w)), 0);
+  assert.deepEqual([hp(w, w.body), ops(d).includes('job.schedule')], [10, false]);
+  assert.ok(ops(d).includes('encounter.close'));
+  assert.deepEqual(lines, [
+    { key: key('player_hit_50'), bindings: { target: GOBLIN } },
+    { key: key('npc_died'), bindings: { target: GOBLIN } },
+  ]);
+});
+
+// Breaks: an opted-out cartridge draws at Attack, loses its scheduled round 1 or the odd/even
+// order, or gains bindings; tiers and conditions still apply without initiative.
+test('without initiative Attack only schedules; tiers and conditions still apply', () => {
+  const { before, w, d, lines } = attack(sampler((c) => delete c.initiative));
+  assert.deepEqual([w.state.rng, lines], [before.state.rng, []]);
+  assert.deepEqual(
+    ops(d).filter((o: string) => o.startsWith('job')),
+    ['job.schedule'],
+  );
+  const one = round(w);
+  assert.deepEqual(one.lines, [
+    { key: key('player_hit_25') },
+    { key: key('npc_hit') },
+    { key: key('condition_50') },
+  ]);
+  const two = round(one.w);
+  assert.deepEqual(
+    two.lines.map((l) => l.key),
+    [key('npc_hit'), key('player_hit_25'), key('condition_1')],
+  );
+});

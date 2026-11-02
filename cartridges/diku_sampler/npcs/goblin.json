@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "goblin"
+  ],
+  "name": "npc.goblin.short",
+  "room_line": "npc.goblin.room",
+  "description": "npc.goblin.description",
+  "room": "field",
+  "hp": {
+    "minimum": 0,
+    "maximum": 10,
+    "start": 10,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 2,
+    "damage_max": 2
+  }
+}

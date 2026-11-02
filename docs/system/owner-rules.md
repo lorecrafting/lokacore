@@ -282,3 +282,4 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Authoring readiness and level-up: [owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md).
 - Away catch-up cap, Start over for old saves before launch: [owner decision](../decisions/owner-decision-away-catch-up-cap-2026-11-01.md).
+- Diku rounds (initiative, Attack strikes at once, named lines, damage tiers, condition after the round), showcase opts in: [owner decision](../decisions/owner-decision-diku-rounds-2026-11-01.md).

@@ -92,6 +92,18 @@ test('a bound slot fills and an unbound one stays literal', () => {
   assert.match(line({ amount: 3 }) ?? '', /Gain 3 of \{x\}\./);
 });
 
+// Breaks: a name opening the line stays lower case, or a name inside it is capitalised.
+test('a bound name that opens the line is capitalised, one inside it is not', () => {
+  const said = (form: string) =>
+    lineWords(
+      { key: 'hit', bindings: { attacker: 'g', target: 'g' } } as never,
+      (k) => (k === 'hit' ? form : k === 'g' ? 'a goblin' : k),
+      base,
+    );
+  assert.equal(said('{attacker} hits you.'), 'A goblin hits you.');
+  assert.equal(said('You miss {target}.'), 'You miss a goblin.');
+});
+
 // Breaks: a ranked row keeps ", level N", or an unranked row loses it.
 test('a ranked row reads its rank in place of the level', () => {
   const row = (more: object) => ({ ...s(true, 2, more), profession: 'p' });

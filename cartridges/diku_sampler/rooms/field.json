@@ -1,0 +1,9 @@
+{
+  "name": "room.field.title",
+  "description": "room.field.description",
+  "exits": {
+    "north": {
+      "to": "hall"
+    }
+  }
+}

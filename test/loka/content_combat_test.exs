@@ -197,6 +197,35 @@ defmodule Loka.ContentCombatTest do
     end
   end
 
+  # Breaks: a Diku tier or condition names missing text, or a cut is not below the one before
+  # (a later row could never be reached by the first-match rule).
+  test "Diku tiers and conditions resolve their text and fall strictly", %{tmp_dir: dir} do
+    combat = %{
+      "initiative" => true,
+      "tiers" => [
+        %{"at_percent" => 50, "player_hit" => "missing"},
+        %{"at_percent" => 50, "npc_hit" => "t"}
+      ],
+      "conditions" => [
+        %{"at_percent" => 100, "text" => "t"},
+        %{"at_percent" => 50, "text" => "gone"}
+      ]
+    }
+
+    source(dir, update_in(@manifest, ["world", "combat"], &Map.merge(&1, combat)))
+    assert {:error, ds} = Loka.Content.compile(dir)
+    found = MapSet.new(ds, &{&1["code"], &1["path"]})
+
+    for want <- [
+          {"UNRESOLVED_REFERENCE", "cartridge.world.combat.tiers[0].player_hit"},
+          {"SCHEMA_VIOLATION", "cartridge.world.combat.tiers[1].at_percent"},
+          {"UNRESOLVED_REFERENCE", "cartridge.world.combat.conditions[1].text"}
+        ],
+        do: assert(want in found, inspect(ds))
+
+    refute {"SCHEMA_VIOLATION", "cartridge.world.combat.conditions[1].at_percent"} in found
+  end
+
   # Breaks: combat loads but its first fatal round has no corpse/shrine settings.
   test "combat requires death settings", %{tmp_dir: dir} do
     source(dir, update_in(@manifest, ["world"], &Map.delete(&1, "death")))

@@ -41,7 +41,37 @@ defmodule Loka.Content.Combat do
     if(get_in(settings, ["world", "death"]), do: [], else: [bad("cartridge.world.death")]) ++
       requirements(m) ++
       profile(combat["player_attack"], "cartridge.world.combat.player_attack") ++
-      narration(combat, text)
+      narration(combat, text) ++
+      cuts("tiers", combat["tiers"] || [], text) ++
+      cuts("conditions", combat["conditions"] || [], text)
+  end
+
+  # Diku rounds: each tier's or condition's keys resolve, and its cut falls strictly below the one before.
+  defp cuts(field, rows, text) do
+    path = ["world", "combat", field]
+
+    for {row, i} <- Enum.with_index(rows),
+        d <- unresolved(row, path ++ [i], text) ++ unordered(rows, row, i, path),
+        do: d
+  end
+
+  defp unresolved(_row, _path, :unknown), do: []
+
+  defp unresolved(row, path, text) do
+    for {f, key} <- Map.delete(row, "at_percent"), not is_map_key(text, key) do
+      diag("UNRESOLVED_REFERENCE", at("cartridge.json", path ++ [f]), %{"target" => key})
+    end
+  end
+
+  defp unordered(rows, row, i, path) do
+    if i > 0 and row["at_percent"] >= Enum.at(rows, i - 1)["at_percent"],
+      do: [
+        diag("SCHEMA_VIOLATION", at("cartridge.json", path ++ [i, "at_percent"]), %{
+          "error" => "invalid_value",
+          "why" => "tiers_unordered"
+        })
+      ],
+      else: []
   end
 
   # Toolbox row 6b: each ally is an authored NPC with an attack; allies need their narration.

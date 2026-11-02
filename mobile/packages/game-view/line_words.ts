@@ -94,11 +94,14 @@ export const emoteSentence = (
 };
 
 // An authored line fills its bound slots; an unbound brace stays as written (level-rush rulings).
+// A name that opens the line is capitalised (Diku rounds, loka-kgd.197: "A goblin hits you.").
 export const fillSlots = (
   said: string,
   bindings: Record<string, unknown> | undefined,
   word: (v: unknown) => string,
 ) =>
-  said.replace(/\{(\w+)\}/g, (slot, k: string) =>
-    bindings?.[k] === undefined ? slot : word(bindings[k]),
+  said.replace(/\{(\w+)\}/g, (slot, k: string, at: number) =>
+    bindings?.[k] === undefined
+      ? slot
+      : word(bindings[k]).replace(/^./, (a) => (at === 0 ? a.toUpperCase() : a)),
   );

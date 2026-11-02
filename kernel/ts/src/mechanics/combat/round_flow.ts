@@ -7,16 +7,18 @@ import type {
   EntityId,
   JobId,
   Text,
+  TextKey,
 } from '../../contracts.gen.ts';
 import { accepted, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { add, mul } from '../../foundation/int.ts';
 import { encode } from '../../foundation/canonical.ts';
-import { level, resourceRef } from '../resource.ts';
+import { level, resourceRef, resourceSpec } from '../resource.ts';
+import { describeEntity } from '../description_variant/rule.ts';
 import { living } from '../death/shared.ts';
 import { standing } from '../position/shared.ts';
 import { ally, allyOf, npcRef, participantsPresent } from './shared.ts';
 import { afraid, eligible, flight, next, packPlan } from './behavior.ts';
-import { attack, prefix } from './round_attack.ts';
+import { attack, playerFirst, prefix } from './round_attack.ts';
 import { statusAllows } from '../status/bars.ts';
 import type { CombatEvent, Round } from './round.ts';
 
@@ -90,14 +92,7 @@ function selectedFrom(present: readonly EntityId[], cursor: EntityId) {
 
 function packResult(world: World, row: EncounterRow, job: JobRow, r: Round) {
   const timed = r.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: job.due_time } : op));
-  return accepted(
-    world,
-    'job_ran',
-    timed,
-    r.events,
-    [...narrate(world, row, r.events, r.shot), ...r.notes],
-    r.rng,
-  );
+  return accepted(world, 'job_ran', timed, r.events, told(world, row, job, r), r.rng);
 }
 
 function packTurns({
@@ -114,7 +109,7 @@ function packTurns({
   settings,
 }: PackContext) {
   const helper = allyOf(world, row);
-  const order = row.round % 2 ? [row.body_id, selected] : [selected, row.body_id];
+  const order = playerFirst(world, row, r) ? [row.body_id, selected] : [selected, row.body_id];
   for (const attacker of helper ? [...order, helper] : order) {
     const at = prefix(world, r.ops, r.due_time);
     const target =
@@ -227,27 +222,72 @@ export function successor(
   ];
 }
 
-export function narrate(
-  world: World,
-  row: EncounterRow,
-  events: readonly CombatEvent[],
-  shot = false,
-) {
-  const words = world.cartridge.world!.combat!.narration;
+/** A round's lines (loka-kgd.197 names, tiers and the foe's condition when declared), then its notes. */
+export function told(world: World, row: EncounterRow, job: JobRow, r: Round): Text[] {
+  const combat = world.cartridge.world!.combat!;
+  const words = combat.narration;
+  const hp = resourceRef(world, 'hp');
+  const named = naming(world, row, r);
   const striker = (attacker: EntityId) =>
     attacker === row.body_id
-      ? shot
+      ? r.shot
         ? 'shot'
         : 'player'
       : ally(world, row.character_id, attacker)
         ? 'ally'
         : 'npc';
-  return events.map(({ payload: e }) => ({
-    key:
-      e.type === 'entity_died'
-        ? words[e.victim_id === row.body_id ? 'player_died' : 'npc_died']
-        : 'prevented_by' in e && e.prevented_by
+  const lines: Text[] = r.events.map(({ payload: e }) => {
+    if (e.type === 'entity_died')
+      return {
+        key: words[e.victim_id === row.body_id ? 'player_died' : 'npc_died'],
+        ...named(e.killer_id, e.victim_id),
+      };
+    const s = striker(e.attacker_id);
+    const max = resourceSpec(world, e.target_id, hp).maximum;
+    const tier =
+      e.hit && e.loss > 0
+        ? combat.tiers?.find((t) => t[`${s}_hit`] && 100 * e.loss >= t.at_percent * max)
+        : undefined;
+    return {
+      key:
+        'prevented_by' in e && e.prevented_by
           ? words[e.prevented_by]!
-          : words[`${striker(e.attacker_id)}_${e.hit ? 'hit' : 'miss'}`]!,
-  }));
+          : (tier?.[`${s}_hit`] ?? words[`${s}_${e.hit ? 'hit' : 'miss'}`]!),
+      ...named(e.attacker_id, e.target_id),
+    };
+  });
+  const state = condition(world, job, r);
+  if (state) {
+    const died = r.events.findIndex((e) => e.payload.type === 'entity_died');
+    lines.splice(died < 0 ? lines.length : died, 0, { key: state.text, ...named(null, state.foe) });
+  }
+  return [...lines, ...r.notes];
+}
+
+// Diku rounds (loka-kgd.197): a line's {attacker}/{target} bind each non-player participant's short name.
+function naming(world: World, row: EncounterRow, r: Round) {
+  const name = (id: EntityId | null) =>
+    world.cartridge.world!.combat!.initiative && id && id !== row.body_id
+      ? describeEntity(world, row.character_id, id, 'short', r.steps)
+      : undefined;
+  return (attacker: EntityId | null, target: EntityId | null) => {
+    const bindings = Object.fromEntries(
+      Object.entries({ attacker: name(attacker), target: name(target) }).filter(([, v]) => v),
+    ) as Record<string, TextKey>;
+    return Object.keys(bindings).length ? { bindings } : {};
+  };
+}
+
+// The player's current foe's condition row after a round with an attack; none once it is dead.
+function condition(world: World, job: JobRow, r: Round) {
+  const rows = world.cartridge.world!.combat!.conditions;
+  if (!rows || !r.events.some((e) => e.payload.type === 'attack_result')) return undefined;
+  const end = prefix(world, r.ops, r.due_time);
+  const foe = end.state.encounters![job.encounter_id!].npc_id;
+  if (!living(end, foe)) return undefined;
+  const hp = resourceRef(end, 'hp');
+  const { minimum, maximum } = resourceSpec(end, foe, hp);
+  const current = level(end, foe, hp)!;
+  const row = rows.find((c) => 100 * (current - minimum) >= c.at_percent * (maximum - minimum));
+  return row && { text: row.text, foe };
 }

@@ -1180,6 +1180,16 @@ A room's optional `sound` (`RoomDefinition`, a `Key` the cartridge names) is its
 
 [Ranged first strike](mechanics.md#ranged-first-strike-toolbox-row-17) reads an item's optional `weapon.ranged {ammo}` (`protocol/entity.schema.json` `WeaponProfile`, no other field): `ammo` is a resource DefinitionRef (a short key in source, named like allies) of the body pool each shot spends; an unknown pool is UNRESOLVED_REFERENCE at `weapon.ranged.ammo`. When any item declares `weapon.ranged`, the combat narration must name `shot_hit` and `shot_miss` (optional TextKeys otherwise); a missing one is SCHEMA_VIOLATION at `.cartridge.world.combat.narration.shot_hit` (or `shot_miss`), as for `ally_hit` and `ally_miss`. `cartridges/ranged_sampler` is the sampler.
 
+## Diku rounds
+
+[Diku rounds](mechanics.md#diku-rounds-loka-kgd197) read three optional keys of `world.combat` (`protocol/cartridge.schema.json` `CombatSettings`):
+
+- `world.combat.initiative: true` (the only value) opts into the initiative draw, round 1 at Attack and named lines (`{attacker}`, `{target}`) in every combat narration key.
+- `world.combat.tiers`: a non-empty list of `{at_percent, player_hit?, npc_hit?, ally_hit?, shot_hit?}`, highest `at_percent` first; `at_percent` is an integer 1..100 (the schema refuses others). Each named key resolves in the catalog (UNRESOLVED_REFERENCE at `.cartridge.world.combat.tiers[i].<field>`); a cut not strictly below the one before is SCHEMA_VIOLATION at `.cartridge.world.combat.tiers[i].at_percent` (`tiers_unordered`).
+- `world.combat.conditions`: a non-empty list of `{at_percent, text}` (both required), ordered and bounded as `tiers`; `text` resolves in the catalog (UNRESOLVED_REFERENCE at `.cartridge.world.combat.conditions[i].text`), told after each round for the player's foe with a `{target}` binding.
+
+A cartridge without them keeps its bytes, hash and behavior. `cartridges/diku_sampler` is the sampler; `cartridges/toolbox_showcase` declares all three.
+
 ## Skill growth and rating declarations
 
 [Skill growth and opposed checks](mechanics.md#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5) read a skill's optional `growth` (`SkillDefinition.growth`, 1 to 8 strictly increasing positive integers), a detail's optional `rating` (`InspectableDetail.rating`, an integer) and the action check `{kind: "opposed", key}` with exactly one of `skill` or `attribute` (source: short keys, expanded like `attribute_threshold`'s). The compiler (`lib/loka/content/skills.ex`, `lib/loka/content/scripted_actions.ex`) synthesizes the reserved fact `uses_<key>` for each skill with growth (an authored fact of that key is RESERVED_FACT) and refuse growth not strictly increasing (SCHEMA_VIOLATION at `growth`), an unresolved skill or attribute (UNRESOLVED_REFERENCE at the check member), an opposed check whose target detail has no `rating` (SCHEMA_VIOLATION at `check`). `cartridges/skills_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.

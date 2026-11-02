@@ -1,4 +1,4 @@
-# size: allow 530, one catalog walked row by row; each row is its own small test
+# size: allow 545, one catalog walked row by row; each row is its own small test
 defmodule Loka.ContentExplainTest do
   # What an author reads from a refused compile (loka-vduxr A1, A9). Expected fragments are
   # hand-written; wording around them may move.
@@ -225,6 +225,19 @@ defmodule Loka.ContentExplainTest do
   test "a resolve's bad quest names its own line", %{tmp_dir: dir} do
     lines = scene(dir, "npc: bram\nbram: hi\n- Go\n  quest: resolve none\n  bram: ok\n")
     assert line_at(lines, "scenes/hi.scene:4") =~ "none"
+  end
+
+  # Break: an unordered Diku tier falls back to the generic schema words, which never say to sort.
+  test "an unordered tier says to list rows highest first", %{tmp_dir: dir} do
+    diag = %{
+      "severity" => "error",
+      "code" => "SCHEMA_VIOLATION",
+      "path" => "cartridge.world.combat.tiers[1].at_percent",
+      "data" => %{"error" => "invalid_value", "why" => "tiers_unordered"}
+    }
+
+    assert [line] = Explain.lines([diag], dir)
+    assert line =~ "highest `at_percent` down"
   end
 
   # Break: a reference site that passes no target prints a hole where the name goes.

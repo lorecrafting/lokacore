@@ -1967,6 +1967,41 @@
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
           },
           "minItems": 1
+        },
+        "initiative": {
+          "description": "Opts into Diku rounds (docs/system/mechanics.md, Diku rounds): each round draws initiative for which side strikes first, Attack resolves round 1 at once, and the combat narration binds {attacker} and {target}.",
+          "const": true
+        },
+        "tiers": {
+          "description": "Damage tiers (docs/system/mechanics.md, Diku rounds), highest at_percent first: a hit whose hp loss reaches at_percent of the target's hp maximum is told with the first such tier's key for that perspective instead of the plain hit key.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at_percent": {"description": "The percent of the target's hp maximum a hit's loss must reach.", "type": "integer", "minimum": 1, "maximum": 100},
+              "player_hit": {"description": "Told for the player's hit at this tier.", "$ref": "text.schema.json#/$defs/TextKey"},
+              "npc_hit": {"description": "Told for the foe's hit at this tier.", "$ref": "text.schema.json#/$defs/TextKey"},
+              "ally_hit": {"description": "Told for the ally's hit at this tier.", "$ref": "text.schema.json#/$defs/TextKey"},
+              "shot_hit": {"description": "Told for a ranged first strike's hit at this tier.", "$ref": "text.schema.json#/$defs/TextKey"}
+            },
+            "required": ["at_percent"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "conditions": {
+          "description": "Condition lines (docs/system/mechanics.md, Diku rounds), highest at_percent first: after each round, the first row the player's living foe's hp reaches is told, binding {target}.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at_percent": {"description": "The percent of the foe's hp range it must reach.", "type": "integer", "minimum": 1, "maximum": 100},
+              "text": {"description": "The line told, binding {target}.", "$ref": "text.schema.json#/$defs/TextKey"}
+            },
+            "required": ["at_percent", "text"],
+            "additionalProperties": false
+          },
+          "minItems": 1
         }
       },
       "required": [
