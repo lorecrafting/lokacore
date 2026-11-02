@@ -6,7 +6,9 @@ review ([record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d6
 *Amendment* notes in §4 and §6; amended again by R5 slice 2 ([owner decision](owner-decision-lab-failed-lookups-2026-09-25.md)):
 the `target.unresolved` diagnostics record and its §6 note; amended again by R6 slice 2's review
 ([record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-09-30-r6-s2-review.md)): the phone placement in §2 and the trace
-segments in §§3-4; amended again by R6 slice 6a (PM decision): the phone trace cap in §2.
+segments in §§3-4; amended again by R6 slice 6a (PM decision): the phone trace cap in §2;
+amended again 2026-11-01 (PM ruling, loka-vduxr.41): replay rebuilding a rejection's recorded
+form in §4.
 Written by the developer agent
 (Claude Code, Claude Opus) for the observability design slice
 ([owner decision](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decisions-observability-astra-2026-09-25.md)).
@@ -145,6 +147,12 @@ entry; the jobs it runs appear in its committed events.
   reads a decision or commit outcome, and never consults `commit` to force an outcome. A fix
   is proven by deterministic replay (09 §2): the inputs reproduce the failure before the fix
   and not after.
+  *Amendment (2026-11-01, PM ruling, loka-vduxr.41):* a rejection has two lawful rows in the
+  table above, so replay reads a rejected entry's recorded `commit.state` to choose which row
+  to rebuild: `committed` gives the receipt-storing host's form, anything else the
+  receipt-less one. The decision is still recomputed from the inputs, so a recorded rejection
+  that replay decides otherwise still differs. No schema change; a `failed` or `unknown`
+  rejection is not rebuilt.
 - **Committed events only.** Proposed events never leave a failed commit (04 §5.1), so a
   failed or unknown commit carries none; the events are `CommittedEvent`s, the only form
   that may be traced. Replay recovers the proposal, which a viewer labels as reconstructed

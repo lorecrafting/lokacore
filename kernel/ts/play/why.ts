@@ -15,7 +15,7 @@ import { refString } from '../src/runtime/decision.ts';
 import { marked, replay } from './coverage.ts';
 import { ROOT } from './obs.ts';
 import { replayRecords } from './replay.ts';
-import { decideReplay, start, type Run } from './run.ts';
+import { decideReplay, replayEntry, start, type Run } from './run.ts';
 
 type Trace = ReturnType<typeof replayRecords>;
 // now: read the asked policy on the world after the step, as the author panel asks about what could be done next.
@@ -101,7 +101,7 @@ function prefix(cartridge: Cartridge, trace: Trace, ordinal: number) {
     head.ids.seed,
     head.ids.kernel_version,
   );
-  for (const e of entries.slice(0, ordinal - 1)) decideReplay(r, e.data.command);
+  for (const e of entries.slice(0, ordinal - 1)) replayEntry(r, e);
   return r;
 }
 
