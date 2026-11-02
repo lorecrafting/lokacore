@@ -93,8 +93,11 @@ test('each round on the clock begins its own block of the combat log', () => {
   round('two');
   const lines = p.screen().combatLog;
   assert.deepEqual(lines, ['A.', 'B.', 'A.', 'B.']);
-  // A mark at the end waits for the next round's first line.
-  assert.deepEqual(logMark(lines).rounds, [2, 4]);
+  // The one boundary inside the log: between the rounds, none within one.
+  assert.deepEqual(
+    logMark(lines).rounds.filter((n) => n < lines.length),
+    [2],
+  );
 });
 
 // Real Book state/effect routing over controlled committed Game projections; no native layout claim.

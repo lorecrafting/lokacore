@@ -51,6 +51,7 @@ export const Rounds: StoryObj = {
   play: async ({ canvas }) => {
     const last = await canvas.findByText('You strike the boar (round 20).');
     await waitFor(() => expect(last.getBoundingClientRect().bottom).toBeLessThan(innerHeight));
+    await expect(last.getBoundingClientRect().top).toBeGreaterThanOrEqual(0);
     const top = (text: string) => canvas.getByText(text).getBoundingClientRect().top;
     const within = top('You strike the boar (round 19).') - top('The boar bites you (round 19).');
     const between = top('The boar bites you (round 20).') - top('You strike the boar (round 19).');

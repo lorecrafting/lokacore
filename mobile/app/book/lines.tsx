@@ -96,10 +96,11 @@ export function LogLines({
   const { gone, drawn, rounds } = logMark(lines);
   useEffect(() => markDrawn(lines), [gone + lines.length]);
   // A line's number, also its stable key; a round's first number keys its block.
+  const starts = new Set(rounds);
   const blocks: [number, ReactNode[]][] = [[gone, []]];
   lines.forEach((line, i) => {
     const n = gone + i;
-    if (rounds.includes(n) && blocks.at(-1)![1].length) blocks.push([n, []]);
+    if (starts.has(n) && blocks.at(-1)![1].length) blocks.push([n, []]);
     if (!keep || keep(line))
       blocks.at(-1)![1].push(<LogLine key={n} line={line} fresh={n >= drawn} />);
   });

@@ -1,7 +1,7 @@
 // The book's page shell and its shared controls (the room page: Body.tsx; the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ComponentProps, type ReactNode, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -126,19 +126,23 @@ type PageProps = {
  *   page header with the arriving focus; without one, the first block takes it. The room's fixed
  *   title is the only pressable title. The title is `pageTitle`, scaled with the Reading size: centred
  *   when fixed (the room), left-aligned on every other page. A page that grows at the end follows
- *   its end while the reader is there (within `size.touch`); a reader scrolled up stays put.
+ *   its end while the reader is there (within `size.touch`); a reader scrolled up stays put until
+ *   they press anywhere on the page, which follows its own result.
  * - States: scrolling title; fixed title; no title; centred (no game behind it).
  * - Story: Page.stories.tsx
  */
 export function Page(p: PageProps) {
   const c = usePalette();
   const scroll = useRef<ScrollView>(null);
-  const atEnd = useRef(true); // a reader scrolled up to an earlier line is not pulled down
+  const { atEnd, track, press } = useFollow();
   const title = p.title !== undefined && (
     <Title title={p.title} fixed={p.fixedTitle} onPress={p.onTitlePress} />
   );
   return (
-    <View style={{ flex: 1, backgroundColor: p.paperless ? undefined : c.bg }}>
+    <View
+      style={{ flex: 1, backgroundColor: p.paperless ? undefined : c.bg }}
+      onStartShouldSetResponderCapture={press}
+    >
       <LevelWash />
       {p.fixedTitle && (
         <View style={{ paddingHorizontal: space.page, paddingTop: space.xl }}>{title}</View>
@@ -156,10 +160,9 @@ export function Page(p: PageProps) {
           p.scrollToEnd && atEnd.current && scroll.current?.scrollToEnd({ animated: false })
         }
         scrollEventThrottle={motion.quick.duration} // web sends one onScroll without it
-        onScroll={({ nativeEvent: e }) => {
-          atEnd.current =
-            e.contentOffset.y + e.layoutMeasurement.height >= e.contentSize.height - size.touch;
-        }}
+        onScroll={track}
+        onScrollEndDrag={track} // a sampled scroll can miss where it stopped
+        onMomentumScrollEnd={track}
       >
         {!p.fixedTitle && title}
         {p.children}
@@ -167,6 +170,17 @@ export function Page(p: PageProps) {
       {p.foot && <PageFoot>{p.foot}</PageFoot>}
     </View>
   );
+}
+
+// A reader scrolled up to an earlier line is not pulled down; a press anywhere on the page (a Here
+// exit, a card, the foot) follows its own result.
+function useFollow() {
+  const atEnd = useRef(true);
+  const track: ComponentProps<typeof ScrollView>['onScroll'] = ({ nativeEvent: e }) => {
+    atEnd.current =
+      e.contentOffset.y + e.layoutMeasurement.height >= e.contentSize.height - size.touch;
+  };
+  return { atEnd, track, press: () => ((atEnd.current = true), false) };
 }
 
 // A header that takes the arriving focus; the room's is fixed, and a tap on it looks.

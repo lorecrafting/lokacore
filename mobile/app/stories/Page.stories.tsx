@@ -1,7 +1,7 @@
 // Page: one shell for every page (Page's doc comment); RunningHead above it, as Body.tsx
 // draws it. Journal texts are the showcase's own (protocol/fixtures/toolbox_showcase_hash.json).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { type ComponentProps, useState } from 'react';
+import { type ComponentProps, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { expect, fn, waitFor } from 'storybook/test';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -12,6 +12,7 @@ import { RunningHead } from '../book/RunningHead.tsx';
 import { prose, usePalette, useType } from '../book/palette.ts';
 import { Text } from '../book/Text.tsx';
 import { LABEL } from '../book/labels.ts';
+import { motion } from '../book/tokens.ts';
 
 type Quest = Pick<GameView['journal'][number], 'quest' | 'state' | 'journal'>;
 const say = (k: string) => k;
@@ -193,14 +194,19 @@ export const ScrollToEnd: Story = {
 
 // Breaks: on the web ScrollView keeps its first ref callback, so a later render's Page has no view
 // and a line arriving on a full page is cut (the pop unseen).
-function Growing() {
+// `above`: Say sits above the log, as Here's exits and the foe line's spells do; `clock`: five
+// lines arrive unpressed on each tick, as combat rounds do.
+function Growing({ above = false, clock = false }) {
   const [lines, setLines] = useState(30);
+  useEffect(() => {
+    const t =
+      clock && setInterval(() => setLines((n) => Math.min(n + 5, 60)), motion.palette.duration);
+    return () => clearInterval(t || undefined);
+  }, [clock]);
+  const say = <Control label="Say" onPress={() => setLines(lines + 5)} />;
   return (
-    <Framed
-      title="Old Bram"
-      scrollToEnd
-      foot={<Control label="Say" onPress={() => setLines(lines + 5)} />}
-    >
+    <Framed title="Old Bram" scrollToEnd foot={above ? undefined : say}>
+      {above && say}
       <LogLines lines={Array.from({ length: lines }, (_, i) => `Bram says line ${i + 1}.`)} />
     </Framed>
   );
@@ -213,20 +219,40 @@ export const LogFollows: Story = {
     await waitFor(() => expect(inView(canvas.getByText('Bram says line 35.'))).toBe(true));
   },
 };
-// Breaks: a reader scrolled up to an earlier line is pulled down when a line arrives.
+// Breaks: a reader scrolled up to an earlier line is pulled down when a line arrives on the clock.
+const scrollUp = async (first: HTMLElement) => {
+  let pane = first.parentElement!;
+  while (pane.scrollHeight <= pane.clientHeight) pane = pane.parentElement!;
+  pane.scrollTop = 0;
+  pane.dispatchEvent(new Event('scroll'));
+  await waitFor(() => expect(inView(first)).toBe(true));
+  await new Promise((r) => setTimeout(r, motion.quick.duration)); // the sampled scroll settles
+};
 export const ScrolledUpStays: Story = {
-  render: () => <Growing />,
+  render: () => <Growing clock />,
+  play: async ({ canvas }) => {
+    const first = canvas.getByText('Bram says line 1.');
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 30.'))).toBe(true));
+    await scrollUp(first);
+    const next = canvas.getAllByText(/^Bram says line/).length + 5; // a tick after the scroll
+    await canvas.findByText(
+      `Bram says line ${next}.`,
+      {},
+      { timeout: 2 * motion.palette.duration },
+    );
+    await new Promise((r) => setTimeout(r, motion.quick.duration)); // a follow would land by now
+    await expect(inView(first)).toBe(true);
+  },
+};
+// Breaks: a press above the log, made scrolled up, leaves its own result below the fold.
+export const PressFollows: Story = {
+  render: () => <Growing above />,
   play: async ({ canvas, userEvent }) => {
     const first = canvas.getByText('Bram says line 1.');
     await waitFor(() => expect(inView(canvas.getByText('Bram says line 30.'))).toBe(true));
-    let pane = first.parentElement!;
-    while (pane.scrollHeight <= pane.clientHeight) pane = pane.parentElement!;
-    pane.scrollTop = 0;
-    pane.dispatchEvent(new Event('scroll'));
-    await waitFor(() => expect(inView(first)).toBe(true));
+    await scrollUp(first);
     await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
-    await canvas.findByText('Bram says line 35.');
-    await expect(inView(first)).toBe(true);
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 35.'))).toBe(true));
   },
 };
 

@@ -123,7 +123,7 @@ projects authentic Look under the
 Cartridges that do not offer Look retain a fixed text title.
 Only the body scrolls, so description and entities may leave view while the title stays visible.
 World scrolls to its end as its log grows, as a person's page does, while the reader is at the end; a
-reader scrolled up to an earlier line stays put.
+reader scrolled up to an earlier line stays put until they press anywhere on the page, which follows its own result.
 Standalone exit directions, adjacent-sight listings and redundant navigation/
 Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
 explicit per-room clearing direction, the World event log scopes
@@ -940,7 +940,7 @@ the same ScrollView, not a fixed strip. No unavailable or future skill actions a
 while the combat page is open.
 
 **Rounds.** The page follows its newest line as other growing pages do (Page: it follows the end
-while the reader is there; a reader scrolled up to an earlier round stays put), so a round's lines
+while the reader is there; a reader scrolled up to an earlier round stays put until they press), so a round's lines
 land in view above the action cards. Each round's lines (one committed receipt: an elapsed round,
 or one press's receipt) are one block at the log's line pitch, and rounds stand apart by the
 page's block gap (LogLines), as the prompt line parts rounds in a MUD log; no rule glyph, heading
