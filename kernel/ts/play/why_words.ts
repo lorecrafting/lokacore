@@ -43,27 +43,34 @@ const WORDS: { [O in Leaf['op']]: (p: Extract<Leaf, { op: O }>) => string } = {
   time_since: (p) => `at least ${p.at_least} has passed since fact ${p.fact.key}`,
 };
 
-// One tree's rows, parents before children, each branch's verdict from its leaves.
-function rows(p: Annotated, depth: number): { ok: Verdict; rows: Row[] } {
-  if (p.op === 'all' || p.op === 'any' || p.op === 'not') {
-    const kids = (p.op === 'not' ? [p.item] : p.items).map((x) => rows(x, depth + 1));
+// One tree's rows, parents before children, each branch's verdict from its leaves. A `not` adds no
+// row: it folds into what it covers (De Morgan), so a met `not` reads green all the way down.
+function rows(p: Annotated, depth: number, negated = false): { ok: Verdict; rows: Row[] } {
+  if (p.op === 'not') return rows(p.item, depth, !negated);
+  if (p.op === 'all' || p.op === 'any') {
+    const all = (p.op === 'all') !== negated;
+    const kids = p.items.map((x) => rows(x, depth + 1, negated));
     const has = (v: Verdict) => kids.some((k) => k.ok === v);
-    const ok: Verdict =
-      p.op === 'not'
-        ? kids[0]!.ok === 'depends'
-          ? 'depends'
-          : !kids[0]!.ok
-        : has(p.op === 'any')
-          ? p.op === 'any' // one leaf settles it, whatever the target
-          : has('depends')
-            ? 'depends'
-            : p.op === 'all';
-    const text = { all: 'all of these', any: 'any one of these', not: 'not this' }[p.op];
-    return { ok, rows: [{ text, ok, depth }, ...kids.flatMap((k) => k.rows)] };
+    const ok: Verdict = has(!all)
+      ? !all // one leaf settles it, whatever the target
+      : has('depends')
+        ? 'depends'
+        : all;
+    return {
+      ok,
+      rows: [
+        { text: all ? 'all of these' : 'any one of these', ok, depth },
+        ...kids.flatMap((k) => k.rows),
+      ],
+    };
   }
-  const ok = p.holds === 'depends' ? p.holds : p.holds === true;
-  const text = (WORDS[p.op as Leaf['op']] as (p: Policy) => string)(p);
-  return { ok, rows: [{ text, ok, depth }] };
+  const ok = p.holds === 'depends' ? p.holds : (p.holds === true) !== negated;
+  // a negated yes/no fact needs the other answer; any other negated leaf says so first
+  const flip = negated && p.op === 'fact_compare' && typeof p.equals === 'boolean';
+  const said = (WORDS[p.op as Leaf['op']] as (p: Policy) => string)(
+    flip ? { ...p, equals: !p.equals } : p,
+  );
+  return { ok, rows: [{ text: negated && !flip ? `not: ${said}` : said, ok, depth }] };
 }
 
 /** The asked definition's policy as sentences; no policy holds without saying anything more. */

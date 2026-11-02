@@ -101,6 +101,7 @@ const authorTools = (story: Open) => ({
   entityIds: () => story.world().entityIds,
   roomIds: () => story.world().roomIds,
   facts: () => story.world().state.facts ?? {},
+  choices: () => story.world().state.choices ?? {}, // names an open choice's dialogue in a replay note
   trace: () => story.trace(), // the author column replays these
 });
 function managedGame(story: Open, cartridge: Cartridge, db: Db) {
