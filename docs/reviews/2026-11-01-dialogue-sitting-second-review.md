@@ -1,0 +1,47 @@
+# Dialogue sitting and end_talk contract: second review
+
+PR #576, `engine/dialogue-sitting`, commit `8c413c8c34cbf36c9287c0e6bb3dea162de40c4b`, Beads `loka-vduxr.11`. Scope by brief: schema, saves, `proposal_farewell.ts`, `kernel_api`. Written without reading the first reviewer's record.
+
+Governing: [reopen principle](../lessons/storage.md) (lines 41-45), [`docs/system/save.md`](../system/save.md) (pin, lines 19-25), `docs/system/mechanics.md:499`, `docs/system/cartridge.md:272`.
+
+## Must be true (written before the diff)
+
+1. Schema additions are additive; existing cartridges compile and hash unchanged.
+2. Elixir refusals of `sitting` match where the TS `hub` reopens.
+3. Every state accepted commands reach reopens through `openGame`, without replay.
+4. A stale `choice_ids` row cannot cross a release.
+5. `end_talk` never faults the player's action.
+6. `closedByOpener` changes nothing for existing cartridges.
+7. `SITTING_SPENT` is a warning; the refusals are errors.
+8. Generated files are current; `kernel_api` is main+1.
+
+## Findings
+
+**Blocker 1: `end_talk` on `choice_opened` loses the save.** `lib/loka/content/reactions.ex:136` admits the event and `docs/system/cartridge.md:272` documents it. Compiled `persuade_sampler` plus `{on: {event: choice_opened}, steps: [{op: end_talk}]}`: `talk` is accepted, the row opens and closes in one decision, and the next `coldReopen` throws `save_corrupt` from `selectorSave`, at `mobile/authority/local-story/riddle-save.ts:102-104` (it refuses a close of the row the talk opened; raised at `:119`). The check runs for every cartridge and #574 keeps it. An accepted command reaches a save refused for good, against storage.md:41-45. Fix: let the evidence accept the own close, or drop the event from `@own_acts` and the doc.
+
+**Blocker 2: `end_talk` from another command closes a bounded riddle and loses the save.** Riddle fragment plus `{on: {event: action_completed}, steps: [{op: end_talk}]}`: open the riddle, run `coil_rope`; accepted with `choice.close`. `coldReopen` throws `save_corrupt` at `riddle-save.ts:158` (`answerEvidence`'s `else`, reached through `attempts`). Controls: a `narrate` step instead reopens; without `wrong_limit` reopens, so the hole is bounded riddles only. Fix: any accepted receipt with this close counts as closing. This run used a hand-built bundle; compiler acceptance is by reading `reactions.ex:136`; `grep end_talk lib/` shows no other refusal.
+
+Blockers 1 and 2 share a test gap: `kernel/ts/test/dialogue_sitting.test.ts` uses `checkRow` and an in-memory `reload`, which skip `selectorSave` and `riddleSave`. The fix needs a `coldReopen` test (`storage.md:29`) for each.
+
+**Blocker 3: the riddle arm of the `sitting` refusal is untested.** `lib/loka/content/hub.ex:60`: replacing `d["riddle"]` with `nil` leaves `content_dialogue_sitting_test.exs` and the riddle-limit, rest, group and fixture-contract tests green (35 passed). Not equivalent, by compile: `guard.json` with an unbounded riddle, no quest, choices `a` and sitting `b` is refused at head and compiles `{:ok, []}` under the mutant, so `sitting` there is silently ignored. Blocker by the review rule on green suites; one list entry fixes it.
+
+**Nit: PR body line 1** says `kernel_api` 1.146 to 1.147; `kernel/ts/src/runtime/world.ts:110` and body line 38 say 1.148.
+
+**Nit: `lib/loka/content/reactions.ex:93`** comment says a second close would fault the action. Two `end_talk` steps in one rule are refused, but two rules on one event ran accepted with one close: the second sees it closed. The comment overstates it.
+
+## Passing
+
+- Mid-sitting cold open through `openGame` reopens, row `[b, z]`; `end_talk` on `choice_resolved` with sitting reopens. Stale rows: refused at the pin (`pinned_release_missing`, save.md:19-25) before any row check, so no reworded-dialogue case reaches `openable`. Nothing here needs replay.
+- Additive: `git diff` deletions in `protocol/cartridge.schema.json` are descriptions and the enum's trailing comma; `cartridges`, `test/fixtures`, `protocol/fixtures` unchanged; seven story save pin lines change, as expected.
+- `closedByOpener` changes only an own close of a row opened in the same proposal, which earlier faulted; `farewell` is a pure extraction. No existing cartridge has `end_talk`.
+- `SITTING_SPENT` is `warning(...)`; refusals match TS `hub`/`reopens` by reading.
+- `kernel_api` 1.148, main 1.147.
+- Mutants, all red: `behavior.ts:106` filter dropped (2 failed), `closedByOpener` no remap (1), `openable` sitting clause (1), `reactions.ex` `@own_acts` check (1).
+- Claims rerun: `dialogue_sitting.test.ts:19` cite holds; PR body line 1 does not (nit above).
+- `/code-review medium` reported. CI at head by `gh run list`: ci, book-e2e, graph-diff success.
+
+## Not checked
+
+`bin/regen.sh` stopped locally at the story views (`react` missing from cloned deps) with no tree change before that point; story views rest on green CI. No full `bin/mutate_diff.sh`, by brief. `end_talk` on `check_passed`/`check_failed` against a bounded riddle not run. Book UI not in scope.
+
+Final verdict: CHANGES REQUIRED
