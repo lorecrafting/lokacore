@@ -19,7 +19,7 @@ and dark. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book,
 
 ## Write a scene
 
-Edit `text.json` for any line the Book shows: the page updates as you save, no reload. Add a room,
+Edit `text.json` (or the `.scene` file a scene's words are in) for any line the Book shows: the page updates as you save, no reload. Add a room,
 NPC, item or quest as JSON ([Builders' Guide](../BUILDERS-GUIDE.md)); the page reloads and replays
 what you had done. Write a conversation as `scenes/<key>.scene`; a committed one that compiles and is
 walked is [`identity_sampler/scenes/stranger_talk.scene`](../../cartridges/identity_sampler/scenes/stranger_talk.scene):
