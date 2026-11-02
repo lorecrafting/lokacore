@@ -134,7 +134,7 @@ type PageProps = {
 export function Page(p: PageProps) {
   const c = usePalette();
   const scroll = useRef<ScrollView>(null);
-  const { atEnd, track, press } = useFollow();
+  const { track, grown, press } = useFollow();
   const title = p.title !== undefined && (
     <Title title={p.title} fixed={p.fixedTitle} onPress={p.onTitlePress} />
   );
@@ -156,8 +156,8 @@ export function Page(p: PageProps) {
           gap: space.xl,
           ...(p.centred && { flexGrow: 1, justifyContent: 'center' }),
         }}
-        onContentSizeChange={() =>
-          p.scrollToEnd && atEnd.current && scroll.current?.scrollToEnd({ animated: false })
+        onContentSizeChange={(_, h) =>
+          p.scrollToEnd && grown(h) && scroll.current?.scrollToEnd({ animated: false })
         }
         scrollEventThrottle={motion.quick.duration} // web sends one onScroll without it
         onScroll={track}
@@ -176,11 +176,15 @@ export function Page(p: PageProps) {
 // exit, a card, the foot) follows its own result.
 function useFollow() {
   const atEnd = useRef(true);
+  const seen = useRef(0); // the bottom of the view at the last sample
+  const near = (h: number) => (atEnd.current = seen.current >= h - size.touch);
   const track: ComponentProps<typeof ScrollView>['onScroll'] = ({ nativeEvent: e }) => {
-    atEnd.current =
-      e.contentOffset.y + e.layoutMeasurement.height >= e.contentSize.height - size.touch;
+    seen.current = e.contentOffset.y + e.layoutMeasurement.height;
+    near(e.contentSize.height);
   };
-  return { atEnd, track, press: () => ((atEnd.current = true), false) };
+  // A log that shrinks to the view sends no scroll; its size alone re-arms the follow.
+  const grown = (h: number) => atEnd.current || near(h);
+  return { track, grown, press: () => ((atEnd.current = true), false) };
 }
 
 // A header that takes the arriving focus; the room's is fixed, and a tap on it looks.

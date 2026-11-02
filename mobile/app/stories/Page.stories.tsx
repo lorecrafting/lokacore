@@ -244,6 +244,34 @@ export const ScrolledUpStays: Story = {
     await expect(inView(first)).toBe(true);
   },
 };
+// Breaks: a reader scrolled up whose log shrinks to fit the page (no scroll to sample) is not
+// followed when the log grows again.
+function Shrinking() {
+  const [lines, setLines] = useState(30);
+  useEffect(() => {
+    const t = setTimeout(() => setLines(3), motion.palette.duration);
+    const u = setTimeout(() => setLines(40), 2 * motion.palette.duration);
+    return () => [t, u].forEach(clearTimeout);
+  }, []);
+  return (
+    <Framed title="Old Bram" scrollToEnd>
+      <LogLines lines={Array.from({ length: lines }, (_, i) => `Bram says line ${i + 1}.`)} />
+    </Framed>
+  );
+}
+export const ShrinkFollows: Story = {
+  render: () => <Shrinking />,
+  play: async ({ canvas }) => {
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 30.'))).toBe(true));
+    await scrollUp(canvas.getByText('Bram says line 1.'));
+    const last = await canvas.findByText(
+      'Bram says line 40.',
+      {},
+      { timeout: 3 * motion.palette.duration },
+    );
+    await waitFor(() => expect(inView(last)).toBe(true));
+  },
+};
 // Breaks: a press above the log, made scrolled up, leaves its own result below the fold.
 export const PressFollows: Story = {
   render: () => <Growing above />,
