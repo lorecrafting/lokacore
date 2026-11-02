@@ -129,7 +129,7 @@ export function load(db: Db, fresh: World, first: () => Meta, dev = false) {
     receiptRecovery(fresh, world, db, meta, h.revision, dev);
     return saved(world, h.revision, meta, db);
   } catch (e) {
-    if (e instanceof SyntaxError || /malformed JSON/.test(String(e))) return undefined;
+    if (unreadable(e)) return undefined;
     throw e;
   }
 }
@@ -181,6 +181,10 @@ function saved(world: World, revision: number, meta: Meta, db: Db) {
 
 // ponytail: SQLite's own messages for SQLITE_NOTADB and SQLITE_CORRUPT, as node:sqlite reports
 // them; expo-sqlite's wording is checked on the phone (S6b), its error codes if it differs.
+/** True when a saved row is unusable: bad JSON, or a shape a reader trips on (null where an op goes). */
+export const unreadable = (e: unknown) =>
+  e instanceof SyntaxError || e instanceof TypeError || /malformed JSON/.test(String(e));
+
 /** True when SQLite reports the file is not a database or a page of it corrupt, not bad JSON (OFF-07). */
 export const corrupt = (e: unknown) => /file is not a database|malformed(?! JSON)/.test(String(e));
 

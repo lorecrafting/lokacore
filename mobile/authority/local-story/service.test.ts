@@ -142,7 +142,7 @@ test('room-before-Rest, meal, partial/empty ale reopen and exact retries preserv
   );
 });
 
-// Breaks: bounded forged entitlement/stock/ale or altered service/payment/benefit receipts pass current-value checks.
+// Breaks: the service loader opens a receipt whose service, provider, quote or payment no longer binds, or an unearned entitlement row.
 test('a service receipt that no longer binds, and an unearned entitlement row, refuse without repair', (t) => {
   for (const mutation of ['service', 'provider', 'quote', 'payment']) {
     const a = setup();

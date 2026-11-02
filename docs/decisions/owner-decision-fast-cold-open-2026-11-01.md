@@ -8,14 +8,17 @@ is an accepted price.
 
 ## Effect
 
-1. Opening a save does not replay receipts. `receiptHistory` stays for tests and dev tooling.
+1. Opening a save does not replay receipts. `receiptHistory` stays, called only by tests.
    Receipts stay written; the save format and `kernel_api` are unchanged.
 2. No stored state hash replaces it.
 3. Kept at open: row parse and validation, a head clock not behind the newest receipt, the revision
    matching the newest receipt, and that row's id and actor binding.
-4. A state row or older receipt edited by hand so that it still parses now opens. A row that ordinary
-   play or a crash could produce is still handled by the
-   [reopen principle](../lessons/storage.md).
+4. A state row or older receipt that still parses now opens, whoever wrote it. The owner's words named
+   hand edits; the price is wider: wrong rows from a kernel or writer bug persist instead of refusing
+   (tests' `coldReopen` is the only catch, before ship), and a stale page from a bad restore can open
+   and save the next action on the wrong state. The owner has been told, with the recommendation to
+   accept (second review, 2026-11-01). A row that ordinary play or a crash could produce is still
+   handled by the [reopen principle](../lessons/storage.md).
 5. Commerce recovery no longer validates every receipt; it reads only the rows it needs.
 
 Contract: [save.md](../system/save.md#what-reopen-proves).

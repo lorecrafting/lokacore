@@ -4,6 +4,7 @@ import type { Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { ChronicleEntry, NarrationRecord } from '../../packages/game-view/session.ts';
 import { combatLines, type NarrationRow } from './narration.ts';
 import { scope, type Story } from './save.ts';
+import { unreadable } from './store.ts';
 
 /**
  * The Chronicle (mechanics.md, Chronicle): every accepted receipt's lines in revision order, with
@@ -22,22 +23,26 @@ export function chronicle(s: Story): ChronicleEntry[] {
     'SELECT revision, command_id, command, response FROM receipt WHERE scope = ? ORDER BY revision',
     scope(s),
   )) {
-    const d = JSON.parse(r.response) as Accepted;
-    if (d.kind !== 'accepted') continue;
-    for (const op of d.delta.ops) if (op.op === 'time.advance') clock = op.to;
-    const lines = d.narration ?? [];
-    const combat_lines = combatLines(s, d, lines);
-    // Only receipts with a World line: combat-only ones belong to the combat log.
-    if (lines.length > combat_lines.length)
-      entries.push({
-        day: Math.floor(clock / day) + 1,
-        record: {
-          command_id: r.command_id,
-          lines,
-          ...(combat_lines.length && { combat_lines }),
-        } as NarrationRecord,
-        milestone: d.events.some((e) => e.payload.type === 'story_point_reached'),
-      });
+    try {
+      const d = JSON.parse(r.response) as Accepted;
+      if (d.kind !== 'accepted') continue;
+      for (const op of d.delta.ops) if (op.op === 'time.advance') clock = op.to;
+      const lines = d.narration ?? [];
+      const combat_lines = combatLines(s, d, lines);
+      // Only receipts with a World line: combat-only ones belong to the combat log.
+      if (lines.length > combat_lines.length)
+        entries.push({
+          day: Math.floor(clock / day) + 1,
+          record: {
+            command_id: r.command_id,
+            lines,
+            ...(combat_lines.length && { combat_lines }),
+          } as NarrationRecord,
+          milestone: d.events.some((e) => e.payload.type === 'story_point_reached'),
+        });
+    } catch (e) {
+      if (!unreadable(e)) throw e; // an edited older receipt opens; the Journal shows the rest
+    }
   }
   return entries;
 }

@@ -16,7 +16,7 @@ export { INSTALLED, KERNEL_ID } from '../../../kernel/ts/src/index.ts'; // the a
 import type { Cartridge } from '../../../kernel/ts/src/index.ts';
 import type { Failed, Game, GameSession, Intent, Reply } from '../../packages/game-view/session.ts';
 import { openStory, type Host } from './authority.ts';
-import { corrupt, type Db } from './store.ts';
+import { corrupt, unreadable, type Db } from './store.ts';
 import {
   sessionInvoke,
   SESSION_ID_PREFIX as ID_PREFIX,
@@ -73,7 +73,7 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>)
     if (last?.lines.some((t) => typeof (t as { key?: unknown } | null)?.key !== 'string'))
       throw new Error('malformed JSON: a narration line without a key');
   } catch (e) {
-    if (!(e instanceof SyntaxError) && !/malformed JSON/.test(String(e))) throw e; // I/O may leave an intact save
+    if (!unreadable(e)) throw e; // I/O may leave an intact save
     throw refusal(e);
   }
 }

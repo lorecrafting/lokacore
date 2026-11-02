@@ -82,7 +82,7 @@ test('real SQLite carries the same apple through storage/drop/Take/give/Eat and 
   assert.equal(mv(a), 62);
 });
 
-// Breaks: deleting the food-only replay trigger permits a bounded forged MV benefit or terminal receipt/custody lie.
+// Breaks: open stops refusing an Eat receipt that no longer binds or is missing, or a consumed holder row no command can run.
 test('food-only cold-open refuses unbound receipts and unrunnable custody without writing bytes', (t) => {
   for (const mutation of ['nonfood', 'holder-row', 'actor', 'scope', 'missing']) {
     const { a, path } = disk(t, onlyFood),

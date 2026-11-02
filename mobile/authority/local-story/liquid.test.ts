@@ -171,7 +171,7 @@ test('empty, filled, partial Pour, empty, nested, ground and shop custody reopen
   assert.deepEqual(cold.story().world().state, expected);
 });
 
-// Breaks: shape-valid quantity or malformed vessel rows reopen without their actual transition proof.
+// Breaks: a liquid row that is missing, extra or fails validation opens, or the refusal rewrites it.
 test('cold open refuses missing, extra and malformed liquid rows without repair', () => {
   for (const mutation of ['missing', 'extra', 'kind', 'negative', 'fraction', 'overflow', 'null']) {
     const a = setup();
@@ -203,7 +203,7 @@ test('cold open refuses missing, extra and malformed liquid rows without repair'
   }
 });
 
-// Breaks: bounded current rows mask forged earlier command, causal event, custody or finite debit evidence.
+// Breaks: the liquid loader opens a receipt whose actor or command id no longer binds.
 test('cold open refuses a liquid receipt whose command no longer binds', () => {
   for (const mutation of ['actor', 'command-id']) {
     const a = setup();

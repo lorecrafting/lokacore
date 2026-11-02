@@ -138,7 +138,7 @@ test('failed and lost COMMIT exchange outcomes reconcile all-prior or all-next r
   }
 });
 
-// Breaks: forged contribution, occurrence, transfer receipt or current custody is accepted as a lawful repeat save.
+// Breaks: a repeat-exchange row naming a foreign occurrence opens, or the refusal rewrites the rows.
 test('a repeat-exchange row with a foreign occurrence refuses without rewriting the SQLite rows', () => {
   const a = setup();
   a.gather();

@@ -42,9 +42,12 @@ Opening reads the head, the rows and the newest receipt; it replays no receipts 
 [fast cold open](../decisions/owner-decision-fast-cold-open-2026-11-01.md)). It refuses a row that
 does not parse or validate, a newest receipt whose id, actor or revision does not bind to the head,
 a head clock behind the newest receipt, and a row the kernel would throw or hang on at the next
-command ([reopen principle](../lessons/storage.md)). A state row or older receipt that parses but
-was edited by hand opens. Receipts stay written. `receiptHistory` (`receipt-history.ts`) still
-replays every accepted receipt, for tests and dev tooling only. A line below that says a receipt
+command ([reopen principle](../lessons/storage.md)). A reader's `TypeError` on a saved row refuses
+with Start over, never a crash. Any other state row or older receipt that parses opens, whoever
+wrote it: a hand edit, wrong rows from a kernel or writer bug (they now persist and later saves build
+on them), and a stale page from a bad restore (the next action saves on the wrong state). Receipts
+stay written. `receiptHistory` (`receipt-history.ts`) still replays every accepted receipt, in tests
+only (`coldReopen`): that is the one check of rows against receipts, and it runs before ship. A line below that says a receipt
 replay cannot pay, allocate or grant twice is about replaying one invocation, not about opening.
 This section wins over the sections below: where one lists forged, missing or contradictory receipt
 evidence as `save_corrupt`, opening refuses it only if that section's loader still reads the row
