@@ -5,7 +5,7 @@
   "title": "Toolbox Showcase",
   "requires": {
     "kernel_api": {
-      "at_least": "1.126",
+      "at_least": "1.150",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -224,7 +224,7 @@
     },
     "combat": {
       "player_attack": {
-        "chance": 0,
+        "chance": 50,
         "damage_min": 1,
         "damage_max": 1
       },
@@ -244,7 +244,94 @@
       "allies": [
         "gil"
       ],
-      "target_choice": true
+      "target_choice": true,
+      "initiative": true,
+      "tiers": [
+        {
+          "at_percent": 100,
+          "player_hit": "combat.player_hit_100",
+          "npc_hit": "combat.npc_hit_100",
+          "ally_hit": "combat.ally_hit_100"
+        },
+        {
+          "at_percent": 80,
+          "player_hit": "combat.player_hit_80",
+          "npc_hit": "combat.npc_hit_80",
+          "ally_hit": "combat.ally_hit_80"
+        },
+        {
+          "at_percent": 65,
+          "player_hit": "combat.player_hit_65",
+          "npc_hit": "combat.npc_hit_65",
+          "ally_hit": "combat.ally_hit_65"
+        },
+        {
+          "at_percent": 50,
+          "player_hit": "combat.player_hit_50",
+          "npc_hit": "combat.npc_hit_50",
+          "ally_hit": "combat.ally_hit_50"
+        },
+        {
+          "at_percent": 40,
+          "player_hit": "combat.player_hit_40",
+          "npc_hit": "combat.npc_hit_40",
+          "ally_hit": "combat.ally_hit_40"
+        },
+        {
+          "at_percent": 30,
+          "player_hit": "combat.player_hit_30",
+          "npc_hit": "combat.npc_hit_30",
+          "ally_hit": "combat.ally_hit_30"
+        },
+        {
+          "at_percent": 20,
+          "player_hit": "combat.player_hit_20",
+          "npc_hit": "combat.npc_hit_20",
+          "ally_hit": "combat.ally_hit_20"
+        },
+        {
+          "at_percent": 10,
+          "player_hit": "combat.player_hit_10",
+          "npc_hit": "combat.npc_hit_10",
+          "ally_hit": "combat.ally_hit_10"
+        },
+        {
+          "at_percent": 1,
+          "player_hit": "combat.player_hit_1",
+          "npc_hit": "combat.npc_hit_1",
+          "ally_hit": "combat.ally_hit_1"
+        }
+      ],
+      "conditions": [
+        {
+          "at_percent": 100,
+          "text": "combat.condition_100"
+        },
+        {
+          "at_percent": 90,
+          "text": "combat.condition_90"
+        },
+        {
+          "at_percent": 75,
+          "text": "combat.condition_75"
+        },
+        {
+          "at_percent": 50,
+          "text": "combat.condition_50"
+        },
+        {
+          "at_percent": 30,
+          "text": "combat.condition_30"
+        },
+        {
+          "at_percent": 15,
+          "text": "combat.condition_15"
+        },
+        {
+          "at_percent": 1,
+          "text": "combat.condition_1"
+        }
+      ]
     },
     "levelling": {
       "thresholds": [

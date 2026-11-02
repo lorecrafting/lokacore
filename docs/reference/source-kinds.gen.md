@@ -830,10 +830,14 @@ Cartridge-owned attack profile, round interval, position multipliers and combat 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | allies | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Authored NPCs that fight beside the player (docs/system/mechanics.md, toolbox row 6b, narration ally_hit and ally_miss): the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player. |
+| conditions | list of object |  | Condition lines (docs/system/mechanics.md, Diku rounds), highest at_percent first: after each round, the first row the player's living foe's hp reaches is told, binding {target}. |
+| conditions[].at_percent | integer | yes | The percent of the foe's hp range it must reach. |
+| conditions[].text | [TextKey](source-kinds.gen.md#textkey) | yes | The line told, binding {target}. |
 | dodge | object |  | Percent chance to dodge an enemy attack that would otherwise hit; absent means no dodge. |
 | dodge.chance | integer | yes | Percent chance of dodging. |
 | dodge.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill that must be usable for a dodge. |
 | flee_multiplier | integer | yes | Multiplies the move cost of a body that is engaged. |
+| initiative | `true` |  | Opts into Diku rounds (docs/system/mechanics.md, Diku rounds): each round draws initiative for which side strikes first, Attack resolves round 1 at once, and the combat narration binds {attacker} and {target}. |
 | interval | integer | yes | Clock units between combat rounds. |
 | narration | object | yes | Text keys told in combat rounds. |
 | narration.ally_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told when an ally's strike hits. |
@@ -851,6 +855,12 @@ Cartridge-owned attack profile, round interval, position multipliers and combat 
 | player_attack | [AttackProfile](source-kinds.gen.md#attackprofile) | yes | See the type. |
 | sleep_multiplier | integer | yes | Multiplies an NPC's damage against a sleeping player. |
 | target_choice | `true` |  | Opts into target choice (docs/system/mechanics.md, toolbox row 6a): during a roster encounter the player's attack on another present active member makes it the primary the player strikes. |
+| tiers | list of object |  | Damage tiers (docs/system/mechanics.md, Diku rounds), highest at_percent first: a hit whose hp loss reaches at_percent of the target's hp maximum is told with the first such tier's key for that perspective instead of the plain hit key. |
+| tiers[].ally_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told for the ally's hit at this tier. |
+| tiers[].at_percent | integer | yes | The percent of the target's hp maximum a hit's loss must reach. |
+| tiers[].npc_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told for the foe's hit at this tier. |
+| tiers[].player_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told for the player's hit at this tier. |
+| tiers[].shot_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told for a ranged first strike's hit at this tier. |
 
 ### CompatibilityRequirements
 

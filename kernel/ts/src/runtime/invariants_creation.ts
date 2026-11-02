@@ -1,6 +1,7 @@
 // Independent creation/initial-custody proof, without compose's creation guard or result oracle.
 import { validate } from '../foundation/validate.ts';
 import { key, same } from '../foundation/compose.ts';
+import { occurrence } from '../foundation/compose_rows.ts';
 import { sightSlot } from './invariants_sight.ts';
 
 // Decoded portable observations, as in invariants.ts.
@@ -266,7 +267,7 @@ function flightTime(state: Any, ops: Any[], s: Any, id: string) {
         op.writer_group === s.writer_group &&
         op.job_id === s.expected.sight_job_id,
     );
-  return deerFlight ? sight.due_time : round && state.jobs?.[round.job_id]?.due_time;
+  return deerFlight ? sight.due_time : round && occurrence(state, round);
 }
 
 function selectedFlight(state: Any, row: Any, id: string) {

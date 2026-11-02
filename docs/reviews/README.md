@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: opt-in Diku rounds, PR #590 (loka-kgd.197)](2026-11-02-diku-rounds-review.md): **CHANGES REQUIRED**
 - [Second review: writer follow-ups, PR #568 (loka-vduxr.27, .22, .28)](2026-11-01-writer-followups-second-review.md): **CHANGES REQUIRED**
 - [Review: writer errors, PR #585 (loka-vduxr.45)](2026-11-01-writer-errors-review.md): **CHANGES REQUIRED**
 - [Review: trace refused replay, PR #580 (loka-vduxr.41)](2026-11-01-trace-refused-replay-review.md): **CHANGES REQUIRED**

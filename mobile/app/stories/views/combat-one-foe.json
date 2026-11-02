@@ -285,9 +285,31 @@
     "article": "the",
     "bare": "npc.boar.bare"
    },
-   "band": "ready"
+   "band": "hurt"
   },
+  "conditions": [
+   {
+    "label": "condition.bleeding",
+    "ends_at": 27000,
+    "duration": 1800,
+    "next_tick_at": 26100,
+    "resource": "hp",
+    "per_tick": -1,
+    "tick_every": 900,
+    "kind": "debuff"
+   },
+   {
+    "label": "condition.gored",
+    "resource": "hp",
+    "tick_every": 60,
+    "kind": "debuff"
+   }
+  ],
   "cues": [
+   {
+    "sense": "smell",
+    "text": "cue.blood"
+   },
    {
     "sense": "sound",
     "text": "cue.boar"
@@ -378,7 +400,7 @@
     "description": "npc.boar.description",
     "kind": "npc",
     "actions": [],
-    "band": "ready",
+    "band": "hurt",
     "contents": [
      {
       "id": "84596f20-3ba6-865a-b243-8ccbae9fc4fb",
@@ -461,10 +483,10 @@
      "kind": "resource",
      "key": "hp"
     },
-    "current": 10,
+    "current": 8,
     "maximum": 10,
-    "band": "ready",
-    "tone": "normal"
+    "band": "hurt",
+    "tone": "warning"
    },
    {
     "resource": {
@@ -535,8 +557,20 @@
  ],
  "log": [
   "You arrive from the south.",
-  "a boar grunting"
+  "a boar grunting",
+  "You hit the boar.",
+  "The boar hits you hard.",
+  "The boar has some cuts.",
+  "The tusk opens a wound; you are bleeding.",
+  "The tusk leaves a scar that will not fade.",
+  "the iron smell of your own blood"
  ],
- "combatLog": [],
+ "combatLog": [
+  "You hit the boar.",
+  "The boar hits you hard.",
+  "The boar has some cuts.",
+  "The tusk opens a wound; you are bleeding.",
+  "The tusk leaves a scar that will not fade."
+ ],
  "details": {}
 }

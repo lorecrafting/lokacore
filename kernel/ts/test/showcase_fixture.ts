@@ -111,6 +111,46 @@ export function wait(w: World, target: number) {
   return { world: w, lines, events };
 }
 
+/** The corpse a death made of `who` (the player's body or an NPC). */
+export function corpseOf(w: World, who: string) {
+  const found = Object.keys(w.state.created ?? {}).find((e) => {
+    const o = w.state.created![e].origin as { kind: string; victim_id?: string };
+    return o.kind === 'death' && o.victim_id === who;
+  });
+  assert.ok(found, `no corpse of ${who}`);
+  return found;
+}
+/** Attack `who`: round 1 resolves at once (Diku rounds); its world, lines and events. */
+export function fight(w: World, who: string) {
+  const r = play(w, { type: 'attack', target_id: npc(w, who) });
+  const events = r.decision.kind === 'accepted' ? r.decision.events.map((e) => e.payload) : [];
+  return { ...r, events: events as { type: string; [k: string]: unknown }[] };
+}
+export const attack = (w: World, who: string) => fight(w, who).world;
+
+/** `w` with its RNG at a numeric-vectors.json state (docs/spec/conformance). */
+export const seeded = (w: World, rng: number[]): World => ({
+  ...w,
+  state: { ...w.state, rng: rng as World['state']['rng'] },
+});
+// Initiative is the next raw mod 2: from [1, 2, 3, 4] the raw 11520 (0, the player first); from
+// rng_steps[3].state the raw 2031721883 (1, the foe first).
+export const PLAYER_FIRST = [1, 2, 3, 4];
+export const FOE_FIRST = [27274249, 25704967, 31982592, 12605441];
+// rng_steps[2].state: raws 70819200 (initiative 0, the player first) and 2031721883 (roll 83 >= 50,
+// the unarmed blow misses); the foe's roll draws what follows.
+export const MISS = [25179138, 12295, 540162, 2107404];
+/** Rounds every 150 s until `target`, each seeded MISS: the unarmed player never lands a blow. */
+export function missing(w: World, target: number) {
+  const lines: string[] = [];
+  while (w.state.clock < target) {
+    const r = wait(seeded(w, MISS), Math.min(target, w.state.clock + 150));
+    lines.push(...r.lines);
+    w = r.world;
+  }
+  return { world: w, lines };
+}
+
 // Low Wardle: the helpers showcase_social and showcase_consequence share.
 export const SOCIAL = '5ca5e000-0000-4000-8000-00000000032e';
 export const green = (ctx = SOCIAL) => go(fresh(ctx), 'south').world;

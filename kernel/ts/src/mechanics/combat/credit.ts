@@ -64,7 +64,8 @@ function fatalGroup(
   const p = event.payload;
   const creation = ops.find((o) => o.op === 'entity.create' && o.identity.id === p.corpse_id);
   if (!creation || creation.op !== 'entity.create' || !corpseValid(world, event, creation)) return;
-  if (!spellKill(world, event, root) && !roundKill(world, event, ops, events, creation)) return;
+  if (!spellKill(world, event, root) && !roundKill(world, event, ops, events, creation, root))
+    return;
   const fatal = ops.some(
     (o) =>
       o.op === 'resource.adjust' &&
@@ -96,8 +97,10 @@ function roundKill(
   ops: readonly DeltaOp[],
   events: readonly DomainEvent[],
   creation: Create,
+  root: Actor,
 ) {
   const attack = attackOf(event, events);
+  const opening = openingKill(world, event, root);
   if (!attack || attack.payload.type !== 'attack_result') return;
   const { encounter_id } = attack.payload;
   // The round's own write names the job that ran: its close, or its advance when a pack fights on.
@@ -107,15 +110,30 @@ function roundKill(
       (o.op === 'encounter.close' || o.op === 'encounter.advance') &&
       o.writer_group === creation.writer_group &&
       o.encounter_id === encounter_id &&
-      jobCommandId(o.job_id, event.logical_time) === (event.causation_id as string),
+      (opening || jobCommandId(o.job_id, event.logical_time) === (event.causation_id as string)),
   );
-  return !!ending && occurrenceValid(world, event, attack.payload, ending);
+  return !!ending && occurrenceValid(world, event, attack.payload, ending, opening);
 }
 
-function occurrenceValid(world: World, event: Death, attack: Attack, ending: Ending) {
+// Diku rounds (loka-kgd.197): an Attack's own round 1 runs on a job never scheduled.
+function openingKill(world: World, event: Death, root: Actor) {
+  return (
+    world.cartridge.world?.combat?.initiative === true &&
+    'type' in root.payload &&
+    root.payload.type === 'attack' &&
+    event.causation_id === (root.id as string)
+  );
+}
+
+function occurrenceValid(
+  world: World,
+  event: Death,
+  attack: Attack,
+  ending: Ending,
+  opening: boolean,
+) {
   const p = event.payload;
   const encounter = world.state.encounters?.[attack.encounter_id];
-  const job = world.state.jobs?.[ending.job_id];
   return (
     !!encounter &&
     encounter.character_id === p.credited_character_id &&
@@ -126,9 +144,16 @@ function occurrenceValid(world: World, event: Death, attack: Attack, ending: End
     // The primary, or any member of the pack's roster at the round's start (loka-lpq6).
     (encounter.npc_id === p.victim_id || !!ending.expected?.active_ids?.includes(p.victim_id)) &&
     encounter.room_id === p.room_id &&
+    (opening || jobRan(world, event, ending))
+  );
+}
+
+function jobRan(world: World, event: Death, ending: Ending) {
+  const job = world.state.jobs?.[ending.job_id];
+  return (
     !!job &&
     job.status === 'completed' &&
-    job.encounter_id === attack.encounter_id &&
+    job.encounter_id === ending.encounter_id &&
     job.due_time === event.logical_time &&
     jobCommandId(ending.job_id, job.due_time) === (event.causation_id as string)
   );

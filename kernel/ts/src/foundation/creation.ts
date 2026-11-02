@@ -3,6 +3,7 @@ import { encode, type Json } from './canonical.ts';
 import type { DeltaOp, EncounterRow, EntityId } from '../contracts.gen.ts';
 import type { State } from './compose.ts';
 import { sightSlot } from './compose_sight.ts';
+import { occurrence } from './compose_rows.ts';
 type Obj = { readonly [key: string]: Json };
 const section = (state: State, name: string): Obj => (state[name] ?? {}) as Obj;
 const key = (value: Json): string => encode(value);
@@ -245,9 +246,7 @@ function flightDue(ops: readonly DeltaOp[], group: number, id: EntityId, state: 
       selectedFlight(op.expected, id, state) &&
       (op.op === 'encounter.close' || !op.active_ids?.includes(id)),
   );
-  return round && 'job_id' in round
-    ? ((state.jobs ?? {}) as Record<string, Obj>)[round.job_id]?.due_time
-    : undefined;
+  return round && 'job_id' in round ? occurrence(state, round) : undefined;
 }
 
 function selectedFlight(row: EncounterRow, id: string, state: State) {

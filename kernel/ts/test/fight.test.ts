@@ -191,10 +191,13 @@ test('the rating: the first level and build at a win_pct of at least 50.00', () 
 // Breaks: a target that flees played to the round cap and counted as a timeout (finding 3 of the
 // review). The showcase goblins (hp 6, flight below 25%) against a sure player hit of 1: the
 // target flees at hp 1 in round 5, out of the player's room, while the player (hp 10, the goblin
-// a sure 1) stands; the levelling is dropped so the copy has one level.
+// a sure 1) stands; the levelling is dropped so the copy has one level, and Diku initiative
+// (loka-kgd.197) so the rounds keep the alternating order this count rests on.
 test('the showcase goblins with a sure player hit: the target flees every seed', () => {
   const [, showcase] = compile('cartridges/toolbox_showcase', 'showcase.json');
-  const r = fights(hitting(showcase, 100, { levelling: undefined }), { seeds: 2 });
+  const copy = hitting(showcase, 100, { levelling: undefined });
+  delete (copy.world!.combat as { initiative?: unknown }).initiative;
+  const r = fights(copy, { seeds: 2 });
   const goblins = r.targets.find((t) => t.target === 'toolbox_showcase@0.0.1:population/goblins')!;
   assert.deepEqual(goblins.cells[0], {
     level: 1,

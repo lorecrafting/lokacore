@@ -2,7 +2,8 @@
 // "Guided loop and expected outcomes"). Steps 1 to 8 continue one world (step 3's inn check is its
 // own branch); step 10 starts fresh in the social district and combat 11 and the tilt yard's pack
 // in the hub.
-// Every attack is chance 100 or 0, so the numbers are the plan's; the purse roll alone is seeded.
+// Attacks are chance 100 or 0 but the unarmed blow (chance 50): where its hits matter, and for each
+// round's initiative, a test seeds the RNG from numeric-vectors.json (loka-kgd.197).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView } from '../src/index.ts';
@@ -28,6 +29,14 @@ import {
   take,
   wait,
   leave,
+  missing,
+  seeded,
+  attack,
+  corpseOf,
+  fight,
+  FOE_FIRST,
+  MISS,
+  PLAYER_FIRST,
 } from './showcase_fixture.ts';
 
 const CTX = '5ca5e000-0000-4000-8000-0000000000c0';
@@ -52,15 +61,6 @@ const conditions = (w: World) => gameView(w).conditions;
 const levelling = (w: World) => gameView(w).levelling;
 const inside = (w: World, holder: string) =>
   Object.keys(w.state.containers).filter((e) => w.state.containers[e] === holder);
-/** The corpse a death made of `who` (the player's body or an NPC). */
-function corpseOf(w: World, who: string) {
-  const found = Object.keys(w.state.created ?? {}).find((e) => {
-    const o = w.state.created![e].origin as { kind: string; victim_id?: string };
-    return o.kind === 'death' && o.victim_id === who;
-  });
-  assert.ok(found, `no corpse of ${who}`);
-  return found;
-}
 const bleedRow = (w: World) =>
   w.state.statuses?.[statusKey(w.body, { ...C, kind: 'status', key: 'bleeding' } as never)];
 /** The dialogue whose choice is pending. */
@@ -74,7 +74,6 @@ function choose(w: World, choice_id: string) {
   const [continuation_id] = pending(w, w.character)!;
   return play(w, { type: 'choose', choice_id, continuation_id });
 }
-const attack = (w: World, who: string) => play(w, { type: 'attack', target_id: npc(w, who) }).world;
 const wield = (w: World) =>
   play(w, { type: 'wear', item_id: id(w, 'item', 'training_sword') }).world;
 
@@ -155,9 +154,7 @@ test('combat 3: Shout a warning in the yard warns Gil; the inn offers no such ca
 // the bounty's resolve or its reward is missing from the elapsed round, or the level-up line is
 // missing, doubled or not last, or Aldous still offers the bounty once the raider is dead.
 test('combat 4: Gil kills the raider; the bounty resolves and the player reaches level 2', () => {
-  const start = w.state.clock;
-  w = attack(w, 'raider');
-  const r = wait(w, start + 150);
+  const r = fight(w, 'raider');
   w = r.world;
   const raider = npc(w, 'raider');
   const died = r.events.find((e) => e.type === 'entity_died');
@@ -211,7 +208,7 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   assert.equal(where(w, w.body), room(w, 'boar_run'));
   assert.deepEqual(cues(w), [{ sense: 'sound', text: 'cue.boar' }]);
   const start = w.state.clock;
-  const first = wait(attack(w, 'boar'), start + 150);
+  const first = fight(seeded(w, MISS), 'boar');
   w = first.world;
   for (const line of [
     'combat.player_miss',
@@ -220,7 +217,7 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   ])
     assert.ok(first.lines.includes(line), line);
   assert.equal(pool(w, 'hp'), 7);
-  assert.deepEqual(conditions(w), [bleeding(start + 150), GORED]);
+  assert.deepEqual(conditions(w), [bleeding(start), GORED]);
   assert.deepEqual(cues(w), [
     { sense: 'smell', text: 'cue.blood' },
     { sense: 'sound', text: 'cue.boar' },
@@ -229,17 +226,17 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   const { when: _, ...bare } = w.cartridge.reactions![gore]!;
   const reactions = { ...w.cartridge.reactions, [gore]: bare };
   const unguarded = { ...w, cartridge: { ...w.cartridge, reactions } };
-  assert.deepEqual(conditions(wait(unguarded, start + 750).world), [GORED]);
+  assert.deepEqual(conditions(missing(unguarded, start + 600).world), [GORED]);
   const scar = statusKey(w.body, { ...C, kind: 'status', key: 'gored' } as never);
-  const before = wait(unguarded, start + 600).world; // alive: the boar's next blow kills
+  const before = missing(unguarded, start + 450).world; // alive: the boar's next blow kills
   assert.equal(where(before, before.body), room(w, 'boar_run'));
   const { [scar]: _row, ...unscarred } = before.state.statuses!;
   const unscarredWorld = { ...before, state: { ...before.state, statuses: unscarred } };
-  assert.deepEqual(conditions(wait(unscarredWorld, start + 750).world), [GORED]); // permanent: still lands
+  assert.deepEqual(conditions(missing(unscarredWorld, start + 600).world), [GORED]); // permanent: still lands
   const onDeath = { ...reactions, [gore]: { ...bare, on: { event: 'entity_died' } } };
   const mourned = { ...w, cartridge: { ...w.cartridge, reactions: onDeath } } as World;
-  assert.equal(conditions(wait(mourned, start + 750).world)?.length, 2); // the death's own reaction
-  const last = wait(w, start + 750);
+  assert.equal(conditions(missing(mourned, start + 600).world)?.length, 2); // the death's own reaction
+  const last = missing(w, start + 600);
   w = last.world;
   assert.ok(last.lines.includes('combat.player_died'));
   assert.ok(!last.lines.includes('narration.bleeding.tick'));
@@ -281,21 +278,22 @@ test('combat 7: back at the run, the corpse gives back the sword and the watersk
 test('combat 8: armed, the boar falls in three rounds; the poultice stops the bleeding', () => {
   const boar = npc(w, 'boar');
   const start = w.state.clock;
-  const first = wait(attack(w, 'boar'), start + 150);
+  const first = fight(w, 'boar');
   assert.deepEqual([hp(first.world, boar), pool(first.world, 'hp')], [5, 8]);
   assert.ok(first.lines.includes('narration.bleeding.applied'));
   assert.ok(!first.lines.includes('narration.gored.applied'));
   assert.equal(bleedRow(first.world)?.generation, 2);
   assert.deepEqual(activeStatuses(first.world, boar), []);
-  const second = wait(first.world, start + 300).world;
+  const second = wait(first.world, start + 150).world;
   assert.deepEqual([hp(second, boar), pool(second, 'hp')], [2, 6]);
-  // The purse roll (chance 50): the round's rolls after the player's hit draw are the tusk's then
-  // the purse's, as loot.test.ts's rat (hit, tail, coin), whose hand-computed rows give from
-  // [1, 1, 1, 1] rolls 60, 20 (the purse drops) and from its last seed 50, 86 (the boar keeps it).
+  // The purse roll (chance 50): the round draws initiative, the player's hit, then the tusk's and
+  // the purse's rolls. numeric-vectors.json rng_steps from [1, 2, 3, 4] draws 11520, 0, 5927040,
+  // 70819200, 2031721883: from [1, 2, 3, 4] initiative 0 (player first), rolls 40, 0 (the purse
+  // drops); from rng_steps[0].state initiative 0, rolls 0, 83 (the boar keeps it).
   const killed = (rng: number[]) =>
-    wait({ ...second, state: { ...second.state, rng: rng as never } }, start + 450);
-  const noPurse = killed([170029958, 3890805239, 3345768512, 779757290]).world;
-  const withPurse = killed([1, 1, 1, 1]);
+    wait({ ...second, state: { ...second.state, rng: rng as never } }, start + 300);
+  const noPurse = killed([7, 0, 1026, 12288]).world;
+  const withPurse = killed([1, 2, 3, 4]);
   w = withPurse.world;
   assert.ok(withPurse.lines.includes('combat.npc_died'));
   assert.equal(pool(w, 'hp'), 6);
@@ -314,14 +312,14 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
     level_up: LEVEL_UP,
   });
   assert.deepEqual(cues(w), [{ sense: 'smell', text: 'cue.blood' }]);
-  // Without the poultice: ticks at +1050 and +1950, expiry at +2100 (the round-1 refresh at +150).
-  const tick1 = wait(w, start + 1050).world;
-  const tick2 = wait(tick1, start + 1950).world;
-  const over = wait(tick2, start + 2100);
+  // Without the poultice: ticks at +900 and +1800, expiry at +1950 (round 1 refreshes it at the Attack).
+  const tick1 = wait(w, start + 900).world;
+  const tick2 = wait(tick1, start + 1800).world;
+  const over = wait(tick2, start + 1950);
   assert.deepEqual([pool(tick1, 'hp'), pool(tick2, 'hp')], [5, 4]);
   // Breaks (loka-3w3q): a status tick that kills the player outside a fight writes no fall
   // line or no waking line, or writes them out of order.
-  const fallen = wait(withHp(w, 1), start + 1050);
+  const fallen = wait(withHp(w, 1), start + 900);
   assert.equal(where(fallen.world, fallen.world.body), room(w, 'crossroads_inn'));
   assert.deepEqual(fallen.lines.slice(-3), [
     'narration.bleeding.tick',
@@ -338,7 +336,7 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
 });
 
 // Breaks: the pit's pack or target choice is missing (the second Attack is refused or plays a
-// round), the switch does not move the player's blow off A, the goblin kill entry is lost, or a
+// round), round 1 does not strike A at the Attack, the switch does not move the next blow off A, the goblin kill entry is lost, or a
 // non-final pack kill earns nothing (loka-lpq6: 70 at B's death, 80 at A's).
 test('combat 9: in the pit the player turns on the second goblin; each kill pays', () => {
   w = go(w, 'south').world;
@@ -353,18 +351,21 @@ test('combat 9: in the pit the player turns on the second goblin; each kill pays
     [turned.world.state.clock, turned.world.state.rng],
     [start, joined.world.state.rng],
   );
-  const unswitched = wait(joined.world, start + 150).world;
-  assert.deepEqual([hp(unswitched, a), hp(unswitched, b)], [3, 6]);
   const hps = (x: World) => [hp(x, a), hp(x, b), pool(x, 'hp')];
+  assert.deepEqual(hps(joined.world), [3, 6, 5]); // round 1 strikes A at the Attack
+  const { world: unswitched, lines } = wait(joined.world, start + 150);
+  assert.deepEqual([hp(unswitched, a), hp(unswitched, b)], [0, 6]);
+  // A, the foe struck, died (3 of 6): no condition line, and not B's (6 of 6, condition_100)
+  assert.ok(!lines.some((l) => l.startsWith('combat.condition')), lines.join());
   const r1 = wait(turned.world, start + 150).world;
-  assert.deepEqual(hps(r1), [6, 3, 5]);
-  const r2 = wait(r1, start + 300).world;
-  assert.deepEqual(hps(r2), [6, 0, 4]);
+  assert.deepEqual(hps(r1), [3, 3, 4]);
+  const r2 = wait(seeded(r1, FOE_FIRST), start + 300).world; // B strikes, then falls
+  assert.deepEqual(hps(r2), [3, 0, 3]);
   assert.equal(levelling(r2)?.experience, 70);
-  const r3 = wait(r2, start + 450).world;
-  assert.deepEqual(hps(r3), [3, 0, 3]);
-  w = wait(r3, start + 600).world;
-  assert.deepEqual(hps(w), [0, 0, 2]);
+  const r3 = wait(seeded(r2, PLAYER_FIRST), start + 450); // A falls before it strikes
+  assert.deepEqual(r3.lines.slice(0, 2), ['combat.player_hit_50', 'combat.npc_died']);
+  w = r3.world;
+  assert.deepEqual(hps(w), [0, 0, 3]);
   assert.equal(engaged(w, w.body), undefined);
   assert.deepEqual(levelling(w), {
     level: 2,

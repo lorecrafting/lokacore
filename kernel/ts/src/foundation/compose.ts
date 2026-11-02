@@ -1,4 +1,3 @@
-// size: allow 307, final checks order rows by code point so both kernels report the same first fault
 import { recordKnowledge } from './compose_knowledge.ts';
 import { cmp } from './validate.ts';
 import { choice, pendingAtLimit } from './compose_choice.ts';
@@ -25,7 +24,7 @@ import { completeBirths, creationValid, initialPair, initialPlacement } from './
 import { sightHandoffValid } from './compose_sight.ts';
 import { sightRebindValid } from './compose_sight_rebind.ts';
 import type { Json } from './canonical.ts';
-import { key, get, section, containment, read, rows } from './compose_rows.ts';
+import { key, get, section, containment, read, rows, occurrence } from './compose_rows.ts';
 import { composeAdjustment } from './resource.ts';
 import {
   LIMITS,
@@ -214,14 +213,7 @@ function encounter(
     return changeEncounter(
       op,
       row,
-      (id, room) =>
-        packMemberRemains(
-          id,
-          room,
-          op.writer_group,
-          get(section(ctx.state, 'jobs')[op.job_id], 'due_time'),
-          ctx,
-        ),
+      (id, room) => packMemberRemains(id, room, op.writer_group, occurrence(ctx.state, op), ctx),
       (id, room) => packMemberInitiallyPresent(id, room, ctx.state),
     );
   return openEncounter(

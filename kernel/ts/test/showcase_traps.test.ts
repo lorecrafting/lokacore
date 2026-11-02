@@ -33,6 +33,9 @@ import {
   talk,
   wait,
   where,
+  FOE_FIRST,
+  PLAYER_FIRST,
+  seeded,
 } from './showcase_fixture.ts';
 
 const WORLD = '5ca5e000-0000-4000-8000-0000000007a1';
@@ -323,22 +326,21 @@ const hp = (x: World, e: string) => level(x, e as never, resourceRef(x, 'hp'));
 const statuses = (x: World, e: string) => activeStatuses(x, e as never).map((s) => s.spec.key);
 const afraidEnds = (x: World, e: string) =>
   activeStatuses(x, e as never).find((s) => s.spec.key === 'afraid')?.row.ends_at;
-/** One Attack on `target`, then a round at a time until the encounter closes; the rounds' lines. */
+/** Attack `target` (round 1, the player first), then round 2 (the foe first); each round's lines. */
 function flight(x: World, target: string) {
-  const r = play(x, { type: 'attack', target_id: target });
-  const start = r.world.state.clock;
-  const r1 = wait(r.world, start + 150);
-  const r2 = wait(r1.world, start + 300);
-  return { join: r.lines, r1, r2 };
+  const r1 = play(seeded(x, PLAYER_FIRST), { type: 'attack', target_id: target });
+  const r2 = wait(seeded(r1.world, FOE_FIRST), r1.world.state.clock + 150);
+  return { r1, r2 };
 }
 /** The pack in the den, afraid, flees south one goblin a round; no hit on the player; the
  * plate (disarmed or not) poisons no goblin. */
 function assertFlight(x: World) {
   const [a, b] = goblinsIn(x, 'chief_den');
-  const { join, r1, r2 } = flight(x, a!);
-  assert.deepEqual(join, ['combat.goblin_joined']);
+  const { r1, r2 } = flight(x, a!);
   assert.deepEqual(r1.lines, [
-    'combat.player_hit',
+    'combat.goblin_joined',
+    'combat.player_hit_30', // 2 of A's 6 hp; A then flees on its turn
+    'combat.condition_50', // A's, the foe struck: 4 of 6 (400 >= 50 × 6, 400 < 75 × 6), not B's
     'combat.goblin_fled_south',
     'combat.goblin_targeted',
   ]);
@@ -416,10 +418,9 @@ test('traps 8 wounded: a calm goblin struck to 1 of 6 hp flees, to 2 of 6 stands
 // Breaks: the chief takes more than one blow, pays other experience, or its fall frightens no
 // goblin (chief_fell's co_present dropped) or frightens the player.
 test('traps 9: the chief falls to one blow; its fall frightens the pack, which then flees', () => {
-  const k = play(den, { type: 'attack', target_id: npc(den, 'chief') });
-  const r1 = wait(k.world, k.world.state.clock + 150);
+  const r1 = play(seeded(den, PLAYER_FIRST), { type: 'attack', target_id: npc(den, 'chief') });
   assert.deepEqual(r1.lines, [
-    'combat.player_hit',
+    'combat.player_hit_100', // 2 of the chief's 2 hp
     'combat.npc_died',
     'narration.afraid.applied',
     'narration.afraid.applied',
@@ -492,8 +493,7 @@ test("traps sandbox twins: the cellar pack fears the shout and its chief's fall,
   assert.deepEqual(mood(s, a!), AFRAID);
   const { r1 } = flight(s, a!);
   assert.deepEqual(goblinsIn(r1.world, 'sapper_stair'), [a]);
-  const k = play(x, { type: 'attack', target_id: chief });
-  const died = wait(k.world, k.world.state.clock + 150);
+  const died = play(x, { type: 'attack', target_id: chief }); // round 1 at the Attack
   assert.ok(died.lines.includes('combat.npc_died'), died.lines.join());
   const f = died.world;
   assert.deepEqual([statuses(f, a!), statuses(f, b!)], [['afraid'], ['afraid']]);

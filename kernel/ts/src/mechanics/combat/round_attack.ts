@@ -1,3 +1,4 @@
+// size: allow 305, one round's attack, draws and injury, plus Diku rounds' initiative draw (loka-kgd.197)
 import { status } from '../skills.ts';
 import type {
   AttackProfile,
@@ -42,6 +43,10 @@ export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.
 // than two of its eight (hit, damage) skips the ally's turn (two left can still exhaust the
 // budget on a rejected hit draw; mechanics.md row 6b states the limit).
 const allyFits = (r: Round) => r.draws <= 6;
+
+/** Diku rounds (loka-kgd.197): one uniform(2) a round, 0 the player's side first; else odd rounds. */
+export const playerFirst = (world: World, row: EncounterRow, r: Round) =>
+  world.cartridge.world!.combat!.initiative ? draw(r, 2) === 0 : row.round % 2 === 1;
 
 function draw(r: Round, bound: number) {
   const [value, rng, spent] = uniformCounted(r.rng, bound, 8 - r.draws);

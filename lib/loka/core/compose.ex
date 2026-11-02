@@ -224,7 +224,7 @@ defmodule Loka.Core.Compose do
             id,
             room,
             op["writer_group"],
-            get_in(elem(ctx, 0), ["jobs", op["job_id"], "due_time"]),
+            Loka.Core.ComposeJob.occurrence(elem(ctx, 0), op),
             ctx
           )
         end,

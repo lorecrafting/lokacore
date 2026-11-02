@@ -1124,7 +1124,9 @@ answer the `target-*` cases of `protocol/fixtures/c4_pack_composition.json`.
 
 For this actual scheduler seam, extend each separately targeted C3 slot with
 nullable `last_flight_at`, initially null and reset to null only on a new generation.
-A successful selected flight sets it to this occurrence's logical clock, checking
+A successful selected flight sets it to this occurrence's logical clock (the round job's due
+time; an Attack's [opening round](mechanics.md#diku-rounds-loka-kgd197) runs on a job never scheduled, so its
+occurrence is the current clock, in both kernels, fixture `opening-round-*`), checking
 the exact plan/slot/generation/member and complete prior row. Fatal slot transitions
 retain that generation's value. Population dispatch skips a living member when
 it is engaged or its last flight equals that dispatch clock. It writes no unchanged

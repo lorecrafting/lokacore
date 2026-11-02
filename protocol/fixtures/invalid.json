@@ -23139,6 +23139,354 @@
     ]
   },
   {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "initiative": false
+    },
+    "errors": [
+      {
+        "path": "/initiative",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "tiers": []
+    },
+    "errors": [
+      {
+        "path": "/tiers",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "tiers": [
+        {
+          "at_percent": 0,
+          "player_hit": "combat.player_hit"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tiers/0/at_percent",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "tiers": [
+        {
+          "at_percent": 101,
+          "player_hit": "combat.player_hit"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tiers/0/at_percent",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "tiers": [
+        {
+          "player_hit": "combat.player_hit"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tiers/0/at_percent",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "tiers": [
+        {
+          "at_percent": 50,
+          "player_hit": "combat.player_hit",
+          "miss": "combat.player_miss"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tiers/0/miss",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "conditions": []
+    },
+    "errors": [
+      {
+        "path": "/conditions",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "conditions": [
+        {
+          "at_percent": 0,
+          "text": "combat.npc_hit"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/conditions/0/at_percent",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "conditions": [
+        {
+          "at_percent": 101,
+          "text": "combat.npc_hit"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/conditions/0/at_percent",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "conditions": [
+        {
+          "at_percent": 50
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/conditions/0/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "conditions": [
+        {
+          "at_percent": 50,
+          "text": "combat.npc_hit",
+          "npc": "combat.npc_hit"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/conditions/0/npc",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "ScriptedTarget",
     "value": {
       "kind": "use"

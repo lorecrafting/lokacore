@@ -197,6 +197,71 @@ defmodule Loka.ContentCombatTest do
     end
   end
 
+  # Breaks: a Diku tier or condition names missing text, or a cut is not below the one before
+  # (a later row could never be reached by the first-match rule).
+  test "Diku tiers and conditions resolve their text and fall strictly", %{tmp_dir: dir} do
+    combat = %{
+      "initiative" => true,
+      "tiers" => [
+        %{"at_percent" => 50, "player_hit" => "missing"},
+        %{"at_percent" => 50, "npc_hit" => "t"}
+      ],
+      "conditions" => [
+        %{"at_percent" => 100, "text" => "t"},
+        %{"at_percent" => 50, "text" => "gone"}
+      ]
+    }
+
+    source(dir, update_in(@manifest, ["world", "combat"], &Map.merge(&1, combat)))
+    assert {:error, ds} = Loka.Content.compile(dir)
+    found = MapSet.new(ds, &{&1["code"], &1["path"]})
+
+    for want <- [
+          {"UNRESOLVED_REFERENCE", "cartridge.world.combat.tiers[0].player_hit"},
+          {"SCHEMA_VIOLATION", "cartridge.world.combat.tiers[1].at_percent"},
+          {"UNRESOLVED_REFERENCE", "cartridge.world.combat.conditions[1].text"}
+        ],
+        do: assert(want in found, inspect(ds))
+
+    refute {"SCHEMA_VIOLATION", "cartridge.world.combat.conditions[1].at_percent"} in found
+  end
+
+  # Breaks: a dropped `required` entry or bound on a Diku tier or condition row (schema
+  # CombatSettings tiers/conditions: at_percent required, integer 1..100; text required; no
+  # other keys; at least one row) lets a malformed row load.
+  test "Diku tier and condition rows keep every schema bound", %{tmp_dir: dir} do
+    row = %{
+      "tiers" => %{"at_percent" => 50, "player_hit" => "t"},
+      "conditions" => %{"at_percent" => 50, "text" => "t"}
+    }
+
+    cases =
+      for list <- ~w(tiers conditions),
+          bad <-
+            [
+              &Map.delete(&1, "at_percent"),
+              &Map.put(&1, "at_percent", 50.5),
+              &Map.put(&1, "at_percent", 0),
+              &Map.put(&1, "at_percent", 101),
+              &Map.put(&1, "extra", 1)
+            ] ++ if(list == "conditions", do: [&Map.delete(&1, "text")], else: []),
+          do: {list, [bad.(row[list])]}
+
+    for {list, rows} <- cases ++ [{"tiers", []}, {"conditions", []}] do
+      combat = %{"initiative" => true, list => rows}
+      source(dir, update_in(@manifest, ["world", "combat"], &Map.merge(&1, combat)))
+      assert {:error, ds} = Loka.Content.compile(dir), inspect(rows)
+      path = "cartridge.world.combat." <> list
+
+      assert Enum.any?(
+               ds,
+               &(&1["code"] in ~w(SCHEMA_VIOLATION UNKNOWN_FIELD) and
+                   String.starts_with?(&1["path"], path))
+             ),
+             inspect({rows, ds})
+    end
+  end
+
   # Breaks: combat loads but its first fatal round has no corpse/shrine settings.
   test "combat requires death settings", %{tmp_dir: dir} do
     source(dir, update_in(@manifest, ["world"], &Map.delete(&1, "death")))
