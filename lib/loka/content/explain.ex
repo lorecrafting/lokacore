@@ -1,4 +1,4 @@
-# size: allow 390, one row per refusal a writer can meet; the table reads together
+# size: allow 400, one row per refusal a writer can meet; the table reads together
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -174,7 +174,7 @@ defmodule Loka.Content.Explain do
          true <- String.ends_with?(file, ".scene"),
          {:ok, facts} <- facts(dir) do
       fact = last_word(Path.join(dir, file), n)
-      words = %{"fact" => fact, "type" => get_in(facts, ["facts", fact, "value_type", "type"])}
+      words = %{"fact" => fact, "type" => fact_type(facts, fact)}
       Map.update(d, "data", words, &Map.merge(&1, words))
     else
       _ -> d
@@ -185,6 +185,14 @@ defmodule Loka.Content.Explain do
 
   defp facts(dir) do
     with {:ok, text} <- File.read(Path.join(dir, "facts.json")), do: JSON.decode(text)
+  end
+
+  # A dotted name in facts.json is keyed with `_` (cartridge.md, facts.json row).
+  defp fact_type(facts, fact) do
+    Enum.find_value(facts["facts"] || %{}, fn {name, spec} ->
+      if String.replace(name, ".", "_") == String.replace(fact, ".", "_"),
+        do: get_in(spec, ["value_type", "type"])
+    end)
   end
 
   defp last_word(file, n),

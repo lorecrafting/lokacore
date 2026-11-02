@@ -1,4 +1,4 @@
-# size: allow 565, one catalog walked row by row; each row is its own small test
+# size: allow 575, one catalog walked row by row; each row is its own small test
 defmodule Loka.ContentExplainTest do
   # What an author reads from a refused compile (loka-vduxr A1, A9). Expected fragments are
   # hand-written; wording around them may move.
@@ -224,15 +224,15 @@ defmodule Loka.ContentExplainTest do
 
   # Break: `when:` or `needs:` on a number fact reads as the JSON mismatch (an `equals` the writer
   # never wrote), or the two point at each other's line, or the fact and its type go unnamed,
-  # or a `sets:` line in a choice is told about `needs:`.
+  # or a `sets:` line in a choice is told about `needs:`, or a dotted fact (`pouch.gold`) loses its type.
   test "when: and needs: on a number fact name the fact and its type", %{tmp_dir: dir} do
     facts =
-      ~s({"facts":{"coins":{"version":1,"meaning":"m","scopes":["player"],"value_type":{"type":"int","default":0,"minimum":0,"maximum":9}}}})
+      ~s({"facts":{"coins":{"version":1,"meaning":"m","scopes":["player"],"value_type":{"type":"int","default":0,"minimum":0,"maximum":9}},"pouch.gold":{"version":1,"meaning":"m","scopes":["player"],"value_type":{"type":"int","default":0}}}})
 
     lines =
       scene(
         dir,
-        "npc: bram\nwhen: coins\nbram: hi\n- Go\n  needs: coins\n  sets: coins\n  bram: ok\n",
+        "npc: bram\nwhen: coins\nbram: hi\n- Go\n  needs: coins\n  sets: coins\n  bram: ok\n- Pay\n  needs: pouch_gold\n  bram: ok\n",
         %{
           "facts.json" => facts
         }
@@ -241,6 +241,7 @@ defmodule Loka.ContentExplainTest do
     assert line_at(lines, "scenes/hi.scene:2") =~ ~r/`when:`.*`coins` is a number/
     assert line_at(lines, "scenes/hi.scene:5") =~ ~r/`needs:`.*`coins` is a number/
     refute line_at(lines, "scenes/hi.scene:6") =~ "`needs:`"
+    assert line_at(lines, "scenes/hi.scene:9") =~ ~r/`needs:`.*`pouch_gold` is a number/
   end
 
   # Break: a file that cannot be read still lets the rest compile, so the writer also gets
