@@ -281,8 +281,8 @@ once and durably rebases negative gaps without rewind.
 **Coalesced ticks.** A driver tick whose decision only moved the clock (accepted `elapsed`, one
 `time.advance` op, no events, effects or narration) replaces the newest receipt in the same transaction
 when this process wrote that receipt from such a tick too, for the same run and context, ending where the
-tick starts, with the same RNG (`coalesced` in `delivery.ts`). Anything else in between, a reopen or an
-unknown or failed COMMIT inserts as before, so a save gains at most one such row per launch or event. The stored row is what one tick over the whole span decides: its span,
+tick starts, with the same RNG (`coalesced` in `delivery.ts`). Anything else in between, a reopen or a
+failed COMMIT, inserts as before, so a save gains at most one such row per launch or event. The stored row is what one tick over the whole span decides: its span,
 its `elapsedCommandId`, its digest and op, so an hour of idle costs a row per due job or command, not
 per tick. Rows that carry anything are never touched, so the Chronicle and the narration read the same
 receipts. The head revision still moves per tick (`opened_revision`, view tokens and redraws depend on

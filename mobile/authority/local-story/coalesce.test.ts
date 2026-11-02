@@ -10,11 +10,14 @@ import type { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
 import { replay as replayCoverage } from '../../../kernel/ts/play/coverage.ts';
 import { replayRecords } from '../../../kernel/ts/play/replay.ts';
+import { decideReplay, start } from '../../../kernel/ts/play/run.ts';
 import { newWorld } from '../../../kernel/ts/src/index.ts';
 import { cartridgeOf, CONTEXT, SEED } from './session.ts';
 import { compiled } from './__tests__/compiled.ts';
 import { coalesced } from './delivery.ts';
 import { openStory } from './authority.ts';
+import { onlyClock, receiptHistory } from './receipt-history.ts';
+import { load } from './store.ts';
 import { coldReopen, elapsedBundle, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const START = 64800; // elapsedBundle's calendar start
@@ -66,6 +69,11 @@ const traced = (sql: DatabaseSync) =>
     (r) => JSON.parse(r.record).data,
   );
 
+const entrySpans = (sql: DatabaseSync) =>
+  traced(sql)
+    .slice(1)
+    .map((e) => [e.command.payload.from, e.command.payload.until]);
+
 // The child of the kill test: `kill <save> <n> before|after` ticks three times, then SIGKILLs
 // itself at the fourth tick's n-th COMMIT (1: the receipt, 2: its trace entry).
 if (process.argv[2] === 'kill') {
@@ -95,6 +103,8 @@ test('twenty idle ticks are one receipt, byte for byte the one long tick writes'
   assert.equal(tick(b, 5000), 'ready');
   assert.deepEqual(spans(a.sql), [[START, START + 250]]);
   assert.deepEqual(rows(a.sql), rows(b.sql));
+  const digests = (sql: DatabaseSync) => sql.prepare('SELECT intent_digest FROM receipt').all();
+  assert.deepEqual(digests(a.sql), digests(b.sql));
   assert.deepEqual(world(a.sql), world(b.sql));
   assert.equal(traced(a.sql).length, 2); // the run header and the one entry
   assert.equal(traced(a.sql)[1].command.payload.until, START + 250);
@@ -175,11 +185,20 @@ test('failed and lost COMMITs on a merging tick keep lawful receipts', (t) => {
   a.fault.armed = true;
   assert.notEqual(tick(a), 'ready');
   assert.deepEqual(spans(a.sql), [[START, START + 12]]);
+  assert.deepEqual(entrySpans(a.sql), [
+    [START, START + 12],
+    [START, START + 25],
+  ]);
   a.sql.close();
   const b = elapsedHost(path, { wall: 10500, mono: 500 }, bundle);
   assert.equal(tick(b), 'ready');
   assert.deepEqual(spans(b.sql), [
     [START, START + 12],
+    [START + 12, START + 37],
+  ]);
+  assert.deepEqual(entrySpans(b.sql), [
+    [START, START + 12],
+    [START, START + 25], // the failed attempt: a catch-up prunes only what committed
     [START + 12, START + 37],
   ]);
   b.fault.kind = 'lost';
@@ -233,19 +252,112 @@ for (const [name, forge] of IDLE)
     assert.equal(coalesced(idle as never, tick as never, d as never), undefined);
   });
 
-// Breaks: a driver tick swallowing a trusted story.elapsed receipt, whose retry must still replay.
-test('a trusted elapsed receipt is not absorbed by the next, and its retry replays', (t) => {
+// Breaks: a driver tick swallowing a trusted story.elapsed receipt, or a trusted one extending a
+// driver's: its retry must still replay.
+test('a trusted elapsed receipt is never merged either way, and its retry replays', (t) => {
   const bundle = elapsedBundle();
   const a = elapsedHost(save(t), { wall: 10000, mono: 0 }, bundle);
   const fresh = newWorld(cartridgeOf(bundle), CONTEXT as never, SEED as never);
   const story = openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host);
   if (story.kind !== 'open') throw new Error(story.kind);
-  const first = { expected_run_id: story.runId(), from: START, until: START + 10 };
-  assert.equal(story.elapsed(first).kind, 'saved');
-  assert.equal(story.elapsed({ ...first, from: START + 10, until: START + 20 }).kind, 'saved');
-  const again = story.elapsed(first);
+  const run = story.runId();
+  const driven = (ms: number) => {
+    a.clock.wall += ms;
+    a.clock.mono += ms;
+    assert.equal(story.pulse('active', run).kind, 'ready');
+  };
+  driven(250); // 12 units at 50 per 1000 ms
+  const trusted = { expected_run_id: run, from: START + 12, until: START + 20 };
+  assert.equal(story.elapsed(trusted).kind, 'saved');
+  driven(1000); // the trusted span moved the target past this tick's start
+  assert.deepEqual(spans(a.sql).slice(0, 2), [
+    [START, START + 12],
+    [START + 12, START + 20],
+  ]);
+  assert.equal(spans(a.sql).length, 3);
+  const again = story.elapsed(trusted);
   assert.equal(again.kind === 'saved' && again.replay, true);
   a.sql.close();
+});
+
+// Breaks: a save whose receipts' revisions repeat, or skip before a row that changed the world,
+// passing the check of saved rows against receipts. Each forge moves one row of a lawful save.
+const FORGED: [string, string][] = [
+  ['a repeated revision', 'UPDATE receipt SET revision = 3 WHERE rowid = 1'],
+  ['a gap before a move', 'UPDATE receipt SET revision = 1 WHERE rowid = 1'],
+];
+for (const [name, forge] of FORGED)
+  test(`receiptHistory refuses ${name}`, (t) => {
+    const path = save(t),
+      bundle = compiled('cartridges/toolbox_showcase');
+    const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+    tick(a);
+    tick(a);
+    assert.equal(a.game.invoke(south).kind, 'saved');
+    assert.deepEqual(
+      a.sql
+        .prepare('SELECT revision FROM receipt ORDER BY rowid')
+        .all()
+        .map((r: any) => r.revision),
+      [2, 3], // the two ticks became one row at the newest revision, then the move
+    );
+    a.sql.close();
+    const { db, sql } = elapsedHost(path, undefined, bundle);
+    const fresh = newWorld(cartridgeOf(bundle), CONTEXT as never, SEED as never);
+    const saved = load(db, fresh, () => assert.fail('the save exists'), true)!;
+    const check = () => receiptHistory(fresh, saved.world, db, saved.meta, saved.revision);
+    check();
+    sql.exec(forge);
+    assert.throws(check);
+    sql.close();
+  });
+
+// Breaks: a row that did more than move the clock passing as a coalesced one, whose revision gap
+// and merge are lawful only because nothing else changed.
+const CLOCK = {
+  kind: 'accepted',
+  outcome: 'elapsed',
+  delta: { ops: [{ op: 'time.advance' }] },
+  events: [],
+  effects: [],
+};
+test('onlyClock is the bare clock move and nothing more', () => {
+  assert.equal(onlyClock(CLOCK as never), true);
+  for (const more of [
+    { kind: 'rejected' },
+    { outcome: 'moved' },
+    { delta: { ops: [{ op: 'time.advance' }, { op: 'time.advance' }] } },
+    { delta: { ops: [{ op: 'fact.set' }] } },
+    { events: [{}] },
+    { effects: [{}] },
+    { narration: [{}] },
+  ])
+    assert.equal(onlyClock({ ...CLOCK, ...more } as never), false, JSON.stringify(more));
+});
+
+// Breaks: replay jumping a player command's revision, or moving the revision back on a forged trace.
+test('a replay moves the revision only forward, only for an elapsed command', (t) => {
+  const bundle = elapsedBundle();
+  const a = elapsedHost(save(t), { wall: 10000, mono: 0 }, bundle);
+  tick(a);
+  const [tickRow] = rows(a.sql);
+  a.sql.close();
+  const elapsedCommand = JSON.parse(tickRow![0]!);
+  const run = () =>
+    start(
+      cartridgeOf(bundle),
+      'h',
+      elapsedCommand.payload.run_id,
+      CONTEXT as never,
+      SEED as never,
+      'v',
+    );
+  const back = { ...run(), revision: 5 };
+  decideReplay(back, elapsedCommand, 2);
+  assert.equal(back.revision, 6);
+  const other = run();
+  decideReplay(other, { ...elapsedCommand, payload: { type: 'look' } }, 99);
+  assert.ok(other.revision < 99);
 });
 
 // Breaks: a death at any write of a merging tick loses the save, doubles the span, or leaves an
@@ -266,11 +378,7 @@ for (const n of [1, 2])
         [cut, START + 62],
       ];
       assert.deepEqual(spans(a.sql), lawful);
-      const entries = traced(a.sql).slice(1);
-      assert.deepEqual(
-        entries.map((e) => [e.command.payload.from, e.command.payload.until]),
-        lawful,
-      );
+      assert.deepEqual(entrySpans(a.sql), lawful);
       a.sql.close();
       coldReopen(path, bundle);
     });

@@ -38,7 +38,7 @@ export function receiptHistory(fresh: World, saved: World, db: Db, meta: Meta, r
     `SELECT invocation_id,command_id,actor_id,command,response,revision FROM receipt WHERE scope=? AND json_extract(response,'$.kind')='accepted' ORDER BY revision`,
     `story/${meta.lineage_id}/${saved.character}`,
   )) {
-    if (row.revision <= previous || row.revision > revision) invalid();
+    if (row.revision <= previous) invalid();
     const { command, decision } = acceptedReceipt(row, saved, meta);
     if (row.revision !== previous + 1 && !onlyClock(decision)) invalid(); // coalesced ticks' gap
     const replayed =

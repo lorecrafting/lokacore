@@ -76,7 +76,8 @@ export function observe(db: Db, record: object): void {
 const OBSERVED = 1000;
 
 // ponytail: rows counted by their rowid span, O(1) per entry, which holds while rows are deleted
-// only here, oldest first (no VACUUM); about 5 MB at the entry size measured in R6 S6a.
+// here, oldest first, or as a coalesced tick's tail row, whose rowid the next insert reuses (no
+// VACUUM); about 5 MB at the entry size measured in R6 S6a.
 const CAP = 5000;
 const runOf = (record: string) => JSON.parse(record).ids.run_id as string;
 /** The trace's rows, by rowid span, and the run of its oldest row. */

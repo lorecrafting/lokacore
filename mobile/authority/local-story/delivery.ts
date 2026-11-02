@@ -123,8 +123,7 @@ function commitElapsed(
     d.kind === 'accepted' ? checkpoint : undefined,
     replaces,
   );
-  if (driver && onlyClock(d) && reply.kind === 'saved')
-    s.idle = { command, rng: encode(d.rng as never) };
+  if (driver && onlyClock(d)) s.idle = { command, rng: encode(d.rng as never) };
   return reply;
 }
 
