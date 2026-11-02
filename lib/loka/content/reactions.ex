@@ -88,14 +88,14 @@ defmodule Loka.Content.Reactions do
 
   defp inside?(_, _), do: false
 
-  # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
-  # moved.
   # One rule closes one talk: a second close of the row would fault the player's whole action.
   defp second_end_talk(rel, steps) do
     ends = for {%{"op" => "end_talk"}, i} <- steps, do: i
     for i <- Enum.drop(ends, 1), do: diag("DUPLICATE_DEFINITION", at(rel, ["steps", i]))
   end
 
+  # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
+  # moved.
   defp steps(rel, steps, on, ctx) do
     runs = for {%{"op" => "replenish.run", "replenish" => k}, i} <- steps, do: {k, i}
 
