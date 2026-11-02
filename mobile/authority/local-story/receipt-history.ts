@@ -1,5 +1,5 @@
 // Debugging and tests replay a save's accepted receipts with the rules that produced them; a cold
-// open reads only the newest (save.md, The save file).
+// open reads only the newest (save.md, What reopen proves).
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { commandId } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';

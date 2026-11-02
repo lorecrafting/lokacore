@@ -790,11 +790,11 @@ metadata yield typed `save_corrupt` without repair, refill, deletion or repinnin
 A stored lit source whose confirmed fuel has exhausted is lawful; its effective
 state is unlit, and reopening does not restart its interval.
 
-Reconcile accepted fuel-changing receipts in saved revision/clock order from the
+The dev replay reconciles accepted fuel-changing receipts in saved revision/clock order from the
 authored initial rows, binding command ID, actor, exact source/supply IDs and their
 historical custody. Each full prior row and settled replacement must match that
 command's burn/ignite/douse/refill semantics; the resulting stored rows must match
-the current save. Reject a missing debit, fabricated refill, wrong participant,
+the current save. It rejects a missing debit, fabricated refill, wrong participant,
 reordered receipt or unexplained bounded charge as `save_corrupt`. Read historical
 fuel at its commit, not at today's clock; time/custody receipts do not refill rows.
 `receiptHistory` proves this through the kernel's pure fuel transition in tests and dev tooling;
