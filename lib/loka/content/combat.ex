@@ -30,7 +30,6 @@ defmodule Loka.Content.Combat do
       allies(combat, m, defs) ++
       group(settings, combat, m, defs) ++
       npc_profiles(defs, combat) ++
-      sanctuary(combat, defs, text) ++
       shots(combat, m, defs) ++
       if(credit && !combat, do: [bad("cartridge.world.death_credit")], else: []) ++
       credits(credit || [], m, defs)
@@ -152,16 +151,6 @@ defmodule Loka.Content.Combat do
       do: bad(at("cartridge.json", ["world", "combat", "narration", field]))
     )
   end
-
-  # Every sanctuary refuses Attack with this one line; without it the Book would show the key.
-  defp sanctuary(combat, defs, text) when is_map(combat) and is_map(text) do
-    for {_, {rel, _, %{"sanctuary" => true}}} <- defs["room"],
-        not is_map_key(text, "combat.sanctuary"),
-        do:
-          diag("UNRESOLVED_REFERENCE", at(rel, ["sanctuary"]), %{"target" => "combat.sanctuary"})
-  end
-
-  defp sanctuary(_, _, _), do: []
 
   defp narration(_, :unknown), do: []
 
