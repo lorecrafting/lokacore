@@ -33,7 +33,7 @@ defmodule Loka.ContentDialogueSittingTest do
   # Breaks: sitting accepted where the hub never comes back, so the writer's choice silently stays.
   test "sitting is refused where the talk does not come back", %{dir: dir} do
     for bad <- [
-          %{"a" => Map.put(@sitting, "then", "guard"), "b" => @plain},
+          %{"a" => Map.put(@sitting, "then", "end"), "b" => @plain},
           %{"a" => @sitting},
           %{"a" => Map.put(@sitting, "story_point", "met/a"), "b" => @plain},
           %{"a" => Map.put(@sitting, "check", @check), "b" => @plain},
