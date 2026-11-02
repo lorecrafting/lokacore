@@ -274,7 +274,7 @@ git branch review-1 x; git checkout -qb y; echo c > a; git commit -qam y; git br
 git worktree add -q "$R.wt" x 2>/dev/null; git worktree add -q "$R.live" y 2>/dev/null; echo d > a; git stash -q
 HK=hk.json PATH="$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || bad 'session_status leftovers: exit non-zero'
 wt=$(cd "$R.wt" && pwd -P)
-grep -qxF "worktree $wt (merged into main)" out && ! grep -qF "$R.live" out && grep -qx 'stashes: 1' out && grep -qx 'merged review ref (delete): review-1' out \
+grep -qxF "worktree $wt (HEAD in main; check for work)" out && ! grep -qF "$R.live" out && grep -qx 'stashes: 1' out && grep -qx 'merged review ref (delete): review-1' out \
   && ! grep -q "worktree $(pwd -P)\$" out && ! grep -q review-2 out || { bad 'session_status leftovers: wrong list'; sed 's/^/  /' out; }
 HK=hk.json PATH="$tmp/stub:$PATH" capped sh "$R.wt/bin/session_status.sh" > out 2>&1 || true
 if grep -q '^worktree' out; then bad 'session_status leftovers: main checkout listed from a linked worktree'; fi
@@ -297,7 +297,7 @@ CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]
 CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
   HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh --full > out 2>&1 || true
 grep -qx 'nightly ci.yml in_progress abcdef01 u1' out && grep -qx 'nightly book-e2e.yml no scheduled run yet' out || bad 'session_status --full: nightly lines missing'
-# Break: a hung gh (network) loses the rest of the output or hangs past the hook's 30 s: each slow call is capped at 8 s.
+# Break: a hung gh (network) loses the rest of the output or hangs past the hook's 30 s: each slow call is capped at 6 s.
 mkdir -p "$tmp/hang"; printf '#!/bin/sh\nexec sleep 60\n' > "$tmp/hang/gh"; chmod +x "$tmp/hang/gh"
 rc=0; HK=hk.json PATH="$tmp/hang:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || rc=$?
 [ "$rc" = 0 ] && grep -q 'gh unavailable' out && grep -q 'ready: 2, blocked: 3' out || { bad 'session_status hung gh: hung, failed or lost the rest'; sed 's/^/  /' out; }

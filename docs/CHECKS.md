@@ -142,7 +142,7 @@ their rules and red controls remain available for resumption.
   narrow command fails) and `bin/session_status.sh` with stub `br` (the
   housekeeping count, the missed-retro note, a failing `br` still exits 0; worktrees already merged into `origin/main`, the stash
   count and merged `review-<N>` refs are listed, the own checkout, live worktrees and unmerged refs are not; only a red nightly run prints
-  (`--full` also the running and missing ones); a hung `gh` is capped at 8 s and the rest still prints).
+  (`--full` also the running and missing ones); a hung `gh` is capped at 6 s and the rest still prints).
   It also runs `bin/pm_merge.sh` (a protocol schema or `kernel_api` change with no added or updated `docs/reviews` record is refused and reset; a green merge runs `prepush.sh` once, the hook skipping only the sha `pm_merge` checked) and `bin/prepush.sh` (each gated check runs only for its inputs), and `bin/ci_changes.sh` (docs-only skips the test jobs, an engine change runs `sim` and `walk`, any other event or an unreadable diff runs all).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes. PreToolUse `bin/bash_guard.py` (Bash) refuses `git ... --no-verify`,

@@ -5,7 +5,7 @@
 # capped (perl alarm; macOS has no `timeout`) and run in parallel, each section into a file, printed in order.
 cd "$(dirname "$0")/.." || exit 0
 full=; [ "$1" = --full ] && full=1
-cap() { perl -e 'alarm shift; exec @ARGV' 8 "$@"; }
+cap() { perl -e 'alarm shift; exec @ARGV' 6 "$@"; }
 tmp=$(mktemp -d) && trap 'rm -rf "$tmp"' EXIT
 have_br=; command -v br >/dev/null 2>&1 && have_br=1
 # --no-auto-import: a plain br imports main's export over rows a refused Beads sync left open (bin/lib/beads_sync.sh).
@@ -19,30 +19,31 @@ beads() {
   echo "ready: ${r:-?}, blocked: ${b:-?} (lists: br ready, br blocked)"
 }
 
-orphans() { o=$(sh bin/orphans.sh); [ -z "$o" ] || printf 'Orphaned busy processes (check, then stop by PID):\n%s\n' "$o"; }
+orphans() { o=$(sh bin/orphans.sh 2>/dev/null); [ -z "$o" ] || printf 'Orphaned busy processes (check, then stop by PID):\n%s\n' "$o"; }
 
 prs() { # open PRs, then Beads/PR drift from the same list
   if ! cap gh pr list --state open --limit 200 --json number,title,headRefName,isDraft \
     --jq '.[] | "\(.number)\t\(if .isDraft then "DRAFT" else "OPEN" end)\t\(.title[:90])\t\(.headRefName)"' > "$tmp/prs.tsv" 2>/dev/null; then
     echo "gh unavailable: open PRs and drift not checked"; return
   fi
-  [ ! -s "$tmp/prs.tsv" ] || { echo "Open PRs:"; cat "$tmp/prs.tsv"; }
+  [ ! -s "$tmp/prs.tsv" ] || { echo "Open PRs:"; if [ -n "$full" ]; then cat "$tmp/prs.tsv"; else head -10 "$tmp/prs.tsv"; fi; }
+  n=$(wc -l < "$tmp/prs.tsv"); [ -n "$full" ] || [ "$n" -le 10 ] || echo "... and $((n - 10)) more (gh pr list)"
   if [ -z "$have_br" ] || ! brq list --status all --json > "$tmp/issues"; then echo "drift check skipped: br unavailable"; return; fi
   awk -F'\t' '{print $1, "OPEN"}' "$tmp/prs.tsv" > "$tmp/states"
   for n in $(python3 bin/beads_pr_drift.py --in-progress-prs "$tmp/issues"); do
     ( cap gh pr view "$n" --json number,state --jq '"\(.number) \(.state)"' > "$tmp/v$n" 2>/dev/null \
       || echo "drift check incomplete: PR #$n state unavailable" > "$tmp/e$n" ) &
   done
-  wait; cat "$tmp"/v[0-9]* >> "$tmp/states" 2>/dev/null; cat "$tmp"/e[0-9]* 2>/dev/null
+  wait; cat "$tmp"/v[0-9]* >> "$tmp/states" 2>/dev/null; inc=$(cat "$tmp"/e[0-9]* 2>/dev/null); [ -z "$inc" ] || echo "$inc"
   drift=$(python3 bin/beads_pr_drift.py "$tmp/issues" "$tmp/states") || drift="drift check failed"
   [ -z "$drift" ] || printf '%s\n' "$drift"
-  [ -z "$full" ] || [ -n "$drift" ] || echo "no drift"
+  [ -z "$full" ] || [ -n "$drift$inc" ] || echo "no drift"
 }
 
 nightly() { # a red nightly is the session's first job (docs/decisions/owner-decision-preproduction-gate-2026-10-08.md)
   for wf in ci.yml book-e2e.yml; do
     ( run=$(cap gh run list --workflow "$wf" --branch main --event schedule --limit 1 --json conclusion,status,headSha,url \
-        --jq '.[] | "\(if .status == "completed" then .conclusion else .status end) \(.headSha[:8]) \(.url)"' 2>/dev/null) || exit 0
+        --jq '.[] | "\(if .status == "completed" then .conclusion else .status end) \(.headSha[:8]) \(.url)"' 2>/dev/null) || { echo "nightly $wf: check unavailable"; exit 0; }
       case $run in success*|in_progress*|queued*|waiting*|pending*|requested*) [ -z "$full" ] || echo "nightly $wf $run" ;;
         "") [ -z "$full" ] || echo "nightly $wf no scheduled run yet" ;; *) echo "nightly $wf $run (red: fix first)" ;; esac ) > "$tmp/n$wf" &
   done
@@ -77,7 +78,7 @@ leftovers() { # linked worktrees already merged into origin/main or prunable, st
     print p "\t" h "\t" pr }' | while IFS=$tab read -r p h pr; do
     [ "$p" != "$self" ] || continue
     if [ "$pr" = 1 ]; then why=" (prunable)"
-    elif [ -n "$h" ] && [ "$h" != "$head" ] && git merge-base --is-ancestor "$h" origin/main 2>/dev/null; then why=" (merged into main)"
+    elif [ -n "$h" ] && [ "$h" != "$head" ] && git merge-base --is-ancestor "$h" origin/main 2>/dev/null; then why=" (HEAD in main; check for work)"
     elif [ -n "$full" ]; then why=
     else continue; fi
     echo "worktree $p$why" | sed "s|^worktree $HOME|worktree ~|"
