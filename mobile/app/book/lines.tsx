@@ -116,15 +116,20 @@ function LogLine({ line, fresh }: { line: DetailLine; fresh: boolean }) {
     const recap = <AwayRecap lines={grouped(line.recap)} />;
     return dries ? <DryBlock>{recap}</DryBlock> : recap;
   }
-  const plain = typeof line === 'string' || 'quiet' in line;
+  const plain = typeof line === 'string' || 'quiet' in line || 'level' in line;
   const style = plain ? { ...t.log, color: c.fg } : narrated(c, t);
   const name =
     typeof line === 'object' && 'reason' in line
       ? { accessibilityLabel: `${line.reason}, ${line.text}` }
       : {};
   const words = plain ? lineText(line) : line.text;
-  if (dries && typeof line === 'object' && 'gilt' in line) {
-    return <GiltLine style={style}>{words}</GiltLine>;
+  if (dries && typeof line === 'object' && ('level' in line || 'gilt' in line)) {
+    const hold = 'level' in line && line.first ? motion.first.hold : undefined;
+    return (
+      <GiltLine style={style} hold={hold}>
+        {words}
+      </GiltLine>
+    );
   }
   return dries ? (
     <DryLine style={style} lag={plain ? 0 : motion.dry.lag} {...name}>

@@ -104,11 +104,12 @@ function narrate(
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
-  // A room change's fight lines stay on the Combat page; the room log opens at the arrival.
-  if (!last.read)
-    (away?.log ?? s.log).push(
-      ...narrationLines(arrived(last), now, text, false, was).flat().map(lineText),
-    ); // Read text: its page only
+  // Read text stays on its page, a room change's fight lines on Combat; the log opens at the arrival.
+  if (!last.read) {
+    const said = narrationLines(arrived(last), now, text, false, was).flat();
+    if (away) away.log.push(...said.map(lineText));
+    else s.log.push(...said);
+  }
   // A quiet receipt settled in the background is the room log's only, as when restored.
   if (lines.length && !quietOf(s, last.lines, last.detail_id)) to?.push(...lines);
 }

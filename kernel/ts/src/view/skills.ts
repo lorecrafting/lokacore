@@ -68,12 +68,22 @@ function skillView(
   ];
 }
 
-/** The player's level, experience, thresholds around it (next absent at the top), unspent points (row 4). */
+/** The player's level, experience, thresholds around it (next absent at the top), unspent points, level-up line's key (row 4). */
 function levellingView(world: World, actor: CharacterId) {
   const l = levelling(world, actor);
+  const level_up = world.cartridge.world?.levelling?.level_up;
   if (!l) return {};
   const { level, experience, from, next, unspent } = l;
-  return { levelling: { level, experience, from, ...(next !== undefined && { next }), unspent } };
+  return {
+    levelling: {
+      level,
+      experience,
+      from,
+      ...(next !== undefined && { next }),
+      unspent,
+      ...(level_up && { level_up }),
+    },
+  };
 }
 
 /**

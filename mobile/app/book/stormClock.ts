@@ -7,7 +7,7 @@ export type StormNow = {
   exposed: boolean;
   still: boolean; // reduced motion
   flashes: boolean;
-  washed: number; // when the last blow wash fell, ms
+  washed: number; // when the last blow or level wash fell, ms
   entry: number; // counts room entries
 };
 type Act = { light: () => void; thunder: (muffled: boolean) => void; heavy: () => void };

@@ -107,6 +107,7 @@ test('levelling rows survive reopen, failed and lost COMMIT, and replay once', (
         from: action === 'kill' ? 0 : 30,
         next: action === 'kill' ? 30 : 100,
         unspent: action === 'kill' ? 0 : 1,
+        level_up: LEVEL_UP,
       });
       const count = Number(receipts(p.sql));
       if (kind === 'failed')
@@ -125,7 +126,7 @@ test('levelling rows survive reopen, failed and lost COMMIT, and replay once', (
       const w = story.world();
       const after =
         action === 'kill'
-          ? { level: 2, experience: 30, from: 30, next: 100, unspent: 1 }
+          ? { level: 2, experience: 30, from: 30, next: 100, unspent: 1, level_up: LEVEL_UP }
           : { ...before, unspent: 0 };
       assert.deepEqual(gameView(w).levelling, committed ? after : before, action + kind);
       if (action === 'raise') assert.equal(hpMax(w), committed ? 11 : 10, action + kind);

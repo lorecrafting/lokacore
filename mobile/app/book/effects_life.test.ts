@@ -267,12 +267,15 @@ test('a new choice lifts its answers apart, capped, and never again', (t) => {
   assert.deepEqual([g.delays, g.timings], [[], []], 'reduced motion: together');
 });
 
+// The page's wash layer takes no touches either; it is aria-hidden, the faded answers are not.
+const faded = (n: any) => n.props?.pointerEvents === 'none' && !n.props['aria-hidden'];
+
 // Breaks: the others stay pressable or lit once an answer is chosen, the chosen one fades too, or
 // a refusal (no reply pending, the same view) leaves them gone.
 test('choosing an answer fades the others while its reply is pending', (t) => {
   let waiting = true;
   const { page, pressed } = talk(t, 'k3', 3, false, () => waiting);
-  const off0 = page().filter((n) => n.props?.pointerEvents === 'none');
+  const off0 = page().filter((n) => faded(n));
   assert.equal(off0.length, 0, 'none chosen yet: another press pending fades nothing');
   g.timings.length = 0;
   page()
@@ -281,16 +284,12 @@ test('choosing an answer fades the others while its reply is pending', (t) => {
   assert.equal(pressed.length, 1);
   const shown = page();
   assert.deepEqual(g.timings, [motion.fade.duration, motion.fade.duration], 'two others');
-  const off = shown.filter((n) => n.props?.pointerEvents === 'none');
+  const off = shown.filter((n) => faded(n));
   assert.equal(off.length, 2);
   waiting = false;
-  assert.equal(page().filter((n) => n.props?.pointerEvents === 'none').length, 0, 'they return');
+  assert.equal(page().filter((n) => faded(n)).length, 0, 'they return');
   waiting = true; // a later press elsewhere, after a refusal: the old choice is gone
-  assert.equal(
-    page().filter((n) => n.props?.pointerEvents === 'none').length,
-    0,
-    'no stale choice',
-  );
+  assert.equal(page().filter((n) => faded(n)).length, 0, 'no stale choice');
 });
 
 const npc = (id: string) => ({ id, kind: 'npc', name: id });
