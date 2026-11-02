@@ -99,3 +99,11 @@ Not checked: `sky` leaves and an hour crossing with no event, which read the sam
 CI at bcd32c621: graph-diff, book-e2e, ci all completed success.
 
 Verdict: CHANGES REQUIRED
+
+## Re-check at 08b24b346 (Blocker 3 only)
+
+Blocker 3, fixed. Same probe through `game.trace()`, 12 `active` pulses: 2 rows ending at 64950, `holds: true` during the idle tail. Twelve more pulses and a second read: still 2 rows, span 64800-65100, so a later tick still merges after a read. `bin/idle_save_size.ts`: 14,550 commits, 705,536 B, 101 receipts, eventful hash `7834de38`, unchanged; the catch-up runs only on read (`authority.ts`, `trace`). `author_trace.test.ts` passes.
+
+The PR body nit was not rechecked. CI at 08b24b346: graph-diff, book-e2e, ci all completed success.
+
+Verdict: APPROVE WITH NOTES
