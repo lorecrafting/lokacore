@@ -58,7 +58,12 @@ export function act(w: World, p: object) {
     n,
   );
   const narration = r.decision.kind === 'accepted' ? (r.decision.narration ?? []) : [];
-  return { decision: r.decision, world: r.world, lines: narration.map((l) => l.key as string) };
+  return {
+    decision: r.decision,
+    world: r.world,
+    said: narration,
+    lines: narration.map((l) => l.key as string),
+  };
 }
 /** An accepted command's world and narration keys. */
 export function play(w: World, p: object) {

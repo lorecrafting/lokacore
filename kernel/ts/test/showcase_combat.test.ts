@@ -1,7 +1,6 @@
-// The showcase's combat district, the Drill Yard, walked step by step (docs/showcase/combat-district.md,
-// "Guided loop and expected outcomes"). Steps 1 to 8 continue one world (step 3's inn check is its
-// own branch); step 10 starts fresh in the social district and combat 11 and the tilt yard's pack
-// in the hub.
+// The combat district, the Drill Yard, step by step (docs/showcase/combat-district.md, "Guided loop
+// and expected outcomes"). Steps 1 to 8 continue one world (step 3's inn check is its own branch);
+// step 10 starts fresh in the social district and combat 11 and the tilt yard's pack in the hub.
 // Every attack rolls (swings, loka-kgd.200): where hits matter, and for each round's initiative, a
 // test seeds rng_steps from numeric-vectors.json (loka-kgd.197) or a named xoshiro128** state.
 import assert from 'node:assert/strict';
@@ -160,6 +159,8 @@ test('combat 4: Gil kills the raider; the bounty resolves and the player reaches
   const raider = npc(w, 'raider');
   const died = r.events.find((e) => e.type === 'entity_died');
   assert.deepEqual([died?.killer_id, died?.credited_character_id], [npc(w, 'gil'), w.character]);
+  const gil = r.said.find((l) => l.key === 'combat.ally_volley_one');
+  assert.deepEqual(gil?.bindings, { attacker: 'npc.gil.short', count: 2, hits: 1 });
   assert.deepEqual([hp(w, raider), pool(w, 'hp'), fact(w, 'raider_slain')], [0, 9, true]);
   assert.equal(gameView(w).journal[0]?.state, 'resolved');
   assert.deepEqual(levelling(w), {
@@ -170,8 +171,7 @@ test('combat 4: Gil kills the raider; the bounty resolves and the player reaches
     unspent: 1,
     level_up: LEVEL_UP,
   });
-  assert.equal(r.lines.filter((k) => k === LEVEL_UP).length, 1);
-  assert.equal(r.lines.at(-1), LEVEL_UP);
+  assert.equal(r.lines.indexOf(LEVEL_UP), r.lines.length - 1); // once, and last
   assert.deepEqual(inside(w, corpseOf(w, raider)), []);
   const after = talk(go(w, 'east').world, 'aldous');
   assert.equal(after.opened, 'aldous_yard');
