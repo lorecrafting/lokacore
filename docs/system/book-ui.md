@@ -122,7 +122,8 @@ projects authentic Look under the
 [sampler capability repair](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
 Cartridges that do not offer Look retain a fixed text title.
 Only the body scrolls, so description and entities may leave view while the title stays visible.
-World scrolls to its end as its log grows, as a person's page does.
+World scrolls to its end as its log grows, as a person's page does, while the reader is at the end; a
+reader scrolled up to an earlier line stays put.
 Standalone exit directions, adjacent-sight listings and redundant navigation/
 Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
 explicit per-room clearing direction, the World event log scopes
@@ -937,6 +938,13 @@ Flee lets the engine choose a random currently legal exit; success shows the act
 room. All offered combat actions appear as a vertical dialogue-style list below the log inside
 the same ScrollView, not a fixed strip. No unavailable or future skill actions are invented. World time continues
 while the combat page is open.
+
+**Rounds.** The page follows its newest line as other growing pages do (Page: it follows the end
+while the reader is there; a reader scrolled up to an earlier round stays put), so a round's lines
+land in view above the action cards. Each round's lines (one committed receipt: an elapsed round,
+or one press's receipt) are one block at the log's line pitch, and rounds stand apart by the
+page's block gap (LogLines), as the prompt line parts rounds in a MUD log; no rule glyph, heading
+or words mark a round.
 
 Combat takes precedence over ordinary navigation until the encounter closes. **Opening.** The
 receipt that opens an encounter (a move's or Sleep's `engage`, Attack, a cast's fight-back)

@@ -125,13 +125,15 @@ type PageProps = {
  * - Rules: a run of rows of one kind is one block; a heading is its own block. The title is the
  *   page header with the arriving focus; without one, the first block takes it. The room's fixed
  *   title is the only pressable title. The title is `pageTitle`, scaled with the Reading size: centred
- *   when fixed (the room), left-aligned on every other page. A page that grows at the end scrolls to its end.
+ *   when fixed (the room), left-aligned on every other page. A page that grows at the end follows
+ *   its end while the reader is there (within `size.touch`); a reader scrolled up stays put.
  * - States: scrolling title; fixed title; no title; centred (no game behind it).
  * - Story: Page.stories.tsx
  */
 export function Page(p: PageProps) {
   const c = usePalette();
   const scroll = useRef<ScrollView>(null);
+  const atEnd = useRef(true); // a reader scrolled up to an earlier line is not pulled down
   const title = p.title !== undefined && (
     <Title title={p.title} fixed={p.fixedTitle} onPress={p.onTitlePress} />
   );
@@ -151,8 +153,13 @@ export function Page(p: PageProps) {
           ...(p.centred && { flexGrow: 1, justifyContent: 'center' }),
         }}
         onContentSizeChange={() =>
-          p.scrollToEnd && scroll.current?.scrollToEnd({ animated: false })
+          p.scrollToEnd && atEnd.current && scroll.current?.scrollToEnd({ animated: false })
         }
+        scrollEventThrottle={motion.quick.duration} // web sends one onScroll without it
+        onScroll={({ nativeEvent: e }) => {
+          atEnd.current =
+            e.contentOffset.y + e.layoutMeasurement.height >= e.contentSize.height - size.touch;
+        }}
       >
         {!p.fixedTitle && title}
         {p.children}

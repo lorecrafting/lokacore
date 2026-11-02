@@ -5,6 +5,7 @@ import { test } from 'node:test';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
 import { Book, game, nodes, view, words } from './__tests__/combat-book.test.ts';
 import { CONTENTS, control } from './__tests__/control.test.ts';
+import { logMark } from './logs.ts';
 import { presenter } from './presenter.ts';
 
 // Break: a dead combat opponent is narrated both as killed and as leaving the room.
@@ -64,6 +65,36 @@ test('a round on the clock hands its miss to the cues', () => {
   const miss = { command_id: 'miss', lines: [], missed: true };
   round(miss);
   assert.equal(p.screen().deed, miss);
+});
+
+// Breaks: two rounds' lines run together on the Combat page, or one round splits (book-ui.md,
+// Live combat response).
+test('each round on the clock begins its own block of the combat log', () => {
+  let current = view(),
+    token = 'view:1';
+  let last: ReturnType<Game['lastNarration']>;
+  const p = presenter({
+    ...game(current),
+    text: (key) => ({ 'combat.a': 'A.', 'combat.b': 'B.' })[key],
+    view: () => ({ view: current, token }),
+    lastNarration: () => last,
+  });
+  const round = (command_id: string) => {
+    last = {
+      command_id,
+      lines: [{ key: 'combat.a' }, { key: 'combat.b' }],
+      combat_lines: [0, 1],
+    } as never;
+    token += '+';
+    p.update({ kind: 'state', projection: { view: current, token }, status: { kind: 'ready' } });
+    p.update({ kind: 'state', projection: { view: current, token }, status: { kind: 'ready' } });
+  };
+  round('one');
+  round('two');
+  const lines = p.screen().combatLog;
+  assert.deepEqual(lines, ['A.', 'B.', 'A.', 'B.']);
+  // A mark at the end waits for the next round's first line.
+  assert.deepEqual(logMark(lines).rounds, [2, 4]);
 });
 
 // Real Book state/effect routing over controlled committed Game projections; no native layout claim.

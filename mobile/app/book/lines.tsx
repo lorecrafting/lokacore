@@ -79,9 +79,11 @@ export function Note({ children }: { children: string }) {
  *   word stays in its accessible name (`locked, The way west is locked.`, as the live region reads
  *   it). A speech line (speaker bar) waits until the log projects a speaker. A line no page has
  *   drawn yet dries in, a narrated event `motion.dry.lag` later; a quiet merge, a page return and
- *   restored history do not. `keep` hides lines without renumbering the rest.
+ *   restored history do not. `keep` hides lines without renumbering the rest. A log
+ *   with round marks (the combat log, logs.ts `newRound`) draws each round as its own block: `space.sm`
+ *   inside, `space.xl` between (book-ui.md, Live combat response).
  * - States: narration (a repeated quiet line reads `<line> (N times)`); narrated event; refused;
- *   an away recap entry, drawn as AwayRecap; drying.
+ *   an away recap entry, drawn as AwayRecap; drying; rounds.
  * - Story: LogLines.stories.tsx
  */
 export function LogLines({
@@ -91,17 +93,27 @@ export function LogLines({
   lines: readonly DetailLine[];
   keep?: (line: DetailLine) => boolean; // shows only these; the rest still count as drawn
 }) {
-  const { gone, drawn } = logMark(lines);
+  const { gone, drawn, rounds } = logMark(lines);
   useEffect(() => markDrawn(lines), [gone + lines.length]);
-  // A line's number, also its stable key.
-  const shown = lines.flatMap((line, i) =>
-    !keep || keep(line) ? [<LogLine key={gone + i} line={line} fresh={gone + i >= drawn} />] : [],
-  );
+  // A line's number, also its stable key; a round's first number keys its block.
+  const blocks: [number, ReactNode[]][] = [[gone, []]];
+  lines.forEach((line, i) => {
+    const n = gone + i;
+    if (rounds.includes(n) && blocks.at(-1)![1].length) blocks.push([n, []]);
+    if (!keep || keep(line))
+      blocks.at(-1)![1].push(<LogLine key={n} line={line} fresh={n >= drawn} />);
+  });
+  const shown = blocks.filter(([, b]) => b.length);
   if (!shown.length) return null;
   return (
     // The walk tells log lines from refusal notes by this id (walkthrough/walk.ts live).
-    <View testID="log-lines" style={{ gap: space.sm }}>
-      {shown}
+    // Always nested, so a second round arriving remounts no line (a drying line keeps drying).
+    <View testID="log-lines" style={{ gap: space.xl }}>
+      {shown.map(([n, b]) => (
+        <View key={n} style={{ gap: space.sm }}>
+          {b}
+        </View>
+      ))}
     </View>
   );
 }

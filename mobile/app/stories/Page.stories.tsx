@@ -213,6 +213,22 @@ export const LogFollows: Story = {
     await waitFor(() => expect(inView(canvas.getByText('Bram says line 35.'))).toBe(true));
   },
 };
+// Breaks: a reader scrolled up to an earlier line is pulled down when a line arrives.
+export const ScrolledUpStays: Story = {
+  render: () => <Growing />,
+  play: async ({ canvas, userEvent }) => {
+    const first = canvas.getByText('Bram says line 1.');
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 30.'))).toBe(true));
+    let pane = first.parentElement!;
+    while (pane.scrollHeight <= pane.clientHeight) pane = pane.parentElement!;
+    pane.scrollTop = 0;
+    pane.dispatchEvent(new Event('scroll'));
+    await waitFor(() => expect(inView(first)).toBe(true));
+    await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
+    await canvas.findByText('Bram says line 35.');
+    await expect(inView(first)).toBe(true);
+  },
+};
 
 // Breaks: Page drops its foot, so the page loses its return.
 const leave = fn();

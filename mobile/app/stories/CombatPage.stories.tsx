@@ -6,6 +6,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { Blow } from '../book/Blow.tsx';
 import { Combat } from '../book/Combat.tsx';
 import { useCues } from '../book/cues.ts';
+import { newRound, type DetailLine } from '../book/logs.ts';
 import { Control } from '../book/pages.tsx';
 import { opacity, size } from '../book/tokens.ts';
 import { pageStory } from './screen.tsx';
@@ -35,6 +36,26 @@ export const SkippedTurn: StoryObj = {
     combatLog: ['The boar is too stunned to do anything.', 'You are too stunned to do anything.'],
   }),
   name: 'Skipped turn',
+};
+// Each round's lines are one block, a block gap between rounds, and the page follows the newest
+// (book-ui.md, Live combat response). Fixture lines. Breaks: rounds run together, or the newest
+// round sits below the fold under the action cards.
+const rounds: DetailLine[] = [];
+for (let r = 1; r <= 20; r++) {
+  newRound(rounds);
+  rounds.push(`The boar bites you (round ${r}).`, `You strike the boar (round ${r}).`);
+}
+export const Rounds: StoryObj = {
+  ...pageStory(CombatOneFoeView, { combatLog: rounds }),
+  name: 'Rounds',
+  play: async ({ canvas }) => {
+    const last = await canvas.findByText('You strike the boar (round 20).');
+    await waitFor(() => expect(last.getBoundingClientRect().bottom).toBeLessThan(innerHeight));
+    const top = (text: string) => canvas.getByText(text).getBoundingClientRect().top;
+    const within = top('You strike the boar (round 19).') - top('The boar bites you (round 19).');
+    const between = top('The boar bites you (round 20).') - top('You strike the boar (round 19).');
+    await expect(between).toBeGreaterThan(within);
+  },
 };
 // A live foe's line draws its Cast a spell… list (loka-x6t.109.5). Breaks: no list on the foe line.
 const boar = CombatOneFoeView.view.entities[0]!;

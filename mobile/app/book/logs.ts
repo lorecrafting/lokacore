@@ -123,10 +123,14 @@ export function logLines(s: Logs, lines: DetailLine[], page?: DetailLine[], quie
 
 // Each log's lines by a number that never shifts: `gone` counts the lines dropped from its front, and
 // `drawn` is the first number no page has drawn yet, so a page return or a trim re-dries nothing and
-// a quiet merge, in place, is not new (LogLines).
-const marks = new WeakMap<readonly DetailLine[], { gone: number; drawn: number }>();
+// a quiet merge, in place, is not new (LogLines). `rounds` holds the numbers that begin a receipt's
+// lines, so the combat log draws each round as its own block (book-ui.md, Live combat response).
+const marks = new WeakMap<
+  readonly DetailLine[],
+  { gone: number; drawn: number; rounds: number[] }
+>();
 export const logMark = (lines: readonly DetailLine[]) => {
-  const mark = marks.get(lines) ?? { gone: 0, drawn: 0 };
+  const mark = marks.get(lines) ?? { gone: 0, drawn: 0, rounds: [] };
   marks.set(lines, mark);
   return mark;
 };
@@ -136,8 +140,16 @@ export const markDrawn = (lines: readonly DetailLine[]) => {
 };
 export const dropLines = (lines: DetailLine[], count = lines.length) => {
   const n = Math.max(count, 0);
-  logMark(lines).gone += n;
+  const mark = logMark(lines);
+  mark.gone += n;
+  mark.rounds = mark.rounds.filter((r) => r > mark.gone);
   lines.splice(0, n);
+};
+// The next lines pushed begin a new round (one receipt, one press or one update).
+export const newRound = (lines: readonly DetailLine[]) => {
+  const mark = logMark(lines);
+  const next = mark.gone + lines.length;
+  if (next > mark.gone && mark.rounds.at(-1) !== next) mark.rounds.push(next);
 };
 
 export const trimLog = (lines: DetailLine[]) => dropLines(lines, lines.length - 200);
