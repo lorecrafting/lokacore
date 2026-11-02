@@ -196,7 +196,7 @@ test('the rating: the first level and build at a win_pct of at least 50.00', () 
 test('the showcase goblins with a sure player hit: the target flees every seed', () => {
   const [, showcase] = compile('cartridges/toolbox_showcase', 'showcase.json');
   const copy = hitting(showcase, 100, { levelling: undefined });
-  delete copy.world!.combat!.initiative;
+  delete (copy.world!.combat as { initiative?: unknown }).initiative;
   const r = fights(copy, { seeds: 2 });
   const goblins = r.targets.find((t) => t.target === 'toolbox_showcase@0.0.1:population/goblins')!;
   assert.deepEqual(goblins.cells[0], {
