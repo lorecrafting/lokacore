@@ -2,7 +2,8 @@
 // "Guided loop and expected outcomes"). Steps 1 to 8 continue one world (step 3's inn check is its
 // own branch); step 10 starts fresh in the social district and combat 11 and the tilt yard's pack
 // in the hub.
-// size: allow 506, one district walk; WIP: expectations not yet rechecked at the unarmed chance 50 (loka-kgd.197)
+// Attacks are chance 100 or 0 but the unarmed blow (chance 50): where its hits matter, and for each
+// round's initiative, a test seeds the RNG from numeric-vectors.json (loka-kgd.197).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView } from '../src/index.ts';
@@ -28,6 +29,14 @@ import {
   take,
   wait,
   leave,
+  missing,
+  seeded,
+  attack,
+  corpseOf,
+  fight,
+  FOE_FIRST,
+  MISS,
+  PLAYER_FIRST,
 } from './showcase_fixture.ts';
 
 const CTX = '5ca5e000-0000-4000-8000-0000000000c0';
@@ -52,15 +61,6 @@ const conditions = (w: World) => gameView(w).conditions;
 const levelling = (w: World) => gameView(w).levelling;
 const inside = (w: World, holder: string) =>
   Object.keys(w.state.containers).filter((e) => w.state.containers[e] === holder);
-/** The corpse a death made of `who` (the player's body or an NPC). */
-function corpseOf(w: World, who: string) {
-  const found = Object.keys(w.state.created ?? {}).find((e) => {
-    const o = w.state.created![e].origin as { kind: string; victim_id?: string };
-    return o.kind === 'death' && o.victim_id === who;
-  });
-  assert.ok(found, `no corpse of ${who}`);
-  return found;
-}
 const bleedRow = (w: World) =>
   w.state.statuses?.[statusKey(w.body, { ...C, kind: 'status', key: 'bleeding' } as never)];
 /** The dialogue whose choice is pending. */
@@ -74,13 +74,6 @@ function choose(w: World, choice_id: string) {
   const [continuation_id] = pending(w, w.character)!;
   return play(w, { type: 'choose', choice_id, continuation_id });
 }
-/** Attack `who`: round 1 resolves at once (Diku rounds); its world, lines and events. */
-function fight(w: World, who: string) {
-  const r = play(w, { type: 'attack', target_id: npc(w, who) });
-  const events = r.decision.kind === 'accepted' ? r.decision.events.map((e) => e.payload) : [];
-  return { ...r, events: events as { type: string; [k: string]: unknown }[] };
-}
-const attack = (w: World, who: string) => fight(w, who).world;
 const wield = (w: World) =>
   play(w, { type: 'wear', item_id: id(w, 'item', 'training_sword') }).world;
 
@@ -215,7 +208,7 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   assert.equal(where(w, w.body), room(w, 'boar_run'));
   assert.deepEqual(cues(w), [{ sense: 'sound', text: 'cue.boar' }]);
   const start = w.state.clock;
-  const first = fight(w, 'boar');
+  const first = fight(seeded(w, MISS), 'boar');
   w = first.world;
   for (const line of [
     'combat.player_miss',
@@ -233,17 +226,17 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   const { when: _, ...bare } = w.cartridge.reactions![gore]!;
   const reactions = { ...w.cartridge.reactions, [gore]: bare };
   const unguarded = { ...w, cartridge: { ...w.cartridge, reactions } };
-  assert.deepEqual(conditions(wait(unguarded, start + 600).world), [GORED]);
+  assert.deepEqual(conditions(missing(unguarded, start + 600).world), [GORED]);
   const scar = statusKey(w.body, { ...C, kind: 'status', key: 'gored' } as never);
-  const before = wait(unguarded, start + 450).world; // alive: the boar's next blow kills
+  const before = missing(unguarded, start + 450).world; // alive: the boar's next blow kills
   assert.equal(where(before, before.body), room(w, 'boar_run'));
   const { [scar]: _row, ...unscarred } = before.state.statuses!;
   const unscarredWorld = { ...before, state: { ...before.state, statuses: unscarred } };
-  assert.deepEqual(conditions(wait(unscarredWorld, start + 600).world), [GORED]); // permanent: still lands
+  assert.deepEqual(conditions(missing(unscarredWorld, start + 600).world), [GORED]); // permanent: still lands
   const onDeath = { ...reactions, [gore]: { ...bare, on: { event: 'entity_died' } } };
   const mourned = { ...w, cartridge: { ...w.cartridge, reactions: onDeath } } as World;
-  assert.equal(conditions(wait(mourned, start + 600).world)?.length, 2); // the death's own reaction
-  const last = wait(w, start + 600);
+  assert.equal(conditions(missing(mourned, start + 600).world)?.length, 2); // the death's own reaction
+  const last = missing(w, start + 600);
   w = last.world;
   assert.ok(last.lines.includes('combat.player_died'));
   assert.ok(!last.lines.includes('narration.bleeding.tick'));
@@ -364,11 +357,10 @@ test('combat 9: in the pit the player turns on the second goblin; each kill pays
   assert.deepEqual([hp(unswitched, a), hp(unswitched, b)], [0, 6]);
   const r1 = wait(turned.world, start + 150).world;
   assert.deepEqual(hps(r1), [3, 3, 4]);
-  const r2 = wait(r1, start + 300).world;
+  const r2 = wait(seeded(r1, FOE_FIRST), start + 300).world; // B strikes, then falls
   assert.deepEqual(hps(r2), [3, 0, 3]);
   assert.equal(levelling(r2)?.experience, 70);
-  const r3 = wait(r2, start + 450);
-  // Round 4's initiative draw puts the player first: A falls before it strikes.
+  const r3 = wait(seeded(r2, PLAYER_FIRST), start + 450); // A falls before it strikes
   assert.deepEqual(r3.lines.slice(0, 2), ['combat.player_hit_50', 'combat.npc_died']);
   w = r3.world;
   assert.deepEqual(hps(w), [0, 0, 3]);
