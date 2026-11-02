@@ -275,8 +275,10 @@ test('swings grow the round budget past eight draws', () => {
 // Breaks: an opportunity of n swings grows the budget other than by 4 × (n − 1) (mechanics.md
 // "Swings"); three unhit swings spend three draws and touch no world state.
 test('three swings grow the budget by eight', () => {
+  const { w } = attack(sampler());
+  const row = Object.values(w.state.encounters!)[0];
   const r = { rng: [1, 2, 3, 4], draws: 0, budget: 8 } as unknown as Round;
   const profile = { chance: 0, damage_min: 1, damage_max: 1, attacks: 3 };
-  const out = swings(undefined as never, undefined as never, 'x' as never, profile, false, r);
+  const out = swings(w, row, goblin(w), profile, false, r);
   assert.deepEqual([out.hits, r.draws, r.budget], [0, 3, 16]);
 });
