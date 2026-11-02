@@ -20,6 +20,12 @@ const count = (table: string) => a.sql.prepare(`SELECT count(*) AS n FROM ${tabl
 const start = { bytes: statSync(path).size, receipts: receipts(a.sql) };
 
 const ticks = Number(process.argv[2] ?? 14400);
+const exec = a.db.execSync.bind(a.db);
+let commits = 0;
+a.db.execSync = (q: string) => {
+  if (q === 'COMMIT') commits++;
+  exec(q);
+};
 const t0 = performance.now();
 for (let n = 0; n < ticks; n++) {
   clock.wall += 250;
@@ -48,6 +54,7 @@ const rowsOf = (name: string) => a.sql.prepare(`SELECT * FROM "${name}"`).all();
 console.log(
   JSON.stringify({
     ticks,
+    commits,
     start,
     bytes: statSync(path).size,
     receipts: receipts(a.sql),

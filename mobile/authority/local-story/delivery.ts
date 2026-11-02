@@ -93,6 +93,7 @@ function commitElapsed(s: Story, tick: Command, checkpoint?: Checkpoint, driver 
   const { command, decision: d, replaces } = merged ?? { command: tick, decision: next.decision };
   const trace: Trace = (at, ...states) => traceAfter(s, command, d, at, states, replaces);
   if (d.kind === 'fault') {
+    s.idle = undefined; // a fault closes the span, like every other thing between ticks
     trace(s.revision, 'unavailable');
     if (next.limit) observe(s.db, budget(s, command.id, next.limit));
     return { kind: 'fault', code: d.code };
@@ -172,7 +173,12 @@ export function traceAfter(
   states: CommitState[],
   replaces?: string,
 ) {
+  // An absorbed tick writes no trace of its own: the next catch-up swaps in the merged entry.
+  if (replaces) {
+    s.behind = true;
+    if (states.length === 1 && states[0] === 'committed') return;
+  }
   if (s.behind && (s.behind = !catchUp(s.db, ids(s), s.fresh.context, command.id))) return;
-  const written = traceCommand(s.db, ids(s), command, d, at, states, replaces);
+  const written = traceCommand(s.db, ids(s), command, d, at, states);
   if (!written && states.includes('committed')) s.behind = true;
 }

@@ -28,14 +28,11 @@ export function traceCommand(
   d: DecisionResult,
   at: number,
   states: readonly CommitState[],
-  replaces?: string, // a coalesced tick's entry takes the place of the one it absorbed
 ): boolean | 'capped' {
   let capped = false;
   try {
     const written = transaction(db, () => {
       if ((capped = !room(db, ids.run_id))) return;
-      if (replaces && states.includes('committed'))
-        db.runSync('DELETE FROM trace WHERE command_id = ?', replaces);
       // The last row, an entry or its header (0), holds the run's highest ordinal; rowid: O(1).
       const last = db.getFirstSync<{ n: number }>(
         'SELECT ordinal AS n FROM trace ORDER BY rowid DESC LIMIT 1',
@@ -159,7 +156,7 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
  */
 function missed(db: Db, ids: RunIds, skip: string): boolean {
   if (full(db, ids.run_id)) return true; // never read the receipts a capped run dropped
-  // A death between a coalesced tick's COMMIT and its trace write left the entry it absorbed.
+  // The entry a coalesced tick absorbed: its receipt is gone, and only a catch-up writes the merge.
   db.runSync(
     `DELETE FROM trace WHERE command_id IN (SELECT command_id FROM trace WHERE commit_state = 'committed')
       AND command_id NOT IN (SELECT command_id FROM receipt)

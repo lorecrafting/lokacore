@@ -113,6 +113,7 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
 }
 
 function opened(s: Story) {
+  s.behind = true; // a first resume tick's entry must follow what the last process left unwritten
   let changed = (_status: ElapsedStatus) => {};
   const driver =
     s.world.cartridge.manifest.time_policy && s.host.time
