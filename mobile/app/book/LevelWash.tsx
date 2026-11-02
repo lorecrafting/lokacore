@@ -6,7 +6,7 @@ import { useAnimatedStyle, useReducedMotion, useSharedValue } from './fade.ts';
 import { usePalette } from './palette.ts';
 
 /**
- * The level's wash under the ink (book-ui.md, Level wash).
+ * The level's wash under the ink, in `warning` (book-ui.md, Level wash).
  * - Use: `Page` only, as its root's first child: above its under-ink layers, below the ink.
  * - Rules: answers only a `level` with `wash`, which the Flash limit and the Flashes setting decide;
  *   no swell, which reads as impact; no layout change; a page turn remounts it, ending the wash.
