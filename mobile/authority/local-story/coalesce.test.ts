@@ -328,7 +328,7 @@ test('receiptHistory refuses two ticks at one revision', (t) => {
   const revisions = b.sql.prepare('SELECT revision FROM receipt ORDER BY rowid').all();
   assert.deepEqual(
     revisions.map((r) => r.revision),
-    [1, 2],
+    [1, 3], // the reopen's catch-up and its tick merged
   );
   b.sql.close();
   history(path, bundle);
