@@ -1,4 +1,4 @@
-# size: allow 355, one row per refusal a writer can meet; the table reads together
+# size: allow 360, one row per refusal a writer can meet; the table reads together
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -80,7 +80,7 @@ defmodule Loka.Content.Explain do
          no_npc | Line `{text}` comes before the speaker is named. | Start the file with `npc: <key>`.
          scene_when | `when:` needs a true/false fact, and `{fact}` is {type}. | Name a fact whose type is `bool` in facts.json, or write this test as `policy` in `dialogues/<key>.json`.
          scene_needs | `needs:` needs a true/false fact, and `{fact}` is {type}. | Name a fact whose type is `bool` in facts.json, or write this test as `policy` in `dialogues/<key>.json`.
-         placeholder_text | This line is still `~`, a place held for words. | Write the words, or compile with `--allow-placeholders` while the cartridge is unfinished.
+         placeholder_text | Words here are still `~`, a place held for them. | Write the words, or compile with `--allow-placeholders` while the cartridge is unfinished.
          no_prompt | {npc} says nothing before the first choice. | Write what {npc} says first, on a line `{npc}: words` above the first `- ` line.
          no_choices | This scene gives the player nothing to choose. | Add a `- ` choice line under what {npc} says.
          not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:`, `quest:`, `needs:`, `once` or `then:` (docs/guides/writing-the-game.md).
@@ -233,9 +233,14 @@ defmodule Loka.Content.Explain do
   # A scene's `when:` and `needs:` read a fact as true or false (docs/system/cartridge.md, Scene files).
   defp entry("FACT_TYPE_MISMATCH", %{"path" => path}) do
     cond do
-      not String.contains?(path, ".scene\"") -> @words["FACT_TYPE_MISMATCH"]
-      String.contains?(path, ".choices.") -> @words["scene_needs"]
-      true -> @words["scene_when"]
+      not (String.contains?(path, ".scene\"") and String.contains?(path, ".policy")) ->
+        @words["FACT_TYPE_MISMATCH"]
+
+      String.contains?(path, ".choices.") ->
+        @words["scene_needs"]
+
+      true ->
+        @words["scene_when"]
     end
   end
 
