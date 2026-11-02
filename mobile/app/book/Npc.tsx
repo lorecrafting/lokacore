@@ -149,8 +149,8 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  *   only beside a priced service. History restarts after Leave the conversation. One exit: an
  *   authored choice labelled exactly Leave or Close is not drawn; the foot sends it (loka-512o).
  * - States: choice; a talk whose only choice is Leave; shop; services; open order; nothing to say (no line); closed conversation;
- *   cannot be hurt (no Attack card); a sanctuary (grey Attack).
- * - Story: NpcPage.stories.tsx, NpcAttack.stories.tsx
+ *   cannot be hurt (no Attack card); a sanctuary (grey Attack; NpcAttack.stories.tsx).
+ * - Story: NpcPage.stories.tsx
  */
 export function NpcPage(p: NpcProps) {
   const [c, t] = [usePalette(), useType()];
@@ -277,7 +277,7 @@ function service(s: Offer, p: NpcProps & { actions: Button[] }) {
 /**
  * The NPC route: gathers the person's offers and history, then draws NpcPage.
  * - Use: Body only.
- * - Story: NpcPage.stories.tsx, NpcAttack.stories.tsx
+ * - Story: NpcPage.stories.tsx
  */
 export function NpcDetail(p: {
   screen: Screen;
