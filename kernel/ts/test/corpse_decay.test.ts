@@ -20,7 +20,7 @@ function died(change?: (c: any) => void) {
   )!;
   const goblin = world.state.containers[ear] as EntityId;
   const room = world.state.containers[goblin]!;
-  world.state.containers[world.body] = room; // the player watches, so the view shows the corpse
+  (world.state.containers as Record<string, string>)[world.body] = room; // the player watches, so the view shows the corpse
   const { next, sequence } = fatal(world, goblin);
   const after = (next as unknown as { world: World }).world;
   const [corpse] = Object.entries(after.state.created!).find(
@@ -65,8 +65,9 @@ test('an owned player corpse decays at 90000 and spills its items', () => {
     ([, e]) => e.origin.kind === 'spawned' && e.origin.role === 'loot',
   )!;
   // fatal() names the cellar sampler's rat as the player's killer; the showcase's goblin stands in.
-  world.entityIds['cellar_sampler@0.0.8:npc/cellar_rat_1'] = world.state.containers[ear]!;
-  world.state.containers[ear] = world.body;
+  (world.entityIds as Record<string, string>)['cellar_sampler@0.0.8:npc/cellar_rat_1'] =
+    world.state.containers[ear]!;
+  (world.state.containers as Record<string, string>)[ear] = world.body;
   const room = world.state.containers[world.body]!;
   const after = (fatal(world).next as unknown as { world: World }).world;
   const [corpse] = Object.entries(after.state.created!).find(
@@ -90,7 +91,8 @@ test('a decay job binds its corpse and nothing else', () => {
     due_time: 50000,
     corpse_id: corpse as EntityId,
   } as const;
-  const faulted = (o: object) => 'fault' in (compose(world.state, { ops: [o as never] }) as object);
+  const faulted = (o: object) =>
+    'fault' in (compose(world.state as never, { ops: [o as never] }) as object);
   assert.equal(faulted(op), false);
   assert.equal(faulted({ ...op, actor_id: world.character }), true);
   const { corpse_id: _, ...unbound } = op;
