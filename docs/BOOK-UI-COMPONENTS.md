@@ -139,12 +139,13 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   `blurFrom` to `blurTo`, each of label, title and rule `stagger` apart. Sound, `mix` and `haptic`
   hold levels and kinds; the sound table names each sound's haptic. Queue: small cues of one key merge
   within `mix.coalesce`; `motion.flash.gap` is the Flash limit.
+- **Level wash.** `opacity.wash` in `warning` under the ink over `motion.flash`, on every theme. Reduced motion: `opacity.washStill`. No swell.
 - **Blow wash.** `opacity.wash` under the ink over `motion.flash`: `action` on `light` and `dawn`,
   `danger` on `dusk` and `dark` (amber `action` reads as lamplight, not harm). The page scales to
   `motion.flash.swell` at the peak. Reduced motion: `opacity.washStill`, no swell. The hp value dries in the same role and back to `fg`. Exemption from the 4.5:1
   rule above, for the wash's half second only: at its peak `fg` stays above 7:1 and `action` and
   `danger` above 5:1, while `dim` and `warning` dip to about 3.8:1 (opacity 0.08 would keep them
-  at 4.5:1 and barely show). Combat is the only place the wash appears.
+  at 4.5:1 and barely show). The level wash shares this exemption for its half second, in `warning`: at its peak `fg` stays above 7:1, `action` and `danger` above 4.5:1, while `dim` dips to about 3.75:1 and `warning` to about 3.6:1 over a held layer.
 - **Lightning.** The second exemption from the 4.5:1 rule, for at most 700 ms: at `opacity.afterimage`, `fg` stays above 7:1 and `action` and `danger` above 5:1, while `dim` dips to 4.25:1 and `warning` to 4.03:1 on dusk, and `warning` to 3.95:1 on dark. No other role falls below 4.5:1. It draws with no other held layer under it.
 - **Room sound and sky.** Bed cross-fade `motion.bed.duration`; exploration gap `sound.explore.gap`; lightning stays `motion.flash.gap` from a wash; wind corner `motion.flutter`; the light is `color.light.bg` at `opacity.afterimage`, up over 60 ms, away over 1200 ms.
 - **Falling.** The held wash is `opacity.faint`; with Flashes off it fades in over `motion.settle`.
@@ -189,6 +190,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `HapticPulse` | `book/HapticPulse.tsx` | HapticPulse |
 | `ItemPop` | `book/ItemPop.tsx` | LogLines |
 | `Leaf` | `book/Leaf.tsx` | CombatPage |
+| `LevelWash` | `book/LevelWash.tsx` | LevelWash |
 | `MapDrawing` | `book/MapDrawing.tsx` | Footer |
 | `ContentsPage` | `book/Menu.tsx` | SectionPages |
 | `ThingPage` | `book/Menu.tsx` | ItemPage |

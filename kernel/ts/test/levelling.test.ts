@@ -50,6 +50,14 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const LEVEL_UP = 'levelling.level_up';
+const shown = (level: number, experience: number, from: number, next: number, unspent: number) => ({
+  level,
+  experience,
+  from,
+  next,
+  unspent,
+  level_up: LEVEL_UP,
+});
 const attr = (key: string) => ({
   cartridge_id: 'levelling_sampler',
   cartridge_version: '0.0.1',
@@ -128,15 +136,9 @@ const hp = (w: World) => {
 // point, or the level-up line is dropped from the killing step (or emitted by an earlier kill).
 test('three rat kills reach level 2 with one point and narrate the level-up once', () => {
   const { two, third, w } = cull();
-  assert.deepEqual(two.levelling, { level: 1, experience: 20, from: 0, next: 30, unspent: 0 });
+  assert.deepEqual(two.levelling, shown(1, 20, 0, 30, 0));
   assert.ok(!two.actions.some((a) => a.action_key === 'raise_attribute'));
-  assert.deepEqual(gameView(w).levelling, {
-    level: 2,
-    experience: 30,
-    from: 30,
-    next: 100,
-    unspent: 1,
-  });
+  assert.deepEqual(gameView(w).levelling, shown(2, 30, 30, 100, 1));
   assert.equal(narration(third).filter((k) => k === LEVEL_UP).length, 1);
 });
 
@@ -150,7 +152,7 @@ test('Raise STR spends the point, raises the derived damage by 1 and is then ref
   assert.equal(narration(raised).includes(LEVEL_UP), false);
   assert.equal(damage(raised.world), 1);
   const view = gameView(raised.world);
-  assert.deepEqual(view.levelling, { level: 2, experience: 30, from: 30, next: 100, unspent: 0 });
+  assert.deepEqual(view.levelling, shown(2, 30, 30, 100, 0));
   assert.equal(view.attributes!.find((a) => a.attribute.key === 'str')!.value, 11);
   assert.ok(!view.actions.some((a) => a.action_key === 'raise_attribute'));
   const command = {
@@ -182,25 +184,13 @@ test('resolving the den quest grants 20 experience; after two kills it narrates 
     play(w, { type: 'accept_quest', quest: { ...attr('cull'), kind: 'quest' } }, 'cull');
   const den = (w: World) => play(accept(w).world, { type: 'move', direction: 'west' });
   const quest = den(fresh());
-  assert.deepEqual(gameView(quest.world).levelling, {
-    level: 1,
-    experience: 20,
-    from: 0,
-    next: 30,
-    unspent: 0,
-  });
+  assert.deepEqual(gameView(quest.world).levelling, shown(1, 20, 0, 30, 0));
   assert.equal(narration(quest).includes(LEVEL_UP), false);
   let w = play(fresh(), { type: 'move', direction: 'east' }).world;
   w = kill(kill(w, 'rat_a').world, 'rat_b').world;
   w = play(w, { type: 'move', direction: 'west' }).world;
   const up = den(w);
-  assert.deepEqual(gameView(up.world).levelling, {
-    level: 2,
-    experience: 40,
-    from: 30,
-    next: 100,
-    unspent: 1,
-  });
+  assert.deepEqual(gameView(up.world).levelling, shown(2, 40, 30, 100, 1));
   assert.ok(narration(up).includes(LEVEL_UP));
 });
 
@@ -395,21 +385,16 @@ test('one grant crossing two thresholds gives two events in order and one line',
 
 // Breaks: from is the next threshold (thresholds[r]) or goes missing at level 1 or the top.
 test('the view carries the threshold of the current level, validated, at every level', () => {
-  assert.deepEqual(gameView(fresh()).levelling, {
-    level: 1,
-    experience: 0,
-    from: 0,
-    next: 30,
-    unspent: 0,
-  });
+  assert.deepEqual(gameView(fresh()).levelling, shown(1, 0, 0, 30, 0));
   const after = gameView(cull().w);
-  assert.deepEqual(after.levelling, { level: 2, experience: 30, from: 30, next: 100, unspent: 1 });
+  assert.deepEqual(after.levelling, shown(2, 30, 30, 100, 1));
   assert.deepEqual(validate('GameView', after), []);
   assert.deepEqual(gameView(holding(120)).levelling, {
     level: 3,
     experience: 120,
     from: 100,
     unspent: 2,
+    level_up: LEVEL_UP,
   });
 });
 
@@ -424,13 +409,7 @@ function variant(change: (l: any) => void) {
 // cartridge does not list still grants experience.
 test('killing an NPC that kills does not list leaves experience unchanged', () => {
   const { w } = cull(variant((l) => (l.kills = l.kills.filter((k: any) => k.npc.key !== 'rat_c'))));
-  assert.deepEqual(gameView(w).levelling, {
-    level: 1,
-    experience: 20,
-    from: 0,
-    next: 30,
-    unspent: 0,
-  });
+  assert.deepEqual(gameView(w).levelling, shown(1, 20, 0, 30, 0));
 });
 
 // Breaks (#344 review, finding 2): unspent ignores points_per_level (one point per level).
@@ -477,13 +456,7 @@ test('a kill that also resolves a rewarding quest writes experience once and lev
     r.decision.delta.ops.flatMap((o) => (o.op === 'levelling.set' ? [[o.expected, o.value]] : [])),
     [[null, { experience: 30, allocated: {} }]],
   );
-  assert.deepEqual(gameView(r.world).levelling, {
-    level: 2,
-    experience: 30,
-    from: 30,
-    next: 100,
-    unspent: 1,
-  });
+  assert.deepEqual(gameView(r.world).levelling, shown(2, 30, 30, 100, 1));
   assert.equal(narration(r).filter((k) => k === LEVEL_UP).length, 1);
 });
 
