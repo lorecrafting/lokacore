@@ -33,3 +33,20 @@
 ## Verdict
 
 CHANGES REQUIRED: two should-fix.
+
+## Fix re-check (b094edb6b)
+
+Scope: 3767e62ef, 33cf4376a and b094edb6b, the code they touch and its direct callers. CI at `b094edb6bae8d6abcd9dd7582409707ed41be285`: ci, book-e2e and graph-diff all succeeded.
+
+- (1) Holds. Probes on `speech_sampler`:
+  - A scene with no prompt plus `dialogues/hi.json` `prompt` compiles, with no overlap message.
+  - A scene with no choice plus JSON `choices` gets no `no_choices` error.
+  - JSON `"choices": {}` is still refused, by both the scene and the JSON schema.
+  - Mutants are red: dropping the `no_choices` pair, dropping `json != rel` (`scene_merge.ex`), and moving `unwritten` back before `filled` (`scene_files.ex`). One mutant survives: `not in [nil, %{}]` changed to `!= nil`. It is near-equivalent, because the JSON schema still refuses an empty `choices`.
+- (2) Holds. `refs.ex` matches main, so the protocol is unchanged. `needs: coins` on an int fact prints "`coins` is a number". The mutant that drops `scene_fact` is red (`content_explain_test.exs`).
+- (3) Holds. `- ~`, `- ~` and `- Todo 3` give `todo__3`, `todo__5` and `todo_3`. The mutant that reverts to `todo_<n>` is red.
+- The touched tests pass (93).
+
+**should-fix (new, in fix 2)** `lib/loka/content/explain.ex:177`. `scene_fact` looks up the type under the scene's word in `facts.json`. A dotted fact name maps to a snake_case key (`cartridge.md:11`), and dotted names are common (`crypt.gate_open`, `lamps.lit`). So with `"pouch.gold"` (int) in `facts.json`, `needs: pouch_gold` prints "`needs:` needs a true/false fact, and `pouch_gold` is . Name a fact…". Fix: match the name with `.` replaced by `_`. The test uses an undotted name.
+
+Verdict: CHANGES REQUIRED, one small should-fix. The three earlier findings are resolved.
