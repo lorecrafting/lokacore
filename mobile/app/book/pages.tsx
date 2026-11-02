@@ -108,16 +108,6 @@ export function Control(p: {
   );
 }
 
-/**
- * One shell for every page: the title, the blocks, and the PageFoot.
- * - Use: every page.
- * - Rules: a run of rows of one kind is one block; a heading is its own block. The title is the
- *   page header with the arriving focus; without one, the first block takes it. The room's fixed
- *   title is the only pressable title. The title is `pageTitle`, scaled with the Reading size: centred
- *   when fixed (the room), left-aligned on every other page. A page that grows at the end scrolls to its end.
- * - States: scrolling title; fixed title; no title; centred (no game behind it).
- * - Story: Page.stories.tsx
- */
 type PageProps = {
   title?: string;
   fixedTitle?: boolean;
@@ -129,6 +119,16 @@ type PageProps = {
   children: ReactNode;
 };
 
+/**
+ * One shell for every page: the title, the blocks, and the PageFoot.
+ * - Use: every page.
+ * - Rules: a run of rows of one kind is one block; a heading is its own block. The title is the
+ *   page header with the arriving focus; without one, the first block takes it. The room's fixed
+ *   title is the only pressable title. The title is `pageTitle`, scaled with the Reading size: centred
+ *   when fixed (the room), left-aligned on every other page. A page that grows at the end scrolls to its end.
+ * - States: scrolling title; fixed title; no title; centred (no game behind it).
+ * - Story: Page.stories.tsx
+ */
 export function Page(p: PageProps) {
   const c = usePalette();
   const scroll = useRef<ScrollView>(null);
