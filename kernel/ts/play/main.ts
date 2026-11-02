@@ -33,7 +33,7 @@ import {
   scan,
   status,
 } from './text.ts';
-import { decide, decideReplay, found, header, start, type Run } from './run.ts';
+import { decide, replayEntry, found, header, start, type Run } from './run.ts';
 
 const [artifact, flag, transcript] = process.argv.slice(2);
 if (!artifact) fail('usage: loka play <artifact> [script | --replay <transcript>]');
@@ -292,10 +292,7 @@ function replay(path: string | undefined) {
     process.stdout.write(`recorded by ${recorded}\nreplayed on ${kernel_version}\n`);
   shown(r);
   const out =
-    header(r) +
-    entries
-      .map((e) => played(r, e.data.command, decideReplay(r, e.data.command, e.ids.revision), false))
-      .join('');
+    header(r) + entries.map((e) => played(r, e.data.command, replayEntry(r, e), false)).join('');
   if (out !== file) fail(`replay differs from ${path}`);
   process.stdout.write(`replay: ${entries.length} commands identical\n`);
 }

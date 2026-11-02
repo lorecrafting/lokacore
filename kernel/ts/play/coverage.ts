@@ -10,7 +10,7 @@ import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/ind
 import { refString } from '../src/runtime/decision.ts';
 import { line, ROOT } from './obs.ts';
 import { replayRecords } from './replay.ts';
-import { decideReplay, header, start } from './run.ts';
+import { replayEntry, header, start } from './run.ts';
 
 type Trace = ReturnType<typeof replayRecords>;
 const MARK = /^coverage\.m(\d+)$/;
@@ -61,7 +61,7 @@ export function replay(
   for (const e of entries) {
     if (e.data.ordinal === upTo) return;
     const before = r.world;
-    const { trace: t, decision } = decideReplay(r, e.data.command, e.ids.revision);
+    const { trace: t, decision } = replayEntry(r, e);
     if (line(t) !== `${recorded[r.ordinal]}\n`) throw differs(r.ordinal);
     each?.(before, decision, r.ordinal);
   }

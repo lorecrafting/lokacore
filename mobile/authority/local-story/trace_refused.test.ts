@@ -1,0 +1,144 @@
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { test, type TestContext } from 'node:test';
+import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
+import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { dreamBundle } from './__tests__/dream-host.test.ts';
+import { entity, fresh, ref } from '../../../kernel/ts/test/dream_fixture.ts';
+
+const tool = (name: string) => new URL(`../../../kernel/ts/play/${name}`, import.meta.url).pathname;
+
+/** A real host save: an elapsed tick, then `moves` invoked, its stored rows written where the tools read them. */
+type Host = ReturnType<typeof elapsedHost>;
+function played(t: TestContext, moves: (a: Host) => object[]) {
+  const a = elapsedHost(),
+    folder = mkdtempSync(join(tmpdir(), 'loka-refused-'));
+  t.after(() => (a.sql.close(), rmSync(folder, { recursive: true })));
+  a.clock.wall += 20;
+  a.clock.mono += 20;
+  assert.equal(a.game.pulse().kind, 'ready');
+  const replies = moves(a).map((m) => a.game.invoke(m as never));
+  const artifact = join(folder, 'cartridge.json'),
+    path = join(folder, 'trace.jsonl');
+  writeFileSync(
+    artifact,
+    `{"cartridge":${a.bundle.canonical},"content_hash":"${a.bundle.sha256}"}`,
+  );
+  const rows = a.sql
+    .prepare('SELECT record FROM trace ORDER BY rowid')
+    .all()
+    .map((r) => r.record as string);
+  const write = (lines: string[]) => writeFileSync(path, lines.join('\n') + '\n');
+  write(rows);
+  const run = (name: string, ...args: string[]) =>
+    spawnSync(process.execPath, [tool(name), artifact, ...args], {
+      encoding: 'utf8',
+      maxBuffer: 1e9,
+    });
+  return { replies, rows, write, run, path };
+}
+
+const barred = () => [{ action_key: 'move', target_ids: [], input: { direction: 'south' } }];
+const look = { action_key: 'look', target_ids: [], input: {} };
+const decision = (reply: unknown) => (reply as { decision: { kind: string } }).decision.kind;
+// Bram's talk is grey until his quest is active; the kernel refuses it and the host stores a receipt.
+const greyTalk = (a: Host) => {
+  const bram = a.game
+    .view()
+    .view.entities.find((e) => e.actions.some((x) => x.action_key === 'bram'));
+  return [{ action_key: 'bram', target_ids: [bram!.id], input: {} }];
+};
+
+// Breaks: replay rebuilds a stored rejection as commit unavailable, so a host's refused move
+// differs; or replay copies the recorded commit instead of rebuilding it, so a forged one passes.
+test('a refused move replays identically, and a forged revision on it still differs', (t) => {
+  const p = played(t, () => [...barred(), look]);
+  assert.equal(decision(p.replies[0]), 'rejected');
+  const replay = () => p.run('main.ts', '--replay', p.path);
+  const same = replay();
+  assert.equal(same.status, 0, same.stderr);
+  assert.match(same.stdout, /replay: 3 commands identical/);
+
+  const forged = JSON.parse(p.rows[2]);
+  assert.equal(forged.data.commit.state, 'committed');
+  forged.data.commit.revision += 1;
+  p.write([p.rows[0], p.rows[1], encode(forged), p.rows[3]]);
+  const differs = replay();
+  assert.equal(differs.status, 1);
+  assert.match(differs.stderr, /replay differs/);
+});
+
+// Breaks: coverage or Why throws on a host trace, a refusal counts as exercise, or Why calls it done.
+test('coverage credits a refused talk nothing, and Why says rejected and answers past it', (t) => {
+  const p = played(t, (a) => [...greyTalk(a), look]);
+  assert.equal(decision(p.replies[0]), 'rejected');
+  const covered = p.run('coverage.ts', p.path);
+  assert.equal(covered.status, 0, covered.stderr);
+  const plain = played(t, () => [look]);
+  assert.equal(covered.stdout, plain.run('coverage.ts', plain.path).stdout);
+  const why = (ordinal: number) => {
+    const r = p.run('why.ts', p.path, String(ordinal));
+    assert.equal(r.status, 0, r.stderr);
+    return JSON.parse(r.stdout);
+  };
+  assert.equal(why(2).outcome, 'rejected');
+  assert.equal(why(3).outcome, 'looked');
+});
+
+// Breaks: Why's prefix walk replays a coalesced tick without its recorded revision, so a dream
+// choose naming the host's expected revision answers rejected though the host resolved it.
+test('Why resolves a dream choice reached through idle real-elapsed ticks as the host did', (t) => {
+  const change = (c: any) => {
+    c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
+    c.scripted_actions = {}; // real_elapsed refuses the fixture's turn-timed coil_rope
+  };
+  const a = elapsedHost(':memory:', undefined, dreamBundle(change)),
+    folder = mkdtempSync(join(tmpdir(), 'loka-dream-'));
+  t.after(() => (a.sql.close(), rmSync(folder, { recursive: true })));
+  const dream = () => a.game.view().view.notices!.find((n) => n.bed)!.dream!;
+  const invoke = (action_key: string, input: object, target_ids: string[] = []) => {
+    for (let i = 0; i < 3; i++) ((a.clock.wall += 750), (a.clock.mono += 750), a.game.pulse());
+    const r = a.game.invoke({ action_key, target_ids, input } as never);
+    assert.equal(decision(r), 'accepted', JSON.stringify(r));
+  };
+  const maud = entity(fresh(change), 'npc', 'maud');
+  invoke('rent_room', { service: ref('service', 'bed_room'), quoted_price: 3 }, [maud]);
+  invoke('move', { direction: 'up' });
+  invoke('rest', {});
+  for (let i = 0; i < 3; i++) {
+    const d = dream();
+    invoke(d.action!.action_key, { scene: d.scene, line: d.index });
+  }
+  const c = dream().choice!,
+    o = c.choices.find((o) => o.choice_id === 'follow_fox')!;
+  invoke(o.action_key!, {
+    continuation_id: c.continuation_id,
+    choice_id: 'follow_fox',
+    dream: o.dream,
+  });
+  const artifact = join(folder, 'cartridge.json'),
+    path = join(folder, 'trace.jsonl'),
+    rows = a.sql
+      .prepare('SELECT record FROM trace ORDER BY rowid')
+      .all()
+      .map((r) => r.record as string);
+  writeFileSync(
+    artifact,
+    `{"cartridge":${a.bundle.canonical},"content_hash":"${a.bundle.sha256}"}`,
+  );
+  writeFileSync(path, rows.join('\n') + '\n');
+  const why = spawnSync(
+    process.execPath,
+    [tool('why.ts'), artifact, path, String(rows.length - 1)],
+    {
+      encoding: 'utf8',
+    },
+  );
+  assert.equal(why.status, 0, why.stderr);
+  const out = JSON.parse(why.stdout);
+  assert.equal(out.command, 'choose');
+  assert.equal(out.outcome, 'choice_resolved');
+});
