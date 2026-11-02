@@ -11,15 +11,18 @@ import { Separator } from './components/ui/separator.tsx';
 import { clockWords } from '../../../mobile/app/author/shown.ts';
 import { Heading } from './sections.tsx';
 
-const Rows = ({ title, rows }: { title: string; rows: [string, string][] }) => (
+// A row's third field, when given, is its full id (the hover title); the fourth keeps rows with one name apart.
+const Rows = ({ title, rows }: { title: string; rows: [string, string, string?, string?][] }) => (
   <div>
     <Heading>
       {title} ({rows.length})
     </Heading>
     <ul className="space-y-1">
-      {rows.map(([name, value]) => (
-        <li key={name} className="flex items-center justify-between gap-2">
-          <span className="truncate font-mono text-xs">{name}</span>
+      {rows.map(([name, value, id, row]) => (
+        <li key={row ?? name} className="flex items-center justify-between gap-2">
+          <span className="truncate font-mono text-xs" title={id}>
+            {name}
+          </span>
           <span className="shrink-0 font-mono text-xs text-muted-foreground">{value}</span>
         </li>
       ))}
@@ -56,7 +59,10 @@ export function Facts({ state }: { state?: State }) {
       {shown.choice ? <Listed title={`Choice: ${shown.choice.prompt}`} items={shown.choice.options} /> : null}
       <Separator />
       <Rows title="Quests" rows={shown.quests.map((q) => [q.quest, q.state])} />
-      <Rows title="Facts" rows={Object.entries(state.facts).map(([k, v]) => [k, JSON.stringify(v)])} />
+      <Rows
+        title="Facts"
+        rows={state.facts.map((f) => [f.key, f.value === undefined ? 'unset' : `${JSON.stringify(f.value)}${f.set ? '' : ' (default)'}`, f.id, f.row])}
+      />
     </div>
   );
 }
