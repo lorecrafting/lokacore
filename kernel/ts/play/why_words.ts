@@ -13,10 +13,12 @@ const WORDS: { [O in Leaf['op']]: (p: Extract<Leaf, { op: O }>) => string } = {
   target_present: () => 'the target is here',
   has_item: (p) => `item ${p.item.key} is held`,
   quest_state: (p) => `quest ${p.quest.key} is ${p.state}`,
-  fact_compare: (p: Extract<Leaf, { op: 'fact_compare' }> & { now?: unknown }) =>
-    p.now === undefined
-      ? `fact ${p.fact.key} on the target needs ${JSON.stringify(p.equals)}`
-      : `fact ${p.fact.key} is ${p.now === null ? 'unset' : JSON.stringify(p.now)}; needs ${JSON.stringify(p.equals)}`,
+  fact_compare: (p: Extract<Leaf, { op: 'fact_compare' }> & { now?: unknown; not?: true }) => {
+    const needs = `needs ${p.not ? 'not ' : ''}${JSON.stringify(p.equals)}`;
+    return p.now === undefined
+      ? `fact ${p.fact.key} on the target ${needs}`
+      : `fact ${p.fact.key} is ${p.now === null ? 'unset' : JSON.stringify(p.now)}; ${needs}`;
+  },
   fact_at_least: (p) => `fact ${p.fact.key} is at least ${p.at_least}`,
   time_window: (p) => `the time of day is from ${p.from} to ${p.to}`,
   barrier_state: (p) => `barrier ${p.barrier.key} is ${p.equals}`,
@@ -64,13 +66,12 @@ function rows(p: Annotated, depth: number, negated = false): { ok: Verdict; rows
       ],
     };
   }
-  const ok = p.holds === 'depends' ? p.holds : (p.holds === true) !== negated;
-  // a negated yes/no fact needs the other answer; any other negated leaf says so first
-  const flip = negated && p.op === 'fact_compare' && typeof p.equals === 'boolean';
-  const said = (WORDS[p.op as Leaf['op']] as (p: Policy) => string)(
-    flip ? { ...p, equals: !p.equals } : p,
-  );
-  return { ok, rows: [{ text: negated && !flip ? `not: ${said}` : said, ok, depth }] };
+  // an unread leaf (no holds) never counts as met, negated or not
+  const ok = p.holds === 'depends' ? p.holds : p.holds !== undefined && p.holds !== negated;
+  // a negated fact says what it must not be (an unset fact is not true); any other leaf says not first
+  const fact = negated && p.op === 'fact_compare';
+  const said = (WORDS[p.op as Leaf['op']] as (p: object) => string)(fact ? { ...p, not: true } : p);
+  return { ok, rows: [{ text: negated && !fact ? `not: ${said}` : said, ok, depth }] };
 }
 
 /** The asked definition's policy as sentences; no policy holds without saying anything more. */

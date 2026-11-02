@@ -20,7 +20,7 @@ export type Replayable = Pulsed & {
   invoke: (intent: Intent) => Reply;
   entityIds: () => Ids;
   text: (key: string) => string | undefined;
-  choices: () => Readonly<Record<string, { source: { key: string } }>>; // continuation id -> its open choice
+  dialogueOf: (continuation: string) => string | undefined;
 };
 // refused: the game or the file said no to this step, so dropping it can help; a pending or fault reply is not that.
 export type Outcome = { done: number; failed?: string; refused?: true };
@@ -202,12 +202,13 @@ function send(i: number, intent: Intent, game: Replayable): Omit<Outcome, 'done'
   };
 }
 
-// A recorded choice the open choice no longer offers (its words were edited): name it, its dialogue and what it offers now.
+// A recorded choice the open choice does not offer (its words were edited, or its `when` or an earlier
+// step changed): name it, the open dialogue and what that offers now.
 function gone(chosen: unknown, choice: GameView['choice'], game: Replayable) {
   if (typeof chosen !== 'string' || !choice || choice.choices.some((c) => c.choice_id === chosen))
     return undefined;
   const offers = choice.choices.map((c) => `'${game.text(c.label)}'`).join(', ');
-  return `the choice '${chosen}' in ${game.choices()[choice.continuation_id]?.source.key} is gone; it now offers: ${offers}`;
+  return `the choice '${chosen}' is not offered in ${game.dialogueOf(choice.continuation_id)}; it offers: ${offers}`;
 }
 
 /** Exactly one of advance and intent, and an intent `send` can read: this is hand-edited JSON. */

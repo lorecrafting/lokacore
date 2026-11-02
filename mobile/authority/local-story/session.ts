@@ -10,7 +10,7 @@ import { CatchUpRefusedError, type Pulse } from './elapsed.ts';
 // resends an unconfirmed attempt unchanged, and owns open and Start over. It says nothing in words:
 // the app's presenter does, from the views, the replies and the cartridge text (docs/decisions/
 // owner-decision-presenter-split-2026-10-02.md). It adds no mechanics.
-import type { Key } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { ContinuationId, Key } from '../../../kernel/ts/src/contracts.gen.ts';
 import { gameView, INSTALLED, loadCartridge, newWorld } from '../../../kernel/ts/src/index.ts';
 export { INSTALLED, KERNEL_ID } from '../../../kernel/ts/src/index.ts'; // the app names its build and dev save with them
 import type { Cartridge } from '../../../kernel/ts/src/index.ts';
@@ -101,7 +101,8 @@ const authorTools = (story: Open) => ({
   entityIds: () => story.world().entityIds,
   roomIds: () => story.world().roomIds,
   facts: () => story.world().state.facts ?? {},
-  choices: () => story.world().state.choices ?? {}, // names an open choice's dialogue in a replay note
+  dialogueOf: (continuation: string) =>
+    story.world().state.choices?.[continuation as ContinuationId]?.source.key, // a replay note names it
   trace: () => story.trace(), // the author column replays these
 });
 function managedGame(story: Open, cartridge: Cartridge, db: Db) {

@@ -47,7 +47,7 @@ function session(ids: Record<string, string>, replies: Reply[], choice?: string)
     invoke: (i) => (sent.push(i), replies[sent.length - 1]!),
     entityIds: () => ids,
     text: (key) => ({ 'l.go': 'go on' })[key],
-    choices: () => (choice ? { [choice]: { source: { key: 'maud_hello' } } } : {}),
+    dialogueOf: (c) => (c === choice ? 'maud_hello' : undefined),
     pulse: () => ({ kind: 'ready' }),
   };
   return { game, sent };
@@ -134,7 +134,7 @@ test("a choice still offered, a step that is not a choice, or a fault keeps the 
   ] as const) {
     const out = replay([{ intent: intent([], input) }], session({}, [reply], 'c2').game, () => {});
     assert.match(out.failed!, note);
-    assert.doesNotMatch(out.failed!, /gone/);
+    assert.doesNotMatch(out.failed!, /not offered/);
   }
 });
 
