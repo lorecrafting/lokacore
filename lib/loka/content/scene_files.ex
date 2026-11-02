@@ -1,4 +1,4 @@
-# size: allow 425, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
+# size: allow 432, one line clause per verb, each small, and the nested-set links and overlap; the verbs read together
 defmodule Loka.Content.SceneFiles do
   @moduledoc """
   Scene files: `scenes/<key>.scene` (or `dialogues/<key>.scene`) is one dialogue as plain text,
@@ -15,6 +15,7 @@ defmodule Loka.Content.SceneFiles do
       needs: fact          the current choice shows only while that bool fact is true
       needs: not fact      ... only while it is false
       once                 the current choice goes away once taken (`once`, DialogueOnce lowers it)
+      once: sitting        the current choice goes away until the talk next opens (`sitting`)
       asked                the current choice dims once taken (`asked`, DialogueAsked lowers it)
       then: key            the current choice's `then`: that dialogue next, or `end`
       gives: bowl          the speaker hands the current choice's taker that item (`receive`,
@@ -264,7 +265,10 @@ defmodule Loka.Content.SceneFiles do
     do: only_one(at, "then", if(key?(target), do: target), st)
 
   defp line({"once", _} = at, {%{"npc" => _}, cur, _} = st) when cur != nil,
-    do: only_one(at, "once", true, st)
+    do: only_one(at, "once", unless(sitting?(st, "sitting"), do: true), st)
+
+  defp line({"once: sitting", _} = at, {%{"npc" => _}, cur, _} = st) when cur != nil,
+    do: only_one(at, "sitting", unless(sitting?(st, "once"), do: true), st)
 
   defp line({"asked", _} = at, {%{"npc" => _}, cur, _} = st) when cur != nil,
     do: only_one(at, "asked", true, st)
@@ -303,6 +307,9 @@ defmodule Loka.Content.SceneFiles do
   end
 
   defp line(at, {d, cur, bad}), do: refuse(at, d, cur, bad)
+
+  # `once` and `once: sitting` on one choice: the longer one would never show.
+  defp sitting?({d, cur, _}, other), do: get_in(d, ["choices", cur, other]) != nil
 
   # A field a choice may hold once: nil is a form that cannot lower.
   defp only_one(at, _, nil, {d, cur, bad}), do: refuse(at, d, cur, bad)

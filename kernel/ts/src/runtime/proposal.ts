@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/alternates.ts';
-// size: allow 346, typed quest reactions, deadline pairing and group merging share FIFO admission
+// size: allow 347, typed quest reactions, deadline pairing and group merging share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -29,7 +29,7 @@ import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { joinEarlier, joinTail, queueHour, queueScheduled, type Due } from './proposal_hours.ts';
 import { merge, statusGroup, unsaid } from '../mechanics/status/job.ts';
 import { moverGroups } from '../mechanics/containment/job.ts';
-import { farewell } from './proposal_farewell.ts';
+import { closedByOpener, farewell } from './proposal_farewell.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
 export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
@@ -160,7 +160,7 @@ function join(
   const earns = p.world.cartridge.quests && evs.some((e) => e.payload.type === 'item_acquired');
   const before = earns ? now(p) : p.world;
   if (!('cartridge' in before)) return before;
-  p.ops.push(...begun(p.world, own, base.logical_time, p.ops, m));
+  p.ops.push(...begun(p.world, closedByOpener(p.ops, own), base.logical_time, p.ops, m));
   const actors = enteredActors(p.world, own);
   if (actors.size) {
     const at = now(p);

@@ -90,10 +90,17 @@ defmodule Loka.Content.Reactions do
 
   # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
   # moved.
+  # One rule closes one talk: a second close of the row would fault the player's whole action.
+  defp second_end_talk(rel, steps) do
+    ends = for {%{"op" => "end_talk"}, i} <- steps, do: i
+    for i <- Enum.drop(ends, 1), do: diag("DUPLICATE_DEFINITION", at(rel, ["steps", i]))
+  end
+
   defp steps(rel, steps, on, ctx) do
     runs = for {%{"op" => "replenish.run", "replenish" => k}, i} <- steps, do: {k, i}
 
     Enum.flat_map(steps, &consequence(rel, &1, on, ctx)) ++
+      second_end_talk(rel, steps) ++
       for {{k, i}, n} <- Enum.with_index(runs),
           Enum.any?(Enum.take(runs, n), &(elem(&1, 0) == k)),
           do: diag("DUPLICATE_DEFINITION", at(rel, ["steps", i, "replenish"]))

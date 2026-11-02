@@ -71,14 +71,17 @@ export function validAttempts(row: ChoiceRow, d: DialogueDefinition) {
   );
 }
 
+// A scene may start, and a modal scene never runs over an open talk.
+const scened = (a: Accepted) => a.events.some((e) => e.payload.type === 'story_point_reached');
+
 /**
  * The dialogue hub (mechanics.md dialogue@1; owner OK in Beads loka-x6t.5): `decided` plus a fresh
  * pending row of the same sitting (`choice.open` of the row's own bound fields, never rebound) and
  * its `choice_opened` after `choice_resolved`, unless the answer ends the conversation: its
  * dialogue resolves a quest or declares a riddle, it sets a patrol leg off, it was checked (row 14:
  * the reopened hub row could not drop the one choice; see mechanics.md Retry rule), it was the
- * only choice, it is `then: end`, a `then` names this dialogue (a target never reopens itself), or
- * no option would be shown next. A choice's `then` opens that dialogue instead of the same row, of
+ * only choice, it is `then: end`, a `then` names this dialogue (a target never reopens itself),
+ * it reached a story point, or no option would be shown next. A choice's `then` opens that dialogue instead of the same row, of
  * any speaker. Options are read in the world the decision leaves.
  */
 export function hub<T extends { kind: string }>(
@@ -91,15 +94,16 @@ export function hub<T extends { kind: string }>(
   decided: T,
   steps: Steps,
 ): T {
-  if (decided.kind !== 'accepted' || !reopens(d) || option.patrol) return decided;
-  if (!option.then && (option.check || linked(world, d))) return decided;
   const a = decided as unknown as Accepted;
-  const { actor_id, source, beat, roles, choice_ids } = row;
+  if (decided.kind !== 'accepted' || !reopens(d) || option.patrol || scened(a)) return decided;
+  if (!option.then && (option.check || linked(world, d))) return decided;
+  const { actor_id, source, beat, roles } = row;
   const speaker = speakerOf(d, row);
   if (option.then) return leadOn(world, command, mint, row, decided, option.then, steps);
   const left = apply(world, a.delta.ops, false);
   if ('fault' in left) return decided;
   const after = left.world;
+  const choice_ids = row.choice_ids.filter((id) => !option.sitting || d.choices[id] !== option);
   if (shown(after, actor_id, d, choice_ids, speaker, steps).length === 0) return decided;
   const at = a.events.find((e) => e.payload.type === 'choice_resolved')!.position + 1;
   const continuation_id = continuationId(mint);

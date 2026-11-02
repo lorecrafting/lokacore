@@ -14,7 +14,7 @@ defmodule Loka.Content.Waits do
   @type fault :: {String.t(), {String.t(), [String.t() | non_neg_integer()]}, map()}
 
   # The fired job keeps its actor, not the subject RS-4's quest steps read (NPC no-op, trigger holder).
-  @event_bound ~w(barrier.set event.emit item.move npc.move population.suppress quest.activate quest.resolve quest.fail replenish.run)
+  @event_bound ~w(barrier.set end_talk event.emit item.move npc.move population.suppress quest.activate quest.resolve quest.fail replenish.run)
   # The schema's `after` maximum.
   @max 2_147_483_647
 

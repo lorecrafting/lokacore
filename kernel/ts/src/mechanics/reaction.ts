@@ -3,7 +3,6 @@
 // explicit sequence. proposal.ts propose runs the queue, numbers writer groups and counts budgets.
 import type {
   CharacterId,
-  CommandId,
   DefinitionRef,
   DeltaOp,
   DomainEvent,
@@ -19,12 +18,14 @@ import {
   accepted,
   actorOf,
   bodyOf,
+  byCause,
   event,
   refString,
   type Decision,
   type Mint,
   type World,
 } from '../runtime/decision.ts';
+import { leave } from './dialogue/selection.ts';
 import { bounded, durable, npcPair, paired, subjective, targetOf, value } from './fact.ts';
 import { KernelError } from '../foundation/error.ts';
 import { holds } from './policy.ts';
@@ -155,9 +156,8 @@ export function sequence(
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map(), seen: new Set() };
   const [ops, events, narration]: [DeltaOp[], DomainEvent[], Text[]] = [[], [], []];
   let [position, gained] = [0, 0]; // gained: one levelling write per rule (no row race)
-  const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
   const emit = (payload: EventPayload, actor_id = actor) =>
-    events.push(event(then, { ...by, payload: { actor_id } }, mint, ++position, payload));
+    events.push(event(then, byCause(cause, actor_id), mint, ++position, payload));
   for (const step of rule.steps) {
     if (step.op === 'quest.activate') {
       if (!activate(world, rule, actor, !!npc, step.quest, own.seen, group, ops, mint, emit))
@@ -185,7 +185,8 @@ export function sequence(
       const refill = replenishStep(then, step.replenish, group, steps, holders, roots); // hs-1
       if (typeof refill === 'string') return { kind: 'fault', code: refill };
       ops.push(...refill);
-    } else if (step.op === 'experience.grant') gained = saturate(gained + step.amount);
+    } else if (step.op === 'end_talk') ops.push(...leave(then, actor, group));
+    else if (step.op === 'experience.grant') gained = saturate(gained + step.amount);
     else if (isTold(step)) narration.push(...told(then, actor, step, about));
     else if (step.op === 'resource.adjust')
       ops.push(...pooled(then, actor, step, group, ops, holders, prior));

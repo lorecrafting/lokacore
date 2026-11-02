@@ -4,6 +4,15 @@ import type { World } from './decision.ts';
 import type { Admitted } from './proposal_admit.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 
+// end_talk closes a row its own proposal may have opened: one writer group per continuation.
+export function closedByOpener(ops: readonly DeltaOp[], own: readonly DeltaOp[]) {
+  return own.map((o) => {
+    if (o.op !== 'choice.close') return o;
+    const open = ops.find((p) => p.op === 'choice.open' && p.continuation_id === o.continuation_id);
+    return open ? { ...o, writer_group: open.writer_group } : o;
+  });
+}
+
 // dialogue@1: each conversation whose actor and speaker no longer share a room once the proposal
 // is composed ends as Leave would (choice.close, no event), in the writer group that opened it here,
 // else a new one. Composed only while a conversation may be open (no per-action apply otherwise).

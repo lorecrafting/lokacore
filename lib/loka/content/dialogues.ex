@@ -1,4 +1,4 @@
-# size: allow 375, scene-triggered chapter point refs join dialogue trigger checks
+# size: allow 400, scene-triggered chapter point refs join dialogue trigger checks
 defmodule Loka.Content.Dialogues do
   @moduledoc "Compiled dialogue roles, consequences, riddle and chapter trigger checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -89,15 +89,36 @@ defmodule Loka.Content.Dialogues do
       counted =
         if is_map_key(c, "outcome"), do: [outcomes[c["outcome"]]], else: Map.values(outcomes)
 
-      if Enum.any?(counted, &ambiguous?(&1, ctx)),
-        do: [diag("OUTCOME_MISMATCH", at("cartridge.json", steps ++ ["story_point"]))],
-        else: []
+      uncountable(counted, at("cartridge.json", steps ++ ["story_point"]), ctx)
+    end
+  end
+
+  defp uncountable(counted, path, ctx) do
+    cond do
+      Enum.any?(counted, &ambiguous?(&1, ctx)) ->
+        [diag("OUTCOME_MISMATCH", path)]
+
+      Enum.any?(counted, &questless?(&1, ctx)) ->
+        [diag("OUTCOME_MISMATCH", path, %{"why" => "chapter_no_quest"})]
+
+      true ->
+        []
     end
   end
 
   defp ambiguous?(t, ctx) do
     if is_map_key(t, "scene"), do: false, else: dialogue_ambiguous?(t, ctx)
   end
+
+  # view/quest_journal.ts counts a chapter by the dialogue's quest; a choice without one never would.
+  defp questless?(%{"dialogue" => r}, ctx) do
+    match?(
+      {_, _, %{"choices" => _} = d} when not is_map_key(d, "quest"),
+      resolve(r, "dialogue", ctx.m, ctx.defs)
+    )
+  end
+
+  defp questless?(_, _), do: false
 
   defp dialogue_ambiguous?(t, ctx) do
     case resolve(t["dialogue"], "dialogue", ctx.m, ctx.defs) do
@@ -111,7 +132,7 @@ defmodule Loka.Content.Dialogues do
     end
   end
 
-  # dialogue@1 owns story_point_reached; a choice's dialogue resolves a quest; a scene-reached
+  # dialogue@1 owns story_point_reached; a choice that reaches one ends the talk; a scene-reached
   # point's marker fact story_point_<key> fits a Key (key at most 52).
   defp story_points(defs, ctx) do
     for {_, {rel, steps, p}} <- defs["story_point"],
@@ -133,8 +154,13 @@ defmodule Loka.Content.Dialogues do
   defp site(%{"dialogue" => r, "choice" => c}, _, ctx) do
     {rel, steps, d} = resolve(r, "dialogue", ctx.m, ctx.defs)
 
-    {not is_map_key(d, "quest"),
-     diag("OUTCOME_MISMATCH", at(rel, steps ++ ["choices", c, "story_point"]))}
+    o = get_in(d, ["choices", c]) || %{}
+
+    # The hub's own check never sees this: choice story points are gone by the time it runs.
+    why = if o["sitting"], do: "sitting_no_return", else: "story_point_then"
+
+    {o["sitting"] == true or o["then"] not in [nil, "end"] or is_map_key(o, "then_failed"),
+     diag("OUTCOME_MISMATCH", at(rel, steps ++ ["choices", c, "story_point"]), %{"why" => why})}
   end
 
   @doc """

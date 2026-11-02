@@ -44,6 +44,32 @@ defmodule Loka.Content.Hub do
 
   @spec choice(String.t(), list(), map(), map(), map()) :: [map()]
   def choice(rel, steps, o, d, %{proven: proven, targets: targets}) do
+    sitting(rel, steps, o, d, targets) ++ gifts(rel, steps, o, d, proven, targets)
+  end
+
+  # mechanics/dialogue/behavior.ts `hub`: only a plain answer of a dialogue that reopens comes back.
+  defp sitting(rel, steps, %{"sitting" => true} = o, d, targets) do
+    ends =
+      Enum.any?([
+        o["then"],
+        o["then_failed"],
+        o["check"],
+        o["patrol"],
+        d["quest"],
+        d["riddle"]
+      ]) or
+        map_size(d["choices"]) == 1 or MapSet.member?(targets, d["key"])
+
+    if ends,
+      do: [
+        diag("OUTCOME_MISMATCH", at(rel, steps ++ ["sitting"]), %{"why" => "sitting_no_return"})
+      ],
+      else: []
+  end
+
+  defp sitting(_, _, _, _, _), do: []
+
+  defp gifts(rel, steps, o, d, proven, targets) do
     if repeats?(d, targets) and
          not Enum.any?([d["quest"], d["riddle"], o["accept"], o["patrol"]]) and not self_gated?(o),
        do:
@@ -61,7 +87,9 @@ defmodule Loka.Content.Hub do
 
   # The lowered `once`: the policy's condition (alone or under `all`) that a fact its steps set
   # does not yet hold that value.
-  defp self_gated?(%{"policy" => policy, "steps" => steps}) do
+  @doc "Whether a choice's own steps hide it for good (the lowered `once`)."
+  @spec self_gated?(map()) :: boolean()
+  def self_gated?(%{"policy" => policy, "steps" => steps}) do
     conditions = if policy["op"] == "all", do: policy["items"], else: [policy]
 
     Enum.any?(conditions, fn
@@ -78,7 +106,7 @@ defmodule Loka.Content.Hub do
     end)
   end
 
-  defp self_gated?(_), do: false
+  def self_gated?(_), do: false
 
   defp repeatable(o, proven) do
     receive = if is_map_key(o, "receive"), do: [["receive"]], else: []

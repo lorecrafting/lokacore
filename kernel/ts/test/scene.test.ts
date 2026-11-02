@@ -137,6 +137,23 @@ test('fresh scenes keep the same state as their scene-free variant', () => {
   assert.equal(Object.hasOwn(gameView(w), 'scene'), false);
 });
 
+// Breaks: an answer that reaches a story point in a dialogue with no quest reopens the hub under the
+// modal scene (loka-vduxr.11), or the scene waits for a quest; the other answer must still reopen.
+test('a choice with no quest starts its scene and ends the talk', () => {
+  const noQuest = (c: any) => {
+    const bram = c.dialogues[`${R}:dialogue/bram`];
+    delete bram.quest;
+    bram.choices.stay = {
+      label: bram.choices.carry.label,
+      narration: bram.choices.carry.narration,
+    };
+  };
+  const s = choose(ready(fresh(noQuest)));
+  equal(gameView(s.world).scene, shown(1, 'bell'));
+  assert.equal(gameView(s.world).choice, undefined);
+  assert.ok(gameView(choose(ready(fresh(noQuest)), 'stay').world).choice);
+});
+
 // Breaks: missing start, union rather than replacement, time advance or unadvertised modal refusal.
 test('story outcome starts line one and refuses every ordinary action at both boundaries', () => {
   const s = choose(ready());

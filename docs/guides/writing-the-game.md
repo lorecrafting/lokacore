@@ -96,6 +96,11 @@ maud: ~
   `policy` in `dialogues/<key>.json`.
 - `once` hides the choice after the player takes it. It makes a fact of its own,
   `<key>_<choice>_done`; do not declare it.
+- `once: sitting` hides the choice until the next time the player talks to this person. It works
+  only on a choice that comes back to these choices: no `then`, not the only choice, not in a scene
+  another scene leads to or one with nested choices above it, or the compile says why. When every
+  choice is `once` or `once: sitting`, the last answer closes the talk and the build warns
+  `SITTING_SPENT`.
 - `asked` dims the choice after the player takes it; it stays usable. It makes a fact of its own,
   `<key>_<choice>_asked`; do not declare it.
 - `then: branch_next` plays the dialogue `branch_next` next; `then: end` closes the talk. A choice
@@ -178,8 +183,10 @@ A `.cut` file cannot say what starts it, and a cutscene with no trigger never pl
 { "on": { "story_point": "bridge_done", "outcome": "carry" }, "control": "modal" }
 ```
 
-`bridge_done` is a story point, and it has no file of its own: a choice in a scene that resolves a
-quest names it. Take a scene whose every choice ends the quest:
+`bridge_done` is a story point, and it has no file of its own: a choice names it. Any choice with no
+`then` may, with or without a quest; reaching the point ends the talk, so the cutscene never plays
+over open choices. If the player can take the choice twice, write `once` under it. Take a scene
+whose every choice ends the quest:
 
 ```
 npc: maud
@@ -199,6 +206,26 @@ and add `dialogues/<key>.json` beside it, with the point and the outcome this ch
 ```json
 { "choices": { "carry": { "story_point": "bridge_done/carry" } } }
 ```
+
+To start it from an ordinary choice, leave the `quest:` lines out; the rest is the same.
+
+### Cut a talk short
+
+A reaction's `end_talk` step closes the open talk of whoever the event is about, as if they had left: react to the player's own act, not to someone else's arrival. Nothing else
+changes, and with no talk open it does nothing. Put the words in a `narrate` step before it:
+`reactions/<key>.json`:
+
+```json
+{
+  "on": { "event": "choice_resolved", "choice": "carry" },
+  "steps": [
+    { "op": "narrate", "text": "narration.maud_talk.cut_short" },
+    { "op": "end_talk" }
+  ]
+}
+```
+
+Any event can do it: the choice above, or someone arriving.
 
 Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file. A `~`
 holds the place of words only: in a `sets:` or `quest:` line it is listed too, but the compile
