@@ -64,6 +64,17 @@ defmodule Loka.ContentDialogueSittingTest do
     assert "SITTING_SPENT" in warned(dir, [choices(%{"a" => @sitting, "b" => @sitting})])
     refute "SITTING_SPENT" in warned(dir, [choices(%{"a" => @sitting, "b" => @plain})])
     refute "SITTING_SPENT" in warned(dir, [choices(%{"a" => @plain, "b" => @plain})])
+
+    gated =
+      Map.merge(@plain, %{
+        "policy" => %{
+          "op" => "not",
+          "item" => %{"op" => "fact_compare", "fact" => "gate_open", "equals" => true}
+        },
+        "steps" => [%{"op" => "fact.assign", "fact" => "gate_open", "value" => true}]
+      })
+
+    refute "SITTING_SPENT" in warned(dir, [choices(%{"a" => gated, "b" => gated})])
   end
 
   # Breaks: a story point still needs a quest, or an answer that ends the talk may also lead on.
@@ -107,7 +118,7 @@ defmodule Loka.ContentDialogueSittingTest do
     assert {:error, a} =
              Loka.ContentSource.compile(dir, [
                caps,
-               rule.([%{"op" => "wait", "ticks" => 30}, cut])
+               rule.([%{"op" => "wait", "seconds" => 30}, cut])
              ])
 
     refute Enum.any?(a, &(&1["code"] == "DUPLICATE_DEFINITION"))
