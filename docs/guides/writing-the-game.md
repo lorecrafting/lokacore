@@ -208,7 +208,7 @@ and add `dialogues/<key>.json` beside it, with the point and the outcome this ch
 ```
 
 To start it from an ordinary choice, leave the `quest:` lines out and write `once` under the
-choice: with no quest to end it, the build refuses a choice that could reach the point twice, and a second outcome of that point unless every outcome's choice is gated on one fact it sets.
+choice: with no quest to end it, the build refuses a choice that could reach the point twice, and a second outcome of that point unless every outcome's choice is gated on one fact whose last write in its steps closes the gate (a policy `equals false`, or `not` around `equals true`, and a step setting true) and no step of the dialogue sets that fact back.
 
 Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file. A `~`
 holds the place of words only: in a `sets:` or `quest:` line it is listed too, but the compile

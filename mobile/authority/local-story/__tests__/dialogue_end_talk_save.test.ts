@@ -26,11 +26,15 @@ const rule = (event: string, steps: object[] = [{ op: 'end_talk' }]) =>
 // Breaks: riddle-save refuses a choice_opened reaction's second op or a choice_opened that closes
 // its own row, so the next launch is save_corrupt for good.
 test('a save reopens after choice_opened closes or edits the talk it opened', () => {
-  reopened(withToken({ guard: talkTo(twoChoices) }, {}, rule('choice_opened')), (g) =>
-    assert.equal(g.at(), undefined),
+  reopened(
+    withToken({ guard: talkTo(twoChoices) }, {}, rule('choice_opened')),
+    (g) => assert.equal(g.at(), undefined),
+    (next) => next.talk(),
   );
-  reopened(withToken({ guard: talkTo(twoChoices) }, {}, rule('choice_opened', [flag(true)])), (g) =>
-    assert.ok(g.at()),
+  reopened(
+    withToken({ guard: talkTo(twoChoices) }, {}, rule('choice_opened', [flag(true)])),
+    (g) => assert.ok(g.at()),
+    (next) => next.choose('a'),
   );
 });
 
@@ -158,7 +162,8 @@ test('a save reopens after a reaction closes a bounded riddle', () => {
   });
 });
 
-// Breaks: the same closure on a riddle with no limit, whose row keeps no attempts, is refused.
+// Breaks: riddle-save requires `attempts` on a closed riddle row, as it may on one with a limit, so
+// a reaction closing an unbounded riddle leaves a save that is save_corrupt on the next launch.
 test('a save reopens after a reaction closes an unbounded riddle', () => {
   riddle(
     'action_completed',
@@ -170,9 +175,10 @@ test('a save reopens after a reaction closes an unbounded riddle', () => {
   );
 });
 
-// Breaks: a fight stops refusing `choose` or `perform`, so end_talk fires on a player mid-round; or a
-// talk left open through a fight does not reopen.
-test('in a fight no act can fire end_talk, and the open talk survives the save', () => {
+// Breaks: a fight stops refusing `choose` or `perform`, so end_talk fires on a player mid-round; a
+// talk left open through a fight does not reopen; or `cast`, kept in a fight, stops closing the
+// talk or leaves a save that does not reopen and play on.
+test('in a fight only `cast` can fire end_talk; the talk open or closed survives the save', () => {
   const fighter = {
     keywords: ['guard'],
     name: LABEL,
@@ -194,6 +200,13 @@ test('in a fight no act can fire end_talk, and the open talk survives the save',
           on: { event: 'action_completed' },
           steps: [{ op: 'end_talk' }],
         },
+        'actions/hex.json': {
+          name: LABEL,
+          aliases: ['hex'],
+          target: { kind: 'spell', word: 'hex', learned: 'hex_known' },
+          priority: 0,
+          outcomes: { success: { steps: [flag(true)], narration: { actor: SAID } } },
+        },
         'actions/tie.json': {
           name: LABEL,
           aliases: ['tie'],
@@ -203,6 +216,12 @@ test('in a fight no act can fire end_talk, and the open talk survives the save',
         },
       },
       {
+        hex_known: {
+          version: 1,
+          value_type: { type: 'bool', default: true },
+          scopes: ['player'],
+          meaning: 'x',
+        },
         gate_open: {
           version: 1,
           value_type: { type: 'bool', default: false },
@@ -234,4 +253,14 @@ test('in a fight no act can fire end_talk, and the open talk survives the save',
     refused('tie', [post], {}, 2);
     assert.equal(g.at()![0], row[0]);
   });
+  reopened(
+    c,
+    (g) => {
+      g.go('attack', {}, [g.fresh.entityIds['persuade_sampler@0.0.1:npc/guard']!]);
+      assert.ok(g.at());
+      g.go('cast', { word: 'hex' });
+      assert.equal(g.at(), undefined);
+    },
+    (next) => next.go('cast', { word: 'hex' }),
+  );
 });

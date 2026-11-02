@@ -150,7 +150,7 @@ defmodule Loka.Content.Dialogues do
   end
 
   # With no quest to end them, an outcome's choice stays open after another is taken, unless all
-  # of them gate on one fact their steps set.
+  # of them gate on one fact their steps set and no step of the dialogue sets back.
   defp forked(p, path, ctx) do
     outcomes = Map.values(p["outcomes"])
 
@@ -162,8 +162,13 @@ defmodule Loka.Content.Dialogues do
 
   defp gates(%{"dialogue" => r, "choice" => c}, ctx) do
     case resolve(r, "dialogue", ctx.m, ctx.defs) do
-      {_, _, d} -> MapSet.new(Loka.Content.Hub.self_gates(get_in(d, ["choices", c]) || %{}))
-      _ -> MapSet.new()
+      {_, _, d} ->
+        Loka.Content.Hub.self_gates(get_in(d, ["choices", c]) || %{})
+        |> Enum.reject(&Loka.Content.Hub.reopens?(d, &1))
+        |> MapSet.new()
+
+      _ ->
+        MapSet.new()
     end
   end
 

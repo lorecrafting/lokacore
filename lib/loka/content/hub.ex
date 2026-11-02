@@ -85,8 +85,8 @@ defmodule Loka.Content.Hub do
       Enum.any?(choices, fn {_, c} -> is_map_key(c, "then") or is_map_key(c, "then_failed") end)
   end
 
-  # The lowered `once`: the policy's condition (alone or under `all`) that a fact its steps set
-  # does not yet hold that value.
+  # The lowered `once`: the policy's condition (alone or under `all`) on a fact its steps last set
+  # to a value the condition rules out: `not` around `equals v`, or `equals w` with w other than v.
   @doc "Whether a choice's own steps hide it for good (the lowered `once`)."
   @spec self_gated?(map()) :: boolean()
   def self_gated?(o), do: self_gates(o) != []
@@ -96,18 +96,32 @@ defmodule Loka.Content.Hub do
   def self_gates(%{"policy" => policy, "steps" => steps}) do
     conditions = if policy["op"] == "all", do: policy["items"], else: [policy]
 
-    for %{"op" => "not", "item" => %{"op" => "fact_compare", "fact" => f, "equals" => v} = leaf} <-
-          conditions,
+    for {closes?, %{"fact" => f, "equals" => w} = leaf} <- Enum.map(conditions, &gate/1),
         # A leaf reading another holder (subject, npc, with) never sees the step's write.
         Map.take(leaf, ~w(subject npc with)) == %{},
-        Enum.any?(
-          steps,
-          &(match?(%{"op" => "fact.assign", "value" => ^v}, &1) and key(&1["fact"]) == key(f))
-        ),
+        %{"op" => "fact.assign", "value" => v} <- last_write(steps, key(f)),
+        closes?.(v, w),
         do: {key(f), v}
   end
 
   def self_gates(_), do: []
+
+  @doc "Whether a step of any choice of the dialogue writes the gate's fact to another value."
+  @spec reopens?(map(), {String.t(), term()}) :: boolean()
+  def reopens?(dialogue, {f, v}) do
+    Enum.any?(
+      for(c <- Map.values(dialogue["choices"]), s <- c["steps"] || [], writes?(s, f), do: s),
+      &(not match?(%{"op" => "fact.assign", "value" => ^v}, &1))
+    )
+  end
+
+  defp gate(%{"op" => "not", "item" => %{"op" => "fact_compare"} = leaf}), do: {&==/2, leaf}
+  defp gate(%{"op" => "fact_compare"} = leaf), do: {&!=/2, leaf}
+  defp gate(_), do: nil
+
+  defp last_write(steps, f), do: steps |> Enum.filter(&writes?(&1, f)) |> Enum.take(-1)
+
+  defp writes?(step, f), do: match?("fact." <> _, step["op"]) and key(step["fact"]) == f
 
   defp repeatable(o, proven) do
     receive = if is_map_key(o, "receive"), do: [["receive"]], else: []

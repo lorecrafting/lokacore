@@ -207,6 +207,69 @@ defmodule Loka.ContentDialogueSittingTest do
     refusal(dir, [facts, apart], "story_point_two_outcomes")
   end
 
+  # Breaks: any assign counts as the gate though a later step or another choice sets the fact back,
+  # so the two outcomes can both fire; or the positive form a writer reaches for is refused.
+  test "a shared gate holds only while nothing in the dialogue sets its fact back", %{dir: dir} do
+    bool = %{"type" => "bool", "default" => false}
+    fact = %{"version" => 1, "scopes" => ["player"], "meaning" => "x"}
+
+    facts =
+      {"facts.json",
+       &Map.update!(&1, "facts", fn f ->
+         Map.merge(f, %{
+           "d" => Map.put(fact, "value_type", bool),
+           "n" => Map.put(fact, "value_type", %{"type" => "int", "default" => 0})
+         })
+       end)}
+
+    set = fn f, v -> %{"op" => "fact.assign", "fact" => f, "value" => v} end
+    open = %{"op" => "fact_compare", "fact" => "d", "equals" => false}
+    step = fn extra -> Map.merge(@plain, %{"steps" => extra}) end
+
+    gated = fn o, policy, steps ->
+      Map.merge(@plain, %{"story_point" => "met/" <> o, "policy" => policy, "steps" => steps})
+    end
+
+    a = gated.("a", open, [set.("d", true)])
+    b = gated.("b", open, [set.("d", true)])
+
+    built = fn cs ->
+      assert {:ok, _, _} = Loka.ContentSource.compile(dir, [facts, choices(cs)])
+    end
+
+    refused = &refusal(dir, [facts, choices(&1)], "story_point_two_outcomes")
+
+    built.(%{"a" => a, "b" => b, "c" => @plain})
+    built.(%{"a" => a, "c" => @plain})
+    refused.(%{"a" => a, "b" => b, "c" => step.([set.("d", false)])})
+
+    refused.(%{
+      "a" => gated.("a", open, [set.("d", false), set.("d", true)]),
+      "b" => b,
+      "c" => @plain
+    })
+
+    closed = %{
+      "op" => "not",
+      "item" => %{"op" => "fact_compare", "fact" => "d", "equals" => true}
+    }
+
+    last_false = gated.("a", closed, [set.("d", true), set.("d", false)])
+    two = %{"a" => last_false, "b" => gated.("b", closed, [set.("d", true)]), "c" => @plain}
+    refusal(dir, [facts, choices(two)], "story_point_repeats")
+
+    # A step that leaves the positive gate open is no gate at all.
+    still = gated.("a", open, [set.("d", false)])
+    refusal(dir, [facts, choices(%{"a" => still, "c" => @plain})], "story_point_repeats")
+
+    zero = %{"op" => "fact_compare", "fact" => "n", "equals" => 0}
+    na = gated.("a", zero, [set.("n", 1)])
+    nb = gated.("b", zero, [set.("n", 1)])
+    built.(%{"a" => na, "b" => nb, "c" => @plain})
+    bump = %{"op" => "fact.adjust", "fact" => "n", "amount" => 1}
+    refused.(%{"a" => na, "b" => nb, "c" => step.([bump])})
+  end
+
   # Breaks: the line lowers to the wrong field or to `once`, both lines on one choice pass, or the
   # line outside a choice is not refused.
   test "`once: sitting` lowers to sitting and refuses its neighbours" do
