@@ -109,7 +109,8 @@ defmodule Mix.Tasks.Loka.New do
 
   defp plan(["--" <> _ | _], _), do: Mix.raise(@usage)
   defp plan(["scene", npc, key | rest], done), do: plan(rest, [{"scene", key, npc} | done])
-  defp plan(["scene" | _], _), do: Mix.raise(@usage)
+  # A lone trailing `scene` stays a cartridge dir.
+  defp plan(["scene", _], _), do: Mix.raise(@usage)
   defp plan([kind, name | rest], done), do: plan(rest, [{kind, name, nil} | done])
   defp plan(rest, done), do: {Enum.reverse(done), List.first(rest)}
 end

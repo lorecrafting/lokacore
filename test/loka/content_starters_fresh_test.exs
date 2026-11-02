@@ -223,6 +223,17 @@ defmodule Loka.ContentStartersFreshTest do
 
     refute File.exists?(Path.join(dir, "scenes/hello.scene"))
 
+    # A .scene merges with its dialogues/ JSON half, so that file holds the key too.
+    File.mkdir_p!(Path.join(dir, "dialogues"))
+    File.write!(Path.join(dir, "dialogues/hi.json"), "{}")
+    assert {:error, "dialogues/hi.json exists" <> _} = Starters.write(dir, "scene", "hi", "maud")
+    refute File.exists?(Path.join(dir, "scenes/hi.scene"))
+
+    # An NPC key may run to 64 characters, past the starters' own 32.
+    long = String.duplicate("n", 40)
+    File.cp!(Path.join(dir, "npcs/maud.json"), Path.join(dir, "npcs/#{long}.json"))
+    assert {:ok, _} = Starters.write(dir, "scene", "long_talk", long)
+
     File.mkdir_p!(Path.join(dir, "areas"))
     File.write!(Path.join(dir, "areas/yard.json"), JSON.encode!(%{"npcs" => %{"ada" => %{}}}))
     assert {:ok, _} = Starters.write(dir, "scene", "ada_talk", "ada")
@@ -234,6 +245,11 @@ defmodule Loka.ContentStartersFreshTest do
     end
 
     refute File.exists?(Path.join(dir, "scenes/later.scene"))
+
+    # A cartridge dir named scene is still a dir.
+    {:ok, _} = Starters.write(Path.join(tmp, "scene"), "cartridge", Path.join(tmp, "scene"))
+    ExUnit.CaptureIO.capture_io(fn -> Mix.Tasks.Loka.New.run(~w(--cwd #{tmp} npcs bo scene)) end)
+    assert File.exists?(Path.join(tmp, "scene/npcs/bo.json"))
   end
 
   # Runs a starter, first running each starter its refusals name.

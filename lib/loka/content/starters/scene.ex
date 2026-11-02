@@ -11,13 +11,11 @@ defmodule Loka.Content.Starters.Scene do
   @spec write(Path.t(), String.t(), String.t(), (Path.t(), binary() | nil -> any())) ::
           {:ok, [Path.t()]} | {:error, String.t()}
   def write(dir, key, npc, hook) do
-    rel = "scenes/#{key}.scene"
-
     with :ok <- Starters.valid_name(key),
          :ok <- Starters.in_cartridge(dir),
-         :ok <- free(dir, rel, npc),
+         :ok <- free(dir, key, npc),
          {:ok, written} <- Starters.put(dir, %{"cartridge.json" => @dialogue}, nil, hook) do
-      path = Path.join(dir, rel)
+      path = Path.join(dir, "scenes/#{key}.scene")
       hook.(path, nil)
       File.mkdir_p!(Path.dirname(path))
       # A choice needs a reply to compile.
@@ -28,17 +26,24 @@ defmodule Loka.Content.Starters.Scene do
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
   end
 
-  defp free(dir, rel, npc) do
+  # The scene's dialogue key is also a `dialogues/` scene's, and its JSON half's (SourceLines).
+  defp free(dir, key, npc) do
+    taken =
+      Enum.find(
+        ~w(scenes/#{key}.scene dialogues/#{key}.scene dialogues/#{key}.json),
+        &File.exists?(Path.join(dir, &1))
+      )
+
     cond do
       !npc?(dir, npc) -> {:error, "no NPC #{npc}: bin/loka new npcs #{npc} first"}
-      File.exists?(Path.join(dir, rel)) -> {:error, "#{rel} exists: a starter never replaces it"}
+      taken -> {:error, "#{taken} exists: a starter never replaces it"}
       true -> :ok
     end
   end
 
-  # The name check keeps a path out of the lookup.
+  # The key pattern (not the starter's 32-character cap) keeps a path out of the lookup.
   defp npc?(dir, npc) do
-    Starters.valid_name(npc) == :ok and
+    npc =~ ~r/^[a-z][a-z0-9_]{0,63}$/ and
       (File.exists?(Path.join(dir, "npcs/#{npc}.json")) or
          Enum.any?(
            Path.wildcard(Path.join(dir, "areas/*.json")),
