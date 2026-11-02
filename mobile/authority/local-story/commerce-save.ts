@@ -104,7 +104,7 @@ function startingBalances(world: World, resource: DefinitionRef, start: number) 
 function receipts(world: World, db: Db, meta: Meta, revision: number) {
   const rows = db.getAllSync<Row>(
     `SELECT command_id,actor_id,command,response,revision FROM receipt
-    WHERE scope=? AND json_extract(response,'$.kind')='accepted' AND (json_extract(command,'$.payload.type') IS NOT 'elapsed'
+    WHERE scope=? AND json_extract(response,'$.kind')='accepted' AND (json_extract(command,'$.payload.type')<>'elapsed'
       OR instr(response,'entity.transfer') OR instr(response,'resource.adjust')) ORDER BY revision`,
     `story/${meta.lineage_id}/${world.character}`,
   );

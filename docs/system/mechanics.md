@@ -719,9 +719,9 @@ a refresh while active is silent) join the receipt's narration as the delivery i
 the root command's own lines first, then its reactions' lines in delivery order, cascades
 included; then each due job's line, followed by its reactions' lines; the
 [level-up](#experience-and-levelling-toolbox-row-4) line last. Fixed in Beads `loka-kgd.13`
-(2026-10-10): before it, the proposal dropped reaction lines. Where reopen replays receipt
-history, a save holding such an unvoiced first application re-decides differently and opens
-`save_corrupt` with Start over ([save.md](save.md)); no Chapter 1 reaction says a line, so Chapter 1 receipts are unchanged.
+(2026-10-10): before it, the proposal dropped reaction lines. The dev replay of
+a save holding such an unvoiced first application re-decides differently and fails; opening does not
+replay ([save.md](save.md)); no Chapter 1 reaction says a line, so Chapter 1 receipts are unchanged.
 
 <a id="schedule1-behavior1-calendar1-mechanicsschedulerulets-kernelts-srcmechanicsschedulebehaviorts"></a>
 

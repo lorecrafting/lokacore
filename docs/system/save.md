@@ -46,6 +46,9 @@ command ([reopen principle](../lessons/storage.md)). A state row or older receip
 was edited by hand opens. Receipts stay written. `receiptHistory` (`receipt-history.ts`) still
 replays every accepted receipt, for tests and dev tooling only. A line below that says a receipt
 replay cannot pay, allocate or grant twice is about replaying one invocation, not about opening.
+This section wins over the sections below: where one lists forged, missing or contradictory receipt
+evidence as `save_corrupt`, opening refuses it only if that section's loader still reads the row
+(a commerce reconcile, the newest receipt); otherwise the claim holds for `receiptHistory`.
 
 The session controller adds `save_corrupt` causes with the new game in place after a story
 opens: a world whose first screen cannot be built
