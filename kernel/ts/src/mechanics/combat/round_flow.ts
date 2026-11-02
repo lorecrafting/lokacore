@@ -277,17 +277,14 @@ function naming(world: World, row: EncounterRow, r: Round) {
   };
 }
 
-// The condition row, after a round with an attack, of the foe the player struck (else the round's
-// starting foe), not a pack's next member; a dead foe sits at its minimum, below every cut
+// The condition row, after a round with an attack, of the round's starting foe (the one the player
+// struck), not a pack's next member; a dead foe sits at its minimum, below every cut
 // (at_percent >= 1), so it gets none.
 function condition(world: World, row: EncounterRow, r: Round) {
   const rows = world.cartridge.world!.combat!.conditions;
   if (!rows || !r.events.some((e) => e.payload.type === 'attack_result')) return undefined;
   const end = prefix(world, r.ops, r.due_time);
-  const struck = r.events
-    .map((e) => e.payload)
-    .find((e) => e.type === 'attack_result' && e.attacker_id === row.body_id);
-  const foe = struck?.type === 'attack_result' ? struck.target_id : row.npc_id;
+  const foe = row.npc_id;
   const hp = resourceRef(end, 'hp');
   const { minimum, maximum } = resourceSpec(end, foe, hp);
   const current = level(end, foe, hp)!;
