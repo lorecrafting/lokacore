@@ -19,6 +19,7 @@ const gates = [
 const notGates = [
   'asked_when',
   'label',
+  'sitting',
   'narration',
   'narration_variants',
   'order',

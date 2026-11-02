@@ -1,4 +1,4 @@
-// size: allow 326, the closed State row sections include toolbox status, levelling and built rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33) and food status (hs-5); position movement (row 35); rejected takes a GameError cause (x6t.17); reaction composes scripted_action (C3 D7); dev movement (dev@1)
+// size: allow 332, the closed State row sections include toolbox status, levelling and built rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33) and food status (hs-5); position movement (row 35); rejected takes a GameError cause (x6t.17); reaction composes scripted_action (C3 D7); dev movement (dev@1); byCause beside event
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -273,6 +273,12 @@ export function allocator(world: World, command: { readonly id: Command['id'] })
   let ordinal = 0;
   return () => id(world.context, command.id, ordinal++);
 }
+
+/** The `command` argument of `event` for what a domain event caused, not a command. */
+export const byCause = (cause: DomainEvent, actor_id: CharacterId) => ({
+  id: cause.id as string as Command['id'],
+  payload: { actor_id },
+});
 
 /**
  * The DomainEvent at one-based causal `position` (04 §5.2, §8, §11), its id from `mint`, for

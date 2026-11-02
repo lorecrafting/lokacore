@@ -1386,6 +1386,10 @@
           ],
           "type": "object"
         },
+        "sitting": {
+          "const": true,
+          "description": "Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest."
+        },
         "steps": {
           "items": { "$ref": "#/$defs/Step" },
           "type": "array"
@@ -3916,6 +3920,17 @@
         },
         {
           "additionalProperties": false,
+          "description": "End the acting character's open conversation as Leave would (one choice.close, no event, no line); with none open, nothing.",
+          "properties": {
+            "op": { "const": "end_talk" }
+          },
+          "required": [
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
           "description": "Toolbox row 41 (decay): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.",
           "properties": {
             "op": { "const": "item.move" },
@@ -5807,6 +5822,10 @@
           },
           "type": "object"
         },
+        "sitting": {
+          "const": true,
+          "description": "Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest."
+        },
         "steps": {
           "items": { "$ref": "#/$defs/Step" },
           "type": "array"
@@ -7358,6 +7377,14 @@
               "type": "integer"
             },
             "op": { "const": "experience.grant" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "End the acting character's open conversation as Leave would (one choice.close, no event, no line); with none open, nothing.",
+          "properties": {
+            "op": { "const": "end_talk" }
           },
           "type": "object"
         },

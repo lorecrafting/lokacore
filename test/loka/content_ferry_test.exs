@@ -398,13 +398,14 @@ defmodule Loka.ContentFerryTest do
     at = &"dialogues/bram.choices.#{&1}.story_point"
     claim = &dialogue(fn d -> put_in(d, ~w(choices leave story_point), &1) end)
     m = src("cartridge.json")
+    repeats = %{"why" => "story_point_repeats"}
 
     cases = [
       {claim.("lantern_resolved/carry"), [d("DUPLICATE_DEFINITION", at.("leave"), %{})]},
       {claim.("lantern_resolved"),
        [d("SCHEMA_VIOLATION", at.("leave"), %{"error" => "pattern_mismatch"})]},
       {dialogue(&Map.delete(&1, "quest")),
-       for(o <- ~w(carry leave), do: d("OUTCOME_MISMATCH", at.(o), %{}))},
+       for(o <- ~w(carry leave), do: d("OUTCOME_MISMATCH", at.(o), repeats))},
       {%{
          "cartridge.json" => update_in(m, ~w(requires capabilities), &Map.delete(&1, "dialogue"))
        },

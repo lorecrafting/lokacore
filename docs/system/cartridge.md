@@ -193,8 +193,8 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
 - story points: there is no story point file. A dialogue choice's `story_point: "<key>/<outcome>"`
   and a scene's `on_end` declare the point's outcomes, and the point is located at its first
   claim. A second claim of one outcome is `DUPLICATE_DEFINITION` at its site
-  (`dialogues/<d>.choices.<c>.story_point` or `scenes/<s>.on_end`); a claiming choice's dialogue
-  resolves a quest (`OUTCOME_MISMATCH` at the choice's `story_point`); a scene-claimed key is at most
+  (`dialogues/<d>.choices.<c>.story_point` or `scenes/<s>.on_end`); a claiming choice has no `then`
+  or `then_failed`, since reaching a point ends the talk (`OUTCOME_MISMATCH`, why `story_point_then`, at the choice's `story_point`); a scene-claimed key is at most
   52 characters (`SCHEMA_VIOLATION` at `scenes/<s>.on_end.story_point`); a point needs dialogue@1
   (`UNDECLARED_CAPABILITY`, `lib/loka/content/dialogues.ex`);
 - policies: a policy is its condition tree inline (`protocol/policy.schema.json` `Policy`); no
@@ -260,7 +260,7 @@ field of the op; a list names the only fields run besides `op`.
 | `quest.resolve` | `quest_resolved` | all | | | |
 | `barrier.set` | `barrier_changed` | all | | | |
 | `npc.move` | `entity_entered_room` | all | | | |
-| `quest.fail`, `population.suppress`, `population.spawn`, `experience.grant`, `narrate`, `item.move`, `replenish.run` | | all | | | |
+| `quest.fail`, `population.suppress`, `population.spawn`, `experience.grant`, `narrate`, `item.move`, `replenish.run`, `end_talk` | | all | | | |
 | `status.apply` | | all | `npc`, `status` | | |
 | `status.cure` | | all | all | | |
 | `damage`, `light.ignite` | | | all | | |
@@ -268,6 +268,8 @@ field of the op; a list names the only fields run besides `op`.
 | `build` | | | `structure`, `direction` | | all |
 | `skill.acquire`, `topic.grant` | | | | all | |
 | `entitlement`, `meal`, `drink`, `repair`, `claim`, `cancel`, `deposit`, `withdraw`, `mend`, `raze` | | | | | all |
+
+`end_talk` closes the delivery actor's open conversation; the compiler admits it only on a player's own act (`choice_resolved`, `choice_opened`, `check_passed`, `check_failed`, `action_completed`, `story_point_reached`; `end_talk_event`), since any other event's delivery may fall past an NPC subject to whoever acted, or to the tick's root.
 
 ### Source shortcuts
 
@@ -908,7 +910,7 @@ build. The author tools below are reachable only in that bundle (a production ex
   lowered by [Source shortcuts](#source-shortcuts) into today's dialogue or scene JSON and `text.json`
   keys before any other pass; what it cannot say stays in a JSON file of the same key. Errors name the
   scene file and line, with `data.why` for a bad line (`npc` beside it once known); the other lines
-  of the file still lower, so a fault behind a bad line reports in the same compile. `needs:` (`<fact>` or `not <fact>`), `once`, `asked` and `then:` (a key or `end`) lower on a choice; a
+  of the file still lower, so a fault behind a bad line reports in the same compile. `needs:` (`<fact>` or `not <fact>`), `once`, `once: sitting` (`sitting`), `asked` and `then:` (a key or `end`) lower on a choice; a
   deeper `- ` under a reply lowers to the dialogue `<key>_<choice>`, whose `then` the parent takes.
   A deeper set takes `entry: false`, since its way back makes a loop with the root and inference would open the widest; the root takes no marker, so a speaker's several nested scenes are tried by key.
   `once` lowers in the compile pipeline for every dialogue: the engine fact `<key>_<choice>_done`,
