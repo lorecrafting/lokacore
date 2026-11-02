@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { clockWords, shown, type Canon } from './shown.ts';
+import { clockWords, factRows, shown, type Canon } from './shown.ts';
 
 const ref = (kind: string, key: string) => ({
   cartridge_id: 'c',
@@ -93,4 +93,20 @@ test('the clock reads in words', () => {
   // Break: a calendar without day or hour printing "undefined".
   const partial = { subdivision: 0, season: 'autumn' } as GameView['calendar_status'];
   assert.equal(clockWords({ time: 3725, calendar: partial }), '1h 02m');
+});
+
+// Breaks: a held fact matched by short key across cartridges (an extended cartridge's same key);
+// an unset declared fact dropped or shown without its default; a held fact nothing declares lost.
+test('facts: every declared one by short key, unset at its default, set from the held row', () => {
+  const held = (c: string, key: string) =>
+    JSON.stringify({ fact: { ...ref('fact', key), cartridge_id: c }, scope: { kind: 'player' } });
+  const declared = {
+    'c@1:fact/met': { key: 'met', value_type: { default: false } },
+    'base@1:fact/met': { key: 'met', value_type: { default: 0 } },
+  };
+  assert.deepEqual(factRows({ [held('base', 'met')]: 2, [held('c', 'gone')]: 'x' }, declared), [
+    { id: 'c@1:fact/met', key: 'met', value: false, set: false },
+    { id: 'base@1:fact/met', key: 'met', value: 2, set: true },
+    { id: 'c@1:fact/gone', key: 'gone', value: 'x', set: true },
+  ]);
 });

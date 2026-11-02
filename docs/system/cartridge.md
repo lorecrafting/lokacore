@@ -888,9 +888,10 @@ build. The author tools below are reachable only in that bundle (a production ex
 - **Author panel** (`tools/author-panel`, its own web page framing the Book at `?dev=1`; nothing of it enters the app's dependencies or bundles): the last compile's diagnostics in plain words
   (`severity: file:line message`, which is what `mix loka.compile` prints: one sentence and one fix
   per diagnostic code, from `Loka.Content.Explain`, the path mapped to its line by the source JSON;
-  invalid JSON adds `:column`), and under them the lint findings (`mix loka.lint`, run after each
+  invalid JSON adds `:column`), and under them the lint findings, folded behind their count (`mix loka.lint`, run after each
   successful compile; a lint that could not run says so); the game state from the view (room, people,
-  held items, pools with their bands, statuses, clock, pending choice, facts and quests); why a
+  held items, pools with their bands, statuses, clock, pending choice and quests) and every declared
+  fact by its short key, a fact never set at its declared default; why a
   scripted action or dialogue is missing or refused, offered from the current room rather than typed and
   answered in sentences (`fact met_thera is false; needs true`; [rule explainer](#rule-explainer-loka-kgd1943)
   on the recorded path, its policy read on the world as it stands after the last step); find (`GET /__author/find?q=`): a key or

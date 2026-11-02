@@ -7,6 +7,7 @@ type Ref = { cartridge_id: string; cartridge_version: string; kind: string; key:
 export type Canon = {
   scripted_actions?: Record<string, { key: string; target?: { kind: string; room?: Ref } }>;
   dialogues?: Record<string, { key: string; npc: Ref }>;
+  facts?: Record<string, { key: string; value_type: { default?: unknown } }>;
 };
 const refString = (r: Ref) => `${r.cartridge_id}@${r.cartridge_version}:${r.kind}/${r.key}`;
 
@@ -65,4 +66,27 @@ export function clockWords({
   return [`day ${day}, hour ${hour}`, season, solar, lunar, tide, weather]
     .filter(Boolean)
     .join(', ');
+}
+
+/** `cellar_sampler@0.0.11:resource/hp` as `hp`: the name a writer typed. */
+export const shortName = (id: string) => id.slice(id.indexOf('/') + 1);
+
+/** Every declared fact by its short key with its value, then any held row nothing declares; a fact
+ * never set shows its declared default. Held rows are keyed by JSON `{fact: Ref, scope}`. */
+export function factRows(held: Readonly<Record<string, unknown>>, declared: Canon['facts'] = {}) {
+  const set = new Map(
+    Object.entries(held).map(([k, value]) => [
+      refString((JSON.parse(k) as { fact: Ref }).fact),
+      value,
+    ]),
+  );
+  const rows = Object.entries(declared).map(([id, f]) => ({
+    id,
+    key: f.key,
+    value: set.has(id) ? set.get(id) : f.value_type.default,
+    set: set.has(id),
+  }));
+  for (const [id, value] of set)
+    if (!(id in declared)) rows.push({ id, key: shortName(id), value, set: true });
+  return rows;
 }
