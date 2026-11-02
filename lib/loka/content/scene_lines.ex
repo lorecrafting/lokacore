@@ -82,7 +82,7 @@ defmodule Loka.Content.SceneLines do
 
   @doc "The key of the choice `label` on line `n`: a `~` placeholder has no words, so its line keys it."
   @spec choice_key(String.t(), pos_integer()) :: String.t()
-  def choice_key(label, n), do: if(String.trim(label) == "~", do: "todo_#{n}", else: key(label))
+  def choice_key(label, n), do: if(String.trim(label) == "~", do: "todo__#{n}", else: key(label))
 
   defp step({raw, n}, s) do
     text = String.trim(raw)

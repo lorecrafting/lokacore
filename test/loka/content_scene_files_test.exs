@@ -116,7 +116,8 @@ defmodule Loka.ContentSceneFilesTest do
            ]
   end
 
-  # Breaks: two `- ~` choices share one key (one is lost, or refused as a repeat), or a `- ~`
+  # Breaks: two `- ~` choices share one key, or one shares a real label's (`- Todo 3`) key
+  # (one is lost, or refused as a repeat), or a `- ~`
   # is refused in dev; a scene with no words before its first choice, or with no choice, lowers
   # silently and fails later at a dialogue path with no line; or one whose same-key JSON supplies
   # them is refused, or told the JSON overwrites words the scene never wrote.
@@ -125,7 +126,7 @@ defmodule Loka.ContentSceneFilesTest do
 
     File.write!(
       Path.join(tmp, "scenes/todo.scene"),
-      "npc: maud\nmaud: ~\n- ~\n  maud: ~\n- ~\n  maud: ~\n"
+      "npc: maud\nmaud: ~\n- ~\n  maud: ~\n- ~\n  maud: ~\n- Todo 3\n  maud: ~\n"
     )
 
     File.write!(Path.join(tmp, "scenes/mute.scene"), "npc: maud\n- Go\n  maud: ok\n")
@@ -144,7 +145,7 @@ defmodule Loka.ContentSceneFilesTest do
     {files, diags} = Source.load(tmp)
 
     {_, _, todo} = List.keyfind(files, "scenes/todo.scene", 0)
-    assert Map.keys(todo["choices"]) == ["todo_3", "todo_5"]
+    assert Enum.sort(Map.keys(todo["choices"])) == ["todo_3", "todo__3", "todo__5"]
 
     assert Enum.map(diags, &{&1["path"], &1["data"]}) == [
              {~s("scenes/mute.scene"),
