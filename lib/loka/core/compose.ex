@@ -63,17 +63,6 @@ defmodule Loka.Core.Compose do
 
   defdelegate target(op), to: Loka.Core.ComposeTarget
 
-  @doc """
-  An encounter round's occurrence clock: its job's due time; an Attack's opening round
-  (loka-kgd.197) runs on a job never scheduled, at the current clock.
-  """
-  def occurrence(state, job_id) do
-    case get_in(state, ["jobs", job_id]) do
-      nil -> state["clock"]
-      job -> job["due_time"]
-    end
-  end
-
   @doc "Current resource value; malformed opted metadata returns nil."
   defdelegate current(row, spec, now), to: Loka.Core.Resource
 
@@ -235,7 +224,7 @@ defmodule Loka.Core.Compose do
             id,
             room,
             op["writer_group"],
-            occurrence(elem(ctx, 0), op["job_id"]),
+            Loka.Core.ComposeJob.occurrence(elem(ctx, 0), op["job_id"]),
             ctx
           )
         end,

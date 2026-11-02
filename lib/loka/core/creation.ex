@@ -171,7 +171,7 @@ defmodule Loka.Core.Creation do
           (row["op"] == "encounter.close" or id not in (row["active_ids"] || []))
       end)
 
-    if round, do: Loka.Core.Compose.occurrence(state, round["job_id"])
+    if round, do: Loka.Core.ComposeJob.occurrence(state, round["job_id"])
   end
 
   defp selected_flight?(row, id, state) do
