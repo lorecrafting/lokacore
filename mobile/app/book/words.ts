@@ -10,7 +10,7 @@ import type {
   Reply,
 } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
-import { emoteSentence, lineSentence } from '../../packages/game-view/line_words.ts';
+import { emoteSentence, fillSlots, lineSentence } from '../../packages/game-view/line_words.ts';
 import { things } from './item-pages.ts';
 import { levelWords } from './pick.ts';
 import { AT } from './labels.ts';
@@ -192,7 +192,7 @@ export const lineWords = (
     lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);
   if (told) return told;
   if (t.key !== 'combat.skipped') {
-    const said = text(t.key) + levelWords(t, text, view, was);
+    const said = fillSlots(text(t.key), t.bindings, word) + levelWords(t, text, view, was);
     const speaker = named(t.participants?.speaker);
     return speaker && /^["“][^"“”]*["”]$/.test(said)
       ? `${cap(speaker)} says${actor ? '' : ' to you'}, ${said}`

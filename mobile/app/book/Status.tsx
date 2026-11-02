@@ -2,6 +2,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
+import { ExperienceRule, type ExperienceRuleProps } from './ExperienceRule.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { bleedingLine, branch, pools, said, sky, toneOf, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
@@ -26,6 +27,7 @@ type StatusProps = {
   bleeding?: NonNullable<GameView['bleeding']>;
   conditions?: NonNullable<GameView['conditions']>;
   position?: NonNullable<GameView['position']>;
+  rule?: ExperienceRuleProps;
   text: (key: string) => string;
   locked: boolean;
   pending: boolean;
@@ -79,7 +81,7 @@ const skyText = (p: StatusProps) =>
  *   the moon's dark side, waxing lit on the right; the glyph's name is the time in words (`day 3,
  *   18:05, dusk, waxing crescent moon`). Position and pools are controls named by the
  *   label-in-name rule.
- * - States: enabled; weather; locked (not pressable); pending ("save not confirmed" under the
+ * - States: enabled; weather; levelling (ExperienceRule under the row); locked (not pressable); pending ("save not confirmed" under the
  *   line); resource tones normal, warning, danger; only pennies (the button says `character`).
  * - Story: StatusLine.stories.tsx
  */
@@ -105,6 +107,7 @@ export function StatusLine(p: StatusProps) {
           <Contents {...p} resources={pools(p.resources)} />
         </View>
       </View>
+      {p.rule && <ExperienceRule {...p.rule} />}
       <View style={{ alignItems: 'center' }}>
         {p.pending && <Text style={{ ...t.small, color: c.dim }}>{LABEL.saveNotConfirmed}</Text>}
       </View>

@@ -6,6 +6,7 @@ import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Footer } from './Footer.tsx';
 import { StatusLine } from './Status.tsx';
+import type { RuleDrawn } from './ExperienceRule.tsx';
 import {
   group,
   POSITION_ACTIONS,
@@ -243,6 +244,7 @@ type BottomProps = {
 
 function Bottom(p: BottomProps) {
   const [c, t] = [usePalette(), useType()];
+  const ruleDrawn = useRef<RuleDrawn['current']>(undefined);
   const { view, text, pending, fault, ended } = p.screen;
   const shut = !!view.combat || !!ended;
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
@@ -260,7 +262,7 @@ function Bottom(p: BottomProps) {
       }}
     >
       {nav && navigation(p)}
-      {!view.ancestry_choices && !detail && statusLine(p)}
+      {!view.ancestry_choices && !detail && statusLine(p, ruleDrawn)}
       {detail && pending && (
         <Text style={{ ...t.small, color: c.dim }}>{LABEL.saveNotConfirmed}</Text>
       )}
@@ -271,7 +273,7 @@ function Bottom(p: BottomProps) {
 }
 
 // The status line under the footer.
-function statusLine(p: BottomProps) {
+function statusLine(p: BottomProps, ruleDrawn: RuleDrawn) {
   const { view, text, pending, ended } = p.screen;
   // A tap on the position line acts only on the open World page.
   const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
@@ -283,6 +285,7 @@ function statusLine(p: BottomProps) {
       bleeding={view.bleeding}
       conditions={view.conditions}
       position={view.position}
+      rule={view.levelling && { levelling: view.levelling, drawn: ruleDrawn }}
       text={text}
       locked={!!view.scene || !!view.combat || !!ended || p.page?.kind === 'chapter'}
       openPosition={position ? () => p.press(position) : undefined}

@@ -1,6 +1,7 @@
 // The pure diff of two GameViews into named cues (book-ui.md, Effects, sound and haptics; Queue).
 import type { GameView, NarrationRecord } from '../../packages/game-view/session.ts';
 import type { Cue, CueName } from './cues.ts';
+import { skillChanges } from './skillChange.ts';
 
 const amount = (v: GameView, key: string) =>
   v.resources?.find((r) => r.resource.key === key)?.current;
@@ -83,22 +84,9 @@ function combatCues(now: GameView, was: GameView, died: boolean) {
 }
 
 function skillCues(now: GameView, was: GameView) {
-  const old = (key: string) => was.skills?.find((s) => s.skill.key === key);
-  const skills = now.skills?.filter((s) => s.acquired) ?? [];
-  const learned = skills.filter((s) => !old(s.skill.key)?.acquired);
-  const up = skills.filter(
-    (s) => old(s.skill.key)?.acquired && (s.level ?? 0) > (old(s.skill.key)?.level ?? 0),
-  );
-  return [
-    ...named(
-      'skill_learned',
-      learned.map((s) => s.skill.key),
-    ),
-    ...named(
-      'skill_up',
-      up.map((s) => s.skill.key),
-    ),
-  ];
+  const said = skillChanges(was, now);
+  const keys = (name: string) => said.filter((c) => c.name === name).map((c) => c.skill.skill.key);
+  return [...named('skill_learned', keys('skill_learned')), ...named('skill_up', keys('skill_up'))];
 }
 
 // A worn item taken off is no pickup; a buy is one sound, the coin (the item still pops).
