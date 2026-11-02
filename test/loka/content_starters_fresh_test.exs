@@ -24,10 +24,10 @@ defmodule Loka.ContentStartersFreshTest do
   # Breaks: a rerun at exit 0 restoring a step or a key the author removed from the file it names.
   test "a rerun leaves the removals in its own file alone", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
-    follow(dir, "scenes", "s")
+    follow(dir, "cutscene", "s")
     edit(dir, "scenes/s.json", &Map.update!(&1, "steps", fn steps -> Enum.drop(steps, -1) end))
     before = snapshot(dir)
-    assert {:error, "scenes/s.json: steps already" <> _} = Starters.write(dir, "scenes", "s")
+    assert {:error, "scenes/s.json: steps already" <> _} = Starters.write(dir, "cutscene", "s")
     assert snapshot(dir) == before
 
     follow(dir, "statuses", "ill")

@@ -21,7 +21,8 @@ and dark. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book,
 
 Edit `text.json` for any line the Book shows: the page updates as you save, no reload. Add a room,
 NPC, item or quest as JSON ([Builders' Guide](../BUILDERS-GUIDE.md)); the page reloads and replays
-what you had done. Write a conversation as `scenes/<key>.scene`:
+what you had done. Write a conversation as `scenes/<key>.scene`; a committed one that compiles and is
+walked is [`identity_sampler/scenes/stranger_talk.scene`](../../cartridges/identity_sampler/scenes/stranger_talk.scene):
 
 ```
 npc: maud
@@ -287,6 +288,7 @@ when you run `mix loka.compile` by hand.
 | `behaviours` | [`fishing_sampler`](../../cartridges/fishing_sampler/) | nothing |
 | `bleeds` | [`bleed_sampler`](../../cartridges/bleed_sampler/) | a resource |
 | `cartridge` | [`cellar_sampler`](../../cartridges/cellar_sampler/) | nothing: `bin/loka new cartridge cartridges/<id>` makes the manifest and a `start` room |
+| `cutscene` | [`scene_sampler`](../../cartridges/scene_sampler/) | an item (it writes its own quest and `scenes/<name>.json`) |
 | `dialogues` | [`ask_sampler`](../../cartridges/ask_sampler/) | an NPC |
 | `emotes` | [`emote_sampler`](../../cartridges/emote_sampler/) | nothing |
 | `facts` | [`shoo_sampler`](../../cartridges/shoo_sampler/) | nothing |
@@ -300,7 +302,6 @@ when you run `mix loka.compile` by hand.
 | `replenish` | [`decay_sampler`](../../cartridges/decay_sampler/) | an item, a room and an NPC |
 | `resources` | [`affects_sampler`](../../cartridges/affects_sampler/) | nothing |
 | `rooms` | [`rooms_sampler`](../../cartridges/rooms_sampler/) | nothing |
-| `scenes` | [`scene_sampler`](../../cartridges/scene_sampler/) | an item (it writes its own quest) |
 | `services` | [`durability_sampler`](../../cartridges/durability_sampler/) | an NPC and a resource (the currency); also writes the `use_service` action and the service text keys |
 | `skills` | [`damage_sampler`](../../cartridges/damage_sampler/) | nothing |
 | `statuses` | [`pen_sampler`](../../cartridges/pen_sampler/) | a resource |
