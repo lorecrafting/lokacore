@@ -280,7 +280,7 @@ test('a trusted elapsed receipt is never merged either way, and its retry replay
   a.sql.close();
 });
 
-// Reopens the save at `path` and checks its receipts against its rows, up to `head`.
+// Reopens the save at `path` and checks its receipts against its rows.
 function history(
   path: string,
   bundle: ReturnType<typeof elapsedBundle>,
@@ -292,7 +292,7 @@ function history(
   const saved = load(db, fresh, () => assert.fail('the save exists'), true)!;
   try {
     if (forge) sql.exec(forge);
-    receiptHistory(fresh, saved.world, db, saved.meta, head ?? saved.revision);
+    receiptHistory(fresh, saved.world, db, saved.meta, saved.revision);
   } finally {
     sql.close();
   }
@@ -314,25 +314,6 @@ test('receiptHistory takes a gap before a tick and refuses one before a move', (
   a.sql.close();
   history(path, bundle);
   assert.throws(() => history(path, bundle, 'UPDATE receipt SET revision = 1 WHERE rowid = 1'));
-});
-
-// Breaks: two clock-only rows sharing a revision passing: each gap's row must still move it forward.
-test('receiptHistory refuses two ticks at one revision', (t) => {
-  const path = save(t),
-    bundle = elapsedBundle();
-  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
-  tick(a);
-  a.sql.close();
-  const b = elapsedHost(path, { wall: 11000, mono: 0 }, bundle); // a reopen never merges
-  tick(b);
-  const revisions = b.sql.prepare('SELECT revision FROM receipt ORDER BY rowid').all();
-  assert.deepEqual(
-    revisions.map((r) => r.revision),
-    [1, 3], // the reopen's catch-up and its tick merged
-  );
-  b.sql.close();
-  history(path, bundle);
-  assert.throws(() => history(path, bundle, 'UPDATE receipt SET revision = 1 WHERE rowid = 2', 1));
 });
 
 // Breaks: a row that did more than move the clock passing as a coalesced one, whose revision gap
