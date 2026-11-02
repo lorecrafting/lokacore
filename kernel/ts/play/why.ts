@@ -75,7 +75,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
       c,
       on,
       on.now ? prefix(cartridge, trace, ordinal + 1).world : before,
-      on.now ? null : primaryTarget(command.payload), // the last command's is not the next one's
+      on.now ? null : primaryTarget(data.command.payload), // the last command's is not the next one's
     ),
   };
 }
