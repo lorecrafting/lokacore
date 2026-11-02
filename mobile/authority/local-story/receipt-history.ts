@@ -1,4 +1,5 @@
-// Validate saved truth with the same pure rules that produced its accepted receipts.
+// Debugging and tests replay a save's accepted receipts with the rules that produced them; a cold
+// open reads only the newest (save.md, What reopen proves).
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { commandId } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
@@ -19,7 +20,6 @@ const invalid = (): never => {
   throw new SyntaxError('malformed JSON: inconsistent accepted history');
 };
 
-// ponytail: cold recovery replays existing accepted receipts linearly; index only after measuring reopen.
 export function receiptHistory(fresh: World, saved: World, db: Db, meta: Meta, revision: number) {
   if (!Number.isSafeInteger(revision) || revision < 0) invalid();
   let world = { ...fresh, state: { ...fresh.state, rng: meta.seed as World['state']['rng'] } },
@@ -43,12 +43,40 @@ export function receiptHistory(fresh: World, saved: World, db: Db, meta: Meta, r
   if (previous !== revision || !same(world.state, saved.state)) invalid();
 }
 
-function acceptedReceipt(row: Row, world: World, meta: Meta) {
-  const command: Command = JSON.parse(row.command),
-    decision: DecisionResult = JSON.parse(row.response);
+/** Loaders read ops of every accepted receipt without a schema pass, which would slow the open. */
+export function readableOps(ops: unknown) {
+  return Array.isArray(ops) && ops.every((o) => typeof o?.op === 'string');
+}
+
+/** The head agrees with the newest receipt: what a cold open keeps of a replay, at the cost of one row.
+ * A response that is no decision refuses here: its next reader would trip on it as if on a bug of ours. */
+export function newestReceipt(world: World, db: Db, meta: Meta, revision: number) {
+  const scope = `story/${meta.lineage_id}/${world.character}`;
+  const newest = db.getFirstSync<{ revision: number | null }>(
+    'SELECT MAX(revision) AS revision FROM receipt WHERE scope=?',
+    scope,
+  );
+  if ((newest?.revision ?? 0) !== revision) invalid();
+  const row = db.getFirstSync<Row>(
+    `SELECT invocation_id,command_id,actor_id,command,response,revision FROM receipt WHERE scope=? AND json_extract(response,'$.kind')='accepted' ORDER BY revision DESC LIMIT 1`,
+    scope,
+  );
+  if (!row) return;
+  boundCommand(row, world, meta);
+  const decision: DecisionResult = JSON.parse(row.response);
+  if (validate('DecisionResult', decision).length) invalid();
+  if (decision.kind !== 'accepted') return;
+  const times = [
+    ...decision.events.map((e) => e.logical_time),
+    ...decision.delta.ops.flatMap((o) => (o.op === 'time.advance' ? [o.to] : [])),
+  ];
+  if (times.some((t) => t > world.state.clock)) invalid();
+}
+
+function boundCommand(row: Row, world: World, meta: Meta) {
+  const command: Command = JSON.parse(row.command);
   if (
     validate('Command', command).length ||
-    validate('DecisionResult', decision).length ||
     command.id !== row.command_id ||
     command.world_context_id !== world.context ||
     row.actor_id !== world.character ||
@@ -60,5 +88,12 @@ function acceptedReceipt(row: Row, world: World, meta: Meta) {
         command.id !== commandId(`story/${meta.lineage_id}/${world.character}`, row.invocation_id)))
   )
     invalid();
+  return command;
+}
+
+function acceptedReceipt(row: Row, world: World, meta: Meta) {
+  const command = boundCommand(row, world, meta),
+    decision: DecisionResult = JSON.parse(row.response);
+  if (validate('DecisionResult', decision).length) invalid();
   return { command, decision };
 }

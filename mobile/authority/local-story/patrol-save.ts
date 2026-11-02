@@ -1,7 +1,7 @@
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { bodyOf, refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
 
-/** Reject malformed current rows before canonical receipt replay; replay proves causal history. */
+/** Reject malformed current rows; opening does not prove their causal history. */
 export function patrolSave(world: World) {
   const invalid = () => {
     throw new SyntaxError('malformed JSON: invalid patrol row');

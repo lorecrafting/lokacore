@@ -1,4 +1,4 @@
-// Detail routing uses the saved scene binding; accepted-history replay validates its producer.
+// Detail routing uses the saved scene binding.
 import type { Command } from '../../../kernel/ts/src/contracts.gen.ts';
 import { definition } from '../../../kernel/ts/src/mechanics/scene/dream_shared.ts';
 import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';

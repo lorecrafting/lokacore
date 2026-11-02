@@ -12,7 +12,7 @@ import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { openStory } from './authority.ts';
-import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { load } from './store.ts';
 
 const releases = [{ fresh, content_hash: bundle.sha256 }] as const;
@@ -93,7 +93,8 @@ test('real SQLite reopens Attack and both M4 A rounds with original receipt repl
   assert.equal(replay.kind, 'saved');
   if (replay.kind === 'saved') assert.equal(replay.replay, true);
   assert.equal(encode(again.world().state as never), beforeReplay);
-  coldReopen(path, bundle);
+  // The setup places the player by hand, so these receipts cannot replay from a fresh world.
+  elapsedHost(path, undefined, bundle).sql.close();
 });
 
 // Breaks: the miss compares attacker_id with the character id (entity ids differ), or the clock path

@@ -171,18 +171,9 @@ test('empty, filled, partial Pour, empty, nested, ground and shop custody reopen
   assert.deepEqual(cold.story().world().state, expected);
 });
 
-// Breaks: shape-valid quantity or malformed vessel rows reopen without their actual transition proof.
-test('cold open refuses missing, extra, malformed and plausible bounded liquid rows without repair', () => {
-  for (const mutation of [
-    'missing',
-    'extra',
-    'kind',
-    'negative',
-    'fraction',
-    'overflow',
-    'null',
-    'bounded',
-  ]) {
+// Breaks: a liquid row that is missing, extra or fails validation opens, or the refusal rewrites it.
+test('cold open refuses missing, extra and malformed liquid rows without repair', () => {
+  for (const mutation of ['missing', 'extra', 'kind', 'negative', 'fraction', 'overflow', 'null']) {
     const a = setup();
     try {
       buySkins(a);
@@ -196,9 +187,7 @@ test('cold open refuses missing, extra, malformed and plausible bounded liquid r
           .prepare('INSERT INTO state_row VALUES (?,?,?)')
           .run('liquids', a.fresh.body, JSON.stringify(empty));
       else {
-        const quantity = { kind: 1, negative: -1, fraction: 1.5, overflow: 5, null: 1, bounded: 3 }[
-          mutation
-        ]!;
+        const quantity = { kind: 1, negative: -1, fraction: 1.5, overflow: 5, null: 1 }[mutation]!;
         const kind =
           mutation === 'null' ? null : mutation === 'kind' ? { ...water, key: 'oil' } : water;
         a.sql
@@ -214,22 +203,9 @@ test('cold open refuses missing, extra, malformed and plausible bounded liquid r
   }
 });
 
-// Breaks: bounded current rows mask forged earlier command, causal event, custody or finite debit evidence.
-test('cold open binds every liquid receipt to its historical command, source and complete ordered rows', () => {
-  for (const mutation of [
-    'source',
-    'actor',
-    'vessel',
-    'command-id',
-    'cause',
-    'correlation',
-    'event-actor',
-    'event-source',
-    'prior',
-    'result',
-    'debit',
-    'order',
-  ]) {
+// Breaks: the liquid loader opens a receipt whose actor or command id no longer binds.
+test('cold open refuses a liquid receipt whose command no longer binds', () => {
+  for (const mutation of ['actor', 'command-id']) {
     const a = setup();
     try {
       buySkins(a);
@@ -239,30 +215,17 @@ test('cold open binds every liquid receipt to its historical command, source and
       a.invoke('drink', [spare]);
       a.invoke('pour', [original, spare]);
       a.invoke('look');
-      const type = ['debit', 'order'].includes(mutation) ? 'pour' : 'fill';
       const row = a.sql
         .prepare(
           "SELECT invocation_id,command,response FROM receipt WHERE json_extract(command,'$.payload.type')=? ORDER BY revision LIMIT 1",
         )
-        .get(type)!;
-      const command = JSON.parse(row.command as string),
-        decision = JSON.parse(row.response as string);
-      if (mutation === 'source') command.payload.source_id = a.entity('npc', 'peg');
+        .get('fill')!;
+      const command = JSON.parse(row.command as string);
       if (mutation === 'actor') command.payload.actor_id = a.fresh.body;
-      if (mutation === 'vessel') command.payload.vessel_id = spare;
       if (mutation === 'command-id') command.id = a.fresh.body;
-      if (mutation === 'cause') decision.events[0].causation_id = a.fresh.body;
-      if (mutation === 'correlation') decision.events[0].correlation_id = a.fresh.body;
-      if (mutation === 'event-actor') decision.events[0].actor_id = a.fresh.body;
-      if (mutation === 'event-source')
-        decision.events[0].payload.source_id = a.entity('npc', 'peg');
-      if (mutation === 'prior') decision.delta.ops[0].from = wet(1);
-      if (mutation === 'result') decision.delta.ops[0].to = wet(3);
-      if (mutation === 'debit') decision.delta.ops.shift();
-      if (mutation === 'order') decision.delta.ops.reverse();
       a.sql
-        .prepare('UPDATE receipt SET command=?,response=? WHERE invocation_id=?')
-        .run(JSON.stringify(command), JSON.stringify(decision), row.invocation_id as string);
+        .prepare('UPDATE receipt SET command=? WHERE invocation_id=?')
+        .run(JSON.stringify(command), row.invocation_id as string);
       const before = disk(a);
       assert.equal(a.refuse().kind, 'save_corrupt', mutation);
       assert.deepEqual(disk(a), before);

@@ -233,25 +233,6 @@ test('real failed COMMIT and lost acknowledgement settle crow acquisition, legs 
   }
 });
 
-// Breaks: a forged persisted crow phase is accepted as lawful coin custody on reopen.
-test('cold reopen refuses a forged crow occurrence without rewriting owner progress', () => {
-  const a = setup();
-  try {
-    a.invoke('take', [a.coin]);
-    a.invoke('drop', [a.coin]);
-    a.elapsed(43350);
-    const row = a.p.sql.prepare("SELECT key,value FROM state_row WHERE section='crows'").get()!;
-    a.p.sql
-      .prepare("UPDATE state_row SET value=? WHERE section='crows' AND key=?")
-      .run(JSON.stringify({ ...JSON.parse(row.value as string), phase: 'idle' }), row.key);
-    const before = a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
-    assert.equal(openStory(a.p.db, a.releases, a.p.host).kind, 'save_corrupt');
-    assert.deepEqual(a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), before);
-  } finally {
-    a.p.sql.close();
-  }
-});
-
 // Breaks: cold reopen rejects a lawful combat-paused carrier or loses its Flee-resumed binding.
 test('paused and Flee-resumed crow saves cold-reopen with exact released custody', (t) => {
   for (const mode of ['attack', 'flee', 'shoo']) {

@@ -124,45 +124,6 @@ test('paid outbound and return crossings reopen at committed boundaries', (t) =>
   a.reopen();
   assert.deepEqual(truth(a), { money: [4, 6], place: room(a.initial, 'north_post') });
 });
-// Breaks: malformed charge, endpoint/recipient, body transfer or room entry is accepted during historical
-// validation and silently repaired. fast_travel_sampler is transport-only, so 'entry' also proves
-// transport saves validate history with no other history producer.
-test('forged ride receipts and saved custody refuse typed corruption without changing the database', () => {
-  for (const mutation of ['payment', 'recipient', 'endpoint', 'quote', 'move', 'entry', 'state']) {
-    const a = setup();
-    try {
-      a.cross();
-      const row = a.sql
-          .prepare(
-            "SELECT invocation_id,command,response FROM receipt WHERE json_extract(command,'$.payload.type')='use_transport'",
-          )
-          .get()!,
-        c = JSON.parse(row.command as string),
-        d = JSON.parse(row.response as string);
-      if (mutation === 'payment')
-        d.delta.ops = d.delta.ops.filter((o: any) => o.op !== 'resource.adjust');
-      if (mutation === 'recipient') d.delta.ops[1].entity_id = a.initial.body;
-      if (mutation === 'endpoint') c.payload.endpoint_id = endpoint(a.initial, 'south_road');
-      if (mutation === 'quote') c.payload.quoted_fare = 0;
-      if (mutation === 'move')
-        d.delta.ops = d.delta.ops.filter((o: any) => o.op !== 'entity.transfer');
-      if (mutation === 'entry') d.events = [];
-      if (mutation === 'state')
-        a.sql
-          .prepare("UPDATE state_row SET value=? WHERE section='containers' AND key=?")
-          .run(JSON.stringify(room(a.initial, 'north_post')), a.initial.body);
-      else
-        a.sql
-          .prepare('UPDATE receipt SET command=?,response=? WHERE invocation_id=?')
-          .run(JSON.stringify(c), JSON.stringify(d), row.invocation_id);
-      const before = disk(a);
-      assert.equal(a.refuse().kind, 'save_corrupt', mutation);
-      assert.deepEqual(disk(a), before, mutation);
-    } finally {
-      a.sql.close();
-    }
-  }
-});
 // Breaks: COMMIT uncertainty adopts a crossing early, permits input, loses a receipt, or retry moves/debits twice.
 test('real failed and uncertain COMMIT outcomes fence paid and waived crossings then replay once', () => {
   for (const boundary of ['outbound', 'return', 'recovery'])
