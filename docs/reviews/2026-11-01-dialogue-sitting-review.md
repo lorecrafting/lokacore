@@ -45,3 +45,24 @@
 ## Not checked
 
 `end_talk` in combat: Talk and `choose` returned `invalid_state` in a fight, and `kernel/ts/src/commands/actions.ts:173-185`, `:247` read as the guard, but the peace control returned `not_owned`, so no run showed a working `choose`; `action_completed` with a talk left open during an encounter; a `then` to another hub through the authority (played at kernel level only); `hand_over` on a quest-less `once`.
+
+## Re-check at `53af400730c105654ef79019e626b7204aef3748`
+
+Scope: the fix commit `0c58a8e37`'s findings. `riddle-save.ts` belongs to the second reviewer and was not reviewed. CI at this head (`gh run list --commit`): ci, book-e2e, graph-diff completed, success.
+
+Verdict: **APPROVE WITH NOTES**. Two should-fixes, one nit.
+
+Dispositions:
+
+- `end_talk` on `choice_opened`: fixed. Kept in `@own_acts`; compiles; `dialogue_end_talk_save.test.ts` passes 5/5. Dropping it from `@own_acts` turns that file red (4 pass, 1 fail).
+- Sitting refusal rows for patrol and riddle: fixed. Mutants `o["patrol"]` to nil and `d["riddle"]` to nil each go red (10/11).
+- `forked`: fixed. The original case (a and b gated on one self-set fact, c plain, on `persuade_sampler`) compiles. Played: choose a closes the talk, the next talk's `b` is rejected `invalid_state`, cold open holds. `intersection` to `union` goes red (9/11).
+- Writer walk: `once: sitting` compiles, and warns `SITTING_SPENT` when nothing is left. The guide's `end_talk` example compiles on `choice_resolved` and `choice_opened`. The guide's scene from a choice compiles with `once` and one outcome, and with two outcomes gated in the sidecar. `sitting_no_return`, `story_point_two_outcomes` and `end_talk_event` wording reads true against those runs.
+
+Findings:
+
+- **should-fix**, `mobile/authority/local-story/__tests__/dialogue_end_talk_save.test.ts:175`: the title "in a fight no act can fire end_talk" is false, so the developer's claim is not confirmed. `cast` is kept in a fight (`kernel/ts/src/commands/actions.ts:181`). Probe: a fight, an open talk, a `lux` spell and `end_talk` on `action_completed`. The cast is accepted, emits `action_completed`, and its delta has `choice.close`, so the talk row is gone. `flee` is then accepted and cold open holds, so this is safe play and no blocker. Failure scenario: a later change that makes this close fault passes the test, which tries only `choose` and `perform`. Fix: retitle, add the cast row. `docs/guides/writing-the-game.md:225` needs no change.
+- **should-fix**, `lib/loka/content/explain.ex:130`, `docs/guides/writing-the-game.md:211`: "gate every outcome's choice on one fact" does not name the only form `self_gates` accepts (`not` around `fact_compare equals v`, with a step assigning `v`). Probe: a and b gated `fact_compare decided equals false`, stepping `decided` to true, behave the same, but the compile refuses them with "Add `once`". Writer `once` on both gets the two-outcomes message, which sends them back to gating: a loop. `writing-the-game.md` shows no gate; only `dialogue-cookbook.md` uses the `not` form. Fix: name the form in both places, or accept the positive form.
+- **nit**, `lib/loka/content/dialogues.ex:154`: a fork can still reach a second outcome. Probe: a, b as above, plain c with steps setting the fact false. Choose a, Talk, c, b: both accepted, `story_point_reached` twice, cold open holds. The writer has to clear the fact on purpose, and the guide says "gated on one fact it sets", so no change is required.
+
+Not checked: `riddle-save.ts`; the whole of `bin/mutate_diff.sh` (brief). Cast with a rolled check in a fight was not played; only `action_completed` was.

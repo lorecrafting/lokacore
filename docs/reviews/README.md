@@ -34,7 +34,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Second opinion: effects batch 2 PR C, room sound, exposed, deeds, and a live play (loka-xz76e.6, kernel_api 1.138)](2026-11-01-effects-batch-2-c-second-review.md): **APPROVE WITH NOTES**
 - [Review: effects batch 2 PR C, room beds, music, storm, wind, lever, latch, ending (loka-xz76e.6, kernel_api 1.138)](2026-11-01-effects-batch-2-c-review.md): **APPROVE WITH NOTES**
 - [Dialogue sitting and end_talk contract: second review](2026-11-01-dialogue-sitting-second-review.md): **CHANGES REQUIRED**
-- [Review: dialogue sitting, end_talk, scene from a choice, PR #576 (loka-vduxr.11)](2026-11-01-dialogue-sitting-review.md): **CHANGES REQUIRED**
+- [Review: dialogue sitting, end_talk, scene from a choice, PR #576 (loka-vduxr.11)](2026-11-01-dialogue-sitting-review.md): **APPROVE WITH NOTES**
 - [Second opinion: dialogue entry contract and in-progress play, PR #556 (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-second-review.md): **APPROVE WITH NOTES**
 - [Review: dialogue entry (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-review.md): **APPROVE WITH NOTES**
 - [Dev cheats: second opinion (PR #546, loka-vduxr.6)](2026-11-01-dev-cheats-second-review.md): **APPROVE**
