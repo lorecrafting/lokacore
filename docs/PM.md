@@ -129,6 +129,10 @@ An active issue's status stays `in_progress` until the reviewed merge to `main`;
 Keep one PM writer across worktrees/clones; `br` run from any worktree uses the integration
 checkout's database and JSONL, so commit tracker changes from that checkout, not a slice branch.
 A Claude Code session starts with `bin/session_status.sh`, so Beads, not a memory file, holds current status.
+It prints only what the next action depends on: in-progress issues, ready and blocked counts, open PRs, a red nightly,
+orphaned processes, Beads/PR drift, merged or prunable worktrees, stashes and merged `review-<N>` refs (empty sections
+print nothing). `bin/session_status.sh --full` also prints the compaction mode, the housekeeping list, every worktree,
+green nightlies and "no drift".
 When a reviewed brief starts building, the PM marks its ready issue
 `in_progress` with `br update <id> --status in_progress` and keeps its current
 source/review links in the issue. After the source is reviewed and merged to
@@ -229,7 +233,7 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   and proposes at most 5 cross-session items. The PM prompts it when a gate PR merges.
 - **Beads:** `bin/br_create.sh -l housekeeping --description-file <file>`; `br list -l housekeeping` shows the queue. The owner approves: approved items go
   to the next housekeeping PR, rejected ones to `br close` with the reason.
-- **Reminders:** `bin/session_status.sh` lists open housekeeping issues, prints "Before you clear: ask the
+- **Reminders:** `bin/session_status.sh` counts open housekeeping issues (`--full` lists them), prints "Before you clear: ask the
   PM for handoff + retro", and notes a missed retro when no housekeeping issue is newer than the last
   merge on `origin/main`. The PM reminds the owner of the retro when suggesting a wrap-up or when
   context is large.
