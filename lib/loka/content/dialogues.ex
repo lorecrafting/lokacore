@@ -1,4 +1,4 @@
-# size: allow 400, scene-triggered chapter point refs join dialogue trigger checks
+# size: allow 415, scene-triggered chapter point refs join dialogue trigger checks
 defmodule Loka.Content.Dialogues do
   @moduledoc "Compiled dialogue roles, consequences, riddle and chapter trigger checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -156,11 +156,21 @@ defmodule Loka.Content.Dialogues do
 
     o = get_in(d, ["choices", c]) || %{}
 
-    # The hub's own check never sees this: choice story points are gone by the time it runs.
-    why = if o["sitting"], do: "sitting_no_return", else: "story_point_then"
+    why = point_refusal(o, d)
 
-    {o["sitting"] == true or o["then"] not in [nil, "end"] or is_map_key(o, "then_failed"),
+    {why != nil,
      diag("OUTCOME_MISMATCH", at(rel, steps ++ ["choices", c, "story_point"]), %{"why" => why})}
+  end
+
+  # The hub's own check never sees these: choice story points are gone by the time it runs. A quest
+  # resolves once; a choice with no quest could reach its point again on every Talk.
+  defp point_refusal(o, d) do
+    cond do
+      o["sitting"] -> "sitting_no_return"
+      o["then"] not in [nil, "end"] or is_map_key(o, "then_failed") -> "story_point_then"
+      d["quest"] || o["once"] || Loka.Content.Hub.self_gated?(o) -> nil
+      true -> "story_point_repeats"
+    end
   end
 
   @doc """

@@ -35,6 +35,7 @@ defmodule Loka.ContentDialogueSittingTest do
     for bad <- [
           %{"a" => Map.put(@sitting, "then", "end"), "b" => @plain},
           %{"a" => @sitting},
+          %{"a" => Map.put(@sitting, "once", true), "b" => @plain},
           %{"a" => Map.put(@sitting, "story_point", "met/a"), "b" => @plain},
           %{"a" => Map.put(@sitting, "check", @check), "b" => @plain},
           %{"a" => @sitting, "b" => Map.put(@plain, "then", "guard")}
@@ -79,7 +80,7 @@ defmodule Loka.ContentDialogueSittingTest do
 
   # Breaks: a story point still needs a quest, or an answer that ends the talk may also lead on.
   test "a story point on a plain choice compiles, and with a then is refused", %{dir: dir} do
-    point = Map.put(@plain, "story_point", "met/a")
+    point = Map.merge(@plain, %{"story_point" => "met/a", "once" => true})
 
     assert {:ok, bytes, _} =
              Loka.ContentSource.compile(dir, [choices(%{"a" => point, "b" => @plain})])
@@ -91,6 +92,9 @@ defmodule Loka.ContentDialogueSittingTest do
       [choices(%{"a" => Map.put(point, "then", "guard"), "b" => @plain})],
       "story_point_then"
     )
+
+    repeats = Map.delete(point, "once")
+    refusal(dir, [choices(%{"a" => repeats, "b" => @plain})], "story_point_repeats")
 
     ended = Map.put(point, "then", "end")
 

@@ -185,7 +185,7 @@ A `.cut` file cannot say what starts it, and a cutscene with no trigger never pl
 
 `bridge_done` is a story point, and it has no file of its own: a choice names it. Any choice with no
 `then` may, with or without a quest; reaching the point ends the talk, so the cutscene never plays
-over open choices. If the player can take the choice twice, write `once` under it. Take a scene
+over open choices. Without a quest, write `once` under it, or the build refuses it. Take a scene
 whose every choice ends the quest:
 
 ```
@@ -207,7 +207,8 @@ and add `dialogues/<key>.json` beside it, with the point and the outcome this ch
 { "choices": { "carry": { "story_point": "bridge_done/carry" } } }
 ```
 
-To start it from an ordinary choice, leave the `quest:` lines out; the rest is the same.
+To start it from an ordinary choice, leave the `quest:` lines out and write `once` under the
+choice: with no quest to end it, the build refuses a choice that could reach the point twice.
 
 ### Cut a talk short
 
@@ -224,8 +225,6 @@ changes, and with no talk open it does nothing. Put the words in a `narrate` ste
   ]
 }
 ```
-
-Any event can do it: the choice above, or someone arriving.
 
 Leave a line as `~` to come back to it; the panel's Still to write lists every `~` by file. A `~`
 holds the place of words only: in a `sets:` or `quest:` line it is listed too, but the compile
