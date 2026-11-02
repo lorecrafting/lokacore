@@ -17,6 +17,14 @@ defmodule Loka.ContentDialogueSittingTest do
     "failure" => @said
   }
 
+  @patrol %{"npc" => "guard", "quest" => "any", "transition" => "continue"}
+  @riddle %{
+    "choice_id" => "a",
+    "answer" => "tide",
+    "bank" => ["T", "I", "D", "E"],
+    "wrong" => @said
+  }
+
   defp choices(cs), do: {@guard, &Map.put(&1, "choices", cs)}
   defp why(diags), do: Enum.map(diags, & &1["data"]["why"])
 
@@ -38,10 +46,17 @@ defmodule Loka.ContentDialogueSittingTest do
           %{"a" => Map.put(@sitting, "once", true), "b" => @plain},
           %{"a" => Map.put(@sitting, "story_point", "met/a"), "b" => @plain},
           %{"a" => Map.put(@sitting, "check", @check), "b" => @plain},
-          %{"a" => @sitting, "b" => Map.put(@plain, "then", "guard")}
+          %{"a" => @sitting, "b" => Map.put(@plain, "then", "guard")},
+          %{"a" => Map.put(@sitting, "patrol", @patrol), "b" => @plain}
         ] do
       refusal(dir, [choices(bad)], "sitting_no_return")
     end
+
+    riddle =
+      {@guard,
+       &Map.merge(&1, %{"riddle" => @riddle, "choices" => %{"a" => @plain, "b" => @sitting}})}
+
+    refusal(dir, [riddle], "sitting_no_return")
 
     fine = choices(%{"a" => @sitting, "b" => @plain})
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [fine])
@@ -159,6 +174,37 @@ defmodule Loka.ContentDialogueSittingTest do
     refusal(dir, [two], "story_point_two_outcomes")
     one = choices(%{"a" => point.("a"), "c" => @plain})
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [one])
+  end
+
+  # Breaks: outcomes that exclude each other through one fact refused, so the only remedy is a
+  # journal chapter; or a gate on two different facts (the lowered `once`) taken for exclusion.
+  test "outcomes gated on one fact their steps set may share a story point", %{dir: dir} do
+    point = fn o, fact ->
+      Map.merge(@plain, %{
+        "story_point" => "met/" <> o,
+        "policy" => %{
+          "op" => "not",
+          "item" => %{"op" => "fact_compare", "fact" => fact, "equals" => true}
+        },
+        "steps" => [%{"op" => "fact.assign", "fact" => fact, "value" => true}]
+      })
+    end
+
+    fact = %{
+      "version" => 1,
+      "value_type" => %{"type" => "bool", "default" => false},
+      "scopes" => ["player"],
+      "meaning" => "x"
+    }
+
+    facts =
+      {"facts.json",
+       &Map.update!(&1, "facts", fn f -> Map.merge(f, %{"d" => fact, "e" => fact}) end)}
+
+    same = choices(%{"a" => point.("a", "d"), "b" => point.("b", "d"), "c" => @plain})
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [facts, same])
+    apart = choices(%{"a" => point.("a", "d"), "b" => point.("b", "e"), "c" => @plain})
+    refusal(dir, [facts, apart], "story_point_two_outcomes")
   end
 
   # Breaks: the line lowers to the wrong field or to `once`, both lines on one choice pass, or the

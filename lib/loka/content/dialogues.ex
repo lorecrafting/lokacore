@@ -1,4 +1,4 @@
-# size: allow 425, scene-triggered chapter point refs join dialogue trigger checks
+# size: allow 440, scene-triggered chapter point refs join dialogue trigger checks
 defmodule Loka.Content.Dialogues do
   @moduledoc "Compiled dialogue roles, consequences, riddle and chapter trigger checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -149,12 +149,25 @@ defmodule Loka.Content.Dialogues do
     end
   end
 
-  # With no quest to end them, each outcome's `once` choice stays open after the other is taken.
+  # With no quest to end them, an outcome's choice stays open after another is taken, unless all
+  # of them gate on one fact their steps set.
   defp forked(p, path, ctx) do
-    if map_size(p["outcomes"]) > 1 and Enum.any?(Map.values(p["outcomes"]), &questless?(&1, ctx)),
-      do: [diag("OUTCOME_MISMATCH", path, %{"why" => "story_point_two_outcomes"})],
-      else: []
+    outcomes = Map.values(p["outcomes"])
+
+    if map_size(p["outcomes"]) > 1 and Enum.any?(outcomes, &questless?(&1, ctx)) and
+         Enum.reduce(Enum.map(outcomes, &gates(&1, ctx)), &MapSet.intersection/2) == MapSet.new(),
+       do: [diag("OUTCOME_MISMATCH", path, %{"why" => "story_point_two_outcomes"})],
+       else: []
   end
+
+  defp gates(%{"dialogue" => r, "choice" => c}, ctx) do
+    case resolve(r, "dialogue", ctx.m, ctx.defs) do
+      {_, _, d} -> MapSet.new(Loka.Content.Hub.self_gates(get_in(d, ["choices", c]) || %{}))
+      _ -> MapSet.new()
+    end
+  end
+
+  defp gates(_, _), do: MapSet.new()
 
   defp site(%{"scene" => s}, key, ctx) do
     {rel, steps, _} = resolve(s, "scene", ctx.m, ctx.defs)

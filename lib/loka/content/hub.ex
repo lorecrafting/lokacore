@@ -53,7 +53,6 @@ defmodule Loka.Content.Hub do
       Enum.any?([
         o["then"],
         self_gated?(o),
-        o["then_failed"],
         o["check"],
         o["patrol"],
         d["quest"],
@@ -90,24 +89,25 @@ defmodule Loka.Content.Hub do
   # does not yet hold that value.
   @doc "Whether a choice's own steps hide it for good (the lowered `once`)."
   @spec self_gated?(map()) :: boolean()
-  def self_gated?(%{"policy" => policy, "steps" => steps}) do
+  def self_gated?(o), do: self_gates(o) != []
+
+  @doc "Each `{fact key, value}` a choice's policy refuses once its own steps have set it."
+  @spec self_gates(map()) :: [{String.t(), term()}]
+  def self_gates(%{"policy" => policy, "steps" => steps}) do
     conditions = if policy["op"] == "all", do: policy["items"], else: [policy]
 
-    Enum.any?(conditions, fn
-      %{"op" => "not", "item" => %{"op" => "fact_compare", "fact" => f, "equals" => v} = leaf} ->
+    for %{"op" => "not", "item" => %{"op" => "fact_compare", "fact" => f, "equals" => v} = leaf} <-
+          conditions,
         # A leaf reading another holder (subject, npc, with) never sees the step's write.
-        Map.take(leaf, ~w(subject npc with)) == %{} and
-          Enum.any?(
-            steps,
-            &(match?(%{"op" => "fact.assign", "value" => ^v}, &1) and key(&1["fact"]) == key(f))
-          )
-
-      _ ->
-        false
-    end)
+        Map.take(leaf, ~w(subject npc with)) == %{},
+        Enum.any?(
+          steps,
+          &(match?(%{"op" => "fact.assign", "value" => ^v}, &1) and key(&1["fact"]) == key(f))
+        ),
+        do: {key(f), v}
   end
 
-  def self_gated?(_), do: false
+  def self_gates(_), do: []
 
   defp repeatable(o, proven) do
     receive = if is_map_key(o, "receive"), do: [["receive"]], else: []

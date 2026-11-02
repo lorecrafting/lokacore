@@ -81,8 +81,8 @@ const scened = (a: Accepted) => a.events.some((e) => e.payload.type === 'story_p
  * dialogue resolves a quest or declares a riddle, it sets a patrol leg off, it was checked (row 14:
  * the reopened hub row could not drop the one choice; see mechanics.md Retry rule), it was the
  * only choice, it is `then: end`, a `then` names this dialogue (a target never reopens itself),
- * it reached a story point, or no option would be shown next. A choice's `then` opens that dialogue instead of the same row, of
- * any speaker. Options are read in the world the decision leaves.
+ * it reached a story point, or no option would be shown next. A choice's `then` opens that dialogue
+ * instead of the same row, of any speaker. Options are read in the world the decision leaves.
  */
 export function hub<T extends { kind: string }>(
   world: World,

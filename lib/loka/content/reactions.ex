@@ -89,7 +89,7 @@ defmodule Loka.Content.Reactions do
 
   defp inside?(_, _), do: false
 
-  # One rule closes one talk: a second close of the row would fault the player's whole action.
+  # One rule closes one talk; a second `end_talk` step in it could only be a slip.
   defp second_end_talk(rel, steps) do
     ends = for {%{"op" => "end_talk"}, i} <- steps, do: i
     for i <- Enum.drop(ends, 1), do: diag("DUPLICATE_DEFINITION", at(rel, ["steps", i]))
