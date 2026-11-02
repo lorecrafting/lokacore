@@ -8,18 +8,18 @@ defmodule Loka.Content.Starters do
   starter, before any write. Every starter adds the rows an existing layout.json lacks.
   """
   alias Loka.Content.Barriers
-  alias Loka.Content.Starters.{Merge, Parts, Scene, Templates}
+  alias Loka.Content.Starters.{Merge, Parts, Templates}
 
   @doc """
   Writes the starter; `{:ok, paths it changed}` or `{:error, one line for the author}`. `from` is
-  `{room, direction}`: a new room joined to an existing one by exits both ways (`scene`: an NPC). `before_write.(path, old bytes
+  `{room, direction}`: a new room joined to an existing one by exits both ways. `before_write.(path, old bytes
   or nil)` runs before each file is written, so a caller can undo; a refusal calls it for none.
   """
   @spec write(
           Path.t(),
           String.t(),
           String.t(),
-          {String.t(), String.t()} | String.t() | nil,
+          {String.t(), String.t()} | nil,
           (Path.t(), binary() | nil -> any())
         ) :: {:ok, [Path.t()]} | {:error, String.t()}
   def write(dir, kind, name, from \\ nil, before_write \\ fn _, _ -> :ok end)
@@ -33,8 +33,6 @@ defmodule Loka.Content.Starters do
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
   end
-
-  def write(dir, "scene", key, n, hook) when is_binary(n), do: Scene.write(dir, key, n, hook)
 
   def write(dir, kind, name, from, hook) do
     with :ok <- valid_name(name, kind),

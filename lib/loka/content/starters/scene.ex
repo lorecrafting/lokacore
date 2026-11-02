@@ -10,7 +10,7 @@ defmodule Loka.Content.Starters.Scene do
 
   @spec write(Path.t(), String.t(), String.t(), (Path.t(), binary() | nil -> any())) ::
           {:ok, [Path.t()]} | {:error, String.t()}
-  def write(dir, key, npc, hook) do
+  def write(dir, key, npc, hook \\ fn _, _ -> :ok end) do
     with :ok <- Starters.valid_name(key),
          :ok <- Starters.in_cartridge(dir),
          :ok <- free(dir, key, npc),

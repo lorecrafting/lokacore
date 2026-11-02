@@ -117,11 +117,17 @@ defmodule Loka.Content do
   defdelegate lint(dir), to: Loka.Content.Lint, as: :run
 
   @doc "Writes a compiling starter of one source kind into a cartridge (Loka.Content.Starters)."
-  @spec new(Path.t(), String.t(), String.t(), {String.t(), String.t()} | String.t() | nil) ::
+  @spec new(Path.t(), String.t(), String.t(), {String.t(), String.t()} | nil) ::
           {:ok, [Path.t()]} | {:error, String.t()}
   defdelegate new(dir, kind, name, from), to: Loka.Content.Starters, as: :write
 
-  @doc "`new/4` calling `before_write.(path, old bytes or nil)` before each file it writes."
+  @doc """
+  `new/4` calling `before_write.(path, old bytes or nil)` before each file it writes; `scene`'s
+  `from` is its NPC (Loka.Content.Starters.Scene).
+  """
+  def new(dir, "scene", key, npc, before_write) when is_binary(npc),
+    do: Loka.Content.Starters.Scene.write(dir, key, npc, before_write)
+
   defdelegate new(dir, kind, name, from, before_write), to: Loka.Content.Starters, as: :write
 
   @doc "The kinds `new/4` knows."
