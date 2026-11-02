@@ -11,12 +11,14 @@ import { Numbers } from './numbers.tsx';
 import { Facts, Find, Why } from './reading.tsx';
 import { Compile, Play, Source, Todo } from './sections.tsx';
 
-function Header({ title }: { title?: string }) {
+function Header({ title, hash }: { title?: string; hash?: string }) {
   return (
     <header className="flex items-center gap-2 border-b px-3 py-2">
       <BookOpen className="size-4" aria-hidden />
-      <span className="font-heading text-base">{title ?? 'Loka author'}</span>
-      {title ? null : <Badge variant="secondary">waiting for the Book</Badge>}
+      <span className="font-heading text-base" title={hash && `chapter ${hash}`}>
+        {hash ? title : 'Loka author'}
+      </span>
+      {hash ? null : <Badge variant="secondary">waiting for the Book</Badge>}
     </header>
   );
 }
@@ -79,7 +81,7 @@ export default function App() {
     <div className="flex h-full bg-background text-foreground max-[900px]:flex-col">
       <Book frame={frame} />
       <aside className="flex w-[400px] shrink-0 flex-col border-l max-[900px]:h-1/2 max-[900px]:w-full max-[900px]:border-t max-[900px]:border-l-0">
-        <Header title={book.state?.title} />
+        <Header title={book.state?.title} hash={book.state?.hash} />
         <Compile said={said} compiled={compiled} lint={lint} state={book.state} send={book.send} />
         <Panels state={book.state} send={book.send} trace={book.trace} said={said} />
         <Source line={book.line} />

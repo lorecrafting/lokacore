@@ -12,7 +12,7 @@ import App from './App.tsx';
 const files = { [font.body]: EBGaramond, [font.head]: IMFellEnglish, [font.caps]: IMFellEnglishSC };
 for (const [family, url] of Object.entries(files)) document.fonts.add(new FontFace(family, `url(${url})`));
 const role = (r: { fontFamily: string; fontSize: number; lineHeight: number; letterSpacing?: number }) => ({
-  family: `'${r.fontFamily}'`,
+  family: `'${r.fontFamily}', serif`,
   size: `${r.fontSize}px`,
   leading: `${r.lineHeight}px`,
   tracking: `${r.letterSpacing ?? 0}px`,

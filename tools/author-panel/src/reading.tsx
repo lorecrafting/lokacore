@@ -11,15 +11,15 @@ import { Separator } from './components/ui/separator.tsx';
 import { clockWords } from '../../../mobile/app/author/shown.ts';
 import { Heading } from './sections.tsx';
 
-// A row's third field, when given, is its full id: the hover title, and the key a short name can repeat.
-const Rows = ({ title, rows }: { title: string; rows: [string, string, string?][] }) => (
+// A row's third field, when given, is its full id (the hover title); the fourth keeps rows with one name apart.
+const Rows = ({ title, rows }: { title: string; rows: [string, string, string?, string?][] }) => (
   <div>
     <Heading>
       {title} ({rows.length})
     </Heading>
     <ul className="space-y-1">
-      {rows.map(([name, value, id]) => (
-        <li key={id ?? name} className="flex items-center justify-between gap-2">
+      {rows.map(([name, value, id, row]) => (
+        <li key={row ?? name} className="flex items-center justify-between gap-2">
           <span className="truncate font-mono text-xs" title={id}>
             {name}
           </span>
@@ -61,13 +61,11 @@ export function Facts({ state }: { state?: State }) {
       <Rows title="Quests" rows={shown.quests.map((q) => [q.quest, q.state])} />
       <Rows
         title="Facts"
-        rows={state.facts.map((f) => [f.key, f.value === undefined ? 'unset' : `${said(f.value)}${f.set ? '' : ' (default)'}`, f.id])}
+        rows={state.facts.map((f) => [f.key, f.value === undefined ? 'unset' : `${JSON.stringify(f.value)}${f.set ? '' : ' (default)'}`, f.id, f.row])}
       />
     </div>
   );
 }
-
-const said = (v: unknown) => (typeof v === 'string' ? v : JSON.stringify(v));
 
 type Told = { lines: Row[] };
 const Answer = ({ name, report }: { name: string; report: Told }) => (
