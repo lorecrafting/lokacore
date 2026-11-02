@@ -1,7 +1,7 @@
 // The book's page shell and its shared controls (the room page: Body.tsx; the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ComponentProps, type ReactNode, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -125,18 +125,24 @@ type PageProps = {
  * - Rules: a run of rows of one kind is one block; a heading is its own block. The title is the
  *   page header with the arriving focus; without one, the first block takes it. The room's fixed
  *   title is the only pressable title. The title is `pageTitle`, scaled with the Reading size: centred
- *   when fixed (the room), left-aligned on every other page. A page that grows at the end scrolls to its end.
+ *   when fixed (the room), left-aligned on every other page. A page that grows at the end follows
+ *   its end while the reader is there (within `size.touch`); a reader scrolled up stays put until
+ *   they press anywhere on the page, which follows its own result.
  * - States: scrolling title; fixed title; no title; centred (no game behind it).
  * - Story: Page.stories.tsx
  */
 export function Page(p: PageProps) {
   const c = usePalette();
   const scroll = useRef<ScrollView>(null);
+  const { track, grown, press } = useFollow();
   const title = p.title !== undefined && (
     <Title title={p.title} fixed={p.fixedTitle} onPress={p.onTitlePress} />
   );
   return (
-    <View style={{ flex: 1, backgroundColor: p.paperless ? undefined : c.bg }}>
+    <View
+      style={{ flex: 1, backgroundColor: p.paperless ? undefined : c.bg }}
+      onStartShouldSetResponderCapture={press}
+    >
       <LevelWash />
       {p.fixedTitle && (
         <View style={{ paddingHorizontal: space.page, paddingTop: space.xl }}>{title}</View>
@@ -150,9 +156,13 @@ export function Page(p: PageProps) {
           gap: space.xl,
           ...(p.centred && { flexGrow: 1, justifyContent: 'center' }),
         }}
-        onContentSizeChange={() =>
-          p.scrollToEnd && scroll.current?.scrollToEnd({ animated: false })
+        onContentSizeChange={(_, h) =>
+          p.scrollToEnd && grown(h) && scroll.current?.scrollToEnd({ animated: false })
         }
+        scrollEventThrottle={motion.quick.duration} // web sends one onScroll without it
+        onScroll={track}
+        onScrollEndDrag={track} // a sampled scroll can miss where it stopped
+        onMomentumScrollEnd={track}
       >
         {!p.fixedTitle && title}
         {p.children}
@@ -160,6 +170,21 @@ export function Page(p: PageProps) {
       {p.foot && <PageFoot>{p.foot}</PageFoot>}
     </View>
   );
+}
+
+// A reader scrolled up to an earlier line is not pulled down; a press anywhere on the page (a Here
+// exit, a card, the foot) follows its own result.
+function useFollow() {
+  const atEnd = useRef(true);
+  const seen = useRef(0); // the bottom of the view at the last sample
+  const near = (h: number) => (atEnd.current = seen.current >= h - size.touch);
+  const track: ComponentProps<typeof ScrollView>['onScroll'] = ({ nativeEvent: e }) => {
+    seen.current = e.contentOffset.y + e.layoutMeasurement.height;
+    near(e.contentSize.height);
+  };
+  // A log that shrinks to the view sends no scroll; its size alone re-arms the follow.
+  const grown = (h: number) => atEnd.current || near(h);
+  return { track, grown, press: () => ((atEnd.current = true), false) };
 }
 
 // A header that takes the arriving focus; the room's is fixed, and a tap on it looks.

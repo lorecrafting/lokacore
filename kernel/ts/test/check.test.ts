@@ -89,6 +89,49 @@ test('an edit that refuses a step names it and exits 1; each checkpoint still re
   });
 });
 
+// Break: a reworded scene choice reads `rejected invalid_state`, naming neither the recorded choice,
+// its dialogue nor what the dialogue offers now (the session's choices tool, through the real compile).
+test('a reworded scene choice is named with its dialogue and the choices it offers now', async () => {
+  const dir = sampler('reworded', 'cellar_sampler');
+  const { version } = JSON.parse(readFileSync(join(dir, 'cartridge.json'), 'utf8')) as {
+    version: string;
+  };
+  const ref = (kind: string, key: string) => ({
+    cartridge_id: 'cellar_sampler',
+    cartridge_version: version,
+    kind,
+    key,
+  });
+  const maud = `cellar_sampler@${version}:npc/maud`;
+  mkdirSync(join(dir, 'checkpoints'));
+  const scene = (choice: string) =>
+    writeFileSync(
+      join(dir, 'scenes/maud_hello.scene'),
+      `npc: maud\nmaud: Well?\n- ${choice}\nmaud: Hello.\n- leave\nmaud: Bye.\n`,
+    );
+  scene('say hello');
+  const steps = [
+    {
+      action_key: 'dev_go_to_room',
+      target_ids: [],
+      input: { room: ref('room', 'drowned_lantern') },
+    },
+    { action_key: 'maud_hello', target_ids: [maud], input: {} },
+    {
+      action_key: 'choose',
+      target_ids: [],
+      input: { choice_id: 'say_hello', continuation_id: 'x' },
+    },
+  ];
+  write(dir, 'met_maud.json', JSON.stringify({ steps: steps.map((intent) => ({ intent })) }));
+  assert.deepEqual(await run(dir), { code: 0, out: 'met_maud: ok\n' });
+  scene('say hi');
+  const { code, out } = await run(dir);
+  assert.equal(code, 1);
+  for (const named of ['step 3', 'say_hello', 'maud_hello', 'say hi', 'leave'])
+    assert.ok(out.includes(named), out);
+});
+
 // Break: check's host lacks `dev`, so a checkpoint the preview recorded with a cheat fails here; or a
 // cheat that does nothing still passes (from the well, south is the landing; from the landing, none).
 test('a recorded cheat replays', async () => {

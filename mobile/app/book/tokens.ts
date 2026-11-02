@@ -136,7 +136,7 @@ export const opacity = {
 // Book motion. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion. `duration` and
 // `easing` are the way in; `out` the way back (ms), on `outEasing` if it differs.
 export const motion = {
-  quick: { duration: 160, easing: 'ease' }, // minimap zoom, knob return, the page turn's picture deadline
+  quick: { duration: 160, easing: 'ease' }, // minimap zoom, knob return, the page turn's picture deadline, Page's scroll sampling
   turn: { duration: 500, easing: 'inOutQuad' }, // the page curl; tune the duration on a device
   fade: { duration: 160, easing: 'linear' }, // reduced-motion cross-fade
   palette: { duration: 1500, easing: 'inOutQuad' }, // same-polarity phase change only; flips cut (BOOK-UI-COMPONENTS.md#design-tokens)

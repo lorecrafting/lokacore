@@ -13,10 +13,12 @@ const WORDS: { [O in Leaf['op']]: (p: Extract<Leaf, { op: O }>) => string } = {
   target_present: () => 'the target is here',
   has_item: (p) => `item ${p.item.key} is held`,
   quest_state: (p) => `quest ${p.quest.key} is ${p.state}`,
-  fact_compare: (p: Extract<Leaf, { op: 'fact_compare' }> & { now?: unknown }) =>
-    p.now === undefined
-      ? `fact ${p.fact.key} on the target needs ${JSON.stringify(p.equals)}`
-      : `fact ${p.fact.key} is ${p.now === null ? 'unset' : JSON.stringify(p.now)}; needs ${JSON.stringify(p.equals)}`,
+  fact_compare: (p: Extract<Leaf, { op: 'fact_compare' }> & { now?: unknown; not?: true }) => {
+    const needs = `needs ${p.not ? 'not ' : ''}${JSON.stringify(p.equals)}`;
+    return p.now === undefined
+      ? `fact ${p.fact.key} on the target ${needs}`
+      : `fact ${p.fact.key} is ${p.now === null ? 'unset' : JSON.stringify(p.now)}; ${needs}`;
+  },
   fact_at_least: (p) => `fact ${p.fact.key} is at least ${p.at_least}`,
   time_window: (p) => `the time of day is from ${p.from} to ${p.to}`,
   barrier_state: (p) => `barrier ${p.barrier.key} is ${p.equals}`,
@@ -43,27 +45,33 @@ const WORDS: { [O in Leaf['op']]: (p: Extract<Leaf, { op: O }>) => string } = {
   time_since: (p) => `at least ${p.at_least} has passed since fact ${p.fact.key}`,
 };
 
-// One tree's rows, parents before children, each branch's verdict from its leaves.
-function rows(p: Annotated, depth: number): { ok: Verdict; rows: Row[] } {
-  if (p.op === 'all' || p.op === 'any' || p.op === 'not') {
-    const kids = (p.op === 'not' ? [p.item] : p.items).map((x) => rows(x, depth + 1));
+// One tree's rows, parents before children, each branch's verdict from its leaves. A `not` adds no
+// row: it folds into what it covers (De Morgan), so a met `not` reads green all the way down.
+function rows(p: Annotated, depth: number, negated = false): { ok: Verdict; rows: Row[] } {
+  if (p.op === 'not') return rows(p.item, depth, !negated);
+  if (p.op === 'all' || p.op === 'any') {
+    const all = (p.op === 'all') !== negated;
+    const kids = p.items.map((x) => rows(x, depth + 1, negated));
     const has = (v: Verdict) => kids.some((k) => k.ok === v);
-    const ok: Verdict =
-      p.op === 'not'
-        ? kids[0]!.ok === 'depends'
-          ? 'depends'
-          : !kids[0]!.ok
-        : has(p.op === 'any')
-          ? p.op === 'any' // one leaf settles it, whatever the target
-          : has('depends')
-            ? 'depends'
-            : p.op === 'all';
-    const text = { all: 'all of these', any: 'any one of these', not: 'not this' }[p.op];
-    return { ok, rows: [{ text, ok, depth }, ...kids.flatMap((k) => k.rows)] };
+    const ok: Verdict = has(!all)
+      ? !all // one leaf settles it, whatever the target
+      : has('depends')
+        ? 'depends'
+        : all;
+    return {
+      ok,
+      rows: [
+        { text: all ? 'all of these' : 'any one of these', ok, depth },
+        ...kids.flatMap((k) => k.rows),
+      ],
+    };
   }
-  const ok = p.holds === 'depends' ? p.holds : p.holds === true;
-  const text = (WORDS[p.op as Leaf['op']] as (p: Policy) => string)(p);
-  return { ok, rows: [{ text, ok, depth }] };
+  // an unread leaf (no holds) never counts as met, negated or not
+  const ok = p.holds === 'depends' ? p.holds : p.holds !== undefined && p.holds !== negated;
+  // a negated fact says what it must not be (an unset fact is not true); any other leaf says not first
+  const fact = negated && p.op === 'fact_compare';
+  const said = (WORDS[p.op as Leaf['op']] as (p: object) => string)(fact ? { ...p, not: true } : p);
+  return { ok, rows: [{ text: negated && !fact ? `not: ${said}` : said, ok, depth }] };
 }
 
 /** The asked definition's policy as sentences; no policy holds without saying anything more. */

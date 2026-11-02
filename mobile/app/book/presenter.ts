@@ -46,6 +46,7 @@ import {
   leaveLog,
   logLines,
   narrationLines,
+  newRound,
   quietOf,
   resetLogs,
   trimLog,
@@ -135,10 +136,7 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
     warning =
       was.place.id !== now.place.id && was.exits.find((e) => e.direction === direction)?.warning;
   if (!s.fault) s.log.push(...(warning ? [text(warning)] : []), ...cueLines(s, now, text));
-  if (s.fault) {
-    s.returnWorld = false;
-    s.returnDetail = undefined;
-  }
+  if (s.fault) Object.assign(s, { returnWorld: false, returnDetail: undefined });
   s.projection = game.view();
   s.status =
     reply.kind === 'save_corrupt'
@@ -245,9 +243,7 @@ function heard(s: Logs, view: GameView, was: Said | undefined): Said {
 function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, was?: Said) {
   const { view, token } = game.view();
   const said = heard(s, view, was); // before the trim, which drops lines from the front
-  trimLog(s.log);
-  trimLog(s.combatLog);
-  for (const lines of s.details.values()) trimLog(lines);
+  [s.log, s.combatLog, ...s.details.values()].forEach((lines) => trimLog(lines));
   said.log = s.log.length;
   const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({
     ...b,
@@ -290,6 +286,7 @@ export function presenter(game: Game) {
       return shown;
     },
     update: (update: GameSubscription) => {
+      newRound(s.combatLog); // one update or press settles at most one receipt: one round
       const terminal = updated(game, update, s, text);
       if (terminal && s.recovered) generation++;
       return terminal;
@@ -297,6 +294,7 @@ export function presenter(game: Game) {
     recovered: () => !!s.recovered,
     // A pending retry keeps the original detail, even when retried from the world.
     press: (b: Button, detail?: string) => {
+      newRound(s.combatLog);
       const line = pressed(game, liveButton(game, b, label, text, generation), detail, s, text);
       if (s.recovered) generation++;
       return line;

@@ -19,6 +19,8 @@ export type Replayable = Pulsed & {
   view: () => { view: Pick<GameView, 'choice'>; token: string };
   invoke: (intent: Intent) => Reply;
   entityIds: () => Ids;
+  text: (key: string) => string | undefined;
+  dialogueOf: (continuation: string) => string | undefined;
 };
 // refused: the game or the file said no to this step, so dropping it can help; a pending or fault reply is not that.
 export type Outcome = { done: number; failed?: string; refused?: true };
@@ -193,10 +195,20 @@ function send(i: number, intent: Intent, game: Replayable): Omit<Outcome, 'done'
     view_freshness_token: token,
   });
   if (reply.kind === 'saved' && reply.decision.kind === 'accepted') return undefined;
+  const rejected = reply.kind === 'saved' && reply.decision.kind === 'rejected';
   return {
-    failed: `${name}: ${describe(reply)}`,
-    ...(reply.kind === 'saved' && reply.decision.kind === 'rejected' && { refused: true }),
+    failed: `${name}: ${(rejected && gone(intent.input.choice_id, view.choice, game)) || describe(reply)}`,
+    ...(rejected && { refused: true }),
   };
+}
+
+// A recorded choice the open choice does not offer (its words were edited, or its `when` or an earlier
+// step changed): name it, the open dialogue and what that offers now.
+function gone(chosen: unknown, choice: GameView['choice'], game: Replayable) {
+  if (typeof chosen !== 'string' || !choice || choice.choices.some((c) => c.choice_id === chosen))
+    return undefined;
+  const offers = choice.choices.map((c) => `'${game.text(c.label)}'`).join(', ');
+  return `the choice '${chosen}' is not offered in ${game.dialogueOf(choice.continuation_id)}; it offers: ${offers}`;
 }
 
 /** Exactly one of advance and intent, and an intent `send` can read: this is hand-edited JSON. */

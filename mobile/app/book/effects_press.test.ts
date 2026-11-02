@@ -63,7 +63,9 @@ test('a quiet merge in place does not dry; a trim keeps each line its number', (
   assert.ok(merged.some((n) => n.props?.children === 'Rain. (2 times)'));
   assert.deepEqual(dried(merged), []);
   const keys = (shown: readonly any[]) =>
-    (LogLines({ lines: shown }) as any).props.children.map((e: any) => e.key);
+    (LogLines({ lines: shown }) as any).props.children.flatMap((b: any) =>
+      b.props.children.map((e: any) => e.key),
+    ); // through the round blocks
   assert.deepEqual(keys(lines), ['0', '1', '2']);
   dropLines(lines, 2);
   assert.deepEqual(keys(lines), ['2']);
@@ -92,9 +94,10 @@ test('a narrated event dries motion.dry.lag later; reduced motion is a plain fad
   const draw = rig(t);
   const shown = draw(() => nodes(LogLines({ lines: event })));
   assert.deepEqual(g.delays, [60]);
+  const at = (s: any[]) => s.find((n) => n.type === 'Text'); // the line, inside its round block
   const ink = (n: any) => flat(n.props.style).color;
-  assert.equal(ink(shown[1]), '#645c4f', 'wet on its first frame');
-  assert.notEqual(ink(draw(() => nodes(LogLines({ lines: event })))[1]), '#645c4f', 'dry after');
+  assert.equal(ink(at(shown)), '#645c4f', 'wet on its first frame');
+  assert.notEqual(ink(at(draw(() => nodes(LogLines({ lines: event }))))), '#645c4f', 'dry after');
   g.reducedMotion = true;
   g.delays = [];
   g.timings = [];
@@ -103,9 +106,9 @@ test('a narrated event dries motion.dry.lag later; reduced motion is a plain fad
   const still = drawStill(() => nodes(LogLines({ lines: quiet })));
   assert.deepEqual(g.delays, []);
   assert.deepEqual(g.timings, [160]);
-  assert.deepEqual(still[1].props.style[1], { opacity: 0 });
+  assert.deepEqual(at(still).props.style[1], { opacity: 0 });
   const settled = drawStill(() => nodes(LogLines({ lines: quiet })));
-  assert.deepEqual(settled[1].props.style[1], { opacity: 1 });
+  assert.deepEqual(at(settled).props.style[1], { opacity: 1 });
 });
 
 // Breaks: an away recap entering the log has no drying, or an old one re-dries; the cap drifts.

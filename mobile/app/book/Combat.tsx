@@ -158,8 +158,9 @@ function BackToWorld(p: { onPress: () => void }) {
  * The combat foreground (book-ui.md, Live combat response).
  * - Use: while a fight is on.
  * - Rules: opponent lines (name, band phrase; none of your own condition lines) as one block of
- *   touching lines, then the isolated log, then the response cards; no PageFoot.
- * - States: one foe; pack; bleeding.
+ *   touching lines, then the isolated log, then the response cards; no PageFoot. The page follows
+ *   its newest line; each round's lines (one receipt) are one block, a block gap between rounds.
+ * - States: one foe; pack; bleeding; rounds.
  * - Story: CombatPage.stories.tsx
  */
 export function Combat(p: {
@@ -179,7 +180,7 @@ export function Combat(p: {
     // Paper behind the running head too: the leaving page fades over the arriving one.
     <Blow under={<UnderInk view={view} />}>
       <RunningHead view={view} text={text} />
-      <Page paperless title="Combat" foot={foot}>
+      <Page paperless title="Combat" foot={foot} scrollToEnd={combatLog.length > 0}>
         <Fight {...p.screen} combat={combat} press={p.press} />
         <LogLines lines={combatLog} />
         {view.combat && (
