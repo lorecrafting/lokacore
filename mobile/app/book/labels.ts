@@ -135,4 +135,9 @@ export const COUNT: readonly string[] = [
   'nine',
 ];
 // An up or down way's place word: "above", "below" ("The door below is locked.").
+// A key the Book must never show raw when a cartridge has not authored it.
+export const UNAUTHORED: Record<string, string> = {
+  'place.dark': "It's too dark to see...",
+  'combat.sanctuary': LABEL.notHere,
+};
 export const AT: Record<string, string> = { up: 'above', down: 'below' };

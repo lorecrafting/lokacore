@@ -6,7 +6,6 @@ import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, why, type group, type Page as Route } from './model.ts';
 import { cardKey, type Button, type DetailLine, type presenter } from './presenter.ts';
-import { sanctuaryCards } from './sanctuary.tsx';
 import { ActionCard, Cards, PickLists } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
@@ -203,7 +202,6 @@ function Offered(
   const card = (b: Button) => <ActionCard key={cardKey(b)} b={b} press={p.press} />;
   const plain = rest.filter((b) => !b.pick && b.command !== 'use_service');
   const shop = !p.enemy && 'shop' in p.npc && !!p.npc.shop?.length && p.shelf;
-  const grey = sanctuaryCards(p.npc.actions, p.text);
   return (
     <>
       <Cards>
@@ -216,7 +214,7 @@ function Offered(
         lists={picks(p.view, rest, p.npc.id, p.text).filter((k) => k.label !== LABEL.giveAnItem)}
         state={shown}
       />
-      <Cards>{[...plain.filter((b) => b.command !== 'ask').map(card), ...grey]}</Cards>
+      <Cards>{plain.filter((b) => b.command !== 'ask').map(card)}</Cards>
       <Cards>{plain.filter((b) => b.command === 'ask').map(card)}</Cards>
       <Cards lines>{p.services.plain.map((s) => service(s, p))}</Cards>
       {p.services.order.length > 0 && <SectionTitle>{LABEL.yourOrder}</SectionTitle>}

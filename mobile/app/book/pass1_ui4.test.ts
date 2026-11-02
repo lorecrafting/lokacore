@@ -1,6 +1,7 @@
 // Pass-1 UI4 (book-ui.md, Detail-page order; NPC details): an item page's option groups (UR), Lift
 // on an item an NPC holds (E14), no filler line on an empty page (mvlyb5x2m9i3), the purse beside a price (E15).
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
@@ -23,13 +24,13 @@ const nellView = () => {
   a.game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'south' } } as never);
   return a.game.view().view;
 };
-const screenOf = (view: GameView) => {
+const screenOf = (view: GameView, text: (k: string) => string | undefined = () => undefined) => {
   assert.deepEqual(validate('GameView', view), []);
   const game = {
     view: () => ({ view, token: 'view:t' }),
     pending: () => false,
     subscribe: () => () => {},
-    text: () => undefined,
+    text,
     lastNarration: () => undefined,
   } as unknown as Game;
   return presenter(game).screen();
@@ -243,13 +244,13 @@ test('an Attack in a sanctuary is grey with its one sentence, on the page and in
   const v = nellView();
   const nell = v.entities.find((e) => e.shop)!;
   const text = (k: string) => (k === 'combat.sanctuary' ? 'Placeholder sentence.' : k);
-  const attackOf = (reason: object) => {
+  const attackOf = (reason: object, npcFields: object = {}) => {
     const offer = { ...action('attack', { available: false, reason }), target_ids: [nell.id] };
     const view = {
       ...v,
-      entities: v.entities.map((e) => (e === nell ? { ...e, actions: [offer] } : e)),
+      entities: v.entities.map((e) => (e === nell ? { ...e, ...npcFields, actions: [offer] } : e)),
     } as GameView;
-    const s = screenOf(view);
+    const s = screenOf(view, text);
     const npc = s.view.entities.find((e) => e.id === nell.id);
     const page = { ...s, text, npc, g: group(s.buttons), press() {}, leave() {}, open() {} };
     return nodes(NpcPage(page as never) as never)
@@ -259,12 +260,40 @@ test('an Attack in a sanctuary is grey with its one sentence, on the page and in
   const message = { key: 'combat.sanctuary' };
   const sanctuary = { code: 'invalid_state', cause: 'sanctuary', message };
   assert.deepEqual(attackOf(sanctuary), ['Placeholder sentence.']);
+  assert.deepEqual(attackOf(sanctuary, { hostile: true }), ['Placeholder sentence.']);
   assert.deepEqual(attackOf({ code: 'invalid_state' }), []);
   assert.deepEqual(attackOf({ code: 'invalid_target', cause: 'cannot_be_hurt' }), []);
   const reply = { kind: 'saved', decision: { kind: 'rejected', error: sanctuary } } as const;
   assert.deepEqual(replyLine(reply as never, text, v), [
     { kind: 'refused', reason: 'sanctuary', text: 'Placeholder sentence.' },
   ]);
+});
+
+// Breaks: the card reads its label key, or a press stays silent, or touches the world; or a cartridge
+// with no line shows the raw key on the card or in the log.
+test('a press on a sanctuary Attack logs its line and changes nothing; no line reads Not here', () => {
+  const run = (keep: boolean) => {
+    const c = JSON.parse(compiled('cartridges/cellar_sampler').canonical);
+    for (const r of Object.values<any>(c.rooms)) r.sanctuary = true;
+    c.entry.key = 'lantern_cellar';
+    if (!keep) delete c.text['combat.sanctuary'];
+    const canonical = JSON.stringify(c);
+    const sha256 = createHash('sha256').update(canonical).digest('hex');
+    const b = book({ canonical, sha256 } as never);
+    const s = b.p.screen();
+    const attack = s.buttons.find((x) => x.action_key === 'attack')!;
+    const id = attack.target_ids[0]!;
+    const hp = () => b.p.screen().view.entities.find((e) => e.id === id);
+    const before = JSON.stringify(hp());
+    b.p.press(attack, id);
+    const log = b.p.screen().detail(id).at(-1) as { text: string };
+    assert.equal(JSON.stringify(hp()), before);
+    b.sql.close();
+    return [attack.label, attack.refused, log.text];
+  };
+  const line = 'Placeholder for combat.sanctuary.';
+  assert.deepEqual(run(true), ['Attack', line, line]);
+  assert.deepEqual(run(false), ['Attack', LABEL.notHere, LABEL.notHere]);
 });
 
 // Breaks: the World log's refused line brings back its boxed reason chip (a Text of its own), or

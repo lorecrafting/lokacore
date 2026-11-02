@@ -13,12 +13,12 @@ import type { DetailLine } from './logs.ts';
 import { emoteSentence, fillSlots, lineSentence } from '../../packages/game-view/line_words.ts';
 import { things } from './item-pages.ts';
 import { levelWords } from './pick.ts';
-import { AT } from './labels.ts';
+import { AT, UNAUTHORED } from './labels.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
 export const sayers = (g: Game): { text: Say; label: Say } => ({
-  text: (key) => g.text(key) ?? (key === 'place.dark' ? "It's too dark to see..." : key),
+  text: (key) => g.text(key) ?? UNAUTHORED[key] ?? key,
   label: (key) =>
     g.text(key) ??
     key

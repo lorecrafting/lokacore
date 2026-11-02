@@ -45,7 +45,7 @@ export function attackRefused(world: World, actor: CharacterId, target: EntityId
   if (!npc.hp) return { code: 'invalid_target', cause: 'cannot_be_hurt' } as const;
   const room = world.state.containers[body];
   if (!world.rooms[room] || world.state.containers[target] !== room) return 'not_present' as const;
-  // Ahead of every refusal the player could change: one sentence, seated or not (loka-g5hh.2.9).
+  // Ahead of posture and the fight's own refusals: one sentence, seated or not (loka-g5hh.2.9).
   if (world.rooms[room].sanctuary)
     return {
       code: 'invalid_state',

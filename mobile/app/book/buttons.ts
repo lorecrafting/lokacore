@@ -207,9 +207,13 @@ export const other = (
 const pickRows = (row: Press, reason: string, ids: string[]) =>
   ids.map((id) => ({ ...row, pick: reason ? { reason } : {}, detail_id: id }));
 
-// An offer a held thing's page draws: offered, an aimed spell (refused, its row), or a resting use pair.
+// An offer a held thing's page draws: offered, an aimed spell (refused, its row), a sanctuary's grey
+// Attack (book-ui.md, Unavailable actions), or a resting use pair.
 const held = (a: ReturnType<typeof things>[number]['actions'][number], id: string) =>
-  a.available || commandOf(a) === 'cast' || (!!other(a, id) && a.reason?.code === 'cooldown');
+  a.available ||
+  commandOf(a) === 'cast' ||
+  a.reason?.cause === 'sanctuary' ||
+  (!!other(a, id) && a.reason?.code === 'cooldown');
 
 function heldButtons(
   v: GameView,
@@ -230,6 +234,8 @@ function heldButtons(
         if (commandOf(a) === 'cast') return pickRows(button(a, ''), why(a, text), [e.id]);
         // An action naming its own target (a quest offer): the card reads its label, on this page.
         if (a.target_ids?.length === 0) return { ...button(a, ''), detail_id: e.id };
+        if (!a.available && a.reason?.cause === 'sanctuary')
+          return { ...button(a, '', e.id), refused: why(a, text) };
         const two = other(a, e.id);
         // the Book never shows a thing the view does not project (PM ruling, loka-x6t.109.4)
         if (two)

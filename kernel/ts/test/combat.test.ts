@@ -251,6 +251,27 @@ test('a sanctuary refuses Attack with its cause, sitting or standing; a seat els
     assert.ok(out.decision.kind === 'rejected');
     assert.deepEqual(out.decision.error, reason);
   }
+  // Breaks: the sanctuary check moves above an earlier refusal, so an hp-less person gets a grey
+  // Attack instead of no card, or a target in another room reads as this room's rule.
+  const unhurt = calm(w);
+  const { hp: _hp, ...bare } = unhurt.entities[rat(w)] as (typeof unhurt.entities)[string] & {
+    hp?: unknown;
+  };
+  const hpless = { ...unhurt, entities: { ...unhurt.entities, [rat(w)]: bare } };
+  const away = room(w, 'drowned_lantern');
+  const remote = {
+    ...w,
+    rooms: { ...w.rooms, [away]: { ...w.rooms[away], sanctuary: true } },
+    state: { ...w.state, containers: { ...w.state.containers, [w.body]: away } },
+  };
+  for (const [before, error] of [
+    [hpless, { code: 'invalid_target', cause: 'cannot_be_hurt' }],
+    [remote, { code: 'not_present' }],
+  ] as const) {
+    const out = attack(before as typeof w);
+    assert.ok(out.decision.kind === 'rejected');
+    assert.deepEqual(out.decision.error, error);
+  }
 });
 
 // Breaks: raw target bypass, repeat/switch Attack allocation, or Attack advertised on noncombat NPC.
