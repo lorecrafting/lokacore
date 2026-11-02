@@ -365,6 +365,9 @@
           "type": "integer",
           "minimum": 1
         },
+        "sitting": {"description":"Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest.",
+          "const": true
+        },
         "then": {
           "$ref": "action.schema.json#/$defs/Key"
         },

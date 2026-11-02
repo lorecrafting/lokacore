@@ -53,18 +53,11 @@ function attempts(world: World, db: Db, scope: string, id: string, row: ChoiceRo
   );
   let count = 0,
     status: ChoiceRow['status'] = 'pending',
-    prior = row.opened_revision;
+    prior = row.opened_revision - 1;
   for (const r of receipts) {
     const command = JSON.parse(r.command) as Command,
       decision = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
-    const p = command.payload;
-    if (
-      !receiptValid(world, r, command, decision) ||
-      !('actor_id' in p) ||
-      p.actor_id !== row.actor_id ||
-      status !== 'pending' ||
-      r.revision <= prior
-    )
+    if (!receiptValid(world, r, command, decision) || status !== 'pending' || r.revision <= prior)
       invalidRiddle();
     prior = r.revision;
     const next = answerEvidence(world, id, row, r, command, decision, count);
@@ -99,9 +92,6 @@ function openEvidence(
     minted(world.context, command.id, 0) !== id ||
     decision.outcome !== 'choice_opened' ||
     !openedEvent(world, id, row, command, decision) ||
-    decision.delta.ops.some(
-      (o) => o !== op && (o.op !== 'choice.close' || o.continuation_id === id),
-    ) ||
     op?.op !== 'choice.open' ||
     !same(op, {
       op: 'choice.open',
@@ -129,33 +119,24 @@ function answerEvidence(
   count: number,
 ) {
   const p = command.payload;
-  // dialogue@1: a talk to another speaker or the dream's Continue leaves the riddle first.
-  if (p.type === 'talk' || p.type === 'continue') {
+  // Any accepted command may close the row: a talk, a Continue, Leave, or a reaction's end_talk.
+  if (p.type !== 'choose' || p.continuation_id !== id) {
     if (!decision.delta.ops.some((o) => o.op === 'choice.close' && o.continuation_id === id))
       invalidRiddle();
     return { count, status: 'closed' as const };
   }
-  if (p.type === 'close_choice') {
-    if (
-      !same(decision.delta.ops, [{ op: 'choice.close', writer_group: 0, continuation_id: id }]) ||
-      decision.outcome !== 'choice_closed' ||
-      decision.events.length ||
-      decision.effects.length
-    )
-      invalidRiddle();
-    return { count, status: 'closed' as const };
-  } else if (p.type === 'choose') {
-    if (!dialogueDetail({ world } as Story, r.command_id, command, decision)) invalidRiddle();
-    if (decision.outcome === 'riddle_wrong') {
-      const op = decision.delta.ops[0];
-      if (op.op !== 'choice.attempt' || op.prior_count !== count) invalidRiddle();
-      count++;
-      return {
-        count,
-        status: count === row.attempts!.limit ? ('closed' as const) : ('pending' as const),
-      };
-    } else return { count, status: 'resolved' as const };
-  } else invalidRiddle();
+  if (
+    p.actor_id !== row.actor_id ||
+    !dialogueDetail({ world } as Story, r.command_id, command, decision)
+  )
+    invalidRiddle();
+  if (decision.outcome !== 'riddle_wrong') return { count, status: 'resolved' as const };
+  const op = decision.delta.ops[0];
+  if (op.op !== 'choice.attempt' || op.prior_count !== count) invalidRiddle();
+  return {
+    count: count + 1,
+    status: count + 1 === row.attempts!.limit ? ('closed' as const) : ('pending' as const),
+  };
 }
 
 function openedEvent(
@@ -167,8 +148,6 @@ function openedEvent(
 ) {
   const e = decision.events[0];
   return (
-    decision.events.length === 1 &&
-    decision.effects.length === 0 &&
     !!e &&
     e.id === minted(world.context, command.id, 1) &&
     e.actor_id === row.actor_id &&
