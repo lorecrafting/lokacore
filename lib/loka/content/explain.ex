@@ -1,4 +1,4 @@
-# size: allow 335, one row per refusal a writer can meet; the table reads together
+# size: allow 400, one row per refusal a writer can meet; the table reads together
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -78,6 +78,11 @@ defmodule Loka.Content.Explain do
          scene_entry | Line `{text}`: a scene header takes no `entry`. | Put `{"entry": true}` in `dialogues/<key>.json` beside the scene.
          misplaced_header | Line `{text}`: `npc:` comes first, then `when:` and `with:`, before any choice. | Move it to the top of the file.
          no_npc | Line `{text}` comes before the speaker is named. | Start the file with `npc: <key>`.
+         scene_when | `when:` needs a true/false fact, and `{fact}` is {type}. | Name a fact whose type is `bool` in facts.json, or write this test as `policy` in `dialogues/<key>.json`.
+         scene_needs | `needs:` needs a true/false fact, and `{fact}` is {type}. | Name a fact whose type is `bool` in facts.json, or write this test as `policy` in `dialogues/<key>.json`.
+         placeholder_text | Words here are still `~`, a place held for them. | Write the words, or compile with `--allow-placeholders` while the cartridge is unfinished.
+         no_prompt | {npc} says nothing before the first choice. | Write what {npc} says first, on a line `{npc}: words` above the first `- ` line.
+         no_choices | This scene gives the player nothing to choose. | Add a `- ` choice line under what {npc} says.
          not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:`, `quest:`, `needs:`, `once` or `then:` (docs/guides/writing-the-game.md).
          file_name | This file's name cannot be a key. | Rename it with lowercase letters, digits and underscores.
          outside_choice | Line `{text}` belongs under a choice. | Move it under a `- ` line.
@@ -144,6 +149,8 @@ defmodule Loka.Content.Explain do
            {key, List.to_tuple(words)}
          end)
 
+  @fact_types %{"int" => "a number", "enum" => "one of a list of words"}
+
   @doc "Each diagnostic as its one line, against the source tree at `dir`."
   @spec lines([map()], Path.t()) :: [String.t()]
   # mutate-skip: the empty clause only spares a clean compile the file scan; same answer
@@ -153,12 +160,49 @@ defmodule Loka.Content.Explain do
     index = SourceLines.index(dir)
 
     diags
+    |> Enum.map(&scene_fact(&1, index, dir))
     |> without_follow_ons()
     # Errors first: readers (the author panel) take the first line for the build's state.
     |> Enum.sort_by(&(&1["severity"] != "error"))
     |> Enum.map(&String.replace_invalid("#{&1["severity"]}: #{place(&1, index)} #{words(&1)}"))
     |> Enum.uniq()
   end
+
+  # A scene's `when:` or `needs:` names its fact last on its line; facts.json gives its type.
+  defp scene_fact(%{"code" => "FACT_TYPE_MISMATCH", "path" => path} = d, index, dir) do
+    with {file, n} <- index[prefix(path, index)],
+         true <- String.ends_with?(file, ".scene"),
+         {:ok, facts} <- facts(dir) do
+      fact = last_word(Path.join(dir, file), n)
+      words = %{"fact" => fact, "type" => fact_type(facts, fact)}
+      Map.update(d, "data", words, &Map.merge(&1, words))
+    else
+      _ -> d
+    end
+  end
+
+  defp scene_fact(d, _, _), do: d
+
+  defp facts(dir) do
+    with {:ok, text} <- File.read(Path.join(dir, "facts.json")), do: JSON.decode(text)
+  end
+
+  # A dotted name in facts.json is keyed with `_` (cartridge.md, facts.json row).
+  defp fact_type(facts, fact) do
+    Enum.find_value(facts["facts"] || %{}, fn {name, spec} ->
+      if String.replace(name, ".", "_") == String.replace(fact, ".", "_"),
+        do: get_in(spec, ["value_type", "type"])
+    end)
+  end
+
+  defp last_word(file, n),
+    do:
+      file
+      |> File.read!()
+      |> String.split("\n")
+      |> Enum.at(n - 1)
+      |> String.split()
+      |> List.last()
 
   defp without_follow_ons(diags) do
     # A refused scene line leaves its part unset; "missing" would only repeat that line's error.
@@ -223,6 +267,20 @@ defmodule Loka.Content.Explain do
       else: Map.fetch!(@words, d["code"])
   end
 
+  # A scene's `when:` and `needs:` read a fact as true or false (docs/system/cartridge.md, Scene files).
+  defp entry("FACT_TYPE_MISMATCH", %{"path" => path}) do
+    cond do
+      not (String.contains?(path, ".scene\"") and String.contains?(path, ".policy")) ->
+        @words["FACT_TYPE_MISMATCH"]
+
+      String.contains?(path, ".choices.") ->
+        @words["scene_needs"]
+
+      true ->
+        @words["scene_when"]
+    end
+  end
+
   defp entry("UNKNOWN_FIELD", %{"path" => path}) do
     if not String.contains?(path, [".", "["]) or path =~ ~r/^".*"$/,
       do: @words["stray_file"],
@@ -262,6 +320,7 @@ defmodule Loka.Content.Explain do
     data
     |> Map.put("field", field(path))
     |> Map.update("expected", "the right type", &article/1)
+    |> Map.update("type", nil, &(@fact_types[&1] || &1))
     |> Map.put(
       "fields_named",
       if(data["fields"], do: " with fields: #{data["fields"]}", else: "")

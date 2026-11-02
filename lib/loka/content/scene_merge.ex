@@ -68,6 +68,18 @@ defmodule Loka.Content.SceneMerge do
     for {rel, {:dialogue, key, _}} <- scenes -- Enum.uniq_by(scenes, &elem(&1, 1)), do: {rel, key}
   end
 
+  @doc "The `{scene rel, why}` a same-key JSON makes moot: it writes the prompt (`no_prompt`) or choices (`no_choices`) the scene left out."
+  @spec supplied([entry()]) :: [{String.t(), String.t()}]
+  def supplied(files) do
+    for {rel, {:dialogue, _, _} = id, _} <- files,
+        String.ends_with?(rel, ".scene"),
+        {json, ^id, %{} = other} <- files,
+        json != rel,
+        {why, field} <- [{"no_prompt", "prompt"}, {"no_choices", "choices"}],
+        other[field] not in [nil, %{}],
+        do: {rel, why}
+  end
+
   # Lowering's own way back, the one `then` a JSON may replace: no `then:` line, and not the link
   # to the choice's nested set (dropping that would silently cut the set off).
   defp replaceable?(["choices", c, "then"], scene, key),

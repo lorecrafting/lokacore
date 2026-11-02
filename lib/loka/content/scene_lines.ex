@@ -80,6 +80,10 @@ defmodule Loka.Content.SceneLines do
   def key(label),
     do: label |> String.downcase() |> String.replace(~r/[^a-z0-9]+/, "_") |> String.trim("_")
 
+  @doc "The key of the choice `label` on line `n`: a `~` placeholder has no words, so its line keys it."
+  @spec choice_key(String.t(), pos_integer()) :: String.t()
+  def choice_key(label, n), do: if(String.trim(label) == "~", do: "todo__#{n}", else: key(label))
+
   defp step({raw, n}, s) do
     text = String.trim(raw)
     margin = binary_part(raw, 0, byte_size(raw) - byte_size(String.trim_leading(raw)))
@@ -109,24 +113,24 @@ defmodule Loka.Content.SceneLines do
 
   defp head(text, n, s), do: emit(s, s.root, text, n)
 
-  defp frame(text, indent, k, facts),
+  defp frame(text, n, indent, k, facts),
     do: %{
       indent: indent,
       key: k,
-      choice: key(String.trim_leading(text, "- ")),
+      choice: choice_key(String.trim_leading(text, "- "), n),
       then: nil,
       nested: false,
       facts: facts
     }
 
   defp choice(text, indent, n, %{stack: []} = s) do
-    %{s | stack: [frame(text, indent, s.root, s.facts)]} |> emit(s.root, text, n)
+    %{s | stack: [frame(text, n, indent, s.root, s.facts)]} |> emit(s.root, text, n)
   end
 
   defp choice(text, indent, n, %{stack: [top | below]} = s) when indent > top.indent do
     child = top.key <> "_" <> top.choice
     s = s |> then_refused(top) |> linked(top, child, n, text)
-    stack = [frame(text, indent, child, top.facts), %{top | nested: true} | below]
+    stack = [frame(text, n, indent, child, top.facts), %{top | nested: true} | below]
     emit(%{s | stack: stack}, child, text, n)
   end
 
@@ -136,7 +140,7 @@ defmodule Loka.Content.SceneLines do
     {old, below, s} = closed(stack, text, indent, n, s)
 
     facts = if below == [], do: s.facts, else: hd(below).facts
-    %{s | stack: [frame(text, indent, old.key, facts) | below]} |> emit(old.key, text, n)
+    %{s | stack: [frame(text, n, indent, old.key, facts) | below]} |> emit(old.key, text, n)
   end
 
   defp closed(stack, text, indent, n, s) do
@@ -195,7 +199,11 @@ defmodule Loka.Content.SceneLines do
   defp located({"npc: " <> _, n}, at), do: {[{["npc"], n}, {["roles"], n}], at}
   defp located({"when: " <> _, n}, at), do: {[{["policy"], n}], at}
   defp located({"with: " <> npc, n}, at), do: {[{["roles", npc], n}], at}
-  defp located({"- " <> label, n}, _), do: {[{["choices", key(label)], n}], {key(label), 0}}
+
+  defp located({"- " <> label, n}, _) do
+    key = choice_key(label, n)
+    {[{["choices", key], n}], {key, 0}}
+  end
 
   defp located({"gives: " <> item, n}, {cur, _} = at) when cur != nil,
     do: {[{["choices", cur, "receive"], n}, {["roles", item], n}], at}
