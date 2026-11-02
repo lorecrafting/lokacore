@@ -1,4 +1,4 @@
-// The Storybook smoke (npm run storybook:smoke): every story renders in headless Chromium, its play
+// The Storybook smoke (npm run storybook:smoke): every story renders in headless Google Chrome, its play
 // function and the a11y checks pass. Here, not in .storybook, because the Storybook test panel and
 // MCP test-run look for it beside .storybook; .storybook/tsconfig.json type-checks it (Node types).
 import { defineConfig } from 'vitest/config';
@@ -16,7 +16,8 @@ export default defineConfig({
     browser: {
       enabled: true,
       headless: true,
-      provider: playwright(),
+      // Stable Google Chrome: Playwright's bundled Chromium lags Chrome's security fixes (loka-kknxt).
+      provider: playwright({ launchOptions: { channel: 'chrome' } }),
       instances: [{ browser: 'chromium' }],
     },
   },

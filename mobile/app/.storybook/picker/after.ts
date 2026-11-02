@@ -31,7 +31,7 @@ const [width, height] = [pick.viewport?.width ?? 414, pick.viewport?.height ?? 8
 );
 
 mkdirSync(`${dir}/shots`, { recursive: true });
-const browser = await chromium.launch();
+const browser = await chromium.launch({ channel: 'chrome' });
 try {
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 2 });
   page.setDefaultTimeout(10_000); // the done line waits on this shot
