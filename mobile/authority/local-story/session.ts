@@ -16,7 +16,7 @@ export { INSTALLED, KERNEL_ID } from '../../../kernel/ts/src/index.ts'; // the a
 import type { Cartridge } from '../../../kernel/ts/src/index.ts';
 import type { Failed, Game, GameSession, Intent, Reply } from '../../packages/game-view/session.ts';
 import { openStory, type Host } from './authority.ts';
-import { corrupt, type Db } from './store.ts';
+import { corrupt, unreadable, type Db } from './store.ts';
 import {
   sessionInvoke,
   SESSION_ID_PREFIX as ID_PREFIX,
@@ -28,14 +28,14 @@ export type Bundled = { canonical: string; sha256: string };
 
 // The release's own fresh world: the context and seed of every save made before c1-host (whose
 // pin names no context).
-const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
-const SEED = [1, 2, 3, 4];
+export const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
+export const SEED = [1, 2, 3, 4];
 
 // The build's commit, its random source (lineage.test.ts proves the app path passes it; tests
 // without one play the template world), its ids and its clock.
 type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version' | 'random' | 'time' | 'dev'>;
 
-function cartridgeOf(bundled: Bundled): Cartridge {
+export function cartridgeOf(bundled: Bundled): Cartridge {
   const artifact = `{"cartridge":${bundled.canonical},"content_hash":"${bundled.sha256}"}`;
   const loaded = loadCartridge(new TextEncoder().encode(artifact), INSTALLED);
   if (!loaded.ok) throw new Error(`cartridge did not load: ${JSON.stringify(loaded)}`);
@@ -73,7 +73,7 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>)
     if (last?.lines.some((t) => typeof (t as { key?: unknown } | null)?.key !== 'string'))
       throw new Error('malformed JSON: a narration line without a key');
   } catch (e) {
-    if (!(e instanceof SyntaxError) && !/malformed JSON/.test(String(e))) throw e; // I/O may leave an intact save
+    if (!unreadable(e)) throw e; // I/O or a bug of ours may leave an intact save
     throw refusal(e);
   }
 }

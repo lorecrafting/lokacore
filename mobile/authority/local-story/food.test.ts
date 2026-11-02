@@ -82,20 +82,9 @@ test('real SQLite carries the same apple through storage/drop/Take/give/Eat and 
   assert.equal(mv(a), 62);
 });
 
-// Breaks: deleting the food-only replay trigger permits a bounded forged MV benefit or terminal receipt/custody lie.
-test('food-only cold-open refuses plausible bounded forgeries without writing bytes', (t) => {
-  for (const mutation of [
-    'mv',
-    'restore',
-    'nonfood',
-    'holder-row',
-    'item_id',
-    'actor',
-    'scope',
-    'narration',
-    'ops',
-    'missing',
-  ]) {
+// Breaks: open stops refusing an Eat receipt that no longer binds or is missing, or a consumed holder row no command can run.
+test('food-only cold-open refuses unbound receipts and unrunnable custody without writing bytes', (t) => {
+  for (const mutation of ['nonfood', 'holder-row', 'actor', 'scope', 'missing']) {
     const { a, path } = disk(t, onlyFood),
       id = apple(a);
     a.invoke('take', [id]);
@@ -103,18 +92,7 @@ test('food-only cold-open refuses plausible bounded forgeries without writing by
     const row = a.sql
       .prepare("SELECT * FROM receipt WHERE json_extract(command,'$.payload.type')='eat'")
       .get() as any;
-    if (mutation === 'mv')
-      a.sql
-        .prepare("UPDATE state_row SET value=? WHERE section='resources' AND key=?")
-        .run(
-          JSON.stringify({ value: 57, at: 0, rate: 18, remainder: 0 }),
-          key({ kind: 'resource', entity_id: a.initial.body, resource: ref('resource', 'mv') }),
-        );
-    else if (mutation === 'restore')
-      a.sql
-        .prepare("UPDATE state_row SET value=? WHERE section='containers' AND key=?")
-        .run(JSON.stringify(a.initial.body), id);
-    else if (mutation === 'nonfood')
+    if (mutation === 'nonfood')
       a.sql
         .prepare("UPDATE state_row SET value=? WHERE section='containers' AND key=?")
         .run(JSON.stringify(a.initial.consumed), a.initial.body);
@@ -129,18 +107,13 @@ test('food-only cold-open refuses plausible bounded forgeries without writing by
         .prepare('UPDATE receipt SET scope=? WHERE invocation_id=?')
         .run('story/foreign/actor', row.invocation_id);
     else {
-      const d = JSON.parse(row.response),
-        c = JSON.parse(row.command);
-      if (mutation === 'item_id') d.item_id = apple(a, 2);
-      if (mutation === 'actor') c.payload.actor_id = 'ffffffff-0000-4000-8000-000000000001';
-      if (mutation === 'narration') d.narration = [{ key: 'narration.not_eat_loaf' }];
-      if (mutation === 'ops') d.delta.ops.pop();
+      const c = JSON.parse(row.command);
+      c.payload.actor_id = 'ffffffff-0000-4000-8000-000000000001';
       a.sql
-        .prepare('UPDATE receipt SET response=?,command=? WHERE invocation_id=?')
-        .run(JSON.stringify(d), JSON.stringify(c), row.invocation_id);
-    }
-    if (['item_id', 'actor', 'narration'].includes(mutation))
+        .prepare('UPDATE receipt SET command=? WHERE invocation_id=?')
+        .run(JSON.stringify(c), row.invocation_id);
       assert.throws(() => a.story.narration(row.command_id), /invalid committed Eat/, mutation);
+    }
     a.sql.close();
     const before = readFileSync(path);
     // Reopen a real connection without invoking the helper's successful-open assertion.

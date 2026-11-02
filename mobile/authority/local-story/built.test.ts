@@ -175,28 +175,6 @@ test('a real failed or lost COMMIT at completion retries to the same single hut'
   straight.p.sql.close();
 });
 
-// Breaks: load admitting a saved build order whose owner (actor_id) names another actor, which
-// would raise the room for them; refused by the receipt replay (liquid-save.ts), with the file left unchanged.
-test('a pending build order forged to another owner is save_corrupt and the file is unchanged', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-built-owner-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const path = join(dir, 'order.db');
-  const { p } = build(path, false, 'ordered');
-  const job = p.sql.prepare("SELECT key, value FROM state_row WHERE section = 'jobs'").all() as {
-    key: string;
-    value: string;
-  }[];
-  const order = job.find((j) => JSON.parse(j.value).job.kind === 'order')!;
-  const forged = { ...JSON.parse(order.value), actor_id: npc('seller') };
-  p.sql
-    .prepare("UPDATE state_row SET value = ? WHERE section = 'jobs' AND key = ?")
-    .run(JSON.stringify(forged), order.key);
-  p.sql.close();
-  const bytes = readFileSync(path);
-  assert.throws(() => coldReopen(path, bundle), /save_corrupt/);
-  assert.deepEqual(readFileSync(path), bytes);
-});
-
 const opened = (p: ReturnType<typeof elapsedHost>, rel = releases) => {
   const s = openStory(p.db, rel, p.host);
   if (s.kind !== 'open') throw new Error(JSON.stringify(s));

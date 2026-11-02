@@ -156,14 +156,18 @@ const answeredTwice = (g: Play, choice: string, swaps: [string, string][] = []) 
     .run(...(Object.values(values) as string[]));
 };
 
-// Breaks: a duplicate answer row and receipt throwing at the next action or reopen.
+// Breaks: a duplicate answer row and receipt throwing at the next action or reopen. A later drop keeps
+// the copy off the newest row, whose binding a reopen refuses.
 test('a one-way answer saved twice keeps playing', () => {
   survives(
     oneWay(),
-    (g) => g.choose('take'),
+    (g) => {
+      g.choose('take');
+      g.go('drop', {}, [g.fresh.entityIds[TOKEN]!]);
+    },
     (g) => answeredTwice(g, 'take'),
-    (g) => g.go('drop', {}, [g.fresh.entityIds[TOKEN]!]),
-    (g) => assert.equal(holder(g), g.story.world().state.containers[g.fresh.body]),
+    (g) => g.go('take', {}, [g.fresh.entityIds[TOKEN]!]),
+    (g) => assert.equal(holder(g), g.fresh.body),
   );
 });
 

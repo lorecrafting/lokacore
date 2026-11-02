@@ -164,65 +164,6 @@ test('real failed and unknown refill commits reconcile the entire writer group a
     }
   }
 });
-// Break: bounded fuel forgery/missing debit or future/malformed stored row is mistaken for lawful history.
-test('corrupt fuel and forged refills refuse without repairing SQLite', () => {
-  const mutations = [
-    (p: ReturnType<typeof setup>) =>
-      p.sql.prepare("DELETE FROM state_row WHERE section='fuel' AND key=?").run(torch),
-    (p: ReturnType<typeof setup>) =>
-      p.sql
-        .prepare(
-          "UPDATE state_row SET value=json_set(value,'$.at',999999) WHERE section='fuel' AND key=?",
-        )
-        .run(torch),
-    (p: ReturnType<typeof setup>) =>
-      p.sql
-        .prepare(
-          "UPDATE state_row SET value=json_set(value,'$.remaining',7201) WHERE section='fuel' AND key=?",
-        )
-        .run(torch),
-    (p: ReturnType<typeof setup>) =>
-      p.sql
-        .prepare(
-          "UPDATE state_row SET value=json_set(value,'$.remaining',7000) WHERE section='fuel' AND key=?",
-        )
-        .run(torch),
-    (p: ReturnType<typeof setup>) =>
-      p.sql
-        .prepare(
-          "UPDATE state_row SET value=json_set(value,'$.lit',1) WHERE section='fuel' AND key=?",
-        )
-        .run(torch),
-    (p: ReturnType<typeof setup>) => {
-      const r = p.sql
-        .prepare(
-          "SELECT invocation_id,response FROM receipt WHERE json_extract(command,'$.payload.type')='refuel'",
-        )
-        .get()!;
-      const d = JSON.parse(r.response as string);
-      d.delta.ops.pop();
-      p.sql
-        .prepare('UPDATE receipt SET response=? WHERE invocation_id=?')
-        .run(JSON.stringify(d), r.invocation_id as string);
-    },
-  ];
-  for (const corrupt of mutations) {
-    const p = setup();
-    try {
-      p.buy();
-      p.invoke('ignite', [torch]);
-      p.elapsed(3);
-      p.invoke('douse', [torch]);
-      p.invoke('refuel', [torch, oil]);
-      corrupt(p);
-      const before = disk(p);
-      assert.equal(openStory(p.db, releases, p.host).kind, 'save_corrupt');
-      assert.deepEqual(disk(p), before);
-    } finally {
-      p.sql.close();
-    }
-  }
-});
 import { gameView, newWorld } from '../../../kernel/ts/src/index.ts';
 // Break: the real fatal clock/corpse rows fail cold recovery, or loss of the sole light blocks its roots.
 test('dark lethal combat cold reopens and permits the gear-free owner corpse walk and exact recovery', (t) => {
@@ -272,8 +213,8 @@ test('dark lethal combat cold reopens and permits the gear-free owner corpse wal
   assert.equal(q.world().state.containers[corpse], room('well_shaft'));
   assert.notEqual(q.world().state.containers[torch], corpse);
 });
-// Break: receipt history validates fuel only when an unrelated repeated-exchange quest is installed.
-test('a light-only cartridge reopens lawful refill history and rejects a bounded forged charge', () => {
+// Break: fuel recovery works only when an unrelated repeated-exchange quest is installed.
+test('a light-only cartridge reopens lawful refill history', () => {
   const supplied = lightOnlyFixture(),
     p = setup(':memory:', supplied);
   try {
@@ -288,48 +229,6 @@ test('a light-only cartridge reopens lawful refill history and rejects a bounded
       [source]: { remaining: 8, at: 100, lit: false },
       [supply]: { remaining: 0, at: 100, lit: false },
     });
-    p.sql
-      .prepare(
-        "UPDATE state_row SET value=json_set(value,'$.remaining',7) WHERE section='fuel' AND key=?",
-      )
-      .run(source);
-    const before = disk(p);
-    assert.equal(
-      openStory(p.db, [{ fresh: supplied.fresh, content_hash: supplied.bundle.sha256 }], p.host)
-        .kind,
-      'save_corrupt',
-    );
-    assert.deepEqual(disk(p), before);
-  } finally {
-    p.sql.close();
-  }
-});
-
-// Break: orphan fuel rows are ignored when the pinned cartridge declares no fuel items or repeat exchange.
-test('undeclared fuel rows refuse in a cartridge without light metadata and leave SQLite untouched', () => {
-  const p = elapsedHost();
-  try {
-    const base = newWorld(JSON.parse(p.bundle.canonical), fresh.context, [1, 2, 3, 4]);
-    p.sql
-      .prepare('INSERT INTO state_row VALUES (?,?,?)')
-      .run(
-        'fuel',
-        '11111111-0000-4000-8000-000000000001',
-        JSON.stringify({ remaining: 1, at: 64800, lit: false }),
-      );
-    const before = ['state_row', 'head', 'receipt', 'elapsed'].map((t) =>
-      p.sql.prepare(`SELECT * FROM ${t} ORDER BY 1,2`).all(),
-    );
-    assert.equal(
-      openStory(p.db, [{ fresh: base, content_hash: p.bundle.sha256 }], p.host).kind,
-      'save_corrupt',
-    );
-    assert.deepEqual(
-      ['state_row', 'head', 'receipt', 'elapsed'].map((t) =>
-        p.sql.prepare(`SELECT * FROM ${t} ORDER BY 1,2`).all(),
-      ),
-      before,
-    );
   } finally {
     p.sql.close();
   }

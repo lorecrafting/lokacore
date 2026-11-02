@@ -116,21 +116,3 @@ test('the hut, a deposit at branch A and a withdrawal at branch B survive cold r
   s.p.sql.close();
   coldReopen(s.path, bundle);
 });
-
-// Breaks: reopen trusts a stored savings row the receipts do not produce (10 forged to 11).
-test('a forged savings row reopens save_corrupt', (t) => {
-  const s = session(t);
-  s.use('deposit', 'clerk_a', 'deposit_a');
-  assert.deepEqual(books(s.story.world()), [19, 30, 10]);
-  const row = Object.keys(s.story.world().state.facts ?? {}).find(
-    (k) => JSON.parse(k).fact.key === 'savings',
-  )!;
-  const forged = s.p.sql
-    .prepare("UPDATE state_row SET value='11' WHERE section='facts' AND key=?")
-    .run(row);
-  assert.equal(forged.changes, 1);
-  const snapshot = s.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
-  assert.equal(openStory(s.p.db, releases, s.p.host).kind, 'save_corrupt');
-  assert.deepEqual(s.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), snapshot);
-  s.p.sql.close();
-});

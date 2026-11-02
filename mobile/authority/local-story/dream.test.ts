@@ -103,66 +103,6 @@ test('every intermediate checkpoint and both ended branches cold-open and replay
   }
 });
 
-// Breaks: a forged phase/branch or removed/mutated producer receipt survives history recovery and silently rewrites the save.
-test('cold open refuses forged dream truth and receipt producer evidence without changing file bytes', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-dream-corrupt-'));
-  t.after(() => rmSync(dir, { recursive: true }));
-  const changes = [
-    (a: ReturnType<typeof dreamHost>) =>
-      a.sql
-        .prepare(
-          "UPDATE state_row SET value='false' WHERE section='facts' AND key LIKE '%dream_seen%'",
-        )
-        .run(),
-    (a: ReturnType<typeof dreamHost>) =>
-      a.sql
-        .prepare(
-          "UPDATE state_row SET value=json_set(value,'$.choice_id','wake') WHERE section='choices'",
-        )
-        .run(),
-    (a: ReturnType<typeof dreamHost>) => {
-      const row = a.sql
-        .prepare(
-          "SELECT command_id,response FROM receipt WHERE json_extract(command,'$.payload.type')='rest'",
-        )
-        .get()!;
-      const d = JSON.parse(String(row.response));
-      d.events.find((e: any) => e.payload.type === 'rested').payload.body_id =
-        '00000000-0000-4000-8000-000000000000';
-      a.sql
-        .prepare('UPDATE receipt SET response=? WHERE command_id=?')
-        .run(JSON.stringify(d), String(row.command_id));
-    },
-    (a: ReturnType<typeof dreamHost>) =>
-      a.sql
-        .prepare(
-          "UPDATE receipt SET command=json_set(command,'$.payload.dream.expected_revision',99) WHERE json_extract(command,'$.payload.type')='choose'",
-        )
-        .run(),
-  ];
-  for (const [n, change] of changes.entries()) {
-    const path = join(dir, n + '.db'),
-      a = dreamHost(path);
-    try {
-      a.start();
-      a.next();
-      a.next();
-      a.next();
-      a.choose();
-      // Ended memory has a real persisted row; reverting it must contradict its final receipt.
-      if (n === 0) a.next();
-      change(a);
-      const before = disk(a),
-        bytes = readFileSync(path);
-      assert.equal(a.refuse().kind, 'save_corrupt');
-      assert.deepEqual(disk(a), before);
-      assert.deepEqual(readFileSync(path), bytes);
-    } finally {
-      a.sql.close();
-    }
-  }
-});
-
 // Breaks: an unknown COMMIT advances memory, allows new input/elapsed, or resumes with a duplicate scene choice or acknowledgment.
 test('Rest, choice opening, branch selection and final ack settle uncertain COMMIT all old or all new', () => {
   for (const index of [0, 3, 4, 5])

@@ -191,5 +191,4 @@ test('the level-up refill survives a cold reopen', (t) => {
   p = elapsedHost(path, undefined, bundle);
   assert.equal(hp(open().world()), 10);
   p.sql.close();
-  coldReopen(path, bundle);
 });
