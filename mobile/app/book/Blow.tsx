@@ -44,18 +44,6 @@ export const flashed = (still: boolean) =>
     withTiming(0, { duration: out, ...never }),
   );
 
-/**
- * The paper under the combat page (book-ui.md, Blow wash).
- * - Use: Combat only, around a `paperless` Page.
- * - Rules: answers only an `hp_loss` with `wash`, which the Flash limit and the Flashes setting decide;
- *   below the ink; no layout change; a page turn remounts it, ending the wash. A death in a fight
- *   holds the red at `opacity.fatal` until then, no pulse and no fade (book-ui.md, Falling): it
- *   rises as the fatal wash falls, or over the settle time when no wash peaked; a bloodshot rim at
- *   `opacity.bloodshot`, feathered in over `size.bloodshot`, rises and holds with it, to the screen's edge.
- * - States: at rest; washing; held after a death; reduced motion (half the wash, no swell; a death
- *   sets the hold at once, under the half wash: the two stay below the wash's peak).
- * - Story: CombatPage.stories.tsx
- */
 // A fight's blows wash the paper; its death holds the red.
 function useWash(still: boolean) {
   const wash = useSharedValue(0);
@@ -84,6 +72,18 @@ const bloodshot = (c: Palette, foot: number) => ({
   ],
 });
 
+/**
+ * The paper under the combat page (book-ui.md, Blow wash).
+ * - Use: Combat only, around a `paperless` Page.
+ * - Rules: answers only an `hp_loss` with `wash`, which the Flash limit and the Flashes setting decide;
+ *   below the ink; no layout change; a page turn remounts it, ending the wash. A death in a fight
+ *   holds the red at `opacity.fatal` until then, no pulse and no fade (book-ui.md, Falling): it
+ *   rises as the fatal wash falls, or over the settle time when no wash peaked; a bloodshot rim at
+ *   `opacity.bloodshot`, feathered in over `size.bloodshot`, rises and holds with it, to the screen's edge.
+ * - States: at rest; washing; held after a death; reduced motion (half the wash, no swell; a death
+ *   sets the hold at once, under the half wash: the two stay below the wash's peak).
+ * - Story: CombatPage.stories.tsx
+ */
 export function Blow({ children, under }: { children: ReactNode; under?: ReactNode }) {
   const c = usePalette();
   const still = useReducedMotion();
