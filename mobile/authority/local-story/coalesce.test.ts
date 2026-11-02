@@ -470,6 +470,12 @@ for (const n of [1, 2, 3, 4])
       const child = spawnSync(process.execPath, args);
       assert.equal(child.signal, 'SIGKILL', String(child.stderr));
       const a = elapsedHost(path, { wall: 11000, mono: 0 }, bundle);
+      // Open's resume tick follows the entry the dead process left unwritten, not ahead of it.
+      if (n === 1 && when === 'before')
+        assert.deepEqual(entrySpans(a.sql), [
+          [START, START + 37],
+          [START + 37, START + 50],
+        ]);
       assert.equal(tick(a), 'ready'); // 1250 ms in all at 50 per 1000 ms: 62 units
       a.sql.close();
       const lawful =

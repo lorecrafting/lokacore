@@ -176,7 +176,7 @@ export function traceAfter(
   // An absorbed tick writes no trace of its own: the next catch-up swaps in the merged entry.
   if (replaces) {
     s.behind = true;
-    if (states.length === 1 && states[0] === 'committed') return;
+    if (states[0] === 'committed') return;
   }
   if (s.behind && (s.behind = !catchUp(s.db, ids(s), s.fresh.context, command.id))) return;
   const written = traceCommand(s.db, ids(s), command, d, at, states);
