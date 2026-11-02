@@ -218,7 +218,6 @@ test('production hour-boundary recovery precedes damage and Flee preserves the r
   });
 });
 
-// Breaks: raw target bypass, repeat/switch Attack allocation, or Attack advertised on noncombat NPC.
 // Breaks: a sanctuary refusal stays bare, so the Book greys what it should hide, or a seated player
 // is refused for standing first and the card appears then vanishes on standing; or a seated
 // player outside a sanctuary is told sanctuary and loses a card they could bring back by standing.
@@ -250,6 +249,7 @@ test('a sanctuary refuses Attack with its cause, sitting or standing; a seat els
   }
 });
 
+// Breaks: raw target bypass, repeat/switch Attack allocation, or Attack advertised on noncombat NPC.
 test('admission refuses absent, dead, sanctuary, nonstanding and already engaged participants', () => {
   const w = combatWorld();
   const seated = step(w, command(w, { type: 'sit', actor_id: w.character }), 1).world;
