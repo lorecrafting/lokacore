@@ -364,6 +364,21 @@ defmodule Loka.ContentStartersTest do
     assert read(dir, "replenish/more.json")["to"]["room"] == "marsh"
   end
 
+  # Breaks: "Fill the ~ lines" printed over an empty list (contradictory).
+  test "the task prints nothing-left alone when no ~ remains", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+
+    room = Path.join(dir, "rooms/start.json")
+    File.write!(room, String.replace(File.read!(room), "\"~\"", "\"x\""))
+
+    out =
+      ExUnit.CaptureIO.capture_io(fn ->
+        Mix.Tasks.Loka.New.run(~w(--cwd #{tmp} facts ready #{dir}))
+      end)
+
+    assert String.ends_with?(out, "\nNothing left to write. Run: bin/loka dev #{dir} --watch\n")
+  end
+
   # Breaks: the second pair lost, --from read as a pair, a relative path resolved against the
   # repo instead of the caller, no next step, or a refused pair leaving the ones before it written.
   test "the task takes several pairs and ends with the next step", %{tmp_dir: tmp} do

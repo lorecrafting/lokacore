@@ -50,9 +50,14 @@ defmodule Mix.Tasks.Loka.New do
         _ -> "(the list is not available: run bin/loka todo #{last})\n"
       end
 
+    run = "bin/loka dev #{last} --watch"
+
     IO.puts(
-      "Still to write:\n" <>
-        todo <> "Fill the ~ lines (bin/loka todo #{last}), then run: bin/loka dev #{last} --watch"
+      if todo == "Nothing left to write.\n",
+        do: "Nothing left to write. Run: #{run}",
+        else:
+          "Still to write:\n" <>
+            todo <> "Fill the ~ lines (bin/loka todo #{last}), then run: #{run}"
     )
   end
 

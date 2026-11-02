@@ -3,6 +3,33 @@
 The owner's loop for writing a cartridge by hand. Rules: [owner decision](../decisions/owner-decision-handwritten-prose-2026-10-31.md);
 tool behaviour: [author preview](../system/cartridge.md#author-preview).
 
+## The short way: a first meeting, then a hub
+
+The committed [`stranger_talk.scene`](../../cartridges/identity_sampler/scenes/stranger_talk.scene)
+is a stranger who tells you their name. In your own cartridge (not `identity_sampler`, which keeps `stranger_talk`), write two files in `scenes/` instead:
+the first meeting, which sets the fact `knows_name` (declared in `facts.json`), and the scene Talk
+opens from then on, where the player comes back to the same choices.
+
+```
+stranger_first.scene            stranger_later.scene
+npc: stranger                   npc: stranger
+when: not knows_name            when: knows_name
+
+* The stranger waits.           * The stranger waits.
+- Ask their name                - Ask their name
+  sets: knows_name                * "Tamsin," they say.
+  * "Tamsin," they say.
+```
+
+1. Start the tools ([below](#start-the-tools)), save both files and talk to the stranger: the first
+   Talk opens `stranger_first`, the next opens `stranger_later`.
+2. Save a checkpoint in the panel's Play tab after each talk, then run `bin/loka check cartridges/<name>`:
+   it prints `<checkpoint>: ok`, or the first step the game refused.
+3. If Talk opens something you did not expect, type `stranger_first` or `stranger_later` into the
+   panel's Why tab: it names the rules that fired and the one that did not.
+
+Replace the words with your own; everything else here is what each line may say.
+
 ## Start the tools
 
 One command, from the repository root:
@@ -117,16 +144,9 @@ maud: ~
   it must be written first, and the nested choices are shown next. Going back to a shallower `- `
   at the same indent as an earlier choice closes what is deeper. A choice has either nested
   choices or a `then`, not both. Indent with spaces; a tab is refused.
-- A person can have many scenes with nested choices, and Talk only ever opens one at its top, never
-  in the middle. It tries that person's scenes in key order and opens the first whose `when:` holds
-  and that shows a choice; when one fails, it first passes on to what it leads to through a choice
-  the player could take for nothing, and is refused only if nothing further down opens. A Talk with
-  its own `name` is refused. So give each scene but the last a `when:`, since one with no `when:`
-  shuts out those after it (`ENTRY_GUESSED`). `when: not <fact>` asks that a fact is false, so a first
-  meeting and later ones need no order in their names: `maud_first` with `when: not met_maud`, whose
-  choice sets `met_maud`, and `maud_later` with `when: met_maud`. Two scenes open at once go to the
-  first by key, so make their `when:` exclude each other. Only `"entry": true` in the JSON beside a
-  scene makes it the one that opens, shutting out the others.
+- A person can have several scenes: Talk opens the first by key whose `when:` holds, so give each
+  but the last a `when:` (the recipe above). If it opens the wrong one, see
+  [When Talk opens the wrong scene](#when-talk-opens-the-wrong-scene).
 - A `needs:` under a `when:` or a choice that asks the opposite, on a fact the file never sets, gets
   a warning and still compiles: the compiler cannot see another file or a reaction changing that fact.
 
@@ -134,34 +154,6 @@ A JSON of the same key may add what a scene cannot say, but it may not write a f
 already writes (the prompt, the speaker, a choice's words): the compile names the field and asks you
 to keep it in one place. A scene with nested choices cannot resolve a quest or take a keyword or
 riddle from its JSON, since those dialogues do not lead on; give that its own scene.
-
-What you can rely on when dialogues link with `then` (JSON dialogues today):
-
-- Put `"entry": true` on the dialogue Talk should open, and it opens there, whatever else leads to
-  it. A person takes one; their other dialogues stop opening, except keyword ones. Without a marker Talk infers, as below, and the
-  compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess.
-  A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
-  no marker when each but the last by key has a `when:`.
-- A person's default Talk, when a dialogue's condition fails, passes on to what that dialogue leads
-  to, in choice key order, what nested choices lead to after that, but only through a choice the player could take for nothing: its condition
-  holds, with no check, cost or other gate. So a first meeting is an `intro` with a `when:` that links
-  to a `hub`: the first Talk opens the intro, and once the condition fails Talk opens the hub unless
-  another dialogue opens first. A locked or paid way on is skipped, and Talk is refused only when
-  nothing further down opens. A way on through a nested choice counts; a way on through a choice with
-  `once`, or one that sets what its own `needs:` forbids, is shut once taken, and the compile warns
-  `FALL_THROUGH_SPENT` when Talk has no other way. A Talk with its own `name` opens its dialogue or is refused.
-- Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
-  condition holds and that has a choice to show.
-- A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the
-  member that leads to the most other dialogues; first by key on a tie, so a hub and one detail
-  open at the first key. Give the hub the most links and it is where the talk starts.
-- A `then` whose target cannot play (its condition fails, it has no choice to show, its speaker is
-  hostile, dead or gone) ends the talk
-  quietly, with no added line.
-- A plain answer, with no `then` and no check, ends the talk if a `then` anywhere leads to this dialogue. Add
-  `then` naming it to come back.
-- A dialogue nothing links to, with more than one choice, reopens after a plain answer; an answer with a check or a patrol ends the talk. If its own
-  condition stopped holding, it still reopens: its choices show unavailable and the player can leave. Leave is always there.
 
 ### Write a cutscene
 
@@ -215,11 +207,56 @@ Leave a line as `~` to come back to it; the panel's Still to write lists every `
 holds the place of words only: in a `sets:` or `quest:` line it is listed too, but the compile
 refuses it until you write the key.
 
+## When Talk opens the wrong scene
+
+The rules behind the pointer in [Write a scene](#write-a-scene), for when the first Talk, a later one or a loop opens a scene you did not mean.
+
+- A person can have many scenes with nested choices, and Talk only ever opens one at its top, never
+  in the middle. It tries that person's scenes in key order and opens the first whose `when:` holds
+  and that shows a choice; when one fails, it first passes on to what it leads to through a choice
+  the player could take for nothing, and is refused only if nothing further down opens. A Talk with
+  its own `name` is refused. So give each scene but the last a `when:`, since one with no `when:`
+  shuts out those after it (`ENTRY_GUESSED`). `when: not <fact>` asks that a fact is false, so a first
+  meeting and later ones need no order in their names: `maud_first` with `when: not met_maud`, whose
+  choice sets `met_maud`, and `maud_later` with `when: met_maud`. Two scenes open at once go to the
+  first by key, so make their `when:` exclude each other. Only `"entry": true` in the JSON beside a
+  scene makes it the one that opens, shutting out the others.
+
+What you can rely on when dialogues link with `then` (JSON dialogues today):
+
+- Put `"entry": true` on the dialogue Talk should open, and it opens there, whatever else leads to
+  it. A person takes one; their other dialogues stop opening, except keyword ones. Without a marker Talk infers, as below, and the
+  compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess.
+  A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
+  no marker when each but the last by key has a `when:`.
+- A person's default Talk, when a dialogue's condition fails, passes on to what that dialogue leads
+  to, in choice key order, what nested choices lead to after that, but only through a choice the player could take for nothing: its condition
+  holds, with no check, cost or other gate. So a first meeting is an `intro` with a `when:` that links
+  to a `hub`: the first Talk opens the intro, and once the condition fails Talk opens the hub unless
+  another dialogue opens first. A locked or paid way on is skipped, and Talk is refused only when
+  nothing further down opens. A way on through a nested choice counts; a way on through a choice with
+  `once`, or one that sets what its own `needs:` forbids, is shut once taken, and the compile warns
+  `FALL_THROUGH_SPENT` when Talk has no other way. A Talk with its own `name` opens its dialogue or is refused.
+- Talk opens at a dialogue nothing leads to. If a person has several, the first by key whose
+  condition holds and that has a choice to show.
+- A loop nothing outside leads to, such as a hub and its detail that returns to it, opens at the
+  member that leads to the most other dialogues; first by key on a tie, so a hub and one detail
+  open at the first key. Give the hub the most links and it is where the talk starts.
+- A `then` whose target cannot play (its condition fails, it has no choice to show, its speaker is
+  hostile, dead or gone) ends the talk
+  quietly, with no added line.
+- A plain answer, with no `then` and no check, ends the talk if a `then` anywhere leads to this dialogue. Add
+  `then` naming it to come back.
+- A dialogue nothing links to, with more than one choice, reopens after a plain answer; an answer with a check or a patrol ends the talk. If its own
+  condition stopped holding, it still reopens: its choices show unavailable and the player can leave. Leave is always there.
+
 ## Jump to a beat
 
 Play to the moment you want to work on, then in the panel's Play tab type a name under Checkpoints and
 Save. Later, pick it from the list: the game starts over and replays to that point. Checkpoints
-are files in `cartridges/<name>/checkpoints/`, committed with the cartridge.
+are files in `cartridges/<name>/checkpoints/`, committed with the cartridge. The same tab's Game
+time moves the clock on by minutes (the world credits none before the ancestry choice), and its
+Cheats go to a room or set a fact by key; a checkpoint records and replays both.
 
 ## Cut a talk short
 
@@ -261,6 +298,22 @@ step (`step 4 refused: talk Maud`) and the Book stays where the replay got to. A
 Book line to open its source in your editor (`LOKA_EDITOR`, default `code --goto`). The panel's
 Why tab takes an action or dialogue key and explains the last recorded step: which rules fired and
 why the action was missing or refused.
+
+## Catch typos as you type
+
+`schemas/source/` has a JSON Schema for each source file kind, so an editor flags a misspelled field
+or a malformed shortcut. In VS Code, map them in the workspace `settings.json`:
+
+```json
+"json.schemas": [
+  { "fileMatch": ["cartridges/*/rooms/*.json"], "url": "./schemas/source/rooms.schema.json" },
+  { "fileMatch": ["cartridges/*/text.json"], "url": "./schemas/source/text.schema.json" }
+]
+```
+
+Add one entry per directory or root file you edit; the schema file is named after it. Do not put
+`$schema` in a source file: the compiler refuses it as `UNKNOWN_FIELD`. The compiler is still
+the judge; the schemas do not check references.
 
 ## Every kind of content
 

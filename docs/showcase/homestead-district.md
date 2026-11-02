@@ -220,7 +220,7 @@ Per-player: every skill, `regard`, `gifted_*`, `traded_knife`, `owns_plot`, `own
 [seam 9](../decisions/owner-decision-realm-seams-2026-10-13.md#the-seams)'s known gap, stated here,
 not solved), the fish, logs and sticks, the hens (a per-world population; Realm audience `public`).
 Delays are logical units (300, 600, 3600, 43200, 86400, 172800); no device clock; the e2e advances
-time through the dev panel's control (`?dev=1`, [builders guide](../BUILDERS-GUIDE.md)) or its
+time through the dev panel's control (`?dev=1`, [writing the game](../guides/writing-the-game.md)) or its
 `Date.now` override, never a player verb.
 
 ## Pins the build writes
