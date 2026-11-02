@@ -51,7 +51,7 @@ const press: Story['play'] = async ({ canvas, canvasElement, userEvent }) => {
 };
 export const OnPaper: Story = { render: () => <Levels />, play: press };
 export const OverCombat: Story = { render: () => <Levels paperless />, play: press };
-// Breaks: the kill's fight-won pulse and fanfare take the level's moment (book-ui.md, Level wash):
+// Breaks: the kill's fight-won pulse and fanfare take the level's moment (book-ui.md, A level is never dropped):
 // the close must say it levelled, so cueSounds holds the fanfare and leaves the haptic to the level.
 export const KillThatLevels: Story = {
   render: () => <Levels paperless fight />,

@@ -111,7 +111,7 @@ const holdCard = (q: Queue, now: number): Queue => ({
  * One moment of the queue: `turned` cancels the leaving page's effects, and the arriving page's cues
  * wait for its picture deadline (book-ui.md, Queue).
  * A later S3 of another key than the pending one is dropped, but a level is never dropped: it takes
- * the slot (book-ui.md, Level wash); the diff lists the story's first.
+ * the slot (book-ui.md, A level is never dropped); the diff lists the story's first.
  */
 function play(s: Queue, fired: Cue[], cue: Cue, now: number) {
   const clear = now - Math.max(s.washed, struck) >= motion.flash.gap;

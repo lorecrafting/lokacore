@@ -320,7 +320,7 @@ test('a fight found on a first view resumes only its music', (t) => {
 });
 
 // Breaks: a kill that levels buzzes the fight-won pulse (and, inside the 100 ms gap, loses the
-// level's), the fanfare plays over the level note (book-ui.md, Level wash), or a fanfare still
+// level's), the fanfare plays over the level note (book-ui.md, A level is never dropped), or a fanfare still
 // waiting plays over the next fight.
 test('a kill that levels feels the level, and the fanfare waits out the settle hold', (t) => {
   const tick = clock(t);
@@ -355,4 +355,17 @@ test('a kill that levels feels the level, and the fanfare waits out the settle h
     ['fight', 'open'],
     ['haptic', 'medium'],
   ]);
+  // A level note held behind a blow: the hold runs from the note, not from the fall.
+  const won = () => felt().filter((d: string[]) => d[0] === 'fight' && d[1] === 'won');
+  g.bookDevice = [];
+  playCue({ name: 'combat_close', end: 'fell', levelled: true });
+  tick(motion.settle.hold - 100);
+  playCue({ name: 'level' });
+  tick(motion.settle.hold - 1);
+  assert.deepEqual(won(), []);
+  tick(1);
+  assert.deepEqual(won(), [['fight', 'won']]);
+  playCue({ name: 'level' }); // a later level with no kill plays no fanfare
+  tick(motion.settle.hold);
+  assert.deepEqual(won(), [['fight', 'won']]);
 });

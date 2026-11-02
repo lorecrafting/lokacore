@@ -21,7 +21,7 @@ import { sequence, triggered } from '../mechanics/reaction.ts';
 import { levelsReached, oneWrite } from '../mechanics/levelling/shared.ts';
 import { poolWriters } from '../mechanics/resource.ts';
 import { partings } from '../mechanics/escort/shared.ts';
-import { closing } from '../mechanics/death/lines.ts';
+import { closing, levelAt } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
@@ -194,7 +194,7 @@ const cause = (p: P, logical_time: number, id: string) => ({
 });
 
 function creditDelivery(p: P, next: Queued): Admitted | undefined {
-  if (next.cause.payload.type === 'level_reached') p.levelAt ??= p.narration.length;
+  p.levelAt ??= levelAt(p.world, p.command.payload.actor_id, next.cause, p.narration.length);
   if (next.cause.payload.type !== 'entity_died') return;
   const at = now(p);
   if (!('cartridge' in at)) return at;

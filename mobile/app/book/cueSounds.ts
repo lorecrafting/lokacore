@@ -33,12 +33,17 @@ const stronger = <T>(ladder: readonly T[], rung: T) =>
 const TIERS = Object.keys(mix.tier);
 const HAPTICS = ['selection', 'light', 'medium', 'heavy'] as const;
 
-// A fight won with a level waits out the settle hold, so the level's note is heard (book-ui.md, Level
-// wash); any later turn of the music cancels it.
+// A fight won with a level waits out the settle hold from the level's note, so the note is heard
+// (book-ui.md, A level is never dropped); any later turn of the music cancels it.
 let fanfare: ReturnType<typeof setTimeout> | undefined;
 const music = (event: Parameters<typeof fight>[0]) => {
   clearTimeout(fanfare);
+  fanfare = undefined;
   fight(event);
+};
+const hold = () => {
+  clearTimeout(fanfare);
+  fanfare = setTimeout(() => music('won'), motion.settle.hold);
 };
 
 /** Hear the cue bus until the Book goes; a fight's loop goes with it (Start over remounts it). */
@@ -56,12 +61,13 @@ export const playCue = (cue: Cue) => {
     if (!cue.resumed) feel('medium');
   } else if (cue.name === 'combat_close') {
     if (cue.end !== 'fell') music('away');
-    else if (cue.levelled) fanfare = setTimeout(() => fight('won'), motion.settle.hold);
+    else if (cue.levelled) hold();
     else {
       music('won');
       feel(sound.fightWon.haptic as HapticKind);
     }
-  } else if (cue.name === 'death') {
+  } else if (cue.name === 'level' && fanfare) hold();
+  else if (cue.name === 'death') {
     music('cut');
     // The last thing felt, whatever page is turning: in a fight it is the thud's own.
     if (!cue.fight) haptic(sound.blow.haptic as HapticKind);
