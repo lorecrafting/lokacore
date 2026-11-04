@@ -39,8 +39,9 @@ Before handing off:
    runs the tests within one import hop of each module (Elixir: and of its `mix xref callers`) and prints each mutant's first failing test line. The handback's check-to-test table is that output, pasted, plus hand-written `bin/mutate.sh` mutants (output pasted) for every row it could not run and for shell, Python and JSON. The tests are done when every row is red: a TIMEBOX, NOT-UNIQUE or BASELINE-RED row, or a SURVIVED or NO-TESTS row with no red hand-written mutant (the same change, run against a named test the finder missed, e.g. two import hops away), is not done; only a non-logic line carrying a `mutate-skip: <reason>` comment needs no mutant. A content or economy slice also hands back an item loop table: every item that enters play, its source, its sink or cap (the reviewer probes each row). Fix or record a
    disposition for each finding.
 3. Commit (attribution lines per the session). Provisional local:
-   hand the branch and exact head to the PM without pushing; draft or hosted PR: push the branch (a hosted PR also opens the PR) citing the governing `docs/system` sections and
-   including the `/code-review` result and the hosted runs started. A "catches", "only here" or "every" claim, and every
+   hand the branch and exact head to the PM without pushing; draft or hosted PR: push the branch (a hosted PR also opens the PR). The PR body is the reviewer's brief, in the
+   [owner's shape](../../docs/decisions/owner-decision-pr-body-reviewer-brief-2026-11-04.md) and nothing more:
+   what and why with the governing `docs/system` section, where to look, one line per test (break, red control), the `/code-review` result. A "catches", "only here" or "every" claim, and every
    `file:line` cite, in the PR body or handoff is copied from a red-control, test or grep run in
    the same turn; the PR body lists those runs. A slice that adds or changes a mechanic
    includes the [composition record](../../docs/system/architecture.md#building-mechanics-by-composition).
