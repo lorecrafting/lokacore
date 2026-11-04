@@ -222,7 +222,7 @@ defmodule Loka.Core.InvariantsEncounter do
       do:
         Map.take(
           op,
-          ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id crow_member_id crow_generation crow_phase)
+          ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id crow_member_id crow_generation crow_phase corpse_id)
         )
         |> Map.put("status", "pending")
   end
@@ -259,6 +259,12 @@ defmodule Loka.Core.InvariantsEncounter do
   end
 
   # Independent permitted binding tuples; no call to the job composer.
+  # death@1 decay: bound by the corpse only.
+  defp binding?(%{"corpse_id" => _} = op),
+    do:
+      op["corpse_id"] != nil and get_in(op, ["job", "kind"]) == "decay" and
+        Enum.all?(Map.keys(op), &(&1 in ~w(op writer_group job_id job due_time corpse_id)))
+
   defp binding?(op) do
     present =
       Enum.filter(
@@ -268,7 +274,7 @@ defmodule Loka.Core.InvariantsEncounter do
 
     case present do
       fields when fields in [[], ["encounter_id"]] ->
-        get_in(op, ["job", "kind"]) != "reaction"
+        get_in(op, ["job", "kind"]) not in ["reaction", "decay"]
 
       # Built rooms S3: an order job may carry its owner (a build commission's).
       ["actor_id"] ->

@@ -1,6 +1,8 @@
+// size: allow 302, corpse names bind their victim (loka-kgd.203)
 // GameView's offered actions as the book's buttons: place, door, held-item, notice, travel,
 // dream, shop, service, transport and conversation answers, each with its exact intent.
 import type { GameView } from '../../packages/game-view/session.ts';
+import { victimWords } from '../../packages/game-view/line_words.ts';
 import { dreamButtons } from './dreams.ts';
 import { things } from './item-pages.ts';
 import { corpseButtons, serviceButtons, shopButtons, transportButtons } from './offers.ts';
@@ -84,7 +86,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       })),
   );
   const projected = things(v);
-  const names = new Map(projected.map((e) => [e.id, e.name]));
+  const names = new Map(projected.map((e) => [e.id, victimWords(text, e, e.name)]));
   return [
     ...(v.ancestry_choices ?? []).map((a) => ({
       label: label(a.label),
@@ -246,7 +248,7 @@ function heldButtons(
         const join = JOIN[commandOf(a)] ?? 'in';
         const offered = button(
           a,
-          ` ${text(e.name)}${destination ? ` ${join} ${text(destination)}` : ''}`,
+          ` ${names.get(e.id)}${destination ? ` ${join} ${destination}` : ''}`,
           e.id,
         );
         return a.action_key === 'bandage' && v.bleeding
@@ -273,7 +275,7 @@ function noticeButtons(
           (a.target.kind === 'none' || a.target_ids?.length),
       )
       .map((a) => ({
-        ...button(a, a.target_ids?.[1] ? ` ${text(names.get(a.target_ids[1]) ?? '')}` : ''),
+        ...button(a, a.target_ids?.[1] ? ` ${names.get(a.target_ids[1]) ?? ''}` : ''),
         ...(a.input.includes('method') && { input: { method: 'careful' } }),
         ...(a.command === 'expedition' && { input: expeditionInput(v, a.input) }),
         detail_id: n.id,

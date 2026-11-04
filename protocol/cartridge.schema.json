@@ -1767,6 +1767,12 @@
         "npc_corpse": {"description":"Corpse template for an NPC, unless its population names its own.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
+        "npc_corpse_decay": {"description":"Logical units from an NPC's death until its corpse decays: direct items spill to the room, the corpse leaves play. Omitted: never.",
+          "type": "integer", "minimum": 1
+        },
+        "player_corpse_decay": {"description":"Logical units from a player's death until the corpse decays, as npc_corpse_decay.",
+          "type": "integer", "minimum": 1
+        },
         "shrine": {"description":"The room a dead player's body returns to.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },

@@ -93,6 +93,14 @@ export const emoteSentence = (
     : undefined;
 };
 
+// An NPC corpse's text names its victim (owner decision 2026-11-02): `{victim}` is the view's victim short.
+export const victimWords = (text: (key: string) => string, e: object, key: string) => {
+  const { victim } = e as { victim?: string };
+  return fillSlots(text(key), victim === undefined ? undefined : { victim }, (v) =>
+    text(String(v)),
+  );
+};
+
 // An authored line fills its bound slots; an unbound brace stays as written (level-rush rulings).
 // A name that opens the line is capitalised (Diku rounds, loka-kgd.197: "A goblin hits you.").
 export const fillSlots = (
