@@ -156,7 +156,7 @@ defmodule Loka.Core.Compose do
          ctx
        ) do
     cond do
-      not Loka.Core.ComposeFood.valid?(op, elem(ctx, 0)) ->
+      not Loka.Core.ComposeFood.valid?(op, elem(ctx, 0), elem(ctx, 2)) ->
         {:error, "precondition_failed"}
 
       read(t, ctx) != op["source_id"] ->

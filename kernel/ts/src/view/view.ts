@@ -249,7 +249,15 @@ const viewOf = (
   ...(e.kind === 'npc' && e.shop && { shop: shelf(world, actor, id as EntityId) }),
   ...(e.kind === 'npc' &&
     carrying(world, id as EntityId) && { carrying: carrying(world, id as EntityId) }),
+  ...victimView(world, actor, id as EntityId, steps),
 });
+
+// Owner decision 2026-11-02: an NPC's corpse names its victim, the victim's short as `actor` sees it.
+function victimView(world: World, actor: CharacterId, id: EntityId, steps: Steps) {
+  const origin = world.state.created?.[id]?.origin;
+  if (origin?.kind !== 'death' || world.entities[origin.victim_id]?.kind !== 'npc') return {};
+  return { victim: describeEntity(world, actor, origin.victim_id, 'short', steps) };
+}
 
 type Lists = ReturnType<typeof lists>;
 

@@ -29,7 +29,8 @@ defmodule Loka.Content.Death do
       if(death,
         do:
           settings(m, defs, death) ++
-            penalty(death["penalty"], settings, v2) ++ narration(death["narration"], v2),
+            penalty(death["penalty"], settings, v2) ++
+            narration(death["narration"], v2) ++ decay(m, death),
         else: []
       )
   end
@@ -41,6 +42,18 @@ defmodule Loka.Content.Death do
     for {field, key} <- words,
         text != :unknown and not is_map_key(text, key),
         do: diag("UNRESOLVED_REFERENCE", "cartridge.world.death.narration." <> field)
+  end
+
+  # Corpse decay (owner decision 2026-11-02): a job whose sink is food@1's consumed holder.
+  defp decay(m, death) do
+    for field <- ~w(npc_corpse_decay player_corpse_decay),
+        is_map_key(death, field),
+        c <- ~w(schedule food),
+        m["requires"]["capabilities"][c] != 1,
+        do:
+          diag("UNDECLARED_CAPABILITY", "cartridge.world.death." <> field, %{"capability" => c}, [
+            c <> "@1"
+          ])
   end
 
   # Toolbox row 47: an experience penalty needs world.levelling and its narration in text.

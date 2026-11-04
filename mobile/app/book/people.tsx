@@ -2,6 +2,7 @@
 import { Fragment, type ReactNode, useEffect, useRef, useState } from 'react';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { victimWords } from '../../packages/game-view/line_words.ts';
 import { COUNT } from './labels.ts';
 import { InkText } from './fade.ts';
 import { cap } from './model.ts';
@@ -117,7 +118,7 @@ function Present(p: Group) {
     if (same[0] !== e) return []; // a later member of a collapsed group
     const n = same.length;
     if (n > 1) return [{ id: e.id, name: `${COUNT[n - 2] ?? n} ${p.text(plural!)}`, many: true }];
-    return [{ id: e.id, name: p.text(bare ?? e.name), article }];
+    return [{ id: e.id, name: victimWords(p.text, e, bare ?? e.name), article }];
   });
   return (
     <Text style={prose(c, t)}>

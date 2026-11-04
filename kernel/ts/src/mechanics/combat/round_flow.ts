@@ -1,3 +1,4 @@
+// size: allow 306, the condition line placed after the swing (loka-kgd.202)
 // Pack round orchestration and successor rows; round.ts owns the ordinary occurrence.
 import type {
   Command,
@@ -263,9 +264,8 @@ export function told(world: World, row: EncounterRow, r: Round): Text[] {
   });
   const state = condition(world, row, r);
   if (state) {
-    const died = r.events.findIndex((e) => e.payload.type === 'entity_died');
     const target = describeEntity(world, row.character_id, state.foe, 'short', r.steps) as TextKey;
-    lines.splice(died < 0 ? lines.length : died, 0, [{ key: state.text, bindings: { target } }]);
+    lines.splice(state.at, 0, [{ key: state.text, bindings: { target } }]);
   }
   return [...lines.flat(), ...r.notes];
 }
@@ -296,5 +296,11 @@ function condition(world: World, row: EncounterRow, r: Round) {
   const { minimum, maximum } = resourceSpec(end, foe, hp);
   const current = level(end, foe, hp)!;
   const cut = rows.find((c) => 100 * (current - minimum) >= c.at_percent * (maximum - minimum));
-  return cut && { text: cut.text, foe };
+  // Legend order (loka-kgd.202): right after the last strike at the foe, else before a death or last.
+  const died = r.events.findIndex((e) => e.payload.type === 'entity_died');
+  const swung = r.events.reduce(
+    (at, { payload: e }, i) => (e.type === 'attack_result' && e.target_id === foe ? i + 1 : at),
+    0,
+  );
+  return cut && { text: cut.text, foe, at: swung || (died < 0 ? r.events.length : died) };
 }

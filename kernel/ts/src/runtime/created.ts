@@ -251,6 +251,7 @@ function custodyValid(world: World): boolean {
     if (
       id === world.consumed ||
       (container === world.consumed &&
+        world.state.created?.[id]?.origin.kind !== 'death' &&
         (world.entities[id]?.kind !== 'item' ||
           (!world.entities[id].edible && !world.entities[id].bandage)))
     )

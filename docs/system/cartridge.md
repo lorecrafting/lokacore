@@ -1007,6 +1007,18 @@ the schema refuses the bounds and any other field. `cartridges/penalty_sampler` 
 (`lib/loka/content/death.ex`) refuses an unknown key (UNRESOLVED_REFERENCE at `world.death.narration.<field>`); the schema refuses any other field. The toolbox showcase declares
 `woke`.
 
+### Corpse decay declarations
+
+[Corpse decay](mechanics.md#death1--corpse-custody-and-same-body-return-m5-b-foundation) reads
+the optional `world.death.npc_corpse_decay` and `world.death.player_corpse_decay`
+(`DeathSettings`, [owner decision](../decisions/owner-decision-corpses-respawn-2026-11-02.md)):
+logical units from death to decay, each an integer of at least 1; the schema refuses the
+bounds. The compiler (`lib/loka/content/death.ex`) refuses either without schedule@1 and
+food@1 (UNDECLARED_CAPABILITY at the field): the run is a job and its sink is the consumed
+holder. Omitted means the corpse never decays. A corpse template's text may bind `{victim}`,
+the victim's short. The toolbox showcase declares 15000 and 90000 (5 and 30 real minutes at
+rate 50).
+
 ## First encounter authoring (M6-A)
 
 `world.combat` requires combat@1, schedule@1, death@1, valid `world.death`

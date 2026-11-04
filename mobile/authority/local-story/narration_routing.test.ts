@@ -7,7 +7,8 @@ import { test } from 'node:test';
 import { narration } from './narration.ts';
 import type { Story } from './save.ts';
 
-// Break: background combat shares an ambient receipt and loses line routing on a cold reopen.
+// Break: background combat shares an ambient receipt and loses line routing on a cold reopen, or a
+// later round's tier and condition lines go to the World log (loka-kgd.202: only narration keys routed).
 test('committed combat line indices come from pinned keys and structured receipt events', () => {
   const folder = mkdtempSync(join(tmpdir(), 'loka-narration-'));
   const path = join(folder, 'save.db');
@@ -23,7 +24,11 @@ test('committed combat line indices come from pinned keys and structured receipt
         character: 'player',
         cartridge: {
           world: {
-            combat: { narration: { player_hit: 'authored.strike', npc_died: 'authored.fall' } },
+            combat: {
+              narration: { player_hit: 'authored.strike', npc_died: 'authored.fall' },
+              tiers: [{ at_percent: 50, npc_hit: 'authored.maul' }],
+              conditions: [{ at_percent: 75, text: 'authored.cuts' }],
+            },
             death: { narration: { woke: 'authored.woke' } },
           },
         },
@@ -38,6 +43,8 @@ test('committed combat line indices come from pinned keys and structured receipt
       { key: 'authored.strike' },
       { key: 'door' },
       { key: 'authored.fall' },
+      { key: 'authored.maul' },
+      { key: 'authored.cuts' },
     ];
     const decision = {
       kind: 'accepted',
@@ -49,10 +56,18 @@ test('committed combat line indices come from pinned keys and structured receipt
     sql
       .prepare('INSERT INTO receipt(command_id, response, scope, revision) VALUES (?, ?, ?, ?)')
       .run('round', JSON.stringify(decision), 'story/lineage/player', 1);
-    assert.deepEqual(narration(story()), { command_id: 'round', lines, combat_lines: [1, 3] });
+    assert.deepEqual(narration(story()), {
+      command_id: 'round',
+      lines,
+      combat_lines: [1, 3, 4, 5],
+    });
     sql.close();
     sql = new DatabaseSync(path);
-    assert.deepEqual(narration(story()), { command_id: 'round', lines, combat_lines: [1, 3] });
+    assert.deepEqual(narration(story()), {
+      command_id: 'round',
+      lines,
+      combat_lines: [1, 3, 4, 5],
+    });
     // The same text key without a combat occurrence remains an ordinary authored room event.
     sql.prepare('UPDATE receipt SET response = ?').run(JSON.stringify({ ...decision, events: [] }));
     assert.deepEqual(narration(story()), { command_id: 'round', lines });

@@ -6,6 +6,7 @@ import type { Button, DetailLine, presenter } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 import { ActionCard, Cards, PickLists } from './actions.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { victimWords } from '../../packages/game-view/line_words.ts';
 import { EntityLine, LogLines, Note } from './lines.tsx';
 import { carries } from './people.tsx';
 import { Text } from './Text.tsx';
@@ -83,7 +84,11 @@ const inside = (p: { thing?: Thing; contents: Thing[]; text: Say; open: (id: str
       <SectionTitle>{LABEL.inside}</SectionTitle>
       <View>
         {p.contents.map((e) => (
-          <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
+          <EntityLine
+            key={e.id}
+            name={cap(victimWords(p.text, e, e.name))}
+            onPress={() => p.open(e.id)}
+          />
         ))}
       </View>
     </>
@@ -115,7 +120,7 @@ export function ThingPage(p: {
 }) {
   return (
     <Page
-      title={p.thing ? cap(p.text(p.thing.name)) : LABEL.item}
+      title={p.thing ? cap(victimWords(p.text, p.thing, p.thing.name)) : LABEL.item}
       foot={<Control label={LABEL.leave} onPress={p.leave} />}
     >
       <ItemDetails thing={p.thing} text={p.text} />
@@ -174,7 +179,7 @@ export function InsidePage(p: {
   const [c, t] = [usePalette(), useType()];
   const thing = things(view).find((e) => e.id === p.id);
   const open = (id: string) => p.open({ kind: 'thing', id });
-  const name = thing ? cap(text(thing.name)) : LABEL.item;
+  const name = thing ? cap(victimWords(text, thing, thing.name)) : LABEL.item;
   // A container's own buttons, as its item page offers them: Put into as cards, its Close as the foot.
   const own = thing?.kind === 'npc' ? [] : (p.g?.on(p.id) ?? []);
   const press = (b: Button) => p.press?.(b, p.id);

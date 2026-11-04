@@ -56,6 +56,7 @@ export function composeJob(
 
 // size: allow 43, one binding table per job kind (Built rooms S3: an order job may carry its owner)
 function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
+  if (op.corpse_id !== undefined || op.job.kind === 'decay') return decayBindingValid(op);
   if (
     op.crow_member_id !== undefined ||
     op.crow_generation !== undefined ||
@@ -138,11 +139,20 @@ function pendingJob(op: Extract<DeltaOp, { op: 'job.schedule' }>): Json {
       ? { actor_id: op.actor_id }
       : {}),
     ...(op.sight === undefined ? {} : { sight: op.sight }),
+    ...(op.corpse_id === undefined ? {} : { corpse_id: op.corpse_id }),
     ...(op.bleed_body_id === undefined
       ? {}
       : { bleed_body_id: op.bleed_body_id, bleed_generation: op.bleed_generation }),
   };
 }
+
+// death@1 decay (owner decision 2026-11-02): a decay job binds its corpse and nothing else.
+const decayBindingValid = (op: { corpse_id?: unknown }) =>
+  op.corpse_id != null &&
+  (op as unknown as { job: { kind: string } }).job.kind === 'decay' &&
+  Object.keys(op).every((k) =>
+    ['op', 'writer_group', 'job_id', 'job', 'due_time', 'corpse_id'].includes(k),
+  );
 
 function crowBindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
   return (
