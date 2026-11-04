@@ -6,6 +6,10 @@
     "op": "all",
     "items": [
       {
+        "op": "npc_present",
+        "npc": "keeper"
+      },
+      {
         "op": "resource_compare",
         "resource": "hp",
         "subject": "subject",
