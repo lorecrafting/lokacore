@@ -12,7 +12,6 @@ import {
   logLines,
   narrationLines,
   quietOf,
-  fall,
   resetLogs,
   savedNarration,
   type DetailLine,
@@ -20,6 +19,7 @@ import {
 } from './logs.ts';
 import type { Button } from './presenter.ts';
 import { commandOf } from './buttons.ts';
+import { fall } from './spirit.ts';
 
 type Say = (key: string) => string;
 

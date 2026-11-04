@@ -100,7 +100,7 @@ export function Combat(p: Props) {
   const shown: Shown = useState(); // one for every foe's list: one list open at a time (book-ui.md)
   if (!view.combat && !ended) return null;
   // A closed encounter keeps its page: no actions, one foot control (book-ui.md, Closure).
-  // ponytail: Let go goes to World as Back to World does until the spirit state (loka-kgd.205).
+  // Let go goes to World; with `revival` the presenter's leaveCombat makes it the spirit state.
   const foot = !view.combat && (
     <Foot label={fell ? LABEL.letGo : LABEL.backToWorld} onPress={p.world} />
   );

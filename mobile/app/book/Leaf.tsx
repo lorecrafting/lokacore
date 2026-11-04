@@ -29,7 +29,7 @@ export function Leaf(p: Props) {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Storm
         weather={v.calendar_status?.weather}
-        exposed={!!v.place?.exposed}
+        exposed={!!v.place?.exposed && !p.screen.spirit} // the spirit state: no light (book-ui.md)
         room={v.place?.id}
         turn={p.flip.turn}
         world={!fight && !p.page && !v.scene && !v.ancestry_choices}

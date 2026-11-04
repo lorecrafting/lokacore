@@ -18,6 +18,8 @@ const EXEMPT: Record<string, string> = {
   'book/StatusIcon.tsx:Tooltip':
     'the status icon tip, shown through the StatusIcon Held and Focused stories',
   'book/Chip.tsx:Row': 'a titled chip row, shown through Chip ReadingSize',
+  'book/StatusIcon.tsx:Ring':
+    'shown through StatusIcon Ring*, and the rise card through ActionCard Waiting',
   'book/Unavailable.tsx:Unavailable': 'the grey ActionCard, shown through ActionCard Unavailable',
   'book/Combat.tsx:Foe': 'one line of the fight block, shown through the Combat stories',
   'book/MapDrawing.tsx:MapDrawing': 'a drawing, shown through the map pages',

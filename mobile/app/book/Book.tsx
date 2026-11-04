@@ -108,6 +108,16 @@ export function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, 
   }
 }
 
+// The spirit state's clock: a redraw as its next line dries or its next second passes; Rise ends it.
+function useSpirit(pr: Presenter, s: Screen['spirit'], redraw: (f: (n: number) => number) => void) {
+  useEffect(() => {
+    if (s?.next === undefined) return;
+    const id = setTimeout(() => redraw((n) => n + 1), s.next);
+    return () => clearTimeout(id);
+  }, [s]); // a fresh object each screen: re-armed on every draw
+  return () => (pr.rise(), redraw((n) => n + 1));
+}
+
 /**
  * The Book: draws GameView through its presenter; App injects the shell.
  * - Use: the app root.
@@ -134,7 +144,6 @@ export default function Book(p: BookProps) {
   };
   const press = (b: Button, detail?: string) => pressBook(p, pr, state, b, detail);
   const refused = (line: DetailLine) => (screen.log.push(line), redraw((n) => n + 1));
-  const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
   return (
     <BookView
       palette={useBookPalette(paletteOf(screen.view.calendar_status?.solar), usePaletteCurve())}
@@ -144,7 +153,8 @@ export default function Book(p: BookProps) {
       go={go}
       press={press}
       refused={refused}
-      startOver={startOver}
+      startOver={() => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)))}
+      rise={useSpirit(pr, screen.spirit, redraw)}
       shell={p.shell}
       talkingOn={talkingOn}
       talkOn={talkOn}
@@ -164,6 +174,7 @@ type ViewProps = {
   press: (b: Button, detail?: string) => void;
   refused: (line: DetailLine) => void;
   startOver: () => void;
+  rise: () => void; // the spirit state's end (book-ui.md, Spirit state)
   shell: Shell;
   talkingOn?: Page; // Body's conversation latch (Body.tsx), held above PageTurn's remount
   talkOn?: (page?: Page) => void;
@@ -250,8 +261,9 @@ function Bottom(p: BottomProps) {
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
   const detail = !shut && detailPage(p.page);
   if (detail && !pending && !p.screen.catchingUp && !fault) return null;
-  // Dead, the page shows only Let go: no status line (owner 2026-11-04).
-  if (p.screen.fell && !p.screen.catchingUp && !fault) return null;
+  // Dead, the page shows only Let go, and in the spirit state only Rise, catching up included: no
+  // status line (owner 2026-11-04). A fault ends the spirit state (spirit.ts haunt).
+  if ((p.screen.spirit || (p.screen.fell && !p.screen.catchingUp)) && !fault) return null;
   return (
     <View
       style={{

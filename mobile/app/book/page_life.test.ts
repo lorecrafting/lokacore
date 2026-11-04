@@ -76,6 +76,19 @@ test('reduced motion holds the vignette still at its faint value', (t) => {
   assert.deepEqual(g.sequences, []);
 });
 
+// Breaks: the rise fade left to Reanimated's reduced-motion setting, so the blue cuts out in one
+// frame (book-ui.md Spirit state, Rise: a plain fade under reduced motion; design review finding 1).
+test('the spirit layer still fades at the rise under reduced motion', (t) => {
+  effects(t, true);
+  g.modes = [];
+  const shell = rig(t);
+  const draw = (spirit: boolean) => shell(() => nodes(UnderInk({ view: view({}), spirit })));
+  draw(true);
+  g.timings.length = g.modes.length = 0;
+  draw(false);
+  assert.equal(g.modes[g.timings.indexOf(motion.fade.duration)], 'never');
+});
+
 // Breaks: a page turn fades a lit glow in again from nothing (UnderInk: `shown`).
 test('a page arriving on a glow already showing starts at it', (t) => {
   effects(t);

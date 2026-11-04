@@ -1,9 +1,9 @@
 // The sound module in the browser (book-ui.md, Effects, sound and haptics; tokens.ts `mix`). A sound
 // with no sample, locked or failing audio is silence, never a throw.
 import { mix, motion, sound } from './tokens.ts';
+import { busOf, type Bus } from './bus.ts';
 
 type SoundName = keyof typeof sound;
-type Bus = keyof typeof mix.bus;
 type RoomFiles = { beds?: Record<string, string>; pieces?: Record<string, string> };
 
 let urls: Partial<Record<SoundName, string[]>> = {};
@@ -15,18 +15,6 @@ export const sources = (given: typeof urls, room: RoomFiles = {}) => {
   rooms = room;
 };
 
-const busOf = (name: SoundName): Bus =>
-  name === 'bed' || name === 'weather'
-    ? 'ambience'
-    : name === 'chapter' ||
-        name === 'explore' ||
-        name === 'fightIn' ||
-        name === 'fightLoop' ||
-        name === 'fightWon'
-      ? 'music'
-      : name === 'pageTurn' || name === 'pickup' || name === 'tick'
-        ? 'ui'
-        : 'sfx';
 const live: Record<Bus, (() => void)[]> = { ambience: [], sfx: [], ui: [], music: [] };
 const muted = { sound: false, music: false };
 const groupOf = (bus: Bus) => (bus === 'music' ? 'music' : 'sound');
@@ -183,7 +171,7 @@ function voice(name: SoundName, file: string, opts: VoiceOpts): Voice | undefine
 // A room's sound (book-ui.md, Beds; Storm): one bed by tag (no file: `wild`; no `wild`: silence), one
 // weather layer, each cross-fading, and a piece on entering a tag new since launch. Nothing in a fight, away or muted.
 type Held = { key: string; voice: Voice };
-type Room = { tag: string; weather?: string; exposed: boolean };
+type Room = { tag: string; weather?: string; exposed: boolean; spirit: boolean };
 let room: Room | undefined;
 let bed: Held | undefined;
 let layer: Held | undefined;
@@ -216,7 +204,7 @@ function settleRoom(ms: number) {
     return;
   }
   const beds = rooms.beds ?? {};
-  bed = hold(bed, 'bed', beds[room.tag] ?? beds.wild, false, ms);
+  bed = hold(bed, 'bed', beds[room.tag] ?? beds.wild, room.spirit, ms);
   const rain = room.weather ? urls.weather?.[0] : undefined;
   layer = hold(layer, 'weather', rain, !room.exposed, ms);
 }
@@ -231,9 +219,16 @@ function explore(tag: string) {
   if (voice('explore', piece, {})) lastPiece = now;
 }
 const audible = ['rain', 'wind', 'storm'];
-/** The room the Book is on: bed tag, weather phase that sounds, exposed; `quiet`: this view plays no piece; 'woke' also spends the room's. */
-export function ambience(tag?: string, phase?: string, exposed = false, quiet?: boolean | 'woke') {
-  room = { tag: tag || 'wild', weather: audible.includes(phase!) ? phase : undefined, exposed };
+/** The room the Book is on: bed tag, weather phase that sounds, exposed; `quiet`: this view plays no piece; 'woke' also spends the room's; `spirit`: the bed through mix.muffle (book-ui.md, Spirit state). */
+export function ambience(
+  tag?: string,
+  phase?: string,
+  exposed = false,
+  quiet?: boolean | 'woke',
+  spirit = false,
+) {
+  const weather = audible.includes(phase!) ? phase : undefined;
+  room = { tag: tag || 'wild', weather, exposed, spirit };
   settleRoom(motion.bed.duration);
   if (quiet === 'woke') entered.add(room.tag);
   if (!inFight && !quiet) explore(room.tag);
