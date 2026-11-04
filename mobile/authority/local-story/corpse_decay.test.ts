@@ -74,14 +74,19 @@ test('corpse decay survives failed COMMIT, lost ack, reopen and replay', (t) => 
     assert.equal(job.status, 'pending');
     assert.equal(dead.state.containers[ear], corpse);
 
-    // Breaks (store.ts restorable): a decay row bound to a corpse no death created, or a decay
-    // with no corpse, loads and faults the later elapsed run instead of giving save_corrupt.
+    // Breaks (store.ts restorable): a decay row bound to a corpse no death created, a decay with
+    // no corpse, or another kind bound to a corpse (jobRoute runs it as a decay), loads and faults
+    // the later elapsed run instead of giving save_corrupt.
     if (kind === 'failed') {
       const forge = (change: object) =>
         p.sql
           .prepare("UPDATE state_row SET value=? WHERE section='jobs' AND key=?")
           .run(JSON.stringify({ ...job, ...change }), job_id);
-      for (const change of [{ corpse_id: ear }, { corpse_id: undefined }]) {
+      for (const change of [
+        { corpse_id: ear },
+        { corpse_id: undefined },
+        { job: { ...job.job, kind: 'status' } },
+      ]) {
         forge(change);
         assert.equal(
           openStory(p.db, releases, p.host).kind,
