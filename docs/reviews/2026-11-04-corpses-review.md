@@ -56,3 +56,21 @@ The three narrow mutants above stand in for it. The PR's "`compose.ts` exemption
 ## Verdict
 
 CHANGES REQUIRED (two should-fix, plus the companion's two).
+
+## Fix re-check (cff94f3ca)
+
+Scope: fix commits 7a3548abb and cff94f3ca against this record and the [second review](2026-11-04-corpse-decay-second-review.md); nothing else re-reviewed. Each mutant was applied by hand, then reverted.
+
+| Finding | Fix | Mutant, result |
+|---|---|---|
+| Same-advance create then decay | `compose.ts:279` and `compose_food.ex:32` read the overlay; `invariants_food.ts:17` and `invariants_food.ex:38` read the delta's `entity.create` | Overlay read dropped in TS: red in "dies and decays inside one elapsed span" and "guard admits". `ops.find` emptied in TS: red in "guard admits". Each Elixir twin removed: red in "a corpse created and decayed in one proposal". |
+| Reopen with a forged decay row | `store.ts:158` `restorable` | The whole clause, its origin check, or its kind check dropped: `corpse_decay.test.ts` (local story) goes red at the forged rows (`save_corrupt` expected). |
+| `corpse_id` null parity | `compose_job.ts:151`, `invariants_encounter.ts:196`, `invariants_encounter.ex:265` | Each reverted to a presence check: its decay-binding test goes red, including the tests that call the invariant alone. |
+| Spill order | three-item test (b, c, a) | `.sort(cmp)` dropped, or `.reverse()` added: red. |
+| Spec wording | `mechanics.md:814` now reads complete, then spill, then consumed | Matches `job.ts:47`. |
+
+Disputed point (`invariants_food.ts:17` finds a create anywhere in the delta): I agree with the author. A decay placed before its create is refused by both guards on the containment link, even when the compose result is forged. The probe was temporary and was deleted. TS: `deltaPreconditions` gives false; compose faults with `precondition_failed`. Elixir: the same.
+
+CI at cff94f3ca (`gh run list --commit`): ci, book-e2e and graph-diff all succeeded.
+
+Verdict: APPROVE. All five items are fixed, and each new test fails on its mutant.
