@@ -158,16 +158,18 @@ defmodule Loka.ContentAreaFoldersTest do
     assert {:ok, ^twin, _} = compile(dir, [{"reactions/crow_lands.json", zoned} | roost])
   end
 
-  # Break: an area or bundle name equal to a reaction zone silently adds copies to a cartridge
-  # built before area folders (docs/rnd/cartridge-area-layout-design-2026-11-04.md, risks). The
-  # source text is read because loading expands `zone` away; only a reaction has a `"zone"` string.
-  test "no cartridge has a reaction zone equal to one of its area names" do
+  # Break: an area or bundle named like a zone a room already lists in `zones` silently adds the
+  # area's rooms to that zone's reactions (docs/rnd/cartridge-area-layout-design-2026-11-04.md,
+  # risks). A reaction `"zone": "<area>"` alone is the implicit zone and stays valid. The source
+  # text is read because loading expands `zones` away.
+  test "no cartridge lists a room zone equal to one of its area names" do
     for cart <- Path.wildcard("cartridges/*"), File.dir?(cart) do
       areas = for p <- Path.wildcard("#{cart}/areas/*"), do: Path.rootname(Path.basename(p))
 
       zones =
         for f <- Path.wildcard("#{cart}/**/*.json"),
-            [_, z] <- Regex.scan(~r/"zone"\s*:\s*"([^"]+)"/, File.read!(f)),
+            [_, list] <- Regex.scan(~r/"zones"\s*:\s*\[([^\]]*)\]/, File.read!(f)),
+            [_, z] <- Regex.scan(~r/"([^"]+)"/, list),
             do: z
 
       assert zones -- (zones -- areas) == [], cart

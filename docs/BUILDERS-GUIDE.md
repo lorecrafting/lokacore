@@ -72,8 +72,8 @@ two or more areas, or world-wide (statuses, skills, transport, a quest whose off
 in two areas): at the root (`npcs/wren.json`). Text keys and facts stay in the root files.
 
 **Moving a thing across a border.** Move the file; do not edit it. When a second area starts naming
-`areas/hollow/items/lamp.json`, move it to `items/lamp.json`. Keys and the compiled cartridge do not
-change, so saves and `content_hash` stand. The folder is an implicit zone: `"zone": "hollow"` on a
+`areas/hollow/items/lamp.json`, move it to `items/lamp.json`. Keys do not change, so saves stand, and
+`content_hash` stands unless the moved room enters or leaves an area that a reaction `zone` names. The folder is an implicit zone: `"zone": "hollow"` on a
 reaction with no `on.room` copies it to every Hollow room.
 
 | The compiler says | Fix |
@@ -81,7 +81,8 @@ reaction with no `on.room` copies it to every Hollow room.
 | `` `npcs/wren` belongs to the area `hollow`, and only that area and the root may name it. `` (`area_crossing`, also at `extends` and `behaviours[i]`) | Move `wren` to `npcs/`, or move the naming file into `areas/hollow/`. |
 | `` The area `bestiary` has no room. `` (`area_empty`) | Add a room under `areas/bestiary/rooms/`, or move its files to the root folders. |
 | `This area folder's name cannot be a key.` (`area_name`, `areas/Hollow`) | Rename the folder to lowercase snake_case. |
-| `` `widgets` is not a field here. `` (`UNKNOWN_FIELD`: an unknown folder, a deeper folder, a `.json` directly in `areas/hollow/`, or an `area` field) | Use a definition folder of the [Source layout](system/cartridge.md#source-layout); one level only. |
+| `This file is in no folder the compiler reads.` (`UNKNOWN_FIELD`: an unknown folder, a deeper folder, or a `.json` directly in `areas/hollow/`) | Use a definition folder of the [Source layout](system/cartridge.md#source-layout); one level only. |
+| `` `area` is not a field here. `` (`UNKNOWN_FIELD`: an `area` field) | Remove it: the folder is the area. |
 | `This name or key is already taken.` (one key in two areas, or an area and the root) | Rename one; keys are global. |
 
 `mix loka.lint` reads an area file as its root twin (`items/lamp.json: ...`) and runs the same

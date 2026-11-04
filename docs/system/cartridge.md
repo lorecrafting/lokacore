@@ -337,7 +337,8 @@ rooms, NPCs, dialogue and reactions are one file.
 `lib/loka/content/source.ex`); `.scene` sits under `scenes/` or `dialogues/` and `.cut` under
 `scenes/`, as at the root. The folder name is the area: no `area` field (a stray one is
 `UNKNOWN_FIELD`), no key prefix, and nothing of it reaches the artifact, so moving a file in or
-out of an area folder leaves `content_hash` unchanged. `areas/<area>.json` and `areas/<area>/` are
+out of an area folder leaves `content_hash` unchanged, except a room entering or leaving an area
+that a reaction `zone` names (the implicit zone below). `areas/<area>.json` and `areas/<area>/` are
 one area. Diagnostics carry the file path (`areas/hollow/npcs/wren.room`); `mix loka.lint` names
 the root address (`npcs/wren.json: ...`).
 - An area is an implicit zone of its rooms (`Zones.expand`): a reaction `"zone": "<area>"` with no
