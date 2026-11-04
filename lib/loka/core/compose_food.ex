@@ -1,6 +1,6 @@
 defmodule Loka.Core.ComposeFood do
   @moduledoc "Terminal custody preconditions of entity.transfer."
-  def valid?(op, state) do
+  def valid?(op, state, overlay) do
     known = Map.get(state, "known_entities", %{})
     source = known[op["source_id"]] || %{}
     destination = known[op["destination_id"]] || %{}
@@ -14,21 +14,29 @@ defmodule Loka.Core.ComposeFood do
         terminal?(item, source, destination, "bandage")
 
       destination["kind"] == "consumed" ->
-        consumed?(op, state, item, source, destination)
+        consumed?(op, state, overlay, item, source, destination)
 
       true ->
         true
     end
   end
 
-  defp consumed?(op, state, item, source, destination),
-    do: decayed?(op, state, source["kind"]) or terminal?(item, source, destination, "edible")
-
-  # death@1 decay: a death-created corpse leaves its room for the consumed holder.
-  defp decayed?(op, state, source),
+  defp consumed?(op, state, overlay, item, source, destination),
     do:
-      get_in(state, ["created", op["entity_id"], "origin", "kind"]) == "death" and
-        source == "room" and op["consumption"] == nil
+      decayed?(op, state, overlay, source["kind"]) or
+        terminal?(item, source, destination, "edible")
+
+  # death@1 decay: a death-created corpse (saved, or created earlier in this proposal) leaves
+  # its room for the consumed holder.
+  defp decayed?(op, state, overlay, source) do
+    created =
+      overlay[Loka.Core.ComposeTarget.key(%{"kind" => "entity", "entity_id" => op["entity_id"]})]
+
+    identity = if created, do: elem(created, 2), else: get_in(state, ["created", op["entity_id"]])
+
+    get_in(identity || %{}, ["origin", "kind"]) == "death" and source == "room" and
+      op["consumption"] == nil
+  end
 
   defp terminal?(item, source, destination, marker),
     do:

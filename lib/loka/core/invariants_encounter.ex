@@ -262,7 +262,7 @@ defmodule Loka.Core.InvariantsEncounter do
   # death@1 decay: bound by the corpse only.
   defp binding?(%{"corpse_id" => _} = op),
     do:
-      get_in(op, ["job", "kind"]) == "decay" and
+      op["corpse_id"] != nil and get_in(op, ["job", "kind"]) == "decay" and
         Enum.all?(Map.keys(op), &(&1 in ~w(op writer_group job_id job due_time corpse_id)))
 
   defp binding?(op) do

@@ -147,8 +147,8 @@ function pendingJob(op: Extract<DeltaOp, { op: 'job.schedule' }>): Json {
 }
 
 // death@1 decay (owner decision 2026-11-02): a decay job binds its corpse and nothing else.
-const decayBindingValid = (op: object) =>
-  'corpse_id' in op &&
+const decayBindingValid = (op: { corpse_id?: unknown }) =>
+  op.corpse_id != null &&
   (op as unknown as { job: { kind: string } }).job.kind === 'decay' &&
   Object.keys(op).every((k) =>
     ['op', 'writer_group', 'job_id', 'job', 'due_time', 'corpse_id'].includes(k),

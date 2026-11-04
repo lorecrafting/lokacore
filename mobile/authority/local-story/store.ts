@@ -155,6 +155,10 @@ const restorable = (world: World) =>
         (validate('LogicalTime', q.started_at).length || q.started_at > world.state.clock)),
   ) &&
   !recoveryFault(world) &&
+  // death@1: a decay job's corpse is one a death created (an unbound decay fails upstream).
+  Object.values(world.state.jobs ?? {}).every(
+    (j) => j.corpse_id == null || world.state.created?.[j.corpse_id]?.origin.kind === 'death',
+  ) &&
   Object.entries(world.entityResourceSpecs).every(([target, spec]) =>
     validOverrideRow(world.state.resources?.[target], spec, world.state.clock),
   );

@@ -1,4 +1,4 @@
-// size: allow 307, death@1 corpse decay's custody exception sits with the other transfer preconditions (loka-kgd.203)
+// size: allow 313, death@1 corpse decay's custody exception sits with the other transfer preconditions (loka-kgd.203)
 import { recordKnowledge } from './compose_knowledge.ts';
 import { cmp } from './validate.ts';
 import { choice, pendingAtLimit } from './compose_choice.ts';
@@ -253,7 +253,7 @@ function transfer(
     known[e]?.kind === 'consumed' ||
     known[source]?.kind === 'consumed' ||
     (known[d]?.kind === 'consumed' &&
-      !decayed(op, ctx.state) &&
+      !decayed(op, ctx) &&
       (known[e]?.kind !== 'item' ||
         known[source]?.kind !== 'body' ||
         (op.consumption === 'bandaged'
@@ -273,11 +273,17 @@ function transfer(
   return { value: d };
 }
 
-// death@1 decay: a death-created corpse leaves its room for the consumed holder.
-const decayed = (op: Extract<DeltaOp, { op: 'entity.transfer' }>, state: State) =>
+// death@1 decay: a death-created corpse (saved or created in this proposal) leaves its room.
+const decayed = (op: Extract<DeltaOp, { op: 'entity.transfer' }>, ctx: Ctx) =>
   op.consumption === undefined &&
-  (get(section(state, 'created')[op.entity_id], 'origin') as Obj | undefined)?.kind === 'death' &&
-  (section(state, 'known_entities')[op.source_id!] as Obj | undefined)?.kind === 'room';
+  (
+    get(
+      ctx.overlay.get(key({ kind: 'entity', entity_id: op.entity_id }))?.value ??
+        section(ctx.state, 'created')[op.entity_id],
+      'origin',
+    ) as Obj | undefined
+  )?.kind === 'death' &&
+  (section(ctx.state, 'known_entities')[op.source_id!] as Obj | undefined)?.kind === 'room';
 
 // d is e or inside it. Revisiting a container means a cyclic base: fail closed.
 function inside(d: string, e: string, ctx: Ctx): boolean {

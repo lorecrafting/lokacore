@@ -65,6 +65,68 @@ defmodule Loka.Core.CorpseDecayComposeTest do
     )
   end
 
+  # Breaks: a composer or independent guard that reads only saved corpse rows, so a corpse created
+  # earlier in the same proposal (a death inside one elapsed span) faults its own decay.
+  @tag :tmp_dir
+  test "a corpse created and decayed in one proposal leaves play", %{tmp_dir: dir} do
+    [corpse, room, gone, goblin] = for n <- 1..4, do: "a0000000-0000-4000-8000-00000000000#{n}"
+
+    template = %{
+      "cartridge_id" => "c",
+      "cartridge_version" => "1.0.0",
+      "kind" => "item",
+      "key" => "npc_corpse"
+    }
+
+    state = %{
+      "clock" => 100,
+      "containers" => %{goblin => room},
+      "known_entities" => %{
+        goblin => %{"kind" => "npc"},
+        room => %{"kind" => "room"},
+        gone => %{"kind" => "consumed"}
+      },
+      "corpse_templates" => %{elem(Canonical.encode(template), 1) => "npc"}
+    }
+
+    identity = %{
+      "id" => corpse,
+      "definition" => template,
+      "origin" => %{
+        "kind" => "death",
+        "victim_id" => goblin,
+        "event_id" => "b0000000-0000-4000-8000-000000000001",
+        "owner_id" => nil
+      }
+    }
+
+    move = %{"op" => "entity.transfer", "writer_group" => 0, "entity_id" => corpse}
+
+    delta = %{
+      "ops" => [
+        %{"op" => "entity.create", "writer_group" => 0, "identity" => identity},
+        Map.merge(move, %{"source_id" => nil, "destination_id" => room}),
+        Map.merge(move, %{"source_id" => room, "destination_id" => gone})
+      ]
+    }
+
+    # The corpse's two placements fold into one containment row: it ends in the consumed holder.
+    want = %{
+      "changes" => [
+        %{"target" => %{"kind" => "containment", "entity_id" => corpse}, "value" => gone},
+        %{"target" => %{"kind" => "entity", "entity_id" => corpse}, "value" => identity}
+      ]
+    }
+
+    assert Compose.compose(state, delta) == want
+    check = %{"state" => state, "delta" => delta, "result" => want}
+    assert Invariants.check("delta_preconditions_hold", check)
+
+    agree(dir, ["delta_preconditions_hold"], [Map.delete(check, "result")], [
+      %{"result" => want, "invariants" => [true]}
+    ])
+  end
+
   # Breaks: a decay job bound by a nil corpse, or by the corpse and another job's key, that the
   # composer or the independent guard admits.
   test "a decay job binds a corpse and nothing else" do
@@ -95,6 +157,16 @@ defmodule Loka.Core.CorpseDecayComposeTest do
       assert %{"fault" => _} = Compose.compose(state, %{"ops" => [o]}), inspect(o)
       refute Invariants.check("delta_preconditions_hold", check.(o)), inspect(o)
     end
+
+    # A compose that accepted the nil corpse: the invariant alone must refuse it.
+    nulled = %{op | "corpse_id" => nil}
+    forged = put_in(bound, ["changes", Access.at(0), "value", "corpse_id"], nil)
+
+    refute Invariants.check("delta_preconditions_hold", %{
+             "state" => state,
+             "delta" => %{"ops" => [nulled]},
+             "result" => forged
+           })
   end
 
   defp agree(dir, ids, cases, expected) do

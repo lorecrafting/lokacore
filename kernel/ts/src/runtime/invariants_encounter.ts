@@ -193,7 +193,7 @@ function bindingValid(op: Any) {
   // death@1 decay: bound by the corpse only (independent of compose_job.ts).
   if (op.corpse_id !== undefined || op.job.kind === 'decay')
     return (
-      op.corpse_id !== undefined &&
+      op.corpse_id != null &&
       op.job.kind === 'decay' &&
       Object.keys(op).every((k) =>
         ['op', 'writer_group', 'job_id', 'job', 'due_time', 'corpse_id'].includes(k),

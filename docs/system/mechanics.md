@@ -811,10 +811,10 @@ Decay ([owner decision](../decisions/owner-decision-corpses-respawn-2026-11-02.m
 victim) is set, the sequence also writes one `job.schedule` in its writer group: job ref
 kind `decay`, key `corpse`, due at the death clock plus that many units, bound by
 `corpse_id`; its JobId is minted after the corpse EntityId. The due run, inside
-`time.advance` like every job (so the away catch-up settles it), transfers each direct
-child of the corpse to the corpse's room in EntityId order, then transfers the corpse
-to D4's terminal [consumed holder](#d4-homes-finite-apples-and-eat-selected-contract),
-then completes the job: no event, no line, nothing destroyed; nested items stay in their
+`time.advance` like every job (so the away catch-up settles it, also for a corpse created
+earlier in the same advance), completes the job, then transfers each direct child of the
+corpse to the corpse's room in EntityId order, then transfers the corpse to D4's terminal
+[consumed holder](#d4-homes-finite-apples-and-eat-selected-contract): no event, no line, nothing destroyed; nested items stay in their
 bags. A spilled player corpse's items are public room items. A corpse not in a room at the
 due time only completes the job. A decay setting requires food@1 (the consumed holder);
 none set means no job and identical bytes.

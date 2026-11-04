@@ -74,6 +74,25 @@ test('corpse decay survives failed COMMIT, lost ack, reopen and replay', (t) => 
     assert.equal(job.status, 'pending');
     assert.equal(dead.state.containers[ear], corpse);
 
+    // Breaks (store.ts restorable): a decay row bound to a corpse no death created, or a decay
+    // with no corpse, loads and faults the later elapsed run instead of giving save_corrupt.
+    if (kind === 'failed') {
+      const forge = (change: object) =>
+        p.sql
+          .prepare("UPDATE state_row SET value=? WHERE section='jobs' AND key=?")
+          .run(JSON.stringify({ ...job, ...change }), job_id);
+      for (const change of [{ corpse_id: ear }, { corpse_id: undefined }]) {
+        forge(change);
+        assert.equal(
+          openStory(p.db, releases, p.host).kind,
+          'save_corrupt',
+          JSON.stringify(change),
+        );
+      }
+      forge({});
+      assert.equal(openStory(p.db, releases, p.host).kind, 'open');
+    }
+
     // The scheduled job reopens on a fresh connection before it fires.
     p.sql.close();
     const q = elapsedHost(path, { wall: 10000, mono: 0 }, artifact);
