@@ -916,7 +916,7 @@ Reconstruction rejects transfer out, forged entry, mismatched holder or benefit,
 a consumed item restored into circulation, and unsupported pins as typed corruption
 or explicit mismatch, without silent repair/deletion.
 
-Narration reconstruction classifies an accepted Eat as a World result, never a
+Narration reconstruction classifies an accepted Eat (`consume` of an edible item, loka-kgd.209) as a World result, never a
 consumed-item detail. Its saved command must match the receipt command ID and
 actor, typed `eaten` item, same-item body-to-consumed transfer, recovery adjustment
 and that item's authored narration key at the accepted history prefix. Return the

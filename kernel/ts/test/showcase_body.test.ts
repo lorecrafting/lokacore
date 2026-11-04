@@ -7,6 +7,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView } from '../src/index.ts';
+import { validate } from '../src/foundation/validate.ts';
 import type { World } from '../src/runtime/decision.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
@@ -171,6 +172,12 @@ test('body 8: in the hut bread leaves you well fed and water refreshed', () => {
   const eat = play(low, { type: 'consume', item_id: id(low, 'item', 'hut_loaf') });
   assert.ok(eat.lines.includes('narration.well_fed.applied'), JSON.stringify(eat.lines));
   assert.deepEqual(labels(eat.world), ['condition.well_fed']);
+  const view = gameView(eat.world);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.deepEqual(view.conditions?.[0]?.ticks, [
+    { resource: 'hp', per_tick: 1 },
+    { resource: 'mv', per_tick: 5 },
+  ]);
   assert.deepEqual(
     [gain(eat.world, 0), gain(eat.world, 1200), gain(eat.world, 2400), gain(eat.world, 3600)],
     [

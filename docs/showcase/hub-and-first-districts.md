@@ -47,8 +47,7 @@ of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-
   (`exposure_sampler`, `needs_sampler`); `season` period 345600 (four days, so winter is day 4): `spring` 0,
   `summer` 86400, `autumn` 172800, `winter` 259200; `tide` period 43200: `low` 0, `high` 21600;
   `lunar` period 345600: `new` 0, `full` 172800 (`sky_sampler`, `time_sampler`).
-- Pools: `hp` 1..10 start 10 gain 0; `mv` 0..100 start 100; `hunger` and `thirst` 0..10 start 10,
-  each with its own band words (`needs_sampler/resources.json`); `pennies` 0..100 start 10, the
+- Pools: `hp` 1..10 start 10 gain 0; `mv` 0..100 start 100; `pennies` 0..100 start 10, the
   shop currency (`standing_sampler/resources.json`).
 - Attributes: `str` 10, `dex` 10, `cha` 6 (`persuade_sampler/attributes.json`).
 - `world.derived.carry_grams`: base `carry.max_grams` 5000, term `str` per_point 1000, pivot 10
@@ -58,10 +57,11 @@ of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-
 - Statuses ([row 1](../system/mechanics.md#status-effects-over-time-toolbox-row-1),
   [row 2c](../system/mechanics.md#status-modifiers-toolbox-row-2c); `exposure_sampler/statuses`,
   `buffs_sampler/statuses`, `needs_sampler`): `chilled`, `soaked`, `windburnt`, `overheated`
-  each hp -1 every 7200 for 9000; `hungry` hunger -1 every 3600 and `thirsty` thirst -1
-  every 3600, both permanent until bread or water cures them (loka-rn3b); `parched` thirst -1 every 1800 for 5400; `might` modifies str +3 for 3600,
+  each hp -1 every 7200 for 9000; `parched` mv -10 every 1800 for 5400; `well_fed` hp +1 and
+  mv +5 every 1200 for 3600 (a cooked meal's `applies` lasts 7200); `refreshed` mv +5 every 600
+  for 1800; `might` modifies str +3 for 3600,
   no `per_tick`; `inspired` modifies dex +2 for 1800, no `per_tick`.
-- Liquids: `water` cures `thirsty` and `parched`; `draught` (the potion kind, `drank {kind}`
+- Liquids: `water` cures `parched` and applies `refreshed`; `draught` (the potion kind, `drank {kind}`
   reaction applies `might`; `buffs_sampler/liquids/potion.json`).
 
 ## Hub: the Crossroads Inn (slice A)
@@ -83,9 +83,9 @@ slice A builds alone; west is reserved for the combat district (no exit yet; the
   > door will not open, the words in the room say why.
 
 - **waterskin** (vessel, 4 units of `water`, `needs_sampler`) and a **loaf** (edible, `mv` +5,
-  cures `hungry`, `needs_sampler/items/bread.json`) on the bar.
+  applies `well_fed`, `needs_sampler/items/bread.json`) on the bar.
 
-Expected: a new character starts here at 07:00 day 1 with hp 10, hunger 10, thirst 10, str 10,
+Expected: a new character starts here at 07:00 day 1 with hp 10, mv 100, str 10,
 dex 10, cha 6, pennies 10; the room lists two exits in slice A and three once slice B lands;
 before 06:00 Hob's name reads the asleep variant.
 
@@ -111,8 +111,8 @@ what to wear ([trap 12](../MECHANICS-TOOLBOX.md#traps)).
 > The Fell Road. North of here the moor is open to the sky. Go up in frost, rain, gale or heat
 > without the right garment from these pegs and your body pays by the hour, and a long enough bill
 > is paid with your life; come back under this
-> roof and it stops on its own. The climb makes you hungry and thirsty: Wat's hut, east on the
-> top, has bread and a trough. Orla's still room, west, has a draught that makes you strong for an
+> roof and it stops on its own. A meal leaves you well fed and mending faster, a drink leaves you
+> refreshed: Wat's hut, east on the top, has bread and a trough. Orla's still room, west, has a draught that makes you strong for an
 > hour (try the quern), and a lute (try the knucklebones after a song). The fold, east of here,
 > is the same sky with everything on one shelf.
 
@@ -136,8 +136,6 @@ what to wear ([trap 12](../MECHANICS-TOOLBOX.md#traps)).
   heat/`cool`/`overheated` (`exposure_sampler/reactions`). Dry: `drought` with no garment leaf,
   applying `parched` (`needs_sampler`). `entity_entered_room` requires a `room`, so `the_fold`
   gets its own five entry rules; the five `clock_hour` rules name no room and serve both.
-- Needs: reaction on `entity_entered_room` into `fell_top` applying `hungry` and `thirsty` (two
-  steps, one rule; `needs_sampler`).
 - Potion: reaction `on {event: drank, kind: draught}` applies `might` (`buffs_sampler/reactions/potion.json`).
 - Song: scripted action `play_song` at `hearth` (policy `has_item lute`, success emits a custom event as the
   sampler does, `tip`: "A song reaches whoever is in the room with you."); reactions on
@@ -154,18 +152,18 @@ Day 1 is a frost day in the test's world; the day 2 branch is rain.
 | # | Step | Expected | Matrix cells |
 |---|---|---|---|
 | 1 | In `fell_gate`, read `sign_body`. | The text above; no topic granted. | |
-| 2 | North to `fell_top` at 07:00 with no garment worn. | `chilled` applied (its applied line); Character page shows the condition; `hungry` and `thirsty` applied in the same receipt; the room's frost variant shows. | statuses x reactions; sky x exposure x equipment |
-| 3 | Wait to 09:00 (two game hours, 7200). | One chilled tick: hp 9; hunger 8 and thirst 8 after two need ticks; the 08:00 `clock_hour` refreshed `chilled` silently (no second applied line). | statuses x reactions |
+| 2 | North to `fell_top` at 07:00 with no garment worn. | `chilled` applied (its applied line); Character page shows the condition; the room's frost variant shows. | statuses x reactions; sky x exposure x equipment |
+| 3 | Wait to 09:00 (two game hours, 7200). | One chilled tick: hp 9; the 08:00 `clock_hour` refreshed `chilled` silently (no second applied line). | statuses x reactions |
 | 4 | South to `fell_gate` at 09:00; wait to 11:30. | No refresh under the roof: the 09:00 refresh set the end to 11:30 (32400 + 9000); the 11:00 tick puts hp at 8; at 11:30 the expired line, with no cure. The developer pins these two times from row 1's refresh rule in the test. | |
 | 5 | Wear `cloak`, north to `fell_top`. | Nothing applies (the `not wearing warm` leaf fails); the frost variant still shows. | sky x exposure x equipment |
 | 6 | Same step on a rain day wearing only the cloak, then wearing the oilskin. | `soaked` applies with the cloak; nothing with the oilskin. | sky x exposure x equipment |
 | 7 | Stand on `fell_top` across 08:00 on the frost day. | Wat arrives at 08:00; the `wat_frost` rule chills him (no player line, [row G3](../system/mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3)); his description reads the shivering variant; at 09:00 he leaves for the hut; at 10:00 his tick puts him at hp 9; at 10:30 the variant stops. | NPC status x variants x schedule |
-| 8 | East to `shepherd_hut`; eat `hut_loaf`; drink from `trough_skin`. | Eat ends `hungry` (mv rises by up to 5, never past 100; the hunger pool is unchanged); Drink ends `thirsty`; both conditions leave the Character page. | statuses x reactions |
+| 8 | East to `shepherd_hut`; eat `hut_loaf`; drink from `trough_skin`. | Eat applies `well_fed` (mv rises by up to 5, never past 100; then hp +1 and mv +5 every 1200 until it wears off at 3600); Drink applies `refreshed` (mv +5 every 600, gone at 1800); each shows on the Character page while it lasts. | statuses x reactions |
 | 9 | West to `still_room`; take `quern`. | Refused: 7000 g over the 5000 g carry. | potion x derived carry |
 | 10 | Drink from `cask`; take `quern`. | `might` applied; Character page str 13; carry 8000 g; the take succeeds. A second dose at once moves the end, never stacks (str stays 13). | potion x derived carry |
 | 11 | `throw_bones` before any song. | Failure line (dex 10 < 11). | |
 | 12 | `play_song` (holding the lute), then `throw_bones`. | Song line plus the tip once; `inspired` on the player and on Orla (her humming variant); dex reads 12; the throw passes. 1800 later both expire. | statuses x reactions |
-| 13 | Drought day: `fell_top`. | `parched` applied; a drink from the trough skin ends it; the next `clock_hour` on the moor applies it again. | sky x exposure x equipment |
+| 13 | Drought day: `fell_top`. | `parched` applied and drains mv; a drink from the trough skin ends it; the next `clock_hour` on the moor applies it again. | sky x exposure x equipment |
 
 Sandbox `the_fold`: everything above in one exposed room: wear any mix of garments and watch
 which condition lands by the day's weather; drink, play, shove the Drover (passes only under
