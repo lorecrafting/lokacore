@@ -111,7 +111,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 > it before the raider falls. South is a pit with two
 > goblins who fight as a pack: in a pack you choose which one you hit. Every kill earns
 > experience, each goblin of a pack too; thirty points make a level and a point to raise a stat, and raised strength bites harder. When you
-> fall you wake at the inn with your level, your scar and your skill; what you carried waits on your
+> fall you wake at the Wayside Shrine with your level, your scar and your skill; what you carried waits on your
 > corpse where you fell. The Warden in Low Wardle wears mail no blade gets through. The tilt yard,
 > south of the gate, has all of it and a draught.
 
