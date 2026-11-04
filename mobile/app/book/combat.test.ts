@@ -97,7 +97,7 @@ test('combat page lists offered controls vertically below history in one scroll'
     );
     assert.deepEqual(
       controls.map((n) => n.props.accessibilityLabel),
-      ['Stand', 'Look', 'Flee'],
+      ['Stand', 'Flee'], // no Look in a fight (owner 2026-11-04)
     );
     const scroll = drawn.find((n) => n.type === 'ScrollView')!;
     const inside = nodes(scroll);
@@ -118,7 +118,6 @@ test('combat page lists offered controls vertically below history in one scroll'
     sent,
     Array.from({ length: 3 }, () => [
       { action_key: 'stand', target_ids: [], input: {}, view_freshness_token: 'view:drawn' },
-      { action_key: 'look', target_ids: [], input: {}, view_freshness_token: 'view:drawn' },
       {
         action_key: 'flee',
         target_ids: [],

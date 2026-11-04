@@ -927,9 +927,9 @@ offer under ordinary freshness; an old view never promises rescue, and expiry re
 An attackable present NPC offers deliberate Attack. An active encounter automatically opens
 and foregrounds its own full Book page, like dialogue, including when another ordinary page
 or menu was open and when reopening a saved encounter. The page shows
-committed combat narration, and renders only currently available Stand, directionless Flee
-and Look actions as complete typed invocations. The shared kernel ActionSet also permits Scan;
-its existing phone presentation deferral remains. The combat restriction is applied after all
+committed combat narration, and renders only currently available Stand and directionless Flee actions as complete typed
+invocations. The kernel still permits Look and Scan in a fight; the page offers neither (Look:
+owner 2026-11-04, until the combat hotbar is designed). The combat restriction is applied after all
 ordinary contributions, so no blocked action or alias is exposed by a hidden ordinary page.
 Attack initiates combat from the NPC page; it is not usable again during an open encounter
 and is not shown on the combat page.

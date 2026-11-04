@@ -62,7 +62,6 @@ function Responses(p: Props & { shown: Shown }) {
   return (
     <Cards>
       {stand && <ActionCard b={stand} press={p.press} />}
-      {p.g.look && <ActionCard b={p.g.look} press={p.press} />}
       {p.g.flee.map((b) => (
         <ActionCard key={cardKey(b)} b={b} press={p.press} />
       ))}
