@@ -6,6 +6,7 @@ import { key } from '../src/foundation/compose.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { liquidActions } from '../src/view/liquid.ts';
+import { foodActions } from '../src/view/food.ts';
 import { transition } from '../src/mechanics/liquid/shared.ts';
 import { gameview_agrees_with_admission } from '../src/view/invariants_view.ts';
 import { id as lid, liquidFresh } from './liquid_fixture.ts';
@@ -376,12 +377,12 @@ test('liquid pair projection fails at the same exhausted budget as direct admiss
 // Breaks: liquid candidates bypass keyed ActionSet target/input/policy admission or lose their primary target.
 test('authored liquid overrides project the same availability as the exact invocation', () => {
   const base = owned(3, 2);
-  for (const [type, targets, scope] of [
-    ['fill', [well, spare], 'inspectable_details'],
-    ['pour', [skin, spare], 'inventory'],
-    ['drink', [skin], 'inventory'],
+  for (const [type, targets, scope, project] of [
+    ['fill', [well, spare], 'inspectable_details', liquidActions],
+    ['pour', [skin, spare], 'inventory', liquidActions],
+    ['consume', [skin], 'inventory', foodActions], // a vessel's Drink is food@1's consume (loka-kgd.209)
   ] as const) {
-    for (const actionKey of [type, { fill: 'draw_water', pour: 'decant', drink: 'sip' }[type]])
+    for (const actionKey of [type, { fill: 'draw_water', pour: 'decant', consume: 'sip' }[type]])
       for (const [variant, target, input, policy, code] of [
         ['allowed', { kind: 'entity', scopes: [scope] }, [], { op: 'all', items: [] }, undefined],
         ['target', { kind: 'none' }, [], { op: 'all', items: [] }, 'unsupported_capability'],
@@ -418,7 +419,7 @@ test('authored liquid overrides project the same availability as the exact invoc
             },
           },
         };
-        const shown = liquidActions(w, w.character, targets[0], resolved(w, w.character), {
+        const shown = project(w, w.character, targets[0], resolved(w, w.character), {
           n: 0,
         }).find(
           (a) =>

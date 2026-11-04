@@ -79,4 +79,37 @@ defmodule Loka.ContentMealTest do
       assert expected in for(d <- ds, do: {d["code"], d["path"]})
     end
   end
+
+  # loka-kgd.209. Breaks: an {status, duration} entry left unresolved, a duration on a permanent
+  # status, a status naming both `resource` and `ticks`, a 0 tick, or one naming no pool at all.
+  test "an applies entry's own duration and a status's ticks are checked", %{dir: dir} do
+    read = &JSON.decode!(File.read!(Path.join(dir, &1)))
+    stew = "items/stew_plain_01.json"
+    fed = "statuses/fed.json"
+    applies = &{stew, put_in(read.(stew), ["edible", "applies"], [&1])}
+    status = &{fed, &1.(read.(fed))}
+    ticks = &Map.put(&1, "ticks", [%{"resource" => "mv", "per_tick" => &2}])
+    at = "items/stew_plain_01.edible.applies[0]"
+
+    cases = [
+      {[applies.(%{"status" => "nothing", "duration" => 60})], {"UNRESOLVED_REFERENCE", at}},
+      {[applies.(%{"status" => "fed", "duration" => 60}), status.(&permanent/1)],
+       {"SCHEMA_VIOLATION", at}},
+      {[status.(&ticks.(&1, 2))], {"SCHEMA_VIOLATION", "statuses/fed.resource"}},
+      {[status.(&ticks.(Map.delete(&1, "resource"), 0))],
+       {"SCHEMA_VIOLATION", "statuses/fed.ticks[0].per_tick"}},
+      {[status.(&Map.delete(&1, "resource"))], {"SCHEMA_VIOLATION", "statuses/fed.resource"}}
+    ]
+
+    for {changes, expected} <- cases do
+      assert {:error, ds} = Loka.ContentSource.compile(dir, changes)
+      assert expected in for(d <- ds, do: {d["code"], d["path"]}), inspect(ds)
+    end
+
+    # The control: the same entry on the timed status compiles.
+    assert {:ok, _, []} =
+             Loka.ContentSource.compile(dir, [applies.(%{"status" => "fed", "duration" => 60})])
+  end
+
+  defp permanent(s), do: Map.put(s, "duration", "permanent")
 end

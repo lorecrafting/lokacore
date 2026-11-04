@@ -1,3 +1,4 @@
+# size: allow 311, consumable applies entries carry their own duration and drinks share the meal checks (loka-kgd.209)
 defmodule Loka.Content.Status do
   @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers and (row G13) the liquids that cure them; (row W8) permanent statuses, which may tick until cured, never move the derived hp maximum."
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, diag: 4, ref: 3]
@@ -18,7 +19,8 @@ defmodule Loka.Content.Status do
       else:
         gate(m) ++
           values(statuses, {m, settings}, defs, text) ++
-          holders(m, defs) ++ foods(cures ++ later, m, defs) ++ meals(cures, m, defs, settings)
+          holders(m, defs) ++
+          foods(cures ++ later, m, defs) ++ meals(cures ++ later, m, defs, settings)
   end
 
   # Row hs-5: a meal's `applies` names statuses as its `cures` do.
@@ -27,7 +29,7 @@ defmodule Loka.Content.Status do
         k <- ~w(cures applies),
         list = get_in(i, ["edible", k]),
         list,
-        do: {rel, ["edible", k], statuses(list)}
+        do: {rel, ["edible", k], list}
   end
 
   # Row G3's immune lists, steps naming an item (or, row 42, an
@@ -51,11 +53,12 @@ defmodule Loka.Content.Status do
         {_, {rel, _, l}} <- defs["liquid"] || %{},
         k <- ~w(cures applies),
         l[k],
-        do: {rel, [k], statuses(l[k])}
+        do: {rel, [k], l[k]}
       )
 
-  # An applies entry is {status, duration} (loka-kgd.209); a cures entry is the status itself.
-  defp statuses(list), do: Enum.map(list, &(&1["status"] || &1))
+  # An applies entry may be {status, duration} (loka-kgd.209); a cures entry is the status itself.
+  defp name(%{"status" => s}), do: s
+  defp name(s), do: s
 
   defp trigger?({_, {_, _, %{} = r}}),
     do:
@@ -178,7 +181,8 @@ defmodule Loka.Content.Status do
           Map.has_key?(s, k),
           do: diag("SCHEMA_VIOLATION", at(rel, [k]))
 
-    both ++ Enum.flat_map(Enum.with_index(ticks), fn {t, i} -> tick(rel, t, i, m, defs) end)
+    # Beside a `resource`, Resolve.expand leaves the ticks' own refs unexpanded: report only both.
+    if both != [], do: both, else: Enum.flat_map(Enum.with_index(ticks), &tick(rel, &1, m, defs))
   end
 
   defp pools(rel, s, m, defs) when is_map_key(s, "resource"),
@@ -186,10 +190,10 @@ defmodule Loka.Content.Status do
 
   defp pools(rel, _, _, _), do: [diag("SCHEMA_VIOLATION", at(rel, ["resource"]))]
 
-  defp tick(rel, %{"per_tick" => 0}, i, _, _),
+  defp tick(rel, {%{"per_tick" => 0}, i}, _, _),
     do: [diag("SCHEMA_VIOLATION", at(rel, ["ticks", i, "per_tick"]))]
 
-  defp tick(rel, t, i, m, defs), do: Refs.reference(rel, ["ticks", i], "resource", t, m, defs)
+  defp tick(rel, {t, i}, m, defs), do: Refs.reference(rel, ["ticks", i], "resource", t, m, defs)
 
   # Never 0; only a ticks (loka-kgd.209), modifying (row 2c), fear (row W21), reader (4, 5, 6, 8) or permanent (row W8) status
   # may omit it.
@@ -264,16 +268,24 @@ defmodule Loka.Content.Status do
         do: diag("SCHEMA_VIOLATION", at(rel, ["modifies", i, "attribute"]))
   end
 
-  # Row hs-5: a meal's status never moves the derived hp maximum either (loka-kgd.50).
+  # Row hs-5: a meal's or drink's status never moves the derived hp maximum either (loka-kgd.50),
+  # and its own duration never lands on a permanent status (loka-kgd.209).
   defp meals(lists, m, defs, settings) do
     terms = hp_terms(settings)
 
-    for {rel, ["edible", "applies"] = path, list} <- lists,
+    for {rel, path, list} <- lists,
+        List.last(path) == "applies",
         {s, i} <- Enum.with_index(list),
-        {_, _, d} <- [Refs.resolve(s, "status", m, defs)],
-        Enum.any?(d["modifies"] || [], &(&1["attribute"] in terms)),
+        bad_meal?(s, Refs.resolve(name(s), "status", m, defs), terms),
         do: diag("SCHEMA_VIOLATION", at(rel, path ++ [i]))
   end
+
+  defp bad_meal?(s, {_, _, d}, terms),
+    do:
+      Enum.any?(d["modifies"] || [], &(&1["attribute"] in terms)) or
+        (is_map(s) and is_map_key(s, "duration") and permanent?(d))
+
+  defp bad_meal?(_, _, _), do: false
 
   defp hp_terms(settings),
     do:
@@ -293,7 +305,7 @@ defmodule Loka.Content.Status do
   defp foods(lists, m, defs) do
     for {rel, path, list} <- lists,
         {s, i} <- Enum.with_index(list),
-        Refs.resolve(s, "status", m, defs) == :unresolved,
+        Refs.resolve(name(s), "status", m, defs) == :unresolved,
         do: diag("UNRESOLVED_REFERENCE", at(rel, path ++ [i]))
   end
 end

@@ -1442,7 +1442,13 @@
       "required": [
         "status"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "status": {"cartridge_id": "kitchen_sampler", "cartridge_version": "0.0.1", "kind": "status", "key": "fed"},
+          "duration": 7200
+        }
+      ]
     },
     "ItemEdible": {
       "description": "D4 held-food metadata; a complete original item grants its effect (capped recovery, cures, applies) when Consume commits.",

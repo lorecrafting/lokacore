@@ -59,7 +59,7 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
   const w = fresh((c) => {
     c.actions[`${prefix}:action/bite`] = {
       key: 'bite',
-      command: 'eat',
+      command: 'consume',
       name: 'action.eat',
       accessibility: 'action.eat',
       priority: 10,
@@ -212,7 +212,7 @@ test('created edible loot uses the same admitted terminal transfer as static foo
   assert.equal(
     gameView(held)
       .inventory.find((i) => i.id === item)!
-      .actions.find((a) => a.action_key === 'eat')!.available,
+      .actions.find((a) => a.action_key === 'consume')!.available,
     true,
   );
   const eaten = step(held, command(held, 1, { type: 'consume', item_id: item }), 0);

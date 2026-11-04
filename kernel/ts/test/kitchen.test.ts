@@ -174,10 +174,10 @@ test('a reaction on status_applied hears the first fed, and a refresh stays sile
   assert.deepEqual(types('fish_03'), [[], 1]);
 });
 
-// Breaks: a meal with `applies` refused at full mv, or eaten there when nothing would newly land:
-// a plain meal, an immune eater, or fed already active (PM rulings: the buff applies, the restore
-// is capped; a meal that would land no new status is refused as a plain meal).
-test('at full mv the stew applies fed; a plain, immune or refresh-only meal is refused', () => {
+// Breaks: a meal with `applies` refused at full mv, or eaten there when nothing would land: a plain
+// meal or an immune eater (PM rulings: the buff applies, the restore is capped). A later meal with
+// fed active refreshes it to the later end (loka-kgd.209 F2), so it is eaten, not refused.
+test('at full mv the stew applies fed or refreshes it; a plain or immune meal is refused', () => {
   const r = reload(base, (c) => {
     const { applies: _, ...plain } = c.items[`${S}:item/stew_plain_01`].edible;
     c.items[`${S}:item/fish_03`].edible = plain;
@@ -196,7 +196,10 @@ test('at full mv the stew applies fed; a plain, immune or refresh-only meal is r
   refused({ ...w, entities: { ...w.entities, [w.body]: body } } as World, 'fish_04');
   w = play(w, { type: 'consume', item_id: item(w, 'stew_plain_01') });
   assert.deepEqual([mv(w), str(w)], [100, 11]);
-  refused(w, 'fish_04');
+  const fed = (w: World) => currentStatus(w, w.body, ref('status', 'fed'))!.ends_at!;
+  const first = fed(w);
+  w = play(wait(w, 60), { type: 'consume', item_id: item(w, 'fish_04') });
+  assert.equal(fed(w), first + 60);
 });
 
 // Breaks: the keep reaction missing, the W6 variant not reading spoiling, the spoil reaction not
