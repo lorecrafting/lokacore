@@ -1,4 +1,4 @@
-# size: allow 653, every scene form shares the sampler fixture and its twin
+# size: allow 654, every scene form shares the sampler fixture and its twin
 defmodule Loka.ContentSceneBranchingTest do
   # needs, once, then and nested choices in a `.scene` (docs/system/cartridge.md, Source
   # shortcuts). Expected JSON is hand-written; `~` stands for the words.
@@ -604,7 +604,8 @@ defmodule Loka.ContentSceneBranchingTest do
     write(tmp, "scenes/u.scene", "npc: bram\nbram: ~\n- B\n  bram: ~\n- A\n  bram: ~\n")
     write(tmp, "dialogues/u.json", "{#{order}}")
     write(tmp, "dialogues/j.json", ~s({"npc": "bram", #{order}}))
-    write(tmp, "areas/a.json", ~s({"dialogues": {"k": {"npc": "bram", #{order}}}}))
+    dialogues = ~s("dialogues": {"k": {"npc": "bram", #{order}}})
+    write(tmp, "areas/a.json", ~s({"rooms": {"r": {}}, #{dialogues}}))
     {_, diags} = Source.load(tmp)
     got = for d <- diags, is_map_key(d["data"], "why"), do: {d["data"]["why"], d["path"]}
 

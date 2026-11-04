@@ -5,8 +5,12 @@ defmodule Loka.Content.Areas do
   into definition entries at steps `[dir, key]`; `unique/1`, run before `extends` is flattened
   (Extends indexes one per kind and key), refuses two definitions of one kind and key. Both
   return faults; Source builds the diagnostics, so this module never calls Source (a call
-  either way is an xref cycle).
+  either way is an xref cycle). Area folders: `areas/<name>/<dir>/<file>` is a definition of
+  the area `<name>`; `area_of/1`, `crossed/2` and `check/1` hold the border rules
+  (docs/system/cartridge.md, Area folders).
   """
+
+  alias Loka.Core.Contracts
 
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
   @type entry :: {String.t(), term(), term()}
@@ -47,6 +51,49 @@ defmodule Loka.Content.Areas do
 
   defp refused(rel), do: {rel, :area, :invalid}
   defp invalid_type, do: %{"error" => "invalid_type"}
+
+  @doc "The area of a source path: `<a>` for `areas/<a>.json` and `areas/<a>/<dir>/<file>`, else nil (the root)."
+  @spec area_of(String.t()) :: String.t() | nil
+  def area_of(rel) do
+    case Path.split(rel) do
+      ["areas", file] -> Path.rootname(file)
+      ["areas", area, _, _] -> area
+      _ -> nil
+    end
+  end
+
+  @doc """
+  The area a definition at `to` belongs to when one at `from` may not name it, else nil: only its
+  own area and the root may name an area's definition (rooms are exempt; the caller checks kind).
+  """
+  @spec crossed(String.t(), String.t()) :: String.t() | nil
+  def crossed(from, to) do
+    {a, b} = {area_of(from), area_of(to)}
+    if a && b && a != b, do: b
+  end
+
+  @doc """
+  An `area_empty` fault for each area, folder or bundle, with no room among `files`, and an
+  `area_name` fault for each area folder whose name is not a Key.
+  """
+  @spec check([entry()]) :: [fault()]
+  def check(files) do
+    areas = for {rel, {_, _, _}, _} <- files, a <- [area_of(rel)], a, uniq: true, do: a
+    rooms = for {rel, {:room, _, _}, _} <- files, do: area_of(rel)
+
+    for(a <- areas -- rooms, do: fault("area_empty", "areas/#{a}.json", %{"area" => a})) ++
+      names(files)
+  end
+
+  defp names(files) do
+    folders = for {rel, _, _} <- files, ["areas", a, _, _] <- [Path.split(rel)], uniq: true, do: a
+
+    for a <- folders,
+        Contracts.validate("Key", a) != :ok,
+        do: fault("area_name", "areas/" <> a, %{})
+  end
+
+  defp fault(why, rel, data), do: {"SCHEMA_VIOLATION", {rel, []}, Map.put(data, "why", why)}
 
   @doc "The first definition of each kind and key; every site of a repeat is DUPLICATE_DEFINITION."
   @spec unique([entry()]) :: {[entry()], [fault()]}

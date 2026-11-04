@@ -47,7 +47,11 @@ defmodule Loka.ContentBundlesTest do
   # lost, or the hold stays on when no bundle is refused and hides a real unresolved entry.
   test "a refused bundle holds back unresolved references; an intact one does not" do
     romos = fn b -> b |> Map.delete("rooms") |> Map.put("romos", b["rooms"]) end
-    assert refused([{@bundle, romos}]) == [{"UNKNOWN_FIELD", "areas/village.romos", %{}}]
+    # The bundle lost every room, so it is also an area with no room (area_empty).
+    assert refused([{@bundle, romos}]) == [
+             {"SCHEMA_VIOLATION", "areas/village", %{"area" => "village", "why" => "area_empty"}},
+             {"UNKNOWN_FIELD", "areas/village.romos", %{}}
+           ]
 
     assert refused([{"cartridge.json", &Map.put(&1, "entry", "nowhere")}]) == [
              {"UNRESOLVED_REFERENCE", "cartridge.entry",

@@ -18,6 +18,7 @@ its NPC and item definitions with the rest of the world's definitions and text:
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
 | `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
+| `areas/<area>/<dir>/<key>.json` (`.scene`, `.cut` as at the root) | an area folder: the file `<dir>/<key>.json` would be, owned by the area `<area>` ([Area folders](#area-folders)) |
 
 `requires.kernel_api` is a range `{at_least, below}` with `at_least < below` (`KERNEL_API_RANGE_INVALID` at `cartridge.requires.kernel_api`, compiler); the loader refuses an installed API outside it (`KERNEL_API_UNSUPPORTED`). `at_least` rises only when the content uses a newer kernel feature; a contract bump alone changes `INSTALLED.kernel_api` and never a cartridge (the save pin carries the kernel_api, [save.md](save.md#opening-a-story); loka-daha). Floors raised by contract bumps before loka-daha (the dialogue cartridges at 1.124, the showcase at 1.126; 2026-10-30) stand; they are not lowered. No field carries its own floor; a cartridge released later states the API it was compiled against here.
 
@@ -303,7 +304,7 @@ A built-in action and a scripted action cannot share a key: two files cannot, an
 definition beside a file is `DUPLICATE_DEFINITION` at both sites (`actions/<key>`,
 `areas/<name>.actions.<key>`).
 
-**Area bundles.** `areas/<name>.json` (one level; `areas/x/y.json` is `UNKNOWN_FIELD`) holds
+**Area bundles.** `areas/<name>.json` (a `.json` directly in `areas/<area>/` is `UNKNOWN_FIELD`) holds
 `{"<dir>": {"<key>": <definition without key>}}`, where each `<dir>` is a definition directory
 of the [Source layout](#source-layout) table. `text` and `facts` stay in their root files.
 - A bundled definition is exactly the file `<dir>/<key>.json` would be: every stage checks it, and
@@ -329,6 +330,36 @@ of the [Source layout](#source-layout) table. `text` and `facts` stay in their r
 
 [speech_sampler](../../cartridges/speech_sampler/areas/village.json) is the working example: its
 rooms, NPCs, dialogue and reactions are one file.
+
+#### Area folders
+
+`areas/<area>/<dir>/<key>.json` is read as the root file `<dir>/<key>.json` (`Source.classify`,
+`lib/loka/content/source.ex`); `.scene` sits under `scenes/` or `dialogues/` and `.cut` under
+`scenes/`, as at the root. The folder name is the area: no `area` field (a stray one is
+`UNKNOWN_FIELD`), no key prefix, and nothing of it reaches the artifact, so moving a file in or
+out of an area folder leaves `content_hash` unchanged. `areas/<area>.json` and `areas/<area>/` are
+one area. Diagnostics carry the file path (`areas/hollow/npcs/wren.room`); `mix loka.lint` names
+the root address (`npcs/wren.json: ...`).
+- An area is an implicit zone of its rooms (`Zones.expand`): a reaction `"zone": "<area>"` with no
+  `on.room` copies once per room of the area. Explicit `zones` still name any key.
+- **Border rule** (`Loka.Content.Areas.area_of/1`; the root has no area). A file of area A may name
+  a definition of area B only when B is A, either is the root, or the target is a room. The
+  compiler checks every reference after short references expand (`Loka.Content.AreaRules`), each
+  `extends` (`Extends.flatten`) and each `behaviours` entry (`Behaviours.expand`). Text keys and
+  facts are root and never checked.
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| A reference from area A to a non-room definition of area B | `SCHEMA_VIOLATION` | `<src>.<path to the ref>` (`areas/coop/reactions/crow_lands.on.npc`) | `{"why": "area_crossing", "target": "npcs/crow", "area": "rookery"}` |
+| `extends` or `behaviours[i]` naming a parent or behaviour of another area | `SCHEMA_VIOLATION` | `<src>.extends`, `<src>.behaviours[<i>]` | the same, `target` `items/pebble` or `behaviours/nibbles` |
+| An area (folder or bundle) with no room, counted after bundles open | `SCHEMA_VIOLATION` | `areas/<area>` | `{"why": "area_empty", "area": "<area>"}` |
+| An area folder name that is not a Key (lowercase snake_case) | `SCHEMA_VIOLATION` | `"areas/<Name>"` (quoted: the name is no key) | `{"why": "area_name"}` |
+| An unknown folder in an area, a deeper folder, or a `.json` directly in `areas/<area>/` | `UNKNOWN_FIELD` | `areas/rookery/widgets/w` | `{}` |
+| One kind and key in two areas, or an area and the root | `DUPLICATE_DEFINITION` | each site | `{}` |
+
+A behaviour with no reactions copies nothing and is not checked. The rationale and the showcase
+migration are the [area layout design](../rnd/cartridge-area-layout-design-2026-11-04.md); the
+[Builders' Guide](../BUILDERS-GUIDE.md#cartridge-layout) is the author's view.
 
 **`extends`.** A file in a definition directory may hold `"extends": "<key>"`, the key of a
 definition of the same kind (the short-reference convention), in any file of that kind.

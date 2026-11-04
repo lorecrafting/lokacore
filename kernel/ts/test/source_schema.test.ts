@@ -2,7 +2,7 @@
 // every committed cartridge source file and refuse the shortcut mistakes an author makes.
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 import { test } from 'node:test';
 import Ajv2020 from 'ajv/dist/2020.js';
 
@@ -25,7 +25,11 @@ test('every committed cartridge source file validates against its kind schema', 
       if (entry === 'checkpoints') continue; // recorded walks, not compiled source
       const path = join(base, entry);
       const sources = statSync(path).isDirectory()
-        ? readdirSync(path).map((name) => [entry, join(path, name)])
+        ? // areas/<area>/<dir>/<file> takes the schema of <dir>; areas/<area>.json is an `areas` bundle
+          readdirSync(path, { recursive: true, encoding: 'utf8' }).map((name) => [
+            name.split(sep).at(-2) ?? entry,
+            join(path, name),
+          ])
         : [[entry.replace(/\.json$/, ''), path]];
       for (const [kind, file] of sources.filter(([, file]) => file.endsWith('.json'))) {
         count += 1;

@@ -6,7 +6,7 @@ defmodule Loka.Content.Extends do
   merge (docs/system/cartridge.md, Source shortcuts).
   """
 
-  alias Loka.Content.{Params, Source}
+  alias Loka.Content.{Areas, Params, Source}
 
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
   @type entry :: {String.t(), term(), term()}
@@ -65,7 +65,11 @@ defmodule Loka.Content.Extends do
   defp own({at, %{"extends" => parent} = value}, {kind, _} = id, stack, {index, _} = ctx, acc)
        when is_map_key(index, {kind, parent}) do
     {up_at, _} = index[{kind, parent}]
-    inherit(at, up_at, value, resolve({kind, parent}, [id | stack], ctx, acc))
+
+    case crossing(kind, at, up_at, parent) do
+      [] -> inherit(at, up_at, value, resolve({kind, parent}, [id | stack], ctx, acc))
+      faults -> refuse(acc, faults)
+    end
   end
 
   defp own({at, %{"extends" => parent}}, _, _, {_, files}, acc) when is_binary(parent) do
@@ -83,6 +87,13 @@ defmodule Loka.Content.Extends do
       ])
 
   defp own({_, value}, _, _, _, acc), do: {{:ok, value}, acc}
+
+  # A child may extend a parent in its own area or the root; a room may extend any room.
+  defp crossing(kind, at, up_at, parent) do
+    area = kind != :room && Areas.crossed(elem(at, 0), elem(up_at, 0))
+    data = %{"why" => "area_crossing", "target" => dir(up_at) <> "/" <> parent, "area" => area}
+    if is_binary(area), do: [{"SCHEMA_VIOLATION", under(at, ["extends"]), data, nil}], else: []
+  end
 
   # A refused `params` or a marker naming none of them refuses the declaring definition once.
   defp declared({at, %{"abstract" => true, "params" => params} = value}) do
@@ -123,7 +134,7 @@ defmodule Loka.Content.Extends do
 
   defp under({rel, steps}, more), do: {rel, steps ++ more}
 
-  defp dir({rel, []}), do: Path.dirname(rel)
+  defp dir({rel, []}), do: rel |> Path.dirname() |> Path.basename()
   defp dir({_, [dir, _]}), do: dir
 
   defp other_kind(files, key),
