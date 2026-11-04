@@ -9,9 +9,18 @@ import { useDry } from './press.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { unseen } from './lines.tsx';
 import { reasonSentence } from './reasons.ts';
+import { Ring } from './StatusIcon.tsx';
 import { radius, size, space, type } from './tokens.ts';
 
-type Refusal = { label: string; reason?: string; name?: string; link?: string; send?: () => void };
+export type Wait = { left: number; seconds: number }; // a countdown's whole seconds left, of its total
+type Refusal = {
+  label: string;
+  reason?: string;
+  name?: string;
+  link?: string;
+  send?: () => void;
+  wait?: Wait;
+};
 
 export const card = (c: ReturnType<typeof usePalette>, grayed = false) => ({
   backgroundColor: grayed ? c.bg : c.card,
@@ -53,7 +62,7 @@ export const linked = (label: string, link: string) => {
  */
 export function Unavailable(p: Refusal) {
   const c = usePalette();
-  const sentence = reasonSentence(p.reason);
+  const sentence = p.wait ? '' : reasonSentence(p.reason); // a wait reads no sentence
   const [pressed, setPressed] = useState<string>();
   const shown = `${p.label}\n${sentence}`;
   const grayed = pressed === shown;
@@ -61,13 +70,13 @@ export function Unavailable(p: Refusal) {
   const a11y = (grayed && sentence ? shown : p.label) + (p.name ?? p.label).slice(p.label.length);
   const hint = grayed ? '' : sentence;
   const press = () => {
-    setPressed(shown);
+    if (!p.wait) setPressed(shown);
     haptic('warning');
     if (p.send) p.send();
     else if (sentence) AccessibilityInfo.announceForAccessibility(sentence);
   };
   const reason = grayed ? sentence : '';
-  const body = <RefusedBody grayed={grayed} label={label} reason={reason} />;
+  const body = <Waiting wait={p.wait} grayed={grayed} label={label} reason={reason} />;
   return (
     <View>
       {p.link ? (
@@ -78,6 +87,7 @@ export function Unavailable(p: Refusal) {
         <Pressable
           accessibilityLabel={a11y}
           {...refusedProps(hint)}
+          accessibilityValue={p.wait && { min: 0, max: p.wait.seconds, now: p.wait.left }}
           onPress={press}
           style={card(c, grayed)}
         >
@@ -94,6 +104,17 @@ const SaidReason = ({ children }: { children: string | null }) => (
     {children ? <Text>{children}</Text> : null}
   </View>
 );
+
+// A wait's body has its countdown ring before the label (book-ui.md, Spirit state).
+function Waiting({ wait, ...body }: { wait?: Wait } & Parameters<typeof RefusedBody>[0]) {
+  if (!wait) return <RefusedBody {...body} />;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+      <Ring fraction={wait.left / wait.seconds} locked={false} />
+      <RefusedBody {...body} />
+    </View>
+  );
+}
 
 function RefusedBody(p: { grayed: boolean; label: ReactNode; reason: string }) {
   const [c, t] = [usePalette(), useType()];

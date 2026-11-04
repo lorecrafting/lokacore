@@ -192,7 +192,7 @@ export const turns = (deg: number) => {
   return { right: Math.min(deg, 180) - 180, left: Math.max(deg - 180, 0) };
 };
 
-function Ring(p: { fraction: number; locked: boolean; children: ReactNode }) {
+export function Ring(p: { fraction: number; locked: boolean; children?: ReactNode }) {
   const c = usePalette();
   const deg = 360 * p.fraction;
   const reduced = useReducedMotion();

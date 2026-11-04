@@ -2,7 +2,7 @@
 import { Children, type ReactNode, type Ref, useContext, useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
-import { card, linked, Unavailable } from './Unavailable.tsx';
+import { card, linked, Unavailable, type Wait } from './Unavailable.tsx';
 import { InkText, LiftPressable } from './fade.ts';
 import { haptic } from './haptic';
 import { Tap } from './pages.tsx';
@@ -28,7 +28,7 @@ type CardProps = (
       asked?: boolean;
     }
   | { label: string; onPress: () => void; expanded?: boolean }
-  | { label: string; reason?: string; name?: string; link?: string }
+  | { label: string; reason?: string; name?: string; link?: string; wait?: Wait }
 ) & { ref?: Ref<View> };
 /**
  * An offered action as a card.
@@ -47,7 +47,8 @@ type CardProps = (
  *   sentence with no card. Shop lines stack in `Cards lines`. Stories: NpcPage (Shelf, Sale, Services).
  * - States: available; asked (a dialogue choice already taken: dim italic words, named with ASKED, still pressable); unavailable; unavailable, pressed; each as a card or a line.
  * - Effects: a card lifts with a selection haptic; an unavailable press does not lift, its reason
- *   dries and it gives a warning haptic.
+ *   dries and it gives a warning haptic. With `wait` (the rise card, book-ui.md, Spirit state) it has
+ *   no reason: a countdown ring leads its label, its value the whole seconds left.
  * - Story: ActionCard.stories.tsx
  */
 export function ActionCard(p: CardProps) {

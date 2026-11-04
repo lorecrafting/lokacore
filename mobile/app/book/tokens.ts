@@ -58,6 +58,8 @@ const dusk: typeof light = {
 
 export const color = { light, dawn, dusk, dark };
 
+export const spirit = { day: '#c8dcf6', night: '#0b1e45' }; // the spirit state's layer: day on light and dawn, night on dusk and dark
+
 // The night sky's star and shooting-star colour (the mock's meteor, rgba(255,255,245)).
 export const nightSky = { star: '#fffff5' };
 
@@ -134,6 +136,7 @@ export const opacity = {
   fatal: 0.075, // the fatal blow's held red: the most light's dim and warning bear at 4.5:1 -- mutate-skip: uncalibrated design value
   bloodshot: 1, // the fatal hold's edges at the screen's rim, feathered in over size.bloodshot -- mutate-skip: uncalibrated design value
   glow: 0.08, // the lamp at the page's hip, at its peak; 4.5:1 holds -- mutate-skip: uncalibrated design value
+  spirit: 0.6, // the spirit layer, held; every text role keeps 4.5:1
 };
 
 // Book motion. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion. `duration` and

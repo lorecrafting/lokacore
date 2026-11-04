@@ -1,17 +1,19 @@
 // The under-ink layers' contract: one at a time, and every text role still reads over each.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { heldLayer, lampLit, lowHealth } from './heldLayer.ts';
+import { heldLayer, lampLit, lowHealth, spiritInk } from './heldLayer.ts';
 import { contrast, mixInk, washInk } from './palette.ts';
 import { color, opacity, size, space } from './tokens.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
-// Breaks: two layers at once, or the order inverted, so a lamp hides the fatal hold.
+// Breaks: two layers at once, or the order inverted, so a lamp hides the fatal hold or the spirit
+// blue shows under a glow (book-ui.md, Spirit state).
 test('one held layer, highest first', () => {
-  assert.equal(heldLayer({ fatal: true, low: true, lit: true }), 'fatal');
-  assert.equal(heldLayer({ fatal: false, low: true, lit: true }), 'vignette');
-  assert.equal(heldLayer({ fatal: false, low: false, lit: true }), 'glow');
-  assert.equal(heldLayer({ fatal: false, low: false, lit: false }), undefined);
+  assert.equal(heldLayer({ spirit: true, fatal: false, low: true, lit: true }), 'spirit');
+  assert.equal(heldLayer({ spirit: false, fatal: true, low: true, lit: true }), 'fatal');
+  assert.equal(heldLayer({ spirit: false, fatal: false, low: true, lit: true }), 'vignette');
+  assert.equal(heldLayer({ spirit: false, fatal: false, low: false, lit: true }), 'glow');
+  assert.equal(heldLayer({ spirit: false, fatal: false, low: false, lit: false }), undefined);
 });
 
 // Breaks: a token raised past what the ink can bear (book-ui.md's 4.5:1 at the layer's peak).
@@ -22,6 +24,7 @@ test('every text role holds 4.5:1 over every under-ink layer at its peak', () =>
       ['fatal', washInk(p), opacity.fatal],
       ['vignette', p.fg, opacity.faint],
       ['dream', color.dusk.bg, opacity.faint],
+      ['spirit', spiritInk(p.bg), opacity.spirit], // and its colour by the paper's polarity
     ];
     if (name === 'dusk' || name === 'dark') layers.push(['glow', color.dark.action, opacity.glow]);
     for (const [layer, ink, peak] of layers)

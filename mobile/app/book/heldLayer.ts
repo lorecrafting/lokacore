@@ -1,12 +1,21 @@
 // Which under-ink layer shows (book-ui.md, Room page anatomy): one at a time, highest first;
 // together they would break the 4.5:1 rule (BOOK-UI-COMPONENTS.md#design-tokens).
 import type { GameView } from '../../packages/game-view/session.ts';
-import { color, motion } from './tokens.ts';
+import { color, motion, spirit } from './tokens.ts';
 
-export type HeldLayer = 'fatal' | 'vignette' | 'glow' | undefined;
+export type HeldLayer = 'spirit' | 'fatal' | 'vignette' | 'glow' | undefined;
 
-export const heldLayer = (f: { fatal: boolean; low: boolean; lit: boolean }): HeldLayer =>
-  f.fatal ? 'fatal' : f.low ? 'vignette' : f.lit ? 'glow' : undefined;
+export const heldLayer = (f: {
+  spirit: boolean;
+  fatal: boolean;
+  low: boolean;
+  lit: boolean;
+}): HeldLayer =>
+  f.spirit ? 'spirit' : f.fatal ? 'fatal' : f.low ? 'vignette' : f.lit ? 'glow' : undefined;
+
+/** The spirit layer's colour on this paper: deep on the dark palettes, as the blow wash splits. */
+export const spiritInk = (paper: string) =>
+  paper === color.dusk.bg || paper === color.dark.bg ? spirit.night : spirit.day;
 
 const cutters = new Set<() => void>();
 /** Storm's light fell: the held layer leaves for the strike, so the afterimage's exemption stays true. */
