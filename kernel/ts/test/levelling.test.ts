@@ -653,6 +653,6 @@ test('level lines move up only for an answered level of the actor; a penalty lin
     expected: { experience: 50, allocated: {} },
     value: { experience: 45, allocated: {} },
   };
-  const own = [{ key: 'tick' }, { key: 'died' }] as Text[];
-  assert.deepEqual(closing(dying, w.character, [fall], [], own, 0), [...own, { key: 'lost' }]);
+  const p = { events: [], narration: [{ key: 'tick' }, { key: 'died' }] as Text[], levelAt: 0 };
+  assert.deepEqual(closing(dying, w.character, [fall], p), [...p.narration, { key: 'lost' }]);
 });

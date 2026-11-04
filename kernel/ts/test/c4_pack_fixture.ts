@@ -66,7 +66,7 @@ export const h1 = spawned(plain, 1);
 export const h2 = spawned(plain, 2);
 export const home = plain.roomIds[`${prefix}:room/goblin_pit`] as never;
 export const nest = plain.roomIds[`${prefix}:room/drill_yard`] as never;
-export const shrine = plain.roomIds[`${prefix}:room/crossroads_inn`] as never;
+export const shrine = plain.roomIds[`${prefix}:room/wayside_shrine`] as never;
 
 export function fixture(start?: number, wander_interval?: number) {
   const w = genesis(undefined, start, wander_interval);

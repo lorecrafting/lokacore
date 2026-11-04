@@ -1038,6 +1038,15 @@ the schema refuses the bounds and any other field. `cartridges/penalty_sampler` 
 (`lib/loka/content/death.ex`) refuses an unknown key (UNRESOLVED_REFERENCE at `world.death.narration.<field>`); the schema refuses any other field. The toolbox showcase declares
 `woke`.
 
+### Revival declarations
+
+[Revival](mechanics.md#death1--corpse-custody-and-same-body-return-m5-b-foundation) reads the
+optional `world.death.revival` (`Revival`, Beads `loka-kgd.206`): `lines`, 1 to 16 TextKeys
+shown in order, and `seconds`, an integer from 1 to 600 over which a client shows them. The
+cartridge owns both. The compiler (`lib/loka/content/death.ex`) refuses a line missing from
+text (UNRESOLVED_REFERENCE at `world.death.revival.lines[<index>]`); the schema refuses any
+other field and the bounds. The toolbox showcase declares five lines over 10 seconds.
+
 ### Corpse decay declarations
 
 [Corpse decay](mechanics.md#death1--corpse-custody-and-same-body-return-m5-b-foundation) reads

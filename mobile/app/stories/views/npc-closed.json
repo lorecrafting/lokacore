@@ -101,12 +101,12 @@
   },
   "known_npcs": [
    {
-    "id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7",
-    "name": "npc.wat.short"
+    "id": "1ff34115-09bf-88cc-94fc-be3e623e9a19",
+    "name": "npc.hob.short"
    },
    {
-    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
-    "name": "npc.hob.short"
+    "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763",
+    "name": "npc.wat.short"
    }
   ],
   "levelling": {
@@ -445,7 +445,7 @@
   ],
   "entities": [
    {
-    "id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7",
+    "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763",
     "name": "npc.wat.short",
     "words": {
      "bare": "npc.wat.bare"
@@ -486,7 +486,7 @@
     "band": "ready"
    },
    {
-    "id": "3b4da12e-4604-8c79-b8c2-2d3f1db2681c",
+    "id": "16c513e4-940c-8c24-9a21-94f7e33adc7d",
     "name": "item.hut_loaf.short",
     "words": {
      "article": "a",
@@ -511,7 +511,7 @@
     ]
    },
    {
-    "id": "08b595bc-213e-89d1-a063-08f39c5187b3",
+    "id": "c05ae6b4-6a5c-8cc0-a18c-1cd559a2812d",
     "name": "item.trough_skin.short",
     "words": {
      "article": "a",
@@ -665,12 +665,22 @@
     "band": "quenched",
     "tone": "normal"
    }
-  ]
+  ],
+  "revival": {
+   "lines": [
+    "death.revival.1",
+    "death.revival.2",
+    "death.revival.3",
+    "death.revival.4",
+    "death.revival.5"
+   ],
+   "seconds": 10
+  }
  },
  "stack": [
   {
    "kind": "thing",
-   "id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7"
+   "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763"
   }
  ],
  "log": [

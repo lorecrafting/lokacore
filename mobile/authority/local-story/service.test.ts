@@ -343,9 +343,37 @@ test('same-body fatal return reopens the paid room, meal and ale truth', (t) => 
   b.reopen();
   const w = b.story.world();
   assert.equal(w.body, b.initial.body);
-  assert.equal(w.state.containers[w.body], b.initial.roomIds[`${prefix}:room/crossroads_inn`]);
+  assert.equal(w.state.containers[w.body], b.initial.roomIds[`${prefix}:room/wayside_shrine`]);
   assert.deepEqual(amounts(w), [14, 16]);
   assert.equal(stock(w), 3);
   assert.equal(ale(w).quantity, 3);
   assert.ok(Object.values(w.entities).some((e) => e.kind === 'item' && e.key === 'player_corpse'));
+});
+
+// Breaks (loka-kgd.206): the keeper's greeting is told before the waking line, so the Book's
+// arrival split leaves it on the boar's fight page instead of the shrine's room log.
+test('a fatal blow opens the shrine log at the waking line, the keeper after it', (t) => {
+  const b = setup(':memory:', (c) => {
+    c.resources[`${prefix}:resource/hp`].start = 1;
+    c.npcs[`${prefix}:npc/boar`].attack = { chance: 100, damage_min: 2, damage_max: 2 };
+    c.npcs[`${prefix}:npc/boar`].room.key = 'farm_kitchen';
+  });
+  t.after(() => b.sql.close());
+  const attack = b.story.invoke({
+    invocation_id: 'ffffffff-0000-4000-8000-0000000000a1',
+    actor_id: b.initial.character,
+    action_key: 'attack',
+    target_ids: [entity(b.initial, 'npc', 'boar')],
+    input: {},
+  });
+  assert.equal(attack.kind, 'saved');
+  const told = b.story.narration()!;
+  const keys = told.lines.map((l) => l.key);
+  assert.ok(told.died);
+  // The fight page keeps the lines before `arrival`; the shrine's log opens at it.
+  assert.deepEqual(keys.slice(told.arrival! - 1), [
+    'combat.player_died',
+    'death.woke',
+    'npc.keeper.revived_1',
+  ]);
 });

@@ -39,7 +39,7 @@ of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-
   tags, description_variant, variety, knowledge, scripted_action, check, skills, attributes, liquid,
   readable, topics, quest, dialogue, scene, barrier, death, position, commerce, behavior
   (schedules) and combat (the Warden's `attack` and `engage`); the compiler names any missing one).
-- `entry`: `crossroads_inn`; `world.death.shrine`: `crossroads_inn`.
+- `entry`: `crossroads_inn`; `world.death.shrine`: `wayside_shrine` (loka-kgd.206; up from `shore_steps`).
 - `time_policy`: `real_elapsed`, rate 50, `recap_after_minutes` 30 (slice B adds the field;
   `recap_sampler/cartridge.json`).
 - `calendar`: start 25200 (07:00 day 1), 3600 units per hour, 24 hours, 4 subdivisions;
@@ -66,7 +66,7 @@ of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-
 
 ## Hub: the Crossroads Inn (slice A)
 
-One room, `crossroads_inn`, the entry and the death shrine. Exits: north `fell_gate` (body), east
+One room, `crossroads_inn`, the entry (the death shrine is `wayside_shrine`, loka-kgd.206). Exits: north `fell_gate` (body), east
 `shore_steps` (world); slice B adds south `village_green` (social) when that room exists, so
 slice A builds alone; west is reserved for the combat district (no exit yet; the sign says so).
 
@@ -184,7 +184,7 @@ Rows: 10, 11, 30, 31, W6, W7.
 
 | Room | Tags | Exits | Holds |
 |---|---|---|---|
-| `shore_steps` (sign; the shingle) | none (no world room is `exposed`, so the body's `clock_hour` drains never land here) | west `crossroads_inn`, north `cliff_path`, east `sea_cave` through barrier `tidegate`, south `tide_pools` | detail `sign_world`; `net` (item, `description_variants` on `sky {weather: rain}`: "sodden"); detail `horizon` |
+| `shore_steps` (sign; the shingle) | none (no world room is `exposed`, so the body's `clock_hour` drains never land here) | west `crossroads_inn`, north `cliff_path`, east `sea_cave` through barrier `tidegate`, south `tide_pools`, up `wayside_shrine` (the death shrine; the keeper NPC) | detail `sign_world`; `net` (item, `description_variants` on `sky {weather: rain}`: "sodden"); detail `horizon` |
 | `cliff_path` | none | south `shore_steps`, north `cliff_top` | **Idony** |
 | `cliff_top` | none | south `cliff_path`, down `smugglers_stair` (climb face `{item: rope, damage: 3, fell}`), east `tide_pools` through barrier `moon_door` | `rope` |
 | `smugglers_stair` | none | up `cliff_top` (plain), down `sea_cave` (plain) | nothing |

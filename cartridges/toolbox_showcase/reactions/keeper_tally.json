@@ -1,0 +1,19 @@
+{
+  "on": {
+    "event": "entity_died"
+  },
+  "when": {
+    "op": "resource_compare",
+    "resource": "hp",
+    "subject": "subject",
+    "at_least": 1
+  },
+  "steps": [
+    {
+      "op": "fact.adjust",
+      "fact": "keeper_greeted",
+      "amount": 1
+    }
+  ],
+  "silent": true
+}

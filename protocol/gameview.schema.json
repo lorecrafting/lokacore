@@ -1527,6 +1527,10 @@
           },
           "minItems": 1,
           "description": "Sense cues reaching the actor's room (toolbox row G6), nearest first, then by direction and text; absent when none."
+        },
+        "revival": {
+          "$ref": "cartridge.schema.json#/$defs/Revival",
+          "description": "loka-kgd.206 (death@1): the cartridge's world.death.revival, present exactly when it is authored. Nothing is stored: a client plays it when a receipt tells the player's own death."
         }
       },
       "required": [

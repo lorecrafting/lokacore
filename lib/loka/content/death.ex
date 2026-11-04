@@ -30,7 +30,8 @@ defmodule Loka.Content.Death do
         do:
           settings(m, defs, death) ++
             penalty(death["penalty"], settings, v2) ++
-            narration(death["narration"], v2) ++ decay(m, death),
+            narration(death["narration"], v2) ++
+            revival(death["revival"], v2) ++ decay(m, death),
         else: []
       )
   end
@@ -42,6 +43,15 @@ defmodule Loka.Content.Death do
     for {field, key} <- words,
         text != :unknown and not is_map_key(text, key),
         do: diag("UNRESOLVED_REFERENCE", "cartridge.world.death.narration." <> field)
+  end
+
+  # loka-kgd.206: every revival line resolves in text.
+  defp revival(nil, _), do: []
+
+  defp revival(%{"lines" => lines}, {_, text}) do
+    for {key, i} <- Enum.with_index(lines),
+        text != :unknown and not is_map_key(text, key),
+        do: diag("UNRESOLVED_REFERENCE", "cartridge.world.death.revival.lines[#{i}]")
   end
 
   # Corpse decay (owner decision 2026-11-02): a job whose sink is food@1's consumed holder.

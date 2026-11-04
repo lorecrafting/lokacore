@@ -1187,6 +1187,7 @@
           ],
           "type": "object"
         },
+        "revival": { "$ref": "#/$defs/Revival" },
         "shrine": {
           "$ref": "#/$defs/DefinitionRef",
           "description": "The room a dead player's body returns to."
@@ -3439,6 +3440,30 @@
         "entitlement",
         "credit",
         "quest"
+      ],
+      "type": "object"
+    },
+    "Revival": {
+      "additionalProperties": false,
+      "description": "loka-kgd.206: what a client shows a player between death and waking: the lines in order, over seconds of wall-clock time. Presentation only; the kernel restores the body at once and exposes this as GameView.revival.",
+      "properties": {
+        "lines": {
+          "description": "The revival lines, shown in order.",
+          "items": { "$ref": "#/$defs/TextKey" },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        },
+        "seconds": {
+          "description": "How long the client takes to show every line.",
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lines",
+        "seconds"
       ],
       "type": "object"
     },

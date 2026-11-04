@@ -15,6 +15,9 @@
     },
     "south": {
       "to": "tide_pools"
+    },
+    "up": {
+      "to": "wayside_shrine"
     }
   },
   "details": {
