@@ -1758,6 +1758,30 @@
         }
       ]
     },
+    "Revival": {
+      "type": "object",
+      "description": "loka-kgd.206: what a client shows a player between death and waking: the lines in order, over seconds of wall-clock time. Presentation only; the kernel restores the body at once and exposes this as GameView.revival.",
+      "properties": {
+        "lines": {"description":"The revival lines, shown in order.",
+          "type": "array",
+          "items": {
+            "$ref": "text.schema.json#/$defs/TextKey"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "seconds": {"description":"How long the client takes to show every line.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600
+        }
+      },
+      "required": [
+        "lines",
+        "seconds"
+      ],
+      "additionalProperties": false
+    },
     "DeathSettings": {
       "type": "object",
       "properties": {
@@ -1839,6 +1863,9 @@
             }
           },
           "additionalProperties": false
+        },
+        "revival": {
+          "$ref": "#/$defs/Revival"
         }
       },
       "required": [

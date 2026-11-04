@@ -71,11 +71,11 @@
   },
   "known_npcs": [
    {
-    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+    "id": "1ff34115-09bf-88cc-94fc-be3e623e9a19",
     "name": "npc.hob.short"
    },
    {
-    "id": "c735ddfb-fc9d-866a-b5e0-1feb5a516bf6",
+    "id": "f3de2a43-417f-8e67-86d1-a375231e01ed",
     "name": "npc.hedge_wizard.short"
    }
   ],
@@ -292,17 +292,17 @@
      "title": "room.crossroads_inn.title",
      "entities": [
       {
-       "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+       "id": "1ff34115-09bf-88cc-94fc-be3e623e9a19",
        "name": "npc.hob.short",
        "kind": "npc"
       },
       {
-       "id": "fe91520e-73f4-8409-a933-1ef6d86a4055",
+       "id": "3dad0219-52f4-8518-ba70-74e427893bdd",
        "name": "item.loaf.short",
        "kind": "item"
       },
       {
-       "id": "90a83592-b743-8257-95a6-029721650767",
+       "id": "b0a6cc25-cd7d-89cb-b53c-e76053d751a9",
        "name": "item.waterskin.short",
        "kind": "item"
       }
@@ -317,7 +317,7 @@
      "title": "room.crypt_stair.title",
      "entities": [
       {
-       "id": "4b9d837b-76f4-8464-9b47-cb6d90b80c0c",
+       "id": "48c6f062-d9b1-8231-8f6d-d1a8dcded5ae",
        "name": "item.gate_winch.short",
        "kind": "item"
       }
@@ -332,7 +332,7 @@
      "title": "room.reading_room.title",
      "entities": [
       {
-       "id": "542dc207-7ae5-8fc4-8643-4854106d9e84",
+       "id": "4c2b24ad-1e89-8d16-9b4b-1fb2d613fb25",
        "name": "item.grimoire.short",
        "kind": "item"
       }
@@ -347,32 +347,32 @@
      "title": "room.loft_attic.title",
      "entities": [
       {
-       "id": "e26d5050-0ec1-8ec4-a164-209a07f75784",
+       "id": "10798f17-56fe-899f-b1f1-2165bc7aa94a",
        "name": "npc.attic_golem.short",
        "kind": "npc"
       },
       {
-       "id": "7aa6c88d-bb91-86bf-add6-146962885046",
+       "id": "2d75f5bd-a92e-8c56-97b0-652cdbf9ca62",
        "name": "npc.attic_wight.short",
        "kind": "npc"
       },
       {
-       "id": "48a8dc05-4012-86d8-9d24-e68f2d7317ac",
+       "id": "a1451e93-408d-8bbb-8485-a3c04b023270",
        "name": "item.attic_bucket.short",
        "kind": "item"
       },
       {
-       "id": "095f2582-fe61-8790-8a4d-01463a2975b7",
+       "id": "96959e17-0504-835b-8968-b091fda108b6",
        "name": "item.attic_jar.short",
        "kind": "item"
       },
       {
-       "id": "30c00822-6fb5-833d-a05e-7787134bea59",
+       "id": "88d0018b-7bfd-89be-aef9-dc1d36e5e929",
        "name": "item.attic_lantern.short",
        "kind": "item"
       },
       {
-       "id": "a1451e93-408d-8bbb-8485-a3c04b023270",
+       "id": "1e873355-97c2-8ceb-847d-f8b56e3b82f9",
        "name": "item.attic_torch.short",
        "kind": "item"
       }
@@ -387,22 +387,22 @@
      "title": "room.golem_yard.title",
      "entities": [
       {
-       "id": "f6fc60a2-0eb4-8a50-8ed8-38cd3dbd0f1a",
+       "id": "c735ddfb-fc9d-866a-b5e0-1feb5a516bf6",
        "name": "npc.golem.short",
        "kind": "npc"
       },
       {
-       "id": "5aab89ab-7313-80b2-abb0-ad9e96fc2474",
+       "id": "331fb134-17eb-866f-a2fa-57583b9ac017",
        "name": "item.rain_bucket.short",
        "kind": "item"
       },
       {
-       "id": "f23aacfa-2254-82e4-912e-5596b3720ce3",
+       "id": "a22f3ad4-3270-8dfd-926e-c809cd7c383a",
        "name": "item.spark_jar.short",
        "kind": "item"
       },
       {
-       "id": "970fabec-aff8-88eb-997d-2bb1de46190c",
+       "id": "ee26add7-1154-8f05-a4cc-6b10a26e9b8f",
        "name": "item.yard_torch.short",
        "kind": "item"
       }
@@ -453,7 +453,7 @@
     },
     "input": [],
     "target_ids": [
-     "5ce172d0-4fa9-8ded-bde5-0f32bc984fcc"
+     "f3c7442b-1155-8f9a-8482-3a4f621a90fd"
     ],
     "available": true
    },
@@ -518,7 +518,7 @@
   ],
   "notices": [
    {
-    "id": "699d2010-15a3-8a4a-936b-e8e55b4fa065",
+    "id": "5ce172d0-4fa9-8ded-bde5-0f32bc984fcc",
     "key": "hearth",
     "title": "detail.hearth.title",
     "description": "detail.hearth.description",
@@ -535,7 +535,7 @@
     ]
    },
    {
-    "id": "5ce172d0-4fa9-8ded-bde5-0f32bc984fcc",
+    "id": "f3c7442b-1155-8f9a-8482-3a4f621a90fd",
     "key": "sign_magic",
     "title": "detail.sign_magic.title",
     "description": "detail.sign_magic.description"
@@ -543,7 +543,7 @@
   ],
   "entities": [
    {
-    "id": "c735ddfb-fc9d-866a-b5e0-1feb5a516bf6",
+    "id": "f3de2a43-417f-8e67-86d1-a375231e01ed",
     "name": "npc.hedge_wizard.short",
     "words": {
      "article": "the",
@@ -581,7 +581,7 @@
     ],
     "contents": [
      {
-      "id": "16c513e4-940c-8c24-9a21-94f7e33adc7d",
+      "id": "fe91520e-73f4-8409-a933-1ef6d86a4055",
       "name": "item.lamp_oil.short",
       "words": {
        "article": "the",
@@ -608,12 +608,12 @@
        "capacity": 3600,
        "lit": false
       },
-      "container_id": "c735ddfb-fc9d-866a-b5e0-1feb5a516bf6"
+      "container_id": "f3de2a43-417f-8e67-86d1-a375231e01ed"
      }
     ]
    },
    {
-    "id": "f8598a43-4a6f-8277-b092-c4449c71d2e2",
+    "id": "5d0ee8a3-538e-860b-beed-a91c1c9fc9ca",
     "name": "item.lantern.short",
     "words": {
      "article": "the",
@@ -642,7 +642,7 @@
     }
    },
    {
-    "id": "5d0ee8a3-538e-860b-beed-a91c1c9fc9ca",
+    "id": "9a837e05-6320-8aeb-b91f-7e51d2f48fa7",
     "name": "item.loft_bucket.short",
     "words": {
      "article": "the",
@@ -678,7 +678,7 @@
     }
    },
    {
-    "id": "ed46889f-3b43-8c50-854e-eb0f678931e7",
+    "id": "286a9781-0c21-8be9-88f3-edf8d1a50c34",
     "name": "item.oilcan.short",
     "words": {
      "article": "the",
@@ -831,7 +831,17 @@
     "band": "quenched",
     "tone": "normal"
    }
-  ]
+  ],
+  "revival": {
+   "lines": [
+    "death.revival.1",
+    "death.revival.2",
+    "death.revival.3",
+    "death.revival.4",
+    "death.revival.5"
+   ],
+   "seconds": 10
+  }
  },
  "stack": [
   {

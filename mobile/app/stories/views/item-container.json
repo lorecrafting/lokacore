@@ -117,11 +117,11 @@
   },
   "known_npcs": [
    {
-    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+    "id": "1ff34115-09bf-88cc-94fc-be3e623e9a19",
     "name": "npc.hob.short"
    },
    {
-    "id": "d74bfe67-ee0c-839e-b5e1-ef2095ae3109",
+    "id": "676a7640-aee6-8d70-a326-ed19a6d9a130",
     "name": "npc.farmer.short"
    }
   ],
@@ -338,12 +338,12 @@
      "title": "room.pond.title",
      "entities": [
       {
-       "id": "cd96d994-df5b-8158-b798-019f0397c557",
+       "id": "bc13b805-57dc-8d94-86db-65d89f134ad4",
        "name": "item.pond_water.short",
        "kind": "item"
       },
       {
-       "id": "7b98f110-721a-8f0b-af5b-eb2bfa6721f6",
+       "id": "070b866b-771e-858a-bc9d-634eb4dbe1d0",
        "name": "item.rod.short",
        "kind": "item"
       }
@@ -367,7 +367,7 @@
      "title": "room.farm_kitchen.title",
      "entities": [
       {
-       "id": "00a60498-0ca6-8137-8172-7101d3767e0c",
+       "id": "d74bfe67-ee0c-839e-b5e1-ef2095ae3109",
        "name": "npc.cook.short",
        "kind": "npc"
       }
@@ -382,17 +382,17 @@
      "title": "room.glade.title",
      "entities": [
       {
-       "id": "a43af65e-41c7-895b-ac08-3360dac98cc2",
+       "id": "ca479bb2-783b-89b8-8948-2ebc1bd65d0e",
        "name": "item.pelt_01.short",
        "kind": "item"
       },
       {
-       "id": "bbcf44ff-8b4a-8113-88d7-fdf1821b0432",
+       "id": "cd96d994-df5b-8158-b798-019f0397c557",
        "name": "item.pelt_02.short",
        "kind": "item"
       },
       {
-       "id": "0b3ebcd4-4cc4-8913-aeb9-7e9def688005",
+       "id": "f4074819-6c28-8215-a5ce-4c303c2ba4b3",
        "name": "item.pelt_03.short",
        "kind": "item"
       }
@@ -493,7 +493,7 @@
   ],
   "entities": [
    {
-    "id": "d74bfe67-ee0c-839e-b5e1-ef2095ae3109",
+    "id": "676a7640-aee6-8d70-a326-ed19a6d9a130",
     "name": "npc.farmer.short",
     "words": {
      "article": "the",
@@ -586,7 +586,7 @@
         "quoted_price"
        ],
        "target_ids": [
-        "d74bfe67-ee0c-839e-b5e1-ef2095ae3109"
+        "676a7640-aee6-8d70-a326-ed19a6d9a130"
        ],
        "available": false,
        "reason": {
@@ -630,7 +630,7 @@
         "quoted_price"
        ],
        "target_ids": [
-        "d74bfe67-ee0c-839e-b5e1-ef2095ae3109"
+        "676a7640-aee6-8d70-a326-ed19a6d9a130"
        ],
        "available": true
       }
@@ -668,7 +668,7 @@
         "quoted_price"
        ],
        "target_ids": [
-        "d74bfe67-ee0c-839e-b5e1-ef2095ae3109"
+        "676a7640-aee6-8d70-a326-ed19a6d9a130"
        ],
        "available": true
       }
@@ -676,7 +676,7 @@
     ]
    },
    {
-    "id": "ce2487e6-4790-88cd-8d1e-cbe55fb6c6f1",
+    "id": "66998c23-25e1-8de8-8284-f78446a85745",
     "name": "item.dead_rat.short",
     "words": {
      "article": "a",
@@ -700,7 +700,7 @@
     ]
    },
    {
-    "id": "d24daef5-84db-8e1f-8947-a89fb421033a",
+    "id": "a6579cfe-0b81-8c71-af34-20947857b1f0",
     "name": "item.holding_apple.short",
     "words": {
      "article": "a",
@@ -724,7 +724,7 @@
     ]
    },
    {
-    "id": "ca479bb2-783b-89b8-8948-2ebc1bd65d0e",
+    "id": "84596f20-3ba6-865a-b243-8ccbae9fc4fb",
     "name": "item.plot.short",
     "words": {
      "article": "a",
@@ -751,7 +751,7 @@
     ]
    },
    {
-    "id": "a73c20e5-6215-859b-a573-fd34b4ffc92d",
+    "id": "4aca6f3f-73f0-8539-943c-7303d8236a8c",
     "name": "item.sack.short",
     "words": {
      "article": "a",
@@ -791,7 +791,7 @@
     ],
     "contents": [
      {
-      "id": "4aca6f3f-73f0-8539-943c-7303d8236a8c",
+      "id": "b72c7516-1060-84e4-8768-92ec2206cba3",
       "name": "item.seed_01.short",
       "words": {
        "article": "a",
@@ -813,12 +813,12 @@
         "input": []
        }
       ],
-      "container_id": "a73c20e5-6215-859b-a573-fd34b4ffc92d"
+      "container_id": "4aca6f3f-73f0-8539-943c-7303d8236a8c"
      }
     ]
    },
    {
-    "id": "7fe722a7-4730-80ff-afdf-8c18385f2ac0",
+    "id": "80dd2a25-dfa2-8e54-8b4b-c52d42f8e572",
     "name": "item.watering_can.short",
     "words": {
      "article": "a",
@@ -971,12 +971,22 @@
     "band": "quenched",
     "tone": "normal"
    }
-  ]
+  ],
+  "revival": {
+   "lines": [
+    "death.revival.1",
+    "death.revival.2",
+    "death.revival.3",
+    "death.revival.4",
+    "death.revival.5"
+   ],
+   "seconds": 10
+  }
  },
  "stack": [
   {
    "kind": "thing",
-   "id": "a73c20e5-6215-859b-a573-fd34b4ffc92d"
+   "id": "4aca6f3f-73f0-8539-943c-7303d8236a8c"
   }
  ],
  "log": [
@@ -984,7 +994,7 @@
   "You open the sack's tie.",
   "You take a turnip seed.",
   {
-   "quiet": "[\"item.put\",{\"item\":\"item.seed_01.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"4aca6f3f-73f0-8539-943c-7303d8236a8c\",\"a73c20e5-6215-859b-a573-fd34b4ffc92d\"],6]",
+   "quiet": "[\"item.put\",{\"item\":\"item.seed_01.short\",\"container\":\"item.sack.short\"},\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",[\"b72c7516-1060-84e4-8768-92ec2206cba3\",\"4aca6f3f-73f0-8539-943c-7303d8236a8c\"],6]",
    "plain": "You put a turnip seed in a seed sack.",
    "times": 1,
    "text": "You put a turnip seed in a seed sack."

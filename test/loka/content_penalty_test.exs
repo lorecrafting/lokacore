@@ -51,4 +51,13 @@ defmodule Loka.ContentPenaltyTest do
              ]
     end
   end
+
+  test "a revival line missing from text is refused at its index" do
+    dir = Loka.ContentSource.copy(@dir)
+    api = edit("cartridge.json", ["requires", "kernel_api", "at_least"], "1.153")
+    revival = %{"lines" => ["band.dying", "death.nope"], "seconds" => 10}
+    lines = edit("cartridge.json", ["world", "death", "revival"], revival)
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [api, lines])
+    assert pairs(diags) == [{"UNRESOLVED_REFERENCE", "cartridge.world.death.revival.lines[1]"}]
+  end
 end

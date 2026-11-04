@@ -276,7 +276,7 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   assert.equal(last.lines.filter((l) => l === 'combat.player_died').length, 1);
   assert.equal(last.lines.at(-1), 'death.woke');
   assert.equal(engaged(w, w.body), undefined);
-  assert.equal(where(w, w.body), room(w, 'crossroads_inn'));
+  assert.equal(where(w, w.body), room(w, 'wayside_shrine'));
   assert.deepEqual([pool(w, 'hp'), pool(w, 'mv')], [10, 100]);
   assert.deepEqual(conditions(w), [GORED]);
   assert.deepEqual(levelling(w), {
@@ -296,7 +296,7 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
 
 // Breaks: the owner cannot take back from the corpse, or the boar engages on entry.
 test('combat 7: back at the run, the corpse gives back the sword and the waterskin', () => {
-  w = go(go(w, 'west').world, 'north').world;
+  for (const way of ['down', 'west', 'west', 'north']) w = go(w, way).world;
   const corpse = corpseOf(w, w.body);
   w = take(take(w, 'training_sword'), 'waterskin');
   assert.deepEqual(inside(w, corpse), []);
@@ -350,8 +350,8 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
   // Breaks (loka-3w3q): a status tick that kills the player outside a fight writes no fall
   // line or no waking line, or writes them out of order.
   const fallen = wait(withHp(w, 1), start + 900);
-  assert.equal(where(fallen.world, fallen.world.body), room(w, 'crossroads_inn'));
-  assert.deepEqual(fallen.lines.slice(-3), [
+  assert.equal(where(fallen.world, fallen.world.body), room(w, 'wayside_shrine'));
+  assert.deepEqual(fallen.lines.filter((l) => !l.startsWith('npc.keeper.')).slice(-3), [
     'narration.bleeding.tick',
     'combat.player_died',
     'death.woke',

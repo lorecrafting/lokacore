@@ -1,0 +1,27 @@
+{
+  "on": {
+    "event": "entity_died"
+  },
+  "when": {
+    "op": "all",
+    "items": [
+      {
+        "op": "resource_compare",
+        "resource": "hp",
+        "subject": "subject",
+        "at_least": 1
+      },
+      {
+        "op": "fact_at_least",
+        "fact": "keeper_greeted",
+        "at_least": 3
+      }
+    ]
+  },
+  "steps": [
+    {
+      "op": "narrate",
+      "text": "npc.keeper.revived_4"
+    }
+  ]
+}

@@ -88,11 +88,11 @@
   },
   "known_npcs": [
    {
-    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
+    "id": "1ff34115-09bf-88cc-94fc-be3e623e9a19",
     "name": "npc.hob.short"
    },
    {
-    "id": "b887681c-2d13-8cab-a2e3-6b4388ee0dd9",
+    "id": "f6fc60a2-0eb4-8a50-8ed8-38cd3dbd0f1a",
     "name": "npc.fence.short"
    }
   ],
@@ -404,7 +404,7 @@
   ],
   "notices": [
    {
-    "id": "e89b9f79-f8a1-8062-a340-1996b92e8a39",
+    "id": "aa3ddc23-4cd4-8c1c-9619-627eca1fe15c",
     "key": "barrels",
     "title": "detail.barrels.title",
     "description": "detail.barrels",
@@ -423,7 +423,7 @@
   ],
   "entities": [
    {
-    "id": "b887681c-2d13-8cab-a2e3-6b4388ee0dd9",
+    "id": "f6fc60a2-0eb4-8a50-8ed8-38cd3dbd0f1a",
     "name": "npc.fence.short",
     "words": {
      "article": "the",
@@ -449,7 +449,7 @@
     ],
     "shop": [
      {
-      "item_id": "72a863ed-f50b-8d73-80a2-06a8371df0c3",
+      "item_id": "ecec7a97-7c7b-8d13-bb1f-3d1caf814abe",
       "name": "item.merchant_purse.short",
       "buy": {
        "price": 6,
@@ -463,7 +463,7 @@
       }
      },
      {
-      "item_id": "88d0018b-7bfd-89be-aef9-dc1d36e5e929",
+      "item_id": "cd9dd8af-8aeb-8c7b-b1e3-5a9699e2fe17",
       "name": "item.beeswax_candle.short",
       "buy": {
        "price": 4,
@@ -477,7 +477,7 @@
       }
      },
      {
-      "item_id": "9c71d3ac-0152-870d-ae3b-9fc5ae74e4fe",
+      "item_id": "7148406b-175b-84ac-9801-82e8b8d40d43",
       "name": "item.yard_purse.short",
       "buy": {
        "price": 6,
@@ -610,12 +610,22 @@
     "band": "quenched",
     "tone": "normal"
    }
-  ]
+  ],
+  "revival": {
+   "lines": [
+    "death.revival.1",
+    "death.revival.2",
+    "death.revival.3",
+    "death.revival.4",
+    "death.revival.5"
+   ],
+   "seconds": 10
+  }
  },
  "stack": [
   {
    "kind": "thing",
-   "id": "b887681c-2d13-8cab-a2e3-6b4388ee0dd9"
+   "id": "f6fc60a2-0eb4-8a50-8ed8-38cd3dbd0f1a"
   }
  ],
  "log": [

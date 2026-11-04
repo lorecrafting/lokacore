@@ -279,7 +279,7 @@
   "topics": [],
   "combat": {
    "encounter_id": "d8de6604-8212-8c0d-a187-64bf21f91e3c",
-   "opponent_id": "dae37be6-777f-8cc2-9150-358c305d326e",
+   "opponent_id": "7b72a594-271c-8c13-93f9-9268c2d98f40",
    "name": "npc.goblin.short",
    "words": {
     "article": "a",
@@ -289,7 +289,7 @@
    "band": "hurt",
    "active_opponents": [
     {
-     "id": "dae37be6-777f-8cc2-9150-358c305d326e",
+     "id": "7b72a594-271c-8c13-93f9-9268c2d98f40",
      "name": "npc.goblin.short",
      "words": {
       "article": "a",
@@ -299,7 +299,7 @@
      "band": "hurt"
     },
     {
-     "id": "fb3908f6-f602-82da-b5c6-e6ea6e1ed23b",
+     "id": "a66c4ee3-4fc3-8152-8184-34d87abeb9e7",
      "name": "npc.goblin.short",
      "words": {
       "article": "a",
@@ -328,12 +328,12 @@
      "title": "room.drill_yard.title",
      "entities": [
       {
-       "id": "385d5416-3de6-82e4-aae0-775164b045c2",
+       "id": "7aa6c88d-bb91-86bf-add6-146962885046",
        "name": "npc.aldous.short",
        "kind": "npc"
       },
       {
-       "id": "f4074819-6c28-8215-a5ce-4c303c2ba4b3",
+       "id": "5aab89ab-7313-80b2-abb0-ad9e96fc2474",
        "name": "item.poultice.short",
        "kind": "item"
       }
@@ -386,7 +386,7 @@
   ],
   "entities": [
    {
-    "id": "dae37be6-777f-8cc2-9150-358c305d326e",
+    "id": "7b72a594-271c-8c13-93f9-9268c2d98f40",
     "name": "npc.goblin.short",
     "words": {
      "article": "a",
@@ -415,7 +415,7 @@
     "band": "hurt",
     "contents": [
      {
-      "id": "7b72a594-271c-8c13-93f9-9268c2d98f40",
+      "id": "17f7ae44-cfca-8148-b5cc-da1c85a21aff",
       "name": "item.ear.short",
       "words": {
        "article": "a",
@@ -424,12 +424,12 @@
       "description": "item.ear.description",
       "kind": "item",
       "actions": [],
-      "container_id": "dae37be6-777f-8cc2-9150-358c305d326e"
+      "container_id": "7b72a594-271c-8c13-93f9-9268c2d98f40"
      }
     ]
    },
    {
-    "id": "fb3908f6-f602-82da-b5c6-e6ea6e1ed23b",
+    "id": "a66c4ee3-4fc3-8152-8184-34d87abeb9e7",
     "name": "npc.goblin.short",
     "words": {
      "article": "a",
@@ -455,7 +455,7 @@
     "band": "ready",
     "contents": [
      {
-      "id": "4916d02f-f380-82aa-aee6-f0aa54a79b29",
+      "id": "8bc14c30-ac5a-8b04-babd-6081f039374f",
       "name": "item.ear.short",
       "words": {
        "article": "a",
@@ -464,7 +464,7 @@
       "description": "item.ear.description",
       "kind": "item",
       "actions": [],
-      "container_id": "fb3908f6-f602-82da-b5c6-e6ea6e1ed23b"
+      "container_id": "a66c4ee3-4fc3-8152-8184-34d87abeb9e7"
      }
     ]
    }
@@ -586,7 +586,17 @@
     "band": "quenched",
     "tone": "normal"
    }
-  ]
+  ],
+  "revival": {
+   "lines": [
+    "death.revival.1",
+    "death.revival.2",
+    "death.revival.3",
+    "death.revival.4",
+    "death.revival.5"
+   ],
+   "seconds": 10
+  }
  },
  "stack": [
   {

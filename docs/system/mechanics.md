@@ -837,6 +837,16 @@ no fare, gate traversal, clock jump or lineage/story reset. Position recovery se
 the old rate through the fatal clock, then switches to standing. HP/MV restore to the
 authored amounts (full pools discard remainder); MA and unrelated story state persist.
 
+Revival (loka-kgd.206): the optional `world.death.revival {lines, seconds}` is presentation
+only. The kernel restores the body at once, as above; the GameView carries the cartridge's
+revival as `revival`, present exactly when it is authored, and nothing is stored. A client
+plays the lines in order over `seconds` of wall-clock time when a receipt carries the
+player's own `entity_died`. Composition record: consumer the GameView; reads
+`world.death.revival`; writes, events, jobs and save rows: none; reused the death return
+above; new: the field and its view. A cartridge greets a return with existing reactions on
+`entity_died` (the showcase's shrine keeper: a player-scope fact tallies deaths, a
+`resource_compare` on the subject's hp skips NPC deaths). Installed kernel 1.153.
+
 Corpses are fixed room containers: Take/Drop/Give/Wear refuse the whole corpse even
 by raw ID. Contents of a player corpse are available only to its owner; NPC corpse
 contents are public. The shared custody walk and projection enforce the same boundary,

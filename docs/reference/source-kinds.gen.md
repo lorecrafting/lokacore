@@ -970,6 +970,7 @@ Fixed corpse templates, same-body return room and pool restoration; requires dea
 | restore | object | yes | The values the dead body's pools are set to. |
 | restore.hp | integer | yes | HP after death; capped at the body's HP maximum. |
 | restore.mv | integer | yes | Movement after death; capped at the body's movement maximum. |
+| revival | [Revival](source-kinds.gen.md#revival) |  | See the type. |
 | shrine | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room a dead player's body returns to. |
 
 ### DefinitionRef
@@ -1387,6 +1388,15 @@ Toolbox row G2 (docs/system/mechanics.md damage model): an NPC's percent resista
 A resource bound, value or amount: a 32-bit signed integer, so that every derived value (regeneration, costs, adjustments) stays exact in every kernel's arithmetic.
 
 Type: integer.
+
+### Revival
+
+loka-kgd.206: what a client shows a player between death and waking: the lines in order, over seconds of wall-clock time. Presentation only; the kernel restores the body at once and exposes this as GameView.revival.
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| lines | list of [TextKey](source-kinds.gen.md#textkey) | yes | The revival lines, shown in order. |
+| seconds | integer | yes | How long the client takes to show every line. |
 
 ### ScriptedTarget
 

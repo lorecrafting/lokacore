@@ -279,7 +279,7 @@
   "topics": [],
   "combat": {
    "encounter_id": "d8de6604-8212-8c0d-a187-64bf21f91e3c",
-   "opponent_id": "2d75f5bd-a92e-8c56-97b0-652cdbf9ca62",
+   "opponent_id": "b98193c5-44c9-8ea4-9b9d-600c2aa84ebb",
    "name": "npc.boar.short",
    "words": {
     "article": "the",
@@ -333,12 +333,12 @@
      "title": "room.drill_yard.title",
      "entities": [
       {
-       "id": "385d5416-3de6-82e4-aae0-775164b045c2",
+       "id": "7aa6c88d-bb91-86bf-add6-146962885046",
        "name": "npc.aldous.short",
        "kind": "npc"
       },
       {
-       "id": "f4074819-6c28-8215-a5ce-4c303c2ba4b3",
+       "id": "5aab89ab-7313-80b2-abb0-ad9e96fc2474",
        "name": "item.poultice.short",
        "kind": "item"
       }
@@ -391,7 +391,7 @@
   ],
   "entities": [
    {
-    "id": "2d75f5bd-a92e-8c56-97b0-652cdbf9ca62",
+    "id": "b98193c5-44c9-8ea4-9b9d-600c2aa84ebb",
     "name": "npc.boar.short",
     "words": {
      "article": "the",
@@ -403,7 +403,7 @@
     "band": "hurt",
     "contents": [
      {
-      "id": "84596f20-3ba6-865a-b243-8ccbae9fc4fb",
+      "id": "7b98f110-721a-8f0b-af5b-eb2bfa6721f6",
       "name": "item.purse.short",
       "words": {
        "article": "a",
@@ -413,10 +413,10 @@
       "description": "item.purse.description",
       "kind": "item",
       "actions": [],
-      "container_id": "2d75f5bd-a92e-8c56-97b0-652cdbf9ca62"
+      "container_id": "b98193c5-44c9-8ea4-9b9d-600c2aa84ebb"
      },
      {
-      "id": "bc3d071f-472b-8655-9e2d-d5d0fe2edc5c",
+      "id": "41059ffe-c281-86f7-bcac-57d83de4493b",
       "name": "item.tusk.short",
       "words": {
        "article": "a",
@@ -426,7 +426,7 @@
       "description": "item.tusk.description",
       "kind": "item",
       "actions": [],
-      "container_id": "2d75f5bd-a92e-8c56-97b0-652cdbf9ca62"
+      "container_id": "b98193c5-44c9-8ea4-9b9d-600c2aa84ebb"
      }
     ]
    }
@@ -548,7 +548,17 @@
     "band": "quenched",
     "tone": "normal"
    }
-  ]
+  ],
+  "revival": {
+   "lines": [
+    "death.revival.1",
+    "death.revival.2",
+    "death.revival.3",
+    "death.revival.4",
+    "death.revival.5"
+   ],
+   "seconds": 10
+  }
  },
  "stack": [
   {
