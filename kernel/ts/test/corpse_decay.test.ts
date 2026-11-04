@@ -150,7 +150,7 @@ test('a decay spills the corpse contents in EntityId order', () => {
     { ...world, state: { ...world.state, containers } } as World,
     id('ff') as JobId,
     jobOf(world, corpse)!,
-  ) as { delta: { ops: { op: string; entity_id?: string }[] } };
+  ) as unknown as { delta: { ops: { op: string; entity_id?: string }[] } };
   const moved = decided.delta.ops.filter((o) => o.op === 'entity.transfer').map((o) => o.entity_id);
   assert.deepEqual(moved, [id('0a'), id('0b'), id('0c'), corpse]);
 });
