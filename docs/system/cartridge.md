@@ -633,7 +633,7 @@ committed or checked in CI. Refs are DefinitionRefStrings.
   paying mechanic shows.
 - **Items.** `items.faucets`: `receive` (ref the dialogue, `choice`, `item` and `npc` its roles),
   `drop` (ref the NPC, `item`, `chance`). `items.sinks`: `hand_over` (ref the dialogue, `choice`,
-  `item` and `npc` its roles), `edible` (ref the item, `resource`, `amount`).
+  `item` and `npc` its roles), `edible` (ref the item, `resource` and `amount` when it restores).
 - **Ecology.** `populations`: each plan `{ref, home, area, cap, day_target, night_target,
   replacement_delay, chance?, npc, item?, corpse}`, `chance` only on an encounter plan; a replacement is the only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
   careful?}`: the count of its items, its tool's tag, its careful count.
@@ -1302,7 +1302,7 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 ## Need declarations
 
-[Hunger, thirst and dry days](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) add one field: a liquid's optional `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status), ended by a Drink of it. The compiler (`lib/loka/content/status.ex`) refuses an unresolved name (UNRESOLVED_REFERENCE at the entry). Needs themselves are [status declarations](#status-declarations) on cartridge pools. Sampler: `cartridges/needs_sampler`.
+[Hunger, thirst and dry days](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) add one field: a liquid's optional `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status), ended by a Drink of it. [Consume](mechanics.md#consume-loka-kgd209) adds the restore pair (`resource`, `amount`) and `applies` beside it, with an edible item's rules; an edible's `resource` and `amount` become optional (both or neither). The compiler (`lib/loka/content/status.ex`) refuses an unresolved name (UNRESOLVED_REFERENCE at the entry). Needs themselves are [status declarations](#status-declarations) on cartridge pools. Sampler: `cartridges/needs_sampler`.
 
 ## Dialogue check declarations
 

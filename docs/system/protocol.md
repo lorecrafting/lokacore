@@ -852,8 +852,8 @@ writer groups, checked arithmetic and query budgets apply.
 ### Liquid composition
 
 `liquid@1` owns only commands
-`fill {actor_id, source_id, vessel_id}`, `pour {actor_id, source_id, receiver_id}`
-and `drink {actor_id, vessel_id}`. Fill's source is a detail; Pour's source is an
+`fill {actor_id, source_id, vessel_id}` and `pour {actor_id, source_id, receiver_id}`;
+Drink is food@1's `consume {actor_id, item_id}` on a vessel ([Consume](mechanics.md#consume-loka-kgd209)), still answered `drank`. Fill's source is a detail; Pour's source is an
 item. ActionInvocation targets retain that exact ordered pair (or Drink's one
 item), with no player-supplied amount, kind or resource benefit. Projection and
 admission share current custody, reach, compatibility, capacity and load checks.
@@ -949,11 +949,11 @@ rewearing and no general remote Take. Malformed custody never creates an offer.
 ### Held-food composition
 
 **D4 consumed subset.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
-adds `food@1`, command payload `eat {actor_id: CharacterId, item_id: EntityId}`,
+adds `food@1`, command payload `consume {actor_id: CharacterId, item_id: EntityId}` (formerly `eat`; on a vessel it is Drink, [Consume](mechanics.md#consume-loka-kgd209)),
 accepted outcome `eaten` with the exact consumed `item_id: EntityId` in the accepted
 envelope (mandatory for this producer; receipt replay binds it), and immutable optional item metadata
-`edible {resource: DefinitionRef(resource), amount: positive safe integer,
-label: TextKey, narration: TextKey}`. The ActionSet key is `eat`, targeting one
+`edible {resource?: DefinitionRef(resource), amount?: positive safe integer (with `resource`),
+label: TextKey, narration: TextKey, cures?, applies?}`, at least one effect. The ActionSet key is `consume`, targeting one
 exact directly held edible item with no input. Its GameView inventory action
 uses the same pure keyed admission query as execution. Harvest remains the
 installed containment invocation; only its orchard label says Forage.
