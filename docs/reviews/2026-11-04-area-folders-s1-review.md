@@ -28,6 +28,7 @@
 - PR claim rerun:
   - A planted `{"bogus_field":1}` at `rooms_sampler/areas/plant/rooms/planted.json` turns `source_schema.test.ts` red.
   - With `recursive: true` removed, the same test is green (3/3).
+- Red control for the section 14 pin: an empty `cartridges/codex_sampler/areas/priory/` (codex has a reaction with `"zone": "priory"`) turns `content_area_folders_test.exs:164` red.
 - Probes, run in a scratch test and then removed:
   - `resource_sampler` and `identity_sampler` (a `.scene`, an npc and a room moved into an area) compile to the same bytes.
   - An `area` field gives `UNKNOWN_FIELD areas/r/rooms/roost.area`.
@@ -36,7 +37,7 @@
 
 ## Findings
 
-1. **Should-fix.** `docs/BUILDERS-GUIDE.md:84` quotes "`widgets` is not a field here" for an unknown folder, a deeper folder or a stray `.json`. The explain for `areas/r/widgets/w` actually reads "This file is in no folder the compiler reads. Move it into a kind's folder…". Only an `area` field gets "is not a field here". An author who searches the Guide for the message they were shown will not find it. Fix: split the row in two.
+1. **Should-fix.** `docs/BUILDERS-GUIDE.md:84` quotes "`widgets` is not a field here" for an unknown folder, a deeper folder or a stray `.json`. The explain for `areas/r/widgets/w`, `areas/r/rooms/x/y` and `areas/r/x`, all probed, actually reads "This file is in no folder the compiler reads. Move it into a kind's folder…". Only an `area` field gets "is not a field here". An author who searches the Guide for the message they were shown will not find it. Fix: split the row in two.
 2. **Nit.** The pin at `test/loka/content_area_folders_test.exs:164` covers every `cartridges/*`. In S2, valid content (a `"zone": "hollow"` reaction inside area `hollow`) turns it red, although that is the intended use. Narrow it to the cartridges that existed before area folders, or note it for S2.
 3. **Nit.** `docs/BUILDERS-GUIDE.md:76` and `docs/system/cartridge.md:340` say that a move leaves `content_hash` unchanged. That is false when the room moved is in, or leaves, an area that a reaction `zone` names, because the zone copies change. Add a one-clause qualifier.
 4. **Nit.** The room added to the bundle at `test/loka/content_scene_branching_test.exs:607`, and the size allowance raised from 653 to 654, are unneeded after the PM ruling. Revert them, as `content_bundles_test` was.
