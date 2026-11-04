@@ -1,3 +1,4 @@
+// size: allow 532, the combat district steps continue one world; the condition-order cases need its Gil and boar state
 // The combat district, the Drill Yard, step by step (docs/showcase/combat-district.md, "Guided loop
 // and expected outcomes"). Steps 1 to 8 continue one world (step 3's inn check is its own branch);
 // step 10 starts fresh in the social district and combat 11 and the tilt yard's pack in the hub.
@@ -149,6 +150,22 @@ test('combat 3: Shout a warning in the yard warns Gil; the inn offers no such ca
   );
 });
 
+// Breaks (loka-kgd.202, S1): the foe's condition line sits after the FIRST strike at it, so Gil's
+// later blow follows it. Hand-checked: unarmed, seed MISS: the player misses (player first), the
+// raider swings at the player, Gil hits once (raider 3 -> 2 of 3 hp, below the 75 cut, at the 50 cut).
+test('combat 3a: the raider condition follows Gil strike, the last at it, not the first', () => {
+  const bare = play(w, { type: 'remove', item_id: id(w, 'item', 'training_sword') }).world;
+  const r = fight(seeded(bare, MISS), 'raider');
+  assert.deepEqual(r.lines, [
+    'combat.player_miss',
+    'combat.npc_volley_all',
+    'combat.npc_hit_20',
+    'combat.ally_volley_one',
+    'combat.ally_hit_30',
+    'combat.condition_50',
+  ]);
+});
+
 // Breaks: Gil does not strike or his kill is not credited to the player, the death credit fact,
 // the bounty's resolve or its reward is missing from the elapsed round, or the level-up line is
 // missing, doubled or not last, or Aldous still offers the bounty once the raider is dead.
@@ -195,6 +212,21 @@ test('combat 5: Raise str spends the point', () => {
     level_up: LEVEL_UP,
   });
   assert.ok(!gameView(w).actions.some((a) => a.action_key === 'raise_attribute'));
+});
+
+// Breaks (loka-kgd.202, S1): when nothing strikes the foe and its blow kills the player, the foe's
+// condition line lands after the fall line (or after the first event) instead of before the death.
+// Hand-checked: foe first (FOE_FIRST), the player at 1 hp falls to the boar's first blow, so the
+// player never swings; the boar is untouched (condition_100).
+test('combat 6a: a fall with no strike at the boar puts its condition before the fall line', () => {
+  const boar = go(go(w, 'east').world, 'north').world;
+  const r = fight(seeded(withHp(boar, 1), FOE_FIRST), 'boar');
+  assert.deepEqual(r.lines.slice(0, 4), [
+    'combat.npc_volley_one',
+    'combat.npc_hit_10',
+    'combat.condition_100',
+    'combat.player_died',
+  ]);
 });
 
 // Breaks: the gore reaction or a status is missing, the boar's statuses land on the player twice, the
