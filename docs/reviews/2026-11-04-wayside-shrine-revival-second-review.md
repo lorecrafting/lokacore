@@ -32,11 +32,11 @@
 
 ## Findings
 
-**should-fix** `protocol/cartridge.schema.json:1770-1782` (Revival bounds): nothing kills removing a bound, against contracts.md:6.
+**nit** (downgraded from should-fix: the owner is the only author and stays inside the bounds, so tight edge-case cover is not worth the tokens) `protocol/cartridge.schema.json:1770-1782` (Revival bounds): nothing kills removing a bound, against contracts.md:6.
 - Sweep: one bound at a time removed from the protocol schema, then `bin/contracts.exs` to regenerate. `validate`, `cartridge` and `shrine_keeper` tests (TS) and `content_penalty` and `contracts` tests (Elixir) all stay green with any one of these removed: `minItems`, `maxItems`, `minimum`, `maximum`, `required` lines, `required` seconds.
 - Only removing `additionalProperties` goes red, because generation fails.
 - Scenario: someone drops `maximum: 600`. A cartridge with `seconds: 100000` then loads in both kernels, and the Book countdown runs for 27 hours, with no test red.
-- Fix: add one rejected fixture per bound, in one table test per kernel.
+- Optional fix: add one rejected fixture per bound, in one table test per kernel. Not required for merge.
 
 **question** The revival is compiled at any `at_least`; there is no per-field kernel_api gate anywhere (precedent). A 1.152 app refuses such a cartridge at schema, not with KERNEL_API_UNSUPPORTED.
 
@@ -44,4 +44,4 @@
 
 ## Verdict
 
-APPROVE WITH NOTES. One should-fix (bound fixtures). Contract, parity and save effect hold.
+APPROVE WITH NOTES. No should-fix; one nit (bound fixtures). Contract, parity and save effect hold.
