@@ -120,8 +120,9 @@ function useLayers(view: GameView, paper: string, spirit: boolean) {
  *   returns the same way. Storm's light cuts it for the strike; it returns over `motion.settle`.
  *   The glow flickers by `motion.flicker` away from an exposed room, steady under reduced motion.
  *   The spirit layer (`spirit`, book-ui.md Spirit state) is a flat wash in `spiritInk` at
- *   `opacity.spirit`, set as the page lands and fading out over `motion.palette` at the rise, in
- *   every mode; a plain view, so it draws on the web too.
+ *   `opacity.spirit`, set as the page lands in every mode and fading out at the rise over
+ *   `motion.palette` (`motion.fade` under reduced motion, still a fade; Flashes off the same); a
+ *   plain view, so it draws on the web too.
  * - States: none; glow (in `motion.palette`, by cut under reduced motion); vignette (breathes;
  *   steady at `opacity.faint` under reduced motion); under a fatal hold; spirit.
  * - Story: UnderInk.stories.tsx
