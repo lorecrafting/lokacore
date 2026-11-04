@@ -89,9 +89,15 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
     footer: () => draw().some((n) => n.type?.name === 'Footer'),
     said: () => draw().find((n) => n.type?.name === 'Heard').props.said.text as string,
     control: (shown: string | RegExp) => control(draw(), shown),
+    node: (match: (n: any) => boolean) => draw().find(match), // any node, a disabled one included
     tap: (shown: string | RegExp) => control(draw(), shown).props.onPress(),
     // `fight`: a line told before `line`, the room reached's arrival (loka-glj8).
-    publish: (next: GameView, line?: string, fight?: string) => {
+    publish: (
+      next: GameView,
+      line?: string,
+      fight?: string,
+      status: object = { kind: 'ready' },
+    ) => {
       current = next;
       revision++;
       if (line)
@@ -102,7 +108,7 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
           ...(fight && { arrival: 1 }),
           ...(line === 'combat.death' && { died: true }),
         } as never;
-      listener?.({ kind: 'state', projection: projection(), status: { kind: 'ready' } });
+      listener?.({ kind: 'state', projection: projection(), status } as never);
     },
     answer: (reply: any, next = current, line?: string, ambient?: string, arrival?: number) => {
       respond = () => {

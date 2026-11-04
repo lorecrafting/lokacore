@@ -59,11 +59,11 @@ export function letGo(s: Logs, text: (key: string) => string) {
   return true;
 }
 
-/** An update in the spirit state: its new lines held; an encounter, chapter or scene arriving ends it. */
+/** An update in the spirit state: its new lines held; a fault, or an encounter, chapter or scene arriving, ends it. */
 export function haunt(s: Logs, from: number, chapter: number | undefined) {
   s.spirit!.held.push(...since(s.log, from));
   const { combat, scene, chapter: now } = s.projection.view;
-  if (combat || scene || now?.index !== chapter) wake(s);
+  if (s.fault || combat || scene || now?.index !== chapter) wake(s);
 }
 
 /** The rise: the held lines logged, the rest of the revival dropped. */

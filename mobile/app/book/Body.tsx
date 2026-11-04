@@ -240,19 +240,25 @@ export function RoomPage(p: {
 }
 
 // The spirit state's one control: unavailable, its ring draining, until zero; then Rise, focus to
-// the title (book-ui.md, Spirit state). At zero the card is a new element: focus moves to it once.
+// the title (book-ui.md, Spirit state). At zero the card is a new element: focus held on the
+// waiting card moves to it once; focus elsewhere stays. A blur as the waiting card leaves is not a move.
 function Rise(p: { wait: Wait; rise: () => void }) {
   const title = useContext(titleContext);
-  const waited = useRef(false);
-  if (p.wait.left) waited.current = true;
+  const held = useRef(false);
+  const waiting = useRef(true);
+  waiting.current = p.wait.left > 0;
   const rise = () => (p.rise(), focusTitle(title.last));
   const ready = (card: View | null) => {
-    if (card && waited.current) ((waited.current = false), focusTitle(card as never));
+    if (card && held.current) ((held.current = false), focusTitle(card as never));
   };
   return (
     <View style={{ flexGrow: 1 }}>
       {p.wait.left ? (
-        <ActionCard label={LABEL.rise} wait={p.wait} />
+        <ActionCard
+          label={LABEL.rise}
+          wait={p.wait}
+          focus={(on) => void ((on || waiting.current) && (held.current = on))}
+        />
       ) : (
         <ActionCard label={LABEL.rise} onPress={rise} ref={ready} />
       )}

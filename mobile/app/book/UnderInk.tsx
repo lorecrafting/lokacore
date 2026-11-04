@@ -6,6 +6,7 @@ import { onCue } from './cues.ts';
 import {
   curveOf,
   Reanimated,
+  ReduceMotion,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -23,7 +24,7 @@ import {
   spiritInk,
   type HeldLayer,
 } from './heldLayer.ts';
-import { usePalette } from './palette.ts';
+import { usePalette, type Palette } from './palette.ts';
 import { color, motion, opacity } from './tokens.ts';
 
 const Gradient = lazy(() => import('./Gradient.tsx'));
@@ -74,7 +75,13 @@ function useCut() {
   return cut;
 }
 
-function useLayers(view: GameView, paper: string, spirit: boolean) {
+// Never: under reduced motion Reanimated would cut the rise; it is ruled a plain fade.
+const riseFade = (still: boolean) => ({
+  duration: (still ? motion.fade : motion.palette).duration,
+  reduceMotion: ReduceMotion.Never,
+});
+
+function useLayers(view: GameView, c: Palette, spirit: boolean) {
   const still = useReducedMotion();
   const [fatal, setFatal] = useState(false);
   useEffect(
@@ -84,14 +91,14 @@ function useLayers(view: GameView, paper: string, spirit: boolean) {
       }),
     [],
   );
-  const held = heldLayer({ spirit, fatal, low: lowHealth(view), lit: lampLit(view, paper) });
+  const held = heldLayer({ spirit, fatal, low: lowHealth(view), lit: lampLit(view, c.bg) });
   const glow = useSharedValue(shown === 'glow' && held === 'glow' ? opacity.glow : 0);
   const edge = useSharedValue(shown === 'vignette' && held === 'vignette' ? opacity.faint : 0);
   const ghost = useSharedValue(spirit ? opacity.spirit : 0); // set with the page turn, in every mode
   useEffect(() => {
     shown = held;
     if (held === 'spirit') ghost.value = opacity.spirit;
-    else if (ghost.value) ghost.value = withTiming(0, { duration: motion.palette.duration });
+    else if (ghost.value) ghost.value = withTiming(0, riseFade(still));
     glow.value = withTiming(held === 'glow' ? opacity.glow : 0, {
       duration: held === 'glow' ? motion.palette.duration : motion.settle.duration,
     });
@@ -108,7 +115,7 @@ function useLayers(view: GameView, paper: string, spirit: boolean) {
   const glowStyle = useAnimatedStyle(() => ({ opacity: glow.value * flick.value * cut.value }));
   const edgeStyle = useAnimatedStyle(() => ({ opacity: edge.value * cut.value }));
   const ghostStyle = useAnimatedStyle(() => ({ opacity: ghost.value }));
-  const spiritStyle = [{ backgroundColor: spiritInk(paper) }, ghostStyle];
+  const spiritStyle = [{ backgroundColor: spiritInk(c) }, ghostStyle];
   return { glowStyle, edgeStyle, spiritStyle };
 }
 
@@ -129,7 +136,7 @@ function useLayers(view: GameView, paper: string, spirit: boolean) {
  */
 export function UnderInk({ view, spirit = false }: { view: GameView; spirit?: boolean }) {
   const c = usePalette();
-  const { glowStyle, edgeStyle, spiritStyle } = useLayers(view, c.bg, spirit);
+  const { glowStyle, edgeStyle, spiritStyle } = useLayers(view, c, spirit);
   // Once drawn a layer stays, at no opacity, so it can fade out over the settle.
   const drawn = useRef({ lit: false, low: false, spirit: false }).current;
   drawn.lit ||= lampLit(view, c.bg);

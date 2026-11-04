@@ -28,7 +28,14 @@ type CardProps = (
       asked?: boolean;
     }
   | { label: string; onPress: () => void; expanded?: boolean }
-  | { label: string; reason?: string; name?: string; link?: string; wait?: Wait }
+  | {
+      label: string;
+      reason?: string;
+      name?: string;
+      link?: string;
+      wait?: Wait;
+      focus?: (on: boolean) => void;
+    }
 ) & { ref?: Ref<View> };
 /**
  * An offered action as a card.

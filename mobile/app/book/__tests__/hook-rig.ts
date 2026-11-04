@@ -10,7 +10,14 @@ export function effects(t: After, reduced = false) {
   g.sequences = [];
   g.bookDevice = [];
   t.after(() => {
-    g.reducedMotion = g.timings = g.delays = g.sequences = g.bookDevice = g.sharedSlot = undefined;
+    g.reducedMotion =
+      g.timings =
+      g.modes =
+      g.delays =
+      g.sequences =
+      g.bookDevice =
+      g.sharedSlot =
+        undefined;
   });
 }
 

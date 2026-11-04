@@ -72,7 +72,7 @@ export const mixInk = (a: string, b: string, t: number) => {
     .map((v, i) => hex(v + (y[i]! - v) * t))
     .join('')}`;
 };
-function mix(a: Palette, b: Palette, t: number): Palette {
+export function mix(a: Palette, b: Palette, t: number): Palette {
   const out = { ...b };
   for (const role of Object.keys(b) as (keyof Palette)[]) out[role] = mixInk(a[role], b[role], t);
   return out;

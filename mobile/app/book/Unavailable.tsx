@@ -21,6 +21,7 @@ type Refusal = {
   link?: string;
   send?: () => void;
   wait?: Wait;
+  focus?: (on: boolean) => void; // the waiting card's focus, kept across its turn to Rise
 };
 
 export const card = (c: ReturnType<typeof usePalette>, grayed = false) => ({
@@ -61,6 +62,10 @@ export const linked = (label: string, link: string) => {
  * - States: at rest; pressed, with its reason; dried reason; waiting (the rise card: its ring, no reason).
  * - Story: ActionCard.stories.tsx
  */
+// The web drops a button's value (react-native-web), so there the seconds left join its name.
+const waitName = (name: string, wait?: Wait) =>
+  wait && 'document' in globalThis ? `${name}, ${wait.left}` : name;
+
 export function Unavailable(p: Refusal) {
   const c = usePalette();
   const sentence = p.wait ? '' : reasonSentence(p.reason); // a wait reads no sentence
@@ -86,10 +91,12 @@ export function Unavailable(p: Refusal) {
         </Tap>
       ) : (
         <Pressable
-          accessibilityLabel={a11y}
+          accessibilityLabel={waitName(a11y, p.wait)}
           {...refusedProps(hint)}
           accessibilityValue={p.wait && { min: 0, max: p.wait.seconds, now: p.wait.left }}
           onPress={press}
+          onFocus={() => p.focus?.(true)}
+          onBlur={() => p.focus?.(false)}
           style={card(c, grayed)}
         >
           {body}

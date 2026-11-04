@@ -383,8 +383,8 @@ test('a flight into another fight opens the room log at its arrival line', () =>
 
 // Breaks (book-ui.md, Spirit state): Rise works before zero or comes on its own, the revival lines
 // lose their pace, the waking line shows (or is read) before the rise or out of order, focus is
-// lost as the card turns available, or an encounter, scene or chapter arriving leaves the spirit
-// state up.
+// pulled to the card at zero or lost from it, its seconds left missing on the web, catching up
+// draws the bottom row, or a fault, encounter, scene or chapter arriving leaves the spirit state up.
 test('a death with revival lands in the spirit state until Rise', () => {
   const clock = Date.now;
   let now = 0;
@@ -434,11 +434,19 @@ test('a death with revival lands in the spirit state until Rise', () => {
     assert.deepEqual(shown(h), ['Dark.', 'A bell.']);
     now = 9999;
     assert.throws(() => h.tap('Rise'));
+    h.node((n) => n.props?.accessibilityLabel === 'Rise').props.onFocus(); // the reader sits on the waiting card
+    (globalThis as any).document = {}; // on the web the seconds left are in its name
+    try {
+      assert.ok(h.node((n) => n.props?.accessibilityLabel === 'Rise, 1'));
+    } finally {
+      delete (globalThis as any).document;
+    }
     assert.deepEqual(shown(h), ['Dark.', 'A bell.']);
     now = 60_000; // no rise at zero
     assert.deepEqual(shown(h), ['Dark.', 'A bell.', 'Breath.']);
-    let focused = 0; // the card is new at zero: focus moves to it, once
-    [1, 2].forEach(() => h.control('Rise').props.ref({ focus: () => focused++ }));
+    let focused = 0; // the card is new at zero: focus held on it moves to it, once
+    const ready = (e: typeof h) => e.control('Rise').props.ref({ focus: () => focused++ });
+    [1, 2].forEach(() => ready(h));
     assert.equal(focused, 1);
     h.tap('Rise');
     assert.equal(h.said(), 'You wake at the shrine.');
@@ -446,6 +454,11 @@ test('a death with revival lands in the spirit state until Rise', () => {
     assert.equal(h.texts().includes('Rise'), false);
     assert.notEqual(h.footer(), false); // it returns at the rise
     h.close();
+    const elsewhere = died(); // focus not on the card: zero moves none
+    now = 60_000;
+    ready(elsewhere);
+    assert.equal(focused, 1);
+    elsewhere.close();
     for (const [end, extra] of Object.entries({
       combat: { combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } },
       scene: { scene: { index: 1, line: 'road.crows' } },
@@ -459,6 +472,15 @@ test('a death with revival lands in the spirit state until Rise', () => {
       assert.equal(e.texts().includes('Rise'), false, end);
       e.close();
     }
+    const caught = died();
+    caught.publish(view(shrine), undefined, undefined, { kind: 'catching_up' });
+    assert.equal(caught.footer(), false); // catching up keeps the spirit layout
+    assert.ok(caught.texts().includes('Rise'));
+    caught.publish(view(shrine), undefined, undefined, { kind: 'fault', code: 'x' });
+    assert.ok(shown(caught).includes('You wake at the shrine.')); // a fault ends it
+    assert.equal(caught.texts().includes('Rise'), false);
+    assert.notEqual(caught.footer(), false);
+    caught.close();
   } finally {
     Date.now = clock;
   }
