@@ -11,7 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Second review: revival contract and save effect, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-revival-second-review.md): **APPROVE WITH NOTES**
-- [Review: world.death.revival and the Wayside Shrine keeper, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-review.md): **CHANGES REQUIRED**
+- [Review: world.death.revival and the Wayside Shrine keeper, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-review.md): **APPROVE**
 - [Review: corpses name their victim, decay and spill, PR #593 (loka-kgd.203)](2026-11-04-corpses-review.md): **APPROVE**
 - [Second review: corpse decay save and delta contract, PR #593 (loka-kgd.203)](2026-11-04-corpse-decay-second-review.md): **CHANGES REQUIRED**
 - [Review: Combat round two, PR #596 (loka-kgd.202 a and b)](2026-11-04-combat-round-two-review.md): **APPROVE WITH NOTES**

@@ -42,3 +42,24 @@
 ## Verdict
 
 **CHANGES REQUIRED** (finding 1).
+
+## Fix re-check
+
+Reviewed `git diff 5a104deae d8ffe8feb` only. Head `d8ffe8feb184498d3a934b335769b644fa7f1313`.
+
+- **1, fixed.** `proposal.ts` `creditDelivery` sets `wokeAt` at the first delivered player `entity_died`, before its reaction lines. `closing()` in `death/lines.ts` splices the end lines at `wokeAt`. The spec at mechanics.md:848 and :2202 says the same. Tests: `shrine_keeper.test.ts:25` and `service.test.ts:352` (Book `arrival()` slice `[player_died, woke, revived_1]`).
+- **2, fixed.** The sign reads "wake at the Wayside Shrine", in the PM's words.
+- **4, fixed.** `npc_present keeper` is on `keeper_line_1..4`, tested at `shrine_keeper.test.ts:41`.
+- **5, fixed.** The prose says "stands above the shore steps".
+- **3:** PM ruling, not reopened.
+
+Proof:
+- **Fixtures.** The canonical diff is the four `npc_present` items and the two strings. All 30 transcripts and the 7 story `.sql` files change only the content hash.
+- **Size.** The `proposal.ts` allowance goes from 347 to 349, which matches the file's 349 lines: the `wokeAt` field plus one line in `creditDelivery`.
+- **Mutants**, each restored afterwards:
+  - M1, drop the `wokeAt` line: red in penalty, showcase_combat, shrine_keeper and service.
+  - M2, `i <= w` changed to `i < w`: red in penalty.
+  - M3, strip `npc_present` from the pinned canonical: red at `shrine_keeper.test.ts:41`.
+- **CI** (`gh run list --commit d8ffe8feb`): ci, book-e2e and graph-diff are all success.
+
+**Verdict: APPROVE.**
