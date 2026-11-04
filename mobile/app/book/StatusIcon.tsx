@@ -1,4 +1,4 @@
-// size: allow 340, the icon, its arrival, its ring and its tooltip are one component's parts
+// size: allow 342, the icon, its arrival, its ring and its tooltip are one component's parts
 // The status icon row above the status line.
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Pressable, View } from 'react-native';
@@ -192,6 +192,10 @@ export const turns = (deg: number) => {
   return { right: Math.min(deg, 180) - 180, left: Math.max(deg - 180, 0) };
 };
 
+/**
+ * A condition's ring, draining as its time runs out; also the rise card's wait (Unavailable).
+ * - Story: StatusIcon.stories.tsx
+ */
 export function Ring(p: { fraction: number; locked: boolean; children?: ReactNode }) {
   const c = usePalette();
   const deg = 360 * p.fraction;
