@@ -293,7 +293,7 @@ export const SpiritState: StoryObj = {
   ...pageStory(RoomNpcsItemsView, { spirit: { seconds: 10, left: 6, fraction: 0.6, next: 0 } }),
   name: 'Spirit state',
   play: async ({ canvas }) => {
-    const rise = await canvas.findByRole('button', { name: LABEL.rise });
+    const rise = await canvas.findByRole('button', { name: `${LABEL.rise}, 6` });
     await expect(rise).toHaveAttribute('aria-disabled', 'true');
     await expect(canvas.getAllByRole('button')).toEqual([rise]);
   },
