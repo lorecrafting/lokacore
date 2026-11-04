@@ -8,6 +8,8 @@ import { due, end, fall, haunt, left, letGo, next, type Spirit } from './spirit.
 // the next line (or the next second), or keeps ticking at zero.
 test('the spirit clock wakes for each line and each second, and stops at zero', () => {
   assert.equal(due(1, 10, 0), 1);
+  assert.equal(due(2, 1, 0), 1); // two lines: the second at zero, not at once
+  assert.equal(due(3, 1, 1500), 3); // past zero: never more than n
   assert.equal(left(10, 4001), 6);
   const sp = (shown: number): Spirit => ({
     lines: ['a', 'b', 'c'],
@@ -17,6 +19,10 @@ test('the spirit clock wakes for each line and each second, and stops at zero', 
     held: [],
   });
   assert.equal(next(sp(1), 200), 300); // line b at 500
+  assert.equal(next(sp(1), 500), 0); // line b due now
+  const half = (lines: string[], shown: number): Spirit => ({ ...sp(shown), lines, seconds: 0.5 });
+  assert.equal(next(half(['a', 'b'], 1), 100), 400); // two lines: b at 500
+  assert.equal(next(half(['a', 'b', 'c'], 3), 200), 800); // all shown: no line wait
   assert.equal(next(sp(3), 200), 800); // all shown: the next second
   assert.equal(next(sp(3), 1000), undefined);
 });
