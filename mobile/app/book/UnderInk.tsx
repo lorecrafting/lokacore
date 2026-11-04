@@ -85,13 +85,13 @@ function useLayers(view: GameView, paper: string, spirit: boolean) {
     [],
   );
   const held = heldLayer({ spirit, fatal, low: lowHealth(view), lit: lampLit(view, paper) });
-  const ghost = useSharedValue(spirit ? opacity.spirit : 0); // set with the page turn, in every mode
   const glow = useSharedValue(shown === 'glow' && held === 'glow' ? opacity.glow : 0);
   const edge = useSharedValue(shown === 'vignette' && held === 'vignette' ? opacity.faint : 0);
+  const ghost = useSharedValue(spirit ? opacity.spirit : 0); // set with the page turn, in every mode
   useEffect(() => {
     shown = held;
-    ghost.value =
-      held === 'spirit' ? opacity.spirit : withTiming(0, { duration: motion.palette.duration });
+    if (held === 'spirit') ghost.value = opacity.spirit;
+    else if (ghost.value) ghost.value = withTiming(0, { duration: motion.palette.duration });
     glow.value = withTiming(held === 'glow' ? opacity.glow : 0, {
       duration: held === 'glow' ? motion.palette.duration : motion.settle.duration,
     });
@@ -107,7 +107,8 @@ function useLayers(view: GameView, paper: string, spirit: boolean) {
   const cut = useCut();
   const glowStyle = useAnimatedStyle(() => ({ opacity: glow.value * flick.value * cut.value }));
   const edgeStyle = useAnimatedStyle(() => ({ opacity: edge.value * cut.value }));
-  const spiritStyle = useAnimatedStyle(() => ({ opacity: ghost.value }));
+  const ghostStyle = useAnimatedStyle(() => ({ opacity: ghost.value }));
+  const spiritStyle = [{ backgroundColor: spiritInk(paper) }, ghostStyle];
   return { glowStyle, edgeStyle, spiritStyle };
 }
 
@@ -129,11 +130,11 @@ export function UnderInk({ view, spirit = false }: { view: GameView; spirit?: bo
   const c = usePalette();
   const { glowStyle, edgeStyle, spiritStyle } = useLayers(view, c.bg, spirit);
   // Once drawn a layer stays, at no opacity, so it can fade out over the settle.
-  const drawn = useRef({ lit: false, low: false }).current;
+  const drawn = useRef({ lit: false, low: false, spirit: false }).current;
   drawn.lit ||= lampLit(view, c.bg);
   drawn.low ||= lowHealth(view);
-  const ghost = <Layer style={[{ backgroundColor: spiritInk(c.bg) }, spiritStyle]}>{null}</Layer>;
-  if (!canDraw()) return ghost;
+  const ghost = (drawn.spirit ||= spirit) && <Layer style={spiritStyle}>{null}</Layer>;
+  if (!canDraw()) return ghost || null;
   return (
     <>
       {ghost}
