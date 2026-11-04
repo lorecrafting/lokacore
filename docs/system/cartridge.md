@@ -352,7 +352,7 @@ the root address (`npcs/wren.json: ...`).
 |---|---|---|---|
 | A reference from area A to a non-room definition of area B | `SCHEMA_VIOLATION` | `<src>.<path to the ref>` (`areas/coop/reactions/crow_lands.on.npc`) | `{"why": "area_crossing", "target": "npcs/crow", "area": "rookery"}` |
 | `extends` or `behaviours[i]` naming a parent or behaviour of another area | `SCHEMA_VIOLATION` | `<src>.extends`, `<src>.behaviours[<i>]` | the same, `target` `items/pebble` or `behaviours/nibbles` |
-| An area (folder or bundle) with no room, counted after bundles open | `SCHEMA_VIOLATION` | `areas/<area>` | `{"why": "area_empty", "area": "<area>"}` |
+| An area folder with no room (its bundle's rooms count; a room-less bundle `areas/<name>.json` alone is never empty: PM ruling 2026-11-04) | `SCHEMA_VIOLATION` | `areas/<area>` | `{"why": "area_empty", "area": "<area>"}` |
 | An area folder name that is not a Key (lowercase snake_case) | `SCHEMA_VIOLATION` | `"areas/<Name>"` (quoted: the name is no key) | `{"why": "area_name"}` |
 | An unknown folder in an area, a deeper folder, or a `.json` directly in `areas/<area>/` | `UNKNOWN_FIELD` | `areas/rookery/widgets/w` | `{}` |
 | One kind and key in two areas, or an area and the root | `DUPLICATE_DEFINITION` | each site | `{}` |

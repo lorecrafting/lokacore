@@ -73,25 +73,26 @@ defmodule Loka.Content.Areas do
   end
 
   @doc """
-  An `area_empty` fault for each area, folder or bundle, with no room among `files`, and an
+  An `area_empty` fault for each area folder with no room among `files` (its own or its bundle's;
+  a room-less bundle alone is never empty, PM ruling 2026-11-04), and an
   `area_name` fault for each area folder whose name is not a Key.
   """
   @spec check([entry()]) :: [fault()]
   def check(files) do
-    areas = for {rel, {_, _, _}, _} <- files, a <- [area_of(rel)], a, uniq: true, do: a
     rooms = for {rel, {:room, _, _}, _} <- files, do: area_of(rel)
 
-    for(a <- areas -- rooms, do: fault("area_empty", "areas/#{a}.json", %{"area" => a})) ++
+    for(a <- folders(files) -- rooms, do: fault("area_empty", "areas/#{a}.json", %{"area" => a})) ++
       names(files)
   end
 
   defp names(files) do
-    folders = for {rel, _, _} <- files, ["areas", a, _, _] <- [Path.split(rel)], uniq: true, do: a
-
-    for a <- folders,
+    for a <- folders(files),
         Contracts.validate("Key", a) != :ok,
         do: fault("area_name", "areas/" <> a, %{})
   end
+
+  defp folders(files),
+    do: for({rel, _, _} <- files, ["areas", a, _, _] <- [Path.split(rel)], uniq: true, do: a)
 
   defp fault(why, rel, data), do: {"SCHEMA_VIOLATION", {rel, []}, Map.put(data, "why", why)}
 

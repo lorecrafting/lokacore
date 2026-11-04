@@ -114,7 +114,7 @@ Definition: `area(rel)` is `<area>` for `areas/<area>/...` and `areas/<area>.jso
 |---|---|---|---|
 | A reference from area A to a non-room definition of area B | `SCHEMA_VIOLATION` | `<src>.<path to the ref>` (`areas/edge/dialogues/brennan_warns.choices.go_back.accept`) | `{"why": "area_crossing", "target": "quests/tend_fields", "area": "hollow"}` |
 | `extends` or a `behaviours[i]` naming a parent or behaviour of another area | `SCHEMA_VIOLATION` | `<src>.extends`, `<src>.behaviours[<i>]` | same, `target` `npcs/wild` or `behaviours/spoils` |
-| An area with no room (folder or bundle; counted after bundles open) | `SCHEMA_VIOLATION` | `areas/<area>` | `{"why": "area_empty"}` |
+| An area folder with no room (its bundle's rooms count; a room-less bundle alone is never empty: PM ruling 2026-11-04) | `SCHEMA_VIOLATION` | `areas/<area>` | `{"why": "area_empty"}` |
 | A folder deeper than one area level, or a `.json` directly in `areas/<area>/`, or a `shared/` dir | `UNKNOWN_FIELD` | `areas/a/b/rooms/x`, `areas/hollow/notes`, `shared/items/water` | `{}` (existing) |
 | One kind and key in two areas, or an area and the root | `DUPLICATE_DEFINITION` | each site | `{}` (existing) |
 

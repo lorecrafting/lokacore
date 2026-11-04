@@ -13,7 +13,9 @@ const files = readdirSync(dir).filter((name) => name.endsWith('.schema.json'));
 const ajv = new Ajv2020({ allErrors: true });
 for (const name of files) ajv.addSchema(read(join(dir, name)) as object, name);
 const check = (kind: string, value: unknown) => {
-  const valid = ajv.getSchema(kind.includes('#') ? kind : `${kind}.schema.json`)!;
+  const valid = ajv.getSchema(kind.includes('#') ? kind : `${kind}.schema.json`);
+  // A stray nested file (rooms/old/x.json, areas/a/x.json) has no kind schema: refused, not a crash.
+  if (!valid) return [`no schema for kind ${kind}`];
   return valid(value) ? [] : valid.errors!;
 };
 

@@ -119,6 +119,10 @@ defmodule Loka.ContentAreaFoldersTest do
              {"SCHEMA_VIOLATION", "areas/rookery", %{"area" => "rookery", "why" => "area_empty"}}
            ]
 
+    # Break: a room-less one-file bundle is refused as empty (PM ruling 2026-11-04: only folders).
+    crow = %{"npcs" => %{"crow" => read(dir, "npcs/crow.json")}}
+    assert {:ok, _, _} = compile(dir, [{"areas/nest.json", crow}, {"npcs/crow.json", nil}])
+
     roost = moved(dir, %{"rooms/roost.json" => "rookery"})
 
     assert refused(dir, [{"areas/rookery/widgets/w.json", %{}} | roost]) == [
