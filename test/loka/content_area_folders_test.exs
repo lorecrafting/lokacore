@@ -50,13 +50,16 @@ defmodule Loka.ContentAreaFoldersTest do
            ]
   end
 
-  # Break: `extends` names a parent in another area and inherits it. Red control: the child at
-  # the root compiles.
-  test "an extends into another area is refused", %{dir: dir} do
+  # Break: `extends` names a parent in another area and inherits it, or a room may not extend a
+  # room across the border. Red control: the child at the root compiles.
+  test "an extends into another area is refused; a room may cross", %{dir: dir} do
     areas = moved(dir, %{"rooms/roost.json" => "rookery", "items/pebble.json" => "rookery"})
     areas = areas ++ moved(dir, %{"rooms/yard.json" => "coop"})
     flint = %{"extends" => "pebble"}
     assert {:ok, _, _} = compile(dir, [{"items/flint.json", flint} | areas])
+
+    assert {:ok, _, _} =
+             compile(dir, [{"areas/coop/rooms/den.json", %{"extends" => "roost"}} | areas])
 
     assert refused(dir, [{"areas/coop/items/flint.json", flint} | areas]) == [
              {"SCHEMA_VIOLATION", "areas/coop/items/flint.extends",

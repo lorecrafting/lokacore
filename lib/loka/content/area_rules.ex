@@ -17,7 +17,7 @@ defmodule Loka.Content.AreaRules do
         is_map(ds),
         {_, {rel, steps, value}} when is_binary(rel) <- ds,
         Areas.area_of(rel),
-        {path, ref} <- refs(value, [], manifest["id"]),
+        {path, %{"key" => _} = ref} <- refs(value, [], manifest["id"]),
         d <- crossing(defs, rel, steps ++ path, ref),
         do: d
   end
