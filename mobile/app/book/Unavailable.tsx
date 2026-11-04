@@ -51,6 +51,10 @@ export const linked = (label: string, link: string) => {
 
 // ponytail: announceForAccessibility is a no-op on web, where the card's own polite region reads the
 // sentence; where native maps aria-live too, it may be read twice (Footer.tsx, check on device).
+// The web drops a button's value (react-native-web), so there the seconds left join its name.
+const waitName = (name: string, wait?: Wait) =>
+  wait && 'document' in globalThis ? `${name}, ${wait.left}` : name;
+
 /**
  * The unavailable form: its own component, so its pressed state is the card's alone.
  * - Use: ActionCard only; exported from its own file.
@@ -62,10 +66,6 @@ export const linked = (label: string, link: string) => {
  * - States: at rest; pressed, with its reason; dried reason; waiting (the rise card: its ring, no reason).
  * - Story: ActionCard.stories.tsx
  */
-// The web drops a button's value (react-native-web), so there the seconds left join its name.
-const waitName = (name: string, wait?: Wait) =>
-  wait && 'document' in globalThis ? `${name}, ${wait.left}` : name;
-
 export function Unavailable(p: Refusal) {
   const c = usePalette();
   const sentence = p.wait ? '' : reasonSentence(p.reason); // a wait reads no sentence
