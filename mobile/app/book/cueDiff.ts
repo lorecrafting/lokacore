@@ -2,6 +2,7 @@
 import type { GameView, NarrationRecord } from '../../packages/game-view/session.ts';
 import type { Cue, CueName } from './cues.ts';
 import { skillChanges } from './skillChange.ts';
+import { tickings } from './model.ts';
 
 const amount = (v: GameView, key: string) =>
   v.resources?.find((r) => r.resource.key === key)?.current;
@@ -18,18 +19,16 @@ const ticks = (was?: Ticking, now?: Ticking) =>
 function ticked(now: GameView, was: GameView) {
   const same = now.bleeding?.generation === was.bleeding?.generation;
   const bled = (same ? ticks(was.bleeding, now.bleeding) : 0) * (was.bleeding?.hp_loss ?? 0);
-  return (was.conditions ?? [])
-    .filter((c) => c.resource === 'hp')
-    .reduce(
-      (sum, c) =>
-        sum -
-        (c.per_tick ?? 0) *
-          ticks(
-            c,
-            now.conditions?.find((o) => o.label === c.label),
-          ),
-      bled,
-    );
+  return (was.conditions ?? []).reduce(
+    (sum, c) =>
+      sum -
+      (tickings(c).find((t) => t.resource === 'hp')?.per_tick ?? 0) *
+        ticks(
+          c,
+          now.conditions?.find((o) => o.label === c.label),
+        ),
+    bled,
+  );
 }
 
 const named = (name: CueName, ids: string[], more?: Partial<Cue>): Cue[] =>

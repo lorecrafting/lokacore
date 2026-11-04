@@ -50,7 +50,7 @@ test('real SQLite carries the same apple through storage/drop/Take/give/Eat and 
   a.invoke('take', [id]);
   a.reopen();
   assert.equal(a.story.world().state.containers[id], a.initial.body);
-  const eaten = a.invoke('eat', [id]);
+  const eaten = a.invoke('consume', [id]);
   a.reopen();
   assert.equal(mv(a), 56);
   assert.equal(a.story.world().state.containers[id], a.initial.consumed);
@@ -77,7 +77,7 @@ test('real SQLite carries the same apple through storage/drop/Take/give/Eat and 
   a.invoke('take', [apples[2]]);
   a.reopen();
   assert.equal(a.story.world().state.containers[apples[2]], a.initial.body);
-  a.invoke('eat', [apples[2]]);
+  a.invoke('consume', [apples[2]]);
   a.reopen();
   assert.equal(mv(a), 62);
 });
@@ -88,9 +88,9 @@ test('food-only cold-open refuses unbound receipts and unrunnable custody withou
     const { a, path } = disk(t, onlyFood),
       id = apple(a);
     a.invoke('take', [id]);
-    a.invoke('eat', [id]);
+    a.invoke('consume', [id]);
     const row = a.sql
-      .prepare("SELECT * FROM receipt WHERE json_extract(command,'$.payload.type')='eat'")
+      .prepare("SELECT * FROM receipt WHERE json_extract(command,'$.payload.type')='consume'")
       .get() as any;
     if (mutation === 'nonfood')
       a.sql
@@ -154,7 +154,7 @@ test('real failed and committed/absent uncertain COMMIT preserve atomic Eat and 
         }
       };
     }
-    const i = a.attempt('eat', [id]);
+    const i = a.attempt('consume', [id]);
     a.fault.kind = kind === 'definite' ? 'failed' : kind;
     a.fault.armed = true;
     if (kind === 'definite')
@@ -190,7 +190,7 @@ test('spent apple and another apple in a real fight corpse both reopen before a 
     held = apple(a, 2),
     rat = entity(a.initial, 'npc', 'boar');
   a.invoke('take', [spent]);
-  a.invoke('eat', [spent]);
+  a.invoke('consume', [spent]);
   a.invoke('take', [held]);
   a.invoke('attack', [rat]);
   a.clock.wall += 3000;
@@ -209,7 +209,7 @@ test('spent apple and another apple in a real fight corpse both reopen before a 
   assert.equal(a.story.world().state.containers[held], corpse);
   a.invoke('take', [held]);
   a.reopen();
-  a.invoke('eat', [held]);
+  a.invoke('consume', [held]);
   a.reopen();
   assert.equal(a.story.world().state.containers[held], a.initial.consumed);
   assert.equal(mv(a), 56);

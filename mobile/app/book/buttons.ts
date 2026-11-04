@@ -69,7 +69,7 @@ const toButton =
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
     ...(a.command && { command: a.command }),
-    ...(['read', 'refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
+    ...(['read', 'refuel', 'pour'].includes(commandOf(a)) && id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
@@ -246,11 +246,11 @@ function heldButtons(
             : [];
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         const join = JOIN[commandOf(a)] ?? 'in';
-        const offered = button(
-          a,
-          ` ${names.get(e.id)}${destination ? ` ${join} ${destination}` : ''}`,
-          e.id,
-        );
+        const offered = {
+          ...button(a, ` ${names.get(e.id)}${destination ? ` ${join} ${destination}` : ''}`, e.id),
+          // A vessel's Consume is a Drink (loka-kgd.209): its log reads on the vessel, as Drink's did.
+          ...(commandOf(a) === 'consume' && 'liquid' in e && e.liquid && { detail_id: e.id }),
+        };
         return a.action_key === 'bandage' && v.bleeding
           ? { ...offered, input: { effect_generation: v.bleeding.generation } }
           : offered;

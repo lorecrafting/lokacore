@@ -130,7 +130,6 @@ export function primaryTarget(payload: CommandPayload): EntityId | undefined {
   if (payload.type === 'use_service') return payload.provider_id;
   if (payload.type === 'use_transport') return payload.endpoint_id;
   if (payload.type === 'fill' || payload.type === 'pour') return payload.source_id;
-  if (payload.type === 'drink') return payload.vessel_id;
   const p = payload as { target_id?: EntityId; item_id?: EntityId };
   return p.target_id ?? p.item_id;
 }
@@ -147,6 +146,5 @@ export function hiddenTarget(world: World, payload: CommandPayload, steps: Steps
   const ids = [p.target_id, p.item_id, p.recipient_id, p.container_id, p.provider_id, p.crow_id];
   if (payload.type === 'fill') ids.push(payload.source_id, payload.vessel_id);
   if (payload.type === 'pour') ids.push(payload.source_id, payload.receiver_id);
-  if (payload.type === 'drink') ids.push(payload.vessel_id);
   return ids.some((id) => id && !visible(world, p.actor_id, id, steps));
 }

@@ -128,7 +128,7 @@ test('a tonic cures a refreshed might with con -6 after 4000 s at 10 of 10: hp r
   let w = chosen('hardy', mightCon(-6));
   w = wait(play(play(w, { type: 'take', item_id: tonic(w) }), north), 1800);
   w = wait(play(play(w, { type: 'move', direction: 'south' }), north), 2200); // ends at +5400
-  w = play(w, { type: 'eat', item_id: tonic(w) });
+  w = play(w, { type: 'consume', item_id: tonic(w) });
   assert.equal(gameView(w).conditions, undefined);
   assert.deepEqual(hpView(w), [10, 16]);
 });
@@ -161,7 +161,7 @@ test('a flask of water curing a refreshed might with con -6 at 10 of 10: hp read
   const flask = w.entityIds['derived_sampler@0.0.1:item/flask'];
   w = wait(play(play(w, { type: 'take', item_id: flask }), north), 1800);
   w = wait(play(play(w, { type: 'move', direction: 'south' }), north), 2200); // ends at +5400
-  w = play(w, { type: 'drink', vessel_id: flask });
+  w = play(w, { type: 'consume', item_id: flask });
   assert.equal(gameView(w).conditions, undefined);
   assert.deepEqual(hpView(w), [10, 16]);
 });
@@ -172,7 +172,7 @@ test('a tonic eaten at hp 10 of 13 (might con -3) cures it and restores 2: hp 12
   let w = chosen('hardy', mightCon(-3));
   w = play(play(w, { type: 'take', item_id: tonic(w) }), north);
   assert.deepEqual(hpView(w), [10, 13]);
-  w = play(w, { type: 'eat', item_id: tonic(w) });
+  w = play(w, { type: 'consume', item_id: tonic(w) });
   assert.deepEqual(hpView(w), [12, 16]);
 });
 

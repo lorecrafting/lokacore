@@ -187,15 +187,16 @@ function receiptDetail(s: Story, r: { command_id: string; command: string }, d: 
   }
   if (command?.payload?.type === 'use_transport' || command?.payload?.type === 'use_service')
     return travelDetail(r, command, d);
-  if (command?.payload?.type === 'eat') return eatReceipt(s.world, command, r.command_id, d);
+  if (command?.payload?.type === 'consume' && d.outcome !== 'drank')
+    return eatReceipt(s.world, command, r.command_id, d);
   if (command?.payload?.type === 'bandage') return bandaged(s, r, command, command.payload, d);
   if (d.outcome === 'harvested' && command?.payload?.type === 'harvest')
     return command.payload.target_id;
   const p = command?.payload;
-  if (p?.type === 'fill' || p?.type === 'pour' || p?.type === 'drink') {
+  if (p?.type === 'fill' || p?.type === 'pour' || p?.type === 'consume') {
     if (validate('Command', command).length || command?.id !== r.command_id)
       throw new Error('malformed JSON: invalid committed liquid action');
-    return p.type === 'drink' ? p.vessel_id : p.source_id;
+    return p.type === 'consume' ? p.item_id : p.source_id;
   }
   return readableDetail(s, r, command, d);
 }

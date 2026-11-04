@@ -26,7 +26,7 @@ import { replenishMovers } from '../containment/job.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
 import { visible } from '../light/shared.ts';
 import { fatalTick } from './fatal.ts';
-import { expire, specOf } from './shared.ts';
+import { expire, specOf, ticksOf } from './shared.ts';
 
 export type Queue = readonly (readonly [string, { due_time: number }])[];
 
@@ -41,7 +41,7 @@ type Active = Extract<StatusRow, { active: true }> & { next_tick_at: number; job
  * status/shared.ts refreshed), so the drain carries its true tick (`carried`); only the last
  * sub-step writes the row's successor.
  */
-// size: allow 50, one due job saturates or folds the tick, expires, or runs the fatal death sequence
+// size: allow 53, one due job saturates or folds each tick, expires, or runs the fatal death sequence
 export function runStatus(
   world: World,
   command: Pick<Command, 'id'>,
@@ -67,9 +67,12 @@ export function runStatus(
   if (world.consumed && world.state.containers[body] === world.consumed)
     return accepted<never>(world, 'job_ran', [...ops, ...expire(visit, body, status, row, 0)], []);
   const expired = now >= (row.ends_at ?? Infinity);
-  const due = !expired && spec.per_tick !== undefined && now >= tick;
-  const { by, fatal } = due ? amount(visit, body, spec) : { by: 0, fatal: false };
-  if (by) ops.push({ ...adjust(visit, body, spec.resource, by, {}).op, at: now });
+  const due = !expired && ticksOf(spec).length > 0 && now >= tick;
+  const changes = due ? amounts(visit, body, spec) : [];
+  const fatal = changes.some((c) => c.fatal);
+  const by = changes.some((c) => c.by !== 0);
+  for (const c of changes)
+    if (c.by) ops.push({ ...adjust(visit, body, c.resource, c.by, {}).op, at: now });
   if (expired) ops.push(...expire(visit, body, status, row, 0));
   const say = (key: TextKey) => (player ? [{ key }] : []);
   const events = due ? [happened(visit, command, mint, 'status_ticked', body, status)] : [];
@@ -123,11 +126,16 @@ export function folds(world: World, job_id: JobId, job: JobRow) {
   const held = statusHolder(world, job_id); // only a status job's id matches a row
   if (!held) return false;
   const spec = specOf(world, job.job);
-  if (held.row.ends_at !== undefined || spec?.per_tick === undefined) return false;
-  const pool = resourceSpec(world, held.body, spec.resource);
+  if (held.row.ends_at !== undefined || !spec || !ticksOf(spec).length) return false;
   const body = world.entities[held.body]?.kind !== 'item' && !world.rooms[held.body];
-  if (!body || !pool || level(world, held.body, spec.resource) === undefined) return false;
-  if (amount(world, held.body, spec).by !== 0 || pool.gain !== 0 || pool.regen) return false;
+  if (!body) return false;
+  // Every tick's pool must be readable and still: one moving pool makes the tick count.
+  for (const { resource } of ticksOf(spec)) {
+    const pool = resourceSpec(world, held.body, resource);
+    if (!pool || level(world, held.body, resource) === undefined) return false;
+    if (pool.gain !== 0 || pool.regen) return false;
+  }
+  if (amounts(world, held.body, spec).some((c) => c.by !== 0)) return false;
   const ref = refString(job.job);
   return !Object.values(world.cartridge.reactions ?? {}).some(
     ({ on }) =>
@@ -162,16 +170,19 @@ function foldedTicks(
 }
 
 /**
- * A due tick's change, saturated at the pool bounds (the op itself stays exact), and whether it
- * takes hp to 0. An item or room has no pools: its tick changes nothing but still emits status_ticked.
+ * A due tick's change to each ticked pool, saturated at the pool bounds (the op itself stays exact),
+ * and whether it takes hp to 0. An item or room has no pools: its tick changes nothing but still
+ * emits status_ticked.
  */
-function amount(visit: World, body: EntityId, spec: StatusDefinition) {
-  const current = level(visit, body, spec.resource);
-  const pool = resourceSpec(visit, body, spec.resource);
-  if (visit.entities[body]?.kind === 'item' || visit.rooms[body] || current === undefined || !pool)
-    return { by: 0, fatal: false };
-  const by = Math.max(pool.minimum - current, Math.min(pool.maximum - current, spec.per_tick!));
-  return { by, fatal: by < 0 && spec.resource.key === 'hp' && current + by === 0 };
+function amounts(visit: World, body: EntityId, spec: StatusDefinition) {
+  const inert = visit.entities[body]?.kind === 'item' || !!visit.rooms[body];
+  return ticksOf(spec).map(({ resource, per_tick }) => {
+    const current = level(visit, body, resource);
+    const pool = resourceSpec(visit, body, resource);
+    if (inert || current === undefined || !pool) return { resource, by: 0, fatal: false };
+    const by = Math.max(pool.minimum - current, Math.min(pool.maximum - current, per_tick));
+    return { resource, by, fatal: by < 0 && resource.key === 'hp' && current + by === 0 };
+  });
 }
 
 /**
@@ -207,7 +218,7 @@ const happened = (
 
 // A status that never ticks (row 2c, always timed) follows a refreshed end.
 const untick = (spec: StatusDefinition, row: Active, tick: number) =>
-  spec.per_tick === undefined ? row.ends_at! : tick;
+  ticksOf(spec).length ? tick : row.ends_at!;
 
 // The row's next job, due at the earlier of its next tick and its end.
 const successor = (

@@ -1176,26 +1176,6 @@
           "type": "object",
           "properties": {
             "type": {
-              "const": "drink"
-            },
-            "actor_id": {
-              "$ref": "identity.schema.json#/$defs/CharacterId"
-            },
-            "vessel_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
-            }
-          },
-          "required": [
-            "type",
-            "actor_id",
-            "vessel_id"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
               "const": "ignite"
             },
             "actor_id": {
@@ -1317,11 +1297,11 @@
           "additionalProperties": false
         },
         {
-          "description": "Eat one directly held opted edible item; its identity enters terminal custody.",
+          "description": "Consume one directly held edible item (its identity enters terminal custody) or drink from a held vessel (loka-kgd.209).",
           "type": "object",
           "properties": {
             "type": {
-              "const": "eat"
+              "const": "consume"
             },
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"

@@ -32,7 +32,7 @@ import {
 } from '../combat/shared.ts';
 import { opened } from '../disposition.ts';
 import { prefix } from '../combat/round_attack.ts';
-import { specOf, statusStep } from '../status/shared.ts';
+import { specOf, statusStep, ticksOf } from '../status/shared.ts';
 import { transition, visible } from '../light/shared.ts';
 
 export type Effected = {
@@ -133,8 +133,8 @@ const drainsFlagged = (
   return (
     target?.kind === 'npc' &&
     target.unattackable &&
-    spec?.resource?.key === 'hp' &&
-    (spec.per_tick ?? 0) < 0
+    !!spec &&
+    ticksOf(spec).some((t) => t.resource.key === 'hp' && t.per_tick < 0)
   );
 };
 

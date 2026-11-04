@@ -248,6 +248,27 @@
       "description": "api_version: the authored source document/schema family (05 §3).",
       "type": "string"
     },
+    "AppliedStatus": {
+      "anyOf": [
+        { "$ref": "#/$defs/Key" },
+        {
+          "additionalProperties": false,
+          "description": "loka-kgd.209: a status a consumable applies; duration, logical seconds, replaces the status's own (never on a permanent status, compiler SCHEMA_VIOLATION). A repeat refreshes to the later end. The source may name the status alone.",
+          "properties": {
+            "duration": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "status": { "$ref": "#/$defs/DefinitionRef" }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        }
+      ]
+    },
     "AttackProfile": {
       "additionalProperties": false,
       "description": "Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max.",
@@ -2043,7 +2064,7 @@
     },
     "ItemEdible": {
       "additionalProperties": false,
-      "description": "D4 held-food metadata; a complete original item grants capped recovery when Eat commits.",
+      "description": "D4 held-food metadata; a complete original item grants its effect (capped recovery, cures, applies) when Consume commits.",
       "properties": {
         "amount": {
           "description": "Positive integer; the canonical numeric profile supplies the safe-integer upper limit.",
@@ -2051,8 +2072,8 @@
           "type": "integer"
         },
         "applies": {
-          "description": "Toolbox row hs-5: statuses Eat applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
-          "items": { "$ref": "#/$defs/DefinitionRef" },
+          "description": "Toolbox row hs-5: statuses Consume applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
+          "items": { "$ref": "#/$defs/AppliedStatus" },
           "minItems": 1,
           "type": "array"
         },
@@ -2072,12 +2093,10 @@
         },
         "resource": {
           "$ref": "#/$defs/DefinitionRef",
-          "description": "The pool eating restores (for example hp)."
+          "description": "The pool eating restores (for example mv); with amount, or neither (loka-kgd.209)."
         }
       },
       "required": [
-        "resource",
-        "amount",
         "label",
         "narration"
       ],
@@ -6323,7 +6342,7 @@
     },
     "partial.ItemEdible": {
       "additionalProperties": false,
-      "description": "D4 held-food metadata; a complete original item grants capped recovery when Eat commits.",
+      "description": "D4 held-food metadata; a complete original item grants its effect (capped recovery, cures, applies) when Consume commits.",
       "properties": {
         "amount": {
           "description": "Positive integer; the canonical numeric profile supplies the safe-integer upper limit.",
@@ -6331,8 +6350,8 @@
           "type": "integer"
         },
         "applies": {
-          "description": "Toolbox row hs-5: statuses Eat applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
-          "items": { "$ref": "#/$defs/DefinitionRef" },
+          "description": "Toolbox row hs-5: statuses Consume applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
+          "items": { "$ref": "#/$defs/AppliedStatus" },
           "minItems": 1,
           "type": "array"
         },
@@ -6352,7 +6371,7 @@
         },
         "resource": {
           "$ref": "#/$defs/partial.DefinitionRef",
-          "description": "The pool eating restores (for example hp)."
+          "description": "The pool eating restores (for example mv); with amount, or neither (loka-kgd.209)."
         }
       },
       "type": "object"
@@ -8597,6 +8616,18 @@
       "additionalProperties": false,
       "description": "Cartridge-owned mass, integer serving and unit labels for a declared liquid.",
       "properties": {
+        "amount": {
+          "description": "The capped restore of one Drink.",
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "applies": {
+          "description": "loka-kgd.209: statuses a Drink of this liquid applies to the drinker's body, as an edible's applies; a service serving does not.",
+          "items": { "$ref": "#/$defs/AppliedStatus" },
+          "minItems": 1,
+          "type": "array"
+        },
         "cures": {
           "description": "Statuses (toolbox rows 1 and G13) a Drink of this liquid ends; a service serving does not.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
@@ -8619,6 +8650,10 @@
         "name": {
           "$ref": "#/$defs/partial.TextKey",
           "description": "Text key of its name."
+        },
+        "resource": {
+          "$ref": "#/$defs/partial.DefinitionRef",
+          "description": "loka-kgd.209: the pool a Drink of this liquid restores, with amount; a service serving does not."
         },
         "unit_label": {
           "$ref": "#/$defs/partial.TextKey",
@@ -10637,13 +10672,34 @@
         },
         "resource": {
           "$ref": "#/$defs/partial.DefinitionRef",
-          "description": "The pool per_tick changes."
+          "description": "The pool per_tick changes; omitted only beside ticks (compiler SCHEMA_VIOLATION)."
         },
         "tick_every": {
           "description": "Seconds between ticks.",
           "maximum": 2147483647,
           "minimum": 1,
           "type": "integer"
+        },
+        "ticks": {
+          "description": "loka-kgd.209: several pools one tick changes, each by its signed per_tick (never 0), in place of resource and per_tick (compiler SCHEMA_VIOLATION beside either).",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "per_tick": {
+                "maximum": 2147483647,
+                "minimum": -2147483647,
+                "type": "integer"
+              },
+              "resource": { "$ref": "#/$defs/DefinitionRef" }
+            },
+            "required": [
+              "resource",
+              "per_tick"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
         },
         "with": { "type": "object" }
       },
@@ -11240,6 +11296,18 @@
       "additionalProperties": false,
       "description": "Cartridge-owned mass, integer serving and unit labels for a declared liquid.",
       "properties": {
+        "amount": {
+          "description": "The capped restore of one Drink.",
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "applies": {
+          "description": "loka-kgd.209: statuses a Drink of this liquid applies to the drinker's body, as an edible's applies; a service serving does not.",
+          "items": { "$ref": "#/$defs/AppliedStatus" },
+          "minItems": 1,
+          "type": "array"
+        },
         "cures": {
           "description": "Statuses (toolbox rows 1 and G13) a Drink of this liquid ends; a service serving does not.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
@@ -11261,6 +11329,10 @@
         "name": {
           "$ref": "#/$defs/TextKey",
           "description": "Text key of its name."
+        },
+        "resource": {
+          "$ref": "#/$defs/DefinitionRef",
+          "description": "loka-kgd.209: the pool a Drink of this liquid restores, with amount; a service serving does not."
         },
         "unit_label": {
           "$ref": "#/$defs/TextKey",
@@ -13642,19 +13714,39 @@
         },
         "resource": {
           "$ref": "#/$defs/DefinitionRef",
-          "description": "The pool per_tick changes."
+          "description": "The pool per_tick changes; omitted only beside ticks (compiler SCHEMA_VIOLATION)."
         },
         "tick_every": {
           "description": "Seconds between ticks.",
           "maximum": 2147483647,
           "minimum": 1,
           "type": "integer"
+        },
+        "ticks": {
+          "description": "loka-kgd.209: several pools one tick changes, each by its signed per_tick (never 0), in place of resource and per_tick (compiler SCHEMA_VIOLATION beside either).",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "per_tick": {
+                "maximum": 2147483647,
+                "minimum": -2147483647,
+                "type": "integer"
+              },
+              "resource": { "$ref": "#/$defs/DefinitionRef" }
+            },
+            "required": [
+              "resource",
+              "per_tick"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
         }
       },
       "required": [
         "duration",
         "tick_every",
-        "resource",
         "name",
         "narration"
       ],

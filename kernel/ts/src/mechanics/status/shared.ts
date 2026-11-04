@@ -10,6 +10,7 @@ import type {
   JobId,
   Key,
   Resistances,
+  StatusDefinition,
   StatusRow,
   TextKey,
 } from '../../contracts.gen.ts';
@@ -119,13 +120,14 @@ const holds = (world: World, body: EntityId) =>
  * Apply or refresh `status` on `body` (a body, a living NPC or an item) at the world's clock; an
  * unknown or immune status, a dead NPC or another kind of entity changes nothing.
  */
-// size: allow 45, a first application writes the row and schedules its job; a refresh writes only the end; a permanent one may tick (loka-rn3b)
+// size: allow 47, a first application writes the row and schedules its job; a refresh writes only the end; a permanent one may tick (loka-rn3b); a consumable may set the duration (loka-kgd.209)
 export function applyStatus(
   world: World,
   body: EntityId,
   status: DefinitionRef,
   writer_group: number,
   mint: Mint,
+  duration?: number, // a consumable's own (loka-kgd.209), never on a permanent status (compiler)
 ): DeltaOp[] {
   const spec = specOf(world, status);
   if (!spec || !holds(world, body) || immune(world, body, status)) return [];
@@ -143,12 +145,13 @@ export function applyStatus(
   // A permanent status (row W8) has no end, and without a per_tick no tick or job (loka-rn3b);
   // it moves no hp_max, so its settle is empty.
   const permanent = spec.duration === 'permanent';
-  if (permanent && (active || spec.per_tick === undefined))
-    return active ? [] : [change({ active: true, generation })];
+  const ticks = ticksOf(spec).length > 0;
+  if (permanent && (active || !ticks)) return active ? [] : [change({ active: true, generation })];
   const now = world.state.clock;
-  const ends_at = permanent ? undefined : add(now, spec.duration as number);
-  if (active) return [change(refreshed(world, active, ends_at!))];
-  const next_tick_at = spec.per_tick === undefined ? ends_at! : add(now, spec.tick_every);
+  const ends_at = permanent ? undefined : add(now, duration ?? (spec.duration as number));
+  // A repeat refreshes to the later end (loka-kgd.209); an earlier one changes nothing.
+  if (active) return active.ends_at! > ends_at! ? [] : [change(refreshed(world, active, ends_at!))];
+  const next_tick_at = ticks ? add(now, spec.tick_every) : ends_at!;
   const value = {
     active: true as const,
     generation,
@@ -165,6 +168,11 @@ export function applyStatus(
   };
   return [...settleFor(world, body, status, writer_group), change(value), job];
 }
+
+/** A status's ticks: its `ticks` list, or its single `resource`/`per_tick` pair (loka-kgd.209). */
+export const ticksOf = (spec: StatusDefinition) =>
+  spec.ticks ??
+  (spec.per_tick === undefined ? [] : [{ resource: spec.resource!, per_tick: spec.per_tick }]);
 
 // A refresh writes only the end. Mid-advance a crossed sub-step (job.ts runStatus) has completed the
 // row's job and left its tick stale; the drain carries the true tick, so the row holds the end.
@@ -254,7 +262,7 @@ export function statusMovement(world: World, body: EntityId) {
  */
 export function statusStep(
   world: World,
-  step: { op: 'status.apply' | 'status.cure'; status: DefinitionRef },
+  step: { op: 'status.apply' | 'status.cure'; status: DefinitionRef; duration?: number },
   on: readonly (EntityId | undefined)[],
   body: EntityId,
   group: number,
@@ -272,7 +280,7 @@ export function statusStep(
     applied.add(once);
     const joined = holders.get(holder) ?? group;
     const ops = apply
-      ? applyStatus(world, holder, step.status, joined, mint)
+      ? applyStatus(world, holder, step.status, joined, mint, step.duration)
       : cureOps(world, holder, [step.status], joined);
     if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
     out.ops.push(...ops);

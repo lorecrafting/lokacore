@@ -2899,8 +2899,31 @@
           "minimum": 1,
           "maximum": 2147483647
         },
-        "resource": {"description":"The pool per_tick changes.",
+        "resource": {"description":"The pool per_tick changes; omitted only beside ticks (compiler SCHEMA_VIOLATION).",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "ticks": {
+          "description": "loka-kgd.209: several pools one tick changes, each by its signed per_tick (never 0), in place of resource and per_tick (compiler SCHEMA_VIOLATION beside either).",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "resource": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "per_tick": {
+                "type": "integer",
+                "minimum": -2147483647,
+                "maximum": 2147483647
+              }
+            },
+            "required": [
+              "resource",
+              "per_tick"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
         },
         "per_tick": {
           "type": "integer",
@@ -3059,7 +3082,6 @@
         "key",
         "duration",
         "tick_every",
-        "resource",
         "name",
         "narration"
       ],

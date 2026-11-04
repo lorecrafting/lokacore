@@ -1426,11 +1426,29 @@
         }
       ]
     },
-    "ItemEdible": {
-      "description": "D4 held-food metadata; a complete original item grants capped recovery when Eat commits.",
+    "AppliedStatus": {
+      "description": "loka-kgd.209: a status a consumable applies; duration, logical seconds, replaces the status's own (never on a permanent status, compiler SCHEMA_VIOLATION). A repeat refreshes to the later end. The source may name the status alone.",
       "type": "object",
       "properties": {
-        "resource": {"description":"The pool eating restores (for example hp).",
+        "status": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "ItemEdible": {
+      "description": "D4 held-food metadata; a complete original item grants its effect (capped recovery, cures, applies) when Consume commits.",
+      "type": "object",
+      "properties": {
+        "resource": {"description":"The pool eating restores (for example mv); with amount, or neither (loka-kgd.209).",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "amount": {
@@ -1453,17 +1471,15 @@
           "minItems": 1
         },
         "applies": {
-          "description": "Toolbox row hs-5: statuses Eat applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
+          "description": "Toolbox row hs-5: statuses Consume applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
           "type": "array",
           "items": {
-            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            "$ref": "#/$defs/AppliedStatus"
           },
           "minItems": 1
         }
       },
       "required": [
-        "resource",
-        "amount",
         "label",
         "narration"
       ],

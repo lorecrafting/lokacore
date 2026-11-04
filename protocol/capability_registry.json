@@ -437,8 +437,7 @@
     "residency": "portable_capability",
     "commands": [
       "fill",
-      "pour",
-      "drink"
+      "pour"
     ],
     "events": [
       "filled",
@@ -570,7 +569,7 @@
     "portability": "portable",
     "residency": "portable_capability",
     "commands": [
-      "eat"
+      "consume"
     ],
     "definitions": [
       "edible"

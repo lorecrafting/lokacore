@@ -3,7 +3,7 @@ import { refString, type World } from '../runtime/decision.ts';
 import { level, resourceRef, resourceSpec } from '../mechanics/resource.ts';
 import { cmp } from '../foundation/validate.ts';
 import { key } from '../foundation/compose.ts';
-import { activeStatuses } from '../mechanics/status/shared.ts';
+import { activeStatuses, ticksOf } from '../mechanics/status/shared.ts';
 import { KernelError } from '../foundation/error.ts';
 
 // The engine default condition bands of 04 §15 (amendments 2026-10-01, 2026-10-02), highest
@@ -72,7 +72,14 @@ export function conditionViews(world: World, body: EntityId | undefined) {
         duration: spec.duration as number, // the ring denominator (loka-x6t.65)
       }), // none: permanent, row W8
       ...(row.next_tick_at !== undefined && { next_tick_at: row.next_tick_at }), // ticking (loka-rn3b)
-      resource: spec.resource.key as Key,
+      ...(spec.ticks
+        ? {
+            ticks: spec.ticks.map((t) => ({
+              resource: t.resource.key as Key,
+              per_tick: t.per_tick,
+            })),
+          }
+        : { resource: spec.resource!.key as Key }),
       ...(spec.per_tick !== undefined && { per_tick: spec.per_tick }),
       tick_every: spec.tick_every,
       ...(kind && { kind }),
@@ -84,15 +91,23 @@ export function conditionViews(world: World, body: EntityId | undefined) {
 // The authored kind, else debuff on any harm, buff on any gain, none for a status with no effect.
 function polarity(s: StatusDefinition): 'buff' | 'debuff' | undefined {
   if (s.kind) return s.kind;
-  const tick = s.per_tick ?? 0;
+  const ticks = ticksOf(s);
   const amounts = [
     ...(s.modifies ?? []).map((m) => m.modifier),
     ...Object.values(s.resistances ?? {}),
   ];
   const cost = s.movement?.cost_percent ?? 100;
   const { sight, hearing } = s.perception ?? {};
-  if (tick < 0 || amounts.some((n) => n < 0) || s.fear || s.blocks || s.allows) return 'debuff';
+  if (
+    ticks.some((t) => t.per_tick < 0) ||
+    amounts.some((n) => n < 0) ||
+    s.fear ||
+    s.blocks ||
+    s.allows
+  )
+    return 'debuff';
   if (sight === 'blind' || hearing === 'deaf' || cost > 100) return 'debuff';
-  const gain = tick > 0 || amounts.some((n) => n > 0) || sight || cost < 100;
+  const gain =
+    ticks.some((t) => t.per_tick > 0) || amounts.some((n) => n > 0) || sight || cost < 100;
   return gain || s.movement?.passes || s.concealment ? 'buff' : undefined;
 }

@@ -48,7 +48,7 @@ import { chainRefused } from '../mechanics/locks.ts';
 const HIDDEN = [
   'where',
   'recover_corpse',
-  'eat',
+  'consume',
   'bandage',
   'buy',
   'sell',
@@ -56,7 +56,6 @@ const HIDDEN = [
   'read',
   'fill',
   'pour',
-  'drink',
   ...MODAL,
 ];
 const hidden = (world: World, actor: CharacterId, a: Offered) =>

@@ -98,13 +98,13 @@ test('Fill, Drink, partial Pour and Drink conserve finite contents and affect no
   assert.equal(again.decision.kind, 'rejected');
   assert.equal(again.world, world);
   const initial = world.state;
-  world = run(world, { type: 'drink', vessel_id: spare }).world;
+  world = run(world, { type: 'consume', item_id: spare }).world;
   assert.deepEqual(contents(world), [row(4), row(3)]);
   const poured = run(world, { type: 'pour', source_id: skin, receiver_id: spare });
   assert.equal(poured.decision.kind, 'accepted');
   world = poured.world;
   assert.deepEqual(contents(world), [row(3), row(4)]);
-  world = run(world, { type: 'drink', vessel_id: skin }).world;
+  world = run(world, { type: 'consume', item_id: skin }).world;
   assert.deepEqual(contents(world), [row(2), row(4)]);
   assert.deepEqual(world.state.resources, initial.resources);
   assert.equal(world.state.clock, initial.clock);
@@ -121,7 +121,7 @@ test('each liquid line binds its vessel with the committed level and capacity', 
   const pour = { type: 'pour', source_id: skin, receiver_id: spare };
   const rows: [World, object, string, string, number, number, number][] = [
     [owned(1, 2), fill, 'liquid.filled', skin, 3, 4, 4],
-    [owned(4, 2), { type: 'drink', vessel_id: skin }, 'liquid.drank', skin, 1, 3, 4],
+    [owned(4, 2), { type: 'consume', item_id: skin }, 'liquid.drank', skin, 1, 3, 4],
     [small(3, 1), pour, 'liquid.poured', spare, 2, 3, 3],
   ];
   const words = { kind: 'liquid.water', unit_label: 'liquid.units' };
@@ -136,7 +136,7 @@ test('liquid refusal participants and custody leave every row unchanged while op
   const cases: [World, object][] = [
     [start, { type: 'pour', source_id: skin, receiver_id: skin }],
     [owned(4, 4), { type: 'pour', source_id: skin, receiver_id: spare }],
-    [owned(0, 0), { type: 'drink', vessel_id: skin }],
+    [owned(0, 0), { type: 'consume', item_id: skin }],
     [start, { type: 'fill', source_id: skin, vessel_id: spare }],
     [
       start,
@@ -149,7 +149,7 @@ test('liquid refusal participants and custody leave every row unchanged while op
             ...start,
             state: { ...start.state, containers: { ...start.state.containers, [skin]: holder } },
           },
-          { type: 'drink', vessel_id: skin },
+          { type: 'consume', item_id: skin },
         ] as [World, object],
     ),
   ];
@@ -167,7 +167,7 @@ test('liquid refusal participants and custody leave every row unchanged while op
       containers: { ...start.state.containers, [skin]: bag, [bag]: start.body },
     },
   };
-  assert.equal(run(nested, { type: 'drink', vessel_id: skin }).decision.kind, 'accepted');
+  assert.equal(run(nested, { type: 'consume', item_id: skin }).decision.kind, 'accepted');
 });
 function massWorld(load: number): World {
   const w = owned();
@@ -216,7 +216,7 @@ test('Fill includes liquid mass, admits equality, and owned Pour/Drink remain le
     run(loaded, { type: 'pour', source_id: skin, receiver_id: spare }).decision.kind,
     'accepted',
   );
-  assert.equal(run(loaded, { type: 'drink', vessel_id: skin }).decision.kind, 'accepted');
+  assert.equal(run(loaded, { type: 'consume', item_id: skin }).decision.kind, 'accepted');
 });
 // Breaks: incoming carrying reads a filled shell's empty weight, or liquid projection hides exact pairs/faults.
 test('Take and Buy reject filled mass above ceiling and GameView exposes exact current pairs', () => {
@@ -298,14 +298,14 @@ test('authored larger servings refuse a partial last drink and exhausted Pour ke
       [spare]: { capacity: 7, kinds: [waterRef] },
     },
   };
-  const drunk = run(tuned, { type: 'drink', vessel_id: skin });
+  const drunk = run(tuned, { type: 'consume', item_id: skin });
   assert.equal(drunk.decision.kind, 'accepted');
   assert.equal(drunk.world.state.liquids![skin].quantity, 5);
   const last = {
     ...tuned,
     state: { ...tuned.state, liquids: { ...tuned.state.liquids, [skin]: row(1) } },
   };
-  const refused = run(last, { type: 'drink', vessel_id: skin });
+  const refused = run(last, { type: 'consume', item_id: skin });
   assert.equal(refused.decision.kind, 'rejected');
   assert.equal(refused.world, last);
   const poured = run(
@@ -349,7 +349,7 @@ test('closed owned nested vessels and exact out-of-room sources refuse without a
     ...w,
     state: { ...w.state, containers: { ...w.state.containers, [trunk]: w.body, [skin]: trunk } },
   };
-  const noDrink = run(closed, { type: 'drink', vessel_id: skin });
+  const noDrink = run(closed, { type: 'consume', item_id: skin });
   assert.equal(noDrink.decision.kind, 'rejected');
   assert.equal(noDrink.world, closed);
   const away = {
@@ -467,7 +467,7 @@ test('an offered liquid action under a foreign actor or the nil CommandId agrees
   for (const payload of [
     { type: 'fill', source_id: well, vessel_id: spare },
     { type: 'pour', source_id: skin, receiver_id: spare },
-    { type: 'drink', vessel_id: skin },
+    { type: 'consume', item_id: skin },
   ])
     for (const [id, actor_id, code] of [
       ['aaaaaaaa-0000-4000-8000-000000000001', w.body, 'not_found'],
@@ -491,7 +491,7 @@ test('before the ancestry choice a nil-id liquid command agrees only with invali
   const command = {
     id: '00000000-0000-0000-0000-000000000000',
     world_context_id: w.context,
-    payload: { type: 'drink', vessel_id: skin, actor_id: w.character },
+    payload: { type: 'consume', item_id: skin, actor_id: w.character },
   };
   const decision = step(w, command as never, 1).decision;
   assert.deepEqual(decision, { kind: 'rejected', error: { code: 'invalid_state' } });

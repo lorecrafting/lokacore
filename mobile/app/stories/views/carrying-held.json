@@ -605,8 +605,8 @@
       ]
      },
      {
-      "action_key": "eat",
-      "command": "eat",
+      "action_key": "consume",
+      "command": "consume",
       "label": "action.eat",
       "target": {
        "kind": "entity",

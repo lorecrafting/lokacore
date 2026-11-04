@@ -937,8 +937,8 @@
       ]
      },
      {
-      "action_key": "drink",
-      "command": "drink",
+      "action_key": "consume",
+      "command": "consume",
       "label": "action.drink",
       "target": {
        "kind": "entity",

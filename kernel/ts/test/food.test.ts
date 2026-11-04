@@ -20,7 +20,7 @@ test('Take/Drop keeps one apple in custody and exact Eat adds the benefit, cappe
   w = step(w, command(w, 2, { type: 'drop', item_id: apples[1] }), 2).world;
   assert.equal(w.state.containers[apples[1]], inn);
   w = step(w, command(w, 3, { type: 'take', item_id: apples[0] }), 3).world;
-  const plain = step(w, command(w, 4, { type: 'eat', item_id: apples[0] }), 4);
+  const plain = step(w, command(w, 4, { type: 'consume', item_id: apples[0] }), 4);
   assert.equal(plain.decision.kind, 'accepted');
   assert.equal(level(plain.world, w.body, ref('resource', 'mv')), 56);
   w = step(w, command(w, 5, { type: 'take', item_id: apples[2] }), 5).world;
@@ -33,7 +33,7 @@ test('Take/Drop keeps one apple in custody and exact Eat adds the benefit, cappe
       resources: { ...w.state.resources, [row]: { value: 92, at: 0, rate: 18, remainder: 0 } },
     },
   };
-  const eaten = step(w, command(w, 7, { type: 'eat', item_id: apples[0] }), 7);
+  const eaten = step(w, command(w, 7, { type: 'consume', item_id: apples[0] }), 7);
   assert.equal(eaten.decision.kind, 'accepted');
   if (eaten.decision.kind === 'accepted') {
     assert.equal(eaten.decision.outcome, 'eaten');
@@ -88,7 +88,7 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
   const resolved = resolve(held, identified);
   assert.ok('payload' in resolved);
   if ('payload' in resolved) {
-    assert.deepEqual(resolved.payload, { type: 'eat', actor_id: w.character, item_id: apple });
+    assert.deepEqual(resolved.payload, { type: 'consume', actor_id: w.character, item_id: apple });
     assert.equal(step(held, resolved, 2, offered.action_key).decision.kind, 'accepted');
   }
   for (const [name, id, at, expected] of [
@@ -104,7 +104,7 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
       state: { ...held.state, containers: { ...held.state.containers, [id]: at } },
     };
     assert.deepEqual(
-      transition(x, { type: 'eat', actor_id: w.character, item_id: id as never }),
+      transition(x, { type: 'consume', actor_id: w.character, item_id: id as never }),
       { code: expected },
       name,
     );
@@ -117,7 +117,7 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
       resources: { ...held.state.resources, [row]: { value: 100, at: 0, rate: 18, remainder: 0 } },
     },
   };
-  assert.deepEqual(transition(full, { type: 'eat', actor_id: w.character, item_id: apple }), {
+  assert.deepEqual(transition(full, { type: 'consume', actor_id: w.character, item_id: apple }), {
     code: 'invalid_state',
   });
   assert.equal(
@@ -129,7 +129,7 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
   assert.deepEqual(
     transition(
       held,
-      { type: 'eat', actor_id: w.character, item_id: apple },
+      { type: 'consume', actor_id: w.character, item_id: apple },
       { n: LIMITS.query_steps },
     ),
     { code: 'budget_exceeded' },
@@ -162,7 +162,7 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
     ...held,
     state: { ...held.state, resources: { ...held.state.resources, [hp]: { value: 0, at: 0 } } },
   };
-  assert.deepEqual(transition(dead, { type: 'eat', actor_id: w.character, item_id: apple }), {
+  assert.deepEqual(transition(dead, { type: 'consume', actor_id: w.character, item_id: apple }), {
     code: 'invalid_state',
   });
   const enemy = fresh((c) => {
@@ -181,7 +181,7 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
   assert.equal(fighting.decision.kind, 'accepted');
   assert.deepEqual(
     transition(fighting.world, {
-      type: 'eat',
+      type: 'consume',
       actor_id: enemy.character,
       item_id: entity(enemy, 'item', 'apple_01'),
     }),
@@ -215,7 +215,7 @@ test('created edible loot uses the same admitted terminal transfer as static foo
       .actions.find((a) => a.action_key === 'eat')!.available,
     true,
   );
-  const eaten = step(held, command(held, 1, { type: 'eat', item_id: item }), 0);
+  const eaten = step(held, command(held, 1, { type: 'consume', item_id: item }), 0);
   assert.equal(eaten.decision.kind, 'accepted');
   assert.equal(eaten.world.state.containers[item], w.consumed);
   assert.equal(level(eaten.world, w.body, ref('resource', 'mv')), 56);

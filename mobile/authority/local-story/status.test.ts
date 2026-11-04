@@ -104,7 +104,7 @@ test('status tick and cure survive reopen, failed and lost COMMIT, and replay on
           'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent DEFERRABLE INITIALLY DEFERRED)',
         );
       const tick = { expected_run_id: story.runId(), from: t0, until: t0 + 60 };
-      const cure = invoke('eat', [antidote]);
+      const cure = invoke('consume', [antidote]);
       const run = () => (action === 'tick' ? story.elapsed(tick) : story.invoke(cure));
       p.fault.kind = kind;
       p.fault.armed = true;

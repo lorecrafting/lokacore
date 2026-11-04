@@ -24,7 +24,11 @@ import { opened } from '../lookups.ts';
 import { carryingAdded } from '../containment/shared.ts';
 import { cureOps } from '../status/shared.ts';
 
-type Payload = Extract<CommandPayload, { type: 'fill' | 'pour' | 'drink' }>;
+/** food@1's Consume of a vessel runs this drink plan (loka-kgd.209); fill and pour are commands. */
+export type Drink = Pick<Extract<CommandPayload, { type: 'fill' }>, 'actor_id' | 'vessel_id'> & {
+  type: 'drink';
+};
+export type Payload = Extract<CommandPayload, { type: 'fill' | 'pour' }> | Drink;
 export function initialLiquids(cartridge: Cartridge, entities: Readonly<Record<string, Entity>>) {
   const kinds = Object.keys(cartridge.liquids ?? {}).map((ref) => {
     const d = cartridge.liquids![ref];

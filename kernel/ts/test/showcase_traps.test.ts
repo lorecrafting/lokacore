@@ -220,7 +220,7 @@ test('traps 6: the wheels open the east door at 3, 1, 2; the bitters cure the po
   assert.ok(poisoned(w)?.ends_at, 'still poisoned before the drink');
   assert.equal(pool(w, 'hp'), 10);
   const skin = id(w, 'item', 'bitters_skin');
-  const r = play(w, { type: 'drink', vessel_id: skin });
+  const r = play(w, { type: 'consume', item_id: skin });
   assert.ok(!r.lines.includes('narration.poisoned.tick'), r.lines.join());
   w = r.world;
   assert.equal(poisoned(w)?.ends_at, undefined);

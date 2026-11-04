@@ -84,9 +84,9 @@ test('the track drains hunger and thirst an hour at a time; bread and a drink en
   assert.deepEqual(labels(w), ['condition.hungry', 'condition.thirsty']);
   w = wait(w, 3 * HOUR);
   assert.deepEqual([pool(w, 'hunger'), pool(w, 'thirst')], [7, 7]);
-  w = play(w, { type: 'eat', item_id: id(w, 'bread') });
+  w = play(w, { type: 'consume', item_id: id(w, 'bread') });
   assert.deepEqual(labels(w), ['condition.thirsty']);
-  w = play(w, { type: 'drink', vessel_id: id(w, 'waterskin') });
+  w = play(w, { type: 'consume', item_id: id(w, 'waterskin') });
   assert.equal(labels(w), undefined);
   w = wait(w, 9 * HOUR);
   assert.deepEqual([pool(w, 'hunger'), pool(w, 'thirst')], [7, 7]);
@@ -118,7 +118,7 @@ test('a dry day on the flats drains thirst until a drink, and never past the poo
   w = wait(w, 2 * HOUR);
   assert.equal(pool(w, 'thirst'), 6);
   w = play(w, { type: 'move', direction: 'south' });
-  w = play(w, { type: 'drink', vessel_id: id(w, 'waterskin') });
+  w = play(w, { type: 'consume', item_id: id(w, 'waterskin') });
   assert.equal(labels(w), undefined);
   w = wait(w, 6 * HOUR);
   assert.equal(pool(w, 'thirst'), 6);
@@ -161,6 +161,6 @@ test('a permanent hungry ticks past the day until bread cures it', () => {
   assert.deepEqual(labels(w), ['condition.hungry']);
   assert.deepEqual(hungry(), { ...view, next_tick_at: t0 + 31 * HOUR });
   assert.equal(pool(w, 'hunger'), 0);
-  w = play(w, { type: 'eat', item_id: id(w, 'bread') });
+  w = play(w, { type: 'consume', item_id: id(w, 'bread') });
   assert.equal(labels(w), undefined);
 });

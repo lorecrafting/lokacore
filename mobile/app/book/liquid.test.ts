@@ -44,7 +44,7 @@ test('Book preserves exact water pairs and invalidates changed quantities in dis
     invoke(game, 'put', [original, bag]);
     invoke(game, 'fill', [well, original]);
     invoke(game, 'fill', [well, spare]);
-    invoke(game, 'drink', [spare]);
+    invoke(game, 'consume', [spare]);
     const before = game.view().view,
       text = (key: string) => game.text(key) ?? key,
       buttons = buttonsOf(before, text, text);
@@ -102,7 +102,7 @@ test('Book restores liquid narration on the exact saved source detail after SQLi
       presenter(game).screen().detail(well).join(' '),
       /You fill the skin\. The waterskin is full of water\./,
     );
-    invoke(game, 'drink', [original]);
+    invoke(game, 'consume', [original]);
     game = openGame(p.db, pin, p.host);
     assert.match(
       presenter(game).screen().detail(original).join(' '),
@@ -114,7 +114,7 @@ test('Book restores liquid narration on the exact saved source detail after SQLi
   }
 });
 
-const aliases = { fill: 'draw_water', pour: 'decant', drink: 'sip' } as const;
+const aliases = { fill: 'draw_water', pour: 'decant', consume: 'sip' } as const;
 function aliasBundle(type = 'fill', variant = 'allowed') {
   return liquidBundle((c) => alias(c, type, variant));
 }
@@ -150,7 +150,7 @@ function alias(c: any, type: string, variant: string) {
 }
 // Breaks: a loaded authored liquid key loses projection, exact invocation, source ownership or live committed quantity.
 test('loaded liquid aliases reach exact Book presses and matching target/input/policy refusal', () => {
-  for (const type of ['fill', 'pour', 'drink'] as const)
+  for (const type of ['fill', 'pour', 'consume'] as const)
     for (const variant of ['allowed', 'target', 'input', 'policy']) {
       const bundle = aliasBundle(type, variant),
         { p, game, original, spare, well } = prepared(bundle, false, true);

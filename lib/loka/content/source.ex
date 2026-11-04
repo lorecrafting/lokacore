@@ -1,4 +1,4 @@
-# size: allow 447, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, a JSON supplying a scene prompt, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code
+# size: allow 449, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, a JSON supplying a scene prompt, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code; an applies entry may be a bare status key (loka-kgd.209)
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -402,6 +402,8 @@ defmodule Loka.Content.Source do
 
     defs
     |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
+    # loka-kgd.209: an applies entry may be the bare status key, as a cures entry is.
+    |> Map.update!("AppliedStatus", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
     |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
     |> put_in(["DialogueChoice", "properties", "once"], @choice_once)
     |> update_in(["DialogueChoice", "properties"], &AskedField.source_fields/1)

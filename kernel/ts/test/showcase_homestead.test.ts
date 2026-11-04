@@ -442,7 +442,7 @@ test('homestead 10 branch: eel by night, salmon on a wet day, nothing on a miss'
   assert.deepEqual(fishIn(miss.world, 'pond'), []);
 });
 
-const eat = (w: World, k: string) => play(w, { type: 'eat', item_id: id(w, 'item', k) });
+const eat = (w: World, k: string) => play(w, { type: 'consume', item_id: id(w, 'item', k) });
 const str = (w: World) => attribute(w, 'str');
 const cookAt = (w: World, scripted: string) => ({
   type: 'perform',
@@ -500,13 +500,13 @@ test('homestead 12: learn cooking, cook a hearty stew from two fresh fish, eat i
   assert.equal(fishIn(w, 'larder').length, 2);
   assert.equal(fact(w, 'uses_cooking'), 1);
   assert.deepEqual(offer(w, 'cook_feast').reason, { code: 'invalid_state' });
-  w = play(w, { type: 'eat', item_id: hearty! }).world;
+  w = play(w, { type: 'consume', item_id: hearty! }).world;
   assert.equal(str(w), 12);
   assert.deepEqual(labels(w), ['condition.hearty']);
   // Branch: the same stew eaten while fed is still active.
   const both = structuredClone(fed) as any;
   both.state.containers[hearty!] = both.body;
-  assert.equal(str(play(both, { type: 'eat', item_id: hearty! }).world), 13);
+  assert.equal(str(play(both, { type: 'consume', item_id: hearty! }).world), 13);
   // The loop's pennies last: the 3 left buy the plot (step 13).
   assert.equal(pennies(play(walk(w, 'north'), farmer(w, 'buy_plot', 3)).world), 0);
   valid(w);

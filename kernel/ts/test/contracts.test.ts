@@ -133,7 +133,17 @@ test('wisp attempts compose to their literal answers', () => {
     assert.deepEqual(validate('ConditionView', { ...permanent, duration }), [
       { path: '/ends_at', code: 'missing_property' },
     ]);
-    const optional = ['per_tick', 'ends_at', 'duration', 'next_tick_at', 'kind'];
+    // A status with several ticks (loka-kgd.209) lists them in place of resource and per_tick.
+    const { resource: _r, per_tick: _p, ...multi } = view;
+    const ticks = [
+      { resource: 'hp', per_tick: 1 },
+      { resource: 'mv', per_tick: 2 },
+    ];
+    assert.deepEqual(validate('ConditionView', { ...multi, ticks }), []);
+    assert.deepEqual(validate('ConditionView', { ...multi, ticks: [{ resource: 'hp' }] }), [
+      { path: '/ticks/0/per_tick', code: 'missing_property' },
+    ]);
+    const optional = ['resource', 'per_tick', 'ends_at', 'duration', 'next_tick_at', 'kind'];
     for (const field of Object.keys(view).filter((f) => !optional.includes(f))) {
       const partial: Record<string, unknown> = { ...view };
       delete partial[field];
@@ -172,8 +182,9 @@ test('wisp attempts compose to their literal answers', () => {
       },
     };
     assert.deepEqual(validate('StatusDefinition', def), []);
-    // per_tick may be omitted with modifies (row 2c); the compiler and loader require it otherwise.
-    for (const field of Object.keys(def).filter((f) => f !== 'per_tick')) {
+    // per_tick may be omitted with modifies (row 2c), resource beside ticks (loka-kgd.209); the
+    // compiler and loader require them otherwise.
+    for (const field of Object.keys(def).filter((f) => f !== 'per_tick' && f !== 'resource')) {
       const partial: Record<string, unknown> = { ...def };
       delete partial[field];
       assert.deepEqual(validate('StatusDefinition', partial), [

@@ -165,12 +165,12 @@ test('body 8: in the hut bread ends hungry and water ends thirsty', () => {
   const unfed = wait(w, w.state.clock + DAY + HOUR).world;
   assert.deepEqual(labels(unfed), ['condition.hungry', 'condition.thirsty']);
   const [hunger, mv] = [pool(w, 'hunger'), pool(w, 'mv')];
-  w = play(take(w, 'hut_loaf'), { type: 'eat', item_id: id(w, 'item', 'hut_loaf') }).world;
+  w = play(take(w, 'hut_loaf'), { type: 'consume', item_id: id(w, 'item', 'hut_loaf') }).world;
   assert.deepEqual([pool(w, 'hunger'), pool(w, 'mv')], [hunger, Math.min(100, mv! + 5)]);
   assert.deepEqual(labels(w), ['condition.thirsty']);
   w = play(take(w, 'trough_skin'), {
-    type: 'drink',
-    vessel_id: id(w, 'item', 'trough_skin'),
+    type: 'consume',
+    item_id: id(w, 'item', 'trough_skin'),
   }).world;
   assert.deepEqual(labels(w), []);
   w = play(w, { type: 'drop', item_id: id(w, 'item', 'trough_skin') }).world;
@@ -181,7 +181,7 @@ test('body 8: in the hut bread ends hungry and water ends thirsty', () => {
 test('body 9-10: the quern is too heavy until the draught; a second dose never stacks', () => {
   w = go(go(w, 'west').world, 'west').world;
   assert.equal(refused(w, { type: 'take', item_id: id(w, 'item', 'quern') }), 'too_heavy');
-  const drink = (v: World) => play(v, { type: 'drink', vessel_id: id(v, 'item', 'cask') });
+  const drink = (v: World) => play(v, { type: 'consume', item_id: id(v, 'item', 'cask') });
   const r = drink(take(w, 'cask'));
   assert.ok(r.lines.includes('narration.might.applied'), JSON.stringify(r.lines));
   assert.equal(attribute(r.world, 'str'), 13);
@@ -231,7 +231,7 @@ test('body 13: a drought day parches on the fell; a drink ends it; the next hour
   assert.ok(labels(x).includes('condition.parched'));
   x = take(go(x, 'east').world, 'trough_skin');
   x = go(x, 'west').world;
-  x = play(x, { type: 'drink', vessel_id: id(x, 'item', 'trough_skin') }).world;
+  x = play(x, { type: 'consume', item_id: id(x, 'item', 'trough_skin') }).world;
   assert.ok(!labels(x).includes('condition.parched'));
   x = wait(x, 2 * DAY + 8 * HOUR).world;
   assert.ok(labels(x).includes('condition.parched'));
@@ -242,7 +242,7 @@ test('sandbox: the fold chills on a frost day; the Drover moves only under might
   let x = go(atGate, 'east').world;
   assert.ok(labels(x).includes('condition.chilled'));
   assert.ok(perform(x, 'shove_drover').lines.includes('narration.shove_drover.failure'));
-  x = play(take(x, 'fold_cask'), { type: 'drink', vessel_id: id(x, 'item', 'fold_cask') }).world;
+  x = play(take(x, 'fold_cask'), { type: 'consume', item_id: id(x, 'item', 'fold_cask') }).world;
   assert.ok(perform(x, 'shove_drover').lines.includes('narration.shove_drover.success'));
 });
 
