@@ -185,6 +185,7 @@ and not repeated here.
 
 ## Process
 
+- A PR body is the reviewer's brief: what and why, where to look, tests with their breaks, self-review; nothing else ([record](../decisions/owner-decision-pr-body-reviewer-brief-2026-11-04.md)).
 - HANDOFF holds the present only; rulings edit briefs in place; repeated command sequences become `bin/` tools; roles exist for independent judgement, not file ownership ([record](../decisions/owner-decision-harness-patterns-2026-10-28.md)).
 - During pre-production, hosted CI runs on every pushed branch head, nightly on `main` and by hand, and a green run on the exact head is the merge gate; no local pre-push checks, no check lock, at most 5 agents with 3 running tests while load is under 8 (owner 2026-10-10; `bin/agent_load_gate.sh`), focused tests only on the M1; review records only for save, protocol or kernel contract slices ([owner decision](../decisions/owner-decision-two-lane-ci-2026-10-09.md); earlier lanes: [scope](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md), [gate](../decisions/owner-decision-preproduction-gate-2026-10-08.md), [drafts](../decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
 - Move forward: fold recurring failure classes into lessons first, then delete records of closed or superseded work; links become pinned permalinks. Protocol fixtures, in-force decisions and open work stay ([owner decision](../decisions/owner-decision-move-forward-2026-10-07.md)).
