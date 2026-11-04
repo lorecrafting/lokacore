@@ -8,17 +8,7 @@ import type { World } from '../src/runtime/decision.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { key } from '../src/foundation/compose.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
-import {
-  content,
-  fight,
-  fresh,
-  go,
-  id,
-  MISS,
-  PLAYER_FIRST,
-  ref,
-  seeded,
-} from './showcase_fixture.ts';
+import { fight, fresh, go, id, MISS, PLAYER_FIRST, ref, seeded } from './showcase_fixture.ts';
 
 const withHp = (w: World, entity: string, value: number): World => {
   const k = key({ kind: 'resource', entity_id: entity, resource: resourceRef(w, 'hp') });
@@ -63,7 +53,7 @@ test('an NPC death draws no keeper line', () => {
 // Breaks: the GameView drops or reshapes the cartridge's revival, or the schema refuses it.
 test('the GameView carries the authored revival', () => {
   const view = gameView(fresh('5ca5e000-0000-4000-8000-0000000002a8'));
-  assert.deepEqual(view.revival, content.world!.death!.revival);
-  assert.equal(view.revival?.lines.length, 5);
+  const lines = [1, 2, 3, 4, 5].map((n) => `death.revival.${n}`);
+  assert.deepEqual({ ...view.revival }, { lines, seconds: 10 }); // loaded content has a null prototype
   assert.deepEqual(validate('GameView', view), []);
 });
