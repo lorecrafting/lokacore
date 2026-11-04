@@ -434,7 +434,9 @@ test('a death with revival lands in the spirit state until Rise', () => {
     assert.deepEqual(shown(h), ['Dark.', 'A bell.']);
     now = 9999;
     assert.throws(() => h.tap('Rise'));
-    h.node((n) => n.props?.accessibilityLabel === 'Rise').props.onFocus(); // the reader sits on the waiting card
+    const card = (e: typeof h) => e.node((n) => n.props?.accessibilityLabel === 'Rise').props;
+    const waiting = card(h);
+    waiting.onFocus(); // the reader sits on the waiting card
     (globalThis as any).document = {}; // on the web the seconds left are in its name
     try {
       assert.ok(h.node((n) => n.props?.accessibilityLabel === 'Rise, 1'));
@@ -444,6 +446,7 @@ test('a death with revival lands in the spirit state until Rise', () => {
     assert.deepEqual(shown(h), ['Dark.', 'A bell.']);
     now = 60_000; // no rise at zero
     assert.deepEqual(shown(h), ['Dark.', 'A bell.', 'Breath.']);
+    waiting.onBlur(); // the waiting card leaves at zero: not a move away
     let focused = 0; // the card is new at zero: focus held on it moves to it, once
     const ready = (e: typeof h) => e.control('Rise').props.ref({ focus: () => focused++ });
     [1, 2].forEach(() => ready(h));
@@ -454,7 +457,9 @@ test('a death with revival lands in the spirit state until Rise', () => {
     assert.equal(h.texts().includes('Rise'), false);
     assert.notEqual(h.footer(), false); // it returns at the rise
     h.close();
-    const elsewhere = died(); // focus not on the card: zero moves none
+    const elsewhere = died(); // focus moved off the card: zero moves none
+    card(elsewhere).onFocus();
+    card(elsewhere).onBlur();
     now = 60_000;
     ready(elsewhere);
     assert.equal(focused, 1);
