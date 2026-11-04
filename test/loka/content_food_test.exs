@@ -38,6 +38,25 @@ defmodule Loka.ContentFoodTest do
       assert Enum.any?(d, &(&1["path"] in paths)), inspect({file, Enum.map(d, & &1["path"])})
     end
   end
+
+  # loka-kgd.209, loka-kgd.50. Breaks: a drink's applies escaping the meal gate, so a liquid
+  # status moves the derived hp maximum.
+  test "a drink's applies never names an hp_max status", %{dir: dir} do
+    read = &JSON.decode!(File.read!(Path.join(dir, &1)))
+    water = {"liquids/water.json", Map.put(read.("liquids/water.json"), "applies", ["hearty"])}
+    terms = %{"terms" => [%{"attribute" => "str", "per_point" => 1, "pivot" => 10}]}
+    derived = put_in(read.("cartridge.json"), ["world", "derived", "hp_max"], terms)
+
+    assert {:error, ds} = Loka.ContentSource.compile(dir, [water, {"cartridge.json", derived}])
+
+    assert {"SCHEMA_VIOLATION", "liquids/water.applies[0]"} in for(
+             d <- ds,
+             do: {d["code"], d["path"]}
+           )
+
+    # The control: the same drink without the hp_max term compiles.
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [water])
+  end
 end
 
 defmodule Loka.ContentMealTest do

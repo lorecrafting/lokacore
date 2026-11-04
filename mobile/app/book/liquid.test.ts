@@ -215,7 +215,7 @@ test('loaded liquid aliases reach exact Book presses and matching target/input/p
             ? [command.payload.source_id, command.payload.vessel_id]
             : type === 'pour'
               ? [command.payload.source_id, command.payload.receiver_id]
-              : [command.payload.vessel_id],
+              : [command.payload.item_id],
           targets,
         );
         assert.deepEqual(
