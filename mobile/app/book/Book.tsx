@@ -109,16 +109,12 @@ export function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, 
 }
 
 // The spirit state's clock: a redraw as its next line dries or its next second passes; Rise ends it.
-function useSpirit(
-  pr: Presenter,
-  wait: number | undefined,
-  redraw: (f: (n: number) => number) => void,
-) {
+function useSpirit(pr: Presenter, s: Screen['spirit'], redraw: (f: (n: number) => number) => void) {
   useEffect(() => {
-    if (wait === undefined) return;
-    const id = setTimeout(() => redraw((n) => n + 1), wait);
+    if (s?.next === undefined) return;
+    const id = setTimeout(() => redraw((n) => n + 1), s.next);
     return () => clearTimeout(id);
-  });
+  }, [s]); // a fresh object each screen: re-armed on every draw
   return () => (pr.rise(), redraw((n) => n + 1));
 }
 
@@ -158,7 +154,7 @@ export default function Book(p: BookProps) {
       press={press}
       refused={refused}
       startOver={() => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)))}
-      rise={useSpirit(pr, screen.spirit?.next, redraw)}
+      rise={useSpirit(pr, screen.spirit, redraw)}
       shell={p.shell}
       talkingOn={talkingOn}
       talkOn={talkOn}

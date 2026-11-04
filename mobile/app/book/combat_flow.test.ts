@@ -1,12 +1,14 @@
 // Combat narration and encounter lifecycle over controlled Book boundary inputs (the harness:
-// __tests__/combat-book.test.ts).
+// __tests__/mounted.ts).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Game, GameView } from '../../packages/game-view/session.ts';
-import { Book, game, nodes, view, words } from './__tests__/combat-book.test.ts';
-import { CONTENTS, control } from './__tests__/control.test.ts';
+import type { Game } from '../../packages/game-view/session.ts';
+import { game, view } from './__tests__/combat-book.test.ts';
+import { CONTENTS } from './__tests__/control.test.ts';
 import { logMark } from './logs.ts';
 import { presenter } from './presenter.ts';
+import { validate } from '../../authority/local-story/__tests__/validate.ts';
+import { mounted } from './__tests__/mounted.ts';
 
 // Break: a dead combat opponent is narrated both as killed and as leaving the room.
 test('committed opponent death narrates once through the existing subscription', () => {
@@ -99,122 +101,6 @@ test('each round on the clock begins its own block of the combat log', () => {
     [2],
   );
 });
-
-// Real Book state/effect routing over controlled committed Game projections; no native layout claim.
-function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']>) {
-  let current = initial,
-    revision = 1,
-    last = recovered,
-    pending = false;
-  let respond: () => any = () => ({ kind: 'stale_view' });
-  let listener: ((event: any) => void) | undefined;
-  const state: any[] = [],
-    effects: (() => void)[] = [];
-  // Per component, as React's are: a log's lines vary in number and must not shift the hooks after them.
-  let slots: Record<string, number> = {};
-  const slotOf = () => {
-    const scope = (globalThis as any)[Symbol.for('combat-scope')];
-    slots[scope] = (slots[scope] ?? 0) + 1;
-    return `${scope}:${slots[scope]}`;
-  };
-  const projection = () => ({ view: current, token: `view:${revision}` });
-  const g: Game = {
-    ...game(initial),
-    view: projection,
-    lastNarration: () => last,
-    text: (key) =>
-      ({
-        'room.title': 'The cellar',
-        'road.title': 'The road',
-        'shrine.title': 'The shrine',
-        'npc.rat': 'a marsh rat',
-        'combat.hit': 'You strike the marsh rat.',
-        'combat.result': 'The marsh rat falls.',
-        'combat.flee': 'You escape to the road.',
-        'combat.death': 'You wake at the shrine.',
-        'road.crows': 'Crows lift off the road.',
-      })[key],
-    invoke: () => respond(),
-    pending: () => pending,
-    pendingInvocation: () => (pending ? 'reservation' : undefined),
-    subscribe: (f) => (
-      (listener = f),
-      f({ kind: 'state', projection: projection(), status: { kind: 'ready' } }),
-      () => {
-        listener = undefined;
-      }
-    ),
-  };
-  (globalThis as any)[Symbol.for('combat-state')] = (initial: any) => {
-    const i = slotOf();
-    if (!(i in state)) state[i] = typeof initial === 'function' ? initial() : initial;
-    return [
-      state[i],
-      (next: any) => {
-        state[i] = typeof next === 'function' ? next(state[i]) : next;
-      },
-    ];
-  };
-  (globalThis as any)[Symbol.for('combat-effect')] = (f: () => any, deps: any[]) => {
-    const i = slotOf(),
-      before = state[i];
-    if (before && deps.every((d, j) => Object.is(d, before.deps[j]))) return;
-    effects.push(() => {
-      before?.cleanup?.();
-      state[i] = { deps, cleanup: f() };
-    });
-  };
-  const draw = () => {
-    slots = {};
-    (globalThis as any)[Symbol.for('combat-scope')] = 'Book';
-    const root = Book({
-      game: g,
-      shell: { confirm: (f) => f(), learned: { get: () => true } as never },
-      startOver: () => undefined,
-    });
-    effects.splice(0).forEach((f) => f());
-    return nodes(root);
-  };
-  const texts = () =>
-    draw()
-      .filter((n) => n.type === 'Text')
-      .map(words);
-  return {
-    texts,
-    footer: () => draw().some((n) => n.type?.name === 'Footer'),
-    tap: (shown: string | RegExp) => control(draw(), shown).props.onPress(),
-    // `fight`: a line told before `line`, the room reached's arrival (loka-glj8).
-    publish: (next: GameView, line?: string, fight?: string) => {
-      current = next;
-      revision++;
-      if (line)
-        last = {
-          command_id: `commit-${revision}`,
-          lines: [...(fight ? [{ key: fight }] : []), { key: line }],
-          combat_lines: fight ? [0, 1] : [0],
-          ...(fight && { arrival: 1 }),
-          ...(line === 'combat.death' && { died: true }),
-        } as never;
-      listener?.({ kind: 'state', projection: projection(), status: { kind: 'ready' } });
-    },
-    answer: (reply: any, next = current, line?: string, ambient?: string, arrival?: number) => {
-      respond = () => {
-        current = next;
-        revision++;
-        pending = reply.kind === 'pending';
-        if (line)
-          last = {
-            command_id: `commit-${revision}`,
-            lines: [{ key: line }, ...(ambient ? [{ key: ambient }] : [])],
-            combat_lines: [0],
-            ...(arrival && { arrival }),
-          } as never;
-        return reply;
-      };
-    },
-    close: () => state.forEach((s) => s?.cleanup?.()),
-  };
-}
 
 // Breaks: a death that closes no fight (bled out on the clock) turns an earlier fight's closed page into a death's.
 test('a death after a closed fight keeps its Back to World', () => {
@@ -493,4 +379,79 @@ test('a flight into another fight opens the room log at its arrival line', () =>
     p.screen().log.filter((l) => l.includes('south')),
     ['You run in from the south.'],
   );
+});
+
+// Breaks (book-ui.md, Spirit state): Rise works before zero or comes on its own, the revival lines
+// lose their pace, the waking line shows before the rise or out of order, or an encounter, scene
+// or chapter arriving leaves the spirit state up.
+test('a death with revival lands in the spirit state until Rise', () => {
+  const clock = Date.now;
+  let now = 0;
+  Date.now = () => now;
+  const shrine = {
+    combat: undefined,
+    place: {
+      id: 'shrine',
+      title: { key: 'shrine.title' },
+      description: { key: 'shrine.description' },
+    },
+    revival: { lines: ['rev.1', 'rev.2', 'rev.3'], seconds: 10 },
+  };
+  const id = '00000000-0000-4000-8000-000000000000'; // the harness's ids are not schema ids
+  const { combat: _, ...wire } = view({
+    ...shrine,
+    actor_id: id,
+    place: { ...shrine.place, id },
+    entities: [{ id, kind: 'npc', name: 'npc.rat', actions: [] }],
+  });
+  assert.deepEqual(validate('GameView', wire), []);
+  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
+  const died = () => {
+    const h = mounted(view({ combat: undefined }));
+    h.texts(); // mounts the subscription
+    h.publish(
+      view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
+      'combat.hit',
+    );
+    assert.ok(h.texts().includes('Combat'));
+    h.publish(view(shrine), 'combat.death', 'combat.hit');
+    now = 0;
+    h.tap('Let go');
+    return h;
+  };
+  const shown = (h: ReturnType<typeof mounted>) =>
+    h.texts().filter((t) => ['Dark.', 'A bell.', 'Breath.', 'You wake at the shrine.'].includes(t));
+  try {
+    const h = died();
+    assert.deepEqual(shown(h), ['Dark.']);
+    assert.throws(() => h.tap('Rise')); // the unavailable form until zero
+    now = 4999;
+    assert.deepEqual(shown(h), ['Dark.']);
+    now = 5000;
+    assert.deepEqual(shown(h), ['Dark.', 'A bell.']);
+    now = 9999;
+    assert.throws(() => h.tap('Rise'));
+    assert.deepEqual(shown(h), ['Dark.', 'A bell.']);
+    now = 60_000; // no rise at zero
+    assert.deepEqual(shown(h), ['Dark.', 'A bell.', 'Breath.']);
+    h.tap('Rise');
+    assert.deepEqual(shown(h), ['Dark.', 'A bell.', 'Breath.', 'You wake at the shrine.']);
+    assert.equal(h.texts().includes('Rise'), false);
+    h.close();
+    for (const [end, extra] of Object.entries({
+      combat: { combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } },
+      scene: { scene: { index: 1, line: 'road.crows' } },
+      chapter: { chapter: { index: 1, title: 'chapter.first' } },
+    })) {
+      const e = died();
+      e.publish(view({ ...shrine, ...extra }));
+      e.publish(view(shrine)); // and ends: the World page again
+      if (end !== 'scene') e.tap('Back to World'); // the ended fight's or the chapter's page
+      assert.ok(shown(e).includes('You wake at the shrine.'), end);
+      assert.equal(e.texts().includes('Rise'), false, end);
+      e.close();
+    }
+  } finally {
+    Date.now = clock;
+  }
 });

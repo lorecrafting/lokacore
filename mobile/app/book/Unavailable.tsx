@@ -57,7 +57,7 @@ export const linked = (label: string, link: string) => {
  *   (label in name). Once pressed the name holds the reason, so the hint drops it: read once either
  *   way. With `send` the press goes to the engine and the log's line reads the sentence (book-ui.md,
  *   Live announcements).
- * - States: at rest; pressed, with its reason; dried reason.
+ * - States: at rest; pressed, with its reason; dried reason; waiting (the rise card: its ring, no reason).
  * - Story: ActionCard.stories.tsx
  */
 export function Unavailable(p: Refusal) {

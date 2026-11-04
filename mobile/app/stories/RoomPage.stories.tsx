@@ -287,3 +287,14 @@ export const LiquidLines: StoryObj = {
     await expect(canvas.getByText('You fill it. The waterskin is full of water.')).toBeVisible();
   },
 };
+
+// Breaks (book-ui.md, Spirit state): Rise pressable before zero, or any other control drawn.
+export const SpiritState: StoryObj = {
+  ...pageStory(RoomNpcsItemsView, { spirit: { seconds: 10, left: 6, next: undefined } }),
+  name: 'Spirit state',
+  play: async ({ canvas }) => {
+    const rise = await canvas.findByRole('button', { name: LABEL.rise });
+    await expect(rise).toHaveAttribute('aria-disabled', 'true');
+    await expect(canvas.getAllByRole('button')).toEqual([rise]);
+  },
+};
