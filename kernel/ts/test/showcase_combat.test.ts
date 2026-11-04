@@ -150,9 +150,9 @@ test('combat 3: Shout a warning in the yard warns Gil; the inn offers no such ca
   );
 });
 
-// Breaks (loka-kgd.202, S1): the foe's condition line sits after the FIRST strike at it, so Gil's
-// later blow follows it. Hand-checked: unarmed, seed MISS: the player misses (player first), the
-// raider swings at the player, Gil hits once (raider 3 -> 2 of 3 hp, below the 75 cut, at the 50 cut).
+// Breaks (loka-kgd.202, S1): the foe's condition line sits after the FIRST strike at it (the player's
+// miss counts) instead of the LAST (Gil's), between the two. Hand-checked: unarmed, seed MISS: the
+// player misses (player first), the raider swings at the player, Gil hits once (raider 2 of 3 hp: the 50 cut).
 test('combat 3a: the raider condition follows Gil strike, the last at it, not the first', () => {
   const bare = play(w, { type: 'remove', item_id: id(w, 'item', 'training_sword') }).world;
   const r = fight(seeded(bare, MISS), 'raider');
@@ -215,7 +215,7 @@ test('combat 5: Raise str spends the point', () => {
 });
 
 // Breaks (loka-kgd.202, S1): when nothing strikes the foe and its blow kills the player, the foe's
-// condition line lands after the fall line (or after the first event) instead of before the death.
+// condition line lands at the end (after the fall line) instead of before the death.
 // Hand-checked: foe first (FOE_FIRST), the player at 1 hp falls to the boar's first blow, so the
 // player never swings; the boar is untouched (condition_100).
 test('combat 6a: a fall with no strike at the boar puts its condition before the fall line', () => {
