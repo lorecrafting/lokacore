@@ -437,12 +437,9 @@ test('a death with revival lands in the spirit state until Rise', () => {
     const card = (e: typeof h) => e.node((n) => n.props?.accessibilityLabel === 'Rise').props;
     const waiting = card(h);
     waiting.onFocus(); // the reader sits on the waiting card
-    (globalThis as any).document = {}; // on the web the seconds left are in its name
-    try {
-      assert.ok(h.node((n) => n.props?.accessibilityLabel === 'Rise, 1'));
-    } finally {
-      delete (globalThis as any).document;
-    }
+    const attrs: Record<string, string> = {}; // on the web the seconds left are its description
+    waiting.ref({ setAttribute: (k: string, v: string) => (attrs[k] = v) });
+    assert.equal(attrs['aria-description'], '1 second');
     assert.deepEqual(shown(h), ['Dark.', 'A bell.']);
     now = 60_000; // no rise at zero
     assert.deepEqual(shown(h), ['Dark.', 'A bell.', 'Breath.']);

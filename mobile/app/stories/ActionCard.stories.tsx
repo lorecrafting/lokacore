@@ -73,11 +73,12 @@ export const Unavailable: Story = {
 };
 
 // Breaks (book-ui.md, Spirit state): the waiting rise card is not disabled, or a press shows a
-// reason, or the web name lacks the seconds left (react-native-web drops a button's value).
+// reason, or the web lacks the seconds left as its description (react-native-web drops a button's value).
 export const Waiting: Story = {
   render: () => <ActionCard label="Rise" wait={{ seconds: 10, left: 4, fraction: 0.4 }} />,
   play: async ({ canvas, userEvent }) => {
-    const card = canvas.getByRole('button', { name: 'Rise, 4' });
+    const card = canvas.getByRole('button', { name: 'Rise' });
+    await expect(card).toHaveAccessibleDescription('4 seconds');
     await expect(card).toHaveAttribute('aria-disabled', 'true');
     await userEvent.click(card);
     await expect(card).toHaveTextContent(/^Rise$/);

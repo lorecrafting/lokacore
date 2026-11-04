@@ -11,6 +11,7 @@ export const LABEL = {
   backToWorld: 'Back to World',
   letGo: 'Let go', // a death's Combat page foot; owner-approved 2026-11-02 (loka-kgd.204)
   rise: 'Rise', // the spirit state's one card; owner-approved 2026-11-04 (loka-kgd.205)
+  secondsLeft: (n: number) => (n === 1 ? '1 second' : `${n} seconds`), // the rise card's web description; PM-approved 2026-11-04
   backToContents: 'Back to Contents',
   backToBoard: 'Back to board',
   backToSettings: 'Back to Settings',

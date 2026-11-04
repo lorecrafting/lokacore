@@ -9,6 +9,7 @@ import { useDry } from './press.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { unseen } from './lines.tsx';
 import { reasonSentence } from './reasons.ts';
+import { LABEL } from './labels.ts';
 import { Ring } from './StatusIcon.tsx';
 import { radius, size, space, type } from './tokens.ts';
 
@@ -51,9 +52,17 @@ export const linked = (label: string, link: string) => {
 
 // ponytail: announceForAccessibility is a no-op on web, where the card's own polite region reads the
 // sentence; where native maps aria-live too, it may be read twice (Footer.tsx, check on device).
-// The web drops a button's value (react-native-web), so there the seconds left join its name.
-const waitName = (name: string, wait?: Wait) =>
-  wait && 'document' in globalThis ? `${name}, ${wait.left}` : name;
+// The web drops a button's value (react-native-web), and aria-description too: set it by hand.
+const waiting = (props: ReturnType<typeof refusedProps>, wait?: Wait) =>
+  wait
+    ? {
+        ...props,
+        ref: (n: unknown) => {
+          props.ref(n);
+          (n as Element | null)?.setAttribute?.('aria-description', LABEL.secondsLeft(wait.left));
+        },
+      }
+    : props;
 
 /**
  * The unavailable form: its own component, so its pressed state is the card's alone.
@@ -91,8 +100,8 @@ export function Unavailable(p: Refusal) {
         </Tap>
       ) : (
         <Pressable
-          accessibilityLabel={waitName(a11y, p.wait)}
-          {...refusedProps(hint)}
+          accessibilityLabel={a11y}
+          {...waiting(refusedProps(hint), p.wait)}
           accessibilityValue={p.wait && { min: 0, max: p.wait.seconds, now: p.wait.left }}
           onPress={press}
           onFocus={() => p.focus?.(true)}
