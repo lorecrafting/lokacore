@@ -1489,6 +1489,14 @@
         "label",
         "narration"
       ],
+      "dependentRequired": {
+        "resource": [
+          "amount"
+        ],
+        "amount": [
+          "resource"
+        ]
+      },
       "additionalProperties": false,
       "examples": [
         {

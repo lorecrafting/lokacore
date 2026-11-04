@@ -2064,6 +2064,14 @@
     },
     "ItemEdible": {
       "additionalProperties": false,
+      "dependentRequired": {
+        "amount": [
+          "resource"
+        ],
+        "resource": [
+          "amount"
+        ]
+      },
       "description": "D4 held-food metadata; a complete original item grants its effect (capped recovery, cures, applies) when Consume commits.",
       "properties": {
         "amount": {
@@ -11295,6 +11303,14 @@
     },
     "source.LiquidDefinition": {
       "additionalProperties": false,
+      "dependentRequired": {
+        "amount": [
+          "resource"
+        ],
+        "resource": [
+          "amount"
+        ]
+      },
       "description": "Cartridge-owned mass, integer serving and unit labels for a declared liquid.",
       "properties": {
         "amount": {

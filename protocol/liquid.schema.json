@@ -131,6 +131,14 @@
         "grams_per_unit",
         "drink_amount"
       ],
+      "dependentRequired": {
+        "resource": [
+          "amount"
+        ],
+        "amount": [
+          "resource"
+        ]
+      },
       "additionalProperties": false,
       "description": "Cartridge-owned mass, integer serving and unit labels for a declared liquid.",
       "examples": [
