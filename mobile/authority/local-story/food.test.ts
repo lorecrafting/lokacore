@@ -180,6 +180,7 @@ test('real failed and committed/absent uncertain COMMIT preserve atomic Eat and 
 test('spent apple and another apple in a real fight corpse both reopen before a later Eat', (t) => {
   const { a } = disk(t, (c) => {
     c.world.death.restore.mv = 50;
+    c.world.death.shrine.key = 'crossroads_inn'; // wake beside the corpse
     c.npcs[`${prefix}:npc/boar`].room.key = 'crossroads_inn';
     c.npcs[`${prefix}:npc/boar`].attack.chance = 100;
     c.npcs[`${prefix}:npc/boar`].attack.damage_min = 20;

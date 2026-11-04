@@ -110,6 +110,7 @@ export function gameView(world: World, actor: CharacterId = world.character): Ga
     ...timeView(world),
     ...(choice && { choice }),
     ...(pools.length > 0 && { resources: pools }),
+    ...(world.cartridge.world?.death?.revival && { revival: world.cartridge.world.death.revival }),
   };
   if (steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
   return view;

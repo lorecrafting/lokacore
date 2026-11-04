@@ -12,25 +12,27 @@ export function fallLine(world: World): Text[] {
 }
 
 /**
- * A receipt's lines with its level (or penalty) lines at `at`, before a level_reached rule's own,
- * then its waking line, cut to DecisionResult's 64 lines.
+ * A receipt's lines with its level lines at `levelAt`, before a level_reached rule's own, and its
+ * penalty line then its waking line at `wokeAt`, before the death's reaction lines (loka-kgd.206),
+ * cut to DecisionResult's 64 lines.
  */
 export function closing(
   world: World,
   actor: CharacterId,
   ops: readonly DeltaOp[],
-  events: DomainEvent[],
-  narration: Text[],
-  at = narration.length,
+  p: { events: DomainEvent[]; narration: Text[]; levelAt?: number; wokeAt?: number },
 ): Text[] {
+  const { events, narration, levelAt: at = narration.length, wokeAt = narration.length } = p;
   const level = levelUp(world, actor, ops);
   const end = woke(world, events);
   const kept = narration.slice(0, 64 - level.length - end.length);
-  // A penalty line (no level line) stays after the death's own lines.
-  const i = level.some((l) => l.key === world.cartridge.world?.levelling?.level_up)
-    ? at
-    : kept.length;
-  return [...kept.slice(0, i), ...level, ...kept.slice(i), ...end];
+  const w = Math.min(wokeAt, kept.length);
+  // A penalty line (no level line) stays after the death's own lines, before its waking line.
+  const i = level.some((l) => l.key === world.cartridge.world?.levelling?.level_up) ? at : w;
+  const lines = [...kept];
+  lines.splice(w, 0, ...end);
+  lines.splice(i <= w ? i : i + end.length, 0, ...level);
+  return lines;
 }
 
 /** Where the actor's level lines go: before the lines of a level_reached its rules answer, at `length`. */

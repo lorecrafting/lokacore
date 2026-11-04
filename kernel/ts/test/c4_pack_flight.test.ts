@@ -132,7 +132,7 @@ test('no legal area exit keeps the wounded goblin in combat', () => {
 // Breaks: same-clock population wander moves a just-fled member twice or conflicts with its custody write.
 test('both real same-deadline job orders leave the fled goblin and ear at its destination', () => {
   for (const [n, combatFirst] of [
-    [3, true],
+    [4, true],
     [1, false],
   ] as const) {
     const original = fixture();

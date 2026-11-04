@@ -663,6 +663,19 @@
         "instance"
       ],
       "meaning": "The Sappers' Cellar plate is wedged for good."
+    },
+    "keeper_greeted": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 3
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "How many of this character's deaths the shrine keeper has greeted, up to 3; after that he says the same line."
     }
   }
 }

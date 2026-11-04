@@ -837,6 +837,17 @@ no fare, gate traversal, clock jump or lineage/story reset. Position recovery se
 the old rate through the fatal clock, then switches to standing. HP/MV restore to the
 authored amounts (full pools discard remainder); MA and unrelated story state persist.
 
+Revival (loka-kgd.206): the optional `world.death.revival {lines, seconds}` is presentation
+only. The kernel restores the body at once, as above; the GameView carries the cartridge's
+revival as `revival`, present exactly when it is authored, and nothing is stored. A client
+plays the lines in order over `seconds` of wall-clock time when a receipt carries the
+player's own `entity_died`. Composition record: consumer the GameView; reads
+`world.death.revival`; writes, events, jobs and save rows: none; reused the death return
+above; new: the field and its view. A cartridge greets a return with existing reactions on
+`entity_died` (the showcase's shrine keeper: a player-scope fact tallies deaths, a
+`resource_compare` on the subject's hp skips NPC deaths, an `npc_present` keeper keeps him
+silent when the body wakes elsewhere); their lines follow the [waking line](#death-lines-outside-a-combat-round-loka-3w3q). Installed kernel 1.153.
+
 Corpses are fixed room containers: Take/Drop/Give/Wear refuse the whole corpse even
 by raw ID. Contents of a player corpse are available only to its owner; NPC corpse
 contents are public. The shared custody walk and projection enforce the same boundary,
@@ -2188,7 +2199,7 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 Beads `loka-3w3q` (designer ruling 2026-10-22) and [declarations](cartridge.md#death-narration-declarations) govern it; [Book UI](book-ui.md) turns the World page with these lines (`loka-x6t.26`).
 
 - **Fall line.** A bleed tick (`bleed/job.ts`) or a status tick (`status/fatal.ts`) that kills a player tells, after its tick line, `world.death.narration.player_died`, else `world.combat.narration.player_died`, else nothing; a tick during an open fight is not a combat round and tells it too. A combat round tells its own `player_died` (`combat/round_flow.ts`) and nothing more; a drowning's fall line is its required `world.water.drowned`, so `player_died` never follows it.
-- **Waking line.** `world.death.narration.woke`, when declared, is appended once at the end of any proposal whose events hold a player's `entity_died` (combat and drowning included), after the [penalty line](#death-penalties-toolbox-row-47). The receipt order is tick, fall, penalty, woke.
+- **Waking line.** `world.death.narration.woke`, when declared, is told once in any proposal whose events hold a player's `entity_died` (combat and drowning included), after the [penalty line](#death-penalties-toolbox-row-47), where the first such death is delivered (`wokeAt`, `runtime/proposal.ts`): every line told after that delivery (the death's own reaction lines, a greeting at the return room, later due jobs) follows it, so the Book's arrival split puts them in the return room's log (loka-kgd.206). The receipt order is tick, fall, penalty, woke, then every later line; with no later line, woke is last.
 - **NPC.** An NPC's death outside a combat round tells nothing, except a status tick that kills the last opponent of a player's open fight: it closes the fight and tells `world.combat.narration.npc_died`.
 - **Opt-in.** `narration` is optional; without it, the fall line still falls back to combat's and no waking line is told.
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)). Consumers: the bleed and status fatal producers (fall and NPC lines) and `runtime/proposal.ts` (waking line). Reads: `world.death.narration`, `world.combat.narration`, the proposal's `entity_died` events. Writes: narration only; ops, events, jobs and save rows: none new. Writer groups and composers: unchanged.

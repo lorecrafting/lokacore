@@ -14,7 +14,7 @@ import { hydrate } from '../src/runtime/created.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { resolve } from '../src/commands/target.ts';
 
-// Showcase, entered at the Drill Yard (no up exit) at 18:00; the death shrine is the Crossroads Inn.
+// Showcase, entered at the Drill Yard (no up exit) at 18:00; the death shrine is the Wayside Shrine.
 const f = fragment('protocol/fixtures/toolbox_showcase_hash.json');
 const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never;
 const id = (kind: string, name: string) => `${f.prefix}:${kind}/${name}`;
@@ -136,7 +136,7 @@ test('real fatal sequence records shrine return in the same adopted proposal', (
   const proposal = admit('death', accepted(initial, 'died', [loss, ...seq.ops], seq.events));
   const next = adopt(initial, proposal, c as never, mint, 2);
   assert.equal(next.decision.kind, 'accepted', JSON.stringify(next.decision));
-  assert.deepEqual(names(next.world), ['room.crossroads_inn.title', 'room.drill_yard.title']);
+  assert.deepEqual(names(next.world), ['room.drill_yard.title', 'room.wayside_shrine.title']);
 });
 
 // Break: Where lists a dead NPC (pass-1 UF3), or the living filter also drops a 1 HP one; typed

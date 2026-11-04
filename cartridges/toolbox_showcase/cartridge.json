@@ -5,7 +5,7 @@
   "title": "Toolbox Showcase",
   "requires": {
     "kernel_api": {
-      "at_least": "1.152",
+      "at_least": "1.153",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -215,13 +215,23 @@
       "npc_corpse": "npc_corpse",
       "npc_corpse_decay": 15000,
       "player_corpse_decay": 90000,
-      "shrine": "crossroads_inn",
+      "shrine": "wayside_shrine",
       "narration": {
         "woke": "death.woke"
       },
       "restore": {
         "hp": 10,
         "mv": 100
+      },
+      "revival": {
+        "lines": [
+          "death.revival.1",
+          "death.revival.2",
+          "death.revival.3",
+          "death.revival.4",
+          "death.revival.5"
+        ],
+        "seconds": 10
       }
     },
     "combat": {

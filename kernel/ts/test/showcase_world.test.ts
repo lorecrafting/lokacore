@@ -82,7 +82,7 @@ test('map: a visited room stubs its unvisited exits by direction only, never a h
   const stubs = (v: World, k: string) => from(v, 'unexplored', k);
   assert.deepEqual(
     [stubs(x, 'sea_cave'), stubs(x, 'shore_steps'), from(x, 'links', 'shore_steps')],
-    [[], ['north', 'south'], ['east', 'west']],
+    [[], ['north', 'south', 'up'], ['east', 'west']],
   );
   x = perform(x, 'search_cleft').world;
   assert.deepEqual(stubs(x, 'sea_cave'), ['up']);
