@@ -5,7 +5,7 @@ import { control } from './control.test.ts';
 
 export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']>) {
   let current = initial,
-    revision = 1,
+    revision = 1, // mutate-skip: test harness, moved unchanged from combat_flow.test.ts
     last = recovered,
     pending = false;
   let respond: () => any = () => ({ kind: 'stale_view' });
@@ -16,7 +16,7 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
   let slots: Record<string, number> = {};
   const slotOf = () => {
     const scope = (globalThis as any)[Symbol.for('combat-scope')];
-    slots[scope] = (slots[scope] ?? 0) + 1;
+    slots[scope] = (slots[scope] ?? 0) + 1; // mutate-skip: test harness, moved unchanged from combat_flow.test.ts
     return `${scope}:${slots[scope]}`;
   };
   const projection = () => ({ view: current, token: `view:${revision}` });
@@ -77,7 +77,7 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
       shell: { confirm: (f) => f(), learned: { get: () => true } as never },
       startOver: () => undefined,
     });
-    effects.splice(0).forEach((f) => f());
+    effects.splice(0).forEach((f) => f()); // mutate-skip: test harness, moved unchanged from combat_flow.test.ts
     return nodes(root);
   };
   const texts = () =>
@@ -96,7 +96,7 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
         last = {
           command_id: `commit-${revision}`,
           lines: [...(fight ? [{ key: fight }] : []), { key: line }],
-          combat_lines: fight ? [0, 1] : [0],
+          combat_lines: fight ? [0, 1] : [0], // mutate-skip: test harness, moved unchanged from combat_flow.test.ts
           ...(fight && { arrival: 1 }),
           ...(line === 'combat.death' && { died: true }),
         } as never;

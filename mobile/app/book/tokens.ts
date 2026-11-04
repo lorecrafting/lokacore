@@ -136,7 +136,7 @@ export const opacity = {
   fatal: 0.075, // the fatal blow's held red: the most light's dim and warning bear at 4.5:1 -- mutate-skip: uncalibrated design value
   bloodshot: 1, // the fatal hold's edges at the screen's rim, feathered in over size.bloodshot -- mutate-skip: uncalibrated design value
   glow: 0.08, // the lamp at the page's hip, at its peak; 4.5:1 holds -- mutate-skip: uncalibrated design value
-  spirit: 0.6, // the spirit layer, held; every text role keeps 4.5:1
+  spirit: 0.6, // the spirit layer, held; every text role keeps 4.5:1 -- mutate-skip: brief-set design value
 };
 
 // Book motion. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion. `duration` and

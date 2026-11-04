@@ -424,6 +424,7 @@ test('a death with revival lands in the spirit state until Rise', () => {
   try {
     const h = died();
     assert.deepEqual(shown(h), ['Dark.']);
+    assert.equal(h.footer(), false); // the bottom row is not drawn
     assert.throws(() => h.tap('Rise')); // the unavailable form until zero
     now = 4999;
     assert.deepEqual(shown(h), ['Dark.']);
@@ -437,6 +438,7 @@ test('a death with revival lands in the spirit state until Rise', () => {
     h.tap('Rise');
     assert.deepEqual(shown(h), ['Dark.', 'A bell.', 'Breath.', 'You wake at the shrine.']);
     assert.equal(h.texts().includes('Rise'), false);
+    assert.notEqual(h.footer(), false); // it returns at the rise
     h.close();
     for (const [end, extra] of Object.entries({
       combat: { combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } },
