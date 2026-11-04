@@ -96,7 +96,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### Combat
 
-- Order: own page; opponent block "name — band"; combat log (each line also in the World log); vertical action list (Stand, Flee,
+- Order: own page; combat log (its first line names the foe; no opponent block, owner 2026-11-02) (each line also in the World log); vertical action list (Stand, Flee,
   Look, item combat uses, Cast a spell… per foe); on closure the page stays with Back to World.
 - Never appears: a minimap or say field; horizontal buttons.
 - Source: [Combat interaction](../system/book-ui.md#combat-interaction),

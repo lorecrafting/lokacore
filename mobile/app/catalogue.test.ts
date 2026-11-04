@@ -104,6 +104,7 @@ const NO_BOOK_CONSUMER: Record<string, string> = {
       'miss',
       'lever',
       'latch',
+      'death',
       'thunder',
       'bed',
       'weather',

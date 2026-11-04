@@ -9,6 +9,7 @@ export const LABEL = {
   leaveConversation: 'Leave the conversation',
   back: 'Back',
   backToWorld: 'Back to World',
+  letGo: 'Let go', // a death's Combat page foot; owner-approved 2026-11-02 (loka-kgd.204)
   backToContents: 'Back to Contents',
   backToBoard: 'Back to board',
   backToSettings: 'Back to Settings',
@@ -71,13 +72,14 @@ export const LABEL = {
   giveAnItem: 'Give an item…',
   giveTo: 'Give to…',
   castASpell: 'Cast a spell…',
+  castASpellOn: (foe: string) => `Cast a spell on ${foe}…`, // a Combat foe's list, its projected name
   castOn: 'Cast on…', // a Skills page Spells line's list of the aimed spell's targets (loka-x6t.109.5)
   // The NPC page's Talk and shop cards, the shop page's Sell card (owner picks mvlrlvappy4w, mvlymuams73l).
   talk: 'Talk',
   trade: 'Trade',
   sell: 'Sell',
   yourOrder: 'Your order',
-  // A foe's definite article on the Combat page, "the goblin" (loka-6qi).
+  // A foe's definite article on the Combat page, "Cast a spell on the goblin…" (loka-6qi).
   the: 'the',
   // Page titles and the Contents lines (Menu.tsx, sections.tsx, journal.tsx; loka-x6t.61).
   contents: 'Contents',

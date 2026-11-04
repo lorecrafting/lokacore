@@ -1,6 +1,6 @@
 // C row Pages, Combat (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { expect, waitFor } from 'storybook/test';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { Blow } from '../book/Blow.tsx';
@@ -40,25 +40,68 @@ export const SkippedTurn: StoryObj = {
 // Each round's lines are one block, a block gap between rounds, and the page follows the newest
 // (book-ui.md, Live combat response). Fixture lines. Breaks: rounds run together, or the newest
 // round sits below the fold under the action cards.
+// Six rounds in the showcase's words, Legend order: your swings, your strike, the boar's condition,
+// then its blow (loka-kgd.200, .202).
 const rounds: DetailLine[] = [];
-for (let r = 1; r <= 20; r++) {
+for (const round of [
+  [
+    'You quickly attack 3 times and hit once.',
+    'You hardly hit the boar.',
+    'The boar has a few bruises.',
+    'The boar misses you.',
+  ],
+  [
+    'You quickly attack 3 times and hit 2 times.',
+    'You hit the boar.',
+    'The boar has some cuts.',
+    'The boar hits you.',
+  ],
+  [
+    'You quickly attack and hit 3 times.',
+    'You hit the boar hard.',
+    'The boar has many nasty wounds.',
+    'The boar hits you hard.',
+  ],
+  [
+    'You quickly attack 3 times and hit 2 times.',
+    'You hit the boar extremely hard.',
+    'The boar is bleeding freely.',
+    'The boar hits you.',
+  ],
+  [
+    'You quickly attack and hit 3 times.',
+    'You assault the boar with an astonishing blow.',
+    'The boar is covered in blood.',
+    'The boar misses you.',
+  ],
+  [
+    'You quickly attack 3 times and hit once.',
+    'You ravage the boar!',
+    'The boar is in awful condition.',
+    'The boar hits you extremely hard.',
+  ],
+]) {
   newRound(rounds);
-  rounds.push(`The boar bites you (round ${r}).`, `You strike the boar (round ${r}).`);
+  rounds.push(...round);
 }
 export const Rounds: StoryObj = {
   ...pageStory(CombatOneFoeView, { combatLog: rounds }),
   name: 'Rounds',
   play: async ({ canvas }) => {
-    const last = await canvas.findByText('You strike the boar (round 20).');
+    const last = await canvas.findByText('The boar hits you extremely hard.');
     await waitFor(() => expect(last.getBoundingClientRect().bottom).toBeLessThan(innerHeight));
     await expect(last.getBoundingClientRect().top).toBeGreaterThanOrEqual(0);
     const top = (text: string) => canvas.getByText(text).getBoundingClientRect().top;
-    const within = top('You strike the boar (round 19).') - top('The boar bites you (round 19).');
-    const between = top('The boar bites you (round 20).') - top('You strike the boar (round 19).');
-    await expect(between).toBeGreaterThan(within);
+    const within = top('The boar has many nasty wounds.') - top('You hit the boar hard.');
+    // round 3's condition to round 4's strike: its blow, the blank line, round 4's swings, the strike
+    const between =
+      top('You hit the boar extremely hard.') - top('The boar has many nasty wounds.');
+    // A round's lines run on at the log's line pitch; one blank line parts rounds (owner 2026-11-04).
+    await expect([within, between]).toEqual([26, 104]);
   },
 };
-// A live foe's line draws its Cast a spell… list (loka-x6t.109.5). Breaks: no list on the foe line.
+// Each live foe draws its Cast a spell on it… list among the cards (loka-x6t.109.5). Breaks: no list,
+// or an option that names no foe.
 const boar = CombatOneFoeView.view.entities[0]!;
 const flamma = {
   action_key: 'flamma',
@@ -75,7 +118,7 @@ export const FoeCast: StoryObj = {
   }),
   name: 'Foe with Cast a spell…',
   play: async ({ canvas, userEvent }) => {
-    await userEvent.click(canvas.getByRole('button', { name: 'Cast a spell…' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Cast a spell on the boar…' }));
     await expect(canvas.getByRole('button', { name: /^Flamma, cast flamma on/ })).toBeVisible();
   },
 };
@@ -104,7 +147,7 @@ export const BlowWash: StoryObj = {
   render: () => <Struck />,
   name: 'Blow wash',
   play: async ({ canvas, canvasElement, userEvent }) => {
-    const paper = canvasElement.querySelectorAll<HTMLElement>('[aria-hidden="true"]')[1]!;
+    const paper = canvasElement.querySelectorAll<HTMLElement>('[aria-hidden="true"]')[2]!;
     await expect(Number(getComputedStyle(paper).opacity)).toBe(0);
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
     await waitFor(() => expect(Number(getComputedStyle(paper).opacity)).toBeGreaterThan(0));
@@ -115,7 +158,7 @@ export const BlowWash: StoryObj = {
     await expect(frame.scrollHeight).toBe(frame.clientHeight);
   },
 };
-// A death in a fight leaves a faint wash (book-ui.md, Falling). Breaks: the wash clears after a fatal blow.
+// A death in a fight holds the red wash (book-ui.md, Falling). Breaks: the wash clears after a fatal blow.
 function Fatal() {
   const [view, setView] = useState(() => struck(5));
   const [died, setDied] = useState<string>();
@@ -134,14 +177,48 @@ function Fatal() {
     </div>
   );
 }
+// The page a fatal blow closes (owner, 2026-11-02, loka-kgd.204): blood-red held, one Let go, no
+// foe line, no countdown. The cues fall from a fight to a death beside the page, as Book's own do.
+function Falls({ children }: { children: ReactNode }) {
+  const [view, setView] = useState(() => struck(5));
+  const [died, setDied] = useState<string>();
+  useCues(view, false, 0, 0, false, undefined, died);
+  useEffect(() => {
+    setView(struck(0));
+    setDied('fatal');
+  }, []);
+  return children;
+}
+const { combat: closed, ...afterView } = CombatOneFoeView.view;
+export const Death: StoryObj = {
+  ...pageStory(
+    { ...CombatOneFoeView, view: afterView },
+    { ended: closed as never, died: 'fatal', fell: true },
+  ),
+  decorators: [(Story) => <Falls>{Story()}</Falls>],
+  name: 'Death',
+  play: async ({ canvas, canvasElement }) => {
+    // the foot fades in (useDry), so wait for it
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Let go' })).toBeVisible(), {
+      timeout: 3000,
+    });
+    await expect(canvas.queryByRole('button', { name: 'Back to World' })).toBeNull();
+    await expect(canvas.queryByText(/standing/)).toBeNull(); // no status line once dead (owner 2026-11-04)
+    const layers = () => [...canvasElement.querySelectorAll('[aria-hidden="true"]')];
+    const at = (e: Element) => Number(getComputedStyle(e).opacity);
+    await waitFor(() => expect(layers().some((e) => at(e) === opacity.fatal)).toBe(true), {
+      timeout: 3000,
+    });
+  },
+};
 export const FatalBlowHeld: StoryObj = {
   render: () => <Fatal />,
   name: 'Fatal blow held',
   play: async ({ canvas, canvasElement, userEvent }) => {
-    const faint = canvasElement.querySelector<HTMLElement>('[aria-hidden="true"]')!;
+    const held = canvasElement.querySelector<HTMLElement>('[aria-hidden="true"]')!;
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
     // Settled at its hold, so axe reads the resting colours (loka-gj82.10).
-    await waitFor(() => expect(Number(getComputedStyle(faint).opacity)).toBe(opacity.faint), {
+    await waitFor(() => expect(Number(getComputedStyle(held).opacity)).toBe(opacity.fatal), {
       timeout: 3000,
     });
   },

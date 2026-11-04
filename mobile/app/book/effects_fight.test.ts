@@ -1,17 +1,15 @@
-// The fatal blow's hold and the foe's press and settle, on real components.
+// The fatal blow's hold, on real components.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { effects, flat, rig } from './__tests__/hook-rig.ts';
-import { nodes, words } from './__tests__/polish-book.test.ts';
+import { effects, rig } from './__tests__/hook-rig.ts';
+import { nodes } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
 const { Blow } = await import('./Blow.tsx');
-const { Foe } = await import('./Combat.tsx');
 const { flashesOn, useCues } = await import('./cues.ts');
-const { color, size } = await import('./tokens.ts');
+const { opacity } = await import('./tokens.ts');
 
 const g = globalThis as any;
-const say = ((s: string) => s.replace('.name', '')) as never;
 const held_view = { place: { id: 'p' }, inventory: [], journal: [] } as unknown as GameView;
 const hit = (hp: number) =>
   ({
@@ -49,8 +47,8 @@ function falling(t: any, reduced = false) {
 
 // Breaks: the wash falls to nothing; the half wash is lost under reduced motion; a death with no peak pops
 // the hold in over the wash's time, not fading over settle; or the hold rises under the peak and the
-// two add up past it (only the fall's time runs the hold up: .18 over 120, then .06 over 380).
-test('a fatal blow falls to the faint hold, whatever the settings say of its peak', (t) => {
+// two add up past it (only the fall's time runs the hold up: .18 over 120, then the hold over 380).
+test('a fatal blow falls to the fatal hold, whatever the settings say of its peak', (t) => {
   for (const [reduced, flashes, peak, over] of [
     [false, true, [0.18], 380],
     [true, true, [0.09], 380],
@@ -65,7 +63,7 @@ test('a fatal blow falls to the faint hold, whatever the settings say of its pea
       g.timings.length = 0;
       at(shrine, 'd');
       assert.deepEqual(peaks(), peak);
-      assert.equal(held(), 0.06);
+      assert.equal(held(), opacity.fatal);
       assert.equal(g.timings.at(reduced || flashes ? -1 : 0), over);
     });
 });
@@ -111,95 +109,6 @@ test('a death outside a fight holds nothing', (t) => {
   at(shrine, 'd');
   assert.equal(held(), 0);
   assert.deepEqual(g.sequences, []);
-});
-
-const fought = (band?: string) =>
-  ({
-    ...held_view,
-    entities: [{ id: 'wolf' }],
-    combat: { encounter_id: 'e', opponent_id: 'wolf', band },
-  }) as unknown as GameView;
-function foe(t: any, reduced = false) {
-  effects(t, reduced);
-  const tick = clock(t);
-  const draw = rig(t);
-  const at = (view: GameView) => {
-    const out = draw(() => {
-      useCues(view, false, 0);
-      return nodes(
-        Foe({
-          opponent: { id: 'wolf', name: 'wolf.name', band: 'hurt' } as never,
-          target: false,
-          live: true,
-          text: say,
-          children: null,
-        }),
-      );
-    });
-    return { lift: flat(out[0].props.style).transform[0].translateY, shown: out };
-  };
-  return { at, tick, draw, fell: () => draw.shared[1]!.value };
-}
-const phraseInk = (shown: any[]) =>
-  flat(shown.find((n) => n.type?.name === 'Line' && words(n).startsWith(' — '))?.props.style)
-    ?.color;
-
-// Breaks: the press loses its colour under reduced motion, keeps its travel there, sticks, or fires
-// when the band did not move.
-test('a blow dealt presses the phrase once; reduced motion keeps colour, not travel', (t) => {
-  for (const reduced of [false, true])
-    t.test(`reduced ${reduced}`, (s: any) => {
-      const f = foe(s, reduced);
-      f.at(fought('fine'));
-      f.at(fought('hurt'));
-      assert.equal(phraseInk(f.at(fought('hurt')).shown), color.dim);
-      assert.equal(g.sequences.length, 1);
-      f.draw.shared[0]!.value = 1;
-      assert.equal(f.at(fought('hurt')).lift, reduced ? 0 : -size.rule);
-      f.tick(250);
-      assert.equal(phraseInk(f.at(fought('hurt')).shown), undefined);
-    });
-});
-
-// Breaks: one blow in a pack presses every foe's line, or a cue other than a blow presses it at all.
-test('only a blow naming this foe presses its line', (t) => {
-  const f = foe(t);
-  const pack = (wolf: string, bear: string, hp: number) =>
-    ({
-      ...fought(),
-      combat: {
-        encounter_id: 'e',
-        opponent_id: 'wolf',
-        active_opponents: [
-          { id: 'wolf', band: wolf },
-          { id: 'bear', band: bear },
-        ],
-      },
-      resources: [{ resource: { key: 'hp' }, current: hp, maximum: 20 }],
-    }) as unknown as GameView;
-  f.at(pack('fine', 'fine', 20));
-  f.at(pack('fine', 'hurt', 20)); // the bear's blow
-  f.at(pack('fine', 'hurt', 15)); // the hero's loss, heard but no blow dealt
-  f.tick(1000);
-  f.at(pack('fine', 'hurt', 15));
-  assert.deepEqual(g.sequences, []);
-  f.at(pack('hurt', 'hurt', 15));
-  f.at(pack('hurt', 'hurt', 15));
-  assert.equal(g.sequences.length, 1);
-});
-
-// Breaks: the foe's line stays in full ink after it falls, or dims on a flight.
-test('a fallen foe settles to dim; a flight does not', (t) => {
-  for (const [after, fell] of [
-    [{ ...held_view, entities: [] } as unknown as GameView, 1],
-    [{ ...fought(), place: { id: 'away' }, combat: undefined } as unknown as GameView, 0],
-  ] as const)
-    t.test(String(fell), (s: any) => {
-      const f = foe(s);
-      f.at(fought('hurt'));
-      f.at(after);
-      assert.equal(f.fell(), fell);
-    });
 });
 
 // Breaks: a death with no line retains no narration read, so a fatal press never falls.

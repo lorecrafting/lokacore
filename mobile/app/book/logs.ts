@@ -83,6 +83,8 @@ export type Logs = {
   // An open elapsed settlement's held World entries, one per line.
   away?: { from: number; log: string[] };
   ended?: GameView['combat']; // a closed encounter's page, until Back to World (book-ui.md, Closure)
+  fell?: GameView['combat']; // the encounter the player died in: its page closes on Let go
+  closing?: boolean; // this view closed a fight (resetLogs), so a death in it is that fight's
   noted?: Set<string>; // the cue lines logged this room visit
 };
 
@@ -218,11 +220,18 @@ export function resetLogs(s: Logs, now: GameView) {
     s.away = undefined; // held lines belong to the room left, as its log
   }
   if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) dropLines(s.combatLog);
-  if (was.combat && !now.combat) s.ended = was.combat;
+  s.closing = !!was.combat && !now.combat;
+  if (s.closing) s.ended = was.combat;
+}
+
+// The player's death, from its receipt (book-ui.md, Falling): a fight it closed is the one they fell in.
+export function fall(s: Logs, command_id: string) {
+  s.died = command_id;
+  if (s.closing) s.fell = s.ended;
 }
 
 // A closing receipt's lines all end the fight on its Combat page, whatever their key (book-ui.md,
-// Closure); so do a spell's cast in the fight (a foe line's Cast a spell…, loka-x6t.109.5).
+// Closure); so do a spell's cast in the fight (a foe's Cast a spell…, loka-x6t.109.5).
 export const closing = (
   last: NarrationRecord,
   was: GameView,

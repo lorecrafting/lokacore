@@ -77,11 +77,11 @@ test('a page turn mounts a fresh page: the old wash does not carry over', async 
   const first = keyed(await go(0))[0].key;
   blow(first);
   pages.get(first)!.shared[0]!.value = 0.18;
-  assert.equal(flat(blow(first)[2].props.style).opacity, 0.18);
+  assert.equal(flat(blow(first)[3].props.style).opacity, 0.18);
   const second = keyed(await go(1))[0].key;
   const fresh = blow(second);
-  assert.equal(flat(fresh[2].props.style).opacity, 0);
-  assert.equal(flat(fresh[4].props.style).transform[0].scale, 1);
+  assert.equal(flat(fresh[3].props.style).opacity, 0);
+  assert.equal(flat(fresh[5].props.style).transform[0].scale, 1);
 });
 
 // Breaks: a travel's riffle runs one sweep's length, cutting its five sweeps short (book-ui.md, Page life).

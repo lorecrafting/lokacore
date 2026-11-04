@@ -193,6 +193,7 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
           lines: [...(fight ? [{ key: fight }] : []), { key: line }],
           combat_lines: fight ? [0, 1] : [0],
           ...(fight && { arrival: 1 }),
+          ...(line === 'combat.death' && { died: true }),
         } as never;
       listener?.({ kind: 'state', projection: projection(), status: { kind: 'ready' } });
     },
@@ -215,9 +216,29 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
   };
 }
 
+// Breaks: a death that closes no fight (bled out on the clock) turns an earlier fight's closed page into a death's.
+test('a death after a closed fight keeps its Back to World', () => {
+  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
+  const h = mounted(view({ combat: undefined }));
+  try {
+    h.publish(
+      view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
+      'combat.hit',
+    );
+    assert.ok(h.texts().includes('Combat'));
+    h.publish(view({ combat: undefined }), 'combat.result');
+    assert.ok(h.texts().includes('Back to World'));
+    h.publish(view({ combat: undefined }), 'combat.death');
+    assert.ok(h.texts().includes('You wake at the shrine.'));
+    assert.equal(h.texts().includes('Let go'), false);
+  } finally {
+    h.close();
+  }
+});
+
 // Breaks: a closure jumps straight to the World (its closing lines unseen), the ended page keeps
 // action cards, the footer or an open status line, or Back to World leaves the Combat page.
-test('confirmed encounter foregrounds another page; closure keeps Combat until Back to World', () => {
+test('confirmed encounter foregrounds another page; closure keeps Combat until its foot', () => {
   for (const ending of ['closed', 'opponent_dead', 'player_dead']) {
     const h = mounted(view({ combat: undefined }));
     try {
@@ -232,7 +253,7 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until B
       assert.ok(h.texts().includes('Combat'));
       assert.ok(h.texts().includes('You strike the marsh rat.'));
       assert.equal(h.texts().includes('Back to World'), false); // a live encounter has no foot
-      assert.ok(h.texts().includes('a marsh rat (your target)'));
+      assert.ok(!h.texts().some((t) => t.startsWith('a marsh rat')), 'no foe line (loka-kgd.204)');
       assert.equal(h.texts().includes('Settings'), false);
       h.publish(
         view({
@@ -256,19 +277,24 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until B
         ending === 'player_dead' ? 'combat.hit' : undefined,
       );
       const ended = h.texts();
-      assert.ok(ended.includes('Combat') && ended.includes('a marsh rat'), ending);
-      assert.equal(ended.includes('a marsh rat (your target)'), false); // nothing is left to aim at
+      assert.ok(
+        ended.includes('Combat') && !ended.some((t) => t.startsWith('a marsh rat')),
+        ending,
+      );
       if (ending !== 'closed')
         assert.ok(
           ended.includes(
             ending === 'player_dead' ? 'You wake at the shrine.' : 'The marsh rat falls.',
           ),
         );
-      assert.equal(ended.filter((t) => t === 'Back to World').length, 1);
+      // A death's page closes on Let go alone, a fight's on Back to World (book-ui.md, Falling).
+      const [foot, not] =
+        ending === 'player_dead' ? ['Let go', 'Back to World'] : ['Back to World', 'Let go'];
+      assert.equal(ended.filter((t) => t === foot).length, 1, ending);
       assert.equal(h.footer(), false);
-      for (const shut of [CONTENTS, 'sitting', 'Stand', 'Flee'])
+      for (const shut of [CONTENTS, 'sitting', 'Stand', 'Flee', not])
         assert.throws(() => h.tap(shut), undefined, `${ending}: ${shut}`);
-      h.tap('Back to World');
+      h.tap(foot);
       assert.equal(h.texts().includes('Combat'), false);
       // The fight's lines stay in the room log; a death's room change clears the cellar's, and
       // its own receipt's fight lines stay on the Combat page: the shrine opens at woke (loka-glj8).

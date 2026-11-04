@@ -250,6 +250,8 @@ function Bottom(p: BottomProps) {
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
   const detail = !shut && detailPage(p.page);
   if (detail && !pending && !p.screen.catchingUp && !fault) return null;
+  // Dead, the page shows only Let go: no status line (owner 2026-11-04).
+  if (p.screen.fell && !p.screen.catchingUp && !fault) return null;
   return (
     <View
       style={{
