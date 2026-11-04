@@ -223,9 +223,7 @@ function lookAt(p: {
   const { view, text } = p.screen;
   return (
     <>
-      {thing.description && (
-        <Text style={prose(c, t)}>{plain(victimWords(text, thing, thing.description))}</Text>
-      )}
+      {thing.description && <Text style={prose(c, t)}>{plain(text(thing.description))}</Text>}
       {'band' in thing && thing.band && (
         <Text style={prose(c, t)}>
           {LABEL.looksToBe(name, bandPhrase({ band: thing.band }, text))}
