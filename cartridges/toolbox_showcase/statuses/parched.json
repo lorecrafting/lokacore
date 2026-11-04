@@ -1,8 +1,8 @@
 {
   "duration": 5400,
   "tick_every": 1800,
-  "resource": "thirst",
-  "per_tick": -1,
+  "resource": "mv",
+  "per_tick": -10,
   "name": "condition.parched",
   "narration": {
     "applied": "narration.parched.applied",

@@ -37,8 +37,6 @@
     "16": "shepherd_hut"
   },
   "immune": [
-    "hungry",
-    "thirsty",
     "parched",
     "windburnt",
     "overheated"

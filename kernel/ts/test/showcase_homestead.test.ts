@@ -452,7 +452,7 @@ const cookAt = (w: World, scripted: string) => ({
 let fed: World; // step 11 just after the stew, fed still active
 
 // Breaks: the order taking one fish, its price or escrow custody, the ready_after boundary
-// (+299 or +300), the stew not fed, or fed's str modifier or duration.
+// (+299 or +300), the stew not fed, fed's str modifier or duration, or the stew's longer well fed.
 test('homestead 11: order a stew from two fish, claim it at +300, eat it', () => {
   w = walk(w, 'west', 'south');
   assert.equal(refused(drop(w, 'trout_02'), cook(w, 'stew')), 'not_owned');
@@ -473,9 +473,11 @@ test('homestead 11: order a stew from two fish, claim it at +300, eat it', () =>
   fed = w;
   assert.equal(pool(w, 'mv'), Math.min(100, mv + 10));
   assert.equal(str(w), 11);
-  assert.deepEqual(labels(w), ['condition.fed']);
+  assert.deepEqual(labels(w), ['condition.fed', 'condition.well_fed']);
   w = wait(w, w.state.clock + 3600).world;
   assert.equal(str(w), 10);
+  // A cooked meal's well fed (7200) outlasts a loaf's (the status's own 3600).
+  assert.deepEqual(labels(w), ['condition.well_fed']);
   valid(w);
 });
 
@@ -502,7 +504,7 @@ test('homestead 12: learn cooking, cook a hearty stew from two fresh fish, eat i
   assert.deepEqual(offer(w, 'cook_feast').reason, { code: 'invalid_state' });
   w = play(w, { type: 'consume', item_id: hearty! }).world;
   assert.equal(str(w), 12);
-  assert.deepEqual(labels(w), ['condition.hearty']);
+  assert.deepEqual(labels(w), ['condition.hearty', 'condition.well_fed']);
   // Branch: the same stew eaten while fed is still active.
   const both = structuredClone(fed) as any;
   both.state.containers[hearty!] = both.body;

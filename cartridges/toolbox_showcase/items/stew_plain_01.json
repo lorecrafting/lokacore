@@ -16,7 +16,11 @@
     "label": "action.eat",
     "narration": "narration.eat_stew_plain",
     "applies": [
-      "fed"
+      "fed",
+      {
+        "status": "well_fed",
+        "duration": 7200
+      }
     ]
   },
   "words": {
