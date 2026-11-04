@@ -81,7 +81,7 @@ function shown(
   return code ? { ...offer, available: false, reason: { code } } : { ...offer, available: true };
 }
 
-function eligible(world: World, body: EntityId, id: EntityId, steps: Steps): boolean {
+export function eligible(world: World, body: EntityId, id: EntityId, steps: Steps): boolean {
   const code = vesselUsable(world, body, id, steps);
   if (code === 'budget_exceeded' || code === 'containment_cycle' || code === 'precondition_failed')
     throw new KernelError(code);

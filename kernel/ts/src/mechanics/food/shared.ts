@@ -89,7 +89,6 @@ function restored(world: World, body: EntityId, { resource, amount }: Effect) {
 }
 
 function drink(world: World, p: Payload, steps: Steps): UnavailableReason | Plan {
-  if (!world.cartridge.lock.capabilities.liquid) return { code: 'precondition_failed' };
   const plan = drinkPlan(
     world,
     { type: 'drink', actor_id: p.actor_id, vessel_id: p.item_id },

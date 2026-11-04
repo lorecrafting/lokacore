@@ -12,6 +12,9 @@ defmodule Loka.ContentFoodTest do
        ["items/loaf.edible.amount"]},
       {file, &put_in(&1, ["edible", "resource"], "unknown"), ["items/loaf.edible"]},
       {file, &put_in(&1, ["edible", "resource"], "hp"), ["items/loaf.edible"]},
+      {file, &update_in(&1, ["edible"], fn e -> Map.delete(e, "resource") end),
+       ["items/loaf.edible"]},
+      {"liquids/water.json", &Map.put(&1, "resource", "unknown"), ["liquids/water.resource"]},
       {file, &Map.put(&1, "container", true), ["items/loaf.edible"]},
       {file, &Map.put(&1, "slot", "hand"), ["items/loaf.slot"]},
       {file, &put_in(&1, ["edible", "narration"], "missing.line"),
@@ -37,6 +40,12 @@ defmodule Loka.ContentFoodTest do
       {:error, d} = Loka.ContentSource.compile(dir, [{file, changed} | regen])
       assert Enum.any?(d, &(&1["path"] in paths)), inspect({file, Enum.map(d, & &1["path"])})
     end
+  end
+
+  # Breaks: the restore check asks more than a positive standing regen of mv.
+  test "a restore compiles when mv regenerates by one standing", %{dir: dir} do
+    standing = &put_in(&1, ["resources", "mv", "regen", "by_position", "standing"], 1)
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [{"resources.json", standing}])
   end
 
   # loka-kgd.209, loka-kgd.50. Breaks: a drink's applies escaping the meal gate, so a liquid

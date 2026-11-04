@@ -67,7 +67,7 @@ export function runStatus(
   if (world.consumed && world.state.containers[body] === world.consumed)
     return accepted<never>(world, 'job_ran', [...ops, ...expire(visit, body, status, row, 0)], []);
   const expired = now >= (row.ends_at ?? Infinity);
-  const due = !expired && ticksOf(spec).length > 0 && now >= tick;
+  const due = !expired && !!ticksOf(spec).length && now >= tick;
   const changes = due ? amounts(visit, body, spec) : [];
   const fatal = changes.some((c) => c.fatal);
   const by = changes.some((c) => c.by !== 0);

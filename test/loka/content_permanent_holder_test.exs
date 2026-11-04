@@ -22,6 +22,18 @@ defmodule Loka.ContentPermanentHolderTest do
     assert codes(dir, & &1) == refused(@path <> ".item")
   end
 
+  # Breaks: the item refusal reads only per_tick, so a status ticking through `ticks` lands on an item.
+  test "a permanent status ticking through ticks is refused on a named item", %{dir: dir} do
+    ticks = fn s ->
+      s |> Map.delete("resource") |> Map.put("ticks", [%{"resource" => "hp", "per_tick" => -1}])
+    end
+
+    assert {:error, diags} =
+             Loka.ContentSource.compile(dir, [{"statuses/cursed.json", ticks}])
+
+    assert Enum.map(diags, &{&1["code"], &1["path"], &1["data"]}) == refused(@path <> ".item")
+  end
+
   test "a ticking permanent status is refused on a named room", %{dir: dir} do
     assert codes(dir, &holder(&1, "room", "chapel")) == refused(@path <> ".room")
   end

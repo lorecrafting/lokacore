@@ -7,6 +7,7 @@ import { id } from '../src/foundation/id_source.ts';
 import { level } from '../src/mechanics/resource.ts';
 import { carrying } from '../src/mechanics/containment/shared.ts';
 import { transition } from '../src/mechanics/food/shared.ts';
+import { foodActions } from '../src/view/food.ts';
 import { LIMITS } from '../src/contracts.gen.ts';
 import { fresh, entity, command, ref, prefix, onlyFood } from './food_fixture.ts';
 
@@ -235,4 +236,21 @@ test('the consumed holder takes the ordinal after the last slot holder and is no
   assert.equal(ordinal(w.consumed!), last + 1);
   for (const m of [w.state.containers, w.entities, w.capacities])
     assert.equal(w.consumed! in m, false);
+});
+
+// Breaks: a restore drops a gap of exactly one, or the view reads an unknown id as an item
+// (mv 99 of 100, apple amount 6).
+test('Consume fills a gap of one and offers nothing on an unknown id', () => {
+  const w = fresh();
+  const apple = entity(w, 'item', 'apple_01');
+  const held = step(w, command(w, 1, { type: 'take', item_id: apple }), 1).world;
+  const row = key({ kind: 'resource', entity_id: w.body, resource: ref('resource', 'mv') });
+  const resources = {
+    ...held.state.resources,
+    [row]: { value: 99, at: held.state.clock, rate: 18, remainder: 0 },
+  };
+  const gap = { ...held, state: { ...held.state, resources } };
+  const full = step(gap, command(gap, 2, { type: 'consume', item_id: apple }), 2);
+  assert.equal(level(full.world, w.body, ref('resource', 'mv')), 100);
+  assert.deepEqual(foodActions(held, held.character, 'nope', {}, { n: 0 }), []);
 });

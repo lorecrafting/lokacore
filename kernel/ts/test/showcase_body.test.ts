@@ -157,7 +157,8 @@ test('body 7: Wat arrives at 08:00, is chilled, leaves at 09:00, ticks at 10:00,
 
 // Breaks: bread applies no well fed or it ticks one pool only, water applies no refreshed, or
 // either buff lasts the wrong span (statuses/well_fed.json: hp +1 and mv +5 every 1800 for 3600,
-// the loaf restores mv 5; refreshed.json: mv +5 every 900 for 1800). Body 9 starts in the hut.
+// the loaf restores mv 5; refreshed.json: mv +5 every 900 for 1800), or a receipt's events skip
+// or repeat a position (a drink's status_applied follows its drank). Body 9 starts in the hut.
 test('body 8: in the hut bread leaves you well fed and water refreshed', () => {
   w = go(w, 'east').world;
   const at = key({ kind: 'resource', resource: resourceRef(w, 'mv'), entity_id: w.body });
@@ -171,6 +172,11 @@ test('body 8: in the hut bread leaves you well fed and water refreshed', () => {
   };
   const eat = play(low, { type: 'consume', item_id: id(low, 'item', 'hut_loaf') });
   assert.ok(eat.lines.includes('narration.well_fed.applied'), JSON.stringify(eat.lines));
+  const order = (r: typeof eat) =>
+    r.decision.kind === 'accepted'
+      ? r.decision.events.map((e) => [e.payload.type, e.position])
+      : [];
+  assert.deepEqual(order(eat), [['status_applied', 1]]);
   assert.deepEqual(labels(eat.world), ['condition.well_fed']);
   const view = gameView(eat.world);
   assert.deepEqual(validate('GameView', view), []);
@@ -190,6 +196,10 @@ test('body 8: in the hut bread leaves you well fed and water refreshed', () => {
   assert.ok(wait(eat.world, t0 + 3600).lines.includes('narration.well_fed.expired'));
   const drink = play(low, { type: 'consume', item_id: id(low, 'item', 'trough_skin') });
   assert.ok(drink.lines.includes('narration.refreshed.applied'), JSON.stringify(drink.lines));
+  assert.deepEqual(order(drink), [
+    ['drank', 1],
+    ['status_applied', 2],
+  ]);
   assert.deepEqual(
     [gain(drink.world, 600), gain(drink.world, 1200)],
     [
