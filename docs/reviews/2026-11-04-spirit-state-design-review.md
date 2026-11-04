@@ -53,3 +53,20 @@
 ## Verdict
 
 CHANGES REQUIRED: findings 1 to 3 are small and local; the rest of the state matches the rulings.
+
+## Fix re-check
+
+- Head `d898995e0f0d9645c0ede42731a6433ce57662e0`, diffed against the review head `500cd4f64`. CI at this head (`gh run list --commit`): ci, book-e2e and graph-diff success.
+- Finding 1, fixed: `UnderInk.tsx` `riseFade` uses `motion.fade` with `ReduceMotion.Never` under reduced motion; `page_life.test.ts` pins the mode.
+- Finding 2, fixed: `heldLayer.ts` `spiritInk(p)` reads `dark(p)`; `heldLayer.test.ts` holds 4.5:1 for every role on the dusk/dark and light/dawn mid-blends (the proposed check).
+- Finding 3, fixed for the web: `Body.tsx` Rise refocuses only when the waiting card held focus; a blur as it unmounts is not a move. `combat_flow.test.ts` covers both cases.
+- Ruling 5, fixed: `Book.tsx:266` keeps the spirit layout while catching up; `spirit.ts` `haunt` wakes on a fault. I accept the developer's added book-ui.md sentence as written.
+- Ruling 4, **should-fix** `mobile/app/book/Unavailable.tsx:55` (`waitName`): the web name becomes "Rise, 6", "Rise, 5", and so on. A focused button whose name changes is re-announced by some readers (VoiceOver with Safari among them), so a player waiting on the card hears a number every second. That breaks "never announced per tick", and the name is no longer its label. Required change:
+  - The accessible name stays `LABEL.rise` at every tick, so drop `waitName`.
+  - On the web only, set `aria-description` on the button to `${left} seconds`, or `1 second` when one is left. Use the DOM ref, as `refusedProps` sets `aria-disabled` (`pages.tsx:30`); react-native-web does not pass `aria-description`. A description is read when focus lands and is not re-read when it changes.
+  - The stories find the button by `{ name: 'Rise' }` and assert `toHaveAccessibleDescription('6 seconds')` in RoomPage and `'4 seconds'` in ActionCard; the `combat_flow.test.ts` `'Rise, 1'` assertion changes to match.
+  - The spec text is written below.
+- Open risk (b), accepted, follow-up: on native, `onFocus` does not fire for a screen reader's focus, so the reader's place is not carried across zero. It is a device check for when native resumes; the likely fix is one pressable across both states.
+- `heldLayer.ts:44` `lampLit` also matches exact hex. During the dusk/dark cross-fade a lit lamp's glow drops out and comes back over about 1.5 s. Follow-up nit, not a blocker here; the fix is `dark(p)` as for `spiritInk`.
+- Spec text written: `docs/system/book-ui.md` Spirit state, The rise card: the name is the same at every tick, and on the web the seconds are its description ("4 seconds", "1 second"), read when focus lands.
+- Verdict: CHANGES REQUIRED, for ruling 4's label only; everything else is approved.
