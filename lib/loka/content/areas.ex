@@ -69,7 +69,7 @@ defmodule Loka.Content.Areas do
   @spec crossed(String.t(), String.t()) :: String.t() | nil
   def crossed(from, to) do
     {a, b} = {area_of(from), area_of(to)}
-    if a && b && a != b, do: b
+    if a && a != b, do: b
   end
 
   @doc """
