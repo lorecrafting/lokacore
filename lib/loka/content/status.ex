@@ -1,4 +1,4 @@
-# size: allow 311, consumable applies entries carry their own duration and drinks share the meal checks (loka-kgd.209)
+# size: allow 318, consumable applies entries carry their own duration, drinks share the meal checks and a status ticks each pool once (loka-kgd.209)
 defmodule Loka.Content.Status do
   @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers and (row G13) the liquids that cure them; (row W8) permanent statuses, which may tick until cured, never move the derived hp maximum."
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, diag: 4, ref: 3]
@@ -182,7 +182,9 @@ defmodule Loka.Content.Status do
           do: diag("SCHEMA_VIOLATION", at(rel, [k]))
 
     # Beside a `resource`, Resolve.expand leaves the ticks' own refs unexpanded: report only both.
-    if both != [], do: both, else: Enum.flat_map(Enum.with_index(ticks), &tick(rel, &1, m, defs))
+    if both != [],
+      do: both,
+      else: Enum.flat_map(Enum.with_index(ticks), &tick(rel, &1, m, defs, ticks))
   end
 
   defp pools(rel, s, m, defs) when is_map_key(s, "resource"),
@@ -190,10 +192,15 @@ defmodule Loka.Content.Status do
 
   defp pools(rel, _, _, _), do: [diag("SCHEMA_VIOLATION", at(rel, ["resource"]))]
 
-  defp tick(rel, {%{"per_tick" => 0}, i}, _, _),
+  defp tick(rel, {%{"per_tick" => 0}, i}, _, _, _),
     do: [diag("SCHEMA_VIOLATION", at(rel, ["ticks", i, "per_tick"]))]
 
-  defp tick(rel, {t, i}, m, defs), do: Refs.reference(rel, ["ticks", i], "resource", t, m, defs)
+  # One tick per pool: the kernel saturates each tick alone, so a repeat would overshoot the floor.
+  defp tick(rel, {t, i}, m, defs, ticks) do
+    if t["resource"] in Enum.map(Enum.take(ticks, i), & &1["resource"]),
+      do: [diag("SCHEMA_VIOLATION", at(rel, ["ticks", i, "resource"]))],
+      else: Refs.reference(rel, ["ticks", i], "resource", t, m, defs)
+  end
 
   # Never 0; only a ticks (loka-kgd.209), modifying (row 2c), fear (row W21), reader (4, 5, 6, 8) or permanent (row W8) status
   # may omit it.

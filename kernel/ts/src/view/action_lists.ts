@@ -118,6 +118,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
     worn: (id: string) =>
       listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id).concat(
         liquid(id),
+        foodActions(world, actor, id, set, steps),
         useActions(world, actor, id, set, steps),
       ),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, { direction })),
