@@ -343,7 +343,7 @@ test('same-body fatal return reopens the paid room, meal and ale truth', (t) => 
   b.reopen();
   const w = b.story.world();
   assert.equal(w.body, b.initial.body);
-  assert.equal(w.state.containers[w.body], b.initial.roomIds[`${prefix}:room/crossroads_inn`]);
+  assert.equal(w.state.containers[w.body], b.initial.roomIds[`${prefix}:room/wayside_shrine`]);
   assert.deepEqual(amounts(w), [14, 16]);
   assert.equal(stock(w), 3);
   assert.equal(ale(w).quantity, 3);

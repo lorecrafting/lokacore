@@ -1780,7 +1780,8 @@
         "lines",
         "seconds"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [{"lines": ["death.revival.1", "death.revival.2"], "seconds": 10}]
     },
     "DeathSettings": {
       "type": "object",
