@@ -114,12 +114,13 @@ function extra(
   s: Any,
   containers: Map<string, string>,
   quests: Map<string, Any>,
+  ops: DeltaOp[],
 ): boolean {
   switch (op.op) {
     case 'fuel.set':
       return fuelValid(op, s);
     case 'entity.transfer':
-      return foodTransferValid(op, s) && transferValid(op, containers, s.capacities);
+      return foodTransferValid(op, s, ops) && transferValid(op, containers, s.capacities);
     case 'quest.retire':
     case 'quest.activate':
     case 'quest.transition':
@@ -159,7 +160,7 @@ export function deltaPreconditions(state: Any, ops: DeltaOp[], result: Any) {
     }
     if (
       !same(seen.has(k) ? seen.get(k) : initial(op, state), need) ||
-      !extra(op, state, containers, quests)
+      !extra(op, state, containers, quests, ops)
     )
       return false;
     seen.set(k, give);

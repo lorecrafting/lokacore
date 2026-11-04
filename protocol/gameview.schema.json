@@ -515,6 +515,10 @@
         "carrying": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
+        "victim": {
+          "description": "An NPC's death-created corpse: the victim's short as the viewer sees it, filling {victim} in the corpse's text (owner decision 2026-11-02); absent otherwise.",
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
         "contents": {
           "type": "array",
           "items": {

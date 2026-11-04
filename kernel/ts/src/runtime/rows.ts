@@ -119,6 +119,7 @@ export type JobRow = {
   readonly quest_instance_id?: QuestInstanceId;
   readonly actor_id?: CharacterId;
   readonly bleed_body_id?: EntityId;
+  readonly corpse_id?: EntityId;
   readonly bleed_generation?: number;
   readonly sight?: Extract<DeltaOp, { op: 'job.schedule' }>['sight'];
 };

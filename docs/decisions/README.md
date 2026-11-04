@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-11-02 [Owner decision: corpses and respawn](owner-decision-corpses-respawn-2026-11-02.md): a corpse names its victim, stays uncarriable, and decays opt-in (items spill, nothing destroyed); prologue numbers for decay and goblin respawn.
 - 2026-11-01 [Owner decision: Diku rounds](owner-decision-diku-rounds-2026-11-01.md): opt-in initiative, round 1 at Attack, named lines, damage tiers and condition lines; the showcase follows LegendMUD wording.
 - 2026-11-01 [Owner decision: fast cold open; no receipt replay at open](owner-decision-fast-cold-open-2026-11-01.md)
 - 2026-11-01 [Owner decision: away catch-up is capped](owner-decision-away-catch-up-cap-2026-11-01.md)

@@ -1,3 +1,4 @@
+// size: allow 308, death@1 decay adds its job binding (loka-kgd.203)
 // Independent encounter/job replay: prove both guards and final rows without composing.
 import { key, same } from '../foundation/compose.ts';
 import { advancePack, memberInitiallyPresent, packMembers } from './invariants_pack.ts';
@@ -173,6 +174,7 @@ function job(op: Any, row: Any, horizon: number, at: number): Any {
     if (['reaction', 'order'].includes(op.job.kind) && op.actor_id !== undefined)
       next.actor_id = op.actor_id;
     if (op.sight !== undefined) next.sight = op.sight;
+    if (op.corpse_id !== undefined) next.corpse_id = op.corpse_id;
     if (op.bleed_body_id !== undefined) {
       next.bleed_body_id = op.bleed_body_id;
       next.bleed_generation = op.bleed_generation;
@@ -186,8 +188,17 @@ function job(op: Any, row: Any, horizon: number, at: number): Any {
   return row.due_time <= horizon ? { ...row, status: 'completed' } : undefined;
 }
 
-// size: allow 47, one binding table per job kind (FD1: a reaction job carries actor_id; S3: an order job may)
+// size: allow 55, one binding table per job kind (FD1: a reaction job carries actor_id; S3: an order job may; death@1 decay)
 function bindingValid(op: Any) {
+  // death@1 decay: bound by the corpse only (independent of compose_job.ts).
+  if (op.corpse_id !== undefined || op.job.kind === 'decay')
+    return (
+      op.corpse_id != null &&
+      op.job.kind === 'decay' &&
+      Object.keys(op).every((k) =>
+        ['op', 'writer_group', 'job_id', 'job', 'due_time', 'corpse_id'].includes(k),
+      )
+    );
   if (
     op.bleed_body_id !== undefined ||
     op.bleed_generation !== undefined ||

@@ -21,6 +21,7 @@ valid:
   - "import { runStatus } from '../status/job.ts';"
   - "import { runReplenish } from '../containment/job.ts';"
   - "import { runWage } from '../escort/job.ts';"
+  - "import { runDecay } from '../death/job.ts';"
   - "import { flee } from './flee.ts';"
   - "import { exchangeTransfers } from './exchange.ts';"
   - "import { decideHarvest } from './harvest.ts';"

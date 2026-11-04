@@ -13,6 +13,7 @@
 // invalid_state, except a crossed-hour sub-step (decideAt `at` later than its due time), which
 // schedules no job when its next hour is crossed too (so its arrival takes the first ordinal).
 // Daily schedules retain their DefinitionRef dispatch; bound encounter jobs use the current occurrence.
+import { runDecay } from '../death/job.ts';
 import { expiry } from '../water/expiry.ts';
 import { expire } from '../quest/job.ts';
 import { roundSequence } from '../combat/round.ts';
@@ -66,6 +67,7 @@ export function jobRoute(row: JobRow) {
   if (row.quest_instance_id) return 'quest';
   if (row.crow_phase !== undefined) return 'crow';
   if (row.sight) return 'sight';
+  if (row.corpse_id) return 'decay';
   return KIND_ROUTES.find((kind) => kind === row.job.kind) ?? 'npc';
 }
 
@@ -100,6 +102,7 @@ export const decideAt = (
     if (route === 'crow')
       return runCrow(world, command, payload.job_id, row, crowBinding(world, payload.job_id), mint);
     if (route === 'sight') return runSight(world, payload.job_id, row, steps);
+    if (route === 'decay') return runDecay(world, payload.job_id, row);
     if (route === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
     if (route === 'population') return runPopulation(world, command, payload.job_id, row, mint, at);
     if (route === 'replenish')

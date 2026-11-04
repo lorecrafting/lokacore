@@ -33,4 +33,30 @@ defmodule Loka.ContentDeathTest do
       assert {:error, _} = Loka.Content.compile(dir), name
     end
   end
+
+  # Breaks (owner decision 2026-11-02): a corpse decay admitted without the job runner (schedule@1)
+  # or the consumed holder its corpse moves to (food@1).
+  test "corpse decay needs schedule and food" do
+    dir = Loka.ContentSource.copy("cartridges/cellar_sampler")
+    path = "cartridge.world.death.player_corpse_decay"
+    decay = {"cartridge.json", &put_in(&1, ["world", "death", "player_corpse_decay"], 60)}
+
+    no_schedule =
+      {"cartridge.json",
+       &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "schedule") end)}
+
+    for {edits, expected} <- [
+          {[decay], [{"UNDECLARED_CAPABILITY", path, "food"}]},
+          {[decay, no_schedule],
+           [{"UNDECLARED_CAPABILITY", path, "food"}, {"UNDECLARED_CAPABILITY", path, "schedule"}]}
+        ] do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+
+      assert for(
+               d <- diags,
+               d["path"] == path,
+               do: {d["code"], d["path"], d["data"]["capability"]}
+             ) == expected
+    end
+  end
 end
