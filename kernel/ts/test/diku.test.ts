@@ -78,7 +78,8 @@ const ops = (d: any) => d.delta.ops.map((o: { op: string }) => o.op);
 
 // Breaks: Attack only schedules round 1 (no blows, no RNG), draws other than three, the proposal carries a job.complete
 // (invariant job_complete_owned_by_run), round 2 is not at clock + interval, the odd/even rule
-// orders round 1, a line lacks its name, the tier or condition is missing or misplaced.
+// orders round 1, a line lacks its name, the tier or condition is missing or not right after the
+// player's swing (Legend order, loka-kgd.202).
 test('Attack strikes round 1 at once, player first, and names, tiers and conditions it', () => {
   const { before, w, d, lines } = attack(sampler());
   const g = goblin(w);
@@ -101,15 +102,15 @@ test('Attack strikes round 1 at once, player first, and names, tiers and conditi
   );
   assert.deepEqual(lines, [
     { key: key('player_hit_25'), bindings: { target: GOBLIN } },
-    { key: key('npc_hit'), bindings: { attacker: GOBLIN } },
     { key: key('condition_50'), bindings: { target: GOBLIN } },
+    { key: key('npc_hit'), bindings: { attacker: GOBLIN } },
   ]);
   // 4 of 10 is below the 50 cut (400 < 500), at or above the 1 cut
   const two = round(w);
   assert.deepEqual([hp(two.w, g), hp(two.w, two.w.body)], [4, 6]);
   assert.deepEqual(
     two.lines.map((l) => l.key),
-    [key('player_hit_25'), key('npc_hit'), key('condition_1')],
+    [key('player_hit_25'), key('condition_1'), key('npc_hit')],
   );
 });
 
@@ -141,7 +142,7 @@ test('a cut compares 100 × hp with at_percent × hp range, both sides, on a 101
   assert.equal(hp(w, goblin(w)), 98);
   assert.deepEqual(
     lines.map((l) => l.key),
-    [key('player_hit_25'), key('npc_hit'), key('condition_50')],
+    [key('player_hit_25'), key('condition_50'), key('npc_hit')],
   );
 });
 
@@ -202,8 +203,8 @@ test('without initiative Attack only schedules; tiers and conditions still apply
   const one = round(w);
   assert.deepEqual(one.lines, [
     { key: key('player_hit_25') },
-    { key: key('npc_hit') },
     { key: key('condition_50'), bindings: { target: GOBLIN } },
+    { key: key('npc_hit') },
   ]);
   const two = round(one.w);
   assert.deepEqual(
@@ -230,9 +231,9 @@ test('three swings at 30 hit, miss, hit: a summary, then the 50 tier of the 6 to
   assert.deepEqual(lines, [
     { key: key('player_volley'), bindings: { count: 3, hits: 2 } },
     { key: key('player_hit_50'), bindings: { target: GOBLIN } },
+    { key: key('condition_1'), bindings: { target: GOBLIN } },
     { key: key('npc_volley_all'), bindings: { attacker: GOBLIN, count: 2, hits: 2 } },
     { key: key('npc_hit'), bindings: { attacker: GOBLIN } },
-    { key: key('condition_1'), bindings: { target: GOBLIN } },
   ]);
 });
 
@@ -249,7 +250,7 @@ test('one hit of two tells the _one summary; no hit tells only the miss line', (
   ]);
   assert.deepEqual(told(0).slice(0, 2), [
     [key('player_miss'), { target: GOBLIN }],
-    [key('npc_hit'), { attacker: GOBLIN }],
+    [key('condition_100'), { target: GOBLIN }],
   ]);
 });
 
@@ -265,9 +266,9 @@ test('swings grow the round budget past eight draws', () => {
     [
       key('player_volley_all'),
       key('player_hit_50'),
+      key('condition_50'),
       key('npc_volley_all'),
       key('npc_hit_50'),
-      key('condition_50'),
     ],
   );
 });

@@ -92,8 +92,16 @@ export function combatLines(s: Story, d: Accepted, lines: NonNullable<Accepted['
         o.op === 'encounter.close' &&
         ['engaged', 'fled'].includes(d.outcome)),
   );
+  const combat = s.world.cartridge.world?.combat;
+  // Every key a round can say: its strike words, its tiers and its foe's condition (loka-kgd.202).
   const keys = d.events.some((e) => e.payload.type === 'attack_result')
-    ? Object.values(s.world.cartridge.world?.combat?.narration ?? {})
+    ? [
+        ...Object.values(combat?.narration ?? {}),
+        ...(combat?.tiers ?? []).flatMap((t) =>
+          Object.values(t).filter((v) => typeof v === 'string'),
+        ),
+        ...(combat?.conditions ?? []).map((c) => c.text),
+      ]
     : [];
   const packKeys = Object.values(s.world.cartridge.populations ?? {}).flatMap((plan) => {
     const n = plan.pack?.narration;

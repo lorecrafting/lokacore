@@ -560,28 +560,31 @@
   "a boar grunting",
   "You quickly attack and hit 2 times.",
   "You hit the boar hard.",
+  "The boar has some cuts.",
   "The boar quickly attacks 2 times and hits once.",
   "The boar hits you extremely hard.",
-  "The boar has some cuts.",
   "The tusk opens a wound; you are bleeding.",
   "The tusk leaves a scar that will not fade.",
   "the iron smell of your own blood",
-  "You hit the boar.",
-  "The boar hits you extremely hard.",
-  "The boar has many nasty wounds.",
   "You quickly attack 2 times and hit once.",
-  "The boar quickly attacks and hits 2 times."
+  "You hit the boar.",
+  "The boar has many nasty wounds.",
+  "The boar quickly attacks and hits 2 times.",
+  "The boar hits you extremely hard."
  ],
  "combatLog": [
   "You quickly attack and hit 2 times.",
   "You hit the boar hard.",
+  "The boar has some cuts.",
   "The boar quickly attacks 2 times and hits once.",
   "The boar hits you extremely hard.",
-  "The boar has some cuts.",
   "The tusk opens a wound; you are bleeding.",
   "The tusk leaves a scar that will not fade.",
   "You quickly attack 2 times and hit once.",
-  "The boar quickly attacks and hits 2 times."
+  "You hit the boar.",
+  "The boar has many nasty wounds.",
+  "The boar quickly attacks and hits 2 times.",
+  "The boar hits you extremely hard."
  ],
  "details": {}
 }
