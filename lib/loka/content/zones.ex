@@ -18,7 +18,7 @@ defmodule Loka.Content.Zones do
   @spec expand([entry()]) :: {[entry()], [fault()]}
   def expand(files) do
     # A room with malformed `zones` joins no zone.
-    {good, bad} = files |> rooms() |> Enum.split_with(&(elem(&1, 3) == nil or keys?(elem(&1, 3))))
+    {good, bad} = files |> rooms() |> Enum.split_with(&keys?(elem(&1, 3)))
     zones = members(good)
     {files, refused} = files |> Enum.map(&rule(&1, zones)) |> Enum.unzip()
     {files, repeats} = Areas.unique(List.flatten(files))
@@ -26,7 +26,11 @@ defmodule Loka.Content.Zones do
   end
 
   defp rooms(files),
-    do: for({rel, {:room, room, steps}, %{} = v} <- files, do: {rel, room, steps, v["zones"]})
+    do:
+      for(
+        {rel, {:room, room, steps}, %{} = v} <- files,
+        do: {rel, room, steps, Map.get(v, "zones", [])}
+      )
 
   defp malformed({rel, _, steps, _}),
     do: {"SCHEMA_VIOLATION", {rel, steps ++ ["zones"]}, invalid("type")}
@@ -36,7 +40,7 @@ defmodule Loka.Content.Zones do
   defp members(rooms) do
     pairs =
       for {rel, room, _, zs} <- rooms,
-          zone <- List.wrap(Areas.area_of(rel)) ++ (zs || []),
+          zone <- List.wrap(Areas.area_of(rel)) ++ zs,
           uniq: true,
           do: {zone, room}
 

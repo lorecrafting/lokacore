@@ -1,7 +1,7 @@
 defmodule Loka.ContentAreaFoldersTest do
   use ExUnit.Case, async: true
 
-  alias Loka.Content.{Lint, Source, SourceLines}
+  alias Loka.Content.{Explain, Lint, Source, SourceLines}
 
   # Area folders (docs/system/cartridge.md, Area folders) on reactions_sampler: roost and crow
   # move to the area rookery; yard and crow_lands, when named, to coop.
@@ -27,6 +27,12 @@ defmodule Loka.ContentAreaFoldersTest do
     Enum.map(diags, &{&1["code"], &1["path"], &1["data"]})
   end
 
+  # The one explain line of a refusal (Explain's row for its `why`, not the generic fallback).
+  defp explained(dir, changes) do
+    assert {:error, [diag]} = compile(dir, changes)
+    hd(Explain.lines([diag], dir))
+  end
+
   defp crossing(target, area), do: %{"why" => "area_crossing", "target" => target, "area" => area}
 
   # Break: an area folder file is not read as its root twin (its room is unresolved), or the area
@@ -45,6 +51,19 @@ defmodule Loka.ContentAreaFoldersTest do
     coop = %{"rooms/yard.json" => "coop", "reactions/crow_lands.json" => "coop"}
 
     assert refused(dir, moved(dir, Map.merge(rookery, coop))) == [
+             {"SCHEMA_VIOLATION", "areas/coop/reactions/crow_lands.on.npc",
+              crossing("npcs/crow", "rookery")}
+           ]
+
+    # The same border when rookery is a bundle (areas/rookery.json) rather than a folder.
+    bundle = %{
+      "rooms" => %{"roost" => read(dir, "rooms/roost.json")},
+      "npcs" => %{"crow" => read(dir, "npcs/crow.json")}
+    }
+
+    flat = [{"areas/rookery.json", bundle}, {"rooms/roost.json", nil}, {"npcs/crow.json", nil}]
+
+    assert refused(dir, flat ++ moved(dir, coop)) == [
              {"SCHEMA_VIOLATION", "areas/coop/reactions/crow_lands.on.npc",
               crossing("npcs/crow", "rookery")}
            ]
@@ -109,6 +128,13 @@ defmodule Loka.ContentAreaFoldersTest do
     assert refused(dir, moved(dir, %{"rooms/roost.json" => "Perch"})) == [
              {"SCHEMA_VIOLATION", ~s("areas/Perch"), %{"why" => "area_name"}}
            ]
+
+    # Break: a refusal falls back to the generic schema line instead of its explain row.
+    assert explained(dir, moved(dir, %{"rooms/roost.json" => "Perch"})) =~ "cannot be a key"
+    assert explained(dir, moved(dir, %{"items/pebble.json" => "rookery"})) =~ "has no room"
+    coop = moved(dir, %{"rooms/yard.json" => "coop", "reactions/crow_lands.json" => "coop"})
+    rookery = moved(dir, %{"rooms/roost.json" => "rookery", "npcs/crow.json" => "rookery"})
+    assert explained(dir, coop ++ rookery) =~ "only that area and the root may name it"
   end
 
   # Break: an area is not a zone of its rooms, so `"zone": "rookery"` is unresolved or copies to

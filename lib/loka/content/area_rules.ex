@@ -15,22 +15,33 @@ defmodule Loka.Content.AreaRules do
   def check(manifest, defs) do
     for {_, ds} <- defs,
         is_map(ds),
-        {_, {rel, steps, value}} when is_binary(rel) <- ds,
-        Areas.area_of(rel),
+        {_, {rel, steps, value}} <- ds,
+        Areas.area_of(file(rel)),
         {path, %{"key" => _} = ref} <- refs(value, [], manifest["id"]),
         d <- crossing(defs, rel, steps ++ path, ref),
         do: d
   end
 
   defp crossing(defs, rel, steps, %{"kind" => kind, "key" => key}) do
-    with {trel, tsteps, _} when is_binary(trel) <- get_in(defs, [kind, key]),
-         area when is_binary(area) <- Areas.crossed(rel, trel),
+    with {trel, tsteps, _} <- get_in(defs, [kind, key]),
+         area when is_binary(area) <- Areas.crossed(file(rel), file(trel)),
          do: [diag("SCHEMA_VIOLATION", at(rel, steps), data(trel, tsteps, key, area))],
          else: (_ -> [])
   end
 
+  # A definition's source file: its own, or its bundle's (`{bundle rel, [dir, key]}`); a fact has none.
+  defp file({rel, [_, _]}) when is_binary(rel), do: rel
+  defp file(rel) when is_binary(rel), do: rel
+  defp file(_), do: ""
+
   defp data(trel, tsteps, key, area) do
-    dir = if tsteps == [], do: trel |> Path.split() |> Enum.at(-2), else: hd(tsteps)
+    dir =
+      case {trel, tsteps} do
+        {{_, [dir, _]}, _} -> dir
+        {_, [dir | _]} -> dir
+        _ -> trel |> Path.split() |> Enum.at(-2)
+      end
+
     %{"why" => "area_crossing", "target" => dir <> "/" <> key, "area" => area}
   end
 
