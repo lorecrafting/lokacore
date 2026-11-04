@@ -179,8 +179,15 @@ test('a death at 50 lowers experience to 45 once, keeps the spent point, and sur
       };
     }),
   );
-  assert.deepEqual(narration(full).slice(-3), ['death.mourn', 'death.penalty', 'death.woke']);
-  assert.equal(narration(full).length, 64);
+  const cut = narration(full);
+  const fell = cut.indexOf('combat.player_died');
+  assert.deepEqual(cut.slice(fell, fell + 4), [
+    'combat.player_died',
+    'death.penalty',
+    'death.woke',
+    'death.mourn', // the death's reaction lines follow its waking (loka-kgd.206)
+  ]);
+  assert.equal(cut.length, 64);
   assert.deepEqual(validate('DecisionResult', full.decision), []);
   const reopened = hydrate(hall(0), JSON.parse(JSON.stringify(r.world.state)), true);
   assert.ok(reopened);

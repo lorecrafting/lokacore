@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/alternates.ts';
-// size: allow 347, typed quest reactions, deadline pairing and group merging share FIFO admission
+// size: allow 349, typed quest reactions, deadline pairing and group merging share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -58,6 +58,7 @@ type P = {
   rng: World['state']['rng'];
   narration: Text[];
   levelAt?: number; // the narration's length when the first level_reached was delivered
+  wokeAt?: number; // the narration's length when the first player's entity_died was delivered
   holders: Map<string, number>; // each status holder's, reaction fact row's, written pool's writer group
   // Each item the root command moved: its writer group (hs-1). ponytail: merge and joinEarlier do
   // not relabel it; pass it to their maps once a root command both moves an item and advances time.
@@ -100,7 +101,7 @@ export function propose(
   failed ??= farewell(p, () => now(p)) ?? parting(p);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
-  p.narration = closing(world, command.payload.actor_id, ops, p.events, p.narration, p.levelAt);
+  p.narration = closing(world, command.payload.actor_id, ops, p);
   return {
     decision: {
       ...root,
@@ -196,6 +197,7 @@ const cause = (p: P, logical_time: number, id: string) => ({
 function creditDelivery(p: P, next: Queued): Admitted | undefined {
   p.levelAt ??= levelAt(p.world, p.command.payload.actor_id, next.cause, p.narration.length);
   if (next.cause.payload.type !== 'entity_died') return;
+  if (!next.cause.payload.victim_definition) p.wokeAt ??= p.narration.length;
   const at = now(p);
   if (!('cartridge' in at)) return at;
   const credit = deathCredit(at, next.cause, p.ops, p.events, p.command);

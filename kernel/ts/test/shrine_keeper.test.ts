@@ -19,26 +19,43 @@ const keeper = (lines: string[]) => lines.filter((l) => l.startsWith('npc.keeper
 const walk = (w: World, ways: string[]) => ways.reduce((at, way) => go(at, way).world, w);
 const shrine = (w: World) => w.roomIds[ref('room', 'wayside_shrine')];
 
-// Breaks: the keeper is silent, says a line twice, skips one, stops at the third, or the body
-// wakes anywhere but the shrine.
+// Breaks: the keeper is silent, says a line twice, skips one, stops at the third, speaks before
+// the waking line (the Book's arrival split would leave him on the fight page), or the body wakes
+// anywhere but the shrine.
 test('five deaths at the boar: the keeper greets each in order, then repeats his last line', () => {
   let w = walk(fresh('5ca5e000-0000-4000-8000-0000000002a6'), ['west', 'north']);
   const said: string[][] = [];
   for (let death = 1; death <= 5; death += 1) {
     const r = fight(seeded(withHp(w, w.body, 1), MISS), 'boar');
     assert.ok(r.lines.includes('combat.player_died'), `death ${death}`);
-    assert.equal(r.lines.at(-1), 'death.woke');
     assert.equal(r.world.state.containers[r.world.body], shrine(r.world));
-    said.push(keeper(r.lines));
+    said.push(r.lines.slice(r.lines.indexOf('combat.player_died')));
     w = walk(r.world, ['down', 'west', 'west', 'north']);
   }
-  assert.deepEqual(said, [
-    ['npc.keeper.revived_1'],
-    ['npc.keeper.revived_2'],
-    ['npc.keeper.revived_3'],
-    ['npc.keeper.revived_4'],
-    ['npc.keeper.revived_4'],
-  ]);
+  const woke = (n: number) => ['combat.player_died', 'death.woke', `npc.keeper.revived_${n}`];
+  assert.deepEqual(said, [woke(1), woke(2), woke(3), woke(4), woke(4)]);
+});
+
+// Breaks: a keeper line loses its npc_present guard, so he speaks from an empty shrine when the
+// body wakes elsewhere (four deaths reach every line rule).
+test('a body that wakes away from the keeper hears nothing from him', () => {
+  const at = fresh('5ca5e000-0000-4000-8000-0000000002a9');
+  const death = at.cartridge.world!.death!;
+  const inn = { ...death, shrine: { ...death.shrine, key: 'crossroads_inn' } };
+  const world = { ...at.cartridge.world!, death: inn };
+  let w: World = walk({ ...at, cartridge: { ...at.cartridge, world } }, ['west', 'north']);
+  for (let death = 1; death <= 4; death += 1) {
+    const r = fight(seeded(withHp(w, w.body, 1), MISS), 'boar');
+    assert.equal(
+      r.world.state.containers[r.world.body],
+      r.world.roomIds[ref('room', 'crossroads_inn')],
+    );
+    assert.deepEqual(r.lines.slice(r.lines.indexOf('combat.player_died')), [
+      'combat.player_died',
+      'death.woke',
+    ]);
+    w = walk(r.world, ['west', 'north']);
+  }
 });
 
 // Breaks: the keeper's alive guard is lost, so an NPC's death also moves his tally or speaks.

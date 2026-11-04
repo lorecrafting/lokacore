@@ -274,7 +274,7 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   assert.ok(!last.lines.includes('narration.bleeding.tick'));
   // loka-3w3q: one fall line (the round's), then the authored waking line.
   assert.equal(last.lines.filter((l) => l === 'combat.player_died').length, 1);
-  assert.equal(last.lines.at(-1), 'death.woke');
+  assert.deepEqual(last.lines.slice(-2), ['death.woke', 'npc.keeper.revived_1']);
   assert.equal(engaged(w, w.body), undefined);
   assert.equal(where(w, w.body), room(w, 'wayside_shrine'));
   assert.deepEqual([pool(w, 'hp'), pool(w, 'mv')], [10, 100]);
