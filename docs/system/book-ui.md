@@ -941,8 +941,8 @@ while the combat page is open.
 **Rounds.** The page follows its newest line as other growing pages do (Page: it follows the end
 while the reader is there; a reader scrolled up to an earlier round stays put until they press), so a round's lines
 land in view above the action cards. Each round's lines (one committed receipt: an elapsed round,
-or one press's receipt) are one block at the log's line pitch, and rounds stand apart by the
-page's block gap (LogLines), as the prompt line parts rounds in a MUD log; no rule glyph, heading
+or one press's receipt) are one block at the log's line pitch with no gap between lines, and rounds stand apart by one
+blank line (one log line height; owner 2026-11-04), as the prompt line parts rounds in a MUD log; no rule glyph, heading
 or words mark a round.
 
 Combat takes precedence over ordinary navigation until the encounter closes. **Opening.** The
@@ -957,7 +957,7 @@ every committed closure (opponent death, player death and inn return, successful
 other end) the Combat page stays the shown page, as a one-reply conversation does: its log ending with the closing
 lines (every line of the closing receipt, whatever its key), no action cards, and one foot Control
 [**Back to World**](../BOOK-UI-COMPONENTS.md#component-catalogue), or **Let go** when the
-receipt says the player died ([Falling](#effects-sound-and-haptics); owner-approved label 2026-11-02). The status line stays locked as during the fight. The tap is local (no engine verb)
+receipt says the player died ([Falling](#effects-sound-and-haptics); owner-approved label 2026-11-02). The status line and its icons are hidden while Let go shows (owner 2026-11-04); after a fight you survived it stays locked as during the fight. The tap is local (no engine verb)
 and shows the World page of the room the player is now in (the inn after death, the room fled
 to) through the existing room-change flow. Time runs meanwhile; later ambient and room lines go to
 the World log. A new encounter replaces the ended page; nothing is stored, so reopening a save

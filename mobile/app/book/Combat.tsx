@@ -91,7 +91,7 @@ function Responses(p: Props & { shown: Shown }) {
  * - Use: while a fight is on, and its closed page until the foot is pressed.
  * - Rules: the page opens with its log (no foe or band line above it, owner 2026-11-02), then the
  *   response cards, each live foe's Cast a spell on it… last; no PageFoot. The page follows its newest
- *   line; each round's lines (one receipt) are one block, a block gap between rounds. A closed
+ *   line; each round's lines (one receipt) run on as one block, one blank line between rounds. A closed
  *   fight has one foot control: Back to World, or Let go when the player fell in it (Falling).
  * - States: one foe; pack; bleeding; rounds; death (held red, Let go, no countdown).
  * - Story: CombatPage.stories.tsx
@@ -110,7 +110,7 @@ export function Combat(p: Props) {
     <Blow under={<UnderInk view={view} />}>
       <RunningHead view={view} text={text} />
       <Page paperless title="Combat" foot={foot} scrollToEnd={combatLog.length > 0}>
-        <LogLines lines={combatLog} />
+        <LogLines lines={combatLog} rounds />
         {view.combat && <Responses {...p} shown={shown} />}
       </Page>
     </Blow>

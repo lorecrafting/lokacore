@@ -55,7 +55,8 @@ export const Rounds: StoryObj = {
     const top = (text: string) => canvas.getByText(text).getBoundingClientRect().top;
     const within = top('You strike the boar (round 19).') - top('The boar bites you (round 19).');
     const between = top('The boar bites you (round 20).') - top('You strike the boar (round 19).');
-    await expect(between).toBeGreaterThan(within);
+    // A round's lines run on at the log's line pitch; one blank line parts rounds (owner 2026-11-04).
+    await expect([within, between]).toEqual([26, 52]);
   },
 };
 // Each live foe draws its Cast a spell on it… list among the cards (loka-x6t.109.5). Breaks: no list,
@@ -161,6 +162,7 @@ export const Death: StoryObj = {
       timeout: 3000,
     });
     await expect(canvas.queryByRole('button', { name: 'Back to World' })).toBeNull();
+    await expect(canvas.queryByText(/standing/)).toBeNull(); // no status line once dead (owner 2026-11-04)
     const layers = () => [...canvasElement.querySelectorAll('[aria-hidden="true"]')];
     const at = (e: Element) => Number(getComputedStyle(e).opacity);
     await waitFor(() => expect(layers().some((e) => at(e) === opacity.fatal)).toBe(true), {
