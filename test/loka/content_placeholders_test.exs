@@ -68,7 +68,7 @@ defmodule Loka.ContentPlaceholdersTest do
           assert catch_exit(Mix.Tasks.Loka.Compile.run([dir, out])) == {:shutdown, 1}
         end)
 
-      assert said =~ ~r/^error: scenes\/still_to_write\.scene:#{unquote(at)} .*`~`/
+      assert said =~ ~r/^error: scenes\/still_to_write\.scene:#{unquote(at)} .*`~`/m
       refute File.exists?(out)
     end
   end
