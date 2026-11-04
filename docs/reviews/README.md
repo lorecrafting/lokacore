@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: corpses name their victim, decay and spill, PR #593 (loka-kgd.203)](2026-11-04-corpses-review.md): **CHANGES REQUIRED**
 - [Second review: corpse decay save and delta contract, PR #593 (loka-kgd.203)](2026-11-04-corpse-decay-second-review.md): **CHANGES REQUIRED**
 - [Review: Swings, PR #591 (loka-kgd.200)](2026-11-02-swings-review.md): **APPROVE**
 - [Review: opt-in Diku rounds, PR #590 (loka-kgd.197)](2026-11-02-diku-rounds-review.md): **APPROVE**
