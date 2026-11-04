@@ -40,23 +40,64 @@ export const SkippedTurn: StoryObj = {
 // Each round's lines are one block, a block gap between rounds, and the page follows the newest
 // (book-ui.md, Live combat response). Fixture lines. Breaks: rounds run together, or the newest
 // round sits below the fold under the action cards.
+// Six rounds in the showcase's words, Legend order: your swings, your strike, the boar's condition,
+// then its blow (loka-kgd.200, .202).
 const rounds: DetailLine[] = [];
-for (let r = 1; r <= 20; r++) {
+for (const round of [
+  [
+    'You quickly attack 3 times and hit once.',
+    'You hardly hit the boar.',
+    'The boar has a few bruises.',
+    'The boar misses you.',
+  ],
+  [
+    'You quickly attack 3 times and hit 2 times.',
+    'You hit the boar.',
+    'The boar has some cuts.',
+    'The boar hits you.',
+  ],
+  [
+    'You quickly attack and hit 3 times.',
+    'You hit the boar hard.',
+    'The boar has many nasty wounds.',
+    'The boar hits you hard.',
+  ],
+  [
+    'You quickly attack 3 times and hit 2 times.',
+    'You hit the boar extremely hard.',
+    'The boar is bleeding freely.',
+    'The boar hits you.',
+  ],
+  [
+    'You quickly attack and hit 3 times.',
+    'You assault the boar with an astonishing blow.',
+    'The boar is covered in blood.',
+    'The boar misses you.',
+  ],
+  [
+    'You quickly attack 3 times and hit once.',
+    'You ravage the boar!',
+    'The boar is in awful condition.',
+    'The boar hits you extremely hard.',
+  ],
+]) {
   newRound(rounds);
-  rounds.push(`The boar bites you (round ${r}).`, `You strike the boar (round ${r}).`);
+  rounds.push(...round);
 }
 export const Rounds: StoryObj = {
   ...pageStory(CombatOneFoeView, { combatLog: rounds }),
   name: 'Rounds',
   play: async ({ canvas }) => {
-    const last = await canvas.findByText('You strike the boar (round 20).');
+    const last = await canvas.findByText('The boar hits you extremely hard.');
     await waitFor(() => expect(last.getBoundingClientRect().bottom).toBeLessThan(innerHeight));
     await expect(last.getBoundingClientRect().top).toBeGreaterThanOrEqual(0);
     const top = (text: string) => canvas.getByText(text).getBoundingClientRect().top;
-    const within = top('You strike the boar (round 19).') - top('The boar bites you (round 19).');
-    const between = top('The boar bites you (round 20).') - top('You strike the boar (round 19).');
+    const within = top('The boar has many nasty wounds.') - top('You hit the boar hard.');
+    // round 3's condition to round 4's strike: its blow, the blank line, round 4's swings, the strike
+    const between =
+      top('You hit the boar extremely hard.') - top('The boar has many nasty wounds.');
     // A round's lines run on at the log's line pitch; one blank line parts rounds (owner 2026-11-04).
-    await expect([within, between]).toEqual([26, 52]);
+    await expect([within, between]).toEqual([26, 104]);
   },
 };
 // Each live foe draws its Cast a spell on it… list among the cards (loka-x6t.109.5). Breaks: no list,
