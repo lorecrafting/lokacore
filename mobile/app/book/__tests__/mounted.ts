@@ -87,6 +87,8 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
   return {
     texts,
     footer: () => draw().some((n) => n.type?.name === 'Footer'),
+    said: () => draw().find((n) => n.type?.name === 'Heard').props.said.text as string,
+    control: (shown: string | RegExp) => control(draw(), shown),
     tap: (shown: string | RegExp) => control(draw(), shown).props.onPress(),
     // `fight`: a line told before `line`, the room reached's arrival (loka-glj8).
     publish: (next: GameView, line?: string, fight?: string) => {

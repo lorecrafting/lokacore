@@ -12,7 +12,8 @@ import { reasonSentence } from './reasons.ts';
 import { Ring } from './StatusIcon.tsx';
 import { radius, size, space, type } from './tokens.ts';
 
-export type Wait = { left: number; seconds: number }; // a countdown's whole seconds left, of its total
+// A countdown: its whole seconds left, of its total; the ring's share left, from the time elapsed.
+export type Wait = { left: number; seconds: number; fraction: number };
 type Refusal = {
   label: string;
   reason?: string;
@@ -110,7 +111,7 @@ function Waiting({ wait, ...body }: { wait?: Wait } & Parameters<typeof RefusedB
   if (!wait) return <RefusedBody {...body} />;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-      <Ring fraction={wait.left / wait.seconds} locked={false} />
+      <Ring fraction={wait.fraction} locked={false} />
       <RefusedBody {...body} />
     </View>
   );

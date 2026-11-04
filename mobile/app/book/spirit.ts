@@ -17,12 +17,12 @@ export const due = (n: number, seconds: number, ms: number) =>
 /** The whole seconds left before the rise card is available. */
 export const left = (seconds: number, ms: number) => Math.max(0, Math.ceil(seconds - ms / 1000));
 
-/** Ms until the next line dries or the next whole second passes; undefined once nothing is left. */
+/** Ms until the next line dries, the next whole second passes or zero; undefined once nothing is left. */
 export function next(sp: Spirit, ms: number) {
   const n = sp.lines.length;
   if (left(sp.seconds, ms) === 0) return undefined;
   const line = sp.shown < n && n > 1 ? (sp.shown * sp.seconds * 1000) / (n - 1) - ms : Infinity;
-  return Math.max(0, Math.min(line, 1000 - (ms % 1000)));
+  return Math.max(0, Math.min(line, 1000 - (ms % 1000), sp.seconds * 1000 - ms));
 }
 
 // A log position that survives a trim or a room change's reset: lines ever pushed, not an index.
@@ -37,9 +37,15 @@ export function fall(s: Logs, command_id: string) {
   if (s.closing) s.fell = s.ended;
 }
 
+const dead = (s: Logs) => (s.ended && s.fell === s.ended ? s.projection.view.revival : undefined);
+
+/** Dead with `revival`, where the log's held lines start: unread until the rise, so read once. */
+export const unheard = (s: Logs) =>
+  dead(s) && s.woke !== undefined ? Math.max(0, s.woke - logMark(s.log).gone) : undefined;
+
 /** Let go or Back to World closes the ended page; Let go with `revival` begins the spirit state. */
 export function letGo(s: Logs, text: (key: string) => string) {
-  const revival = s.ended && s.fell === s.ended ? s.projection.view.revival : undefined;
+  const revival = dead(s);
   s.ended = undefined;
   if (!revival) return false;
   const held = since(s.log, s.woke ?? end(s.log));
@@ -74,5 +80,11 @@ export function haunting(s: Logs, now: number) {
     n = due(sp.lines.length, sp.seconds, ms);
   s.log.push(...sp.lines.slice(sp.shown, n));
   sp.shown = n;
-  return { seconds: sp.seconds, left: left(sp.seconds, ms), next: next(sp, ms) };
+  const spent = Math.min(1, ms / (sp.seconds * 1000)); // the ring drains by elapsed over total
+  return {
+    seconds: sp.seconds,
+    left: left(sp.seconds, ms),
+    fraction: 1 - spent,
+    next: next(sp, ms),
+  };
 }

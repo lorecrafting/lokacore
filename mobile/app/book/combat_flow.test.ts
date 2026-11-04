@@ -382,8 +382,9 @@ test('a flight into another fight opens the room log at its arrival line', () =>
 });
 
 // Breaks (book-ui.md, Spirit state): Rise works before zero or comes on its own, the revival lines
-// lose their pace, the waking line shows before the rise or out of order, or an encounter, scene
-// or chapter arriving leaves the spirit state up.
+// lose their pace, the waking line shows (or is read) before the rise or out of order, focus is
+// lost as the card turns available, or an encounter, scene or chapter arriving leaves the spirit
+// state up.
 test('a death with revival lands in the spirit state until Rise', () => {
   const clock = Date.now;
   let now = 0;
@@ -415,6 +416,7 @@ test('a death with revival lands in the spirit state until Rise', () => {
     );
     assert.ok(h.texts().includes('Combat'));
     h.publish(view(shrine), 'combat.death', 'combat.hit');
+    assert.doesNotMatch(h.said(), /wake/); // read once, at the rise
     now = 0;
     h.tap('Let go');
     return h;
@@ -435,7 +437,11 @@ test('a death with revival lands in the spirit state until Rise', () => {
     assert.deepEqual(shown(h), ['Dark.', 'A bell.']);
     now = 60_000; // no rise at zero
     assert.deepEqual(shown(h), ['Dark.', 'A bell.', 'Breath.']);
+    let focused = 0; // the card is new at zero: focus moves to it, once
+    [1, 2].forEach(() => h.control('Rise').props.ref({ focus: () => focused++ }));
+    assert.equal(focused, 1);
     h.tap('Rise');
+    assert.equal(h.said(), 'You wake at the shrine.');
     assert.deepEqual(shown(h), ['Dark.', 'A bell.', 'Breath.', 'You wake at the shrine.']);
     assert.equal(h.texts().includes('Rise'), false);
     assert.notEqual(h.footer(), false); // it returns at the rise

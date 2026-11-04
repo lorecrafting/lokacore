@@ -290,7 +290,7 @@ export const LiquidLines: StoryObj = {
 
 // Breaks (book-ui.md, Spirit state): Rise pressable before zero, or any other control drawn.
 export const SpiritState: StoryObj = {
-  ...pageStory(RoomNpcsItemsView, { spirit: { seconds: 10, left: 6, next: undefined } }),
+  ...pageStory(RoomNpcsItemsView, { spirit: { seconds: 10, left: 6, fraction: 0.6, next: 0 } }),
   name: 'Spirit state',
   play: async ({ canvas }) => {
     const rise = await canvas.findByRole('button', { name: LABEL.rise });

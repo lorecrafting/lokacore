@@ -2,10 +2,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { dropLines, trimLog, type Logs } from './logs.ts';
-import { due, end, fall, haunt, left, letGo, next, type Spirit } from './spirit.ts';
+import { due, end, fall, haunt, haunting, left, letGo, next, type Spirit } from './spirit.ts';
 
 // Breaks: a lone revival line waits, the countdown rounds down, or the redraw timer sleeps past
-// the next line (or the next second), or keeps ticking at zero.
+// the next line (or the next second, or zero), or keeps ticking at zero.
 test('the spirit clock wakes for each line and each second, and stops at zero', () => {
   assert.equal(due(1, 10, 0), 1);
   assert.equal(due(2, 1, 0), 1); // two lines: the second at zero, not at once
@@ -22,7 +22,7 @@ test('the spirit clock wakes for each line and each second, and stops at zero', 
   assert.equal(next(sp(1), 500), 0); // line b due now
   const half = (lines: string[], shown: number): Spirit => ({ ...sp(shown), lines, seconds: 0.5 });
   assert.equal(next(half(['a', 'b'], 1), 100), 400); // two lines: b at 500
-  assert.equal(next(half(['a', 'b', 'c'], 3), 200), 800); // all shown: no line wait
+  assert.equal(next(half(['a', 'b', 'c'], 3), 200), 300); // all shown: zero, before the next second
   assert.equal(next(sp(3), 200), 800); // all shown: the next second
   assert.equal(next(sp(3), 1000), undefined);
 });
@@ -58,4 +58,14 @@ test('the lines held to the rise survive a trim and a reset', () => {
   Object.assign(s, { ended: fight, fell: fight });
   letGo(s, String);
   assert.deepEqual(s.spirit!.held, [line('a'), line('b'), line('c')]);
+});
+
+// Break: the ring drawn from the whole seconds left, so a 2.5 s wait starts past full and drains in steps.
+test("the rise card's ring drains by the time elapsed over the total", () => {
+  const spirit = { lines: [], seconds: 2.5, at: 0, shown: 0, held: [] };
+  const s = { log: [], spirit } as unknown as Logs;
+  assert.deepEqual(
+    [0, 1000].map((now) => haunting(s, now)!.fraction),
+    [1, 0.6],
+  );
 });

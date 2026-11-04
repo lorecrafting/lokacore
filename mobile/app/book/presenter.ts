@@ -55,7 +55,7 @@ import {
 import { named, received } from './received.ts';
 import { days } from './chronicle.ts';
 import { holding, pressedAway, settle } from './recap.ts';
-import { end, fall, haunt, haunting, letGo, wake } from './spirit.ts';
+import { end, fall, haunt, haunting, letGo, unheard, wake } from './spirit.ts';
 import { heard, type Said } from './heard.ts';
 
 function background(
@@ -224,7 +224,7 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
 function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, was?: Said) {
   const { view, token } = game.view();
   const ghost = haunting(s, Date.now()); // its due lines first, so the live region reads them
-  const said = heard(s, view, was); // before the trim, which drops lines from the front
+  const said = heard(s, view, was, unheard(s)); // before the trim, which drops lines from the front
   [s.log, s.combatLog, ...s.details.values()].forEach((lines) => trimLog(lines));
   said.log = s.log.length;
   const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({

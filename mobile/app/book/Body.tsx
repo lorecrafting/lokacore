@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useRef } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import { DreamPage } from './DreamPage.tsx';
@@ -240,16 +240,21 @@ export function RoomPage(p: {
 }
 
 // The spirit state's one control: unavailable, its ring draining, until zero; then Rise, focus to
-// the title (book-ui.md, Spirit state).
+// the title (book-ui.md, Spirit state). At zero the card is a new element: focus moves to it once.
 function Rise(p: { wait: Wait; rise: () => void }) {
   const title = useContext(titleContext);
+  const waited = useRef(false);
+  if (p.wait.left) waited.current = true;
   const rise = () => (p.rise(), focusTitle(title.last));
+  const ready = (card: View | null) => {
+    if (card && waited.current) ((waited.current = false), focusTitle(card as never));
+  };
   return (
     <View style={{ flexGrow: 1 }}>
       {p.wait.left ? (
         <ActionCard label={LABEL.rise} wait={p.wait} />
       ) : (
-        <ActionCard label={LABEL.rise} onPress={rise} />
+        <ActionCard label={LABEL.rise} onPress={rise} ref={ready} />
       )}
     </View>
   );
