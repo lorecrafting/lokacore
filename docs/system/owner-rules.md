@@ -281,6 +281,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Opening room NPC for conversation and directions: [owner direction and PM selection of the opening NPC](../decisions/owner-decision-opening-npc-2026-10-05.md).
 
+- Cartridge source by world area: `areas/<area>/<dir>/` folders; a file names its own area, the root and any area's rooms, all else via the root (a compiler error); the folder is an implicit zone; no area field or key prefix: [owner decision](../decisions/owner-decision-area-layout-2026-11-04.md).
 - Authoring readiness and level-up: [owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md).
 - Away catch-up cap, Start over for old saves before launch: [owner decision](../decisions/owner-decision-away-catch-up-cap-2026-11-01.md).
 - Diku rounds (initiative, Attack strikes at once, named lines, damage tiers, condition after the round), showcase opts in: [owner decision](../decisions/owner-decision-diku-rounds-2026-11-01.md).

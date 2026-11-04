@@ -28,11 +28,16 @@ defmodule Loka.Content.SourceLines do
 
   defp scene?(rel), do: String.ends_with?(rel, [".scene", ".cut"])
 
-  # The JSON file a scene file merges with.
+  # A scene's JSON half in its own tree: its area folder, or the root for a root scene.
   defp json_half(rel) do
     if Path.extname(rel) == ".cut",
       do: Path.rootname(rel) <> ".json",
-      else: "dialogues/" <> Path.basename(rel, ".scene") <> ".json"
+      else:
+        Path.join(
+          Path.split(rel)
+          |> Enum.drop(-2)
+          |> Enum.concat(["dialogues", Path.basename(rel, ".scene") <> ".json"])
+        )
   end
 
   defp scene(rel, text, acc) do

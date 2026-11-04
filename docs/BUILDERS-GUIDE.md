@@ -45,6 +45,54 @@ hash. The [retired first chapter](https://github.com/lorecrafting/lokacore/blob/
 release and oracle identity. Existing saves remain pinned to the release that created
 them ([save model](system/save.md)).
 
+## Cartridge layout
+
+Read this before creating, moving or restructuring cartridge files. Rationale:
+[area layout design](rnd/cartridge-area-layout-design-2026-11-04.md); rules:
+[Area folders](system/cartridge.md#area-folders).
+
+```
+cartridges/<id>/
+  cartridge.json facts.json text.json layout.json   root files: one per world
+  rooms/ npcs/ items/ reactions/ ...                root folders: shared by two or more areas
+  areas/
+    hollow.json                                     optional: area hollow as one bundle file
+    hollow/                                         area hollow: lowercase snake_case
+      rooms/ npcs/ items/ dialogues/ scenes/ ...    the same folders, owned by hollow
+```
+
+**The border rule.** A file in `areas/hollow/` may name its own things, anything at the root, and
+any area's rooms; nothing else. Rooms are geography, so anyone may point at a place (an exit, a
+schedule, a patrol); everything else (an NPC, an item, a quest, a behaviour, a parent named by
+`extends`) is owned, and another area reaches it only through the root. The root may name
+anything.
+
+**Where a new thing goes.** Used by one area: in that area (`areas/hollow/npcs/wren.json`). Used by
+two or more areas, or world-wide (statuses, skills, transport, a quest whose offer and reward sit
+in two areas): at the root (`npcs/wren.json`). Text keys and facts stay in the root files.
+
+**Moving a thing across a border.** Move the file; do not edit it. When a second area starts naming
+`areas/hollow/items/lamp.json`, move it to `items/lamp.json`. Keys do not change, so saves stand, and
+`content_hash` stands unless the moved room enters or leaves an area that a reaction `zone` names. The folder is an implicit zone: `"zone": "hollow"` on a
+reaction with no `on.room` copies it to every Hollow room.
+
+| The compiler says | Fix |
+|---|---|
+| `` `npcs/wren` belongs to the area `hollow`, and only that area and the root may name it. `` (`area_crossing`, also at `extends` and `behaviours[i]`) | Move `wren` to `npcs/`, or move the naming file into `areas/hollow/`. |
+| `` The area `bestiary` has no room. `` (`area_empty`) | Add a room under `areas/bestiary/rooms/`, or move its files to the root folders. |
+| `This area folder's name cannot be a key.` (`area_name`, `areas/Hollow`) | Rename the folder to lowercase snake_case. |
+| `This file is in no folder the compiler reads.` (`UNKNOWN_FIELD`: an unknown folder, a deeper folder, or a `.json` directly in `areas/hollow/`) | Use a definition folder of the [Source layout](system/cartridge.md#source-layout); one level only. |
+| `` `area` is not a field here. `` (`UNKNOWN_FIELD`: an `area` field) | Remove it: the folder is the area. |
+| `This name or key is already taken.` (one key in two areas, or an area and the root) | Rename one; keys are global. |
+
+`mix loka.lint` reads an area file as its root twin (`items/lamp.json: ...`) and runs the same
+findings on it. Its area findings (orphan room, unreachable area, astray room) arrive with
+loka-vduxr.58.3.
+
+**No `area` field, no key prefix.** The folder already says the area; a field would be a second
+copy that can disagree with it, and nothing in play needs it. Keys stay global so a file can move
+without renaming anything; prefix a generic key (`well`, `gate`) only when you choose to.
+
 ## Make and try a cartridge
 
 Start from a small development cartridge such as

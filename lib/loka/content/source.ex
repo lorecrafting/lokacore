@@ -71,16 +71,16 @@ defmodule Loka.Content.Source do
     replaced = Enum.uniq(replaced ++ merge_diags(SceneMerge.order_refused(files)))
     {files, repeats} = Areas.unique(files)
     {files, faults} = Extends.flatten(files)
-    {files, located} = shortcuts(files, opened ++ repeats)
+    {files, located} = shortcuts(files, opened ++ repeats, Areas.check(files))
     {files, diags ++ replaced ++ untriggered ++ located ++ Enum.map(faults, &extends_diag/1)}
   end
 
-  defp shortcuts(files, faults) do
+  defp shortcuts(files, faults, area_faults) do
     {files, clashes} = Prose.lower(files)
     {files, held} = Behaviours.expand(files)
     {files, zoned} = Zones.expand(files)
     {files, waited} = Waits.lower(files)
-    {files, Enum.map(faults ++ clashes ++ held ++ zoned ++ waited, &bundle_diag/1)}
+    {files, Enum.map(faults ++ area_faults ++ clashes ++ held ++ zoned ++ waited, &bundle_diag/1)}
   end
 
   defp read(dir) do
@@ -231,24 +231,24 @@ defmodule Loka.Content.Source do
     "emotes" => :emote
   }
 
+  # An area folder file classifies as its root twin (docs/system/cartridge.md, Area folders).
   defp classify(rel) do
     case {Path.split(rel), Path.extname(rel)} do
-      {[dir, file], ".scene"} when dir in ~w(scenes dialogues) ->
-        {:scene_file, {:dialogue, Path.rootname(file), []}}
-
-      {["scenes", file], ".cut"} ->
-        {:scene_file, {:scene, Path.rootname(file), []}}
-
-      {["areas", _], ".json"} ->
-        :area
-
-      {[dir, file], ".json"} when is_map_key(@dirs, dir) ->
-        {@dirs[dir], Path.rootname(file), []}
-
-      _ ->
-        :unknown
+      {["areas", _], ".json"} -> :area
+      {["areas", _, dir, file], ext} -> placed({[dir, file], ext})
+      path -> placed(path)
     end
   end
+
+  defp placed({[dir, file], ".scene"}) when dir in ~w(scenes dialogues),
+    do: {:scene_file, {:dialogue, Path.rootname(file), []}}
+
+  defp placed({["scenes", file], ".cut"}), do: {:scene_file, {:scene, Path.rootname(file), []}}
+
+  defp placed({[dir, file], ".json"}) when is_map_key(@dirs, dir),
+    do: {@dirs[dir], Path.rootname(file), []}
+
+  defp placed(_), do: :unknown
 
   @doc false
   def dirs, do: @dirs

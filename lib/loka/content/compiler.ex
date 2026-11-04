@@ -129,7 +129,8 @@ defmodule Loka.Content.Compiler do
         Loka.Content.Standing.check(manifest, defs) ++
         Loka.Content.Replenish.check(manifest, defs) ++
         Loka.Content.Delayed.check(manifest, defs, Resolve.trees(defs)) ++
-        Loka.Content.Construction.check(manifest, defs, v2, located, registry)
+        Loka.Content.Construction.check(manifest, defs, v2, located, registry) ++
+        Loka.Content.AreaRules.check(manifest, defs)
 
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
