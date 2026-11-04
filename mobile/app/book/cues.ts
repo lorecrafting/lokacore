@@ -29,7 +29,7 @@ const CUES = {
   miss: { s: 2, sound: 'miss' },
   lever: { s: 3, sound: 'lever' },
   latch: { s: 2, sound: 'latch' },
-  death: { s: 4 }, // the player's, from the receipt: its haptic and cut are playCue's
+  death: { s: 4, sound: 'death' }, // the player's, from the receipt: its haptic and cut are playCue's
 } satisfies Record<string, { s: 1 | 2 | 3 | 4; sound?: SoundName }>; // mutate-skip: a type
 
 export type CueName = keyof typeof CUES;

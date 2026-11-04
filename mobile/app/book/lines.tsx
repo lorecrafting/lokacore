@@ -89,11 +89,14 @@ export function Note({ children }: { children: string }) {
 export function LogLines({
   lines,
   keep,
+  rounds: run,
 }: {
   lines: readonly DetailLine[];
   keep?: (line: DetailLine) => boolean; // shows only these; the rest still count as drawn
+  rounds?: true; // combat: a round's lines run on, one blank line between rounds (owner 2026-11-04)
 }) {
   const { gone, drawn, rounds } = logMark(lines);
+  const t = useType();
   useEffect(() => markDrawn(lines), [gone + lines.length]);
   // A line's number, also its stable key; a round's first number keys its block.
   const starts = new Set(rounds);
@@ -109,9 +112,9 @@ export function LogLines({
   return (
     // The walk tells log lines from refusal notes by this id (walkthrough/walk.ts live).
     // Always nested, so a second round arriving remounts no line (a drying line keeps drying).
-    <View testID="log-lines" style={{ gap: space.xl }}>
+    <View testID="log-lines" style={{ gap: run ? t.log.lineHeight : space.xl }}>
       {shown.map(([n, b]) => (
-        <View key={n} style={{ gap: space.sm }}>
+        <View key={n} style={{ gap: run ? 0 : space.sm }}>
           {b}
         </View>
       ))}

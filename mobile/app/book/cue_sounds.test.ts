@@ -168,6 +168,21 @@ for (const [cue, music, felt] of fightRows)
     );
   });
 
+// Breaks: a death falls silent, or its sound plays under the fight loop (book-ui.md, Falling).
+test('a death cuts the fight, then plays the death sound', () => {
+  g.bookDevice = [];
+  playCue({ name: 'death', fight: true });
+  const log: [string, string][] = g.bookDevice;
+  g.bookDevice = undefined;
+  assert.deepEqual(
+    log.filter((l) => l[0] !== 'haptic'),
+    [
+      ['fight', 'cut'],
+      ['play', 'death'],
+    ],
+  );
+});
+
 // Breaks: a blow dealt buzzes, or plays nothing.
 test('a blow dealt is an impact, with no haptic', () => {
   g.bookDevice = [];

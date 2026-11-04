@@ -48,6 +48,7 @@ import {
   narrationLines,
   newRound,
   quietOf,
+  fall,
   resetLogs,
   trimLog,
   restoredLogs,
@@ -100,7 +101,7 @@ function narrate(
   const [lines, combat] = narrationLines(last, now, text, false, was);
   s.combatLog.push(...combat);
   s.narrationId = last.command_id;
-  if (last.died) s.died = last.command_id;
+  if (last.died) fall(s, last.command_id);
   if (last.missed) s.deed = last; // a round's miss comes on the clock (book-ui.md, Fight music)
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
@@ -270,6 +271,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     returnDetail: s.returnDetail,
     confirmedRead: s.confirmedRead,
     ended: s.ended,
+    fell: !!s.ended && s.fell === s.ended, // the closed page is your death's (book-ui.md, Falling)
   };
 }
 

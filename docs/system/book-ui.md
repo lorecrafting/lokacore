@@ -106,8 +106,7 @@ loose items share 'a' or 'an' the same way, written again when the word changes 
 orange are here.'; owner 2026-10-23), and written again on a name ending in the same word as the one before it ('A stick and a stick are here.'; 'A cowering goblin and a goblin are here.'; owner 2026-10-30);
 same-kind entities with a plural collapse into one link, 'two crows', count words to
 nine, digits after; the link opens the first member, and after Take the sentence recounts ('Five eggs are here.'), so
-every member stays reachable (PM ruling 2026-10-23); a name without words draws as its `name`. Combat foe lines take the definite
-form, one line per foe. Every entity that is not an
+every member stays reachable (PM ruling 2026-10-23); a name without words draws as its `name`. Every entity that is not an
 NPC or player goes in the item sentence, so none is dropped or listed twice. Each name is
 its own inline link named "<name>, open" that opens its detail (a tap, or Enter or Space on a keyboard); the commas, "and" and "are here."
 are not pressable. An item's Take option appears only when currently offered; an NPC or
@@ -625,7 +624,7 @@ The option is an Action card that sends nothing: a press opens its list in the p
 
 A row press (or Enter on a focused row) sends that pair under [live action freshness](#live-action-freshness); nothing sends while an action is pending, and the list stays as it is. A confirmed accepted pick closes the detail page back to World and adds the receipt's authored narration to the World log once; without narration the Book writes one line from [`words.ts`](../../mobile/app/book/words.ts) with the original projected names: **You give an apple to the farmer.** (Give), **You douse the cart with the bucket.** (a use pair: the scripted action's authored label, first letter lowercased, then target and tool), **You cast lux on the cart.** (a spell). The existing [Announcements](#announcements) region reads it; the list adds no live region of its own. A refused pick keeps the page, closes the list, returns focus to the option, and the refusal shows as a refused line in that page's history; a stale pick redraws and nothing acts. An item the pick consumes follows the [consumed-item](#item-details-and-takedrop) line rule, which already ends in World. Put keeps its concrete pair button.
 
-**Aimed spells off the target's page** (owner 2026-10-23, loka-x6t.109.5; PM approved as built 2026-10-23). The Skills page's Spells block draws one pick option per aimed spell the GameView offers on some target, labelled with the spell's label and **Cast on…** ("Flamma, cast on…"); its rows are that spell's targets, labelled with each target's projected name, a refused one an [unavailable](#unavailable-actions) row (`The lantern`), and an accepted pick turns to World with its line as above. During a live fight each foe line on the Combat page draws that foe's **Cast a spell…** option; an accepted pick stays on Combat while the fight goes on, and its narration goes to the combat log, never the World log. When the foe dies its option goes with it. Open item: with two foes, the two options read alike (the foe's name is in each row's accessible name, not the option's).
+**Aimed spells off the target's page** (owner 2026-10-23, loka-x6t.109.5; PM approved as built 2026-10-23). The Skills page's Spells block draws one pick option per aimed spell the GameView offers on some target, labelled with the spell's label and **Cast on…** ("Flamma, cast on…"); its rows are that spell's targets, labelled with each target's projected name, a refused one an [unavailable](#unavailable-actions) row (`The lantern`), and an accepted pick turns to World with its line as above. During a live fight the Combat page draws each live foe's option last among its cards, naming the foe by its projected name (**Cast a spell on the goblin…**, owner 2026-11-02, loka-kgd.204); an accepted pick stays on Combat while the fight goes on, and its narration goes to the combat log, never the World log. When the foe dies its option goes with it. Open item: two foes of one name read alike.
 
 **Equipment and skills.** A weapon's or shield's page shows its projected slot, attack or block
 figures ("2–4 damage", or "2 damage" when the two are equal) and skill requirement, read from the projection, never renderer literals or inferred
@@ -771,9 +770,9 @@ value dries in the wash's colour and back, with the thud and the heavy haptic. T
 at the wash's peak, with no layout change or reflow (owner, 2026-10-31). Reduced motion halves the
 wash and removes the swell; Flashes off removes both, leaving the value, thud and haptic.
 
-**Falling.** The player's death is a committed fact from the receipt, never a view diff, a rendered line or a room name. It is one S4: pending cues clear, music and beds cut at once, and one heavy haptic is the last thing felt: in a fight the thud's own, which is never cut; outside one, the death cue's. In a fight the fatal blow's wash falls to the faint opacity and holds until the page turns (Flashes off: no peak, the hold fades in over the settle time; reduced motion: the half wash, no swell, the same hold). A death outside a fight has no wash. Waking has no chord: the page lands on the palette of the current in-game hour, because death does not move the clock, and the current room's bed returns. No palette change marks the fall. ([Designer rulings](../design/effects-batch-2-rulings.md).)
+**Falling.** The player's death is a committed fact from the receipt, never a view diff, a rendered line or a room name. It is one S4: pending cues clear, music and beds cut at once, and one heavy haptic is the last thing felt: in a fight the thud's own, which is never cut; outside one, the death cue's. In a fight the fatal blow's wash falls to the fatal hold (the reddest the dim and warning ink bear at 4.5:1; its look is in the [catalogue](../BOOK-UI-COMPONENTS.md)) and holds there, still, with no pulse and no fade, until the page turns; the screen's edges hold a deeper bloodshot red, feathered inward and gone before the page margins, so no ink sits on it (owner 2026-11-02, loka-kgd.204; Flashes off: no peak, the hold rises over the settle time; reduced motion: the same still edges, the half wash, no swell, over the hold set at once). A death outside a fight has no wash. The death sound plays once (for now the book's close: no Falling cue is recorded yet). There is no countdown: the held red says the player is dead, and the closed Combat page's one foot reads **Let go** ([Closure](#live-combat-response-m6-a)), which for now goes to World as Back to World does; the spirit state (loka-kgd.205, not built) will change where it leads. Waking has no chord: the page lands on the palette of the current in-game hour, because death does not move the clock, and the current room's bed returns. No palette change marks the fall. ([Designer rulings](../design/effects-batch-2-rulings.md).)
 
-**Fight music.** A fight's opening plays a stinger into a lean loop on the music bus, and beds go silent; a fight within the fight gap of the last, or a reopened one, plays the loop alone. A foe falling cuts the loop into a short fanfare, then the room's bed returns. Flight or a quiet end lets the loop fall away with no fanfare. Death cuts it (Falling). A blow dealt presses the opponent's band phrase once and plays one impact under the music; the player's own miss, read from the receipt's attack event, plays one whisper; a blow that moves no band, a dodge and a block add no sound, until events can tell them apart, and never from a rendered line.
+**Fight music.** A fight's opening plays a stinger into a lean loop on the music bus, and beds go silent; a fight within the fight gap of the last, or a reopened one, plays the loop alone. A foe falling cuts the loop into a short fanfare, then the room's bed returns. Flight or a quiet end lets the loop fall away with no fanfare. Death cuts it (Falling). A blow dealt plays one impact under the music; the player's own miss, read from the receipt's attack event, plays one whisper; a blow that moves no band, a dodge and a block add no sound, until events can tell them apart, and never from a rendered line.
 
 **Beds.** Each room plays its tag's one loop on the ambience bus, or `wild`, or silence; the same tag across rooms carries on, a new tag cross-fades, and the background stops it. S3 and S4 sounds duck it; the paper turn does not.
 
@@ -927,10 +926,10 @@ offer under ordinary freshness; an old view never promises rescue, and expiry re
 
 An attackable present NPC offers deliberate Attack. An active encounter automatically opens
 and foregrounds its own full Book page, like dialogue, including when another ordinary page
-or menu was open and when reopening a saved encounter. The page names the opponent, shows
-committed combat narration, and renders only currently available Stand, directionless Flee
-and Look actions as complete typed invocations. The shared kernel ActionSet also permits Scan;
-its existing phone presentation deferral remains. The combat restriction is applied after all
+or menu was open and when reopening a saved encounter. The page shows
+committed combat narration, and renders only currently available Stand and directionless Flee actions as complete typed
+invocations. The kernel still permits Look and Scan in a fight; the page offers neither (Look:
+owner 2026-11-04, until the combat hotbar is designed). The combat restriction is applied after all
 ordinary contributions, so no blocked action or alias is exposed by a hidden ordinary page.
 Attack initiates combat from the NPC page; it is not usable again during an open encounter
 and is not shown on the combat page.
@@ -942,26 +941,23 @@ while the combat page is open.
 **Rounds.** The page follows its newest line as other growing pages do (Page: it follows the end
 while the reader is there; a reader scrolled up to an earlier round stays put until they press), so a round's lines
 land in view above the action cards. Each round's lines (one committed receipt: an elapsed round,
-or one press's receipt) are one block at the log's line pitch, and rounds stand apart by the
-page's block gap (LogLines), as the prompt line parts rounds in a MUD log; no rule glyph, heading
+or one press's receipt) are one block at the log's line pitch with no gap between lines, and rounds stand apart by one
+blank line (one log line height; owner 2026-11-04), as the prompt line parts rounds in a MUD log; no rule glyph, heading
 or words mark a round.
 
 Combat takes precedence over ordinary navigation until the encounter closes. **Opening.** The
 receipt that opens an encounter (a move's or Sleep's `engage`, Attack, a cast's fight-back)
 draws all of its narration in the combat log (and the World log), so the page opens with the engage line as its
-first log line; the opponent block always shows, so the page is never blank. The opponent block
-leads with the opponent lines, each the name and its hp band phrase joined by " — " ("the
-raider — hurt", the cartridge's `band.<key>` words the status line uses; no number, the hp
-band stays on the locked status line; the opponent's band is a GameView field, engine slice
-loka-y6yg.49); the target suffix follows the name, before the dash ("the raider (your target) — hurt"). Your own bleeding and condition lines draw nowhere on the Combat page: they stay
+first log line, which names the foe ("You attack a boar!" / "A boar attacks you!", loka-kgd.202). No
+foe name, band phrase or target line sits above the log (owner 2026-11-02, loka-kgd.204): the log
+opens the page, and each live foe's **Cast a spell on** list ("Cast a spell on the goblin…") comes last among the cards. Your own bleeding and condition lines draw nowhere on the Combat page: they stay
 on the status line and Character, so a reader never takes your hunger for the raider's
 (pass-1 C2b, as loka-x6t.15). **Closure.** On
 every committed closure (opponent death, player death and inn return, successful Flee, any
-other end) the Combat page stays the shown page, as a one-reply conversation does: its opponent
-block of names only, without the band phrase or the target suffix (nothing is left to aim at), its log ending with the closing
+other end) the Combat page stays the shown page, as a one-reply conversation does: its log ending with the closing
 lines (every line of the closing receipt, whatever its key), no action cards, and one foot Control
-[**Back to World**](../BOOK-UI-COMPONENTS.md#component-catalogue) (the existing label; no
-new words). The status line stays locked as during the fight. The tap is local (no engine verb)
+[**Back to World**](../BOOK-UI-COMPONENTS.md#component-catalogue), or **Let go** when the
+receipt says the player died ([Falling](#effects-sound-and-haptics); owner-approved label 2026-11-02). The status line and its icons are hidden while Let go shows (owner 2026-11-04); after a fight you survived it stays locked as during the fight. The tap is local (no engine verb)
 and shows the World page of the room the player is now in (the inn after death, the room fled
 to) through the existing room-change flow. Time runs meanwhile; later ambient and room lines go to
 the World log. A new encounter replaces the ended page; nothing is stored, so reopening a save

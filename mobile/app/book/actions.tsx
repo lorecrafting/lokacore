@@ -154,7 +154,7 @@ export function PickLists(p: {
   text: (key: string) => string;
   press: (b: Button) => void;
   pending?: boolean;
-  /** shared open state, for lists on one screen under several pages (Combat's foe lines) */
+  /** shared open state, for lists on one screen under several pages (Combat's foes) */
   state?: Shown;
 }) {
   const own = useState<{ page: string; label: string }>();

@@ -194,7 +194,7 @@ export const ScrollToEnd: Story = {
 
 // Breaks: on the web ScrollView keeps its first ref callback, so a later render's Page has no view
 // and a line arriving on a full page is cut (the pop unseen).
-// `above`: Say sits above the log, as Here's exits and the foe line's spells do; `clock`: five
+// `above`: Say sits above the log, as Here's exits do; `clock`: five
 // lines arrive unpressed on each tick, as combat rounds do.
 function Growing({ above = false, clock = false }) {
   const [lines, setLines] = useState(30);

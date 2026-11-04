@@ -60,6 +60,7 @@ sources(
     skillNew: [noteLow],
     questDone: [noteLow],
     questFailed: [close],
+    death: [close],
     skillUp: [toneHigh],
     questGained: [toneLow],
     chapter: [chapter],

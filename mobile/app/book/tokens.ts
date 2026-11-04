@@ -118,6 +118,7 @@ export const size = {
   chapterRule: 80, // the chapter card's short rule (the mock's `.chapter i`)
   statusIcon: 28, // a status icon's disc, inside a size.touch box
   unseen: 1, // a box a screen reader reads and the eye cannot see (the live region)
+  bloodshot: 16, // the fatal hold's feathered edge: its blur, gone before the page margins' ink -- mutate-skip: uncalibrated design value
   column: 768, // the Book's widest page column (tablet width), centred on a desktop; a phone fills the screen
 };
 
@@ -129,7 +130,9 @@ export const opacity = {
   afterimage: 0.12, // Storm's light, the second exemption: BOOK-UI-COMPONENTS.md#design-tokens -- mutate-skip: uncalibrated design value
   wash: 0.18, // the blow wash at its peak, the exemption: BOOK-UI-COMPONENTS.md#design-tokens
   washStill: 0.09, // the same wash under reduced motion
-  faint: 0.06, // a held under-ink layer: low-health vignette, dream paper, the fatal wash's hold; 4.5:1 holds -- mutate-skip: uncalibrated design value
+  faint: 0.06, // a held under-ink layer: low-health vignette, dream paper; 4.5:1 holds -- mutate-skip: uncalibrated design value
+  fatal: 0.075, // the fatal blow's held red: the most light's dim and warning bear at 4.5:1 -- mutate-skip: uncalibrated design value
+  bloodshot: 1, // the fatal hold's edges at the screen's rim, feathered in over size.bloodshot -- mutate-skip: uncalibrated design value
   glow: 0.08, // the lamp at the page's hip, at its peak; 4.5:1 holds -- mutate-skip: uncalibrated design value
 };
 
@@ -208,6 +211,7 @@ export const sound = {
   riddleRight: { tier: 'note', variants: 1, haptic: 'light' }, // the note-low sample; no new file -- mutate-skip: uncalibrated design value
   riffle: { tier: 'note', variants: 1, haptic: 'light' }, // one travel's turn -- mutate-skip: uncalibrated design value
   fightWon: { tier: 'chapter', variants: 1, haptic: 'light' }, // a foe falling: the fanfare -- mutate-skip: uncalibrated design value
+  death: { tier: 'beat', variants: 1 }, // the player falls: the book's close until a Falling cue is recorded; no new file -- mutate-skip: uncalibrated design value
 };
 
 // Loudness targets (LUFS, uncalibrated until recorded samples are heard), voices per bus, ambience
