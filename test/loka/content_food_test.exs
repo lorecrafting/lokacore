@@ -100,7 +100,7 @@ defmodule Loka.ContentMealTest do
   end
 
   # loka-kgd.209. Breaks: an {status, duration} entry left unresolved, a duration on a permanent
-  # status, a status naming both `resource` and `ticks`, a 0 tick, a pool ticked twice, or none at all.
+  # status, a status naming both `resource` and `ticks`, a 0 tick, a pool ticked twice, over 16 ticks, or none.
   test "an applies entry's own duration and a status's ticks are checked", %{dir: dir} do
     read = &JSON.decode!(File.read!(Path.join(dir, &1)))
     stew = "items/stew_plain_01.json"
@@ -120,7 +120,9 @@ defmodule Loka.ContentMealTest do
        {"SCHEMA_VIOLATION", "statuses/fed.ticks[0].per_tick"}},
       {[status.(&Map.delete(&1, "resource"))], {"SCHEMA_VIOLATION", "statuses/fed.resource"}},
       {[status.(&Map.put(Map.delete(&1, "resource"), "ticks", [mv, %{mv | "per_tick" => -1}]))],
-       {"SCHEMA_VIOLATION", "statuses/fed.ticks[1].resource"}}
+       {"SCHEMA_VIOLATION", "statuses/fed.ticks[1].resource"}},
+      {[status.(&Map.put(Map.delete(&1, "resource"), "ticks", List.duplicate(mv, 17)))],
+       {"SCHEMA_VIOLATION", "statuses/fed.ticks"}}
     ]
 
     for {changes, expected} <- cases do
