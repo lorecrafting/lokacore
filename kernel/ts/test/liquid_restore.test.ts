@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { step, type World } from '../src/index.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { id, liquidFresh } from './liquid_fixture.ts';
 
 const fresh = liquidFresh();
@@ -34,7 +35,7 @@ test('a liquid restoring mv raises it by its amount and stops at the pool maximu
     },
   };
   const levels = [];
-  for (const n of [1, 2]) {
+  for (const n of [1, 2, 3]) {
     const payload = { type: 'consume', actor_id: world.character, item_id: skin };
     const next = step(
       world,
@@ -49,5 +50,19 @@ test('a liquid restoring mv raises it by its amount and stops at the pool maximu
     world = next.world;
     levels.push(world.state.resources![mv].value);
   }
-  assert.deepEqual(levels, [96, 100]);
+  // A drink at the maximum is still admitted (mechanics.md Admission binds only edibles).
+  assert.deepEqual(levels, [96, 100, 100]);
+});
+
+// Breaks: a loaded liquid carries resource or amount alone, so the restore adds NaN to the pool.
+test('LiquidDefinition refuses resource without amount and amount without resource', () => {
+  assert.notDeepEqual(
+    validate('LiquidDefinition', { ...water, resource: ref('resource', 'mv') }),
+    [],
+  );
+  assert.notDeepEqual(validate('LiquidDefinition', { ...water, amount: 6 }), []);
+  assert.deepEqual(
+    validate('LiquidDefinition', { ...water, resource: ref('resource', 'mv'), amount: 6 }),
+    [],
+  );
 });
