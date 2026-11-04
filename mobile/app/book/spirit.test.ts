@@ -1,7 +1,8 @@
 // The spirit state's clock (book-ui.md, Spirit state), on controlled times.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { due, left, next, type Spirit } from './spirit.ts';
+import { dropLines, trimLog, type Logs } from './logs.ts';
+import { due, end, fall, haunt, left, letGo, next, type Spirit } from './spirit.ts';
 
 // Breaks: a lone revival line waits, the countdown rounds down, or the redraw timer sleeps past
 // the next line (or the next second), or keeps ticking at zero.
@@ -18,4 +19,37 @@ test('the spirit clock wakes for each line and each second, and stops at zero', 
   assert.equal(next(sp(1), 200), 300); // line b at 500
   assert.equal(next(sp(3), 200), 800); // all shown: the next second
   assert.equal(next(sp(3), 1000), undefined);
+});
+
+// Breaks: the held lines are found by a raw log index, so a trim after the death (a full log) or a
+// room change's reset in the spirit state shows the return's lines early, or holds old lines.
+test('the lines held to the rise survive a trim and a reset', () => {
+  const line = (key: string) => ({ kind: 'line', key }) as never;
+  const fight = { encounter_id: 'f' } as never;
+  const s = {
+    log: Array.from({ length: 201 }, (_, i) => line(`old${i}`)),
+    projection: { view: { revival: { lines: [], seconds: 1 } } },
+  } as unknown as Logs;
+  trimLog(s.log); // already trimmed before the death
+  fall(s, 'death');
+  s.log.push(line('woke'), line('hello'));
+  trimLog(s.log);
+  Object.assign(s, { ended: fight, fell: fight });
+  assert.equal(letGo(s, String), true);
+  assert.deepEqual(s.spirit!.held, [line('woke'), line('hello')]);
+  assert.equal(s.log.length, 198);
+  const from = end(s.log);
+  dropLines(s.log);
+  s.log.push(line('arrived'));
+  haunt(s, from, undefined);
+  assert.deepEqual(s.log, []);
+  assert.deepEqual(s.spirit!.held.at(-1), line('arrived'));
+  // A room change after the death drops the receipt itself: all that came after is held.
+  fall(s, 'again');
+  s.log.push(line('woke'), line('hello'));
+  dropLines(s.log);
+  s.log.push(line('a'), line('b'), line('c'));
+  Object.assign(s, { ended: fight, fell: fight });
+  letGo(s, String);
+  assert.deepEqual(s.spirit!.held, [line('a'), line('b'), line('c')]);
 });

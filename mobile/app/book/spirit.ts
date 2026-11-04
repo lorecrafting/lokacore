@@ -1,6 +1,6 @@
 // The death and its return (book-ui.md, Falling; Spirit state): after a death with `revival`, Let go
 // lands on the World page in the spirit state, its lines held to the rise. Wall-clock time; nothing is stored.
-import type { DetailLine, Logs } from './logs.ts';
+import { logMark, type DetailLine, type Logs } from './logs.ts';
 
 export type Spirit = {
   lines: string[]; // the revival lines' text, in order
@@ -25,10 +25,15 @@ export function next(sp: Spirit, ms: number) {
   return Math.max(0, Math.min(line, 1000 - (ms % 1000)));
 }
 
+// A log position that survives a trim or a room change's reset: lines ever pushed, not an index.
+export const end = (lines: DetailLine[]) => logMark(lines).gone + lines.length;
+const since = (lines: DetailLine[], at: number) =>
+  lines.splice(Math.max(0, at - logMark(lines).gone));
+
 // The player's death, from its receipt: a fight it closed is the one they fell in.
 export function fall(s: Logs, command_id: string) {
   s.died = command_id;
-  s.woke = s.log.length; // before the receipt's own lines
+  s.woke = end(s.log); // before the receipt's own lines
   if (s.closing) s.fell = s.ended;
 }
 
@@ -37,7 +42,7 @@ export function letGo(s: Logs, text: (key: string) => string) {
   const revival = s.ended && s.fell === s.ended ? s.projection.view.revival : undefined;
   s.ended = undefined;
   if (!revival) return false;
-  const held = s.log.splice(s.woke ?? s.log.length);
+  const held = since(s.log, s.woke ?? end(s.log));
   s.spirit = {
     lines: revival.lines.map(text),
     seconds: revival.seconds,
@@ -50,7 +55,7 @@ export function letGo(s: Logs, text: (key: string) => string) {
 
 /** An update in the spirit state: its new lines held; an encounter, chapter or scene arriving ends it. */
 export function haunt(s: Logs, from: number, chapter: number | undefined) {
-  s.spirit!.held.push(...s.log.splice(from));
+  s.spirit!.held.push(...since(s.log, from));
   const { combat, scene, chapter: now } = s.projection.view;
   if (combat || scene || now?.index !== chapter) wake(s);
 }

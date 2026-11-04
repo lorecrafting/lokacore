@@ -55,7 +55,7 @@ import {
 import { named, received } from './received.ts';
 import { days } from './chronicle.ts';
 import { holding, pressedAway, settle } from './recap.ts';
-import { fall, haunt, haunting, letGo, wake } from './spirit.ts';
+import { end, fall, haunt, haunting, letGo, wake } from './spirit.ts';
 import { heard, type Said } from './heard.ts';
 
 function background(
@@ -75,7 +75,7 @@ function background(
     now = update.projection.view;
   resetLogs(s, now);
   const away = holding(s, was, now),
-    from = s.log.length;
+    from = end(s.log);
   // World entries: to the log, or held by the open settlement (book-ui.md, Away recap).
   (away?.log ?? s.log).push(...comings(was, now, text));
   s.projection = update.projection;
@@ -271,7 +271,7 @@ export function presenter(game: Game) {
     },
     update: (update: GameSubscription) => {
       newRound(s.combatLog); // one update or press settles at most one receipt: one round
-      const [from, chapter] = [s.log.length, s.projection.view.chapter?.index];
+      const [from, chapter] = [end(s.log), s.projection.view.chapter?.index];
       const terminal = updated(game, update, s, text);
       if (s.spirit) haunt(s, from, chapter);
       if (terminal && s.recovered) generation++;

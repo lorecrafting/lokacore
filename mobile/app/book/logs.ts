@@ -86,7 +86,7 @@ export type Logs = {
   ended?: GameView['combat']; // a closed encounter's page, until Back to World (book-ui.md, Closure)
   fell?: GameView['combat']; // the encounter the player died in: its page closes on Let go
   closing?: boolean; // this view closed a fight (resetLogs), so a death in it is that fight's
-  woke?: number; // where the last death's return receipt starts in the log: held in the spirit state
+  woke?: number; // where the last death's return receipt starts in the log (spirit.ts, end): held in the spirit state
   spirit?: Spirit; // the spirit state, from Let go to the rise (spirit.ts)
   noted?: Set<string>; // the cue lines logged this room visit
 };
