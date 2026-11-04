@@ -8,7 +8,7 @@ defmodule Loka.Content.Behaviours do
   faults; Source builds the diagnostics, so this module never calls Source.
   """
 
-  alias Loka.Content.Params
+  alias Loka.Content.{Areas, Params}
   alias Loka.Core.Contracts
 
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
@@ -114,7 +114,21 @@ defmodule Loka.Content.Behaviours do
 
   defp attach(_, {nil, _}, _, _), do: {[], []}
 
-  defp attach({{_, with}, i}, {params, rs}, holder, {rel, steps}) do
+  # A behaviour with no reactions copies nothing, so its area is not checked.
+  defp attach({{name, _}, i} = a, {_, [{from, _, _, _} | _]} = b, holder, {rel, steps} = at) do
+    case Areas.crossed(rel, from) do
+      nil ->
+        fill(a, b, holder, at)
+
+      area ->
+        data = %{"why" => "area_crossing", "target" => "behaviours/" <> name, "area" => area}
+        {[], [{"SCHEMA_VIOLATION", {rel, steps ++ [i]}, data}]}
+    end
+  end
+
+  defp attach(a, b, holder, at), do: fill(a, b, holder, at)
+
+  defp fill({{_, with}, i}, {params, rs}, holder, {rel, steps}) do
     case Params.check(with, params) do
       [] ->
         {for(r <- rs, do: copy(r, holder, Map.put(with, "holder", holder))), []}

@@ -87,6 +87,9 @@ defmodule Loka.Content.Explain do
          no_choices | This scene gives the player nothing to choose. | Add a `- ` choice line under what {npc} says.
          not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:`, `quest:`, `needs:`, `once` or `then:` (docs/guides/writing-the-game.md).
          file_name | This file's name cannot be a key. | Rename it with lowercase letters, digits and underscores.
+         area_name | This area folder's name cannot be a key. | Rename the folder with lowercase letters, digits and underscores.
+         area_empty | The area `{area}` has no room. | Add a room under areas/{area}/rooms/, or move its files to the root folders of their kinds.
+         area_crossing | `{target}` belongs to the area `{area}`, and only that area and the root may name it. | Move {target} to the root folder of its kind, or move this file into areas/{area}/. Any file may name a room.
          outside_choice | Line `{text}` belongs under a choice. | Move it under a `- ` line.
          bad_indent | Line `{text}` does not line up under a choice. | Indent with spaces: a nested `- ` goes deeper than its choice, its lines deeper still, and a choice lines up with the ones beside it.
          bad_needs | Line `{text}` is not `needs: <fact>` or `needs: not <fact>`, or repeats a `needs:`. | Give a choice one `needs:` naming one fact by its key; `~` holds the place of words, not of a fact. Anything richer goes in `policy` in `dialogues/<key>.json`.
