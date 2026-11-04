@@ -124,10 +124,13 @@ test('empty, filled, partial Pour, empty, nested, ground and shop custody reopen
   assert.equal(fillReplay.kind === 'saved' && fillReplay.replay, true);
   assert.deepEqual(rows(a), [wet(4), empty]);
   a.invoke('fill', [a.well, spare]);
+  // Breaks: a Fill's or a Drink's receipt opens no detail, or the wrong one (narration.ts receiptDetail).
+  assert.equal(a.story().narration()?.detail_id, a.well);
   a.reopen();
   assert.deepEqual(rows(a), [wet(4), wet(4)]);
   const drink = a.attempt('consume', [spare]);
   assert.equal(a.story().invoke(drink).kind, 'saved');
+  assert.equal(a.story().narration()?.detail_id, spare);
   a.reopen();
   assert.deepEqual(rows(a), [wet(4), wet(3)]);
   const drinkReplay = a.story().invoke(drink);
