@@ -15,6 +15,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: one consume command and one effect block, PR #605 (loka-kgd.209)](2026-11-04-loka-kgd.209-consume-review.md): **CHANGES REQUIRED**
 - [Review: corpses name their victim, decay and spill, PR #593 (loka-kgd.203)](2026-11-04-corpses-review.md): **APPROVE**
 - [Second review: corpse decay save and delta contract, PR #593 (loka-kgd.203)](2026-11-04-corpse-decay-second-review.md): **CHANGES REQUIRED**
+- [Second review: consume contract and save effect, PR #605 (loka-kgd.209)](2026-11-04-consume-one-effect-second-review.md): **APPROVE WITH NOTES**
 - [Review: Combat round two, PR #596 (loka-kgd.202 a and b)](2026-11-04-combat-round-two-review.md): **APPROVE WITH NOTES**
 - [Review: area layout S1, the compiler reads area folders, PR #603 (loka-vduxr.58.1)](2026-11-04-area-folders-s1-review.md): **APPROVE WITH NOTES**
 - [Review: Swings, PR #591 (loka-kgd.200)](2026-11-02-swings-review.md): **APPROVE**
