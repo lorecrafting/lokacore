@@ -12,7 +12,9 @@ import {
   addable,
   applied,
   branchOf,
+  choices,
   diff,
+  editable,
   fieldErrors,
   hidden,
   proseKey,
@@ -62,6 +64,8 @@ test('an edit through the card round-trips to the file, one op per changed field
     diff(doc, { ...doc, ask: {}, attack: { crit: {}, on_hit: { x: undefined } } }),
     [],
   );
+  assert.deepEqual(diff({ hp: { start: 1 } }, { hp: 3 }), [{ path: ['hp'], value: 3 }]);
+  assert.deepEqual(applied(doc, { ...doc, room: 'gate', ask: {} }), { ...doc, room: 'gate' });
 });
 
 // Break: a refusal lands on the wrong field or is lost (another file's, a quoted file name, an
@@ -77,6 +81,8 @@ test("the compiler's refusals show at their field", () => {
       { path: 'npcs/ada.room', rel, words: room },
       { path: 'npcs/ada.ask.answers[2]["odd key"]', rel, words: 'deep' },
       { path: 'npcs/ada', rel, words: 'whole' },
+      { path: 'npcs/bob.hp', rel, words: 'other source' },
+      { path: 'npcs/ada!', rel, words: 'unread step' },
       { path: 'npcs/bram.hp', rel: 'npcs/bram.json', words: 'other file' },
     ],
     rel,
@@ -85,7 +91,7 @@ test("the compiler's refusals show at their field", () => {
     hp: { __errors: [hp] },
     room: { __errors: [room] },
     ask: { answers: { 2: { 'odd key': { __errors: ['deep'] } } } },
-    __errors: ['whole'],
+    __errors: ['whole', 'other source', 'unread step'],
   });
   assert.deepEqual(
     fieldErrors(
@@ -132,8 +138,33 @@ test('a value is drawn in the branch its op names', () => {
   assert.equal(branchOf(outer, { op: 'wait', seconds: 5 }), 1);
   assert.equal(branchOf(outer, { op: 'narrate' }), 0);
   assert.equal(branchOf(outer, undefined), -1);
+  assert.equal(branchOf(step, { op: 'fact.assign' }), 0);
   assert.deepEqual(start(step[2]), { op: 'quest.activate' });
   assert.equal(start(outer[0]), undefined);
+});
+
+// Break: an untagged value is drawn in a branch of another type (a number not taken as integer,
+// null as an object), or a branch with no type is skipped.
+test('a value with no op is drawn in the first branch its type fits', () => {
+  const typed = [{ type: 'string' }, { type: 'integer' }, { type: 'null' }];
+  assert.equal(branchOf(typed, 3), 1);
+  assert.equal(branchOf(typed, null), 2);
+  assert.equal(branchOf(typed, true), -1);
+  assert.equal(branchOf([{}], true), 0);
+});
+
+// Break: a reference field offers another kind's keys, or the ref's cartridge prefix; a `.scene`
+// (or no file) gets a card.
+test('a picker offers the bare keys of its kind; only .json files have a card', () => {
+  const nodes = [
+    { ref: 'c@0.1:room/square', kind: 'room' },
+    { ref: 'c@0.1:npc/ada', kind: 'npc' },
+  ];
+  assert.deepEqual(choices('room', nodes), ['square']);
+  assert.deepEqual(
+    [editable('npcs/a.json'), editable('rooms/a.scene'), editable(undefined)],
+    [true, false, false],
+  );
 });
 
 // Break: the in-Book edit opens the wrong text key (plural kind, a missing `room_line` alias, an
