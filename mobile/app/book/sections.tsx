@@ -4,7 +4,15 @@ import { useContext } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bandPhrase, cap, conditionLine, isPool, toneOf, type Thing } from './model.ts';
+import {
+  bandPhrase,
+  bleedingParts,
+  cap,
+  conditionLine,
+  isPool,
+  toneOf,
+  type Thing,
+} from './model.ts';
 import type { Button } from './presenter.ts';
 import { cardContext, useCardInk, useCardTurn } from './card.ts';
 import { InkText, Reanimated } from './fade.ts';
@@ -64,7 +72,11 @@ export function CharacterPage(p: Character) {
         <Text style={prose(c, t)}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>
       )}
       {levelling && <LevelLine levelling={levelling} />}
-      {p.view?.bleeding && <Text style={prose(c, t)}>{p.text(p.view.bleeding.label)}</Text>}
+      {p.view?.bleeding && (
+        <Text style={prose(c, t)}>
+          {cap(bleedingParts(p.view.bleeding, p.view.time, p.text).join(' · '))}
+        </Text>
+      )}
       {p.view?.conditions?.map((x, i) => (
         <Text key={`${x.label}-${i}`} style={prose(c, t)}>
           {cap(conditionLine(x, p.view!.time, p.text))}

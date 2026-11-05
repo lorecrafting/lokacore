@@ -1,4 +1,4 @@
-// size: allow 580, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
+// size: allow 645, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
 import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -363,11 +363,47 @@ test('the status line shows the weather in words and names season and tide', () 
   );
 });
 
-// Breaks: a sixth icon where the +N disc belongs (or the disc at five), a name losing its polarity or
-// giving a permanent status a time, the glyph not falling back by polarity, a locked icon still a
-// button, or the Character page dropping a condition's time, tick or sign
-// (book-ui.md Conditions details; StatusIcons' doc comment).
-test('status icons: five then +N, named by label, time and polarity, pictures while locked', () => {
+// Breaks: the spirit state or the reverie treatment drawing the status row, bleeding icon included
+// (status-line-rulings.md; owner 2026-11-04).
+test('the spirit state and the reverie hide the status row, bleeding included', () => {
+  const bottom = (more: object) => {
+    const book = BookView({
+      palette: color.light,
+      screen: {
+        buttons: [],
+        view: {
+          place: { id: 'room' },
+          time: 0,
+          bleeding: { label: 'bleeding', ends_at: 60, hp_loss: 1, tick_every: 60 },
+        },
+        text: (key: string) => key,
+        log: [],
+        pending: false,
+        catchingUp: false,
+        ...more,
+      } as any,
+      stack: [],
+      flip: { turn: 0, dir: 1 },
+      go: () => {},
+      press: () => {},
+      refused: () => {},
+      startOver: () => {},
+      shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
+    } as any);
+    const b = book.props.children.props.children.props.children[0].props.children[1].props.children;
+    return b.type(b.props);
+  };
+  const drawn = [bottom({}).props.children].flat().find((c: any) => c?.props?.bleeding);
+  assert.equal(drawn.props.bleeding.label, 'bleeding'); // drawn outside both
+  assert.equal(bottom({ spirit: true }), null);
+  assert.equal(bottom({ treatment: 'reverie' }), null);
+});
+
+// Breaks: icons in projected order rather than debuffs, neutral, buffs; a disc at six or none at
+// seven (or a sixth icon beside it); a name losing its polarity or giving a permanent status a time,
+// the glyph not falling back by polarity, a locked icon still a button, or the Character page
+// dropping a condition's time, tick or sign (status-line-rulings.md; book-ui.md Conditions details).
+test('status icons: debuffs first, six or five then +N, named by label, time and polarity, pictures while locked', () => {
   const at = (label: string, kind?: string, ends_at?: number, per_tick?: number) =>
     ({ label, kind, ends_at, per_tick, resource: 'hp', tick_every: 60 }) as any;
   const five = [
@@ -379,7 +415,8 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
   ];
   const text = (key: string) => (key === 'condition.fed' ? 'fed' : key);
   const icons = (conditions: any[], open?: () => void) => {
-    const [shown, more] = StatusIcons({ conditions, time: 720, text, open }).props.children;
+    const [, items, more] = StatusIcons({ conditions, time: 720, text, open }).props.children;
+    const shown = items.filter((arrival: any) => !arrival.props.hidden);
     return [...shown.map((arrival: any) => arrival.props.children), more]
       .filter(Boolean)
       .map((e: any) => e.type(e.props));
@@ -389,30 +426,31 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
   const open = () => opened.push('character');
   const shown = icons(five, open);
   assert.deepEqual(names(shown), [
-    'fed, 48m remaining, buff, opens Character',
     'poisoned, 4m remaining, debuff, opens Character',
-    'rested, 10m remaining, opens Character',
     'scarred, debuff, opens Character',
+    'rested, 10m remaining, opens Character',
+    'fed, 48m remaining, buff, opens Character',
     'warded, 90s remaining, buff, opens Character',
   ]);
   const discOf = (e: any) => ((d: any) => d.type(d.props))(unpress(e));
   const glyphOf = (e: any) => discOf(e).props.children.props.children;
-  assert.deepEqual(shown.map(glyphOf), ['◡', '−', '○', '−', '+']);
+  assert.deepEqual(shown.map(glyphOf), ['−', '−', '○', '◡', '+']);
   const c = color.light;
   const look = (e: any) => {
     const disc = discOf(e).props;
     return [disc.style.backgroundColor, disc.style.borderColor, disc.children.props.style.color];
   };
-  assert.deepEqual(shown.slice(0, 3).map(look), [
+  assert.deepEqual([shown[3], shown[0], shown[2]].map(look), [
     [c.card, c.line, c.fg],
     [c.fg, c.danger, c.bg],
     [c.card, c.line, c.dim],
   ]);
-  const six = icons([...five, at('mighty', 'buff', 4000)], open);
-  assert.equal(six.length, 6);
-  assert.equal(six[5].props.accessibilityLabel, '+1 more, opens Character');
-  assert.equal(glyphOf(six[5]), '+1');
-  six[5].props.onPress();
+  const six = [...five, at('mighty', 'buff', 4000)];
+  assert.deepEqual(icons(six, open).map(glyphOf), ['−', '−', '○', '◡', '+', '+']);
+  const seven = icons([...six, at('sharp', 'buff')], open);
+  assert.deepEqual(seven.map(glyphOf), ['−', '−', '○', '◡', '+', '+2']);
+  assert.equal(seven[5].props.accessibilityLabel, '+2 more, mighty, sharp, opens Character');
+  seven[5].props.onPress();
   assert.deepEqual(opened, ['character']);
   // Reduced motion (the fade stub): the tip shows at once, no fade started (no Animated.timing here).
   assert.equal(Tooltip({ text: 'fed' }).props.style.opacity.v, 1);
@@ -427,9 +465,9 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
     locked.map((e) => [e.type, e.props.accessibilityRole]),
     five.map(() => ['View', 'image']),
   );
-  assert.equal(locked[0].props.accessibilityLabel, 'fed, 48m remaining, buff');
+  assert.equal(locked[0].props.accessibilityLabel, 'poisoned, 4m remaining, debuff');
   // Locked, a debuff goes dim like the Contents button: the neutral look.
-  assert.deepEqual(look(locked[1]), [c.card, c.line, c.dim]);
+  assert.deepEqual(look(locked[0]), [c.card, c.line, c.dim]);
   const character = CharacterPage({
     view: { time: 720, conditions: five } as any,
     text,
@@ -449,6 +487,33 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
     'Scarred',
     'Warded · 90s remaining · +5 HP each 60s',
   ]);
+});
+
+// Breaks: bleeding left on the status line, after a condition, in another look, ringed, or outside
+// the cap (status-line-rulings.md; book-ui.md Conditions details).
+test('bleeding is the first status icon: debuff look, no ring, inside the cap', () => {
+  const bleeding = { label: 'bleeding', ends_at: 757, hp_loss: 1, tick_every: 60 } as any;
+  const at = (label: string) => ({ label, kind: 'buff', resource: 'hp', tick_every: 60 }) as any;
+  const six = ['a', 'b', 'c', 'd', 'e', 'f'].map(at);
+  const text = (key: string) => key;
+  const line = StatusLine({ time: 720, resources: [], text, bleeding, conditions: six } as any);
+  const [row, statusRow] = line.props.children;
+  assert.equal(row.props.bleeding, bleeding);
+  assert.deepEqual(
+    statusRow.props.children[0].props.children.map((e: any) => e.key),
+    ['time'],
+  );
+  const [, items, more] = StatusIcons(row.props).props.children;
+  const first = items[0].props.children.props;
+  assert.deepEqual(
+    [first.name, first.look, first.fraction, first.children],
+    ['bleeding, 37s remaining, 1 HP each 60s, debuff', 'debuff', undefined, '−'],
+  );
+  assert.deepEqual(
+    items.map((a: any) => a.props.hidden),
+    [false, false, false, false, false, true, true],
+  );
+  assert.equal(more.props.children, '+2');
 });
 
 // Breaks: the remaining share is not clamped to 0..1, a permanent status (or one without a duration)
@@ -479,7 +544,7 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
       time: 720,
       text: (k: string) => k,
       open: locked ? undefined : () => {},
-    }).props.children[0];
+    }).props.children[1];
     return unpress(icon.type(icon.props));
   };
   const halves = (e: any) => {
@@ -553,7 +618,7 @@ test('status icon countdown ring: drains between views, capped, jumps up and und
       time: 732,
       text: (k: string) => k,
       open: () => {},
-    }).props.children[0];
+    }).props.children[1];
     const e = unpress(icon.type(icon.props));
     return e.type(e.props);
   };

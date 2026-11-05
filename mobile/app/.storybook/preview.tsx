@@ -121,10 +121,11 @@ const preview: Preview = {
   },
   // Label in name (book-ui.md): every button's accessible name starts with its shown text (a run of
   // whitespace as one space); a button that shows no text (the minimap at rest, whose stair words
-  // are aria-hidden drawing) is skipped.
+  // are aria-hidden drawing) or is not rendered (a status icon behind the +N disc) is skipped.
   afterEach: ({ canvasElement }) => {
     const words = (s: string) => s.replace(/\s+/g, ' ').trim();
     for (const b of canvasElement.querySelectorAll<HTMLElement>('[role="button"], button')) {
+      if (b.closest('[aria-hidden="true"]') && !b.checkVisibility()) continue;
       const hidden = [...b.querySelectorAll<HTMLElement>('[aria-hidden="true"]')];
       hidden.forEach((n) => (n.style.display = 'none'));
       const shown = words(b.innerText); // innerText: laid-out lines, so blocks keep their break
