@@ -141,7 +141,7 @@ test('the page turn has its three recordings', () => {
 });
 
 // Every row: [cue, music call, haptics]. Breaks: the fanfare's light haptic reaches a flight, a reopened
-// fight buzzes, a death in a fight doubles the thud's heavy, or one outside a fight has none.
+// fight buzzes, a death in a fight doubles the thud's heavy, or one outside a fight has none or no bed after.
 const fightRows: [Parameters<typeof playCue>[0], string, string[]][] = [
   [{ name: 'combat_open' }, 'open', ['medium']],
   [{ name: 'combat_open', resumed: true }, 'resume', []],
@@ -150,7 +150,7 @@ const fightRows: [Parameters<typeof playCue>[0], string, string[]][] = [
   [{ name: 'combat_close', end: 'quiet' }, 'away', []],
   [{ name: 'combat_close', resumed: true }, 'away', []],
   [{ name: 'death', fight: true }, 'cut', []],
-  [{ name: 'death', fight: false }, 'cut', ['heavy']],
+  [{ name: 'death', fight: false }, 'fell', ['heavy']],
 ];
 for (const [cue, music, felt] of fightRows)
   test(`${cue.name} ${JSON.stringify(cue)}: music ${music}, haptic ${felt}`, () => {

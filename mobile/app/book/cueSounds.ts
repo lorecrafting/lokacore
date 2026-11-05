@@ -71,7 +71,7 @@ export const playCue = (cue: Cue) => {
     }
   } else if (cue.name === 'level' && fanfare) hold();
   else if (cue.name === 'death') {
-    music('cut');
+    music(cue.fight ? 'cut' : 'fell');
     // The last thing felt, whatever page is turning: in a fight it is the thud's own.
     if (!cue.fight) haptic(sound.blow.haptic as HapticKind);
   }

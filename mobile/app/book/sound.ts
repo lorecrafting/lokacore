@@ -16,5 +16,5 @@ export const ambience = (
 ) => {};
 export const thunder = (_muffled: boolean) => {};
 export const play = (_name: SoundName, _tier?: string) => {};
-export const fight = (_event: 'open' | 'resume' | 'won' | 'away' | 'cut') => {};
+export const fight = (_event: 'open' | 'resume' | 'won' | 'away' | 'cut' | 'fell') => {};
 export const setMuted = (_group: 'sound' | 'music', _muted: boolean) => {};
