@@ -40,7 +40,7 @@ test("the registry's hand-built edit card claims its field; generic and other ki
 });
 
 // Breaks: a recursive definition never ends, or an anyOf branch shows rjsf's "Option 1" because
-// it has no title.
+// it has no title, or a oneOf's titles land under anyOf where rjsf does not read them.
 test('a recursive definition ends and every anyOf branch is titled', () => {
   const tree = {
     $ref: '#/$defs/Node',
@@ -59,6 +59,7 @@ test('a recursive definition ends and every anyOf branch is titled', () => {
             {},
           ],
         },
+        one: { oneOf: [{ title: 'A' }, {}] },
       },
     },
     Gate: {},
@@ -70,4 +71,5 @@ test('a recursive definition ends and every anyOf branch is titled', () => {
     out.pick.anyOf.map((b: any) => b['ui:title']),
     ['Named', 'Gate', 'door', 'string', 'option 5'],
   );
+  assert.deepEqual(out.one, { oneOf: [{ 'ui:title': 'A' }, { 'ui:title': 'option 2' }] });
 });

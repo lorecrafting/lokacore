@@ -1,4 +1,4 @@
-# size: allow 365, the editor gate shares the source-schema walk and argv of the toolbox gate
+# size: allow 377, the editor gate shares the source-schema walk and argv of the toolbox gate
 # Generates docs/TOOLBOX.gen.md, the builder's toolbox page (loka-vduxr.59): one row per
 # implemented capability of protocol/capability_registry.json (its docs/features.json row names
 # implemented_in, which bin/features.exs requires of every implemented one) and one per Book
@@ -210,9 +210,10 @@ baseline_path = Enum.at(System.argv(), 5, "test/loka/editor_generic_baseline.txt
 lines = &MapSet.new(String.split(&1, "\n", trim: true))
 baseline = lines.(read.(baseline_path))
 
+# shrink-only gates --check; generating (merge_resolve, no origin/main) skips it
 reference =
-  case Enum.at(System.argv(), 6) do
-    nil ->
+  case {System.argv(), Enum.at(System.argv(), 6)} do
+    {["--check" | _], nil} ->
       git = &System.cmd("git", &1, cd: root, stderr_to_stdout: true)
 
       if elem(git.(~w(rev-parse --verify -q origin/main)), 1) != 0,
@@ -223,7 +224,10 @@ reference =
         _ -> nil
       end
 
-    path ->
+    {_, nil} ->
+      nil
+
+    {_, path} ->
       lines.(read.(path))
   end
 
@@ -234,10 +238,17 @@ generic =
       into: MapSet.new(),
       do: "#{p}.#{v}"
 
+# a surface is "generic" or a component file in the edit folder, never a path out of it
 surface? = fn
-  "generic" -> true
-  s when is_binary(s) -> File.regular?(Path.join(root, "tools/author-panel/src/edit/" <> s))
-  _ -> false
+  "generic" ->
+    true
+
+  s when is_binary(s) ->
+    String.ends_with?(s, ".tsx") and match?({:ok, _}, Path.safe_relative(s)) and
+      File.regular?(Path.join(root, "tools/author-panel/src/edit/" <> s))
+
+  _ ->
+    false
 end
 
 problems =
@@ -265,7 +276,8 @@ problems =
     ) ++
     for(
       l <- MapSet.difference(baseline, reference || baseline),
-      do: "#{baseline_path}: #{l}: not in main's baseline; the generic list only shrinks"
+      do:
+        "#{baseline_path}: #{l}: not in main's baseline; generic only shrinks; rebase if main shrank"
     )
 
 if problems != [] do

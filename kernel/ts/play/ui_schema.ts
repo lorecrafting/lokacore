@@ -35,7 +35,10 @@ function walk(node: unknown, defs: Record<string, Node>, seen: string[]): Ui {
     for (const [k, v] of Object.entries(walk(b, defs, seen))) put(k, v as Ui);
   const branches: Node[] | undefined = n.anyOf ?? n.oneOf;
   if (branches)
-    ui.anyOf = branches.map((b, i) => ({ ...walk(b, defs, seen), 'ui:title': title(b, i) }));
+    ui[n.anyOf ? 'anyOf' : 'oneOf'] = branches.map((b, i) => ({
+      ...walk(b, defs, seen),
+      'ui:title': title(b, i),
+    }));
   return ui;
 }
 

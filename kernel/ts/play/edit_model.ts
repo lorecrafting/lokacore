@@ -1,7 +1,7 @@
 // The editor's edit model (docs/rnd/gui-editor-design-2026-11-04.md §11): path ops on a parsed
-// source file, the ops that undo them, and the kind schema's verdict on the result. Pure and
-// browser-safe: write.ts applies ops for `POST /change`, the author panel's cards build them.
-import Ajv2020 from 'ajv/dist/2020.js';
+// source file and the ops that undo them (the kind schema's verdict is edit_validator.ts). Pure,
+// browser-safe and dependency-free: write.ts applies ops for `POST /change`, the author panel's
+// cards build them.
 
 export type Step = string | number;
 /** `{path, value}` sets, `{path, delete: true}` removes; an array index may be one past its end. */
@@ -47,43 +47,42 @@ export function apply(doc: unknown, op: Op) {
   else delete at[last];
 }
 
-/** Applies `ops` to `doc` in place, in order, and answers the ops that put it back byte for byte. */
+/**
+ * Applies `ops` to `doc` in place, in order, and answers the ops that put it back byte for byte.
+ * All or nothing: a refused op puts back the ops before it, then throws.
+ */
 export function change(doc: unknown, ops: Op[]): Op[] {
-  const back = ops.map((op) => {
-    const [at, last] = parent(doc, op);
-    const up = op.path.slice(0, -1);
-    const keep = (k: Step): Op => ({ path: [...up, k], value: structuredClone(at[k]) });
-    const had = Object.hasOwn(at, last);
-    let undo: Op[];
-    if (op.delete !== true) undo = [had ? keep(last) : { path: op.path, delete: true }];
-    else if (!had) undo = [];
-    // an array closes up: every element from the index on is set back, the last one appended
-    else if (Array.isArray(at)) undo = at.slice(last as number).map((_, i) => keep(+last + i));
-    else {
-      // a key re-set lands last, so the keys after it come off and go back on in order
-      const keys = Object.keys(at);
-      const after = keys.slice(keys.indexOf(String(last)) + 1);
-      undo = [
-        ...after.map((k) => ({ path: [...up, k], delete: true })),
-        keep(last),
-        ...after.map(keep),
-      ];
-    }
-    apply(doc, op);
-    return undo;
-  });
-  return back.reverse().flat();
+  const back: Op[][] = [];
+  const undo = () => back.reverse().flat();
+  try {
+    for (const op of ops) back.push(step(doc, op));
+  } catch (e) {
+    for (const op of undo()) apply(doc, op);
+    throw e;
+  }
+  return undo();
 }
 
-/**
- * A checker over `schemas/source` (file name to schema, defs.schema.json included): a kind's file
- * after an edit to the errors, `instancePath message` each, `[]` when it is valid.
- */
-export function validator(schemas: Record<string, object>) {
-  const ajv = new Ajv2020({ allErrors: true });
-  for (const [name, schema] of Object.entries(schemas)) ajv.addSchema(schema, name);
-  return (kind: string, doc: unknown): string[] => {
-    const valid = ajv.getSchema(`${kind}.schema.json`) ?? no(`no source schema for ${kind}`);
-    return valid(doc) ? [] : valid.errors!.map((e) => `${e.instancePath} ${e.message}`);
-  };
+function step(doc: unknown, op: Op): Op[] {
+  const [at, last] = parent(doc, op);
+  const up = op.path.slice(0, -1);
+  const keep = (k: Step): Op => ({ path: [...up, k], value: structuredClone(at[k]) });
+  const had = Object.hasOwn(at, last);
+  let undo: Op[];
+  if (op.delete !== true) undo = [had ? keep(last) : { path: op.path, delete: true }];
+  else if (!had) undo = [];
+  // an array closes up: every element from the index on is set back, the last one appended
+  else if (Array.isArray(at)) undo = at.slice(last as number).map((_, i) => keep(+last + i));
+  else {
+    // a key re-set lands last, so the keys after it come off and go back on in order
+    const keys = Object.keys(at);
+    const after = keys.slice(keys.indexOf(String(last)) + 1);
+    undo = [
+      ...after.map((k) => ({ path: [...up, k], delete: true })),
+      keep(last),
+      ...after.map(keep),
+    ];
+  }
+  apply(doc, op);
+  return undo;
 }

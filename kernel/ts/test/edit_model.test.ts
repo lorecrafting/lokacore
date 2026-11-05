@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { apply, change, Refused, validator, type Op } from '../play/edit_model.ts';
+import { apply, change, Refused, type Op } from '../play/edit_model.ts';
+import { validator } from '../play/edit_validator.ts';
 
 const ROOT = join(import.meta.dirname, '../../..');
 const json = (v: unknown) => JSON.stringify(v, null, 2) + '\n';
@@ -67,6 +68,18 @@ test('deleting a missing key has no undo; a key set over keeps its place', () =>
   assert.deepEqual(doc, { a: 1, b: { c: 9 }, d: 3 });
 });
 
+// Break: a refused op leaves the ops before it applied, so a half edit is saved.
+test('a change with a refused op puts back the ops before it', () => {
+  const doc = { a: 1, l: ['x'] };
+  const ops: Op[] = [
+    { path: ['a'], delete: true },
+    { path: ['l', 0], value: 'y' },
+    { path: ['l', 5], value: 'z' },
+  ];
+  assert.throws(() => change(doc, ops), Refused);
+  assert.equal(json(doc), json({ a: 1, l: ['x'] }));
+});
+
 // Breaks: a dropped check lets an op write to the prototype, through a scalar, past an array's
 // end, at a negative or string index, or apply an op that neither sets nor deletes.
 test('a path that names no field of the file is refused and changes nothing', () => {
@@ -102,7 +115,7 @@ test("an edited file is checked against its kind's source schema", () => {
   const room = { name: 'room.a.title', description: 'room.a.description', exits: {} };
   assert.deepEqual(valid('rooms', room), []);
   const errors = valid('rooms', { description: 'room.a.description', exits: {} });
-  assert.ok(errors.includes(" must have required property 'name'"), errors.join('\n'));
+  assert.ok(errors.includes("/ must have required property 'name'"), errors.join('\n'));
   assert.notDeepEqual(valid('items', room), []);
   assert.throws(() => valid('nosuch', room), Refused);
 });

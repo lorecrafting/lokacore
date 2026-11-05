@@ -1,4 +1,4 @@
-# size: allow 336, one table per gate; the editor gate adds nine planted files
+# size: allow 344, one table per gate; the editor gate adds ten planted files
 # Red controls plant violations, require checks to fail, and clean their own files.
 # Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
@@ -221,14 +221,22 @@ editor_controls =
         {"component", %{registry: card.("nope.tsx")}, "rooms.name: no edit surface"},
         {"unlisted", %{baseline: String.replace(base, "rooms.name.edit\n", "")},
          "rooms.name.edit: generic but not in the baseline"},
-        {"bespoke", %{registry: card.("../App.tsx")}, "rooms.name.edit: no longer generic"},
+        {"escape", %{registry: card.("../App.tsx")}, "rooms.name: no edit surface"},
+        {"bespoke", %{registry: card.("RedCard.tsx"), card: ""},
+         "rooms.name.edit: no longer generic"},
         {"grown", %{main: String.replace(base, "rooms.name.edit\n", "")},
          "rooms.name.edit: not in main's baseline"}
       ] do
     files =
       for {k, v} <- planted,
           into: %{},
-          do: {"tmp/red-editor-#{name}.#{k}", if(is_map(v), do: JSON.encode!(v), else: v)}
+          do: {
+            if(k == :card,
+              do: "tools/author-panel/src/edit/RedCard.tsx",
+              else: "tmp/red-editor-#{name}.#{k}"
+            ),
+            if(is_map(v), do: JSON.encode!(v), else: v)
+          }
 
     at = &if(planted[&1], do: "tmp/red-editor-#{name}.#{&1}", else: &2)
 
