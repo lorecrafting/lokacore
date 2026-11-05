@@ -21,16 +21,19 @@ import {
   type Step,
 } from './place.ts';
 import { factRows, shown, type Canon } from './shown.ts';
+import { worded } from '../book/words.ts';
 
 export { frozenClock } from './place.ts';
 
 export type Opened = NonNullable<ReturnType<ReturnType<typeof localSession>['game']>>;
 /** words -> text key, filled as the Book resolves text, so a clicked line names its source. */
 const seen = new Map<string, string>();
+const said = new Map<string, string>(); // text key -> its words before binding, as the source has them
 export const devClock =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' &&
   Platform.OS === 'web' &&
   new URLSearchParams(location.search).get('dev') === '1';
+if (devClock) worded.note = (words, key) => seen.set(words, key); // a line as shown, bound too
 const g = globalThis as { loka_dev_skew?: number }; // ms the dev clock has moved both host clocks
 export const skew = () => g.loka_dev_skew ?? 0;
 
@@ -115,6 +118,7 @@ export function played(game: Opened | undefined) {
       text: (key) => {
         const words = overlay[key] ?? game.text(key);
         seen.set(words, key);
+        said.set(key, words);
         return words;
       },
       invoke: recording(game, keep),
@@ -183,7 +187,8 @@ const onClick = (e: MouseEvent) => {
   e.preventDefault();
   e.stopPropagation();
   const words = (e.target as HTMLElement).textContent ?? '';
-  tell({ line: { key: seen.get(words), words } });
+  const key = seen.get(words);
+  tell({ line: { key, words: (key && said.get(key)) || words } });
 };
 // Through `played`, so an accepted cheat is a recorded step `bin/loka check` replays.
 function askCheat(game: Opened, cheat: Cheat) {

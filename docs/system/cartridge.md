@@ -929,7 +929,7 @@ build. The author tools below are reachable only in that bundle (a production ex
   answered in sentences (`fact met_thera is false; needs true`; [rule explainer](#rule-explainer-loka-kgd1943)
   on the recorded path, its policy read on the world as it stands after the last step); find (`GET /__author/find?q=`): a key or
   words to every source `file:line`, and each definition of the compiled artifact whose refs name that
-  key; each Book line opens its source `file:line` in the owner's editor (`POST /__author/open`,
+  key; Alt-click on a Book line opens its source `file:line` in the owner's editor by the line's text key, a bound or speaker-joined line too (`POST /__author/open`,
   `LOKA_EDITOR`, default `code --goto`); the game-time control, which delivers the time at once and
   records it only when delivered; the checkpoint list; the still-to-write list; go to a room and set a fact by key (below). An input the session held
   (`pending`, `catching_up`) is recorded when it settles as accepted.
