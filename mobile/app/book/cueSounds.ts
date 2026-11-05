@@ -6,9 +6,17 @@ import { haptic, type HapticKind } from './haptic';
 import { fight, play } from './sound';
 import { mix, motion, sound } from './tokens.ts';
 
-// No haptic during a page turn: dropped, not held, for one felt late is felt as nothing's.
-const feel = (kind: HapticKind) => {
-  if (performance.now() >= curlEnds) haptic(kind);
+// No haptic during a page turn: dropped, not held, for one felt late is felt as nothing's; a level's
+// is held to the curl's end (looked at again, for a riffle can lengthen it), for a level is never
+// dropped (book-ui.md); a death, the last thing felt, or the Book going cancels it.
+let waiting: ReturnType<typeof setTimeout> | undefined;
+const feel = (kind: HapticKind, held = false) => {
+  const wait = curlEnds - performance.now();
+  if (wait <= 0) haptic(kind);
+  else if (held) {
+    clearTimeout(waiting); // one level felt per curl, and every one cancellable
+    waiting = setTimeout(() => feel(kind, true), wait);
+  }
 };
 
 export const playTurn = () => play('pageTurn');
@@ -51,6 +59,7 @@ export const hearCues = () => {
   const off = onCue(playCue);
   return () => {
     off();
+    clearTimeout(waiting);
     music('cut');
   };
 };
@@ -68,18 +77,20 @@ export const playCue = (cue: Cue) => {
     }
   } else if (cue.name === 'level' && fanfare) hold();
   else if (cue.name === 'death') {
-    music('cut');
+    clearTimeout(waiting);
+    music(cue.fight ? 'cut' : 'fell');
     // The last thing felt, whatever page is turning: in a fight it is the thud's own.
     if (!cue.fight) haptic(sound.blow.haptic as HapticKind);
   }
   const name = soundOf(cue);
   if (!name) return;
   const felt = (sound[name] as { haptic?: HapticKind }).haptic;
+  const held = cue.name === 'level';
   if (!cue.first) {
     play(name);
-    if (felt) feel(felt);
+    if (felt) feel(felt, held);
     return;
   }
   play(name, stronger(TIERS, sound[name].tier));
-  if (felt) feel(stronger(HAPTICS, felt as (typeof HAPTICS)[number]));
+  if (felt) feel(stronger(HAPTICS, felt as (typeof HAPTICS)[number]), held);
 };

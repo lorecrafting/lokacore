@@ -1,3 +1,4 @@
+// size: allow 525, the queue's cases share one step() harness and hand-written views
 // Named breaks for the cue bus, over minimal views; every expected value is written by hand.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -26,7 +27,8 @@ const skill = (key: string, acquired: boolean, level?: number) => ({
   acquired,
   level,
 });
-const QUICK = motion.quick.duration;
+const [QUICK, card] = [motion.quick.duration, motion.card.duration];
+const late: Cue = { name: 'level', ids: ['later'] };
 const fight = { combat: { encounter_id: 'e' } };
 
 // Each row breaks if that cue's trigger, or its sound, changes. [cue, was, now, sound].
@@ -345,9 +347,33 @@ test('a page turn cancels what is queued; the arriving cues start at the picture
   assert.deepEqual(names(step(chapter.q, [], 1200 + QUICK).fired), ['chapter']);
 });
 
+// Breaks (book-ui.md, A level is never dropped; loka-g5hh.2.11): a turn, two, or a card (with, after
+// or over it) drops a level; it waits the old beat, not the hold; a later level replaces an earlier.
+test('a pending or held level outlives a page turn and a chapter card, then plays', () => {
+  const r = step(step(QUIET, [blow(1)], 1000).q, [{ name: 'level' }], 1100);
+  const turned = step(step(r.q, [], 1200, true).q, [], 1300, true);
+  assert.equal(turned.q.until, 1300 + QUICK); // deliver's timer looks again then
+  assert.deepEqual(names(step(turned.q, [], 1300 + QUICK).fired), ['level']);
+  const both = step(step(r.q, [{ name: 'level' }], 1200, true).q, [], 1200 + QUICK);
+  assert.deepEqual([names(both.fired), both.q.pending], [['level'], undefined]);
+  const held = step(step(QUIET, [{ name: 'level' }], 1000, true).q, [blow(2), late], 1100, true);
+  assert.deepEqual(held.q.held, [blow(2), late]); // the later level replaces the held one
+  for (const [before, with_] of [
+    [[{ name: 'level' }], []],
+    [[], [{ name: 'level' }, late]],
+  ] as Cue[][][]) {
+    const c = step(step(r.q, before, 1150).q, [{ name: 'chapter' }, ...with_], 1200);
+    assert.deepEqual([names(c.fired), step(c.q, [], 1199 + card).fired], [['chapter'], []]);
+    const ids = step(c.q, [], 1200 + card).fired.map((f) => f.ids);
+    assert.deepEqual(ids, [with_.at(-1)?.ids]); // the last level, not the first
+  }
+  const over = step(step(QUIET, [{ name: 'chapter' }], 1000).q, [{ name: 'level' }], 1100);
+  assert.deepEqual(names(step(over.q, [], 1000 + card).fired), ['level']);
+});
+
 // Breaks: a second turn lets the first arriving page's cue play on the page after it.
 test('another turn inside the hold cancels the held cues', () => {
-  const first = step(QUIET, [{ name: 'level' }], 1000, true);
+  const first = step(QUIET, [blow(1)], 1000, true);
   const second = step(first.q, [], 1100, true);
   assert.deepEqual(step(second.q, [], 1100 + QUICK).fired, []);
 });
