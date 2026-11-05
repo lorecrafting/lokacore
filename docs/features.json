@@ -549,11 +549,11 @@
   },
   "emote": {
     "summary": "Social gestures between the player and NPCs.",
-    "declares": ["emotes"],
+    "declares": ["emotes", "rooms.ambient", "npcs.ambient", "items.ambient"],
     "sampler": "emote_sampler",
     "showcase": "none: the showcase cartridge does not require emote",
     "mechanics": "#npc-emotes-g9",
-    "spec": "docs/system/mechanics.md NPC emotes (G9); docs/system/cartridge.md Emote declarations",
+    "spec": "docs/system/mechanics.md NPC emotes (G9), Ambient emotes; docs/system/cartridge.md Emote declarations, Ambient declarations",
     "contracts": [
       "EmoteDefinition",
       "ReactionRule",
@@ -561,6 +561,7 @@
     ],
     "modules": [
       "kernel/ts/src/mechanics/emote/line.ts",
+      "kernel/ts/src/mechanics/emote/ambient.ts",
       "lib/loka/content/emotes.ex"
     ],
     "fixtures": [

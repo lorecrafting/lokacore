@@ -1,0 +1,17 @@
+{
+  "name": "room.cave.title",
+  "description": "room.cave.description",
+  "exits": {
+    "south": {
+      "to": "passage"
+    }
+  },
+  "ambient": [
+    {
+      "lines": [
+        "room.cave.drip"
+      ],
+      "every": 600
+    }
+  ]
+}
