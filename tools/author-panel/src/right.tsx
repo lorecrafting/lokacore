@@ -33,14 +33,14 @@ export function Inspector({ sel, story }: { sel?: Selection; story?: Story }) {
 
 const clock = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-/** Each write to a source file, newest first: the editor's in `accent`, one from outside in `outside`. */
+/** Each write to a source file, newest first: the editor's uncoloured, one from outside marked by an `outside` bar and word (rulings §3). */
 export function Feed({ changes }: { changes: Change[] }) {
   if (!changes.length) return <p className="px-3 py-2 text-xs text-muted-foreground">No change since this page opened.</p>;
   return (
     <ul className="px-3 py-2 font-mono text-xs" aria-label="Change feed">
       {changes.map((c) => (
-        <li key={`${c.seen}${c.file}${c.sha256}`} className={c.by === 'outside' ? 'text-outside' : 'text-primary'}>
-          {clock(c.seen)} {c.by === 'outside' ? 'outside' : 'you'} {c.file}
+        <li key={`${c.seen}${c.file}${c.sha256}`} className={`border-l-2 pl-1 ${c.by === 'outside' ? 'border-outside' : 'border-transparent'}`}>
+          {clock(c.seen)} {c.by === 'outside' ? <span className="font-semibold text-outside">outside</span> : <span className="text-muted-foreground">you</span>} {c.file}
         </li>
       ))}
     </ul>

@@ -76,20 +76,31 @@ test('dividers move 16 px, 64 with Shift, inside their range; Cmd-\\ and Cmd-/ f
   assert.equal(shell.fold(l, 'k'), l);
 });
 
-// Breaks: Cmd-K misses a definition key or a `~`, ranks a mere detail match over a name, lists a
-// `~` twice (once as text), `~` does not narrow to the unwritten, or the three tiers lose their order.
+// Breaks: Cmd-K misses a definition key, a text key /find returns or a `~`, takes a definition
+// file's line for a text key, ranks a mere detail match over a name, lists a `~` twice (once as
+// text), `~` does not narrow to the unwritten, or the three tiers lose their order.
 test('Cmd-K finds a key, a text key`s words and a `~`, and lists the commands', () => {
-  const all = shell.items(
-    NODES,
-    { 'room.hut.title': 'A hut.', 'room.barn.title': '~' },
-    { 'room.barn.title': 'a.loka:3' },
-  );
+  const text = shell.words([
+    { at: 'text.json:2', text: '"room.hut.title": "A hut.",' },
+    { at: 'text.json:3', text: '"room.barn.title": "~"' },
+    { at: 'rooms/hut.json:2', text: '"name": "room.hut.title",' },
+    { at: 'text.json:1', text: '{' },
+  ]);
+  assert.deepEqual(text, { 'room.hut.title': 'A hut.', 'room.barn.title': '~' });
+  const all = shell.items(NODES, text, { 'room.barn.title': 'a.loka:3' });
   assert.deepEqual(
     shell.rank('hut', all).map((i) => [i.kind, i.id]),
     [
       ['key', HUT],
       ['key', 'demo@1:npc/hut_keeper'],
       ['text', 'room.hut.title'],
+    ],
+  );
+  assert.deepEqual(
+    shell.rank('barn', all).map((i) => [i.kind, i.id]),
+    [
+      ['key', 'demo@1:room/barn'],
+      ['todo', 'room.barn.title'],
     ],
   );
   assert.deepEqual(

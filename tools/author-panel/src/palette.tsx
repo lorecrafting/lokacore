@@ -2,10 +2,22 @@
 // keys, the text keys' words and the `~` still to write; shell.ts ranks them.
 import { Search } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { rank, type Item } from './shell.ts';
+import { find } from './author.ts';
+import { rank, words, type Item } from './shell.ts';
+
+/** The text keys whose words or key hold `q`, from /find; none for an empty query. */
+function useFound(q: string) {
+  const [text, setText] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let live = true; // a slower reply to an older query never overwrites a newer one
+    if (q.trim()) find(q.trim()).then((f) => live && setText(words(f.hits)), () => {});
+    return () => void (live = false);
+  }, [q]);
+  return q.trim() ? text : {};
+}
 
 /** Esc closes it and gives focus back; Up, Down and Enter pick a row. */
-export function Palette({ all, run, close }: { all: Item[]; run: (i: Item) => void; close: () => void }) {
+export function Palette({ all, run, close }: { all: (text: Record<string, string>) => Item[]; run: (i: Item) => void; close: () => void }) {
   const [q, setQ] = useState('');
   const [at, setAt] = useState(0);
   const input = useRef<HTMLInputElement>(null);
@@ -14,7 +26,7 @@ export function Palette({ all, run, close }: { all: Item[]; run: (i: Item) => vo
     input.current?.focus();
     return () => back?.focus();
   }, []);
-  const rows = rank(q, all);
+  const rows = rank(q, all(useFound(q)));
   const key = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') close();
     else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {

@@ -198,7 +198,8 @@ export default function App() {
   useEffect(() => void getStory().then(setStory, () => {}), [diag.said]); // a failed fetch keeps the last good
   const { pick, run } = useWiring(book, heard, layout, set, () => setPalette(true));
   const s: Shell = { layout, set, story, book, diag, pick };
-  const all = items(story?.graph.nodes ?? [], diag.text ?? {}, diag.placeholders ?? {});
+  const all = (text: Record<string, string>) =>
+    items(story?.graph.nodes ?? [], text, diag.placeholders ?? {});
   return (
     <div className="flex h-full bg-background text-foreground max-[900px]:flex-col">
       <Side side="left" s={s}>

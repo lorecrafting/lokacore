@@ -95,7 +95,7 @@ export const COMMANDS: Item[] = [
   ['undo', 'Undo the last edit'],
   ['go', 'Go to room'],
 ].map(([id, label]) => ({ kind: 'command', label, detail: 'command', id }));
-/** The palette's rows: commands, /story's definitions, the event stream's text keys and `~` keys. */
+/** The palette's rows: commands, /story's definitions, /find's text keys and the `~` keys. */
 export function items(
   nodes: Node[],
   text: Record<string, string>,
@@ -117,6 +117,17 @@ export function items(
       .filter(([key]) => !(key in todo))
       .map(([key, words]) => ({ kind: 'text' as const, label: words, detail: key, id: key })),
   ];
+}
+/** /find's hits on text.json lines (`"key": "words",`), as key to words; other files hold no text key. */
+export function words(hits: { at: string; text: string }[]) {
+  const out: Record<string, string> = {};
+  for (const { at, text } of hits) {
+    if (!at.startsWith('text.json:')) continue;
+    try {
+      Object.assign(out, JSON.parse(`{${text.replace(/,$/, '')}}`));
+    } catch {} // a brace line or a value over several lines: no row
+  }
+  return out;
 }
 /** Rows holding `q`: a label that starts with it first, then one holding it, then a detail; `~` alone narrows to the unwritten. */
 export function rank(
