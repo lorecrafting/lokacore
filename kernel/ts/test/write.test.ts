@@ -140,6 +140,19 @@ test('ops write the house format and keep integer-like keys; a path into a proto
   const set = (ops: unknown[]) => ask('/change', { file: 'rooms/a.json', was, ops });
   assert.equal((await set([{ path: ['__proto__', 'x'], value: 1 }])).status, 400);
   assert.equal((await set([{ path: ['name', 'x'], value: 1 }])).status, 400);
+  // Breaks: a path that is no array, or one that walks on past a string, throws a 500.
+  assert.equal((await set([{ path: 'x', value: 1 }])).status, 400);
+  assert.equal((await set([{ path: ['name', 'x', 'y'], value: 1 }])).status, 400);
+  // Break: index 0, or the last element, refused, or a delete taking two elements.
+  const ends = await set([
+    { path: ['exits'], value: ['n', 's', 'w'] },
+    { path: ['exits', 0], value: 'e' },
+    { path: ['exits', 2], delete: true },
+    { path: ['exits', 0], delete: true },
+  ]);
+  assert.equal(ends.status, 200);
+  assert.deepEqual(JSON.parse(read('rooms/a.json')).exits, ['s']);
+  was = ends.body.sha256;
   // Break: an array step that is no index (NaN splices 0, -1 the last) deletes another element.
   for (const step of ['north', -1, 1])
     assert.equal(
@@ -162,6 +175,24 @@ test('ops write the house format and keep integer-like keys; a path into a proto
     '{\n  "name": "room.a",\n  "daily_schedule": {\n    "8": "a",\n    "14": "b"\n  }\n}\n';
   assert.equal(read('rooms/a.json'), bytes);
   assert.equal(ok.body.sha256, sha256(bytes));
+});
+
+test('a delete touches layout.json only when it holds the room', async (t) => {
+  // Breaks: a room without a layout row rewriting layout.json (journaled as touched), or a room
+  // deleted with no layout.json reading the missing file (a 500).
+  const { ask, src } = tree(t);
+  const files = async () =>
+    (await ask('/journal')).body.find((e: { by: string }) => e.by === 'editor').files;
+  for (const [name, gone] of [
+    ['b', ['rooms/b.json']],
+    ['a', ['rooms/a.json', 'layout.json']],
+    ['c', ['rooms/c.json']],
+  ]) {
+    writeFileSync(join(src, `rooms/${name}.json`), ROOM);
+    const sent = { file: `rooms/${name}.json`, was: sha256(ROOM) };
+    assert.equal((await ask('/delete', sent)).status, 200);
+    assert.deepEqual(await files(), gone);
+  }
 });
 
 test('undo puts the files back, refuses one changed since, and knows no other id', async (t) => {
@@ -200,10 +231,10 @@ test('an outside change is journaled once as outside; an editor write is not jou
   live.seen();
   const journal = (await ask('/journal')).body;
   assert.deepEqual(
-    journal.map((e: any) => [e.by, e.files]),
+    journal.map((e: any) => [e.id, e.by, e.files]),
     [
-      ['outside', ['rooms/c.json']],
-      ['editor', ['rooms/a.json']],
+      [2, 'outside', ['rooms/c.json']],
+      [1, 'editor', ['rooms/a.json']],
     ],
   );
 });
@@ -229,30 +260,97 @@ test('/edit replaces only the words of one line, and refuses a line that is not 
   assert.equal(read('scenes/s.scene'), 'npc: stranger\n* new\n- Go on\n');
 });
 
+test('each refusal is a 400 that names its reason', async (t) => {
+  // Break: a refusal answered with another status, a bound or type check that lets a bad request
+  // through to a 409 or a write, or a refusal that names another reason.
+  const { ask, src } = tree(t);
+  mkdirSync(join(src, 'scenes'));
+  writeFileSync(join(src, 'scenes/s.scene'), '* hello\n');
+  writeFileSync(join(src, 'rooms/bad.json'), '{');
+  const TEXT = '{\n  "room.a": "old words"\n}\n';
+  writeFileSync(join(src, 'text.json'), TEXT);
+  const room = { file: 'rooms/a.json', was: sha256(ROOM) };
+  const edit = (line: unknown, was: unknown) => ({ file: 'text.json', line, was, words: 'x' });
+  const cases: [string, object, string][] = [
+    [
+      '/change',
+      { file: 'scenes/s.scene', was: '', ops: [] },
+      'a scene file changes by /edit, a line at a time',
+    ],
+    [
+      '/change',
+      { file: 'rooms/bad.json', was: sha256('{'), ops: [] },
+      'rooms/bad.json is not JSON: fix it first',
+    ],
+    ['/change', { ...room, ops: {} }, 'ops: an array'],
+    ['/change', { ...room, ops: [{ path: ['name'] }] }, 'an op sets a value or deletes'],
+    [
+      '/delete',
+      { file: 'text.json', was: sha256(TEXT) },
+      'text.json is a root file: delete its rows, not the file',
+    ],
+    [
+      '/move',
+      { file: 'text.json', was: sha256(TEXT), area: null },
+      'text.json is not a definition file',
+    ],
+    ['/move', { ...room, area: 'North' }, 'area: [a-z0-9_]+, or null for the root'],
+    ['/edit', edit(4, ''), 'not a line of words'], // the empty line after the last newline
+    ['/edit', edit(2, 5), 'was and words: one line each, no tab'],
+    ['/edit', edit(0, '{'), 'no such line'],
+    ['/edit', edit(1.5, '{'), 'no such line'],
+    ['/edit', edit(5, ''), 'no such line'],
+    [
+      '/new',
+      { kind: 'room', name: 'b', area: 'north' },
+      'a new file in an area waits for area starters (S3)',
+    ],
+  ];
+  const got = [];
+  for (const [url, sent] of cases) got.push(await ask(url, sent));
+  assert.deepEqual(
+    got,
+    cases.map(([, , body]) => ({ status: 400, body })),
+  );
+  assert.equal((await ask('/journal')).status, 200);
+});
+
 test('/new refuses a name that is a flag before it runs anything, and journals what loka.new wrote', async (t) => {
   // Breaks: `--cwd` as a name reaching mix (it would scaffold into another tree); the files the
   // scaffold wrote missing from the entry undo reads.
-  const { dir, ask } = tree(t);
+  const { dir, ask, live } = tree(t);
   const bin = join(dir, 'bin');
   mkdirSync(bin);
   // the stub `mise exec -- mix loka.new <kind> <name> <root>`: a mark that it ran, and one room
   writeFileSync(
     join(bin, 'mise'),
-    '#!/bin/sh\ntouch "$0.ran"\nsleep 0.5\necho "{}" > "$7/rooms/$6.json"\n',
+    '#!/bin/sh\ntouch "$0.ran"\n[ "$6" = taken ] && { echo "noise\nrooms/taken.json exists" >&2; exit 1; }\nsleep 0.5\necho "{}" > "$7/rooms/$6.json"\nsleep 0.5\n',
   );
   chmodSync(join(bin, 'mise'), 0o755);
   const path = process.env.PATH;
   process.env.PATH = `${bin}:${path}`;
   t.after(() => (process.env.PATH = path));
   assert.equal((await ask('/new', { kind: 'room', name: '--cwd' })).status, 400);
+  const from = { room: 'a', direction: 'North' };
+  assert.equal((await ask('/new', { kind: 'room', name: 'b', from })).status, 400);
   assert.equal(existsSync(join(bin, 'mise.ran')), false);
+  // Break: loka.new's refusal answered as another status, or by other words than its last line.
+  const taken = { status: 400, body: 'rooms/taken.json exists' };
+  assert.deepEqual(await ask('/new', { kind: 'room', name: 'taken' }), taken);
   const making = ask('/new', { kind: 'room', name: 'cellar' });
   // Break: a write during the run lands in the new entry's snapshot diff, so its undo reverts it.
   await new Promise((r) => setTimeout(r, 200));
   const during = { file: 'rooms/a.json', was: sha256(ROOM), ops: [] };
   assert.equal((await ask('/change', during)).status, 409);
+  // Break: a burst while loka.new runs journals its writes a second time, as outside.
+  await new Promise((r) => setTimeout(r, 500));
+  live.seen();
   const made = await making;
   assert.deepEqual([made.status, made.body.files], [200, ['rooms/cellar.json']]);
+  assert.deepEqual(
+    (await ask('/journal')).body.map((e: any) => e.by),
+    ['editor'],
+  );
   assert.equal((await ask('/undo', { id: made.body.id })).status, 200);
 });
 
@@ -270,17 +368,24 @@ test('POST /hold sets held on the stream and its release writes what was parked'
 
 test('the journal drops its oldest entries past its byte cap', async (t) => {
   // Break: a journal that keeps every before and after grows without bound in a long session.
+  // Breaks: a cap other than 64 MiB of characters, an entry dropped at exactly the cap, a lone
+  // entry over the cap dropped (its undo lost).
   const { ask, src } = tree(t);
-  const big = `"${'x'.repeat(25 * 1024 * 1024)}"\n`;
-  writeFileSync(join(src, 'rooms/big.json'), big);
-  const first = await ask('/change', { file: 'rooms/big.json', was: sha256(big), ops: [] });
-  const second = await ask('/delete', { file: 'rooms/big.json', was: sha256(big) });
-  assert.equal(second.status, 200);
-  assert.deepEqual(
-    (await ask('/journal')).body.map((e: any) => e.id),
-    [second.body.id],
-  );
+  const MiB = 1024 * 1024;
+  const big = (n: number) => `"${'x'.repeat(n - 3)}"\n`; // n characters, in the house format
+  writeFileSync(join(src, 'rooms/b.json'), big(16 * MiB));
+  writeFileSync(join(src, 'rooms/c.json'), big(32 * MiB));
+  const first = await ask('/change', { file: 'rooms/b.json', was: sha256(big(16 * MiB)), ops: [] });
+  const second = await ask('/delete', { file: 'rooms/c.json', was: sha256(big(32 * MiB)) });
+  const ids = async () => (await ask('/journal')).body.map((e: any) => e.id);
+  assert.deepEqual(await ids(), [second.body.id, first.body.id]); // 16 + 16 + 32: at the cap
+  const third = await ask('/change', { file: 'rooms/a.json', was: sha256(ROOM), ops: [] });
+  assert.deepEqual(await ids(), [third.body.id, second.body.id]);
   assert.equal((await ask('/undo', { id: first.body.id })).status, 404);
+  const lone = tree(t);
+  writeFileSync(join(lone.src, 'rooms/d.json'), big(33 * MiB));
+  await lone.ask('/change', { file: 'rooms/d.json', was: sha256(big(33 * MiB)), ops: [] });
+  assert.equal((await lone.ask('/journal')).body.length, 1);
 });
 
 test('a new file may take only a place Source.classify reads; a taken or unlisted one is refused', async (t) => {

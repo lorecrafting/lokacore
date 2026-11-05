@@ -33,9 +33,10 @@ if (!dir || (flag !== undefined && flag !== '--watch') || rest.length) {
   process.exit(2);
 }
 const source = resolve(dir);
+const port = Number(process.env.LOKA_AUTHOR_PORT || 19008); // mutate-skip: dev port default
 const live =
   flag === '--watch'
-    ? serve(Number(process.env.LOKA_AUTHOR_PORT || 19008), source, out, () => {
+    ? serve(port, source, out, () => {
         if (!parked) return;
         write(...parked);
         if (failed) notCompiled(failed); // the source on disk is the failed save's, not the parked
@@ -84,7 +85,7 @@ function publish(canonicalText: string, sha256: string, said: string[], started:
     return true;
   }
   write(canonicalText, sha256, said);
-  console.log(`Preview updated: ${sha256.slice(0, 12)} ${ms()}`);
+  console.log(`Preview updated: ${sha256.slice(0, 12)} ${ms()}`); // mutate-skip: console notice
   return true;
 }
 function write(canonicalText: string, sha256: string, said: string[]) {

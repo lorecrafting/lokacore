@@ -183,5 +183,8 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   // Break: a compile that wrote no diagnostics file (the stub never does) leaves the last build's
   // cards up; it clears them.
   assert.ok(messages.some((m) => (m as { diagnostics?: unknown[] }).diagnostics?.length === 0));
+  // Break: the Hold's end with nothing parked writes an empty build (a 500).
+  await hold(true);
+  assert.equal((await hold(false)).status, 200);
   reader.cancel();
 });
