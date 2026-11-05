@@ -30,7 +30,7 @@ export function ambient(
 ): Text[] {
   const body = bodyOf(w, actor);
   const here = body && w.state.containers[body];
-  if (!here || to <= from) return [];
+  if (!here) return [];
   const line = (ref: string, sets: readonly Set[] | undefined, target?: EntityId): Text[] => {
     const i = sets?.findIndex((s) => holds(w, actor, s.when, { target, steps })) ?? -1;
     const set = sets?.[i];
@@ -55,7 +55,7 @@ export function ambient(
   for (const [ref, id] of Object.entries(w.entityIds)) {
     const e = w.entities[id];
     if (!e?.ambient || w.state.containers[id] !== here) continue;
-    if ((e.kind === 'npc' && !living(w, id)) || !visible(w, actor, id, steps)) continue;
+    if (!living(w, id) || !visible(w, actor, id, steps)) continue;
     out.push(...line(ref, e.ambient, id as EntityId));
   }
   return out;

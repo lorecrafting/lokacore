@@ -39,6 +39,7 @@ const content = load();
 
 const CAVE = 'ambient_emote_sampler@0.0.1:room/cave';
 const LANTERN = 'ambient_emote_sampler@0.0.1:item/lantern';
+const GOBLIN = 'ambient_emote_sampler@0.0.1:npc/goblin';
 const hash = (ref: string, set: number, n: number) =>
   createHash('sha256').update(`${ref}:${set}:${n}`).digest();
 /** The in-test roll: does `ref`'s set fire at boundary n under `chance`. */
@@ -137,6 +138,30 @@ test('chance 100 fires on all of 20 boundaries; chance 1 only where the in-test 
     w = r.w;
   }
   assert.ok(want.includes(true) && want.includes(false), 'both outcomes occur');
+  assert.deepEqual(got, want);
+});
+
+// Breaks: the line or emote is picked from other bytes than 0-3 or not modulo the count (a one-line
+// set cannot tell); here the cave's set has two lines and the goblin's later set two emotes.
+test('two-entry sets tell list[u32(bytes 0-3) % 2] at each boundary', () => {
+  const pick = (ref: string, set: number, k: number, list: string[]) =>
+    list[hash(ref, set, k).readUInt32BE(0) % list.length]!;
+  const lines = ['room.cave.drip', 'item.lantern.gutter'];
+  const two = load((c) => {
+    c.rooms[CAVE].ambient[0].lines = lines;
+    delete c.items[LANTERN].ambient;
+    c.npcs[GOBLIN].ambient[1].emotes.unshift(c.npcs[GOBLIN].ambient[0].emotes[0]);
+  });
+  let w = start(two);
+  const got: string[][] = [];
+  const want: string[][] = [];
+  for (let k = 1; k <= 12; k++) {
+    const r = wait(w, 1200);
+    got.push(r.lines.toSorted());
+    want.push([pick(CAVE, 0, 2 * k, lines), pick(GOBLIN, 1, k, ['glance', 'scratch'])].toSorted());
+    w = r.w;
+  }
+  assert.ok(new Set(want.flat()).size === 4, 'every entry is picked somewhere');
   assert.deepEqual(got, want);
 });
 
