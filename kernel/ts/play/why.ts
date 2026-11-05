@@ -80,7 +80,7 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
 
 // The last row at `ordinal`: an unknown commit's follow-up repeats it with the outcome (ADR-075 §4).
 function entryAt({ entries }: Trace, ordinal: number) {
-  const e = entries.findLast((e) => e.data.ordinal === ordinal);
+  const e = entries.filter((e) => e.data.ordinal === ordinal).at(-1);
   if (!e) throw new Usage(`ordinal ${ordinal} is not in 1..${entries.at(-1)?.data.ordinal ?? 0}`);
   return e;
 }
