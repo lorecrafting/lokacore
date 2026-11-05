@@ -22,7 +22,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { units } from '../src/mechanics/calendar.ts';
 import * as patrol from './patrol_fixture.ts';
 import * as water from './water_fixture.ts';
-import { ctx } from './harness.ts';
+import { cmd, ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 
@@ -169,11 +169,11 @@ for (const [file, bytes] of artifacts) {
     for (let s = gameView(w0).scene, i = 0; s; s = gameView(w0).scene, i++) {
       const r = step(
         w0,
-        {
+        cmd({
           id: uuid(`dddddd${String(i).padStart(2, '0')}`),
           world_context_id: w0.context,
           payload: { type: 'continue', actor_id: w0.character, scene: s.scene, line: s.index },
-        } as never,
+        }),
         seq,
       );
       assert.equal(r.decision.kind, 'accepted');
