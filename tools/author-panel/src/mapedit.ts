@@ -1,0 +1,194 @@
+// The map's edits (editor-map-and-story-rulings.md, Left to E3b; gui-editor-design §3): each gesture
+// as write-route calls (§5.1) in order, undone together. No React or fetch here: the panel passes its
+// routes in; tested from kernel/ts/test/author_mapedit.test.ts.
+import type { At, MapRoom } from './map.ts';
+
+type Told = { ok: boolean; told: unknown };
+export type Io = {
+  post: (route: string, sent: object) => Promise<Told>;
+  source: (file: string) => Promise<{ bytes: string; sha256: string }>;
+};
+type Op = { path: (string | number)[]; value?: unknown; delete?: true };
+type Exit = { to: string; barrier?: string };
+type Doc = { exits?: Record<string, Exit> };
+type Row = { room: string } & At;
+/** One gesture's write calls: each journals an entry the gesture's undo puts back. */
+type Run = {
+  call: (route: string, sent: object) => Promise<{ id: number; files?: string[] }>;
+  read: <T>(file: string) => Promise<{ doc: T; was: string }>;
+  /** One `/change` of `file` with the ops `edit` builds from its current source; none skips it. */
+  change: <T>(file: string, edit: (doc: T) => Op[]) => Promise<void>;
+};
+
+/** The direction back through an exit (Loka.Content.Barriers.opposite). */
+export const BACK: Record<string, string> = {
+  north: 'south',
+  south: 'north',
+  east: 'west',
+  west: 'east',
+  up: 'down',
+  down: 'up',
+};
+
+const no = (why: string): never => {
+  throw new Error(why);
+};
+const fileOf = (r: MapRoom) => r.file ?? no(`${r.key} has no source file`);
+const back = (dir: string) => BACK[dir] ?? no(`${dir} is not a direction`);
+const said = (told: unknown) =>
+  typeof told === 'string'
+    ? told
+    : `${(told as { file?: string })?.file ?? 'a file'} changed since the map read it`;
+/** Sets one exit, making `exits` when the room has none. */
+const exit = (doc: Doc, dir: string, value: Exit): Op =>
+  doc.exits ? { path: ['exits', dir], value } : { path: ['exits'], value: { [dir]: value } };
+const faceOf = async (s: Run, a: MapRoom, dir: string) =>
+  (await s.read<Doc>(fileOf(a))).doc.exits?.[dir] ?? no(`${a.key} has no exit ${dir}`);
+const roomOf = (rooms: MapRoom[], key: string) =>
+  rooms.find((r) => r.key === key) ?? no(`${key} is not on the map`);
+
+/** The layout cell under a point of the map's SVG (the inverse of mapdraw.tsx `at`). */
+export const cellAt = (v: { zoom: number; x: number; y: number }, p: { x: number; y: number }) => ({
+  x: Math.floor((p.x - v.x) / (v.zoom * 64)),
+  y: Math.floor((p.y - v.y) / (v.zoom * 64)),
+});
+/** The compass direction from one cell toward another on the same level: the larger axis wins. */
+export function toward(a: At, b: At) {
+  const [dx, dy] = [b.x - a.x, b.y - a.y];
+  if (a.z !== b.z || (!dx && !dy)) return undefined;
+  if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? 'east' : 'west';
+  return dy > 0 ? 'south' : 'north';
+}
+
+/** Drag: writes `r`'s layout row (appending one for an unplaced room); a taken cell refuses. */
+const place = (s: Run, r: MapRoom, at: At) =>
+  s.change<Row[]>('layout.json', (rows) => {
+    const taken = rows.find((o) => o.room !== r.key && o.x === at.x && o.y === at.y && o.z === at.z);
+    if (taken) no(`${taken.room} is in that cell`);
+    const i = rows.findIndex((o) => o.room === r.key);
+    return [{ path: [i < 0 ? rows.length : i], value: { room: r.key, ...at } }];
+  });
+
+/** Draws an exit `a` → `b` going `dir` and, unless one-way, its reciprocal face. */
+async function link(s: Run, a: MapRoom, dir: string, b: MapRoom, oneWay: boolean) {
+  const home = back(dir);
+  if (a.key === b.key) no('an exit leads to another room');
+  const add = (from: MapRoom, way: string, to: string) =>
+    s.change<Doc>(fileOf(from), (doc) =>
+      doc.exits?.[way] ? no(`${from.key} already has an exit ${way}`) : [exit(doc, way, { to })],
+    );
+  await add(a, dir, b.key);
+  if (!oneWay) await add(b, home, a.key);
+}
+
+/** Deletes `a`'s exit `dir` and its reciprocal face, if the room it leads to has one. */
+async function unlink(s: Run, a: MapRoom, dir: string, rooms: MapRoom[]) {
+  const to = (await faceOf(s, a, dir)).to;
+  await s.change(fileOf(a), () => [{ path: ['exits', dir], delete: true }]);
+  const b = rooms.find((r) => r.key === to);
+  if (b)
+    await s.change<Doc>(fileOf(b), (doc) =>
+      doc.exits?.[back(dir)]?.to === a.key ? [{ path: ['exits', back(dir)], delete: true }] : [],
+    );
+}
+
+/** One-way toggle: removes the reciprocal face of `a`'s exit `dir`, or draws it back. */
+async function oneWay(s: Run, a: MapRoom, dir: string, rooms: MapRoom[]) {
+  const face = await faceOf(s, a, dir);
+  if (face.barrier) no(`${face.barrier} needs both faces: take the barrier off first`);
+  const b = roomOf(rooms, face.to);
+  await s.change<Doc>(fileOf(b), (doc) => {
+    const was = doc.exits?.[back(dir)];
+    if (!was) return [exit(doc, back(dir), { to: a.key })];
+    if (was.to !== a.key) no(`${b.key}'s exit ${back(dir)} leads to ${was.to}`);
+    return [{ path: ['exits', back(dir)], delete: true }];
+  });
+}
+
+/** Barrier drop: a new barrier `key` (`~` words, closed or locked) named on both faces of the exit. */
+async function barrier(s: Run, a: MapRoom, dir: string, rooms: MapRoom[], key: string, locked: boolean) {
+  const b = roomOf(rooms, (await faceOf(s, a, dir)).to);
+  const reverse = (await s.read<Doc>(fileOf(b))).doc.exits?.[back(dir)];
+  if (reverse?.to !== a.key) no('a barrier needs the exit both ways: a one-way exit has none');
+  // a barrier is owned: in the rooms' area when they share one, else at the root (border rule)
+  const area = a.area === b.area ? a.area : null;
+  const made = await s.call('new', { kind: 'barriers', name: key, ...(area ? { area } : {}) });
+  const file = made.files?.find((f) => f.endsWith(`barriers/${key}.json`));
+  if (locked)
+    await s.change(file ?? no(`no barriers/${key}.json was made`), () => [
+      { path: ['initial'], value: 'locked' },
+    ]);
+  await s.change(fileOf(a), () => [{ path: ['exits', dir, 'barrier'], value: key }]);
+  await s.change(fileOf(b), () => [{ path: ['exits', back(dir), 'barrier'], value: key }]);
+}
+
+/** New room from here: `bin/loka new rooms <key> --from <a> <dir>` (its words `~`), in `a`'s area. */
+async function grow(s: Run, a: MapRoom, dir: string, key: string) {
+  back(dir);
+  if ((await s.read<Doc>(fileOf(a))).doc.exits?.[dir]) no(`${a.key} already has an exit ${dir}`);
+  const from = { room: a.key, direction: dir };
+  await s.call('new', { kind: 'rooms', name: key, from, ...(a.area ? { area: a.area } : {}) });
+}
+
+/** Move to area: the file moves to `areas/<area>/rooms/`, or to the root for null. */
+const move = async (s: Run, r: MapRoom, area: string | null) =>
+  s.call('move', { file: fileOf(r), was: (await s.read(fileOf(r))).was, area });
+
+/** Undoes `ids` newest first, dropping each as it goes, so a refusal leaves only what stands. */
+async function undo(io: Io, ids: number[]) {
+  while (ids.length) {
+    const r = await io.post('undo', { id: ids.at(-1) });
+    if (!r.ok) no(`put back stopped: ${said(r.told)}`);
+    ids.pop();
+  }
+}
+
+/** Runs one gesture's calls in order; a refusal puts back the calls before it, then throws. */
+async function gesture(io: Io, done: number[][], steps: (s: Run) => Promise<unknown>) {
+  const ids: number[] = [];
+  const call: Run['call'] = async (route, sent) => {
+    const r = await io.post(route, sent);
+    if (!r.ok) no(said(r.told));
+    const told = r.told as { id: number; files?: string[] };
+    ids.push(told.id);
+    return told;
+  };
+  const read: Run['read'] = async (file) => {
+    const got = await io.source(file);
+    return { doc: JSON.parse(got.bytes), was: got.sha256 };
+  };
+  const change: Run['change'] = async (file, edit) => {
+    const { doc, was } = await read<never>(file);
+    const ops = edit(doc);
+    if (ops.length) await call('change', { file, was, ops });
+  };
+  try {
+    await steps({ call, read, change });
+  } catch (e) {
+    await undo(io, ids); // ponytail: a put-back refused here (a Hold, an outside edit) is reported, not retried
+    throw e;
+  }
+  if (ids.length) done.push(ids);
+}
+
+/** The map's gestures over the panel's routes, and an undo of the last whole gesture. */
+export function editor(io: Io) {
+  const done: number[][] = []; // the journal ids of each gesture, oldest first
+  const run = (steps: (s: Run) => Promise<unknown>) => gesture(io, done, steps);
+  return {
+    undoable: () => done.length > 0,
+    async undo() {
+      await undo(io, done.at(-1) ?? no('no map edit to undo'));
+      done.pop();
+    },
+    place: (r: MapRoom, at: At) => run((s) => place(s, r, at)),
+    link: (a: MapRoom, dir: string, b: MapRoom, one = false) => run((s) => link(s, a, dir, b, one)),
+    unlink: (a: MapRoom, dir: string, rooms: MapRoom[]) => run((s) => unlink(s, a, dir, rooms)),
+    oneWay: (a: MapRoom, dir: string, rooms: MapRoom[]) => run((s) => oneWay(s, a, dir, rooms)),
+    barrier: (a: MapRoom, dir: string, rooms: MapRoom[], key: string, locked: boolean) =>
+      run((s) => barrier(s, a, dir, rooms, key, locked)),
+    grow: (a: MapRoom, dir: string, key: string) => run((s) => grow(s, a, dir, key)),
+    move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
+  };
+}
+export type Editor = ReturnType<typeof editor>;

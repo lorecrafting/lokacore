@@ -9,6 +9,8 @@ import { Button } from './components/ui/button.tsx';
 import * as map from './map.ts';
 import { M, type Box as Size, type View } from './map.ts';
 import { Drawing } from './mapsvg.tsx';
+import { cellAt } from './mapedit.ts';
+import { edit, shown } from './mapwire.ts';
 import type { Selection } from './shell.ts';
 
 export type MapProps = {
@@ -119,19 +121,36 @@ function useFollow(
 export function AreaMap(p: MapProps) {
   const l = useLevel(p);
   const reach = reachOf(p);
+  const [told, tell] = useState('');
+  shown.rooms = p.story.map;
+  useEffect(() => void (shown.tell = tell), []);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Header p={p} l={l} />
-      <div ref={l.ref} className="relative min-h-0 flex-1 overflow-hidden">
+      <div
+        ref={l.ref}
+        className="relative min-h-0 flex-1 overflow-hidden"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => drop(e, p, l)}
+      >
         {l.v.view && l.level.length ? <Drawing p={p} l={l} reach={reach} /> : null}
       </div>
       <Unplaced rooms={p.story.map.filter((r) => !r.at)} pick={p.pick} />
-      <p className="truncate px-2 py-1 text-xs text-muted-foreground">
-        {map.footer(p.story.map, reach.unreached, reach.locked)}
+      <p role={told ? 'alert' : undefined} className={`truncate px-2 py-1 text-xs ${told ? 'text-destructive' : 'text-muted-foreground'}`}>
+        {told || map.footer(p.story.map, reach.unreached, reach.locked)}
       </p>
       <p aria-live="polite" className="sr-only">{`level ${l.z}, ${l.level.length} rooms`}</p>
     </div>
   );
+}
+
+/** An Unplaced chip dropped on the map: its room's layout row at the cell under the pointer. */
+function drop(e: React.DragEvent<HTMLDivElement>, p: MapProps, l: Level) {
+  const r = p.story.map.find((o) => o.key === e.dataTransfer.getData('text/x-loka-room'));
+  const box = e.currentTarget.getBoundingClientRect();
+  if (!r || !l.v.view) return;
+  const at = cellAt(l.v.view, { x: e.clientX - box.left, y: e.clientY - box.top });
+  edit((ed) => ed.place(r, { ...at, z: l.z }));
 }
 
 const reachOf = (p: MapProps) => ({
@@ -199,7 +218,7 @@ function Header({ p, l }: { p: MapProps; l: Level }) {
   );
 }
 
-/** Rooms with no layout row, as hollow dashed chips; a click selects. */
+/** Rooms with no layout row, as hollow dashed chips; a click selects, a drag onto the map places. */
 function Unplaced({ rooms, pick }: { rooms: MapRoom[]; pick: (s: Selection) => void }) {
   if (!rooms.length) return null;
   return (
@@ -211,6 +230,8 @@ function Unplaced({ rooms, pick }: { rooms: MapRoom[]; pick: (s: Selection) => v
           type="button"
           className="rounded-sm border border-dashed border-muted-foreground px-1 font-mono text-muted-foreground"
           onClick={() => pick(map.select(r))}
+          draggable
+          onDragStart={(e) => e.dataTransfer.setData('text/x-loka-room', r.key)}
         >
           {r.key}
         </button>

@@ -6,6 +6,8 @@ import type { MapRoom } from './map.ts';
 import * as map from './map.ts';
 import { M } from './map.ts';
 import { Box, Edges, Hulls, Pills, Stubs, type Marks } from './mapdraw.tsx';
+import { cellAt, toward } from './mapedit.ts';
+import { edit, shown } from './mapwire.ts';
 
 export type DrawProps = { p: MapProps; l: Level; reach: Reach };
 
@@ -122,9 +124,11 @@ function useWheel(svg: React.RefObject<SVGSVGElement | null>, d: DrawProps) {
   }, [svg]);
 }
 
-/** A drag that starts on empty ground (not a room) pans. */
+/** A drag that starts on empty ground pans; one that starts on a room moves it. */
 function pan(e: React.PointerEvent<SVGSVGElement>, d: DrawProps) {
-  if ((e.target as Element).closest('[data-key]')) return;
+  const key = (e.target as Element).closest('[data-key]')?.getAttribute('data-key');
+  const r = d.l.level.find((o) => o.key === key);
+  if (r) return drag(e, d, r);
   const el = e.currentTarget;
   el.setPointerCapture(e.pointerId);
   const [x0, y0, start] = [e.clientX, e.clientY, d.l.v.now.current!];
@@ -142,6 +146,26 @@ function pan(e: React.PointerEvent<SVGSVGElement>, d: DrawProps) {
   );
   el.addEventListener('pointermove', move);
   el.addEventListener('pointerup', up);
+}
+
+const DRAG = 4; // mutate-skip: px a press moves before it is a drag, uncalibrated design value
+/** A room dragged past a few pixels: to an empty cell moves it there; Shift onto another room on the
+ * level draws an exit both ways. The click that ends a drag does not select. */
+function drag(e: React.PointerEvent<SVGSVGElement>, d: DrawProps, r: MapRoom) {
+  const [x0, y0, box] = [e.clientX, e.clientY, e.currentTarget.getBoundingClientRect()];
+  const up = (u: PointerEvent) => {
+    if (Math.hypot(u.clientX - x0, u.clientY - y0) < DRAG) return;
+    const stop = (c: MouseEvent) => c.stopPropagation();
+    window.addEventListener('click', stop, { capture: true, once: true });
+    setTimeout(() => window.removeEventListener('click', stop, { capture: true }));
+    const at = { ...cellAt(d.l.v.view!, { x: u.clientX - box.left, y: u.clientY - box.top }), z: d.l.z };
+    if (!u.shiftKey) return edit((ed) => ed.place(r, at));
+    const to = d.l.level.find((o) => o.at!.x === at.x && o.at!.y === at.y);
+    const dir = to && toward(r.at!, to.at!);
+    if (!to || !dir) return shown.tell('Shift-drag onto another room on this level draws an exit');
+    edit((ed) => ed.link(r, dir, to));
+  };
+  window.addEventListener('pointerup', up, { once: true });
 }
 
 /** Arrows, PageUp and PageDown, Enter, Shift-Enter, `+` `-` `0` and Esc, per the E3a keyboard row. */
