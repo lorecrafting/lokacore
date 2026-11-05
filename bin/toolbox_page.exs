@@ -221,7 +221,7 @@ reference =
 
       case git.(["show", "origin/main:" <> baseline_path]) do
         {text, 0} -> lines.(text)
-        _ -> nil
+        {out, _} -> raise("cannot read origin/main:#{baseline_path} to hold it to: #{out}")
       end
 
     {_, nil} ->

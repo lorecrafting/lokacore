@@ -1,4 +1,4 @@
-# size: allow 344, one table per gate; the editor gate adds ten planted files
+# size: allow 352, one table per gate; the editor gate adds eleven planted files
 # Red controls plant violations, require checks to fail, and clean their own files.
 # Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
@@ -250,7 +250,14 @@ editor_controls =
        ], expect}
   end
 
-controls = controls ++ toolbox ++ editor_controls
+# main's baseline unreadable (a path main lacks): --check raises instead of skipping shrink-only
+unread =
+  {"editor gate: main unreadable", %{"tmp/red-editor-unread.baseline" => base},
+   ~w(elixir bin/toolbox_page.exs --check docs/features.json docs/MECHANICS-TOOLBOX.md
+      docs/toolbox.gen.json #{editor_registry} tmp/red-editor-unread.baseline),
+   "cannot read origin/main:tmp/red-editor-unread.baseline"}
+
+controls = controls ++ toolbox ++ editor_controls ++ [unread]
 
 for {_, files, _, _} <- controls, {rel, _} <- files do
   if File.exists?(Path.join(root, rel)),
