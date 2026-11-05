@@ -21,13 +21,14 @@
 
 ## Findings
 
-- **Blocker B1** `kernel/ts/play/reach.ts:30-33`: `isWrite` omits `fact.stamp`. The edge from `reaction/sow` (`steps[3]`, `fact.stamp`) to `fact/sown_at` carries no `set`. Toolbox showcase: Trace `sown_at` shows `never set`, `read at plot`, `read at sow` (shot `s2-review-dark-3-trace-sown_at.png`); `orphan_facts.read_only` lists `sown_at` too. Fix: count `fact.stamp` in `isWrite`, list it in cartridge.md Content reports, add a stamped-fact case to `story.test.ts` or `content_graph.test.ts`.
+- **Blocker B1** `kernel/ts/play/reach.ts:30-33`: `isWrite` omits `fact.stamp`. The edge from `reaction/sow` (`steps[3]`, `fact.stamp`) to `fact/sown_at` carries no `set`. Toolbox showcase: Trace `sown_at` shows `never set`, `read at plot`, `read at sow` (shot `s2-review-dark-3-trace-sown_at.png`); `orphan_facts.read_only` lists `sown_at` too. Fix: count `fact.stamp` in `isWrite`, list it in cartridge.md Content reports, add a stamped-fact case to `story.test.ts` or `content_graph.test.ts`. Elixir already counts it (`lib/loka/content/position.ex:48`, `lib/loka/content/lint.ex:11`), so the TypeScript report disagrees with the compiler; after the fix `sown_at` leaves `orphan_facts.read_only`.
 - **Blocker B2** `tools/author-panel/src/storylist.ts:240`: the topic clause is untested. Hand mutant `fromRef(e.from)?.kind === 'topic'` -> `false` stays green against `author_story.test.ts`. Failure: a topic's fact loses its codex read, and Trace says that only the topic sets it. Fix: add a topic edge to the planted Trace test.
 - Nit N1 (Beads) `storylist.ts:240` vs `reach.ts:35`: the read rule is written twice. Once B1 lands, have `reach.ts` emit the read flag next to `set` and drop the local copy.
 - Nit N2 (Beads) `storylist.ts:122`: a duplicate beat `n` gives duplicate row ids, so React drops rows. This is an author error, and the owner is the sole author.
 - Nit N3 (Beads) `storylist.tsx:228,217`: localStorage is written on every scroll event, and `L.rows` is rebuilt on every render. No failure seen at 371 rows.
 - Nit N4 (Beads) `storylist.tsx`: no unit harness. 43 view mutants survive (handback agrees). The walk below covered click, keys, Trace, sync and reload.
-- Question Q1: the PR body says the Knowledge and Pacing rows (with their rulings tests) are "deferred by decision". The reviewer found no record in HANDOFF, Beads or the rulings. PM to confirm or cite.
+- Question Q1: the PR body says the Knowledge and Pacing rows (with their rulings tests) are "deferred by decision". The reviewer found no record in HANDOFF, Beads or the rulings. PM to cite the decision; without one, the missing rows block as unmet S2 scope.
+- Question Q2 `reach.ts:28`: service `.benefit.account` (deposit and withdraw write the savings fact) is not in `SITES`. That list is outside design 4.2, so this is not part of this slice. PM to decide.
 
 ## Checks that held
 
@@ -36,9 +37,11 @@
   - Keys: Right, Down and Up work; Enter selects, and hierarchy and inspector follow. Hierarchy click on `chop` reveals and selects its list row.
   - Cmd-K: `trace sown_at` opens Trace with selection unchanged; `story: sown_at` focuses the row; `f` traces.
   - Trace: clicking the `sow` row selects it in the list, scrolls to it, and the inspector follows. Esc closes Trace, and a second Esc focuses the Story radio. `×` closes. Cmd-F passes through.
+  - Trace `wheel_1` (23 edges): the section is 120px in a 240px slot (half) and scrolls (scrollHeight 452).
+  - Not walked: sync from a Book selection to the list (no Book at the head was running).
   - Reload keeps the segment.
   - The one 404 is light only and was not traced to this slice.
-  - Shots: `s2-review-{light,dark}-{1-list,2-selected,3-trace-sown_at,4-palette-story}.png`, `s2-review-light-5-trace-click.png`.
+  - Shots: `s2-review-{light,dark}-{1-list,2-selected,3-trace-sown_at,4-palette-story}.png`, `s2-review-light-5-trace-click.png`, `s2-review-light-6-trace-wheel_1.png`.
 - No `fetch` or POST is added; Alt-click reuses `/open`. No hex is added; `hatch` uses tokens. Nothing under `mobile/app` changes.
 - PR claims rerun: `story.ts:232` `!==`->`===` is red on "a beat lists its bound nodes once each"; the Trace dedupe mutant (drop `x.set === e.set`) is red on "Trace follows a fact". Both back the body.
 
