@@ -21,6 +21,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Editor E2, the three-column shell (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-review.md): **CHANGES REQUIRED**
 - [Review: Editor E2 shell, fix round and owner walk (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-fable-review.md): **APPROVE WITH NOTES**
 - [Review: death and level bug batch (PR #623; loka-3tc7, loka-g5hh.2.11, loka-dbtxr (a))](2026-11-05-death-level-bugs-review.md): **CHANGES REQUIRED**
+- [Review: one cartridge format, drop v1 and `Topics.grants/2` (PR #635, loka-9x5y, loka-1b68q)](2026-11-05-compiler-one-format-review.md): **APPROVE WITH NOTES**
 - [Review: combat title names who started the fight (PR #621, loka-kgd.207)](2026-11-05-combat-title-review.md): **APPROVE**
 - [Review: Area layout S3, layout lint and `bin/loka new --area` (PR #624, loka-vduxr.58.3)](2026-11-05-area-layout-s3-review.md): **APPROVE WITH NOTES**
 - [Second review: revival contract and save effect, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-revival-second-review.md): **APPROVE WITH NOTES**
