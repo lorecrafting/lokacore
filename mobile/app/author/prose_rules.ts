@@ -15,7 +15,7 @@ export const saving = (draft: string, words: string) =>
 const MARK = /[\u200b\u200c]+$/;
 const ids = new Map<string, number>();
 export function tagged(key: string, words: string) {
-  if (words.trim() !== '~') return words;
+  if (words?.trim() !== '~') return words; // a key with no words reaches here undefined
   if (!ids.has(key)) ids.set(key, ids.size);
   return words + '\u200b'.repeat(ids.get(key)!) + '\u200c'; // the key's number, in unary
 }

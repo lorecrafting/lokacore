@@ -30,6 +30,7 @@ test('two `~` lines are told apart, and both still read as unwritten', () => {
   assert.notEqual(a, b);
   assert.equal(tagged('k.a', '~'), a);
   assert.equal(tagged('k.c', 'Rain'), 'Rain');
+  assert.equal(tagged('k.d', undefined as never), undefined); // Break: the Book throws on a key with no text
   assert.ok(unwritten(a) && unwritten(b) && unwritten(' ~ '));
   assert.ok(!unwritten('Rain ~') && !unwritten(''));
 });
