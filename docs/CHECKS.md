@@ -76,7 +76,10 @@ their rules and red controls remain available for resumption.
 - `elixir bin/toolbox_page.exs --check`: the [toolbox page](TOOLBOX.gen.md) matches
   `docs/features.json`; an implemented capability without a summary, its source-schema
   declarations (or an engine-only reason), a sampler cartridge that requires it and a showcase
-  district (or a reason each) fails, as does a scene treatment missing from the Book treatments table.
+  district (or a reason each) fails, as does a scene treatment missing from the Book treatments table;
+  the editor gate: every source-schema path (and scene treatment) has a create, edit and delete
+  surface in `tools/author-panel/src/edit/registry.json`, a hand-built component or `generic`;
+  the generic ones equal `test/loka/editor_generic_baseline.txt`, which only shrinks against main's copy.
 - `elixir bin/red_controls.exs`: refuses occupied plant paths and creates files exclusively;
   `test/loka/red_controls_test.exs` checks preserved local bytes. It plants a boundary violation, a cycle, a compile edge, an
   oversized AGENTS.md, size-limit cases, one violation per Credo check, a stale and an
