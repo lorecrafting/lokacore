@@ -8,7 +8,7 @@ the `target.unresolved` diagnostics record and its §6 note; amended again by R6
 ([record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-09-30-r6-s2-review.md)): the phone placement in §2 and the trace
 segments in §§3-4; amended again by R6 slice 6a (PM decision): the phone trace cap in §2;
 amended again 2026-11-01 (PM ruling, loka-vduxr.41): replay rebuilding a rejection's recorded
-form in §4; amended again 2026-11-05 (loka-vduxr.42, PM to confirm): replay rebuilding a failed
+form in §4; amended again 2026-11-05 (PM ruling, loka-vduxr.42): replay rebuilding a failed
 or unknown commit in §4.
 Written by the developer agent
 (Claude Code, Claude Opus) for the observability design slice
@@ -154,7 +154,7 @@ entry; the jobs it runs appear in its committed events.
   receipt-less one. The decision is still recomputed from the inputs, so a recorded rejection
   that replay decides otherwise still differs. No schema change; a `failed` or `unknown`
   rejection is not rebuilt.
-  *Amendment (2026-11-05, loka-vduxr.42, PM to confirm):* replay also reads `failed` and
+  *Amendment (2026-11-05, PM ruling, loka-vduxr.42):* replay also reads `failed` and
   `unknown` from `commit.state`, for any decision: it decides the entry from the inputs but
   does not adopt it (world and revision stay; a `failed` entry takes its ordinal, an `unknown`
   one leaves it to the follow-up row that repeats it), and keeps the recorded commit, a
