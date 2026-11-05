@@ -77,9 +77,9 @@ test('the registry is the contract treatments plus spirit', () => {
   for (const e of named) assert.deepEqual(['spirit', ...e].sort(), Object.keys(TREATMENTS).sort());
 });
 
-// The fatal hold's rim is a blur of standard deviation half its width (CSS box-shadow): its share at
+// The fatal hold's rim is a solid band, then a blur of standard deviation half its width (CSS box-shadow): its share at
 // the page margin, at most φ(x)/x past x deviations from each edge, twice in a corner.
-const x = space.page / (size.bloodshot / 2);
+const x = (space.page - size.bloodshot.spread) / (size.bloodshot.blur / 2);
 const rim = (2 * opacity.bloodshot * Math.exp((-x * x) / 2)) / (x * Math.sqrt(2 * Math.PI));
 
 // Breaks: the bloodshot rim widened or deepened until it reaches the ink at the page margins.

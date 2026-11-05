@@ -175,7 +175,7 @@ export const size = {
   chapterRule: 80, // the chapter card's short rule (the mock's `.chapter i`)
   statusIcon: 22, // a status icon's disc, inside a size.touch box (owner: smaller, 2026-11-04)
   unseen: 1, // a box a screen reader reads and the eye cannot see (the live region)
-  bloodshot: 16, // the fatal hold's feathered edge: its blur, gone before the page margins' ink -- mutate-skip: uncalibrated design value
+  bloodshot: { spread: 10, blur: 8 }, // the fatal hold's edge: a solid band, then feathered, gone before the page margins' ink -- mutate-skip: uncalibrated design value
   column: 768, // the Book's widest page column (tablet width), centred on a desktop; a phone fills the screen
 };
 
@@ -189,7 +189,7 @@ export const opacity = {
   washStill: 0.09, // the same wash under reduced motion
   faint: 0.06, // a held under-ink layer: low-health vignette, dream paper; 4.5:1 holds -- mutate-skip: uncalibrated design value
   fatal: { day: 0.075, night: 0.25 }, // the fatal blow's held red, by polarity: the most light's dim and warning, and dark's warning, bear at 4.5:1 -- mutate-skip: uncalibrated design value
-  bloodshot: 1, // the fatal hold's edges at the screen's rim, feathered in over size.bloodshot -- mutate-skip: uncalibrated design value
+  bloodshot: 1, // the fatal hold's edges at the screen's rim, a size.bloodshot.spread band feathered in over size.bloodshot.blur -- mutate-skip: uncalibrated design value
   glow: 0.08, // the lamp at the page's hip, at its peak; 4.5:1 holds -- mutate-skip: uncalibrated design value
   spirit: 0.6, // the spirit layer, held; every text role keeps 4.5:1 -- mutate-skip: brief-set design value
   reverie: { day: 0.8, night: 0.06 }, // the reverie layer, held, by polarity; every text role keeps 4.5:1 (night 0.08 breaks dark.warning) -- mutate-skip: brief-set design value

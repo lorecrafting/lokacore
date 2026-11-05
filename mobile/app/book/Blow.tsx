@@ -68,7 +68,16 @@ function useWash(still: boolean, peak: number, dead?: boolean) {
 // The fatal hold's bloodshot rim, reaching under the foot to the screen's edge.
 const bloodshot = (ink: string, foot: number) => ({
   bottom: -foot,
-  boxShadow: [{ offsetX: 0, offsetY: 0, blurRadius: size.bloodshot, color: ink, inset: true }],
+  boxShadow: [
+    {
+      offsetX: 0,
+      offsetY: 0,
+      blurRadius: size.bloodshot.blur,
+      spreadDistance: size.bloodshot.spread,
+      color: ink,
+      inset: true,
+    },
+  ],
 });
 
 /**
@@ -78,7 +87,7 @@ const bloodshot = (ink: string, foot: number) => ({
  *   below the ink; no layout change; a page turn remounts it, ending the wash. A death in a fight
  *   holds the red (`fatalInk`: oxblood at `opacity.fatal`, by polarity) until then, no pulse and no fade (book-ui.md, Falling): it
  *   rises as the fatal wash falls, or over the settle time when no wash peaked; a bloodshot rim at
- *   `opacity.bloodshot`, feathered in over `size.bloodshot`, rises and holds with it, to the screen's edge.
+ *   `opacity.bloodshot`, a `size.bloodshot.spread` band feathered in over `size.bloodshot.blur`, rises and holds with it, to the screen's edge.
  * - States: at rest; washing; held after a death; dead (held from mount); reduced motion (half the wash, no swell; a death
  *   sets the hold at once, under the half wash: the two stay below the wash's peak).
  * - Story: CombatPage.stories.tsx
