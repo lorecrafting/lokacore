@@ -38,13 +38,25 @@ test('the opener of a fight comes from its receipt, survives a cold reopen and i
   assert.deepEqual(p.story.opener(fight), { npc_id: rat(fresh), player: true });
   // Breaks: any receipt's encounter.open answers, whatever encounter was asked.
   assert.equal(p.story.opener('00000000-0000-4000-8000-0000000000ff'), undefined);
-  // A second fight, opened by the NPC (a move into a hostile's room), in the same world.
-  p.sql
-    .prepare(
-      `INSERT INTO receipt SELECT scope, 'second', 'second', actor_id, intent_digest_version, intent_digest,
-         json_set(command, '$.payload.type', 'move'), revision, replace(replace(response, ?, ?), ?, ?) FROM receipt`,
-    )
-    .run(fight, 'second-fight', rat(fresh), rat(fresh, 3));
+  // More fights in the same world, each a copy of the first receipt opened by another command.
+  const copy = (type: string, encounter: string, npc: string) =>
+    p.sql
+      .prepare(
+        `INSERT INTO receipt SELECT scope, ?, ?, actor_id, intent_digest_version, intent_digest,
+           json_set(command, '$.payload.type', ?), revision, replace(replace(response, ?, ?), ?, ?)
+         FROM receipt WHERE rowid = 1`,
+      )
+      .run(encounter, encounter, type, fight, encounter, rat(fresh), npc);
+  copy('move', 'second-fight', rat(fresh, 3)); // the NPC's: a move into a hostile's room
+  copy('cast', 'cast-fight', 'cast-npc');
+  copy('perform', 'perform-fight', 'perform-npc');
+  // Breaks: a lookup inside the commit transaction answers with (or caches the miss of) rows that
+  // may never commit; the same lookup after COMMIT answers.
+  p.sql.exec('BEGIN');
+  copy('attack', 'open-fight', 'open-npc');
+  assert.equal(p.story.opener('open-fight'), undefined);
+  p.sql.exec('COMMIT');
+  assert.deepEqual(p.story.opener('open-fight'), { npc_id: 'open-npc', player: true });
   p.sql.close();
 
   // Breaks: the opener lives only in memory, so a reload loses the title.
@@ -52,6 +64,9 @@ test('the opener of a fight comes from its receipt, survives a cold reopen and i
   assert.deepEqual(q.story.opener(fight), { npc_id: rat(fresh), player: true });
   // Breaks: a second fight answers with the first fight's opener, or a move reads as the player's attack.
   assert.deepEqual(q.story.opener('second-fight'), { npc_id: rat(fresh, 3), player: false });
+  // Breaks: a spell's or a performance's fight-back reads as the foe's attack.
+  assert.deepEqual(q.story.opener('cast-fight'), { npc_id: 'cast-npc', player: true });
+  assert.deepEqual(q.story.opener('perform-fight'), { npc_id: 'perform-npc', player: true });
   q.sql.close();
 
   // Breaks: an old save with no opening receipt guesses an opener instead of none.
@@ -66,4 +81,20 @@ test('the opener of a fight comes from its receipt, survives a cold reopen and i
     .run();
   assert.equal(r.story.opener(fight), undefined);
   r.sql.close();
+});
+
+// Breaks: the Combat page reads the opener while a lost COMMIT holds the press unsettled, when the
+// save's reads fail, so drawing the page throws (session.ts, as lastNarration).
+test('no opener is read while the opening press is unsettled', (t) => {
+  const directory = mkdtempSync(join(tmpdir(), 'loka-opener-'));
+  t.after(() => rmSync(directory, { recursive: true }));
+  const path = join(directory, 'save.db');
+  at(path).sql.close();
+  const h = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  h.fault.kind = 'lost';
+  h.fault.armed = true;
+  const attack = { action_key: 'attack', target_ids: [rat(fresh)], input: {} };
+  assert.equal(h.game.invoke(attack as never).kind, 'pending');
+  assert.equal(h.game.opener('any-fight'), undefined); // any lookup not yet cached reads the save
+  h.sql.close();
 });

@@ -1,15 +1,9 @@
 // The Combat page's title: who opened the fight (book-ui.md, Live combat response; loka-kgd.207).
 import { fillSlots } from '../../packages/game-view/line_words.ts';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
-import { LABEL } from './labels.ts';
 import type { Logs } from './logs.ts';
 
-type Foe = { name: string; words?: { bare: string; article?: string } };
 type Say = (key: string) => string;
-
-// A foe as its projected name, definite with name words ("the goblin"); a proper name stays bare.
-export const named = (o: Foe, text: Say) =>
-  o.words ? `${o.words.article ? `${LABEL.the} ` : ''}${text(o.words.bare)}` : text(o.name);
 
 // "You attack {target}!" or "{attacker} attacks you!" in the cartridge's words; none when the
 // opening receipt is unknown (a replaced world), its NPC is no longer a foe here, or the cartridge
@@ -23,8 +17,9 @@ export function combatTitle(c: NonNullable<GameView['combat']>, text: Say, opene
   const [key, slot] = by.player
     ? ['combat.title_you_attack', 'target']
     : ['combat.title_attacks_you', 'attacker'];
-  const [said, name] = [key, foe.words?.bare ?? foe.name].map((k) => text(k) !== k && text(k));
-  return said && name ? fillSlots(said, { [slot]: named(foe, text) }, String) : undefined;
+  // The foe's short name, as the engage line binds it ("You attack a goblin!", loka-kgd.202).
+  const [said, name] = [key, foe.name].map((k) => text(k) !== k && text(k));
+  return said && name ? fillSlots(said, { [slot]: name }, String) : undefined;
 }
 
 // The encounter's title, kept while its opener cannot be read (a save in flight, the opener fallen)

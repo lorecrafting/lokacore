@@ -14,7 +14,6 @@ import { Reanimated } from './fade.ts';
 import { useDry } from './press.ts';
 import type { presenter, Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
-import { named } from './combat-title.ts';
 
 function Foot(p: { label: typeof LABEL.letGo | typeof LABEL.backToWorld; onPress: () => void }) {
   return (
@@ -31,11 +30,16 @@ type Props = {
   world: () => void;
 };
 
+type Foe = { name: string; words?: { bare: string; article?: string } };
+// A foe as its projected name, definite with name words ("the goblin"); a proper name stays bare.
+const named = (o: Foe, text: (key: string) => string) =>
+  o.words ? `${o.words.article ? `${LABEL.the} ` : ''}${text(o.words.bare)}` : text(o.name);
+
 // A foe's pick lists, its Cast a spell… option naming it.
 const foeLists = (
   view: Parameters<typeof picks>[0],
   casts: Button[],
-  o: Parameters<typeof named>[0] & { id: string },
+  o: Foe & { id: string },
   text: (key: string) => string,
 ) =>
   picks(
