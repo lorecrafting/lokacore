@@ -9,6 +9,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  rmSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -157,5 +158,19 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
     messages.slice(seen).filter((m) => (m as { lint?: string[] }).lint),
     [],
   );
+
+  // Hold. Breaks: a structural compile written while the editor holds (Metro reloads mid-edit),
+  // or the Hold's end never writing what waited.
+  rmSync(`${which}.slow`);
+  const hold = (on: boolean) =>
+    fetch(`http://127.0.0.1:${port}/hold`, { method: 'POST', body: JSON.stringify({ on }) });
+  await hold(true);
+  const held = readFileSync(out, 'utf8');
+  writeFileSync(which, good);
+  writeFileSync(join(src, 'rooms.json'), '{    }');
+  await until(() => (messages.at(-1) as { pending?: number }).pending === 1);
+  assert.equal(readFileSync(out, 'utf8'), held);
+  await hold(false);
+  await until(() => JSON.parse(readFileSync(out, 'utf8')).sha256 === kat.sha256);
   reader.cancel();
 });
