@@ -5,6 +5,8 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { color } from '../book/tokens.ts';
 import {
+  selects,
+  shortcut,
   noFieldNote,
   oneLine,
   paletteNear,
@@ -115,4 +117,33 @@ test('only the gated require reaches the in-Book editor', () => {
       "author/panel.tsx: process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;",
     ],
   );
+});
+
+// Breaks: a Book Cmd-Z or walk key goes to the panel (two undos), a panel shortcut stays in the
+// Book; a selection marks another definition's lines, or one whose key only starts the same.
+test('the Book hands the panel its shortcuts, and marks only the selection`s lines', () => {
+  const key = (k: string, mod = {}) => ({
+    key: k,
+    metaKey: false,
+    ctrlKey: false,
+    altKey: false,
+    ...mod,
+  });
+  assert.deepEqual(
+    ['k', '.', 'e', '\\', '/'].map((k) => shortcut(key(k, { metaKey: true }))),
+    ['k', '.', 'e', '\\', '/'],
+  );
+  assert.equal(shortcut(key('k', { ctrlKey: true })), 'k');
+  for (const asked of [
+    key('z', { metaKey: true }),
+    key(']'),
+    key('k'),
+    key('k', { metaKey: true, altKey: true }),
+  ])
+    assert.equal(shortcut(asked), undefined);
+  assert.ok(selects('room.hut.title', 'room', 'hut'));
+  assert.ok(
+    !selects('room.hutch.title', 'room', 'hut') && !selects('item.hut.short', 'room', 'hut'),
+  );
+  assert.ok(!selects(undefined, 'room', 'hut'));
 });

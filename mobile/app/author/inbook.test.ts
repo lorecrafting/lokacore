@@ -67,7 +67,7 @@ beforeEach(async () => {
       seen.set(el.textContent, key);
       said.set(key, words);
     }
-    (w as unknown as { said: typeof said }).said = said;
+    Object.assign(w, { said, seen });
     w.inbook.start({ seen, said, tell: (m) => w.told.push(m), redraw: () => {} });
   }, LINES);
 });
@@ -179,6 +179,31 @@ test('a click ends the landing; the panel relays the walk keys', async () => {
   await page.locator('[data-loka-landed]').waitFor();
   await page.evaluate((data) => postMessage({ ...data, key: 'Enter' }, '*'), relay);
   await page.locator('[data-loka-field]').waitFor();
+});
+
+// Breaks: the panel's selection marks no line, or every line; Cmd-K in the Book is lost to the
+// panel; editing a key not on the page does nothing.
+test('the selection marks its lines; the panel`s shortcuts and edits reach it from the Book', async () => {
+  await page.evaluate(() => {
+    const w = window as unknown as { seen: Map<string, string> };
+    const el = document.querySelector('main')!.appendChild(document.createElement('p'));
+    el.dir = 'auto';
+    el.textContent = 'A hut.';
+    w.seen.set('A hut.', 'room.hut.title');
+    postMessage({ op: 'select', kind: 'room', key: 'hut' }, '*');
+  });
+  await page.waitForFunction(() => document.querySelectorAll('[data-loka-selected]').length === 1);
+  await page.evaluate(() => postMessage({ op: 'select', kind: 'room', key: 'barn' }, '*'));
+  await page.waitForFunction(() => !document.querySelector('[data-loka-selected]'));
+  assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+k')), { shortcut: 'k' });
+  await page.evaluate(() => postMessage({ op: 'edit', key: 'a.rain' }, '*'));
+  await page.locator('[data-loka-field]').waitFor();
+  await page.keyboard.press('Escape');
+  const gone = () => postMessage({ op: 'edit', key: 'b.gone' }, '*');
+  assert.deepEqual(await told1(() => page.evaluate(gone)), {
+    note: 'b.gone is not on this page; opened in your editor.',
+  });
+  assert.deepEqual(posted('/open'), [{ key: 'b.gone', words: '' }]);
 });
 
 // Breaks: Cmd-Z puts back nothing, the wrong id, or hides a 409 behind a success note; or sends

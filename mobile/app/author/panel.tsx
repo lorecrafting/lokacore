@@ -187,13 +187,15 @@ const stateOf = (game: Opened) => ({
   facts: factRows(game.facts(), canon().facts),
   shown: shown(game.view().view, played(game)!.text, canon(), game.entityIds(), game.roomIds()),
 });
-// Alt-click (Option-click) on a Book line: the panel opens its source in the owner's editor.
+// A click on a Book line selects its definition in the panel; Alt-click (Option-click) also opens
+// its source in the owner's editor.
 const onClick = (e: MouseEvent) => {
+  const words = (e.target as HTMLElement).textContent ?? '';
+  const key = seen.get(words);
+  if (key) tell({ select: key });
   if (!e.altKey) return;
   e.preventDefault();
   e.stopPropagation();
-  const words = (e.target as HTMLElement).textContent ?? '';
-  const key = seen.get(words);
   tell({ line: { key, words: (key && said.get(key)) || words } });
 };
 // Through `played`, so an accepted cheat is a recorded step `bin/loka check` replays.
@@ -233,7 +235,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     const stop = inBook?.start({ seen, said, tell, redraw: () => latest.current.redraw({}) });
     if (panel) state();
     else if (window.parent !== window)
-      window.parent.postMessage({ loka: 'author', ready: true }, '*');
+      window.parent.postMessage({ loka: 'author', ready: true, sha256: chapter.sha256 }, '*');
     return () => {
       window.removeEventListener('message', onMessage);
       document.removeEventListener('click', onClick, true);

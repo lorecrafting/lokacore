@@ -45,6 +45,15 @@ export type Message = {
   // the lines /edit pushed that the last compile refused (file:line); a good compile clears them
   unconfirmed?: { key: string; at: string }[];
   placeholders?: Record<string, string>; // each `~` key's file:line, from the compile (/line)
+  timings?: Timings; // the last compile's, kept like the rest: the editor tells them apart by `at`
+};
+/** One compile's milliseconds: the compile, then its push or write (a refusal: its notice). */
+export type Timings = {
+  at: number;
+  compile: number;
+  publish: number;
+  kind: 'prose' | 'structural' | 'refusal';
+  sha256?: string; // a structural edit's artifact: the Book's `ready` names it when loaded
 };
 
 /** `mix loka.lint`'s findings (`rel: words`, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */

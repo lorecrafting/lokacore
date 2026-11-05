@@ -88,7 +88,13 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
     for (let i = 0; i < 100 && !ready(); i++) await settle(50);
     assert.ok(ready(), 'timed out');
   };
-  const messages: { text: Record<string, string>; said: string[]; compiled: boolean }[] = [];
+  type Timings = { kind: string; compile: number; publish: number; sha256?: string };
+  const messages: {
+    text: Record<string, string>;
+    said: string[];
+    compiled: boolean;
+    timings?: Timings;
+  }[] = [];
   const stream = await (async function connect(): Promise<Response> {
     return fetch(`http://127.0.0.1:${port}/events`).catch(() => settle(50).then(connect));
   })();
@@ -116,6 +122,10 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   );
   await settle(400); // the compile that follows the quick push
   assert.equal(readFileSync(out, 'utf8'), first);
+  // Break: the editor's console has no timing for a prose edit, or files it as structural.
+  const prose = messages.at(-1)!.timings!;
+  assert.equal(prose.kind, 'prose');
+  assert.ok(prose.compile >= 0 && prose.publish >= 0);
   assert.deepEqual(messages.at(-1)!.text, { 'room.boathouse.description': 'line one' });
 
   const rest = read('protocol/fixtures/cartridge_rest_hash.json');
@@ -132,6 +142,11 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   });
   await until(() => messages.at(-1)!.text['room.boathouse.description'] === undefined);
   assert.equal(messages.at(-1)!.compiled, true);
+  // Break: a structural timing lacks the sha256 the Book's `ready` is matched against.
+  assert.deepEqual(
+    [messages.at(-1)!.timings!.kind, messages.at(-1)!.timings!.sha256],
+    ['structural', rest.sha256],
+  );
 
   await until(
     () => (messages.at(-1) as { lint?: string[] }).lint?.[0] === 'items/x.json: lint of rest.json',
@@ -143,6 +158,7 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   writeFileSync(join(src, 'rooms.json'), '{ }');
   await until(() => messages.at(-1)!.compiled === false);
   assert.match(messages.at(-1)!.said.join(), /kernel refuses/);
+  assert.equal(messages.at(-1)!.timings!.kind, 'refusal');
   // Break: the lint of the last good compile still shows, as if it read the refused source.
   assert.equal((messages.at(-1) as { lint?: string[] }).lint, undefined);
 
