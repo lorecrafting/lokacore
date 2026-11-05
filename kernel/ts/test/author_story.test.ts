@@ -225,7 +225,7 @@ test('knowledge at a beat: knows, may know (one choice of two), not yet', () => 
         set(d2, fa, '.choices.yes.steps[0].fact'), // one choice of two
         set(d2, fb, '.choices.yes.steps[0].fact'),
         set(d2, fb, '.choices.no.steps[1].fact'), // every choice
-        set(s1, fc, '.on_end.assign[0].fact'),
+        set(d2, fc, '.on_end.assign[0].fact'), // no choice scopes it
         { from: s1, to: t, path: '.on_end.steps[0].topic', op: 'topic.grant' },
         set(r1, fd, '.steps[0].fact'), // only in beat 2
         set(r1, fa, '.steps[1].fact'),
@@ -248,7 +248,7 @@ test('knowledge at a beat: knows, may know (one choice of two), not yet', () => 
 });
 
 // Break: Pacing counts a node bound twice in a part twice, marks a part at half the median thin,
-// misses the thin part, or does not list it first.
+// takes the lower middle of an even count as the median, misses the thin part, or does not list it first.
 test('pacing: words per part over its bound nodes, the thin part first', () => {
   const [x, y, z, w] = ['x', 'y', 'z', 'w'].map((k) => ref('room', k));
   const beat = (part: number, n: number, nodes: string[]) => ({ part, n, status: 'built', nodes });
@@ -270,5 +270,11 @@ test('pacing: words per part over its bound nodes, the thin part first', () => {
       ['C', 90, false],
       ['D', 45, false], // half the median (90) is not below it
     ],
+  );
+  // the median is the upper middle part of an even count: 90 here, not 40
+  const fewer = pacing({ ...s, words: { ...s.words, [w]: 40 } });
+  assert.deepEqual(
+    fewer.filter((p) => p.thin).map((p) => p.title),
+    ['B', 'D'],
   );
 });

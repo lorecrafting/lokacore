@@ -18,6 +18,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { after, test } from 'node:test';
 import { serve } from '../play/live.ts';
 import { story } from '../play/story.ts';
+import { wordsByNode } from '../play/story_counts.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const dir = mkdtempSync(join(tmpdir(), 'loka-story-'));
@@ -207,6 +208,12 @@ test('words by node from the text keys it names; choices by dialogue', () => {
   assert.equal(words[ref('room', 'attic')], 2);
   assert.equal(choices[ref('dialogue', 'greet')], 2);
   assert.equal(choices[ref('dialogue', 'hub')], 1);
+});
+
+// Break: a key one definition names twice counted twice, or a `~` line counted as a word.
+test('words by node count each named key once and skip a ~ line', () => {
+  const defs = new Map([['rooms/a', { name: 'k1', description: 'k1', note: 'k2' }]]);
+  assert.deepEqual(wordsByNode(defs, { k1: 'one two', k2: 'three\n~' }), { 'rooms/a': 3 });
 });
 
 // Break: `then: end` drawn as an edge to a dialogue named end, a `then` dropped, or a
