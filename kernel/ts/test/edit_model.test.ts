@@ -68,6 +68,16 @@ test('deleting a missing key has no undo; a key set over keeps its place', () =>
   assert.deepEqual(doc, { a: 1, b: { c: 9 }, d: 3 });
 });
 
+// Break: the doc holds the op's own object, so a card that edits its draft afterwards, or a later
+// nested edit to an undo value, changes the file with no op and no undo.
+test("an op's value is copied into the file", () => {
+  const draft = { c: 1 };
+  const doc: { b?: { c: number } } = {};
+  change(doc, [{ path: ['b'], value: draft }]);
+  draft.c = 2;
+  assert.deepEqual(doc, { b: { c: 1 } });
+});
+
 // Break: a refused op leaves the ops before it applied, so a half edit is saved.
 test('a change with a refused op puts back the ops before it', () => {
   const doc = { a: 1, l: ['x'] };

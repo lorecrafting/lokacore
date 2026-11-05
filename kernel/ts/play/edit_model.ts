@@ -42,7 +42,8 @@ function parent(doc: unknown, op: Op): [Box, Step] {
 /** Applies one op to `doc` in place. */
 export function apply(doc: unknown, op: Op) {
   const [at, last] = parent(doc, op);
-  if (op.delete !== true) at[last] = op.value;
+  if (op.delete !== true)
+    at[last] = structuredClone(op.value); // the doc never shares an op's object
   else if (Array.isArray(at)) at.splice(last as number, 1);
   else delete at[last];
 }
