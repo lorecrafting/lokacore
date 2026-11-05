@@ -7,29 +7,29 @@ defmodule Loka.ContentFoodTest do
     file = "items/loaf.json"
 
     cases = [
-      {file, &put_in(&1, ["edible", "amount"], 0), ["items/loaf.edible.amount"]},
+      {file, &put_in(&1, ["edible", "amount"], 0), ["areas/hub/items/loaf.edible.amount"]},
       {file, &put_in(&1, ["edible", "amount"], 9_007_199_254_740_992),
-       ["items/loaf.edible.amount"]},
-      {file, &put_in(&1, ["edible", "resource"], "unknown"), ["items/loaf.edible"]},
-      {file, &put_in(&1, ["edible", "resource"], "hp"), ["items/loaf.edible"]},
+       ["areas/hub/items/loaf.edible.amount"]},
+      {file, &put_in(&1, ["edible", "resource"], "unknown"), ["areas/hub/items/loaf.edible"]},
+      {file, &put_in(&1, ["edible", "resource"], "hp"), ["areas/hub/items/loaf.edible"]},
       # amount alone is refused by the schema pair (loka-kgd.209)
       {file, &update_in(&1, ["edible"], fn e -> Map.delete(e, "resource") end),
-       ["items/loaf.edible.resource"]},
+       ["areas/hub/items/loaf.edible.resource"]},
       {"liquids/water.json", &Map.merge(&1, %{"resource" => "unknown", "amount" => 1}),
        ["liquids/water.resource"]},
-      {file, &Map.put(&1, "container", true), ["items/loaf.edible"]},
-      {file, &Map.put(&1, "slot", "hand"), ["items/loaf.slot"]},
+      {file, &Map.put(&1, "container", true), ["areas/hub/items/loaf.edible"]},
+      {file, &Map.put(&1, "slot", "hand"), ["areas/hub/items/loaf.slot"]},
       {file, &put_in(&1, ["edible", "narration"], "missing.line"),
-       ["items/loaf.edible.narration"]},
+       ["areas/hub/items/loaf.edible.narration"]},
       {"resources.json", &put_in(&1, ["resources", "mv", "regen", "by_position", "standing"], 0),
-       ["items/loaf.edible"]},
+       ["areas/hub/items/loaf.edible"]},
       {"cartridge.json",
        &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "food") end),
-       ["items/loaf.edible"]}
+       ["areas/hub/items/loaf.edible"]}
     ]
 
     for {file, change, paths} <- cases do
-      changed = change.(JSON.decode!(File.read!(Path.join(dir, file))))
+      changed = change.(JSON.decode!(File.read!(Loka.ContentSource.path(dir, file))))
 
       regen =
         if get_in(changed, ["edible", "resource"]) == "hp",

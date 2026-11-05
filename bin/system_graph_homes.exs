@@ -38,7 +38,8 @@ defmodule SystemGraph.Homes do
         uniq: true,
         into: %{} do
       files =
-        for g <- ["*/#{map}/*.json", "*/#{map}.json"], do: Path.join([root, "cartridges", g])
+        for g <- ["*/#{map}/*.json", "*/areas/*/#{map}/*.json", "*/#{map}.json"],
+            do: Path.join([root, "cartridges", g])
 
       {r,
        files

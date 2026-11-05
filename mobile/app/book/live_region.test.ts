@@ -80,7 +80,7 @@ test('each batch holds only the lines new since the last screen', () => {
 // their own shorts, so they never merge; this copy gives both the same one.
 test('two equal buys on a shop page are each read in full', () => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-shared-short-'));
-  const item = join(dir, 'items/candle_02.json');
+  const item = join(dir, 'areas/economy_law/items/candle_02.json');
   cpSync(fileURLToPath(new URL('../../../cartridges/toolbox_showcase', import.meta.url)), dir, {
     recursive: true,
   });

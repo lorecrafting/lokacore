@@ -5,7 +5,11 @@ defmodule Loka.ContentServicesTest do
   # copy here, with their stock, cask, fact and actions. Every number is set in this file.
   setup_all do
     dir = Loka.ContentSource.copy("cartridges/toolbox_showcase")
-    put = fn rel, f -> File.write!(Path.join(dir, rel), JSON.encode!(f.(read(dir, rel)))) end
+
+    put = fn rel, f ->
+      File.write!(Loka.ContentSource.path(dir, rel), JSON.encode!(f.(read(dir, rel))))
+    end
+
     open = %{"op" => "all", "items" => []}
 
     put.("resources.json", fn r ->
@@ -69,6 +73,8 @@ defmodule Loka.ContentServicesTest do
       })
     )
 
+    File.mkdir_p!(Path.join(dir, "services"))
+
     for {name, action, price, benefit} <- [
           {"kitchen_meal", "eat_kitchen_meal", 2,
            %{
@@ -120,7 +126,7 @@ defmodule Loka.ContentServicesTest do
     %{dir: dir}
   end
 
-  defp read(dir, rel), do: JSON.decode!(File.read!(Path.join(dir, rel)))
+  defp read(dir, rel), do: JSON.decode!(File.read!(Loka.ContentSource.path(dir, rel)))
 
   # Breaks: source compilation accepts impossible/nonfinite service funding, arbitrary benefits or mismatched provider stock.
   # Each case names the diagnostic path it must hit, so an unrelated showcase failure cannot pass it.
@@ -136,9 +142,10 @@ defmodule Loka.ContentServicesTest do
       {"npcs/cook.json",
        &update_in(&1, ["resource_starts"], fn r -> Map.delete(r, "pennies") end),
        "services/kitchen_meal.currency"},
-      {"npcs/hob.json", &Map.put(&1, "services", ["kitchen_meal"]), "npcs/hob.services"},
+      {"npcs/hob.json", &Map.put(&1, "services", ["kitchen_meal"]),
+       "areas/hub/npcs/hob.services"},
       {"npcs/cook.json", &update_in(&1, ["services"], fn r -> [hd(r) | r] end),
-       "npcs/cook.services"},
+       "areas/homestead/npcs/cook.services"},
       {"resources.json", &put_in(&1, ["resources", "meal_stock", "gain"], 1),
        "services/kitchen_meal.benefit.stock"},
       {"services/kitchen_room.json", &Map.put(&1, "narration", "unknown.line"),
@@ -166,7 +173,7 @@ defmodule Loka.ContentServicesTest do
       {"dialogues/aldous_lesson.json",
        &put_in(&1, ["choices", "learn", "steps"], [
          %{"op" => "fact.assign", "fact" => "bed_paid", "value" => true}
-       ]), "dialogues/aldous_lesson.choices.learn.steps[0].fact"}
+       ]), "areas/combat/dialogues/aldous_lesson.choices.learn.steps[0].fact"}
     ]
 
     for {file, change, path} <- mutations do
