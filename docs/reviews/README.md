@@ -20,6 +20,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: an open conversation re-words an edited line; stale `~` map by line count (PR #625, loka-wfrgk.19)](2026-11-05-loka-wfrgk.19-review.md): **APPROVE WITH NOTES**
 - [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
 - [Review: Editor E4a, edit model, schema walker, registry and strict gate (PR #642, loka-wfrgk.11)](2026-11-05-e4a-edit-model-review.md): **APPROVE WITH NOTES**
+- [Review: Editor E3b, map edits in the left column (PR #644, loka-wfrgk.7)](2026-11-05-e3b-map-edits-review.md): **CHANGES REQUIRED**
 - [Review: Editor E3a, the always-on map (PR #641, loka-vduxr.52)](2026-11-05-e3a-map-review.md): **CHANGES REQUIRED**
 - [Review: Editor E2, the three-column shell (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-review.md): **CHANGES REQUIRED**
 - [Review: Editor E2 shell, fix round and owner walk (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-fable-review.md): **APPROVE WITH NOTES**
