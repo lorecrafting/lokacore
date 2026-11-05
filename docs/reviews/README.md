@@ -14,6 +14,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Story map S1, the story model (PR #620, loka-wfrgk.18)](2026-11-05-story-map-s1-review.md): **APPROVE WITH NOTES**
 - [Review: author panel lint covers .scene and .cut (PR #630, loka-vduxr.50)](2026-11-05-scene-lint-review.md): **CHANGES REQUIRED**
 - [Review: retire hunger and thirst (PR #618, loka-vduxr.61)](2026-11-05-retire-hunger-review.md): **APPROVE WITH NOTES**
+- [Review: resident `mix loka.compile --serve` for the editor (loka-wfrgk.16)](2026-11-05-resident-compiler-review.md): **APPROVE WITH NOTES**
 - [Review: replay of failed and unknown commits, and a test hang (PR #627, loka-vduxr.42, loka-votey)](2026-11-05-replay-failed-unknown-review.md): **CHANGES REQUIRED**
 - [Review: scene@1 opening scene, `on {start: true}` (PR #622, loka-g5hh.3)](2026-11-05-opening-scene-review.md): **APPROVE WITH NOTES**
 - [Review: a death outside a fight shows the dead page, then Let go (PR #634, loka-kgd.210)](2026-11-05-offfight-death-review.md): **CHANGES REQUIRED**

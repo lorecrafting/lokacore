@@ -76,7 +76,9 @@ defmodule Loka.Content do
   """
   @spec placeholder_lines(binary(), Path.t()) :: %{String.t() => String.t()}
   def placeholder_lines(bytes, dir) do
-    index = Loka.Content.SourceLines.index(dir)
+    held = held(bytes, dir)
+    # no `~`, no source index: it is most of a resident preview compile's time
+    index = if held == [], do: %{}, else: Loka.Content.SourceLines.index(dir)
 
     # an inline `{"prose": "~"}` over lines: its words' own line, not its field's
     prose =
@@ -85,7 +87,7 @@ defmodule Loka.Content do
         else: &1["path"]
       )
 
-    for {key, d} <- held(bytes, dir),
+    for {key, d} <- held,
         %{"rel" => rel, "line" => line} when is_binary(rel) <- [
           Loka.Content.Explain.Place.of(%{d | "path" => prose.(d)}, index)
         ],
