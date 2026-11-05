@@ -1,4 +1,4 @@
-# Status line: design rulings for loka-15g, loka-kgd.7 and loka-x6t.63
+# Status line: design rulings for loka-15g, loka-kgd.7, loka-x6t.63 and loka-x6t.134
 
 Decided, one pass, before the prologue stacks hunger, thirst, cold, tiredness and bleeding at once (beats 9 to 41). The spec is [Conditions details](../system/book-ui.md#conditions-details); this record holds the reasons. No new component, token or page type: the status icon row ([StatusIcon.tsx](../../mobile/app/book/StatusIcon.tsx)), its Tooltip and disc, and the Character page carry it all.
 
@@ -9,22 +9,60 @@ Decided, one pass, before the prologue stacks hunger, thirst, cold, tiredness an
 | Short form (kgd.7) | Bleeding leaves the text line and becomes a status icon, the debuff look. The line keeps only the sky glyph and weather, position and pools. No word is abbreviated | Conditions are already icons; bleeding was the one text item. An icon replaces the whole line, so nothing needs a short spelling |
 | Bleeding's icon | Hold tip `statusTip`-shaped ("bleeding, 37s remaining"); its name is the bleeding line's parts joined by ", ", then the polarity and action ("bleeding, 37s remaining, 1 HP each 60s, debuff, opens Character"), as every icon name joins. No countdown ring until `BleedingView` carries a duration (PM protocol item); the presenter never back-computes one | The screen reader keeps every fact the old line said. A ring from a guessed duration would show a wrong share |
 | Character page | Keeps the full bleeding and condition lines, unchanged | The full list lives in one place |
-| Cap (15g) | Up to six icons show; seven or more show five and a +N disc. Same on every width | Six 44 px boxes take 294 px of the 328 px at 360 px; seven take 344. "First two" was written for text items and is superseded |
+| Cap (15g) | Up to six icons show; seven or more show five and a +N disc. Same on every width | "First two" was written for text items and is superseded. Widths: [x6t.134](#below-the-line-smaller-drawn-loka-x6t134) |
 | Precedence | Bleeding, then debuffs, then neutral, then buffs; projected (canonical) order within each group | The threats stay visible when the disc swallows the rest. `kind` is projected, so the presenter has no thresholds and the order is stable |
 | +N disc | Tap opens Character (unchanged). Hold, hover or focus shows the Tooltip listing the hidden labels in row order; its name is "+2 more, fed, refreshed, opens Character" | Reuses Tooltip; no popover or new component |
 | Announcing | A new condition is announced by its log narration only, through the one polite live region. The row adds no announcement | Announcements keep one source |
 | Motion | An arrival behind the disc gets no pop, nor does an icon revealed from behind it. An icon pushed behind the disc leaves without the expiry fade, which stays reserved for an ending. Reduced motion: no pop (unchanged). Flashes off: unchanged, a scale is not a luminance change | The pop means "new" and the fade "ended"; neither a reveal nor a push is |
 | Contrast | Buff glyph `fg` on `card` 12.2 / 12.6 / 10.3 / 9.5 (light / dark / dawn / dusk); debuff glyph `bg` on `fg` 13.1 / 13.8 / 11.5 / 11.0; neutral glyph `dim` on `card` 4.9 / 5.9 / 5.3 / 5.1; debuff border `danger` on `bg` 8.4 / 8.1 / 7.4 / 7.4; ring arc `fg` 13.1 / 13.8 / 11.5 / 11.0, track `dim` 5.3 / 6.4 / 5.9 / 5.9. The disc edge (`line` on `bg`, 1.35 to 1.53) is under 3:1 by design | The glyph and the debuff's solid fill tell the icons apart, not the edge |
-| Icon frame (x6t.63) | The 28 px disc (`size.statusIcon`) in a 44 px box, the ring outside it. A glyph is single-colour vector line art in a centred 16 px area, 1.5 px stroke, round caps and joins, in the look's ink; each a distinct silhouette; no text, letters or emoji | One frame for the family; ink from the look keeps every palette's contrast |
+| Icon frame (x6t.63) | Superseded by [x6t.134](#below-the-line-smaller-drawn-loka-x6t134) | |
 | First icons | Bleeding, hungry, thirsty, cold, tired (the prologue's five); then the showcase's fed and refreshed; then drawn buff, debuff and neutral fallbacks for any other label | What a player meets first |
-| Wait for icons? | No. The build ships on the placeholders (debuff '−' for bleeding). Drawing the family is a separate exploration: escalated to the PM for a Fable designer | A new icon family has no precedent in the system |
-| Icon naming | Open: how a status names its icon is a schema gap for the PM (perhaps a name from a closed Book set, as treatments are chosen). Not ruled here | Keying on cartridge text keys (`byLabel`) does not scale |
+| Wait for icons? | Superseded by [x6t.134](#below-the-line-smaller-drawn-loka-x6t134): the owner asked for drawn icons (2026-11-04) | |
+| Icon naming | Ruled in [x6t.134](#below-the-line-smaller-drawn-loka-x6t134) | |
 | Spirit and reverie | Keep hiding the whole status row, the bleeding icon included | [Spirit state](spirit-state-rulings.md); reverie as specified |
 
 ## Slice tests
 
-- At 360 px (galaxyS25), Standard size, the five prologue states (bleeding, hungry, thirsty, cold, tired) and a position: the status line is one line and the row shows five icons, bleeding first.
+- At 360 px (galaxyS25), Standard size, the five prologue states (bleeding, hungry, thirsty, cold, tired) and a position: the status line is one line and the row under it shows five icons, bleeding first.
 - Seven statuses: five icons and "+2"; the disc's name lists the two hidden labels. Red control: cap at seven.
 - A buff arriving while the row is full: no pop; a debuff arriving pushes a buff behind the disc with no fade.
 - Seven statuses down to six: the revealed icon shows without a pop.
 - Spirit state and reverie draw no bleeding icon.
+
+## Below the line, smaller, drawn (loka-x6t.134)
+
+Owner, 2026-11-04 (paraphrased): put the status icons below the status line, make them smaller, and draw icons that show what each status is, not placeholders. No new component, token or page type; `size.statusIcon` changes.
+
+| Question | Ruling | Why |
+|---|---|---|
+| Position | The row is the last child of the status block: line, experience rule, then the icons, then "save not confirmed" when pending. Centred in the page column, no added margin: each 44 px box's own air (11 px above and below the disc) is the spacing. With no icon showing (the last fade done) the row takes no height. The line moves 44 px when the first icon arrives or the last fade ends, with no animated height. The Tooltip still opens above its icon, now over the status line | Owner's ask. The experience rule belongs to the line it underlines. A reserved empty row is the gap the owner would see most often. The tip never takes a touch, so covering the line costs nothing |
+| Size | Disc 22 px (`size.statusIcon`, was 28), glyph area 14 px (`size.statusIcon − space.md`, no new token), the box stays 44 px (`size.touch`) in both axes, columnGap 0 so the boxes abut and never overlap; no hitSlop. The ring follows the disc: 22 + 2 × (2 + 1) = 28 px, the rise card's ring too. "+N" stays `type.label` (11 px): one digit fits the 22 px disc; two digits may touch its edge, accepted | Smaller to the eye, the same to the thumb (WCAG 2.5.8, BOOK-UI-COMPONENTS touch rule). Six boxes take 264 px of the 328 px at 360 px (16 px footer padding); seven take 308, so the cap is for clutter, not width, and stays six |
+| Drawings | Hand-authored SVG path `d` strings, one file in the Book (`mobile/app/book/statusGlyphs.ts`), keyed by the label text key, drawn by Skia `Path` (already installed; Gradient.tsx precedent), stroke only, in the look's ink. No new dependency (`react-native-svg` is not installed) | One family in one place; Skia already loads on native and web |
+| Drawing frame | viewBox 0 0 24 24 drawn at 14 px; stroke 2.5 units (about 1.5 px), `fill: none`, round caps and joins; all geometry, stroke included, inside 3 to 21; at most four strokes; a distinct outline at 14 px; no letters, digits, emoji or fill. One family: the same stroke, corner rounding and weight on every icon | Matches the old 1.5 px line at the smaller size; a 3-unit margin keeps the stroke off the disc edge |
+| Naming (schema) | The Book maps the projected `label` text key to a drawing; keys sharing a motif map to one drawing (`condition.cold`, `condition.chilled`). Bleeding is fixed in the Book. A label with no drawing gets its polarity fallback. **Not a contract change**: `label` is already in ConditionView. `ponytail:` upgrade to an `icon` name on StatusDefinition (a contract change, normal reviewer) if two statuses need one label's key differently or a second author arrives | Smallest option with one author and about forty labels. Supersedes "byLabel does not scale": the fallback makes a miss safe, and a check (below) makes it visible |
+| Fallbacks | Buff: one upward chevron `M7 14l5-5 5 5`; debuff: one downward chevron `M7 10l5 5 5-5`; neutral: a ring `M7 12a5 5 0 1 0 10 0a5 5 0 1 0 -10 0`. The +N disc keeps its text | A plain sign of polarity, never a letter |
+| Contrast | Unchanged: the ink and fills are the same, so the figures above hold. Each stroke is a graphic, needing 3:1 (WCAG 1.4.11); the lowest is the neutral `dim` on `card`, 4.9 | |
+| Motion | Pop and fade unchanged; reduced motion and Flashes off unchanged. The row's height change is not animated | |
+| Screen reader | Names, tips and labels unchanged; the drawing is `aria-hidden` (no `accessibilityLabel`), as the placeholder text was | The name already says what the status is |
+
+### Drawer brief
+
+Drawing the family is a separate artistic task for the Fable designer (PM routes it). Deliverable: the path strings in `mobile/app/book/statusGlyphs.ts` to the frame above, and one Storybook story showing every drawing in each look, light and dark, at 360 px. First the prologue five, then the rest. Motifs are suggestions; a distinct silhouette at 14 px wins.
+
+- **Prologue.** bleeding: a large drop and a small one falling from a short slash. hungry: an empty bowl, side view, a spoon across it. thirsty: an empty tumbler, two dry dashes over its rim. cold (and chilled): a six-armed snowflake. tired: a closed eye, three lashes down.
+- **Debuffs.** parched: cracked ground under a small sun. poisoned: a round vial, bubbles rising. burning: a flame. shocked: a lightning bolt. stunned: three small stars on an arc. wet: one drop over a ripple. soaked: a drop over two wave lines. overheated: a thermometer with heat lines. windburnt: three swept wind lines. afraid: a wide eye, small pupil, tremble marks. cursed: an inward spiral. hushed: a finger across closed lips. scarred: a line crossed by stitches. gored: a curved horn. bruised: a blotch with a smaller one inside. notched: a blade with a V in its edge. wanted: a pinned notice. word_travels: arcs spreading from a dot.
+- **Buffs.** fed and well_fed: the hungry bowl, full, a steam curl. hearty: a heart. refreshed: a two-leaf sprout. well_rested: a crescent moon and a star. blessed: a halo with rays. mighty and might: two stacked upward chevrons. inspired: a four-point spark. warded: a shield. warm: a small sun.
+- **Neutral.** hidden: an eye with a slash. disguised: a half mask. hound_dream: a paw print.
+- **Never in the row** (statuses on things or NPCs): spoiling, rot, growing, growing_croft, withered, ruin, weathering, hen_fed, spent, furious. No drawing.
+
+### Slice tests (x6t.134)
+
+- No status: nothing under the experience rule; the block's height equals the old line alone. One status: the row under the rule. Red control: reserve the row's height when empty.
+- Each box measures 44 × 44 and boxes do not overlap; the disc 22. At 360 px six icons sit on one row.
+- A mapped label draws its path; an unmapped buff, debuff and neutral label draw their fallbacks; bleeding draws its own drawing.
+- The drawing is hidden from the screen reader; every icon name is unchanged (the existing name tests pass untouched).
+- The rise card's ring at 28 px.
+
+### Proposed check
+
+A test that lists every status label in the cartridges and fails on one that has no drawing and is not on a short "never in the row" or "fallback on purpose" list, so a new status is drawn or knowingly left to its fallback.

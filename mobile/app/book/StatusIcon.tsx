@@ -102,10 +102,12 @@ export const ringFraction = (c: Condition, time: number) =>
 
 /**
  * The status icon row: one round, graphic-only icon per status (book-ui.md, Conditions details).
- * - Use: above the status line.
+ * - Use: below the status line and its experience rule; no height while no icon shows.
  * - Rules: a tap opens Character; a hold, hover or focus shows a Tooltip; cap, order and ring are
- *   Conditions details. A drawn glyph (loka-x6t.63): one-colour line art in the look's ink, a centred
- *   16 px area of the 28 px disc, 1.5 px stroke, round caps and joins, distinct, no letters or emoji.
+ *   Conditions details. A 22 px disc in a 44 px box, boxes abutting (no gap, no hitSlop). Its
+ *   drawing, keyed by label (statusGlyphs.ts), is a Skia stroke path in the look's ink: viewBox 24,
+ *   drawn in the centred 14 px area (size.statusIcon − space.md), stroke 2.5 units, round caps and joins, no fill, inside 3 to 21,
+ *   aria-hidden; no letters or emoji. No drawing: the polarity fallback (status-line-rulings.md).
  * - States: bleeding (first, debuff look, no ring); buff; debuff; neutral; permanent; overflow
  *   (six show, seven or more show five and a +N disc whose tip lists the rest); held; focused; locked
  *   (pictures, not pressable); ring full, near empty, draining. Pops on arrival, fades on expiry;

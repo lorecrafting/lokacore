@@ -73,7 +73,7 @@ const skyText = (p: StatusProps) =>
  * (book-ui.md, World and status entry); no say icon in single-player (book-ui.md, Word bar).
  * - Use: under the footer on every page.
  * - Rules: at most two lines, nothing dropped: too wide, the pools take the second line whole
- *   (the only break falls before hp); bleeding is the first status icon above (book-ui.md
+ *   (the only break falls before hp); bleeding is the first status icon below (book-ui.md
  *   Conditions details). The glyph and pools never shrink. The pools are one unbreakable
  *   run: no-break spaces as text, never a margin, so the shown words lead the button's name. A
  *   gap, not a dot, sets the pools apart.
