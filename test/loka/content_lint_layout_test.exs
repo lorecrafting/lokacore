@@ -16,7 +16,7 @@ defmodule Loka.ContentLintLayoutTest do
 
   defp room(exits), do: %{"exits" => Map.new(exits, fn {way, to} -> {way, %{"to" => to}} end)}
 
-  # Breaks: a room nothing reaches and nothing is kept in passes, a room kept by an NPC is
+  # Breaks: a room nothing reaches and nothing is kept in passes, a room kept by an NPC or population is
   # called an orphan, or a room file mid-edit (broken JSON) crashes the whole lint.
   test "orphan room: an area room no exit reaches, unless something is kept there", %{
     tmp_dir: dir
@@ -32,6 +32,7 @@ defmodule Loka.ContentLintLayoutTest do
            ]
 
     assert plant(dir, Map.put(files, "npcs/hermit.json", %{"room" => "old_well"})) == []
+    assert plant(dir, Map.put(files, "populations/bats.json", %{"home" => "old_well"})) == []
     File.write!(Path.join(dir, "areas/hollow/rooms/broken.json"), "{")
     assert plant(dir, Map.put(files, "npcs/hermit.json", %{"room" => "old_well"})) == []
   end

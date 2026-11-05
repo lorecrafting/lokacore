@@ -1,4 +1,4 @@
-# size: allow 550, one case per starter kind and refusal; the area placement cases join them
+# size: allow 553, one case per starter kind and refusal; the area placement cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -254,7 +254,9 @@ defmodule Loka.ContentStartersTest do
     assert {:ok, _, _} = Loka.Content.compile(dir)
 
     File.write!(Path.join(dir, "layout.json"), ~s([{"room":"start","y":0,"z":0}]))
-    assert {:error, "layout.json: every" <> _} = Starters.write(dir, "text", "hello")
+
+    assert {:error, "layout.json: every row needs a number x, y and z: fix it first"} =
+             Starters.write(dir, "text", "hello")
   end
 
   # Breaks: layout demanding a plain room file when every room is in a bundle.
@@ -447,13 +449,15 @@ defmodule Loka.ContentStartersTest do
   test "--area, a new area and --from an area room write into areas/<area>/", %{tmp_dir: tmp} do
     run = fn args -> ExUnit.CaptureIO.capture_io(fn -> Mix.Tasks.Loka.New.run(args) end) end
     run.(~w(--cwd #{tmp} cartridge mine areas marsh rooms reeds --from marsh east))
-    run.(~w(--cwd #{tmp} rooms bog --area marsh items rope --area marsh mine))
+    run.(~w(--cwd #{tmp} rooms bog --area marsh items rope --area marsh rooms w --area m mine))
     run.(~w(--cwd #{tmp} rooms ford --from start north --area marsh mine))
     dir = Path.join(tmp, "mine")
 
     assert read(dir, "areas/marsh/rooms/marsh.json")["exits"] == %{"east" => %{"to" => "reeds"}}
     assert read(dir, "areas/marsh/rooms/reeds.json")["exits"] == %{"west" => %{"to" => "marsh"}}
+
     assert read(dir, "areas/marsh/rooms/bog.json")["exits"] == %{}
+    assert read(dir, "areas/m/rooms/w.json")["exits"] == %{}
     assert read(dir, "areas/marsh/items/rope.json")["location"]["room"] == "bog"
     assert read(dir, "areas/marsh/rooms/ford.json")["exits"] == %{"south" => %{"to" => "start"}}
     assert read(dir, "rooms/start.json")["exits"] == %{"north" => %{"to" => "ford"}}
@@ -467,9 +471,10 @@ defmodule Loka.ContentStartersTest do
     before = snapshot(dir)
     File.write!(Path.join(tmp, "x.json"), "{}")
 
-    assert_raise Mix.Error, ~r/^mix loka.new: --area: an area is lowercase/, fn ->
-      run.(~w(--cwd #{tmp} rooms x --area ../.. mine))
-    end
+    bad =
+      "mix loka.new: --area: an area is lowercase letters, digits and _, 64 at most (got ../..)"
+
+    assert_raise Mix.Error, bad, fn -> run.(~w(--cwd #{tmp} rooms x --area ../.. mine)) end
 
     assert_raise Mix.Error,
                  "mix loka.new: no rooms in areas/fen yet: bin/loka new areas fen first",
