@@ -31,8 +31,8 @@ function cartridge(ash = 0, den = false, luxCooldown = 0) {
     if (den) edit('actions/flamma.json', (j) => (j.policy = { op: 'not', item: j.policy }));
     if (luxCooldown) edit('actions/lux.json', (j) => (j.cooldown = luxCooldown));
     edit('resources.json', (j) => (j.resources.ash.start = ash));
-    edit('rooms/crypt.json', (j) => delete j.dark_description);
-    edit('items/lantern.json', (j) => (j.location.room = 'crypt'));
+    edit('areas/magic/rooms/crypt.json', (j) => delete j.dark_description);
+    edit('areas/magic/items/lantern.json', (j) => (j.location.room = 'crypt'));
     return compiled(dir);
   } finally {
     rmSync(dir, { recursive: true });
