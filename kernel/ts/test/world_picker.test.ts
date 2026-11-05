@@ -102,37 +102,27 @@ test('/world lists real worlds, refuses names that are paths, and makes one as b
 test('after a switch the restarted watcher writes into the new world only', async (t) => {
   const { dir, a, env } = worlds(t);
   const port = 20000 + Math.floor(Math.random() * 12000);
-  const watcher = (...args: string[]) => {
-    const run = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, ...args], {
-      env: {
-        ...env,
-        LOKA_DEV_CARTRIDGE: join(dir, 'out/current.json'),
-        LOKA_AUTHOR_PORT: `${port}`,
-      },
-    });
-    t.after(() => run.kill());
-    return { run, exited: new Promise<number | null>((done) => run.on('exit', done)) };
-  };
-  const up = async () => {
-    for (let i = 0; i < 100; i++)
-      if (
-        await ask(port, '/world').then(
-          () => true,
-          () => false,
-        )
-      )
-        return;
+  // bin/loka dev itself, so its restart on 75 with the remembered world is under test too.
+  const dev = spawn(`${ROOT}bin/loka`, ['dev', a, '--watch'], {
+    env: { ...env, LOKA_DEV_CARTRIDGE: join(dir, 'out/current.json'), LOKA_AUTHOR_PORT: `${port}` },
+    detached: true,
+  });
+  t.after(() => process.kill(-dev.pid!));
+  const current = () =>
+    ask(port, '/world').then(
+      (r) => r.body.current,
+      () => undefined,
+    );
+  const now = async (name: string) => {
+    for (let i = 0; i < 200; i++)
+      if ((await current()) === name) return;
       else await new Promise((r) => setTimeout(r, 50));
-    assert.fail('timed out');
+    assert.fail(`never on ${name}`);
   };
-  const first = watcher(a, '--watch');
-  await up();
+  await now('a');
   assert.equal((await ask(port, '/world', { name: 'b' })).status, 200);
-  assert.equal(await first.exited, 75); // bin/loka dev restarts on 75
+  await now('b');
   assert.equal(readFileSync(join(dir, 'out/world'), 'utf8'), join(dir, 'worlds/b'));
-  watcher('--watch'); // what bin/loka dev runs next: the remembered world
-  await up();
-  assert.equal((await ask(port, '/world')).body.current, 'b');
   // Break: the guard still rooted at a (in-process state carried over): a's file changes.
   const change = { file: 'rooms/start.json', was: sha256(ROOM), ops: [{ path: ['x'], value: 1 }] };
   assert.equal((await ask(port, '/change', change)).status, 200);
