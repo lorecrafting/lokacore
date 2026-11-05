@@ -155,13 +155,17 @@ defmodule Loka.Content do
   def new(dir, kind, name, from), do: new(dir, kind, name, from, fn _, _ -> :ok end)
 
   @doc """
-  `new/4` calling `before_write.(path, old bytes or nil)` before each file it writes; `scene`'s
-  `from` is its NPC (Loka.Content.Starters.Scene).
+  `new/4` calling `before_write.(path, old bytes or nil)` before each file it writes, its own
+  file in `areas/<area>/` when `area` is given; `scene`'s `from` is its NPC
+  (Loka.Content.Starters.Scene).
   """
-  def new(dir, "scene", key, npc, before_write) when is_binary(npc),
+  def new(dir, kind, name, from, before_write, area \\ nil)
+
+  def new(dir, "scene", key, npc, before_write, nil) when is_binary(npc),
     do: Loka.Content.Starters.Scene.write(dir, key, npc, before_write)
 
-  defdelegate new(dir, kind, name, from, before_write), to: Loka.Content.Starters, as: :write
+  def new(dir, kind, name, from, before_write, area),
+    do: Loka.Content.Starters.write(dir, kind, name, from, before_write, area)
 
   @doc "The kinds `new/4` knows."
   defdelegate kinds(), to: Loka.Content.Starters

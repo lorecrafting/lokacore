@@ -191,14 +191,16 @@ defmodule Loka.ContentStartersFreshTest do
     # A new area bundle's room joins the map.
     assert {:ok, _} = Starters.write(dir, "areas", "moor")
     assert Enum.any?(read(dir, "layout.json"), &(&1["room"] == "moor"))
-    assert Path.wildcard(Path.join(dir, "rooms/*.json")) == [Path.join(dir, "rooms/yard.json")]
+    # A room made --from an area room joins that room's area folder.
+    assert Path.wildcard(Path.join(dir, "rooms/*.json")) == []
+    assert File.exists?(Path.join(dir, "areas/b/rooms/yard.json"))
     assert {:ok, _, _} = Loka.Content.compile(dir)
     # A rerun on an area folder's room is that file's rerun: no root copy, and what the author cut
     # stays cut.
     edit(dir, "areas/b/rooms/far.json", &Map.delete(&1, "description"))
     assert {:ok, []} = Starters.write(dir, "rooms", "far")
     refute Map.has_key?(read(dir, "areas/b/rooms/far.json"), "description")
-    assert Path.wildcard(Path.join(dir, "rooms/*.json")) == [Path.join(dir, "rooms/yard.json")]
+    assert Path.wildcard(Path.join(dir, "rooms/*.json")) == []
   end
 
   # Breaks: a stack trace from an areas file whose top level is not an object.

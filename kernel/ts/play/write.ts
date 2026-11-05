@@ -169,10 +169,9 @@ const loka = (args: string[]) =>
     ),
   );
 async function create(t: Tree, { kind, name, from, area }: Sent): Promise<Answer> {
-  if (area !== undefined) refuse(400, 'a new file in an area waits for area starters (S3)');
   const fromOk = from === undefined || (named(from?.room) && named(from?.direction));
-  if (!named(kind) || !named(name) || !fromOk)
-    refuse(400, 'kind, name, from.room and from.direction: [a-z0-9_]+');
+  if (!named(kind) || !named(name) || !fromOk || !(area == null || named(area)))
+    refuse(400, 'kind, name, area, from.room and from.direction: [a-z0-9_]+');
   t.busy++;
   try {
     const before = t.snapshot();
@@ -180,6 +179,7 @@ async function create(t: Tree, { kind, name, from, area }: Sent): Promise<Answer
       kind,
       name,
       ...(from ? ['--from', from.room, from.direction] : []),
+      ...(area ? ['--area', area] : []),
       t.root,
     ]);
     if (refused !== undefined) refuse(400, refused);

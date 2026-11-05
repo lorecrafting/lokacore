@@ -353,11 +353,6 @@ test('each refusal is a 400 that names its reason', async (t) => {
     ['/edit', edit(0, '{'), 'no such line'],
     ['/edit', edit(1.5, '{'), 'no such line'],
     ['/edit', edit(5, ''), 'no such line'],
-    [
-      '/new',
-      { kind: 'room', name: 'b', area: 'north' },
-      'a new file in an area waits for area starters (S3)',
-    ],
   ];
   const got = [];
   for (const [url, sent] of cases) got.push(await ask(url, sent));
@@ -378,7 +373,8 @@ test('/new refuses a name that is a flag before it runs anything, and journals w
   writeFileSync(
     join(bin, 'mise'),
     '#!/bin/sh\ntouch "$0.ran"\n[ "$6" = taken ] && { echo "noise\nrooms/taken.json exists" >&2; exit 1; }\n' +
-      'for root; do :; done\nsleep 0.5\necho "{}" > "$root/rooms/$6.json"\n' +
+      'for root; do :; done\nsleep 0.5\nd=$root; [ "$7" = --area ] && d=$root/areas/$8\n' +
+      'mkdir -p "$d/rooms"; echo "{}" > "$d/rooms/$6.json"\n' +
       '[ "$7" = --from ] && echo "{}" > "$root/areas/north/rooms/$8.json"\nsleep 0.5\n',
   );
   chmodSync(join(bin, 'mise'), 0o755);
@@ -388,6 +384,8 @@ test('/new refuses a name that is a flag before it runs anything, and journals w
   assert.equal((await ask('/new', { kind: 'room', name: '--cwd' })).status, 400);
   const from = { room: 'a', direction: 'North' };
   assert.equal((await ask('/new', { kind: 'room', name: 'b', from })).status, 400);
+  // Break: an area name that climbs out of the cartridge reaching mix as `--area ../x`.
+  assert.equal((await ask('/new', { kind: 'room', name: 'b', area: '../x' })).status, 400);
   assert.equal(existsSync(join(bin, 'mise.ran')), false);
   // Break: loka.new's refusal answered as another status, or by other words than its last line.
   const taken = { status: 400, body: 'rooms/taken.json exists' };
@@ -413,6 +411,11 @@ test('/new refuses a name that is a flag before it runs anything, and journals w
   const from2 = { room: 'gate', direction: 'north' };
   const hall = await ask('/new', { kind: 'room', name: 'hall', from: from2 });
   assert.deepEqual(hall.body.files, ['areas/north/rooms/gate.json', 'rooms/hall.json']);
+  // Break: area not passed as --area, or its new folder left out of the journal, so undo keeps it.
+  const den = await ask('/new', { kind: 'room', name: 'den', area: 'south' });
+  assert.deepEqual([den.status, den.body.files], [200, ['areas/south/rooms/den.json']]);
+  assert.equal((await ask('/undo', { id: den.body.id })).status, 200);
+  assert.equal(existsSync(join(src, 'areas/south/rooms/den.json')), false);
 });
 
 test('POST /hold sets held on the stream and its release writes what was parked', async (t) => {
