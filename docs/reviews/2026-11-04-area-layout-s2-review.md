@@ -63,3 +63,20 @@
 ## Verdict
 
 CHANGES REQUIRED. Findings 1 and 2 are logic changes to the script, so they take a fix round ([small should-fix](../WORKFLOW.md#small-should-fix)). For finding 1, a PM amendment to §9 is the alternative disposition.
+
+## Re-check at deec81fde
+
+The fix commits were reviewed against findings 1-3 and their direct callers. CI at `deec81fdef68f9570af8c321993cfe4a480becad`: ci, graph-diff and book-e2e were all success (`gh run list --commit`).
+
+- **Hash.** `mix loka.compile` at head gave rc 0 and content_hash `9511cb35ac7b…` (in full: `9511cb35ac7b199931c437d09422c36fc43f91b36c54ac9130070ebe72299c00`). It equals the fixture. The diff under `protocol/`, `kernel/ts/src` and `docs/spec` is empty, and the cartridge changes are 501 R100 renames.
+- **Rerun.** I ran the head `bin/area_split.py` with `bin/area_split_toolbox_showcase.json` on clean origin/main. It printed 501 moves and the same hash, with rc 0. Its `git diff --name-status` was identical to the branch.
+- **Finding 1, resolved.** `wat` is in `areas/fell_road`. All 43 NPCs and all 21 dialogues are in areas, and `wizard_errand` is in `areas/magic`.
+  - Of the 55 root reactions, 52 touch no area. `wat_at_gate` and `tam_hears_wat` touch fell_road and low_wardle.
+  - The root items, liquids, quests and statuses each touch zero areas or two or more (e.g. `letter`: fell_road and low_wardle).
+  - Mutant: I changed the placement check `len(touched(n)) == 1` to `>= 1`. The compile then failed with `area_crossing` errors, so the script fails closed.
+- **Finding 2, resolved.** The script takes `<cartridge> <rooms.json>` and prints the first differing definition.
+- **Finding 3, resolved.** `test/test_helper.exs:37` uses `Starters.home/2`.
+- **Accepted deviation.** The script compares the hash against its own pre-move compile, not against the fixture. A generic cartridge has no fixture, and `content_showcase_test.exs:9` still pins the showcase fixture in CI.
+- **Small should-fix, made in place (`beed387a8`).** 12 code spans in `docs/showcase/{cause-and-effect,combat-district,economy-law-district,homestead-district,hub-and-first-districts}.md` still cited root paths the migration had moved. I prefixed each with `areas/<area>/` and checked that every target exists. The docs link check reported 0 broken links.
+
+Verdict: **APPROVE**.
