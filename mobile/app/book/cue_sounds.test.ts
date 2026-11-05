@@ -208,6 +208,13 @@ test('a level under a page curl is felt once the curl ends; a blow there is not'
   assert.deepEqual(felt(), []);
   await wait(80);
   assert.deepEqual(felt(), [['haptic', 'medium']]);
+  const clock = performance.now;
+  performance.now = () => 1000; // a curl 1ms from its end still holds it
+  curlFor(1);
+  playCue({ name: 'level' });
+  performance.now = clock;
+  assert.deepEqual(felt(), [['haptic', 'medium']]);
+  await wait(10);
   g.bookDevice = undefined;
 });
 
@@ -217,6 +224,7 @@ test('a death or the Book going cancels a held level haptic', async () => {
   g.bookDevice = [];
   curlFor(40);
   playCue({ name: 'level' });
+  playCue({ name: 'level' }); // a second held one: the first is still cancelled
   playCue({ name: 'death', fight: false });
   const off = hearCues();
   curlFor(40);

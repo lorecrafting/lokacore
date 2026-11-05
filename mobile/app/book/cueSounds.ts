@@ -13,7 +13,10 @@ let waiting: ReturnType<typeof setTimeout> | undefined;
 const feel = (kind: HapticKind, held = false) => {
   const wait = curlEnds - performance.now();
   if (wait <= 0) haptic(kind);
-  else if (held) waiting = setTimeout(() => feel(kind, true), wait);
+  else if (held) {
+    clearTimeout(waiting); // one level felt per curl, and every one cancellable
+    waiting = setTimeout(() => feel(kind, true), wait);
+  }
 };
 
 export const playTurn = () => play('pageTurn');

@@ -28,6 +28,7 @@ const skill = (key: string, acquired: boolean, level?: number) => ({
   level,
 });
 const QUICK = motion.quick.duration;
+const late: Cue = { name: 'level', ids: ['later'] };
 const fight = { combat: { encounter_id: 'e' } };
 
 // Each row breaks if that cue's trigger, or its sound, changes. [cue, was, now, sound].
@@ -355,20 +356,19 @@ test('a pending or held level outlives a page turn and a chapter card, then play
   assert.deepEqual(names(step(turned.q, [], 1300 + QUICK).fired), ['level']);
   const both = step(step(r.q, [{ name: 'level' }], 1200, true).q, [], 1200 + QUICK);
   assert.deepEqual([names(both.fired), both.q.pending], [['level'], undefined]);
-  const held = step(step(QUIET, [{ name: 'level' }], 1000, true).q, [], 1100, true);
-  assert.deepEqual(names(step(held.q, [], 1100 + QUICK).fired), ['level']);
-  const card = motion.card.duration;
+  const held = step(step(QUIET, [{ name: 'level' }], 1000, true).q, [blow(2), late], 1100, true);
+  assert.deepEqual(held.q.held, [blow(2), late]); // the later level replaces the held one
   for (const [before, with_] of [
     [[{ name: 'level' }], []],
     [[], [{ name: 'level' }]],
   ] as Cue[][][]) {
     const c = step(step(r.q, before, 1150).q, [{ name: 'chapter' }, ...with_], 1200);
     assert.deepEqual(names(c.fired), ['chapter']);
-    assert.deepEqual(step(c.q, [], 1199 + card).fired, []);
-    assert.deepEqual(names(step(c.q, [], 1200 + card).fired), ['level']);
+    assert.deepEqual(step(c.q, [], 1199 + motion.card.duration).fired, []);
+    assert.deepEqual(names(step(c.q, [], 1200 + motion.card.duration).fired), ['level']);
   }
   const over = step(step(QUIET, [{ name: 'chapter' }], 1000).q, [{ name: 'level' }], 1100);
-  assert.deepEqual(names(step(over.q, [], 1000 + card).fired), ['level']);
+  assert.deepEqual(names(step(over.q, [], 1000 + motion.card.duration).fired), ['level']);
 });
 
 // Breaks: a second turn lets the first arriving page's cue play on the page after it.

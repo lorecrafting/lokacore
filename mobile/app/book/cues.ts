@@ -144,8 +144,11 @@ export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
   s.merged = { ...q.merged };
   const fired: Cue[] = [];
   s.held = [...(turned ? q.held.filter(isLevel) : q.held), ...arriving];
-  // A later level replaces a pending one, as it does in the slot.
-  if (turned) s.pending = s.held.some(isLevel) ? undefined : kept(q.pending);
+  if (turned) {
+    const level = s.held.filter(isLevel).at(-1); // a later level replaces an earlier one, as in the slot
+    s.held = s.held.filter((c) => !isLevel(c) || c === level);
+    s.pending = level ? undefined : kept(q.pending);
+  }
   const death = s.held.find((c) => c.name === 'death');
   if (death) return { q: s, fired: fall(s, death, now) };
   // Nothing plays over a turn: a level kept over it waits out the hold, not the old beat.
@@ -155,11 +158,11 @@ export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
   s.held = [];
   const chapter = cues.find((c) => c.name === 'chapter');
   if (s.card && now < s.until) {
-    s.pending = cues.find(isLevel) ?? s.pending;
+    s.pending = cues.filter(isLevel).at(-1) ?? s.pending;
     return { q: s, fired };
   }
   s.card = false;
-  if (chapter) return { q: holdCard(s, now, cues.find(isLevel)), fired: [chapter] };
+  if (chapter) return { q: holdCard(s, now, cues.filter(isLevel).at(-1)), fired: [chapter] };
   if (!s.playing || s.until <= now) {
     const next = s.pending;
     s.playing = s.pending = undefined;

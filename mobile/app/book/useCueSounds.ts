@@ -21,7 +21,10 @@ export function useCueSounds(s: Screen, turn: number, resumes?: number, riffle?:
   // Waking is the exception: only the bed returns, and the room's piece is spent (plan 14).
   useEffect(() => {
     // The fatal card is up: the bed waits for waking, not the room before it (a death off a fight keeps it).
-    if (s.ended && s.died !== fell.current) return fight('cut');
+    if (s.ended && s.died !== fell.current) {
+      fight('cut');
+      return;
+    }
     const woke = s.died !== fell.current;
     fell.current = s.died;
     const theme = chapter !== undefined && chapter !== read.current;
