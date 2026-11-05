@@ -40,14 +40,12 @@ class Usage extends Error {}
 
 /** The explanation of step `ordinal` of `trace` (cartridge.md Rule explainer lists the evidence). */
 export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {}) {
-  const { entries } = trace;
-  if (!Number.isInteger(ordinal) || ordinal < 1 || ordinal > entries.length)
-    throw new Usage(`ordinal ${ordinal} is not in 1..${entries.length}`);
+  const entry = entryAt(trace, ordinal);
   const { cartridge, ruleOf } = marked(c);
   const r = prefix(cartridge, trace, ordinal);
-  const command: Command = entries[ordinal - 1]!.data.command;
+  const command: Command = entry.data.command;
   const before = r.world;
-  const decide = (cart: Cartridge) => step(r, cart, entries[ordinal - 1]!, ordinal);
+  const decide = (cart: Cartridge) => step(r, cart, entry, ordinal);
   const d = decide(cartridge);
   const rules = cartridge.reactions ?? {};
   const probe = `coverage.m${Object.keys(rules).length}`; // no rule's, and never authored (marked)
@@ -80,6 +78,13 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
   };
 }
 
+// The last row at `ordinal`: an unknown commit's follow-up repeats it with the outcome (ADR-075 §4).
+function entryAt({ entries }: Trace, ordinal: number) {
+  const e = entries.findLast((e) => e.data.ordinal === ordinal);
+  if (!e) throw new Usage(`ordinal ${ordinal} is not in 1..${entries.at(-1)?.data.ordinal ?? 0}`);
+  return e;
+}
+
 // Step `ordinal` (`e`) decided on a copy of `r` (replay advances the Run it is given) with `cart`.
 function step(r: Run, cart: Cartridge, e: Trace['entries'][number], ordinal: number) {
   const d = replayEntry({ ...r, world: { ...r.world, cartridge: cart } }, e).decision;
@@ -101,7 +106,7 @@ function prefix(cartridge: Cartridge, trace: Trace, ordinal: number) {
     head.ids.seed,
     head.ids.kernel_version,
   );
-  for (const e of entries.slice(0, ordinal - 1)) replayEntry(r, e);
+  for (const e of entries) if (e.data.ordinal < ordinal) replayEntry(r, e);
   return r;
 }
 

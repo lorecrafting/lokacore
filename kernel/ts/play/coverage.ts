@@ -58,12 +58,13 @@ export function replay(
   );
   const differs = (n: number) => new Error(`replay differs at ordinal ${n}`);
   if (header(r) !== `${recorded[0]}\n`) throw differs(0);
-  for (const e of entries) {
+  for (const [i, e] of entries.entries()) {
     if (e.data.ordinal === upTo) return;
     const before = r.world;
     const { trace: t, decision } = replayEntry(r, e);
-    if (line(t) !== `${recorded[r.ordinal]}\n`) throw differs(r.ordinal);
-    each?.(before, decision, r.ordinal);
+    // line i + 1, not ordinal: an unknown entry's follow-up repeats its ordinal (ADR-075 §4)
+    if (line(t) !== `${recorded[i + 1]}\n`) throw differs(e.data.ordinal);
+    each?.(before, decision, e.data.ordinal);
   }
 }
 

@@ -92,11 +92,24 @@ export function decideReplay(r: Run, command: Command, at = r.revision, receipte
   return out;
 }
 
-/** A trace entry replayed: recorded committed, a rejection keeps its stored receipt's form. */
-export const replayEntry = (
+/**
+ * A trace entry replayed: recorded committed, a rejection keeps its stored receipt's form. A
+ * failed or unknown entry is decided but not adopted, and an unknown one leaves its ordinal to the
+ * follow-up that resolves it; its commit is rebuilt from the state alone (ADR-075 §4, loka-vduxr.42).
+ */
+export function replayEntry(
   r: Run,
   e: { ids: { revision: number }; data: { command: Command; commit: { state: string } } },
-) => decideReplay(r, e.data.command, e.ids.revision, e.data.commit.state === 'committed');
+) {
+  const { state } = e.data.commit;
+  if (state !== 'failed' && state !== 'unknown')
+    return decideReplay(r, e.data.command, e.ids.revision, state === 'committed');
+  const { world, revision, ordinal } = r;
+  const out = decideReplay(r, e.data.command, e.ids.revision);
+  Object.assign(r, { world, revision }, state === 'unknown' && { ordinal });
+  out.trace.data.commit = { state, cause: state === 'failed' ? 'storage_error' : 'no_outcome' };
+  return out;
+}
 
 function evaluated(
   r: Run,

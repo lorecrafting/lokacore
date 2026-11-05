@@ -11,15 +11,20 @@ import { entity, fresh, ref } from '../../../kernel/ts/test/dream_fixture.ts';
 
 const tool = (name: string) => new URL(`../../../kernel/ts/play/${name}`, import.meta.url).pathname;
 
-/** A real host save: an elapsed tick, then `moves` invoked, its stored rows written where the tools read them. */
+/**
+ * A real host save: an elapsed tick unless `tick` is false (replay refuses elapsed beside a
+ * storage fault), then `moves` invoked, its stored rows written where the tools read them.
+ */
 type Host = ReturnType<typeof elapsedHost>;
-function played(t: TestContext, moves: (a: Host) => object[]) {
+function played(t: TestContext, moves: (a: Host) => object[], tick = true) {
   const a = elapsedHost(),
     folder = mkdtempSync(join(tmpdir(), 'loka-refused-'));
   t.after(() => (a.sql.close(), rmSync(folder, { recursive: true })));
-  a.clock.wall += 20;
-  a.clock.mono += 20;
-  assert.equal(a.game.pulse().kind, 'ready');
+  if (tick) {
+    a.clock.wall += 20;
+    a.clock.mono += 20;
+    assert.equal(a.game.pulse().kind, 'ready');
+  }
   const replies = moves(a).map((m) => a.game.invoke(m as never));
   const artifact = join(folder, 'cartridge.json'),
     path = join(folder, 'trace.jsonl');
@@ -141,4 +146,62 @@ test('Why resolves a dream choice reached through idle real-elapsed ticks as the
   const out = JSON.parse(why.stdout);
   assert.equal(out.command, 'choose');
   assert.equal(out.outcome, 'choice_resolved');
+});
+
+// Breaks: replay adopts a failed or unknown entry's world, revision or ordinal, so a host trace
+// holding a storage fault differs, or coverage and Why misread its repeated ordinal.
+test('a failed and an unknown commit replay identically, and Why and coverage read past them', (t) => {
+  const move = (direction: string) => ({
+    action_key: 'move',
+    target_ids: [],
+    input: { direction },
+  });
+  const p = played(
+    t,
+    (a) => {
+      a.sql.exec(
+        'PRAGMA foreign_keys=ON; CREATE TABLE parent(id INTEGER PRIMARY KEY); CREATE TABLE child(id INTEGER REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+      );
+      for (const [kind, direction] of [
+        ['failed', 'north'],
+        ['lost', 'south'],
+      ] as const) {
+        a.fault.kind = kind;
+        a.fault.armed = true;
+        a.game.invoke(move(direction) as never);
+        assert.equal(a.game.pending(), true);
+        a.fault.reads = false;
+        assert.equal(a.game.pulse('active').kind, 'ready');
+      }
+      return [look];
+    },
+    false,
+  );
+  assert.deepEqual(
+    p.rows.slice(1).map((r) => {
+      const { data } = JSON.parse(r);
+      return [data.ordinal, data.command.payload.direction, data.decision.kind, data.commit.state];
+    }),
+    // The host retries the failed move once its storage answers again.
+    [
+      [1, 'north', 'accepted', 'unknown'],
+      [1, 'north', 'accepted', 'failed'],
+      [2, 'north', 'accepted', 'committed'],
+      [3, 'south', 'accepted', 'unknown'],
+      [3, 'south', 'accepted', 'committed'],
+      [4, undefined, 'accepted', 'committed'],
+    ],
+  );
+  const replay = () => p.run('main.ts', '--replay', p.path);
+  const same = replay();
+  assert.equal(same.status, 0, same.stderr);
+  assert.match(same.stdout, /replay: 6 commands identical/);
+  const covered = p.run('coverage.ts', p.path);
+  assert.equal(covered.status, 0, covered.stderr);
+  const why = (ordinal: number) => {
+    const r = p.run('why.ts', p.path, String(ordinal));
+    assert.equal(r.status, 0, r.stderr);
+    return JSON.parse(r.stdout).outcome;
+  };
+  assert.deepEqual([why(2), why(3), why(4)], ['moved', 'moved', 'looked']);
 });
