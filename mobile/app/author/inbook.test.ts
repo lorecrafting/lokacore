@@ -188,6 +188,9 @@ test('Cmd-Z puts back this page`s edits one per press, then says none are left',
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
   await page.locator('main').click();
+  await page.keyboard.press('ControlOrMeta+c');
+  await page.waitForTimeout(200);
+  assert.deepEqual(posted('/undo'), []); // Break: any Cmd chord puts back
   assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+z')), {
     note: 'put back a.loka:3',
   });
@@ -280,6 +283,15 @@ test('pushed messages mark unconfirmed lines and open the notice under a changed
 });
 
 // Breaks: a line with no field opens one anyway, or gives the generic note for a choice label.
+// Breaks: a refused save hides the watcher's reason behind a bare status.
+test('a refused save says the watcher`s reason', async () => {
+  answer = (path) => (path.startsWith('/line') ? [200, RAIN] : [400, 'Two lines say this.']);
+  await openFirst();
+  await page.keyboard.type('!');
+  await page.keyboard.press('Enter');
+  await noteSays('Two lines say this.');
+});
+
 test('a line with no field says why', async () => {
   answer = () => [400, 'a choice label: its key is its words'];
   await page.locator('p').first().dblclick();
