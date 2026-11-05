@@ -72,7 +72,9 @@ function useLevel(p: MapProps) {
   const all = map.levels(rooms);
   const sel = rooms.find((r) => r.ref === p.selected);
   const here = rooms.find((r) => r.ref === p.here);
-  const [z, setZ] = useState(() => sel?.at?.z ?? here?.at?.z ?? all[0] ?? 0);
+  const [z, setZ] = useState(() =>
+    map.levelOf(rooms, sel?.key, map.levelOf(rooms, here?.key, all[0] ?? 0)),
+  );
   const level = map.onLevel(rooms, z);
   const [ref, size] = useSize();
   const v = useView();
@@ -85,8 +87,8 @@ function useLevel(p: MapProps) {
     () => void (size.w && level.length && !v.view && v.set(fitted(z))),
     [size.w, level.length],
   ); // eslint-disable-line react-hooks/exhaustive-deps
-  useFollow(sel, z, size, v, toLevel);
-  useFollow(here, z, size, v, toLevel);
+  useFollow(rooms, sel, z, size, v, toLevel);
+  useFollow(rooms, here, z, size, v, toLevel);
   const centre = { x: size.w / 2, y: size.h / 2 };
   const zoom = (f: number) =>
     v.now.current &&
@@ -97,6 +99,7 @@ export type Level = ReturnType<typeof useLevel>;
 
 /** When `r` becomes the selected or current room: its level, and a pan only if it is off screen. */
 function useFollow(
+  rooms: MapRoom[],
   r: MapRoom | undefined,
   z: number,
   size: Size,
@@ -105,7 +108,8 @@ function useFollow(
 ) {
   useEffect(() => {
     if (!r?.at || !size.w || !v.now.current) return;
-    if (r.at.z !== z) toLevel(r.at.z, r.at);
+    const nz = map.levelOf(rooms, r.key, z);
+    if (nz !== z) toLevel(nz, r.at);
     else v.ease(map.show(v.now.current, size, r.at));
   }, [r?.ref, size.w > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 }
