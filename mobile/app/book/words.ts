@@ -1,4 +1,4 @@
-// size: allow 313, corpse names bind their victim (loka-kgd.203), the author hook (loka-vduxr.51)
+// size: allow 314, corpse names bind their victim (loka-kgd.203), the author hook (loka-vduxr.51, .53)
 // The app's own words for the kernel's codes (R6P Polish): what an accepted outcome says in the log
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
@@ -12,6 +12,7 @@ import type {
 } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
 import {
+  emoteForm,
   emoteSentence,
   fillSlots,
   lineSentence,
@@ -180,7 +181,7 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
 // A skipped combat turn (loka-x6t.30) names its status from engine line combat.skipped, actorless when
 // the player skipped; an NPC's emote (G9) words from the view's emote table; a liquid line adds its
 // level (pick.ts levelWords). A bound speaker's quotation reads `Nell says [to you], "..."` (book-ui.md).
-// The author preview's hook (panel.tsx; never set in a release): an authored line as shown, bound
+// The author preview's hook (panel.tsx; never set in a release): a line as shown (an engine line too), bound
 // or joined, with its text key, so an Alt-click on it names its source.
 export const worded: { note?: (words: string, key: string) => void } = {};
 export const lineWords = (
@@ -199,9 +200,9 @@ export const lineWords = (
   const cast = Object.values(t.participants ?? {});
   const word = (v: unknown) =>
     victimWords(text, view.entities.find((e) => e.name === v && cast.includes(e.id)) ?? {}, `${v}`);
-  const told =
-    (actor && emoteSentence(t, view.emotes, word, actor)) ||
-    lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);
+  const emote = actor && emoteSentence(t, view.emotes, word, actor);
+  const told = emote || lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);
+  if (told) worded.note?.(told, (emote && emoteForm(t, view.emotes)) || t.key);
   if (told) return told;
   if (t.key !== 'combat.skipped') {
     const said = fillSlots(text(t.key), t.bindings, word) + levelWords(t, text, view, was);

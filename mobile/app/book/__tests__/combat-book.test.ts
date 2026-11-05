@@ -111,6 +111,12 @@ export const game = (current: GameView): Game => ({
   pending: () => false,
   pendingInvocation: () => undefined,
   subscribe: () => () => {},
-  text: (key) => ({ 'npc.rat': 'a marsh rat', 'combat.result': 'The marsh rat falls.' })[key],
+  text: (key) =>
+    ({
+      'npc.rat': 'a marsh rat',
+      'combat.result': 'The marsh rat falls.',
+      'combat.title_you_attack': 'You attack {target}!',
+    })[key],
   lastNarration: () => undefined,
+  opener: () => ({ npc_id: 'rat', player: true }),
 });

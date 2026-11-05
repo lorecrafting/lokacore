@@ -37,20 +37,25 @@ export const numbers = () =>
   });
 
 /** The last compile's plain-words diagnostics; `undefined` until the watcher answers. */
+// the stream's message (kernel/ts/play/live.ts Message), the fields the panel reads
+type Message = { said: string[]; compiled: boolean; lint?: string[]; held?: boolean; pending?: number; unconfirmed?: { at: string }[] };
+
 export function useDiagnostics() {
   const [said, setSaid] = useState<string[]>();
   const [compiled, setCompiled] = useState(true);
   const [lint, setLint] = useState<string[]>();
+  const [hold, setHold] = useState<Pick<Message, 'held' | 'pending' | 'unconfirmed'>>({});
   useEffect(() => {
     let events: EventSource;
     let retry: ReturnType<typeof setTimeout> | undefined;
     const open = () => {
       events = new EventSource('/__author/events');
       events.onmessage = (e) => {
-        const message = JSON.parse(e.data) as { said: string[]; compiled: boolean; lint?: string[] };
+        const message = JSON.parse(e.data) as Message;
         setSaid(message.said);
         setCompiled(message.compiled);
         setLint(message.lint);
+        setHold({ held: message.held, pending: message.pending, unconfirmed: message.unconfirmed });
       };
       // a 502 while the watcher restarts closes the stream for good; only a network drop retries
       events.onerror = () => {
@@ -63,5 +68,5 @@ export function useDiagnostics() {
       events.close();
     };
   }, []);
-  return { said, compiled, lint };
+  return { said, compiled, lint, ...hold };
 }

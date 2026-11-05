@@ -237,6 +237,16 @@ test('a cut stays silent until the Book names the room again', async () => {
   assert.deepEqual(urlsOf(b.els), ['inn.m4a']);
 });
 
+// Breaks (book-ui.md, Falling; loka-dbtxr): a death outside a fight, cut after its waking view
+// named the room, leaves that room silent until another view.
+test('a death outside a fight cuts the room, then its bed returns', async () => {
+  const b = await browser();
+  b.gesture();
+  b.ambience('inn', undefined, true, 'woke');
+  b.fight('fell');
+  assert.deepEqual(urlsOf(b.els), ['inn.m4a']);
+});
+
 // Breaks: a treated scene keeps the bed, the weather or the music under its silence, or the room
 // stays silent after it (book-ui.md, Book treatments: Sound).
 test('a treated scene fades the bed, weather and music out; the room after it comes back', async (t) => {

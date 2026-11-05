@@ -91,7 +91,11 @@ test('combat page lists offered controls vertically below history in one scroll'
         shell: { confirm: (f) => f(), learned: { get: () => true } as never },
       }),
     );
-    assert.ok(drawn.some((n) => n.props?.accessibilityRole === 'header' && words(n) === 'Combat'));
+    assert.ok(
+      drawn.some(
+        (n) => n.props?.accessibilityRole === 'header' && words(n) === 'You attack a marsh rat!',
+      ),
+    );
     const controls = drawn.filter((n) =>
       ['Stand', 'Look', 'Flee', 'Flee north', 'Flee west'].includes(n.props?.accessibilityLabel),
     );
@@ -156,7 +160,7 @@ test('combat shows the running head, even over a Journal page', () => {
       }),
     );
     const lines = drawn.filter((n) => n.type === 'Text').map(words);
-    assert.ok(lines.includes('Combat'));
+    assert.ok(lines.includes('You attack a marsh rat!'));
     assert.equal(lines.filter((line) => line === head).length, 1);
   }
 });

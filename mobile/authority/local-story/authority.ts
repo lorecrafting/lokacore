@@ -11,6 +11,7 @@ import { corrupt, identityOf, load, reconcile, replace } from './store.ts';
 import type { Db, Meta } from './store.ts';
 import { chronicle } from './chronicle.ts';
 import { narration } from './narration.ts';
+import { opener } from './combat-receipt.ts';
 import { adopt, ids, token } from './save.ts';
 import type { Story } from './save.ts';
 import type { ElapsedStatus } from '../../packages/game-view/session.ts';
@@ -143,9 +144,7 @@ function opened(s: Story) {
     beforeToken: () => s.beforeToken ?? token(s),
     clockStatus: () => driver?.state() ?? { kind: 'ready' as const },
     invoke: (value: unknown) => invoke(s, value, driver),
-    onAdvance: (listener: typeof changed) => {
-      changed = listener;
-    },
+    onAdvance: (listener: typeof changed) => void (changed = listener),
     requestResume: (expected: string) => driver?.requestResume(expected),
     pulse: (mode: Pulse, expected: string) =>
       driver?.pulse(mode, expected) ?? { kind: 'ready' as const },
@@ -155,6 +154,7 @@ function opened(s: Story) {
     newGame: () => newGame(s),
     narration: (command_id?: string) => narration(s, command_id),
     chronicle: () => chronicle(s),
+    opener: (encounter_id: string) => opener(s, encounter_id),
     token: () => token(s), // the view freshness token of the world() now shown
   };
 }

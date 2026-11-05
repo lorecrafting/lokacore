@@ -11,9 +11,7 @@ import type {
 import { comings, lineText, replyLine, sayers } from './words.ts';
 import { actionContext, buttonsOf, intentOf } from './model.ts';
 
-/**
- * A tappable action: its text, the intent it sends, its freshness token and context (Book UI).
- */
+/** A tappable action: its text, the intent it sends, its freshness token and context (Book UI). */
 export type Button = {
   label: string;
   action_key: string;
@@ -57,6 +55,7 @@ import { days } from './chronicle.ts';
 import { holding, pressedAway, settle } from './recap.ts';
 import { end, fall, haunt, haunting, letGo, unheard, wake } from './spirit.ts';
 import { heard, type Said } from './heard.ts';
+import { keptTitle } from './combat-title.ts';
 
 function background(
   game: Game,
@@ -104,6 +103,7 @@ function narrate(
   s.combatLog.push(...combat);
   s.narrationId = last.command_id;
   if (last.died) fall(s, last.command_id);
+  if (last.died && away) away.from = Infinity; // a death ends the recap, as a room change does
   if (last.missed) s.deed = last; // a round's miss comes on the clock (book-ui.md, Fight music)
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
@@ -243,6 +243,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     combatLog: s.combatLog,
     said,
     chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
+    title: keptTitle(s, view.combat, text, game.opener),
     detail: (id: string) => s.details.get(id) ?? [],
     leave: (id: string) => leaveLog(s, id, game.view().view.choice?.speaker_id === id),
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),

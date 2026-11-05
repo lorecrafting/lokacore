@@ -5,7 +5,7 @@
 // inline, never export it) moves the artifact. With --watch, a change that only alters text
 // values (a `text.json` save at once, any other save after its compile) goes to the open page as
 // an overlay over the written artifact (play/live.ts): no reload, no replay.
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
@@ -97,28 +97,37 @@ function write(canonicalText: string, sha256: string, said: string[]) {
   pending = 0;
   live?.push({ text: {}, said, compiled: true, pending });
 }
-// The preview allows `~` placeholders; a release compile refuses them (mix loka.compile).
+// The preview allows `~` placeholders; a release compile refuses them (mix loka.compile). Not
+// spawnSync: the watcher answers /source, /events and writes while it runs.
 const compile = (artifact: string) =>
-  spawnSync(
-    'mise',
-    [
-      'exec',
-      '--',
-      'mix',
-      'loka.compile',
-      source,
-      artifact,
-      '--allow-placeholders',
-      '--json',
-      diagnostics(artifact),
-    ],
-    {
-      cwd: root,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'], // a launcher may have closed stdin (EBADF otherwise)
-    },
-  );
+  new Promise<{ status: number | null; stderr: string; error?: Error }>((done) => {
+    let stderr = '';
+    const run = spawn(
+      'mise',
+      [
+        'exec',
+        '--',
+        'mix',
+        'loka.compile',
+        source,
+        artifact,
+        '--allow-placeholders',
+        '--json',
+        diagnostics(artifact),
+        '--placeholders',
+        placeholders(artifact),
+      ],
+      { cwd: root, stdio: ['ignore', 'ignore', 'pipe'] }, // a launcher may have closed stdin (EBADF otherwise)
+    );
+    let error: Error | undefined;
+    run.stderr.on('data', (chunk) => (stderr += chunk));
+    run.on('error', (e) => (error = e)); // `close` follows
+    run.on('close', (status) => done({ status, stderr, error }));
+  });
 const diagnostics = (artifact: string) => join(dirname(artifact), 'diagnostics.json');
+const placeholders = (artifact: string) => join(dirname(artifact), 'placeholders.json');
+const parsed = (file: string, none: unknown) =>
+  existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : none;
 // The last lint read older source, so it goes with the failed compile.
 let failed: string[] | undefined; // the last compile's lines, when it failed
 const notCompiled = (said: string[]) => {
@@ -126,16 +135,21 @@ const notCompiled = (said: string[]) => {
   live?.push({ said, compiled: false, lint: undefined });
 };
 
-function build(): boolean {
+async function build(): Promise<boolean> {
   const started = performance.now();
   const tmp = mkdtempSync(join(tmpdir(), 'loka-dev-'));
   try {
     const artifact = join(tmp, 'artifact.json');
-    const run = compile(artifact);
+    const read = saves;
+    const run = await compile(artifact);
+    // a save since (even inside the debounce) compiles next: these older words would undo its push
+    if (saves !== read) return false;
     // none written (mix crashed before it): the last build's cards must not stay up
-    const file = diagnostics(artifact);
-    live?.push({ diagnostics: existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : [] });
-    const said = `${run.stderr ?? ''}`.split('\n').filter((l) => /^(error|warning|info): /.test(l));
+    live?.push({
+      diagnostics: parsed(diagnostics(artifact), []),
+      placeholders: parsed(placeholders(artifact), {}),
+    });
+    const said = run.stderr.split('\n').filter((l) => /^(error|warning|info): /.test(l));
     for (const line of said) console.error(line);
     if (run.status !== 0) {
       if (!said.length) said.push(run.error?.message ?? run.stderr);
@@ -179,26 +193,39 @@ function lint() {
   });
 }
 
-const ok = build();
+// One compile at a time, in save order; a save while one waits is in the waiting one's source.
+let queue: Promise<unknown> = Promise.resolve();
+let waiting = false;
+let saves = 0;
+function enqueue() {
+  if (waiting) return;
+  waiting = true;
+  queue = queue
+    .then(() => {
+      waiting = false;
+      return build();
+    })
+    .then((ok) => ok && lint())
+    .catch((e) => console.error(`Not updated: ${(e as Error).message}`)); // a thrown build must not end the watch
+}
+let timer: ReturnType<typeof setTimeout> | undefined;
+// before the first compile: a save the moment its artifact lands is not lost while FSEvents starts
+if (flag === '--watch')
+  watch(source, { recursive: true }, (_, file) => {
+    if (file?.startsWith('checkpoints/')) return; // the page's own save, not content
+    saves++;
+    clearTimeout(timer);
+    // one build for an editor's burst of writes
+    timer = setTimeout(() => {
+      live!.seen(); // what changed outside the editor, before its compile
+      lints++;
+      quick();
+      enqueue();
+    }, 100);
+  });
+const first = build();
+queue = first.catch(() => {}); // a save during the first compile compiles after it
+const ok = await first;
 if (flag !== '--watch') process.exit(ok ? 0 : 1);
 if (ok) lint();
-let timer: ReturnType<typeof setTimeout> | undefined;
-watch(source, { recursive: true }, (_, file) => {
-  if (file?.startsWith('checkpoints/')) return; // the page's own save, not content
-  clearTimeout(timer);
-  // one build for an editor's burst of writes; a thrown build must not end the watch
-  timer = setTimeout(() => {
-    live!.seen(); // what changed outside the editor, before its compile
-    lints++;
-    quick();
-    // the page gets the quick words before the compile blocks this process (spawnSync)
-    setImmediate(() => {
-      try {
-        if (build()) lint();
-      } catch (e) {
-        console.error(`Not updated: ${(e as Error).message}`);
-      }
-    });
-  }, 100);
-});
 console.log(`Watching ${dir}`);

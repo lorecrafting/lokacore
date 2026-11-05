@@ -1,4 +1,4 @@
-// size: allow 658, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
+// size: allow 681, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
 // Toolbox row 4 on the compiled levelling sampler: rats grant 10 experience each, level 2 at 30
 // grants one point, Raise spends it, and the quest reward grants 20 (mechanics.md row 4).
 import assert from 'node:assert/strict';
@@ -29,7 +29,7 @@ import { key } from '../src/foundation/compose.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { levelsReached, levelUp, oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
-import { closing, levelAt } from '../src/mechanics/death/lines.ts';
+import { closing, say } from '../src/mechanics/death/lines.ts';
 import { type Joins, runDelayed } from '../src/mechanics/delayed.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { gameView } from '../src/view/view.ts';
@@ -631,16 +631,39 @@ test('an unchanged fact write takes no position', () => {
   assert.equal(emitted!.position, 1);
 });
 
-// Breaks: a level no rule answers, or another character's, pins the actor's level lines mid-receipt
-// ahead of later lines; or a death's penalty line jumps ahead of the death's own lines.
-test('level lines move up only for an answered level of the actor; a penalty line stays last', () => {
+// Breaks (book-ui.md, A level is never dropped; loka-g5hh.2.11): a level_reached rule that says
+// nothing still pins the level lines ahead of a later rule's line, so they no longer come last.
+test('a silent level rule leaves the level lines at the end, after a later line', () => {
+  const c = structuredClone(content) as any;
+  const rule = Object.values<any>(c.reactions).find((r) => r.on.level === 2);
+  rule.steps = rule.steps.filter((s: any) => s.op === 'fact.assign');
+  c.reactions.later = {
+    key: 'later',
+    on: { event: 'fact_changed', fact: { ...rule.steps[0].fact } },
+    steps: [{ op: 'narrate', text: 'levelling.level_three' }],
+  };
+  const { third } = cull(c);
+  assert.deepEqual(
+    lines(third)
+      .slice(-3)
+      .map((t: any) => t.key),
+    ['levelling.level_three', GAINED, LEVEL_UP],
+  );
+});
+
+// Breaks: another character's level pins the actor's level lines mid-receipt ahead of later lines;
+// or a death's penalty line jumps ahead of the death's own lines.
+test("level lines move up only for the actor's level; a penalty line stays last", () => {
   const w = holding(50);
   const reached = (character_id: string) =>
     ({ payload: { type: 'level_reached', character_id, level: 2 } }) as unknown as DomainEvent;
-  assert.equal(levelAt(w, w.character, reached(w.character), 3), 3);
-  assert.equal(levelAt(w, w.character, reached('someone'), 3), undefined);
-  const bare = holding(50, { ...content, reactions: {} });
-  assert.equal(levelAt(bare, w.character, reached(w.character), 3), undefined);
+  const at = (character_id: string) => {
+    const p: { narration: Text[]; levelAt?: number } = { narration: [{ key: 'a' } as Text] };
+    say(p, w.character, reached(character_id), [{ key: 'b' } as Text]);
+    return p.levelAt;
+  };
+  assert.equal(at(w.character), 1);
+  assert.equal(at('someone'), undefined);
   const death = { penalty: { experience: { narration: 'lost' } } };
   const dying = {
     ...w,

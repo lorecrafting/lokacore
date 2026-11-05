@@ -30,6 +30,7 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
         'road.title': 'The road',
         'shrine.title': 'The shrine',
         'npc.rat': 'a marsh rat',
+        'combat.title_you_attack': 'You attack {target}!',
         'combat.hit': 'You strike the marsh rat.',
         'combat.result': 'The marsh rat falls.',
         'combat.flee': 'You escape to the road.',
@@ -86,6 +87,7 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
       .map(words);
   return {
     texts,
+    game: g, // a test may change what the Game answers between draws
     footer: () => draw().some((n) => n.type?.name === 'Footer'),
     said: () => draw().find((n) => n.type?.name === 'Heard').props.said.text as string,
     control: (shown: string | RegExp) => control(draw(), shown),

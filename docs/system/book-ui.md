@@ -793,7 +793,7 @@ wash and removes the swell; Flashes off removes both, leaving the value, thud an
 
 **Level wash.** A level washes the paper once under the ink in the gilt colour, on whatever page shows, with no swell. It covers what `Page` draws, foot included; the running head and status row sit outside `Page` and stay unwashed, on every page. It shares the Flash limit with the blow wash; when both land together the level has it and the blow keeps value, thud and haptic. Reduced motion halves it; Flashes off removes it, leaving the gilt line, sound, haptic and experience rule.
 
-**A level is never dropped.** A level arriving while an S3 plays takes the pending slot from any other S3. A level in the same view as a foe falling leads: its note and haptic come first, the fight-won haptic yields, and the fanfare waits out the settle hold. The engine's level line comes before a `level_reached` reaction's own line, so an ability is named after the level that opened it. Not yet built: a chapter card or a page turn in the same beat still drops a pending level, a page curl can drop its haptic, and the level line moves ahead of later lines even when the `level_reached` rule's `when` fails or it says nothing.
+**A level is never dropped.** A level arriving while an S3 plays takes the pending slot from any other S3. A level in the same view as a foe falling leads: its note and haptic come first, the fight-won haptic yields, and the fanfare waits out the settle hold. The engine's level line comes before a `level_reached` reaction's own line, so an ability is named after the level that opened it. A page turn or a chapter card in the same beat holds a pending level until it ends, and a page curl holds the level's haptic to the curl's end. A `level_reached` rule whose `when` fails or that says nothing leaves the level line at the end.
 
 **Flash limit.** At most one full-page luminance change per second, never three in any second; a
 later blow or level in that second keeps the value, thud and haptic, so a flurry never peaks twice in a second.
@@ -872,6 +872,44 @@ deadline. A merged cue fires once.
 **Wind.** On an exposed World page, on the change to wind and once per room entry, the top outer corner's paper lifts twice; no ink moves, nothing under reduced motion.
 
 **Lever and latch.** A lever's completion is one clunk and a medium haptic, without page motion. An exit newly shown dries in the Footer, with a latch and a light haptic only when the player's own action opened it. Both read the event, never a label. A lever is a cartridge's authored custom event with the key `lever`.
+
+## Author mode (dev only)
+
+The `?dev=1` dev-cartridge page only ([author preview](cartridge.md#author-preview)); no player
+rule above changes, and nothing here is drawn by a component in `mobile/app/book/`: it is laid
+over the Book from `mobile/app/author/`, with its words there too. Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue);
+reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-rulings.md).
+
+- **Edit in place.** A click plays. A double-click on a line's words (not on a link or card in it)
+  turns that line into a field in its place, nothing reflowing, the double-clicked word selected,
+  captioned `<file>:<line>  Enter saves · Esc cancels`. It holds the source words unbound (slots
+  and `~` as written; a speaker-joined line only its quoted words). One line, soft-wrapped: Enter
+  or leaving the field saves, Esc cancels and returns focus to the line, no break is ever
+  inserted, a pasted break or tab is a space, unchanged words write nothing, an empty field stays
+  open saying `Empty. Write ~ to leave it unwritten.`
+- **Confirming.** The new words show at once; nothing marks the line while the compile runs. A
+  refused compile marks the line unconfirmed (accessible name adds `unconfirmed`) until a good
+  compile, and the console badge reads `The Book shows unconfirmed words (N)`, listing each
+  line's `file:line` and refusal.
+- **Put it back.** Cmd-Z (Ctrl-Z) outside a text field undoes this page's last prose edit; each
+  press goes one further back; no redo; nothing left says `Nothing of yours to put back.` Inside
+  a field it is the field's own undo. A refused put-back says `<file> changed since; not put back.`
+- **`~` lines** carry a margin mark (accessible name adds `still to write`); the line is
+  unchanged. `]` and `[` walk the page's `~` lines (wrapping), `}` and `{` every editable line;
+  the landed line scrolls into view and takes focus, and Enter opens its field. The jump never
+  leaves the page; elsewhere is the console's Still to write list. Counts are in the console:
+  `~ 2 of 5 here · 41 in cartridge`. No key fires in a text field (the say field too) or with a
+  modifier, Cmd-Z aside; the keys work from the Book frame and the panel.
+- **Changed on disk (409).** The field keeps the draft; under it: `Changed on disk since you
+  opened it.`, their words, and Keep mine (writes the draft over their line, found again) or Take
+  theirs; only Open source when their line is not found exactly once. It opens unasked when a
+  pushed change alters the field's line.
+- **Hold** shows in the panel header (a toggle and `Held · N waiting`), never in the Book;
+  leaving the page releases a Hold it set.
+- **No field.** A double-click on a line that is not words opens nothing; a note under it, until
+  the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
+  `The engine writes this line.`, else `Not a line of words. Alt-click opens its source.`
+- Nothing here animates (the scroll to a landed line is instant under reduced motion).
 
 ## Future boundaries
 
@@ -961,9 +999,13 @@ or words mark a round.
 Combat takes precedence over ordinary navigation until the encounter closes. **Opening.** The
 receipt that opens an encounter (a move's or Sleep's `engage`, Attack, a cast's fight-back)
 draws all of its narration in the combat log (and the World log), so the page opens with the engage line as its
-first log line, which names the foe ("You attack a boar!" / "A boar attacks you!", loka-kgd.202). No
-foe name, band phrase or target line sits above the log (owner 2026-11-02, loka-kgd.204): the log
-opens the page, and each live foe's **Cast a spell on** list ("Cast a spell on the goblin…") comes last among the cards. Your own bleeding and condition lines draw nowhere on the Combat page: they stay
+first log line, which names the foe ("You attack a boar!" / "A boar attacks you!", loka-kgd.202). The
+page title names who opened the fight, in the cartridge's words (`combat.title_you_attack` {target},
+`combat.title_attacks_you` {attacker}, each bound to the foe's short name as the engage line binds it; owner 2026-11-02, loka-kgd.204 notes: "title like 'You attack
+a boar!' / 'A boar attacks you!'"; loka-kgd.207). It is kept for the encounter, its closed page too, and
+reads **Combat** when the opener is unknown (an old save, a fallen pack opener after a reload, a
+cartridge without the keys or the foe's name words). Nothing else names the foe above the log: no foe
+name, band phrase or target line (owner 2026-11-02, loka-kgd.204); the log opens the page, and each live foe's **Cast a spell on** list ("Cast a spell on the goblin…") comes last among the cards. Your own bleeding and condition lines draw nowhere on the Combat page: they stay
 on the status icon row and Character, so a reader never takes your hunger for the raider's
 (pass-1 C2b, as loka-x6t.15). **Closure.** On
 every committed closure (opponent death, player death and inn return, successful Flee, any

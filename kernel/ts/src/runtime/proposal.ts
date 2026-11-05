@@ -21,7 +21,7 @@ import { sequence, triggered } from '../mechanics/reaction.ts';
 import { levelsReached, oneWrite } from '../mechanics/levelling/shared.ts';
 import { poolWriters } from '../mechanics/resource.ts';
 import { partings } from '../mechanics/escort/shared.ts';
-import { closing, levelAt } from '../mechanics/death/lines.ts';
+import { closing, say } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
@@ -58,7 +58,7 @@ type P = {
   applied: number;
   rng: World['state']['rng'];
   narration: Text[];
-  levelAt?: number; // the narration's length when the first level_reached was delivered
+  levelAt?: number; // the narration's length when a rule answering the actor's level_reached first spoke
   wokeAt?: number; // the narration's length when the first player's entity_died was delivered
   holders: Map<string, number>; // each status holder's, reaction fact row's, written pool's writer group
   // Each item the root command moved: its writer group (hs-1). ponytail: merge and joinEarlier do
@@ -207,7 +207,6 @@ const cause = (p: P, logical_time: number, id: string) => ({
 });
 
 function creditDelivery(p: P, next: Queued): Admitted | undefined {
-  p.levelAt ??= levelAt(p.world, p.command.payload.actor_id, next.cause, p.narration.length);
   if (next.cause.payload.type !== 'entity_died') return;
   if (!next.cause.payload.victim_definition) p.wokeAt ??= p.narration.length;
   const at = now(p);
@@ -272,7 +271,7 @@ function react(p: P, ran = false): Admitted | undefined {
       if (!own) continue;
       const delivered = admit('reaction', own);
       if (delivered.kind !== 'accepted') return delivered;
-      p.narration.push(...(delivered.narration ?? []));
+      say(p, p.command.payload.actor_id, next.cause, delivered.narration);
       p.group++;
       const base = cause(p, next.cause.logical_time, next.cause.id);
       const failed = join(p, delivered.delta.ops, delivered.events, base, depth, next.mint);

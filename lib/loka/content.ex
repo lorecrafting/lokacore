@@ -67,6 +67,33 @@ defmodule Loka.Content do
   """
   @spec placeholders(binary(), Path.t()) :: [map()]
   def placeholders(bytes, dir) do
+    for {_key, d} <- held(bytes, dir), do: d
+  end
+
+  @doc """
+  Each `placeholders/2` key => the `file:line` that wrote it, for the author preview's in-Book
+  editor: two `~` lines hold the same words, so only the compile knows which key is whose.
+  """
+  @spec placeholder_lines(binary(), Path.t()) :: %{String.t() => String.t()}
+  def placeholder_lines(bytes, dir) do
+    index = Loka.Content.SourceLines.index(dir)
+
+    # an inline `{"prose": "~"}` over lines: its words' own line, not its field's
+    prose =
+      &if(Map.has_key?(index, &1["path"] <> ".prose"),
+        do: "#{&1["path"]}.prose",
+        else: &1["path"]
+      )
+
+    for {key, d} <- held(bytes, dir),
+        %{"rel" => rel, "line" => line} when is_binary(rel) <- [
+          Loka.Content.Explain.Place.of(%{d | "path" => prose.(d)}, index)
+        ],
+        into: %{},
+        do: {key, "#{rel}:#{line}"}
+  end
+
+  defp held(bytes, dir) do
     keys =
       for {key, text} <- Map.get(JSON.decode!(bytes)["cartridge"], "text", %{}),
           text |> String.split("\n") |> Enum.any?(&(String.trim(&1) == "~")),
@@ -76,12 +103,14 @@ defmodule Loka.Content do
     written = written(keys, dir)
 
     for key <- Enum.sort(keys),
-        do: %{
-          "severity" => "error",
-          "code" => "placeholder_text",
-          "path" => Map.get(written, key, Source.at("text.json", [key])),
-          "data" => %{}
-        }
+        do:
+          {key,
+           %{
+             "severity" => "error",
+             "code" => "placeholder_text",
+             "path" => Map.get(written, key, Source.at("text.json", [key])),
+             "data" => %{}
+           }}
   end
 
   # Each inline word's generated key, at the source path that wrote it (text.json keys stay out).
