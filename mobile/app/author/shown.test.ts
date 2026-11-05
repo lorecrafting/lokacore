@@ -29,6 +29,7 @@ const view = {
   ],
   conditions: [{ label: 'status.cold', resource: 'cold', ends_at: 40 }],
   time: { label: 'dusk' },
+  map: { rooms: [{ id: 'r2' }], links: [], unexplored: [] },
   choice: {
     prompt: { key: 'choice.p' },
     choices: [{ choice_id: 'a', label: 'choice.a', available: true }],
@@ -56,12 +57,13 @@ const ids = {
 const words: Record<string, string> = { 'room.t': 'Cellar', 'npc.maud': 'Maud', 'choice.a': 'Yes' };
 
 // Breaks: an item listed among the people; a key shown where its words exist; a key with no words
-// lost; a quest's Ref passed through (an object as a React child blanks the panel, Book included).
+// lost; a visited room missing from the map's path or the current one counted as visited; a quest's Ref passed through (an object as a React child blanks the panel, Book included).
 test('the view reads with its words, a key standing in for a line with none', () => {
   const { offers: _, ...state } = shown(view, (k) => words[k], canon, ids, rooms);
   assert.deepEqual(state, {
     room: 'Cellar',
     here: 'c@1:room/r',
+    visited: ['c@1:room/other'],
     people: ['Maud'],
     held: ['item.lamp'],
     quests: [{ quest: 'lantern', state: 'active' }],

@@ -1,6 +1,7 @@
 // The shell's left column: the Hierarchy (every definition by kind, the current room marked, the
 // selection shared) and the map slot under it, its Map | Story segment (E3a and S2 fill them).
-import { MapPin, Play } from 'lucide-react';
+import { CircleAlert, MapPin, Play } from 'lucide-react';
+import { AreaMap, type MapProps } from './areamap.tsx';
 import type { Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import type { SetLayout } from './columns.tsx';
@@ -89,37 +90,65 @@ export function Hierarchy({
 }
 
 /** The map slot: Map | Story, both placeholders until E3a and S2; Story counts GET /story. */
-export function MapSlot({ layout, set, story }: { layout: Layout; set: SetLayout; story?: Story }) {
-  const views = ['map', 'story'] as const;
-  const todo = story && Object.values(story.todo).flat().length;
-  const unreached = story && Object.values(story.report.unreachable).flat().length;
+export function MapSlot({
+  layout,
+  set,
+  story,
+  refused,
+  ...m
+}: { layout: Layout; set: SetLayout; story?: Story; refused?: string } & Omit<
+  MapProps,
+  'story' | 'segment'
+>) {
+  const segment = <Segment layout={layout} set={set} />;
   return (
-    <section className="h-48 shrink-0 border-t p-2" aria-label="Map slot">
-      <div
-        role="radiogroup"
-        aria-label="Map or Story"
-        className="mb-2 inline-flex rounded-md border"
-      >
-        {views.map((v) => (
-          <button
-            key={v}
-            type="button"
-            role="radio"
-            aria-checked={layout.map === v}
-            className={`px-2 text-xs capitalize ${layout.map === v ? 'bg-accent' : ''}`}
-            onClick={() => set((l) => ({ ...l, map: v }))}
-          >
-            {v}
-          </button>
-        ))}
-      </div>
-      <p className="text-muted-foreground">
-        {layout.map === 'map'
-          ? 'The area map comes with E3a.'
-          : story
-            ? `${story.graph.nodes.length} definitions · ${story.graph.edges.length} links · ${todo} ~ · ${unreached} unreached`
-            : 'Waiting for the watcher.'}
-      </p>
+    <section
+      className="flex max-h-[calc(100%-2rem)] shrink-0 flex-col"
+      style={{ height: layout.slot }}
+      aria-label="Map slot"
+    >
+      {refused ? (
+        <div className="p-2">
+          {segment}
+          <p className="mt-2 flex items-center gap-1 truncate text-destructive">
+            <CircleAlert className="size-4 shrink-0" />
+            {refused}
+          </p>
+        </div>
+      ) : layout.map === 'map' && story ? (
+        <AreaMap story={story} segment={segment} {...m} />
+      ) : (
+        <div className="p-2">
+          {segment}
+          <p className="mt-2 text-muted-foreground">
+            {story ? counts(story) : 'Waiting for the watcher.'}
+          </p>
+        </div>
+      )}
     </section>
+  );
+}
+
+const counts = (story: Story) =>
+  `${story.graph.nodes.length} definitions · ${story.graph.edges.length} links · ${Object.values(story.todo).flat().length} ~ · ${Object.values(story.report.unreachable).flat().length} unreached`;
+
+/** The Map | Story segment (Esc in the map returns here). */
+function Segment({ layout, set }: { layout: Layout; set: SetLayout }) {
+  const views = ['map', 'story'] as const;
+  return (
+    <div role="radiogroup" aria-label="Map or Story" className="inline-flex rounded-md border">
+      {views.map((v) => (
+        <button
+          key={v}
+          type="button"
+          role="radio"
+          aria-checked={layout.map === v}
+          className={`px-1 text-xs capitalize ${layout.map === v ? 'bg-accent' : ''}`}
+          onClick={() => set((l) => ({ ...l, map: v }))}
+        >
+          {v}
+        </button>
+      ))}
+    </div>
   );
 }
