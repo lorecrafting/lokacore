@@ -55,6 +55,7 @@ export const screenFrom = (
     confirmedRead: undefined,
     ended: undefined,
     fell: false,
+    spirit: undefined,
     ...shell,
   };
 };
@@ -130,6 +131,7 @@ export const pageStory = (
           press={fn()}
           refused={fn()}
           startOver={fn()}
+          rise={fn()}
           reading={readingOf(globals.reading)}
           shell={{ confirm: (go) => go(), learned: { seen: () => true, see: () => {} } }}
         />

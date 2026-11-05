@@ -59,7 +59,12 @@ test('place.sound and place.exposed reach the bed and the sky', () => {
   effects = true;
   useCueSounds(screen, 0);
   effects = false;
-  assert.deepEqual(g.bed, ['shore', 'storm', true, false]);
+  assert.deepEqual(g.bed, ['shore', 'storm', true, false, false]);
+  // Breaks: the spirit state's bed is clear, or thunder sounds its open air (book-ui.md, Spirit state).
+  effects = true;
+  useCueSounds({ ...screen, spirit: {} } as never, 0);
+  effects = false;
+  assert.deepEqual(g.bed, ['shore', 'storm', false, false, true]);
   // Breaks: a fight's or a new chapter's view starts a piece the music steals at once.
   const quiet = (next: Partial<GameView>) => {
     effects = true;

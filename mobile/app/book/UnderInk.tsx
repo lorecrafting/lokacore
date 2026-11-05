@@ -1,11 +1,12 @@
 // The page's held under-ink layers (book-ui.md, Room page anatomy): the lamp glow and the low-health
-// vignette, one at a time with the fatal hold above them (heldLayer.ts).
+// vignette, one at a time with the fatal hold and the spirit layer above them (heldLayer.ts).
 import { createContext, lazy, Suspense, useContext, useEffect, useRef, useState } from 'react';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { onCue } from './cues.ts';
 import {
   curveOf,
   Reanimated,
+  ReduceMotion,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -14,8 +15,16 @@ import {
   withDelay,
   withTiming,
 } from './fade.ts';
-import { flickerClock, heldLayer, lampLit, lowHealth, onCut, type HeldLayer } from './heldLayer.ts';
-import { usePalette } from './palette.ts';
+import {
+  flickerClock,
+  heldLayer,
+  lampLit,
+  lowHealth,
+  onCut,
+  spiritInk,
+  type HeldLayer,
+} from './heldLayer.ts';
+import { usePalette, type Palette } from './palette.ts';
 import { color, motion, opacity } from './tokens.ts';
 
 const Gradient = lazy(() => import('./Gradient.tsx'));
@@ -66,7 +75,13 @@ function useCut() {
   return cut;
 }
 
-function useLayers(view: GameView, paper: string) {
+// Never: under reduced motion Reanimated would cut the rise; it is ruled a plain fade.
+const riseFade = (still: boolean) => ({
+  duration: (still ? motion.fade : motion.palette).duration,
+  reduceMotion: ReduceMotion.Never,
+});
+
+function useLayers(view: GameView, c: Palette, spirit: boolean) {
   const still = useReducedMotion();
   const [fatal, setFatal] = useState(false);
   useEffect(
@@ -76,11 +91,14 @@ function useLayers(view: GameView, paper: string) {
       }),
     [],
   );
-  const held = heldLayer({ fatal, low: lowHealth(view), lit: lampLit(view, paper) });
+  const held = heldLayer({ spirit, fatal, low: lowHealth(view), lit: lampLit(view, c.bg) });
   const glow = useSharedValue(shown === 'glow' && held === 'glow' ? opacity.glow : 0);
   const edge = useSharedValue(shown === 'vignette' && held === 'vignette' ? opacity.faint : 0);
+  const ghost = useSharedValue(spirit ? opacity.spirit : 0); // set with the page turn, in every mode
   useEffect(() => {
     shown = held;
+    if (held === 'spirit') ghost.value = opacity.spirit;
+    else if (ghost.value) ghost.value = withTiming(0, riseFade(still));
     glow.value = withTiming(held === 'glow' ? opacity.glow : 0, {
       duration: held === 'glow' ? motion.palette.duration : motion.settle.duration,
     });
@@ -96,30 +114,38 @@ function useLayers(view: GameView, paper: string) {
   const cut = useCut();
   const glowStyle = useAnimatedStyle(() => ({ opacity: glow.value * flick.value * cut.value }));
   const edgeStyle = useAnimatedStyle(() => ({ opacity: edge.value * cut.value }));
-  return { glowStyle, edgeStyle };
+  const ghostStyle = useAnimatedStyle(() => ({ opacity: ghost.value }));
+  const spiritStyle = [{ backgroundColor: spiritInk(c) }, ghostStyle];
+  return { glowStyle, edgeStyle, spiritStyle };
 }
 
 /**
- * The lamp glow and the low-health vignette under a page's ink.
+ * The spirit layer, the lamp glow and the low-health vignette under a page's ink.
  * - Use: behind a `paperless` Page, on World and Combat.
  * - Rules: paper, not a part: draws no block, holds no words, takes no touch. Only the highest of
  *   the fatal hold, the vignette and the glow shows; a lower one fades out over `motion.settle` and
  *   returns the same way. Storm's light cuts it for the strike; it returns over `motion.settle`.
  *   The glow flickers by `motion.flicker` away from an exposed room, steady under reduced motion.
+ *   The spirit layer (`spirit`, book-ui.md Spirit state) is a flat wash in `spiritInk` at
+ *   `opacity.spirit`, set as the page lands in every mode and fading out at the rise over
+ *   `motion.palette` (`motion.fade` under reduced motion, still a fade; Flashes off the same); a
+ *   plain view, so it draws on the web too.
  * - States: none; glow (in `motion.palette`, by cut under reduced motion); vignette (breathes;
- *   steady at `opacity.faint` under reduced motion); under a fatal hold.
+ *   steady at `opacity.faint` under reduced motion); under a fatal hold; spirit.
  * - Story: UnderInk.stories.tsx
  */
-export function UnderInk({ view }: { view: GameView }) {
+export function UnderInk({ view, spirit = false }: { view: GameView; spirit?: boolean }) {
   const c = usePalette();
-  const { glowStyle, edgeStyle } = useLayers(view, c.bg);
+  const { glowStyle, edgeStyle, spiritStyle } = useLayers(view, c, spirit);
   // Once drawn a layer stays, at no opacity, so it can fade out over the settle.
-  const drawn = useRef({ lit: false, low: false }).current;
+  const drawn = useRef({ lit: false, low: false, spirit: false }).current;
   drawn.lit ||= lampLit(view, c.bg);
   drawn.low ||= lowHealth(view);
-  if (!canDraw()) return null;
+  const ghost = (drawn.spirit ||= spirit) && <Layer style={spiritStyle}>{null}</Layer>;
+  if (!canDraw()) return ghost || null;
   return (
     <>
+      {ghost}
       {drawn.lit && (
         <Layer style={glowStyle}>
           <Gradient
