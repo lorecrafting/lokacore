@@ -1,8 +1,39 @@
 // The Story list and Trace (docs/design/editor-map-and-story-rulings.md S2): the tree's visible
 // rows, the arrow keys' moves, which rows a selection or a palette row opens, a trace's rows and
 // the palette's story rows. No React here: tested from kernel/ts/test/author_story.test.ts.
-import type { Edge, Story } from './author.ts';
+import type { MapRoom } from './map.ts';
 import { fromRef, type Item } from './shell.ts';
+
+export type Todo = { file: string; words: number; placeholders: string[] };
+/** A content-graph link (kernel/ts/play/reach.ts): `set` when it writes its fact. */
+export type Edge = { from: string; to: string; path: string; op?: string; set?: true };
+export type Beat = {
+  part: number;
+  n: number;
+  title?: string;
+  status: string; // built, ~, missing or unreached
+  missing?: string[];
+  nodes: string[];
+};
+export type Outline = {
+  parts: (string | null)[];
+  beats: Beat[];
+  unpaid: { seed: string; n: number }[];
+  unseeded: { pays: string; n: number }[];
+};
+export type Story = {
+  hash: string;
+  graph: { nodes: { ref: string; kind: string }[]; edges: Edge[] };
+  report: {
+    unreachable: Record<string, string[]>;
+    behind_lock: { rooms: string[] };
+    orphan_facts: { unused: string[]; write_only: string[]; read_only: string[] };
+  };
+  outline: Outline | { refused: string } | null;
+  todo: Record<string, Todo[]>;
+  diagnostics: Record<string, { code?: string; path?: string }[]>;
+  map: MapRoom[];
+};
 
 /** The kinds the list holds (design section 4.1); Trace opens on the fact, quest and story point. */
 export const KINDS = ['quest', 'story_point', 'scene', 'dialogue', 'reaction', 'action', 'fact', 'topic', 'npc'];
