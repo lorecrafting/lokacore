@@ -30,17 +30,58 @@ defmodule Loka.ContentAmbientTest do
     assert [%{"emotes" => [%{"kind" => "emote", "key" => "glance"}]}, _] = goblin["ambient"]
   end
 
-  # Breaks: the schema drops a bound on every or chance.
-  for {name, field, value} <- [
-        {"every 0", "every", 0},
-        {"chance 0", "chance", 0},
-        {"chance 101", "chance", 101}
+  # Breaks: the schema drops a bound or required field of a room's or NPC's set or set list (the
+  # item list shares the room's schema). Bounds from the schema text: 1 to 4 sets, 1 to 8 lines or
+  # emotes, every 1 to 2^53-1, chance 1 to 100; lines (room) and every required.
+  big = 9_007_199_254_740_992
+
+  for {name, rel, fun, at} <- [
+        {"room every 0", "rooms/cave", quote(do: &put(&1, 0, "every", 0)), "[0].every"},
+        {"room every 2^53", "rooms/cave", quote(do: &put(&1, 0, "every", unquote(big))),
+         "[0].every"},
+        {"room chance 0", "rooms/cave", quote(do: &put(&1, 0, "chance", 0)), "[0].chance"},
+        {"room chance 101", "rooms/cave", quote(do: &put(&1, 0, "chance", 101)), "[0].chance"},
+        {"room no lines", "rooms/cave", quote(do: &put(&1, 0, "lines", [])), "[0].lines"},
+        {"room nine lines", "rooms/cave", quote(do: &put(&1, 0, "lines", nine("room.cave.drip"))),
+         "[0].lines"},
+        {"room set lacks lines", "rooms/cave", quote(do: &drop(&1, 0, "lines")), "[0].lines"},
+        {"room set lacks every", "rooms/cave", quote(do: &drop(&1, 0, "every")), "[0].every"},
+        {"room no sets", "rooms/cave", quote(do: &Map.put(&1, "ambient", [])), ""},
+        {"room five sets", "rooms/cave", quote(do: &five/1), ""},
+        {"npc every 0", "npcs/goblin", quote(do: &put(&1, 1, "every", 0)), "[1].every"},
+        {"npc every 2^53", "npcs/goblin", quote(do: &put(&1, 1, "every", unquote(big))),
+         "[1].every"},
+        {"npc chance 0", "npcs/goblin", quote(do: &put(&1, 1, "chance", 0)), "[1].chance"},
+        {"npc chance 101", "npcs/goblin", quote(do: &put(&1, 1, "chance", 101)), "[1].chance"},
+        {"npc no emotes", "npcs/goblin", quote(do: &put(&1, 1, "emotes", [])), "[1].emotes"},
+        {"npc nine emotes", "npcs/goblin", quote(do: &put(&1, 1, "emotes", nine("glance"))),
+         "[1].emotes"},
+        {"npc no lines", "npcs/goblin", quote(do: &lines(&1, [])), "[1].lines"},
+        {"npc nine lines", "npcs/goblin", quote(do: &lines(&1, nine("npc.goblin.room"))),
+         "[1].lines"},
+        {"npc set lacks every", "npcs/goblin", quote(do: &drop(&1, 1, "every")), "[1].every"},
+        {"npc no sets", "npcs/goblin", quote(do: &Map.put(&1, "ambient", [])), ""},
+        {"npc five sets", "npcs/goblin", quote(do: &five/1), ""}
       ] do
-    test "#{name} is a schema violation at the field", %{tmp_dir: dir} do
-      set(dir, "rooms/cave.json", 0, &Map.put(&1, unquote(field), unquote(value)))
-      refused(dir, "SCHEMA_VIOLATION", "rooms/cave.ambient[0].#{unquote(field)}")
+    test "#{name} is a schema violation", %{tmp_dir: dir} do
+      update(dir, "#{unquote(rel)}.json", unquote(fun))
+      refused(dir, "SCHEMA_VIOLATION", "#{unquote(rel)}.ambient#{unquote(at)}")
     end
   end
+
+  defp put(d, i, k, v), do: put_in(d, ["ambient", Access.at(i), k], v)
+  defp drop(d, i, k), do: update_in(d, ["ambient", Access.at(i)], &Map.delete(&1, k))
+
+  defp lines(d, v),
+    do:
+      update_in(
+        d,
+        ["ambient", Access.at(1)],
+        &(&1 |> Map.delete("emotes") |> Map.put("lines", v))
+      )
+
+  defp nine(k), do: List.duplicate(k, 9)
+  defp five(d), do: Map.update!(d, "ambient", &List.duplicate(hd(&1), 5))
 
   # Breaks: an NPC set with both or neither of lines and emotes is admitted.
   for {name, fun} <- [
