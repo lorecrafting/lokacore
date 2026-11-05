@@ -11,7 +11,7 @@ import type {
 import type { Button } from './presenter.ts';
 import { cueLine } from './model.ts';
 import { LABEL } from './labels.ts';
-import { lineText, lineWords, withoutHeading, worded } from './words.ts';
+import { lineText, lineWords, noted, withoutHeading } from './words.ts';
 type Say = (key: string) => string;
 
 // One log line per narration record, then the cue (book-ui.md, Live action freshness; pass-1 UO):
@@ -254,7 +254,7 @@ function fullLine(
   const sentence = lineWords(line, text, view, was);
   if (line.key !== 'item.recovered' || typeof line.bindings?.item !== 'string') return sentence;
   const full = `${sentence} ${text(line.bindings.item)}.`;
-  worded.note?.(full, line.key);
+  noted(full, line.key, () => fullLine(line, text, view, was));
   return full;
 }
 

@@ -1,4 +1,4 @@
-// size: allow 314, corpse names bind their victim (loka-kgd.203), the author hook (loka-vduxr.51, .53)
+// size: allow 323, corpse names bind their victim (loka-kgd.203), the author hook (loka-vduxr.51, .53, wfrgk.19)
 // The app's own words for the kernel's codes (R6P Polish): what an accepted outcome says in the log
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
@@ -182,8 +182,16 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
 // the player skipped; an NPC's emote (G9) words from the view's emote table; a liquid line adds its
 // level (pick.ts levelWords). A bound speaker's quotation reads `Nell says [to you], "..."` (book-ui.md).
 // The author preview's hook (panel.tsx; never set in a release): a line as shown (an engine line too), bound
-// or joined, with its text key, so an Alt-click on it names its source.
-export const worded: { note?: (words: string, key: string) => void } = {};
+// or joined, with its text key, so an Alt-click on it names its source; `made` keeps each such line's
+// composition, so an open conversation re-words its lines when the author's words change (loka-wfrgk.19).
+export const worded: {
+  note?: (words: string, key: string) => void;
+  made?: Map<string, () => string>;
+} = {};
+export const noted = (words: string, key: string, again: () => string) => {
+  worded.note?.(words, key);
+  worded.made?.set(words, again);
+};
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
   text: Say,
@@ -202,7 +210,8 @@ export const lineWords = (
     victimWords(text, view.entities.find((e) => e.name === v && cast.includes(e.id)) ?? {}, `${v}`);
   const emote = actor && emoteSentence(t, view.emotes, word, actor);
   const told = emote || lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);
-  if (told) worded.note?.(told, (emote && emoteForm(t, view.emotes)) || t.key);
+  if (told)
+    noted(told, (emote && emoteForm(t, view.emotes)) || t.key, () => lineWords(t, text, view, was));
   if (told) return told;
   if (t.key !== 'combat.skipped') {
     const said = fillSlots(text(t.key), t.bindings, word) + levelWords(t, text, view, was);
@@ -211,7 +220,7 @@ export const lineWords = (
       speaker && /^["“][^"“”]*["”]$/.test(said)
         ? `${cap(speaker)} says${actor ? '' : ' to you'}, ${said}`
         : said;
-    worded.note?.(shown, t.key);
+    noted(shown, t.key, () => lineWords(t, text, view, was));
     return shown;
   }
   const who = id === undefined ? 'You are' : actor ? `${actor} is` : 'They are';
