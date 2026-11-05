@@ -135,8 +135,10 @@ async function build(): Promise<boolean> {
   const tmp = mkdtempSync(join(tmpdir(), 'loka-dev-'));
   try {
     const artifact = join(tmp, 'artifact.json');
+    const read = saves;
     const run = await compile(artifact);
-    if (waiting) return false; // a later save compiles next: this one's words would undo its quick push
+    // a save since (even inside the debounce) compiles next: these older words would undo its push
+    if (saves !== read) return false;
     // none written (mix crashed before it): the last build's cards must not stay up
     const file = diagnostics(artifact);
     live?.push({ diagnostics: existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : [] });
@@ -187,6 +189,7 @@ function lint() {
 // One compile at a time, in save order; a save while one waits is in the waiting one's source.
 let queue: Promise<unknown> = Promise.resolve();
 let waiting = false;
+let saves = 0;
 function enqueue() {
   if (waiting) return;
   waiting = true;
@@ -204,6 +207,7 @@ if (ok) lint();
 let timer: ReturnType<typeof setTimeout> | undefined;
 watch(source, { recursive: true }, (_, file) => {
   if (file?.startsWith('checkpoints/')) return; // the page's own save, not content
+  saves++;
   clearTimeout(timer);
   // one build for an editor's burst of writes
   timer = setTimeout(() => {

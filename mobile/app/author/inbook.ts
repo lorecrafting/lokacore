@@ -133,8 +133,7 @@ async function openField(el: HTMLElement) {
 const caption = () =>
   field && say(field.el, `${field.at.file}:${field.at.line}  Enter saves · Esc cancels`);
 function close() {
-  if (!field) return;
-  const { el, kept } = field;
+  const { el, kept } = field!; // every caller holds the open field
   field = undefined;
   el.removeEventListener('keydown', onFieldKey);
   el.removeEventListener('beforeinput', onInput);
@@ -177,10 +176,10 @@ async function save() {
   const { file, line, was } = f.at;
   const [status, answer] = await api('/edit', { file, line, was, words: draft, key: f.key });
   f.busy = false;
-  if (status === 200) {
+  if (status === 200)
     edits.push({ id: answer.id, at: `${file}:${line}`, file, key: f.key, words: draft });
-    return close();
-  }
+  if (field !== f) return; // closed (Esc), or another line opened, while it saved
+  if (status === 200) return close();
   if (status === 409) return conflict(f);
   say(f.el, typeof answer === 'string' ? answer : `Not saved (${status}).`, true);
 }

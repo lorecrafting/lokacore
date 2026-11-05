@@ -1,7 +1,7 @@
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
-import { after, before, beforeEach, test } from 'node:test';
+import { after, afterEach, before, beforeEach, test } from 'node:test';
 import { build } from 'esbuild';
 import { chromium, type Browser, type Page } from 'playwright';
 import type { start } from './inbook.ts';
@@ -17,7 +17,8 @@ let browser: Browser;
 let page: Page;
 let bundle: string;
 let asked: { path: string; body: any }[];
-let answer: (path: string, body: any) => [number, unknown];
+let answer: (path: string, body: any) => [number, unknown] | Promise<[number, unknown]>;
+let thrown: Error[]; // a guard dropped, a key or click throws in the page
 
 before(async () => {
   const out = await build({
@@ -36,6 +37,8 @@ beforeEach(async () => {
   asked = [];
   answer = (path) => (path.startsWith('/line') ? [200, RAIN] : [200, { id: 7, file: 'a.loka' }]);
   page = await browser.newPage();
+  thrown = [];
+  page.on('pageerror', (e) => thrown.push(e));
   page.setDefaultTimeout(5000); // a broken editor fails in seconds, not 30 s per wait
   await page.route(`${ORIGIN}/**`, async (route) => {
     const url = new URL(route.request().url());
@@ -44,7 +47,7 @@ beforeEach(async () => {
     const path = url.pathname.slice('/__author'.length) + url.search;
     const body = route.request().postDataJSON();
     asked.push({ path, body });
-    const [status, sent] = answer(path, body);
+    const [status, sent] = await answer(path, body);
     await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(sent) });
   });
   await page.goto(`${ORIGIN}/`);
@@ -64,9 +67,12 @@ beforeEach(async () => {
       seen.set(el.textContent, key);
       said.set(key, words);
     }
+    (w as unknown as { said: typeof said }).said = said;
     w.inbook.start({ seen, said, tell: (m) => w.told.push(m), redraw: () => {} });
   }, LINES);
 });
+
+afterEach(() => assert.deepEqual(thrown, []));
 
 const told = () => page.evaluate(() => (window as unknown as { told: object[] }).told);
 const note = () => page.locator('.loka-note').textContent();
@@ -283,4 +289,82 @@ test('a line with no field says why', async () => {
   await page.locator('button').dblclick();
   await noteSays('Not a line of words. Alt-click opens its source.');
   assert.equal(await page.locator('[data-loka-field]').count(), 0);
+});
+
+/** An answer held until `open()`: the request is in flight meanwhile. */
+const held = () => {
+  let open!: () => void;
+  const gate = new Promise<void>((r) => (open = r));
+  return { gate, open };
+};
+const settle = () => page.waitForTimeout(200); // an answer's handler has run
+
+// Breaks: a second double-click while the first /line is in flight opens a second field.
+test('a double-click while a field is opening opens nothing more', async () => {
+  const { gate, open } = held();
+  answer = async () => (await gate, [200, RAIN]);
+  await page.locator('p').first().dblclick();
+  await page.locator('p').nth(1).dblclick();
+  open();
+  await page.locator('[data-loka-field]').waitFor();
+  await settle();
+  assert.equal(await page.locator('[data-loka-field]').count(), 1);
+  assert.equal(asked.filter((a) => a.path.startsWith('/line')).length, 1);
+});
+
+// Breaks: a Book render while the field is open shows the newer words, not those it opened on.
+test('the open field keeps the words it opened on', async () => {
+  await openFirst();
+  await page.evaluate(() => (window as any).said.set('a.rain', 'Rain stops.'));
+  const frozen = () => page.evaluate(() => (window as any).inbook.frozen('a.rain'));
+  assert.equal(await frozen(), 'Rain falls.');
+  await page.keyboard.press('Escape');
+  assert.equal(await frozen(), undefined);
+});
+
+// Breaks: a blur while Enter's save is in flight posts the line a second time.
+test('a blur during a save writes once', async () => {
+  const { gate, open } = held();
+  answer = async (path) =>
+    path.startsWith('/line') ? [200, RAIN] : (await gate, [200, { id: 7 }]);
+  await openFirst();
+  await page.keyboard.type('!');
+  await page.keyboard.press('Enter');
+  await page.locator('button').click();
+  open();
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.equal(posted('/edit').length, 1);
+});
+
+// Breaks: a save or its conflict answered after Esc closes or marks the line opened since.
+test('an answer after Esc leaves the next field alone', async () => {
+  const saved = held();
+  answer = async (path) =>
+    path.startsWith('/line') ? [200, RAIN] : (await saved.gate, [200, { id: 7 }]);
+  await openFirst();
+  await page.keyboard.type('!');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Escape');
+  await page.locator('p').nth(1).dblclick();
+  await page.locator('[data-loka-field]').waitFor();
+  saved.open();
+  await settle();
+  assert.equal(await page.locator('p').nth(1).getAttribute('data-loka-field'), '');
+  await page.keyboard.press('Escape');
+  const reread = held();
+  let lines = 0;
+  answer = async (path) =>
+    path.startsWith('/line')
+      ? lines++
+        ? (await reread.gate, [200, RAIN])
+        : [200, RAIN]
+      : [409, 'stale'];
+  await openFirst();
+  await page.keyboard.type('!');
+  await page.keyboard.press('Enter');
+  while (lines < 2) await page.waitForTimeout(20); // the conflict's re-read is in flight
+  await page.keyboard.press('Escape');
+  reread.open();
+  await settle();
+  assert.equal(await page.locator('.loka-note').isHidden(), true);
 });

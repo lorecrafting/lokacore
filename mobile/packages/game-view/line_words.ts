@@ -65,13 +65,13 @@ export const lineSentence = (
 
 /** The text key an emote.performed line is worded from (see emoteSentence), or undefined. */
 export const emoteForm = (
-  t: Parameters<typeof emoteSentence>[0],
-  emotes: Parameters<typeof emoteSentence>[1] = [],
+  t: Parameters<typeof emoteSentence>[0], // mutate-skip: type only
+  emotes: Parameters<typeof emoteSentence>[1] = [], // mutate-skip: type only
 ) => {
-  const emote = t.key === 'emote.performed' && emotes.find((e) => e.key === t.bindings?.emote);
-  if (!emote) return undefined;
-  if (t.participants?.target === undefined) return emote.others;
-  return t.bindings?.target === undefined ? emote.to?.you : emote.to?.others;
+  const emote =
+    t.key === 'emote.performed' ? emotes.find((e) => e.key === t.bindings?.emote) : undefined;
+  if (t.participants?.target === undefined) return emote?.others;
+  return t.bindings?.target === undefined ? emote?.to?.you : emote?.to?.others;
 };
 
 /** An emote.performed line's sentence (G9, docs/system/mechanics.md#npc-emotes-g9) from the view's emote

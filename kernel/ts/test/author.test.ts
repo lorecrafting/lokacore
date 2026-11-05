@@ -245,10 +245,30 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
   writeFileSync(which, join(dir, 'rest.json'));
   writeFileSync(join(src, 'rooms.json'), '{  }');
   await settle(400); // past the debounce: the second save waits in the queue
+  writeFileSync(join(src, 'rooms.json'), '{   }');
+  await settle(400); // a third joins the waiting one: no compile of its own
   rmSync(`${which}.block`);
   await until(() => JSON.parse(readFileSync(artifact, 'utf8')).sha256 === rest.sha256);
   assert.equal(
     log(),
     'start good.json\nend good.json\nstart good.json\nend good.json\nstart rest.json\nend rest.json\n',
   );
+  // Break: a compile that ends inside a later save's debounce is written, so its older words
+  // replace the page's newer ones until the next compile. Writes every 30 ms hold the debounce open.
+  writeFileSync(which, good);
+  writeFileSync(`${which}.block`, '');
+  writeFileSync(join(src, 'rooms.json'), '{}');
+  await until(() => log().endsWith('start good.json\n'));
+  let n = 0;
+  const saving = setInterval(
+    () => writeFileSync(join(src, 'rooms.json'), `{${' '.repeat(++n)}}`),
+    30,
+  );
+  await settle(150);
+  rmSync(`${which}.block`);
+  await until(() => log().endsWith('end good.json\n'));
+  await settle(300);
+  clearInterval(saving);
+  assert.equal(JSON.parse(readFileSync(artifact, 'utf8')).sha256, rest.sha256);
+  await until(() => JSON.parse(readFileSync(artifact, 'utf8')).sha256 === kat.sha256);
 });
