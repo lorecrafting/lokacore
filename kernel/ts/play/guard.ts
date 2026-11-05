@@ -30,7 +30,16 @@ export class Refused extends Error {
 export const refuse = (status: number, body: unknown): never => {
   throw new Refused(status, body);
 };
-export const there = (path: string) => lstatSync(path, { throwIfNoEntry: false });
+export const there = (path: string) => {
+  try {
+    return lstatSync(path, { throwIfNoEntry: false });
+  } catch (e) {
+    // a file where a folder must be; the error message would carry the absolute path
+    if ((e as NodeJS.ErrnoException).code === 'ENOTDIR')
+      refuse(400, 'a file stands where a folder must be');
+    throw e;
+  }
+};
 const real = (path: string) => {
   try {
     return realpathSync(path);
@@ -55,7 +64,7 @@ export function placed(rel: string) {
     (ext === 'cut' && dir === 'scenes');
   return key && DIRS.includes(dir) && fits ? { dir, key, ext, area } : undefined;
 }
-const rootFile = (rel: string) =>
+export const rootFile = (rel: string) =>
   ROOTS.some((r) => rel === `${r}.json`) || /^areas\/[a-z0-9_]+\.json$/.test(rel);
 
 /** The one path guard: `rel` a normal relative path under the (real) root with no symlink on the

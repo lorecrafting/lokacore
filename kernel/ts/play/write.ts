@@ -17,7 +17,7 @@ import {
   refuse,
   Refused,
 } from './guard.ts';
-import { ROOTS, SCHEMAS, sha256, stale, there } from './guard.ts';
+import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
 import { edit } from './prose.ts';
 
 type By = 'editor' | 'outside';
@@ -122,7 +122,8 @@ function change(t: Tree, { file, was, ops }: Sent) {
 
 function remove(t: Tree, { file, was }: Sent) {
   const path = guarded(t.root, file, 'read');
-  if (!file.includes('/')) refuse(400, `${file} is a root file: delete its rows, not the file`);
+  if (!file.includes('/') || rootFile(file))
+    refuse(400, `${file} is a root file: delete its rows, not the file`);
   const changes: Change[] = [{ file, before: fresh(path, was), after: null }];
   const room = placed(file)?.dir === 'rooms' ? placed(file)!.key : undefined;
   const layout = current(join(t.root, 'layout.json')); // another file's room matches no row

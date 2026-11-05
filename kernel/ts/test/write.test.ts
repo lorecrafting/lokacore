@@ -76,6 +76,11 @@ test('a path outside the source tree is refused before any file is read', async 
   );
   writeFileSync(join(src, 'text.json'), '{}\n');
   assert.equal((await ask('/source?file=text.json')).body.kind, 'text'); // a root file: its name
+  writeFileSync(join(src, 'areas'), ''); // a file where a folder must be: ENOTDIR names the root
+  const file = 'areas/north/rooms/a.json';
+  const notDir = { status: 400, body: 'a file stands where a folder must be' };
+  assert.deepEqual(await ask(`/source?file=${file}`), notDir);
+  assert.deepEqual(await ask('/change', { file, was: '', ops: [] }), notDir);
 });
 
 test('GET /schema/<kind> is the source schema with its defs inlined; another name is a 404', async (t) => {
@@ -278,6 +283,12 @@ test('/edit replaces only the words of one line, and refuses a line that is not 
   });
   assert.equal((await scene(2, '* hello')).status, 200);
   assert.equal(read('scenes/s.scene'), 'npc: stranger\n* new\n- Go on\n');
+  writeFileSync(join(src, 'scenes/c.cut'), 'The rain falls.\n---\n'); // every line words but ---
+  const cut = (line: number, was: string) =>
+    ask('/edit', { file: 'scenes/c.cut', line, was, words: 'x' });
+  assert.deepEqual(await cut(2, '---'), { status: 400, body: 'not a line of words' });
+  assert.equal((await cut(1, 'The rain falls.')).status, 200);
+  assert.equal(read('scenes/c.cut'), 'x\n---\n');
 });
 
 test('each refusal is a 400 that names its reason', async (t) => {
@@ -290,6 +301,8 @@ test('each refusal is a 400 that names its reason', async (t) => {
   writeFileSync(join(src, 'rooms/n.json'), '{"k": null}');
   const TEXT = '{\n  "room.a": "old words"\n}\n';
   writeFileSync(join(src, 'text.json'), TEXT);
+  mkdirSync(join(src, 'areas'));
+  writeFileSync(join(src, 'areas/north.json'), '{}');
   const room = { file: 'rooms/a.json', was: sha256(ROOM) };
   const edit = (line: unknown, was: unknown) => ({ file: 'text.json', line, was, words: 'x' });
   const cases: [string, object, string][] = [
@@ -320,6 +333,11 @@ test('each refusal is a 400 that names its reason', async (t) => {
       'text.json is a root file: delete its rows, not the file',
     ],
     [
+      '/delete',
+      { file: 'areas/north.json', was: sha256('{}') },
+      'areas/north.json is a root file: delete its rows, not the file',
+    ],
+    [
       '/move',
       { file: 'text.json', was: sha256(TEXT), area: null },
       'text.json is not a definition file',
@@ -327,6 +345,11 @@ test('each refusal is a 400 that names its reason', async (t) => {
     ['/move', { ...room, area: 'North' }, 'area: [a-z0-9_]+, or null for the root'],
     ['/edit', edit(4, ''), 'not a line of words'], // the empty line after the last newline
     ['/edit', edit(2, 5), 'was and words: one line each, no tab'],
+    [
+      '/edit',
+      { ...edit(2, '  "room.a": "old words"'), words: 'a\tb' },
+      'was and words: one line each, no tab',
+    ],
     ['/edit', edit(0, '{'), 'no such line'],
     ['/edit', edit(1.5, '{'), 'no such line'],
     ['/edit', edit(5, ''), 'no such line'],

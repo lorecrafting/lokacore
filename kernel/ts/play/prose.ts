@@ -14,6 +14,8 @@ export function worded(rel: string, line: string, words: string) {
       ? `${literal[1]}${JSON.stringify(words)}${literal[2]}`
       : refuse(400, 'not a line of words');
   }
+  if (rel.endsWith('.cut'))
+    return line.trim() && line.trim() !== '---' ? words : refuse(400, 'not a line of words');
   const said = /^(\s*\* ).*$/.exec(line);
   if (said) return `${said[1]}${words}`;
   return refuse(400, /^\s*- /.test(line) ? 'a choice label: its key is its words' : 'a key line');
