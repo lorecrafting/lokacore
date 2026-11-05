@@ -27,7 +27,7 @@ import { todo } from './todo.ts';
 import { find } from './find.ts';
 import { why } from './why.ts';
 import { storyRoute } from './story.ts';
-import { body, editing, foreign, json } from './editing.ts';
+import { body, editing, foreign, type Hooks, json } from './editing.ts';
 import { sourceOf } from './prose.ts';
 import type { Changed } from './write.ts';
 import { sentences } from './why_words.ts';
@@ -250,7 +250,7 @@ const bound = (server: Server) => ({
 /** Serves `GET /events` (each client gets the current message on connect and every push after),
  * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, the column's `POST /open` and
  * `POST /why`, `GET /story` (story.ts), and the editor's routes (editing.ts) after its Host and Origin checks. */
-export function serve(port: number, source: string, artifact: string, release = () => {}) {
+export function serve(port: number, source: string, artifact: string, on: Hooks = {}) {
   const clients = new Set<ServerResponse>();
   let last: Message = { text: {}, said: [], compiled: true };
   const send = (client: ServerResponse, once = {}) =>
@@ -263,7 +263,7 @@ export function serve(port: number, source: string, artifact: string, release = 
     else if ('compiled' in message || 'diagnostics' in message || 'held' in message) map.stale();
     for (const client of clients) send(client);
   }, source);
-  const editor = editing(source, said, (once) => clients.forEach((c) => send(c, once)), release);
+  const editor = editing(source, said, (once) => clients.forEach((c) => send(c, once)), on);
   const route = async (request: IncomingMessage, response: ServerResponse) => {
     if (foreign(request, response) || (await editor.route(request, response))) return;
     if (request.url === '/story') return map.answer(request, response, last.diagnostics ?? []);

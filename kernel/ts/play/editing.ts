@@ -1,6 +1,7 @@
 // The author server's HTTP side of the editor (docs/system/cartridge.md#author-preview): who may
 // ask at all (Host, Origin), the write routes (write.ts) and the Hold the watcher parks under.
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { dirname, join } from 'node:path';
 import { type Answer, type Changed, writer, writes } from './write.ts';
 
 export const json = (response: ServerResponse, status: number, body: unknown) =>
@@ -32,8 +33,11 @@ type Said = {
 };
 /** `push` keeps the message for later clients and `tell` shows an /edit's words by the text key
  * the page names, before the compile (told.ts); `once` sends `changed` without keeping it.
- * `release` runs when the Hold ends, to write what the watcher parked. */
-export function editing(source: string, said: Said, once: Push, release: () => void) {
+ * `on.release` runs when the Hold ends, to write what the watcher parked; `on.leave` once a POST
+ * /world's answer is sent, with the world's folder (author.ts restarts on it: a fresh guard root,
+ * journal and Hold). */
+export type Hooks = { release?: () => void; leave?: (world: string) => void };
+export function editing(source: string, said: Said, once: Push, on: Hooks) {
   const { push, tell, places } = said;
   const editor = writer(source, (changed) => once({ changed }), places);
   let held = false;
@@ -41,7 +45,7 @@ export function editing(source: string, said: Said, once: Push, release: () => v
     if (typeof sent?.on !== 'boolean') return [400, 'on: true or false'];
     held = sent.on;
     push({ held });
-    if (!held) release();
+    if (!held) on.release?.();
     return [200, { held }];
   };
   /** Answers a write route and is true, or is false for a request that is not one. */
@@ -65,6 +69,8 @@ export function editing(source: string, said: Said, once: Push, release: () => v
     if (/^\/(edit|undo)$/.test(url) && answer[0] === 200 && typeof key === 'string')
       if (typeof words === 'string') tell(key, words, `${sent.file}:${sent.line}`);
     json(response, ...answer);
+    if (url === '/world' && answer[0] === 200)
+      response.on('finish', () => on.leave?.(join(dirname(source), sent.name)));
     return true;
   }
   return { route, held: () => held, seen: editor.seen };

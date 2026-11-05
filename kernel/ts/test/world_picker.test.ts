@@ -1,0 +1,145 @@
+// The editor's worlds (POST /world, write.ts; author.ts restarts on the chosen one): which names
+// reach mix, and that the restarted watcher writes only into the world it switched to.
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
+import { realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { test, type TestContext } from 'node:test';
+import { serve } from '../play/live.ts';
+import { sha256 } from '../play/guard.ts';
+import { ROOT } from '../play/obs.ts';
+import { read } from './read.ts';
+
+const ROOM = '{\n  "name": "room.start",\n  "exits": {}\n}\n';
+
+/** worlds/a and worlds/b (b titled "Bee"), a `mise` stub on PATH: a compile copies the known-answer
+ * artifact; `mix loka.new` logs its arguments, waits 0.5 s, and makes a cartridge at its 6th. */
+function worlds(t: TestContext) {
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-world-')));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  for (const [name, title] of [
+    ['a', 'A'],
+    ['b', 'Bee'],
+    ['c', '~'],
+  ]) {
+    mkdirSync(join(dir, 'worlds', name, 'rooms'), { recursive: true });
+    writeFileSync(join(dir, 'worlds', name, 'cartridge.json'), JSON.stringify({ id: name, title }));
+    writeFileSync(join(dir, 'worlds', name, 'rooms/start.json'), ROOM);
+  }
+  mkdirSync(join(dir, 'worlds', 'loose')); // no cartridge.json: not a world
+  symlinkSync(join(dir, 'worlds', 'b'), join(dir, 'worlds', 'linked')); // a link: not a world
+  const kat = read('protocol/fixtures/cartridge_rooms_hash.json');
+  const good = join(dir, 'good.json');
+  writeFileSync(good, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`);
+  writeFileSync(
+    join(dir, 'mise'),
+    `#!/bin/sh\n[ "$4" = loka.lint ] && exit 0\n[ "$4" = loka.compile ] && exec cp "${good}" "$6"\n` +
+      `shift 3; echo "$@" >> "${dir}/new.log"; sleep 0.5; mkdir "$3"; echo {} > "$3/cartridge.json"\n`,
+  );
+  chmodSync(join(dir, 'mise'), 0o755);
+  return { dir, a: join(dir, 'worlds/a'), env: { PATH: `${dir}:${process.env.PATH}` } };
+}
+
+const ask = async (port: number, path: string, sent?: unknown) => {
+  const response = await fetch(`http://127.0.0.1:${port}${path}`, {
+    method: sent === undefined ? 'GET' : 'POST',
+    headers: { host: `localhost:${port}` },
+    ...(sent !== undefined && { body: JSON.stringify(sent) }),
+  });
+  return { status: response.status, body: await response.json() };
+};
+
+test('/world lists real worlds, refuses names that are paths, and makes one as bin/loka new does', async (t) => {
+  const { dir, a, env } = worlds(t);
+  const path = process.env.PATH;
+  process.env.PATH = env.PATH;
+  t.after(() => (process.env.PATH = path));
+  const left: string[] = [];
+  const live = serve(0, a, join(dir, 'none.json'), { leave: (world) => left.push(world) });
+  t.after(() => live.close());
+  const port = await live.port;
+  // Break: a link or a folder with no cartridge.json listed; a `~` title shown instead of the name.
+  assert.deepEqual((await ask(port, '/world')).body, {
+    current: 'a',
+    worlds: [
+      { name: 'a', title: 'A' },
+      { name: 'b', title: 'Bee' },
+      { name: 'c', title: 'c' },
+    ],
+  });
+  // Break: a name that climbs out of worlds/, a link, or a folder that is no cartridge, opened or made.
+  for (const sent of [
+    { name: '../worlds/b' },
+    { name: 'linked' },
+    { name: 'loose' },
+    { name: '../x', new: true },
+    { name: 'x.y', new: true },
+    { name: 'b', new: true },
+    { name: 'x', new: true, from: '../worlds/b' },
+    { name: 'x', new: true, from: 'linked' },
+  ])
+    assert.ok((await ask(port, '/world', sent)).status >= 400, JSON.stringify(sent));
+  assert.equal(existsSync(join(dir, 'new.log')), false);
+  assert.deepEqual(left, []);
+  // Break: the route runs mix with other arguments than `bin/loka new cartridge <path> --from <path>`.
+  const making = ask(port, '/world', { name: 'd', new: true, from: 'b' });
+  await new Promise((r) => setTimeout(r, 200));
+  // Break: a switch, or an edit, while the new world is being made.
+  assert.equal((await ask(port, '/world', { name: 'b' })).status, 409);
+  assert.deepEqual(await making, { status: 200, body: { world: 'd' } });
+  const worlds_ = join(dir, 'worlds');
+  assert.equal(
+    readFileSync(join(dir, 'new.log'), 'utf8'),
+    `loka.new cartridge ${worlds_}/d --from ${worlds_}/b\n`,
+  );
+  assert.deepEqual((await ask(port, '/world', { name: 'b' })).body, { world: 'b' });
+  await new Promise((r) => setTimeout(r, 50));
+  assert.deepEqual(left, [`${worlds_}/d`, `${worlds_}/b`]);
+});
+
+test('after a switch the restarted watcher writes into the new world only', async (t) => {
+  const { dir, a, env } = worlds(t);
+  const port = 20000 + Math.floor(Math.random() * 12000);
+  const watcher = (...args: string[]) => {
+    const run = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, ...args], {
+      env: {
+        ...env,
+        LOKA_DEV_CARTRIDGE: join(dir, 'out/current.json'),
+        LOKA_AUTHOR_PORT: `${port}`,
+      },
+    });
+    t.after(() => run.kill());
+    return { run, exited: new Promise<number | null>((done) => run.on('exit', done)) };
+  };
+  const up = async () => {
+    for (let i = 0; i < 100; i++)
+      if (
+        await ask(port, '/world').then(
+          () => true,
+          () => false,
+        )
+      )
+        return;
+      else await new Promise((r) => setTimeout(r, 50));
+    assert.fail('timed out');
+  };
+  const first = watcher(a, '--watch');
+  await up();
+  assert.equal((await ask(port, '/world', { name: 'b' })).status, 200);
+  assert.equal(await first.exited, 75); // bin/loka dev restarts on 75
+  assert.equal(readFileSync(join(dir, 'out/world'), 'utf8'), join(dir, 'worlds/b'));
+  watcher('--watch'); // what bin/loka dev runs next: the remembered world
+  await up();
+  assert.equal((await ask(port, '/world')).body.current, 'b');
+  // Break: the guard still rooted at a (in-process state carried over): a's file changes.
+  const change = { file: 'rooms/start.json', was: sha256(ROOM), ops: [{ path: ['x'], value: 1 }] };
+  assert.equal((await ask(port, '/change', change)).status, 200);
+  assert.equal(
+    (await ask(port, '/change', { ...change, file: '../a/rooms/start.json' })).status,
+    400,
+  );
+  assert.equal(readFileSync(join(a, 'rooms/start.json'), 'utf8'), ROOM);
+  assert.notEqual(readFileSync(join(dir, 'worlds/b/rooms/start.json'), 'utf8'), ROOM);
+});

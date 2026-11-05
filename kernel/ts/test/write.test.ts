@@ -23,7 +23,7 @@ async function tree(t: TestContext, release = () => {}) {
   writeFileSync(join(src, 'rooms/a.json'), ROOM);
   writeFileSync(join(dir, 'src-evil/rooms/x.json'), 'secret');
   writeFileSync(join(src, 'layout.json'), '[\n  { "room": "a", "x": 0, "y": 0, "z": 0 }\n]\n');
-  const live = serve(0, src, join(dir, 'none.json'), release);
+  const live = serve(0, src, join(dir, 'none.json'), { release });
   const port = await live.port;
   const errors = t.mock.method(console, 'error', () => {});
   t.after(() => {

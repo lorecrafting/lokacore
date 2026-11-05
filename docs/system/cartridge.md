@@ -945,6 +945,12 @@ build. The author tools below are reachable only in that bundle (a production ex
   `/delete {file, was}` (a room's `layout.json` row goes with it); `/move {file, was, area}`;
   `/new {kind, name, from?, area?}` runs `mix loka.new` (`area` its `--area`; refused while any
   symlink is in the tree) and journals the files it wrote, from a snapshot diff; `/undo {id}`.
+  `GET /world` lists the sibling cartridge folders (`name`, the `cartridge.json` title) and the
+  `current` one; `POST /world {name, new?, from?}` switches to a listed sibling, or with `new`
+  first runs `mix loka.new cartridge` (`from` its `--from`, a listed sibling) for a free folder
+  name `[a-z0-9_]+`, refused while a write is in flight. The watcher then exits 75 and
+  `bin/loka dev` restarts it on that world, remembered in `.dev-cartridge/world` for the next
+  `bin/author.sh` with no folder; journal, Hold and the panel's selection start empty.
   `was` is the sha256 of the whole file (for `/edit`, the line's text): a file
   changed since answers 409 with its current bytes, and nothing is written. One path guard reads
   every path a body names: a normal relative path under the real source root (not the root as a
