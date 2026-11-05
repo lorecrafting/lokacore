@@ -135,7 +135,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
   ([row 6b](../system/mechanics.md#npc-vs-npc-damage-allies-and-kill-credit-toolbox-row-6b)).
 - **The raider**: `room: gate_yard`; hp 0..3 gain 0; `attack {attacks 2, chance 50, 1..1}`; no disposition
   (passive until attacked; it is the death-credit NPC).
-- **Goblins**: `npcs/goblin.json` `spawn_template: true`, hp 0..6 gain 0, `attack {attacks 2, chance 50,
+- **Goblins**: `areas/combat/npcs/goblin.json` `spawn_template: true`, hp 0..6 gain 0, `attack {attacks 2, chance 50,
   1..1}`; bundle `goblins {npc: goblin, item: ear, corpse: npc_corpse}`; plan `goblins`: home
   `goblin_pit`, area `[goblin_pit, drill_yard]`, cap 2, day and night targets 2, `night_start` 20,
   `night_end` 6, `replacement_delay` 86400, `wander_interval` 8640000 (one hundred days: the pack
