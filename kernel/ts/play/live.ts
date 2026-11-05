@@ -24,6 +24,8 @@ import { replayRecords } from './replay.ts';
 import { files, todo } from './todo.ts';
 import { find } from './find.ts';
 import { why } from './why.ts';
+import { body, editing, foreign, json } from './editing.ts';
+import type { Changed } from './write.ts';
 import { sentences } from './why_words.ts';
 
 export type Canonical = { text: Record<string, string> } & Record<string, unknown>;
@@ -32,6 +34,10 @@ export type Message = {
   said: string[];
   compiled: boolean;
   lint?: string[];
+  diagnostics?: unknown[]; // `mix loka.compile --json`'s, for the cards
+  pending?: number; // compiles parked while the editor holds (POST /hold)
+  held?: boolean;
+  changed?: Changed[]; // sent once with its write or burst, never kept for a later message
 };
 
 /** `mix loka.lint`'s findings (`rel: words`, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */
@@ -54,13 +60,6 @@ export function textOnly(written: Canonical, next: Canonical): Record<string, st
 }
 
 const NAME = /^\/checkpoints\/([a-z0-9][a-z0-9_-]{0,63})$/; // a file name, never a path
-const json = (response: ServerResponse, status: number, body: unknown) =>
-  response.writeHead(status, { 'content-type': 'application/json' }).end(JSON.stringify(body));
-async function body(request: IncomingMessage) {
-  let text = '';
-  for await (const chunk of request) text += chunk;
-  return text;
-}
 
 /** `GET /checkpoints` lists names; `GET|PUT /checkpoints/<name>` reads or writes `{steps}`. */
 async function checkpoints(request: IncomingMessage, response: ServerResponse, source: string) {
@@ -157,9 +156,6 @@ async function post(
   source: string,
   artifact: string,
 ) {
-  const origin = request.headers.origin;
-  if (origin && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin))
-    return json(response, 403, `not from the author page: ${origin}`);
   let sent: Sent;
   try {
     sent = JSON.parse(await body(request));
@@ -232,34 +228,53 @@ const asked = (url: string) => new URL(url, 'http://x').searchParams.get('q') ??
 const reply = (response: ServerResponse, artifact: string) =>
   numbers(artifact).then((n) => json(response, 200, n));
 
+/** The column's routes, or false for a request that is not one. */
+function column(
+  request: IncomingMessage,
+  response: ServerResponse,
+  source: string,
+  artifact: string,
+) {
+  if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source);
+  if (request.url === '/todo') return json(response, 200, todo(source));
+  if (request.url === '/numbers') return reply(response, artifact);
+  if (request.url?.startsWith('/find?'))
+    return json(response, 200, find(source, artifact, asked(request.url)));
+  if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
+    return post(request, response, source, artifact);
+  return false;
+}
+
 /** Serves `GET /events` (each client gets the current message on connect and every push after),
- * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers` and the column's `POST /open` and
- * `POST /why`. */
-export function serve(port: number, source: string, artifact: string) {
+ * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, the column's `POST /open` and
+ * `POST /why`, and the editor's routes (editing.ts) after its Host and Origin checks. */
+export function serve(port: number, source: string, artifact: string, release = () => {}) {
   const clients = new Set<ServerResponse>();
   let last: Message = { text: {}, said: [], compiled: true };
-  const send = (client: ServerResponse) => client.write(`data: ${JSON.stringify(last)}\n\n`);
-  const route = (request: IncomingMessage, response: ServerResponse) => {
-    if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source);
-    if (request.url === '/todo') return json(response, 200, todo(source));
-    if (request.url === '/numbers') return reply(response, artifact);
-    if (request.url?.startsWith('/find?'))
-      return json(response, 200, find(source, artifact, asked(request.url)));
-    if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
-      return post(request, response, source, artifact);
+  const send = (client: ServerResponse, once = {}) =>
+    client.write(`data: ${JSON.stringify({ ...last, ...once })}\n\n`);
+  const push = (message: Partial<Message>) => {
+    last = { ...last, ...message };
+    for (const client of clients) send(client);
+  };
+  const editor = editing(source, push, (once) => clients.forEach((c) => send(c, once)), release);
+  const route = async (request: IncomingMessage, response: ServerResponse) => {
+    if (foreign(request, response) || (await editor.route(request, response))) return;
+    const answered = column(request, response, source, artifact);
+    if (answered !== false) return answered;
     if (request.url !== '/events') return response.writeHead(404).end();
     response.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });
     send(response);
     clients.add(response);
     request.on('close', () => clients.delete(response));
   };
-  // A half-saved or hand-edited file is the author's to fix, not the watcher's to die of.
+  // A bad file is the author's to fix, not the watcher's to die of; a throw after an answer: logged.
   const server = createServer((request, response) =>
     Promise.resolve()
       .then(() => route(request, response))
-      .catch((e: unknown) => {
-        if (!response.headersSent) response.writeHead(500).end(String(e));
-      }),
+      .catch((e) =>
+        response.headersSent ? console.error(e) : response.writeHead(500).end(`${e}`),
+      ),
   )
     .on('error', (e: NodeJS.ErrnoException) => {
       console.error(`author stream: port ${port} ${e.code}; set LOKA_AUTHOR_PORT to a free port`);
@@ -267,10 +282,9 @@ export function serve(port: number, source: string, artifact: string) {
     })
     .listen(port, '127.0.0.1');
   return {
-    push(message: Partial<Message>) {
-      last = { ...last, ...message };
-      for (const client of clients) send(client);
-    },
+    push,
+    held: editor.held,
+    seen: editor.seen,
     close: () => server.close(),
   };
 }

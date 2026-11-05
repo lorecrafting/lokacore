@@ -1,0 +1,60 @@
+// The author server's HTTP side of the editor (docs/system/cartridge.md#author-preview): who may
+// ask at all (Host, Origin), the write routes (write.ts) and the Hold the watcher parks under.
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import { type Answer, type Changed, writer, writes } from './write.ts';
+
+export const json = (response: ServerResponse, status: number, body: unknown) =>
+  response.writeHead(status, { 'content-type': 'application/json' }).end(JSON.stringify(body));
+export async function body(request: IncomingMessage) {
+  let text = '';
+  for await (const chunk of request) text += chunk;
+  return text;
+}
+
+const HOST = /^(localhost|127\.0\.0\.1)(:\d+)?$/; // the Metro proxy forwards `localhost:<port>`
+const ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+/** Answers 403 (and is true) for a request not from the author's own page: a rebinding DNS name's
+ * Host, or a cross-site page's Origin on anything but a GET (its simple POST would run). */
+export function foreign(request: IncomingMessage, response: ServerResponse) {
+  const { host, origin } = request.headers;
+  if (!HOST.test(host ?? '')) json(response, 403, `not the author host: ${host}`);
+  else if (request.method !== 'GET' && origin && !ORIGIN.test(origin))
+    json(response, 403, `not from the author page: ${origin}`);
+  else return false;
+  return true;
+}
+
+type Push = (message: { held?: boolean; changed?: Changed[] }) => void;
+/** `push` keeps the message for later clients; `once` sends `changed` without keeping it.
+ * `release` runs when the Hold ends, to write what the watcher parked. */
+export function editing(source: string, push: Push, once: Push, release: () => void) {
+  const editor = writer(source, (changed) => once({ changed }));
+  let held = false;
+  const hold = (sent: { on?: unknown }): Answer => {
+    if (typeof sent?.on !== 'boolean') return [400, 'on: true or false'];
+    held = sent.on;
+    push({ held });
+    if (!held) release();
+    return [200, { held }];
+  };
+  /** Answers a write route and is true, or is false for a request that is not one. */
+  async function route(request: IncomingMessage, response: ServerResponse) {
+    const url = request.url ?? '';
+    if (request.method === 'GET') {
+      const read = await editor.get(url);
+      if (read) json(response, ...read);
+      return read !== undefined;
+    }
+    if (request.method !== 'POST' || !(writes(url) || url === '/hold')) return false;
+    let sent;
+    try {
+      sent = JSON.parse(await body(request));
+    } catch {
+      json(response, 400, 'a JSON body');
+      return true;
+    }
+    json(response, ...(url === '/hold' ? hold(sent) : await editor.post(url, sent)));
+    return true;
+  }
+  return { route, held: () => held, seen: editor.seen };
+}

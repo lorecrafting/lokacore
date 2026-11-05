@@ -33,10 +33,19 @@ if (!dir || (flag !== undefined && flag !== '--watch') || rest.length) {
   process.exit(2);
 }
 const source = resolve(dir);
+const port = Number(process.env.LOKA_AUTHOR_PORT || 19008); // mutate-skip: dev port default
 const live =
   flag === '--watch'
-    ? serve(Number(process.env.LOKA_AUTHOR_PORT || 19008), source, out)
+    ? serve(port, source, out, () => {
+        if (!parked) return;
+        write(...parked);
+        if (failed) notCompiled(failed); // the source on disk is the failed save's, not the parked
+      })
     : undefined;
+// While the editor holds (POST /hold), a structural compile waits here, and every compile after
+// it (the newest replaces it), so Metro does not reload the frame mid-edit.
+let parked: [canonicalText: string, sha256: string, said: string[]] | undefined;
+let pending = 0; // mutate-skip: the startup write resets it before any Hold can start
 // the canonical the page runs (the written artifact), the base of every overlay
 let written: Canonical | undefined = existsSync(out)
   ? JSON.parse(JSON.parse(readFileSync(out, 'utf8')).canonical)
@@ -45,7 +54,7 @@ let written: Canonical | undefined = existsSync(out)
 const keeps = 'the preview keeps the last good cartridge.';
 // A `text.json` save shows before its compile: the written words, overlaid with the file's.
 function quick() {
-  if (!written) return;
+  if (!written || parked) return;
   try {
     const text = {
       ...written.text,
@@ -59,36 +68,63 @@ function quick() {
 }
 // A text-only change (against the artifact the page runs) is pushed in place; any other is written.
 function publish(canonicalText: string, sha256: string, said: string[], started: number) {
+  failed = undefined;
   const ms = () => `in ${Math.round(performance.now() - started)} ms`;
   const canonical: Canonical = JSON.parse(canonicalText);
   const overlay = live && written ? textOnly(written, canonical) : undefined;
+  if (live?.held() && (parked || !overlay)) {
+    parked = [canonicalText, sha256, said];
+    live.push({ said, compiled: true, pending: ++pending });
+    console.log(`Held: ${pending} changes wait ${ms()}`);
+    return true;
+  }
   if (overlay) {
     live!.push({ text: overlay, said, compiled: true });
     const n = Object.keys(overlay).length;
     console.log(n ? `Text updated in place: ${n} keys ${ms()}` : `Preview unchanged ${ms()}`);
     return true;
   }
+  write(canonicalText, sha256, said);
+  console.log(`Preview updated: ${sha256.slice(0, 12)} ${ms()}`); // mutate-skip: console notice
+  return true;
+}
+function write(canonicalText: string, sha256: string, said: string[]) {
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(`${out}.tmp`, JSON.stringify({ canonical: canonicalText, sha256 }));
   renameSync(`${out}.tmp`, out); // Metro never reads half a file
-  written = canonical;
-  live?.push({ text: {}, said, compiled: true });
-  console.log(`Preview updated: ${sha256.slice(0, 12)} ${ms()}`);
-  return true;
+  written = JSON.parse(canonicalText);
+  parked = undefined;
+  pending = 0;
+  live?.push({ text: {}, said, compiled: true, pending });
 }
 // The preview allows `~` placeholders; a release compile refuses them (mix loka.compile).
 const compile = (artifact: string) =>
   spawnSync(
     'mise',
-    ['exec', '--', 'mix', 'loka.compile', source, artifact, '--allow-placeholders'],
+    [
+      'exec',
+      '--',
+      'mix',
+      'loka.compile',
+      source,
+      artifact,
+      '--allow-placeholders',
+      '--json',
+      diagnostics(artifact),
+    ],
     {
       cwd: root,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'], // a launcher may have closed stdin (EBADF otherwise)
     },
   );
+const diagnostics = (artifact: string) => join(dirname(artifact), 'diagnostics.json');
 // The last lint read older source, so it goes with the failed compile.
-const notCompiled = (said: string[]) => live?.push({ said, compiled: false, lint: undefined });
+let failed: string[] | undefined; // the last compile's lines, when it failed
+const notCompiled = (said: string[]) => {
+  failed = said;
+  live?.push({ said, compiled: false, lint: undefined });
+};
 
 function build(): boolean {
   const started = performance.now();
@@ -96,6 +132,9 @@ function build(): boolean {
   try {
     const artifact = join(tmp, 'artifact.json');
     const run = compile(artifact);
+    // none written (mix crashed before it): the last build's cards must not stay up
+    const file = diagnostics(artifact);
+    live?.push({ diagnostics: existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : [] });
     const said = `${run.stderr ?? ''}`.split('\n').filter((l) => /^(error|warning|info): /.test(l));
     for (const line of said) console.error(line);
     if (run.status !== 0) {
@@ -149,6 +188,7 @@ watch(source, { recursive: true }, (_, file) => {
   clearTimeout(timer);
   // one build for an editor's burst of writes; a thrown build must not end the watch
   timer = setTimeout(() => {
+    live!.seen(); // what changed outside the editor, before its compile
     lints++;
     quick();
     // the page gets the quick words before the compile blocks this process (spawnSync)

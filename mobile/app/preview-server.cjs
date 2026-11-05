@@ -47,7 +47,8 @@ const server = http.createServer((request, response) => {
       port,
       path: author ? request.url.slice('/__author'.length) : request.url,
       method: request.method,
-      headers: { ...request.headers, host: `localhost:${port}` },
+      // the author server checks the page's own Host (a rebinding name's is foreign)
+      headers: { ...request.headers, host: author ? request.headers.host : `localhost:${port}` },
     },
     (result) => {
       response.writeHead(result.statusCode, {
