@@ -45,18 +45,17 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   const opening = values(cartridge.scenes ?? {}).find(
     (s) => s.control === 'modal' && 'start' in s.on,
   );
-  const ops = [
-    ...record(world, world.character, true, { n: 0 }),
-    ...(opening
-      ? assigned(
-          world,
-          world.character,
-          { ops: [], position: 0, facts: {} },
-          { fact: fact(world, opening), value: 1 },
-          'scene',
-        ).ops
-      : []),
-  ];
+  const ops = record(world, world.character, true, { n: 0 });
+  if (opening)
+    ops.push(
+      ...assigned(
+        world,
+        world.character,
+        { ops: [], position: 0, facts: {} }, // mutate-skip: only .ops of this accumulator is read
+        { fact: fact(world, opening), value: 1 },
+        'scene',
+      ).ops,
+    );
   if (!ops.length) return world;
   const known = apply(world, ops);
   if ('fault' in known) throw new Error('invalid initial knowledge');
