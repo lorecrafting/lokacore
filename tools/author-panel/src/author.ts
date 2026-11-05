@@ -90,9 +90,20 @@ export function useDiagnostics() {
 export type Story = {
   hash: string;
   graph: { nodes: { ref: string; kind: string }[]; edges: unknown[] };
-  report: { unreachable: Record<string, string[]> };
+  report: { unreachable: Record<string, string[]>; behind_lock: { rooms: string[] } };
   todo: Record<string, unknown[]>;
   diagnostics: Record<string, unknown[]>;
+  map: MapRoom[];
+};
+/** A room as the map draws it (kernel/ts/play/story.ts `rooms`): `at` is absent when unplaced. */
+export type MapRoom = {
+  ref: string;
+  key: string;
+  file?: string;
+  area: string | null;
+  title: string;
+  exits: { dir: string; to: string; barrier?: string; hidden?: boolean }[];
+  at?: { x: number; y: number; z: number };
 };
 /** The Story map's model (kernel/ts/play/story.ts): the definitions, their `~` and diagnostics. */
 export const story = () =>
