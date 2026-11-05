@@ -18,11 +18,18 @@ const ui = (kind: string, registry = {}) =>
 // the `partial.` prefix of an extending definition, or does not follow a $ref into a definition.
 test('a real kind claims its text keys, definition references, policies and steps', () => {
   const rooms = ui('rooms');
-  assert.deepEqual(rooms.name, { 'ui:field': 'TextKey' });
-  assert.deepEqual(rooms.exits.north.barrier, { 'ui:field': 'DefinitionRef' });
-  assert.deepEqual(ui('dialogues').policy, { 'ui:field': 'Policy' });
+  assert.deepEqual(rooms.name, { 'ui:field': 'TextKey', 'ui:fieldReplacesAnyOrOneOf': true });
+  assert.deepEqual(rooms.exits.north.barrier, {
+    'ui:field': 'DefinitionRef',
+    'ui:fieldReplacesAnyOrOneOf': true,
+  });
+  assert.deepEqual(ui('dialogues').policy, {
+    'ui:field': 'Policy',
+    'ui:fieldReplacesAnyOrOneOf': true,
+  });
   assert.deepEqual(ui('reactions').steps.items.anyOf[0], {
     'ui:field': 'Step',
+    'ui:fieldReplacesAnyOrOneOf': true,
     'ui:title': 'Step',
   });
 });
@@ -36,7 +43,7 @@ test("the registry's hand-built edit card claims its field; generic and other ki
     'npcs.name': card('NpcName.tsx'),
   });
   assert.deepEqual(rooms.exits, { 'ui:field': 'ExitsCard' });
-  assert.deepEqual(rooms.name, { 'ui:field': 'TextKey' });
+  assert.deepEqual(rooms.name, { 'ui:field': 'TextKey', 'ui:fieldReplacesAnyOrOneOf': true });
 });
 
 // Breaks (loka-wfrgk.11 review 2, 5): a root-level row (no field) is dropped, so the text catalog
@@ -82,9 +89,15 @@ test('a recursive definition ends and every anyOf branch is titled', () => {
     Gate: {},
   };
   const out = uiSchema('k', tree, nodes, {});
-  assert.deepEqual(out.label, { 'ui:field': 'TextKey' });
-  assert.deepEqual(out.kids.items.label, { 'ui:field': 'TextKey' });
-  assert.deepEqual(out.kids.items.kids.items.label, { 'ui:field': 'TextKey' });
+  assert.deepEqual(out.label, { 'ui:field': 'TextKey', 'ui:fieldReplacesAnyOrOneOf': true });
+  assert.deepEqual(out.kids.items.label, {
+    'ui:field': 'TextKey',
+    'ui:fieldReplacesAnyOrOneOf': true,
+  });
+  assert.deepEqual(out.kids.items.kids.items.label, {
+    'ui:field': 'TextKey',
+    'ui:fieldReplacesAnyOrOneOf': true,
+  });
   assert.equal(out.kids.items.kids.items.kids, undefined);
   assert.deepEqual(
     out.pick.anyOf.map((b: any) => b['ui:title']),

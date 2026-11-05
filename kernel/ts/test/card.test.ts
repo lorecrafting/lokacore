@@ -114,7 +114,7 @@ test('absent fields are hidden until revealed; a revealed one keeps its card', (
   assert.deepEqual(hidden(ui, 'npcs', registry, { room: 'square' }, ['short']), {
     room: { 'ui:field': 'DefinitionRef' },
     short: { 'ui:field': 'TextKey' },
-    hp: { 'ui:field': 'Hidden' },
+    hp: { 'ui:field': 'Hidden', 'ui:widget': 'hidden' },
   });
 });
 

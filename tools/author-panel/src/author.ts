@@ -93,6 +93,7 @@ export type Story = {
   report: { unreachable: Record<string, string[]> };
   todo: Record<string, unknown[]>;
   diagnostics: Record<string, unknown[]>;
+  files: Record<string, string>;
 };
 /** The Story map's model (kernel/ts/play/story.ts): the definitions, their `~` and diagnostics. */
 export const story = () =>

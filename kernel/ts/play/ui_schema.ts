@@ -23,7 +23,8 @@ function walk(node: unknown, defs: Record<string, Node>, seen: string[]): Ui {
   if (n.$ref) {
     const ref = named(n.$ref);
     const claim = CLAIMED.exec(ref);
-    if (claim) return { 'ui:field': claim[1] };
+    // the hand-built field draws the whole union (TextKey, DefinitionRef, Policy and Step are anyOf), not under rjsf's selector
+    if (claim) return { 'ui:field': claim[1], 'ui:fieldReplacesAnyOrOneOf': true };
     // a recursive definition is drawn DEPTH levels deep, then ends (no real kind recurses today)
     if (seen.filter((s) => s === ref).length >= DEPTH) return {};
     return walk(defs[ref], defs, [...seen, ref]);

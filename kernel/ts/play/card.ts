@@ -90,7 +90,8 @@ export function hidden(
   revealed: string[],
 ): Ui {
   const out = { ...ui };
-  for (const f of addable(kind, registry, doc, revealed)) out[f] = { 'ui:field': 'Hidden' };
+  for (const f of addable(kind, registry, doc, revealed))
+    out[f] = { 'ui:field': 'Hidden', 'ui:widget': 'hidden' }; // the widget drops rjsf's label row too
   return out;
 }
 
