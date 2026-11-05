@@ -77,6 +77,7 @@ test('/world lists real worlds, refuses names that are paths, and makes one as b
     [400, { name: '../worlds/b' }],
     [404, { name: 'linked' }],
     [404, { name: 'loose' }],
+    [404, { name: 'e', new: 'yes' }], // only new: true makes a world
     [400, { name: '../x', new: true }],
     [400, { name: 'x.y', new: true }],
     [400, { name: '1x', new: true }],
@@ -153,8 +154,13 @@ test('bin/loka dev --watch with no remembered world prints the usage', (t) => {
   const { dir, a } = worlds(t);
   for (const args of [['--watch'], [a, '--x'], [a, '--watch', 'x']]) {
     const run = spawnSync(`${ROOT}bin/loka`, ['dev', ...args], {
-      env: { ...process.env, LOKA_DEV_CARTRIDGE: join(dir, 'out/current.json') },
+      env: {
+        ...process.env,
+        LOKA_DEV_CARTRIDGE: join(dir, 'out/current.json'),
+        LOKA_AUTHOR_PORT: '0',
+      },
       encoding: 'utf8',
+      timeout: 20_000, // a dev that starts watching fails here instead of hanging
     });
     assert.equal(run.status, 2, `${args} ${run.stderr}`);
   }
