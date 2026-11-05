@@ -19,6 +19,7 @@ export function useLayout(): [Layout, SetLayout] {
 export function Divider({ side, layout, set }: { side: 'left' | 'right'; layout: Layout; set: SetLayout }) {
   const width = (px: number) => set((l) => ({ ...l, [side]: px }));
   const drag = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId); // a release over the Book frame still ends the drag
     const [from, start] = [e.clientX, layout[side]];
     const move = (m: PointerEvent) => width(clamp(side, start + (m.clientX - from) * (side === 'left' ? 1 : -1)));
     const up = () => (removeEventListener('pointermove', move), removeEventListener('pointerup', up));

@@ -2,12 +2,12 @@
 // editors) over the console (the change feed, you or outside, and the last compile's diagnostics).
 import type { Change, Story } from './author.ts';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card.tsx';
-import type { Selection } from './shell.ts';
+import { places, type Selection } from './shell.ts';
 
 /** The selection's summary: its kind, ref, `~`, diagnostics and links, from GET /story. */
 export function Inspector({ sel, story }: { sel?: Selection; story?: Story }) {
   if (!sel) return <p className="p-3 text-muted-foreground">Select a definition in the hierarchy or a line in the Book.</p>;
-  const ref = story?.graph.nodes.find((n) => n.ref.endsWith(`:${sel.kind}/${sel.key}`))?.ref;
+  const ref = places(sel, story?.graph.nodes ?? []).inspector?.ref;
   const count = (rows?: Record<string, unknown[]>) => (ref && rows?.[ref]?.length) || 0;
   const unreached = !!ref && Object.values(story!.report.unreachable).some((refs) => refs.includes(ref));
   return (

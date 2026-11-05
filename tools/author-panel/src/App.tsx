@@ -53,10 +53,10 @@ function useStart(book: Book) {
   const done = useRef<number>(undefined);
   useEffect(() => {
     const name = localStorage.getItem(START);
-    if (!book.loaded || !book.state || done.current === book.loaded.at) return;
+    if (!name || !book.loaded || book.state?.steps.length !== 0 || done.current === book.loaded.at)
+      return; // a state still the last Book's (steps) waits for the new one
     done.current = book.loaded.at;
-    if (name && book.state.steps.length === 0)
-      void checkpoints.get(name).then(({ steps }) => book.send({ op: 'jump', steps }));
+    void checkpoints.get(name).then(({ steps }) => book.send({ op: 'jump', steps }));
   }, [book]);
 }
 
@@ -195,7 +195,7 @@ export default function App() {
   const [layout, set] = useLayout();
   const [story, setStory] = useState<Story>();
   const [palette, setPalette] = useState(false);
-  useEffect(() => void getStory().then(setStory, () => setStory(undefined)), [diag.said]);
+  useEffect(() => void getStory().then(setStory, () => {}), [diag.said]); // a failed fetch keeps the last good
   const { pick, run } = useWiring(book, heard, layout, set, () => setPalette(true));
   const s: Shell = { layout, set, story, book, diag, pick };
   const all = items(story?.graph.nodes ?? [], diag.text ?? {}, diag.placeholders ?? {});

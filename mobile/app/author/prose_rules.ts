@@ -94,9 +94,9 @@ export const CSS = `
 [data-loka-todo]{position:relative}
 [data-loka-todo]::before{content:"";position:absolute;left:-${space.lg}px;top:0;bottom:0;width:${size.speechBar}px;background:var(--loka-warning)}
 [data-loka-landed]::before{background:var(--loka-action)}
+[data-loka-selected]{background:color-mix(in srgb,var(--loka-action) 14%,transparent)}
 [data-loka-landed],[data-loka-field]{outline:${size.focus}px solid var(--loka-action);outline-offset:${size.focus}px}
 [data-loka-field]{background:var(--loka-card);color:var(--loka-fg);caret-color:var(--loka-action)}
-[data-loka-selected]{background:color-mix(in srgb,var(--loka-action) 14%,transparent)}
 [data-loka-unconfirmed]{text-decoration:underline wavy var(--loka-warning)}
 [data-loka-a11y]::after{content:", " attr(data-loka-a11y);position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .loka-note{position:absolute;font:${label};letter-spacing:${type.label.letterSpacing}px;color:var(--loka-dim);z-index:10}
