@@ -269,6 +269,8 @@ test('GET /story carries the diagnostics, and a Hold keeps the last whole model'
     const released = await body();
     assert.deepEqual(released.diagnostics, {});
     assert.deepEqual(released.outline.beats, []);
+    server.push({ diagnostics: [row] }); // out of a Hold, a GET's model takes the latest ones
+    assert.deepEqual((await body()).diagnostics, { [green]: [row] });
   } finally {
     put('outline.json', outline);
   }
