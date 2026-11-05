@@ -56,6 +56,9 @@ test('/edit shows its words before the compile, marks them on a refused one, cle
     [refused.text, refused.unconfirmed],
     [{ 'room.a': 'new words', 'room.b': 'b' }, [{ key: 'room.a', at: 'text.json:2' }]],
   );
+  // Break: a compile parked by the Hold (written later) clears the words while held.
+  live.push({ compiled: true, pending: 1 });
+  assert.equal((await events()).text['room.a'], 'new words');
   live.push({ compiled: true, text: {} });
   const good = await events();
   assert.deepEqual([good.text, good.unconfirmed], [{}, []]);
@@ -96,4 +99,9 @@ test('/line answers the source line a Book line writes, its words unbound, or wh
     'a choice label: its key is its words',
   ]);
   assert.equal((await line('room.none', 'nowhere'))[0], 404);
+  // Break: two scenes' `* ~` lines both answer the first, so a save writes into the wrong scene.
+  writeFileSync(join(src, 'scenes/t.scene'), 'dialogue t\n  * ~\n');
+  assert.equal((await line('dialogue.t.prompt', '~'))[0], 200);
+  writeFileSync(join(src, 'scenes/u.scene'), 'dialogue u\n  * ~\n');
+  assert.equal((await line('dialogue.u.prompt', '~'))[0], 400);
 });

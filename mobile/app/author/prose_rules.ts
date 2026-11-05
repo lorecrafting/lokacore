@@ -42,9 +42,10 @@ export function walk(e: Key, typing: boolean) {
   return Object.hasOwn(asked, e.key) ? asked[e.key as keyof typeof asked] : undefined;
 }
 
-/** Whether the panel hands a key to the Book: a walk key, or Enter anywhere but a text field or a
- * control (whose Enter is its own). */
+/** Whether the panel hands a key to the Book: a walk key or Cmd-Z, or Enter anywhere but a text
+ * field or a control (whose Enter is its own). */
 export function relays(e: Key, target: Target) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'z') return !textField(target); // put back
   if (e.key !== 'Enter') return walk(e, textField(target)) !== undefined;
   return (
     !textField(target) &&

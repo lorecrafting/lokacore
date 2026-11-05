@@ -69,6 +69,10 @@ test("the panel hands the Book its walk keys and Enter, but not a field's or a c
   assert.ok(!relays(key(']'), on('INPUT')) && !relays(key('['), on('DIV', true)));
   assert.ok(!relays(key('Enter'), on('BUTTON')) && !relays(key('Enter'), on('TEXTAREA')));
   assert.ok(!relays(key('Enter', { metaKey: true }), on('BODY')) && !relays(key('x'), on('BODY')));
+  assert.ok(
+    relays(key('z', { metaKey: true }), on('BUTTON')) &&
+      !relays(key('z', { ctrlKey: true }), on('INPUT')),
+  );
 });
 
 // Breaks: an engine line or a choice label gets the generic note.
@@ -101,7 +105,9 @@ test('only the gated require reaches the in-Book editor', () => {
     },
   )
     .split('\n')
-    .filter((l) => /['"]\.{1,2}\/(author\/)?inbook/.test(l) && !/typeof import\(/.test(l));
+    .filter(
+      (l) => /['"]\.{1,2}\/(author\/)?inbook/.test(l) && !/typeof import\(|import type /.test(l),
+    );
   assert.deepEqual(
     hits.map((l) => l.replace(/:\d+:\s*/, ': ')),
     [

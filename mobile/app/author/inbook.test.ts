@@ -112,6 +112,8 @@ test('a double-click opens the source words; Enter saves them to that line and c
 // Breaks: Esc or an untouched field writes, an emptied field saves, or a paste keeps its newline.
 test('Esc and unchanged words write nothing; empty words say how to leave a line unwritten', async () => {
   await openFirst();
+  await page.locator('[data-loka-field]').dblclick(); // picks a word; opens no second field
+  assert.equal(await page.locator('[data-loka-field]').count(), 1);
   await page.keyboard.press('Escape');
   await openFirst();
   await page.keyboard.press('Enter'); // unchanged

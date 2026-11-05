@@ -9,7 +9,7 @@ export function told(push: (message: Partial<Message>) => void) {
   const words = new Map<string, { words: string; at: string }>(); // a Map: the page names the key
   let text: Record<string, string> = {}; // the overlay as pushed, before these words
   const over = (message: Partial<Message>) => {
-    if (message.compiled) words.clear();
+    if (message.compiled && !message.pending) words.clear(); // a held compile is not written
     if (message.text) text = message.text;
     const shown = Object.fromEntries([...words].map(([key, t]) => [key, t.words]));
     if (message.text) message = { ...message, text: { ...message.text, ...shown } };

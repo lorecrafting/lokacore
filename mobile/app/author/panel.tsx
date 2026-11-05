@@ -209,10 +209,11 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
   latest.current = tools;
   useEffect(() => {
     if (!devClock || !game) return;
-    const state = () => (tell({ state: stateOf(game) }), inBook?.recount()); // hello missed the `~` counts
+    const state = () => tell({ state: stateOf(game) });
     const onMessage = (e: MessageEvent<Asked>) => {
       if (!LOCAL.test(e.origin) || !e.source || !OPS.has(e.data?.op)) return;
       panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
+      if (e.data.op === 'hello') inBook?.recount(); // a new panel missed the `~` counts
       if (e.data.op === 'trace') return void tell({ trace: game.trace(), id: e.data.id });
       if (e.data.op === 'advance') advance(e.data.minutes, game);
       if (e.data.op === 'go_to_room' || e.data.op === 'set_fact') askCheat(game, e.data);
@@ -227,10 +228,8 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     window.addEventListener('message', onMessage);
     document.addEventListener('click', onClick, true);
     const unsubscribe = game.subscribe(state);
-    const unlisten = listen((message) => {
-      inBook?.heard(message);
-      latest.current.redraw({}); // a text overlay redraws in place
-    });
+    // a text overlay redraws in place
+    const unlisten = listen((message) => (inBook?.heard(message), latest.current.redraw({})));
     const stop = inBook?.start({ seen, said, tell, redraw: () => latest.current.redraw({}) });
     if (panel) state();
     else if (window.parent !== window)

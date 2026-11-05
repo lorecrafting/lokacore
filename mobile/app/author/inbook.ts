@@ -51,6 +51,7 @@ let hooks: Hooks = { seen: new Map(), said: new Map(), tell: () => {}, redraw: (
 const edits: { id: number; at: string; file: string; key: string; words: string }[] = []; // this page's /edit answers
 let unconfirmed = new Set<string>();
 let field: Field | undefined;
+let opening = false; // a /line in flight: a second double-click opens nothing
 let landed: HTMLElement | undefined;
 let counted = '';
 let note: HTMLDivElement;
@@ -110,10 +111,13 @@ function reapply() {
 }
 async function openField(el: HTMLElement) {
   const key = hooks.seen.get(el.textContent ?? '');
-  if (!key || field) return say(el, key ? '' : noFieldNote(undefined));
-  const [status, at] = await api(`/line?key=${enc(key)}&words=${enc(hooks.said.get(key) ?? '')}`);
+  if (!key || field || opening) return say(el, key ? '' : noFieldNote(undefined));
+  opening = true;
+  const [status, at] = await api(
+    `/line?key=${enc(key)}&words=${enc(hooks.said.get(key) ?? '')}`,
+  ).finally(() => (opening = false));
   if (status !== 200) return say(el, noFieldNote(key, typeof at === 'string' ? at : undefined));
-  field = { el, kept: [...el.childNodes], shown: el.textContent!, key, at };
+  field = { el, kept: [...el.childNodes], shown: hooks.said.get(key)!, key, at };
   observer?.disconnect(); // the field is not a Book render
   el.replaceChildren(at.words);
   el.contentEditable = 'plaintext-only';
@@ -226,6 +230,7 @@ function onKey(e: KeyboardEvent, inField = typing(e.target), relayed = false) {
   reapply();
 }
 const onDouble = (e: MouseEvent) => {
+  if (field?.el.contains(e.target as Node)) return; // a word picked in the field
   let el = e.target as HTMLElement | null;
   while (el && el !== document.body && !hooks.seen.has(el.textContent ?? '')) el = el.parentElement;
   void openField(el && el !== document.body ? el : (e.target as HTMLElement));

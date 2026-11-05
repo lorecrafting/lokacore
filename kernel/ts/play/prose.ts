@@ -39,32 +39,34 @@ export function edit(
   return done(`edit ${file}:${line}`, { file, before, after: lines.join('\n') });
 }
 
-export function sourceOf(source: string, key: string, words?: string) {
+/** Every `file:line` that may write `key`: its `"key":` lines, else lines holding `words`. */
+export function sourcesOf(source: string, key: string, words?: string) {
   const all = files(source);
-  const find = (hit: (line: string) => boolean, rels = all) => {
-    for (const rel of rels) {
-      const i = readFileSync(join(source, rel), 'utf8').split('\n').findIndex(hit);
-      if (i >= 0) return `${rel}:${i + 1}`;
-    }
-  };
+  const find = (hit: (line: string) => boolean, rels = all) =>
+    rels.flatMap((rel) =>
+      readFileSync(join(source, rel), 'utf8')
+        .split('\n')
+        .flatMap((l, i) => (hit(l) ? [`${rel}:${i + 1}`] : [])),
+    );
   const defined = find((l) => l.includes(`"${key}":`));
   const first = words?.trim().split('\n')[0];
-  if (defined || !first) return defined;
-  return (
-    find((l) => l.includes(JSON.stringify(words))) ??
-    find(
-      (l) =>
-        l.trimEnd().endsWith(`: ${first}`) ||
-        [`- ${first}`, `* ${first}`, first].includes(l.trim()),
-      all.filter((rel) => /\.(scene|cut)$/.test(rel)),
-    )
+  if (defined.length || !first) return defined;
+  const quoted = find((l) => l.includes(JSON.stringify(words)));
+  if (quoted.length) return quoted;
+  return find(
+    (l) =>
+      l.trimEnd().endsWith(`: ${first}`) || [`- ${first}`, `* ${first}`, first].includes(l.trim()),
+    all.filter((rel) => /\.(scene|cut)$/.test(rel)),
   );
 }
+export const sourceOf = (source: string, key: string, words?: string) =>
+  sourcesOf(source, key, words)[0];
 
 /** GET /line?key=&words=: the source line a Book line's field writes (`sourceOf`), with its words
  * as written, or the reason it holds none (`worded`'s). */
 export function located(root: string, key: string, words: string): Answer {
-  const at = sourceOf(root, key, words) ?? refuse(404, `no source line for ${key}`);
+  const [at = refuse(404, `no source line for ${key}`), other] = sourcesOf(root, key, words);
+  if (other) refuse(400, `more than one source line holds ${key}'s words`); // two `* ~` lines: which?
   const [file, n] = [at.slice(0, at.lastIndexOf(':')), Number(at.slice(at.lastIndexOf(':') + 1))];
   const was = readFileSync(guarded(root, file, 'read'), 'utf8').split('\n')[n - 1];
   worded(file, was, ''); // refuses a line that is not words
