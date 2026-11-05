@@ -44,7 +44,7 @@ of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-
   `recap_sampler/cartridge.json`).
 - `calendar`: start 25200 (07:00 day 1), 3600 units per hour, 24 hours, 4 subdivisions;
   `weather` `clear` 2, `frost` 1, `rain` 1 (`wet`), `gale` 1, `heat` 1, `drought` 1
-  (`exposure_sampler`, `test/fixtures/drain_cartridge`); `season` period 345600 (four days, so winter is day 4): `spring` 0,
+  (`exposure_sampler`; `drought` is the showcase's own); `season` period 345600 (four days, so winter is day 4): `spring` 0,
   `summer` 86400, `autumn` 172800, `winter` 259200; `tide` period 43200: `low` 0, `high` 21600;
   `lunar` period 345600: `new` 0, `full` 172800 (`sky_sampler`, `time_sampler`).
 - Pools: `hp` 1..10 start 10 gain 0; `mv` 0..100 start 100; `pennies` 0..100 start 10, the
@@ -56,7 +56,7 @@ of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-
   (`persuade_sampler`, `barrier_sampler`).
 - Statuses ([row 1](../system/mechanics.md#status-effects-over-time-toolbox-row-1),
   [row 2c](../system/mechanics.md#status-modifiers-toolbox-row-2c); `exposure_sampler/statuses`,
-  `buffs_sampler/statuses`, `test/fixtures/drain_cartridge`): `chilled`, `soaked`, `windburnt`, `overheated`
+  `buffs_sampler/statuses`, `fed_sampler/statuses`, `areas/fell_road/statuses/parched.json`): `chilled`, `soaked`, `windburnt`, `overheated`
   each hp -1 every 7200 for 9000; `parched` mv -10 every 1800 for 5400; `well_fed` hp +1 and
   mv +5 every 1200 for 3600 (a cooked meal's `applies` lasts 7200); `refreshed` mv +5 every 600
   for 1800; `might` modifies str +3 for 3600,
@@ -134,7 +134,7 @@ what to wear ([trap 12](../MECHANICS-TOOLBOX.md#traps)).
   and `clock_hour`), each `when all(sky {weather}, has_tag {tag: exposed, subject: room}, not
   wearing {tag})`: frost/`warm`/`chilled`, rain/`waterproof`/`soaked`, gale/`windproof`/`windburnt`,
   heat/`cool`/`overheated` (`exposure_sampler/reactions`). Dry: `drought` with no garment leaf,
-  applying `parched` (`test/fixtures/drain_cartridge`). `entity_entered_room` requires a `room`, so `the_fold`
+  applying `parched`, a drought weather debuff on `mv`, not a need (`areas/fell_road/reactions/parched_*.json`). `entity_entered_room` requires a `room`, so `the_fold`
   gets its own five entry rules; the five `clock_hour` rules name no room and serve both.
 - Potion: reaction `on {event: drank, kind: draught}` applies `might` (`buffs_sampler/reactions/potion.json`).
 - Song: scripted action `play_song` at `hearth` (policy `has_item lute`, success emits a custom event as the
