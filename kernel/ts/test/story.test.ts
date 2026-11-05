@@ -72,7 +72,7 @@ const outline = {
 };
 put('outline.json', outline);
 const artifact = join(dir, 'artifact.json');
-execFileSync('mise', ['exec', '--', 'mix', 'loka.compile', src, artifact, '--allow-placeholders'], {
+execFileSync('mix', ['loka.compile', src, artifact, '--allow-placeholders'], {
   cwd: root,
   stdio: 'ignore',
 });
