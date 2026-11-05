@@ -16,7 +16,7 @@ registerHooks({
       return stub('export const Storm=(p)=>{globalThis.sky=p;return null}');
     if (specifier === './sound.ts')
       return stub(`const quiet=()=>{};export const ambience=(...a)=>{globalThis.bed=a},
-        thunder=quiet,play=quiet,fight=quiet,setMuted=quiet,sources=quiet,explore=quiet,
+        thunder=quiet,play=quiet,fight=(e)=>globalThis.fought?.push(e),setMuted=quiet,sources=quiet,explore=quiet,
         chapterDuck=quiet,playTurn=quiet,duck=quiet`);
     return next(specifier, context);
   },
@@ -81,8 +81,8 @@ test('place.sound and place.exposed reach the bed and the sky', () => {
   useCueSounds({ ...screen, treatment: 'reverie' }, 0);
   effects = false;
   assert.equal(g.bed[3], 'silent');
-  // Breaks: after a fatal blow the bed returns over the Combat card, not on waking; or a later won
-  // fight's page, or a first view after a past death, holds the bed back.
+  // Breaks: after a fatal blow the bed returns over the Combat card, not on waking (nor the room's
+  // before it, loka-dbtxr); or a later won fight's page, or a first view after a past death, holds it.
   const heard = (next: object) => {
     g.bed = undefined;
     effects = true;
@@ -92,7 +92,9 @@ test('place.sound and place.exposed reach the bed and the sky', () => {
     return !!g.bed;
   };
   const fight = view().combat;
+  g.fought = [];
   assert.equal(heard({ died: 'fatal', ended: fight }), false, 'the fatal card');
+  assert.ok(g.fought.includes('cut'), 'the room before the death is cut');
   assert.equal(heard({ died: 'fatal', ended: fight }), false, 'a next view on the card');
   assert.equal(heard({ died: 'fatal' }), true, 'Back to World');
   // Breaks: waking is not told apart, so the wake room's piece plays (plan 14).

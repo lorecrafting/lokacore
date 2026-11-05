@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/alternates.ts';
-// size: allow 362, typed quest reactions, deadline pairing and group merging share FIFO admission; ambient lines read the advanced state
+// size: allow 361, typed quest reactions, deadline pairing and group merging share FIFO admission; ambient lines read the advanced state
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -21,7 +21,7 @@ import { sequence, triggered } from '../mechanics/reaction.ts';
 import { levelsReached, oneWrite } from '../mechanics/levelling/shared.ts';
 import { poolWriters } from '../mechanics/resource.ts';
 import { partings } from '../mechanics/escort/shared.ts';
-import { closing, levelAt } from '../mechanics/death/lines.ts';
+import { closing, say } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
@@ -58,7 +58,7 @@ type P = {
   applied: number;
   rng: World['state']['rng'];
   narration: Text[];
-  levelAt?: number; // the narration's length when the first level_reached was delivered
+  levelAt?: number; // the narration's length when a rule answering the actor's level_reached first spoke
   wokeAt?: number; // the narration's length when the first player's entity_died was delivered
   holders: Map<string, number>; // each status holder's, reaction fact row's, written pool's writer group
   // Each item the root command moved: its writer group (hs-1). ponytail: merge and joinEarlier do
@@ -237,7 +237,7 @@ function earnedExit(p: P, instance_id: QuestInstanceId, at: Parameters<typeof st
 }
 
 // The queue's deliveries to quiescence, or the fault that ends them.
-// size: allow 43, each delivery names the bodies dead after its cause once (loka-kgd.105); a level's lines go before its first spoken rule's
+// size: allow 41, each delivery names the bodies dead after its cause once (loka-kgd.105)
 function react(p: P, ran = false): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
@@ -271,9 +271,7 @@ function react(p: P, ran = false): Admitted | undefined {
       if (!own) continue;
       const delivered = admit('reaction', own);
       if (delivered.kind !== 'accepted') return delivered;
-      if (delivered.narration?.length)
-        p.levelAt ??= levelAt(p.command.payload.actor_id, next.cause, p.narration.length);
-      p.narration.push(...(delivered.narration ?? []));
+      say(p, p.command.payload.actor_id, next.cause, delivered.narration);
       p.group++;
       const base = cause(p, next.cause.logical_time, next.cause.id);
       const failed = join(p, delivered.delta.ops, delivered.events, base, depth, next.mint);

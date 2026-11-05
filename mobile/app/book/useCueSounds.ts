@@ -4,7 +4,7 @@ import { useCues } from './cues.ts';
 import { hearCues, playRiffle, playTurn } from './cueSounds.ts';
 import { useReducedMotion } from './fade.ts';
 import type { presenter } from './presenter.ts';
-import { ambience } from './sound';
+import { ambience, fight } from './sound';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
@@ -20,7 +20,8 @@ export function useCueSounds(s: Screen, turn: number, resumes?: number, riffle?:
   // This runs before useCues, so a fight or a new chapter's music has not started: no piece, none spent.
   // Waking is the exception: only the bed returns, and the room's piece is spent (plan 14).
   useEffect(() => {
-    if (s.ended && s.died !== fell.current) return; // the fatal card is up: the bed waits for waking
+    // The fatal card is up: the bed waits for waking, not the room before it (a death off a fight keeps it).
+    if (s.ended && s.died !== fell.current) return fight('cut');
     const woke = s.died !== fell.current;
     fell.current = s.died;
     const theme = chapter !== undefined && chapter !== read.current;

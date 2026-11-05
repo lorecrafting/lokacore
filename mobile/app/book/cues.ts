@@ -140,15 +140,16 @@ function fall(s: Queue, death: Cue, now: number) {
 }
 
 export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
-  const s: Queue = turned
-    ? { ...q, card: false, playing: undefined, pending: kept(q.pending) }
-    : { ...q };
+  const s: Queue = turned ? { ...q, card: false, playing: undefined } : { ...q };
   s.merged = { ...q.merged };
   const fired: Cue[] = [];
   s.held = [...(turned ? q.held.filter(isLevel) : q.held), ...arriving];
+  // A later level replaces a pending one, as it does in the slot.
+  if (turned) s.pending = s.held.some(isLevel) ? undefined : kept(q.pending);
   const death = s.held.find((c) => c.name === 'death');
   if (death) return { q: s, fired: fall(s, death, now) };
-  if (turned) s.heldUntil = now + motion.quick.duration;
+  // Nothing plays over a turn: a level kept over it waits out the hold, not the old beat.
+  if (turned) s.heldUntil = s.until = now + motion.quick.duration;
   if (now < s.heldUntil) return { q: s, fired };
   const cues = gathered(s.held);
   s.held = [];

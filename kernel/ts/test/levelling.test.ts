@@ -1,4 +1,4 @@
-// size: allow 680, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
+// size: allow 681, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
 // Toolbox row 4 on the compiled levelling sampler: rats grant 10 experience each, level 2 at 30
 // grants one point, Raise spends it, and the quest reward grants 20 (mechanics.md row 4).
 import assert from 'node:assert/strict';
@@ -29,7 +29,7 @@ import { key } from '../src/foundation/compose.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { levelsReached, levelUp, oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
-import { closing, levelAt } from '../src/mechanics/death/lines.ts';
+import { closing, say } from '../src/mechanics/death/lines.ts';
 import { type Joins, runDelayed } from '../src/mechanics/delayed.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { gameView } from '../src/view/view.ts';
@@ -657,8 +657,13 @@ test("level lines move up only for the actor's level; a penalty line stays last"
   const w = holding(50);
   const reached = (character_id: string) =>
     ({ payload: { type: 'level_reached', character_id, level: 2 } }) as unknown as DomainEvent;
-  assert.equal(levelAt(w.character, reached(w.character), 3), 3);
-  assert.equal(levelAt(w.character, reached('someone'), 3), undefined);
+  const at = (character_id: string) => {
+    const p: { narration: Text[]; levelAt?: number } = { narration: [{ key: 'a' }] };
+    say(p, w.character, reached(character_id), [{ key: 'b' }]);
+    return p.levelAt;
+  };
+  assert.equal(at(w.character), 1);
+  assert.equal(at('someone'), undefined);
   const death = { penalty: { experience: { narration: 'lost' } } };
   const dying = {
     ...w,

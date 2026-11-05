@@ -192,17 +192,38 @@ test('a blow dealt is an impact, with no haptic', () => {
   assert.deepEqual(log, [['play', 'impact']]);
 });
 
+const felt = () => (g.bookDevice as string[][]).filter((l) => l[0] === 'haptic');
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 // Breaks (book-ui.md, A level is never dropped; loka-g5hh.2.11): a level landing under a page curl
-// loses its haptic, or feels it at once under the curl; a blow's haptic is still dropped, not held.
+// loses its haptic, feels it at once under the curl, or at the curl's first end when a riffle
+// lengthened it; a blow's haptic is still dropped, not held.
 test('a level under a page curl is felt once the curl ends; a blow there is not', async () => {
   g.bookDevice = [];
   curlFor(40);
   playCue({ name: 'level' });
   playCue({ name: 'hp_loss', loss: 1 });
-  const felt = () => (g.bookDevice as string[][]).filter((l) => l[0] === 'haptic');
+  curlFor(100);
+  await wait(70);
   assert.deepEqual(felt(), []);
-  await new Promise((r) => setTimeout(r, 80));
+  await wait(80);
   assert.deepEqual(felt(), [['haptic', 'medium']]);
+  g.bookDevice = undefined;
+});
+
+// Breaks (book-ui.md, a death's heavy haptic is the last thing felt): a level's held haptic fires
+// after a death outside a fight, or after the Book has gone.
+test('a death or the Book going cancels a held level haptic', async () => {
+  g.bookDevice = [];
+  curlFor(40);
+  playCue({ name: 'level' });
+  playCue({ name: 'death', fight: false });
+  const off = hearCues();
+  curlFor(40);
+  playCue({ name: 'level' });
+  off();
+  await wait(80);
+  assert.deepEqual(felt(), [['haptic', 'heavy']]);
   g.bookDevice = undefined;
 });
 

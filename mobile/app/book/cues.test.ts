@@ -346,13 +346,15 @@ test('a page turn cancels what is queued; the arriving cues start at the picture
   assert.deepEqual(names(step(chapter.q, [], 1200 + QUICK).fired), ['chapter']);
 });
 
-// Breaks (book-ui.md, A level is never dropped; loka-g5hh.2.11): a page turn, a second turn inside
-// the hold, or a chapter card (arriving with the level, after it, or over it) drops the level.
+// Breaks (book-ui.md, A level is never dropped; loka-g5hh.2.11): a turn, two, or a card (with, after or
+// over it) drops a level; it waits the old beat, not the hold; a later level plays besides, not over.
 test('a pending or held level outlives a page turn and a chapter card, then plays', () => {
-  let r = step(QUIET, [blow(1)], 1000);
-  r = step(r.q, [{ name: 'level' }], 1100);
+  const r = step(step(QUIET, [blow(1)], 1000).q, [{ name: 'level' }], 1100);
   const turned = step(step(r.q, [], 1200, true).q, [], 1300, true);
+  assert.equal(turned.q.until, 1300 + QUICK); // deliver's timer looks again then
   assert.deepEqual(names(step(turned.q, [], 1300 + QUICK).fired), ['level']);
+  const both = step(step(r.q, [{ name: 'level' }], 1200, true).q, [], 1200 + QUICK);
+  assert.deepEqual([names(both.fired), both.q.pending], [['level'], undefined]);
   const held = step(step(QUIET, [{ name: 'level' }], 1000, true).q, [], 1100, true);
   assert.deepEqual(names(step(held.q, [], 1100 + QUICK).fired), ['level']);
   const card = motion.card.duration;
