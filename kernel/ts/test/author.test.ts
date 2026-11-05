@@ -24,15 +24,18 @@ const out = join(dir, 'current.json');
 const good = join(dir, 'good.json');
 writeFileSync(good, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`);
 // `mise exec -- mix loka.compile <src> <artifact>`: the artifact is $6; a watch test, whose
-// environment is fixed at spawn, names the artifact to copy in the file $STUB_WHICH.
+// environment is fixed at spawn, names the artifact to copy in the file $STUB_WHICH. `--serve` (the
+// resident) records its pid in $STUB_WHICH.serve and compiles each tab-separated stdin line.
 writeFileSync(
   join(dir, 'mise'),
   '#!/bin/sh\n[ "$4" = loka.lint ] && { [ -f "$STUB_WHICH.slow" ] && sleep 1; echo "items/x.json: lint of $(basename "$(cat "$STUB_WHICH")")" >&2; exit 1; }\n[ -n "$STUB_ERR" ] && { echo "$STUB_ERR" >&2; exit 1; }\n' +
-    '[ -n "$STUB_WHICH" ] && STUB_ART=$(cat "$STUB_WHICH")\n' +
     // a compile logs its start and end, and waits while $STUB_WHICH.block exists
+    'c() { [ -n "$STUB_WHICH" ] && STUB_ART=$(cat "$STUB_WHICH")\n' +
     'L="$STUB_WHICH.log"; [ -n "$STUB_WHICH" ] || L=/dev/null; echo "start $(basename "$STUB_ART")" >> "$L"\n' +
     'while [ -n "$STUB_WHICH" ] && [ -f "$STUB_WHICH.block" ]; do sleep 0.05; done\n' +
-    'cp "$STUB_ART" "$6"; echo "end $(basename "$STUB_ART")" >> "$L"\n',
+    'cp "$STUB_ART" "$1"; echo "end $(basename "$STUB_ART")" >> "$L"; }\n' +
+    '[ "$5" = --serve ] || { c "$6"; exit; }\necho $$ >> "$STUB_WHICH.serve"\n' +
+    'while IFS="$(printf \'\\t\')" read -r s a rest; do c "$a"; echo \'loka.compile {"status":0,"stderr":""}\'; done\n',
 );
 chmodSync(join(dir, 'mise'), 0o755);
 
@@ -276,6 +279,8 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
     log(),
     'start good.json\nend good.json\nstart good.json\nend good.json\nstart rest.json\nend rest.json\n',
   );
+  // Break: the watcher boots a compiler per save instead of keeping one resident.
+  assert.equal(readFileSync(`${which}.serve`, 'utf8').split('\n').length, 2);
   // Break: a compile that ends after a later save is written, so its older words replace the
   // page's newer ones until the next compile. No wall time: the watcher's push of the save is the
   // proof it saw it, and every compile after the blocked one is refused, so only it could write kat.
@@ -297,4 +302,83 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
   writeFileSync(join(src, 'rooms.json'), '{ }');
   await until(() => JSON.parse(readFileSync(artifact, 'utf8')).sha256 === kat.sha256);
   reader.cancel();
+});
+
+// Breaks: a dead resident compiler fails the save or hangs the queue instead of compiling it
+// one-shot; it is never restarted; or it outlives a world switch (a BEAM left per switch), or the old
+// world compiles after the switch.
+test('watch: a killed resident compiler falls back to a one-shot compile and restarts', async (t) => {
+  const src = join(dir, 'resident');
+  mkdirSync(src);
+  const which = join(dir, 'resident-which');
+  writeFileSync(which, good);
+  const artifact = join(dir, 'resident.json');
+  const watcher = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, src, '--watch'], {
+    env: {
+      PATH: `${dir}:${process.env.PATH}`,
+      LOKA_DEV_CARTRIDGE: artifact,
+      LOKA_AUTHOR_PORT: '0',
+      STUB_WHICH: which,
+    },
+  });
+  t.after(() => watcher.kill());
+  let said = '';
+  watcher.stdout.on('data', (c) => (said += c));
+  const exited = new Promise((r) => watcher.on('exit', r));
+  const settle = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  const until = async (ready: () => boolean) => {
+    for (let i = 0; i < 100 && !ready(); i++) await settle(50);
+    assert.ok(ready(), 'timed out');
+  };
+  const pids = () =>
+    existsSync(`${which}.serve`)
+      ? readFileSync(`${which}.serve`, 'utf8').split('\n').filter(Boolean)
+      : [];
+  const alive = (pid: string) => {
+    try {
+      return process.kill(Number(pid), 0);
+    } catch {
+      return false;
+    }
+  };
+  await until(
+    () => existsSync(artifact) && JSON.parse(readFileSync(artifact, 'utf8')).sha256 === kat.sha256,
+  );
+  const [first] = pids();
+  const rest = read('protocol/fixtures/cartridge_rest_hash.json');
+  writeFileSync(
+    join(dir, 'rest.json'),
+    `{"cartridge":${rest.canonical},"content_hash":"${rest.sha256}"}`,
+  );
+  writeFileSync(which, join(dir, 'rest.json'));
+  const log = () => readFileSync(`${which}.log`, 'utf8').trim().split('\n');
+  let starts = log().length;
+  writeFileSync(`${which}.block`, '');
+  writeFileSync(join(src, 'rooms.json'), '{}');
+  await until(() => log().length > starts); // the resident dies mid-request, not idle
+  process.kill(Number(first), 'SIGKILL');
+  rmSync(`${which}.block`);
+  await until(() => JSON.parse(readFileSync(artifact, 'utf8')).sha256 === rest.sha256);
+  await until(() => pids().length === 2);
+  const second = pids()[1];
+  assert.ok(alive(second));
+  // a world switch while a save of this world is mid-compile on the resident
+  mkdirSync(join(dir, 'other'));
+  writeFileSync(join(dir, 'other', 'cartridge.json'), '{}');
+  starts = log().length;
+  writeFileSync(`${which}.block`, '');
+  writeFileSync(join(src, 'rooms.json'), '{ }');
+  await until(() => log().length > starts);
+  await until(() => / port \d+/.test(said));
+  const port = said.match(/ port (\d+)/)![1];
+  const posted = await fetch(`http://127.0.0.1:${port}/world`, {
+    method: 'POST',
+    body: JSON.stringify({ name: 'other' }),
+  });
+  assert.equal(posted.status, 200);
+  rmSync(`${which}.block`);
+  assert.equal(await exited, 75);
+  await until(() => !alive(second));
+  await settle(300);
+  assert.deepEqual(log().slice(starts), ['start rest.json', 'end rest.json']);
 });

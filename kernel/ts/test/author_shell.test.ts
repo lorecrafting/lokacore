@@ -38,6 +38,7 @@ test('the layout comes back from storage, kept inside the ruling`s ranges', () =
   assert.deepEqual(shell.load(storage), {
     left: 280,
     right: 360,
+    slot: 240,
     leftOpen: true,
     rightOpen: true,
     tablet: false,
@@ -53,13 +54,15 @@ test('the layout comes back from storage, kept inside the ruling`s ranges', () =
   };
   shell.save(storage, mine);
   assert.deepEqual(shell.load(storage), mine);
-  store.set(shell.STORE, JSON.stringify({ left: 9999, right: 'wide' }));
-  assert.deepEqual([shell.load(storage).left, shell.load(storage).right], [480, 360]);
+  store.set(shell.STORE, JSON.stringify({ left: 9999, right: 'wide', slot: 40 }));
+  const { left, right, slot } = shell.load(storage);
+  assert.deepEqual([left, right, slot], [480, 360, 160]);
   store.set(shell.STORE, '{not json');
   assert.equal(shell.load(storage).left, 280);
 });
 
-// Breaks: arrows move a divider the wrong way or by the wrong step, past its range; Cmd-\ and
+// Breaks: arrows move a divider the wrong way or by the wrong step, past its range (the slot's
+// most is measured: the column less its tab strip); the slot takes Left/Right; Cmd-\ and
 // Cmd-/ fold the wrong column, or another key folds one.
 test('dividers move 16 px, 64 with Shift, inside their range; Cmd-\\ and Cmd-/ fold a side', () => {
   assert.equal(shell.nudge('left', 280, 'ArrowRight', false), 296);
@@ -68,8 +71,13 @@ test('dividers move 16 px, 64 with Shift, inside their range; Cmd-\\ and Cmd-/ f
   assert.equal(shell.nudge('right', 550, 'ArrowLeft', true), 560);
   assert.equal(shell.nudge('right', 360, 'Enter', false), 360);
   assert.equal(shell.nudge('left', 300, 'ArrowRight', true), 364);
+  assert.equal(shell.nudge('slot', 240, 'ArrowUp', false, 600), 256);
+  assert.equal(shell.nudge('slot', 240, 'ArrowDown', true, 600), 176);
+  assert.equal(shell.nudge('slot', 590, 'ArrowUp', true, 600), 600);
+  assert.equal(shell.nudge('slot', 240, 'ArrowRight', false, 600), 240);
+  assert.equal(shell.reset('slot'), 240);
   assert.deepEqual([shell.reset('left'), shell.reset('right')], [280, 360]);
-  assert.deepEqual([shell.LAYOUT.left, shell.LAYOUT.right], [280, 360]);
+  assert.deepEqual([shell.LAYOUT.left, shell.LAYOUT.right, shell.LAYOUT.slot], [280, 360, 240]);
   const l = shell.LAYOUT;
   assert.deepEqual([shell.fold(l, '\\').leftOpen, shell.fold(l, '\\').rightOpen], [false, true]);
   assert.deepEqual([shell.fold(l, '/').leftOpen, shell.fold(l, '/').rightOpen], [true, false]);

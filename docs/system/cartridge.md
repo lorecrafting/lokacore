@@ -908,7 +908,10 @@ build. The author tools below are reachable only in that bundle (a production ex
   only in text values (inline prose too) is pushed the same way once compiled, and the artifact
   is written on the next structural edit. Any other edit compiles, and the page reloads and
   replays. The overlay lives in the watcher's memory and the page; no file carries it. A failed compile keeps the last good
-  artifact and names the fault. The release compile (`mix loka.compile`) and every CI check are
+  artifact and names the fault. Each compile after the first goes to one resident compiler
+  (`mix loka.compile --serve`), one at a time in save order, and answers exactly as the one-shot
+  would; when it dies, wedges or finds changed engine code, that compile runs one-shot (on the new
+  code) and a new resident starts. The release compile (`mix loka.compile`) and every CI check are
   unchanged by the fast path; the overlay never becomes an artifact.
 - **Checkpoints.** A recorded path saved under a name is a plain file in the source tree,
   `checkpoints/<name>.json` (`{"steps": [...]}`, the same steps as keep my place, versioned with

@@ -7,6 +7,7 @@ export type Selection = { file?: string; kind: string; key: string };
 export type Layout = {
   left: number;
   right: number;
+  slot: number; // the map slot's height
   leftOpen: boolean;
   rightOpen: boolean;
   tablet: boolean;
@@ -14,14 +15,16 @@ export type Layout = {
   map: 'map' | 'story';
   selection?: Selection;
 };
-type Side = 'left' | 'right';
+type Side = 'left' | 'right' | 'slot';
 
-const RANGE = { left: [220, 480, 280], right: [280, 560, 360] }; // mutate-skip: uncalibrated design value
+// The slot's most is its column less the tab strip, measured by the divider.
+const RANGE = { left: [220, 480, 280], right: [280, 560, 360], slot: [160, Infinity, 240] }; // mutate-skip: uncalibrated design value
 export const STORE = 'loka.editor.layout';
 export const START = 'loka.editor.start'; // the pinned checkpoint a fresh Book replays
 export const LAYOUT: Layout = {
   left: RANGE.left[2],
   right: RANGE.right[2],
+  slot: RANGE.slot[2],
   leftOpen: true,
   rightOpen: true,
   tablet: false,
@@ -30,14 +33,18 @@ export const LAYOUT: Layout = {
 };
 
 export const reset = (side: Side) => RANGE[side][2];
-export const clamp = (side: Side, px: number) =>
+export const clamp = (side: Side, px: number, most = RANGE[side][1]) =>
   Number.isFinite(px)
-    ? Math.min(RANGE[side][1], Math.max(RANGE[side][0], Math.round(px)))
+    ? Math.min(most, Math.max(RANGE[side][0], Math.round(px)))
     : reset(side);
-/** A divider's arrow key: 16 px, 64 with Shift; the right column grows leftwards. */
-export function nudge(side: Side, px: number, key: string, shift: boolean) {
-  const way = key === 'ArrowRight' ? 1 : key === 'ArrowLeft' ? -1 : 0;
-  return clamp(side, px + way * (shift ? 64 : 16) * (side === 'left' ? 1 : -1));
+const GROW: Record<Side, Record<string, number>> = {
+  left: { ArrowRight: 1, ArrowLeft: -1 },
+  right: { ArrowLeft: 1, ArrowRight: -1 },
+  slot: { ArrowUp: 1, ArrowDown: -1 },
+};
+/** A divider's arrow key: 16 px, 64 with Shift; the right column grows leftwards, the slot upwards. */
+export function nudge(side: Side, px: number, key: string, shift: boolean, most?: number) {
+  return clamp(side, px + (GROW[side][key] ?? 0) * (shift ? 64 : 16), most);
 }
 /** Cmd-\ folds the left column, Cmd-/ the right. */
 export const fold = (l: Layout, key: string): Layout =>
@@ -55,7 +62,7 @@ export function load(storage: Pick<Storage, 'getItem'>): Layout {
     // a hand-edited or old value: the defaults
   }
   const l = { ...LAYOUT, ...kept };
-  return { ...l, left: clamp('left', l.left), right: clamp('right', l.right) };
+  return { ...l, left: clamp('left', l.left), right: clamp('right', l.right), slot: clamp('slot', l.slot) };
 }
 export const save = (storage: Pick<Storage, 'setItem'>, l: Layout) =>
   storage.setItem(STORE, JSON.stringify(l));
