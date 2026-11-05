@@ -265,6 +265,7 @@ export function presenter(game: Game) {
   const s = restoredLogs(game, text);
   let generation = 0; // Player receipts invalidate old controls even if the context cycles back.
   let said: Said | undefined;
+  const credit = (read: number) => said && (said.log += read); // the dead page read some
   return {
     screen: () => {
       const shown = screen(game, s, label, text, generation, said);
@@ -275,7 +276,7 @@ export function presenter(game: Game) {
       newRound(s.combatLog); // one update or press settles at most one receipt: one round
       const [from, chapter] = [end(s.log), s.projection.view.chapter?.index];
       const terminal = updated(game, update, s, text);
-      if (s.spirit) haunt(s, from, chapter);
+      if (s.spirit) credit(haunt(s, from, chapter));
       if (terminal && s.recovered) generation++;
       return terminal;
     },
@@ -288,10 +289,8 @@ export function presenter(game: Game) {
       return line;
     },
     // ponytail: the spirit clock starts at Let go, a page turn before the page lands (spec: the landing).
-    leaveCombat: () => {
-      if (letGo(s, text) && said) said.log = s.log.length; // the revival lines are new to the live region
-    },
-    rise: () => (said && (said.log += s.spirit?.read ?? 0), wake(s)), // the dead page read some
+    leaveCombat: () => void (letGo(s, text) && said && (said.log = s.log.length)), // revival: new to the live region
+    rise: () => credit(wake(s)),
     visit: (open: (string | undefined)[]) => visit(s, open),
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push({ text: `Start over fails. ${why}`, event: true });

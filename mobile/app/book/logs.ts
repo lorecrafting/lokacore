@@ -200,9 +200,9 @@ export function restoredLogs(game: Game, text: Say): Logs {
 }
 
 // Each sense cue is one plain World line the first time it shows in a room visit (book-ui.md,
-// Sense cues details); one that stops and comes back is not logged again.
+// Sense cues details); one that stops and comes back is not logged again; none on the dead page.
 export function cueLines(s: Logs, view: GameView, text: Say) {
-  return (view.cues ?? []).flatMap((c) => {
+  return (s.down ? [] : (view.cues ?? [])).flatMap((c) => {
     const line = cueLine(c, text);
     if ((s.noted ??= new Set()).has(line)) return [];
     s.noted.add(line);

@@ -77,15 +77,37 @@ test('an off-fight death shows the dead page; Let go enters the spirit state', (
 });
 
 // Breaks (book-ui.md :133): without revival, Let go keeps the old room's log or title, drops the
-// receipt's lines with the room change, or reorders them.
+// receipt's lines with the room change, or reorders them; or the recovery room's cue shows on the dead page.
 test('an off-fight death without revival: Let go turns to the recovery room, its log the receipt', () => {
   const h = cellar();
   try {
-    h.die(view({ ...SHRINE, revival: undefined }), RECEIPT);
+    h.die(
+      view({ ...SHRINE, revival: undefined, cues: [{ sense: 'heat', text: 'cue.heat' }] }),
+      RECEIPT,
+    );
+    assert.equal(h.texts().includes('cue.heat'), false);
     h.tap('Let go');
     const t = h.texts();
     assert.ok(t.includes('The shrine') && !t.includes('The cellar') && !t.includes('Let go'));
-    assert.deepEqual(these(h, ['Water drips.', 'Dark.', ...DEATH]), DEATH);
+    assert.deepEqual(these(h, ['Water drips.', 'Dark.', 'cue.heat', ...DEATH]), [
+      ...DEATH,
+      'cue.heat',
+    ]);
+  } finally {
+    h.close();
+  }
+});
+
+// Breaks (book-ui.md, Spirit state): an encounter that ends the spirit state reads the dead page's
+// lines again.
+test('an encounter ending the spirit state does not reread the death', () => {
+  const h = cellar();
+  try {
+    h.die(view(SHRINE), RECEIPT);
+    h.tap('Let go');
+    h.publish(view({ ...SHRINE, combat: view().combat }), 'combat.hit');
+    assert.equal(these(h, ['Dark.', 'Rise']).length, 0); // woken
+    assert.doesNotMatch(h.said(), /You die\./);
   } finally {
     h.close();
   }
@@ -114,6 +136,7 @@ test('a death that closes a fight keeps the Combat page', () => {
 // the spirit state, or a fault leaves it up; with a scene open, the dead page is not first, or Let go starts the spirit state or skips the card.
 test('a reopen shows the recovery room solid; a scene shows after Let go', () => {
   const h = cellar();
+  const open = [h];
   try {
     h.die(view(SHRINE), RECEIPT);
     h.close();
@@ -122,22 +145,21 @@ test('a reopen shows the recovery room solid; a scene shows after Let go', () =>
     const t = again.texts();
     assert.ok(t.includes('The shrine'));
     assert.equal(t.includes('Let go') || t.includes('Rise') || t.includes('Dark.'), false);
-    again.close();
     const scene = { scene: { scene: { key: 'road' }, line: 'road.crows', index: 1, count: 1 } };
     const e = cellar();
+    open.push(again, e);
     e.die(view({ ...SHRINE, ...scene }), RECEIPT);
     assert.deepEqual(these(e, ['Crows lift off the road.', 'Let go']), ['Let go']);
     e.tap('Let go');
     assert.ok(e.texts().includes('Crows lift off the road.')); // its card
     e.publish(view(SHRINE)); // and it ends: no spirit state behind it
     assert.equal(these(e, ['Rise', 'Dark.']).length, 0);
-    e.close();
-    const fault = cellar(); // a fault ends the dead page, as a reopen does
+    const fault = cellar();
+    open.push(fault); // a fault ends the dead page, as a reopen does
     fault.die(view(SHRINE), RECEIPT);
     fault.publish(view(SHRINE), undefined, undefined, { kind: 'fault', code: 'x' });
     assert.equal(fault.texts().includes('Let go'), false);
-    fault.close();
   } finally {
-    h.close();
+    open.forEach((x) => x.close());
   }
 });

@@ -1,6 +1,6 @@
 // The death and its return (book-ui.md, Falling; Spirit state): after a death with `revival`, Let go
 // lands on the World page in the spirit state, its lines held to the rise. Wall-clock time; nothing is stored.
-import { logMark, type DetailLine, type Logs } from './logs.ts';
+import { cueLines, logMark, type DetailLine, type Logs } from './logs.ts';
 
 export type Spirit = {
   lines: string[]; // the revival lines' text, in order
@@ -58,11 +58,12 @@ export const unheard = (s: Logs) =>
     : undefined;
 
 /** Let go or Back to World closes the ended page or the dead page; Let go with `revival` begins the
- * spirit state, unless a scene is open (it shows instead, book-ui.md Dead page). */
+ * spirit state, unless the dead page's scene is open (it shows instead, book-ui.md Dead page). */
 export function letGo(s: Logs, text: (key: string) => string) {
   const [revival, read] = [dead(s), !!s.down];
   s.ended = s.down = undefined;
-  if (!revival || s.projection.view.scene) return false;
+  if (read) s.log.push(...cueLines(s, s.projection.view, text)); // held off the dead page
+  if (!revival || (read && s.projection.view.scene)) return false; // the fight's Let go is unchanged
   const held = since(s.log, s.woke ?? end(s.log));
   s.spirit = {
     lines: revival.lines.map(text),
@@ -75,17 +76,20 @@ export function letGo(s: Logs, text: (key: string) => string) {
   return true;
 }
 
-/** An update in the spirit state: its new lines held; a fault, or an encounter, chapter or scene arriving, ends it. */
+/** An update in the spirit state: its new lines held; a fault, or an encounter, chapter or scene arriving, ends it
+ * (wake's count). */
 export function haunt(s: Logs, from: number, chapter: number | undefined) {
   s.spirit!.held.push(...since(s.log, from));
   const { combat, scene, chapter: now } = s.projection.view;
-  if (s.fault || combat || scene || now?.index !== chapter) wake(s);
+  return s.fault || combat || scene || now?.index !== chapter ? wake(s) : 0;
 }
 
-/** The rise: the held lines logged, the rest of the revival dropped. */
+/** The rise: the held lines logged, the rest of the revival dropped; how many the dead page read. */
 export function wake(s: Logs) {
+  const read = s.spirit?.read ?? 0;
   s.log.push(...(s.spirit?.held ?? []));
   s.spirit = undefined;
+  return read;
 }
 
 /** The spirit state's due lines logged; what its card and clock show. */

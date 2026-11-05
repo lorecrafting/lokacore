@@ -27,7 +27,6 @@ export const DeadPage: StoryObj = {
     {
       dead: { title: 'The cellar', log: ['You light the lamp.'] },
       log: ['You bleed.', 'You die.', 'You wake at the shrine.'],
-      fell: true,
     },
   ),
   name: 'Dead page',
