@@ -2,22 +2,21 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* No .dark class is ever set: this keeps the kit's dark: styles off under a dark OS setting. */
+/* .dark follows the OS setting (main.tsx); docs/design/editor-chrome-rulings.md. */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    /* The Book's type roles: text-xs is its label size, text-sm its small, text-base its body;
-       font-caps its small capitals. font-mono stays for ids and lint lines, which are code. */
-    --font-sans: var(--book-small-family);
-    --font-caps: var(--book-label-family);
-    --font-heading: var(--book-pageTitle-family);
-    --tracking-caps: var(--book-label-tracking);
-    --text-xs: var(--book-label-size);
-    --text-xs--line-height: var(--book-label-leading);
-    --text-sm: var(--book-small-size);
-    --text-sm--line-height: var(--book-small-leading);
-    --text-base: var(--book-body-size);
-    --text-base--line-height: var(--book-body-leading);
+    /* The chrome's type roles: text-xs its label, text-sm its body and code, text-base the Book's
+       prose (an inspector field only). */
+    --font-sans: var(--chrome-sans);
+    --font-mono: var(--chrome-mono);
+    --font-prose: var(--chrome-prose);
+    --text-xs: var(--chrome-label-size);
+    --text-xs--line-height: var(--chrome-label-leading);
+    --text-sm: var(--chrome-body-size);
+    --text-sm--line-height: var(--chrome-body-leading);
+    --text-base: var(--chrome-prose-size);
+    --text-base--line-height: var(--chrome-prose-leading);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -43,36 +42,103 @@
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
+    --color-outside: var(--outside);
+    --color-outside-soft: var(--outside-soft);
+    --color-refusal-soft: var(--refusal-soft);
+    --color-warning: var(--warning);
+    --color-warning-soft: var(--warning-soft);
+    --color-ok: var(--ok);
+    --color-sunken: var(--sunken);
+    --color-area-1: var(--area-1);
+    --color-area-2: var(--area-2);
+    --color-area-3: var(--area-3);
+    --color-area-4: var(--area-4);
+    --color-area-5: var(--area-5);
+    --color-area-6: var(--area-6);
 }
 
+/* Both palettes are inline variables from mobile/app/book/tokens.ts (main.tsx); these pick one. */
 :root {
-    /* The Book's light palette and radius, set from mobile/app/book/tokens.ts by main.tsx. */
-    --radius: var(--book-radius);
-    --background: var(--book-bg);
-    --foreground: var(--book-fg);
-    --card: var(--book-card);
-    --card-foreground: var(--book-fg);
-    --popover: var(--book-bg);
-    --popover-foreground: var(--book-fg);
-    --primary: var(--book-action);
-    --primary-foreground: var(--book-bg);
-    --secondary: var(--book-card);
-    --secondary-foreground: var(--book-fg);
-    --muted: var(--book-card);
-    --muted-foreground: var(--book-dim);
-    --accent: var(--book-card);
-    --accent-foreground: var(--book-fg);
-    --destructive: var(--book-danger);
-    --border: var(--book-line);
-    --input: var(--book-line);
-    --ring: var(--book-action);
+    --radius: var(--chrome-radius);
+    --background: var(--chrome-light-bg);
+    --foreground: var(--chrome-light-fg);
+    --card: var(--chrome-light-surface);
+    --card-foreground: var(--chrome-light-fg);
+    --popover: var(--chrome-light-surface);
+    --popover-foreground: var(--chrome-light-fg);
+    --primary: var(--chrome-light-accent);
+    --primary-foreground: var(--chrome-light-on-fill);
+    --secondary: var(--chrome-light-sunken);
+    --secondary-foreground: var(--chrome-light-fg);
+    --muted: var(--chrome-light-sunken);
+    --muted-foreground: var(--chrome-light-dim);
+    --accent: var(--chrome-light-accent-soft);
+    --accent-foreground: var(--chrome-light-fg);
+    --destructive: var(--chrome-light-refusal);
+    --border: var(--chrome-light-line);
+    --input: var(--chrome-light-strong);
+    --ring: var(--chrome-light-accent);
+    --outside: var(--chrome-light-outside);
+    --outside-soft: var(--chrome-light-outside-soft);
+    --refusal-soft: var(--chrome-light-refusal-soft);
+    --warning: var(--chrome-light-warning);
+    --warning-soft: var(--chrome-light-warning-soft);
+    --ok: var(--chrome-light-ok);
+    --sunken: var(--chrome-light-sunken);
+    --area-1: var(--chrome-light-area-1);
+    --area-2: var(--chrome-light-area-2);
+    --area-3: var(--chrome-light-area-3);
+    --area-4: var(--chrome-light-area-4);
+    --area-5: var(--chrome-light-area-5);
+    --area-6: var(--chrome-light-area-6);
+}
+
+.dark {
+    --background: var(--chrome-dark-bg);
+    --foreground: var(--chrome-dark-fg);
+    --card: var(--chrome-dark-surface);
+    --card-foreground: var(--chrome-dark-fg);
+    --popover: var(--chrome-dark-surface);
+    --popover-foreground: var(--chrome-dark-fg);
+    --primary: var(--chrome-dark-accent);
+    --primary-foreground: var(--chrome-dark-on-fill);
+    --secondary: var(--chrome-dark-sunken);
+    --secondary-foreground: var(--chrome-dark-fg);
+    --muted: var(--chrome-dark-sunken);
+    --muted-foreground: var(--chrome-dark-dim);
+    --accent: var(--chrome-dark-accent-soft);
+    --accent-foreground: var(--chrome-dark-fg);
+    --destructive: var(--chrome-dark-refusal);
+    --border: var(--chrome-dark-line);
+    --input: var(--chrome-dark-strong);
+    --ring: var(--chrome-dark-accent);
+    --outside: var(--chrome-dark-outside);
+    --outside-soft: var(--chrome-dark-outside-soft);
+    --refusal-soft: var(--chrome-dark-refusal-soft);
+    --warning: var(--chrome-dark-warning);
+    --warning-soft: var(--chrome-dark-warning-soft);
+    --ok: var(--chrome-dark-ok);
+    --sunken: var(--chrome-dark-sunken);
+    --area-1: var(--chrome-dark-area-1);
+    --area-2: var(--chrome-dark-area-2);
+    --area-3: var(--chrome-dark-area-3);
+    --area-4: var(--chrome-dark-area-4);
+    --area-5: var(--chrome-dark-area-5);
+    --area-6: var(--chrome-dark-area-6);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-    }
+    @apply border-border outline-ring;
+  }
   body {
-    @apply bg-background text-foreground;
-    }
+    @apply bg-background text-foreground text-sm;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  [role='listbox'] :focus-visible, [role='tree'] :focus-visible {
+    outline-offset: -2px;
+  }
 }

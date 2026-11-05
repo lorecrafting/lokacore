@@ -19,9 +19,9 @@ export function shown(
   roomIds: Readonly<Record<string, string>>,
 ) {
   const say = (key: string) => text(key) ?? key;
-  const inRoom = (ref: Ref) => view.entities.some((e) => e.id === ids[refString(ref)]);
   return {
     room: say(view.place.title.key),
+    here: Object.keys(roomIds).find((ref) => roomIds[ref] === view.place.id), // the editor's highlight
     people: view.entities.filter((e) => e.kind === 'npc').map((e) => say(e.name)),
     held: view.inventory.map((e) => say(e.name)),
     quests: view.journal.map((q) => ({ quest: q.quest.key, state: q.state })),
@@ -46,7 +46,7 @@ export function shown(
         )
         .map((a) => a.key),
       dialogue: Object.values(canon.dialogues ?? {})
-        .filter((d) => inRoom(d.npc))
+        .filter((d) => view.entities.some((e) => e.id === ids[refString(d.npc)]))
         .map((d) => d.key),
     },
   };

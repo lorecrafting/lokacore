@@ -1,5 +1,6 @@
 // `bin/loka dev --watch`'s API (kernel/ts/play/live.ts), proxied at /__author by vite.config.ts.
 import { useEffect, useState } from 'react';
+import type { Timings } from './shell.ts';
 import type { Numbers } from '../../../kernel/ts/play/numbers.ts';
 
 export const ask = (path: string, sent: object) =>
@@ -36,26 +37,41 @@ export const numbers = () =>
     return (await r.json()) as Numbers;
   });
 
-/** The last compile's plain-words diagnostics; `undefined` until the watcher answers. */
-// the stream's message (kernel/ts/play/live.ts Message), the fields the panel reads
-type Message = { said: string[]; compiled: boolean; lint?: string[]; held?: boolean; pending?: number; unconfirmed?: { at: string }[] };
+type Message = {
+  text: Record<string, string>;
+  said: string[];
+  compiled: boolean;
+  lint?: string[];
+  diagnostics?: unknown[];
+  held?: boolean;
+  pending?: number;
+  changed?: { file: string; sha256: string; by: 'editor' | 'outside' }[];
+  unconfirmed?: { key: string; at: string }[];
+  placeholders?: Record<string, string>;
+  timings?: Timings;
+};
+export type Change = NonNullable<Message['changed']>[number] & { seen: number };
+type Kept = Omit<Message, 'changed' | 'timings'>;
+const KEEP = 50; // mutate-skip: the console's scrollback, a display bound
 
+/** The last compile's message, the change feed (newest first) and each edit's timings once. */
 export function useDiagnostics() {
-  const [said, setSaid] = useState<string[]>();
-  const [compiled, setCompiled] = useState(true);
-  const [lint, setLint] = useState<string[]>();
-  const [hold, setHold] = useState<Pick<Message, 'held' | 'pending' | 'unconfirmed'>>({});
+  const [last, setLast] = useState<Partial<Kept>>({});
+  const [changes, setChanges] = useState<Change[]>([]);
+  const [timings, setTimings] = useState<Timings[]>([]);
   useEffect(() => {
     let events: EventSource;
     let retry: ReturnType<typeof setTimeout> | undefined;
     const open = () => {
       events = new EventSource('/__author/events');
       events.onmessage = (e) => {
-        const message = JSON.parse(e.data) as Message;
-        setSaid(message.said);
-        setCompiled(message.compiled);
-        setLint(message.lint);
-        setHold({ held: message.held, pending: message.pending, unconfirmed: message.unconfirmed });
+        const { changed, timings: t, ...kept } = JSON.parse(e.data) as Message;
+        setLast(kept);
+        const seen = Date.now();
+        if (changed?.length)
+          setChanges((c) => [...changed.map((x) => ({ ...x, seen })), ...c].slice(0, KEEP));
+        if (t)
+          setTimings((all) => (all.some((x) => x.at === t.at) ? all : [t, ...all].slice(0, KEEP)));
       };
       // a 502 while the watcher restarts closes the stream for good; only a network drop retries
       events.onerror = () => {
@@ -68,5 +84,19 @@ export function useDiagnostics() {
       events.close();
     };
   }, []);
-  return { said, compiled, lint, ...hold };
+  return { ...last, compiled: last.compiled ?? true, changes, timings };
 }
+
+export type Story = {
+  hash: string;
+  graph: { nodes: { ref: string; kind: string }[]; edges: unknown[] };
+  report: { unreachable: Record<string, string[]> };
+  todo: Record<string, unknown[]>;
+  diagnostics: Record<string, unknown[]>;
+};
+/** The Story map's model (kernel/ts/play/story.ts): the definitions, their `~` and diagnostics. */
+export const story = () =>
+  fetch('/__author/story').then(async (r) => {
+    if (!r.ok) throw new Error(await r.text());
+    return (await r.json()) as Story;
+  });
