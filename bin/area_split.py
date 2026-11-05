@@ -68,26 +68,9 @@ def main(cart, fixture):
             node = ROOT if kind in SHARED else (DIRS.get(section, DIRS.get(kind, kind + "s")), key)
             by_key.setdefault((kind, key), node)
             edges += [(node, r) for r in refs(d, set())]
-    parents = set()  # abstract parents: in no artifact section
-    # `extends` is resolved away in the artifact: a child names its parent (the border rule's extends)
-    for f in sorted(os.listdir(os.path.join(cart, "reactions"))):
-        with open(os.path.join(cart, "reactions", f), encoding="utf-8") as h:
-            parent = json.load(h).get("extends")
-        if parent:
-            edges.append((("reactions", f[:-5]), ("reactions", parent)))
-            parents.add(("reactions", parent))
-
-    def resolve(kind, key):
-        if kind == "entity":
-            hits = [n for (k, kk), n in by_key.items() if kk == key and k in ("item", "npc")]
-            if len(hits) == 1:
-                return hits[0]
-        elif (kind, key) in by_key:
-            return by_key[(kind, key)]
-        sys.exit(f"area_split: no definition for ref {kind}/{key}")
-
-    edges = [(a, b if isinstance(b, tuple) and b[0] == "reactions" and b in parents else resolve(*b))
-             for a, b in edges]
+    # A ref with no definition is a KeyError before any move. An abstract `extends` parent is in no
+    # section, so it stays at the root, which any child may name.
+    edges = [(a, by_key[b]) for a, b in edges]
     area = {("rooms", r): a for r, a in room_area.items()}
     for _ in range(len(by_key) + 2):  # monotone: None < one area < ROOT, so each pass only widens
         touched = {}

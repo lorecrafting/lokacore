@@ -63,8 +63,8 @@ defmodule Loka.Content.Starters do
   defp own(dir, kind, name, nil), do: home(dir, "#{dir_of(kind)}/#{name}.json")
   defp own(_, _, _, _from), do: nil
 
-  # The one area folder's copy of a file (areas/<area>/<rel>), else the root (a new file) one.
-  defp home(dir, rel) do
+  @doc "The one area folder's copy of `rel` (`areas/<area>/<rel>`), else the root one (a new file)."
+  def home(dir, rel) do
     case Path.wildcard(Path.join([dir, "areas/*", rel])) do
       [found] -> Path.relative_to(found, dir)
       _ -> rel
