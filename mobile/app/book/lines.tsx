@@ -136,12 +136,12 @@ function LogLine({ line, fresh, reword }: { line: DetailLine; fresh: boolean; re
   }
   const plain = typeof line === 'string' || 'quiet' in line || 'level' in line;
   const style = plain ? { ...t.log, color: c.fg } : narrated(c, t);
-  const name =
-    typeof line === 'object' && 'reason' in line
-      ? { accessibilityLabel: `${line.reason}, ${line.text}` }
-      : {};
   const stored = plain ? lineText(line) : line.text;
   const words = (reword && worded.made?.get(stored)?.()) || stored;
+  const name =
+    typeof line === 'object' && 'reason' in line
+      ? { accessibilityLabel: `${line.reason}, ${words}` }
+      : {};
   if (dries && typeof line === 'object' && ('level' in line || 'gilt' in line)) {
     const hold = 'level' in line && line.first ? motion.first.hold : undefined;
     return (

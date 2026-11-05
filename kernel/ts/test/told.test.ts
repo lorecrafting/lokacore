@@ -124,7 +124,6 @@ test("/line finds a `~` key's own line by the compile's map, among many `~` line
   );
   live.push({
     placeholders: {
-      'dialogue.s.prompt': 'scenes/s.scene:2', // the compile maps every `~`
       'dialogue.s.choices.yes.prompt': 'scenes/s.scene:5',
       'scene.bell.steps.1.text': 'scenes/bell.cut:3',
       'room.green.description': 'rooms/green.json:2',
@@ -165,10 +164,10 @@ test("an outside save that moves a `~` line before the compile: /line and /edit 
   assert.equal(readFileSync(scene, 'utf8'), 'npc: bram\n* Hello.\n* Aye.\nbram: Asked.\n');
 });
 
-test("an outside `~` inserted at the map's line: /line refuses it, the Book's own fills keep the map", async (t) => {
-  // Break: /line trusts any `~` at the map's line, so a `* ~` pasted there from outside opens in the
-  // key's field and /edit writes it; or the Book's own fill of one `~` makes the map distrusted, so
-  // the next `~` in the run is refused before the compile.
+test("an outside save that adds or drops a `~` line: /line stops trusting the map; the Book's own fill keeps it", async (t) => {
+  // Break: /line trusts any `~` at the map's line, so a `* ~` pasted (or the key's own line cut)
+  // there from outside opens another line in the key's field and /edit writes it; or the Book's own
+  // fill of one `~` makes the map distrusted, so the next `~` in the run is refused before the compile.
   const { live, call, ask, src } = served(t);
   mkdirSync(join(src, 'scenes'));
   const scene = join(src, 'scenes/s.scene');
@@ -190,11 +189,11 @@ test("an outside `~` inserted at the map's line: /line refuses it, the Book's ow
     200,
     { file: 'scenes/s.scene', line: 3, was: '* ~', words: '~' },
   ]);
+  const refused = [400, "more than one source line holds dialogue.s.b's words"];
   writeFileSync(scene, 'npc: bram\n* Aye.\n* ~\n* ~\n* ~\n'); // an outside save, no compile yet
-  assert.deepEqual(await line('dialogue.s.b'), [
-    400,
-    "more than one source line holds dialogue.s.b's words",
-  ]);
+  assert.deepEqual(await line('dialogue.s.b'), refused);
+  writeFileSync(scene, 'npc: bram\n* ~\n* ~\n'); // b's line cut: c's `~` now sits at line 3
+  assert.deepEqual(await line('dialogue.s.b'), refused);
 });
 
 test('a 200 /undo shows the old words it sent at once, before the compile', async (t) => {

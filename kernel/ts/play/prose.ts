@@ -81,19 +81,11 @@ export function located(
     const [file, n] = [at.slice(0, at.lastIndexOf(':')), Number(at.slice(at.lastIndexOf(':') + 1))];
     return [file, n, readFileSync(guarded(root, file, 'read'), 'utf8').split('\n')[n - 1]] as const;
   };
-  // An outside save before the compile can move lines: the map's line no longer holds the words,
-  // or its file holds such a line the map never placed (one inserted; the Book's own /edit only
-  // fills them). ponytail: a `~` inserted exactly where the Book just filled one still passes.
-  const mapped = Object.hasOwn(places, key) ? places[key] : undefined;
-  const placed = new Set(Object.values(places));
+  // an outside save that moved lines before the compile: the map's line no longer holds the words
   const fresh =
-    mapped !== undefined &&
-    lineAt(mapped)[2]?.includes(words.split('\n')[0]) &&
-    sourcesOf(root, key, words).every(
-      (l) => placed.has(l) || !l.startsWith(mapped.slice(0, mapped.lastIndexOf(':') + 1)),
-    );
+    Object.hasOwn(places, key) && lineAt(places[key])[2]?.includes(words.split('\n')[0]);
   const [at = refuse(404, `no source line for ${key}`), other] = fresh
-    ? [mapped]
+    ? [places[key]]
     : sourcesOf(root, key, words);
   if (other) refuse(400, `more than one source line holds ${key}'s words`); // two `* ~` lines: which?
   const [file, n, was] = lineAt(at);
