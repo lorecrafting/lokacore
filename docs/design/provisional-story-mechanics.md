@@ -178,7 +178,7 @@ pulse up to one point. For a20-point maximum at stat50, five full resting pulses
 points. This preserves useful pacing even for tiny early-game pools.
 
 Integrate recovery only for the time actually spent under each rate: changing position, equipment,
-load or hunger settles the preceding interval first. Resting just before a pulse cannot earn a
+or load settles the preceding interval first. Resting just before a pulse cannot earn a
 whole pulse of rest. Leaving combat also cannot retroactively credit its non-recovery interval.
 The six-second pulse is the initial accrual/display cadence, not a loophole
 to select the final position for all elapsed time. Reopening a save cannot credit the same interval twice.

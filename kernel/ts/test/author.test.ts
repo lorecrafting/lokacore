@@ -96,7 +96,7 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   }[] = [];
   let said = '';
   watcher.stdout.on('data', (chunk) => (said += chunk));
-  await until(() => said.includes('Watching'));
+  await until(() => /port \d+\n/.test(said)); // the whole line, not a cut-off port
   const port = /port (\d+)/.exec(said)![1];
   const stream = await fetch(`http://127.0.0.1:${port}/events`);
   await until(() => existsSync(out) && JSON.parse(readFileSync(out, 'utf8')).sha256 === kat.sha256);
@@ -249,7 +249,7 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
   };
   let said = '';
   watcher.stdout.on('data', (chunk) => (said += chunk));
-  await until(() => said.includes('Watching'));
+  await until(() => /port \d+\n/.test(said)); // the whole line, not a cut-off port
   const port = /port (\d+)/.exec(said)![1];
   let events = '';
   const reader = (await fetch(`http://127.0.0.1:${port}/events`)).body!.getReader();
@@ -286,11 +286,15 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
   const refused = join(dir, 'queued-refused.json');
   writeFileSync(refused, '{"cartridge":{},"content_hash":"00"}');
   writeFileSync(which, refused);
-  const mark = events.length;
   writeFileSync(join(src, 'rooms.json'), '{      }');
-  await until(() => events.slice(mark).includes('"changed":[{"file":"rooms.json"'));
+  const later = createHash('sha256').update('{      }').digest('hex'); // not the first save's push
+  await until(() => events.includes(later));
   rmSync(`${which}.block`);
   await until(() => log().endsWith('end queued-refused.json\n'));
   assert.equal(JSON.parse(readFileSync(artifact, 'utf8')).sha256, rest.sha256);
+  // Break: the compile after a discarded one is discarded too, so the newest good save never shows.
+  writeFileSync(which, good);
+  writeFileSync(join(src, 'rooms.json'), '{ }');
+  await until(() => JSON.parse(readFileSync(artifact, 'utf8')).sha256 === kat.sha256);
   reader.cancel();
 });
