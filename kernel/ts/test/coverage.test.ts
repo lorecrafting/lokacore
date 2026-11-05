@@ -13,7 +13,7 @@ import { test } from 'node:test';
 import { encode } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { coverage, replay } from '../play/coverage.ts';
-import { ROOT } from '../play/obs.ts';
+import { line, ROOT } from '../play/obs.ts';
 import { replayRecords } from '../play/replay.ts';
 import { read } from './read.ts';
 
@@ -114,6 +114,21 @@ test('C, D: a failed perform counted as completed, a wrong scripted action-to-ac
     scripted_actions: ['check_sampler@0.0.1:action/pick_lock'],
   });
   assert.deepEqual(coverage(dusk, [trace(DUSK)]).never, { ...none, scripted_actions: [] });
+});
+
+test('a failed commit exercises nothing: bell_after, reached only at ordinal 7, stays never', () => {
+  // Break: coverage credits a decision whose commit failed (ADR-075 §4, loka-vduxr.42 review).
+  const t = trace(SCENE);
+  const lines = t.file.split('\n');
+  const last = { ...t.entries[6]! };
+  last.data = { ...last.data, commit: { state: 'failed', cause: 'storage_error' } };
+  lines[7] = line(last).trimEnd();
+  const failed = { ...t, file: lines.join('\n'), entries: [...t.entries.slice(0, 6), last] };
+  assert.deepEqual(coverage(edited, [failed]).never.reactions, [
+    `${S}reaction/bell_after`,
+    `${S}reaction/never_held`,
+    `${S}reaction/never_matched`,
+  ]);
 });
 
 test('E: coverage of a stale transcript (the byte guard missing)', () => {

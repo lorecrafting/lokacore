@@ -70,7 +70,8 @@ it. Do not create a new screen merely because a mechanic has a new name.
 ## Design tokens
 
 [`tokens.ts`](../mobile/app/book/tokens.ts) is the single source of the Book's colours, fonts,
-type styles, spacing, sizes, radius, opacity, motion and sound. Its values are the
+type styles, spacing, sizes, radius, opacity, motion and sound. Its `chrome` export is the editor's, never drawn in the Book
+([editor chrome rulings](design/editor-chrome-rulings.md)). Its values are the
 [Chapter 1 mock's](design/ui-exploration/chapter-one-playable.html) base page with every effect
 off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) renders them live.
 
