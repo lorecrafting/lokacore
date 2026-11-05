@@ -36,8 +36,33 @@ ruleless =
       not Map.has_key?(row, "implemented_in") and not Map.has_key?(row, "spec")
   end) || raise("no unimplemented ruleless capability for feature red control")
 
-# rows with one row changed; `|| %{}` keeps the occupied-path test (rows "{}") reaching its check.
-planted_row = &JSON.encode!(Map.put(rows, &1, &2.(rows[&1] || %{})))
+# Toolbox page controls: one docs/features.json row changed, planted at tmp/red-toolbox-<name>.json.
+toolbox =
+  for {name, key, change, expect} <- [
+        {"summary", "movement", &Map.delete(&1, "summary"), "movement@1: missing summary"},
+        {"sampler", "bleed", &Map.put(&1, "sampler", "rooms_sampler"),
+         "bleed@1: sampler rooms_sampler: does not require bleed"},
+        {"stale", "movement", &Map.put(&1, "summary", "Planted."),
+         "TOOLBOX.gen.md is out of date"},
+        {"declares", "light", &Map.put(&1, "declares", ["rooms.nosuch"]),
+         ~s(light@1: declares "rooms.nosuch": no such source-schema path)},
+        {"reason", "dev", &Map.put(&1, "declares", "engine-only: "), "dev@1: missing declares"},
+        {"no-sampler", "movement", &Map.delete(&1, "sampler"), "movement@1: missing sampler"},
+        {"cartridge", "movement", &Map.put(&1, "sampler", "nope"),
+         "sampler nope: no such cartridge"},
+        {"district", "movement", &Map.put(&1, "showcase", "areas/nope"),
+         "areas/nope: no such district"},
+        {"root", "movement", &Map.put(&1, "showcase", "areas/"), "movement@1: missing showcase"},
+        {"requires", "emote", &Map.put(&1, "showcase", "areas/hub"), "does not require emote"},
+        {"anchor", "dev", &Map.put(&1, "mechanics", "#nope"),
+         "dev@1: mechanics #nope: no such heading"}
+      ] do
+    file = "tmp/red-toolbox-#{name}.json"
+    planted = JSON.encode!(Map.put(rows, key, change.(rows[key])))
+
+    {"toolbox page: #{name}", %{file => planted}, ~w(elixir bin/toolbox_page.exs --check #{file}),
+     expect}
+  end
 
 controls = [
   {"boundary: web reaches store (only platform may)",
@@ -134,22 +159,15 @@ controls = [
   {"features: a transcript added without regenerating the feature map",
    %{"cartridges/details_sampler/transcripts/skill.jsonl" => ""},
    ~w(elixir bin/features.exs --check), "docs/features.gen.md is out of date"},
-  {"toolbox page: an implemented capability without its summary",
+  {"toolbox page: a scene treatment with no Book treatments row",
    %{
-     "tmp/red-toolbox-summary.json" => planted_row.("movement", &Map.delete(&1, "summary"))
-   }, ~w(elixir bin/toolbox_page.exs --check tmp/red-toolbox-summary.json),
-   "movement@1: missing summary"},
-  {"toolbox page: a sampler cartridge that does not require its capability",
-   %{
-     "tmp/red-toolbox-sampler.json" =>
-       planted_row.("bleed", &Map.put(&1, "sampler", "rooms_sampler"))
-   }, ~w(elixir bin/toolbox_page.exs --check tmp/red-toolbox-sampler.json),
-   "bleed@1: sampler rooms_sampler: does not require bleed"},
-  {"toolbox page: a summary changed without regenerating the page",
-   %{
-     "tmp/red-toolbox-stale.json" => planted_row.("movement", &Map.put(&1, "summary", "Planted."))
-   }, ~w(elixir bin/toolbox_page.exs --check tmp/red-toolbox-stale.json),
-   "docs/TOOLBOX.gen.md is out of date"},
+     "tmp/red-toolbox-treatments.md" =>
+       root
+       |> Path.join("docs/MECHANICS-TOOLBOX.md")
+       |> File.read!()
+       |> String.replace(~r/^\| `reverie` .*\n/m, "")
+   }, ~w(elixir bin/toolbox_page.exs --check docs/features.json tmp/red-toolbox-treatments.md),
+   "treatment:reverie: no row in the Book treatments table"},
   {"transcripts: a walk_ transcript whose replay differs",
    %{
      "cartridges/toolbox_showcase/transcripts/walk_red.jsonl" =>
@@ -159,6 +177,8 @@ controls = [
        |> String.replace(~s("direction":"west"), ~s("direction":"north"), global: false)
    }, ~w(node --test kernel/ts/test/transcripts.test.ts), "walk_red.jsonl: replay differs"}
 ]
+
+controls = controls ++ toolbox
 
 for {_, files, _, _} <- controls, {rel, _} <- files do
   if File.exists?(Path.join(root, rel)),

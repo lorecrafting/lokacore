@@ -14,10 +14,10 @@
 # Treatment rows come from the "Book treatments" table of docs/MECHANICS-TOOLBOX.md, which must
 # name every value of the scene `treatment` enum. Row ids (`key@N`, `treatment:<name>`) are stable:
 # the editor registry keys on them. Halts on a missing or broken cell. `--check` regenerates in
-# memory and exits 1 if the committed file differs; a second argument reads the rows from that
-# file instead (red controls).
+# memory and exits 1 if the committed file differs; a second and third argument read the rows
+# and the treatments doc from those files instead (red controls).
 #
-#   elixir bin/toolbox_page.exs [--check [rows.json]]
+#   elixir bin/toolbox_page.exs [--check [rows.json [toolbox.md]]]
 defmodule SchemaPath do
   # The {field, subschema} pairs a node offers, through $ref (not partial.*), branches and
   # array or map members.
@@ -59,14 +59,16 @@ root = Path.expand("..", __DIR__)
 read = &File.read!(Path.join(root, &1))
 json = &JSON.decode!(read.(&1))
 registry = json.("protocol/capability_registry.json")
-rows = json.(Enum.at(System.argv(), 1, "docs/features.json"))
+rows_path = Enum.at(System.argv(), 1, "docs/features.json")
+rows = json.(rows_path)
+toolbox_path = Enum.at(System.argv(), 2, "docs/MECHANICS-TOOLBOX.md")
 defs = json.("schemas/source/defs.schema.json")["$defs"]
 
 requires = fn cart ->
   path = "cartridges/#{cart}/cartridge.json"
 
   if File.exists?(Path.join(root, path)),
-    do: Map.keys(json.(path)["requires"]["capabilities"]),
+    do: Map.keys(get_in(json.(path), ["requires", "capabilities"]) || %{}),
     else: nil
 end
 
@@ -75,7 +77,7 @@ slug = &("#" <> String.replace(Regex.replace(~r/[^\w\- ]/u, String.downcase(&1),
 
 headings =
   for [h] <-
-        Regex.scan(~r/^## (.+)$/m, read.("docs/system/mechanics.md"), capture: :all_but_first),
+        Regex.scan(~r/^##+ (.+)$/m, read.("docs/system/mechanics.md"), capture: :all_but_first),
       do: h
 
 anchors = MapSet.new(headings, slug)
@@ -100,8 +102,8 @@ caps =
         case row["declares"] do
           [_ | _] = ps ->
             for p <- ps,
-                SchemaPath.resolve(p, defs) == [],
-                do: "declares #{p}: no such source-schema path"
+                not is_binary(p) or SchemaPath.resolve(p, defs) == [],
+                do: "declares #{inspect(p)}: no such source-schema path"
 
           d ->
             if(not reason?.(d, "engine-only"),
@@ -119,7 +121,7 @@ caps =
           reason?.(row["showcase"], "none") ->
             nil
 
-          not (is_binary(row["showcase"]) and String.starts_with?(row["showcase"], "areas/")) ->
+          not (is_binary(row["showcase"]) and row["showcase"] =~ ~r{^areas/[\w-]+$}) ->
             "missing showcase (areas/<district> or \"none: <reason>\")"
 
           not File.dir?(Path.join([root, "cartridges/toolbox_showcase", row["showcase"]])) ->
@@ -144,7 +146,7 @@ caps =
       ]
       |> List.flatten()
       |> Enum.reject(&is_nil/1)
-      |> Enum.map(&"#{k}@#{e["version"]}: #{&1}")
+      |> Enum.map(&"#{rows_path}: #{k}@#{e["version"]}: #{&1}")
 
     {e, row, anchor, problems}
   end
@@ -153,24 +155,40 @@ enum =
   for(n <- SchemaPath.resolve("scenes.treatment", defs), v <- n["enum"] || [], do: v)
   |> Enum.uniq()
 
+# The "### Book treatments" section's table rows; each must parse.
+section =
+  read.(toolbox_path)
+  |> String.split(~r/^### Book treatments$/m)
+  |> Enum.at(1, "")
+  |> String.split(~r/^#/m)
+  |> hd()
+
+table = for l <- String.split(section, "\n"), String.starts_with?(l, "| `"), do: l
+
 treatments =
-  Regex.scan(~r/^\| `(\w+)` \| (.+?) \| `([^`]+)` \|$/m, read.("docs/MECHANICS-TOOLBOX.md"),
-    capture: :all_but_first
-  )
+  for l <- table, m = Regex.run(~r/^\| `(\w+)` \| (.+?) \| `([^`]+)` \|$/, l), do: tl(m)
 
 problems =
   Enum.flat_map(caps, &elem(&1, 3)) ++
+    if(enum == [],
+      do: ["#{toolbox_path}: scenes.treatment has no enum in the source schema"],
+      else: []
+    ) ++
+    if(length(treatments) < length(table) or table == [],
+      do: ["#{toolbox_path}: Book treatments table rows must read | `name` | host | `sampler` |"],
+      else: []
+    ) ++
     for(
       t <- enum,
       not Enum.any?(treatments, &(hd(&1) == t)),
-      do: "treatment:#{t}: no row in the Book treatments table of docs/MECHANICS-TOOLBOX.md"
+      do: "#{toolbox_path}: treatment:#{t}: no row in the Book treatments table"
     ) ++
     for [t, _, s] <- treatments,
         not File.exists?(Path.join(root, s)),
-        do: "treatment:#{t}: no sampler #{s}"
+        do: "#{toolbox_path}: treatment:#{t}: no sampler #{s}"
 
 if problems != [] do
-  Enum.each(problems, &IO.puts(:stderr, "docs/features.json: #{&1}"))
+  Enum.each(problems, &IO.puts(:stderr, &1))
   System.halt(1)
 end
 

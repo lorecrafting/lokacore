@@ -185,7 +185,7 @@
     "summary": "Pools such as health and coin that rise, fall and cap.",
     "declares": ["resources", "npcs.resource_starts"],
     "sampler": "climb_sampler",
-    "showcase": "areas/combat",
+    "showcase": "areas/homestead",
     "spec": "21 §4 Resource, §7 Cost; 04 §5.3 Resource adjustment, §15 condition bands; 00 §4 amendment, §4.2 Regeneration, §4.3 Resources",
     "contracts": [
       "ResourceSpec",
@@ -378,7 +378,7 @@
     "implemented_in": "R5 S7 open, close, lock, unlock, barrier_state, closed and locked exits; C1 c1-locks (#135) a barrier on an item (container lid), the door verbs by target_id"
   },
   "quest": {
-    "summary": "Quests with objectives, offers, deadlines and journal lines.",
+    "summary": "Quests with one objective each, an offer, a deadline and journal lines.",
     "declares": ["quests", "dialogues.quest", "dialogues.choices.accept"],
     "sampler": "quest_sampler",
     "showcase": "areas/magic",
@@ -484,7 +484,7 @@
     "implemented_in": "Early R7/R8 N a scripted action narration's participants (the actor, an NPC or item) pinned to EntityIds in the committed line, so redisplay and receipt replay never resolve them again"
   },
   "dialogue": {
-    "summary": "Conversations with choices, conditions, payments and hand-overs.",
+    "summary": "Conversations with bounded choices (not a free graph), conditions, payments and hand-overs.",
     "declares": ["dialogues"],
     "sampler": "access_sampler",
     "showcase": "areas/low_wardle",
@@ -527,7 +527,7 @@
     "summary": "Character attributes, ancestries and derived values.",
     "declares": ["attributes", "cartridge.ancestries", "cartridge.world.derived", "npcs.attributes"],
     "sampler": "npc_attr_sampler",
-    "showcase": "areas/combat",
+    "showcase": "areas/homestead",
     "spec": "06 §21 (amendment 2026-10-03); 00 §4.3 (amendment 2026-10-03)",
     "contracts": [
       "AttributeSpec",
@@ -630,7 +630,7 @@
     "summary": "Scripted scenes that take control for a few steps.",
     "declares": ["scenes"],
     "sampler": "scene_sampler",
-    "showcase": "areas/low_wardle",
+    "showcase": "areas/fell_road",
     "spec": "06 §35/§37 modal text subset (amendment 2026-10-03); 21 §3.6; 00a §9; mechanics.md scene@1",
     "contracts": [
       "SceneDefinition",
