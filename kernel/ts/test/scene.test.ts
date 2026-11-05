@@ -334,7 +334,7 @@ test('a treated scene carries its treatment into SceneView; the contract refuses
 });
 
 // Breaks: newWorld leaves the opening scene unstarted (play opens on a room page), starts it at a
-// line other than 1, or its last Continue leaves the player anywhere but the entry room.
+// line other than 1, or its last Continue does not end it onto the entry room's page.
 test('an opening scene is the first view and its last Continue lands in the entry room', () => {
   let w = fresh(opening);
   const view = gameView(w);

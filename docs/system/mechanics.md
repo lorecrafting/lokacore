@@ -611,7 +611,7 @@ choice closes. Duplicate delivery or receipt retry never restarts an ended scene
 
 An opening scene (`on: {start: true}`, no `outcome`; at most one per cartridge) starts at world
 creation instead: `newWorld` applies `steps` fact := 1 through the same fact.assign path as the
-initial knowledge, so play opens on line 1 before any command and before any room page, with no
+initial knowledge, so play opens on line 1 before any room page, with no
 event, receipt or story point. A save rebuilds that initial world under its rows, so a reopen
 before the first Continue shows line 1, a later one the persisted line, and an ended (−1) scene
 never replays.
