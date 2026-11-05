@@ -20,10 +20,12 @@ defmodule Mix.Tasks.Loka.Compile do
   def run([dir, out | opts]) do
     {allow, json, held} = options(opts)
     if !File.dir?(dir), do: Mix.raise("mix loka.compile: #{dir} is not a directory")
-    compiled(Loka.Content.compile(dir), dir, out, allow, json)
+    result = compiled(Loka.Content.compile(dir), dir, out, allow, json)
 
     if held,
       do: File.write!(held, JSON.encode!(Loka.Content.placeholder_lines(File.read!(out), dir)))
+
+    result
   end
 
   def run(_), do: Mix.raise(@usage)
