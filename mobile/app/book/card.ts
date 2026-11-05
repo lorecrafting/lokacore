@@ -34,9 +34,13 @@ export function useCardInk(i: number) {
   return useAnimatedStyle(() => ({ opacity: ink.value }));
 }
 
-// Runs `turn` after `motion.card.auto` of foreground time; returns the stop.
-function cardClock(timer: { current?: ReturnType<typeof setTimeout> }, turn: () => void) {
-  let left = motion.card.auto;
+// Runs `turn` after `ms` of foreground time; returns the stop.
+function cardClock(
+  timer: { current?: ReturnType<typeof setTimeout> },
+  turn: () => void,
+  ms = motion.card.auto,
+) {
+  let left = ms;
   let from = 0;
   const run = () => {
     from = Date.now();
@@ -83,4 +87,44 @@ export function useCardTurn(done: () => void) {
     return cardClock(timer, turn);
   }, [reader]);
   return { reader, turn };
+}
+
+/**
+ * A treated scene's line (book-ui.md, Book treatments): it rises `motion.reverie.lag` after the
+ * page lands, over `motion.reverie`, then Continue shows over `motion.settle`. `complete` (a tap)
+ * ends the rise at once and sends nothing; no clock ever sends. A screen reader, or an untreated
+ * scene (`on` false), has the line and Continue at once.
+ */
+export function useArrival(on: boolean) {
+  const [reader, setReader] = useState<boolean>();
+  const [full, setFull] = useState(!on);
+  const ink = useSharedValue(on ? 0 : 1);
+  const next = useSharedValue(on ? 0 : 1);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const complete = () => {
+    clearTimeout(timer.current);
+    ink.value = 1;
+    setFull(true);
+  };
+  useEffect(() => {
+    if (on) void screenReaderOn().then(setReader);
+  }, []);
+  useEffect(() => {
+    if (reader === undefined) return;
+    if (reader) return complete();
+    const { lag, duration, easing } = motion.reverie;
+    const reduceMotion = ReduceMotion.Never; // an opacity rise, ruled unchanged under reduced motion
+    ink.value = withDelay(
+      lag,
+      withTiming(1, { duration, easing: curveOf(easing), reduceMotion }),
+      reduceMotion,
+    );
+    return cardClock(timer, complete, lag + duration);
+  }, [reader]);
+  useEffect(() => {
+    if (on && full) next.value = withTiming(1, { duration: motion.settle.duration });
+  }, [full]);
+  const line = useAnimatedStyle(() => ({ opacity: ink.value }));
+  const shown = useAnimatedStyle(() => ({ opacity: next.value }));
+  return { full, complete, line, shown };
 }

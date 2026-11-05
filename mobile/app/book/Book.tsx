@@ -263,7 +263,13 @@ function Bottom(p: BottomProps) {
   if (detail && !pending && !p.screen.catchingUp && !fault) return null;
   // Dead, the page shows only Let go, and in the spirit state only Rise, catching up included: no
   // status line (owner 2026-11-04). A fault ends the spirit state (spirit.ts haunt).
-  if ((p.screen.spirit || (p.screen.fell && !p.screen.catchingUp)) && !fault) return null;
+  if (
+    (p.screen.spirit ||
+      !!p.screen.view.scene?.treatment ||
+      (p.screen.fell && !p.screen.catchingUp)) &&
+    !fault
+  )
+    return null;
   return (
     <View
       style={{

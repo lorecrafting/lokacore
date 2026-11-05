@@ -240,7 +240,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `MapPage` | `book/sections.tsx` | MapPage |
 | `SettingsPage` | `book/sections.tsx` | SectionPages |
 | `ChapterPage` | `book/sections.tsx` | ChapterPages |
-| `ScenePage` | `book/sections.tsx` | ChapterPages |
+| `ScenePage` | `book/ScenePage.tsx` | ChapterPages |
 | `SkillDetails` | `book/skills.tsx` | SectionPages |
 | `SkillsPage` | `book/skills.tsx` | SectionPages |
 | `Professions` | `book/skills.tsx` | SectionPages |

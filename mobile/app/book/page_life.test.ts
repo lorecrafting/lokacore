@@ -82,7 +82,8 @@ test('the spirit layer still fades at the rise under reduced motion', (t) => {
   effects(t, true);
   g.modes = [];
   const shell = rig(t);
-  const draw = (spirit: boolean) => shell(() => nodes(UnderInk({ view: view({}), spirit })));
+  const draw = (spirit: boolean) =>
+    shell(() => nodes(UnderInk({ view: view({}), treatment: spirit ? 'spirit' : undefined })));
   draw(true);
   g.timings.length = g.modes.length = 0;
   draw(false);

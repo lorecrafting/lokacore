@@ -21,8 +21,9 @@ import {
   lampLit,
   lowHealth,
   onCut,
-  spiritInk,
+  treatmentInk,
   type HeldLayer,
+  type Treatment,
 } from './heldLayer.ts';
 import { usePalette, type Palette } from './palette.ts';
 import { color, motion, opacity } from './tokens.ts';
@@ -81,7 +82,7 @@ const riseFade = (still: boolean) => ({
   reduceMotion: ReduceMotion.Never,
 });
 
-function useLayers(view: GameView, c: Palette, spirit: boolean) {
+function useLayers(view: GameView, c: Palette, treatment?: Treatment) {
   const still = useReducedMotion();
   const [fatal, setFatal] = useState(false);
   useEffect(
@@ -91,13 +92,14 @@ function useLayers(view: GameView, c: Palette, spirit: boolean) {
       }),
     [],
   );
-  const held = heldLayer({ spirit, fatal, low: lowHealth(view), lit: lampLit(view, c.bg) });
+  const held = heldLayer({ treatment, fatal, low: lowHealth(view), lit: lampLit(view, c.bg) });
   const glow = useSharedValue(shown === 'glow' && held === 'glow' ? opacity.glow : 0);
   const edge = useSharedValue(shown === 'vignette' && held === 'vignette' ? opacity.faint : 0);
-  const ghost = useSharedValue(spirit ? opacity.spirit : 0); // set with the page turn, in every mode
+  const [ink, peak] = treatment ? treatmentInk(treatment, c) : [];
+  const ghost = useSharedValue(peak ?? 0); // set with the page turn, in every mode
   useEffect(() => {
     shown = held;
-    if (held === 'spirit') ghost.value = opacity.spirit;
+    if (peak) ghost.value = peak;
     else if (ghost.value) ghost.value = withTiming(0, riseFade(still));
     glow.value = withTiming(held === 'glow' ? opacity.glow : 0, {
       duration: held === 'glow' ? motion.palette.duration : motion.settle.duration,
@@ -109,14 +111,16 @@ function useLayers(view: GameView, c: Palette, spirit: boolean) {
         withSequence(withTiming(opacity.faint, breathe), withTiming(0, breathe)),
         -1,
       );
-  }, [held, still]);
+  }, [held, still, peak]);
   const flick = useFlicker(held === 'glow' && !still && !view.place?.exposed);
   const cut = useCut();
   const glowStyle = useAnimatedStyle(() => ({ opacity: glow.value * flick.value * cut.value }));
   const edgeStyle = useAnimatedStyle(() => ({ opacity: edge.value * cut.value }));
   const ghostStyle = useAnimatedStyle(() => ({ opacity: ghost.value }));
-  const spiritStyle = [{ backgroundColor: spiritInk(c) }, ghostStyle];
-  return { glowStyle, edgeStyle, spiritStyle };
+  const wash = useRef(ink); // the last treatment's ink, kept so its wash can fade out
+  wash.current = ink ?? wash.current;
+  const washStyle = [{ backgroundColor: wash.current }, ghostStyle];
+  return { glowStyle, edgeStyle, washStyle };
 }
 
 /**
@@ -126,22 +130,23 @@ function useLayers(view: GameView, c: Palette, spirit: boolean) {
  *   the fatal hold, the vignette and the glow shows; a lower one fades out over `motion.settle` and
  *   returns the same way. Storm's light cuts it for the strike; it returns over `motion.settle`.
  *   The glow flickers by `motion.flicker` away from an exposed room, steady under reduced motion.
- *   The spirit layer (`spirit`, book-ui.md Spirit state) is a flat wash in `spiritInk` at
- *   `opacity.spirit`, set as the page lands in every mode and fading out at the rise over
+ *   A treatment (`treatment`, book-ui.md Book treatments: `spirit` for the Spirit state, `reverie`)
+ *   is the top layer: a flat, still wash in its `TREATMENTS` ink at its peak by the paper's
+ *   polarity (`treatmentInk`), set as the page lands in every mode and fading out when it ends over
  *   `motion.palette` (`motion.fade` under reduced motion, still a fade; Flashes off the same); a
  *   plain view, so it draws on the web too.
  * - States: none; glow (in `motion.palette`, by cut under reduced motion); vignette (breathes;
- *   steady at `opacity.faint` under reduced motion); under a fatal hold; spirit.
+ *   steady at `opacity.faint` under reduced motion); under a fatal hold; spirit; reverie.
  * - Story: UnderInk.stories.tsx
  */
-export function UnderInk({ view, spirit = false }: { view: GameView; spirit?: boolean }) {
+export function UnderInk({ view, treatment }: { view: GameView; treatment?: Treatment }) {
   const c = usePalette();
-  const { glowStyle, edgeStyle, spiritStyle } = useLayers(view, c, spirit);
+  const { glowStyle, edgeStyle, washStyle } = useLayers(view, c, treatment);
   // Once drawn a layer stays, at no opacity, so it can fade out over the settle.
-  const drawn = useRef({ lit: false, low: false, spirit: false }).current;
+  const drawn = useRef({ lit: false, low: false, wash: false }).current;
   drawn.lit ||= lampLit(view, c.bg);
   drawn.low ||= lowHealth(view);
-  const ghost = (drawn.spirit ||= spirit) && <Layer style={spiritStyle}>{null}</Layer>;
+  const ghost = (drawn.wash ||= !!treatment) && <Layer style={washStyle}>{null}</Layer>;
   if (!canDraw()) return ghost || null;
   return (
     <>

@@ -314,3 +314,20 @@ test('start needs only scene and never restarts an ended fact or a different out
       !s.decision.delta.ops.some((x) => x.op === 'fact.assign' && x.fact.key === 'scene_bell_rung'),
     );
 });
+
+// Breaks: a scene's treatment dropped between definition and view (the Book would draw reverie as a
+// plain page), or put on a view whose scene names none (book-ui.md, Book treatments).
+test('a treated scene carries its treatment into SceneView; the contract refuses an unknown one', () => {
+  const w = invoke(fresh(), 'coil_rope').world;
+  const view = gameView(w);
+  equal(view.scene, {
+    scene: ref('scene', 'rope_reverie'),
+    index: 1,
+    count: 2,
+    line: 'narration.coil_rope.actor',
+    treatment: 'reverie',
+  });
+  assert.deepEqual(validate('GameView', view), []);
+  const dream = { ...view, scene: { ...view.scene!, treatment: 'dream' } };
+  assert.notDeepEqual(validate('GameView', dream), []);
+});

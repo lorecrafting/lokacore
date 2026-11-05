@@ -7,6 +7,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 
 const { playCue, playTurn } = await import('./cueSounds.ts');
 const { onCue, useCues } = await import('./cues.ts');
+const { useCueSounds } = await import('./useCueSounds.ts');
 const { ItemPop } = await import('./ItemPop.tsx');
 const { RunningHead } = await import('./RunningHead.tsx');
 const { ShelfPage } = await import('./Shelf.tsx');
@@ -266,4 +267,25 @@ test('one action, one paper sound', (t) => {
     ]),
     ['pageTurn', 'coin'],
   );
+});
+
+// Breaks: a page turn inside a treated scene sounds (book-ui.md, Book treatments: no sound inside,
+// page turns included).
+test('a page turn is silent inside a treated scene', (t) => {
+  effects(t);
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const turns = (scene?: object) => {
+    g.bookDevice = [];
+    const draw = rig(t);
+    const view = { ...held([]), scene };
+    for (const turn of [0, 1]) {
+      draw(() => useCueSounds({ view, catchingUp: false } as never, turn));
+      t.mock.timers.tick(1000);
+    }
+    const log = g.bookDevice.filter((l: string[]) => l[0] === 'play');
+    g.bookDevice = undefined;
+    return log.length;
+  };
+  assert.equal(turns(), 1);
+  assert.equal(turns({ treatment: 'reverie' }), 0);
 });

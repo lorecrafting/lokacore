@@ -236,3 +236,19 @@ test('a cut stays silent until the Book names the room again', async () => {
   b.ambience('inn', undefined, true);
   assert.deepEqual(urlsOf(b.els), ['inn.m4a']);
 });
+
+// Breaks: a treated scene keeps the bed, the weather or the music under its silence, or the room
+// stays silent after it (book-ui.md, Book treatments: Sound).
+test('a treated scene fades the bed, weather and music out; the room after it comes back', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const b = await browser();
+  b.gesture();
+  b.ambience('inn', 'rain', true);
+  b.play('chapter');
+  assert.deepEqual(urlsOf(b.els).sort(), ['inn.m4a', 'rain.m4a', 'theme.m4a']);
+  b.ambience('inn', 'rain', true, 'silent');
+  t.mock.timers.tick(motion.bed.duration);
+  assert.deepEqual(urlsOf(b.els), []);
+  b.ambience('inn', 'rain', true);
+  assert.deepEqual(urlsOf(b.els).sort(), ['inn.m4a', 'rain.m4a']);
+});
