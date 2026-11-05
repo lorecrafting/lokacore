@@ -17,7 +17,11 @@
     "label": "action.eat",
     "narration": "narration.eat_stew_hearty",
     "applies": [
-      "hearty"
+      "hearty",
+      {
+        "status": "well_fed",
+        "duration": 7200
+      }
     ]
   },
   "words": {

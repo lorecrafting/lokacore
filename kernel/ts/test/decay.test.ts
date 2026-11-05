@@ -199,7 +199,7 @@ test('an eaten fish stays eaten when its spoiling ends', () => {
       narration: label,
     };
   });
-  w = ok(play(take(w, 'fish'), { type: 'eat', item_id: item(w, 'fish') }));
+  w = ok(play(take(w, 'fish'), { type: 'consume', item_id: item(w, 'fish') }));
   assert.equal(activeStatuses(w, item(w, 'fish')).length, 1);
   const run_id = 'aaaaaaaa-0000-4000-8000-000000000001';
   const [from, until] = [w.state.clock, w.state.clock + 86400];
@@ -230,7 +230,7 @@ test('an eaten fish logs no status event when its spoiling would have ended', ()
       narration: label,
     };
   });
-  w = ok(play(take(w, 'fish'), { type: 'eat', item_id: item(w, 'fish') }));
+  w = ok(play(take(w, 'fish'), { type: 'consume', item_id: item(w, 'fish') }));
   const run_id = 'aaaaaaaa-0000-4000-8000-000000000002';
   const [from, until] = [w.state.clock, w.state.clock + 86400];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };

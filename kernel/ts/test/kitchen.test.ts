@@ -14,7 +14,7 @@ import { gameView, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/attribute/shared.ts';
-import { currentStatus } from '../src/mechanics/status/shared.ts';
+import { applyStatus, currentStatus } from '../src/mechanics/status/shared.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { level as skillLevel, practice } from '../src/mechanics/skill_level.ts';
 import { value as fact } from '../src/mechanics/fact.ts';
@@ -117,7 +117,7 @@ test('two fish order a stew that is ready 300 s later; the larder restocks the p
 test('eating the stew restores mv and makes the eater fed for an hour', () => {
   let w = served();
   const before = mv(w);
-  const r = send(w, { type: 'eat', item_id: item(w, 'stew_plain_01') });
+  const r = send(w, { type: 'consume', item_id: item(w, 'stew_plain_01') });
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   if (r.decision.kind !== 'accepted') return;
   // No reaction listens for status_applied here, so the shared step emits none (status reader 2).
@@ -140,9 +140,9 @@ test('a meal that cures and applies the active fed writes it once: the cure wins
   });
   assert.ok(r.ok, JSON.stringify(r));
   let w = catchFish(served(r.cartridge as Cartridge), 'fish_03');
-  w = play(w, { type: 'eat', item_id: item(w, 'fish_03') });
+  w = play(w, { type: 'consume', item_id: item(w, 'fish_03') });
   assert.equal(str(w), 11);
-  w = play(w, { type: 'eat', item_id: item(w, 'stew_plain_01') });
+  w = play(w, { type: 'consume', item_id: item(w, 'stew_plain_01') });
   assert.equal(str(w), 10);
 });
 
@@ -162,7 +162,7 @@ test('a reaction on status_applied hears the first fed, and a refresh stays sile
   assert.ok(r.ok, JSON.stringify(r));
   let w = catchFish(served(r.cartridge as Cartridge), 'fish_03');
   const types = (k: string) => {
-    const d = send(w, { type: 'eat', item_id: item(w, k) });
+    const d = send(w, { type: 'consume', item_id: item(w, k) });
     assert.equal(d.decision.kind, 'accepted', JSON.stringify(d.decision));
     w = d.world;
     return d.decision.kind === 'accepted'
@@ -174,10 +174,11 @@ test('a reaction on status_applied hears the first fed, and a refresh stays sile
   assert.deepEqual(types('fish_03'), [[], 1]);
 });
 
-// Breaks: a meal with `applies` refused at full mv, or eaten there when nothing would newly land:
-// a plain meal, an immune eater, or fed already active (PM rulings: the buff applies, the restore
-// is capped; a meal that would land no new status is refused as a plain meal).
-test('at full mv the stew applies fed; a plain, immune or refresh-only meal is refused', () => {
+// Breaks: a meal with `applies` refused at full mv, or eaten there when nothing would land: a plain
+// meal or an immune eater (PM rulings: the buff applies, the restore is capped). A later meal with
+// fed active refreshes it to the later end (loka-kgd.209 F2), so it is eaten, not refused; a
+// repeat ending sooner changes nothing (it never shortens).
+test('at full mv the stew applies fed or refreshes it; a plain or immune meal is refused', () => {
   const r = reload(base, (c) => {
     const { applies: _, ...plain } = c.items[`${S}:item/stew_plain_01`].edible;
     c.items[`${S}:item/fish_03`].edible = plain;
@@ -187,16 +188,23 @@ test('at full mv the stew applies fed; a plain, immune or refresh-only meal is r
   let w = wait(catchFish(served(r.cartridge as Cartridge), 'fish_03', 'fish_04'), 7200);
   assert.equal(mv(w), 100);
   const refused = (w: World, k: string) =>
-    assert.deepEqual(send(w, { type: 'eat', item_id: item(w, k) }).decision, {
+    assert.deepEqual(send(w, { type: 'consume', item_id: item(w, k) }).decision, {
       kind: 'rejected',
       error: { code: 'invalid_state' },
     });
   refused(w, 'fish_03');
   const body = { ...w.entities[w.body], immune: [ref('status', 'fed')] };
   refused({ ...w, entities: { ...w.entities, [w.body]: body } } as World, 'fish_04');
-  w = play(w, { type: 'eat', item_id: item(w, 'stew_plain_01') });
+  w = play(w, { type: 'consume', item_id: item(w, 'stew_plain_01') });
   assert.deepEqual([mv(w), str(w)], [100, 11]);
-  refused(w, 'fish_04');
+  const fed = (w: World) => currentStatus(w, w.body, ref('status', 'fed'))!.ends_at!;
+  const first = fed(w);
+  w = play(wait(w, 60), { type: 'consume', item_id: item(w, 'fish_04') });
+  assert.equal(fed(w), first + 60);
+  assert.deepEqual(
+    applyStatus(w, w.body, ref('status', 'fed'), 0, () => 'x', 1),
+    [],
+  );
 });
 
 // Breaks: the keep reaction missing, the W6 variant not reading spoiling, the spoil reaction not
@@ -320,11 +328,11 @@ test('the cook teaches cooking free; stews and the feast are cooked at the heart
   w = cooked(gather(w, 2), 'cook_stew').world;
   assert.deepEqual([uses(w), skillLevel(w, w.character, cooking)], [4, 3]);
   assert.equal(refusal(gather(w, 2), 'cook_stew'), null); // larder empty of hearty stews
-  w = play(w, { type: 'eat', item_id: item(w, 'stew_hearty_01') });
+  w = play(w, { type: 'consume', item_id: item(w, 'stew_hearty_01') });
   assert.equal(str(w), 12);
   w = wait(w, 3600);
   assert.equal(str(w), 10);
-  assert.equal(str(play(w, { type: 'eat', item_id: item(w, 'feast_01') })), 12);
+  assert.equal(str(play(w, { type: 'consume', item_id: item(w, 'feast_01') })), 12);
 });
 
 // Breaks: a failed cook keeps the fish or still hands out a stew (the brief's "boils over").
@@ -346,7 +354,7 @@ test('at a hearth rated 2 the level-1 cook boils the pot over: fish lost, no ste
 test('eaten and spoiled stews never refill the larder', () => {
   let w = learn(fresh());
   for (let i = 0; i < 3; i++) w = cooked(gather(w, 2), 'cook_stew').world;
-  w = play(w, { type: 'eat', item_id: item(w, 'stew_hearty_01') });
+  w = play(w, { type: 'consume', item_id: item(w, 'stew_hearty_01') });
   w = wait(w, 86400);
   assert.deepEqual(
     ['stew_hearty_02', 'stew_hearty_03'].map((k) => holder(w, k)),

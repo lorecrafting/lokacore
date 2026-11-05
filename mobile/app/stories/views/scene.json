@@ -325,14 +325,6 @@
   "topics": [],
   "conditions": [
    {
-    "label": "condition.hungry",
-    "next_tick_at": 28800,
-    "resource": "hunger",
-    "per_tick": -1,
-    "tick_every": 3600,
-    "kind": "debuff"
-   },
-   {
     "label": "condition.overheated",
     "ends_at": 34200,
     "duration": 9000,
@@ -340,14 +332,6 @@
     "resource": "hp",
     "per_tick": -1,
     "tick_every": 7200,
-    "kind": "debuff"
-   },
-   {
-    "label": "condition.thirsty",
-    "next_tick_at": 28800,
-    "resource": "thirst",
-    "per_tick": -1,
-    "tick_every": 3600,
     "kind": "debuff"
    }
   ],
@@ -536,18 +520,6 @@
      "cartridge_id": "toolbox_showcase",
      "cartridge_version": "0.0.1",
      "kind": "resource",
-     "key": "hunger"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "fed",
-    "tone": "normal"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
      "key": "ma"
     },
     "current": 5,
@@ -578,18 +550,6 @@
     "maximum": 100,
     "band": "purse_empty",
     "tone": "danger"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
-     "key": "thirst"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "quenched",
-    "tone": "normal"
    }
   ],
   "revival": {

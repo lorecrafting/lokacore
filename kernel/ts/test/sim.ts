@@ -414,16 +414,14 @@ const aimed = (type: string, id: string, to: string): Payload =>
     ? { type, source_id: id, vessel_id: to }
     : type === 'pour'
       ? { type, source_id: id, receiver_id: to }
-      : type === 'drink'
-        ? { type, vessel_id: id }
-        : type === 'look' || type === 'talk' || Object.hasOwn(MOVES, type)
-          ? { type, target_id: id }
-          : {
-              type,
-              item_id: id,
-              ...(type === 'give' && { recipient_id: to }),
-              ...(type === 'put' && { container_id: to }),
-            };
+      : type === 'look' || type === 'talk' || Object.hasOwn(MOVES, type)
+        ? { type, target_id: id }
+        : {
+            type,
+            item_id: id,
+            ...(type === 'give' && { recipient_id: to }),
+            ...(type === 'put' && { container_id: to }),
+          };
 
 const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
 const DIRECTIONS = ['north', 'south', 'east', 'west', 'up', 'down', 'sideways', 'constructor'];

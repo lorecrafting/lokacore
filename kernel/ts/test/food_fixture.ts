@@ -17,6 +17,8 @@ function base(c: any) {
       keywords: [`apple_0${n}`],
       edible: { ...structuredClone(loaf.edible), amount: 6 },
     };
+  // Restore-only apples: the loaf's well fed (loka-kgd.209) is tested in showcase_body.
+  for (const n of [1, 2, 3]) delete c.items[`${prefix}:item/apple_0${n}`].edible.applies;
 }
 export function bundle(change: (c: any) => void = () => {}) {
   return f.bundle((c) => {

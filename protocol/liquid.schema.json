@@ -106,6 +106,22 @@
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
           },
           "minItems": 1
+        },
+        "resource": {"description":"loka-kgd.209: the pool a Drink of this liquid restores, with amount; a service serving does not.",
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "amount": {"description":"The capped restore of one Drink.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "applies": {
+          "description": "loka-kgd.209: statuses a Drink of this liquid applies to the drinker's body, as an edible's applies; a service serving does not.",
+          "type": "array",
+          "items": {
+            "$ref": "entity.schema.json#/$defs/AppliedStatus"
+          },
+          "minItems": 1
         }
       },
       "required": [
@@ -115,6 +131,14 @@
         "grams_per_unit",
         "drink_amount"
       ],
+      "dependentRequired": {
+        "resource": [
+          "amount"
+        ],
+        "amount": [
+          "resource"
+        ]
+      },
       "additionalProperties": false,
       "description": "Cartridge-owned mass, integer serving and unit labels for a declared liquid.",
       "examples": [

@@ -48,7 +48,7 @@ import { chainRefused } from '../mechanics/locks.ts';
 const HIDDEN = [
   'where',
   'recover_corpse',
-  'eat',
+  'consume',
   'bandage',
   'buy',
   'sell',
@@ -56,7 +56,6 @@ const HIDDEN = [
   'read',
   'fill',
   'pour',
-  'drink',
   ...MODAL,
 ];
 const hidden = (world: World, actor: CharacterId, a: Offered) =>
@@ -119,6 +118,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
     worn: (id: string) =>
       listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id).concat(
         liquid(id),
+        foodActions(world, actor, id, set, steps),
         useActions(world, actor, id, set, steps),
       ),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, { direction })),

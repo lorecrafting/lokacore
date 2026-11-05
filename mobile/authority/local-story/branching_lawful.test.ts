@@ -281,7 +281,7 @@ test('a Give-restricted item taken and eaten reopens', () => {
     g.talk();
     g.choose('take');
     g.go('move', { direction: 'south' });
-    g.go('eat', {}, [g.fresh.entityIds[TOKEN]!]);
+    g.go('consume', {}, [g.fresh.entityIds[TOKEN]!]);
     assert.equal(holder(g), g.story.world().consumed);
   });
 });

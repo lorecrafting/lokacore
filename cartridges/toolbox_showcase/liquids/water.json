@@ -4,7 +4,9 @@
   "grams_per_unit": 250,
   "drink_amount": 1,
   "cures": [
-    "thirsty",
     "parched"
+  ],
+  "applies": [
+    "refreshed"
   ]
 }

@@ -16,8 +16,8 @@
     "amount": 5,
     "label": "action.eat",
     "narration": "narration.eat_fold_loaf_2",
-    "cures": [
-      "hungry"
+    "applies": [
+      "well_fed"
     ]
   },
   "words": {

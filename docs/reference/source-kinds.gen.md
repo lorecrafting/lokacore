@@ -234,10 +234,13 @@ Cartridge-owned mass, integer serving and unit labels for a declared liquid.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
+| amount | integer |  | The capped restore of one Drink. |
+| applies | list of [AppliedStatus](source-kinds.gen.md#appliedstatus) |  | loka-kgd.209: statuses a Drink of this liquid applies to the drinker's body, as an edible's applies; a service serving does not. |
 | cures | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses (toolbox rows 1 and G13) a Drink of this liquid ends; a service serving does not. |
 | drink_amount | integer | yes | The integer serving. |
 | grams_per_unit | integer | yes | Mass of one unit. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) |  | loka-kgd.209: the pool a Drink of this liquid restores, with amount; a service serving does not. |
 | unit_label | [TextKey](source-kinds.gen.md#textkey) | yes | Its unit label. |
 
 ## npcs
@@ -559,8 +562,11 @@ Toolbox row 1: one authored timed status on a body. Every tick_every seconds unt
 | pierced_by.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The attribute whose value the seer needs; it is compared with the holder's skill level. |
 | pierced_by.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill whose level the seer's attribute value must beat to see through the concealment. |
 | resistances | [Resistances](source-kinds.gen.md#resistances) |  | Status reader 5: while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick. |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The pool per_tick changes. |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The pool per_tick changes; omitted only beside ticks (compiler SCHEMA_VIOLATION). |
 | tick_every | integer | yes | Seconds between ticks. |
+| ticks | list of object |  | loka-kgd.209: several pools one tick changes, each by its signed per_tick (never 0), in place of resource and per_tick (compiler SCHEMA_VIOLATION beside either). |
+| ticks[].per_tick | integer | yes |  |
+| ticks[].resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
 
 ## structures
 
@@ -689,6 +695,15 @@ One authored character choice and its bounded initial effects.
 api_version: the authored source document/schema family (05 ยง3).
 
 Type: `loka/v3`.
+
+### AppliedStatus
+
+Type: [Key](source-kinds.gen.md#key) or object.
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| duration | integer |  |  |
+| status | [DefinitionRef](source-kinds.gen.md#definitionref) | in this form |  |
 
 ### AttackProfile
 
@@ -1143,16 +1158,16 @@ A directly held item opted into exact bleed treatment.
 
 ### ItemEdible
 
-D4 held-food metadata; a complete original item grants capped recovery when Eat commits.
+D4 held-food metadata; a complete original item grants its effect (capped recovery, cures, applies) when Consume commits.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| amount | integer | yes | Positive integer; the canonical numeric profile supplies the safe-integer upper limit. |
-| applies | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row hs-5: statuses Eat applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute. |
+| amount | integer |  | Positive integer; the canonical numeric profile supplies the safe-integer upper limit. |
+| applies | list of [AppliedStatus](source-kinds.gen.md#appliedstatus) |  | Toolbox row hs-5: statuses Consume applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute. |
 | cures | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses (toolbox row 1) this food ends when eaten; eating is allowed at the pool maximum while one of them is active. |
 | label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the eat action's button. |
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is eaten. |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The pool eating restores (for example hp). |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The pool eating restores (for example mv); with amount, or neither (loka-kgd.209). |
 
 ### ItemLocation
 
@@ -1647,8 +1662,10 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 
 ## Fields without a meaning
 
-13 fields.
+17 fields.
 
+- `AppliedStatus: duration`
+- `AppliedStatus: status`
 - `attributes: attributes`
 - `behaviours: params`
 - `behaviours: reactions`
@@ -1662,3 +1679,5 @@ The cartridge's world settings (owner decision world parameters; 00 ยง4 and 04 ย
 - `policy fact_at_least: subject`
 - `policy fact_at_least: with`
 - `resources: resources`
+- `statuses: ticks[].per_tick`
+- `statuses: ticks[].resource`

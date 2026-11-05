@@ -1,3 +1,4 @@
+// size: allow 306, the condition line names one tick or several (loka-kgd.209)
 import { dreamPages, dreamAt } from './dreams.ts';
 import type {
   ActionInput,
@@ -24,9 +25,15 @@ const left = (c: Condition, time: number) =>
 export const conditionLine = (c: Condition, time: number, text: Say) =>
   [text(c.label), left(c, time)].filter(Boolean).join(' · ') +
   // A status that never ticks (row 2c) shows no tick part.
-  (c.per_tick === undefined
-    ? ''
-    : ` · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${dur(c.tick_every)}`);
+  tickings(c)
+    .map(
+      (t) =>
+        ` · ${t.per_tick > 0 ? '+' : ''}${t.per_tick} ${t.resource.toUpperCase()} each ${dur(c.tick_every)}`,
+    )
+    .join('');
+// Each pool a status ticks and by how much: one `resource`, or several `ticks` (loka-kgd.209).
+export const tickings = (c: Condition) =>
+  c.ticks ?? (c.per_tick === undefined ? [] : [{ resource: c.resource!, per_tick: c.per_tick }]);
 // A status icon's hold tip (book-ui.md Conditions details): label and time left, no tick part.
 export const statusTip = (c: Condition, time: number, text: Say) =>
   [text(c.label), left(c, time)].filter(Boolean).join(', ');
@@ -281,7 +288,7 @@ export function actionContext(
     commandOf(b) === 'use_transport'
       ? view.notices?.find((n) => n.id === b.detail_id)?.transport
       : null,
-    ['fill', 'pour', 'drink', 'use_service'].includes(commandOf(b))
+    ['fill', 'pour', 'consume', 'use_service'].includes(commandOf(b))
       ? things(view)
           .filter((e) => b.target_ids.includes(e.id))
           .map((e) => [e.id, e.liquid, 'services' in e ? e.services : undefined])

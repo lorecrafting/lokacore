@@ -1,9 +1,11 @@
-import type { AdvertisedAction, CharacterId, EntityId } from '../contracts.gen.ts';
+import type { AdvertisedAction, CharacterId, EntityId, TextKey } from '../contracts.gen.ts';
 import type { ActionSet } from '../commands/actions.ts';
 import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
 import { availability } from '../mechanics/food/shared.ts';
 import { KernelError } from '../foundation/error.ts';
+import { eligible } from './liquid.ts';
 
+// A carried vessel offers Consume as Drink (loka-kgd.209); an edible only in the hand.
 export function foodActions(
   world: World,
   actor: CharacterId,
@@ -11,15 +13,21 @@ export function foodActions(
   set: ActionSet,
   steps: Steps,
 ): AdvertisedAction[] {
-  const e = world.entities[id];
-  if (e?.kind !== 'item' || !e.edible || world.state.containers[id] !== bodyOf(world, actor))
+  const e = world.entities[id],
+    body = bodyOf(world, actor);
+  if (e?.kind !== 'item' || !body) return [];
+  if (
+    e.vessel
+      ? !eligible(world, body, id as EntityId, steps)
+      : !e.edible || world.state.containers[id] !== body
+  )
     return [];
   return Object.values(set)
-    .filter((a) => a.command === 'eat')
+    .filter((a) => a.command === 'consume')
     .map((a) => {
       const result = availability(
         world,
-        { type: 'eat', actor_id: actor, item_id: id as EntityId },
+        { type: 'consume', actor_id: actor, item_id: id as EntityId },
         steps,
         a.key,
       );
@@ -28,7 +36,7 @@ export function foodActions(
       const shown = {
         action_key: a.key,
         command: a.command,
-        label: a.engine ? e.edible!.label : a.label,
+        label: a.engine ? (e.vessel ? ('action.drink' as TextKey) : e.edible!.label) : a.label,
         target: a.target,
         input: a.input,
         target_ids: [id as EntityId],

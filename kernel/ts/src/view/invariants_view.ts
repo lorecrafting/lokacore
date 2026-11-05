@@ -46,8 +46,7 @@ export const gameview_agrees_with_admission = ({
   if (command.world_context_id !== context) return code === 'not_found';
   if (type === 'continue' || (type === 'choose' && command.payload.dream))
     return dreamAgrees(view, command.payload, decision, action_key);
-  if (['fill', 'pour', 'drink'].includes(type))
-    return liquidAgrees(view, command, decision, action_key); // own keys only: an action may be keyed `constructor`
+  if (['fill', 'pour'].includes(type)) return liquidAgrees(view, command, decision, action_key); // own keys only: an action may be keyed `constructor`
   const commandOf = (a: AdvertisedAction) =>
     Object.hasOwn(resolves, a.action_key) ? resolves[a.action_key] : undefined;
   const equip = (a: AdvertisedAction) => EQUIP_VERBS.includes(commandOf(a));
@@ -213,12 +212,7 @@ const entityView = (view: GameView, id: string): EntityView | ContentView | unde
 
 function liquidAgrees(view: GameView, command: Any, decision: Any, key?: string): boolean {
   const p = command.payload;
-  const targets =
-    p.type === 'fill'
-      ? [p.source_id, p.vessel_id]
-      : p.type === 'pour'
-        ? [p.source_id, p.receiver_id]
-        : [p.vessel_id];
+  const targets = p.type === 'fill' ? [p.source_id, p.vessel_id] : [p.source_id, p.receiver_id];
   const source =
     p.type === 'fill'
       ? (view.notices ?? []).find((n) => n.id === p.source_id)

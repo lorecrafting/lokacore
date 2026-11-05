@@ -1,0 +1,20 @@
+{
+  "duration": 3600,
+  "tick_every": 1200,
+  "ticks": [
+    {
+      "resource": "hp",
+      "per_tick": 1
+    },
+    {
+      "resource": "mv",
+      "per_tick": 5
+    }
+  ],
+  "name": "condition.well_fed",
+  "narration": {
+    "applied": "narration.well_fed.applied",
+    "tick": "narration.well_fed.tick",
+    "expired": "narration.well_fed.expired"
+  }
+}

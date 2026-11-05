@@ -220,7 +220,7 @@ export const COMPOSES = {
   expedition: ['quest'],
   transport: ['movement'],
   scripted_action: ['check', 'status', 'death', 'containment'],
-  food: ['status'],
+  food: ['status', 'liquid'],
   // W26 doors; fact: a delayed reaction's fact_changed (row FD1)
   schedule: ['movement', 'combat', 'death', 'quest', 'containment', 'status', 'barrier', 'fact'],
   combat: ['movement', 'quest', 'death'], // Diku rounds' round 1 at Attack can kill (loka-kgd.197)

@@ -124,10 +124,13 @@ test('empty, filled, partial Pour, empty, nested, ground and shop custody reopen
   assert.equal(fillReplay.kind === 'saved' && fillReplay.replay, true);
   assert.deepEqual(rows(a), [wet(4), empty]);
   a.invoke('fill', [a.well, spare]);
+  // Breaks: a Fill's or a Drink's receipt opens no detail, or the wrong one (narration.ts receiptDetail).
+  assert.equal(a.story().narration()?.detail_id, a.well);
   a.reopen();
   assert.deepEqual(rows(a), [wet(4), wet(4)]);
-  const drink = a.attempt('drink', [spare]);
+  const drink = a.attempt('consume', [spare]);
   assert.equal(a.story().invoke(drink).kind, 'saved');
+  assert.equal(a.story().narration()?.detail_id, spare);
   a.reopen();
   assert.deepEqual(rows(a), [wet(4), wet(3)]);
   const drinkReplay = a.story().invoke(drink);
@@ -137,7 +140,7 @@ test('empty, filled, partial Pour, empty, nested, ground and shop custody reopen
   a.reopen();
   assert.deepEqual(rows(a), [wet(3), wet(4)]);
   for (let n = 2; n >= 0; n--) {
-    a.invoke('drink', [original]);
+    a.invoke('consume', [original]);
     a.reopen();
     assert.deepEqual(rows(a), [n ? wet(n) : empty, wet(4)]);
   }
@@ -147,7 +150,7 @@ test('empty, filled, partial Pour, empty, nested, ground and shop custody reopen
   a.invoke('put', [spare, satchel]);
   a.reopen();
   assert.equal(a.story().world().state.containers[spare], satchel);
-  a.invoke('drink', [spare]);
+  a.invoke('consume', [spare]);
   a.reopen();
   assert.deepEqual(rows(a), [empty, wet(3)]);
   a.invoke('take', [spare]);
@@ -212,7 +215,7 @@ test('cold open refuses a liquid receipt whose command no longer binds', () => {
       const [original, spare] = skins(a);
       a.invoke('fill', [a.well, original]);
       a.invoke('fill', [a.well, spare]);
-      a.invoke('drink', [spare]);
+      a.invoke('consume', [spare]);
       a.invoke('pour', [original, spare]);
       a.invoke('look');
       const row = a.sql
@@ -265,7 +268,7 @@ test('Pour failed COMMIT and lost acknowledgement fence liquid then reconcile an
       const attempt = a.attempt('pour', [original, spare]);
       assert.equal(a.story().invoke(attempt).kind, 'pending');
       assert.equal(a.story().world(), old);
-      assert.equal(a.story().invoke(a.attempt('drink', [spare])).kind, 'pending');
+      assert.equal(a.story().invoke(a.attempt('consume', [spare])).kind, 'pending');
       assert.equal(
         a.story().elapsed({
           expected_run_id: a.story().runId(),
@@ -331,7 +334,7 @@ test('actual fatal combat cold reopens the filled shell on its corpse then ordin
     a.reopen();
     assert.equal(a.story().world().state.containers[skin], a.fresh.body);
     assert.deepEqual(rows(a), [wet(4), empty]);
-    a.invoke('drink', [skin]);
+    a.invoke('consume', [skin]);
     a.reopen();
     assert.deepEqual(rows(a), [wet(3), empty]);
   } finally {

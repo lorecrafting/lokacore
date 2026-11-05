@@ -183,7 +183,7 @@ test('drinking the antidote ends the poison and its pending tick', () => {
   w = wait(w, 60);
   assert.equal(hp(w), 9);
   w = withPool(w, 'mv', 100);
-  w = play(w, { type: 'eat', item_id: antidote(w) });
+  w = play(w, { type: 'consume', item_id: antidote(w) });
   assert.equal(gameView(w).conditions, undefined);
   w = wait(w, 300);
   assert.equal(hp(w), 9);
@@ -262,7 +262,7 @@ test('a cure listed twice ends the status once', () => {
   });
   w = play(w, { type: 'take', item_id: antidote(w) });
   w = play(w, { type: 'move', direction: 'east' });
-  w = play(w, { type: 'eat', item_id: antidote(w) });
+  w = play(w, { type: 'consume', item_id: antidote(w) });
   assert.equal(gameView(w).conditions, undefined);
 });
 

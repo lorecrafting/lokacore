@@ -937,8 +937,8 @@
       ]
      },
      {
-      "action_key": "drink",
-      "command": "drink",
+      "action_key": "consume",
+      "command": "consume",
       "label": "action.drink",
       "target": {
        "kind": "entity",
@@ -1028,18 +1028,6 @@
      "cartridge_id": "toolbox_showcase",
      "cartridge_version": "0.0.1",
      "kind": "resource",
-     "key": "hunger"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "fed",
-    "tone": "normal"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
      "key": "ma"
     },
     "current": 5,
@@ -1070,18 +1058,6 @@
     "maximum": 100,
     "band": "purse_empty",
     "tone": "danger"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
-     "key": "thirst"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "quenched",
-    "tone": "normal"
    }
   ],
   "revival": {

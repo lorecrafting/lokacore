@@ -361,7 +361,7 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
   // With it: no tick, mv + 1, the scar stays.
   w = take(go(w, 'south').world, 'poultice');
   const mv = pool(w, 'mv')!;
-  w = play(w, { type: 'eat', item_id: id(w, 'item', 'poultice') }).world;
+  w = play(w, { type: 'consume', item_id: id(w, 'item', 'poultice') }).world;
   assert.deepEqual([pool(w, 'hp'), pool(w, 'mv'), conditions(w)], [6, mv + 1, [GORED]]);
 });
 

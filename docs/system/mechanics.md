@@ -1300,7 +1300,7 @@ kind to null. No arbitrary amount input or discard verb is added. Drink requires
 at least the liquid's authored positive integer drink amount, consumes exactly
 that amount and narrates the committed kind/amount. A smaller remainder refuses
 unchanged; there is no partial last serving. Emptying resets kind to null. B7
-water drinking changes no HP, MV, needs, faction, money, RNG or clock (since [row G13](#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) a liquid's `cures` may end statuses).
+water drinking changes no HP, MV, needs, faction, money, RNG or clock (since [row G13](#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) a liquid's `cures` may end statuses, and since [Consume](#consume-loka-kgd209) Drink is `consume` on a vessel and a liquid may declare the restore pair and `applies`).
 Each Fill, Pour and Drink verb line (not a service's served drink) binds participant
 `vessel` (Fill and Drink: the vessel; Pour: the receiver) with `remaining`, that vessel's
 committed quantity, and its `capacity` (loka-tc2e).
@@ -1878,8 +1878,8 @@ read the exact committed child enum; they do not move or create the child, compl
 an escort, write a child outcome or claim that the child is in the cottage.
 
 D4 is the first held-food consumer. B8 supplies resource recovery semantics;
-`food@1` owns the installed `eat
-{actor_id, item_id}` and accepted `eaten {item_id}`. Admission requires the exact
+`food@1` owns `consume
+{actor_id, item_id}` (formerly `eat`, [Consume](#consume-loka-kgd209)) and accepted `eaten {item_id}`. Admission requires the exact
 opted edible item directly in the living actor's body and positive headroom in
 its declared recovery pool. An unknown item is `not_found`, a nonfood target is
 `invalid_target`, indirect/foreign/room/spent custody is `not_owned`, and no
@@ -1915,6 +1915,20 @@ Both foundation validators and independent precondition checks enforce the termi
 subset; literal fixtures and differential proof cover it.
 Projection and execution share one budgeted pure admission query, including exact
 keyed-action admission. Ordinary uneaten food custody and death remain unchanged.
+
+## Consume (loka-kgd.209)
+
+One command, `consume {actor_id, item_id}`, owned by `food@1`, replaces Eat and Drink; brief and decisions in Beads `loka-kgd.209`. The verb a player sees (Eat, Drink, Quaff, Apply) is only the item's authored `label` and narration line.
+
+- **Effect block.** Any consumable declares the same optional effects, at least one present: the restore (`resource` and `amount`, both or neither, the existing flat pair, so the hash tag stays), `cures: [status]` and `applies: [entry]`. An edible item declares them in `edible` ([D4](#d4-homes-finite-apples-and-eat-selected-contract)); a liquid kind declares them in its `LiquidDefinition` ([B7](#b7-well-and-waterskin-selected-contract)). One runtime function applies the block for both: settle and cap the restore, end each active cured status, then land each applied status through `statusStep` (row 1), in one writer group with the custody or vessel change.
+- **Targets.** An edible item moves to terminal consumed custody, as Eat did; receipt `eaten {item_id}`. A vessel item is drunk by liquid@1's own admission (held vessel, one serving, no partial last serving); receipt and event `drank {vessel_id, kind, quantity}`, so a reaction on `drank` keeps working. `consume` on a vessel needs `liquid@1` as well (UNDECLARED_CAPABILITY otherwise); a cartridge with `liquid@1` and Drink adds `food@1`.
+- **Admission.** Refusal codes are D4's. At the pool maximum eating an edible is admitted only when a cure ends or an applied status lands or refreshes (not `immune`); otherwise `invalid_state`; a vessel is drunk whenever liquid@1 admits it. This replaces hs-5's "newly land" rule, so a second meal while Well fed refreshes it.
+- **Buffs.** status@1 stays the only home of temporary effects. One row per holder and status: a repeat refreshes to the later of its current end and now plus this application's duration, never stacks. No percent or hp-maximum modifier (loka-kgd.50; hs-5's gate holds). **Fork F2 (PM):** an `applies` entry is a status ref or `{status, duration}`, the duration overriding the status's own, so a cooked meal lasts longer than bread with the same status. **Fork F1 (PM):** a status may tick more than one resource (`ticks: [{resource, per_tick}]` in place of the single pair), so Well fed speeds both hp and mv.
+- **Bandage.** Not folded: it treats a bleed, not a status, and is skill-gated (C5).
+- **Spell reagents (loka-kgd.83).** Not covered by consume: a reagent is spent by a cast, not consumed by its holder. What remains is the craft path: TS already runs `crafted()` for a cast (`kernel/ts/src/mechanics/scripted_action/rule.ts`); the Elixir compiler refuses craft on a spell (`lib/loka/content/replenish.ex` `misplaced/2`). Lifting that gate for a consume-only craft is a small separate slice.
+- **Book.** No new component: the inventory line's action shows the item's label. Same-kind items are one line each today (`CarryingPage`); grouping with a count is a designer item, not built here.
+- **Opt-in.** Every field is optional; Chapter 1 declares none.
+- **Composition record.** Consumer: the showcase (meals give Well fed, drinks give Refreshed; numbers are cartridge settings). Reads: the effect block, status definitions and rows, liquid rows, the restore pool. Writes: `entity.transfer` to the consumed holder or the vessel's liquid change, the resource adjust, `status.transition`. Events: `drank` (existing). Jobs and save rows: none new. Reused: D4 custody, B7 serving rules, row 1 `statusStep`, hs-5's hp-max gate. New: the `consume` command, the liquid effect fields, the forks' fields if chosen. Missing invariant: none. Installed kernel 1.154.
 
 ## D5 dry Deep Fen exploration (selected contract)
 
@@ -2385,7 +2399,7 @@ Beads `loka-3w3q` (designer ruling 2026-10-22) and [declarations](cartridge.md#d
 
 [Toolbox rows 18 and 42](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#status-declarations) govern them; the brief and its decisions are in Beads `loka-kgd.36` (2026-10-10). Both are [row 2c](#status-modifiers-toolbox-row-2c) statuses without `per_tick`, applied by a reaction; per the PM ruling in Beads `loka-kgd.50` they modify attributes the derived hp maximum does not read.
 
-- **Potion (row 18, content only).** A potion is a liquid kind in a vessel; Drink emits `drank {kind}`, whose subject is the drinker, so a reaction on that kind applies the status ([reaction@1](#reaction1-kerneltssrcmechanicsreactionts)). Eat emits no reaction event, so an edible potion is not built. _Stacking:_ a second dose while active refreshes `ends_at` to now + duration and never stacks (one row per holder and status, [row 1](#status-effects-over-time-toolbox-row-1)); different statuses sum (row 2c).
+- **Potion (row 18, content only).** A potion is a liquid kind in a vessel; Drink emits `drank {kind}`, whose subject is the drinker, so a reaction on that kind applies the status ([reaction@1](#reaction1-kerneltssrcmechanicsreactionts)). An edible item's `applies` lands a status directly ([Consume](#consume-loka-kgd209)), so a potion item needs no reaction. _Stacking:_ a second dose while active refreshes `ends_at` to now + duration and never stacks (one row per holder and status, [row 1](#status-effects-over-time-toolbox-row-1)); different statuses sum (row 2c).
 - **Song (row 42).** A song is a scripted action whose policy needs the instrument (`has_item`); its `action_completed {action}` reaction applies the status to the performer. No event a player's action emits has a co-present NPC as its subject, and a song's scripted action steps cannot apply a status (only a spell's can, [row 29b](#spell-effects-toolbox-row-29b)), so the one engine addition is a `status.apply` step's `npc`: like `item`, it names an authored NPC, whose instance takes the status (a dead one takes nothing, `immune` holds). Presence stays content: each listener has its own rule on the same trigger with `when: npc_present {npc}` ([row W6](#entity-description-variants-toolbox-row-w6)), so an absent listener takes nothing and the performer's rule never depends on a listener. _Known limits:_ listeners are authored one rule each, never "everyone present"; a spawned copy of a template never takes it (the compiler refuses a template).
 - **Opt-in.** A step's `npc` is optional; a cartridge without it keeps its bytes, hash and behavior; Chapter 1 declares no status.
 - **Book.** No new element: the condition line names the player's status and the Character page shows the attribute with the modifier (row 2c); a listener's status adds no line (it declares no observed line, row G3).
@@ -2462,7 +2476,7 @@ Beads `loka-3w3q` (designer ruling 2026-10-22) and [declarations](cartridge.md#d
 [Toolbox row G13](../MECHANICS-TOOLBOX.md#ranked-toolbox) and row W25's `dry` condition; [declarations](cartridge.md#need-declarations) govern them; the PM briefs are in Beads `loka-kgd.36` and `loka-kgd.44` (2026-10-10).
 
 - **Drains.** Content on [row 1](#status-effects-over-time-toolbox-row-1): a need is a cartridge pool and a status with a negative `per_tick` on it. A tick saturates at the pool's authored minimum, and only an hp tick runs death, so a need pool at its floor never kills (W25's content floor).
-- **Cures.** Bread is an edible item whose `cures` lists the hunger status (row 1). A liquid may declare `cures` too: a Drink of it ends each listed active status in the same commit, as Eat does (`kernel/ts/src/mechanics/liquid/shared.ts`). A service serving (`serving`, Maud's ale) cures nothing (known limit). Neither restores the need pool: food restores only `mv` (D4) and a Drink restores nothing (B7); restoring a need pool is not in these rows.
+- **Cures.** Bread is an edible item whose `cures` lists the hunger status (row 1). A liquid may declare `cures` too: a Drink of it ends each listed active status in the same commit, as Eat does (`kernel/ts/src/mechanics/liquid/shared.ts`). A service serving (`serving`, Maud's ale) cures nothing (known limit). Neither restores the need pool: food restores only `mv` (D4); a liquid's restore ([Consume](#consume-loka-kgd209)) is held to the same MV rule.
 - **Dry.** Row W25's shape without clothing: a reaction on `entity_entered_room` into the exposed room and one on `clock_hour`, both with `when` all(`sky {weather: drought}`, `has_tag {tag: "exposed", subject: "room"}`), apply the dry status to the thirst pool; each hour refreshes it silently and in shelter it expires by itself. A Drink ends it; on the exposed ground in a drought the next hour applies it again.
 - **Opt-in.** A liquid's `cures` is optional. A cartridge without it keeps its bytes, hash and behavior; Chapter 1 declares none.
 - **Book.** Nothing new: each drain is a status whose label is a line in words on the Character page, and the room's drought variant says why ([trap 12](../MECHANICS-TOOLBOX.md#traps)).
@@ -3655,7 +3669,7 @@ Homestead row hs-9 (Beads `loka-otn4`). The owner pays to raze a built room; its
 Homestead row hs-5 (Beads `loka-kgd.108.4`): a cook turns two caught fish into a stew over a timed commission, and the stew is a meal that leaves a buff. Declaration: an edible's `applies` ([status declarations](cartridge.md#status-declarations)). Save rules: none new.
 
 - **Command.** None new: Eat ([D4](#d4-homes-finite-apples-and-eat-selected-contract)) and `use_service` with an [escrow](#escrow-custody-toolbox-row-20a) and a [timed claim](#timed-job-claim-and-cancel-toolbox-row-20b).
-- **Admission.** A meal with no `applies` that restores nothing and cures nothing is `invalid_state`, as before. At the pool maximum a meal with `applies` is eaten only when at least one listed status would newly land (not `immune`, not already active): its statuses apply and the capped restore writes nothing; otherwise it is refused `invalid_state` as a plain meal.
+- **Admission.** A meal with no `applies` that restores nothing and cures nothing is `invalid_state`, as before. At the pool maximum a meal with `applies` is eaten only when at least one listed status lands or refreshes (not `immune`; [Consume](#consume-loka-kgd209)): its statuses apply and the capped restore writes nothing; otherwise it is refused `invalid_state` as a plain meal.
 - **Effect** (`decide` in `kernel/ts/src/mechanics/food/rule.ts`). After the restore and the cures, each `applies` status lands on the eater's body through `statusStep` (`mechanics/status/shared.ts`), as a reaction step would: one writer group with the meal, `status_applied` only while a reaction listens for it, `immune` holds, and a refresh while active is silent. No `ate` event. The narration is the meal's line, then each first-applied status's `applied` line in `applies` order; a reaction on `status_applied` may add its own lines after them. The mobile local-story Eat receipt binds only line 0, the meal's authored key ([save.md](save.md#finite-food-and-terminal-custody-recovery); `mobile/authority/local-story/food-receipt.ts`), so reaction and `alternates` lines reopen.
 - **Gate.** A listed status must not modify an attribute that is a `world.derived.hp_max` term (loka-kgd.50): the compiler (`lib/loka/content/status.ex` `meals`) refuses it with SCHEMA_VIOLATION at `edible.applies[i]`.
 - **Realm seams** (owner decision 2026-10-13, brief checklist).
