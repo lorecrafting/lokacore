@@ -73,11 +73,16 @@ their rules and red controls remain available for resumption.
 - `elixir bin/features.exs --check`: the [feature map](features.gen.md) matches the
   capability registry and `docs/features.json`; an implemented capability (a rule module) with
   a missing cell fails.
+- `elixir bin/toolbox_page.exs --check`: the [toolbox page](TOOLBOX.gen.md) matches
+  `docs/features.json`; an implemented capability without a summary, its source-schema
+  declarations (or an engine-only reason), a sampler cartridge that requires it and a showcase
+  district (or a reason each) fails, as does a scene treatment missing from the Book treatments table.
 - `elixir bin/red_controls.exs`: refuses occupied plant paths and creates files exclusively;
   `test/loka/red_controls_test.exs` checks preserved local bytes. It plants a boundary violation, a cycle, a compile edge, an
   oversized AGENTS.md, size-limit cases, one violation per Credo check, a stale and an
   out-of-subset schema, an Elixir adapter without a differential, a stale feature map, an
-  implemented capability without its map cells, and a PartyId passed where a CharacterId is
+  implemented capability without its map cells, a toolbox row without its summary or with a
+  sampler that does not require it, a stale toolbox page, and a PartyId passed where a CharacterId is
   matched (nominal ids, `Loka.Core.Contracts`), and requires each check to fail.
 - `elixir bin/check_docs.exs`: relative links and `#anchor`s resolve; every Markdown file is reachable
   by links from README.md, AGENTS.md or CLAUDE.md; AGENTS.md stays
