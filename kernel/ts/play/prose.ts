@@ -39,7 +39,8 @@ export function edit(
   return done(`edit ${file}:${line}`, { file, before, after: lines.join('\n') });
 }
 
-/** Every `file:line` that may write `key`: its `"key":` lines, else lines holding `words`. */
+/** Every `file:line` that may write `key`: its `"key":` lines, else lines holding `words`
+ * (as a JSON string, or a scene line that says their first line). */
 export function sourcesOf(source: string, key: string, words?: string) {
   const all = files(source);
   const find = (hit: (line: string) => boolean, rels = all) =>
@@ -51,13 +52,16 @@ export function sourcesOf(source: string, key: string, words?: string) {
   const defined = find((l) => l.includes(`"${key}":`));
   const first = words?.trim().split('\n')[0];
   if (defined.length || !first) return defined;
-  const quoted = find((l) => l.includes(JSON.stringify(words)));
-  if (quoted.length) return quoted;
-  return find(
-    (l) =>
-      l.trimEnd().endsWith(`: ${first}`) || [`- ${first}`, `* ${first}`, first].includes(l.trim()),
-    all.filter((rel) => /\.(scene|cut)$/.test(rel)),
-  );
+  // both kinds: a `~` scene line must not lose to some JSON `"~"` (located refuses two)
+  return [
+    ...find((l) => l.includes(JSON.stringify(words))),
+    ...find(
+      (l) =>
+        l.trimEnd().endsWith(`: ${first}`) ||
+        [`- ${first}`, `* ${first}`, first].includes(l.trim()),
+      all.filter((rel) => /\.(scene|cut)$/.test(rel)),
+    ),
+  ];
 }
 export const sourceOf = (source: string, key: string, words?: string) =>
   sourcesOf(source, key, words)[0];

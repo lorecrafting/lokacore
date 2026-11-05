@@ -16,7 +16,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { ROOT } from '../play/obs.ts';
 import { lastRun, limited, lintLines, serve, textOnly } from '../play/live.ts';
-import { sourceOf } from '../play/prose.ts';
+import { sourceOf, sourcesOf } from '../play/prose.ts';
 
 const was = { format: 1, rooms: { a: { name: 'room.a' } }, text: { 'room.a': 'line one' } };
 
@@ -105,6 +105,10 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   writeFileSync(join(dir, 'scenes/c.cut'), 'Bell one.\nBell two.\n---\n');
   assert.equal(sourceOf(dir, 'dialogue.n.prompt', 'Rain falls.'), 'scenes/n.scene:2');
   assert.equal(sourceOf(dir, 'scene.c.steps.0.text', 'Bell one.\nBell two.'), 'scenes/c.cut:1');
+  // Break: a `~` scene line resolves to an unrelated JSON `"~"` alone, and its field writes there.
+  writeFileSync(join(dir, 'two.json'), '{"room.d": "~"}\n');
+  writeFileSync(join(dir, 'scenes/q.scene'), 'npc: maud\n* ~\n');
+  assert.deepEqual(sourcesOf(dir, 'dialogue.q.prompt', '~'), ['two.json:1', 'scenes/q.scene:2']);
   const log = join(dir, 'opened');
   writeFileSync(join(dir, 'ed'), `#!/bin/sh\n[ "$1" = --goto ] && printf %s "$2" > ${log}\n`, {
     mode: 0o755,

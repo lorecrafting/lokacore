@@ -90,10 +90,6 @@ async function checkpoints(request: IncomingMessage, response: ServerResponse, s
   return response.writeHead(204).end();
 }
 
-/** `rel:line` of the first line defining `key` (`"key":`), else of the first holding `words` as a
- * JSON string (inline prose has no key in the source), else of the scene line that says their
- * first line (`maud: words`, `- words`); undefined when none is in `source`. */
-
 /** The rows of the last run in a trace table dump (a start over begins a new run; the explainer
  * takes one run). */
 export function lastRun(rows: string[]) {

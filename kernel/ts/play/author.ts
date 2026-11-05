@@ -201,20 +201,22 @@ function enqueue() {
     .then((ok) => ok && lint())
     .catch((e) => console.error(`Not updated: ${(e as Error).message}`)); // a thrown build must not end the watch
 }
+let timer: ReturnType<typeof setTimeout> | undefined;
+// before the first compile: a save the moment its artifact lands is not lost while FSEvents starts
+if (flag === '--watch')
+  watch(source, { recursive: true }, (_, file) => {
+    if (file?.startsWith('checkpoints/')) return; // the page's own save, not content
+    saves++;
+    clearTimeout(timer);
+    // one build for an editor's burst of writes
+    timer = setTimeout(() => {
+      live!.seen(); // what changed outside the editor, before its compile
+      lints++;
+      quick();
+      enqueue();
+    }, 100);
+  });
 const ok = await build();
 if (flag !== '--watch') process.exit(ok ? 0 : 1);
 if (ok) lint();
-let timer: ReturnType<typeof setTimeout> | undefined;
-watch(source, { recursive: true }, (_, file) => {
-  if (file?.startsWith('checkpoints/')) return; // the page's own save, not content
-  saves++;
-  clearTimeout(timer);
-  // one build for an editor's burst of writes
-  timer = setTimeout(() => {
-    live!.seen(); // what changed outside the editor, before its compile
-    lints++;
-    quick();
-    enqueue();
-  }, 100);
-});
 console.log(`Watching ${dir}`);

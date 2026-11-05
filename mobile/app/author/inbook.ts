@@ -117,7 +117,7 @@ async function openField(el: HTMLElement) {
     `/line?key=${enc(key)}&words=${enc(hooks.said.get(key) ?? '')}`,
   ).finally(() => (opening = false));
   if (status !== 200) return say(el, noFieldNote(key, typeof at === 'string' ? at : undefined));
-  field = { el, kept: [...el.childNodes], shown: hooks.said.get(key)!, key, at };
+  field = { el, kept: [...el.childNodes], shown: el.textContent!, key, at }; // as drawn (a `~`'s marks too): React rewrites a change
   observer?.disconnect(); // the field is not a Book render
   el.replaceChildren(at.words);
   el.contentEditable = 'plaintext-only';
@@ -134,6 +134,7 @@ const caption = () =>
   field && say(field.el, `${field.at.file}:${field.at.line}  Enter saves · Esc cancels`);
 function close() {
   const { el, kept } = field!; // every caller holds the open field
+  const had = document.activeElement === el; // not when a blur saved: focus stays where it went
   field = undefined;
   el.removeEventListener('keydown', onFieldKey);
   el.removeEventListener('beforeinput', onInput);
@@ -142,7 +143,7 @@ function close() {
   el.removeAttribute('contenteditable');
   el.removeAttribute('data-loka-field');
   el.tabIndex = -1;
-  el.focus();
+  if (had) el.focus();
   say(undefined);
   watch();
   reapply();
@@ -243,7 +244,7 @@ const onClick = () => {
   reapply();
 };
 const onRelay = (e: MessageEvent) => {
-  if (LOCAL.test(e.origin) && e.data?.op === 'key') onKey(e.data, false, true);
+  if (LOCAL.test(e.origin) && e.data?.op === 'key') onKey(e.data, !!field, true); // an open field holds the keys
 };
 /** The words a Book render shows for `key`: the open field's, held until it closes, else undefined. */
 export const frozen = (key: string) => (field?.key === key ? field.shown : undefined);

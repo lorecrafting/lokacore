@@ -314,10 +314,13 @@ test('a double-click while a field is opening opens nothing more', async () => {
 
 // Breaks: a Book render while the field is open shows the newer words, not those it opened on.
 test('the open field keeps the words it opened on', async () => {
-  await openFirst();
-  await page.evaluate(() => (window as any).said.set('a.rain', 'Rain stops.'));
-  const frozen = () => page.evaluate(() => (window as any).inbook.frozen('a.rain'));
-  assert.equal(await frozen(), 'Rain falls.');
+  const drawn = await page.locator('p').nth(1).textContent(); // `~` and its key's marks
+  answer = () => [200, { file: 'a.loka', line: 4, was: '~', words: '~' }];
+  await page.locator('p').nth(1).dblclick();
+  await page.locator('[data-loka-field]').waitFor();
+  await page.evaluate(() => (window as any).said.set('a.one', 'Rain stops.'));
+  const frozen = () => page.evaluate(() => (window as any).inbook.frozen('a.one'));
+  assert.equal(await frozen(), drawn);
   await page.keyboard.press('Escape');
   assert.equal(await frozen(), undefined);
 });
@@ -334,6 +337,29 @@ test('a blur during a save writes once', async () => {
   open();
   await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
   assert.equal(posted('/edit').length, 1);
+});
+
+// Breaks: a blur's save pulls focus back to the line from the control the author clicked.
+test('a blur save leaves focus on what was clicked', async () => {
+  await openFirst();
+  await page.keyboard.type('!');
+  await page.locator('button').click();
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.equal(await page.evaluate(() => document.activeElement?.tagName), 'BUTTON');
+});
+
+// Breaks: a key relayed from the panel walks or puts back while a field is open.
+test('a relayed key leaves an open field alone', async () => {
+  await openFirst();
+  await page.keyboard.type('!');
+  await page.keyboard.press('Enter'); // an edit Cmd-Z could put back
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  await openFirst();
+  await page.evaluate(() => postMessage({ op: 'key', key: 'z', metaKey: true }, '*'));
+  await page.evaluate(() => postMessage({ op: 'key', key: ']' }, '*'));
+  await settle();
+  assert.deepEqual(posted('/undo'), []);
+  assert.equal(await page.locator('[data-loka-landed]').count(), 0);
 });
 
 // Breaks: a save or its conflict answered after Esc closes or marks the line opened since.
