@@ -345,15 +345,19 @@ test('watch: a killed resident compiler falls back to a one-shot compile and res
     () => existsSync(artifact) && JSON.parse(readFileSync(artifact, 'utf8')).sha256 === kat.sha256,
   );
   const [first] = pids();
-  process.kill(Number(first), 'SIGKILL');
-  await settle(200); // the fs watch is live
   const rest = read('protocol/fixtures/cartridge_rest_hash.json');
   writeFileSync(
     join(dir, 'rest.json'),
     `{"cartridge":${rest.canonical},"content_hash":"${rest.sha256}"}`,
   );
   writeFileSync(which, join(dir, 'rest.json'));
+  const log = () => readFileSync(`${which}.log`, 'utf8').trim().split('\n');
+  let starts = log().length;
+  writeFileSync(`${which}.block`, '');
   writeFileSync(join(src, 'rooms.json'), '{}');
+  await until(() => log().length > starts); // the resident dies mid-request, not idle
+  process.kill(Number(first), 'SIGKILL');
+  rmSync(`${which}.block`);
   await until(() => JSON.parse(readFileSync(artifact, 'utf8')).sha256 === rest.sha256);
   await until(() => pids().length === 2);
   const second = pids()[1];
@@ -361,8 +365,7 @@ test('watch: a killed resident compiler falls back to a one-shot compile and res
   // a world switch while a save of this world is mid-compile on the resident
   mkdirSync(join(dir, 'other'));
   writeFileSync(join(dir, 'other', 'cartridge.json'), '{}');
-  const log = () => readFileSync(`${which}.log`, 'utf8').trim().split('\n');
-  const starts = log().length;
+  starts = log().length;
   writeFileSync(`${which}.block`, '');
   writeFileSync(join(src, 'rooms.json'), '{ }');
   await until(() => log().length > starts);
