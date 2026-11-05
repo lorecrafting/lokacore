@@ -242,7 +242,6 @@ globalThis.document?.addEventListener?.('visibilitychange', () => settleRoom(mot
 
 /** Storm's thunder, on the sfx bus; through mix.muffle when the room is not exposed. */
 export const thunder = (muffled: boolean) => start('thunder', { muffled });
-
 // A fight's music (book-ui.md, Fight music): one voice on the music bus, with a stinger into a loop.
 // ponytail: a chapter card during a fight steals the loop for good; no chapter opens mid-fight today.
 let inFight = false;
@@ -257,6 +256,7 @@ const fade = (ms: number, then?: () => void) => {
   const stop = live.music[0];
   if (!stop) return then?.();
   ramp(tune!, 0, ms);
+  clearTimeout(fading); // the newer fade owns the bus: a won fanfare must not sound into a treated scene's silence
   fading = setTimeout(() => {
     if (live.music[0] !== stop) return; // a new voice took the bus: it keeps it (a chapter's theme)
     stop();

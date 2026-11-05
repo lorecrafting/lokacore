@@ -370,12 +370,16 @@ async function reverie(t: any, device: object = {}) {
     );
   const inks = () =>
     page().flatMap((n) => (n.props?.style?.opacity === undefined ? [] : [n.props.style.opacity]));
-  assert.deepEqual(inks(), [0], 'the line waits on the paper');
+  assert.deepEqual(inks(), [0, 0], 'the line and Continue wait on the paper');
+  assert.deepEqual(inks(), [0, 0], "no rise before the screen reader's answer");
   await settle();
   page(); // the screen reader's answer is in: the rise starts
-  // Continue, once it shows.
-  const button = () =>
-    page().find((n) => n.props?.accessibilityRole === 'button' && n.props.onPress);
+  // Continue, once it shows: before, it is drawn inert.
+  const button = () => {
+    const all = page();
+    if (all.some((n) => n.props?.inert)) return undefined;
+    return all.find((n) => n.props?.accessibilityRole === 'button' && n.props.onPress);
+  };
   return { sent, next, page, inks, button, tick: (ms: number) => t.mock.timers.tick(ms) };
 }
 
@@ -383,16 +387,24 @@ async function reverie(t: any, device: object = {}) {
 // its place is not kept (the page shifts when it settles in),
 // or the clock sends Continue itself, turning the page unread ("no timer sends Continue").
 test('a reverie line rises, then Continue shows; no clock sends it', async (t) => {
-  const { sent, page, button, tick } = await reverie(t);
+  const { sent, page, inks, button, tick } = await reverie(t);
   tick(2799);
   assert.equal(button(), undefined);
+  const before = page();
   assert.ok(
-    page().some((n) => n.props?.style?.minHeight === 48),
+    before.some(
+      (n) => n.props?.inert && n.props.pointerEvents === 'none' && n.props['aria-hidden'],
+    ),
+    'Continue is drawn but not pressable or focusable',
+  );
+  assert.ok(
+    before.some((n) => n.props?.accessibilityRole === 'button'),
     "Continue's place is kept",
   );
   tick(1);
   assert.ok(button());
   tick(60_000);
+  assert.deepEqual(inks(), [1, 1], 'the line whole, Continue shown');
   button();
   assert.deepEqual(sent, []);
 });

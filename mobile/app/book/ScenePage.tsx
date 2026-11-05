@@ -7,13 +7,22 @@ import type { Button } from './presenter.ts';
 import { useArrival } from './card.ts';
 import { UnderInk } from './UnderInk.tsx';
 import type { Treatment } from './heldLayer.ts';
-import { size } from './tokens.ts';
 import { Reanimated } from './fade.ts';
 import { prose, usePalette, useType } from './palette.ts';
 import { ContinueButton } from './actions.tsx';
 import { Page, useTitleFocus } from './pages.tsx';
 
 type Say = (key: string) => string;
+
+// Continue before the line is whole: drawn (invisible, by `shown`) so a wrapped label holds its own
+// height, but not pressable, touchable or focusable (aria-hidden alone leaves it tabbable on web).
+const kept = {
+  pointerEvents: 'none',
+  'aria-hidden': true,
+  importantForAccessibility: 'no-hide-descendants',
+  accessibilityElementsHidden: true,
+  ...({ inert: true } as object),
+} as const;
 
 type Props = {
   view: GameView;
@@ -52,12 +61,11 @@ export function Scene(p: Props) {
           {plain(p.text(scene.line))}
         </Text>
       </Reanimated.View>
-      {p.next && full && (
-        <Reanimated.View style={shown}>
+      {p.next && (
+        <Reanimated.View style={shown} {...(full ? {} : kept)}>
           <ContinueButton label={p.next.label} onPress={() => p.press(p.next!)} />
         </Reanimated.View>
       )}
-      {p.next && !full && <View style={{ minHeight: size.card }} />}
     </Page>
   );
   if (!p.treatment) return page;

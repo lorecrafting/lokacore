@@ -371,7 +371,8 @@ test('a kill that levels feels the level, and the fanfare waits out the settle h
   assert.deepEqual(won(), [['fight', 'won']]);
 });
 
-// Breaks: a cue sounds inside a treated scene (book-ui.md, Book treatments: nothing plays inside).
+// Breaks: a cue sounds inside a treated scene, or is kept and sounds after it (book-ui.md, Book
+// treatments: nothing plays inside; its cues are dropped for good).
 test('a treated scene plays no cue', (t) => {
   const heard = listen(t);
   const draw = mount();

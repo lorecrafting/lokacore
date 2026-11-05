@@ -90,6 +90,16 @@ test('the spirit layer still fades at the rise under reduced motion', (t) => {
   assert.equal(g.modes[g.timings.indexOf(motion.fade.duration)], 'never');
 });
 
+// Breaks: an untreated page starts its treatment layer up and fades it out, so every page arrives
+// with a rise fade nobody asked for (UnderInk: `ghost` starts at the treatment's peak, or 0).
+test('an untreated page draws no rise fade', (t) => {
+  effects(t, true);
+  g.timings = [];
+  const shell = rig(t);
+  shell(() => nodes(UnderInk({ view: view({}) })));
+  assert.equal(g.timings.includes(motion.fade.duration), false);
+});
+
 // Breaks: a page turn fades a lit glow in again from nothing (UnderInk: `shown`).
 test('a page arriving on a glow already showing starts at it', (t) => {
   effects(t);
