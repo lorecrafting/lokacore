@@ -1,4 +1,3 @@
-# size: allow 305, a scenes/ .scene dialogue meets the dialogue rules through one path helper
 defmodule Loka.Content.Lint do
   @moduledoc """
   Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 5, 6 and 7, with fill sources, plus the label rules: no final period on a
@@ -7,7 +6,7 @@ defmodule Loka.Content.Lint do
   these: a sampler may break them on purpose.
   """
 
-  alias Loka.Content.{LintLayout, Source}
+  alias Loka.Content.{LintLabels, LintLayout, Source}
 
   @writes ~w(status.apply status.cure fact.assign fact.adjust fact.stamp resource.adjust)
   @always %{"op" => "all", "items" => []}
@@ -18,7 +17,8 @@ defmodule Loka.Content.Lint do
 
   @doc "Only the label findings for the source directory `dir` (samplers are checked for these too)."
   @spec labels(Path.t()) :: [String.t()]
-  def labels(dir), do: lint(dir, &labels(&1, Map.get(&1, "text.json", %{})), fn _ -> [] end)
+  def labels(dir),
+    do: lint(dir, &LintLabels.run(&1, Map.get(&1, "text.json", %{})), fn _ -> [] end)
 
   defp lint(dir, find, layout) do
     {files, _} = Source.load(dir)
@@ -45,9 +45,9 @@ defmodule Loka.Content.Lint do
 
     files
     |> Enum.sort()
-    |> Enum.flat_map(fn {rel, v} -> file(parts(rel), rel, v) ++ always(rel, v, []) end)
+    |> Enum.flat_map(fn {rel, v} -> file(LintLabels.parts(rel), rel, v) ++ always(rel, v, []) end)
     |> Kernel.++(talk(files, text))
-    |> Kernel.++(labels(files, text))
+    |> Kernel.++(LintLabels.run(files, text))
     |> Kernel.++(items(files))
     |> Kernel.++(fills(files))
     |> Kernel.++(Loka.Content.LintPages.run(files, text))
@@ -136,7 +136,7 @@ defmodule Loka.Content.Lint do
   # eats, consumes, buys back, takes in escrow or asks for never leaves it. Read by field: an id
   # named elsewhere (a guard, a key) is neither.
   defp items(files) do
-    refs = Enum.flat_map(files, fn {rel, v} -> refs(parts(rel), v) end)
+    refs = Enum.flat_map(files, fn {rel, v} -> refs(LintLabels.parts(rel), v) end)
 
     for {"items/" <> name, _} <- Enum.sort(files),
         id = Path.rootname(name),
@@ -178,9 +178,6 @@ defmodule Loka.Content.Lint do
 
   defp refs(_, _), do: []
 
-  # A rel's path segments for the rules; a scenes/ .scene is a dialogue (Source.placed).
-  defp parts(rel), do: Path.split(Regex.replace(~r{^scenes/(?=[^/]+\.scene$)}, rel, "dialogues/"))
-
   defp tag(kind, ids), do: for(id <- List.wrap(ids), do: {kind, id})
 
   # Row 7 fill sources (M8c): a liquid a use or drink service wants needs a vessel that starts
@@ -195,7 +192,8 @@ defmodule Loka.Content.Lint do
         do: fill_line(want, users |> Enum.uniq() |> Enum.sort() |> Enum.join(", "))
   end
 
-  defp scan(files, fun), do: Enum.flat_map(files, fn {rel, v} -> fun.(parts(rel), v) end)
+  defp scan(files, fun),
+    do: Enum.flat_map(files, fn {rel, v} -> fun.(LintLabels.parts(rel), v) end)
 
   defp fill_line({:liquid, id}, users),
     do: "liquids/#{id}.json: #{users} want it; no vessel starts with it and no detail gives it"
@@ -231,7 +229,7 @@ defmodule Loka.Content.Lint do
   defp talk(files, text) do
     bare? =
       Enum.any?(files, fn {rel, d} ->
-        match?(["dialogues", _], parts(rel)) and !is_map_key(d, "name") and
+        match?(["dialogues", _], LintLabels.parts(rel)) and !is_map_key(d, "name") and
           !is_map_key(d, "keyword")
       end)
 
@@ -239,67 +237,4 @@ defmodule Loka.Content.Lint do
       do: ["text.json: action.talk has no text, yet a dialogue has no name of its own"],
       else: []
   end
-
-  # A choice or action label is a bare imperative: no single final "." unless it opens with a quote
-  # mark (a spoken line). A status label is authored lowercase; condition.bleeding keeps its capital
-  # (the kernel keys on it). book-ui.md: NPC dialogue and action details, Conditions details.
-  defp labels(files, text) do
-    for(
-      {rel, d} <- Enum.sort(files),
-      {kind, key} <- label_keys(parts(rel), d),
-      s = text[key],
-      is_binary(s),
-      msg = label_problem(kind, key, s),
-      do: "#{rel}: label #{key} #{msg}"
-    ) ++ exits(files, text) ++ colon_labels(text)
-  end
-
-  # A sentence that opens with a one-to-three-word label and a colon ("High tide: ...", "Nell: ...")
-  # reads as a form, not prose (book-ui.md Line placement, loka-pxa0); a longer lead-in or a
-  # mid-sentence colon is prose. Link markup, `[words]` or `[words](key)`, reads as its words; a
-  # quotation is the speaker's own words, so only its closing stop counts.
-  @colon_label ~r/(?:^|[.!?]["”’]?\s)(?:[\w'’-]+,?\s){0,2}[\w'’-]+:\s/u
-  defp colon_labels(text) do
-    for {key, s} <- Enum.sort(text),
-        is_binary(s),
-        s
-        |> String.replace(~r/\[([^\[\]]+)\](?:\([^()]*\))?/, "\\1")
-        |> String.replace(~r/["“][^"“”]*?([.!?]?)["”]/u, "\"x\\1\"")
-        |> String.match?(@colon_label),
-        do: "text.json: #{key} opens a sentence with a colon label"
-  end
-
-  # The page's own Leave control ends a talk, so a do-nothing Leave or Close choice is refused
-  # on a talk with more than one choice; a single-choice talk keeps it (book-ui.md NPC
-  # dialogue; loka-x6t.21).
-  defp exits(files, text) do
-    for {rel, %{"choices" => %{} = cs}} <- Enum.sort(files),
-        match?(["dialogues", _], parts(rel)),
-        map_size(cs) > 1,
-        {key, c} <- Enum.sort(cs),
-        Map.keys(c) -- ["label", "narration", "asked"] == [],
-        s = text[c["label"]],
-        is_binary(s) and s =~ ~r/^(Leave|Close)\b/,
-        do: "#{rel}: choice #{key} only leaves; the page's own Leave control ends the talk"
-  end
-
-  defp label_keys(["dialogues", _], d),
-    do:
-      Enum.map(
-        [d["name"] | for({_, c} <- Enum.sort(d["choices"] || %{}), do: c["label"])],
-        &{:choice, &1}
-      )
-
-  defp label_keys(["actions", _], d), do: [{:choice, d["name"]}]
-  defp label_keys(["statuses", _], d), do: [{:status, d["name"]}]
-  defp label_keys(_, _), do: []
-
-  defp label_problem(:choice, _, s),
-    do:
-      if(s =~ ~r/[^.]\.$/ and not String.starts_with?(s, ["\"", "“", "‘"]),
-        do: "ends in a period"
-      )
-
-  defp label_problem(:status, key, s),
-    do: if(key != "condition.bleeding" and s != String.downcase(s), do: "is not lowercase")
 end
