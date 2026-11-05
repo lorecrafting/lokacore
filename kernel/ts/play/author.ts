@@ -131,20 +131,16 @@ function write(canonicalText: string, sha256: string, said: string[], timings?: 
 }
 // The preview allows `~` placeholders; a release compile refuses them (mix loka.compile). Not
 // spawnSync: the watcher answers /source, /events and writes while it runs.
-const args = (artifact: string) => [
-  source,
-  artifact,
-  '--allow-placeholders',
-  '--json',
-  diagnostics(artifact),
-  '--placeholders',
-  placeholders(artifact),
-];
+const MIX = ['exec', '--', 'mix', 'loka.compile'];
+const compileArgs = (a: string) => {
+  const out = ['--json', diagnostics(a), '--placeholders', placeholders(a)];
+  return [source, a, '--allow-placeholders', ...out];
+};
 type Run = { status: number | null; stderr: string; error?: Error };
 const oneShot = (artifact: string) =>
   new Promise<Run>((done) => {
     let stderr = '';
-    const run = spawn('mise', ['exec', '--', 'mix', 'loka.compile', ...args(artifact)], {
+    const run = spawn('mise', [...MIX, ...compileArgs(artifact)], {
       cwd: root,
       stdio: ['ignore', 'ignore', 'pipe'], // a launcher may have closed stdin (EBADF otherwise)
     });
@@ -153,23 +149,16 @@ const oneShot = (artifact: string) =>
     run.on('error', (e) => (error = e)); // `close` follows
     run.on('close', (status) => done({ status, stderr, error }));
   });
-// With --watch, a resident `mix loka.compile --serve` takes each compile (no BEAM boot per save):
-// one request at a time (the queue), so its one reply line is the request's. When it dies, wedges
-// or halts (it does when lib/ changed since its start), or is not up yet (the first build), that
-// compile runs one-shot and a new one starts.
+// With --watch, a resident `mix loka.compile --serve` takes each compile, one at a time (the queue).
+// Dead, wedged, halted (lib/ changed) or not up yet: that compile runs one-shot, a new one starts.
 const WEDGED_MS = 60_000; // mutate-skip: far past a cold showcase compile on a loaded machine
-let resident: ChildProcess | undefined;
-let answer: ((line?: string) => void) | undefined;
+let resident: ChildProcess | undefined, answer: ((line?: string) => void) | undefined;
 function start() {
-  const run = spawn('mise', ['exec', '--', 'mix', 'loka.compile', '--serve'], {
-    cwd: root,
-    stdio: ['pipe', 'pipe', 'ignore'],
-  });
+  const run = spawn('mise', [...MIX, '--serve'], { cwd: root, stdio: ['pipe', 'pipe', 'ignore'] });
   createInterface({ input: run.stdout }).on('line', (line) => {
     if (line.startsWith('loka.compile ')) answer?.(line.slice(13));
   });
-  run.stdin.on('error', () => {}); // a dead one: `close` answers
-  run.on('error', () => {});
+  run.on('error', () => {}).stdin.on('error', () => {}); // a dead one: `close` answers
   run.on('close', () => {
     if (resident !== run) return;
     resident = undefined;
@@ -185,13 +174,13 @@ const served = (artifact: string) =>
     answer = (line) => {
       clearTimeout(wedged);
       answer = undefined;
-      if (line === undefined && resident === run) {
+      if (line === undefined) {
         resident = undefined; // never reused: a late reply would answer the next compile
         run.kill('SIGKILL');
       }
       done(line);
     };
-    run.stdin!.write(`${args(artifact).join('\t')}\n`);
+    run.stdin!.write(`${compileArgs(artifact).join('\t')}\n`);
   });
 async function compile(artifact: string): Promise<Run> {
   const line = await served(artifact);

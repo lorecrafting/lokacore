@@ -305,7 +305,8 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
 });
 
 // Breaks: a dead resident compiler fails the save or hangs the queue instead of compiling it
-// one-shot; it is never restarted; or it outlives the author (a BEAM left per world switch).
+// one-shot; it is never restarted; or it outlives a world switch (a BEAM left per switch), or the old
+// world compiles after the switch.
 test('watch: a killed resident compiler falls back to a one-shot compile and restarts', async (t) => {
   const src = join(dir, 'resident');
   mkdirSync(src);
@@ -321,6 +322,9 @@ test('watch: a killed resident compiler falls back to a one-shot compile and res
     },
   });
   t.after(() => watcher.kill());
+  let said = '';
+  watcher.stdout.on('data', (c) => (said += c));
+  const exited = new Promise((r) => watcher.on('exit', r));
   const settle = (ms: number) => new Promise((r) => setTimeout(r, ms));
   const until = async (ready: () => boolean) => {
     for (let i = 0; i < 100 && !ready(); i++) await settle(50);
@@ -354,6 +358,24 @@ test('watch: a killed resident compiler falls back to a one-shot compile and res
   await until(() => pids().length === 2);
   const second = pids()[1];
   assert.ok(alive(second));
-  watcher.kill();
+  // a world switch while a save of this world is mid-compile on the resident
+  mkdirSync(join(dir, 'other'));
+  writeFileSync(join(dir, 'other', 'cartridge.json'), '{}');
+  const log = () => readFileSync(`${which}.log`, 'utf8').trim().split('\n');
+  const starts = log().length;
+  writeFileSync(`${which}.block`, '');
+  writeFileSync(join(src, 'rooms.json'), '{ }');
+  await until(() => log().length > starts);
+  await until(() => / port \d+/.test(said));
+  const port = said.match(/ port (\d+)/)![1];
+  const posted = await fetch(`http://127.0.0.1:${port}/world`, {
+    method: 'POST',
+    body: JSON.stringify({ name: 'other' }),
+  });
+  assert.equal(posted.status, 200);
+  rmSync(`${which}.block`);
+  assert.equal(await exited, 75);
   await until(() => !alive(second));
+  await settle(300);
+  assert.deepEqual(log().slice(starts), ['start rest.json', 'end rest.json']);
 });
