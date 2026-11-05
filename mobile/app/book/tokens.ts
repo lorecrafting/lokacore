@@ -188,7 +188,7 @@ export const opacity = {
   wash: 0.18, // the blow wash at its peak, the exemption: BOOK-UI-COMPONENTS.md#design-tokens
   washStill: 0.09, // the same wash under reduced motion
   faint: 0.06, // a held under-ink layer: low-health vignette, dream paper; 4.5:1 holds -- mutate-skip: uncalibrated design value
-  fatal: 0.075, // the fatal blow's held red: the most light's dim and warning bear at 4.5:1 -- mutate-skip: uncalibrated design value
+  fatal: { day: 0.075, night: 0.25 }, // the fatal blow's held red, by polarity: the most light's dim and warning, and dark's warning, bear at 4.5:1 -- mutate-skip: uncalibrated design value
   bloodshot: 1, // the fatal hold's edges at the screen's rim, feathered in over size.bloodshot -- mutate-skip: uncalibrated design value
   glow: 0.08, // the lamp at the page's hip, at its peak; 4.5:1 holds -- mutate-skip: uncalibrated design value
   spirit: 0.6, // the spirit layer, held; every text role keeps 4.5:1 -- mutate-skip: brief-set design value

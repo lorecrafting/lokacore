@@ -49,9 +49,16 @@ const fellIn = (s: Logs) => !!s.ended && s.fell === s.ended;
  * fault ends the dead page, as a reopen does. */
 export function fallen(s: Logs, text: (key: string) => string) {
   if (s.fault) s.down = undefined;
-  const dead = s.down && { title: text(s.down.title), log: s.down.log };
+  const dead = s.down && {
+    title: text(s.down.title),
+    log: s.down.log,
+    lines: s.log.slice(0, drawn(s)), // its own only
+  };
   return { fell: fellIn(s), dead };
 }
+/** The dead page's end in the log once the next receipt came: later lines wait for Let go, unread. */
+export const drawn = (s: Logs) =>
+  s.down?.to === undefined ? undefined : Math.max(0, s.down.to - logMark(s.log).gone);
 const dead = (s: Logs) => (fellIn(s) || s.down ? s.projection.view.revival : undefined);
 
 /** Fallen in a fight with `revival`, where the log's held lines start: unread until the rise, so read
@@ -64,7 +71,7 @@ export const unheard = (s: Logs) =>
 /** Let go or Back to World closes the ended page or the dead page; Let go with `revival` begins the
  * spirit state, unless a scene is open (it shows instead, book-ui.md Dead page). */
 export function letGo(s: Logs, text: (key: string) => string) {
-  const [revival, read] = [dead(s), !!s.down];
+  const [revival, read, to] = [dead(s), !!s.down, s.down?.to ?? Infinity];
   s.ended = s.down = undefined;
   if (read) s.log.push(...cueLines(s, s.projection.view, text)); // held off the dead page
   if (!revival || s.projection.view.scene) return false;
@@ -75,7 +82,7 @@ export function letGo(s: Logs, text: (key: string) => string) {
     at: Date.now(),
     shown: 0,
     held,
-    read: read ? held.length : 0,
+    read: read ? Math.min(held.length, to - (s.woke ?? 0)) : 0, // what the dead page drew
   };
   return true;
 }

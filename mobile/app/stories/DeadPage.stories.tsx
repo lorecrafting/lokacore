@@ -25,8 +25,11 @@ export const DeadPage: StoryObj = {
   ...pageStory(
     { ...RoomNpcsItemsView, view: { ...view, resources: low } },
     {
-      dead: { title: 'The cellar', log: ['You light the lamp.'] },
-      log: ['You bleed.', 'You die.', 'You wake at the shrine.'],
+      dead: {
+        title: 'The cellar',
+        log: ['You light the lamp.'],
+        lines: ['You bleed.', 'You bleed.', 'You bleed.', 'You die.', 'You wake at the shrine.'],
+      },
     },
   ),
   name: 'Dead page',
@@ -39,7 +42,7 @@ export const DeadPage: StoryObj = {
     // Settled at the fatal hold, so axe reads the resting colours (loka-gj82.10).
     const layers = () => [...canvasElement.querySelectorAll('[aria-hidden="true"]')];
     const at = (e: Element) => Number(getComputedStyle(e).opacity);
-    await waitFor(() => expect(layers().some((e) => at(e) === opacity.fatal)).toBe(true), {
+    await waitFor(() => expect(layers().some((e) => at(e) === opacity.fatal.day)).toBe(true), {
       timeout: 3000,
     });
     await new Promise((r) => setTimeout(r, 1500)); // a breath of the vignette, were it drawn

@@ -6,12 +6,12 @@ import { LABEL } from './labels.ts';
 import { LogLines } from './lines.tsx';
 import type { DetailLine } from './logs.ts';
 import { Page } from './pages.tsx';
+import { space } from './tokens.ts';
 import { UnderInk } from './UnderInk.tsx';
 
 type Props = {
   view: GameView;
-  log: DetailLine[]; // the death receipt's lines
-  dead: { title: string; log: DetailLine[] }; // the room died in: its title's text and kept log
+  dead: { title: string; log: DetailLine[]; lines: DetailLine[] }; // the room died in: its title's text and kept log; the death's lines
   letGo: () => void;
 };
 
@@ -34,9 +34,10 @@ export function DeadPage(p: Props) {
         scrollToEnd
         foot={<Foot label={LABEL.letGo} onPress={p.letGo} />}
       >
-        <View>
+        <View style={{ gap: space.sm }}>
+          {/* Two logs, one pitch: LogLines' own line gap across the seam. */}
           <LogLines lines={p.dead.log} />
-          <LogLines lines={p.log} />
+          <LogLines lines={p.dead.lines} />
         </View>
       </Page>
     </Blow>

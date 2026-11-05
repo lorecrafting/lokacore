@@ -63,6 +63,9 @@ test('an off-fight death shows the dead page; Let go enters the spirit state', (
     h.publish(view(SHRINE), undefined, undefined, { kind: 'catching_up' });
     assert.equal(h.footer(), false); // catching up included
     assert.match(h.said(), /You die\./); // read once, here
+    h.publish(view(SHRINE), 'road.crows'); // after the death: held until the rise
+    assert.equal(h.texts().includes('Crows lift off the road.'), false);
+    assert.doesNotMatch(h.said(), /Crows/);
     h.tap('Let go');
     assert.deepEqual(these(h, ['Dark.', ...DEATH]), ['Dark.']); // held until the rise
     now = 60_000;
@@ -70,6 +73,7 @@ test('an off-fight death shows the dead page; Let go enters the spirit state', (
     assert.ok(h.texts().includes('The shrine'));
     assert.deepEqual(these(h, ['Water drips.', ...DEATH]), DEATH);
     assert.doesNotMatch(h.said(), /You die\./); // not read again
+    assert.match(h.said(), /Crows lift off the road\./); // never drawn, so read at the rise
   } finally {
     h.close();
     Date.now = clock;
@@ -77,15 +81,21 @@ test('an off-fight death shows the dead page; Let go enters the spirit state', (
 });
 
 // Breaks (book-ui.md :133): without revival, Let go keeps the old room's log or title, drops the
-// receipt's lines with the room change, or reorders them; or the recovery room's cue shows on the dead page.
+// receipt's lines with the room change, or reorders them; or the recovery room's cue, or a line
+// after the death, shows on the dead page.
 test('an off-fight death without revival: Let go turns to the recovery room, its log the receipt', () => {
   const h = cellar();
   try {
-    h.die(
-      view({ ...SHRINE, revival: undefined, cues: [{ sense: 'heat', text: 'cue.heat' }] }),
-      RECEIPT,
-    );
+    const shrine = view({
+      ...SHRINE,
+      revival: undefined,
+      cues: [{ sense: 'heat', text: 'cue.heat' }],
+    });
+    h.die(shrine, RECEIPT);
     assert.equal(h.texts().includes('cue.heat'), false);
+    h.publish(shrine, 'road.crows'); // after the death
+    assert.deepEqual(these(h, [...DEATH, 'Crows lift off the road.']), DEATH);
+    assert.doesNotMatch(h.said(), /Crows/);
     h.tap('Let go');
     const t = h.texts();
     assert.ok(t.includes('The shrine') && !t.includes('The cellar') && !t.includes('Let go'));
@@ -93,6 +103,8 @@ test('an off-fight death without revival: Let go turns to the recovery room, its
       ...DEATH,
       'cue.heat',
     ]);
+    assert.ok(t.includes('Crows lift off the road.')); // drawn once the page is let go
+    assert.match(h.said(), /Crows lift off the road\./); // and read
   } finally {
     h.close();
   }

@@ -53,7 +53,7 @@ import {
 import { named, received } from './received.ts';
 import { days } from './chronicle.ts';
 import { holding, pressedAway, settle } from './recap.ts';
-import { end, fall, fallen, haunt, haunting, letGo, unheard, wake } from './spirit.ts';
+import { drawn, end, fall, fallen, haunt, haunting, letGo, unheard, wake } from './spirit.ts';
 import { heard, type Said } from './heard.ts';
 import { keptTitle } from './combat-title.ts';
 
@@ -102,6 +102,7 @@ function narrate(
   const [lines, combat] = narrationLines(last, now, text, false, was);
   s.combatLog.push(...combat);
   s.narrationId = last.command_id;
+  if (s.down) s.down.to ??= end(s.log); // the dead page's lines end at the next receipt (spirit.ts)
   if (last.died) fall(s, last.command_id);
   if (last.died && away) away.from = Infinity; // a death ends the recap, as a room change does
   if (last.missed) s.deed = last; // a round's miss comes on the clock (book-ui.md, Fight music)
@@ -224,9 +225,9 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
 function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, was?: Said) {
   const { view, token } = game.view();
   const ghost = haunting(s, Date.now()); // its due lines first, so the live region reads them
-  const said = heard(s, view, was, unheard(s)); // before the trim, which drops lines from the front
+  const said = heard(s, view, was, unheard(s) ?? drawn(s)); // before the trim, which drops lines from the front
   [s.log, s.combatLog, ...s.details.values()].forEach((lines) => trimLog(lines));
-  said.log = s.log.length;
+  said.log = drawn(s) ?? s.log.length;
   const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({
     ...b,
     token,

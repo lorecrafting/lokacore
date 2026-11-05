@@ -90,7 +90,7 @@ export type Logs = {
   woke?: number; // where the last death's return receipt starts in the log (spirit.ts, end): held in the spirit state
   spirit?: Spirit; // the spirit state, from Let go to the rise (spirit.ts)
   room?: { title: string; log: DetailLine[] }; // the room this view left, with its log (resetLogs): a death outside a fight keeps it
-  down?: Logs['room']; // the dead page's (book-ui.md, Dead page): the room died in, until Let go (spirit.ts)
+  down?: Logs['room'] & { to?: number }; // the dead page's (book-ui.md, Dead page): the room died in, until Let go (spirit.ts)
   noted?: Set<string>; // the cue lines logged this room visit
 };
 

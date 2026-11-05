@@ -67,7 +67,7 @@ test('a fatal blow falls to the fatal hold, whatever the settings say of its pea
       g.timings.length = 0;
       at(shrine, 'd');
       assert.deepEqual(peaks(), peak);
-      assert.equal(held(), opacity.fatal);
+      assert.equal(held(), opacity.fatal.day);
       assert.equal(g.timings.at(reduced || flashes ? -1 : 0), over);
     });
 });

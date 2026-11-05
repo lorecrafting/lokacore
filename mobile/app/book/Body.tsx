@@ -261,7 +261,7 @@ function Rise(p: { wait: Wait; rise: () => void }) {
           focus={(on) => void ((on || waiting.current) && (held.current = on))}
         />
       ) : (
-        <ActionCard label={LABEL.rise} onPress={rise} ref={ready} />
+        <ActionCard label={LABEL.rise} onPress={rise} ref={ready} centred />
       )}
     </View>
   );

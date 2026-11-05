@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import {
+  fatalInk,
   heldLayer,
   lampLit,
   lowHealth,
@@ -10,7 +11,7 @@ import {
   treatmentInk,
   type Treatment,
 } from './heldLayer.ts';
-import { contrast, mix, mixInk, washInk } from './palette.ts';
+import { contrast, mix, mixInk } from './palette.ts';
 import { color, opacity, size, space } from './tokens.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
@@ -38,7 +39,7 @@ const papers = [
 test('every text role holds 4.5:1 over every under-ink layer at its peak', () => {
   for (const [name, p] of papers) {
     const layers: [string, string, number][] = [
-      ['fatal', washInk(p), opacity.fatal],
+      ['fatal', ...fatalInk(p)],
       ['vignette', p.fg, opacity.faint],
       ...Object.keys(TREATMENTS).map(
         (t) => [t, ...treatmentInk(t as Treatment, p)] as [string, string, number],
@@ -85,7 +86,8 @@ const rim = (2 * opacity.bloodshot * Math.exp((-x * x) / 2)) / (x * Math.sqrt(2 
 test('every text role holds 4.5:1 at the page margin over the fatal hold and its rim', () => {
   for (const [name, p] of Object.entries(color))
     for (const role of ['fg', 'dim', 'action', 'danger', 'warning'] as const) {
-      const under = mixInk(mixInk(p.bg, washInk(p), opacity.fatal), washInk(p), rim);
+      const [ink, peak] = fatalInk(p);
+      const under = mixInk(mixInk(p.bg, ink, peak), ink, rim);
       const ratio = contrast(p[role], under);
       assert.ok(ratio >= 4.5, `${name}.${role} at the margin: ${ratio.toFixed(2)}`);
     }
