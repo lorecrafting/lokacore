@@ -37,8 +37,8 @@ export function marked(c: Cartridge) {
 
 /**
  * Replays `trace` against `c` from the trace head's own ids, comparing the header and each
- * produced line with the recorded line at its ordinal; `each` sees the world before each step.
- * Stops before ordinal `upTo` without comparing it.
+ * produced line with the recorded line at its ordinal; `each` sees the world before each adopted
+ * step. Stops before ordinal `upTo` without comparing it.
  */
 export function replay(
   c: Cartridge,
@@ -64,7 +64,9 @@ export function replay(
     const { trace: t, decision } = replayEntry(r, e);
     // line i + 1, not ordinal: an unknown entry's follow-up repeats its ordinal (ADR-075 §4)
     if (line(t) !== `${recorded[i + 1]}\n`) throw differs(e.data.ordinal);
-    each?.(before, decision, e.data.ordinal);
+    // a failed or unknown commit was decided but not adopted, so it exercises nothing (PM ruling)
+    if (!['failed', 'unknown'].includes(e.data.commit.state))
+      each?.(before, decision, e.data.ordinal);
   }
 }
 
