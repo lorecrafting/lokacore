@@ -76,17 +76,7 @@ const shown: StoryObj = {
   },
 };
 export const ReverieArriving: StoryObj = { ...arriving, name: 'Reverie arriving' };
-export const ReverieArrivingDark: StoryObj = {
-  ...arriving,
-  name: 'Reverie arriving, dark',
-  globals: { palette: 'dark' },
-};
 export const ReverieShown: StoryObj = { ...shown, name: 'Reverie, Continue shown' };
-export const ReverieShownDark: StoryObj = {
-  ...shown,
-  name: 'Reverie, Continue shown, dark',
-  globals: { palette: 'dark' },
-};
 
 // The showcase authors no dream, so the page takes a synthetic screen (words are their own keys).
 export const Dream: StoryObj = {

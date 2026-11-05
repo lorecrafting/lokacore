@@ -206,6 +206,8 @@ a new component needs a real consumer, its comment and its line here in the same
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |
 | `RunningHead` | `book/RunningHead.tsx` | Page |
 | `SayField` | `book/SayField.tsx` | SayField |
+| `ScenePage` | `book/ScenePage.tsx` | undefined |
+| `Scene` | `book/ScenePage.tsx` | undefined |
 | `ShelfPage` | `book/Shelf.tsx` | NpcPage |
 | `StatusLine` | `book/Status.tsx` | StatusLine |
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
@@ -240,7 +242,6 @@ a new component needs a real consumer, its comment and its line here in the same
 | `MapPage` | `book/sections.tsx` | MapPage |
 | `SettingsPage` | `book/sections.tsx` | SectionPages |
 | `ChapterPage` | `book/sections.tsx` | ChapterPages |
-| `ScenePage` | `book/ScenePage.tsx` | ChapterPages |
 | `SkillDetails` | `book/skills.tsx` | SectionPages |
 | `SkillsPage` | `book/skills.tsx` | SectionPages |
 | `Professions` | `book/skills.tsx` | SectionPages |
