@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { view } from './__tests__/combat-book.test.ts';
-import { lineWords } from './words.ts';
+import { lineWords, worded } from './words.ts';
 
 const SAY: Record<string, string> = {
   'npc.rat': 'the rat',
@@ -19,7 +19,10 @@ const bow = {
 
 // Breaks: the reader test swapped (the reader's own body, which the kernel binds no name, read as a third
 // person, or a named NPC read as "you"), or a targeted line read with the untargeted form (G9).
-test('an NPC emote reads to.you for the reader, to.others for a named target, others with none', () => {
+test('an NPC emote reads to.you for the reader, to.others for a named target, others with none', (t) => {
+  const noted: string[] = []; // Break (E5): an emote noted by its line key, not the form it reads
+  worded.note = (_, key) => noted.push(key);
+  t.after(() => (worded.note = undefined));
   const v = view({ emotes: [bow] } as never);
   const line = (target?: string) =>
     lineWords(
@@ -34,4 +37,5 @@ test('an NPC emote reads to.you for the reader, to.others for a named target, ot
   assert.equal(line('body'), 'The rat bows to you.');
   assert.equal(line('rat'), 'The rat bows to the rat.');
   assert.equal(line(), 'The rat bows.');
+  assert.deepEqual(noted, ['emote.bow.to.you', 'emote.bow.to.others', 'emote.bow.others']);
 });

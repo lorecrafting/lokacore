@@ -49,6 +49,7 @@
     "@types/react": "19.2.18",
     "@vitest/browser-playwright": "5.0.3",
     "e2e": "^0.17.0",
+    "esbuild": "0.28.2",
     "html-to-image": "1.11.13",
     "playwright": "1.63.0",
     "storybook": "10.6.1",

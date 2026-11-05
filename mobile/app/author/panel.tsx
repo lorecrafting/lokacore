@@ -33,6 +33,9 @@ export const devClock =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' &&
   Platform.OS === 'web' &&
   new URLSearchParams(location.search).get('dev') === '1';
+// the in-Book editor (E5) is required only in the author preview, so a player build drops it
+const inBook: typeof import('./inbook.ts') | undefined =
+  process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;
 if (devClock) worded.note = (words, key) => seen.set(words, key); // a line as shown, bound too
 const g = globalThis as { loka_dev_skew?: number }; // ms the dev clock has moved both host clocks
 export const skew = () => g.loka_dev_skew ?? 0;
@@ -116,10 +119,13 @@ export function played(game: Opened | undefined) {
     recorded.set(game, {
       ...game,
       text: (key) => {
+        const held = inBook?.frozen(key); // an open field's words stay put under React
+        if (held !== undefined) return held;
         const words = overlay[key] ?? game.text(key);
-        seen.set(words, key);
+        const shown = inBook?.tagged(key, words) ?? words; // two `~` lines show apart
+        seen.set(shown, key);
         said.set(key, words);
-        return words;
+        return shown;
       },
       invoke: recording(game, keep),
     });
@@ -207,6 +213,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     const onMessage = (e: MessageEvent<Asked>) => {
       if (!LOCAL.test(e.origin) || !e.source || !OPS.has(e.data?.op)) return;
       panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
+      if (e.data.op === 'hello') inBook?.recount(); // a new panel missed the `~` counts
       if (e.data.op === 'trace') return void tell({ trace: game.trace(), id: e.data.id });
       if (e.data.op === 'advance') advance(e.data.minutes, game);
       if (e.data.op === 'go_to_room' || e.data.op === 'set_fact') askCheat(game, e.data);
@@ -221,7 +228,9 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     window.addEventListener('message', onMessage);
     document.addEventListener('click', onClick, true);
     const unsubscribe = game.subscribe(state);
-    const unlisten = listen(() => latest.current.redraw({})); // a text overlay redraws in place
+    // a text overlay redraws in place
+    const unlisten = listen((message) => (inBook?.heard(message), latest.current.redraw({})));
+    const stop = inBook?.start({ seen, said, tell, redraw: () => latest.current.redraw({}) });
     if (panel) state();
     else if (window.parent !== window)
       window.parent.postMessage({ loka: 'author', ready: true }, '*');
@@ -230,6 +239,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       document.removeEventListener('click', onClick, true);
       unsubscribe();
       unlisten();
+      stop?.();
     };
   }, [game]);
 }

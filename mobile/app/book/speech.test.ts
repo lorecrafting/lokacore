@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { view } from './__tests__/combat-book.test.ts';
+import { rendered } from './logs.ts';
 import { lineWords, worded } from './words.ts';
 
 const SAY: Record<string, string> = {
@@ -12,6 +13,8 @@ const SAY: Record<string, string> = {
   tagged: '"Fine," Nell says.',
   curly: '“Well?”',
   takes: 'You take the {item}.',
+  'item.recovered': 'You find your things.',
+  'item.pack': 'your pack',
 };
 const say = (k: string) => SAY[k] ?? k;
 const v = view({
@@ -45,8 +48,16 @@ test('each worded line reaches the author hook with its text key, bound and join
   t.after(() => (worded.note = undefined));
   words('quoted', 'r');
   lineWords({ key: 'takes', bindings: { item: 'rope' } }, say, v);
+  // Break (E5): an engine line or a recovered line's whole words never noted, so a double-click
+  // on it finds no key and says nothing.
+  lineWords({ key: 'item.dropped', bindings: { item: 'npc.rat' } }, say, v);
+  const recovered = { key: 'item.recovered', bindings: { item: 'item.pack' } };
+  rendered({ lines: [recovered] } as never, v, say, false);
   assert.deepEqual(noted, [
     ['Reeve Hal says to you, "Well, stranger?"', 'quoted'],
     ['You take the rope.', 'takes'],
+    ['You drop the rat.', 'item.dropped'],
+    ['You find your things.', 'item.recovered'],
+    ['You find your things. your pack.', 'item.recovered'],
   ]);
 });

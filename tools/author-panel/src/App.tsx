@@ -8,10 +8,11 @@ import { Badge } from './components/ui/badge.tsx';
 import { ScrollArea } from './components/ui/scroll-area.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs.tsx';
 import { Numbers } from './numbers.tsx';
+import { Counts, Hold, Unconfirmed } from './prose.tsx';
 import { Facts, Find, Why } from './reading.tsx';
 import { Compile, Play, Source, Todo } from './sections.tsx';
 
-function Header({ title, hash }: { title?: string; hash?: string }) {
+function Header({ title, hash, children }: { title?: string; hash?: string; children?: React.ReactNode }) {
   return (
     <header className="flex items-center gap-2 border-b px-3 py-2">
       <BookOpen className="size-4" aria-hidden />
@@ -19,6 +20,7 @@ function Header({ title, hash }: { title?: string; hash?: string }) {
         {hash ? title : 'Loka author'}
       </span>
       {hash ? null : <Badge variant="secondary">waiting for the Book</Badge>}
+      {children}
     </header>
   );
 }
@@ -76,13 +78,19 @@ function Panels({ state, send, trace, said }: Pick<ReturnType<typeof useBook>, '
 export default function App() {
   const frame = useRef<HTMLIFrameElement>(null);
   const book = useBook(frame);
-  const { said, compiled, lint } = useDiagnostics();
+  const { said, compiled, lint, held, pending, unconfirmed } = useDiagnostics();
   return (
     <div className="flex h-full bg-background text-foreground max-[900px]:flex-col">
       <Book frame={frame} />
       <aside className="flex w-[400px] shrink-0 flex-col border-l max-[900px]:h-1/2 max-[900px]:w-full max-[900px]:border-t max-[900px]:border-l-0">
-        <Header title={book.state?.title} hash={book.state?.hash} />
+        <Header title={book.state?.title} hash={book.state?.hash}>
+          <Hold held={held} pending={pending} />
+        </Header>
         <Compile said={said} compiled={compiled} lint={lint} state={book.state} send={book.send} />
+        <section className="border-b px-3 pb-2">
+          <Counts prose={book.prose} said={said} />
+          <Unconfirmed prose={book.prose} unconfirmed={unconfirmed} said={said} />
+        </section>
         <Panels state={book.state} send={book.send} trace={book.trace} said={said} />
         <Source line={book.line} />
       </aside>

@@ -25,10 +25,17 @@ export function foreign(request: IncomingMessage, response: ServerResponse) {
 }
 
 type Push = (message: { held?: boolean; changed?: Changed[] }) => void;
-/** `push` keeps the message for later clients; `once` sends `changed` without keeping it.
+type Said = {
+  push: Push;
+  tell: (key: string, words: string, at: string) => void;
+  places?: () => Record<string, string>; // the last compile's `~` key => file:line (GET /line)
+};
+/** `push` keeps the message for later clients and `tell` shows an /edit's words by the text key
+ * the page names, before the compile (told.ts); `once` sends `changed` without keeping it.
  * `release` runs when the Hold ends, to write what the watcher parked. */
-export function editing(source: string, push: Push, once: Push, release: () => void) {
-  const editor = writer(source, (changed) => once({ changed }));
+export function editing(source: string, said: Said, once: Push, release: () => void) {
+  const { push, tell, places } = said;
+  const editor = writer(source, (changed) => once({ changed }), places);
   let held = false;
   const hold = (sent: { on?: unknown }): Answer => {
     if (typeof sent?.on !== 'boolean') return [400, 'on: true or false'];
@@ -53,7 +60,11 @@ export function editing(source: string, push: Push, once: Push, release: () => v
       json(response, 400, 'a JSON body');
       return true;
     }
-    json(response, ...(url === '/hold' ? hold(sent) : await editor.post(url, sent)));
+    const answer = url === '/hold' ? hold(sent) : await editor.post(url, sent);
+    const { key, words } = sent ?? {}; // an /undo's are the old words, shown at once like an /edit's
+    if (/^\/(edit|undo)$/.test(url) && answer[0] === 200 && typeof key === 'string')
+      if (typeof words === 'string') tell(key, words, `${sent.file}:${sent.line}`);
+    json(response, ...answer);
     return true;
   }
   return { route, held: () => held, seen: editor.seen };

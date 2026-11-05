@@ -269,6 +269,16 @@ dotted underline at the platform's thickness (solid where the platform has no do
 thickness token, since no platform's `Text` sets one); linked, or plain prose when no detail is
 projected.
 
+**Author-mode marks** (no component; laid over the Book from `mobile/app/author/` at `?dev=1`,
+never in `mobile/app/book/`; behaviour: [Book UI](system/book-ui.md#author-mode-dev-only), reasons:
+[rulings](design/prose-in-the-book-rulings.md)). Existing tokens only, in the Book's current palette.
+The prose field: the line's own type role at the reading size, its own wrap and width, `fg` on
+`card`, the focus ring (`size.focus`, `action`), caret `action`, browser selection; its caption and
+any no-field note `type.label` in `dim`. Unconfirmed words: a static wavy underline in `warning`
+(never dotted: that is the fixture link). A `~` line: a `size.speechBar` bar in `warning` in the
+left page margin over the line's full height, `action` on the landed line. The changed-on-disk
+notice: `type.label` in `warning`. Worst pair: `warning` on `card`, 4.75 (light).
+
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an
 `ActionCard` in its line form (`link`), a prose line in `Cards lines` ([shop lines](system/book-ui.md#npc-dialogue-and-action-details), owner 2026-10-30).
