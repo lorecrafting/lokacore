@@ -3,7 +3,15 @@
 // reaction, a room no exit reaches and an outline.json.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { get as httpGet } from 'node:http';
 import { join, resolve } from 'node:path';
@@ -219,6 +227,12 @@ test('GET /story: an ETag, 304 until the next compile pushes, and refused to a f
 
 // Break: the CLI's hash is not the artifact's (another build, or the source's hash).
 test('bin/loka story prints the model with the compiled artifact hash', () => {
-  const out = execFileSync(join(root, 'bin/loka'), ['story', src], { encoding: 'utf8' });
+  // mise is stubbed as CI has none (as check.test.ts); mix comes from PATH.
+  const bin = join(dir, 'bin');
+  mkdirSync(bin);
+  writeFileSync(join(bin, 'mise'), '#!/bin/sh\nshift 2\nexec "$@"\n');
+  chmodSync(join(bin, 'mise'), 0o755);
+  const env = { ...process.env, PATH: `${bin}:${process.env.PATH}` };
+  const out = execFileSync(join(root, 'bin/loka'), ['story', src], { encoding: 'utf8', env });
   assert.equal(JSON.parse(out).hash, sha256);
 });
