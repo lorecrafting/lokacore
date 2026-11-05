@@ -14,6 +14,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: retire hunger and thirst (PR #618, loka-vduxr.61)](2026-11-05-retire-hunger-review.md): **APPROVE WITH NOTES**
 - [Review: replay of failed and unknown commits, and a test hang (PR #627, loka-vduxr.42, loka-votey)](2026-11-05-replay-failed-unknown-review.md): **CHANGES REQUIRED**
 - [Review: scene@1 opening scene, `on {start: true}` (PR #622, loka-g5hh.3)](2026-11-05-opening-scene-review.md): **APPROVE WITH NOTES**
+- [Review: an open conversation re-words an edited line; stale `~` map by line count (PR #625, loka-wfrgk.19)](2026-11-05-loka-wfrgk.19-review.md): **APPROVE WITH NOTES**
 - [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
 - [Review: death and level bug batch (PR #623; loka-3tc7, loka-g5hh.2.11, loka-dbtxr (a))](2026-11-05-death-level-bugs-review.md): **CHANGES REQUIRED**
 - [Review: combat title names who started the fight (PR #621, loka-kgd.207)](2026-11-05-combat-title-review.md): **APPROVE**
