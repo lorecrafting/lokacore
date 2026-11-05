@@ -28,6 +28,7 @@ import {
   type Layout,
   type Selection,
 } from './shell.ts';
+import { go, LIST, storyItems } from './storylist.ts';
 
 type Book = ReturnType<typeof useBook>;
 
@@ -168,13 +169,19 @@ function useWiring(
   layout: Layout,
   set: SetLayout,
   open: () => void,
+  story?: Story,
 ) {
   const pick = (s?: Selection) => s && set((l) => ({ ...l, selection: s }));
   heard.current.select = (textKey) => pick(fromTextKey(textKey));
   const mark = places(layout.selection, []).book;
   useEffect(() => void (mark && book.send(mark)), [mark?.kind, mark?.key, book.loaded]); // eslint-disable-line react-hooks/exhaustive-deps
   useStart(book);
-  const run = command(book, layout.selection, pick);
+  const base = command(book, layout.selection, pick);
+  // a palette story row shows Story and reveals its row (rulings S2 Cmd-K)
+  const run = (i: Item) =>
+    i.kind === 'story'
+      ? story && set((l) => ({ ...l, map: 'story', story: go(story, l.story ?? LIST, i.id) }))
+      : base(i);
   useShortcuts(heard, (key) => {
     if (key === 'k') open();
     else if (key === 'e' && layout.selection) void ask('open', { key: layout.selection.key });
@@ -231,10 +238,12 @@ export default function App() {
   const [layout, set] = useLayout();
   const [story, refused] = useStory(diag.said);
   const [palette, setPalette] = useState(false);
-  const { pick, run } = useWiring(book, heard, layout, set, () => setPalette(true));
+  const { pick, run } = useWiring(book, heard, layout, set, () => setPalette(true), story);
   const s: Shell = { layout, set, story, book, diag, pick };
-  const all = (text: Record<string, string>) =>
-    items(story?.graph.nodes ?? [], text, diag.placeholders ?? {});
+  const all = (text: Record<string, string>) => [
+    ...items(story?.graph.nodes ?? [], text, diag.placeholders ?? {}),
+    ...(story ? storyItems(story) : []),
+  ];
   return (
     <div className="flex h-full bg-background text-foreground max-[900px]:flex-col">
       <Side side="left" s={s}>

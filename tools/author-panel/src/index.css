@@ -142,3 +142,8 @@
     outline-offset: -2px;
   }
 }
+
+/* A missing beat's swatch (chrome rulings section 4: hatched). */
+@utility hatch {
+  background: repeating-linear-gradient(45deg, var(--border) 0 1px, var(--background) 1px 4px);
+}

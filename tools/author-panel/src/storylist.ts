@@ -160,6 +160,7 @@ const opened = (st: ListState, path: string[], id: string, outlined: boolean) =>
 
 /** A selection from elsewhere: open the node's first beat (or Unplaced) and focus its row; a kind the list does not hold changes nothing. */
 export function reveal(s: Story, st: ListState, ref: string): ListState {
+  if (st.focus?.endsWith(`/${ref}`)) return st; // the row clicked: keep it, not the node's first beat
   const o = outlineOf(s);
   const b = o?.beats.find((x) => x.nodes.includes(ref));
   if (b) return opened(st, [`part:${b.part}`, `beat:${b.n}`], `beat:${b.n}/${ref}`, true);

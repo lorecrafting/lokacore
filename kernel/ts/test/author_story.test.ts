@@ -113,7 +113,8 @@ test('a beat names its status and what is missing; a bound node its refusals, ~ 
   assert.equal(by[`beat:1/${d1}`]!.title, 'unknown_ref /a\nshape /b');
 });
 
-// Break: a selection on the map or in the Book leaves its row shut inside a folded part and beat.
+// Break: a selection on the map or in the Book leaves its row shut inside a folded part and beat,
+// or a click on a node's second beat jumps the focus to its first.
 test('a selection opens the folded part and beat that hold it and focuses its row', () => {
   const shut = list.toggle(list.LIST, 'part:0');
   const st = list.reveal(planted, shut, d1);
@@ -122,6 +123,8 @@ test('a selection opens the folded part and beat that hold it and focuses its ro
   const loose = list.reveal(planted, list.LIST, f1);
   assert.ok(ids(planted, loose).includes(`unplaced/${f1}`));
   assert.equal(list.reveal(planted, shut, ref('room', 'hall')), shut);
+  const clicked = { ...list.LIST, focus: `beat:3/${d1}` };
+  assert.equal(list.reveal(planted, clicked, d1), clicked);
 });
 
 // Break: Trace mixes writers with readers, loses the reader's beat or the clock read's dash, or
