@@ -10,6 +10,7 @@ import { uiSchema } from '../play/ui_schema.ts';
 const SOURCE = join(import.meta.dirname, '../../../schemas/source');
 const read = (f: string) => JSON.parse(readFileSync(join(SOURCE, f), 'utf8'));
 const defs = read('defs.schema.json').$defs;
+const card = (edit: string) => ({ create: 'generic', edit, delete: 'generic' });
 const ui = (kind: string, registry = {}) =>
   uiSchema(kind, read(`${kind}.schema.json`), defs, registry);
 
@@ -26,20 +27,36 @@ test('a real kind claims its text keys, definition references, policies and step
   });
 });
 
-// Breaks: a hand-built card in the registry is not drawn, `generic` replaces rjsf's own field, or
-// another kind's row lands on this one.
+// Breaks: a hand-built card in the registry is not drawn, `generic` replaces rjsf's own field, the
+// card keeps its `.tsx` (rjsf's fields map has no such name), or another kind's row lands here.
 test("the registry's hand-built edit card claims its field; generic and other kinds do not", () => {
-  const card = (edit: string) => ({ create: 'generic', edit, delete: 'generic' });
   const rooms = ui('rooms', {
     'rooms.exits': card('ExitsCard.tsx'),
     'rooms.name': card('generic'),
     'npcs.name': card('NpcName.tsx'),
   });
-  assert.deepEqual(rooms.exits, { 'ui:field': 'ExitsCard.tsx' });
+  assert.deepEqual(rooms.exits, { 'ui:field': 'ExitsCard' });
   assert.deepEqual(rooms.name, { 'ui:field': 'TextKey' });
 });
 
-// Breaks: a recursive definition never ends, or an anyOf branch shows rjsf's "Option 1" because
+// Breaks (loka-wfrgk.11 review 2, 5): a root-level row (no field) is dropped, so the text catalog
+// never gets its card; a field of an array file (layout) is claimed beside `items`, where rjsf
+// never reads it; a treatment's card is never drawn on its host's `treatment` field.
+test('a whole-kind, an array-file field and a treatment card are each claimed where rjsf reads', () => {
+  assert.equal(ui('text', { text: card('Catalog.tsx') })['ui:field'], 'Catalog');
+  const layout = ui('layout', { 'layout.room': card('RoomSpot.tsx') });
+  assert.deepEqual(layout.items.room, { 'ui:field': 'RoomSpot' });
+  assert.equal(layout.room, undefined);
+  const scenes = ui('scenes', {
+    'scenes.treatment': card('generic'),
+    'treatment:reverie': card('Reverie.tsx'),
+  });
+  assert.deepEqual(scenes.treatment, { 'ui:field': 'Reverie' });
+  assert.equal(ui('rooms', { 'treatment:reverie': card('Reverie.tsx') }).treatment, undefined);
+});
+
+// Breaks: a recursive definition never ends, loses its claims below the first level (review 3:
+// depth 3 is drawn), or an anyOf branch shows rjsf's "Option 1" because
 // it has no title, or a oneOf's titles land under anyOf where rjsf does not read them.
 test('a recursive definition ends and every anyOf branch is titled', () => {
   const tree = {
@@ -66,7 +83,9 @@ test('a recursive definition ends and every anyOf branch is titled', () => {
   };
   const out = uiSchema('k', tree, nodes, {});
   assert.deepEqual(out.label, { 'ui:field': 'TextKey' });
-  assert.equal(out.kids, undefined);
+  assert.deepEqual(out.kids.items.label, { 'ui:field': 'TextKey' });
+  assert.deepEqual(out.kids.items.kids.items.label, { 'ui:field': 'TextKey' });
+  assert.equal(out.kids.items.kids.items.kids, undefined);
   assert.deepEqual(
     out.pick.anyOf.map((b: any) => b['ui:title']),
     ['Named', 'Gate', 'door', 'string', 'option 5'],
