@@ -48,3 +48,30 @@ Hand mutants, each against the tests that import the module, all red: `told.ts` 
 ## Verdict
 
 CHANGES REQUIRED: the two should-fixes are logic changes (a fix round); no blocker. Security held on every probe; the export holds no author code; the queue and optimistic path match the rulings.
+
+## Re-check: `bbe815ba9f49d1fc6c9ef40f9cdd0fdaa7dff442` (fix commits `654b393e5`, `bbe815ba9`)
+
+CI at the head: `ci` success, `book-e2e` success. Fresh detached worktree; `told.test.ts` + `author.test.ts` 8/8, `inbook.test.ts` 17/17 (real Chrome), `content_placeholders_test.exs` + `red_controls_test.exs` 17/17.
+
+Dispositions:
+
+- Should-fix 1 (scene `~` refused as 400): fixed. `mix loka.compile --placeholders <path>` (`lib/loka/content.ex:78` `placeholder_lines/2`, `lib/mix/tasks/loka.compile.ex:54`) writes each `~` key's own `file:line`; `author.ts` pushes it with the diagnostics; `told.ts` keeps `places`; `prose.ts:80` `located` uses the map before scanning. `test/loka/content_placeholders_test.exs` covers `.scene` (top and nested `* ~`), `.cut`, room `{"prose": "~"}` and `text.json`, expected lines hand-written. Red controls hold: `located` forced to always scan, told.test 1 fail; the `prose` field mapping dropped, the Elixir test fails (`village_green.json:3` vs `:4`).
+- Should-fix 2 (undo words linger): fixed. `editing.ts:65` tells on `/undo` 200 too, from the undo body's `key`/`words`; `inbook.ts` posts the whole edit entry. Red control: `/^\/edit$/` alone turns `told.test` 1 fail. `write.ts:154` `undo` destructures only `id`, so the extra fields are harmless.
+- Nits: button spacing (`inbook.ts` padding on the button's left), 409 `edits.push(last)`, startup `queue = first.catch(() => {})` then awaited: all as stated.
+- CI fix `bbe815ba9`: `compiled(...)`'s result is returned after the placeholders write, so the task's exit status is the compile's again.
+
+Attacks on the map:
+
+- Area folder: `SourceFiles.paths` globs `**/*.{json,scene,cut}`, so an area's scene or room is indexed.
+- Duplicate key: `into: %{}` keeps the last `{key, place}`; the index already lets a JSON half win over its scene. Author-side; no finding.
+- Failed compile: no placeholders file is written, `parsed` yields `{}`, `located` falls back to the scan. Fine.
+- Release and fixtures: the flag parses only in the five-argument form after `--allow-placeholders --json`; `options/1` raises usage otherwise; the artifact bytes are unchanged, so the hash fixtures stand.
+- Stale map (an outside edit moves a line): should-fix below.
+
+Finding:
+
+- Should-fix (logic, 2 lines): `kernel/ts/play/prose.ts:80-86`. `located` trusts `places[key]` without checking that the line there still reads `~`. `places` refreshes only on a good compile, so between an outside save that inserts a line above a `* ~` and that compile (debounce plus 0.5-7 s) a double-click on the `~` opens the moved-in line's words. Proven with a scratch call (`places = {key: 'scenes/s.scene:2'}`, line 2 now `* Inserted words.`): 200 `{line: 2, was: '* Inserted words.', words: 'Inserted words.'}`. Enter then posts `/edit` with that `was`, which matches disk, so the wrong line is overwritten (Cmd-Z restores it; the words are visible in the field before Enter). Guard: when the mapped line's own words are not `~`, fall back to `sourcesOf` or refuse 409. A logic change, so not fixed in place; a narrow race on the owner's own saves, so it may be filed in Beads rather than hold the PR.
+
+Known gap (PM filing): an edited scene line in an already open conversation keeps its old words until Leave and Talk. Scope confirmed: `panel.tsx:124` applies the overlay inside `text(key)`, so only lines whose words were copied into game state when spoken miss it; room, text.json and not-yet-spoken lines redraw at once. `/edit` writes disk before the compile and the journal holds the undo, so nothing is lost on disk.
+
+Verdict: APPROVE WITH NOTES. One should-fix (the stale-map guard) to file or take in a two-line follow-up at the PM's call; no blocker.
