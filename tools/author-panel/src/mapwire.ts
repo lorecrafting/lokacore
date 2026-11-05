@@ -12,7 +12,7 @@ const ed = editor({
     ),
 });
 /** What the mounted map shows: its footer line and its rooms (the palette's map commands need both). */
-export const alone = (why: string) => why && alert(why);
+export const alone = (why: string): void => void (why && alert(why));
 export const shown = { tell: alone, rooms: [] as MapRoom[] };
 
 let queue = Promise.resolve();
