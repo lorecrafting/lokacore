@@ -385,10 +385,12 @@ async function reverie(t: any, device: object = {}) {
 
 // Breaks: Continue shows before the line is whole (the rise is lag 400 + 2400 after the page lands),
 // its place is not kept (the page shifts when it settles in),
+// the rise aims past whole (so it looks done early; the rig's withTiming lands on its target),
 // or the clock sends Continue itself, turning the page unread ("no timer sends Continue").
 test('a reverie line rises, then Continue shows; no clock sends it', async (t) => {
   const { sent, page, inks, button, tick } = await reverie(t);
   tick(2799);
+  assert.deepEqual(inks(), [1, 0], 'the line rises to whole; Continue still hidden');
   assert.equal(button(), undefined);
   const before = page();
   assert.ok(
