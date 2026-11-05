@@ -53,7 +53,7 @@ import {
 import { named, received } from './received.ts';
 import { days } from './chronicle.ts';
 import { holding, pressedAway, settle } from './recap.ts';
-import { end, fall, haunt, haunting, letGo, unheard, wake } from './spirit.ts';
+import { end, fall, fallen, haunt, haunting, letGo, unheard, wake } from './spirit.ts';
 import { heard, type Said } from './heard.ts';
 import { keptTitle } from './combat-title.ts';
 
@@ -253,7 +253,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     returnDetail: s.returnDetail,
     confirmedRead: s.confirmedRead,
     ended: s.ended,
-    fell: !!s.ended && s.fell === s.ended, // the closed page is your death's (book-ui.md, Falling)
+    ...fallen(s, text),
     spirit: ghost,
     treatment: s.fault ? undefined : view.scene?.treatment, // a fault shows the scene plain (book-ui.md, Book treatments)
   };
@@ -291,7 +291,7 @@ export function presenter(game: Game) {
     leaveCombat: () => {
       if (letGo(s, text) && said) said.log = s.log.length; // the revival lines are new to the live region
     },
-    rise: () => wake(s),
+    rise: () => (said && (said.log += s.spirit?.read ?? 0), wake(s)), // the dead page read some
     visit: (open: (string | undefined)[]) => visit(s, open),
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push({ text: `Start over fails. ${why}`, event: true });

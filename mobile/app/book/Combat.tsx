@@ -15,7 +15,10 @@ import { useDry } from './press.ts';
 import type { presenter, Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 
-function Foot(p: { label: typeof LABEL.letGo | typeof LABEL.backToWorld; onPress: () => void }) {
+export function Foot(p: {
+  label: typeof LABEL.letGo | typeof LABEL.backToWorld;
+  onPress: () => void;
+}) {
   return (
     <Reanimated.View style={useDry()}>
       <Control label={p.label} onPress={p.onPress} />

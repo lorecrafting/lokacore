@@ -22,6 +22,7 @@ import { note, prose, usePalette, useType, type Palette, type Type } from './pal
 import { ItemPop } from './ItemPop.tsx';
 import { space } from './tokens.ts';
 import { UnderInk } from './UnderInk.tsx';
+import { DeadPage } from './DeadPage.tsx';
 import { chapterLabel } from './words.ts';
 import type { Effects, Reading } from './reading.ts';
 import {
@@ -69,6 +70,7 @@ export function Body(p: BodyProps & Talk) {
   const t = useType();
   const water = p.screen.view.water;
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
+  if (p.screen.dead) return <DeadPage {...p.screen} dead={p.screen.dead} letGo={p.world} />;
   return (
     <View style={{ flex: 1 }}>
       {p.page?.kind !== 'journal' && !p.screen.spirit && !p.screen.treatment && (

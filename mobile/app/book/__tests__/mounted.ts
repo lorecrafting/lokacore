@@ -35,6 +35,9 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
         'combat.result': 'The marsh rat falls.',
         'combat.flee': 'You escape to the road.',
         'combat.death': 'You wake at the shrine.',
+        'bleed.tick': 'You bleed.',
+        'death.fell': 'You die.',
+        'room.drip': 'Water drips.',
         'road.crows': 'Crows lift off the road.',
         'rev.1': 'Dark.',
         'rev.2': 'A bell.',
@@ -111,6 +114,18 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
           ...(line === 'combat.death' && { died: true }),
         } as never;
       listener?.({ kind: 'state', projection: projection(), status } as never);
+    },
+    // A death outside a fight's round (a bleed tick on the clock): no combat lines, no arrival.
+    die: (next: GameView, keys: string[]) => {
+      current = next;
+      revision++;
+      last = {
+        command_id: `commit-${revision}`,
+        lines: keys.map((key) => ({ key })),
+        combat_lines: [],
+        died: true,
+      } as never;
+      listener?.({ kind: 'state', projection: projection(), status: { kind: 'ready' } } as never);
     },
     answer: (reply: any, next = current, line?: string, ambient?: string, arrival?: number) => {
       respond = () => {

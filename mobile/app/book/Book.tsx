@@ -187,6 +187,7 @@ const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as con
 export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][number]) =>
   !s.view.combat &&
   !s.ended &&
+  !s.dead &&
   !s.view.scene && // Body draws these two over the chapter page
   !s.view.ancestry_choices &&
   page?.kind === 'chapter' &&

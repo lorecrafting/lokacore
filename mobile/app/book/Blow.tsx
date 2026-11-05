@@ -45,9 +45,13 @@ export const flashed = (still: boolean) =>
   );
 
 // A fight's blows wash the paper; its death holds the red.
-function useWash(still: boolean) {
+function useWash(still: boolean, dead?: boolean) {
   const wash = useSharedValue(0);
   const held = useSharedValue(0);
+  // A death outside a fight has no blow: the hold rises as the dead page lands (book-ui.md, Falling).
+  useEffect(() => {
+    if (dead) held.value = still ? opacity.fatal : withTiming(opacity.fatal, settled);
+  }, [dead]);
   useEffect(
     () =>
       onCue((cue) => {
@@ -74,20 +78,28 @@ const bloodshot = (c: Palette, foot: number) => ({
 
 /**
  * The paper under the combat page (book-ui.md, Blow wash).
- * - Use: Combat only, around a `paperless` Page.
+ * - Use: Combat, and the dead page (`dead`), around a `paperless` Page.
  * - Rules: answers only an `hp_loss` with `wash`, which the Flash limit and the Flashes setting decide;
  *   below the ink; no layout change; a page turn remounts it, ending the wash. A death in a fight
  *   holds the red at `opacity.fatal` until then, no pulse and no fade (book-ui.md, Falling): it
  *   rises as the fatal wash falls, or over the settle time when no wash peaked; a bloodshot rim at
  *   `opacity.bloodshot`, feathered in over `size.bloodshot`, rises and holds with it, to the screen's edge.
- * - States: at rest; washing; held after a death; reduced motion (half the wash, no swell; a death
+ * - States: at rest; washing; held after a death; dead (held from mount); reduced motion (half the wash, no swell; a death
  *   sets the hold at once, under the half wash: the two stay below the wash's peak).
  * - Story: CombatPage.stories.tsx
  */
-export function Blow({ children, under }: { children: ReactNode; under?: ReactNode }) {
+export function Blow({
+  children,
+  under,
+  dead,
+}: {
+  children: ReactNode;
+  under?: ReactNode;
+  dead?: boolean; // the dead page: the hold rises from mount, no blow (book-ui.md, Dead page)
+}) {
   const c = usePalette();
   const still = useReducedMotion();
-  const { wash, held } = useWash(still);
+  const { wash, held } = useWash(still, dead);
   const paper = useAnimatedStyle(() => ({ opacity: wash.value }));
   const fatal = useAnimatedStyle(() => ({ opacity: held.value }));
   // The rim rises and holds with the flat red, at its own strength.

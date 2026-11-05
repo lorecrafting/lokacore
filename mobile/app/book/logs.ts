@@ -89,6 +89,8 @@ export type Logs = {
   closing?: boolean; // this view closed a fight (resetLogs), so a death in it is that fight's
   woke?: number; // where the last death's return receipt starts in the log (spirit.ts, end): held in the spirit state
   spirit?: Spirit; // the spirit state, from Let go to the rise (spirit.ts)
+  room?: { title: string; log: DetailLine[] }; // the room this view left, with its log (resetLogs): a death outside a fight keeps it
+  down?: Logs['room']; // the dead page's (book-ui.md, Dead page): the room died in, until Let go (spirit.ts)
   noted?: Set<string>; // the cue lines logged this room visit
 };
 
@@ -149,7 +151,7 @@ export const dropLines = (lines: DetailLine[], count = lines.length) => {
   const mark = logMark(lines);
   mark.gone += n;
   mark.rounds = mark.rounds.filter((r) => r > mark.gone);
-  lines.splice(0, n);
+  return lines.splice(0, n);
 };
 // The next lines pushed begin a new round (one receipt, one press or one update).
 export const newRound = (lines: readonly DetailLine[]) => {
@@ -218,8 +220,9 @@ export function savedNarration(game: Game, s: Logs, command_id?: string) {
 
 export function resetLogs(s: Logs, now: GameView) {
   const was = s.projection.view;
+  s.room = { title: was.place.title.key, log: [] };
   if (was.place.id !== now.place.id) {
-    dropLines(s.log);
+    markDrawn((s.room.log = dropLines(s.log))); // already drawn: the dead page does not dry them again
     s.noted = new Set();
     s.away = undefined; // held lines belong to the room left, as its log
   }
