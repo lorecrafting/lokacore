@@ -26,6 +26,7 @@ import registry from './registry.json';
 
 const validator = customizeValidator({ AjvClass: Ajv2020 });
 type Saved = { doc: unknown; sha256: string; dir: string; schema: RJSFSchema };
+type Sent = { ops?: Op[]; [k: string]: unknown }; // the /change or /undo body
 
 type Diag = ReturnType<typeof useDiagnostics>;
 
@@ -57,7 +58,7 @@ function useCard(rel: string, diag: Diag) {
   useEffect(() => {
     if (saved && outside?.file === rel && outside.sha256 !== saved.sha256) void load(saved.doc);
   }, [outside]); // eslint-disable-line react-hooks/exhaustive-deps
-  const post = async (path: string, sent: { ops?: Op[] }, otherwise: string, held?: string) => {
+  const post = async (path: string, sent: Sent, otherwise: string, held?: string) => {
     const { ok, told } = await ask(path, sent);
     setRefused(ok ? held : typeof told === 'string' ? told : otherwise);
     setUndo(ok && path === 'change' ? (told as { id: string }).id : undefined);
