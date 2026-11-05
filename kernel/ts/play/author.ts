@@ -242,4 +242,4 @@ queue = first.catch(() => {}); // a save during the first compile compiles after
 const ok = await first;
 if (flag !== '--watch') process.exit(ok ? 0 : 1);
 if (ok) lint();
-console.log(`Watching ${dir}`);
+console.log(`Watching ${dir}, author API on port ${await live!.port}`);

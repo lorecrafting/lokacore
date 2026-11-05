@@ -73,13 +73,11 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   mkdirSync(src);
   const which = join(dir, 'which');
   writeFileSync(which, good);
-  // Below Linux's ephemeral range (32768+), where serve(0) in other test files binds.
-  const port = 20000 + Math.floor(Math.random() * 12000);
   const watcher = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, src, '--watch'], {
     env: {
       PATH: `${dir}:${process.env.PATH}`,
       LOKA_DEV_CARTRIDGE: out,
-      LOKA_AUTHOR_PORT: String(port),
+      LOKA_AUTHOR_PORT: '0', // a free port: random ones collided
       STUB_WHICH: which,
     },
   });
@@ -96,9 +94,11 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
     compiled: boolean;
     timings?: Timings;
   }[] = [];
-  const stream = await (async function connect(): Promise<Response> {
-    return fetch(`http://127.0.0.1:${port}/events`).catch(() => settle(50).then(connect));
-  })();
+  let said = '';
+  watcher.stdout.on('data', (chunk) => (said += chunk));
+  await until(() => said.includes('Watching'));
+  const port = /port (\d+)/.exec(said)![1];
+  const stream = await fetch(`http://127.0.0.1:${port}/events`);
   await until(() => existsSync(out) && JSON.parse(readFileSync(out, 'utf8')).sha256 === kat.sha256);
   const first = readFileSync(out, 'utf8');
   const reader = stream.body!.getReader();
@@ -232,13 +232,11 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
     `{"cartridge":${rest.canonical},"content_hash":"${rest.sha256}"}`,
   );
   const artifact = join(dir, 'queued.json');
-  // Below Linux's ephemeral range (32768+), where serve(0) in other test files binds.
-  const port = 20000 + Math.floor(Math.random() * 12000);
   const watcher = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, src, '--watch'], {
     env: {
       PATH: `${dir}:${process.env.PATH}`,
       LOKA_DEV_CARTRIDGE: artifact,
-      LOKA_AUTHOR_PORT: String(port),
+      LOKA_AUTHOR_PORT: '0', // a free port: random ones collided
       STUB_WHICH: which,
     },
   });
@@ -252,6 +250,13 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
   let said = '';
   watcher.stdout.on('data', (chunk) => (said += chunk));
   await until(() => said.includes('Watching'));
+  const port = /port (\d+)/.exec(said)![1];
+  let events = '';
+  const reader = (await fetch(`http://127.0.0.1:${port}/events`)).body!.getReader();
+  (async () => {
+    for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read())
+      events += new TextDecoder().decode(chunk.value);
+  })().catch(() => {}); // the stream ends with the watcher
   await settle(200); // the fs watch is live
   writeFileSync(`${which}.block`, '');
   writeFileSync(join(src, 'rooms.json'), '{ }');
@@ -271,22 +276,21 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
     log(),
     'start good.json\nend good.json\nstart good.json\nend good.json\nstart rest.json\nend rest.json\n',
   );
-  // Break: a compile that ends inside a later save's debounce is written, so its older words
-  // replace the page's newer ones until the next compile. Writes every 30 ms hold the debounce open.
+  // Break: a compile that ends after a later save is written, so its older words replace the
+  // page's newer ones until the next compile. No wall time: the watcher's push of the save is the
+  // proof it saw it, and every compile after the blocked one is refused, so only it could write kat.
   writeFileSync(which, good);
   writeFileSync(`${which}.block`, '');
   writeFileSync(join(src, 'rooms.json'), '{}');
   await until(() => log().endsWith('start good.json\n'));
-  let n = 0;
-  const saving = setInterval(
-    () => writeFileSync(join(src, 'rooms.json'), `{${' '.repeat(++n)}}`),
-    30,
-  );
-  await settle(150);
+  const refused = join(dir, 'queued-refused.json');
+  writeFileSync(refused, '{"cartridge":{},"content_hash":"00"}');
+  writeFileSync(which, refused);
+  const mark = events.length;
+  writeFileSync(join(src, 'rooms.json'), '{      }');
+  await until(() => events.slice(mark).includes('"changed":[{"file":"rooms.json"'));
   rmSync(`${which}.block`);
-  await until(() => log().endsWith('end good.json\n'));
-  await settle(300);
-  clearInterval(saving);
+  await until(() => log().endsWith('end queued-refused.json\n'));
   assert.equal(JSON.parse(readFileSync(artifact, 'utf8')).sha256, rest.sha256);
-  await until(() => JSON.parse(readFileSync(artifact, 'utf8')).sha256 === kat.sha256);
+  reader.cancel();
 });

@@ -169,8 +169,6 @@ CON governs HP, Mind governs MA, DEX governs MV.100 basis points is1%. Multiply 
 |---|---|
 | Standing or sitting | 1× |
 | Resting or sleeping | 4× |
-| Hungry | 0.5× |
-| Thirsty | 0.5× |
 | Carrying load | MV only, from the load table below |
 
 Rest and sleep recover equally fast, consistent with the published Legend REST description.
