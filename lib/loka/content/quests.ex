@@ -1,6 +1,6 @@
 defmodule Loka.Content.Quests do
   @moduledoc """
-  Quests in a v2 source (quest.schema.json QuestDefinition; 06 §2, §8): each quest's owning capability is
+  Quests in a source (quest.schema.json QuestDefinition; 06 §2, §8): each quest's owning capability is
   required (quest@1, by its quest_activated, as a scripted action's check by check@1's events), its key is no registered
   command's, action's or scripted action's (DUPLICATE_DEFINITION: its offer is an ActionSet identity), its
   name, its offer's label (the offer is optional) and all journal texts have catalog entries
@@ -28,9 +28,9 @@ defmodule Loka.Content.Quests do
 
   defp all(defs), do: for({_, {rel, [], q}} <- defs["quest"], do: {rel, q})
 
-  @doc "Diagnostics for the schema-valid quests of a v2 source with a valid manifest (else none)."
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
-  def check(m, _, v2, _) when m == nil or v2 == nil, do: []
+  @doc "Diagnostics for the schema-valid quests of a source with a valid manifest (else none)."
+  @spec check(map() | nil, map(), {term(), map() | :unknown}, [map()]) :: [map()]
+  def check(nil, _, _, _), do: []
 
   def check(m, defs, {_, text}, registry) do
     events = {m["requires"]["capabilities"], owners(registry, ["events"])}

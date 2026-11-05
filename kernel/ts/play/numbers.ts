@@ -62,8 +62,6 @@ export type Numbers = {
 export const FIGHT_LIMITS =
   'Each fight is alone: allies removed, starting gear, no consumables or spells.';
 
-export const NO_ROOMS = 'This cartridge has no rooms, so there is nothing to play and no numbers.';
-
 export const hours = (n: number | null) =>
   n === null ? 'no hours' : `${n} ${n === 1 ? 'hour' : 'hours'}`;
 

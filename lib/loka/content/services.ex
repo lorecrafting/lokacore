@@ -54,7 +54,6 @@ defmodule Loka.Content.Services do
   def npc(n, _), do: n
 
   def check(nil, _, _), do: []
-  def check(_, _, nil), do: []
 
   def check(m, defs, {_, text}) do
     declared = for {_, {rel, [], s}} <- defs["service"], do: {rel, s}

@@ -115,8 +115,7 @@ export function serviceOrder(offers: readonly Offer[]) {
   };
 }
 
-// A talk offer's label ends `.talk` (kernel dialogue/selection.ts `action.talk`, hello_sampler's
-// `actions.talk`, patrol's `watch.talk`).
+// A talk offer's label ends `.talk` (kernel dialogue/selection.ts `action.talk`, patrol's `watch.talk`).
 // ponytail: GameView drops the talk command, so a talk with another label stays its own card;
 // project `command: 'talk'` (view/action_lists.ts commanded) if that matters.
 const talky = (label: string) => label.endsWith('.talk');

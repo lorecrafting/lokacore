@@ -108,8 +108,9 @@ defmodule Loka.Core.ContractsTest do
       {"structures", "structure"}
     ]
 
-    for %{"properties" => props} <- Contracts.defs()["CompiledCartridge"]["oneOf"],
-        {map, kind} <- maps,
+    props = Contracts.defs()["CompiledCartridge"]["properties"]
+
+    for {map, kind} <- maps,
         is_map_key(props, map) do
       expected = String.replace(ref, ":[a-z][a-z0-9_]{0,63}/", ":#{kind}/")
       assert expected != ref

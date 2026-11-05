@@ -188,9 +188,8 @@ defmodule SystemGraph do
 
   # Definition kind => contract, from CompiledCartridge's maps (key pattern `:kind/`).
   defp definition_kinds(defs) do
-    for b <- defs["CompiledCartridge"]["oneOf"],
-        {_, %{"propertyNames" => %{"pattern" => p}, "additionalProperties" => %{"$ref" => r}}} <-
-          b["properties"],
+    for {_, %{"propertyNames" => %{"pattern" => p}, "additionalProperties" => %{"$ref" => r}}} <-
+          defs["CompiledCartridge"]["properties"],
         [_, kind] <- [Regex.run(~r/\):([a-z_]+)\//, p)],
         into: %{},
         do: {kind, r}

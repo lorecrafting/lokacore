@@ -33,9 +33,8 @@ defmodule SystemGraph.Homes do
   # `cartridges/*/rooms/*.json` or one file `cartridges/*/facts.json`.
   @spec authored(String.t(), map()) :: %{String.t() => [String.t()]}
   def authored(root, defs) do
-    for b <- defs["CompiledCartridge"]["oneOf"],
-        {map, %{"additionalProperties" => %{"$ref" => r}}} <- b["properties"],
-        uniq: true,
+    for {map, %{"additionalProperties" => %{"$ref" => r}}} <-
+          defs["CompiledCartridge"]["properties"],
         into: %{} do
       files =
         for g <- ["*/#{map}/*.json", "*/areas/*/#{map}/*.json", "*/#{map}.json"],
