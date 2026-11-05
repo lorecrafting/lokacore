@@ -14,7 +14,8 @@ import { encode, type Json } from '../src/foundation/canonical.ts';
 import { artifactBytes, compiled } from './compiled.ts';
 import { contentGraph, reachReport } from './reach.ts';
 import { placed } from './guard.ts';
-import { todo, type Todo } from './todo.ts';
+import { files, todo, type Todo } from './todo.ts';
+import { refString } from '../src/runtime/decision.ts';
 
 type Dev = { canonical: string; sha256: string };
 type Diagnostic = { rel?: string };
@@ -131,7 +132,43 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     todo: todos,
     diagnostics: byNode,
     outline: beats(source, { refs, defs, todos, unreached }),
+    map: rooms(source, c, refs),
   };
+}
+
+/** The editor map's rooms (docs/design/editor-map-and-story-rulings.md E3a): each with its source
+ * file, its area (the folder, or an `areas/<name>.json` bundle; null at the root), its title's
+ * words, its exits and its layout.json cell (`at`, absent when unplaced). */
+function rooms(source: string, c: Obj, refs: Map<string, string>) {
+  const file = new Map<string, [string, string | null]>();
+  for (const rel of files(source)) {
+    const bundle = /^areas\/([a-z0-9_]+)\.json$/.exec(rel)?.[1];
+    if (!bundle) {
+      const ref = nodeOf(rel, refs);
+      if (ref) file.set(ref, [rel, placed(rel)!.area]);
+      continue;
+    }
+    const held = JSON.parse(readFileSync(join(source, rel), 'utf8')) as Obj;
+    for (const key of Object.keys(held.rooms ?? {}))
+      file.set(refs.get(`rooms/${key}`) ?? '', [rel, bundle]);
+  }
+  const at = new Map(
+    ((c.layout ?? []) as Obj[]).map(({ room, x, y, z }) => [refString(room as never), { x, y, z }]),
+  );
+  return Object.entries((c.rooms ?? {}) as Record<string, Obj>).map(([ref, r]) => ({
+    ref,
+    key: r.key as string,
+    file: file.get(ref)?.[0],
+    area: file.get(ref)?.[1] ?? null,
+    title: ((c.text ?? {}) as Obj)[r.name] ?? r.name,
+    exits: Object.entries(r.exits as Record<string, Obj>).map(([dir, e]) => ({
+      dir,
+      to: e.to.key as string,
+      ...(e.barrier && { barrier: e.barrier.key as string }),
+      ...(e.hidden_until && { hidden: true }),
+    })),
+    at: at.get(ref),
+  }));
 }
 
 type Bound = {
