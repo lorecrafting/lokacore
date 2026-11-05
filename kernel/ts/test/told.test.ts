@@ -50,6 +50,7 @@ test('/edit shows its words before the compile, marks them on a refused one, cle
   assert.equal(await ask('/edit', { ...edit, was, words: 'new words' }), 200);
   assert.equal((await events()).text['room.a'], 'new words');
   live.push({ text: { 'room.b': 'b' } }); // the next save's overlay keeps them
+  assert.equal((await events()).unconfirmed, undefined); // marked only by a refused compile
   live.push({ compiled: false });
   const refused = await events();
   assert.deepEqual(
@@ -58,6 +59,7 @@ test('/edit shows its words before the compile, marks them on a refused one, cle
   );
   // Break: a compile parked by the Hold (written later) clears the words while held.
   live.push({ compiled: true, pending: 1 });
+  live.push({ text: {} }); // the overlay is rebuilt from the words still held
   assert.equal((await events()).text['room.a'], 'new words');
   live.push({ compiled: true, text: {} });
   const good = await events();
