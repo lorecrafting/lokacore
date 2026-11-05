@@ -83,7 +83,7 @@ slice A builds alone; west is reserved for the combat district (no exit yet; the
   > door will not open, the words in the room say why.
 
 - **waterskin** (vessel, 4 units of `water`, `fed_sampler`) and a **loaf** (edible, `mv` +5,
-  applies `well_fed`, `fed_sampler/items/bread.json`) on the bar.
+  applies `well_fed` as `fed_sampler/items/bread.json` does) on the bar.
 
 Expected: a new character starts here at 07:00 day 1 with hp 10, mv 100, str 10,
 dex 10, cha 6, pennies 10; the room lists two exits in slice A and three once slice B lands;
