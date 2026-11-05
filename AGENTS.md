@@ -125,11 +125,11 @@ A test exists to catch a specific break. Adapted from
 
 ## Searching code (use precise tools first)
 
-- Elixir structure (callers, dependencies, cycles): `mix xref callers <Module>`,
-  `mix xref graph --format cycles`. The compiler resolves aliases, so these are exact.
-- Syntax patterns in Elixir or TypeScript: `ast-grep --lang elixir -p '<pattern>' --json`
-  (`--lang typescript` for TS). `ast-grep outline` does not parse Elixir.
-- Plain text search only for strings, docs and config.
+- Elixir callers, dependencies, cycles: `mix xref callers <Module>`, `mix xref graph --format cycles` (exact).
+- TypeScript definitions, references, callers: `LSP` tool ([quirk, fallback](docs/guides/code-search.md#typescript)).
+- Syntax: `ast-grep --lang elixir -p '<pattern>' --json` (`tsx` for TS); `outline` skips Elixir.
+- Architecture: [generated answers](docs/guides/code-search.md#generated-answers) via `jq` or text search, never read whole.
+- Plain text: strings, docs, config.
 
 ## Checks
 
