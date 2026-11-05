@@ -27,9 +27,10 @@ export function combatTitle(c: NonNullable<GameView['combat']>, text: Say, opene
 }
 
 // The encounter's title, kept while its opener cannot be read (a save in flight, the opener fallen)
-// and on the closed page; a new encounter starts afresh.
+// and on the closed page; a new encounter starts afresh. Once said, the receipts are not read again.
 export function keptTitle(s: Logs, c: GameView['combat'], text: Say, opener: Game['opener']) {
-  const said = c && combatTitle(c, text, opener);
-  if (c && (said || s.title?.id !== c.encounter_id)) s.title = { id: c.encounter_id, said };
+  if (!c || (s.title?.id === c.encounter_id && s.title.said)) return s.title?.said;
+  const said = combatTitle(c, text, opener);
+  if (said || s.title?.id !== c.encounter_id) s.title = { id: c.encounter_id, said };
   return s.title?.said;
 }

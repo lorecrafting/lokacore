@@ -58,12 +58,14 @@ test('a fight keeps its title while its opener is unread; the next fight has its
   try {
     assert.ok(h.texts().includes(TITLE));
     assert.equal(scrolled(), false); // no line yet: nothing to scroll to
-    h.game.opener = () => undefined;
+    let reads = 0; // a kept title reads no receipt again (each read scans the save)
+    h.game.opener = () => void reads++;
     h.publish(
       view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
       'combat.hit',
     );
     assert.ok(h.texts().includes(TITLE));
+    assert.equal(reads, 0);
     assert.equal(scrolled(), true); // the page opens at its newest line
     h.publish(
       view({
