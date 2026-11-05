@@ -88,12 +88,33 @@ export function useDiagnostics() {
   return { ...last, compiled: last.compiled ?? true, changes, timings };
 }
 
+/** A content-graph link (kernel/ts/play/reach.ts): `set` when it writes its fact. */
+export type Edge = { from: string; to: string; path: string; op?: string; set?: true };
+export type Beat = {
+  part: number;
+  n: number;
+  title?: string;
+  status: string; // built, ~, missing or unreached
+  missing?: string[];
+  nodes: string[];
+};
+export type Outline = {
+  parts: (string | null)[];
+  beats: Beat[];
+  unpaid: { seed: string; n: number }[];
+  unseeded: { pays: string; n: number }[];
+};
 export type Story = {
   hash: string;
-  graph: { nodes: { ref: string; kind: string }[]; edges: unknown[] };
-  report: { unreachable: Record<string, string[]>; behind_lock: { rooms: string[] } };
-  todo: Record<string, unknown[]>;
-  diagnostics: Record<string, unknown[]>;
+  graph: { nodes: { ref: string; kind: string }[]; edges: Edge[] };
+  report: {
+    unreachable: Record<string, string[]>;
+    behind_lock: { rooms: string[] };
+    orphan_facts: { unused: string[]; write_only: string[]; read_only: string[] };
+  };
+  outline: Outline | { refused: string } | null;
+  todo: Record<string, Todo[]>;
+  diagnostics: Record<string, { code?: string; path?: string }[]>;
   map: MapRoom[];
 };
 /** The Story map's model (kernel/ts/play/story.ts): the definitions, their `~` and diagnostics. */
