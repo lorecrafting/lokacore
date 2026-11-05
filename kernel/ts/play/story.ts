@@ -14,7 +14,7 @@ import { encode, type Json } from '../src/foundation/canonical.ts';
 import { artifactBytes, compiled } from './compiled.ts';
 import { contentGraph, reachReport } from './reach.ts';
 import { placed } from './guard.ts';
-import { todo, type Todo } from './todo.ts';
+import { files, todo, type Todo } from './todo.ts';
 
 type Dev = { canonical: string; sha256: string };
 type Diagnostic = { rel?: string };
@@ -124,9 +124,16 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   const byNode: Record<string, Diagnostic[]> = {};
   for (const d of diagnostics) add(byNode, nodeOf(d.rel, refs), d);
   const unreached = new Set(Object.values(report.unreachable).flat());
+  // each node's own `.json` source file, for the inspector's card (a `.scene` or `.cut` has none)
+  const sources: Record<string, string> = {};
+  for (const rel of files(source).filter((f) => f.endsWith('.json'))) {
+    const ref = nodeOf(rel, refs);
+    if (ref) sources[ref] = rel;
+  }
   return {
     hash: dev.sha256,
     graph,
+    files: sources,
     report,
     todo: todos,
     diagnostics: byNode,
