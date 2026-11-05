@@ -14,9 +14,10 @@ defmodule Mix.Tasks.Loka.Compile do
   `mix loka.compile --serve` (the author preview's resident compiler, docs/system/cartridge.md,
   Author preview): each stdin line is the arguments above, tab-separated; each compile writes the
   same files and answers one stdout line `loka.compile {"status":0|1,"stderr":<the lines it would
-  print>}`. Before each it recompiles the project's Elixir code and halts (75) if that compiled
-  anything, so no request is served by stale modules: the caller reruns it one-shot, on the new
-  code. It halts on any other failure too, and at the end of stdin.
+  print>}`. Before each it runs the project's compilers (Boundary's too) and halts (75) if the
+  Elixir manifest changed since it started, by that compile or by any other mix, so no request is
+  served by stale modules: the caller reruns it one-shot, on the new code. It halts on any other
+  failure too, and at the end of stdin.
   """
   use Mix.Task
   use Boundary, top_level?: true, deps: [Loka.Content, Mix]
@@ -27,8 +28,10 @@ defmodule Mix.Tasks.Loka.Compile do
 
   @impl Mix.Task
   def run(["--serve"]) do
+    built = built()
+
     for line <- IO.stream(:stdio, :line) do
-      if !match?({:noop, _}, Mix.Task.rerun("compile.elixir")), do: System.halt(75)
+      if built() != built, do: System.halt(75)
       {status, lines} = compile(String.split(String.trim_trailing(line, "\n"), "\t"))
       stderr = Enum.map_join(lines, &(&1 <> "\n"))
       IO.puts(@reply <> JSON.encode!(%{status: status, stderr: stderr}))
@@ -53,6 +56,14 @@ defmodule Mix.Tasks.Loka.Compile do
   end
 
   defp compile(_), do: Mix.raise(@usage)
+
+  # IEx's recompile/0: `rerun("compile")` alone runs no compiler twice
+  defp built do
+    chain = Enum.map(Mix.Project.config()[:compilers], &"compile.#{&1}")
+    Enum.each(["compile", "compile.all", "compile.protocols" | chain], &Mix.Task.reenable/1)
+    Mix.Task.run("compile")
+    File.read!(Path.join(Mix.Project.manifest_path(), "compile.elixir"))
+  end
 
   defp compiled({:ok, bytes, warnings}, dir, out, allow, json) do
     left = if allow, do: [], else: Loka.Content.placeholders(bytes, dir)
