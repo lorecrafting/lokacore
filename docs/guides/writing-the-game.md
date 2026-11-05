@@ -319,11 +319,11 @@ the judge; the schemas do not check references.
 
 Every kind's fields are in [source kinds](../reference/source-kinds.gen.md); step ops, policy leaves, events and choice fields are in [vocabulary](../reference/vocabulary.gen.md).
 
-`mise exec -- bin/loka new <kind> <name> [--from <room> <direction>] ... [cartridge dir]` (from any directory; the cartridge dir defaults to the current one, or the cartridge a `cartridge <dir>` pair just made) writes a
+`mise exec -- bin/loka new <kind> <name> [--from <room> <direction>] [--area <area>] ... [cartridge dir]` (from any directory; the cartridge dir defaults to the current one, or the cartridge a `cartridge <dir>` pair just made) writes a
 compiling file for each pair on one Mix boot (name several pairs in one call; if any is refused, nothing is written), with every line a `~` placeholder, merged into the files it touches
 (it never replaces a value already there: it refuses, names the value and writes nothing; a shared `text.json` line you filled, such as `transport.unaffordable`, just stays),
 plus the capabilities it needs in `cartridge.json`; it prints what it changed, then what to fill (the list `bin/loka todo` prints) and the
-next command. `rooms <name> --from <room> <direction>` writes the exit both ways and, when `layout.json` exists, places the new room's row that way from its source. `cartridge <dir>` stands alone: run it first, then the other pairs with the dir last. A rerun leaves the file it names as you left it, and refuses when that file's steps differ. A kind that refers
+next command. `rooms <name> --from <room> <direction>` writes the exit both ways and, when `layout.json` exists, places the new room's row that way from its source; the new room goes into the source room's area folder. `--area <area>` writes the pair's own file into `areas/<area>/` (with `--from`, it wins: a border room), and a room it refers to is that area's first room. `areas <name>` starts an area folder with its first room, `areas/<name>/rooms/<name>.json`. `cartridge <dir>` stands alone: run it first, then the other pairs with the dir last. A rerun leaves the file it names as you left it, and refuses when that file's steps differ. A kind that refers
 to another takes the first one you have (for a room, the entry) and refuses with the command to run first. The shapes
 come from the samplers; the rules from the [Builders' Guide](../BUILDERS-GUIDE.md#authoring-paths-and-examples).
 
@@ -335,7 +335,7 @@ when you run `mix loka.compile` by hand.
 | Kind | Smallest sampler | Needs first |
 |---|---|---|
 | `actions` | [`gift_sampler`](../../cartridges/gift_sampler/) | a room; writes its own `<name>_done` fact |
-| `areas` | [`speech_sampler`](../../cartridges/speech_sampler/) | nothing; a bundle of rooms (and their NPCs, dialogues) |
+| `areas` | [`speech_sampler`](../../cartridges/speech_sampler/) (a bundle, written by hand) | nothing; `bin/loka new areas <name>` starts the folder `areas/<name>/` with its first room |
 | `attributes` | [`barrier_sampler`](../../cartridges/barrier_sampler/) | nothing |
 | `barriers` | [`position_sampler`](../../cartridges/position_sampler/) | nothing |
 | `behaviours` | [`fishing_sampler`](../../cartridges/fishing_sampler/) | nothing |

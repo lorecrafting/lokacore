@@ -1,3 +1,4 @@
+# size: allow 562, one case per starter kind and refusal; the area placement cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -234,9 +235,8 @@ defmodule Loka.ContentStartersTest do
   test "a room in another file, a long name and a bad layout are refused", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
     assert {:error, "a room start" <> _} = Starters.write(dir, "areas", "start")
-    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    bundle(dir, "marsh")
     assert {:error, "a room marsh" <> _} = Starters.write(dir, "rooms", "marsh")
-    assert {:ok, []} = Starters.write(dir, "areas", "marsh")
 
     for kind <- ~w(items npcs resources facts quests),
         do: {:ok, _} = Starters.write(dir, kind, "x")
@@ -254,13 +254,15 @@ defmodule Loka.ContentStartersTest do
     assert {:ok, _, _} = Loka.Content.compile(dir)
 
     File.write!(Path.join(dir, "layout.json"), ~s([{"room":"start","y":0,"z":0}]))
-    assert {:error, "layout.json: every" <> _} = Starters.write(dir, "text", "hello")
+
+    assert {:error, "layout.json: every row needs a number x, y and z: fix it first"} =
+             Starters.write(dir, "text", "hello")
   end
 
   # Breaks: layout demanding a plain room file when every room is in a bundle.
   test "layout takes a cartridge whose rooms are all bundled", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
-    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    bundle(dir, "marsh")
     edit(dir, "cartridge.json", &Map.put(&1, "entry", "marsh"))
     File.rm!(Path.join(dir, "rooms/start.json"))
     assert {:ok, _} = Starters.write(dir, "layout", "x")
@@ -274,7 +276,7 @@ defmodule Loka.ContentStartersTest do
     {:ok, _} = Starters.write(dir, "rooms", "loft", {"start", "up"})
     assert read(dir, "rooms/start.json")["exits"] == %{"up" => %{"to" => "loft"}}
     assert read(dir, "rooms/loft.json")["exits"] == %{"down" => %{"to" => "start"}}
-    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    bundle(dir, "marsh")
     before = snapshot(dir)
 
     assert {:error, "rooms/start.json: exits up to already has" <> _} =
@@ -318,7 +320,8 @@ defmodule Loka.ContentStartersTest do
              %{"room" => "yard", "x" => 6, "y" => 0, "z" => 0}
            ]
 
-    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    bundle(dir, "marsh")
+    {:ok, _} = Starters.write(dir, "text", "bye")
 
     assert List.last(read(dir, "layout.json")) == %{
              "room" => "marsh",
@@ -340,7 +343,7 @@ defmodule Loka.ContentStartersTest do
     {:ok, _} = Starters.write(dir, "populations", "wolves")
     assert read(dir, "populations/wolves.json")["home"] == "start"
 
-    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    bundle(dir, "marsh")
     edit(dir, "cartridge.json", &Map.put(&1, "entry", "marsh"))
     {:ok, _} = Starters.write(dir, "npcs", "thera")
     assert read(dir, "npcs/thera.json")["room"] == "marsh"
@@ -354,7 +357,7 @@ defmodule Loka.ContentStartersTest do
   # Breaks: a room reference demanding a plain room file when the only room is the bundled entry.
   test "items and npcs land in a bundled entry with no plain room", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
-    {:ok, _} = Starters.write(dir, "areas", "marsh")
+    bundle(dir, "marsh")
     edit(dir, "cartridge.json", &Map.put(&1, "entry", "marsh"))
     File.rm!(Path.join(dir, "rooms/start.json"))
     {:ok, _} = Starters.write(dir, "items", "rope")
@@ -440,6 +443,59 @@ defmodule Loka.ContentStartersTest do
     end
   end
 
+  # Breaks: an --area file written at the root, a --from neighbour of an area room left at the
+  # root (the astray lint's case), a brand-new area folder refused or empty, an item in an area
+  # placed in the entry, or an --area name escaping the cartridge.
+  test "--area, a new area and --from an area room write into areas/<area>/", %{tmp_dir: tmp} do
+    run = fn args -> ExUnit.CaptureIO.capture_io(fn -> Mix.Tasks.Loka.New.run(args) end) end
+    run.(~w(--cwd #{tmp} cartridge mine areas marsh rooms reeds --from marsh east))
+    run.(~w(--cwd #{tmp} rooms bog --area marsh items rope --area marsh rooms w --area m mine))
+    run.(~w(--cwd #{tmp} rooms ford --from start north --area marsh mine))
+
+    run.(
+      ~w(--cwd #{tmp} areas edge npcs brennan --area edge npcs zed dialogues hi --area marsh mine)
+    )
+
+    dir = Path.join(tmp, "mine")
+
+    assert read(dir, "areas/marsh/rooms/marsh.json")["exits"] == %{"east" => %{"to" => "reeds"}}
+    assert read(dir, "areas/marsh/rooms/reeds.json")["exits"] == %{"west" => %{"to" => "marsh"}}
+
+    assert read(dir, "areas/marsh/rooms/bog.json")["exits"] == %{}
+    assert read(dir, "areas/m/rooms/w.json")["exits"] == %{}
+    assert read(dir, "areas/marsh/items/rope.json")["location"]["room"] == "bog"
+    assert read(dir, "areas/marsh/rooms/ford.json")["exits"] == %{"south" => %{"to" => "start"}}
+    assert read(dir, "rooms/start.json")["exits"] == %{"north" => %{"to" => "ford"}}
+    # Break: an area file naming another area's NPC (brennan sorts first), so compile refuses it.
+    assert read(dir, "areas/marsh/dialogues/hi.json")["npc"] == "zed"
+
+    assert Path.wildcard(Path.join(dir, "{rooms,items}/*.json")) == [
+             Path.join(dir, "rooms/start.json")
+           ]
+
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+
+    before = snapshot(dir)
+    File.write!(Path.join(tmp, "x.json"), "{}")
+
+    bad =
+      "mix loka.new: --area: an area is lowercase letters, digits and _, 64 at most (got ../..)"
+
+    assert_raise Mix.Error, bad, fn -> run.(~w(--cwd #{tmp} rooms x --area ../.. mine)) end
+    own = "mix loka.new: areas x is its own area: drop --area marsh"
+    assert_raise Mix.Error, own, fn -> run.(~w(--cwd #{tmp} areas x --area marsh mine)) end
+
+    assert_raise Mix.Error,
+                 "mix loka.new: no rooms in areas/fen yet: bin/loka new areas fen first",
+                 fn ->
+                   run.(~w(--cwd #{tmp} items lamp --area fen mine))
+                 end
+
+    assert snapshot(dir) == before
+    assert File.read!(Path.join(tmp, "x.json")) == "{}"
+    refute File.exists?(Path.join(tmp, "rooms"))
+  end
+
   # Break: a refusal after a pair merged into an author's file deletes it or leaves the merge.
   test "a refusal restores a hand-written file an earlier pair merged into", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
@@ -486,6 +542,12 @@ defmodule Loka.ContentStartersTest do
     dir = Path.join(parent, "mine")
     {:ok, _} = Starters.write(dir, "cartridge", dir)
     dir
+  end
+
+  defp bundle(dir, key) do
+    File.mkdir_p!(Path.join(dir, "areas"))
+    room = Loka.Content.Starters.Parts.room()
+    File.write!(Path.join(dir, "areas/#{key}.json"), JSON.encode!(%{"rooms" => %{key => room}}))
   end
 
   defp edit(dir, rel, change) do

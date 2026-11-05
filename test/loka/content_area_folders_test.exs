@@ -176,8 +176,9 @@ defmodule Loka.ContentAreaFoldersTest do
     end
   end
 
-  # Break: an area folder file is linted under its own path, so its kind's checks miss it.
-  test "an area folder file lints as its root twin" do
+  # Break: an area folder file is linted under its own path, so its kind's checks miss it, or its
+  # finding names the root address, a file the author cannot find.
+  test "an area folder file lints as its root twin, printed at its own path" do
     tmp = Loka.ContentSource.copy(@sampler)
     flat = Lint.run(tmp)
 
@@ -188,7 +189,12 @@ defmodule Loka.ContentAreaFoldersTest do
     end
 
     assert Enum.any?(flat, &(&1 =~ "items/bone.json"))
-    assert Lint.run(tmp) == flat
+
+    assert Lint.run(tmp) ==
+             Enum.map(
+               flat,
+               &String.replace(&1, "items/bone.json", "areas/rookery/items/bone.json")
+             )
   end
 
   # Break: a scene in an area folder takes its JSON half's lines from the root dialogues folder.

@@ -9,23 +9,26 @@ defmodule Loka.Content.Starters do
   starter, before any write. Every starter adds the rows an existing layout.json lacks.
   """
   alias Loka.Content.Barriers
-  alias Loka.Content.Starters.{Merge, Parts, Templates}
+  alias Loka.Content.Starters.{Area, Merge, Parts, Templates}
 
   @doc """
   Writes the starter; `{:ok, paths it changed}` or `{:error, one line for the author}`. `from` is
-  `{room, direction}`: a new room joined to an existing one by exits both ways. `before_write.(path, old bytes
-  or nil)` runs before each file is written, so a caller can undo; a refusal calls it for none.
+  `{room, direction}`: a new room joined to an existing one by exits both ways, in that room's area
+  folder. `before_write.(path, old bytes or nil)` runs before each file is written, so a caller can
+  undo; a refusal calls it for none. `area` places the starter's own file in `areas/<area>/`, and a
+  room it needs is that area's first room; with `from`, it wins (a border room).
   """
   @spec write(
           Path.t(),
           String.t(),
           String.t(),
           {String.t(), String.t()} | nil,
-          (Path.t(), binary() | nil -> any())
+          (Path.t(), binary() | nil -> any()),
+          String.t() | nil
         ) :: {:ok, [Path.t()]} | {:error, String.t()}
-  def write(dir, kind, name, from \\ nil, before_write \\ fn _, _ -> :ok end)
+  def write(dir, kind, name, from \\ nil, before_write \\ fn _, _ -> :ok end, area \\ nil)
 
-  def write(_dir, "cartridge", path, _from, hook) do
+  def write(_dir, "cartridge", path, _from, hook, _area) do
     cond do
       File.exists?(Path.join(path, "cartridge.json")) -> {:error, "#{path}/cartridge.json exists"}
       valid_name(Path.basename(path)) != :ok -> valid_name(Path.basename(path))
@@ -35,24 +38,36 @@ defmodule Loka.Content.Starters do
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
   end
 
-  def write(dir, kind, name, from, hook) do
+  # An area is a folder that starts with a room of its own name.
+  def write(dir, "areas", name, from, hook, nil), do: write(dir, "rooms", name, from, hook, name)
+
+  def write(_, "areas", name, _, _, area),
+    do: {:error, "areas #{name} is its own area: drop --area #{area}"}
+
+  def write(dir, kind, name, from, hook, area) do
     with :ok <- valid_name(name, kind),
          :ok <- in_cartridge(dir),
-         {:ok, {caps, needs, make}} <- Map.fetch(Templates.kinds(), kind) |> or_unknown(kind),
-         {:ok, context} <- context(dir, needs),
-         {:ok, context} <- placed(context, dir, kind, name, from) do
-      files =
-        make.(name, context)
-        |> with_capabilities(caps)
-        |> kept_lines(dir, kind)
-        |> with_layout(dir, context, name)
-
-      put(dir, files, own(dir, kind, name, from), hook)
-    end
+         {:ok, template} <- Map.fetch(Templates.kinds(), kind) |> or_unknown(kind),
+         {:ok, area} <- Area.pick(dir, kind, area, from),
+         do: build(dir, {kind, name, from, area, own(dir, kind, name, area)}, template, hook)
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
     :bad_layout -> {:error, "layout.json: every row needs a number x, y and z: fix it first"}
     {:bad_area, file} -> {:error, "#{file} needs a rooms object: fix it first"}
+  end
+
+  defp build(dir, {kind, name, from, area, own}, {caps, needs, make}, hook) do
+    with {:ok, context} <- context(dir, needs, area),
+         {:ok, context} <- placed(context, dir, kind, name, from, own) do
+      files =
+        make.(name, context)
+        |> Area.moved(own)
+        |> with_capabilities(caps)
+        |> kept_lines(dir, kind)
+        |> with_layout(dir, context, name)
+
+      put(dir, files, if(from, do: nil, else: own), hook)
+    end
   end
 
   defp with_capabilities(files, caps) do
@@ -61,15 +76,7 @@ defmodule Loka.Content.Starters do
   end
 
   defp own(dir, kind, name, nil), do: home(dir, "#{dir_of(kind)}/#{name}.json")
-  defp own(_, _, _, _from), do: nil
-
-  @doc "The one area folder's copy of `rel` (`areas/<area>/<rel>`), else the root one (a new file)."
-  def home(dir, rel) do
-    case Path.wildcard(Path.join([dir, "areas/*", rel])) do
-      [found] -> Path.relative_to(found, dir)
-      _ -> rel
-    end
-  end
+  defp own(_, kind, name, area), do: "areas/#{area}/#{dir_of(kind)}/#{name}.json"
 
   # A cutscene is a `scenes/` file; `scene` would name the writer's `.scene` format.
   defp dir_of("cutscene"), do: "scenes"
@@ -105,18 +112,18 @@ defmodule Loka.Content.Starters do
 
   # The first key of each kind the template references (dirs only: an area bundle's npcs are not
   # scanned), plus every room, bundled ones too, for layout's completeness check.
-  defp context(dir, needs) do
+  defp context(dir, needs, area) do
     room_list = rooms(dir)
     entry = with %{"entry" => e} <- read(Path.join(dir, "cartridge.json")), do: e
 
     start = %{
       "room_list" => room_list,
       "layout" => layout_rows(dir),
-      "entry" => if(entry in room_list, do: entry)
+      "entry" => (area && Area.first_room(dir, area)) || if(entry in room_list, do: entry)
     }
 
     Enum.reduce_while(needs, {:ok, start}, fn kind, {:ok, acc} ->
-      case first(dir, kind, start["entry"]) do
+      case first(dir, kind, start["entry"], area) do
         nil ->
           {:halt, {:error, "no #{missing(kind)} yet: bin/loka new #{missing(kind)} <name> first"}}
 
@@ -126,16 +133,15 @@ defmodule Loka.Content.Starters do
     end)
   end
 
-  defp placed(context, dir, kind, name, from) do
-    with :ok <- new_room(dir, kind, name, context), do: joined(context, dir, name, from)
+  defp placed(context, dir, kind, name, from, own) do
+    with :ok <- new_room(dir, kind, name, context, own), do: joined(context, dir, name, from)
   end
 
   # A rerun finds its own file; another file holding the room would be a duplicate definition.
-  defp new_room(dir, kind, name, c) do
-    if kind in ~w(rooms areas) and name in c["room_list"] and
-         !File.exists?(Path.join(dir, home(dir, "#{kind}/#{name}.json"))),
-       do: {:error, "a room #{name} already exists in another file"},
-       else: :ok
+  defp new_room(dir, kind, name, c, own) do
+    if kind == "rooms" and name in c["room_list"] and !File.exists?(Path.join(dir, own)),
+      do: {:error, "a room #{name} already exists in another file"},
+      else: :ok
   end
 
   defp joined(context, _, _, nil), do: {:ok, context}
@@ -178,7 +184,7 @@ defmodule Loka.Content.Starters do
   end
 
   defp rooms_in(["rooms", file], _), do: [Path.basename(file, ".json")]
-  defp rooms_in(["areas", _], body), do: Map.keys(body["rooms"])
+  defp rooms_in(["areas", _ | rel], body), do: rooms_in(rel, body)
   defp rooms_in(_, _), do: []
 
   defp rooms(dir) do
@@ -212,7 +218,7 @@ defmodule Loka.Content.Starters do
   defp placed_row?(row), do: is_map(row) and Enum.all?(~w(x y z), &is_number(row[&1]))
 
   @single ~w(facts resources attributes)
-  defp first(dir, kind, _) when kind in @single do
+  defp first(dir, kind, _, _) when kind in @single do
     case read(Path.join(dir, "#{kind}.json")) do
       %{^kind => defs} when map_size(defs) > 0 -> defs |> Map.keys() |> Enum.min()
       _ -> nil
@@ -220,17 +226,18 @@ defmodule Loka.Content.Starters do
   end
 
   # "entry" is a room reference, bundled or not; "rooms" is a room with its own file to merge into.
-  defp first(dir, "entry", entry), do: entry || first(dir, "rooms", entry)
+  defp first(dir, "entry", entry, area), do: entry || first(dir, "rooms", entry, area)
 
-  defp first(dir, kind, entry) do
-    keys = for p <- own_files(dir, kind), do: Path.basename(p, ".json")
+  # An area file may name only the root's and its own area's definitions (area_crossing).
+  defp first(dir, kind, entry, area) do
+    keys = for p <- own_files(dir, kind, area || "*"), do: Path.basename(p, ".json")
     if kind == "rooms" and entry in keys, do: entry, else: List.first(keys)
   end
 
-  # One file per definition, at the root or in an area folder; sorted by key.
-  defp own_files(dir, kind) do
+  # One file per definition, at the root or in an area folder (`area`, or any); sorted by key.
+  defp own_files(dir, kind, area \\ "*") do
     (Path.wildcard(Path.join([dir, kind, "*.json"])) ++
-       Path.wildcard(Path.join([dir, "areas/*", kind, "*.json"])))
+       Path.wildcard(Path.join([dir, "areas", area, kind, "*.json"])))
     |> Enum.sort_by(&Path.basename/1)
   end
 
@@ -311,16 +318,6 @@ defmodule Loka.Content.Starters do
     end
   end
 
-  def read(path) do
-    case File.read(path) do
-      {:ok, text} ->
-        case JSON.decode(text) do
-          {:ok, value} -> value
-          _ -> throw({:bad_json, path})
-        end
-
-      _ ->
-        %{}
-    end
-  end
+  defdelegate home(dir, rel), to: Area
+  defdelegate read(path), to: Area
 end
