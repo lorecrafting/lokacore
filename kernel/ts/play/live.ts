@@ -230,9 +230,6 @@ function column(
   return false;
 }
 
-/** Serves `GET /events` (each client gets the current message on connect and every push after),
- * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, the column's `POST /open` and
- * `POST /why`, `GET /story` (story.ts), and the editor's routes (editing.ts) after its Host and Origin checks. */
 /** A watcher's close, and the port it bound: a test passes 0 for a free one (random ones collided). */
 const bound = (server: Server) => ({
   close: () => server.close(),
@@ -241,6 +238,9 @@ const bound = (server: Server) => ({
   ),
 });
 
+/** Serves `GET /events` (each client gets the current message on connect and every push after),
+ * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, the column's `POST /open` and
+ * `POST /why`, `GET /story` (story.ts), and the editor's routes (editing.ts) after its Host and Origin checks. */
 export function serve(port: number, source: string, artifact: string, release = () => {}) {
   const clients = new Set<ServerResponse>();
   let last: Message = { text: {}, said: [], compiled: true };
