@@ -110,9 +110,9 @@ async function openField(el: HTMLElement) {
   const [status, at] = await api(
     `/line?key=${enc(key)}&words=${enc(hooks.said.get(key) ?? '')}`,
   ).finally(() => (opening = false));
-  if (status !== 200) return say(el, noFieldNote(key, typeof at === 'string' ? at : undefined));
   el = el.isConnected ? el : lineOf(key)!; // a click's select render can remount it while /line waits
   if (!el) return;
+  if (status !== 200) return say(el, noFieldNote(key, typeof at === 'string' ? at : undefined));
   field = { el, kept: [...el.childNodes], shown: el.textContent!, key, at }; // as drawn (a `~`'s marks too): React rewrites a change
   observer?.disconnect(); // the field is not a Book render
   el.replaceChildren(at.words);
