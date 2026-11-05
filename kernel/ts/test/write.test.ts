@@ -122,8 +122,21 @@ test('ops write the house format and keep integer-like keys; a path into a proto
   const set = (ops: unknown[]) => ask('/change', { file: 'rooms/a.json', was, ops });
   assert.equal((await set([{ path: ['__proto__', 'x'], value: 1 }])).status, 400);
   assert.equal((await set([{ path: ['name', 'x'], value: 1 }])).status, 400);
+  // Break: an array step that is no index (NaN splices 0, -1 the last) deletes another element.
+  for (const step of ['north', -1, 1])
+    assert.equal(
+      (
+        await set([
+          { path: ['exits'], value: ['n'] },
+          { path: ['exits', step], delete: true },
+        ])
+      ).status,
+      400,
+    );
   const ok = await set([
     { path: ['daily_schedule'], value: { '14': 'b', '8': 'a' } },
+    { path: ['exits'], value: ['n'] },
+    { path: ['exits', 1], value: 's' }, // one past the end appends
     { path: ['exits'], delete: true },
   ]);
   assert.equal(ok.status, 200);
@@ -134,17 +147,21 @@ test('ops write the house format and keep integer-like keys; a path into a proto
 });
 
 test('undo puts the files back, refuses one changed since, and knows no other id', async (t) => {
-  // Breaks: undo over a newer edit (losing it), or a delete's layout row not coming back.
+  // Breaks: undo over a newer edit (losing it), or a delete's layout row not coming back; the
+  // last row's delete leaving `[]`, which the layout schema refuses (minItems 1).
+  // The 409 carries sha256 as /change's does, so the panel rebases the same way.
   const { ask, read, src } = tree(t);
   const layout = read('layout.json');
   const gone = await ask('/delete', { file: 'rooms/a.json', was: sha256(ROOM) });
   assert.equal(gone.status, 200);
   assert.equal(existsSync(join(src, 'rooms/a.json')), false);
-  assert.equal(read('layout.json'), '[]\n');
+  assert.equal(existsSync(join(src, 'layout.json')), false);
   writeFileSync(join(src, 'layout.json'), '[1]\n');
-  assert.equal((await ask('/undo', { id: gone.body.id })).status, 409);
+  const late = await ask('/undo', { id: gone.body.id });
+  const body = { file: 'layout.json', bytes: '[1]\n', sha256: sha256('[1]\n') };
+  assert.deepEqual([late.status, late.body], [409, body]);
   assert.equal(existsSync(join(src, 'rooms/a.json')), false); // checked all before writing any
-  writeFileSync(join(src, 'layout.json'), '[]\n');
+  rmSync(join(src, 'layout.json'));
   assert.equal((await ask('/undo', { id: gone.body.id })).status, 200);
   assert.deepEqual([read('rooms/a.json'), read('layout.json')], [ROOM, layout]);
   assert.equal((await ask('/undo', { id: 99 })).status, 404);
@@ -201,14 +218,22 @@ test('/new refuses a name that is a flag before it runs anything, and journals w
   const bin = join(dir, 'bin');
   mkdirSync(bin);
   // the stub `mise exec -- mix loka.new <kind> <name> <root>`: a mark that it ran, and one room
-  writeFileSync(join(bin, 'mise'), '#!/bin/sh\ntouch "$0.ran"\necho "{}" > "$7/rooms/$6.json"\n');
+  writeFileSync(
+    join(bin, 'mise'),
+    '#!/bin/sh\ntouch "$0.ran"\nsleep 0.5\necho "{}" > "$7/rooms/$6.json"\n',
+  );
   chmodSync(join(bin, 'mise'), 0o755);
   const path = process.env.PATH;
   process.env.PATH = `${bin}:${path}`;
   t.after(() => (process.env.PATH = path));
   assert.equal((await ask('/new', { kind: 'room', name: '--cwd' })).status, 400);
   assert.equal(existsSync(join(bin, 'mise.ran')), false);
-  const made = await ask('/new', { kind: 'room', name: 'cellar' });
+  const making = ask('/new', { kind: 'room', name: 'cellar' });
+  // Break: a write during the run lands in the new entry's snapshot diff, so its undo reverts it.
+  await new Promise((r) => setTimeout(r, 200));
+  const during = { file: 'rooms/a.json', was: sha256(ROOM), ops: [] };
+  assert.equal((await ask('/change', during)).status, 409);
+  const made = await making;
   assert.deepEqual([made.status, made.body.files], [200, ['rooms/cellar.json']]);
   assert.equal((await ask('/undo', { id: made.body.id })).status, 200);
 });

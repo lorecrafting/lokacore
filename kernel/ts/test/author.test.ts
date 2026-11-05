@@ -170,7 +170,18 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   writeFileSync(join(src, 'rooms.json'), '{    }');
   await until(() => (messages.at(-1) as { pending?: number }).pending === 1);
   assert.equal(readFileSync(out, 'utf8'), held);
+  // Break: the Hold's end pushes the parked build as compiled over a later failed save.
+  writeFileSync(which, join(dir, 'refused.json'));
+  writeFileSync(join(src, 'rooms.json'), '{     }');
+  await until(() => messages.at(-1)!.compiled === false);
+  const at = messages.length;
   await hold(false);
   await until(() => JSON.parse(readFileSync(out, 'utf8')).sha256 === kat.sha256);
+  await until(() => messages.slice(at).some((m) => (m as { pending?: number }).pending === 0));
+  await settle(100);
+  assert.equal(messages.at(-1)!.compiled, false);
+  // Break: a compile that wrote no diagnostics file (the stub never does) leaves the last build's
+  // cards up; it clears them.
+  assert.ok(messages.some((m) => (m as { diagnostics?: unknown[] }).diagnostics?.length === 0));
   reader.cancel();
 });

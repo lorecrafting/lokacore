@@ -36,7 +36,9 @@ const source = resolve(dir);
 const live =
   flag === '--watch'
     ? serve(Number(process.env.LOKA_AUTHOR_PORT || 19008), source, out, () => {
-        if (parked) write(...parked);
+        if (!parked) return;
+        write(...parked);
+        if (failed) notCompiled(failed); // the source on disk is the failed save's, not the parked
       })
     : undefined;
 // While the editor holds (POST /hold), a structural compile waits here, and every compile after
@@ -65,6 +67,7 @@ function quick() {
 }
 // A text-only change (against the artifact the page runs) is pushed in place; any other is written.
 function publish(canonicalText: string, sha256: string, said: string[], started: number) {
+  failed = undefined;
   const ms = () => `in ${Math.round(performance.now() - started)} ms`;
   const canonical: Canonical = JSON.parse(canonicalText);
   const overlay = live && written ? textOnly(written, canonical) : undefined;
@@ -116,7 +119,11 @@ const compile = (artifact: string) =>
   );
 const diagnostics = (artifact: string) => join(dirname(artifact), 'diagnostics.json');
 // The last lint read older source, so it goes with the failed compile.
-const notCompiled = (said: string[]) => live?.push({ said, compiled: false, lint: undefined });
+let failed: string[] | undefined; // the last compile's lines, when it failed
+const notCompiled = (said: string[]) => {
+  failed = said;
+  live?.push({ said, compiled: false, lint: undefined });
+};
 
 function build(): boolean {
   const started = performance.now();
@@ -124,8 +131,9 @@ function build(): boolean {
   try {
     const artifact = join(tmp, 'artifact.json');
     const run = compile(artifact);
-    if (existsSync(diagnostics(artifact)))
-      live?.push({ diagnostics: JSON.parse(readFileSync(diagnostics(artifact), 'utf8')) });
+    // none written (mix crashed before it): the last build's cards must not stay up
+    const file = diagnostics(artifact);
+    live?.push({ diagnostics: existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : [] });
     const said = `${run.stderr ?? ''}`.split('\n').filter((l) => /^(error|warning|info): /.test(l));
     for (const line of said) console.error(line);
     if (run.status !== 0) {

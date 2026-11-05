@@ -183,8 +183,10 @@ defmodule Loka.Content.Explain do
       d
       |> Map.take(~w(severity code path))
       |> Map.merge(Place.of(d, index))
-      |> Map.put("words", String.replace_invalid(words(d)))
+      |> Map.put("words", words(d))
+      |> Map.new(fn {k, v} -> {k, if(is_binary(v), do: String.replace_invalid(v), else: v)} end)
     end)
+    |> Enum.uniq()
   end
 
   # A scene's `when:` or `needs:` names its fact last on its line; facts.json gives its type.

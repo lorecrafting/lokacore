@@ -140,4 +140,13 @@ defmodule Loka.ContentPlaceholdersTest do
     refute File.exists?(out)
     assert_raise Mix.Error, ~r/usage/, fn -> Mix.Tasks.Loka.Compile.run([dir, out, "--json"]) end
   end
+
+  # Break: --json writes a diagnostic twice that its printed line shows once, or a non-UTF-8 byte
+  # in a path makes JSON.encode! raise, so the preview loses every diagnostic of that build.
+  test "explained_entries are unique and encode with a non-UTF-8 path", %{tmp_dir: tmp} do
+    d = %{"severity" => "error", "code" => "UNKNOWN_FIELD", "path" => <<"rooms.", 0xFF>>}
+    d = Map.put(d, "data", %{"field" => "x"})
+    assert [e] = Loka.Content.explained_entries([d, d], tmp)
+    assert JSON.encode!(e) =~ "rooms."
+  end
 end

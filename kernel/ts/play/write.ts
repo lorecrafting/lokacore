@@ -96,7 +96,11 @@ function applied(doc: unknown, op: Sent) {
   if (typeof at !== 'object' || at === null)
     refuse(400, `a path through a non-object: ${JSON.stringify(path)}`);
   const last = path.at(-1);
-  if (op.delete === true) Array.isArray(at) ? at.splice(Number(last), 1) : delete at[last];
+  // an array step is an index in it, or one past its end to append a value
+  const end = Array.isArray(at) && at.length - (op.delete === true ? 1 : 0);
+  if (end !== false && !(Number.isInteger(last) && last >= 0 && last <= end))
+    refuse(400, `not an index of the array: ${last}`);
+  if (op.delete === true) Array.isArray(at) ? at.splice(last, 1) : delete at[last];
   else if (op.value === undefined) refuse(400, 'an op sets a value or deletes');
   else at[last] = op.value;
 }
@@ -126,7 +130,7 @@ function remove(t: Tree, { file, was }: Sent) {
     const rows = JSON.parse(layout ?? 'null');
     const kept = Array.isArray(rows) ? rows.filter((r) => r?.room !== room) : rows;
     if (kept?.length < rows?.length)
-      changes.push({ file: 'layout.json', before: layout, after: json(kept) });
+      changes.push({ file: 'layout.json', before: layout, after: kept.length ? json(kept) : null });
   } catch {
     // a layout.json that is not JSON is the compile's to report
   }
@@ -150,7 +154,8 @@ function undo(t: Tree, { id }: Sent) {
   const entry = t.journal.find((e) => e.id === id) ?? refuse(404, `no journal entry ${id}`);
   for (const c of entry.files) {
     const path = guarded(t.root, c.file, there(join(t.root, c.file)) ? 'read' : 'create');
-    if (current(path) !== c.after) refuse(409, { file: c.file, bytes: current(path) });
+    const bytes = current(path);
+    if (bytes !== c.after) refuse(409, { file: c.file, bytes, sha256: sha256(bytes) });
   }
   const back = entry.files.map((c) => ({ file: c.file, before: c.after, after: c.before }));
   return done(t, `undo ${entry.what}`, back);
@@ -241,7 +246,9 @@ export function writer(source: string, push: (changed: Changed[]) => void) {
   const t = tree(source, push);
   return {
     get: (url: string) => answered(() => get(t, url)),
-    post: (url: string, sent: Sent) => answered(() => POSTS[url](t, sent)),
+    // a write during /new's seconds-long run would land in its snapshot diff, and so its undo
+    post: (url: string, sent: Sent) =>
+      answered(() => (t.busy ? refuse(409, 'a /new is running') : POSTS[url](t, sent))),
     /** After an fs burst: what changed outside the editor is journaled and pushed `outside`.
      * ponytail: rereads every source file per burst; fine at showcase size, hash by mtime when not. */
     seen() {
