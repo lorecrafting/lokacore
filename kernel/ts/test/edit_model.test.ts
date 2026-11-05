@@ -75,6 +75,7 @@ test('a path that names no field of the file is refused and changes nothing', ()
     { path: ['__proto__', 'x'], value: 1 },
     { path: ['constructor'], value: 1 },
     { path: ['n', 'x'], value: 1 },
+    { path: ['z', 'x', 'y'], value: 1 },
     { path: ['l', 3], value: 1 },
     { path: ['l', 2], delete: true },
     { path: ['l', -1], value: 1 },
@@ -84,9 +85,9 @@ test('a path that names no field of the file is refused and changes nothing', ()
     { path: [true as any], value: 1 },
   ];
   for (const op of bad) {
-    const doc = { n: 1, l: ['a', 'b'] };
+    const doc = { n: 1, z: null, l: ['a', 'b'] };
     assert.throws(() => apply(doc, op), Refused, JSON.stringify(op));
-    assert.deepEqual(doc, { n: 1, l: ['a', 'b'] });
+    assert.deepEqual(doc, { n: 1, z: null, l: ['a', 'b'] });
   }
   const doc = { n: 1, l: ['a', 'b'] };
   apply(doc, { path: ['l', 2], value: 'c' });

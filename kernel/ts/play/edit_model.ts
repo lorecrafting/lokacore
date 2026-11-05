@@ -30,7 +30,10 @@ function parent(doc: unknown, op: Op): [Box, Step] {
   const last = path.at(-1)!;
   // an array step is an index in it, or one past its end to append a value
   const end = Array.isArray(at) && at.length - (op.delete === true ? 1 : 0);
-  if (end !== false && !(Number.isInteger(last) && (last as number) >= 0 && last <= end))
+  if (
+    end !== false &&
+    !(Number.isInteger(last) && (last as number) >= 0 && (last as number) <= end)
+  )
     no(`not an index of the array: ${last}`);
   if (op.delete !== true && op.value === undefined) no('an op sets a value or deletes');
   return [at, last];

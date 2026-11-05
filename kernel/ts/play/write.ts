@@ -18,7 +18,7 @@ import {
   Refused,
 } from './guard.ts';
 import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
-import { apply, Refused as EditRefused } from './edit_model.ts';
+import { apply } from './edit_model.ts';
 import { edit, located } from './prose.ts';
 
 type By = 'editor' | 'outside';
@@ -93,13 +93,11 @@ function change(t: Tree, { file, was, ops }: Sent) {
     refuse(400, `${file} is not JSON: fix it first`);
   }
   if (!Array.isArray(ops)) refuse(400, 'ops: an array');
-  for (const op of ops)
-    try {
-      apply(doc, op);
-    } catch (e) {
-      if (!(e instanceof EditRefused)) throw e;
-      refuse(400, e.message);
-    }
+  try {
+    for (const op of ops) apply(doc, op);
+  } catch (e) {
+    refuse(400, (e as Error).message); // apply throws only its Refused, which names the reason
+  }
   return done(t, `change ${file}`, [{ file, before, after: json(doc) }]);
 }
 
