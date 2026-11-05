@@ -14562,6 +14562,83 @@
         "type": "object"
       }
     },
+    "source.outline": {
+      "additionalProperties": false,
+      "description": "The Story map's beats: author notes at the cartridge root, never in the artifact.",
+      "properties": {
+        "parts": {
+          "description": "The outline's parts, in order.",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "beats": {
+                "description": "The part's beats, in play order.",
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "n": {
+                      "description": "The beat's number in the outline.",
+                      "type": "integer"
+                    },
+                    "nodes": {
+                      "description": "Short refs `<dir>/<key>` (a choice: `dialogues/<d>/<c>`) the beat binds.",
+                      "items": {
+                        "pattern": "^[a-z_]+(/[a-z0-9_]+){1,2}$",
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "pays": {
+                      "description": "Names this beat pays; an earlier beat plants each.",
+                      "items": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "seeds": {
+                      "description": "Names this beat plants; a later beat pays each.",
+                      "items": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "title": {
+                      "description": "An author note; never shown to a player.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "n"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "minutes": {
+                "description": "The part's planned minutes.",
+                "minimum": 0,
+                "type": "number"
+              },
+              "title": {
+                "description": "An author note; never shown to a player.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "beats"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "parts"
+      ],
+      "type": "object"
+    },
     "source.populations": {
       "else": {
         "else": { "$ref": "#/$defs/source.PopulationPlan" },

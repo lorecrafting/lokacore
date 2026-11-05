@@ -314,6 +314,22 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 | unattackable | boolean |  | loka-w9id: this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile. |
 | words | [NameWords](source-kinds.gen.md#namewords) |  | See the type. |
 
+## outline
+
+The Story map's beats: author notes at the cartridge root, never in the artifact.
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| parts | list of object | yes | The outline's parts, in order. |
+| parts[].beats | list of object | yes | The part's beats, in play order. |
+| parts[].beats[].n | integer | yes | The beat's number in the outline. |
+| parts[].beats[].nodes | list of string |  | Short refs `<dir>/<key>` (a choice: `dialogues/<d>/<c>`) the beat binds. |
+| parts[].beats[].pays | list of string |  | Names this beat pays; an earlier beat plants each. |
+| parts[].beats[].seeds | list of string |  | Names this beat plants; a later beat pays each. |
+| parts[].beats[].title | string |  | An author note; never shown to a player. |
+| parts[].minutes | number |  | The part's planned minutes. |
+| parts[].title | string |  | An author note; never shown to a player. |
+
 ## populations
 
 One fixed-slot, two-room bounded population with an owned wander and replacement job.

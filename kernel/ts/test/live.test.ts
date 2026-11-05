@@ -110,9 +110,13 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   writeFileSync(join(dir, 'scenes/q.scene'), 'npc: maud\n* ~\n');
   assert.deepEqual(sourcesOf(dir, 'dialogue.q.prompt', '~'), ['two.json:1', 'scenes/q.scene:2']);
   const log = join(dir, 'opened');
-  writeFileSync(join(dir, 'ed'), `#!/bin/sh\n[ "$1" = --goto ] && printf %s "$2" > ${log}\n`, {
-    mode: 0o755,
-  });
+  // Written aside and renamed: `> log` creates the file empty before printf fills it, and the
+  // existsSync poll below read that empty file on CI (loka-vduxr.30).
+  writeFileSync(
+    join(dir, 'ed'),
+    `#!/bin/sh\n[ "$1" = --goto ] && printf %s "$2" > ${log}.part && mv ${log}.part ${log}\n`,
+    { mode: 0o755 },
+  );
   process.env.LOKA_EDITOR = `${join(dir, 'ed')} --goto`; // split on spaces, no shell
   const port = 20000 + Math.floor(Math.random() * 20000);
   const server = serve(port, dir, join(dir, 'none.json'));
