@@ -31,7 +31,7 @@ const opens = (c: Obj, r: DefinitionRef | undefined, keys: Set<string>) => {
  */
 export function reach(c: Obj, keys = true): { rooms: Set<string>; items: Set<string> } {
   const items = Object.entries((c.items ?? {}) as Obj);
-  const rooms = new Set<string>([refString(c.entry)]);
+  const rooms = new Set<string>(c.entry ? [refString(c.entry)] : []);
   const held = new Set<string>();
   const usable = keys ? held : new Set<string>();
   const open = (r?: DefinitionRef) => opens(c, r, usable);
