@@ -36,14 +36,14 @@ test('a liquid restoring mv raises it by its amount and stops at the pool maximu
   };
   const levels = [];
   for (const n of [1, 2, 3]) {
-    const payload = { type: 'consume', actor_id: world.character, item_id: skin };
+    const payload = { type: 'consume' as const, actor_id: world.character, item_id: skin };
     const next = step(
       world,
       {
         id: `aaaaaaaa-0000-4000-8000-00000000000${n}`,
         world_context_id: world.context,
         payload,
-      } as never,
+      },
       n,
     );
     assert.equal(next.decision.kind, 'accepted', JSON.stringify(next.decision));

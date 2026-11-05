@@ -12,9 +12,11 @@ defmodule Loka.ContentFoodTest do
        ["items/loaf.edible.amount"]},
       {file, &put_in(&1, ["edible", "resource"], "unknown"), ["items/loaf.edible"]},
       {file, &put_in(&1, ["edible", "resource"], "hp"), ["items/loaf.edible"]},
+      # amount alone is refused by the schema pair (loka-kgd.209)
       {file, &update_in(&1, ["edible"], fn e -> Map.delete(e, "resource") end),
-       ["items/loaf.edible"]},
-      {"liquids/water.json", &Map.put(&1, "resource", "unknown"), ["liquids/water.resource"]},
+       ["items/loaf.edible.resource"]},
+      {"liquids/water.json", &Map.merge(&1, %{"resource" => "unknown", "amount" => 1}),
+       ["liquids/water.resource"]},
       {file, &Map.put(&1, "container", true), ["items/loaf.edible"]},
       {file, &Map.put(&1, "slot", "hand"), ["items/loaf.slot"]},
       {file, &put_in(&1, ["edible", "narration"], "missing.line"),
