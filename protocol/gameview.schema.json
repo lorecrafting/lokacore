@@ -2163,6 +2163,12 @@
         "count": {
           "type": "integer",
           "minimum": 1
+        },
+        "treatment": {
+          "enum": [
+            "reverie"
+          ],
+          "description": "The running scene's Book treatment, when its definition names one; absent otherwise."
         }
       },
       "required": [

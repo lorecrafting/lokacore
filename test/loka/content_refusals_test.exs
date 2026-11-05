@@ -68,6 +68,9 @@ defmodule Loka.ContentRefusalsTest do
 
   # Breaks: an action-started scene can bind a different detail than its Begin scripted action targets.
   test "action scene detail must match its Begin scripted action", %{scene_sampler: dir} do
+    # The sampler's own coil_rope scene would collide with this test's (one scene per trigger).
+    File.rm!(Path.join(dir, "scenes/rope_reverie.json"))
+
     scene = %{
       "on" => %{
         "action" => "coil_rope",

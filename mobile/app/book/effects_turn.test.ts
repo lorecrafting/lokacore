@@ -32,7 +32,8 @@ registerHooks({
 const { PageTurn } = await import(new URL('./PageTurn.tsx', import.meta.url).href);
 const { Blow } = await import('./Blow.tsx');
 const { motion } = await import('./tokens.ts');
-const { cardContext, useCardInk, useCardTurn } = await import('./card.ts');
+const { cardContext, useArrival, useCardInk, useCardTurn } = await import('./card.ts');
+const { Scene } = await import('./ScenePage.tsx');
 const { curlContext } = await import('./press.ts');
 
 // The tree as PageTurn returns it, inner components left unrendered.
@@ -342,4 +343,100 @@ test('an arriving page waits for its curl: a riffle longer, a card or reduced mo
   assert.equal(waited(true, false, false), q + motion.riffle.sweeps * motion.riffle.duration);
   assert.equal(waited(false, true, false), 0);
   assert.equal(waited(false, false, true), 0);
+});
+
+// A treated scene page on the mock clock (book-ui.md, Book treatments: Pacing), its sends counted.
+async function reverie(t: any, device: object = {}) {
+  effects(t);
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  g.cardDevice = device;
+  t.after(() => (g.cardDevice = undefined));
+  const sent: unknown[] = [];
+  const next = { label: 'Continue' };
+  const scene = { scene: { key: 'rope' }, line: 'l', index: 1, count: 1, treatment: 'reverie' };
+  const view = { scene, inventory: [], equipment: [], entities: [] };
+  const draw = rig(t);
+  const page = () =>
+    nodes(
+      draw(() =>
+        Scene({
+          view: view as any,
+          text: (k: string) => k,
+          next: next as any,
+          press: (b) => sent.push(b),
+          treatment: 'reverie',
+        }),
+      ),
+    );
+  const inks = () =>
+    page().flatMap((n) => (n.props?.style?.opacity === undefined ? [] : [n.props.style.opacity]));
+  assert.deepEqual(inks(), [0, 0], 'the line and Continue wait on the paper');
+  assert.deepEqual(inks(), [0, 0], "no rise before the screen reader's answer");
+  await settle();
+  page(); // the screen reader's answer is in: the rise starts
+  // Continue, once it shows: before, it is drawn inert.
+  const button = () => {
+    const all = page();
+    if (all.some((n) => n.props?.inert)) return undefined;
+    return all.find((n) => n.props?.accessibilityRole === 'button' && n.props.onPress);
+  };
+  return { sent, next, page, inks, button, tick: (ms: number) => t.mock.timers.tick(ms) };
+}
+
+// Breaks: Continue shows before the line is whole (the rise is lag 400 + 2400 after the page lands),
+// its place is not kept (the page shifts when it settles in),
+// the rise aims past whole (so it looks done early; the rig's withTiming lands on its target),
+// or the clock sends Continue itself, turning the page unread ("no timer sends Continue").
+test('a reverie line rises, then Continue shows; no clock sends it', async (t) => {
+  const { sent, page, inks, button, tick } = await reverie(t);
+  tick(2799);
+  assert.deepEqual(inks(), [1, 0], 'the line rises to whole; Continue still hidden');
+  assert.equal(button(), undefined);
+  const before = page();
+  assert.ok(
+    before.some(
+      (n) => n.props?.inert && n.props.pointerEvents === 'none' && n.props['aria-hidden'],
+    ),
+    'Continue is drawn but not pressable or focusable',
+  );
+  assert.ok(
+    before.some((n) => n.props?.accessibilityRole === 'button'),
+    "Continue's place is kept",
+  );
+  tick(1);
+  assert.ok(button());
+  tick(60_000);
+  assert.deepEqual(inks(), [1, 1], 'the line whole, Continue shown');
+  button();
+  assert.deepEqual(sent, []);
+});
+
+// Breaks: the rise starts under the page curl, not after the page lands.
+test('a reverie line waits for the curl', async (t) => {
+  (curlContext as any)._currentValue = 660;
+  t.after(() => ((curlContext as any)._currentValue = 0));
+  const { button, tick } = await reverie(t);
+  tick(660 + 2799);
+  assert.equal(button(), undefined);
+  tick(1);
+  assert.ok(button());
+});
+
+// Breaks: a tap mid-rise sends Continue, or leaves the line half drawn.
+test('a tap completes the rise and sends nothing', async (t) => {
+  const { sent, page, inks, button, tick, next } = await reverie(t);
+  tick(100);
+  page()
+    .find((n) => n.props?.accessible === false)
+    .props.onPress();
+  assert.deepEqual(sent, []);
+  assert.deepEqual(inks(), [1, 1], 'the line whole, Continue shown');
+  button().props.onPress();
+  assert.deepEqual(sent, [next]);
+});
+
+// Breaks: a screen reader waits through the rise for a Continue it cannot see.
+test('a screen reader has the line and Continue at once', async (t) => {
+  const { button } = await reverie(t, { reader: true });
+  assert.ok(button());
 });

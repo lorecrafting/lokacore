@@ -2,20 +2,30 @@
 // together they would break the 4.5:1 rule (BOOK-UI-COMPONENTS.md#design-tokens).
 import type { GameView } from '../../packages/game-view/session.ts';
 import { dark, type Palette } from './palette.ts';
-import { color, motion, spirit } from './tokens.ts';
+import { color, motion, opacity, reverie, spirit } from './tokens.ts';
 
-export type HeldLayer = 'spirit' | 'fatal' | 'vignette' | 'glow' | undefined;
+/** The named Book treatments (book-ui.md, Book treatments): each a held layer's ink and peak, by polarity. */
+export const TREATMENTS = {
+  spirit: { ink: spirit, peak: { day: opacity.spirit, night: opacity.spirit } },
+  reverie: { ink: reverie, peak: opacity.reverie },
+} as const;
+export type Treatment = keyof typeof TREATMENTS;
+
+export type HeldLayer = Treatment | 'fatal' | 'vignette' | 'glow' | undefined;
 
 export const heldLayer = (f: {
-  spirit: boolean;
+  treatment?: Treatment;
   fatal: boolean;
   low: boolean;
   lit: boolean;
 }): HeldLayer =>
-  f.spirit ? 'spirit' : f.fatal ? 'fatal' : f.low ? 'vignette' : f.lit ? 'glow' : undefined;
+  f.treatment ?? (f.fatal ? 'fatal' : f.low ? 'vignette' : f.lit ? 'glow' : undefined);
 
-/** The spirit layer's colour on this paper: deep on the dark palettes, as the blow wash splits. */
-export const spiritInk = (p: Palette) => (dark(p) ? spirit.night : spirit.day);
+/** A treatment's layer on this paper, `[ink, peak]`: the night form on the dark palettes, as the blow wash splits. */
+export const treatmentInk = (name: Treatment, p: Palette) => {
+  const { ink, peak } = TREATMENTS[name];
+  return dark(p) ? ([ink.night, peak.night] as const) : ([ink.day, peak.day] as const);
+};
 
 const cutters = new Set<() => void>();
 /** Storm's light fell: the held layer leaves for the strike, so the afterimage's exemption stays true. */
