@@ -9,10 +9,11 @@ export type Bytes = string | null; // null: no file there
 export const REPO = resolve(import.meta.dirname, '../../..');
 export const SCHEMAS = join(REPO, 'schemas/source');
 export const ROOTS = ['cartridge', 'facts', 'text', 'resources', 'attributes', 'layout'];
-// Source.classify's dirs: every source schema but the root files', defs and the area bundle's
+// Source.classify's dirs: every source schema but the root files', defs, the area bundle's and
+// outline.json's (author notes the compiler skips)
 export const DIRS = readdirSync(SCHEMAS)
   .map((f) => f.replace('.schema.json', ''))
-  .filter((d) => ![...ROOTS, 'defs', 'areas'].includes(d));
+  .filter((d) => ![...ROOTS, 'defs', 'areas', 'outline'].includes(d));
 const NAME = /^[a-z0-9_]+$/;
 export const named = (v: unknown): v is string => typeof v === 'string' && NAME.test(v);
 

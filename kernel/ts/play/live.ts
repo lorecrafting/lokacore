@@ -3,7 +3,8 @@
 // text values over the artifact the page already runs; nothing here writes a file, so the overlay
 // can never be bundled. Checkpoints (named recorded paths) are the one thing the page writes, as
 // plain files under the source tree's `checkpoints/`, which the compiler skips. The author column
-// asks here for a Book line's source (`POST /open`) and the rule explainer (`POST /why`).
+// asks here for a Book line's source (`POST /open`) and the rule explainer (`POST /why`), the
+// Story map for its model (`GET /story`, story.ts).
 import { execFile, spawn } from 'node:child_process';
 import {
   existsSync,
@@ -24,6 +25,7 @@ import { replayRecords } from './replay.ts';
 import { files, todo } from './todo.ts';
 import { find } from './find.ts';
 import { why } from './why.ts';
+import { storyRoute } from './story.ts';
 import { body, editing, foreign, json } from './editing.ts';
 import type { Changed } from './write.ts';
 import { sentences } from './why_words.ts';
@@ -247,19 +249,22 @@ function column(
 
 /** Serves `GET /events` (each client gets the current message on connect and every push after),
  * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, the column's `POST /open` and
- * `POST /why`, and the editor's routes (editing.ts) after its Host and Origin checks. */
+ * `POST /why`, `GET /story` (story.ts), and the editor's routes (editing.ts) after its Host and Origin checks. */
 export function serve(port: number, source: string, artifact: string, release = () => {}) {
   const clients = new Set<ServerResponse>();
   let last: Message = { text: {}, said: [], compiled: true };
   const send = (client: ServerResponse, once = {}) =>
     client.write(`data: ${JSON.stringify({ ...last, ...once })}\n\n`);
+  const map = storyRoute(source, artifact);
   const push = (message: Partial<Message>) => {
+    if ('diagnostics' in message) map.stale(); // every compile pushes its diagnostics
     last = { ...last, ...message };
     for (const client of clients) send(client);
   };
   const editor = editing(source, push, (once) => clients.forEach((c) => send(c, once)), release);
   const route = async (request: IncomingMessage, response: ServerResponse) => {
     if (foreign(request, response) || (await editor.route(request, response))) return;
+    if (request.url === '/story') return map.answer(request, response, last.diagnostics ?? []);
     const answered = column(request, response, source, artifact);
     if (answered !== false) return answered;
     if (request.url !== '/events') return response.writeHead(404).end();
@@ -281,10 +286,5 @@ export function serve(port: number, source: string, artifact: string, release = 
       process.exit(1);
     })
     .listen(port, '127.0.0.1');
-  return {
-    push,
-    held: editor.held,
-    seen: editor.seen,
-    close: () => server.close(),
-  };
+  return { push, held: editor.held, seen: editor.seen, close: () => server.close() };
 }

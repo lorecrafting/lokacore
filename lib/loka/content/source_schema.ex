@@ -35,7 +35,8 @@ defmodule Loka.Content.SourceSchema do
     "resources" => "source.resources",
     "attributes" => "source.attributes",
     "layout" => "source.layout",
-    "areas" => "source.areas"
+    "areas" => "source.areas",
+    "outline" => "source.outline"
   }
 
   @doc "File name => JSON text: defs.schema.json and one `<dir or root file>.schema.json` each."
@@ -285,7 +286,8 @@ defmodule Loka.Content.SourceSchema do
         "type" => "object",
         "properties" => bundle,
         "additionalProperties" => false
-      }
+      },
+      "source.outline" => Loka.Content.OutlineSchema.schema()
     }
   end
 
