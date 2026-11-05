@@ -1,11 +1,14 @@
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
-import type { Op, Step } from './edit_model.ts';
+import { change, type Op, type Step } from './edit_model.ts';
 import type { Surfaces, Ui } from './ui_schema.ts';
 
 type Obj = Record<string, unknown>;
 const plain = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
+// rjsf fills each drawn absent object field with `{}` (nested), which no author wrote
+const empty = (v: unknown): boolean =>
+  v === undefined || (plain(v) && Object.values(v).every(empty));
 
 /** rjsf's default-state options: nothing invented, not a schema default nor a `const` (`dark`). */
 export const FORM_DEFAULTS = {
@@ -15,7 +18,8 @@ export const FORM_DEFAULTS = {
 
 /**
  * The ops that turn `saved` into `draft`: plain objects are walked key by key (a key the draft
- * dropped is deleted); an array or a value that differs is replaced whole.
+ * dropped is deleted, an added tree of empty objects is not added); an array or a value that
+ * differs is replaced whole.
  */
 export function diff(saved: unknown, draft: unknown, path: Step[] = []): Op[] {
   if (plain(saved) && plain(draft)) {
@@ -27,10 +31,19 @@ export function diff(saved: unknown, draft: unknown, path: Step[] = []): Op[] {
           : []
         : Object.hasOwn(saved, k)
           ? diff(saved[k], draft[k], [...path, k])
-          : [{ path: [...path, k], value: draft[k] }],
+          : empty(draft[k])
+            ? []
+            : [{ path: [...path, k], value: draft[k] }],
     );
   }
   return JSON.stringify(saved) === JSON.stringify(draft) ? [] : [{ path, value: draft }];
+}
+
+/** `saved` with the ops to `draft` applied: the card's draft, which rjsf's `{}` fills never reach. */
+export function applied(saved: unknown, draft: unknown): unknown {
+  const out = structuredClone(saved);
+  change(out, diff(saved, draft));
+  return out;
 }
 
 type Diagnostic = { rel?: string; path?: string; words?: string };

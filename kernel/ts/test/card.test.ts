@@ -10,6 +10,7 @@ import { Ajv2020 } from 'ajv/dist/2020.js';
 import {
   FORM_DEFAULTS,
   addable,
+  applied,
   branchOf,
   diff,
   fieldErrors,
@@ -39,7 +40,7 @@ test("an empty room's defaults are {}", () => {
 });
 
 // Break: an edit posts the whole document (or a sibling) instead of the one field, a dropped key is
-// not deleted, or a new key is not added; the file then differs beyond the edit.
+// not deleted, a new key is not added, or rjsf's `{}` for a drawn absent object field is written.
 test('an edit through the card round-trips to the file, one op per changed field', () => {
   const bytes =
     '{\n  "name": "npc.ada.name",\n  "hp": {\n    "start": 10,\n    "maximum": 10\n  },\n  "room": "square"\n}\n';
@@ -57,6 +58,10 @@ test('an edit through the card round-trips to the file, one op per changed field
     '{\n  "name": "npc.ada.name",\n  "hp": {\n    "start": 7,\n    "maximum": 10\n  },\n  "short": "npc.ada.short"\n}\n',
   );
   assert.deepEqual(diff(doc, structuredClone(doc)), []);
+  assert.deepEqual(
+    diff(doc, { ...doc, ask: {}, attack: { crit: {}, on_hit: { x: undefined } } }),
+    [],
+  );
 });
 
 // Break: a refusal lands on the wrong field or is lost (another file's, a quoted file name, an

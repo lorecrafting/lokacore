@@ -9,6 +9,7 @@ import { Ajv2020 } from 'ajv/dist/2020.js';
 import {
   FORM_DEFAULTS,
   addable,
+  applied,
   diff,
   fieldErrors,
   hidden,
@@ -55,11 +56,13 @@ function useCard(rel: string, diag: Diag) {
   };
   const commit = () => {
     const ops = saved ? diff(saved.doc, latest.current) : [];
-    if (!ops.length || validator.validateFormData(latest.current, saved!.schema).errors.length)
-      return;
+    if (!ops.length) return;
+    // rjsf's own live errors would name its `{}` fills; the schema's first error shows on top instead
+    const [error] = validator.validateFormData(latest.current, saved!.schema).errors;
+    if (error) return setRefused(`${error.property} ${error.message}`);
     void post('change', { file: rel, was: saved!.sha256, ops }, 'Changed outside: reloaded.');
   };
-  const change = (doc: unknown) => setDraft((latest.current = doc));
+  const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, doc)));
   const back = () => void post('undo', { id: undo }, 'Changed since: not undone.');
   const reveal = (f: string) => setRevealed([...revealed, f]);
   return { saved, draft, revealed, undo, refused, change, commit, back, reveal };
@@ -125,7 +128,6 @@ export function Generic({ rel, context, diag }: { rel: string; context: Context;
           validator={validator}
           fields={fields}
           formContext={context}
-          liveValidate="onChange"
           experimental_defaultFormStateBehavior={FORM_DEFAULTS}
           extraErrors={fieldErrors((diag.diagnostics ?? []) as never, rel) as never}
           onChange={(e) => card.change(e.formData)}
