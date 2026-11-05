@@ -89,6 +89,17 @@ defmodule Loka.ContentTest do
     assert Loka.Content.compile("cartridges/hello_sampler") == {:ok, @hello_artifact, []}
   end
 
+  # Break: the compiler reads outline.json (the Story map's author notes) as content: a stray
+  # root file refused, a JSON decode error, or a changed hash.
+  test "an outline.json, well-formed or not, leaves the hello artifact unchanged", %{tmp_dir: tmp} do
+    File.cp_r!("cartridges/hello_sampler", tmp)
+
+    for outline <- [~s({"parts":[]}), "{not json"] do
+      File.write!(Path.join(tmp, "outline.json"), outline)
+      assert Loka.Content.compile(tmp) == {:ok, @hello_artifact, []}
+    end
+  end
+
   describe "one diagnostic per code" do
     test "INVALID_JSON: unparsable text or trailing data", %{tmp_dir: tmp} do
       assert errors(tmp, %{"facts.json" => {:raw, "{"}}) == [d("INVALID_JSON", "facts")]
