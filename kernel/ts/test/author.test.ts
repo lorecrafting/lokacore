@@ -28,7 +28,11 @@ writeFileSync(good, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}
 writeFileSync(
   join(dir, 'mise'),
   '#!/bin/sh\n[ "$4" = loka.lint ] && { [ -f "$STUB_WHICH.slow" ] && sleep 1; echo "items/x.json: lint of $(basename "$(cat "$STUB_WHICH")")" >&2; exit 1; }\n[ -n "$STUB_ERR" ] && { echo "$STUB_ERR" >&2; exit 1; }\n' +
-    '[ -n "$STUB_WHICH" ] && STUB_ART=$(cat "$STUB_WHICH")\ncp "$STUB_ART" "$6"\n',
+    '[ -n "$STUB_WHICH" ] && STUB_ART=$(cat "$STUB_WHICH")\n' +
+    // a compile logs its start and end, and waits while $STUB_WHICH.block exists
+    'L="$STUB_WHICH.log"; [ -n "$STUB_WHICH" ] || L=/dev/null; echo "start $(basename "$STUB_ART")" >> "$L"\n' +
+    'while [ -n "$STUB_WHICH" ] && [ -f "$STUB_WHICH.block" ]; do sleep 0.05; done\n' +
+    'cp "$STUB_ART" "$6"; echo "end $(basename "$STUB_ART")" >> "$L"\n',
 );
 chmodSync(join(dir, 'mise'), 0o755);
 
@@ -194,4 +198,57 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   await hold(true);
   assert.equal((await hold(false)).status, 200);
   reader.cancel();
+});
+
+// The compile queue. Breaks: the compile blocks the watcher (spawnSync), so /source and the page's
+// writes wait on mix; or two saves compile at once or out of order, so the older one's artifact
+// is the one written.
+test('watch: the watcher answers during a compile, and saves compile one at a time in order', async (t) => {
+  const src = join(dir, 'queued');
+  mkdirSync(src);
+  writeFileSync(join(src, 'rooms.json'), '{}');
+  const which = join(dir, 'queued-which');
+  writeFileSync(which, good);
+  const rest = read('protocol/fixtures/cartridge_rest_hash.json');
+  writeFileSync(
+    join(dir, 'rest.json'),
+    `{"cartridge":${rest.canonical},"content_hash":"${rest.sha256}"}`,
+  );
+  const artifact = join(dir, 'queued.json');
+  const port = 20000 + Math.floor(Math.random() * 20000);
+  const watcher = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, src, '--watch'], {
+    env: {
+      PATH: `${dir}:${process.env.PATH}`,
+      LOKA_DEV_CARTRIDGE: artifact,
+      LOKA_AUTHOR_PORT: String(port),
+      STUB_WHICH: which,
+    },
+  });
+  t.after(() => watcher.kill());
+  const settle = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  const log = () => (existsSync(`${which}.log`) ? readFileSync(`${which}.log`, 'utf8') : '');
+  const until = async (ready: () => boolean) => {
+    for (let i = 0; i < 100 && !ready(); i++) await settle(50);
+    assert.ok(ready(), 'timed out');
+  };
+  let said = '';
+  watcher.stdout.on('data', (chunk) => (said += chunk));
+  await until(() => said.includes('Watching'));
+  await settle(200); // the fs watch is live
+  writeFileSync(`${which}.block`, '');
+  writeFileSync(join(src, 'rooms.json'), '{ }');
+  await until(() => log().endsWith('start good.json\n'));
+  const answered = await fetch(`http://127.0.0.1:${port}/source?file=rooms.json`, {
+    signal: AbortSignal.timeout(2000),
+  });
+  assert.equal(((await answered.json()) as { bytes: string }).bytes, '{ }');
+  writeFileSync(which, join(dir, 'rest.json'));
+  writeFileSync(join(src, 'rooms.json'), '{  }');
+  await settle(400); // past the debounce: the second save waits in the queue
+  rmSync(`${which}.block`);
+  await until(() => JSON.parse(readFileSync(artifact, 'utf8')).sha256 === rest.sha256);
+  assert.equal(
+    log(),
+    'start good.json\nend good.json\nstart good.json\nend good.json\nstart rest.json\nend rest.json\n',
+  );
 });
