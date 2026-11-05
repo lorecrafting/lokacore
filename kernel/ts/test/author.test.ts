@@ -170,6 +170,13 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   writeFileSync(join(src, 'rooms.json'), '{    }');
   await until(() => (messages.at(-1) as { pending?: number }).pending === 1);
   assert.equal(readFileSync(out, 'utf8'), held);
+  // Break: a text.json save while a build is parked overlays words on the page the Hold keeps.
+  const parkedAt = messages.length;
+  writeFileSync(join(src, 'text.json'), '{"room.boathouse.description":"line two"}');
+  await until(() => (messages.at(-1) as { pending?: number }).pending === 2);
+  assert.ok(
+    !messages.slice(parkedAt).some((m) => m.text?.['room.boathouse.description'] === 'line two'),
+  );
   // Break: the Hold's end pushes the parked build as compiled over a later failed save.
   writeFileSync(which, join(dir, 'refused.json'));
   writeFileSync(join(src, 'rooms.json'), '{     }');

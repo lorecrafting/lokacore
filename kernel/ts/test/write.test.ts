@@ -56,7 +56,7 @@ function tree(t: TestContext, release = () => {}) {
 test('a path outside the source tree is refused before any file is read', async (t) => {
   // Breaks: a `..` in the path, a prefix sibling (`src-evil` starts with `src`: a check of
   // `startsWith(root)` without the separator passes it), or a path that is not normal.
-  const { ask } = tree(t);
+  const { ask, src } = tree(t);
   for (const file of [
     '../src-evil/rooms/x.json',
     'rooms/../../src-evil/rooms/x.json',
@@ -73,6 +73,8 @@ test('a path outside the source tree is refused before any file is read', async 
     [own.status, own.body.bytes, own.body.kind, own.body.key],
     [200, ROOM, 'rooms', 'a'],
   );
+  writeFileSync(join(src, 'text.json'), '{}\n');
+  assert.equal((await ask('/source?file=text.json')).body.kind, 'text'); // a root file: its name
 });
 
 test('GET /schema/<kind> is the source schema with its defs inlined; another name is a 404', async (t) => {
@@ -254,8 +256,11 @@ test('/edit replaces only the words of one line, and refuses a line that is not 
   writeFileSync(join(src, 'scenes/s.scene'), 'npc: stranger\n* hello\n- Go on\n');
   const scene = (line: number, was: string) =>
     ask('/edit', { file: 'scenes/s.scene', line, was, words: 'new' });
-  assert.deepEqual((await scene(1, 'npc: stranger')).body, 'a key line');
-  assert.deepEqual((await scene(3, '- Go on')).body, 'a choice label: its key is its words');
+  assert.deepEqual(await scene(1, 'npc: stranger'), { status: 400, body: 'a key line' });
+  assert.deepEqual(await scene(3, '- Go on'), {
+    status: 400,
+    body: 'a choice label: its key is its words',
+  });
   assert.equal((await scene(2, '* hello')).status, 200);
   assert.equal(read('scenes/s.scene'), 'npc: stranger\n* new\n- Go on\n');
 });
@@ -267,6 +272,7 @@ test('each refusal is a 400 that names its reason', async (t) => {
   mkdirSync(join(src, 'scenes'));
   writeFileSync(join(src, 'scenes/s.scene'), '* hello\n');
   writeFileSync(join(src, 'rooms/bad.json'), '{');
+  writeFileSync(join(src, 'rooms/n.json'), '{"k": null}');
   const TEXT = '{\n  "room.a": "old words"\n}\n';
   writeFileSync(join(src, 'text.json'), TEXT);
   const room = { file: 'rooms/a.json', was: sha256(ROOM) };
@@ -283,6 +289,15 @@ test('each refusal is a 400 that names its reason', async (t) => {
       'rooms/bad.json is not JSON: fix it first',
     ],
     ['/change', { ...room, ops: {} }, 'ops: an array'],
+    [
+      '/change',
+      {
+        file: 'rooms/n.json',
+        was: sha256('{"k": null}'),
+        ops: [{ path: ['k', 'a', 'b'], value: 1 }],
+      },
+      'a path through a non-object: ["k","a","b"]',
+    ],
     ['/change', { ...room, ops: [{ path: ['name'] }] }, 'an op sets a value or deletes'],
     [
       '/delete',

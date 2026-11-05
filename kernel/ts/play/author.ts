@@ -45,7 +45,7 @@ const live =
 // While the editor holds (POST /hold), a structural compile waits here, and every compile after
 // it (the newest replaces it), so Metro does not reload the frame mid-edit.
 let parked: [canonicalText: string, sha256: string, said: string[]] | undefined;
-let pending = 0;
+let pending = 0; // mutate-skip: the startup write resets it before any Hold can start
 // the canonical the page runs (the written artifact), the base of every overlay
 let written: Canonical | undefined = existsSync(out)
   ? JSON.parse(JSON.parse(readFileSync(out, 'utf8')).canonical)
