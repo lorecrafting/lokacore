@@ -33,7 +33,8 @@ defmodule Loka.ContentStartersCopyTest do
         do: assert(File.read!(Path.join(copy, rel)) == File.read!(Path.join(src, rel)), rel)
   end
 
-  # Break: a link copied (it could point out of cartridges/), or a refused copy left half written.
+  # Break: a link copied (it could point out of cartridges/), a refused copy left half written, or a
+  # source with no cartridge.json copied.
   test "a source holding a link is refused and nothing is written", %{tmp_dir: tmp} do
     new(~w(--cwd #{tmp} cartridge src))
     File.ln_s!(Path.join(tmp, "src/rooms/start.json"), Path.join(tmp, "src/rooms/linked.json"))
@@ -43,6 +44,10 @@ defmodule Loka.ContentStartersCopyTest do
     end
 
     refute File.exists?(Path.join(tmp, "copy"))
+
+    assert_raise Mix.Error, ~r{is not a cartridge}, fn ->
+      new(~w(--cwd #{tmp} cartridge copy --from #{tmp}))
+    end
   end
 
   defp new(args), do: ExUnit.CaptureIO.capture_io(fn -> Mix.Tasks.Loka.New.run(args) end)

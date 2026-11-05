@@ -23,6 +23,7 @@ function worlds(t: TestContext) {
     ['a', 'A'],
     ['b', 'Bee'],
     ['c', '~'],
+    ['Big', 'Big'], // not a name mix loka.new takes: not listed
   ]) {
     mkdirSync(join(dir, 'worlds', name, 'rooms'), { recursive: true });
     writeFileSync(join(dir, 'worlds', name, 'cartridge.json'), JSON.stringify({ id: name, title }));
@@ -36,7 +37,8 @@ function worlds(t: TestContext) {
   writeFileSync(
     join(dir, 'mise'),
     `#!/bin/sh\n[ "$4" = loka.lint ] && exit 0\n[ "$4" = loka.compile ] && exec cp "${good}" "$6"\n` +
-      `shift 3; echo "$@" >> "${dir}/new.log"; sleep 0.5; mkdir "$3"; echo {} > "$3/cartridge.json"\n`,
+      `shift 3; echo "$@" >> "${dir}/new.log"; case $3 in */no) echo 'mix: refused' >&2; exit 1;; esac\n` +
+      `sleep 0.5; mkdir "$3"; echo {} > "$3/cartridge.json"\n`,
   );
   chmodSync(join(dir, 'mise'), 0o755);
   return { dir, a: join(dir, 'worlds/a'), env: { PATH: `${dir}:${process.env.PATH}` } };
@@ -84,6 +86,12 @@ test('/world lists real worlds, refuses names that are paths, and makes one as b
     assert.ok((await ask(port, '/world', sent)).status >= 400, JSON.stringify(sent));
   assert.equal(existsSync(join(dir, 'new.log')), false);
   assert.deepEqual(left, []);
+  // Break: mix's refusal not passed on, or the server left busy after it.
+  assert.deepEqual(await ask(port, '/world', { name: 'no', new: true }), {
+    status: 400,
+    body: 'mix: refused',
+  });
+  rmSync(join(dir, 'new.log'));
   // Break: the route runs mix with other arguments than `bin/loka new cartridge <path> --from <path>`.
   const making = ask(port, '/world', { name: 'd', new: true, from: 'b' });
   await new Promise((r) => setTimeout(r, 200));
