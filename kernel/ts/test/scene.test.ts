@@ -353,7 +353,7 @@ test('an opening scene is the first view and its last Continue lands in the entr
   w = invoke(w, 'continue').world;
   equal(gameView(w).scene?.line, 'scene.bell_rung.fen');
   const s = invoke(w, 'continue');
-  equal(s.decision.outcome, 'ended');
+  equal(s.decision.kind, 'accepted');
   equal(gameView(s.world).scene, undefined);
   equal(gameView(s.world).place.title.key, 'room.ferry_landing.title');
 });
