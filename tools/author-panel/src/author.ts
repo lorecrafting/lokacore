@@ -94,6 +94,7 @@ export type Story = {
   report: { unreachable: Record<string, string[]>; behind_lock: { rooms: string[] } };
   todo: Record<string, unknown[]>;
   diagnostics: Record<string, unknown[]>;
+  files: Record<string, string>;
   map: MapRoom[];
 };
 /** The Story map's model (kernel/ts/play/story.ts): the definitions, their `~` and diagnostics. */

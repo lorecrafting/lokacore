@@ -15,7 +15,7 @@ export function validator(schemas: Record<string, object>) {
   const ajv = new Ajv2020({ allErrors: true });
   for (const [name, schema] of Object.entries(schemas)) ajv.addSchema(schema, name);
   return (kind: string, doc: unknown): string[] => {
-    const valid = ajv.getSchema(`${kind}.schema.json`) ?? fail(kind);
+    const valid = (kind !== 'defs' && ajv.getSchema(`${kind}.schema.json`)) || fail(kind);
     return valid(doc) ? [] : valid.errors!.map((e) => `${e.instancePath || '/'} ${e.message}`);
   };
 }

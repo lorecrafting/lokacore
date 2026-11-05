@@ -1,13 +1,18 @@
-// The shell's right column: the inspector (a read-only card for the selection until E4 and E6 add
-// editors) over the console (the change feed, you or outside, and the last compile's diagnostics).
-import type { Change, Story } from './author.ts';
+// The shell's right column: the inspector (the selection's summary, then the generic card that edits
+// its `.json` source) over the console (the change feed, you or outside, and the last compile's diagnostics).
+import { editable } from '../../../kernel/ts/play/card.ts';
+import type { Change, Story, useDiagnostics } from './author.ts';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card.tsx';
+import { Generic } from './edit/Generic.tsx';
 import { places, type Selection } from './shell.ts';
 
-/** The selection's summary: its kind, ref, `~`, diagnostics and links, from GET /story. */
-export function Inspector({ sel, story }: { sel?: Selection; story?: Story }) {
+type Props = { sel?: Selection; story?: Story; diag: ReturnType<typeof useDiagnostics>; edit: (key: string) => void };
+
+/** The selection's summary: its kind, ref, `~`, diagnostics and links, from GET /story; then its card. */
+export function Inspector({ sel, story, diag, edit }: Props) {
   if (!sel) return <p className="p-3 text-muted-foreground">Select a definition in the hierarchy or a line in the Book.</p>;
   const ref = places(sel, story?.graph.nodes ?? []).inspector?.ref;
+  const rel = ref ? story?.files[ref] : undefined;
   const count = (rows?: Record<string, unknown[]>) => (ref && rows?.[ref]?.length) || 0;
   const unreached = !!ref && Object.values(story!.report.unreachable).some((refs) => refs.includes(ref));
   return (
@@ -27,6 +32,9 @@ export function Inspector({ sel, story }: { sel?: Selection; story?: Story }) {
           {unreached ? <dd className="col-span-2 text-warning">unreached from the start</dd> : null}
         </dl>
       </CardContent>
+      {editable(rel) ? (
+        <Generic key={rel} rel={rel!} diag={diag} context={{ kind: sel.kind, key: sel.key, nodes: story!.graph.nodes, edit }} />
+      ) : null}
     </Card>
   );
 }

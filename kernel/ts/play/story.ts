@@ -125,9 +125,16 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   const byNode: Record<string, Diagnostic[]> = {};
   for (const d of diagnostics) add(byNode, nodeOf(d.rel, refs), d);
   const unreached = new Set(Object.values(report.unreachable).flat());
+  // each node's own `.json` source file, for the inspector's card (a `.scene` or `.cut` has none)
+  const sources: Record<string, string> = {};
+  for (const rel of files(source).filter((f) => f.endsWith('.json'))) {
+    const ref = nodeOf(rel, refs);
+    if (ref) sources[ref] = rel;
+  }
   return {
     hash: dev.sha256,
     graph,
+    files: sources,
     report,
     todo: todos,
     diagnostics: byNode,
