@@ -3,7 +3,7 @@
 import { execFile } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
-import { named, REPO, refuse, there } from './guard.ts';
+import { REPO, refuse, there } from './guard.ts';
 import type { Answer } from './write.ts';
 
 type Sent = Record<string, any>;
@@ -17,12 +17,17 @@ export const loka = (args: string[]) =>
   );
 
 // Worlds are the cartridges beside the open one (cartridges/). A name is one folder there, never a
-// path; a world is a real folder (no link) with a cartridge.json.
+// path, by mix loka.new's rule; a world is a real folder (no link) with a cartridge.json.
+const NAME = /^[a-z][a-z0-9_]{0,63}$/;
+const sibling = (root: string, name: unknown) => {
+  if (typeof name !== 'string' || !NAME.test(name)) refuse(400, 'name: [a-z][a-z0-9_]{0,63}');
+  return join(dirname(root), name as string);
+};
+const real = (path: string) =>
+  !!there(path)?.isDirectory() && !!there(join(path, 'cartridge.json'))?.isFile();
 const world = (root: string, name: unknown) => {
-  if (!named(name)) refuse(400, 'name: [a-z0-9_]+');
-  const path = join(dirname(root), name as string);
-  if (!there(path)?.isDirectory() || !there(join(path, 'cartridge.json'))?.isFile())
-    refuse(404, `no world ${name}`);
+  const path = sibling(root, name);
+  if (!real(path)) refuse(404, `no world ${name}`);
   return path;
 };
 const titled = (path: string) => {
@@ -34,11 +39,8 @@ const titled = (path: string) => {
   }
 };
 export function worlds(root: string): Answer {
-  const names = readdirSync(dirname(root), { withFileTypes: true })
-    .filter(
-      (d) => d.isDirectory() && there(join(dirname(root), d.name, 'cartridge.json'))?.isFile(),
-    )
-    .map((d) => d.name)
+  const names = readdirSync(dirname(root))
+    .filter((name) => NAME.test(name) && real(join(dirname(root), name)))
     .sort();
   const list = names.map((name) => ({ name, title: titled(join(dirname(root), name)) ?? name }));
   return [200, { current: basename(root), worlds: list }];
@@ -50,17 +52,16 @@ export async function opened(
   t: { root: string; busy: number },
   { name, new: make, from }: Sent,
 ): Promise<Answer> {
-  if (make !== true) return world(t.root, name) && [200, { world: name }];
-  if (!named(name)) refuse(400, 'name: [a-z0-9_]+');
-  const path = join(dirname(t.root), name);
-  if (there(path)) refuse(409, `${name} exists`);
-  const copy = from === undefined ? [] : ['--from', world(t.root, from)];
-  t.busy++;
-  try {
-    const refused = await loka(['cartridge', path, ...copy]);
-    if (refused !== undefined) refuse(400, refused);
-    return [200, { world: name }];
-  } finally {
+  if (make !== true) world(t.root, name);
+  else {
+    const path = sibling(t.root, name);
+    if (there(path)) refuse(409, `${name} exists`);
+    const copy = from === undefined ? [] : ['--from', world(t.root, from)];
+    t.busy++;
+    const refused = await loka(['cartridge', path, ...copy]); // never rejects
     t.busy--;
+    if (refused !== undefined) refuse(400, refused);
   }
+  t.busy++; // leaving: no write or other switch may land before the watcher restarts
+  return [200, { world: name }];
 }

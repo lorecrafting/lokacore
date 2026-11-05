@@ -33,8 +33,10 @@ const args = process.argv.slice(2);
 if (args.join() === '--watch' && existsSync(remembered))
   args.unshift(readFileSync(remembered, 'utf8'));
 const [dir, flag, ...rest] = args;
-if (!dir || (flag !== undefined && flag !== '--watch') || rest.length) {
-  console.error('usage: bin/loka dev [<cartridge dir>] [--watch] (no dir: the last one watched)');
+if (!dir || dir === '--watch' || (flag !== undefined && flag !== '--watch') || rest.length) {
+  console.error(
+    'usage: bin/loka dev <cartridge dir> [--watch] | bin/loka dev --watch (the last one watched)',
+  );
   process.exit(2);
 }
 const source = resolve(dir);

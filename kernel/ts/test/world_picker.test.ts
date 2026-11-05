@@ -1,7 +1,7 @@
 // The editor's worlds (POST /world, write.ts; author.ts restarts on the chosen one): which names
 // reach mix, and that the restarted watcher writes only into the world it switched to.
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -76,6 +76,7 @@ test('/world lists real worlds, refuses names that are paths, and makes one as b
     { name: 'loose' },
     { name: '../x', new: true },
     { name: 'x.y', new: true },
+    { name: '1x', new: true },
     { name: 'b', new: true },
     { name: 'x', new: true, from: '../worlds/b' },
     { name: 'x', new: true, from: 'linked' },
@@ -94,16 +95,20 @@ test('/world lists real worlds, refuses names that are paths, and makes one as b
     readFileSync(join(dir, 'new.log'), 'utf8'),
     `loka.new cartridge ${worlds_}/d --from ${worlds_}/b\n`,
   );
-  assert.deepEqual((await ask(port, '/world', { name: 'b' })).body, { world: 'b' });
   await new Promise((r) => setTimeout(r, 50));
-  assert.deepEqual(left, [`${worlds_}/d`, `${worlds_}/b`]);
+  assert.deepEqual(left, [`${worlds_}/d`]);
+  // Break: a second switch (or an edit) accepted while the watcher is leaving for d.
+  assert.equal((await ask(port, '/world', { name: 'b' })).status, 409);
+  assert.deepEqual(left, [`${worlds_}/d`]);
 });
 
 test('after a switch the restarted watcher writes into the new world only', async (t) => {
   const { dir, a, env } = worlds(t);
   const port = 20000 + Math.floor(Math.random() * 12000);
-  // bin/loka dev itself, so its restart on 75 with the remembered world is under test too.
-  const dev = spawn(`${ROOT}bin/loka`, ['dev', a, '--watch'], {
+  // bin/loka dev itself, so its restart on 75 with the remembered world is under test too; opened
+  // through a link, so the restart must take the checked (real) path, not the link's.
+  symlinkSync(join(dir, 'worlds'), join(dir, 'via'));
+  const dev = spawn(`${ROOT}bin/loka`, ['dev', join(dir, 'via/a'), '--watch'], {
     env: { ...env, LOKA_DEV_CARTRIDGE: join(dir, 'out/current.json'), LOKA_AUTHOR_PORT: `${port}` },
     detached: true,
   });
@@ -132,4 +137,14 @@ test('after a switch the restarted watcher writes into the new world only', asyn
   );
   assert.equal(readFileSync(join(a, 'rooms/start.json'), 'utf8'), ROOM);
   assert.notEqual(readFileSync(join(dir, 'worlds/b/rooms/start.json'), 'utf8'), ROOM);
+});
+
+// Break: with no remembered world, `--watch` is taken for the cartridge folder.
+test('bin/loka dev --watch with no remembered world prints the usage', (t) => {
+  const { dir } = worlds(t);
+  const run = spawnSync(`${ROOT}bin/loka`, ['dev', '--watch'], {
+    env: { ...process.env, LOKA_DEV_CARTRIDGE: join(dir, 'out/current.json') },
+    encoding: 'utf8',
+  });
+  assert.equal(run.status, 2, run.stderr);
 });

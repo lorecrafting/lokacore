@@ -1,5 +1,6 @@
 // The author server's HTTP side of the editor (docs/system/cartridge.md#author-preview): who may
 // ask at all (Host, Origin), the write routes (write.ts) and the Hold the watcher parks under.
+import { realpathSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { dirname, join } from 'node:path';
 import { type Answer, type Changed, writer, writes } from './write.ts';
@@ -70,7 +71,7 @@ export function editing(source: string, said: Said, once: Push, on: Hooks) {
       if (typeof words === 'string') tell(key, words, `${sent.file}:${sent.line}`);
     json(response, ...answer);
     if (url === '/world' && answer[0] === 200)
-      response.on('finish', () => on.leave?.(join(dirname(source), sent.name)));
+      response.on('finish', () => on.leave?.(join(dirname(realpathSync(source)), sent.name))); // as write.ts's root
     return true;
   }
   return { route, held: () => held, seen: editor.seen };
