@@ -37,7 +37,7 @@ const unlock = () => {
       for (const file of cached) void globalThis.fetch?.(file).catch(() => {});
       if (inFight) loop(); // a fight reopened before the first gesture
       settleRoom(motion.bed.duration);
-      if (room && !inFight) explore(room.tag);
+      if (room && !inFight && !room.silent) explore(room.tag);
     }
     if (audio.ctx.state !== 'running') audio.ctx.resume().catch(() => {});
   } catch {} // no audio in this browser
@@ -171,7 +171,7 @@ function voice(name: SoundName, file: string, opts: VoiceOpts): Voice | undefine
 // A room's sound (book-ui.md, Beds; Storm): one bed by tag (no file: `wild`; no `wild`: silence), one
 // weather layer, each cross-fading, and a piece on entering a tag new since launch. Nothing in a fight, away or muted.
 type Held = { key: string; voice: Voice };
-type Room = { tag: string; weather?: string; exposed: boolean; spirit: boolean };
+type Room = { tag: string; weather?: string; exposed: boolean; spirit: boolean; silent: boolean };
 let room: Room | undefined;
 let bed: Held | undefined;
 let layer: Held | undefined;
@@ -203,6 +203,11 @@ function settleRoom(ms: number) {
     bed = layer = undefined;
     return;
   }
+  if (room.silent) {
+    bed = hold(bed, 'bed', undefined, false, ms);
+    layer = hold(layer, 'weather', undefined, false, ms);
+    return fade(ms);
+  }
   const beds = rooms.beds ?? {};
   bed = hold(bed, 'bed', beds[room.tag] ?? beds.wild, room.spirit, ms);
   const rain = room.weather ? urls.weather?.[0] : undefined;
@@ -219,16 +224,16 @@ function explore(tag: string) {
   if (voice('explore', piece, {})) lastPiece = now;
 }
 const audible = ['rain', 'wind', 'storm'];
-/** The room the Book is on: bed tag, weather phase that sounds, exposed; `quiet`: this view plays no piece; 'woke' also spends the room's; `spirit`: the bed through mix.muffle (book-ui.md, Spirit state). */
+/** The room the Book is on: bed tag, weather phase that sounds, exposed; `quiet`: this view plays no piece; 'woke' also spends the room's; 'silent' (a treated scene, book-ui.md Book treatments) also fades the bed, weather and music out and opens none; `spirit`: the bed through mix.muffle (book-ui.md, Spirit state). */
 export function ambience(
   tag?: string,
   phase?: string,
   exposed = false,
-  quiet?: boolean | 'woke',
+  quiet?: boolean | 'woke' | 'silent',
   spirit = false,
 ) {
   const weather = audible.includes(phase!) ? phase : undefined;
-  room = { tag: tag || 'wild', weather, exposed, spirit };
+  room = { tag: tag || 'wild', weather, exposed, spirit, silent: quiet === 'silent' };
   settleRoom(motion.bed.duration);
   if (quiet === 'woke') entered.add(room.tag);
   if (!inFight && !quiet) explore(room.tag);
@@ -237,7 +242,6 @@ globalThis.document?.addEventListener?.('visibilitychange', () => settleRoom(mot
 
 /** Storm's thunder, on the sfx bus; through mix.muffle when the room is not exposed. */
 export const thunder = (muffled: boolean) => start('thunder', { muffled });
-
 // A fight's music (book-ui.md, Fight music): one voice on the music bus, with a stinger into a loop.
 // ponytail: a chapter card during a fight steals the loop for good; no chapter opens mid-fight today.
 let inFight = false;
@@ -252,6 +256,7 @@ const fade = (ms: number, then?: () => void) => {
   const stop = live.music[0];
   if (!stop) return then?.();
   ramp(tune!, 0, ms);
+  clearTimeout(fading); // the newer fade owns the bus: a won fanfare must not sound into a treated scene's silence
   fading = setTimeout(() => {
     if (live.music[0] !== stop) return; // a new voice took the bus: it keeps it (a chapter's theme)
     stop();

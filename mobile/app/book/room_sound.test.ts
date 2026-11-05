@@ -76,6 +76,11 @@ test('place.sound and place.exposed reach the bed and the sky', () => {
   assert.equal(quiet({ combat: view().combat }), true);
   assert.equal(quiet({ chapter: { index: 2 } as never }), true);
   assert.equal(quiet({ chapter: { index: 2 } as never }), false, 'a later view of that chapter');
+  // Breaks: a treated scene keeps the bed, weather and music (book-ui.md, Book treatments: sound).
+  effects = true;
+  useCueSounds({ ...screen, treatment: 'reverie' }, 0);
+  effects = false;
+  assert.equal(g.bed[3], 'silent');
   // Breaks: after a fatal blow the bed returns over the Combat card, not on waking; or a later won
   // fight's page, or a first view after a past death, holds the bed back.
   const heard = (next: object) => {

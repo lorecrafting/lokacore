@@ -586,7 +586,7 @@ never casts schema values or imports I/O.
 The installed subset of archived 06 §33–§37 and 21 §3.6 has two closed control modes.
 A `modal` SceneDefinition starts from a declared story-point, quest outcome or bound
 accepted action, and has n≥1 `narrate {text}` steps followed by `await_ack`, then `end`.
-It is not skippable or restartable. Its optional validated `on_end` atomically assigns
+It is not skippable or restartable. Its optional `treatment` (`reverie`) names a [Book treatment](book-ui.md#book-treatments): presentation only, it changes no rule and SceneView carries it. Its optional validated `on_end` atomically assigns
 declared player facts and reaches one story point; [A3](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#a3-green-finale)
 consumes this completion. B9 adds the anchored, resumable `presentation_only` Rest dream,
 with its bounded choice/branch and final quest acknowledgement; its exact step and

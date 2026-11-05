@@ -30,9 +30,9 @@ import {
   ChapterPage,
   CharacterPage,
   MapPage,
-  ScenePage,
   SettingsPage,
 } from './sections.tsx';
+import { ScenePage } from './ScenePage.tsx';
 import { SkillsPage } from './skills.tsx';
 import { CreditsPage } from './CreditsPage.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -71,7 +71,7 @@ export function Body(p: BodyProps & Talk) {
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
   return (
     <View style={{ flex: 1 }}>
-      {p.page?.kind !== 'journal' && !p.screen.spirit && (
+      {p.page?.kind !== 'journal' && !p.screen.spirit && !p.screen.treatment && (
         <RunningHead view={p.screen.view} text={p.screen.text} />
       )}
       {water && (
@@ -98,8 +98,7 @@ function PageBody(p: BodyProps & Talk) {
         press={p.press}
       />
     );
-  if (view.scene)
-    return <ScenePage scene={view.scene} text={text} next={p.g.continue} press={p.press} />;
+  if (view.scene) return <ScenePage {...p.screen} next={p.g.continue} press={p.press} />;
   if (page?.kind === 'chapter' && view.chapter)
     return (
       <ChapterPage
@@ -215,7 +214,7 @@ export function RoomPage(p: {
   const look = !p.spirit && p.g.look;
   return (
     <View style={{ flex: 1 }}>
-      <UnderInk view={p.view} spirit={!!p.spirit} />
+      <UnderInk view={p.view} treatment={p.spirit ? 'spirit' : undefined} />
       <PageShell
         paperless
         title={p.text(p.view.place.title.key)}

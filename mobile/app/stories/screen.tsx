@@ -56,6 +56,7 @@ export const screenFrom = (
     ended: undefined,
     fell: false,
     spirit: undefined,
+    treatment: saved.view.scene?.treatment,
     ...shell,
   };
 };

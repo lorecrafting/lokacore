@@ -677,7 +677,7 @@ storage, travel and other quest actions remain available under their normal rule
 
 A declared chapter opens a title page on launch and on index change, once per presenter session.
 A modal scene takes precedence: only its persisted current line, offered Continue and the
-[running head](../BOOK-UI-COMPONENTS.md#component-catalogue) appear;
+[running head](../BOOK-UI-COMPONENTS.md#component-catalogue) appear (a scene's [treatment](#book-treatments) may hide more);
 ordinary details, Leave/Back, Contents and position controls are hidden or disabled. A chapter
 title page shows its chapter label, title and the running head only: no Back to World, and Contents and position are
 locked as in a scene. It turns itself about 4 s from appearing; a tap anywhere
@@ -721,6 +721,17 @@ boundaries live in [session](../../mobile/packages/game-view/session.ts),
 [app](../../mobile/app/App.tsx) and [save error](../../mobile/app/SaveError.tsx).
 
 A cartridge's ending is its last scene, then its last declared chapter's title page; the Book adds no ending page and no words of its own.
+
+## Book treatments
+
+A treatment is a named, designed whole the Book draws over a host: a cartridge selects one by name and sets only its bounded parameters, never a colour, a layer, a timing or a combination of parts ([owner decision](../decisions/owner-decision-authoring-editor-plan-2026-11-04.md#book-treatments); [rulings](../design/book-treatments-rulings.md)). Each is designed once, here, for contrast in every palette, reduced motion, Flashes off and a screen reader; its parts are the Book's kit. Its layer takes the top slot of the [under-ink chooser](../BOOK-UI-COMPONENTS.md#design-tokens), so no fatal hold, vignette or glow shows with it, and two treatments never show at once. A new treatment, or a parameter on one, is a designer ruling with its contrast numbers, never a cartridge's.
+
+| Treatment | Hosts | Parameters | Spec |
+|---|---|---|---|
+| `spirit` | revival, implicitly (not selectable on a scene: its kit needs revival's lines and seconds) | none (`lines` and `seconds` are revival's data) | [Spirit state](#effects-sound-and-haptics) |
+| `reverie` | a modal scene's optional `treatment` | none | below |
+
+**Reverie.** A scene told as a bright dream (owner 2026-11-04, paraphrased: bright and luminous, only Continue, lines at their own pace, silence). **Look.** A held under-ink layer inside the page column, set with the turn onto the scene's first line and gone with the turn off its last, in every mode: ivory by day and dawn, pale gold at dusk and night; every text role keeps 4.5:1 (its look and timing are in the [catalogue](../BOOK-UI-COMPONENTS.md#design-tokens)). Still: no breathing, no glow. Storm draws no light on it. The night sky stays as the hour draws it. **What shows.** Only the scene's current line, in the ink as plain prose, and Continue. The running head, the status row and the whole footer (catching up included) are not drawn. **Pacing.** Every line turns the page, as in any scene. The line starts a moment after the page lands and rises slowly from the paper to full ink; Continue's place is kept from the start and settles in once the line is full, until then not drawn, not pressable and not focusable. A tap anywhere on the page before then completes the line and shows Continue at once and sends nothing; only Continue advances, and the Book never advances by itself. Reduced motion and Flashes off: the same, since a slow opacity rise is neither motion nor a flash. Backgrounded, the arrival pauses; a reopen lands on the current line and it arrives again. **Screen reader.** The line and Continue show at once; the page's title focus lands on the line and reads it once; Continue's name is its label. **Continue.** The engine's offered button and its label, drawn as the scene's [ContinueButton](../BOOK-UI-COMPONENTS.md#component-catalogue), solid; the press keeps its selection haptic. **Sound.** Silence: on the turn into the reverie the room's bed, weather and any music fade out over the bed cross-fade; nothing plays inside it, its page turns and Continue included; the next page's bed opens over the bed cross-fade after the turn out. **Ends.** A fault shows the scene plain with the footer's fault, as the spirit state does; the scene's own precedence is unchanged.
 
 ## Text clarity
 

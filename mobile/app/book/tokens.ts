@@ -59,6 +59,7 @@ const dusk: typeof light = {
 export const color = { light, dawn, dusk, dark };
 
 export const spirit = { day: '#c8dcf6', night: '#0b1e45' }; // the spirit state's layer: day on light and dawn, night on dusk and dark
+export const reverie = { day: '#fffbf0', night: '#f6e6b4' }; // the reverie treatment's layer: ivory on light and dawn, pale gold on dusk and dark
 
 // The night sky's star and shooting-star colour (the mock's meteor, rgba(255,255,245)).
 export const nightSky = { star: '#fffff5' };
@@ -137,6 +138,7 @@ export const opacity = {
   bloodshot: 1, // the fatal hold's edges at the screen's rim, feathered in over size.bloodshot -- mutate-skip: uncalibrated design value
   glow: 0.08, // the lamp at the page's hip, at its peak; 4.5:1 holds -- mutate-skip: uncalibrated design value
   spirit: 0.6, // the spirit layer, held; every text role keeps 4.5:1 -- mutate-skip: brief-set design value
+  reverie: { day: 0.8, night: 0.06 }, // the reverie layer, held, by polarity; every text role keeps 4.5:1 (night 0.08 breaks dark.warning) -- mutate-skip: brief-set design value
 };
 
 // Book motion. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion. `duration` and
@@ -172,6 +174,7 @@ export const motion = {
   flicker: { min: 80, max: 140, depth: 0.08 }, // the lamp's random step (ms) and share of opacity.glow; the peak is opacity.glow -- mutate-skip: uncalibrated design value
   settle: { duration: 400, easing: 'inOutQuad', hold: 600 }, // a resolved running head retiring; hold: gilt's warning ink before it settles -- mutate-skip: uncalibrated design value
   breathe: { duration: 2400, easing: 'inOutQuad' }, // one way of the vignette and the star groups -- mutate-skip: uncalibrated design value
+  reverie: { duration: 2400, easing: 'inOutQuad', lag: 400 }, // a reverie line rising from the paper, `lag` after its page lands; Continue then shows over motion.settle -- mutate-skip: uncalibrated design value
   stagger: { gap: 40, most: 8 }, // choice answers lifting in, with motion.press -- mutate-skip: uncalibrated design value
   riffle: { sweeps: 5, duration: 120, easing: 'linear' }, // one travel's sweeps over one snapshot -- mutate-skip: uncalibrated design value
   first: { hold: 1200 }, // gilt's hold on a first of a playthrough (ordinary: motion.settle.hold) -- mutate-skip: uncalibrated design value

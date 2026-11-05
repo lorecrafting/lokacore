@@ -90,6 +90,8 @@ defmodule Loka.ContentScenesTest do
            ]), ".steps[1].type", "SCHEMA_VIOLATION", %{"error" => "not_in_enum"}},
           {Map.put(s, "control", "restricted"), ".control", "SCHEMA_VIOLATION",
            %{"error" => "unknown_variant"}},
+          {Map.put(s, "treatment", "dream"), ".treatment", "SCHEMA_VIOLATION",
+           %{"error" => "not_in_enum", "allowed" => "reverie"}},
           {update_in(s, ["on"], &Map.delete(&1, "story_point")), ".on", "SCHEMA_VIOLATION",
            %{"error" => "exclusive_properties"}},
           {put_in(s, ["on", "quest"], "ring_the_bell"), ".on", "SCHEMA_VIOLATION",
@@ -184,6 +186,7 @@ defmodule Loka.ContentScenesTest do
   test "scene definitions require scene@1", %{tmp_dir: dir} do
     File.cp_r!(@src, dir)
     File.rm!(Path.join(dir, "reactions/bell_after.json"))
+    File.rm!(Path.join(dir, "scenes/rope_reverie.json"))
     m = src("cartridge.json") |> update_in(["requires", "capabilities"], &Map.delete(&1, "scene"))
     File.write!(Path.join(dir, "cartridge.json"), JSON.encode!(m))
 
