@@ -47,11 +47,11 @@ export const ringFraction = (c: Condition, time: number) =>
     : Math.min(1, Math.max(0, (c.ends_at - time) / c.duration));
 
 /**
- * The status icon row above the status line: one round, graphic-only icon per condition, five
- * then a +N disc (book-ui.md, Conditions details).
+ * The status icon row: one round, graphic-only icon per status (book-ui.md, Conditions details).
  * - Use: above the status line.
- * - Rules: a tap opens Character; a hold, hover or keyboard focus shows a Tooltip. The countdown
- *   ring's motion is the Conditions details rule, not restated here.
+ * - Rules: a tap opens Character; a hold, hover or focus shows a Tooltip; cap, order and ring are
+ *   Conditions details. A drawn glyph (loka-x6t.63): one-colour line art in the look's ink, a centred
+ *   16 px area of the 28 px disc, 1.5 px stroke, round caps and joins, distinct, no letters or emoji.
  * - States: buff; debuff; neutral; permanent; overflow; held; focused; locked (pictures, not
  *   pressable); ring full, near empty, draining. Pops on arrival, fades on expiry; ticks are silent.
  * - Story: StatusIcon.stories.tsx
