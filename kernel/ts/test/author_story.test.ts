@@ -5,6 +5,7 @@ import { test } from 'node:test';
 import type { Story } from '../../../tools/author-panel/src/storylist.ts';
 import { rank } from '../../../tools/author-panel/src/shell.ts';
 import * as list from '../../../tools/author-panel/src/storylist.ts';
+import { knowledge, pacing } from '../../../tools/author-panel/src/storyknow.ts';
 
 const ref = (kind: string, key: string) => `demo@1:${kind}/${key}`;
 const [q1, d1, f1, f2] = [
@@ -49,6 +50,8 @@ const story = (outline: Story['outline']): Story => ({
     ],
   },
   map: [],
+  words: {},
+  choices: {},
 });
 const planted = story({
   parts: ['Arrival', null],
@@ -170,7 +173,7 @@ test('the palette goes to a beat or a node, and traces a fact', () => {
   assert.equal(st.focus, 'beat:3');
   assert.ok(ids(planted, st).includes('beat:3'));
   const traced = list.go(planted, list.LIST, `trace:${f1}`);
-  assert.deepEqual([traced.trace, traced.focus], [f1, `unplaced/${f1}`]);
+  assert.deepEqual([traced.lower, traced.focus], [{ panel: 'trace', at: f1 }, `unplaced/${f1}`]);
   assert.deepEqual(
     list
       .storyItems(planted)
@@ -197,4 +200,75 @@ test('the arrows walk the tree: down, open, into, back to the parent, shut', () 
   assert.deepEqual(at(`beat:1/${q1}`, 'ArrowLeft'), { focus: 'beat:1' });
   assert.deepEqual(at('beat:1', 'ArrowLeft'), { toggle: 'beat:1' });
   assert.deepEqual(at('beat:2', 'ArrowRight'), {});
+});
+
+// Break: Knowledge counts one choice of two as known, misses an on_end or a topic grant, lets a
+// later beat's set leak in (or out of `not yet`), or keeps a known fact under `may know`.
+test('knowledge at a beat: knows, may know (one choice of two), not yet', () => {
+  const [d2, s1, r1] = [ref('dialogue', 'd2'), ref('scene', 's1'), ref('reaction', 'r1')];
+  const [fa, fb, fc, fd, t] = [
+    ...['fa', 'fb', 'fc', 'fd'].map((k) => ref('fact', k)),
+    ref('topic', 't'),
+  ];
+  const set = (from: string, to: string, path: string) => ({
+    from,
+    to,
+    path,
+    op: 'fact.assign',
+    set: true as const,
+  });
+  const s: Story = {
+    ...planted,
+    graph: {
+      nodes,
+      edges: [
+        set(d2, fa, '.choices.yes.steps[0].fact'), // one choice of two
+        set(d2, fb, '.choices.yes.steps[0].fact'),
+        set(d2, fb, '.choices.no.steps[1].fact'), // every choice
+        set(s1, fc, '.on_end.assign[0].fact'),
+        { from: s1, to: t, path: '.on_end.steps[0].topic', op: 'topic.grant' },
+        set(r1, fd, '.steps[0].fact'), // only in beat 2
+        set(r1, fa, '.steps[1].fact'),
+        { from: d2, to: fd, path: '.choices.no.when.fact', op: 'fact_compare' }, // a read, not a set
+      ],
+    },
+    choices: { [d2]: 2 },
+    outline: {
+      parts: [null],
+      beats: [
+        { part: 0, n: 1, status: 'built', nodes: [d2, s1] },
+        { part: 0, n: 2, status: 'built', nodes: [r1] },
+      ],
+      unpaid: [],
+      unseeded: [],
+    },
+  };
+  assert.deepEqual(knowledge(s, 1), { knows: [fb, fc, t], may: [fa], not: [fd] });
+  assert.deepEqual(knowledge(s, 2), { knows: [fa, fb, fc, fd, t], may: [], not: [] });
+});
+
+// Break: Pacing counts a node bound twice in a part twice, marks a part at half the median thin,
+// misses the thin part, or does not list it first.
+test('pacing: words per part over its bound nodes, the thin part first', () => {
+  const [x, y, z, w] = ['x', 'y', 'z', 'w'].map((k) => ref('room', k));
+  const beat = (part: number, n: number, nodes: string[]) => ({ part, n, status: 'built', nodes });
+  const s: Story = {
+    ...planted,
+    words: { [x]: 100, [y]: 10, [z]: 90, [w]: 45 },
+    outline: {
+      parts: ['A', 'B', 'C', 'D'],
+      beats: [beat(0, 1, [x]), beat(0, 2, [x]), beat(1, 3, [y]), beat(2, 4, [z]), beat(3, 5, [w])],
+      unpaid: [],
+      unseeded: [],
+    },
+  };
+  assert.deepEqual(
+    pacing(s).map((p) => [p.title, p.words, p.thin]),
+    [
+      ['B', 10, true],
+      ['A', 100, false],
+      ['C', 90, false],
+      ['D', 45, false], // half the median (90) is not below it
+    ],
+  );
 });

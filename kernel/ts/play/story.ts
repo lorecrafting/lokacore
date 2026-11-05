@@ -15,6 +15,7 @@ import { artifactBytes, compiled } from './compiled.ts';
 import { contentGraph, reachReport } from './reach.ts';
 import { placed } from './guard.ts';
 import { files, todo, type Todo } from './todo.ts';
+import { choiceCounts, keysIn, wordsByNode } from './story_counts.ts';
 import { refString } from '../src/runtime/decision.ts';
 
 type Dev = { canonical: string; sha256: string };
@@ -86,14 +87,6 @@ function nodeOf(rel: string | undefined, refs: Map<string, string>) {
   return at && refs.get(`${at.ext === 'scene' ? 'dialogues' : at.dir}/${at.key}`);
 }
 
-// Every string in a definition: among them, the text keys it names.
-const keysIn = (v: unknown): string[] =>
-  typeof v === 'string'
-    ? [v]
-    : isObj(v) || Array.isArray(v)
-      ? Object.values(v).flatMap(keysIn)
-      : [];
-
 const add = <T>(into: Record<string, T[]>, ref: string | undefined, row: T) => {
   if (ref) (into[ref] ??= []).push(row);
 };
@@ -133,6 +126,8 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     diagnostics: byNode,
     outline: beats(source, { refs, defs, todos, unreached }),
     map: rooms(source, c, refs),
+    words: wordsByNode(defs, (c.text ?? {}) as Record<string, unknown>),
+    choices: choiceCounts(c),
   };
 }
 

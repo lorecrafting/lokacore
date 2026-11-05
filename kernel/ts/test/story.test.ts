@@ -199,6 +199,16 @@ test('an edge that assigns a fact is set, one that reads it is not', () => {
   ]);
 });
 
+// Break: Pacing counts a key's words twice, a `~` as a word, misses scene or inline prose, or
+// Knowledge counts a dialogue's choices wrong (it tells "every choice" from "one of several").
+test('words by node from the text keys it names; choices by dialogue', () => {
+  const { words, choices } = story(src, dev, []);
+  assert.equal(words[ref('dialogue', 'greet')], 5); // Well? + Go Gone twice
+  assert.equal(words[ref('room', 'attic')], 2);
+  assert.equal(choices[ref('dialogue', 'greet')], 2);
+  assert.equal(choices[ref('dialogue', 'hub')], 1);
+});
+
 // Break: `then: end` drawn as an edge to a dialogue named end, a `then` dropped, or a
 // choice_resolved reaction linked from a dialogue without that choice.
 test('then and choice_resolved edges: then: end draws none, then: hub one', () => {

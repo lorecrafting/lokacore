@@ -34,6 +34,8 @@ export type Story = {
   todo: Record<string, Todo[]>;
   diagnostics: Record<string, { code?: string; path?: string }[]>;
   map: MapRoom[];
+  words: Record<string, number>; // written words by node (Pacing)
+  choices: Record<string, number>; // choice count by dialogue (Knowledge)
 };
 
 /** The kinds the list holds (design section 4.1); Trace opens on the fact, quest and story point. */
@@ -58,11 +60,13 @@ export type Row = {
   todo?: number;
   unreached?: boolean;
 };
-/** The list's kept state (Layout.story): the ids toggled from their default, the traced ref, the row to focus. */
-export type ListState = { fold: string[]; trace?: string; focus?: string };
+/** The lower section's one panel (rulings S2): Trace of a ref, Knowledge at a beat, or Pacing. */
+export type Lower = { panel: 'trace'; at: string } | { panel: 'knowledge'; n: number } | { panel: 'pacing' };
+/** The list's kept state (Layout.story): the ids toggled from their default, the lower panel, the row to focus. */
+export type ListState = { fold: string[]; lower?: Lower; focus?: string };
 export const LIST: ListState = { fold: [] };
 
-const outlineOf = (s: Story) => (s.outline && 'beats' in s.outline ? s.outline : undefined);
+export const outlineOf = (s: Story) => (s.outline && 'beats' in s.outline ? s.outline : undefined);
 // Parts and Seeds start open, beats shut, Unplaced open only when it is the whole list.
 const opens = (id: string, outlined: boolean) =>
   id === 'unplaced' ? !outlined : !id.startsWith('beat:');
@@ -210,7 +214,7 @@ export function go(s: Story, st: ListState, id: string): ListState {
     return b ? opened(st, [`part:${b.part}`], `beat:${b.n}`, true) : st;
   }
   const next = reveal(s, st, target);
-  return what === 'trace' ? { ...next, trace: target } : next;
+  return what === 'trace' ? { ...next, lower: { panel: 'trace', at: target } } : next;
 }
 
 export type TraceRow = { label: string; ref?: string; key?: string; beat?: number; dashed?: boolean };
