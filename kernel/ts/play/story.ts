@@ -229,6 +229,7 @@ function beats(source: string, bound: Bound) {
       ...(title !== undefined && { title }),
       status,
       ...(missing.length && { missing }),
+      nodes: [...new Set(refs.filter((r) => r !== undefined))],
     };
   });
   // each seed needs a pays in a later beat, each pays a seed in an earlier one (outline order)
@@ -242,7 +243,7 @@ function beats(source: string, bound: Bound) {
       .filter((p) => !all.slice(0, i).some((e) => e.seeds?.includes(p)))
       .map((pays) => ({ pays, n: b.n })),
   );
-  return { beats: rows, unpaid, unseeded };
+  return { parts: outline.parts.map((p) => p.title ?? null), beats: rows, unpaid, unseeded };
 }
 
 /** live.ts's `GET /story`: the model built on the first ask after each compile (`stale()`), with

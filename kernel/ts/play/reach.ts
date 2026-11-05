@@ -9,7 +9,7 @@ import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { refString } from '../src/runtime/decision.ts';
 
-type Edge = { from: string; to: string; path: string; op?: string };
+type Edge = { from: string; to: string; path: string; op?: string; set?: true };
 
 const REF = /^[^@]+@[^:]+:([a-z_]+)\/[^/]+$/; // DefinitionRefString
 const kindOf = (ref: string) => REF.exec(ref)?.[1];
@@ -42,8 +42,10 @@ export function contentGraph(c: Obj): { nodes: { ref: string; kind: string }[]; 
   const walk = (v: unknown, from: string, path: string, op?: string) => {
     if (Array.isArray(v)) v.forEach((x, i) => walk(x, from, `${path}[${i}]`, op));
     if (!isObj(v)) return;
-    if (typeof v.cartridge_id === 'string' && typeof v.kind === 'string')
-      return void edges.push({ from, to: refString(v as never), path, ...(op && { op }) });
+    if (typeof v.cartridge_id === 'string' && typeof v.kind === 'string') {
+      const e: Edge = { from, to: refString(v as never), path, ...(op && { op }) };
+      return void edges.push(isWrite(e) ? { ...e, set: true } : e); // `set`: the edge writes its fact
+    }
     for (const [k, x] of Object.entries(v)) walk(x, from, `${path}${step(k)}`, v.op);
   };
   for (const [section, v] of Object.entries(c)) {
