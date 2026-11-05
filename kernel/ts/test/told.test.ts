@@ -101,9 +101,10 @@ test('/line answers the source line a Book line writes, its words unbound, or wh
     'a choice label: its key is its words',
   ]);
   assert.equal((await line('room.none', 'nowhere'))[0], 404);
-  // Break: two scenes' `* ~` lines both answer the first, so a save writes into the wrong scene.
+  // Break: two scenes' `* ~` lines both answer the first, so a save writes into the wrong scene;
+  // with no map, the one `* ~` there is may be another key's (409: wait for the compile).
   writeFileSync(join(src, 'scenes/t.scene'), 'dialogue t\n  * ~\n');
-  assert.equal((await line('dialogue.t.prompt', '~'))[0], 200);
+  assert.equal((await line('dialogue.t.prompt', '~'))[0], 409);
   writeFileSync(join(src, 'scenes/u.scene'), 'dialogue u\n  * ~\n');
   assert.equal((await line('dialogue.u.prompt', '~'))[0], 400);
 });
@@ -148,20 +149,16 @@ test("/line finds a `~` key's own line by the compile's map, among many `~` line
   assert.deepEqual((await line('room.b'))[1].line, 3); // a defined key: its own `"key":` line
 });
 
-test("an outside save that moves a `~` line before the compile: /line and /edit miss the map's stale line", async (t) => {
-  // Break: /line trusts the map's line, so it opens the moved-in line's words and /edit
-  // overwrites them.
-  const { live, call, ask, src } = served(t);
+test('an outside save that moves a `~` line before the compile: /line waits for the compile', async (t) => {
+  // Break: /line trusts the map's line, or guesses the one `* ~` left, which names no key, so it
+  // opens a line that may be another key's and /edit overwrites it.
+  const { live, call, src } = served(t);
   mkdirSync(join(src, 'scenes'));
   const scene = join(src, 'scenes/s.scene');
   writeFileSync(scene, 'npc: bram\n* ~\nbram: Asked.\n');
   live.push({ placeholders: { 'dialogue.s.choices.yes.prompt': 'scenes/s.scene:2' } });
   writeFileSync(scene, 'npc: bram\n* Hello.\n* ~\nbram: Asked.\n'); // no compile yet
-  const found = JSON.parse((await call('/line?key=dialogue.s.choices.yes.prompt&words=~')).text);
-  assert.deepEqual(found, { file: 'scenes/s.scene', line: 3, was: '* ~', words: '~' });
-  const edit = { ...found, key: 'dialogue.s.choices.yes.prompt', words: 'Aye.' };
-  assert.equal(await ask('/edit', edit), 200);
-  assert.equal(readFileSync(scene, 'utf8'), 'npc: bram\n* Hello.\n* Aye.\nbram: Asked.\n');
+  assert.equal((await call('/line?key=dialogue.s.choices.yes.prompt&words=~')).status, 409);
 });
 
 test("an outside save that adds or drops a `~` line: /line stops trusting the map; the Book's own fill keeps it", async (t) => {
@@ -194,6 +191,8 @@ test("an outside save that adds or drops a `~` line: /line stops trusting the ma
   assert.deepEqual(await line('dialogue.s.b'), refused);
   writeFileSync(scene, 'npc: bram\n* ~\n* ~\n'); // b's line cut: c's `~` now sits at line 3
   assert.deepEqual(await line('dialogue.s.b'), refused);
+  writeFileSync(scene, 'npc: bram\n* ~\n'); // a's and b's cut: the one `~` left is c's
+  assert.equal((await line('dialogue.s.a'))[0], 409);
 });
 
 test('/line never trusts a place in a file it cannot read', async (t) => {
