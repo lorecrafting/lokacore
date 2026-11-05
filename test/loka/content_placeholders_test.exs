@@ -1,6 +1,8 @@
 defmodule Loka.ContentPlaceholdersTest do
   # Still to write (docs/system/cartridge.md): a release compile refuses a `~` placeholder.
-  use ExUnit.Case, async: true
+  # Synchronous: these tests compare whole :stderr captures, and :stderr is one device shared by
+  # every test, so an async neighbour's compile error landed in them (loka-kgd.211).
+  use ExUnit.Case, async: false
 
   @moduletag :tmp_dir
 
