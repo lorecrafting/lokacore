@@ -80,9 +80,8 @@ def main(cart, rooms_json):
     links = {n: set() for n in defs}  # the definitions each one names or is named by
     for n, rs in defs.items():
         for m in {by_key[r] for r in rs} - {ROOT}:
-            if n not in homes or m[0] != "rooms":  # an NPC's other rooms are walks, not its area
-                links[n].add(m)
-                links[m].add(n)
+            links[n].add(m)
+            links[m].add(n)
 
     def touched(n):
         return {area[m] for m in links[n] if m in area}
