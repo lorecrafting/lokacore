@@ -111,7 +111,6 @@ function nodeRow(s: Story, ref: string, parent: string, level: number, off: Set<
   };
 }
 
-type Outline = NonNullable<ReturnType<typeof outlineOf>>;
 type Ctx = { s: Story; st: ListState; outlined: boolean; off: Set<string> };
 // A row with children: its `open` flag, then its children when open.
 const branch = (c: Ctx, row: Row, kids: () => Row[]): Row[] => {
