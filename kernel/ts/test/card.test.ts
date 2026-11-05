@@ -37,8 +37,11 @@ const served = (dir: string) => {
 // the room is dark; without emptyObjectFields it grows exits.
 test("an empty room's defaults are {}", () => {
   const room = served('rooms') as RJSFSchema;
-  const validator = customizeValidator({ AjvClass: Ajv2020 as never }) as never;
-  assert.deepEqual(getDefaultFormState(validator, room, {}, room, false, FORM_DEFAULTS), {});
+  const validator = customizeValidator<unknown, RJSFSchema>({ AjvClass: Ajv2020 });
+  assert.deepEqual(
+    getDefaultFormState<unknown, RJSFSchema>(validator, room, {}, room, false, FORM_DEFAULTS),
+    {},
+  );
 });
 
 // Break: an edit posts the whole document (or a sibling) instead of the one field, a dropped key is
