@@ -227,11 +227,11 @@ const POSTS: Record<string, (t: Tree, sent: Sent) => Answer | Promise<Answer>> =
 };
 export const writes = (url: string) => Object.hasOwn(POSTS, url);
 
-async function answered(run: () => Answer | Promise<Answer> | undefined) {
+async function answered<A extends Answer | undefined>(run: () => A | Promise<A>): Promise<A> {
   try {
     return await run();
   } catch (e) {
-    if (e instanceof Refused) return [e.status, e.body] as Answer;
+    if (e instanceof Refused) return [e.status, e.body] as A;
     throw e;
   }
 }
