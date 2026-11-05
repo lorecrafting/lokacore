@@ -10,6 +10,8 @@ import { presenter } from './presenter.ts';
 import { validate } from '../../authority/local-story/__tests__/validate.ts';
 import { mounted } from './__tests__/mounted.ts';
 
+const TITLE = 'You attack a marsh rat!';
+
 // Break: a dead combat opponent is narrated both as killed and as leaving the room.
 test('committed opponent death narrates once through the existing subscription', () => {
   let current = view({ combat: undefined }),
@@ -111,7 +113,7 @@ test('a death after a closed fight keeps its Back to World', () => {
       view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
       'combat.hit',
     );
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     h.publish(view({ combat: undefined }), 'combat.result');
     assert.ok(h.texts().includes('Back to World'));
     h.publish(view({ combat: undefined }), 'combat.death');
@@ -136,7 +138,7 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until i
         view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
         'combat.hit',
       );
-      assert.ok(h.texts().includes('Combat'));
+      assert.ok(h.texts().includes(TITLE));
       assert.ok(h.texts().includes('You strike the marsh rat.'));
       assert.equal(h.texts().includes('Back to World'), false); // a live encounter has no foot
       assert.ok(!h.texts().some((t) => t.startsWith('a marsh rat')), 'no foe line (loka-kgd.204)');
@@ -163,10 +165,7 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until i
         ending === 'player_dead' ? 'combat.hit' : undefined,
       );
       const ended = h.texts();
-      assert.ok(
-        ended.includes('Combat') && !ended.some((t) => t.startsWith('a marsh rat')),
-        ending,
-      );
+      assert.ok(ended.includes(TITLE) && !ended.some((t) => t.startsWith('a marsh rat')), ending);
       if (ending !== 'closed')
         assert.ok(
           ended.includes(
@@ -181,7 +180,7 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until i
       for (const shut of [CONTENTS, 'sitting', 'Stand', 'Flee', not])
         assert.throws(() => h.tap(shut), undefined, `${ending}: ${shut}`);
       h.tap(foot);
-      assert.equal(h.texts().includes('Combat'), false);
+      assert.equal(h.texts().includes(TITLE), false);
       // The fight's lines stay in the room log; a death's room change clears the cellar's, and
       // its own receipt's fight lines stay on the Combat page: the shrine opens at woke (loka-glj8).
       const kept = {
@@ -226,15 +225,15 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     h.tap('A marsh rat');
     h.answer(accepted('attacked', 'combat.hit'), fighting, 'combat.hit');
     h.tap('Attack a marsh rat');
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     assert.equal(h.texts().filter((s) => s === 'You strike the marsh rat.').length, 1);
     h.answer({ kind: 'pending' });
     h.tap('Flee');
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     assert.ok(h.texts().includes('save not confirmed'));
     h.answer({ kind: 'saved', decision: { kind: 'rejected', error: { code: 'exit_locked' } } });
     h.tap('Flee');
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     assert.ok(h.texts().includes("You can't do that—locked."));
     const road = view({
       combat: undefined,
@@ -244,7 +243,7 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     // lands in the World log instead of the ended Combat page (book-ui.md, Closure).
     h.answer(accepted('fled', 'combat.flee'), road, 'combat.flee', 'road.crows', 1);
     h.tap('Flee');
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     const shown = h.texts();
     const escape = shown.indexOf('You escape to the road.');
     assert.ok(
@@ -252,7 +251,7 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
       JSON.stringify(shown),
     );
     h.tap('Back to World');
-    assert.equal(h.texts().includes('Combat'), false);
+    assert.equal(h.texts().includes(TITLE), false);
     assert.ok(h.texts().includes('The road'));
     // Break (loka-glj8): the flight's line leaves the fight room's page for the road; the road's
     // room log opens at its arrival line (here the crows); the cellar's lines went with its room.
@@ -273,7 +272,7 @@ test('reopening an encounter restores the combat page and last committed narrati
     combat_lines: [0],
   } as never);
   try {
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     assert.equal(h.texts().filter((s) => s === 'You strike the marsh rat.').length, 1);
   } finally {
     h.close();
@@ -291,7 +290,7 @@ test('reopening after escape or either death never restores combat into the Worl
     } as never);
     try {
       assert.ok(h.texts().includes('The cellar'));
-      assert.equal(h.texts().includes('Combat'), false, key);
+      assert.equal(h.texts().includes(TITLE), false, key);
       assert.equal(
         h
           .texts()
@@ -414,7 +413,7 @@ test('a death with revival lands in the spirit state until Rise', () => {
       view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
       'combat.hit',
     );
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     h.publish(view(shrine), 'combat.death', 'combat.hit');
     assert.doesNotMatch(h.said(), /wake/); // read once, at the rise
     now = 0;

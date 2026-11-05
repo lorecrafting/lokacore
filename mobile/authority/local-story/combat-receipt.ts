@@ -1,7 +1,8 @@
 import type { DomainEvent } from '../../../kernel/ts/src/contracts.gen.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
-import type { Story } from './save.ts';
+import type { Opener } from '../../packages/game-view/session.ts';
+import { scope, type Story } from './save.ts';
 import type { Db } from './store.ts';
 
 /** The first line of the room reached (loka-glj8), the flight's run-in or the death's waking: a
@@ -33,4 +34,30 @@ export function combatReceipts(db: Db, scope: string) {
     scope,
   ))
     defenseEvidence(JSON.parse(r.response).events);
+}
+
+const openers = new WeakMap<Story, Map<string, Opener>>(); // the Combat page asks each render
+
+// The receipt whose encounter.open op opened this encounter (book-ui.md, Combat title). Attack, cast and
+// perform are the player's commands that open one (combat engage, a spell's fight-back); any other
+// (a move into a hostile, a run job, an expedition) is the NPC's. None after a replaced world.
+export function opener(s: Story, encounter_id: string): Opener | undefined {
+  const known = openers.get(s) ?? openers.set(s, new Map()).get(s)!;
+  const id = `${scope(s)} ${encounter_id}`; // a new game is a new lineage, its ids minted afresh
+  if (known.has(id)) return known.get(id); // an opening receipt never changes
+  if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
+  const r = s.db.getFirstSync<{ type: string; npc_id: string }>(
+    `SELECT json_extract(command, '$.payload.type') AS type, json_extract(o.value, '$.npc_id') AS npc_id
+     FROM receipt, json_each(response, '$.delta.ops') o
+     WHERE scope = ? AND instr(response, ?) > 0 AND json_extract(o.value, '$.op') = 'encounter.open'
+       AND json_extract(o.value, '$.encounter_id') = ? LIMIT 1`,
+    scope(s),
+    encounter_id,
+    encounter_id,
+  );
+  const found = r
+    ? { npc_id: r.npc_id, player: ['attack', 'cast', 'perform'].includes(r.type) }
+    : undefined;
+  if (found) known.set(id, found); // an unknown one is asked again (a later commit may hold it)
+  return found;
 }

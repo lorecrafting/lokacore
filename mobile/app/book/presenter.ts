@@ -243,6 +243,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     combatLog: s.combatLog,
     said,
     chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
+    opener: game.opener,
     detail: (id: string) => s.details.get(id) ?? [],
     leave: (id: string) => leaveLog(s, id, game.view().view.choice?.speaker_id === id),
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),

@@ -30,6 +30,7 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
         'road.title': 'The road',
         'shrine.title': 'The shrine',
         'npc.rat': 'a marsh rat',
+        'combat.title_you_attack': 'You attack {target}!',
         'combat.hit': 'You strike the marsh rat.',
         'combat.result': 'The marsh rat falls.',
         'combat.flee': 'You escape to the road.',
