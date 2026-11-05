@@ -94,6 +94,18 @@ test('wait 60000: exactly one line per present entity, as the in-test rolls say'
   assert.deepEqual([...r.lines].sort(), [...want].sort());
 });
 
+// Breaks: an entity the dark hides from the reader still tells its line (no visible filter).
+test('in a dark cave, wait 1200 tells the drip and no goblin emote', () => {
+  const w = start();
+  const here = w.roomIds[CAVE]!;
+  const dark = {
+    ...w,
+    rooms: { ...w.rooms, [here]: { ...w.rooms[here]!, dark_description: 'Dark.' } },
+  } as World;
+  assert.ok(wait(w, 1200).lines.includes('scratch'));
+  assert.deepEqual(wait(dark, 1200).lines, ['room.cave.drip']);
+});
+
 // Breaks: entities in another room tell ambient lines to the reader.
 test('in the passage, wait 6000 tells no ambient line', () => {
   const south = play(start(), { type: 'move', direction: 'south' }).w;
