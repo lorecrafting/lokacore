@@ -1,6 +1,6 @@
 // The death and its return (book-ui.md, Falling; Spirit state): after a death with `revival`, Let go
 // lands on the World page in the spirit state, its lines held to the rise. Wall-clock time; nothing is stored.
-import { logMark, type DetailLine, type Logs } from './logs.ts';
+import { cueLines, logMark, type DetailLine, type Logs } from './logs.ts';
 
 export type Spirit = {
   lines: string[]; // the revival lines' text, in order
@@ -8,6 +8,7 @@ export type Spirit = {
   at: number; // when Let go was pressed, ms
   shown: number; // revival lines logged so far
   held: DetailLine[]; // the return receipt's lines and any arriving meanwhile, logged at the rise
+  read: number; // how many of them the dead page's live region already read
 };
 
 /** How many of n revival lines are due `ms` after landing: line k at k × seconds / (n − 1). */
@@ -30,24 +31,50 @@ export const end = (lines: DetailLine[]) => logMark(lines).gone + lines.length;
 const since = (lines: DetailLine[], at: number) =>
   lines.splice(Math.max(0, at - logMark(lines).gone));
 
-// The player's death, from its receipt: a fight it closed is the one they fell in.
+// The player's death, from its receipt: a fight it closed is the one they fell in; else the room
+// it left (or is in) shows the dead page (book-ui.md, Dead page), whatever page was open.
 export function fall(s: Logs, command_id: string) {
   s.died = command_id;
   s.woke = end(s.log); // before the receipt's own lines
   if (s.closing) s.fell = s.ended;
+  else
+    [s.down, s.ended] = [
+      s.room ?? { title: s.projection.view.place.title.key, log: [] },
+      undefined,
+    ];
 }
 
-const dead = (s: Logs) => (s.ended && s.fell === s.ended ? s.projection.view.revival : undefined);
+const fellIn = (s: Logs) => !!s.ended && s.fell === s.ended;
+/** The page's death (book-ui.md, Falling): the closed fight's, or the dead page's room until Let go; a
+ * fault ends the dead page, as a reopen does. */
+export function fallen(s: Logs, text: (key: string) => string) {
+  if (s.fault) s.down = undefined;
+  const dead = s.down && {
+    title: text(s.down.title),
+    log: s.down.log,
+    lines: s.log.slice(0, drawn(s)), // its own only
+  };
+  return { fell: fellIn(s), dead };
+}
+/** The dead page's end in the log once the next receipt came: later lines wait for Let go, unread. */
+export const drawn = (s: Logs) =>
+  s.down?.to === undefined ? undefined : Math.max(0, s.down.to - logMark(s.log).gone);
+const dead = (s: Logs) => (fellIn(s) || s.down ? s.projection.view.revival : undefined);
 
-/** Dead with `revival`, where the log's held lines start: unread until the rise, so read once. */
+/** Fallen in a fight with `revival`, where the log's held lines start: unread until the rise, so read
+ * once. The dead page reads them as its own log, so they are not held back from the live region. */
 export const unheard = (s: Logs) =>
-  dead(s) && s.woke !== undefined ? Math.max(0, s.woke - logMark(s.log).gone) : undefined;
+  fellIn(s) && dead(s) && s.woke !== undefined
+    ? Math.max(0, s.woke - logMark(s.log).gone)
+    : undefined;
 
-/** Let go or Back to World closes the ended page; Let go with `revival` begins the spirit state. */
+/** Let go or Back to World closes the ended page or the dead page; Let go with `revival` begins the
+ * spirit state, unless a scene is open (it shows instead, book-ui.md Dead page). */
 export function letGo(s: Logs, text: (key: string) => string) {
-  const revival = dead(s);
-  s.ended = undefined;
-  if (!revival) return false;
+  const [revival, read, to] = [dead(s), !!s.down, s.down?.to ?? Infinity];
+  s.ended = s.down = undefined;
+  if (read) s.log.push(...cueLines(s, s.projection.view, text)); // held off the dead page
+  if (!revival || s.projection.view.scene) return false;
   const held = since(s.log, s.woke ?? end(s.log));
   s.spirit = {
     lines: revival.lines.map(text),
@@ -55,21 +82,25 @@ export function letGo(s: Logs, text: (key: string) => string) {
     at: Date.now(),
     shown: 0,
     held,
+    read: read ? Math.min(held.length, to - (s.woke ?? 0)) : 0, // what the dead page drew
   };
   return true;
 }
 
-/** An update in the spirit state: its new lines held; a fault, or an encounter, chapter or scene arriving, ends it. */
+/** An update in the spirit state: its new lines held; a fault, or an encounter, chapter or scene arriving, ends it
+ * (wake's count). */
 export function haunt(s: Logs, from: number, chapter: number | undefined) {
   s.spirit!.held.push(...since(s.log, from));
   const { combat, scene, chapter: now } = s.projection.view;
-  if (s.fault || combat || scene || now?.index !== chapter) wake(s);
+  return s.fault || combat || scene || now?.index !== chapter ? wake(s) : 0;
 }
 
-/** The rise: the held lines logged, the rest of the revival dropped. */
+/** The rise: the held lines logged, the rest of the revival dropped; how many the dead page read. */
 export function wake(s: Logs) {
+  const read = s.spirit?.read ?? 0;
   s.log.push(...(s.spirit?.held ?? []));
   s.spirit = undefined;
+  return read;
 }
 
 /** The spirit state's due lines logged; what its card and clock show. */

@@ -27,6 +27,10 @@ export const treatmentInk = (name: Treatment, p: Palette) => {
   return dark(p) ? ([ink.night, peak.night] as const) : ([ink.day, peak.day] as const);
 };
 
+/** The fatal hold's `[ink, peak]`: oxblood on every paper, deeper by night, where the wash's pink reads as no red. */
+export const fatalInk = (p: Palette) =>
+  [color.light.action, dark(p) ? opacity.fatal.night : opacity.fatal.day] as const;
+
 const cutters = new Set<() => void>();
 /** Storm's light fell: the held layer leaves for the strike, so the afterimage's exemption stays true. */
 export const cutHeld = () => cutters.forEach((cut) => cut());

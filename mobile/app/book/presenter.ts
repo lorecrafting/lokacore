@@ -53,7 +53,7 @@ import {
 import { named, received } from './received.ts';
 import { days } from './chronicle.ts';
 import { holding, pressedAway, settle } from './recap.ts';
-import { end, fall, haunt, haunting, letGo, unheard, wake } from './spirit.ts';
+import { drawn, end, fall, fallen, haunt, haunting, letGo, unheard, wake } from './spirit.ts';
 import { heard, type Said } from './heard.ts';
 import { keptTitle } from './combat-title.ts';
 
@@ -102,6 +102,7 @@ function narrate(
   const [lines, combat] = narrationLines(last, now, text, false, was);
   s.combatLog.push(...combat);
   s.narrationId = last.command_id;
+  if (s.down) s.down.to ??= end(s.log); // the dead page's lines end at the next receipt (spirit.ts)
   if (last.died) fall(s, last.command_id);
   if (last.died && away) away.from = Infinity; // a death ends the recap, as a room change does
   if (last.missed) s.deed = last; // a round's miss comes on the clock (book-ui.md, Fight music)
@@ -224,9 +225,9 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
 function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, was?: Said) {
   const { view, token } = game.view();
   const ghost = haunting(s, Date.now()); // its due lines first, so the live region reads them
-  const said = heard(s, view, was, unheard(s)); // before the trim, which drops lines from the front
+  const said = heard(s, view, was, unheard(s) ?? drawn(s)); // before the trim, which drops lines from the front
   [s.log, s.combatLog, ...s.details.values()].forEach((lines) => trimLog(lines));
-  said.log = s.log.length;
+  said.log = drawn(s) ?? s.log.length;
   const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({
     ...b,
     token,
@@ -253,7 +254,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     returnDetail: s.returnDetail,
     confirmedRead: s.confirmedRead,
     ended: s.ended,
-    fell: !!s.ended && s.fell === s.ended, // the closed page is your death's (book-ui.md, Falling)
+    ...fallen(s, text),
     spirit: ghost,
     treatment: s.fault ? undefined : view.scene?.treatment, // a fault shows the scene plain (book-ui.md, Book treatments)
   };
@@ -265,6 +266,7 @@ export function presenter(game: Game) {
   const s = restoredLogs(game, text);
   let generation = 0; // Player receipts invalidate old controls even if the context cycles back.
   let said: Said | undefined;
+  const credit = (read: number) => said && (said.log += read); // the dead page read some
   return {
     screen: () => {
       const shown = screen(game, s, label, text, generation, said);
@@ -275,7 +277,7 @@ export function presenter(game: Game) {
       newRound(s.combatLog); // one update or press settles at most one receipt: one round
       const [from, chapter] = [end(s.log), s.projection.view.chapter?.index];
       const terminal = updated(game, update, s, text);
-      if (s.spirit) haunt(s, from, chapter);
+      if (s.spirit) credit(haunt(s, from, chapter));
       if (terminal && s.recovered) generation++;
       return terminal;
     },
@@ -288,10 +290,8 @@ export function presenter(game: Game) {
       return line;
     },
     // ponytail: the spirit clock starts at Let go, a page turn before the page lands (spec: the landing).
-    leaveCombat: () => {
-      if (letGo(s, text) && said) said.log = s.log.length; // the revival lines are new to the live region
-    },
-    rise: () => wake(s),
+    leaveCombat: () => void (letGo(s, text) && said && (said.log = s.log.length)), // revival: new to the live region
+    rise: () => credit(wake(s)),
     visit: (open: (string | undefined)[]) => visit(s, open),
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push({ text: `Start over fails. ${why}`, event: true });

@@ -116,7 +116,7 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
 - **Under-ink layers.** A layer that stays under the ink (`opacity.spirit`, `opacity.reverie`, `opacity.fatal`, `opacity.faint`, `opacity.glow`) keeps every
   text role at 4.5:1 at its peak in every palette it shows on and on a same-polarity mid-blend of two. Only one shows at a time, highest first:
   a [treatment's](system/book-ui.md#book-treatments) layer (spirit or reverie, never both), the fatal hold, the low-health vignette, the lamp glow; together they would break the 4.5:1 rule.
-  The fatal hold's rim (`opacity.bloodshot` over `size.bloodshot`) counts with it at the page margin (`space.page`), where the ink starts.
+  The fatal hold's rim (`opacity.bloodshot`, a `size.bloodshot.spread` band then `size.bloodshot.blur`) counts with it at the page margin (`space.page`), where the ink starts.
 - **Motion and sound.** Only the effects named in
   [Effects, sound and haptics](system/book-ui.md#effects-sound-and-haptics); no other decorative
   animation. `motion.palette` is the slow cross-fade between palettes (light
@@ -150,7 +150,7 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   at 4.5:1 and barely show). The level wash shares this exemption for its half second, in `warning`: at its peak `fg` stays above 7:1, `action` and `danger` above 4.5:1, while `dim` dips to about 3.75:1 and `warning` to about 3.6:1 over a held layer.
 - **Lightning.** The second exemption from the 4.5:1 rule, for at most 700 ms: at `opacity.afterimage`, `fg` stays above 7:1 and `action` and `danger` above 5:1, while `dim` dips to 4.25:1 and `warning` to 4.03:1 on dusk, and `warning` to 3.95:1 on dark. No other role falls below 4.5:1. It draws with no other held layer under it.
 - **Room sound and sky.** Bed cross-fade `motion.bed.duration`; exploration gap `sound.explore.gap`; lightning stays `motion.flash.gap` from a wash; wind corner `motion.flutter`; the light is `color.light.bg` at `opacity.afterimage`, up over 60 ms, away over 1200 ms.
-- **Falling.** The held wash is `opacity.fatal`, still (no pulse, no fade), with a bloodshot rim at the screen's edges: `opacity.bloodshot` feathered in over `size.bloodshot`, held with the wash; with Flashes off it rises over `motion.settle`, under reduced motion it is set at once. The sound is `sound.death`. The spirit state's layer is `spirit.day` on light and dawn and `spirit.night` on dusk and dark, at `opacity.spirit`, set with the page turn and faded out over `motion.palette` at the rise; its bed plays through `mix.muffle` until the rise.
+- **Falling.** The held wash is oxblood (`color.light.action`) on every paper at `opacity.fatal.day` on light and dawn and `opacity.fatal.night` on dusk and dark, still (no pulse, no fade), with a bloodshot rim at the screen's edges: `opacity.bloodshot`, a solid `size.bloodshot.spread` band feathered in over `size.bloodshot.blur`, held with the wash; with Flashes off it rises over `motion.settle`, under reduced motion it is set at once. The sound is `sound.death`. The spirit state's layer is `spirit.day` on light and dawn and `spirit.night` on dusk and dark, at `opacity.spirit`, set with the page turn and faded out over `motion.palette` at the rise; its bed plays through `mix.muffle` until the rise.
 - **Reverie.** `reverie.day` at `opacity.reverie.day` on light and dawn, `reverie.night` at `opacity.reverie.night` on dusk and dark, set with the turn; the line rises from the paper to `fg` over `motion.reverie`, `motion.reverie.lag` after the page lands; Continue then shows over `motion.settle`. No sound.
 - **Fight music.** Stinger `sound.fightIn`, loop `sound.fightLoop` (`gap` is the fight gap), fanfare `sound.fightWon`, blow dealt `sound.impact`. A blow taken dips music by `mix.dip` with `mix.duck`'s times. Foe falling: the loop cuts over `motion.quick`; a fall-away fades over `motion.palette`.
 
@@ -179,8 +179,10 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Row` | `book/Chip.tsx` | Chip |
 | `ReadingSize` | `book/Chip.tsx` | Chip |
 | `EffectSettings` | `book/Chip.tsx` | Chip |
+| `Foot` | `book/Combat.tsx` | CombatPage |
 | `Combat` | `book/Combat.tsx` | CombatPage |
 | `CreditsPage` | `book/CreditsPage.tsx` | SectionPages |
+| `DeadPage` | `book/DeadPage.tsx` | DeadPage |
 | `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
 | `DreamPage` | `book/DreamPage.tsx` | ChapterPages |
 | `DreamResume` | `book/DreamPage.tsx` | NoticePage |
