@@ -15,7 +15,7 @@ const ROOM = '{\n  "name": "room.a",\n  "exits": {}\n}\n';
 type Reply = { status: number; body: any };
 
 /** A source tree `src/` (rooms/a.json, layout.json) beside a sibling `src-evil/`, served. */
-function tree(t: TestContext, release = () => {}) {
+async function tree(t: TestContext, release = () => {}) {
   const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-write-')));
   const src = join(dir, 'src');
   mkdirSync(join(src, 'rooms'), { recursive: true });
@@ -23,8 +23,8 @@ function tree(t: TestContext, release = () => {}) {
   writeFileSync(join(src, 'rooms/a.json'), ROOM);
   writeFileSync(join(dir, 'src-evil/rooms/x.json'), 'secret');
   writeFileSync(join(src, 'layout.json'), '[\n  { "room": "a", "x": 0, "y": 0, "z": 0 }\n]\n');
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const live = serve(port, src, join(dir, 'none.json'), release);
+  const live = serve(0, src, join(dir, 'none.json'), release);
+  const port = await live.port;
   const errors = t.mock.method(console, 'error', () => {});
   t.after(() => {
     live.close();
@@ -57,7 +57,7 @@ function tree(t: TestContext, release = () => {}) {
 test('a path outside the source tree is refused before any file is read', async (t) => {
   // Breaks: a `..` in the path, a prefix sibling (`src-evil` starts with `src`: a check of
   // `startsWith(root)` without the separator passes it), or a path that is not normal.
-  const { ask, src } = tree(t);
+  const { ask, src } = await tree(t);
   for (const file of [
     '../src-evil/rooms/x.json',
     'rooms/../../src-evil/rooms/x.json',
@@ -86,7 +86,7 @@ test('a path outside the source tree is refused before any file is read', async 
 
 test('GET /schema/<kind> is the source schema with its defs inlined; another name is a 404', async (t) => {
   // Break: the panel's form validating against a schema whose $ref points at a file it cannot load.
-  const { ask } = tree(t);
+  const { ask } = await tree(t);
   const rooms = await ask('/schema/rooms');
   assert.deepEqual(
     [rooms.status, rooms.body.$ref.startsWith('#'), typeof rooms.body.$defs],
@@ -99,7 +99,7 @@ test('GET /schema/<kind> is the source schema with its defs inlined; another nam
 test('a symlink on the way, or as the file, is refused for reads and writes', async (t) => {
   // Breaks: a guard that only checks the joined string follows `areas -> outside` on a move and
   // writes outside the tree, or reads a linked file's bytes.
-  const { dir, src, ask } = tree(t);
+  const { dir, src, ask } = await tree(t);
   mkdirSync(join(dir, 'outside'));
   symlinkSync(join(dir, 'outside'), join(src, 'areas'));
   symlinkSync(join(dir, 'src-evil/rooms/x.json'), join(src, 'rooms/b.json'));
@@ -127,7 +127,7 @@ test('a symlink on the way, or as the file, is refused for reads and writes', as
 test('only the author page may ask: a foreign Host on any route, a foreign Origin on a POST', async (t) => {
   // Breaks: a DNS-rebinding page (its own name as Host) reads the tree or the stream; a
   // cross-site page's simple POST writes it.
-  const { ask, read } = tree(t);
+  const { ask, read } = await tree(t);
   for (const path of ['/source?file=rooms/a.json', '/events', '/todo'])
     assert.equal((await ask(path, undefined, { host: 'evil.example:80' })).status, 403, path);
   const sent = { file: 'rooms/a.json', was: sha256(ROOM), ops: [{ path: ['name'], value: 'x' }] };
@@ -138,7 +138,7 @@ test('only the author page may ask: a foreign Host on any route, a foreign Origi
 
 test('a stale whole-file was is a 409 with the current bytes, and nothing is written', async (t) => {
   // Break: a change applied over an outside edit the panel never saw, losing it.
-  const { ask, read, src } = tree(t);
+  const { ask, read, src } = await tree(t);
   const was = sha256(ROOM);
   writeFileSync(join(src, 'rooms/a.json'), ROOM.replace('{}', '{ "north": "b" }'));
   const now = read('rooms/a.json');
@@ -154,7 +154,7 @@ test('a stale whole-file was is a 409 with the current bytes, and nothing is wri
 test('ops write the house format and keep integer-like keys; a path into a prototype is refused', async (t) => {
   // Breaks: `__proto__` as a step sets the parsed object's prototype; a path through a string
   // throws a 500; a daily_schedule written in another order than Node's (ascending) would churn.
-  const { ask, read } = tree(t);
+  const { ask, read } = await tree(t);
   let was = sha256(ROOM);
   const set = (ops: unknown[]) => ask('/change', { file: 'rooms/a.json', was, ops });
   assert.equal((await set([{ path: ['__proto__', 'x'], value: 1 }])).status, 400);
@@ -198,7 +198,7 @@ test('ops write the house format and keep integer-like keys; a path into a proto
 
 test('an area file reads, changes and journals by its areas/ path', async (t) => {
   // Break: the guard or the journal dropping or flattening the areas/<area>/ prefix (S2's layout).
-  const { ask, src } = tree(t);
+  const { ask, src } = await tree(t);
   const file = 'areas/north/rooms/gate.json';
   mkdirSync(join(src, 'areas/north/rooms'), { recursive: true });
   writeFileSync(join(src, file), ROOM);
@@ -213,7 +213,7 @@ test('an area file reads, changes and journals by its areas/ path', async (t) =>
 test('a delete touches layout.json only when it holds the room', async (t) => {
   // Breaks: a room without a layout row rewriting layout.json (journaled as touched), or a room
   // deleted with no layout.json reading the missing file (a 500).
-  const { ask, src } = tree(t);
+  const { ask, src } = await tree(t);
   const files = async () =>
     (await ask('/journal')).body.find((e: { by: string }) => e.by === 'editor').files;
   for (const [name, gone] of [
@@ -232,7 +232,7 @@ test('undo puts the files back, refuses one changed since, and knows no other id
   // Breaks: undo over a newer edit (losing it), or a delete's layout row not coming back; the
   // last row's delete leaving `[]`, which the layout schema refuses (minItems 1).
   // The 409 carries sha256 as /change's does, so the panel rebases the same way.
-  const { ask, read, src } = tree(t);
+  const { ask, read, src } = await tree(t);
   const layout = read('layout.json');
   const gone = await ask('/delete', { file: 'rooms/a.json', was: sha256(ROOM) });
   assert.equal(gone.status, 200);
@@ -252,7 +252,7 @@ test('undo puts the files back, refuses one changed since, and knows no other id
 test('an outside change is journaled once as outside; an editor write is not journaled again', async (t) => {
   // Breaks: the burst after an editor write records it a second time as `outside`, or an
   // outside save never reaches the journal undo reads.
-  const { ask, src, live } = tree(t);
+  const { ask, src, live } = await tree(t);
   await ask('/change', {
     file: 'rooms/a.json',
     was: sha256(ROOM),
@@ -275,7 +275,7 @@ test('an outside change is journaled once as outside; an editor write is not jou
 test('/edit replaces only the words of one line, and refuses a line that is not words', async (t) => {
   // Breaks: a quote in the words ends the JSON string; a key or choice line rewritten; an edit
   // over a line that changed since.
-  const { ask, read, src } = tree(t);
+  const { ask, read, src } = await tree(t);
   writeFileSync(join(src, 'text.json'), '{\n  "room.a": "old words",\n  "room.b": "b"\n}\n');
   const edit = (sent: object) =>
     ask('/edit', { file: 'text.json', line: 2, was: '  "room.a": "old words",', ...sent });
@@ -305,7 +305,7 @@ test('/edit replaces only the words of one line, and refuses a line that is not 
 test('each refusal is a 400 that names its reason', async (t) => {
   // Break: a refusal answered with another status, a bound or type check that lets a bad request
   // through to a 409 or a write, or a refusal that names another reason.
-  const { ask, src } = tree(t);
+  const { ask, src } = await tree(t);
   mkdirSync(join(src, 'scenes'));
   writeFileSync(join(src, 'scenes/s.scene'), '* hello\n');
   writeFileSync(join(src, 'rooms/bad.json'), '{');
@@ -377,7 +377,7 @@ test('each refusal is a 400 that names its reason', async (t) => {
 test('/new refuses a name that is a flag before it runs anything, and journals what loka.new wrote', async (t) => {
   // Breaks: `--cwd` as a name reaching mix (it would scaffold into another tree); the files the
   // scaffold wrote missing from the entry undo reads.
-  const { dir, src, ask, live } = tree(t);
+  const { dir, src, ask, live } = await tree(t);
   const bin = join(dir, 'bin');
   mkdirSync(bin);
   // the stub `mise exec -- mix loka.new <kind> <name> <root>`: a mark that it ran, and one room
@@ -432,7 +432,7 @@ test('/new refuses a name that is a flag before it runs anything, and journals w
 test('POST /hold sets held on the stream and its release writes what was parked', async (t) => {
   // Break: a Hold the page turns off that never writes the parked compile (the Book stays stale).
   let released = 0;
-  const { ask, live } = tree(t, () => released++);
+  const { ask, live } = await tree(t, () => released++);
   assert.equal((await ask('/hold', { on: 'yes' })).status, 400);
   assert.deepEqual(await ask('/hold', '{on'), { status: 400, body: 'a JSON body' });
   assert.deepEqual(await ask('/hold', { on: true }), { status: 200, body: { held: true } });
@@ -445,7 +445,7 @@ test('the journal drops its oldest entries past its byte cap', async (t) => {
   // Break: a journal that keeps every before and after grows without bound in a long session.
   // Breaks: a cap other than 64 MiB of characters, an entry dropped at exactly the cap, a lone
   // entry over the cap dropped (its undo lost).
-  const { ask, src } = tree(t);
+  const { ask, src } = await tree(t);
   const MiB = 1024 * 1024;
   const big = (n: number) => `"${'x'.repeat(n - 3)}"\n`; // n characters, in the house format
   writeFileSync(join(src, 'rooms/b.json'), big(16 * MiB));
@@ -459,7 +459,7 @@ test('the journal drops its oldest entries past its byte cap', async (t) => {
   const third = await ask('/change', { file: 'rooms/a.json', was: sha256(ROOM), ops: [] });
   assert.deepEqual(await ids(), [third.body.id, back.body.id]);
   assert.equal((await ask('/undo', { id: first.body.id })).status, 404);
-  const lone = tree(t);
+  const lone = await tree(t);
   writeFileSync(join(lone.src, 'rooms/d.json'), big(33 * MiB));
   await lone.ask('/change', { file: 'rooms/d.json', was: sha256(big(33 * MiB)), ops: [] });
   assert.equal((await lone.ask('/journal')).body.length, 1);
@@ -468,7 +468,7 @@ test('the journal drops its oldest entries past its byte cap', async (t) => {
 test('a new file may take only a place Source.classify reads; a taken or unlisted one is refused', async (t) => {
   // Breaks: /move or /new writing a file the compile never reads (a `.cut` beside a dialogue, a
   // folder that is no area, a dir with no schema), or the wrong status for a taken or absent file.
-  const { src } = tree(t);
+  const { src } = await tree(t);
   const at = (dir: string, key: string, ext: string, area: string | null = null) => ({
     dir,
     key,

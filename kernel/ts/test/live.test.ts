@@ -39,8 +39,8 @@ test('a change outside text is not text-only, even with the same text', () => {
 // `checkpoints/`; a body without a steps array is saved and breaks the next replay.
 test('checkpoints: a name is a file under checkpoints/, the body a steps array', async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-live-'));
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const server = serve(port, dir, join(dir, 'none.json'));
+  const server = serve(0, dir, join(dir, 'none.json'));
+  const port = await server.port;
   t.after(() => server.close());
   const at = (path: string, init?: RequestInit) => fetch(`http://127.0.0.1:${port}${path}`, init);
   const steps = [{ advance: 1 }];
@@ -118,15 +118,16 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
     { mode: 0o755 },
   );
   process.env.LOKA_EDITOR = `${join(dir, 'ed')} --goto`; // split on spaces, no shell
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const server = serve(port, dir, join(dir, 'none.json'));
+  const server = serve(0, dir, join(dir, 'none.json'));
+  const port = await server.port;
   t.after(() => server.close());
   const post = (path: string, sent: object) =>
     fetch(`http://127.0.0.1:${port}${path}`, { method: 'POST', body: JSON.stringify(sent) });
   const opened = await post('/open', { key: 'room.a' });
   assert.equal(opened.status, 200);
   assert.equal(await opened.json(), 'text.json:2');
-  for (let i = 0; i < 50 && !existsSync(log); i++) await new Promise((r) => setTimeout(r, 20));
+  // A poll on the file, bounded (no test timeout is set) at 5 s for a loaded CI runner.
+  for (let i = 0; i < 250 && !existsSync(log); i++) await new Promise((r) => setTimeout(r, 20));
   assert.equal(readFileSync(log, 'utf8'), `${join(dir, 'text.json')}:2`);
   assert.equal((await post('/open', { key: 'room.b', words: 'line five' })).status, 404);
   assert.equal((await fetch(`http://127.0.0.1:${port}/open`)).status, 404); // a GET is not a post
@@ -161,9 +162,10 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   const rows = readFileSync(`${root}cartridges/scene_sampler/transcripts/scene.jsonl`, 'utf8')
     .trim()
     .split('\n');
-  const scene = serve(port + 1, dir, `${root}protocol/fixtures/cartridge_scene_hash.json`);
+  const scene = serve(0, dir, `${root}protocol/fixtures/cartridge_scene_hash.json`);
+  const scenePort = await scene.port;
   t.after(() => scene.close());
-  const told = await fetch(`http://127.0.0.1:${port + 1}/why`, {
+  const told = await fetch(`http://127.0.0.1:${scenePort}/why`, {
     method: 'POST',
     body: JSON.stringify({ trace: ['{"event":"trace.run","ids":{"run_id":"old"}}', ...rows] }),
   });
@@ -171,7 +173,7 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   const { reactions } = (await told.json()) as { reactions: { rule: string; fired: number }[] };
   assert.equal(reactions.find((r) => r.rule.endsWith('reaction/bell_after'))?.fired, 1);
   const toScene = (sent: object) =>
-    fetch(`http://127.0.0.1:${port + 1}/why`, { method: 'POST', body: JSON.stringify(sent) });
+    fetch(`http://127.0.0.1:${scenePort}/why`, { method: 'POST', body: JSON.stringify(sent) });
   // Break: a run with no step yet answers as a failure to explain, not with what to do
   const none = await toScene({ trace: [rows[0]] });
   assert.equal(none.status, 400);
@@ -185,9 +187,10 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   ]);
   // Break: an artifact the kernel will not load reaches the explainer, not its own diagnostic
   writeFileSync(join(dir, 'bad.json'), '{"canonical":"{}","sha256":"x"}');
-  const refused = serve(port + 2, dir, join(dir, 'bad.json'));
+  const refused = serve(0, dir, join(dir, 'bad.json'));
+  const refusedPort = await refused.port;
   t.after(() => refused.close());
-  const unloaded = await fetch(`http://127.0.0.1:${port + 2}/why`, {
+  const unloaded = await fetch(`http://127.0.0.1:${refusedPort}/why`, {
     method: 'POST',
     body: JSON.stringify({ trace: [run('a')] }),
   });
@@ -212,6 +215,11 @@ test('lint lines: clean, findings, or a lint that did not run', () => {
     ),
     ['rooms/a.json details.d: variants[1] has no when', 'areas/deep: no exit'],
   );
+  // Breaks: a dialogue or cutscene source's finding dropped (loka-vduxr.50).
+  assert.deepEqual(
+    lintLines(1, 'scenes/hal.scene: label l ends in a period\nscenes/intro.cut: no line\n'),
+    ['scenes/hal.scene: label l ends in a period', 'scenes/intro.cut: no line'],
+  );
   assert.deepEqual(lintLines(1, 'crash\n'), ['lint failed (exit 1)']);
   assert.deepEqual(lintLines(2, 'items/x.json: unused\n'), ['lint failed (exit 2)']);
   assert.deepEqual(lintLines(null, ''), ['lint failed (exit null)']);
@@ -222,8 +230,8 @@ test('find is served from the source and artifact the watcher was given', async 
   const dir = mkdtempSync(join(tmpdir(), 'loka-find-route-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   writeFileSync(join(dir, 'text.json'), '{"a": "Old Maud"}\n');
-  const port = 21000 + Math.floor(Math.random() * 20000);
-  const server = serve(port, dir, join(dir, 'none.json'));
+  const server = serve(0, dir, join(dir, 'none.json'));
+  const port = await server.port;
   t.after(() => server.close());
   const found = await fetch(`http://127.0.0.1:${port}/find?q=${encodeURIComponent('old maud')}`);
   assert.equal(found.status, 200);
@@ -237,9 +245,9 @@ test('find is served from the source and artifact the watcher was given', async 
 test('GET /numbers: reports on the dev artifact', async (t) => {
   // Break: handing the dev {canonical, sha256} form to the reports, which refuse it.
   const dir = mkdtempSync(join(tmpdir(), 'loka-live-'));
-  const port = 20000 + Math.floor(Math.random() * 20000);
   const artifact = join(dir, 'dev.json');
-  const server = serve(port, dir, artifact);
+  const server = serve(0, dir, artifact);
+  const port = await server.port;
   t.after(() => {
     server.close();
     rmSync(dir, { recursive: true, force: true });

@@ -62,6 +62,7 @@ defmodule Loka.ContentLintTest do
 
     talk = "text.json: action.talk has no text, yet a dialogue has no name of its own"
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{}}) == [talk]
+    assert lint(%{"scenes/bram.scene" => %{}, "text.json" => %{}}) == [talk]
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{"action.talk" => ""}}) == [talk]
 
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{"action.talk" => "Talk to"}}) ==
@@ -111,6 +112,14 @@ defmodule Loka.ContentLintTest do
 
     assert Lint.findings(Map.put(dlg.("l"), "text.json", %{"l" => "Hire him."})) == bad
 
+    # Break: a dialogue written as a scenes/ .scene file escapes the dialogue rules (loka-vduxr.50).
+    scene = %{
+      "scenes/hal.scene" => dlg.("l")["dialogues/hal.json"],
+      "text.json" => %{"l" => "Hire him."}
+    }
+
+    assert Lint.findings(scene) == ["scenes/hal.scene: label l ends in a period"]
+
     for ok <- ["Hire him", "Wait...", "\"Aye,\" he says.", "“Aye,” he says."],
         do: assert(Lint.findings(Map.put(dlg.("l"), "text.json", %{"l" => ok})) == [])
 
@@ -158,6 +167,12 @@ defmodule Loka.ContentLintTest do
 
     assert Lint.findings(talk.(%{"label" => "l", "narration" => "n"})) == bad
     assert Lint.findings(talk.(%{"label" => "c"})) == bad
+    {t, scene} = Map.pop(talk.(%{"label" => "l"}), "dialogues/t.json")
+
+    assert Lint.findings(Map.put(scene, "scenes/t.scene", t)) == [
+             "scenes/t.scene: choice leave only leaves; the page's own Leave control ends the talk"
+           ]
+
     # an asked mark does nothing of its own, so it does not make an exit a real choice
     assert Lint.findings(talk.(%{"label" => "l", "asked" => true})) == bad
     # only a label that starts with Leave or Close is an exit
@@ -342,6 +357,8 @@ defmodule Loka.ContentLintTest do
           {"services/s.json", %{"benefit" => %{"escrow" => %{"items" => ["lamp_oil"]}}}},
           {"dialogues/d.json",
            %{"name" => "d", "choices" => %{"give" => %{"hand_over" => %{"item" => "lamp_oil"}}}}},
+          {"scenes/d.scene",
+           %{"name" => "d", "choices" => %{"give" => %{"hand_over" => %{"item" => "lamp_oil"}}}}},
           {"npcs/n.json", shop.(%{"item" => "lamp_oil", "buy" => 2, "sell" => 1})}
         ],
         do: assert(lint(Map.put(flask, rel, v)) == [], rel)
@@ -472,8 +489,12 @@ defmodule Loka.ContentLintTest do
     File.mkdir_p!(Path.join(dir, "actions"))
     File.write!(Path.join(dir, "actions/flamma.json"), Jason.encode!(%{"policy" => @refuses}))
 
-    ExUnit.CaptureIO.capture_io(:stderr, fn ->
-      assert catch_exit(Mix.Tasks.Loka.Lint.run([dir])) == {:shutdown, 1}
-    end)
+    said =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert catch_exit(Mix.Tasks.Loka.Lint.run([dir])) == {:shutdown, 1}
+      end)
+
+    # Break: the finding goes nowhere, or to stdout. A whole line: stderr is shared by async tests.
+    assert "actions/flamma.json: policy refuses with no reason" in String.split(said, "\n")
   end
 end

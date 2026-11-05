@@ -246,7 +246,15 @@ defmodule Loka.ContentStartersFreshTest do
         assert catch_exit(Mix.Tasks.Loka.Compile.run([dir, out])) == {:shutdown, 1}
       end)
 
-    assert said =~ ~r/^error: scenes\/greet\.scene:\d+ .*`~`/m
+    # The starter's `~` lines 3-5, each a whole line (stderr is shared by async tests).
+    held =
+      " Words here are still `~`, a place held for them. Write the words, or compile with " <>
+        "`--allow-placeholders` while the cartridge is unfinished."
+
+    assert for(n <- 3..5, do: "error: scenes/greet.scene:#{n}" <> held) --
+             String.split(said, "\n") ==
+             []
+
     refute File.exists?(out)
 
     before = File.read!(Path.join(dir, "scenes/greet.scene"))
