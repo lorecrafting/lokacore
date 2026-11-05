@@ -933,6 +933,27 @@ build. The author tools below are reachable only in that bundle (a production ex
   `LOKA_EDITOR`, default `code --goto`); the game-time control, which delivers the time at once and
   records it only when delivered; the checkpoint list; the still-to-write list; go to a room and set a fact by key (below). An input the session held
   (`pending`, `catching_up`) is recorded when it settles as accepted.
+- **Editor write path** ([`write.ts`](../../kernel/ts/play/write.ts), [GUI editor design §11](../rnd/gui-editor-design-2026-11-04.md)): the only way the editor changes the source tree.
+  Every request whose `Host` is not `localhost` or `127.0.0.1` (any port) is answered 403, and so is
+  any non-GET whose `Origin` is not one of those. `GET /source?file=` answers the file's bytes, its
+  sha256 and its kind, key and area; `GET /schema/<dir>` the source schema with its `$defs` inlined;
+  `GET /journal` the entries, newest first. `POST /change {file, was, ops}` sets or deletes JSON
+  fields by path and writes the file in the house format (two-space JSON, a final newline);
+  `/edit {file, line, was, words}` replaces the words of one line (a JSON string literal, or a
+  scene's `* ` line; a key line, a choice label and words with a newline or tab are refused);
+  `/delete {file, was}` (a room's `layout.json` row goes with it); `/move {file, was, area}`;
+  `/new {kind, name, from?}` runs `mix loka.new` and journals the files it wrote, from a snapshot
+  diff; `/undo {id}`. `was` is the sha256 of the whole file (for `/edit`, the line's text): a file
+  changed since answers 409 with its current bytes, and nothing is written. One path guard reads
+  every path a body names: a normal relative path under the real source root (not the root as a
+  string prefix), no symlink on the way to it, for a read a listed regular file, for a create a free
+  place a source file may take. Each write is a `.tmp` and a rename. The journal keeps one entry per
+  editor write and one per watcher burst of outside saves (`by: outside`), with each file's before
+  and after, capped at 64M characters (the oldest go first); `/undo` refuses when any of its files
+  changed since. Each write and burst pushes `changed: [{file, sha256, by}]` to the page. `POST
+  /hold {on}`: while held, a structural compile waits (`pending` counts them, the newest kept) and
+  the Hold's end writes it, so the Book does not reload mid-edit; text overlays still push until one waits. Each
+  compile also pushes `diagnostics`, `mix loka.compile --json <file>`.
 - **Go to room, set fact** ([owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md), dev@1): the panel sends them as ordinary invocations `dev_go_to_room` and `dev_set_fact` the session decides, saves as receipts and records as steps, so a reopen and `bin/loka check` re-decide them under the fixed seed and clock and a checkpoint may hold them. Only a host with `dev` set (the preview, `bin/loka check`) reaches `stepDev`; any other host answers `unsupported_capability`, `step` answers `permission_denied`, and no cartridge action can name them. Go to room moves the body alone and is refused `invalid_state` when that would leave a world invariant wrong: already there, engaged, not standing, in water, with an escort, mount or group that would come along, on a patrol or expedition, in a modal scene or at an open choice. It runs no entry sight or arrival line. Set fact is refused `invalid_state` for a per-subject fact, a value of the wrong type or range, the value it already has, the position and scene facts, and a fact another mechanic owns. The panel states each refusal in one plain sentence.
 - **Still to write.** A text value with a line that trims to `~` is a placeholder, in JSON or in
   a scene file. The panel and
