@@ -167,7 +167,7 @@ export function NpcPage(p: NpcProps) {
       foot={foot}
     >
       {about(c, t, p, !talk && [...services.plain, ...services.order].some((s) => s.price > 0))}
-      <LogLines lines={p.log} />
+      <LogLines lines={p.log} reword />
       {npcSkills(c, t, p)}
       {!talk && enemy && (
         <Note>

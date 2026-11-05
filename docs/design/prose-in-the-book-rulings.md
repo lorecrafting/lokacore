@@ -37,4 +37,4 @@ Author mode is the `?dev=1` dev-cartridge page only; a release, test or e2e bund
 
 ## Proposed check
 
-None new: no raw colour or size is introduced. The `mobile-book-*` ast-grep rules run on this slice; any author code under `mobile/app/book/` beyond the existing `worded.note` hook is a finding.
+None new: no raw colour or size is introduced. The `mobile-book-*` ast-grep rules run on this slice; any author code under `mobile/app/book/` beyond the existing `worded.note` and `worded.made` hooks and LogLines' `reword` prop (an open conversation re-words its lines, loka-wfrgk.19) is a finding.

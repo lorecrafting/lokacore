@@ -244,7 +244,7 @@ export function serve(port: number, source: string, artifact: string, release = 
     if (last.held) map.keep(last.diagnostics ?? []);
     else if ('compiled' in message || 'diagnostics' in message || 'held' in message) map.stale();
     for (const client of clients) send(client);
-  });
+  }, source);
   const editor = editing(source, said, (once) => clients.forEach((c) => send(c, once)), release);
   const route = async (request: IncomingMessage, response: ServerResponse) => {
     if (foreign(request, response) || (await editor.route(request, response))) return;

@@ -10,7 +10,7 @@ import { haptic } from './haptic';
 import { logMark, markDrawn, type DetailLine } from './logs.ts';
 import { GiltLine } from './GiltLine.tsx';
 import { useDry } from './press.ts';
-import { lineText } from './words.ts';
+import { lineText, worded } from './words.ts';
 import { grouped, type RecapLine } from './recap.ts';
 import { Control, Tap } from './pages.tsx';
 import { narrated, note, prose, usePalette, useType } from './palette.ts';
@@ -90,10 +90,12 @@ export function LogLines({
   lines,
   keep,
   rounds: run,
+  reword,
 }: {
   lines: readonly DetailLine[];
   keep?: (line: DetailLine) => boolean; // shows only these; the rest still count as drawn
   rounds?: true; // combat: a round's lines run on, one blank line between rounds (owner 2026-11-04)
+  reword?: true; // a conversation: the author preview re-words each line from its keys (worded.made)
 }) {
   const { gone, drawn, rounds } = logMark(lines);
   const t = useType();
@@ -105,7 +107,7 @@ export function LogLines({
     const n = gone + i;
     if (starts.has(n) && blocks.at(-1)![1].length) blocks.push([n, []]);
     if (!keep || keep(line))
-      blocks.at(-1)![1].push(<LogLine key={n} line={line} fresh={n >= drawn} />);
+      blocks.at(-1)![1].push(<LogLine key={n} line={line} fresh={n >= drawn} reword={reword} />);
   });
   const shown = blocks.filter(([, b]) => b.length);
   if (!shown.length) return null;
@@ -124,7 +126,7 @@ export function LogLines({
 
 // `fresh` is read once: the redraw after this one must not cut the drying, and an old line stays a
 // plain Text, so a long log carries no animation.
-function LogLine({ line, fresh }: { line: DetailLine; fresh: boolean }) {
+function LogLine({ line, fresh, reword }: { line: DetailLine; fresh: boolean; reword?: true }) {
   const c = usePalette();
   const t = useType();
   const dries = useRef(fresh).current;
@@ -134,11 +136,12 @@ function LogLine({ line, fresh }: { line: DetailLine; fresh: boolean }) {
   }
   const plain = typeof line === 'string' || 'quiet' in line || 'level' in line;
   const style = plain ? { ...t.log, color: c.fg } : narrated(c, t);
+  const stored = plain ? lineText(line) : line.text;
+  const words = (reword && worded.made?.get(stored)?.()) || stored;
   const name =
     typeof line === 'object' && 'reason' in line
-      ? { accessibilityLabel: `${line.reason}, ${line.text}` }
+      ? { accessibilityLabel: `${line.reason}, ${words}` }
       : {};
-  const words = plain ? lineText(line) : line.text;
   if (dries && typeof line === 'object' && ('level' in line || 'gilt' in line)) {
     const hold = 'level' in line && line.first ? motion.first.hold : undefined;
     return (

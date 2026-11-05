@@ -11,6 +11,7 @@ Owner items: 2 to 5 owner-confirmed 2026-11-04 (paraphrased), each the recommend
 | Question | Ruling | Why |
 |---|---|---|
 | When | Only with `revival` in the view; Let go from the Combat page or the dead page. Without it, Let go goes to World as today | Chapter 1 authors none; no behaviour change there |
+| A death outside a fight (loka-kgd.210) | A bleed, status tick or drowning shows the dead page first: the World page of the room died in, held red, the receipt's death line, only Let go; Let go then routes as from the Combat page. Option B: owner 2026-11-05 (paraphrased); A, straight into the spirit state, rejected | One death, one look, one control; the spec is [Dead page](../system/book-ui.md#effects-sound-and-haptics) |
 | Where | The World page of the return room, not a new page | The room's lines are the content; no new page type |
 | Clock start | When that page lands, wall-clock | The receipt arrives before Let go; a reader may hold the red for a while |
 | Treatment | A held under-ink layer, top of the chooser, so fatal hold, vignette and glow do not show with it. Pale blue on `light`/`dawn`, deep blue on `dusk`/`dark`, as the blow wash splits by polarity. Still, no breathing. Inside the page column; the night sky is untouched; opaque cards stay solid | A layer keeps the hour's palette, so the rise needs no polarity cross-fade. Stacked with the glow it would fail 4.5:1. Breathing would read as the low-health vignette. Item 1, the strength (`opacity.spirit`) 0.6: PM default, accepted |
@@ -46,6 +47,7 @@ Both colours keep every text role at 4.5:1 on `bg` and `card` in their palettes 
 ## Slice tests
 
 - With `revival`, Let go from Combat and from the dead page lands on the tinted World page with only the rise card; without it, today's World page.
+- An off-fight death (bleed tick) shows the dead page with the old room's title and Let go, never the recovery room's title, before Let go; a death that closes an encounter still shows the Combat page.
 - Revival lines land at k × `seconds` / (n − 1) on a controlled clock; the card is unavailable until zero and available at it; no rise without a press.
 - The return receipt's lines and an ambient line during the wait are absent before the rise and logged in order after it.
 - An encounter opening mid-wait ends the state at once with the held lines logged.
