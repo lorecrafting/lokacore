@@ -58,6 +58,60 @@ const dusk: typeof light = {
 
 export const color = { light, dawn, dusk, dark };
 
+// The editor chrome (tools/author-panel, never the Book), by OS scheme: docs/design/editor-chrome-rulings.md.
+const chromeLight = {
+  bg: '#f6f5f2', // panels, the map
+  surface: '#ffffff', // inputs, inspector cards, popovers, Cmd-K
+  sunken: '#eae8e3', // the well behind the Book strip, collapsed rails
+  fg: '#1c1b19',
+  dim: '#5c5952',
+  line: '#dcd9d2', // hairlines and dividers, not text
+  strong: '#8d887e', // control borders, 3:1 on bg and surface
+  accent: '#1d5bbf', // selection, focus ring, primary button, reload badge
+  accentSoft: '#dde7f8', // a selected row
+  onFill: '#ffffff', // text on an accent or refusal fill
+  outside: '#7a3bb0', // a change made outside the editor
+  outsideSoft: '#efe5f8',
+  refusal: '#b0261d', // compiler refusals only
+  refusalSoft: '#fbe4e1',
+  warning: '#875800', // lint, `~`, unconfirmed, stale, Hold, over budget
+  warningSoft: '#f7ecd4',
+  ok: '#2b7136', // compiled, within budget
+};
+const chromeDark: typeof chromeLight = {
+  bg: '#1f2023',
+  surface: '#292a2e',
+  sunken: '#17181a',
+  fg: '#e7e5e0',
+  dim: '#a29f98',
+  line: '#36383d',
+  strong: '#74767d',
+  accent: '#79acff',
+  accentSoft: '#22324c',
+  onFill: '#17181a',
+  outside: '#c7a2f5',
+  outsideSoft: '#352a4a',
+  refusal: '#ff8f85',
+  refusalSoft: '#47231f',
+  warning: '#e9b350',
+  warningSoft: '#3f321a',
+  ok: '#80c98d',
+};
+export const chrome = {
+  light: chromeLight,
+  dark: chromeDark,
+  // Map hulls and Story map anchor bands, by area (sorted id, index mod 6); 3:1 on bg, distinct under CVD.
+  area: {
+    light: ['#bd8300', '#1c95d9', '#332288', '#117733', '#aa4499', '#ee3377'],
+    dark: ['#e69f00', '#56b4e9', '#6a55d5', '#127b35', '#aa4499', '#ee3377'],
+  },
+  sans: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
+  mono: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
+  type: { body: [13, 18], label: [11, 16], code: [12, 16], prose: [15, 22] }, // mutate-skip: uncalibrated design value
+  size: { row: 28, header: 32, handle: 8, icon: 16, palette: 560 }, // mutate-skip: uncalibrated design value
+  radius: 6, // mutate-skip: uncalibrated design value
+};
+
 export const spirit = { day: '#c8dcf6', night: '#0b1e45' }; // the spirit state's layer: day on light and dawn, night on dusk and dark
 export const reverie = { day: '#fffbf0', night: '#f6e6b4' }; // the reverie treatment's layer: ivory on light and dawn, pale gold on dusk and dark
 

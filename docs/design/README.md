@@ -14,5 +14,7 @@ the [audio listening list](audio-listening-list.md) and [other placeholder candi
 ink shadows, lamp glow, moon palette, drop capitals) are not adopted; the page curl and paper
 sound are. Each effect waits for its own owner decision.
 
+The editor's chrome (dev only, never the Book): [editor chrome rulings](editor-chrome-rulings.md).
+
 Rules: [component catalogue](../BOOK-UI-COMPONENTS.md). Values: [tokens](../../mobile/app/book/tokens.ts).
 Behaviour: [Book UI](../system/book-ui.md). Earlier explorations and the foundation audit: [archive](../archive/README.md).
