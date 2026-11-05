@@ -179,8 +179,10 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Row` | `book/Chip.tsx` | Chip |
 | `ReadingSize` | `book/Chip.tsx` | Chip |
 | `EffectSettings` | `book/Chip.tsx` | Chip |
+| `Foot` | `book/Combat.tsx` | CombatPage |
 | `Combat` | `book/Combat.tsx` | CombatPage |
 | `CreditsPage` | `book/CreditsPage.tsx` | SectionPages |
+| `DeadPage` | `book/DeadPage.tsx` | DeadPage |
 | `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
 | `DreamPage` | `book/DreamPage.tsx` | ChapterPages |
 | `DreamResume` | `book/DreamPage.tsx` | NoticePage |

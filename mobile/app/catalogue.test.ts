@@ -23,6 +23,7 @@ const EXEMPT: Record<string, string> = {
     'shown through StatusIcon Ring*, and the rise card through ActionCard Waiting',
   'book/Unavailable.tsx:Unavailable': 'the grey ActionCard, shown through ActionCard Unavailable',
   'book/Combat.tsx:Foe': 'one line of the fight block, shown through the Combat stories',
+  'book/Combat.tsx:Foot': 'the ended page foot, shown through the CombatPage and DeadPage stories',
   'book/MapDrawing.tsx:MapDrawing': 'a drawing, shown through the map pages',
   'book/Riddle.tsx:RightWord': 'shown after a submitted answer, which no story sends',
   'book/lines.tsx:Fault': 'a press that threw; reached live only, no story throws one',
