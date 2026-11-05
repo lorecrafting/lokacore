@@ -1,4 +1,4 @@
-# size: allow 377, the editor gate shares the source-schema walk and argv of the toolbox gate
+# size: allow 401, the editor gate shares the source-schema walk and argv of the toolbox gate
 # Generates docs/TOOLBOX.gen.md, the builder's toolbox page (loka-vduxr.59): one row per
 # implemented capability of protocol/capability_registry.json (its docs/features.json row names
 # implemented_in, which bin/features.exs requires of every implemented one) and one per Book
@@ -290,6 +290,25 @@ link = fn
   v, href -> "[#{v}](#{href})"
 end
 
+# §7 check 3: what the editor offers for a row's declarations (a kind-wide one covers its fields)
+editor_cell = fn
+  paths when is_list(paths) ->
+    for(
+      d <- paths,
+      p <- [d |> String.split(".") |> Enum.take(2) |> Enum.join(".")],
+      {k, row} <- editor,
+      k == p or String.starts_with?(k, p <> "."),
+      v <- ~w(create edit delete),
+      uniq: true,
+      do: if(row[v] == "generic", do: "generic", else: "bespoke")
+    )
+    |> Enum.sort()
+    |> Enum.join(", ")
+
+  _ ->
+    "engine-only"
+end
+
 cap_rows =
   for {e, row, anchor, _} <- caps do
     declares =
@@ -298,6 +317,7 @@ cap_rows =
         else: row["declares"]
 
     "| `#{e["key"]}@#{e["version"]}` | #{row["summary"]} | #{declares} | " <>
+      "#{editor_cell.(row["declares"])} | " <>
       "#{link.(row["sampler"], "../cartridges/#{row["sampler"]}/")} | " <>
       "#{link.(row["showcase"], "../cartridges/toolbox_showcase/#{row["showcase"]}/")} | " <>
       "[mechanics](system/mechanics.md#{anchor}) |"
@@ -307,7 +327,10 @@ treatment_rows =
   for [t, host, s] <- treatments do
     declares = if t in enum, do: "`scenes.treatment`", else: "engine-only: #{host}"
 
-    "| `treatment:#{t}` | Book treatment drawn over #{host} | #{declares} | [#{s}](../#{s}) | — | " <>
+    cell = editor_cell.(if t in enum, do: ["treatment:#{t}"])
+
+    "| `treatment:#{t}` | Book treatment drawn over #{host} | #{declares} | #{cell} | " <>
+      "[#{s}](../#{s}) | — | " <>
       "[book-ui](system/book-ui.md#book-treatments) |"
   end
 
@@ -342,10 +365,11 @@ md =
       "source-schema paths (`<kind>.<field>`, `cartridge.world.<field>`); engine-only rows need no",
       "declaration. The **sampler** is the smallest cartridge that uses it; every cartridge compiles in",
       "`kernel/ts/test/longwait_property.test.ts`. The **showcase** is the toolbox showcase district",
-      "that shows it in play. Row ids are stable keys.",
+      "that shows it in play. The **editor** column says whether the inspector draws its declarations",
+      "with a hand-built card (`bespoke`) or the schema-generated one (`generic`). Row ids are stable keys.",
       "",
-      "| Id | What it does | You declare | Sampler | Showcase | Mechanics |",
-      "|---|---|---|---|---|---|"
+      "| Id | What it does | You declare | Editor | Sampler | Showcase | Mechanics |",
+      "|---|---|---|---|---|---|---|"
       | cap_rows ++ treatment_rows
     ] ++
       [
