@@ -46,3 +46,32 @@ These hand mutants SURVIVED: `story.test.ts` and `live.test.ts` stay green.
 ## Verdict
 
 CHANGES REQUIRED: findings 1 to 3 (surviving mutants on the §5c status rules and on the diagnostics feed), and 4.
+
+## Re-check at `bc8f06b9fab8b9dd003fd3a5da6ff8bc2c6b8a0f`
+
+Fix commits 47d2e64b9, 59a97678d and bc8f06b9f. CI at that head (`gh run list --commit bc8f06b9f...`): ci success, book-e2e success, graph-diff success.
+
+The spec check: §5c (design doc line 269-270) says unreached means "every bound node is in `reachReport.unreachable`". So a beat with one reached node and one unreached node is `built`, which the fix pins.
+
+Each mutant below was run against `story.test.ts`, `live.test.ts` and `write.test.ts`, and each one was RED:
+
+| Finding | Mutant | Result |
+|---|---|---|
+| 1 | drop `!nodes.length \|\|` (story.ts status) | 1 fail |
+| 2 | `every` to `some` | 1 fail |
+| 3 | `/story` gets `[]` instead of `last.diagnostics` (live.ts:269) | 1 fail |
+| 4 | `compiled(source)` without `absolute()` | 1 fail |
+| Q9 | delete the `if (last.held) map.keep(...)` branch | 1 fail |
+| Q9 | a release (`held` push) does not mark the model stale | 1 fail |
+| Q9 | `keep` with no `existsSync(artifact)` guard | 1 fail (write.test ENOENT) |
+| Q9 | `build` ignores the kept model | 2 fail |
+
+Attempts to break the Hold snapshot, all of which held:
+- A Hold during a compile cannot interleave. In `author.ts` `build()`, the diagnostics push and `publish()` run synchronously after `spawnSync`, so the Hold request is handled only after the compile's pushes have marked the model stale. `keep` then builds the model from the artifact on disk, which is the newest one unless the build was parked.
+- A compile during a Hold, whether parked or failed, pushes while `last.held` is set. `keep` then returns the existing model, so the new diagnostics wait for the release.
+- A release with nothing changed: the `held:false` push marks the model stale, and the rebuild gives the same body, so the same ETag and a 304.
+- A Hold with no artifact yet keeps no model. A GET then reads the missing file and gets a 500, as it did before the fix.
+
+Finding 5 (rebuild on every push): fixed, since `stale()` now fires only on compile, diagnostics or held pushes. Nits 6 to 8 are open, as nits.
+
+Verdict after re-check: APPROVE WITH NOTES (nits 6 to 8).
