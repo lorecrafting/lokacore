@@ -156,7 +156,7 @@ export function move(list: Row[], id: string, key: string): { focus?: string; to
 
 // Open each of `path` that is shut and focus `id`.
 const opened = (st: ListState, path: string[], id: string, outlined: boolean) =>
-  path.reduce((acc, p) => (isOpen(acc, p, outlined) ? acc : toggle(acc, p)), { ...st, focus: id });
+  path.reduce<ListState>((acc, p) => (isOpen(acc, p, outlined) ? acc : toggle(acc, p)), { ...st, focus: id });
 
 /** A selection from elsewhere: open the node's first beat (or Unplaced) and focus its row; a kind the list does not hold changes nothing. */
 export function reveal(s: Story, st: ListState, ref: string): ListState {
