@@ -212,6 +212,11 @@ test('lint lines: clean, findings, or a lint that did not run', () => {
     ),
     ['rooms/a.json details.d: variants[1] has no when', 'areas/deep: no exit'],
   );
+  // Breaks: a dialogue or cutscene source's finding dropped (loka-vduxr.50).
+  assert.deepEqual(
+    lintLines(1, 'dialogues/hal.scene: label l ends in a period\nscenes/intro.cut: no line\n'),
+    ['dialogues/hal.scene: label l ends in a period', 'scenes/intro.cut: no line'],
+  );
   assert.deepEqual(lintLines(1, 'crash\n'), ['lint failed (exit 1)']);
   assert.deepEqual(lintLines(2, 'items/x.json: unused\n'), ['lint failed (exit 2)']);
   assert.deepEqual(lintLines(null, ''), ['lint failed (exit null)']);
