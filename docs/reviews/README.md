@@ -18,6 +18,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: a death outside a fight shows the dead page, then Let go (PR #634, loka-kgd.210)](2026-11-05-offfight-death-review.md): **CHANGES REQUIRED**
 - [Review: an open conversation re-words an edited line; stale `~` map by line count (PR #625, loka-wfrgk.19)](2026-11-05-loka-wfrgk.19-review.md): **APPROVE WITH NOTES**
 - [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
+- [Review: Editor E2, the three-column shell (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-review.md): **CHANGES REQUIRED**
+- [Review: Editor E2 shell, fix round and owner walk (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-fable-review.md): **APPROVE WITH NOTES**
 - [Review: death and level bug batch (PR #623; loka-3tc7, loka-g5hh.2.11, loka-dbtxr (a))](2026-11-05-death-level-bugs-review.md): **CHANGES REQUIRED**
 - [Review: combat title names who started the fight (PR #621, loka-kgd.207)](2026-11-05-combat-title-review.md): **APPROVE**
 - [Review: Area layout S3, layout lint and `bin/loka new --area` (PR #624, loka-vduxr.58.3)](2026-11-05-area-layout-s3-review.md): **APPROVE WITH NOTES**

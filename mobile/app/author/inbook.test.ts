@@ -67,7 +67,7 @@ beforeEach(async () => {
       seen.set(el.textContent, key);
       said.set(key, words);
     }
-    (w as unknown as { said: typeof said }).said = said;
+    Object.assign(w, { said, seen });
     w.inbook.start({ seen, said, tell: (m) => w.told.push(m), redraw: () => {} });
   }, LINES);
 });
@@ -114,6 +114,47 @@ test('a double-click opens the source words; Enter saves them to that line and c
       .first()
       .evaluate((el) => el === document.activeElement),
   );
+});
+
+const TILDE = { file: 'a.loka', line: 4, was: '~', words: '~' };
+
+// Breaks: a bare `~` opens with the caret after it, so typing saves "~Ab, c'd": a stray `~` in
+// the prose, and the line drops out of Still to write (a placeholder is a line that trims to `~`).
+test('typing in a bare ~ line replaces the ~', async () => {
+  answer = (path) => (path.startsWith('/line') ? [200, TILDE] : [200, { id: 7 }]);
+  await page.locator('p').nth(1).dblclick();
+  await page.locator('[data-loka-field]').waitFor();
+  await page.keyboard.type("Ab, c'd");
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.deepEqual(posted('/edit'), [{ ...TILDE, words: "Ab, c'd", key: 'a.one' }]);
+});
+
+// Breaks: the fix empties a bare `~` on open instead of selecting it, so the field no longer
+// shows the line as written; Esc must still leave the line and the file as they were.
+test('a bare ~ opens showing ~; Esc writes nothing and restores the line', async () => {
+  const drawn = await page.locator('p').nth(1).textContent(); // `~` and its key's marks
+  answer = () => [200, TILDE];
+  await page.locator('p').nth(1).dblclick();
+  assert.equal(await page.locator('[data-loka-field]').textContent(), '~');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('p').nth(1).textContent(), drawn);
+  assert.deepEqual(posted('/edit'), []);
+});
+
+// Breaks: a space's keyup presses the button around a line (a room title's): the field blurs and
+// saves the words typed so far.
+test('a space mid-edit in a line inside a button keeps the field open', async () => {
+  await page.evaluate(() => {
+    const button = document.querySelector('button')!;
+    button.append(document.querySelector('p')!);
+    button.onclick = () => button.focus(); // a Book press takes the focus
+  });
+  await page.locator('button p').dblclick();
+  await page.locator('[data-loka-field]').waitFor();
+  await page.keyboard.type(' at dusk');
+  assert.equal(await page.locator('[data-loka-field]').textContent(), 'Rain falls. at dusk');
+  assert.deepEqual(posted('/edit'), []);
 });
 
 // Breaks: Esc or an untouched field writes, an emptied field saves, or a paste keeps its newline.
@@ -179,6 +220,41 @@ test('a click ends the landing; the panel relays the walk keys', async () => {
   await page.locator('[data-loka-landed]').waitFor();
   await page.evaluate((data) => postMessage({ ...data, key: 'Enter' }, '*'), relay);
   await page.locator('[data-loka-field]').waitFor();
+});
+
+// Breaks: the panel's selection marks no line, or every line; Cmd-K in the Book is lost to the
+// panel; editing a key not on the page does nothing; a foreign origin moves the selection.
+test('the selection marks its lines; the panel`s shortcuts and edits reach it from the Book', async () => {
+  await page.evaluate(() => {
+    const w = window as unknown as { seen: Map<string, string> };
+    const el = document.querySelector('main')!.appendChild(document.createElement('p'));
+    el.dir = 'auto';
+    el.textContent = 'A hut.';
+    w.seen.set('A hut.', 'room.hut.title');
+    postMessage({ op: 'select', kind: 'room', key: 'hut' }, '*');
+  });
+  await page.waitForFunction(() => document.querySelectorAll('[data-loka-selected]').length === 1);
+  const data = { op: 'select', kind: 'room', key: 'barn' };
+  await page.evaluate(
+    (d) => dispatchEvent(new MessageEvent('message', { data: d, origin: 'https://example.com' })),
+    data,
+  );
+  assert.equal(
+    await page.locator('[data-loka-selected]').count(),
+    1,
+    'a foreign page moves no selection',
+  );
+  await page.evaluate(() => postMessage({ op: 'select', kind: 'room', key: 'barn' }, '*'));
+  await page.waitForFunction(() => !document.querySelector('[data-loka-selected]'));
+  assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+k')), { shortcut: 'k' });
+  await page.evaluate(() => postMessage({ op: 'edit', key: 'a.rain' }, '*'));
+  await page.locator('[data-loka-field]').waitFor();
+  await page.keyboard.press('Escape');
+  const gone = () => postMessage({ op: 'edit', key: 'b.gone' }, '*');
+  assert.deepEqual(await told1(() => page.evaluate(gone)), {
+    note: 'b.gone is not on this page; opened in your editor.',
+  });
+  assert.deepEqual(posted('/open'), [{ key: 'b.gone', words: '' }]);
 });
 
 // Breaks: Cmd-Z puts back nothing, the wrong id, or hides a 409 behind a success note; or sends
