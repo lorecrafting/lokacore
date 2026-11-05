@@ -25,9 +25,12 @@ export function foreign(request: IncomingMessage, response: ServerResponse) {
 }
 
 type Push = (message: { held?: boolean; changed?: Changed[] }) => void;
-/** `push` keeps the message for later clients; `once` sends `changed` without keeping it.
+type Said = { push: Push; tell: (key: string, words: string, at: string) => void };
+/** `push` keeps the message for later clients and `tell` shows an /edit's words by the text key
+ * the page names, before the compile (told.ts); `once` sends `changed` without keeping it.
  * `release` runs when the Hold ends, to write what the watcher parked. */
-export function editing(source: string, push: Push, once: Push, release: () => void) {
+export function editing(source: string, said: Said, once: Push, release: () => void) {
+  const { push, tell } = said;
   const editor = writer(source, (changed) => once({ changed }));
   let held = false;
   const hold = (sent: { on?: unknown }): Answer => {
@@ -53,7 +56,10 @@ export function editing(source: string, push: Push, once: Push, release: () => v
       json(response, 400, 'a JSON body');
       return true;
     }
-    json(response, ...(url === '/hold' ? hold(sent) : await editor.post(url, sent)));
+    const answer = url === '/hold' ? hold(sent) : await editor.post(url, sent);
+    if (url === '/edit' && answer[0] === 200 && typeof sent.key === 'string')
+      tell(sent.key, sent.words, `${sent.file}:${sent.line}`);
+    json(response, ...answer);
     return true;
   }
   return { route, held: () => held, seen: editor.seen };

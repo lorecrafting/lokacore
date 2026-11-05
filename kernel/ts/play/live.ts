@@ -27,6 +27,7 @@ import { why } from './why.ts';
 import { body, editing, foreign, json } from './editing.ts';
 import type { Changed } from './write.ts';
 import { sentences } from './why_words.ts';
+import { told } from './told.ts';
 
 export type Canonical = { text: Record<string, string> } & Record<string, unknown>;
 export type Message = {
@@ -38,6 +39,8 @@ export type Message = {
   pending?: number; // compiles parked while the editor holds (POST /hold)
   held?: boolean;
   changed?: Changed[]; // sent once with its write or burst, never kept for a later message
+  // the lines /edit pushed that the last compile refused (file:line); a good compile clears them
+  unconfirmed?: { key: string; at: string }[];
 };
 
 /** `mix loka.lint`'s findings (`rel: words`, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */
@@ -253,11 +256,11 @@ export function serve(port: number, source: string, artifact: string, release = 
   let last: Message = { text: {}, said: [], compiled: true };
   const send = (client: ServerResponse, once = {}) =>
     client.write(`data: ${JSON.stringify({ ...last, ...once })}\n\n`);
-  const push = (message: Partial<Message>) => {
+  const said = told((message) => {
     last = { ...last, ...message };
     for (const client of clients) send(client);
-  };
-  const editor = editing(source, push, (once) => clients.forEach((c) => send(c, once)), release);
+  });
+  const editor = editing(source, said, (once) => clients.forEach((c) => send(c, once)), release);
   const route = async (request: IncomingMessage, response: ServerResponse) => {
     if (foreign(request, response) || (await editor.route(request, response))) return;
     const answered = column(request, response, source, artifact);
@@ -282,7 +285,7 @@ export function serve(port: number, source: string, artifact: string, release = 
     })
     .listen(port, '127.0.0.1');
   return {
-    push,
+    push: said.push,
     held: editor.held,
     seen: editor.seen,
     close: () => server.close(),
