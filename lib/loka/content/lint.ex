@@ -6,35 +6,35 @@ defmodule Loka.Content.Lint do
   these: a sampler may break them on purpose.
   """
 
-  alias Loka.Content.Source
+  alias Loka.Content.{LintLayout, Source}
 
   @writes ~w(status.apply status.cure fact.assign fact.adjust fact.stamp resource.adjust)
   @always %{"op" => "all", "items" => []}
 
   @doc "The findings for the source directory `dir`."
   @spec run(Path.t()) :: [String.t()]
-  def run(dir), do: dir |> decoded() |> findings()
+  def run(dir), do: lint(dir, &findings/1, &LintLayout.run/1)
 
   @doc "Only the label findings for the source directory `dir` (samplers are checked for these too)."
   @spec labels(Path.t()) :: [String.t()]
-  def labels(dir), do: dir |> decoded() |> then(&labels(&1, Map.get(&1, "text.json", %{})))
+  def labels(dir), do: lint(dir, &labels(&1, Map.get(&1, "text.json", %{})), fn _ -> [] end)
 
-  defp decoded(dir) do
+  defp lint(dir, find, layout) do
     {files, _} = Source.load(dir)
 
     # A missing folder or the parent cartridges folder loads no manifest and would lint clean.
     if !Enum.any?(files, &match?({"cartridge.json", _, %{}}, &1)),
       do: raise(ArgumentError, "#{dir}: no cartridge.json loaded; give a cartridge source folder")
 
-    # ponytail: a bundled or area folder definition lints under its root address `<dir>/<key>.json`;
-    # dispatch on kind and print Source.at/2 paths if a builder needs file lines.
-    Map.new(for {rel, kind, value} <- files, is_map(value), do: {lint_rel(rel, kind), value})
+    # ponytail: a bundled definition lints and prints under its root address; upgrade: Source.at/2.
+    root = for {rel, kind, v} <- files, is_map(v), into: %{}, do: {lint_rel(rel, kind), v}
+
+    LintLayout.at_real(find.(root), files) ++ layout.(files)
   end
 
   defp lint_rel(_, {_, key, [dir, _]}), do: dir <> "/" <> key <> ".json"
   # A copy of a bundled behaviour's rule sits at [behaviours, name, reactions, rule].
-  defp lint_rel(_, {:reaction, key, [_, _, _, _]}), do: "reactions/" <> key <> ".json"
-  defp lint_rel(_, {:reaction, key, []}), do: "reactions/" <> key <> ".json"
+  defp lint_rel(_, {:reaction, key, p}) when length(p) in [0, 4], do: "reactions/#{key}.json"
   defp lint_rel(rel, _), do: Regex.replace(~r{^areas/[^/]+/(?=[^/]+/)}, rel, "")
 
   @doc "The findings for decoded source files, keyed by their path relative to the cartridge."

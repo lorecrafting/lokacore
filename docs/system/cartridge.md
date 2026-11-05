@@ -943,8 +943,9 @@ build. The author tools below are reachable only in that bundle (a production ex
   `/edit {file, line, was, words}` replaces the words of one line (a JSON string literal, or a
   scene's `* ` line; a key line, a choice label and words with a newline or tab are refused);
   `/delete {file, was}` (a room's `layout.json` row goes with it); `/move {file, was, area}`;
-  `/new {kind, name, from?}` runs `mix loka.new` and journals the files it wrote, from a snapshot
-  diff; `/undo {id}`. `was` is the sha256 of the whole file (for `/edit`, the line's text): a file
+  `/new {kind, name, from?, area?}` runs `mix loka.new` (`area` its `--area`; refused while any
+  symlink is in the tree) and journals the files it wrote, from a snapshot diff; `/undo {id}`.
+  `was` is the sha256 of the whole file (for `/edit`, the line's text): a file
   changed since answers 409 with its current bytes, and nothing is written. One path guard reads
   every path a body names: a normal relative path under the real source root (not the root as a
   string prefix), no symlink on the way to it, for a read a listed regular file, for a create a free

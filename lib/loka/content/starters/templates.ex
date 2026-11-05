@@ -13,7 +13,7 @@ defmodule Loka.Content.Starters.Templates do
   defp kind("actions"),
     do: {~w(scripted_action narration inspectable_detail fact), ~w(rooms), &action/2}
 
-  defp kind("areas"), do: {~w(movement), [], &area/2}
+  defp kind("areas"), do: kind("rooms")
   defp kind("attributes"), do: {~w(attribute), [], single("attributes", %{"start" => 8})}
   defp kind("barriers"), do: {~w(barrier), [], &barrier/2}
   defp kind("behaviours"), do: {~w(reaction narration), [], &behaviour/2}
@@ -81,8 +81,6 @@ defmodule Loka.Content.Starters.Templates do
 
   defp file(dir, body), do: fn name, _ -> %{"#{dir}/#{name}.json" => body} end
   defp single(kind, body), do: fn name, _ -> %{"#{kind}.json" => %{kind => %{name => body}}} end
-
-  defp area(name, _), do: %{"areas/#{name}.json" => %{"rooms" => %{name => room()}}}
 
   defp barrier(name, _),
     do: %{
