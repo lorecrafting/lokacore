@@ -19,7 +19,9 @@ export type State = {
   shown: ReturnType<typeof shown>;
 };
 export type Line = { key?: string; words: string };
-type Told = { loka: 'author'; ready?: true; state?: State; trace?: string[]; id?: number; line?: Line };
+/** What the Book's editor tells (mobile/app/author/inbook.ts): its `~` counts and its last note. */
+export type Prose = { todoHere?: { here: number; at: number }; note?: string; open?: { key: string; words: string } };
+type Told = { loka: 'author'; ready?: true; state?: State; trace?: string[]; id?: number; line?: Line } & Prose;
 type Asked =
   | { op: 'hello' }
   | { op: 'advance'; minutes: number }
@@ -27,11 +29,17 @@ type Asked =
   | { op: 'drop' }
   | { op: 'go_to_room'; room: string }
   | { op: 'set_fact'; fact: string; value: boolean | number | string }
-  | { op: 'trace'; id: number };
+  | { op: 'trace'; id: number }
+  | { op: 'key'; key: string; metaKey: boolean; ctrlKey: boolean; altKey: boolean };
+// The Book's walk keys, relayed from the panel; a text field, a button or a held modifier keeps its own
+const RELAYED = new Set([']', '[', '}', '{', 'Enter']);
+const relayed = (e: KeyboardEvent) =>
+  RELAYED.has(e.key) && e.target === document.body && !e.metaKey && !e.ctrlKey && !e.altKey;
 
 export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
   const [state, setState] = useState<State>();
   const [line, setLine] = useState<Line>();
+  const [prose, setProse] = useState<Prose>({});
   const waiting = useRef(new Map<number, (rows: string[]) => void>());
   const asked = useRef(0);
   const send = useCallback(
@@ -45,10 +53,20 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
       if (e.data.state) setState(e.data.state);
       if (e.data.trace && e.data.id !== undefined) waiting.current.get(e.data.id)?.(e.data.trace);
       if (e.data.line) setLine(e.data.line);
+      if (e.data.todoHere) setProse((p) => ({ ...p, todoHere: e.data.todoHere }));
+      if (e.data.note) setProse((p) => ({ ...p, note: e.data.note, open: e.data.open }));
+    };
+    const onKey = (e: KeyboardEvent) => {
+      const { key, metaKey, ctrlKey, altKey } = e;
+      if (relayed(e)) send({ op: 'key', key, metaKey, ctrlKey, altKey });
     };
     window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('message', onMessage);
+      window.removeEventListener('keydown', onKey);
+    };
   }, [send]);
   const trace = () => askTrace(waiting.current, (id) => send({ op: 'trace', id }), ++asked.current);
-  return { state, line, send, trace };
+  return { state, line, prose, send, trace };
 }

@@ -35,7 +35,7 @@ const typing = (t: EventTarget | null) =>
 
 // One editor per page: its state lives here, set by start().
 let hooks: Hooks = { seen: new Map(), said: new Map(), tell: () => {} };
-const edits: { id: number; at: string; file: string }[] = []; // this page's /edit answers
+const edits: { id: number; at: string; file: string; key: string; words: string }[] = []; // this page's /edit answers
 let unconfirmed = new Set<string>();
 let field: Field | undefined;
 let landed: HTMLElement | undefined;
@@ -160,7 +160,7 @@ async function save() {
   const [status, answer] = await api('/edit', { file, line, was, words: draft, key: f.key });
   f.busy = false;
   if (status === 200) {
-    edits.push({ id: answer.id, at: `${file}:${line}`, file });
+    edits.push({ id: answer.id, at: `${file}:${line}`, file, key: f.key, words: draft });
     return close();
   }
   if (status === 409) return conflict(f);
@@ -185,7 +185,10 @@ async function putBack() {
   if (!last) return hooks.tell({ note: 'Nothing of yours to put back.' });
   const [status] = await api('/undo', { id: last.id });
   if (status === 200) return hooks.tell({ note: `put back ${last.at}` });
-  hooks.tell({ note: `${last.file} changed since; not put back.`, open: last.at });
+  hooks.tell({
+    note: `${last.file} changed since; not put back.`,
+    open: { key: last.key, words: last.words },
+  });
 }
 /** A Book key outside any field: walk, Enter on the landed line, Cmd-Z. */
 function onKey(e: KeyboardEvent, inField = typing(e.target)) {
