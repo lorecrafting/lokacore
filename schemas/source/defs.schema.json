@@ -186,6 +186,47 @@
       "pattern": "^[a-z0-9][a-z0-9_]*$",
       "type": "string"
     },
+    "AmbientSet": {
+      "additionalProperties": false,
+      "description": "An ambient set (emote@1; mechanics.md Ambient emotes): one of its lines is told, at most one per entity per advance, when the clock crosses a multiple of every and the chance roll passes, chosen by SHA-256 of \"<entity ref>:<set index>:<boundary>\", never the authority RNG.",
+      "properties": {
+        "chance": {
+          "description": "Percent chance it fires when due, 1 to 100; 100 when absent.",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "every": {
+          "description": "Logical seconds between chances; a set is due when the clock crosses a multiple of it.",
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "lines": {
+          "description": "The lines, 1 to 8 text keys.",
+          "items": { "$ref": "#/$defs/TextKey" },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        },
+        "when": {
+          "$ref": "#/$defs/Policy",
+          "description": "A condition read with the entity as target (a room has none); the first set whose when holds is the active one."
+        }
+      },
+      "required": [
+        "lines",
+        "every"
+      ],
+      "type": "object"
+    },
+    "AmbientSets": {
+      "description": "A room's or item's ambient sets (AmbientSet), in authored order.",
+      "items": { "$ref": "#/$defs/AmbientSet" },
+      "maxItems": 4,
+      "minItems": 1,
+      "type": "array"
+    },
     "AncestrySpec": {
       "additionalProperties": false,
       "description": "One authored character choice and its bounded initial effects.",
@@ -2456,6 +2497,53 @@
         }
       ],
       "description": "An entity a scripted action's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE."
+    },
+    "NpcAmbientSet": {
+      "additionalProperties": false,
+      "description": "An NPC's ambient set (emote@1): as AmbientSet, with exactly one of lines or emotes (the compiler refuses both or neither); an emote pick is told by emote.performed with the NPC as actor.",
+      "properties": {
+        "chance": {
+          "description": "Percent chance it fires when due, 1 to 100; 100 when absent.",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "emotes": {
+          "description": "The emotes, 1 to 8 EmoteDefinitions.",
+          "items": { "$ref": "#/$defs/DefinitionRef" },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        },
+        "every": {
+          "description": "Logical seconds between chances; a set is due when the clock crosses a multiple of it.",
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "lines": {
+          "description": "The lines, 1 to 8 text keys.",
+          "items": { "$ref": "#/$defs/TextKey" },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        },
+        "when": {
+          "$ref": "#/$defs/Policy",
+          "description": "A condition read with the entity as target (a room has none); the first set whose when holds is the active one."
+        }
+      },
+      "required": [
+        "every"
+      ],
+      "type": "object"
+    },
+    "NpcAmbientSets": {
+      "description": "An NPC's ambient sets, each lines or emotes, in authored order.",
+      "items": { "$ref": "#/$defs/NpcAmbientSet" },
+      "maxItems": 4,
+      "minItems": 1,
+      "type": "array"
     },
     "NpcHp": {
       "additionalProperties": false,
@@ -8450,6 +8538,10 @@
           "minItems": 1,
           "type": "array"
         },
+        "ambient": {
+          "$ref": "#/$defs/AmbientSets",
+          "description": "Ambient lines told while the player is in this item's room and sees it: 1 to 4 of {lines, every, chance?, when?}."
+        },
         "bandage": { "$ref": "#/$defs/partial.ItemBandage" },
         "barrier": {
           "$ref": "#/$defs/partial.DefinitionRef",
@@ -8675,6 +8767,10 @@
       "additionalProperties": false,
       "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants and description_variants vary its name and description, its mood (TextVariants, toolbox row W6); an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
+        "ambient": {
+          "$ref": "#/$defs/NpcAmbientSets",
+          "description": "Ambient lines or emotes told while the player is in this NPC's room and sees it: 1 to 4 of {lines | emotes, every, chance?, when?}."
+        },
         "ask": {
           "additionalProperties": false,
           "description": "Toolbox row FD7 (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
@@ -10096,6 +10192,10 @@
           "minItems": 1,
           "type": "array"
         },
+        "ambient": {
+          "$ref": "#/$defs/AmbientSets",
+          "description": "Ambient lines told while the player is in this room: 1 to 4 of {lines, every, chance?, when?}."
+        },
         "cues": {
           "$ref": "#/$defs/Cues",
           "description": "Sense cues reaching nearby rooms: 1 to 4 of {sense, text, range, when?}."
@@ -11126,6 +11226,10 @@
           "minItems": 1,
           "type": "array"
         },
+        "ambient": {
+          "$ref": "#/$defs/AmbientSets",
+          "description": "Ambient lines told while the player is in this item's room and sees it: 1 to 4 of {lines, every, chance?, when?}."
+        },
         "bandage": { "$ref": "#/$defs/ItemBandage" },
         "barrier": {
           "$ref": "#/$defs/DefinitionRef",
@@ -11374,6 +11478,10 @@
       "additionalProperties": false,
       "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants and description_variants vary its name and description, its mood (TextVariants, toolbox row W6); an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words (NameWords, loka-6qi).",
       "properties": {
+        "ambient": {
+          "$ref": "#/$defs/NpcAmbientSets",
+          "description": "Ambient lines or emotes told while the player is in this NPC's room and sees it: 1 to 4 of {lines | emotes, every, chance?, when?}."
+        },
         "ask": {
           "additionalProperties": false,
           "description": "Toolbox row FD7 (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
@@ -13062,6 +13170,10 @@
           "maxItems": 16,
           "minItems": 1,
           "type": "array"
+        },
+        "ambient": {
+          "$ref": "#/$defs/AmbientSets",
+          "description": "Ambient lines told while the player is in this room: 1 to 4 of {lines, every, chance?, when?}."
         },
         "cues": {
           "$ref": "#/$defs/Cues",

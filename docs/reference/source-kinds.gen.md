@@ -185,6 +185,7 @@ A portable thing (21 §8): its key; keywords, the Alias words a player names it 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | affects | list of [ItemAffect](source-kinds.gen.md#itemaffect) |  | See the type. |
+| ambient | [AmbientSets](source-kinds.gen.md#ambientsets) |  | Ambient lines told while the player is in this item's room and sees it: 1 to 4 of {lines, every, chance?, when?}. |
 | bandage | [ItemBandage](source-kinds.gen.md#itembandage) |  | See the type. |
 | barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The barrier on it, a container lid. |
 | behaviours | list of [Key](source-kinds.gen.md#key) or object |  | Behaviours this entity takes on: each adds one copy of the behaviour's rules, with `{"param": "holder"}` replaced by this entity's key. |
@@ -249,6 +250,7 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
+| ambient | [NpcAmbientSets](source-kinds.gen.md#npcambientsets) |  | Ambient lines or emotes told while the player is in this NPC's room and sees it: 1 to 4 of {lines \| emotes, every, chance?, when?}. |
 | ask | object |  | Toolbox row FD7 (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown. |
 | ask.answers | list of object | yes | What the NPC answers, topic by topic. |
 | ask.answers[].grants | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Granted when this answer is given. |
@@ -470,6 +472,7 @@ A navigable place (21 §5 Place/Room): its key, its name and description text ke
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | actions | list of [ActionContribution](source-kinds.gen.md#actioncontribution) |  | See the type. |
+| ambient | [AmbientSets](source-kinds.gen.md#ambientsets) |  | Ambient lines told while the player is in this room: 1 to 4 of {lines, every, chance?, when?}. |
 | cues | [Cues](source-kinds.gen.md#cues) |  | Sense cues reaching nearby rooms: 1 to 4 of {sense, text, range, when?}. |
 | dark | `true` |  | The room is dark (light@1): a player without light, or blind, reads the engine line place.dark instead of the description and sees none of the room's entities. An authored dark_description wins over the engine line. |
 | dark_description | [TextKey](source-kinds.gen.md#textkey) |  | Shown instead of the description while the room is dark; authoring it marks the room as having no light of its own. |
@@ -673,6 +676,23 @@ A scripted action outcome's narration (21 §4 NarrationSpec): the actor's line, 
 A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases) or, for a ScriptedAction, the action (its verb, the first words typed): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.
 
 Type: string.
+
+### AmbientSet
+
+An ambient set (emote@1; mechanics.md Ambient emotes): one of its lines is told, at most one per entity per advance, when the clock crosses a multiple of every and the chance roll passes, chosen by SHA-256 of "<entity ref>:<set index>:<boundary>", never the authority RNG.
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| chance | integer |  | Percent chance it fires when due, 1 to 100; 100 when absent. |
+| every | integer | yes | Logical seconds between chances; a set is due when the clock crosses a multiple of it. |
+| lines | list of [TextKey](source-kinds.gen.md#textkey) | yes | The lines, 1 to 8 text keys. |
+| when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition read with the entity as target (a room has none); the first set whose when holds is the active one. |
+
+### AmbientSets
+
+A room's or item's ambient sets (AmbientSet), in authored order.
+
+Type: list of [AmbientSet](source-kinds.gen.md#ambientset).
 
 ### AncestrySpec
 
@@ -1296,6 +1316,24 @@ Type: object.
 | {role=item} | variant |  | An item of this cartridge. |
 | {role=item}.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definition. |
 | {role=actor} | variant |  | The player's own body. |
+
+### NpcAmbientSet
+
+An NPC's ambient set (emote@1): as AmbientSet, with exactly one of lines or emotes (the compiler refuses both or neither); an emote pick is told by emote.performed with the NPC as actor.
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| chance | integer |  | Percent chance it fires when due, 1 to 100; 100 when absent. |
+| emotes | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | The emotes, 1 to 8 EmoteDefinitions. |
+| every | integer | yes | Logical seconds between chances; a set is due when the clock crosses a multiple of it. |
+| lines | list of [TextKey](source-kinds.gen.md#textkey) |  | The lines, 1 to 8 text keys. |
+| when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition read with the entity as target (a room has none); the first set whose when holds is the active one. |
+
+### NpcAmbientSets
+
+An NPC's ambient sets, each lines or emotes, in authored order.
+
+Type: list of [NpcAmbientSet](source-kinds.gen.md#npcambientset).
 
 ### NpcHp
 
