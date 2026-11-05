@@ -73,8 +73,8 @@ const skyText = (p: StatusProps) =>
  * (book-ui.md, World and status entry); no say icon in single-player (book-ui.md, Word bar).
  * - Use: under the footer on every page.
  * - Rules: at most two lines, nothing dropped: too wide, the pools take the second line whole
- *   (the only break falls before hp); still too wide, position ends in an ellipsis (bleeding is
- *   the first status icon above, book-ui.md Conditions details). The glyph and pools never shrink. The pools are one unbreakable
+ *   (the only break falls before hp); bleeding is the first status icon above (book-ui.md
+ *   Conditions details). The glyph and pools never shrink. The pools are one unbreakable
  *   run: no-break spaces as text, never a margin, so the shown words lead the button's name. A
  *   gap, not a dot, sets the pools apart.
  *   Every role scales with the Reading size. The sky glyphs are model.ts `sky`: ink is
@@ -214,7 +214,7 @@ const shown = (c: Palette, t: Type, rs: readonly Pool[], locked: boolean, stung:
     </Text>
   ));
 
-// The position word, one line: too wide, it ends in an ellipsis while its label stays whole.
+// The position word, one line.
 function Position(p: { value: NonNullable<GameView['position']>; open?: () => void }) {
   const c = usePalette();
   const words = (

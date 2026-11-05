@@ -431,3 +431,15 @@ test('shared item detail draws confirmed fuel for lit and exhausted items', () =
     ['Empty, unlit.'],
   );
 });
+
+// Breaks (loka-15g, status-line-rulings.md Character page): the page drops bleeding's time left or
+// cadence, which the status line no longer shows (its icon carries them only in the name).
+test('Character keeps the full bleeding line', () => {
+  const bleeding = { label: 'bleeding', ends_at: 37, hp_loss: 1, tick_every: 60 };
+  const view = { time: 0, bleeding } as any;
+  assert.ok(
+    words(CharacterPage({ view, text, world: () => {} })).includes(
+      'Bleeding · 37s remaining · 1 HP each 60s',
+    ),
+  );
+});
