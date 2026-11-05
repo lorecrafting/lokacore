@@ -14,7 +14,7 @@ const SAY: Record<string, string> = {
   'npc.hound': 'a fen hound',
   'band.hurt': 'hurt',
   'band.ready': 'ready',
-  hungry: 'hungry',
+  cold: 'cold',
   bleeding: 'Bleeding',
   goblin: 'goblin',
   Grub: 'Grub',
@@ -31,7 +31,7 @@ const combatLines = (combat: object, extra = {}, ended = false) => {
     .map(words);
 };
 
-// Breaks (owner, 2026-11-02, loka-kgd.204): a foe or band line back atop the page, or your own hunger
+// Breaks (owner, 2026-11-02, loka-kgd.204): a foe or band line back atop the page, or your own cold
 // or bleeding there (book-ui.md Live combat response): the page opens with its log.
 test('the Combat page draws no foe line, band or condition of yours, live or closed', () => {
   const pack = {
@@ -46,13 +46,13 @@ test('the Combat page draws no foe line, band or condition of yours, live or clo
     ],
   };
   const extra = {
-    conditions: [{ label: 'hungry' }],
+    conditions: [{ label: 'cold' }],
     bleeding: { label: 'bleeding', ends_at: 300, hp_loss: 1, tick_every: 100 },
   };
   for (const ended of [false, true]) {
     const lines = combatLines(pack, extra, ended);
     assert.deepEqual(
-      lines.filter((l) => /goblin|hound|hurt|ready|hungry|Bleeding|\d+ \/ \d+/.test(l)),
+      lines.filter((l) => /goblin|hound|hurt|ready|cold|Bleeding|\d+ \/ \d+/.test(l)),
       [],
       JSON.stringify(lines),
     );

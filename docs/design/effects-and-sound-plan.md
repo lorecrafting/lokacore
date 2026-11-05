@@ -342,7 +342,7 @@ pickup pop fires as in 3.2 for a buy, but the coin plays instead of the flick, s
 jump the clock), so rest is the page turn and its line, with no palette effect. Sound: the paper turn only;
 haptic none. P1. Cue: none.
 
-**Hunger / thirst statuses** (G13): the status entry.
+**Well fed / Refreshed** ([Consume](../system/mechanics.md#consume-loka-kgd209); G13 retired): the status entry.
 
 ### 3.9 Calendar, sky, weather (`calendar.ts`, row 31, W25, `CalendarStatus`)
 

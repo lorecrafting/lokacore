@@ -369,7 +369,7 @@ never a sure money loser; paid NPCs stop at beginner tier.
 
 | Profession | Output | Consumed by (system) | Offline buyer | Gap |
 |---|---|---|---|---|
-| Tiller | food, buffs | hunger G13, spoilage row 41, `hearty` | inn, commissions | none |
+| Tiller | food, buffs | Well fed ([Consume](../system/mechanics.md#consume-loka-kgd209)), spoilage row 41, `hearty` | inn, commissions | none |
 | Wright | tools, furniture, rooms | durability row 21, built rooms | repair service, settlers | tool wear (only weapons wear) |
 | Healer | dressings, remedies | bleed, wounds, statuses (cures) | infirmary | none |
 | Scout | hides, meat, guidance | crafts, escorts | traders, escort jobs | none |
