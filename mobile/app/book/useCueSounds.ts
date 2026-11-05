@@ -25,7 +25,7 @@ export function useCueSounds(s: Screen, turn: number, resumes?: number, riffle?:
     fell.current = s.died;
     const theme = chapter !== undefined && chapter !== read.current;
     read.current = chapter;
-    const quiet = s.view.scene?.treatment ? 'silent' : woke ? 'woke' : !!s.view.combat || theme;
+    const quiet = s.treatment ? 'silent' : woke ? 'woke' : !!s.view.combat || theme;
     // The spirit state: the bed muffled, opening at the rise; the room is never exposed (no thunder's open air).
     ambience(place?.sound, weather, !!place?.exposed && !spirit, quiet, spirit);
   }, [s.view, s.ended, spirit]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -36,8 +36,9 @@ export function useCueSounds(s: Screen, turn: number, resumes?: number, riffle?:
     turn,
     resumes,
     reduced,
-    s.view.scene?.treatment ? undefined : riffle ? playRiffle : playTurn, // no turn sound inside a treatment
+    s.treatment ? undefined : riffle ? playRiffle : playTurn, // no turn sound inside a treatment
     s.died,
     s.deed,
+    !!s.treatment,
   );
 }

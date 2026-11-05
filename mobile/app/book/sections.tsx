@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bandPhrase, cap, conditionLine, plain, isPool, toneOf, type Thing } from './model.ts';
+import { bandPhrase, cap, conditionLine, isPool, toneOf, type Thing } from './model.ts';
 import type { Button } from './presenter.ts';
 import { cardContext, useCardInk, useCardTurn } from './card.ts';
 import { InkText, Reanimated } from './fade.ts';

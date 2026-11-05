@@ -38,6 +38,7 @@ function mount() {
     resumes = 0,
     still = false,
     died?: string,
+    silent?: boolean,
   ) => {
     i = 0;
     const g = globalThis as any;
@@ -48,7 +49,7 @@ function mount() {
       cleanup?.();
       cleanup = f();
     };
-    useCues(view, catchingUp, turn, resumes, still, undefined, died);
+    useCues(view, catchingUp, turn, resumes, still, undefined, died, undefined, silent);
   };
   return Object.assign(draw, { unmount: () => cleanup?.() });
 }
@@ -368,4 +369,15 @@ test('a kill that levels feels the level, and the fanfare waits out the settle h
   playCue({ name: 'level' }); // a later level with no kill plays no fanfare
   tick(motion.settle.hold);
   assert.deepEqual(won(), [['fight', 'won']]);
+});
+
+// Breaks: a cue sounds inside a treated scene (book-ui.md, Book treatments: nothing plays inside).
+test('a treated scene plays no cue', (t) => {
+  const heard = listen(t);
+  const draw = mount();
+  draw(place('a'), false, 0);
+  draw(place('b'), false, 0, 0, false, undefined, true);
+  assert.deepEqual(heard, []);
+  draw(place('c'), false, 0);
+  assert.deepEqual(heard, ['place'], 'the control: outside it the cue is heard');
 });

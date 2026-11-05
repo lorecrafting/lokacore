@@ -63,13 +63,13 @@ const reverie = {
 };
 const risen = motion.reverie.lag + motion.reverie.duration + motion.settle.duration + 200;
 const arriving: StoryObj = {
-  ...pageStory(reverie),
+  ...pageStory(reverie, { treatment: 'reverie' }), // the screen's, as the presenter derives it
   play: async ({ canvas }) => {
     await expect(canvas.queryByRole('button', { name: 'Continue' })).toBeNull();
   },
 };
 const shown: StoryObj = {
-  ...pageStory(reverie),
+  ...pageStory(reverie, { treatment: 'reverie' }), // the screen's, as the presenter derives it
   play: async ({ canvas }) => {
     await new Promise((r) => setTimeout(r, risen));
     await expect(await canvas.findByRole('button', { name: 'Continue' })).toBeVisible();

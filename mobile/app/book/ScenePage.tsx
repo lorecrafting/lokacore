@@ -6,6 +6,8 @@ import { plain } from './model.ts';
 import type { Button } from './presenter.ts';
 import { useArrival } from './card.ts';
 import { UnderInk } from './UnderInk.tsx';
+import type { Treatment } from './heldLayer.ts';
+import { size } from './tokens.ts';
 import { Reanimated } from './fade.ts';
 import { prose, usePalette, useType } from './palette.ts';
 import { ContinueButton } from './actions.tsx';
@@ -20,7 +22,13 @@ type Say = (key: string) => string;
  * - Use: while a scene holds the foreground.
  * - Story: ChapterPages.stories.tsx
  */
-type Props = { view: GameView; text: Say; next?: Button; press: (b: Button) => void };
+type Props = {
+  view: GameView;
+  text: Say;
+  next?: Button;
+  press: (b: Button) => void;
+  treatment?: Treatment; // the screen's: none under a fault
+};
 
 export function ScenePage(p: Props) {
   const s = p.view.scene!;
@@ -32,9 +40,9 @@ export function Scene(p: Props) {
   const c = usePalette();
   const t = useType();
   const scene = p.view.scene!;
-  const { full, complete, line, shown } = useArrival(!!scene.treatment);
+  const { full, complete, line, shown } = useArrival(!!p.treatment);
   const page = (
-    <Page paperless={!!scene.treatment}>
+    <Page paperless={!!p.treatment}>
       <Reanimated.View style={line}>
         <Text {...useTitleFocus()} style={prose(c, t)}>
           {plain(p.text(scene.line))}
@@ -45,12 +53,13 @@ export function Scene(p: Props) {
           <ContinueButton label={p.next.label} onPress={() => p.press(p.next!)} />
         </Reanimated.View>
       )}
+      {p.next && !full && <View style={{ minHeight: size.card }} />}
     </Page>
   );
-  if (!scene.treatment) return page;
+  if (!p.treatment) return page;
   return (
     <View style={{ flex: 1 /* mutate-skip: layout */ }}>
-      <UnderInk view={p.view} treatment={scene.treatment} />
+      <UnderInk view={p.view} treatment={p.treatment} />
       <Pressable
         accessible={false}
         focusable={false}

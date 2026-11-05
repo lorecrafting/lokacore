@@ -241,6 +241,7 @@ export function useCues(
   onTurn?: () => void,
   died?: string,
   deed?: NarrationRecord,
+  silent = false, // a treated scene: nothing plays inside it (book-ui.md, Book treatments)
 ) {
   const queue = useRef(QUIET);
   const seen = useRef(turn);
@@ -262,12 +263,12 @@ export function useCues(
     const fresh = !!died && died !== told.current.died;
     const done = deed !== told.current.deed ? deed : undefined;
     const opening = was ? [] : foundFight(view, fought.current);
-    advance([...opening, ...cuesOf(view, was, fresh, done)], turn !== seen.current);
+    advance(silent ? [] : [...opening, ...cuesOf(view, was, fresh, done)], turn !== seen.current);
     told.current = { died, deed };
     fought.current = !!view.combat;
     seen.current = turn;
     back.current = resumes;
     settled.current = catchingUp ? undefined : view;
     return () => clearTimeout(timer);
-  }, [view, catchingUp, turn, resumes, reduced, died, deed]);
+  }, [view, catchingUp, turn, resumes, reduced, died, deed, silent]);
 }

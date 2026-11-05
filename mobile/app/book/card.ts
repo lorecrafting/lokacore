@@ -101,11 +101,14 @@ export function useArrival(on: boolean) {
   const ink = useSharedValue(on ? 0 : 1);
   const next = useSharedValue(on ? 0 : 1);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const complete = () => {
+  // A tap or a reader shows Continue at once; the line's own end settles it in.
+  const done = (settle: boolean) => {
     clearTimeout(timer.current);
     ink.value = 1;
+    next.value = settle ? withTiming(1, { duration: motion.settle.duration }) : 1;
     setFull(true);
   };
+  const complete = () => done(false);
   useEffect(() => {
     if (on) void screenReaderOn().then(setReader);
   }, []);
@@ -119,11 +122,8 @@ export function useArrival(on: boolean) {
       withTiming(1, { duration, easing: curveOf(easing), reduceMotion }),
       reduceMotion,
     );
-    return cardClock(timer, complete, lag + duration);
+    return cardClock(timer, () => done(true), lag + duration);
   }, [reader]);
-  useEffect(() => {
-    if (on && full) next.value = withTiming(1, { duration: motion.settle.duration });
-  }, [full]);
   const line = useAnimatedStyle(() => ({ opacity: ink.value }));
   const shown = useAnimatedStyle(() => ({ opacity: next.value }));
   return { full, complete, line, shown };

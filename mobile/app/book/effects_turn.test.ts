@@ -364,24 +364,32 @@ async function reverie(t: any, device: object = {}) {
           text: (k: string) => k,
           next: next as any,
           press: (b) => sent.push(b),
+          treatment: 'reverie',
         }),
       ),
     );
-  page();
+  const inks = () =>
+    page().flatMap((n) => (n.props?.style?.opacity === undefined ? [] : [n.props.style.opacity]));
+  assert.deepEqual(inks(), [0], 'the line waits on the paper');
   await settle();
   page(); // the screen reader's answer is in: the rise starts
   // Continue, once it shows.
   const button = () =>
     page().find((n) => n.props?.accessibilityRole === 'button' && n.props.onPress);
-  return { sent, next, page, button, tick: (ms: number) => t.mock.timers.tick(ms) };
+  return { sent, next, page, inks, button, tick: (ms: number) => t.mock.timers.tick(ms) };
 }
 
 // Breaks: Continue shows before the line is whole (the rise is lag 400 + 2400 after the page lands),
+// its place is not kept (the page shifts when it settles in),
 // or the clock sends Continue itself, turning the page unread ("no timer sends Continue").
 test('a reverie line rises, then Continue shows; no clock sends it', async (t) => {
-  const { sent, button, tick } = await reverie(t);
+  const { sent, page, button, tick } = await reverie(t);
   tick(2799);
   assert.equal(button(), undefined);
+  assert.ok(
+    page().some((n) => n.props?.style?.minHeight === 48),
+    "Continue's place is kept",
+  );
   tick(1);
   assert.ok(button());
   tick(60_000);
@@ -391,12 +399,13 @@ test('a reverie line rises, then Continue shows; no clock sends it', async (t) =
 
 // Breaks: a tap mid-rise sends Continue, or leaves the line half drawn.
 test('a tap completes the rise and sends nothing', async (t) => {
-  const { sent, page, button, tick, next } = await reverie(t);
+  const { sent, page, inks, button, tick, next } = await reverie(t);
   tick(100);
   page()
     .find((n) => n.props?.accessible === false)
     .props.onPress();
   assert.deepEqual(sent, []);
+  assert.deepEqual(inks(), [1, 1], 'the line whole, Continue shown');
   button().props.onPress();
   assert.deepEqual(sent, [next]);
 });

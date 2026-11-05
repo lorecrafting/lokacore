@@ -274,12 +274,12 @@ test('one action, one paper sound', (t) => {
 test('a page turn is silent inside a treated scene', (t) => {
   effects(t);
   t.mock.timers.enable({ apis: ['setTimeout'] });
-  const turns = (scene?: object) => {
+  const turns = (treatment?: string) => {
     g.bookDevice = [];
     const draw = rig(t);
-    const view = { ...held([]), scene };
+    const view = held([]);
     for (const turn of [0, 1]) {
-      draw(() => useCueSounds({ view, catchingUp: false } as never, turn));
+      draw(() => useCueSounds({ view, catchingUp: false, treatment } as never, turn));
       t.mock.timers.tick(1000);
     }
     const log = g.bookDevice.filter((l: string[]) => l[0] === 'play');
@@ -287,5 +287,5 @@ test('a page turn is silent inside a treated scene', (t) => {
     return log.length;
   };
   assert.equal(turns(), 1);
-  assert.equal(turns({ treatment: 'reverie' }), 0);
+  assert.equal(turns('reverie'), 0);
 });

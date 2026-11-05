@@ -71,7 +71,7 @@ export function Body(p: BodyProps & Talk) {
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
   return (
     <View style={{ flex: 1 }}>
-      {p.page?.kind !== 'journal' && !p.screen.spirit && !p.screen.view.scene?.treatment && (
+      {p.page?.kind !== 'journal' && !p.screen.spirit && !p.screen.treatment && (
         <RunningHead view={p.screen.view} text={p.screen.text} />
       )}
       {water && (
@@ -98,7 +98,7 @@ function PageBody(p: BodyProps & Talk) {
         press={p.press}
       />
     );
-  if (view.scene) return <ScenePage view={view} text={text} next={p.g.continue} press={p.press} />;
+  if (view.scene) return <ScenePage {...p.screen} next={p.g.continue} press={p.press} />;
   if (page?.kind === 'chapter' && view.chapter)
     return (
       <ChapterPage
