@@ -1,5 +1,5 @@
 // Numbers (cartridge.md#author-preview; kernel/ts/play/sim.ts). Expected values are hand-read from
-// cartridges/needs_sampler: hunger starts at 10 and the hungry status takes 1 an hour; below 100%
+// test/fixtures/drain_cartridge: hunger starts at 10 and the hungry status takes 1 an hour; below 100%
 // is peckish, below 50% starving. hp has no drain and a minimum of 1.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -23,7 +23,7 @@ import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 const scratch = mkdtempSync(join(tmpdir(), 'loka-sim-'));
 after(() => rmSync(scratch, { recursive: true, force: true }));
 const file = join(scratch, 'needs.json');
-execFileSync('mix', ['loka.compile', 'cartridges/needs_sampler', file], {
+execFileSync('mix', ['loka.compile', 'test/fixtures/drain_cartridge', file], {
   cwd: ROOT,
   stdio: 'pipe',
 });
@@ -88,7 +88,7 @@ test('bin/loka sim prints the numbers and leaves the cartridge as it was', () =>
   writeFileSync(join(bin, 'mise'), '#!/bin/sh\nshift 2\nexec "$@"\n');
   chmodSync(join(bin, 'mise'), 0o755);
   const copy = join(scratch, 'copy');
-  cpSync(join(ROOT, 'cartridges/needs_sampler'), copy, { recursive: true });
+  cpSync(join(ROOT, 'test/fixtures/drain_cartridge'), copy, { recursive: true });
   const run = spawnSync(join(ROOT, 'bin/loka'), ['sim', copy, '--seeds', '1', '--days', '1'], {
     cwd: ROOT,
     encoding: 'utf8',
@@ -101,7 +101,7 @@ test('bin/loka sim prints the numbers and leaves the cartridge as it was', () =>
     /resource\/hp: 10 to 10, lowest 10, max 10; never empty in the 24 hours played/,
   );
   assert.match(run.stdout, /no levelling in this cartridge/);
-  const diff = spawnSync('diff', ['-r', copy, join(ROOT, 'cartridges/needs_sampler')], {
+  const diff = spawnSync('diff', ['-r', copy, join(ROOT, 'test/fixtures/drain_cartridge')], {
     encoding: 'utf8',
   });
   assert.equal(diff.status, 0, diff.stdout);
@@ -170,7 +170,7 @@ const sim = (...args: string[]) =>
 test('bin/loka sim refuses bad flags and a bad cartridge in plain words', () => {
   // Break: a zero, a non-number or a stray argument run anyway; a failed compile read as an artifact;
   // a roomless cartridge ending in a stack trace.
-  const copy = join(ROOT, 'cartridges/needs_sampler');
+  const copy = join(ROOT, 'test/fixtures/drain_cartridge');
   for (const bad of [
     [copy, '--seeds', '0'],
     [copy, '--days', 'x'],

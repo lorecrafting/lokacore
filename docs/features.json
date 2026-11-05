@@ -941,7 +941,7 @@
   "liquid": {
     "summary": "Liquids, vessels, drinking and filling.",
     "declares": ["liquids", "items.vessel"],
-    "sampler": "needs_sampler",
+    "sampler": "fed_sampler",
     "showcase": "areas/magic",
     "mechanics": "#b7-well-and-waterskin-selected-contract",
     "spec": "docs/system/mechanics.md B7; docs/system/protocol.md Liquid composition",
@@ -1036,7 +1036,7 @@
   "food": {
     "summary": "Eating food and its effects.",
     "declares": ["items.edible"],
-    "sampler": "needs_sampler",
+    "sampler": "fed_sampler",
     "showcase": "areas/homestead",
     "mechanics": "#d4-homes-finite-apples-and-eat-selected-contract",
     "spec": "docs/system/mechanics.md D4; docs/system/protocol.md Held-food composition",

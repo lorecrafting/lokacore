@@ -429,7 +429,7 @@ Each goal names the samplers that already do it; copy their files or start with 
 | Combat and encounters | [`encounter_sampler`](../../cartridges/encounter_sampler/), [`damage_sampler`](../../cartridges/damage_sampler/), [`boss_sampler`](../../cartridges/boss_sampler/), [`ranged_sampler`](../../cartridges/ranged_sampler/), [`raid_sampler`](../../cartridges/raid_sampler/) |
 | A skill | [`skills_sampler`](../../cartridges/skills_sampler/), [`levelling_sampler`](../../cartridges/levelling_sampler/) |
 | Housing | [`build_sampler`](../../cartridges/build_sampler/) (structures), [`furnish_sampler`](../../cartridges/furnish_sampler/), [`property_sampler`](../../cartridges/property_sampler/) |
-| Needs and statuses | [`needs_sampler`](../../cartridges/needs_sampler/), [`status_sampler`](../../cartridges/status_sampler/), [`sleep_sampler`](../../cartridges/sleep_sampler/) |
+| Food buffs and statuses | [`fed_sampler`](../../cartridges/fed_sampler/), [`status_sampler`](../../cartridges/status_sampler/), [`sleep_sampler`](../../cartridges/sleep_sampler/) |
 | A world event | [`schedule_sampler`](../../cartridges/schedule_sampler/), [`settle_sampler`](../../cartridges/settle_sampler/), [`raid_sampler`](../../cartridges/raid_sampler/) |
 
 ## Before release
