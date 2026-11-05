@@ -387,12 +387,12 @@ test('status icons key by label and count; only the held icon lets go of its tip
           open: () => {},
         } as never) as any,
     ).props.children;
-  const keys = (conditions: unknown[]) => row(conditions)[0].map((e: any) => e.key);
+  const keys = (conditions: unknown[]) => row(conditions)[1].map((e: any) => e.key);
   assert.deepEqual(keys([c('a'), c('b'), c('a')]), ['a-0', 'b-0', 'a-1']);
   assert.deepEqual(keys([c('b'), c('a')]), ['b-0', 'a-0']);
   const both = [c('a'), c('b')];
-  const hold = (i: number) => row(both)[0][i].props.children.props.hold;
-  const tip = () => Boolean(row(both).at(-1));
+  const hold = (i: number) => row(both)[1][i].props.children.props.hold;
+  const tip = () => Boolean(row(both)[0]);
   hold(0)(true);
   assert.equal(tip(), true);
   hold(1)(false);
@@ -448,18 +448,18 @@ test('status icons: a pushed icon stays mounted, hidden; the +N tip lists the hi
         } as never) as any,
     ).props.children;
   const shown = (conditions: unknown[]) =>
-    row(conditions)[0].map((e: any) => [e.key, e.props.hidden]);
+    row(conditions)[1].map((e: any) => [e.key, e.props.hidden]);
   assert.deepEqual(shown(six).at(-1), ['f-0', false]);
   const pushed = [c('x', 'debuff'), ...six];
   assert.deepEqual(shown(pushed).slice(-2), [
     ['e-0', true],
     ['f-0', true],
   ]);
-  row(pushed)[1].props.hold(true);
-  assert.equal(row(pushed)[2].props.text, 'e, f');
-  row(pushed)[1].props.hold(false);
-  row(six, { bleeding })[0][0].props.children.props.hold(true);
-  assert.equal(row(six, { bleeding })[2].props.text, 'bleeding, 37s remaining');
+  row(pushed)[2].props.hold(true);
+  assert.equal(row(pushed)[0].props.text, 'e, f');
+  row(pushed)[2].props.hold(false);
+  row(six, { bleeding })[1][0].props.children.props.hold(true);
+  assert.equal(row(six, { bleeding })[0].props.text, 'bleeding, 37s remaining');
 });
 
 // Breaks: an exit's name shows on no direction, or labels the empty one; its press-in lags or runs long.

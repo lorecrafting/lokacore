@@ -126,6 +126,8 @@ export function StatusIcons(p: Props) {
   if (held !== undefined && !tip) setHeld(undefined);
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'center', columnGap: space.sm }}>
+      {/* First: a Reanimated exit whose next sibling unmounts with it stays on web (Focused story) */}
+      {tip && <Tooltip text={tip} />}
       {items.map((x, i) => (
         <Arrival key={x.key} label={x.label} hidden={i >= shown}>
           <Icon look={x.look} name={x.name} fraction={x.fraction} hold={hold(x.key)} open={p.open}>
@@ -143,7 +145,6 @@ export function StatusIcons(p: Props) {
           {`+${hidden.length}`}
         </Icon>
       )}
-      {tip && <Tooltip text={tip} />}
     </View>
   );
 }

@@ -414,7 +414,7 @@ test('status icons: debuffs first, six or five then +N, named by label, time and
   ];
   const text = (key: string) => (key === 'condition.fed' ? 'fed' : key);
   const icons = (conditions: any[], open?: () => void) => {
-    const [items, more] = StatusIcons({ conditions, time: 720, text, open }).props.children;
+    const [, items, more] = StatusIcons({ conditions, time: 720, text, open }).props.children;
     const shown = items.filter((arrival: any) => !arrival.props.hidden);
     return [...shown.map((arrival: any) => arrival.props.children), more]
       .filter(Boolean)
@@ -502,7 +502,7 @@ test('bleeding is the first status icon: debuff look, no ring, inside the cap', 
     statusRow.props.children[0].props.children.map((e: any) => e.key),
     ['time'],
   );
-  const [items, more] = StatusIcons(row.props).props.children;
+  const [, items, more] = StatusIcons(row.props).props.children;
   const first = items[0].props.children.props;
   assert.deepEqual(
     [first.name, first.look, first.fraction, first.children],
@@ -543,7 +543,7 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
       time: 720,
       text: (k: string) => k,
       open: locked ? undefined : () => {},
-    }).props.children[0];
+    }).props.children[1];
     return unpress(icon.type(icon.props));
   };
   const halves = (e: any) => {
@@ -617,7 +617,7 @@ test('status icon countdown ring: drains between views, capped, jumps up and und
       time: 732,
       text: (k: string) => k,
       open: () => {},
-    }).props.children[0];
+    }).props.children[1];
     const e = unpress(icon.type(icon.props));
     return e.type(e.props);
   };

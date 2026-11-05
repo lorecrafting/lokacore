@@ -75,21 +75,34 @@ export const Permanent: Story = {
   },
 };
 
-// Five conditions: five icons, no +N disc.
-export const Five: Story = {
-  args: { conditions: five },
+// Six statuses: six icons, debuffs first, then neutral, then buffs; no +N disc.
+const six = [...five, at('mighty', 'buff', 4000)];
+export const Six: Story = {
+  args: { conditions: six },
   play: async ({ canvas }) => {
-    await expect(canvas.getAllByRole('button')).toHaveLength(5);
-    await expect(canvas.queryByRole('button', { name: /more/ })).toBeNull();
+    const names = canvas.getAllByRole('button').map((b) => b.getAttribute('aria-label'));
+    await expect(names.map((n) => n!.split(',')[0])).toEqual([
+      'poisoned',
+      'scarred',
+      'rested',
+      'fed',
+      'warded',
+      'mighty',
+    ]);
   },
 };
 
-// Six: five icons, then a +1 disc that opens Character too (6x44 + 5x6 = 294 px within 358 at 390).
+// Seven: five icons, then a +2 disc that opens Character too and whose tip lists the hidden two
+// in row order (6x44 + 5x6 = 294 px within 328 at 360).
 export const Overflow: Story = {
-  args: { conditions: [...five, at('mighty', 'buff', 4000)] },
-  play: async ({ canvas }) => {
+  args: { conditions: [...six, at('sharp', 'buff')] },
+  play: async ({ canvas, args, userEvent }) => {
     await expect(canvas.getAllByRole('button')).toHaveLength(6);
-    await expect(canvas.getByRole('button', { name: '+1 more, opens Character' })).toBeVisible();
+    const more = canvas.getByRole('button', { name: '+2 more, mighty, sharp, opens Character' });
+    await userEvent.hover(more);
+    await waitFor(() => expect(canvas.getByText('mighty, sharp')).toBeVisible());
+    await userEvent.click(more);
+    await expect(args.open).toHaveBeenCalled();
   },
 };
 
