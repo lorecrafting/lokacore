@@ -437,6 +437,8 @@ lean slots. No slice changes a protocol file, the kernel or the Book.
 
 ## 12. Open questions for the owner, with recommendations
 
+Owner, 2026-11-04 (paraphrased): accepted all eight recommendations below as written.
+
 1. **Beats in `outline.json` at the cartridge root, ignored by the compiler** (vs tags on
    definitions, vs keeping the markdown outline). Recommend the file: beats exist before nodes,
    seeds are beat-level, one place to reorder.
