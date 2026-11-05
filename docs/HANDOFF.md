@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #605; written 2026-11-04 by Claude Code (Opus 5.5), second PM session of the day. `kernel_api` is 1.154. Lean default in force since #533.
+AS OF main after the authoring plan PR; written 2026-11-04 by Claude Code (Opus 5.5), third PM session of the day (planning only, nothing built). `kernel_api` is 1.154. Lean default in force since #533.
 
 ## Direction (owner 2026-10-30 to 2026-11-04)
 
@@ -18,37 +18,34 @@ AS OF main after #605; written 2026-11-04 by Claude Code (Opus 5.5), second PM s
 - **The showcase is the regression bed**, unfrozen for combat only.
 - **Combat follows DikuMUD/LegendMUD** ([decision](decisions/owner-decision-diku-rounds-2026-11-01.md)).
 - **PR bodies are the reviewer's brief**, no fluff ([decision](decisions/owner-decision-pr-body-reviewer-brief-2026-11-04.md)).
-- **Authoring tool: design and plan before building** (owner 2026-11-04). The next session is a deep, conversational
-  planning session with the owner (see Resume 1). No GUI editor or toolbox-gate code until it ends.
+- **Authoring editor plan agreed** ([record](decisions/owner-decision-authoring-editor-plan-2026-11-04.md), design
+  [section 11](rnd/gui-editor-design-2026-11-04.md#11-audit-changes-2026-11-04)): six promises, three columns, live agent
+  edits, named Book treatments (`spirit`, `reverie`), strict editor coverage, slice order. The owner writes the prologue
+  once E5 (prose in the Book) lands. Owner 2026-11-04: tokens are available; build in parallel as recommended, Fable when useful.
 
 ## Merged this session
 
-#597 PR-body decision; #598 R&D and the area-layout design; #600 previous handoff; #599 Wayside Shrine, revival lines, the keeper
-(waking line before the death's reaction lines); #601 placeholders order flake (loka-kgd.208); #602 spirit-state design rulings;
-#603 area layout S1 (the compiler reads `areas/<area>/`, refusals, Builders' Guide "Cartridge layout"); #604 the Book's spirit
-state (loka-kgd.205: spirit wash, Rise with a countdown, held lines); #605 consumables (loka-kgd.209: one `consume` command,
-`{restore, cures, applies}`, multi-resource status `ticks`, `{status, duration}` applies with later-end refresh, Well fed and
-Refreshed in the showcase, hunger and thirst pools removed); #606 GUI editor design (`docs/rnd/gui-editor-design-2026-11-04.md`).
+The authoring plan PR (decision record, #606 amended, owner-rules and index lines). Beads: editor slices retitled and
+re-linked under loka-wfrgk, new loka-wfrgk.9 to .13, loka-vduxr.54/.55/.56 folded and closed.
 
 ## Resume, in order
 
-1. **Authoring planning session with the owner** (epic loka-wfrgk, read every comment). Conversational and deep: the owner wants
-   a back-and-forth, not a report. Inputs: #606's design and its 14 rulings (the owner accepted them, but now treats them as
-   input, not final), the owner's goal (a world-class GUI editor; every mechanic gets purpose-built create, edit, update and
-   delete, not necessarily forms), loka-vduxr.59 (generated toolbox page plus the coverage gate: summary, declarations, sampler,
-   showcase location), and the **Book presentation vocabulary**: a slowly grown toolbox of designed Book treatments that
-   cartridges select and set parameters on, never raw visual controls. The spirit state is the first extraction candidate. On hold until it ends:
-   loka-wfrgk.2 to .8 (G1 to G7) and loka-vduxr.59. Studio slices loka-vduxr.51 to .53 feed G2 and G6; decide their place there.
-2. **Area layout S2 to S4** (loka-vduxr.58.2 to .4), before the prologue cartridge starts. Ask in the planning session whether
-   they wait for it (S4 writes the per-area INDEX the editor may read).
-3. **loka-kgd.207**: Combat title "You attack {target}!" / "{attacker} attacks you!" (PM lean: the authority finds the opening
-   receipt, no save change).
-4. **loka-vduxr.57**: Builders' Guide story-pattern recipes from `docs/rnd/prologue-adoption-shortlist-2026-11-04.md`.
-5. Follow-ups filed this session: loka-x6t.132 (Book groups same-kind items with a count; designer ruling first; count wording
-   is the designer's or owner's), the spirit state after a death outside a fight (loka-kgd, P2), loka-kgd.211 (flaky
-   content_placeholders_test.exs:28, an extra "lantern" error), native Rise focus (P3), lampLit exact-hex (loka-x6t, P3).
-   loka-kgd.83 (spell reagents) is small: lift `lib/loka/content/replenish.ex` `misplaced/2`.
-6. Ink buttons loka-x6t.131: waiting on the owner's round-3 picks. Smaller: loka-vduxr.50, loka-kgd.198/.199/.201.
+1. **Before the Pro plan (about 2026-11-10), in parallel, at most three agents, each in its own worktree:**
+   - loka-vduxr.58.2 **S2** area migration, with S3's area lookups in `starters.ex` (developer; one reviewer).
+   - loka-wfrgk.9 **T1** treatments: designer rulings first (ask the owner for the reverie's feel), then a developer;
+     contract change, `kernel_api` bump, one reviewer.
+   - loka-wfrgk.2 **E1** write path with loka-vduxr.51 and loka-vduxr.53's route (developer; one reviewer, Fable is a
+     good fit for this trust boundary). Scope is design section 11.
+   - Then loka-vduxr.59 (toolbox page and gate) in the first free slot; it may slip into Pro.
+   E1 and T1 are kept at any cost, then S2.
+2. **Pro, lean, one at a time:** loka-vduxr.53 E5 prose, loka-vduxr.58.3 S3, loka-wfrgk.10 E2 shell, loka-vduxr.52 E3a
+   map, loka-wfrgk.7 E3b map edits, loka-wfrgk.11 E4a gate, loka-wfrgk.12 E4b generic card, then E6 a to e
+   (loka-wfrgk.3, .4, .5 with a reviewer, .6, .8). S4 (loka-vduxr.58.4) any time; loka-wfrgk.13 after E3b and S3.
+3. Interleave lean: **loka-kgd.207** combat title; **loka-vduxr.57** story recipes.
+4. Follow-ups: loka-x6t.132 (Book groups same-kind items; designer first), the spirit state after a death outside a
+   fight (loka-kgd, P2), loka-kgd.211 (flaky `content_placeholders_test.exs`; it reddened nightly `ffb29bb8`),
+   native Rise focus (P3), lampLit exact-hex (P3), loka-kgd.83 (lift `replenish.ex` `misplaced/2`).
+5. Ink buttons loka-x6t.131: waiting on the owner's round-3 picks. Smaller: loka-vduxr.50, loka-kgd.198/.199/.201.
 
 ## Owner's writing list (prologue; text keys, no prose from agents)
 
@@ -59,7 +56,6 @@ status names and meal or drink lines; the combat title keys once loka-kgd.207 la
 
 ## Holds
 
-- Authoring build: loka-wfrgk.2 to .8 and loka-vduxr.59 until the planning session (owner 2026-11-04).
 - P3 hold (owner 2026-10-22): draft #454, kgd.188, 2lvx, 5i4c, x6t.98, the 8 P3 engine bugs, the P3 retro items.
 - loka-x6t.126 skill-gated room depth.
 
