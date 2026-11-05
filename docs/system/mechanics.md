@@ -585,7 +585,7 @@ never casts schema values or imports I/O.
 
 The installed subset of archived 06 §33–§37 and 21 §3.6 has two closed control modes.
 A `modal` SceneDefinition starts from a declared story-point, quest outcome or bound
-accepted action, and has n≥1 `narrate {text}` steps followed by `await_ack`, then `end`.
+accepted action, or at world creation (an opening scene), and has n≥1 `narrate {text}` steps followed by `await_ack`, then `end`.
 It is not skippable or restartable. Its optional `treatment` (`reverie`) names a [Book treatment](book-ui.md#book-treatments): presentation only, it changes no rule and SceneView carries it. Its optional validated `on_end` atomically assigns
 declared player facts and reaches one story point; [A3](https://github.com/lorecrafting/lokacore/blob/9b94cb5f094175727ff8cd7f7b26db44775c7a4d/docs/system/cartridge.md#a3-green-finale)
 consumes this completion. B9 adds the anchored, resumable `presentation_only` Rest dream,
@@ -608,6 +608,13 @@ scene start after authored reactions, in scene-key order: `when` fact equals 0,
 scene starts require scene@1 alone, never reaction@1. There is no `scene_started`.
 The guarded start is part of the triggering command's atomic proposal, after its
 choice closes. Duplicate delivery or receipt retry never restarts an ended scene.
+
+An opening scene (`on: {start: true}`, no `outcome`; at most one per cartridge) starts at world
+creation instead: `newWorld` applies `steps` fact := 1 through the same fact.assign path as the
+initial knowledge, so play opens on line 1 before any command and before any room page, with no
+event, receipt or story point. A save rebuilds that initial world under its rows, so a reopen
+before the first Continue shows line 1, a later one the persisted line, and an ended (−1) scene
+never replays.
 
 While the actor's modal scene fact is in 1..n, the resolved ActionSet is replaced by only
 `continue` (target none, exact input `{scene, line}`, `action.continue`). Normal admission refuses

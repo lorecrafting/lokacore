@@ -141,6 +141,7 @@ defmodule Loka.Content.Scenes do
     cond do
       is_map_key(on, "action") -> "action"
       is_map_key(on, "quest") -> "quest"
+      is_map_key(on, "start") -> "start"
       true -> "story_point"
     end
   end
@@ -148,8 +149,8 @@ defmodule Loka.Content.Scenes do
   defp valid_source?(on, kind) do
     placed = Enum.count(~w(room detail), &is_map_key(on, &1))
 
-    Enum.count(~w(action quest story_point), &is_map_key(on, &1)) == 1 and
-      is_map_key(on, "outcome") and
+    Enum.count(~w(action quest story_point start), &is_map_key(on, &1)) == 1 and
+      (kind == "start" or is_map_key(on, "outcome")) and
       (kind != "action" or
          (placed == 2 and on["outcome"] == "success"))
   end
@@ -166,6 +167,8 @@ defmodule Loka.Content.Scenes do
       if(room == :unresolved, do: [unresolved.("room")], else: []) ++
       start_match(rel, steps, on, action, room)
   end
+
+  defp start_ref(_, _, _, "start", _, _), do: []
 
   defp start_ref(rel, steps, on, kind, m, defs),
     do: reference(rel, steps ++ ["on"], kind, on, m, defs)
@@ -272,6 +275,7 @@ defmodule Loka.Content.Scenes do
     |> Enum.group_by(fn {_, _, s} ->
       case s["on"] do
         %{"rest" => rest} -> {"rest", rest["room"], rest["detail"]}
+        %{"start" => _} -> "start"
         on -> on
       end
     end)

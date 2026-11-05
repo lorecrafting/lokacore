@@ -12,6 +12,7 @@ import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { gameView, holds, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { opening } from './opening_fixture.ts';
 
 const equal = (actual: unknown, expected: unknown) =>
   assert.deepEqual(actual === undefined ? undefined : JSON.parse(JSON.stringify(actual)), expected);
@@ -330,4 +331,29 @@ test('a treated scene carries its treatment into SceneView; the contract refuses
   assert.deepEqual(validate('GameView', view), []);
   const dream = { ...view, scene: { ...view.scene!, treatment: 'dream' } };
   assert.notDeepEqual(validate('GameView', dream), []);
+});
+
+// Breaks: newWorld leaves the opening scene unstarted (play opens on a room page), starts it at a
+// line other than 1, or its last Continue leaves the player anywhere but the entry room.
+test('an opening scene is the first view and its last Continue lands in the entry room', () => {
+  let w = fresh(opening);
+  const view = gameView(w);
+  equal(view.scene, {
+    scene: ref('scene', 'opening'),
+    line: 'scene.bell_rung.bell',
+    index: 1,
+    count: 2,
+    treatment: 'reverie',
+  });
+  equal(
+    view.actions.map((a) => a.action_key),
+    ['continue'],
+  );
+  assert.deepEqual(validate('GameView', view), []);
+  w = invoke(w, 'continue').world;
+  equal(gameView(w).scene?.line, 'scene.bell_rung.fen');
+  const s = invoke(w, 'continue');
+  equal(s.decision.outcome, 'ended');
+  equal(gameView(s.world).scene, undefined);
+  equal(gameView(s.world).place.title.key, 'room.ferry_landing.title');
 });
