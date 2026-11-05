@@ -30,10 +30,14 @@ const U = room('u', null);
 const ROOMS = [D, C, U, B, A];
 const LEVEL0 = map.onLevel(ROOMS, 0);
 // Break: rooms of one area ordered by input, not key.
-assert.deepEqual(
-  map.onLevel([B, A], 0).map((r) => r.key),
-  ['a', 'b'],
-);
+for (const order of [
+  [B, A],
+  [A, B],
+])
+  assert.deepEqual(
+    map.onLevel(order, 0).map((r) => r.key),
+    ['a', 'b'],
+  );
 
 // Breaks: selecting a room on another level leaves the map on the old one, or an unplaced room
 // throws the map to a missing level (the level-switch red control).
@@ -166,7 +170,7 @@ test('arrow keys: the nearest room within 45°, ties by key', () => {
     map.nearest([o, room('b2', null, { x: 2, y: 0, z: 0 }), near], o, 'ArrowRight'),
     near,
   );
-  // Break: a direction's vector off its axis or longer than one widens or turns the cone.
+  // Break: a direction turned the wrong way, or its cone widened past 45°.
   const steep = room('s', null, { x: -1, y: -2, z: 0 });
   assert.equal(map.nearest([o, steep], o, 'ArrowLeft'), undefined);
   assert.equal(map.nearest([o, steep], o, 'ArrowUp'), steep);

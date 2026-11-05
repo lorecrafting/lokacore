@@ -143,21 +143,20 @@ export function show(v: View, box: Box, at: At): View {
   return { zoom: v.zoom, x: box.w / 2 - c.x * v.zoom, y: box.h / 2 - c.y * v.zoom };
 }
 
-const ARROW: Record<string, [number, number]> = {
-  ArrowRight: [1, 0],
-  ArrowLeft: [-1, 0],
-  ArrowUp: [0, -1], // layout y grows south
-  ArrowDown: [0, 1],
+/** Each arrow key's offset turned to (ahead, aside); layout y grows south. */
+const ARROW: Record<string, (x: number, y: number) => [number, number]> = {
+  ArrowRight: (x, y) => [x, y],
+  ArrowLeft: (x, y) => [-x, y],
+  ArrowUp: (x, y) => [-y, x],
+  ArrowDown: (x, y) => [y, x],
 };
 /** The arrow key's next room: the nearest on the level within 45° of its direction (ties by key). */
 export function nearest(level: MapRoom[], from: MapRoom, key: string) {
-  const [dx, dy] = ARROW[key];
   let [best, far] = [undefined as MapRoom | undefined, Infinity];
   for (const r of [...level].sort(byKey)) {
-    const [x, y] = [r.at!.x - from.at!.x, r.at!.y - from.at!.y];
-    const d = Math.hypot(x, y);
-    // within 45°: ahead at least as far as aside (cells are integers, so exact)
-    if (!d || x * dx + y * dy < Math.abs(x * dy - y * dx)) continue;
+    const [ahead, aside] = ARROW[key](r.at!.x - from.at!.x, r.at!.y - from.at!.y);
+    const d = Math.hypot(ahead, aside);
+    if (!d || ahead < Math.abs(aside)) continue; // within 45°: cells are integers, so exact
     if (d < far) [best, far] = [r, d];
   }
   return best;
