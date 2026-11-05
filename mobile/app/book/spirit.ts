@@ -62,12 +62,12 @@ export const unheard = (s: Logs) =>
     : undefined;
 
 /** Let go or Back to World closes the ended page or the dead page; Let go with `revival` begins the
- * spirit state, unless the dead page's scene is open (it shows instead, book-ui.md Dead page). */
+ * spirit state, unless a scene is open (it shows instead, book-ui.md Dead page). */
 export function letGo(s: Logs, text: (key: string) => string) {
   const [revival, read] = [dead(s), !!s.down];
   s.ended = s.down = undefined;
   if (read) s.log.push(...cueLines(s, s.projection.view, text)); // held off the dead page
-  if (!revival || (read && s.projection.view.scene)) return false; // the fight's Let go is unchanged
+  if (!revival || s.projection.view.scene) return false;
   const held = since(s.log, s.woke ?? end(s.log));
   s.spirit = {
     lines: revival.lines.map(text),
