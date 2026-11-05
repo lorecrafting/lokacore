@@ -1,0 +1,175 @@
+// The editor map's drawing and its input (editor-map-and-story-rulings.md E3a): the rooms as SVG
+// buttons, wheel and drag pans, Cmd/Ctrl-wheel zooms, and the keyboard row.
+import { useEffect, useRef, useState } from 'react';
+import type { Level, MapProps, Reach } from './areamap.tsx';
+import type { MapRoom } from './author.ts';
+import * as map from './map.ts';
+import { M } from './map.ts';
+import { Box, Edges, Hulls, Pills, Stubs, type Marks } from './mapdraw.tsx';
+
+export type DrawProps = { p: MapProps; l: Level; reach: Reach };
+
+export function Drawing(d: DrawProps) {
+  const svg = useRef<SVGSVGElement>(null);
+  const [hover, setHover] = useState<string>();
+  const [focus, setFocus] = useState<string>();
+  const view = d.l.v.view!;
+  useWheel(svg, d);
+  const sel = d.l.level.find((r) => r.ref === d.p.selected);
+  const tab =
+    d.l.level.find((r) => r.key === focus) ??
+    map.entry(d.l.level, sel?.key, d.l.level.find((r) => r.ref === d.p.here)?.key);
+  const pills = d.l.level.filter(
+    (r) => r.ref === d.p.selected || r.ref === d.p.here || r.key === hover,
+  );
+  return (
+    <svg
+      ref={svg}
+      role="group"
+      aria-label={`Area map, level ${d.l.z}`}
+      className="absolute inset-0 size-full touch-none select-none"
+      onKeyDown={(e) => keys(e, d, tab, setFocus)}
+      onPointerDown={(e) => pan(e, d)}
+    >
+      <Hulls hulls={map.hulls(d.l.level, map.areas(d.p.story.map))} v={view} />
+      <Edges level={d.l.level} v={view} />
+      <Stubs level={d.l.level} v={view} />
+      {d.l.level.map((r) => (
+        <Room
+          key={r.key}
+          r={r}
+          d={d}
+          m={marks(r, d)}
+          tab={r === tab}
+          focus={setFocus}
+          hover={setHover}
+        />
+      ))}
+      <Pills rooms={pills} v={view} here={d.p.here} />
+    </svg>
+  );
+}
+
+const marks = (r: MapRoom, d: DrawProps): Marks => ({
+  unreached: d.reach.unreached.has(r.ref),
+  locked: d.reach.locked.has(r.ref),
+  visited: d.reach.visited.has(r.ref),
+  here: r.ref === d.p.here,
+  selected: r.ref === d.p.selected,
+});
+
+/** One room: a button named for screen readers; click selects, double-click goes, Alt-click opens. */
+function Room({
+  r,
+  d,
+  m,
+  tab,
+  focus,
+  hover,
+}: {
+  r: MapRoom;
+  d: DrawProps;
+  m: Marks;
+  tab: boolean;
+  focus: (k: string) => void;
+  hover: (k?: string) => void;
+}) {
+  return (
+    <g
+      data-key={r.key}
+      role="button"
+      tabIndex={tab ? 0 : -1}
+      aria-label={map.name(r, m)}
+      className="group cursor-pointer outline-none"
+      onFocus={() => focus(r.key)}
+      onPointerEnter={() => hover(r.key)}
+      onPointerLeave={() => hover(undefined)}
+      onClick={(e) => (e.altKey ? d.p.open(r.key) : d.p.pick(map.select(r)))}
+      onDoubleClick={() => d.p.go(r.key)}
+    >
+      <title>{map.name(r, {})}</title>
+      <Box r={r} v={d.l.v.view!} m={m} />
+    </g>
+  );
+}
+
+/** Wheel pans at once; Cmd/Ctrl-wheel (and a trackpad pinch) zooms about the cursor. Non-passive. */
+function useWheel(svg: React.RefObject<SVGSVGElement | null>, d: DrawProps) {
+  const latest = useRef(d);
+  latest.current = d;
+  useEffect(() => {
+    const el = svg.current!;
+    const wheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const { v, level, size } = latest.current.l;
+      const now = v.now.current!;
+      const box = el.getBoundingClientRect();
+      const moved =
+        e.ctrlKey || e.metaKey
+          ? map.zoomAt(now, Math.exp(-e.deltaY / 100), {
+              x: e.clientX - box.left,
+              y: e.clientY - box.top,
+            })
+          : { ...now, x: now.x - e.deltaX, y: now.y - e.deltaY };
+      v.set(map.keep(moved, map.bounds(level), size));
+    };
+    el.addEventListener('wheel', wheel, { passive: false });
+    return () => el.removeEventListener('wheel', wheel);
+  }, [svg]);
+}
+
+/** A drag that starts on empty ground (not a room) pans. */
+function pan(e: React.PointerEvent<SVGSVGElement>, d: DrawProps) {
+  if ((e.target as Element).closest('[data-key]')) return;
+  const el = e.currentTarget;
+  el.setPointerCapture(e.pointerId);
+  const [x0, y0, start] = [e.clientX, e.clientY, d.l.v.now.current!];
+  const move = (m: PointerEvent) =>
+    d.l.v.set(
+      map.keep(
+        { ...start, x: start.x + m.clientX - x0, y: start.y + m.clientY - y0 },
+        map.bounds(d.l.level),
+        d.l.size,
+      ),
+    );
+  const up = () => (
+    el.removeEventListener('pointermove', move),
+    el.removeEventListener('pointerup', up)
+  );
+  el.addEventListener('pointermove', move);
+  el.addEventListener('pointerup', up);
+}
+
+/** Arrows, PageUp and PageDown, Enter, Shift-Enter, `+` `-` `0` and Esc, per the E3a keyboard row. */
+function keys(
+  e: React.KeyboardEvent<SVGSVGElement>,
+  d: DrawProps,
+  from: MapRoom | undefined,
+  setFocus: (k: string) => void,
+) {
+  const svg = e.currentTarget;
+  const i = d.l.all.indexOf(d.l.z);
+  const room = (r?: MapRoom) =>
+    r &&
+    (setFocus(r.key), svg.querySelector<SVGElement>(`[data-key="${CSS.escape(r.key)}"]`)?.focus());
+  const act: Record<string, (() => unknown) | undefined> = {
+    Enter: () => from && (e.shiftKey ? d.p.go(from.key) : d.p.pick(map.select(from))),
+    PageUp: () => i < d.l.all.length - 1 && d.l.toLevel(d.l.all[i + 1]),
+    PageDown: () => i > 0 && d.l.toLevel(d.l.all[i - 1]),
+    '+': () => d.l.zoom(M.step),
+    '=': () => d.l.zoom(M.step),
+    '-': () => d.l.zoom(1 / M.step),
+    '0': () => d.l.v.ease(map.fit(map.bounds(d.l.level), d.l.size)),
+    Escape: () =>
+      svg
+        .closest('section')
+        ?.querySelector<HTMLElement>('[role="radio"][aria-checked="true"]')
+        ?.focus(),
+  };
+  const run = e.key.startsWith('Arrow')
+    ? () => from && room(map.nearest(d.l.level, from, e.key))
+    : act[e.key];
+  if (!run) return;
+  e.preventDefault();
+  run();
+}

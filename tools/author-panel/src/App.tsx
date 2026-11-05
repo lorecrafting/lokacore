@@ -184,6 +184,42 @@ function useWiring(
   return { pick, run };
 }
 
+/** The map slot under the left column, with its divider; the map's moves go to the Book. */
+function Slot({ layout, set, story, book, pick, refused }: Shell & { refused?: string }) {
+  return (
+    <>
+      <Divider side="slot" layout={layout} set={set} />
+      <MapSlot
+        layout={layout}
+        set={set}
+        story={story}
+        refused={refused}
+        here={book.state?.shown.here}
+        visited={book.state?.shown.visited ?? []}
+        selected={places(layout.selection, story?.graph.nodes ?? []).map}
+        pick={pick}
+        go={(room) => book.send({ op: 'go_to_room', room })}
+        open={(key) => void ask('open', { key })}
+      />
+    </>
+  );
+}
+
+/** The last good story, refetched on each compile; a refusal's first line once the watcher spoke. */
+function useStory(said: unknown[] | undefined) {
+  const [story, setStory] = useState<Story>();
+  const [refused, setRefused] = useState<string>();
+  useEffect(
+    () =>
+      void getStory().then(
+        (s) => (setStory(s), setRefused(undefined)),
+        (e: Error) => setRefused(said?.length ? e.message.split('\n')[0] : undefined), // no watcher yet: waiting
+      ),
+    [said],
+  );
+  return [story, refused] as const;
+}
+
 const COLUMN =
   'flex min-h-0 shrink-0 flex-col bg-background w-(--w) max-[900px]:h-1/2 max-[900px]:w-full';
 
@@ -193,9 +229,8 @@ export default function App() {
   const book = useBook(frame, heard);
   const diag = useDiagnostics();
   const [layout, set] = useLayout();
-  const [story, setStory] = useState<Story>();
+  const [story, refused] = useStory(diag.said);
   const [palette, setPalette] = useState(false);
-  useEffect(() => void getStory().then(setStory, () => {}), [diag.said]); // a failed fetch keeps the last good
   const { pick, run } = useWiring(book, heard, layout, set, () => setPalette(true));
   const s: Shell = { layout, set, story, book, diag, pick };
   const all = (text: Record<string, string>) =>
@@ -204,7 +239,7 @@ export default function App() {
     <div className="flex h-full bg-background text-foreground max-[900px]:flex-col">
       <Side side="left" s={s}>
         <Left {...s} />
-        <MapSlot layout={layout} set={set} story={story} />
+        <Slot {...s} refused={refused} />
       </Side>
       <BookStrip
         frame={frame}
