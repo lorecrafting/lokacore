@@ -63,27 +63,28 @@ test('/world lists real worlds, refuses names that are paths, and makes one as b
   t.after(() => live.close());
   const port = await live.port;
   // Break: a link or a folder with no cartridge.json listed; a `~` title shown instead of the name.
-  assert.deepEqual((await ask(port, '/world')).body, {
-    current: 'a',
-    worlds: [
-      { name: 'a', title: 'A' },
-      { name: 'b', title: 'Bee' },
-      { name: 'c', title: 'c' },
-    ],
+  const list = [
+    { name: 'a', title: 'A' },
+    { name: 'b', title: 'Bee' },
+    { name: 'c', title: 'c' },
+  ];
+  assert.deepEqual(await ask(port, '/world'), {
+    status: 200,
+    body: { current: 'a', worlds: list },
   });
   // Break: a name that climbs out of worlds/, a link, or a folder that is no cartridge, opened or made.
-  for (const sent of [
-    { name: '../worlds/b' },
-    { name: 'linked' },
-    { name: 'loose' },
-    { name: '../x', new: true },
-    { name: 'x.y', new: true },
-    { name: '1x', new: true },
-    { name: 'b', new: true },
-    { name: 'x', new: true, from: '../worlds/b' },
-    { name: 'x', new: true, from: 'linked' },
-  ])
-    assert.ok((await ask(port, '/world', sent)).status >= 400, JSON.stringify(sent));
+  for (const [status, sent] of [
+    [400, { name: '../worlds/b' }],
+    [404, { name: 'linked' }],
+    [404, { name: 'loose' }],
+    [400, { name: '../x', new: true }],
+    [400, { name: 'x.y', new: true }],
+    [400, { name: '1x', new: true }],
+    [409, { name: 'b', new: true }],
+    [400, { name: 'x', new: true, from: '../worlds/b' }],
+    [404, { name: 'x', new: true, from: 'linked' }],
+  ] as const)
+    assert.equal((await ask(port, '/world', sent)).status, status, JSON.stringify(sent));
   assert.equal(existsSync(join(dir, 'new.log')), false);
   assert.deepEqual(left, []);
   // Break: mix's refusal not passed on, or the server left busy after it.
@@ -147,12 +148,14 @@ test('after a switch the restarted watcher writes into the new world only', asyn
   assert.notEqual(readFileSync(join(dir, 'worlds/b/rooms/start.json'), 'utf8'), ROOM);
 });
 
-// Break: with no remembered world, `--watch` is taken for the cartridge folder.
+// Break: with no remembered world, `--watch` is taken for the cartridge folder; a stray argument run.
 test('bin/loka dev --watch with no remembered world prints the usage', (t) => {
-  const { dir } = worlds(t);
-  const run = spawnSync(`${ROOT}bin/loka`, ['dev', '--watch'], {
-    env: { ...process.env, LOKA_DEV_CARTRIDGE: join(dir, 'out/current.json') },
-    encoding: 'utf8',
-  });
-  assert.equal(run.status, 2, run.stderr);
+  const { dir, a } = worlds(t);
+  for (const args of [['--watch'], [a, '--x'], [a, '--watch', 'x']]) {
+    const run = spawnSync(`${ROOT}bin/loka`, ['dev', ...args], {
+      env: { ...process.env, LOKA_DEV_CARTRIDGE: join(dir, 'out/current.json') },
+      encoding: 'utf8',
+    });
+    assert.equal(run.status, 2, `${args} ${run.stderr}`);
+  }
 });
