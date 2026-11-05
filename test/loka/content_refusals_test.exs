@@ -287,7 +287,7 @@ defmodule Loka.ContentRefusalsTest do
   # Breaks: a hound-style area whose rooms are not joined both ways compiles and later strands
   # wandering members (showcase goblins: goblin_pit <-> drill_yard).
   test "population area requires the opposite return exit", %{toolbox_showcase: dir} do
-    assert {"SCHEMA_VIOLATION", "populations/goblins.area"} in codes(dir, [
+    assert {"SCHEMA_VIOLATION", "areas/combat/populations/goblins.area"} in codes(dir, [
              {"rooms/drill_yard.json",
               &update_in(&1, ["exits"], fn e -> Map.delete(e, "south") end)}
            ])
@@ -303,18 +303,24 @@ defmodule Loka.ContentRefusalsTest do
           %{"night_start" => 1, "night_end" => 5},
           %{"night_start" => 5, "night_end" => 5}
         ] do
-      assert {"SCHEMA_VIOLATION", "populations/goblins.wander_interval"} in codes(dir, [
-               {"populations/goblins.json", &Map.merge(&1, change)}
-             ]),
+      assert {"SCHEMA_VIOLATION", "areas/combat/populations/goblins.wander_interval"} in codes(
+               dir,
+               [
+                 {"populations/goblins.json", &Map.merge(&1, change)}
+               ]
+             ),
              inspect(change)
     end
   end
 
   # Breaks: a zero flight threshold compiles, so no living member can ever flee.
   test "pack flight threshold must be positive", %{toolbox_showcase: dir} do
-    assert {"SCHEMA_VIOLATION", "populations/goblins.pack.flight_below_percent"} in codes(dir, [
-             {"populations/goblins.json", &put_in(&1, ["pack", "flight_below_percent"], 0)}
-           ])
+    assert {"SCHEMA_VIOLATION", "areas/combat/populations/goblins.pack.flight_below_percent"} in codes(
+             dir,
+             [
+               {"populations/goblins.json", &put_in(&1, ["pack", "flight_below_percent"], 0)}
+             ]
+           )
   end
 
   # Breaks: a deer plan compiles without its hide (only a scavenger plan may omit the item).

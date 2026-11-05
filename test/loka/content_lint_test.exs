@@ -363,6 +363,7 @@ defmodule Loka.ContentLintTest do
   # tag, or a new tag query, enters unreviewed.
   test "toolbox_showcase target and tool tag queries match exactly the pinned items and NPCs" do
     {files, _} = Loka.Content.Source.load("cartridges/toolbox_showcase")
+    files = for {rel, k, v} <- files, do: {String.replace(rel, ~r{^areas/[^/]+/}, ""), k, v}
 
     holders = fn tag ->
       for {rel, _, %{"tags" => tags}} <- files,

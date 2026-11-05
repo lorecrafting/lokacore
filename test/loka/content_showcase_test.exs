@@ -37,6 +37,8 @@ defmodule Loka.ContentShowcaseTest do
                Loka.ContentSource.compile(dir, [keyed, door("locked", %{"tag" => "burnable"})])
 
       # A keyless burnable barrier on no exit (a lid) is out of a tag's reach.
+      File.mkdir_p!(Path.join(dir, "barriers"))
+
       File.write!(
         Path.join(dir, "barriers/stray.json"),
         JSON.encode!(%{

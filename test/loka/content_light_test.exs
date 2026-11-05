@@ -2,7 +2,7 @@ defmodule Loka.ContentLightTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/toolbox_showcase")}
   @src "cartridges/toolbox_showcase"
-  defp source(path), do: JSON.decode!(File.read!(Path.join(@src, path)))
+  defp source(path), do: JSON.decode!(File.read!(Loka.ContentSource.path(@src, path)))
 
   # Break: compiled fuel drops or retunes the source file fields, the short supply stays short, or a
   # dark description loses its text. Deleted: the chapter's torch tuning and Well Lane stair pins.
