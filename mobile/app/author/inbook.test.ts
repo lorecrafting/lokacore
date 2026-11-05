@@ -116,6 +116,21 @@ test('a double-click opens the source words; Enter saves them to that line and c
   );
 });
 
+// Breaks: a space's keyup presses the button around a line (a room title's): the field blurs and
+// saves the words typed so far.
+test('a space mid-edit in a line inside a button keeps the field open', async () => {
+  await page.evaluate(() => {
+    const button = document.querySelector('button')!;
+    button.append(document.querySelector('p')!);
+    button.onclick = () => button.focus(); // a Book press takes the focus
+  });
+  await page.locator('button p').dblclick();
+  await page.locator('[data-loka-field]').waitFor();
+  await page.keyboard.type(' at dusk');
+  assert.equal(await page.locator('[data-loka-field]').textContent(), 'Rain falls. at dusk');
+  assert.deepEqual(posted('/edit'), []);
+});
+
 // Breaks: Esc or an untouched field writes, an emptied field saves, or a paste keeps its newline.
 test('Esc and unchanged words write nothing; empty words say how to leave a line unwritten', async () => {
   await openFirst();

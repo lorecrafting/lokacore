@@ -26,9 +26,7 @@ type Hooks = {
 };
 type At = { file: string; line: number; was: string; words: string };
 type Field = { el: HTMLElement; kept: Node[]; shown: string; key: string; at: At; busy?: boolean };
-
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
-
 const enc = encodeURIComponent;
 async function api(path: string, sent?: object): Promise<[number, any]> {
   const init = sent && { method: 'POST', body: JSON.stringify(sent) };
@@ -51,7 +49,6 @@ const observer =
   typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(reapply);
 const watch = () =>
   observer?.observe(document.body, { childList: true, subtree: true, characterData: true });
-
 const lines = () =>
   [...document.querySelectorAll<HTMLElement>('[dir="auto"]')].filter((el) =>
     hooks.seen.has(el.textContent ?? ''),
@@ -122,6 +119,7 @@ async function openField(el: HTMLElement) {
   getSelection()?.selectAllChildren(el);
   getSelection()?.collapseToEnd();
   el.addEventListener('keydown', onFieldKey);
+  el.addEventListener('keyup', onFieldUp);
   el.addEventListener('beforeinput', onInput);
   el.addEventListener('blur', onBlur);
   caption();
@@ -133,6 +131,7 @@ function close() {
   const had = document.activeElement === el; // not when a blur saved: focus stays where it went
   field = undefined;
   el.removeEventListener('keydown', onFieldKey);
+  el.removeEventListener('keyup', onFieldUp);
   el.removeEventListener('beforeinput', onInput);
   el.removeEventListener('blur', onBlur);
   el.replaceChildren(...kept); // React's own nodes, so its next render finds them
@@ -152,6 +151,8 @@ function onFieldKey(e: KeyboardEvent) {
   e.preventDefault(); // one line: Enter saves, Shift-Enter does nothing
   if (!e.shiftKey) void save();
 }
+// a space's keyup would press a button around the line (a room title's) and blur the field
+const onFieldUp = (e: KeyboardEvent) => e.key === ' ' && e.preventDefault();
 function onInput(e: InputEvent) {
   if (e.inputType === 'insertParagraph' || e.inputType === 'insertLineBreak') e.preventDefault();
   const text = e.dataTransfer?.getData('text/plain') ?? e.data;
@@ -161,7 +162,6 @@ function onInput(e: InputEvent) {
   }
 }
 const onBlur = () => void save();
-
 async function save() {
   if (!field || field.busy) return;
   const f = field;
