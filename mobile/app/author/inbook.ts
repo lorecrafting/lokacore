@@ -3,12 +3,26 @@
 // panel.tsx requires this only in the author preview, so a player build never holds it.
 import { size, space, type } from '../book/tokens.ts';
 import type { Message } from './live.ts';
-import { noFieldNote, oneLine, paletteNear, saving, step, unwritten, walk } from './prose_rules.ts';
+import {
+  noFieldNote,
+  oneLine,
+  paletteNear,
+  saving,
+  step,
+  textField,
+  unwritten,
+  walk,
+} from './prose_rules.ts';
 
 export { tagged } from './prose_rules.ts';
-type Hooks = { seen: Map<string, string>; said: Map<string, string>; tell: (sent: object) => void };
+type Hooks = {
+  seen: Map<string, string>;
+  said: Map<string, string>;
+  tell: (sent: object) => void;
+  redraw: () => void;
+};
 type At = { file: string; line: number; was: string; words: string };
-type Field = { el: HTMLElement; kept: Node[]; key: string; at: At; busy?: boolean };
+type Field = { el: HTMLElement; kept: Node[]; shown: string; key: string; at: At; busy?: boolean };
 
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 const label = `${type.label.fontSize}px/${type.label.lineHeight}px ${type.label.fontFamily}`;
@@ -30,11 +44,10 @@ async function api(path: string, sent?: object): Promise<[number, any]> {
   const r = await fetch(`/__author${path}`, init);
   return [r.status, await r.json().catch(() => null)];
 }
-const typing = (t: EventTarget | null) =>
-  t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+const typing = (t: EventTarget | null) => t instanceof HTMLElement && textField(t);
 
 // One editor per page: its state lives here, set by start().
-let hooks: Hooks = { seen: new Map(), said: new Map(), tell: () => {} };
+let hooks: Hooks = { seen: new Map(), said: new Map(), tell: () => {}, redraw: () => {} };
 const edits: { id: number; at: string; file: string; key: string; words: string }[] = []; // this page's /edit answers
 let unconfirmed = new Set<string>();
 let field: Field | undefined;
@@ -100,7 +113,7 @@ async function openField(el: HTMLElement) {
   if (!key || field) return say(el, key ? '' : noFieldNote(undefined));
   const [status, at] = await api(`/line?key=${enc(key)}&words=${enc(hooks.said.get(key) ?? '')}`);
   if (status !== 200) return say(el, noFieldNote(key, typeof at === 'string' ? at : undefined));
-  field = { el, kept: [...el.childNodes], key, at };
+  field = { el, kept: [...el.childNodes], shown: el.textContent!, key, at };
   observer?.disconnect(); // the field is not a Book render
   el.replaceChildren(at.words);
   el.contentEditable = 'plaintext-only';
@@ -130,6 +143,7 @@ function close() {
   say(undefined);
   watch();
   reapply();
+  hooks.redraw(); // the words it held back while open
 }
 function onFieldKey(e: KeyboardEvent) {
   e.stopPropagation(); // the Book's keys are not the field's
@@ -191,12 +205,16 @@ async function putBack() {
   });
 }
 /** A Book key outside any field: walk, Enter on the landed line, Cmd-Z. */
-function onKey(e: KeyboardEvent, inField = typing(e.target)) {
+function onKey(e: KeyboardEvent, inField = typing(e.target), relayed = false) {
   if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 'z' && !inField) {
     e.preventDefault?.();
     return void putBack();
   }
-  if (e.key === 'Enter' && landed && !inField) return void openField(landed);
+  const onLanded = relayed || e.target === document.body || e.target === landed; // not a choice's Enter
+  if (e.key === 'Enter' && landed && !inField && onLanded) {
+    e.preventDefault?.();
+    return void openField(landed);
+  }
   const asked = walk(e, inField);
   if (!asked) return;
   const [todoOnly, by] = asked;
@@ -213,9 +231,23 @@ const onDouble = (e: MouseEvent) => {
   void openField(el && el !== document.body ? el : (e.target as HTMLElement));
 };
 const hush = () => field || say(undefined); // a note lasts until the next click or key
-const onRelay = (e: MessageEvent) => {
-  if (LOCAL.test(e.origin) && e.data?.op === 'key') onKey(e.data, false);
+const onClick = () => {
+  hush();
+  if (!landed) return;
+  landed.removeAttribute('data-loka-landed');
+  landed = undefined; // Enter is the page's again
+  reapply();
 };
+const onRelay = (e: MessageEvent) => {
+  if (LOCAL.test(e.origin) && e.data?.op === 'key') onKey(e.data, false, true);
+};
+/** The words a Book render shows for `key`: the open field's, held until it closes, else undefined. */
+export const frozen = (key: string) => (field?.key === key ? field.shown : undefined);
+/** Tells the counts again (a panel that just said hello missed them). */
+export function recount() {
+  counted = '';
+  reapply();
+}
 /** A pushed message (panel.tsx's stream): unconfirmed lines, and a change under the field. */
 export function heard(message: Message) {
   unconfirmed = new Set((message.unconfirmed ?? []).map((u) => u.key));
@@ -229,7 +261,7 @@ export function heard(message: Message) {
 const on: [EventTarget, string, EventListener][] = [
   [document, 'dblclick', onDouble as EventListener],
   [document, 'keydown', onKey as EventListener],
-  [document, 'click', hush],
+  [document, 'click', onClick],
   [document, 'keyup', hush],
   [window, 'message', onRelay as EventListener],
 ];

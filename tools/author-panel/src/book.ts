@@ -3,6 +3,7 @@
 // session update, answers `trace`, and posts `line` for an Alt-clicked Book line.
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { Step as PlaceStep } from '../../../mobile/app/author/place.ts';
+import { relays } from '../../../mobile/app/author/prose_rules.ts';
 import { askTrace } from './ask_trace.ts';
 import type { factRows, shown } from '../../../mobile/app/author/shown.ts';
 
@@ -31,10 +32,6 @@ type Asked =
   | { op: 'set_fact'; fact: string; value: boolean | number | string }
   | { op: 'trace'; id: number }
   | { op: 'key'; key: string; metaKey: boolean; ctrlKey: boolean; altKey: boolean };
-// The Book's walk keys, relayed from the panel; a text field, a button or a held modifier keeps its own
-const RELAYED = new Set([']', '[', '}', '{', 'Enter']);
-const relayed = (e: KeyboardEvent) =>
-  RELAYED.has(e.key) && e.target === document.body && !e.metaKey && !e.ctrlKey && !e.altKey;
 
 export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
   const [state, setState] = useState<State>();
@@ -58,7 +55,7 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
     };
     const onKey = (e: KeyboardEvent) => {
       const { key, metaKey, ctrlKey, altKey } = e;
-      if (relayed(e)) send({ op: 'key', key, metaKey, ctrlKey, altKey });
+      if (e.target instanceof HTMLElement && relays(e, e.target)) send({ op: 'key', key, metaKey, ctrlKey, altKey });
     };
     window.addEventListener('message', onMessage);
     window.addEventListener('keydown', onKey);

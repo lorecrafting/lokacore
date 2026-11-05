@@ -10,7 +10,9 @@ const WARNING = 'text-(--book-warning)';
 /** The header's Hold toggle and `Held · N waiting`; leaving the page releases a Hold it set. */
 export function Hold({ held, pending }: { held?: boolean; pending?: number }) {
   const mine = useRef(false);
-  if (!held) mine.current = false;
+  useEffect(() => {
+    if (!held) mine.current = false; // on a change only: a render before `held` arrives keeps it
+  }, [held]);
   useEffect(() => {
     const release = () =>
       mine.current && navigator.sendBeacon('/__author/hold', JSON.stringify({ on: false }));
@@ -75,11 +77,10 @@ export function Unconfirmed({
           </summary>
           <ul className="mt-1 font-mono">
             {unconfirmed.map(({ at }) => (
-              <li key={at}>
-                {at}: {said?.join(' ')}
-              </li>
+              <li key={at}>{at}</li>
             ))}
           </ul>
+          <p className="mt-1">{said?.join(' ')}</p>
         </details>
       ) : null}
       {prose.note ? (

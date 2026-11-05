@@ -29,14 +29,30 @@ export function step(count: number, at: number, by: 1 | -1) {
   return (at + by + count) % count;
 }
 
+type Key = { key: string; metaKey: boolean; ctrlKey: boolean; altKey: boolean };
+type Target = { tagName: string; isContentEditable: boolean };
+/** A text field keeps its own keys. */
+export const textField = (t: Target) =>
+  t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+
 /** The walk a key asks for, or undefined: never in a text field, never with Cmd, Ctrl or Alt. */
-export function walk(
-  e: { key: string; metaKey: boolean; ctrlKey: boolean; altKey: boolean },
-  typing: boolean,
-) {
+export function walk(e: Key, typing: boolean) {
   if (typing || e.metaKey || e.ctrlKey || e.altKey) return undefined;
   const asked = { ']': [true, 1], '[': [true, -1], '}': [false, 1], '{': [false, -1] } as const;
   return Object.hasOwn(asked, e.key) ? asked[e.key as keyof typeof asked] : undefined;
+}
+
+/** Whether the panel hands a key to the Book: a walk key, or Enter anywhere but a text field or a
+ * control (whose Enter is its own). */
+export function relays(e: Key, target: Target) {
+  if (e.key !== 'Enter') return walk(e, textField(target)) !== undefined;
+  return (
+    !textField(target) &&
+    !/^(BUTTON|A|SUMMARY)$/.test(target.tagName) &&
+    !e.metaKey &&
+    !e.ctrlKey &&
+    !e.altKey
+  );
 }
 
 /** The note under a line that opens no field: the route's refusal (or none: the engine's line). */

@@ -8,6 +8,7 @@ import {
   noFieldNote,
   oneLine,
   paletteNear,
+  relays,
   saving,
   step,
   tagged,
@@ -51,6 +52,23 @@ test('walk keys wrap, and stay out of text fields and Cmd, Ctrl, Alt', () => {
   assert.equal(walk(key('toString'), false), undefined);
 });
 
+// Breaks: the panel keeps a walk key after a button click took the focus, relays a key typed in
+// its own field, or relays Enter on a control (the Book opens a line while the control acts).
+test("the panel hands the Book its walk keys and Enter, but not a field's or a control's", () => {
+  const on = (tagName: string, isContentEditable = false) => ({ tagName, isContentEditable });
+  const key = (k: string, mod = {}) => ({
+    key: k,
+    metaKey: false,
+    ctrlKey: false,
+    altKey: false,
+    ...mod,
+  });
+  assert.ok(relays(key(']'), on('BUTTON')) && relays(key('Enter'), on('BODY')));
+  assert.ok(!relays(key(']'), on('INPUT')) && !relays(key('['), on('DIV', true)));
+  assert.ok(!relays(key('Enter'), on('BUTTON')) && !relays(key('Enter'), on('TEXTAREA')));
+  assert.ok(!relays(key('Enter', { metaKey: true }), on('BODY')) && !relays(key('x'), on('BODY')));
+});
+
 // Breaks: an engine line or a choice label gets the generic note.
 test('a line with no field says why', () => {
   assert.equal(noFieldNote('item.taken'), 'The engine writes this line.');
@@ -72,10 +90,14 @@ test('the marks take the palette nearest the page paper', () => {
 // Breaks: an import of inbook.ts that is not the author-preview require, so a player build holds it
 // (the export proof is in the PR: a static require put its sentinel in the web bundle).
 test('only the gated require reaches the in-Book editor', () => {
-  const hits = execFileSync('git', ['grep', '-n', 'inbook', '--', '*.ts', '*.tsx'], {
-    cwd: join(import.meta.dirname, '..'),
-    encoding: 'utf8',
-  })
+  const hits = execFileSync(
+    'git',
+    ['grep', '-n', 'inbook', '--', '*.ts', '*.tsx', ':!author/prose_rules.test.ts'],
+    {
+      cwd: join(import.meta.dirname, '..'),
+      encoding: 'utf8',
+    },
+  )
     .split('\n')
     .filter((l) => /['"]\.{1,2}\/(author\/)?inbook/.test(l) && !/typeof import\(/.test(l));
   assert.deepEqual(

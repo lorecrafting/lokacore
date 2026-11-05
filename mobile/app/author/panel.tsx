@@ -119,6 +119,8 @@ export function played(game: Opened | undefined) {
     recorded.set(game, {
       ...game,
       text: (key) => {
+        const held = inBook?.frozen(key); // an open field's words stay put under React
+        if (held !== undefined) return held;
         const words = overlay[key] ?? game.text(key);
         const shown = inBook?.tagged(key, words) ?? words; // two `~` lines show apart
         seen.set(shown, key);
@@ -207,7 +209,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
   latest.current = tools;
   useEffect(() => {
     if (!devClock || !game) return;
-    const state = () => tell({ state: stateOf(game) });
+    const state = () => (tell({ state: stateOf(game) }), inBook?.recount()); // hello missed the `~` counts
     const onMessage = (e: MessageEvent<Asked>) => {
       if (!LOCAL.test(e.origin) || !e.source || !OPS.has(e.data?.op)) return;
       panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
@@ -229,7 +231,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       inBook?.heard(message);
       latest.current.redraw({}); // a text overlay redraws in place
     });
-    const stop = inBook?.start({ seen, said, tell });
+    const stop = inBook?.start({ seen, said, tell, redraw: () => latest.current.redraw({}) });
     if (panel) state();
     else if (window.parent !== window)
       window.parent.postMessage({ loka: 'author', ready: true }, '*');
