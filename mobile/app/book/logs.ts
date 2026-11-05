@@ -220,9 +220,9 @@ export function savedNarration(game: Game, s: Logs, command_id?: string) {
 
 export function resetLogs(s: Logs, now: GameView) {
   const was = s.projection.view;
-  s.room = { title: was.place.title.key, log: [] };
+  s.room = undefined; // staying, a death's dead page is this room (spirit.ts fall)
   if (was.place.id !== now.place.id) {
-    markDrawn((s.room.log = dropLines(s.log))); // already drawn: the dead page does not dry them again
+    markDrawn((s.room = { title: was.place.title.key, log: dropLines(s.log) }).log); // drawn: no dry
     s.noted = new Set();
     s.away = undefined; // held lines belong to the room left, as its log
   }

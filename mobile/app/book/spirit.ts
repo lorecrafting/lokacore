@@ -37,7 +37,11 @@ export function fall(s: Logs, command_id: string) {
   s.died = command_id;
   s.woke = end(s.log); // before the receipt's own lines
   if (s.closing) s.fell = s.ended;
-  else [s.down, s.ended] = [s.room, undefined];
+  else
+    [s.down, s.ended] = [
+      s.room ?? { title: s.projection.view.place.title.key, log: [] },
+      undefined,
+    ];
 }
 
 const fellIn = (s: Logs) => !!s.ended && s.fell === s.ended;

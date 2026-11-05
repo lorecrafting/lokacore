@@ -10,7 +10,11 @@ const { flashesOn, useCues } = await import('./cues.ts');
 const { opacity } = await import('./tokens.ts');
 
 const g = globalThis as any;
-const held_view = { place: { id: 'p' }, inventory: [], journal: [] } as unknown as GameView;
+const held_view = {
+  place: { id: 'p', title: { key: 'p' } },
+  inventory: [],
+  journal: [],
+} as unknown as GameView;
 const hit = (hp: number) =>
   ({
     ...held_view,
