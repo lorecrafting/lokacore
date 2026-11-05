@@ -157,8 +157,8 @@ entry; the jobs it runs appear in its committed events.
   *Amendment (2026-11-05, loka-vduxr.42, PM to confirm):* replay also reads `failed` and
   `unknown` from `commit.state`, for any decision: it decides the entry from the inputs but
   does not adopt it (world and revision stay; a `failed` entry takes its ordinal, an `unknown`
-  one leaves it to the follow-up row that repeats it), and rebuilds the commit from the state
-  alone (`storage_error`, `no_outcome`). No schema change; elapsed replay still refuses such a
+  one leaves it to the follow-up row that repeats it), and keeps the recorded commit, a
+  storage fact no input decides. No schema change; elapsed replay still refuses such a
   trace (protocol.md, Trusted local elapsed replay).
 - **Committed events only.** Proposed events never leave a failed commit (04 §5.1), so a
   failed or unknown commit carries none; the events are `CommittedEvent`s, the only form

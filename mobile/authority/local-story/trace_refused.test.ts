@@ -204,4 +204,7 @@ test('a failed and an unknown commit replay identically, and Why and coverage re
     return JSON.parse(r.stdout).outcome;
   };
   assert.deepEqual([why(2), why(3), why(4)], ['moved', 'moved', 'looked']);
+  const past = p.run('why.ts', p.path, '5'); // six rows, four ordinals
+  assert.equal(past.status, 2);
+  assert.match(past.stderr, /ordinal 5 is not in 1\.\.4/);
 });
