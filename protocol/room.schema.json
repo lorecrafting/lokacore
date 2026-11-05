@@ -495,6 +495,9 @@
         "cues": {"description":"Sense cues reaching nearby rooms: 1 to 4 of {sense, text, range, when?}.",
           "$ref": "entity.schema.json#/$defs/Cues"
         },
+        "ambient": {"description":"Ambient lines told while the player is in this room: 1 to 4 of {lines, every, chance?, when?}.",
+          "$ref": "entity.schema.json#/$defs/AmbientSets"
+        },
         "site": {
           "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
           "type": "object",

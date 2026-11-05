@@ -1,4 +1,5 @@
 // C row Pages, Room (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
+// size: allow 340, one story per room page state the log can reach
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, waitFor } from 'storybook/test';
 import { Body, RoomPage } from '../book/Body.tsx';
@@ -12,6 +13,7 @@ import RoomAtNightView from './views/room-at-night.json';
 import RoomRefusalView from './views/room-refusal.json';
 import senses from '../../../cartridges/senses_sampler/text.json';
 import emoteText from '../../../cartridges/emote_sampler/text.json';
+import ambientText from '../../../cartridges/ambient_emote_sampler/text.json';
 import toolboxText from '../../../cartridges/toolbox_showcase/text.json';
 import { lineWords } from '../book/words.ts';
 import { motion } from '../book/tokens.ts';
@@ -208,6 +210,34 @@ export const GoblinsCower: StoryObj = {
   name: 'Goblins cower',
   play: async ({ canvas }) => {
     await expect(await canvas.findAllByText('A goblin cowers in fear.')).toHaveLength(2);
+  },
+};
+
+// Breaks (loka-8ghm, mechanics.md#ambient-emotes): a room, item or NPC ambient line shows its raw
+// key. The sampler's words are placeholders (`~`) until the owner writes them.
+const glancing = {
+  ...RoomNpcsItemsView.view,
+  entities: goblins.slice(0, 1),
+  emotes: [{ key: 'glance', others: 'emote.glance.others' }],
+};
+export const Ambient: StoryObj = {
+  ...pageStory({
+    ...RoomNpcsItemsView,
+    view: glancing,
+    log: [
+      { key: 'room.cave.drip' },
+      { key: 'item.lantern.gutter' },
+      {
+        key: 'emote.performed',
+        bindings: { emote: 'glance' },
+        participants: { actor: goblins[0]!.id },
+      },
+    ].map((line) =>
+      lineWords(line, (k) => (ambientText as Record<string, string>)[k] ?? k, glancing as never),
+    ),
+  }),
+  play: async ({ canvas }) => {
+    await expect(await canvas.findAllByText('~')).toHaveLength(3);
   },
 };
 

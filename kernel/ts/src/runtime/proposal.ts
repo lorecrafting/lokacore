@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/alternates.ts';
-// size: allow 349, typed quest reactions, deadline pairing and group merging share FIFO admission
+// size: allow 359, typed quest reactions, deadline pairing and group merging share FIFO admission; ambient lines read the advanced state
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -34,6 +34,7 @@ import { admit, type Admitted } from './proposal_admit.ts';
 export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
 import { dropped as crowDrop, taken as crowTake } from '../mechanics/crow/behavior.ts';
+import { ambient } from '../mechanics/emote/ambient.ts';
 
 // limit: a budget_exceeded fault's exhausted limit, a side value never in the result (04 §5.4).
 export { adopt, type Stepped } from './proposal_adopt.ts';
@@ -98,7 +99,7 @@ export function propose(
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
   let failed = join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root);
-  failed ??= farewell(p, () => now(p)) ?? parting(p);
+  failed ??= farewell(p, () => now(p)) ?? parting(p) ?? ambience(p);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
   p.narration = closing(world, command.payload.actor_id, ops, p);
@@ -125,6 +126,15 @@ function parting(p: P): Admitted | undefined {
   const at = now(p);
   if (!('cartridge' in at)) return at;
   p.ops.push(...partings(at, held, ++p.group));
+}
+
+// emote@1's ambient lines, read from the state after an advance (mechanics.md#ambient-emotes).
+function ambience(p: P): Admitted | undefined {
+  if (!p.ops.some((o) => o.op === 'time.advance')) return;
+  const at = now(p);
+  if (!('cartridge' in at)) return at;
+  const { actor_id } = p.command.payload;
+  p.narration.push(...ambient(at, actor_id, p.world.state.clock, at.state.clock, p.steps));
 }
 
 // The proposal so far, composed lazily (only a job, a delivery, an acquisition's quests or a held
