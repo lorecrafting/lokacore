@@ -60,6 +60,7 @@ test('a path outside the source tree is refused before any file is read', async 
   for (const file of [
     '../src-evil/rooms/x.json',
     'rooms/../../src-evil/rooms/x.json',
+    'areas/north/../../../src-evil/rooms/x.json',
     '/etc/hosts',
   ]) {
     const got = await ask(`/source?file=${encodeURIComponent(file)}`);
@@ -177,6 +178,20 @@ test('ops write the house format and keep integer-like keys; a path into a proto
     '{\n  "name": "room.a",\n  "daily_schedule": {\n    "8": "a",\n    "14": "b"\n  }\n}\n';
   assert.equal(read('rooms/a.json'), bytes);
   assert.equal(ok.body.sha256, sha256(bytes));
+});
+
+test('an area file reads, changes and journals by its areas/ path', async (t) => {
+  // Break: the guard or the journal dropping or flattening the areas/<area>/ prefix (S2's layout).
+  const { ask, src } = tree(t);
+  const file = 'areas/north/rooms/gate.json';
+  mkdirSync(join(src, 'areas/north/rooms'), { recursive: true });
+  writeFileSync(join(src, file), ROOM);
+  const got = (await ask(`/source?file=${file}`)).body;
+  assert.deepEqual([got.kind, got.key, got.area], ['rooms', 'gate', 'north']);
+  const sent = { file, was: sha256(ROOM), ops: [{ path: ['name'], value: 'Gate' }] };
+  assert.equal((await ask('/change', sent)).status, 200);
+  const journal = (await ask('/journal')).body;
+  assert.deepEqual(journal.find((e: { by: string }) => e.by === 'editor').files, [file]);
 });
 
 test('a delete touches layout.json only when it holds the room', async (t) => {
@@ -333,13 +348,15 @@ test('each refusal is a 400 that names its reason', async (t) => {
 test('/new refuses a name that is a flag before it runs anything, and journals what loka.new wrote', async (t) => {
   // Breaks: `--cwd` as a name reaching mix (it would scaffold into another tree); the files the
   // scaffold wrote missing from the entry undo reads.
-  const { dir, ask, live } = tree(t);
+  const { dir, src, ask, live } = tree(t);
   const bin = join(dir, 'bin');
   mkdirSync(bin);
   // the stub `mise exec -- mix loka.new <kind> <name> <root>`: a mark that it ran, and one room
   writeFileSync(
     join(bin, 'mise'),
-    '#!/bin/sh\ntouch "$0.ran"\n[ "$6" = taken ] && { echo "noise\nrooms/taken.json exists" >&2; exit 1; }\nsleep 0.5\necho "{}" > "$7/rooms/$6.json"\nsleep 0.5\n',
+    '#!/bin/sh\ntouch "$0.ran"\n[ "$6" = taken ] && { echo "noise\nrooms/taken.json exists" >&2; exit 1; }\n' +
+      'for root; do :; done\nsleep 0.5\necho "{}" > "$root/rooms/$6.json"\n' +
+      '[ "$7" = --from ] && echo "{}" > "$root/areas/north/rooms/$8.json"\nsleep 0.5\n',
   );
   chmodSync(join(bin, 'mise'), 0o755);
   const path = process.env.PATH;
@@ -367,6 +384,12 @@ test('/new refuses a name that is a flag before it runs anything, and journals w
     ['editor'],
   );
   assert.equal((await ask('/undo', { id: made.body.id })).status, 200);
+  // Break: a --from room in an area folder (S2) missing from the entry, so its undo leaves the exit.
+  mkdirSync(join(src, 'areas/north/rooms'), { recursive: true });
+  writeFileSync(join(src, 'areas/north/rooms/gate.json'), ROOM);
+  const from2 = { room: 'gate', direction: 'north' };
+  const hall = await ask('/new', { kind: 'room', name: 'hall', from: from2 });
+  assert.deepEqual(hall.body.files, ['areas/north/rooms/gate.json', 'rooms/hall.json']);
 });
 
 test('POST /hold sets held on the stream and its release writes what was parked', async (t) => {
