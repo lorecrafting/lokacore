@@ -1,4 +1,4 @@
-// size: allow 343, the icon, its arrival, its ring and its tooltip are one component's parts
+// size: allow 410, the icon, its arrival, its ring and its tooltip are one component's parts
 // The status icon row above the status line.
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Pressable, View } from 'react-native';
@@ -16,7 +16,7 @@ import {
   useSharedValue,
   withTiming,
 } from './fade.ts';
-import { statusTip } from './model.ts';
+import { bleedingParts, statusTip } from './model.ts';
 import { usePress, useThin } from './press.ts';
 import { usePalette, useType, type Palette } from './palette.ts';
 import { motion, radius, size, space, type } from './tokens.ts';
@@ -27,18 +27,72 @@ type Say = (key: string) => string;
 // ponytail: text characters, not drawings; the icon set replaces this map.
 const byLabel: Record<string, string> = { 'condition.fed': '◡' };
 const byKind = { buff: '+', debuff: '−', neutral: '○' }; // signs, not arrows: they sit by the minimap
-const glyph = (label: string, kind?: 'buff' | 'debuff') =>
-  byLabel[label] ?? byKind[kind ?? 'neutral'];
 type Look = 'buff' | 'debuff' | 'neutral';
+const glyph = (label: string, look: Look) => byLabel[label] ?? byKind[look];
 type Condition = NonNullable<GameView['conditions']>[number];
 type Props = {
   conditions: readonly Condition[];
+  bleeding?: NonNullable<GameView['bleeding']>;
   time: number;
   text: Say;
   open?: () => void; // absent while locked
 };
 
-const SHOWN = 5; // icons before the +N disc
+const CAP = 6; // icons that show whole; past it, one fewer and the +N disc
+const MORE = 'more'; // the disc's hold key: no icon key lacks a "-count"
+
+// One icon of the row: its key, label word, look, hold tip, name and ring share.
+type Item = {
+  key: string;
+  label: string;
+  word: string;
+  look: Look;
+  tip: string;
+  name: string;
+  fraction?: number;
+};
+
+// Bleeding (no ring until it carries a duration), then debuffs, neutral and buffs, each group in
+// projected order: the threats stay in view when the disc takes the rest.
+const itemsOf = (p: Props) => {
+  const bleed = p.bleeding && bleedingParts(p.bleeding, p.time, p.text);
+  const of = (look: Look) =>
+    p.conditions
+      .filter((c) => (c.kind ?? 'neutral') === look)
+      .map((c) => {
+        const tip = statusTip(c, p.time, p.text);
+        const name = [tip, c.kind].filter(Boolean).join(', ');
+        return {
+          label: c.label,
+          word: p.text(c.label),
+          look,
+          tip,
+          name,
+          fraction: ringFraction(c, p.time),
+        };
+      });
+  const all: Omit<Item, 'key'>[] = [
+    ...(p.bleeding && bleed
+      ? [
+          {
+            label: p.bleeding.label,
+            word: bleed[0]!,
+            look: 'debuff' as const,
+            tip: bleed.slice(0, 2).join(', '),
+            name: [...bleed, 'debuff'].join(', '),
+          },
+        ]
+      : []),
+    ...of('debuff'),
+    ...of('neutral'),
+    ...of('buff'),
+  ];
+  // A label and its count so far, not the place: an icon going must not remount those after it.
+  return all.map((x, i): Item => ({
+    ...x,
+    key: `${x.label}-${all.slice(0, i).filter((y) => y.label === x.label).length}`,
+  }));
+};
 
 // The share of a timed status's duration still to run, 0 to 1, on each render; none when permanent.
 export const ringFraction = (c: Condition, time: number) =>
@@ -47,71 +101,76 @@ export const ringFraction = (c: Condition, time: number) =>
     : Math.min(1, Math.max(0, (c.ends_at - time) / c.duration));
 
 /**
- * The status icon row above the status line: one round, graphic-only icon per condition, five
- * then a +N disc (book-ui.md, Conditions details).
+ * The status icon row: one round, graphic-only icon per status (book-ui.md, Conditions details).
  * - Use: above the status line.
- * - Rules: a tap opens Character; a hold, hover or keyboard focus shows a Tooltip. The countdown
- *   ring's motion is the Conditions details rule, not restated here.
- * - States: buff; debuff; neutral; permanent; overflow; held; focused; locked (pictures, not
- *   pressable); ring full, near empty, draining. Pops on arrival, fades on expiry; ticks are silent.
+ * - Rules: a tap opens Character; a hold, hover or focus shows a Tooltip; cap, order and ring are
+ *   Conditions details. A drawn glyph (loka-x6t.63): one-colour line art in the look's ink, a centred
+ *   16 px area of the 28 px disc, 1.5 px stroke, round caps and joins, distinct, no letters or emoji.
+ * - States: bleeding (first, debuff look, no ring); buff; debuff; neutral; permanent; overflow
+ *   (six show, seven or more show five and a +N disc whose tip lists the rest); held; focused; locked
+ *   (pictures, not pressable); ring full, near empty, draining. Pops on arrival, fades on expiry;
+ *   behind the disc neither (arriving, pushed or revealed); ticks are silent.
  * - Story: StatusIcon.stories.tsx
  */
 export function StatusIcons(p: Props) {
   // The held icon's label, so the tip follows the clock and goes with the icon or the lock.
   const [held, setHeld] = useState<string>();
-  const shown = p.conditions.slice(0, SHOWN);
-  // A label and its count so far, not the place: an icon going must not remount those after it.
-  const key = (x: Condition, i: number) =>
-    `${x.label}-${shown.slice(0, i).filter((y) => y.label === x.label).length}`;
-  const tip = p.open ? shown.find((x, i) => key(x, i) === held) : undefined;
-  // An icon that unmounts (locked, expired, moved) never blurs, so its hold is let go here.
+  const items = itemsOf(p);
+  const shown = items.length > CAP ? CAP - 1 : items.length;
+  const hidden = items.slice(shown).map((x) => x.word);
+  const hold = (k: string) => (on: boolean) => setHeld((h) => (on ? k : h === k ? undefined : h));
+  const tips = new Map(items.slice(0, shown).map((x) => [x.key, x.tip]));
+  const tip =
+    p.open && held ? (held === MORE ? hidden.join(', ') || undefined : tips.get(held)) : undefined;
+  // An icon that unmounts or hides (locked, expired, pushed) never blurs: its hold is let go here.
   if (held !== undefined && !tip) setHeld(undefined);
-  const more = p.conditions.length - shown.length;
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'center', columnGap: space.sm }}>
-      {shown.map((x, i) => (
-        <Arrival key={key(x, i)} label={x.label}>
-          <Icon
-            look={x.kind ?? 'neutral'}
-            name={[statusTip(x, p.time, p.text), x.kind].filter(Boolean).join(', ')}
-            fraction={ringFraction(x, p.time)}
-            hold={(on) => setHeld((h) => (on ? key(x, i) : h === key(x, i) ? undefined : h))}
-            open={p.open}
-          >
-            {glyph(x.label, x.kind)}
+      {/* First: a Reanimated exit whose next sibling unmounts with it stays on web (Focused story) */}
+      {tip && <Tooltip text={tip} />}
+      {items.map((x, i) => (
+        <Arrival key={x.key} label={x.label} hidden={i >= shown}>
+          <Icon look={x.look} name={x.name} fraction={x.fraction} hold={hold(x.key)} open={p.open}>
+            {glyph(x.label, x.look)}
           </Icon>
         </Arrival>
       ))}
-      {more > 0 && (
-        <Icon look="neutral" name={`+${more} more`} open={p.open}>
-          {`+${more}`}
+      {hidden.length > 0 && (
+        <Icon
+          look="neutral"
+          name={[`+${hidden.length} more`, ...hidden].join(', ')}
+          hold={hold(MORE)}
+          open={p.open}
+        >
+          {`+${hidden.length}`}
         </Icon>
       )}
-      {tip && <Tooltip text={statusTip(tip, p.time, p.text)} />}
     </View>
   );
 }
 
 const popCurve = curveOf(motion.pop.easing);
 
-// Pops on its `status_in` cue (so a tick or a page return does not), appears under reduced motion,
-// and fades on expiry.
-function Arrival(p: { label: string; children: ReactNode }) {
+// Pops on its `status_in` cue (so a tick or a page return does not), appears under reduced motion
+// or behind the disc, and fades on expiry. Behind the disc it stays mounted, hidden: pushed there it
+// does not fade, back it does not pop.
+function Arrival(p: { label: string; hidden: boolean; children: ReactNode }) {
   const still = useReducedMotion();
   const scale = useSharedValue(1);
   useEffect(
     () =>
       onCue((cue) => {
-        if (still || cue.name !== 'status_in' || !cue.ids?.includes(p.label)) return;
+        if (still || p.hidden || cue.name !== 'status_in' || !cue.ids?.includes(p.label)) return;
         scale.value = motion.pop.from;
         scale.value = withTiming(1, { duration: motion.pop.duration, easing: popCurve });
       }),
-    [still, p.label], // eslint-disable-line
+    [still, p.label, p.hidden], // eslint-disable-line
   );
   const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   return (
     <Reanimated.View
-      style={style}
+      style={[style, p.hidden && { display: 'none' }]}
+      aria-hidden={p.hidden}
       exiting={FadeOut.duration(motion.fade.duration).reduceMotion(ReduceMotion.Never)}
     >
       {p.children}
