@@ -185,7 +185,7 @@ function lint() {
 }
 
 // One compile at a time, in save order; a save while one waits is in the waiting one's source.
-let queue = Promise.resolve();
+let queue: Promise<unknown> = Promise.resolve();
 let waiting = false;
 function enqueue() {
   if (waiting) return;
