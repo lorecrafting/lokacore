@@ -56,10 +56,12 @@ export type Timings = {
   sha256?: string; // a structural edit's artifact: the Book's `ready` names it when loaded
 };
 
-/** `mix loka.lint`'s findings (`rel: words`, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */
+/** `mix loka.lint`'s findings (`rel: words` for a .json, .scene or .cut source, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */
 export function lintLines(code: number | null, stderr: string) {
   if (code === 0) return [];
-  const found = stderr.split('\n').filter((l) => /^([\w./-]+\.json|areas\/\w+)[ :]/.test(l));
+  const found = stderr
+    .split('\n')
+    .filter((l) => /^([\w./-]+\.(json|scene|cut)|areas\/\w+)[ :]/.test(l));
   return code === 1 && found.length ? found : [`lint failed (exit ${code})`];
 }
 
@@ -251,7 +253,7 @@ export function serve(port: number, source: string, artifact: string, release = 
     if (last.held) map.keep(last.diagnostics ?? []);
     else if ('compiled' in message || 'diagnostics' in message || 'held' in message) map.stale();
     for (const client of clients) send(client);
-  });
+  }, source);
   const editor = editing(source, said, (once) => clients.forEach((c) => send(c, once)), release);
   const route = async (request: IncomingMessage, response: ServerResponse) => {
     if (foreign(request, response) || (await editor.route(request, response))) return;

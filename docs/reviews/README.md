@@ -11,9 +11,11 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: Story map S1, the story model (PR #620, loka-wfrgk.18)](2026-11-05-story-map-s1-review.md): **APPROVE WITH NOTES**
+- [Review: author panel lint covers .scene and .cut (PR #630, loka-vduxr.50)](2026-11-05-scene-lint-review.md): **CHANGES REQUIRED**
 - [Review: retire hunger and thirst (PR #618, loka-vduxr.61)](2026-11-05-retire-hunger-review.md): **APPROVE WITH NOTES**
 - [Review: replay of failed and unknown commits, and a test hang (PR #627, loka-vduxr.42, loka-votey)](2026-11-05-replay-failed-unknown-review.md): **CHANGES REQUIRED**
 - [Review: scene@1 opening scene, `on {start: true}` (PR #622, loka-g5hh.3)](2026-11-05-opening-scene-review.md): **APPROVE WITH NOTES**
+- [Review: an open conversation re-words an edited line; stale `~` map by line count (PR #625, loka-wfrgk.19)](2026-11-05-loka-wfrgk.19-review.md): **APPROVE WITH NOTES**
 - [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
 - [Review: Editor E2, the three-column shell (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-review.md): **CHANGES REQUIRED**
 - [Review: death and level bug batch (PR #623; loka-3tc7, loka-g5hh.2.11, loka-dbtxr (a))](2026-11-05-death-level-bugs-review.md): **CHANGES REQUIRED**

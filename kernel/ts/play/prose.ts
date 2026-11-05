@@ -89,6 +89,9 @@ export function located(
     : sourcesOf(root, key, words);
   if (other) refuse(400, `more than one source line holds ${key}'s words`); // two `* ~` lines: which?
   const [file, n, was] = lineAt(at);
+  // a `~` line names no key: with the map stale, the one `~` left may be another key's
+  if (!fresh && words.trim() === '~' && !was.includes(`"${key}":`))
+    refuse(409, `the source moved since the compile: wait for it to open ${key}`);
   worded(file, was, ''); // refuses a line that is not words
   const literal = file.endsWith('.json') && LITERAL.exec(was);
   const own = literal

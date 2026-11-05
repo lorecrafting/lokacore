@@ -36,7 +36,10 @@ export const devClock =
 // the in-Book editor (E5) is required only in the author preview, so a player build drops it
 const inBook: typeof import('./inbook.ts') | undefined =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;
-if (devClock) worded.note = (words, key) => seen.set(words, key); // a line as shown, bound too
+if (devClock) {
+  worded.note = (words, key) => seen.set(words, key); // a line as shown, bound too
+  worded.made = new Map(); // an open conversation re-words its lines from the overlay (loka-wfrgk.19)
+}
 const g = globalThis as { loka_dev_skew?: number }; // ms the dev clock has moved both host clocks
 export const skew = () => g.loka_dev_skew ?? 0;
 
