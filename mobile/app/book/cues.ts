@@ -99,11 +99,15 @@ const gathered = (cues: Cue[]) =>
     return out;
   }, []);
 
-const holdCard = (q: Queue, now: number): Queue => ({
+const isLevel = (cue?: Cue) => cue?.name === 'level';
+// A level is never dropped (book-ui.md): it waits out a page turn or a chapter card in the pending slot.
+const kept = (cue?: Cue) => (isLevel(cue) ? cue : undefined);
+
+const holdCard = (q: Queue, now: number, level?: Cue): Queue => ({
   ...q,
   card: true,
   playing: undefined,
-  pending: undefined,
+  pending: level ?? kept(q.pending),
   until: now + motion.card.duration,
 });
 
@@ -136,23 +140,30 @@ function fall(s: Queue, death: Cue, now: number) {
 }
 
 export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
-  const s: Queue = turned
-    ? { ...q, card: false, playing: undefined, pending: undefined }
-    : { ...q };
+  const s: Queue = turned ? { ...q, card: false, playing: undefined } : { ...q };
   s.merged = { ...q.merged };
   const fired: Cue[] = [];
-  s.held = [...(turned ? [] : q.held), ...arriving];
+  s.held = [...(turned ? q.held.filter(isLevel) : q.held), ...arriving];
+  if (turned) {
+    const level = s.held.filter(isLevel).at(-1); // a later level replaces an earlier one, as in the slot
+    s.held = s.held.filter((c) => !isLevel(c) || c === level);
+    s.pending = level ? undefined : kept(q.pending);
+  }
   const death = s.held.find((c) => c.name === 'death');
   if (death) return { q: s, fired: fall(s, death, now) };
-  if (turned) s.heldUntil = now + motion.quick.duration;
+  // Nothing plays over a turn: a level kept over it waits out the hold, not the old beat.
+  if (turned) s.heldUntil = s.until = now + motion.quick.duration;
   if (now < s.heldUntil) return { q: s, fired };
   const cues = gathered(s.held);
   s.held = [];
   const chapter = cues.find((c) => c.name === 'chapter');
-  if (s.card && now < s.until) return { q: s, fired };
+  if (s.card && now < s.until) {
+    s.pending = cues.filter(isLevel).at(-1) ?? s.pending;
+    return { q: s, fired };
+  }
   s.card = false;
-  if (chapter) return { q: holdCard(s, now), fired: [chapter] };
-  if (s.playing && s.until <= now) {
+  if (chapter) return { q: holdCard(s, now, cues.filter(isLevel).at(-1)), fired: [chapter] };
+  if (!s.playing || s.until <= now) {
     const next = s.pending;
     s.playing = s.pending = undefined;
     if (next) play(s, fired, next, now);

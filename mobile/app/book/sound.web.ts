@@ -264,8 +264,8 @@ const fade = (ms: number, then?: () => void) => {
   }, ms);
 };
 
-/** `open`: a new fight. `resume`: one found on reopening. `won`, `away`, `cut`: how it ended. */
-export function fight(event: 'open' | 'resume' | 'won' | 'away' | 'cut') {
+/** `open`: a new fight. `resume`: one found on reopening. `won`, `away`, `cut`: how it ended; `fell`: a cut that keeps the room its waking view named (a death outside a fight). */
+export function fight(event: 'open' | 'resume' | 'won' | 'away' | 'cut' | 'fell') {
   const now = performance.now();
   clearTimeout(fading);
   if (event === 'open' || event === 'resume') {
@@ -283,8 +283,8 @@ export function fight(event: 'open' | 'resume' | 'won' | 'away' | 'cut') {
   else {
     stopAll('music');
     stopAll('ambience');
-    bed = layer = room = undefined; // only the room page's view restarts it, not the tab or Sound on
-    return;
+    bed = layer = undefined;
+    if (event === 'cut') room = undefined; // only the room page's view restarts it, not the tab or Sound on
   }
   settleRoom(motion.palette.duration);
 }

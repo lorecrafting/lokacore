@@ -281,6 +281,21 @@ test('a poison death while away opens the hall page on the tick, fall and waking
   assert.ok(shown.includes('Maud arrives.'), JSON.stringify(shown)); // the rest logs, not recapped
 });
 
+// Breaks (book-ui.md, World log; loka-3tc7): a death in the recovery room itself, with no room
+// change to end the holding, recaps its own fall and waking lines.
+test('a poison death in the recovery room logs its lines, never a recap', () => {
+  const b = book(deadly() as never, undefined, ids());
+  for (const d of ['east', 'west']) b.go(d);
+  const shown = wait(b, HOURS3).text();
+  assert.equal(count(shown, LABEL.awayRecap), 0, JSON.stringify(shown));
+  const at = shown.indexOf('You fall.');
+  assert.deepEqual(
+    shown.slice(at - 1, at + 2),
+    [TICK, 'You fall.', 'You wake.'],
+    JSON.stringify(shown),
+  );
+});
+
 // Breaks: a recap save defers its catch-up past open, so a refused delivery arrives on a pulse as a
 // plain error with no Start over, where opening would have said save_corrupt.
 test('a catch-up refused on a pulse: fault beside Start over, bytes kept, Start over plays', () => {

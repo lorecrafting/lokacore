@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
-const { cuesOf, QUIET, step } = await import('./cues.ts');
+const { cuesOf, curlFor, QUIET, step } = await import('./cues.ts');
 const { hearCues, playCue } = await import('./cueSounds.ts');
 await import('./samples.web.ts');
 const g = globalThis as any;
@@ -141,7 +141,7 @@ test('the page turn has its three recordings', () => {
 });
 
 // Every row: [cue, music call, haptics]. Breaks: the fanfare's light haptic reaches a flight, a reopened
-// fight buzzes, a death in a fight doubles the thud's heavy, or one outside a fight has none.
+// fight buzzes, a death in a fight doubles the thud's heavy, or one outside a fight has none or no bed after.
 const fightRows: [Parameters<typeof playCue>[0], string, string[]][] = [
   [{ name: 'combat_open' }, 'open', ['medium']],
   [{ name: 'combat_open', resumed: true }, 'resume', []],
@@ -150,7 +150,7 @@ const fightRows: [Parameters<typeof playCue>[0], string, string[]][] = [
   [{ name: 'combat_close', end: 'quiet' }, 'away', []],
   [{ name: 'combat_close', resumed: true }, 'away', []],
   [{ name: 'death', fight: true }, 'cut', []],
-  [{ name: 'death', fight: false }, 'cut', ['heavy']],
+  [{ name: 'death', fight: false }, 'fell', ['heavy']],
 ];
 for (const [cue, music, felt] of fightRows)
   test(`${cue.name} ${JSON.stringify(cue)}: music ${music}, haptic ${felt}`, () => {
@@ -190,6 +190,51 @@ test('a blow dealt is an impact, with no haptic', () => {
   const log: [string, string][] = g.bookDevice;
   g.bookDevice = undefined;
   assert.deepEqual(log, [['play', 'impact']]);
+});
+
+const felt = () => (g.bookDevice as string[][]).filter((l) => l[0] === 'haptic');
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Breaks (book-ui.md, A level is never dropped; loka-g5hh.2.11): a level landing under a page curl
+// loses its haptic, feels it at once under the curl, or at the curl's first end when a riffle
+// lengthened it; a blow's haptic is still dropped, not held.
+test('a level under a page curl is felt once the curl ends; a blow there is not', async () => {
+  g.bookDevice = [];
+  curlFor(40);
+  playCue({ name: 'level' });
+  playCue({ name: 'hp_loss', loss: 1 });
+  curlFor(100);
+  await wait(70);
+  assert.deepEqual(felt(), []);
+  await wait(80);
+  assert.deepEqual(felt(), [['haptic', 'medium']]);
+  const clock = performance.now;
+  performance.now = () => 1000; // a curl 1ms from its end still holds it
+  curlFor(1);
+  playCue({ name: 'level' });
+  performance.now = clock;
+  assert.deepEqual(felt(), [['haptic', 'medium']]);
+  await wait(10);
+  g.bookDevice = undefined;
+});
+
+// Breaks (book-ui.md, a death's heavy haptic is the last thing felt): a level's held haptic fires
+// after a death outside a fight, or after the Book has gone.
+test('a death or the Book going cancels a held level haptic', async () => {
+  g.bookDevice = [];
+  curlFor(40);
+  playCue({ name: 'level' });
+  playCue({ name: 'level' }); // a second held one: the first is still cancelled
+  playCue({ name: 'death', fight: false });
+  await wait(60);
+  assert.deepEqual(felt(), [['haptic', 'heavy']]);
+  const off = hearCues();
+  curlFor(40);
+  playCue({ name: 'level' });
+  off();
+  await wait(80);
+  assert.deepEqual(felt(), [['haptic', 'heavy']]);
+  g.bookDevice = undefined;
 });
 
 // Breaks: the loop outlives the Book, so Start over mid-fight plays it over the new game.

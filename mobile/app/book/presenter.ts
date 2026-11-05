@@ -103,6 +103,7 @@ function narrate(
   s.combatLog.push(...combat);
   s.narrationId = last.command_id;
   if (last.died) fall(s, last.command_id);
+  if (last.died && away) away.from = Infinity; // a death ends the recap, as a room change does
   if (last.missed) s.deed = last; // a round's miss comes on the clock (book-ui.md, Fight music)
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
