@@ -34,6 +34,10 @@ defmodule Loka.Content do
   @spec explained([map()], Path.t()) :: [String.t()]
   defdelegate explained(diags, dir), to: Loka.Content.Explain, as: :lines
 
+  @doc "Compile diagnostics split as `explained/2` places them, for `mix loka.compile --json`."
+  @spec explained_entries([map()], Path.t()) :: [map()]
+  defdelegate explained_entries(diags, dir), to: Loka.Content.Explain, as: :entries
+
   @doc """
   Compiles the source directory into CartridgeArtifact bytes (one canonical JSON document)
   and its warnings (severity warning), or returns its diagnostics, each list in the order

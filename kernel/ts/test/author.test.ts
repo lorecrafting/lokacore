@@ -9,6 +9,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  rmSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -157,5 +158,40 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
     messages.slice(seen).filter((m) => (m as { lint?: string[] }).lint),
     [],
   );
+
+  // Hold. Breaks: a structural compile written while the editor holds (Metro reloads mid-edit),
+  // or the Hold's end never writing what waited.
+  rmSync(`${which}.slow`);
+  const hold = (on: boolean) =>
+    fetch(`http://127.0.0.1:${port}/hold`, { method: 'POST', body: JSON.stringify({ on }) });
+  await hold(true);
+  const held = readFileSync(out, 'utf8');
+  writeFileSync(which, good);
+  writeFileSync(join(src, 'rooms.json'), '{    }');
+  await until(() => (messages.at(-1) as { pending?: number }).pending === 1);
+  assert.equal(readFileSync(out, 'utf8'), held);
+  // Break: a text.json save while a build is parked overlays words on the page the Hold keeps.
+  const parkedAt = messages.length;
+  writeFileSync(join(src, 'text.json'), '{"room.boathouse.description":"line two"}');
+  await until(() => (messages.at(-1) as { pending?: number }).pending === 2);
+  assert.ok(
+    !messages.slice(parkedAt).some((m) => m.text?.['room.boathouse.description'] === 'line two'),
+  );
+  // Break: the Hold's end pushes the parked build as compiled over a later failed save.
+  writeFileSync(which, join(dir, 'refused.json'));
+  writeFileSync(join(src, 'rooms.json'), '{     }');
+  await until(() => messages.at(-1)!.compiled === false);
+  const at = messages.length;
+  await hold(false);
+  await until(() => JSON.parse(readFileSync(out, 'utf8')).sha256 === kat.sha256);
+  await until(() => messages.slice(at).some((m) => (m as { pending?: number }).pending === 0));
+  await settle(100);
+  assert.equal(messages.at(-1)!.compiled, false);
+  // Break: a compile that wrote no diagnostics file (the stub never does) leaves the last build's
+  // cards up; it clears them.
+  assert.ok(messages.some((m) => (m as { diagnostics?: unknown[] }).diagnostics?.length === 0));
+  // Break: the Hold's end with nothing parked writes an empty build (a 500).
+  await hold(true);
+  assert.equal((await hold(false)).status, 200);
   reader.cancel();
 });
