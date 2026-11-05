@@ -109,4 +109,35 @@ defmodule Loka.ContentPlaceholdersTest do
     ExUnit.CaptureIO.capture_io(:stderr, fn -> Mix.Tasks.Loka.Compile.run([dir, out]) end)
     assert File.exists?(out)
   end
+
+  # Break: --json moves the printed line (the split loses a place, a column or the order), or
+  # writes a file whose rel, line and path do not name the field the line names.
+  test "mix loka.compile --json splits the line it prints", %{tmp_dir: tmp} do
+    dir = Loka.ContentSource.copy("cartridges/hello_sampler")
+    talk = Path.join(dir, "actions/talk.json")
+    # The committed file ends with `"accessibility": ...` on line 15, so the field lands on 16.
+    File.write!(talk, String.replace(File.read!(talk), ~r/\n}\n$/, ",\n  \"comand\": \"x\"\n}\n"))
+    {out, json} = {Path.join(tmp, "a.json"), Path.join(tmp, "d.json")}
+
+    run = fn args ->
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert catch_exit(Mix.Tasks.Loka.Compile.run([dir, out | args])) == {:shutdown, 1}
+      end)
+    end
+
+    line = run.([])
+    assert run.(["--allow-placeholders", "--json", json]) == line
+    assert line =~ ~r/^error: actions\/talk\.json:16 `comand` is not a field here\./
+
+    assert [
+             %{"severity" => "error", "code" => "UNKNOWN_FIELD", "path" => "actions/talk.comand"} =
+               d
+           ] =
+             JSON.decode!(File.read!(json))
+
+    assert {d["rel"], d["line"], d["column"]} == {"actions/talk.json", 16, nil}
+    assert line == "error: actions/talk.json:16 #{d["words"]}\n"
+    refute File.exists?(out)
+    assert_raise Mix.Error, ~r/usage/, fn -> Mix.Tasks.Loka.Compile.run([dir, out, "--json"]) end
+  end
 end
