@@ -52,6 +52,10 @@ export const cellAt = (v: { zoom: number; x: number; y: number }, p: { x: number
   x: Math.floor((p.x - v.x) / (v.zoom * M.cell)),
   y: Math.floor((p.y - v.y) / (v.zoom * M.cell)),
 });
+const DRAG = 4; // mutate-skip: px a press moves before it is a drag, uncalibrated design value
+/** A press released this far from where it began is a drag; nearer, it is a click (it selects). */
+export const dragged = (a: { x: number; y: number }, b: { x: number; y: number }) =>
+  Math.hypot(b.x - a.x, b.y - a.y) >= DRAG;
 /** The compass direction from one cell toward another on the same level: the larger axis wins. */
 export function toward(a: At, b: At) {
   const [dx, dy] = [b.x - a.x, b.y - a.y];
@@ -63,7 +67,9 @@ export function toward(a: At, b: At) {
 /** Drag: writes `r`'s layout row (appending one for an unplaced room); a taken cell refuses. */
 const place = (s: Run, r: MapRoom, at: At) =>
   s.change<Row[]>('layout.json', (rows) => {
-    const taken = rows.find((o) => o.room !== r.key && o.x === at.x && o.y === at.y && o.z === at.z);
+    const taken = rows.find(
+      (o) => o.room !== r.key && o.x === at.x && o.y === at.y && o.z === at.z,
+    );
     if (taken) no(`${taken.room} is in that cell`);
     const i = rows.findIndex((o) => o.room === r.key);
     return [{ path: [i < 0 ? rows.length : i], value: { room: r.key, ...at } }];
@@ -106,7 +112,14 @@ async function oneWay(s: Run, a: MapRoom, dir: string, rooms: MapRoom[]) {
 }
 
 /** Barrier drop: a new barrier `key` (`~` words, closed or locked) named on both faces of the exit. */
-async function barrier(s: Run, a: MapRoom, dir: string, rooms: MapRoom[], key: string, locked: boolean) {
+async function barrier(
+  s: Run,
+  a: MapRoom,
+  dir: string,
+  rooms: MapRoom[],
+  key: string,
+  locked: boolean,
+) {
   const face = await faceOf(s, a, dir);
   if (face.barrier) no(`${a.key}'s exit ${dir} already has ${face.barrier}`);
   const b = roomOf(rooms, face.to);

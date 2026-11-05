@@ -15,6 +15,7 @@ import {
   cellAt,
   editor,
   toward,
+  dragged,
   type Editor,
   type Io,
 } from '../../../tools/author-panel/src/mapedit.ts';
@@ -196,6 +197,20 @@ test('a map point maps to its layout cell, and a drag between cells to a compass
       to(0, 0),
     ],
     ['east', 'west', 'south', 'north', 'east', 'west', 'north', undefined, undefined],
+  );
+});
+
+test('a press that stays within 4 px is a click (it selects); one that leaves is a drag', () => {
+  // Breaks: a hand's slip read as a drag (a click writes layout.json), or a real drag read as a click.
+  const o = { x: 10, y: 10 };
+  assert.deepEqual(
+    [
+      dragged(o, o),
+      dragged(o, { x: 13, y: 10 }),
+      dragged(o, { x: 14, y: 10 }),
+      dragged(o, { x: 13, y: 13 }),
+    ],
+    [false, false, true, true],
   );
 });
 

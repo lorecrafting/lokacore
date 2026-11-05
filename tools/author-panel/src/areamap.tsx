@@ -1,6 +1,15 @@
 // The editor's always-on area map (editor-map-and-story-rulings.md E3a): one level of rooms in plain
 // SVG, click selects, double-click goes, Alt-click opens the source; zoom, pan, keys and levels.
-import { ChevronDown, ChevronUp, Maximize, Play, ZoomIn, ZoomOut } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Lock,
+  LockOpen,
+  Maximize,
+  Play,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from '../../../mobile/app/book/tokens.ts';
 import type { Story } from './author.ts';
@@ -122,28 +131,37 @@ export function AreaMap(p: MapProps) {
   const l = useLevel(p);
   const reach = reachOf(p);
   const [told, tell] = useState('');
+  // owner plan: the whole map locks against drags, in browser storage, never in the cartridge; locked by default
+  const [locked, lock] = useState(() => localStorage.getItem(LOCK) !== 'off');
+  useEffect(() => localStorage.setItem(LOCK, locked ? 'on' : 'off'), [locked]);
   shown.rooms = p.story.map;
   useEffect(() => tell(''), [p.story]); // a recompile clears the last refusal
   useEffect(() => ((shown.tell = tell), () => void (shown.tell = alone)), []);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <Header p={p} l={l} />
+      <Header p={p} l={l} locked={locked} lock={lock} />
       <div
         ref={l.ref}
         className="relative min-h-0 flex-1 overflow-hidden"
         onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => drop(e, p, l)}
+        onDrop={(e) => (locked ? tell(UNLOCK) : drop(e, p, l))}
       >
-        {l.v.view && l.level.length ? <Drawing p={p} l={l} reach={reach} /> : null}
+        {l.v.view && l.level.length ? <Drawing p={p} l={l} reach={reach} locked={locked} /> : null}
       </div>
       <Unplaced rooms={p.story.map.filter((r) => !r.at)} pick={p.pick} />
-      <p role={told ? 'alert' : undefined} className={`truncate px-2 py-1 text-xs ${told ? 'text-destructive' : 'text-muted-foreground'}`}>
+      <p
+        role={told ? 'alert' : undefined}
+        className={`truncate px-2 py-1 text-xs ${told ? 'text-destructive' : 'text-muted-foreground'}`}
+      >
         {told || map.footer(p.story.map, reach.unreached, reach.locked)}
       </p>
       <p aria-live="polite" className="sr-only">{`level ${l.z}, ${l.level.length} rooms`}</p>
     </div>
   );
 }
+
+const LOCK = 'loka.author.mapLock';
+const UNLOCK = 'The map is locked: unlock it in the map header to drag';
 
 /** An Unplaced chip dropped on the map: its room's layout row at the cell under the pointer. */
 function drop(e: React.DragEvent<HTMLDivElement>, p: MapProps, l: Level) {
@@ -188,8 +206,9 @@ function Icon({
   );
 }
 
-/** The segment, the level stepper (only when rooms span levels), zoom, fit and Go here. */
-function Header({ p, l }: { p: MapProps; l: Level }) {
+/** The segment, the level stepper (only when rooms span levels), the drag lock, zoom, fit and Go here. */
+type Lockable = { locked: boolean; lock: (on: boolean) => void };
+function Header({ p, l, locked, lock }: { p: MapProps; l: Level } & Lockable) {
   const i = l.all.indexOf(l.z);
   return (
     <div className="flex h-8 shrink-0 items-center gap-0 px-1">
@@ -212,6 +231,11 @@ function Header({ p, l }: { p: MapProps; l: Level }) {
           />
         </>
       ) : null}
+      <Icon
+        label={locked ? 'Unlock map dragging' : 'Lock map dragging'}
+        icon={locked ? Lock : LockOpen}
+        run={() => lock(!locked)}
+      />
       <Icon label="Zoom in" icon={ZoomIn} run={() => l.zoom(M.step)} />
       <Icon label="Zoom out" icon={ZoomOut} run={() => l.zoom(1 / M.step)} />
       <Icon label="Fit level" icon={Maximize} run={l.fit} />
