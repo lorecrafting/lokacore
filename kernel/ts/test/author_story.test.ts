@@ -2,7 +2,7 @@
 // the S2 table (docs/design/editor-map-and-story-rulings.md) on a planted model, not from the code.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Story } from '../../../tools/author-panel/src/author.ts';
+import type { Story } from '../../../tools/author-panel/src/storylist.ts';
 import { rank } from '../../../tools/author-panel/src/shell.ts';
 import * as list from '../../../tools/author-panel/src/storylist.ts';
 
