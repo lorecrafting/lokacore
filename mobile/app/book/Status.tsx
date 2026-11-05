@@ -14,11 +14,11 @@ import { StatusIcons } from './StatusIcon.tsx';
 import { mixInk, usePalette, useType, washInk, type Palette, type Type } from './palette.ts';
 import { motion, size, space } from './tokens.ts';
 
-// The status icon row (StatusIcon.tsx, bleeding first) when any status is on, then the line: the sky glyph (sun by day, moon by night), the position, then
-// the resource button, which shows the condition pools coloured by band when GameView carries them
-// (the room-view status line, an owner-ruled departure) and opens Contents, the index of the
-// existing book sections. Too wide, the pools move to a second line, whole; then the position
-// truncates (polish pick mv1j35ltxddx; loka-x6t.86).
+// The line: the sky glyph (sun by day, moon by night), the position, then the resource button,
+// which shows the condition pools coloured by band when GameView carries them (the room-view
+// status line, an owner-ruled departure) and opens Contents, the index of the existing book sections. Too wide, the pools move to a second line, whole; then the position
+// truncates (polish pick mv1j35ltxddx; loka-x6t.86). Below it and its experience rule, the status
+// icon row (StatusIcon.tsx, bleeding first) when any status is on.
 type StatusProps = {
   time: number;
   // NonNullable: react-docgen reads a bare GameView['x'] as a member-less type that Storybook's arg-type conversion throws on.
@@ -91,14 +91,6 @@ export function StatusLine(p: StatusProps) {
   const items = leading(c, t, p);
   return (
     <View>
-      {/* Mounted when empty too, so the last icon's fade plays. */}
-      <StatusIcons
-        conditions={p.conditions ?? []}
-        bleeding={p.bleeding}
-        time={p.time}
-        text={p.text}
-        open={p.locked ? undefined : p.openCharacter}
-      />
       <View style={statusRow}>
         {/* Two wrap units, so the only break falls before the pools. */}
         <View style={{ ...group, ...shrink }}>
@@ -109,6 +101,14 @@ export function StatusLine(p: StatusProps) {
         </View>
       </View>
       {p.rule && <ExperienceRule {...p.rule} />}
+      {/* Mounted when empty too, so the last icon's fade plays. */}
+      <StatusIcons
+        conditions={p.conditions ?? []}
+        bleeding={p.bleeding}
+        time={p.time}
+        text={p.text}
+        open={p.locked ? undefined : p.openCharacter}
+      />
       <View style={{ alignItems: 'center' }}>
         {p.pending && <Text style={{ ...t.small, color: c.dim }}>{LABEL.saveNotConfirmed}</Text>}
       </View>

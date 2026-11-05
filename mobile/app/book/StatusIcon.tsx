@@ -1,9 +1,18 @@
-// size: allow 410, the icon, its arrival, its ring and its tooltip are one component's parts
-// The status icon row above the status line.
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+// size: allow 435, the icon, its arrival, its ring and its tooltip are one component's parts
+// The status icon row below the status line.
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { Animated, Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { canDraw } from './canDraw.ts';
 import { onCue } from './cues.ts';
 import {
   curveOf,
@@ -19,16 +28,15 @@ import {
 import { bleedingParts, statusTip } from './model.ts';
 import { usePress, useThin } from './press.ts';
 import { usePalette, useType, type Palette } from './palette.ts';
+import { fallback, glyphs } from './statusGlyphs.ts';
 import { motion, radius, size, space, type } from './tokens.ts';
 
+const StatusGlyph = lazy(() => import('./StatusGlyph.tsx'));
+
 type Say = (key: string) => string;
-// Placeholder status icon glyphs (StatusIcons' doc comment) until the own icon set
-// (loka-x6t.63): one character per condition label TextKey, else one by polarity.
-// ponytail: text characters, not drawings; the icon set replaces this map.
-const byLabel: Record<string, string> = { 'condition.fed': '◡' };
-const byKind = { buff: '+', debuff: '−', neutral: '○' }; // signs, not arrows: they sit by the minimap
 type Look = 'buff' | 'debuff' | 'neutral';
-const glyph = (label: string, look: Look) => byLabel[label] ?? byKind[look];
+// The drawing for a label text key, else its polarity's sign (statusGlyphs.ts).
+export const drawingOf = (label: string, look: Look) => glyphs[label] ?? fallback[look];
 type Condition = NonNullable<GameView['conditions']>[number];
 type Props = {
   conditions: readonly Condition[];
@@ -114,6 +122,7 @@ export const ringFraction = (c: Condition, time: number) =>
  *   behind the disc neither (arriving, pushed or revealed); ticks are silent.
  * - Story: StatusIcon.stories.tsx
  */
+// size: allow 45, each icon's six props take a line each
 export function StatusIcons(p: Props) {
   // The held icon's label, so the tip follows the clock and goes with the icon or the lock.
   const [held, setHeld] = useState<string>();
@@ -127,14 +136,19 @@ export function StatusIcons(p: Props) {
   // An icon that unmounts or hides (locked, expired, pushed) never blurs: its hold is let go here.
   if (held !== undefined && !tip) setHeld(undefined);
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'center', columnGap: space.sm }}>
+    <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
       {/* First: a Reanimated exit whose next sibling unmounts with it stays on web (Focused story) */}
       {tip && <Tooltip text={tip} />}
       {items.map((x, i) => (
         <Arrival key={x.key} label={x.label} hidden={i >= shown}>
-          <Icon look={x.look} name={x.name} fraction={x.fraction} hold={hold(x.key)} open={p.open}>
-            {glyph(x.label, x.look)}
-          </Icon>
+          <Icon
+            look={x.look}
+            name={x.name}
+            fraction={x.fraction}
+            hold={hold(x.key)}
+            open={p.open}
+            d={drawingOf(x.label, x.look)}
+          />
         </Arrival>
       ))}
       {hidden.length > 0 && (
@@ -195,15 +209,21 @@ const box = {
 
 // Locked, the disc goes dim like the Contents button (neutral: dim glyph; dim on a debuff's fg fill
 // would not read).
+// size: allow 45, the drawing and the +N text are both a disc's face
 function Icon(p: {
   look: Look;
   name: string;
   fraction?: number; // the countdown ring's remaining arc; absent, no ring
   hold?: (on: boolean) => void;
   open?: () => void;
-  children: string;
+  d?: string; // the drawing; absent, the text (the +N disc)
+  children?: string;
 }) {
-  const face = <Disc look={p.open ? p.look : 'neutral'}>{p.children}</Disc>;
+  const face = (
+    <Disc look={p.open ? p.look : 'neutral'} d={p.d}>
+      {p.children}
+    </Disc>
+  );
   const disc = ringed(p.fraction, !p.open, face);
   const press = usePress();
   const ink = useThin(press, false);
@@ -333,7 +353,7 @@ function Half(p: { right?: boolean; shown: { value: number }; color: string }) {
 }
 
 // The disc alone, so the countdown ring can wrap it.
-function Disc(p: { look: Look; children: string }) {
+function Disc(p: { look: Look; d?: string; children?: string }) {
   const l = looks(usePalette())[p.look];
   return (
     <View
@@ -348,10 +368,18 @@ function Disc(p: { look: Look; children: string }) {
         justifyContent: 'center',
       }}
     >
-      {/* Fixed size, not useType(): the glyph sits in a fixed 28 px disc, and icons keep their size. */}
-      <Text aria-hidden style={{ ...type.label, color: l.ink }}>
-        {p.children}
-      </Text>
+      {p.d === undefined ? (
+        // Fixed size, not useType(): "+N" sits in the fixed size.statusIcon disc, like the drawings.
+        <Text aria-hidden style={{ ...type.label, color: l.ink }}>
+          {p.children}
+        </Text>
+      ) : (
+        canDraw() && (
+          <Suspense fallback={null}>
+            <StatusGlyph d={p.d} ink={l.ink} />
+          </Suspense>
+        )
+      )}
     </View>
   );
 }

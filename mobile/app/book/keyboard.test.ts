@@ -1,4 +1,4 @@
-// size: allow 645, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
+// size: allow 665, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
 import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -53,7 +53,9 @@ const { Footer } = await import('./Footer.tsx');
 const { StatusLine } = await import('./Status.tsx');
 const { BookView } = await import('./Book.tsx');
 const { CharacterPage } = await import('./sections.tsx');
-const { StatusIcons, Tooltip, drainMs, ringFraction, turns } = await import('./StatusIcon.tsx');
+const { StatusIcons, Tooltip, drainMs, drawingOf, ringFraction, turns } =
+  await import('./StatusIcon.tsx');
+const { glyphs, fallback } = await import('./statusGlyphs.ts');
 
 function browser(t: { after: (cleanup: () => void) => void }) {
   const originalWindow = globalThis.window;
@@ -275,8 +277,8 @@ test('the chapter title page leaves only Continue', () => {
   const [navigation, status] = bottom.type(bottom.props).props.children;
   assert.equal(navigation, false);
   assert.equal(status.props.locked, true);
-  // past the (absent) icon row: the row, its two wrap units (line one; the button)
-  const button = StatusLine(status.props).props.children[1].props.children[1].props.children;
+  // the row, its two wrap units (line one; the button)
+  const button = StatusLine(status.props).props.children[0].props.children[1].props.children;
   const contents = button.type(button.props);
   const colours = (e: any): string[] =>
     !e || typeof e !== 'object'
@@ -304,7 +306,7 @@ test('status shows hp, ma and mv only; Character bands those only, never pennies
     pending: false,
     open: () => {},
   } as any);
-  const button = status.props.children[1].props.children[1].props.children;
+  const button = status.props.children[0].props.children[1].props.children;
   const contents = button.type(button.props);
   const text = (e: any): string =>
     e && typeof e === 'object' ? [e.props.children].flat().map(text).join('') : String(e ?? '');
@@ -355,7 +357,7 @@ test('the status line shows the weather in words and names season and tide', () 
     pending: false,
     open: () => {},
   } as any);
-  const sky = status.props.children[1].props.children[0].props.children[0];
+  const sky = status.props.children[0].props.children[0].props.children[0];
   assert.equal([sky.props.children].flat().join(''), '○ rain');
   assert.equal(
     sky.props.accessibilityLabel,
@@ -401,9 +403,13 @@ test('the spirit state and the reverie hide the status row, bleeding included', 
 
 // Breaks: icons in projected order rather than debuffs, neutral, buffs; a disc at six or none at
 // seven (or a sixth icon beside it); a name losing its polarity or giving a permanent status a time,
-// the glyph not falling back by polarity, a locked icon still a button, or the Character page
-// dropping a condition's time, tick or sign (status-line-rulings.md; book-ui.md Conditions details).
-test('status icons: debuffs first, six or five then +N, named by label, time and polarity, pictures while locked', () => {
+// a label's drawing not its own, an unknown label not falling back by polarity, chilled not drawn
+// as cold, a locked icon still a button, or the Character page dropping a condition's time, tick or
+// sign (status-line-rulings.md; book-ui.md Conditions details).
+test('status icons: debuffs first, six or five then +N, drawn by label, time and polarity, pictures while locked', (t) => {
+  const g = globalThis as any;
+  g.CanvasKit = {}; // the drawings need it; without, the disc is empty
+  t.after(() => delete g.CanvasKit);
   const at = (label: string, kind?: string, ends_at?: number, per_tick?: number) =>
     ({ label, kind, ends_at, per_tick, resource: 'hp', tick_every: 60 }) as any;
   const five = [
@@ -433,12 +439,21 @@ test('status icons: debuffs first, six or five then +N, named by label, time and
     'warded, 90s remaining, buff, opens Character',
   ]);
   const discOf = (e: any) => ((d: any) => d.type(d.props))(unpress(e));
-  const glyphOf = (e: any) => discOf(e).props.children.props.children;
-  assert.deepEqual(shown.map(glyphOf), ['−', '−', '○', '◡', '+']);
+  // A drawing's path (inside Suspense), or the +N disc's text.
+  const glyphOf = (e: any) =>
+    ((k: any) => (typeof k === 'string' ? k : k.props.d))(discOf(e).props.children.props.children);
+  const [up, down, ring] = [fallback.buff, fallback.debuff, fallback.neutral];
+  const fed = glyphs['condition.fed'];
+  assert.deepEqual(shown.map(glyphOf), [down, down, ring, fed, up]);
+  assert.equal(drawingOf('condition.chilled', 'debuff'), glyphs['condition.cold']);
   const c = color.light;
   const look = (e: any) => {
     const disc = discOf(e).props;
-    return [disc.style.backgroundColor, disc.style.borderColor, disc.children.props.style.color];
+    return [
+      disc.style.backgroundColor,
+      disc.style.borderColor,
+      disc.children.props.children.props.ink,
+    ];
   };
   assert.deepEqual([shown[3], shown[0], shown[2]].map(look), [
     [c.card, c.line, c.fg],
@@ -446,9 +461,9 @@ test('status icons: debuffs first, six or five then +N, named by label, time and
     [c.card, c.line, c.dim],
   ]);
   const six = [...five, at('mighty', 'buff', 4000)];
-  assert.deepEqual(icons(six, open).map(glyphOf), ['−', '−', '○', '◡', '+', '+']);
+  assert.deepEqual(icons(six, open).map(glyphOf), [down, down, ring, fed, up, up]);
   const seven = icons([...six, at('sharp', 'buff')], open);
-  assert.deepEqual(seven.map(glyphOf), ['−', '−', '○', '◡', '+', '+2']);
+  assert.deepEqual(seven.map(glyphOf), [down, down, ring, fed, up, '+2']);
   assert.equal(seven[5].props.accessibilityLabel, '+2 more, mighty, sharp, opens Character');
   seven[5].props.onPress();
   assert.deepEqual(opened, ['character']);
@@ -456,7 +471,7 @@ test('status icons: debuffs first, six or five then +N, named by label, time and
   assert.equal(Tooltip({ text: 'fed' }).props.style.opacity.v, 1);
   const row = (props: object) =>
     StatusLine({ time: 720, resources: [], text, open: () => {}, openCharacter: open, ...props })
-      .props.children[0];
+      .props.children[2];
   assert.equal(row({ conditions: five }).props.open, open);
   assert.equal(row({ conditions: five, locked: true }).props.open, undefined);
   assert.deepEqual(row({ conditions: [] }).props.conditions, []);
@@ -492,12 +507,12 @@ test('status icons: debuffs first, six or five then +N, named by label, time and
 // Breaks: bleeding left on the status line, after a condition, in another look, ringed, or outside
 // the cap (status-line-rulings.md; book-ui.md Conditions details).
 test('bleeding is the first status icon: debuff look, no ring, inside the cap', () => {
-  const bleeding = { label: 'bleeding', ends_at: 757, hp_loss: 1, tick_every: 60 } as any;
+  const bleeding = { label: 'condition.bleeding', ends_at: 757, hp_loss: 1, tick_every: 60 } as any;
   const at = (label: string) => ({ label, kind: 'buff', resource: 'hp', tick_every: 60 }) as any;
   const six = ['a', 'b', 'c', 'd', 'e', 'f'].map(at);
-  const text = (key: string) => key;
+  const text = (key: string) => key.replace('condition.', '');
   const line = StatusLine({ time: 720, resources: [], text, bleeding, conditions: six } as any);
-  const [row, statusRow] = line.props.children;
+  const [statusRow, , row] = line.props.children;
   assert.equal(row.props.bleeding, bleeding);
   assert.deepEqual(
     statusRow.props.children[0].props.children.map((e: any) => e.key),
@@ -506,8 +521,13 @@ test('bleeding is the first status icon: debuff look, no ring, inside the cap', 
   const [, items, more] = StatusIcons(row.props).props.children;
   const first = items[0].props.children.props;
   assert.deepEqual(
-    [first.name, first.look, first.fraction, first.children],
-    ['bleeding, 37s remaining, 1 HP each 60s, debuff', 'debuff', undefined, '−'],
+    [first.name, first.look, first.fraction, first.d],
+    [
+      'bleeding, 37s remaining, 1 HP each 60s, debuff',
+      'debuff',
+      undefined,
+      glyphs['condition.bleeding'],
+    ],
   );
   assert.deepEqual(
     items.map((a: any) => a.props.hidden),
@@ -565,7 +585,7 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
   assert.deepEqual(halves(ring(1620, 3600)), [['right', -90, fg]]); // a quarter: 12 to 3 o'clock
   assert.deepEqual(halves(ring(2520, 3600)), [['right', 0, fg]]); // exactly half: no left
   assert.deepEqual(halves(ring(720, 3600)), []); // empty: the track only
-  // Each half clips its own side of the 34 px ring box and turns about the ring's centre.
+  // Each half clips its own side of the 28 px ring box and turns about the ring's centre.
   const [, right, left] = ring(3600, 3600).type(ring(3600, 3600).props).props.children;
   const place = (h: any) => {
     const clip = h.type(h.props);
@@ -574,7 +594,7 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
   assert.deepEqual(
     [place(right), place(left)],
     [
-      [17, -17],
+      [14, -14],
       [0, 0],
     ],
   );

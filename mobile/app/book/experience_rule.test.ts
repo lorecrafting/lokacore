@@ -7,6 +7,7 @@ import type { RuleDrawn } from './ExperienceRule.tsx';
 
 const { ExperienceRule } = await import('./ExperienceRule.tsx');
 const { StatusLine } = await import('./Status.tsx');
+const { StatusIcons } = await import('./StatusIcon.tsx');
 const { color, motion, size } = await import('./tokens.ts');
 
 const g = globalThis as any;
@@ -134,8 +135,9 @@ test('coming back from a page without the line runs from the value last drawn', 
   assert.equal(levelled.moves().sequences.length, 2);
 });
 
-// Breaks: the rule gains a touch target or a reader's stop, or sits above the row.
-test('the rule is under the row, unreachable and absent without levelling', () => {
+// Breaks: the rule gains a touch target or a reader's stop, or sits above the row; the status
+// icons back above the line or between it and the rule (status-line-rulings.md, loka-x6t.134).
+test('the rule is under the row, the icons under the rule, unreachable and absent without levelling', () => {
   const line = (rule?: object) =>
     StatusLine({
       time: 0,
@@ -147,8 +149,11 @@ test('the rule is under the row, unreachable and absent without levelling', () =
       rule,
     } as never) as any;
   const kids = line({ levelling: at(10), drawn: {} }).props.children;
-  assert.equal(kids[2].type, ExperienceRule);
-  assert.ok(!line().props.children[2]);
+  assert.deepEqual(
+    kids.slice(1, 3).map((k: any) => k.type),
+    [ExperienceRule, StatusIcons],
+  );
+  assert.ok(!line().props.children[1]);
   const drawn = nodes(ExperienceRule({ levelling: at(10), drawn: {} }));
   assert.equal(drawn[0].props['aria-hidden'], true);
   assert.equal(drawn[0].props.pointerEvents, 'none');

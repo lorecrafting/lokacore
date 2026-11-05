@@ -1,9 +1,20 @@
-// StatusIcons: the round, graphic-only condition icons above the status line
-// (StatusIcons' doc comment). Time 720 in every story.
+// size: allow 315, one story per StatusIcons doc-comment state, and the drawings' contact sheet
+// StatusIcons: the round, graphic-only condition icons below the status line
+// (StatusIcons' doc comment). Time 720 in every story. CanvasKit loads first, served locally;
+// without it the discs are empty.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { useState } from 'react';
+import { View } from 'react-native';
 import { expect, fireEvent, fn, waitFor } from 'storybook/test';
+import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import { StatusIcons } from '../book/StatusIcon.tsx';
+import { space } from '../book/tokens.ts';
+import { fallback, glyphs } from '../book/statusGlyphs.ts';
+
+const loadSkia = async () => {
+  const { LoadSkiaWeb } = await import('@shopify/react-native-skia/lib/module/web/LoadSkiaWeb');
+  await LoadSkiaWeb({ locateFile: () => wasm });
+};
 
 // A timed status lasts an hour (duration 3600), so its countdown ring shows what is left of it.
 const at = (label: string, kind?: 'buff' | 'debuff', ends_at?: number) =>
@@ -24,6 +35,7 @@ const five = [fed, poisoned, rested, scarred, at('warded', 'buff', 810)];
 const meta = {
   title: 'Book/StatusIcon',
   component: StatusIcons,
+  loaders: [loadSkia],
   args: {
     conditions: [fed],
     time: 720,
@@ -267,5 +279,36 @@ export const RingDrainingPastSix: Story = {
     fireEvent.click(canvas.getByText('redraw'));
     await waitFor(() => expect(left() < 1 && left() > 0).toBe(true)); // still draining, not dropped
     await waitFor(() => expect(left()).toBeNaN(), { timeout: 1100 });
+  },
+};
+
+// Every drawing (statusGlyphs.ts), then the three fallbacks under a label with none, in rows of
+// six, in each look: the contact sheet. Light and dark by the palette global.
+const labels = [...Object.keys(glyphs), 'no drawing'];
+const kinds = ['debuff', undefined, 'buff'] as const;
+export const Drawings: Story = {
+  render: (args) => (
+    <View style={{ rowGap: space.md }}>
+      {kinds.flatMap((kind) =>
+        Array.from({ length: Math.ceil(labels.length / 6) }, (_, i) => (
+          <StatusIcons
+            key={`${kind}-${i}`}
+            {...args}
+            conditions={labels.slice(i * 6, i * 6 + 6).map((l) => at(l, kind))}
+          />
+        )),
+      )}
+    </View>
+  ),
+  // Breaks: a drawing Skia cannot parse (it draws nothing), or a disc that draws no canvas.
+  play: async ({ canvasElement }) => {
+    const { Skia } = await import('@shopify/react-native-skia');
+    const bad = [...Object.values(glyphs), ...Object.values(fallback)].filter(
+      (d) => !Skia.Path.MakeFromSVGString(d),
+    );
+    await expect(bad).toEqual([]);
+    await waitFor(() =>
+      expect(canvasElement.querySelectorAll('canvas')).toHaveLength(labels.length * kinds.length),
+    );
   },
 };
