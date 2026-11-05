@@ -182,7 +182,7 @@ test('a click ends the landing; the panel relays the walk keys', async () => {
 });
 
 // Breaks: the panel's selection marks no line, or every line; Cmd-K in the Book is lost to the
-// panel; editing a key not on the page does nothing.
+// panel; editing a key not on the page does nothing; a foreign origin moves the selection.
 test('the selection marks its lines; the panel`s shortcuts and edits reach it from the Book', async () => {
   await page.evaluate(() => {
     const w = window as unknown as { seen: Map<string, string> };
@@ -193,6 +193,16 @@ test('the selection marks its lines; the panel`s shortcuts and edits reach it fr
     postMessage({ op: 'select', kind: 'room', key: 'hut' }, '*');
   });
   await page.waitForFunction(() => document.querySelectorAll('[data-loka-selected]').length === 1);
+  const data = { op: 'select', kind: 'room', key: 'barn' };
+  await page.evaluate(
+    (d) => dispatchEvent(new MessageEvent('message', { data: d, origin: 'https://example.com' })),
+    data,
+  );
+  assert.equal(
+    await page.locator('[data-loka-selected]').count(),
+    1,
+    'a foreign page moves no selection',
+  );
   await page.evaluate(() => postMessage({ op: 'select', kind: 'room', key: 'barn' }, '*'));
   await page.waitForFunction(() => !document.querySelector('[data-loka-selected]'));
   assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+k')), { shortcut: 'k' });

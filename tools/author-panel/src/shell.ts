@@ -119,7 +119,11 @@ export function items(
   ];
 }
 /** Rows holding `q`: a label that starts with it first, then one holding it, then a detail; `~` alone narrows to the unwritten. */
-export function rank(q: string, all: Item[], max = 50) {
+export function rank(
+  q: string,
+  all: Item[],
+  max = 50 /* mutate-skip: list length, a design value */,
+) {
   const s = q.trim().toLowerCase();
   const pool = s.startsWith('~') ? all.filter((i) => i.kind === 'todo') : all;
   const find = s.replace(/^~\s*/, '');
@@ -146,7 +150,7 @@ export type Timings = {
 };
 export const BUDGET = { prose: 300, structural: 1500, refusal: 1000, card: 100 }; // mutate-skip: uncalibrated design value
 /** One edit's milliseconds: compile and publish, and for a structural edit the Book's load until `ready`. */
-export const total = (t: Timings, load = 0) => t.compile + t.publish + load;
+export const total = (t: Timings, load: number) => t.compile + t.publish + load;
 export const within = (t: Timings, load = 0) => total(t, load) <= BUDGET[t.kind];
 
 export type Loaded = { sha256?: string; at: number };
@@ -162,7 +166,10 @@ type Scheme = {
   removeEventListener(type: 'change', f: () => void): void;
 };
 // Shapes, not the DOM's types: the kernel tests that import this have no DOM lib.
-type Root = { classList: { toggle(c: string, on: boolean): unknown }; style: { colorScheme: string } };
+type Root = {
+  classList: { toggle(c: string, on: boolean): unknown };
+  style: { colorScheme: string };
+};
 
 /** `.dark` and color-scheme follow the OS setting, now and on each change; returns the unfollow. */
 export function follow(scheme: Scheme, root: Root) {

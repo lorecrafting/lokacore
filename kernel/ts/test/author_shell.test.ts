@@ -67,7 +67,9 @@ test('dividers move 16 px, 64 with Shift, inside their range; Cmd-\\ and Cmd-/ f
   assert.equal(shell.nudge('right', 360, 'ArrowLeft', false), 376);
   assert.equal(shell.nudge('right', 550, 'ArrowLeft', true), 560);
   assert.equal(shell.nudge('right', 360, 'Enter', false), 360);
+  assert.equal(shell.nudge('left', 300, 'ArrowRight', true), 364);
   assert.deepEqual([shell.reset('left'), shell.reset('right')], [280, 360]);
+  assert.deepEqual([shell.LAYOUT.left, shell.LAYOUT.right], [280, 360]);
   const l = shell.LAYOUT;
   assert.deepEqual([shell.fold(l, '\\').leftOpen, shell.fold(l, '\\').rightOpen], [false, true]);
   assert.deepEqual([shell.fold(l, '/').leftOpen, shell.fold(l, '/').rightOpen], [true, false]);
@@ -75,7 +77,7 @@ test('dividers move 16 px, 64 with Shift, inside their range; Cmd-\\ and Cmd-/ f
 });
 
 // Breaks: Cmd-K misses a definition key or a `~`, ranks a mere detail match over a name, lists a
-// `~` twice (once as text), or `~` does not narrow to the unwritten.
+// `~` twice (once as text), `~` does not narrow to the unwritten, or the three tiers lose their order.
 test('Cmd-K finds a key, a text key`s words and a `~`, and lists the commands', () => {
   const all = shell.items(
     NODES,
@@ -97,6 +99,18 @@ test('Cmd-K finds a key, a text key`s words and a `~`, and lists the commands', 
   assert.deepEqual(
     shell.rank('go to', all).map((i) => [i.kind, i.id]),
     [['command', 'go']],
+  );
+  const row = (label: string, detail: string) => ({
+    kind: 'key' as const,
+    label,
+    detail,
+    id: label,
+  });
+  const tiers = [row('a', 'hut.loka'), row('the hut', ''), row('hut', ''), row('b', '')];
+  assert.deepEqual(
+    shell.rank('hut', tiers).map((i) => i.id),
+    ['hut', 'the hut', 'a'],
+    'a name starting with it, then one holding it, then a detail; input order is the reverse',
   );
 });
 
