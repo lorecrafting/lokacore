@@ -159,6 +159,7 @@ the toolbox showcase.
 | One rule for many rooms | `"zones"` on rooms and `"zone"` on a reaction; [codex wanderer](../cartridges/codex_sampler/reactions/wanderer.json) | The compiler copies a zone rule per member room ([zones](system/cartridge.md#source-shortcuts)). |
 | A consequence that plays out over time | `{"op": "wait", "seconds": <n>}` in a reaction's `steps` | The compiler splits the list into delayed rules ([waits](system/cartridge.md#source-shortcuts)) |
 | A consequence or story presentation | `reactions/<key>.json`, a dialogue choice's `story_point`, `scenes/<key>.json`; [bell scene](../cartridges/scene_sampler/scenes/bell_rung.json) | [Reactions](system/mechanics.md#reaction1-kerneltssrcmechanicsreactionts), [chapters](system/mechanics.md#chapters-kerneltssrcviewviewts) and [scenes](system/mechanics.md#scene1-mechanicsscenerulets) have bounded, typed triggers and steps. |
+| A scene that opens play | `scenes/<key>.json` with `"on": {"start": true}` and `"control": "modal"` (one per cartridge); [opening dream](../cartridges/opening_sampler/scenes/dream.json) | Play starts on its first line before any room page; its last Continue shows the entry room ([scene@1](system/mechanics.md#scene1-mechanicsscenerulets)). |
 
 Put player-facing words in `text.json` and reference their keys from NPC, item and story
 definitions ([text rules](system/cartridge.md#text)), or write them in place as

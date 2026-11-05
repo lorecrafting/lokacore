@@ -118,6 +118,51 @@ defmodule Loka.ContentScenesTest do
               ]}
   end
 
+  # Breaks: the compiler refuses an opening scene (`on: {start: true}`), drops its trigger or
+  # its scene fact, admits a second opening scene, or stops requiring an outcome on a story point.
+  test "an opening scene compiles once per cartridge; other triggers still need an outcome", %{
+    tmp_dir: dir
+  } do
+    opening = %{
+      "on" => %{"start" => true},
+      "control" => "modal",
+      "treatment" => "reverie",
+      "steps" => [
+        %{"type" => "narrate", "text" => "scene.bell_rung.bell"},
+        %{"type" => "await_ack"},
+        %{"type" => "end"}
+      ]
+    }
+
+    assert {:ok, _, []} = Loka.Content.compile("cartridges/opening_sampler")
+    assert {:ok, out, []} = compile(dir, %{"scenes/opening.json" => opening})
+    c = JSON.decode!(out)["cartridge"]
+    assert c["scenes"]["scene_sampler@0.0.1:scene/opening"]["on"] == %{"start" => true}
+    assert c["facts"]["scene_sampler@0.0.1:fact/scene_opening"]["value_type"]["maximum"] == 1
+
+    assert compile(Path.join(dir, "two"), %{
+             "scenes/opening.json" => opening,
+             "scenes/dawn.json" => opening
+           }) ==
+             {:error,
+              [
+                d("DUPLICATE_DEFINITION", "scenes/dawn.on"),
+                d("DUPLICATE_DEFINITION", "scenes/opening.on")
+              ]}
+
+    s = src("scenes/bell_rung.json")
+
+    assert compile(Path.join(dir, "no_outcome"), %{
+             "scenes/bell_rung.json" => update_in(s, ["on"], &Map.delete(&1, "outcome"))
+           }) ==
+             {:error,
+              [
+                d("SCHEMA_VIOLATION", "scenes/bell_rung.on.outcome", %{
+                  "error" => "missing_property"
+                })
+              ]}
+  end
+
   # Breaks: a scene end not derived into its story point's outcomes, an end outcome a choice
   # already claims, one fact assigned twice at scene end, or a scene-reached point key whose
   # story_point_<key> fact overflows a Key (53 characters), loads.

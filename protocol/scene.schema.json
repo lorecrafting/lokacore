@@ -19,7 +19,7 @@
               ]
             },
             "on": {
-              "description": "What starts the scene: a story point reached, a quest outcome, or a scripted action's success; an action start names the scripted action's room and detail.",
+              "description": "What starts the scene: a story point reached, a quest outcome, a scripted action's success, or `start` (an opening scene, started at world creation, without outcome); an action start names the scripted action's room and detail.",
               "type": "object",
               "properties": {
                 "story_point": {
@@ -39,16 +39,28 @@
                 },
                 "outcome": {
                   "$ref": "action.schema.json#/$defs/Key"
+                },
+                "start": {
+                  "const": true
                 }
               },
-              "required": [
-                "outcome"
-              ],
               "exactlyOneRequired": [
                 "story_point",
                 "quest",
-                "action"
+                "action",
+                "start"
               ],
+              "dependentRequired": {
+                "story_point": [
+                  "outcome"
+                ],
+                "quest": [
+                  "outcome"
+                ],
+                "action": [
+                  "outcome"
+                ]
+              },
               "additionalProperties": false
             },
             "control": {
