@@ -32,6 +32,7 @@ const story = (outline: Story['outline']): Story => ({
       { from: d1, to: q1, path: '/steps/1', op: 'quest.start' },
       { from: q1, to: f1, path: '/deadline/fact', set: true },
       { from: q1, to: f1, path: '/policy/when' },
+      { from: ref('topic', 'lore'), to: f1, path: '/fact', set: true }, // set, and read by the codex
     ],
   },
   report: {
@@ -148,9 +149,11 @@ test('Trace follows a fact from where it is set to where it is read, with each b
     { label: 'set at', ref: ref('reaction', 'ring'), key: 'ring', beat: undefined },
     { label: 'set at', ref: ref('reaction', 'toll'), key: 'toll', beat: undefined },
     { label: 'set at', ref: q1, key: 'q1', beat: 1 },
+    { label: 'set at', ref: ref('topic', 'lore'), key: 'lore', beat: undefined },
     { label: 'read at', ref: d1, key: 'd1', beat: 1 },
     { label: 'read at', ref: ref('reaction', 'wait'), key: 'wait', beat: undefined, dashed: true },
     { label: 'read at', ref: q1, key: 'q1', beat: 1 },
+    { label: 'read at', ref: ref('topic', 'lore'), key: 'lore', beat: undefined },
   ]);
   assert.deepEqual(list.trace(planted, f2), [{ label: 'never set' }]);
   assert.deepEqual(

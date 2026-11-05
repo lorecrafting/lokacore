@@ -1,6 +1,7 @@
 // The Story list and Trace (docs/design/editor-map-and-story-rulings.md S2): the tree's visible
 // rows, the arrow keys' moves, which rows a selection or a palette row opens, a trace's rows and
 // the palette's story rows. No React here: tested from kernel/ts/test/author_story.test.ts.
+import { reads } from '../../../kernel/ts/play/reads.ts';
 import type { MapRoom } from './map.ts';
 import { fromRef, type Item } from './shell.ts';
 
@@ -236,8 +237,7 @@ export function trace(s: Story, ref: string): TraceRow[] {
       [o.unused, 'unused'],
     ] as const
   ).flatMap(([facts, label]) => (facts.includes(ref) ? [{ label }] : []));
-  // a topic's fact is also read: the codex lists the topics whose fact holds (reach.ts isRead)
-  const read = (e: Edge) => !e.set || fromRef(e.from)?.kind === 'topic';
+  const read = (e: Edge) => reads(!!e.set, fromRef(e.from)?.kind);
   return [
     ...never,
     ...into.filter((e) => e.set).map((e) => row('set at', e)),

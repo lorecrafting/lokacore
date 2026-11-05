@@ -8,6 +8,7 @@ import { engineWrittenRefs, expectedFacts } from '../src/content/cartridge_posit
 import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { refString } from '../src/runtime/decision.ts';
+import { reads } from './reads.ts';
 
 type Edge = { from: string; to: string; path: string; op?: string; set?: true };
 
@@ -30,9 +31,9 @@ const SITES: [string, RegExp][] = [
 const isWrite = (e: Edge) =>
   e.op === 'fact.assign' ||
   e.op === 'fact.adjust' ||
+  e.op === 'fact.stamp' ||
   SITES.some(([at, path]) => (kindOf(e.from) ?? e.from) === at && path.test(e.path));
-// a topic's fact is also read: the codex (GameView topics) lists the topics whose fact holds
-const isRead = (e: Edge) => !isWrite(e) || kindOf(e.from) === 'topic';
+const isRead = (e: Edge) => reads(isWrite(e), kindOf(e.from));
 
 /** Nodes: every definition of a map keyed by DefinitionRefString; edges: every DefinitionRef in it. */
 export function contentGraph(c: Obj): { nodes: { ref: string; kind: string }[]; edges: Edge[] } {
