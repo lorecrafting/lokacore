@@ -6,7 +6,8 @@ defmodule Loka.ContentStartersTest do
   @schema_kinds "schemas/source/*.schema.json"
                 |> Path.wildcard()
                 |> Enum.map(&Path.basename(&1, ".schema.json"))
-                |> List.delete("defs")
+                # outline.json holds the Story map's beats, author notes rather than a content kind
+                |> Kernel.--(~w(defs outline))
                 # The JSON `scenes/` starter is `cutscene`, so `scene` can name the `.scene` format.
                 |> Enum.map(&if(&1 == "scenes", do: "cutscene", else: &1))
   @guide File.read!("docs/guides/writing-the-game.md")

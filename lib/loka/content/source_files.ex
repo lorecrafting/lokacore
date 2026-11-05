@@ -10,7 +10,8 @@ defmodule Loka.Content.SourceFiles do
     |> Path.wildcard(match_dot: true)
     |> Enum.filter(&File.regular?/1)
     |> Enum.map(&Path.relative_to(&1, dir))
-    # checkpoints/ holds the author preview's recorded paths, not content
-    |> Enum.reject(&String.starts_with?(&1, "checkpoints/"))
+    # checkpoints/ holds the author preview's recorded paths and outline.json the Story map's
+    # beats (author notes), not content
+    |> Enum.reject(&(&1 == "outline.json" or String.starts_with?(&1, "checkpoints/")))
   end
 end
