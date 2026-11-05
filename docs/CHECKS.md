@@ -81,8 +81,8 @@ their rules and red controls remain available for resumption.
   `test/loka/red_controls_test.exs` checks preserved local bytes. It plants a boundary violation, a cycle, a compile edge, an
   oversized AGENTS.md, size-limit cases, one violation per Credo check, a stale and an
   out-of-subset schema, an Elixir adapter without a differential, a stale feature map, an
-  implemented capability without its map cells, a toolbox row without its summary or with a
-  sampler that does not require it, a stale toolbox page, and a PartyId passed where a CharacterId is
+  implemented capability without its map cells, a toolbox row with each missing or broken
+  cell, a Book treatment missing from its table, a stale toolbox page, and a PartyId passed where a CharacterId is
   matched (nominal ids, `Loka.Core.Contracts`), and requires each check to fail.
 - `elixir bin/check_docs.exs`: relative links and `#anchor`s resolve; every Markdown file is reachable
   by links from README.md, AGENTS.md or CLAUDE.md; AGENTS.md stays

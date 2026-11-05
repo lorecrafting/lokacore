@@ -155,6 +155,9 @@ enum =
   for(n <- SchemaPath.resolve("scenes.treatment", defs), v <- n["enum"] || [], do: v)
   |> Enum.uniq()
 
+# Self-check: an enum moved behind a $ref would leave the treatment checks below dead.
+enum != [] || raise "scenes.treatment has no literal enum in schemas/source/defs.schema.json"
+
 # The "### Book treatments" section's table rows; each must parse.
 section =
   read.(toolbox_path)
@@ -170,10 +173,6 @@ treatments =
 
 problems =
   Enum.flat_map(caps, &elem(&1, 3)) ++
-    if(enum == [],
-      do: ["#{toolbox_path}: scenes.treatment has no enum in the source schema"],
-      else: []
-    ) ++
     if(length(treatments) < length(table) or table == [],
       do: ["#{toolbox_path}: Book treatments table rows must read | `name` | host | `sampler` |"],
       else: []
