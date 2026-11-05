@@ -59,7 +59,7 @@ Keep lessons in area files; link here only when relevant to all work.
 - For PM work, read [PM lessons](docs/lessons/pm.md).
 - Before drafting or reviewing a district or area plan, read the [area authoring checklist](docs/guides/area-authoring.md).
 - Read the [toolbox page](docs/TOOLBOX.gen.md) before requesting a mechanic, the
-  [Builders' Guide](docs/BUILDERS-GUIDE.md) before writing, reviewing or moving cartridge source:
+  [Builders' Guide](docs/BUILDERS-GUIDE.md#cartridge-layout) before writing, reviewing or moving cartridge source:
   shortcuts, not repeated JSON; verify via `coverage.ts`/`why.ts`.
 
 **All work**

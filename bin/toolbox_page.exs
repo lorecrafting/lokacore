@@ -14,10 +14,12 @@
 # Treatment rows come from the "Book treatments" table of docs/MECHANICS-TOOLBOX.md, which must
 # name every value of the scene `treatment` enum. Row ids (`key@N`, `treatment:<name>`) are stable:
 # the editor registry keys on them. Halts on a missing or broken cell. `--check` regenerates in
-# memory and exits 1 if the committed file differs; a second and third argument read the rows
-# and the treatments doc from those files instead (red controls).
+# memory and exits 1 if the committed file differs; a second, third and fourth argument read the
+# rows, the treatments doc and the ranked toolbox rows from those files instead (red controls).
+# A last table lists every done row of docs/toolbox.gen.json (bin/contracts.exs writes it from
+# docs/MECHANICS-TOOLBOX.md), most of which add no capability of their own.
 #
-#   elixir bin/toolbox_page.exs [--check [rows.json [toolbox.md]]]
+#   elixir bin/toolbox_page.exs [--check [rows.json [toolbox.md [toolbox.gen.json]]]]
 defmodule SchemaPath do
   # The {field, subschema} pairs a node offers, through $ref (not partial.*), branches and
   # array or map members.
@@ -58,6 +60,9 @@ rows_path = Enum.at(System.argv(), 1, "docs/features.json")
 rows = json.(rows_path)
 toolbox_path = Enum.at(System.argv(), 2, "docs/MECHANICS-TOOLBOX.md")
 defs = json.("schemas/source/defs.schema.json")["$defs"]
+
+done =
+  for r <- json.(Enum.at(System.argv(), 3, "docs/toolbox.gen.json")), r["state"] == "done", do: r
 
 requires = fn cart ->
   path = "cartridges/#{cart}/cartridge.json"
@@ -212,6 +217,22 @@ treatment_rows =
       "[book-ui](system/book-ui.md#book-treatments) |"
   end
 
+done_rows =
+  for r <- done do
+    sampler =
+      case Regex.run(~r{`cartridges/([\w-]+)`}, r["status"]) do
+        [_, c] -> "[#{c}](../cartridges/#{c}/)"
+        nil -> "—"
+      end
+
+    section =
+      if r["section"],
+        do: "[mechanics](#{String.replace_prefix(r["section"], "docs/", "")})",
+        else: "—"
+
+    "| #{r["id"]} | #{r["title"]} | #{sampler} | #{section} |"
+  end
+
 md =
   Enum.join(
     [
@@ -232,7 +253,19 @@ md =
       "| Id | What it does | You declare | Sampler | Showcase | Mechanics |",
       "|---|---|---|---|---|---|"
       | cap_rows ++ treatment_rows
-    ] ++ [""],
+    ] ++
+      [
+        "",
+        "## Done toolbox rows",
+        "",
+        "Every done row of the [ranked toolbox](MECHANICS-TOOLBOX.md#ranked-toolbox): mechanics built from",
+        "the capabilities above (spells, lockpicking, crafting, hirelings and more). The sampler is the",
+        "first cartridge its status names.",
+        "",
+        "| Row | What it does | Sampler | Mechanics |",
+        "|---|---|---|---|"
+        | done_rows
+      ] ++ [""],
     "\n"
   )
 

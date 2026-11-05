@@ -168,6 +168,24 @@ controls = [
        |> String.replace(~r/^\| `reverie` .*\n/m, "")
    }, ~w(elixir bin/toolbox_page.exs --check docs/features.json tmp/red-toolbox-treatments.md),
    "treatment:reverie: no row in the Book treatments table"},
+  {"toolbox page: a Book treatment sampler that does not exist",
+   %{
+     "tmp/red-toolbox-sampler.md" =>
+       String.replace(
+         File.read!(Path.join(root, "docs/MECHANICS-TOOLBOX.md")),
+         "rope_reverie.json`",
+         "nope.json`"
+       )
+   }, ~w(elixir bin/toolbox_page.exs --check docs/features.json tmp/red-toolbox-sampler.md),
+   "treatment:reverie: no sampler"},
+  {"toolbox page: a done toolbox row missing from the page",
+   %{
+     "tmp/red-toolbox-done.json" =>
+       JSON.encode!([
+         %{"id" => "X1", "state" => "done", "title" => "Planted", "status" => "done"}
+       ])
+   }, ~w(elixir bin/toolbox_page.exs --check docs/features.json docs/MECHANICS-TOOLBOX.md
+      tmp/red-toolbox-done.json), "TOOLBOX.gen.md is out of date"},
   {"transcripts: a walk_ transcript whose replay differs",
    %{
      "cartridges/toolbox_showcase/transcripts/walk_red.jsonl" =>
