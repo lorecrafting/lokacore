@@ -47,10 +47,12 @@ export type Message = {
   placeholders?: Record<string, string>; // each `~` key's file:line, from the compile (/line)
 };
 
-/** `mix loka.lint`'s findings (`rel: words`, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */
+/** `mix loka.lint`'s findings (`rel: words` for a .json, .scene or .cut source, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */
 export function lintLines(code: number | null, stderr: string) {
   if (code === 0) return [];
-  const found = stderr.split('\n').filter((l) => /^([\w./-]+\.json|areas\/\w+)[ :]/.test(l));
+  const found = stderr
+    .split('\n')
+    .filter((l) => /^([\w./-]+\.(json|scene|cut)|areas\/\w+)[ :]/.test(l));
   return code === 1 && found.length ? found : [`lint failed (exit ${code})`];
 }
 
