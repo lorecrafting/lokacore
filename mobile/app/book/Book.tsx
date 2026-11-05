@@ -262,13 +262,10 @@ function Bottom(p: BottomProps) {
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
   const detail = !shut && detailPage(p.page);
   if (detail && !pending && !p.screen.catchingUp && !fault) return null;
-  // Dead, the page shows only Let go, and in the spirit state only Rise, catching up included: no
-  // status line (owner 2026-11-04). A fault ends the spirit state (spirit.ts haunt).
-  if (
-    (p.screen.spirit || !!p.screen.treatment || (p.screen.fell && !p.screen.catchingUp)) &&
-    !fault
-  )
-    return null;
+  // Dead, the page shows only Let go (the dead page and the spirit state, Rise, catching up
+  // included): no status line (owner 2026-11-04). A fault ends both (spirit.ts haunt, fallen).
+  const fell = p.screen.dead || (p.screen.fell && !p.screen.catchingUp);
+  if ((p.screen.spirit || !!p.screen.treatment || fell) && !fault) return null;
   return (
     <View
       style={{

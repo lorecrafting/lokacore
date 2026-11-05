@@ -46,7 +46,7 @@ const fellIn = (s: Logs) => !!s.ended && s.fell === s.ended;
 export function fallen(s: Logs, text: (key: string) => string) {
   if (s.fault) s.down = undefined;
   const dead = s.down && { title: text(s.down.title), log: s.down.log };
-  return { fell: fellIn(s) || !!dead, dead };
+  return { fell: fellIn(s), dead };
 }
 const dead = (s: Logs) => (fellIn(s) || s.down ? s.projection.view.revival : undefined);
 

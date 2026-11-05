@@ -32,7 +32,7 @@ const cellar = () => {
 
 // Breaks (book-ui.md, Dead page): an off-fight death skips the dead page (straight to the recovery
 // room or the spirit state), draws the recovery room's title or paragraphs early, drops the room's
-// kept log, keeps the status row or bottom row, does not turn from another page, reads the death
+// kept log, keeps the status row or bottom row (catching up included), does not turn from another page, reads the death
 // lines twice (on the dead page and again at the rise), or Let go misses the spirit state.
 test('an off-fight death shows the dead page; Let go enters the spirit state', () => {
   const clock = Date.now;
@@ -60,6 +60,8 @@ test('an off-fight death shows the dead page; Let go enters the spirit state', (
       ['Let go'],
     );
     assert.equal(h.footer(), false);
+    h.publish(view(SHRINE), undefined, undefined, { kind: 'catching_up' });
+    assert.equal(h.footer(), false); // catching up included
     assert.match(h.said(), /You die\./); // read once, here
     h.tap('Let go');
     assert.deepEqual(these(h, ['Dark.', ...DEATH]), ['Dark.']); // held until the rise
@@ -109,7 +111,7 @@ test('a death that closes a fight keeps the Combat page', () => {
 });
 
 // Breaks (book-ui.md, Dead page: Reopen, A scene): a reopen before Let go shows the dead page or
-// the spirit state; with a scene open, Let go starts the spirit state or skips the scene card.
+// the spirit state, or a fault leaves it up; with a scene open, the dead page is not first, or Let go starts the spirit state or skips the card.
 test('a reopen shows the recovery room solid; a scene shows after Let go', () => {
   const h = cellar();
   try {
@@ -121,20 +123,20 @@ test('a reopen shows the recovery room solid; a scene shows after Let go', () =>
     assert.ok(t.includes('The shrine'));
     assert.equal(t.includes('Let go') || t.includes('Rise') || t.includes('Dark.'), false);
     again.close();
-    const scene = cellar();
-    scene.die(
-      view({
-        ...SHRINE,
-        scene: { scene: { key: 'road' }, line: 'road.crows', index: 1, count: 1 },
-      }),
-      RECEIPT,
-    );
-    assert.equal(scene.texts().includes('Crows lift off the road.'), false);
-    scene.tap('Let go');
-    const s = scene.texts();
-    assert.ok(s.includes('Crows lift off the road.'));
-    assert.equal(s.includes('Rise') || s.includes('Dark.'), false);
-    scene.close();
+    const scene = { scene: { scene: { key: 'road' }, line: 'road.crows', index: 1, count: 1 } };
+    const e = cellar();
+    e.die(view({ ...SHRINE, ...scene }), RECEIPT);
+    assert.deepEqual(these(e, ['Crows lift off the road.', 'Let go']), ['Let go']);
+    e.tap('Let go');
+    assert.ok(e.texts().includes('Crows lift off the road.')); // its card
+    e.publish(view(SHRINE)); // and it ends: no spirit state behind it
+    assert.equal(these(e, ['Rise', 'Dark.']).length, 0);
+    e.close();
+    const fault = cellar(); // a fault ends the dead page, as a reopen does
+    fault.die(view(SHRINE), RECEIPT);
+    fault.publish(view(SHRINE), undefined, undefined, { kind: 'fault', code: 'x' });
+    assert.equal(fault.texts().includes('Let go'), false);
+    fault.close();
   } finally {
     h.close();
   }
