@@ -79,10 +79,13 @@ export function rebase(base: unknown, now: unknown, doc: unknown, sent: Op[]): u
 /**
  * The ops a schema error does not hold: those outside every errored top-level field (`property`
  * is rjsf's `.policy.items`, `.0.room`), so a half-made branch never blocks an edit elsewhere.
+ * A root error (`if`/`else` restating a field's) holds everything only when no field is named.
  */
 export function apart(ops: Op[], errors: { property?: string }[]): Op[] {
-  const held = errors.map((e) => (e.property ?? '').replace(/^\./, '').split('.')[0]);
-  if (held.includes('')) return [];
+  const held = errors
+    .map((e) => (e.property ?? '').replace(/^\./, '').split('.')[0])
+    .filter(Boolean);
+  if (errors.length && !held.length) return [];
   return ops.filter((o) => !held.includes(String(o.path[0])));
 }
 

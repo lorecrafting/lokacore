@@ -129,6 +129,10 @@ test('a schema error holds only the edits inside its top-level field', () => {
   ]);
   assert.deepEqual(apart(ops, []), ops);
   assert.deepEqual(apart(ops, [{ property: '' }]), []);
+  // the root `if`/`else` errors Ajv adds for a branch's error do not hold the step
+  assert.deepEqual(apart(ops, [{ property: '.policy.items' }, { property: '' }]), [
+    { path: ['steps', 0, 'fact'], value: 'b' },
+  ]);
   assert.deepEqual(
     apart(diff([{ x: 1 }, { x: 2 }], [{ x: 0 }, { x: 3 }]), [{ property: '.0.x' }]),
     [{ path: [1, 'x'], value: 3 }],
