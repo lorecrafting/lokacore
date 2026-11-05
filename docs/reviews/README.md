@@ -15,7 +15,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Book treatments T1 (spirit extracted, reverie added), PR #611 (loka-wfrgk.9)](2026-11-04-t1-book-treatments-review.md): **APPROVE WITH NOTES**
 - [Design review: the Book's spirit state, PR #604 (loka-kgd.205)](2026-11-04-spirit-state-design-review.md): **CHANGES REQUIRED**
 - [Review: one consume command and one effect block, PR #605 (loka-kgd.209)](2026-11-04-loka-kgd.209-consume-review.md): **APPROVE**
-- [Review: Editor E1 write path, PR #610 (loka-wfrgk.2, vduxr.51, vduxr.53 `/edit`)](2026-11-04-e1-write-path-review.md): **APPROVE WITH NOTES**
+- [Review: Editor E1 write path, PR #610 (loka-wfrgk.2, vduxr.51, vduxr.53 `/edit`)](2026-11-04-e1-write-path-review.md): **APPROVE**
 - [Review: corpses name their victim, decay and spill, PR #593 (loka-kgd.203)](2026-11-04-corpses-review.md): **APPROVE**
 - [Second review: corpse decay save and delta contract, PR #593 (loka-kgd.203)](2026-11-04-corpse-decay-second-review.md): **CHANGES REQUIRED**
 - [Second review: consume contract and save effect, PR #605 (loka-kgd.209)](2026-11-04-consume-one-effect-second-review.md): **APPROVE WITH NOTES**

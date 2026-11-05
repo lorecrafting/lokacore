@@ -45,3 +45,21 @@
 **nit** `kernel/ts/play/write.ts:123-127` `/delete` accepts `areas/<area>.json` (a root bundle not in the design §5.1 root list) because the root check is `!file.includes('/')`. Author-side.
 
 Verdict: **APPROVE WITH NOTES**. The should-fix is small and may land in the fix round or with the owner's deferral.
+
+## Re-check: `365a7dabccab3734b45fad6286f34dd8f9ef7699`
+
+CI at this head: ci, book-e2e, graph-diff all success (`gh run list --commit`). `write.test.ts` 16/16 here.
+
+Dispositions:
+
+- should-fix `prose.ts:17` (.cut never editable): fixed. A `.cut` line other than `---`/blank is edited as a whole line, the rule `todo.ts:51` `cutLines` uses, so every line the Book can key is the line `/edit` accepts. Test `write.test.ts:286-291` (400 on `---`, 200 rewrites line 1 only). Probes against `serve()`: `---   ` (trailing spaces) 400; `   ` (blank) 400; `----`, `- - -`, `***` edit as words, as `cutLines` keys them; `was` mismatch 409 with bytes; `a\nb` words 400; an indented line is replaced whole (indentation dropped, as `cutLines` trims). CRLF file: `was` must carry the `\r` (`---\r` 400, `First.\r` 200) and the new line is written LF, so the file ends mixed; `cutLines` trims the `\r`, so a Book-keyed `was` for a CRLF `.cut` would 409 until E2's caller strips or echoes it. Author-side (no CRLF file in the repo): nit, for E2.
+- nit `prose.ts:28` tab untested: fixed, `write.test.ts:348-352`. Hand mutant `/[\n\r\t]/` → `/[\n\r]/` now red (the PR's table).
+- nit `guard.ts:75` ENOTDIR 500: fixed, `guard.ts:33` `there()` answers 400 `a file stands where a folder must be`, no path. Test `write.test.ts:79-83`; probe: `/source`, `/change` and `/edit` under `scenes/d.cut/` all 400. Callers `guarded()` and `write.ts undo()` both go through `there()`.
+- nit `write.ts:123` `/delete areas/<area>.json`: fixed via exported `rootFile`, `write.test.ts:335-339`; probe: `areas/north.json` 400, `areas/north/rooms/b.json` and `rooms/a.json` still 200.
+- nit `words.ts:203-205` / `logs.ts:255` keyless lines: filed for E5 (Alt-click fallbacks), per the brief.
+
+Hand mutants (`bin/mutate.sh`, `write.test.ts`): `prose.ts` drop `!== '---'` red; `guard.ts` `=== 'ENOTDIR'` → `false` red; `write.ts` drop `|| rootFile(file)` red. Survivor: `prose.ts:17` drop `line.trim() &&` (a blank `.cut` line becomes editable; `cutLines` gives it no key, so no Book caller reaches it). Author-side: nit, no round.
+
+Tests follow AGENTS.md "Writing tests": expected bytes and refusals are literals, no fixtures beyond the temp tree.
+
+Verdict: **APPROVE**.
