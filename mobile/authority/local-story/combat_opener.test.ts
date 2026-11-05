@@ -60,5 +60,10 @@ test('the opener of a fight comes from its receipt, survives a cold reopen and i
     .prepare("UPDATE receipt SET response = replace(response, 'encounter.open', 'encounter.gone')")
     .run();
   assert.equal(r.story.opener(fight), undefined);
+  // Breaks: a miss scans the whole save again on every draw of the Combat page.
+  r.sql
+    .prepare("UPDATE receipt SET response = replace(response, 'encounter.gone', 'encounter.open')")
+    .run();
+  assert.equal(r.story.opener(fight), undefined);
   r.sql.close();
 });

@@ -36,7 +36,7 @@ export function combatReceipts(db: Db, scope: string) {
     defenseEvidence(JSON.parse(r.response).events);
 }
 
-const openers = new WeakMap<Story, Map<string, Opener>>(); // the Combat page asks each render
+const openers = new WeakMap<Story, Map<string, Opener | undefined>>(); // the Combat page asks each render
 
 // The receipt whose encounter.open op opened this encounter (book-ui.md, Live combat response). Attack, cast and
 // perform are the player's commands that open one (combat engage, a spell's fight-back); any other
@@ -58,6 +58,6 @@ export function opener(s: Story, encounter_id: string): Opener | undefined {
   const found = r
     ? { npc_id: r.npc_id, player: ['attack', 'cast', 'perform'].includes(r.type) }
     : undefined;
-  if (found) known.set(id, found); // an unknown one is asked again (a later commit may hold it)
+  known.set(id, found); // asked outside a transaction, its opening receipt is committed or never was
   return found;
 }

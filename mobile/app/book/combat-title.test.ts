@@ -33,6 +33,11 @@ test('the title names who opened each fight, and nothing when that is not known'
   // Breaks: an old save with no opening receipt guesses a title (the Book names no opener it cannot read).
   assert.equal(combatTitle(fight('three') as never, text, opener), undefined);
   assert.equal(combatTitle(fight('one') as never, text, undefined), undefined);
+  // Breaks: a foe with no words for its name is titled "You attack the undefined!" or by its raw key.
+  const nameless = (k: string) => (k === 'npc.goblin' ? undefined : text(k)) as string;
+  assert.equal(combatTitle(fight('one') as never, nameless, opener), undefined);
+  const raw = (k: string) => (k === 'npc.goblin' ? k : text(k));
+  assert.equal(combatTitle(fight('one') as never, raw, opener), undefined);
   // Breaks: a cartridge with no words for the key (the prologue) shows the raw key as its title.
   assert.equal(
     combatTitle(fight('one') as never, (k) => (k.startsWith('combat') ? k : text(k)), opener),
@@ -78,6 +83,8 @@ test('a fight keeps its title while its opener is unread; the next fight has its
       'combat.hit',
     );
     assert.equal(h.texts().includes(TITLE), false);
+    // Breaks: a fight with no known opener loses the page's header and its screen-reader focus.
+    assert.ok(h.texts().includes('Combat'));
   } finally {
     h.close();
   }

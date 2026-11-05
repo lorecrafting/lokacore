@@ -13,7 +13,8 @@ export const named = (o: Foe, text: Say) =>
 
 // "You attack {target}!" or "{attacker} attacks you!" in the cartridge's words; none when the
 // opening receipt is unknown (a replaced world), its NPC is no longer a foe here, or the cartridge
-// has no words for the key (the Book's text answers a missing key with the key). Never guessed.
+// or its foe has no words for the key or the foe's name (the Book's text answers a missing key with the
+// key, the session's with undefined). Never guessed: the page then reads Combat.
 export function combatTitle(c: NonNullable<GameView['combat']>, text: Say, opener: Game['opener']) {
   const by = opener?.(c.encounter_id);
   const foes = c.active_opponents ?? [{ ...c, id: c.opponent_id }];
@@ -22,8 +23,8 @@ export function combatTitle(c: NonNullable<GameView['combat']>, text: Say, opene
   const [key, slot] = by.player
     ? ['combat.title_you_attack', 'target']
     : ['combat.title_attacks_you', 'attacker'];
-  const said = text(key);
-  return said && said !== key ? fillSlots(said, { [slot]: named(foe, text) }, String) : undefined;
+  const [said, name] = [key, foe.words?.bare ?? foe.name].map((k) => text(k) !== k && text(k));
+  return said && name ? fillSlots(said, { [slot]: named(foe, text) }, String) : undefined;
 }
 
 // The encounter's title, kept while its opener cannot be read (a save in flight, the opener fallen)
