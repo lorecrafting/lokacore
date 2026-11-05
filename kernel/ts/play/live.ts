@@ -22,13 +22,15 @@ import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { artifactBytes } from './compiled.ts';
 import type { FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
 import { replayRecords } from './replay.ts';
-import { files, todo } from './todo.ts';
+import { todo } from './todo.ts';
 import { find } from './find.ts';
 import { why } from './why.ts';
 import { storyRoute } from './story.ts';
 import { body, editing, foreign, json } from './editing.ts';
+import { sourceOf } from './prose.ts';
 import type { Changed } from './write.ts';
 import { sentences } from './why_words.ts';
+import { told } from './told.ts';
 
 export type Canonical = { text: Record<string, string> } & Record<string, unknown>;
 export type Message = {
@@ -40,6 +42,9 @@ export type Message = {
   pending?: number; // compiles parked while the editor holds (POST /hold)
   held?: boolean;
   changed?: Changed[]; // sent once with its write or burst, never kept for a later message
+  // the lines /edit pushed that the last compile refused (file:line); a good compile clears them
+  unconfirmed?: { key: string; at: string }[];
+  placeholders?: Record<string, string>; // each `~` key's file:line, from the compile (/line)
 };
 
 /** `mix loka.lint`'s findings (`rel: words`, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */
@@ -86,31 +91,6 @@ async function checkpoints(request: IncomingMessage, response: ServerResponse, s
   mkdirSync(dir, { recursive: true });
   writeFileSync(file, `${JSON.stringify({ steps }, null, 2)}\n`);
   return response.writeHead(204).end();
-}
-
-/** `rel:line` of the first line defining `key` (`"key":`), else of the first holding `words` as a
- * JSON string (inline prose has no key in the source), else of the scene line that says their
- * first line (`maud: words`, `- words`); undefined when none is in `source`. */
-export function sourceOf(source: string, key: string, words?: string) {
-  const all = files(source);
-  const find = (hit: (line: string) => boolean, rels = all) => {
-    for (const rel of rels) {
-      const i = readFileSync(join(source, rel), 'utf8').split('\n').findIndex(hit);
-      if (i >= 0) return `${rel}:${i + 1}`;
-    }
-  };
-  const defined = find((l) => l.includes(`"${key}":`));
-  const first = words?.trim().split('\n')[0];
-  if (defined || !first) return defined;
-  return (
-    find((l) => l.includes(JSON.stringify(words))) ??
-    find(
-      (l) =>
-        l.trimEnd().endsWith(`: ${first}`) ||
-        [`- ${first}`, `* ${first}`, first].includes(l.trim()),
-      all.filter((rel) => /\.(scene|cut)$/.test(rel)),
-    )
-  );
 }
 
 /** The rows of the last run in a trace table dump (a start over begins a new run; the explainer
@@ -256,14 +236,14 @@ export function serve(port: number, source: string, artifact: string, release = 
   const send = (client: ServerResponse, once = {}) =>
     client.write(`data: ${JSON.stringify({ ...last, ...once })}\n\n`);
   const map = storyRoute(source, artifact);
-  const push = (message: Partial<Message>) => {
+  const said = told((message) => {
     last = { ...last, ...message };
     // §7: a Hold serves the last whole model; a compile's pushes, or the release, make a new one.
     if (last.held) map.keep(last.diagnostics ?? []);
     else if ('compiled' in message || 'diagnostics' in message || 'held' in message) map.stale();
     for (const client of clients) send(client);
-  };
-  const editor = editing(source, push, (once) => clients.forEach((c) => send(c, once)), release);
+  });
+  const editor = editing(source, said, (once) => clients.forEach((c) => send(c, once)), release);
   const route = async (request: IncomingMessage, response: ServerResponse) => {
     if (foreign(request, response) || (await editor.route(request, response))) return;
     if (request.url === '/story') return map.answer(request, response, last.diagnostics ?? []);
@@ -288,5 +268,5 @@ export function serve(port: number, source: string, artifact: string, release = 
       process.exit(1);
     })
     .listen(port, '127.0.0.1');
-  return { push, held: editor.held, seen: editor.seen, close: () => server.close() };
+  return { push: said.push, held: editor.held, seen: editor.seen, close: () => server.close() };
 }

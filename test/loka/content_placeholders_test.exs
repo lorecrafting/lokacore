@@ -143,6 +143,58 @@ defmodule Loka.ContentPlaceholdersTest do
     assert_raise Mix.Error, ~r/usage/, fn -> Mix.Tasks.Loka.Compile.run([dir, out, "--json"]) end
   end
 
+  # Break: the in-Book editor cannot tell which `~` line a key is (several hold the same `~`), or
+  # one key's line is another's: each placeholder key maps to the one line that wrote it.
+  test "--placeholders maps each `~` key to its own line", %{tmp_dir: tmp} do
+    dir = Loka.ContentSource.copy("cartridges/scene_sampler")
+    scene = "npc: bram\n* ~\nbram: Asked.\n- Yes\n  * ~\n- No\n  bram: ~\n"
+    File.write!(Path.join(dir, "scenes/still_to_write.scene"), scene)
+    File.write!(Path.join(dir, "scenes/bell_rung.cut"), "Written.\n\n~\n---\n")
+
+    File.write!(
+      Path.join(dir, "scenes/bell_rung.json"),
+      ~s({"on": {"story_point": "lantern_resolved", "outcome": "carry"}, "control": "modal"})
+    )
+
+    # an inline `~` in a room file, over lines (its words' line); its lowered key leaves text.json
+    room = Path.join(dir, "rooms/village_green.json")
+
+    File.write!(
+      room,
+      String.replace(
+        File.read!(room),
+        ~s("room.village_green.description"),
+        ~s({\n    "prose": "~"\n  })
+      )
+    )
+
+    text = Path.join(dir, "text.json")
+    bytes = String.replace(File.read!(text), ~r/^  "room.village_green.description".*\n/m, "")
+    File.write!(text, String.replace(bytes, ~r/^{/, "{\n  \"room.unwritten\": \"~\","))
+
+    {out, json, held} =
+      {Path.join(tmp, "a.json"), Path.join(tmp, "d.json"), Path.join(tmp, "h.json")}
+
+    ExUnit.CaptureIO.capture_io(:stderr, fn ->
+      Mix.Tasks.Loka.Compile.run([
+        dir,
+        out,
+        "--allow-placeholders",
+        "--json",
+        json,
+        "--placeholders",
+        held
+      ])
+    end)
+
+    lines = JSON.decode!(File.read!(held))
+    assert lines["room.unwritten"] == "text.json:2"
+
+    assert lines |> Map.values() |> Enum.sort() ==
+             ~w(rooms/village_green.json:4 scenes/bell_rung.cut:3 scenes/still_to_write.scene:2
+                scenes/still_to_write.scene:5 scenes/still_to_write.scene:7 text.json:2)
+  end
+
   # Break: --json writes a diagnostic twice that its printed line shows once, or a non-UTF-8 byte
   # in a path makes JSON.encode! raise, so the preview loses every diagnostic of that build.
   test "explained_entries are unique and encode with a non-UTF-8 path", %{tmp_dir: tmp} do

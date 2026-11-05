@@ -63,6 +63,17 @@ export const lineSentence = (
   );
 };
 
+/** The text key an emote.performed line is worded from (see emoteSentence), or undefined. */
+export const emoteForm = (
+  t: Parameters<typeof emoteSentence>[0], // mutate-skip: type only
+  emotes: Parameters<typeof emoteSentence>[1] = [], // mutate-skip: type only
+) => {
+  const emote =
+    t.key === 'emote.performed' ? emotes.find((e) => e.key === t.bindings?.emote) : undefined;
+  if (t.participants?.target === undefined) return emote?.others;
+  return t.bindings?.target === undefined ? emote?.to?.you : emote?.to?.others;
+};
+
 /** An emote.performed line's sentence (G9, docs/system/mechanics.md#npc-emotes-g9) from the view's emote
  * table: others when the line has no target, to.you when the target binds no name (the kernel binds none
  * for the reader's own body), else to.others; {actor} is the emoter's name, {target} the binding worded. Undefined for
@@ -77,15 +88,8 @@ export const emoteSentence = (
   word: (value: unknown) => string,
   actor: string,
 ): string | undefined => {
-  const emote = t.key === 'emote.performed' && emotes.find((e) => e.key === t.bindings?.emote);
+  const form = emoteForm(t, emotes);
   const target = t.bindings?.target;
-  const form =
-    emote &&
-    (t.participants?.target === undefined
-      ? emote.others
-      : target === undefined
-        ? emote.to?.you
-        : emote.to?.others);
   return form
     ? word(form)
         .replace(/\{(actor|target)\}/g, (_, k: string) => (k === 'actor' ? actor : word(target)))

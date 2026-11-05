@@ -873,6 +873,44 @@ deadline. A merged cue fires once.
 
 **Lever and latch.** A lever's completion is one clunk and a medium haptic, without page motion. An exit newly shown dries in the Footer, with a latch and a light haptic only when the player's own action opened it. Both read the event, never a label. A lever is a cartridge's authored custom event with the key `lever`.
 
+## Author mode (dev only)
+
+The `?dev=1` dev-cartridge page only ([author preview](cartridge.md#author-preview)); no player
+rule above changes, and nothing here is drawn by a component in `mobile/app/book/`: it is laid
+over the Book from `mobile/app/author/`, with its words there too. Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue);
+reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-rulings.md).
+
+- **Edit in place.** A click plays. A double-click on a line's words (not on a link or card in it)
+  turns that line into a field in its place, nothing reflowing, the double-clicked word selected,
+  captioned `<file>:<line>  Enter saves · Esc cancels`. It holds the source words unbound (slots
+  and `~` as written; a speaker-joined line only its quoted words). One line, soft-wrapped: Enter
+  or leaving the field saves, Esc cancels and returns focus to the line, no break is ever
+  inserted, a pasted break or tab is a space, unchanged words write nothing, an empty field stays
+  open saying `Empty. Write ~ to leave it unwritten.`
+- **Confirming.** The new words show at once; nothing marks the line while the compile runs. A
+  refused compile marks the line unconfirmed (accessible name adds `unconfirmed`) until a good
+  compile, and the console badge reads `The Book shows unconfirmed words (N)`, listing each
+  line's `file:line` and refusal.
+- **Put it back.** Cmd-Z (Ctrl-Z) outside a text field undoes this page's last prose edit; each
+  press goes one further back; no redo; nothing left says `Nothing of yours to put back.` Inside
+  a field it is the field's own undo. A refused put-back says `<file> changed since; not put back.`
+- **`~` lines** carry a margin mark (accessible name adds `still to write`); the line is
+  unchanged. `]` and `[` walk the page's `~` lines (wrapping), `}` and `{` every editable line;
+  the landed line scrolls into view and takes focus, and Enter opens its field. The jump never
+  leaves the page; elsewhere is the console's Still to write list. Counts are in the console:
+  `~ 2 of 5 here · 41 in cartridge`. No key fires in a text field (the say field too) or with a
+  modifier, Cmd-Z aside; the keys work from the Book frame and the panel.
+- **Changed on disk (409).** The field keeps the draft; under it: `Changed on disk since you
+  opened it.`, their words, and Keep mine (writes the draft over their line, found again) or Take
+  theirs; only Open source when their line is not found exactly once. It opens unasked when a
+  pushed change alters the field's line.
+- **Hold** shows in the panel header (a toggle and `Held · N waiting`), never in the Book;
+  leaving the page releases a Hold it set.
+- **No field.** A double-click on a line that is not words opens nothing; a note under it, until
+  the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
+  `The engine writes this line.`, else `Not a line of words. Alt-click opens its source.`
+- Nothing here animates (the scroll to a landed line is instant under reduced motion).
+
 ## Future boundaries
 
 Other-player presence requires a real projection and UI scope; no fabricated player rows.
