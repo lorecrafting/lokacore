@@ -1,3 +1,4 @@
+// size: allow 502, one editor's keys, saves and conflicts walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -405,6 +406,16 @@ test('a double-click while a field is opening opens nothing more', async () => {
   await settle();
   assert.equal(await page.locator('[data-loka-field]').count(), 1);
   assert.equal(asked.filter((a) => a.path.startsWith('/line')).length, 1);
+});
+
+// Breaks: a click's select render remounts the line while /line waits; the field opens off the page.
+test('a double-click opens the field on a line remounted while it was opening', async () => {
+  const { gate, open } = held();
+  answer = async () => (await gate, [200, RAIN]);
+  await page.locator('p').first().dblclick();
+  await page.$eval('p', (p) => p.replaceWith(p.cloneNode(true)));
+  open();
+  assert.equal(await page.locator('[data-loka-field]').textContent(), 'Rain falls.');
 });
 
 // Breaks: a Book render while the field is open shows the newer words, not those it opened on.

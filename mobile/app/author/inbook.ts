@@ -1,3 +1,4 @@
+// size: allow 304, the field's open, save, put-back and walk keys share its state
 // E5, prose in the Book (docs/design/prose-in-the-book-rulings.md): a double-click turns a line
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
@@ -110,6 +111,8 @@ async function openField(el: HTMLElement) {
     `/line?key=${enc(key)}&words=${enc(hooks.said.get(key) ?? '')}`,
   ).finally(() => (opening = false));
   if (status !== 200) return say(el, noFieldNote(key, typeof at === 'string' ? at : undefined));
+  el = el.isConnected ? el : lineOf(key)!; // a click's select render can remount it while /line waits
+  if (!el) return;
   field = { el, kept: [...el.childNodes], shown: el.textContent!, key, at }; // as drawn (a `~`'s marks too): React rewrites a change
   observer?.disconnect(); // the field is not a Book render
   el.replaceChildren(at.words);
@@ -248,9 +251,10 @@ const onRelay = (e: MessageEvent) => {
   if (e.data?.op === 'select') ((selected = e.data), reapply()); // {kind, key}
   if (e.data?.op === 'edit') edit(String(e.data.key));
 };
+const lineOf = (key: string) => lines().find((l) => hooks.seen.get(l.textContent!) === key);
 /** Opens the field of text key `key`'s line; one not on this page opens in the owner's editor. */
 function edit(key: string) {
-  const el = lines().find((l) => hooks.seen.get(l.textContent!) === key);
+  const el = lineOf(key);
   if (el) return void openField(el);
   hooks.tell({ note: `${key} is not on this page; opened in your editor.` });
   open(key, hooks.said.get(key) ?? '');
