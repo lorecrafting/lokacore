@@ -10,7 +10,7 @@ defmodule Loka.Content.Topics do
     ts = for {_, {rel, _, d}} <- defs["topic"], do: {rel, d}
 
     Enum.flat_map(ts, &topic(&1, ts, m, defs, text)) ++
-      grants(m, defs) ++ books(m, defs) ++ perception(m, defs) ++ markers(defs, text)
+      books(m, defs) ++ perception(m, defs) ++ markers(defs, text)
   end
 
   defp topic({rel, d}, ts, m, defs, text) do
@@ -37,14 +37,6 @@ defmodule Loka.Content.Topics do
         _ ->
           []
       end
-  end
-
-  defp grants(m, defs) do
-    for {_, {rel, _, d}} <- defs["dialogue"],
-        {id, o} <- d["choices"],
-        {%{"op" => "topic.grant"} = s, i} <- Enum.with_index(Map.get(o, "steps", [])),
-        error <- reference(rel, ["choices", id, "steps", i], "topic", s, m, defs),
-        do: error
   end
 
   defp books(m, defs) do
