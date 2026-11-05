@@ -110,7 +110,7 @@ test('one hull per area on the level, padded, hue by area index, dashed from the
 
 // Breaks: labels show below zoom 1, the clip ignores the zoom or overflows the box, or a marked
 // room loses its full-key pill.
-test('labels: clipped to the box from zoom 1, hidden below, a pill when marked', () => {
+test('labels: the key clipped to its box from zoom 1, none below', () => {
   assert.deepEqual(map.label('hut', 1), { text: 'hut' });
   assert.deepEqual(map.label('cells', 1), { text: 'cells' }); // exactly the five that fit
   assert.deepEqual(map.label('village_green', 1), { text: 'vill…' });
