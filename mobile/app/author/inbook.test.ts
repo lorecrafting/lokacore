@@ -116,6 +116,32 @@ test('a double-click opens the source words; Enter saves them to that line and c
   );
 });
 
+const TILDE = { file: 'a.loka', line: 4, was: '~', words: '~' };
+
+// Breaks: a bare `~` opens with the caret after it, so typing saves "~Ab, c'd": a stray `~` in
+// the prose, and the line drops out of Still to write (kernel/ts/play/todo.ts counts only `~`).
+test('typing in a bare ~ line replaces the ~', async () => {
+  answer = (path) => (path.startsWith('/line') ? [200, TILDE] : [200, { id: 7 }]);
+  await page.locator('p').nth(1).dblclick();
+  await page.locator('[data-loka-field]').waitFor();
+  await page.keyboard.type("Ab, c'd");
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.deepEqual(posted('/edit'), [{ ...TILDE, words: "Ab, c'd", key: 'a.one' }]);
+});
+
+// Breaks: the fix empties a bare `~` on open instead of selecting it, so the field no longer
+// shows the line as written; Esc must still leave the line and the file as they were.
+test('a bare ~ opens showing ~; Esc writes nothing and restores the line', async () => {
+  const drawn = await page.locator('p').nth(1).textContent(); // `~` and its key's marks
+  answer = () => [200, TILDE];
+  await page.locator('p').nth(1).dblclick();
+  assert.equal(await page.locator('[data-loka-field]').textContent(), '~');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('p').nth(1).textContent(), drawn);
+  assert.deepEqual(posted('/edit'), []);
+});
+
 // Breaks: a space's keyup presses the button around a line (a room title's): the field blurs and
 // saves the words typed so far.
 test('a space mid-edit in a line inside a button keeps the field open', async () => {

@@ -117,7 +117,7 @@ async function openField(el: HTMLElement) {
   el.setAttribute('data-loka-field', '');
   el.focus();
   getSelection()?.selectAllChildren(el);
-  getSelection()?.collapseToEnd();
+  if (!unwritten(at.words)) getSelection()?.collapseToEnd(); // a bare `~` stays selected: typing replaces it
   el.addEventListener('keydown', onFieldKey);
   el.addEventListener('keyup', onFieldUp);
   el.addEventListener('beforeinput', onInput);
