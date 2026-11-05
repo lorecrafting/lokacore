@@ -111,6 +111,14 @@ defmodule Loka.ContentLintTest do
 
     assert Lint.findings(Map.put(dlg.("l"), "text.json", %{"l" => "Hire him."})) == bad
 
+    # Break: a dialogue written as a scenes/ .scene file escapes the dialogue rules (loka-vduxr.50).
+    scene = %{
+      "scenes/hal.scene" => dlg.("l")["dialogues/hal.json"],
+      "text.json" => %{"l" => "Hire him."}
+    }
+
+    assert Lint.findings(scene) == ["scenes/hal.scene: label l ends in a period"]
+
     for ok <- ["Hire him", "Wait...", "\"Aye,\" he says.", "“Aye,” he says."],
         do: assert(Lint.findings(Map.put(dlg.("l"), "text.json", %{"l" => ok})) == [])
 

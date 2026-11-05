@@ -1,3 +1,4 @@
+# size: allow 305, a scenes/ .scene dialogue meets the dialogue rules through one path helper
 defmodule Loka.Content.Lint do
   @moduledoc """
   Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 5, 6 and 7, with fill sources, plus the label rules: no final period on a
@@ -44,7 +45,7 @@ defmodule Loka.Content.Lint do
 
     files
     |> Enum.sort()
-    |> Enum.flat_map(fn {rel, v} -> file(Path.split(rel), rel, v) ++ always(rel, v, []) end)
+    |> Enum.flat_map(fn {rel, v} -> file(parts(rel), rel, v) ++ always(rel, v, []) end)
     |> Kernel.++(talk(files, text))
     |> Kernel.++(labels(files, text))
     |> Kernel.++(items(files))
@@ -135,7 +136,7 @@ defmodule Loka.Content.Lint do
   # eats, consumes, buys back, takes in escrow or asks for never leaves it. Read by field: an id
   # named elsewhere (a guard, a key) is neither.
   defp items(files) do
-    refs = Enum.flat_map(files, fn {rel, v} -> refs(Path.split(rel), v) end)
+    refs = Enum.flat_map(files, fn {rel, v} -> refs(parts(rel), v) end)
 
     for {"items/" <> name, _} <- Enum.sort(files),
         id = Path.rootname(name),
@@ -177,6 +178,9 @@ defmodule Loka.Content.Lint do
 
   defp refs(_, _), do: []
 
+  # A rel's path segments for the rules; a scenes/ .scene is a dialogue (Source.placed).
+  defp parts(rel), do: Path.split(Regex.replace(~r{^scenes/(?=[^/]+\.scene$)}, rel, "dialogues/"))
+
   defp tag(kind, ids), do: for(id <- List.wrap(ids), do: {kind, id})
 
   # Row 7 fill sources (M8c): a liquid a use or drink service wants needs a vessel that starts
@@ -191,7 +195,7 @@ defmodule Loka.Content.Lint do
         do: fill_line(want, users |> Enum.uniq() |> Enum.sort() |> Enum.join(", "))
   end
 
-  defp scan(files, fun), do: Enum.flat_map(files, fn {rel, v} -> fun.(Path.split(rel), v) end)
+  defp scan(files, fun), do: Enum.flat_map(files, fn {rel, v} -> fun.(parts(rel), v) end)
 
   defp fill_line({:liquid, id}, users),
     do: "liquids/#{id}.json: #{users} want it; no vessel starts with it and no detail gives it"
@@ -227,7 +231,7 @@ defmodule Loka.Content.Lint do
   defp talk(files, text) do
     bare? =
       Enum.any?(files, fn {rel, d} ->
-        String.starts_with?(rel, "dialogues/") and !is_map_key(d, "name") and
+        match?(["dialogues", _], parts(rel)) and !is_map_key(d, "name") and
           !is_map_key(d, "keyword")
       end)
 
@@ -242,7 +246,7 @@ defmodule Loka.Content.Lint do
   defp labels(files, text) do
     for(
       {rel, d} <- Enum.sort(files),
-      {kind, key} <- label_keys(Path.split(rel), d),
+      {kind, key} <- label_keys(parts(rel), d),
       s = text[key],
       is_binary(s),
       msg = label_problem(kind, key, s),
@@ -269,7 +273,8 @@ defmodule Loka.Content.Lint do
   # on a talk with more than one choice; a single-choice talk keeps it (book-ui.md NPC
   # dialogue; loka-x6t.21).
   defp exits(files, text) do
-    for {"dialogues/" <> _ = rel, %{"choices" => %{} = cs}} <- Enum.sort(files),
+    for {rel, %{"choices" => %{} = cs}} <- Enum.sort(files),
+        match?(["dialogues", _], parts(rel)),
         map_size(cs) > 1,
         {key, c} <- Enum.sort(cs),
         Map.keys(c) -- ["label", "narration", "asked"] == [],
