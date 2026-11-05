@@ -46,3 +46,27 @@ Hand mutants were run against `local-story/*.test.ts` (98 files), plus `combat-t
 1. **Blocker: `mobile/authority/local-story/combat-receipt.ts:58`.** Nothing tests cast or perform as player-opened. Failure: a regression that drops `'cast'` titles a spell fight-back "A goblin attacks you!" after the player cast first, and every test stays green. The brief names this exact case. Fix: add a `combat_opener.test.ts` case where the opening receipt is a cast (and one for perform), with a literal `player: true`.
 2. **Should-fix: `combat-receipt.ts:47` and `session.ts:168`.** Nothing tests the two pre-commit guards, even with both removed. Failure: if a lookup ever runs inside the commit transaction, it caches a miss, and that fight reads **Combat** for its whole life without any test noticing. Fix: pin item 7 with a test that reads the opener inside an open transaction and then after commit, or delete whichever guard is unreachable.
 3. **Nit (wording, for the owner): `mobile/app/book/combat-title.ts:11`.** `named` gives a definite article: "You attack the goblin!", while the owner's example reads "You attack a boar!". In a pack of two goblins, "the goblin" does not say which one is meant.
+
+## Re-check at 990e30f6aa0ab2c329e4594cd038ad378a789217
+
+Commits reviewed: 3ad30c8c0, 0cdf2cd46, 990e30f6a. CI on this commit (`gh run list --commit`): ci, book-e2e and graph-diff all passed.
+
+Hand mutants, run against `combat_opener.test.ts`, `combat-title.test.ts` and `cast_pick.test.ts`. The unmutated base is green.
+
+| Mutant | Result |
+|---|---|
+| `combat-receipt.ts:58` drop `'cast'` | red |
+| `combat-receipt.ts:58` drop `'perform'` | red |
+| `combat-receipt.ts:47` drop the `isInTransactionSync` guard | red |
+| `session.ts:168` opener without `unsettled()` | red |
+| `combat-title.ts:21` bind `words.bare` again instead of `foe.name` | red |
+
+Dispositions:
+
+1. **Blocker: fixed.** `combat_opener.test.ts` now has cast and perform openers, each with a literal `player: true`.
+2. **Should-fix: fixed.** The commit-transaction read and the read after commit are both tested. A lost COMMIT is tested as well.
+3. **Nit: fixed.** The title binds `foe.name`, the short name, the same way as the round lines (`round_flow.ts:273`, `'short'`). On screen it reads "You attack a goblin!", followed by log lines such as "You hit a goblin extremely hard." `named` moved into `Combat.tsx`, so "Cast a spell on the goblin…" keeps "the". `book-ui.md` gained one clause saying the same.
+
+Screenshot: `pr621-recheck.png` (live goblin combat, Storybook).
+
+**Verdict: APPROVE.**
