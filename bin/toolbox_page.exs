@@ -22,17 +22,6 @@ defmodule SchemaPath do
   # The {field, subschema} pairs a node offers, through $ref (not partial.*), branches and
   # array or map members.
   def props(%{} = n, defs, seen) do
-    refs =
-      case n["$ref"] do
-        "#/$defs/" <> r ->
-          if r in seen or String.starts_with?(r, "partial."),
-            do: [],
-            else: [{defs[r], [r | seen]}]
-
-        _ ->
-          []
-      end
-
     subs =
       for k <- ~w(then else allOf anyOf oneOf items additionalProperties),
           x <- List.wrap(n[k]),
@@ -40,10 +29,16 @@ defmodule SchemaPath do
           do: {x, seen}
 
     Map.to_list(n["properties"] || %{}) ++
-      Enum.flat_map(refs ++ subs, fn {x, s} -> props(x, defs, s) end)
+      Enum.flat_map(ref(n["$ref"], defs, seen) ++ subs, fn {x, s} -> props(x, defs, s) end)
   end
 
   def props(_, _, _), do: []
+
+  defp ref("#/$defs/" <> r, defs, seen) do
+    if r in seen or String.starts_with?(r, "partial."), do: [], else: [{defs[r], [r | seen]}]
+  end
+
+  defp ref(_, _, _), do: []
 
   # The subschemas a dotted path reaches from source.<kind>; [] when it names nothing.
   def resolve(path, defs) do
