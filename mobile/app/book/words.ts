@@ -1,4 +1,4 @@
-// size: allow 323, corpse names bind their victim (loka-kgd.203), the author hook (loka-vduxr.51, .53, wfrgk.19)
+// size: allow 322, corpse names bind their victim (loka-kgd.203), the author hook (loka-vduxr.51, .53, wfrgk.19)
 // The app's own words for the kernel's codes (R6P Polish): what an accepted outcome says in the log
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
@@ -188,9 +188,9 @@ export const worded: {
   note?: (words: string, key: string) => void;
   made?: Map<string, () => string>;
 } = {};
-export const noted = (words: string, key: string, again: () => string) => {
+export const noted = (words: string, key: string, again?: () => string) => {
   worded.note?.(words, key);
-  worded.made?.set(words, again);
+  if (again) worded.made?.set(words, again);
 };
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
@@ -210,8 +210,7 @@ export const lineWords = (
     victimWords(text, view.entities.find((e) => e.name === v && cast.includes(e.id)) ?? {}, `${v}`);
   const emote = actor && emoteSentence(t, view.emotes, word, actor);
   const told = emote || lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);
-  if (told)
-    noted(told, (emote && emoteForm(t, view.emotes)) || t.key, () => lineWords(t, text, view, was));
+  if (told) worded.note?.(told, (emote && emoteForm(t, view.emotes)) || t.key);
   if (told) return told;
   if (t.key !== 'combat.skipped') {
     const said = fillSlots(text(t.key), t.bindings, word) + levelWords(t, text, view, was);
