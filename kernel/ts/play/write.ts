@@ -125,7 +125,7 @@ function remove(t: Tree, { file, was }: Sent) {
   if (!file.includes('/')) refuse(400, `${file} is a root file: delete its rows, not the file`);
   const changes: Change[] = [{ file, before: fresh(path, was), after: null }];
   const room = placed(file)?.dir === 'rooms' ? placed(file)!.key : undefined;
-  const layout = room && t.cache.has('layout.json') ? current(join(t.root, 'layout.json')) : null;
+  const layout = current(join(t.root, 'layout.json')); // another file's room matches no row
   try {
     const rows = JSON.parse(layout ?? 'null');
     const kept = Array.isArray(rows) ? rows.filter((r) => r?.room !== room) : rows;

@@ -394,8 +394,10 @@ test('the journal drops its oldest entries past its byte cap', async (t) => {
   const second = await ask('/delete', { file: 'rooms/c.json', was: sha256(big(32 * MiB)) });
   const ids = async () => (await ask('/journal')).body.map((e: any) => e.id);
   assert.deepEqual(await ids(), [second.body.id, first.body.id]); // 16 + 16 + 32: at the cap
+  const back = await ask('/undo', { id: second.body.id }); // its before is null: 0 characters
+  assert.deepEqual(await ids(), [back.body.id, second.body.id]); // 32 + 32: at the cap again
   const third = await ask('/change', { file: 'rooms/a.json', was: sha256(ROOM), ops: [] });
-  assert.deepEqual(await ids(), [third.body.id, second.body.id]);
+  assert.deepEqual(await ids(), [third.body.id, back.body.id]);
   assert.equal((await ask('/undo', { id: first.body.id })).status, 404);
   const lone = tree(t);
   writeFileSync(join(lone.src, 'rooms/d.json'), big(33 * MiB));
