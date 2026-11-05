@@ -40,11 +40,10 @@ function useCard(rel: string, diag: Diag) {
     const doc = JSON.parse(s.bytes);
     setSaved({ doc, sha256: s.sha256, dir: s.kind, schema });
     setDraft((latest.current = doc));
-    setRevealed([]);
   }, [rel]);
-  useEffect(() => void load(), [load]);
+  useEffect(() => void (setRevealed([]), load()), [load]); // a new file starts with nothing revealed
   // a write from outside (or the Book's in-place edit) reloads the card
-  const outside = diag.changes[0];
+  const outside = diag.changes.find((c) => c.file === rel);
   useEffect(() => {
     if (saved && outside?.file === rel && outside.sha256 !== saved.sha256) void load();
   }, [outside]); // eslint-disable-line react-hooks/exhaustive-deps

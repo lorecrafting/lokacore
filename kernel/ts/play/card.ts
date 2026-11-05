@@ -18,8 +18,8 @@ export const FORM_DEFAULTS = {
 
 /**
  * The ops that turn `saved` into `draft`: plain objects are walked key by key (a key the draft
- * dropped is deleted, an added tree of empty objects is not added); an array or a value that
- * differs is replaced whole.
+ * dropped is deleted, an added tree of empty objects is not added), as are arrays of one length;
+ * any other value that differs is replaced whole.
  */
 export function diff(saved: unknown, draft: unknown, path: Step[] = []): Op[] {
   if (plain(saved) && plain(draft)) {
@@ -36,6 +36,9 @@ export function diff(saved: unknown, draft: unknown, path: Step[] = []): Op[] {
             : [{ path: [...path, k], value: draft[k] }],
     );
   }
+  // an array of the same length is walked item by item, so an item's `{}` fills are not written
+  if (Array.isArray(saved) && Array.isArray(draft) && saved.length === draft.length)
+    return saved.flatMap((s, i) => diff(s, draft[i], [...path, i]));
   return JSON.stringify(saved) === JSON.stringify(draft) ? [] : [{ path, value: draft }];
 }
 

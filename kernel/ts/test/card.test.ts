@@ -66,6 +66,20 @@ test('an edit through the card round-trips to the file, one op per changed field
   );
   assert.deepEqual(diff({ hp: { start: 1 } }, { hp: 3 }), [{ path: ['hp'], value: 3 }]);
   assert.deepEqual(applied(doc, { ...doc, room: 'gate', ask: {} }), { ...doc, room: 'gate' });
+  // an array item's fills are not written; an item's change is one op at its index
+  const steps = { steps: [{ op: 'wait' }, { op: 'say', n: 1 }] };
+  assert.deepEqual(
+    diff(steps, {
+      steps: [
+        { op: 'wait', at: {} },
+        { op: 'say', n: 2 },
+      ],
+    }),
+    [{ path: ['steps', 1, 'n'], value: 2 }],
+  );
+  assert.deepEqual(diff(steps, { steps: [{ op: 'wait' }] }), [
+    { path: ['steps'], value: [{ op: 'wait' }] },
+  ]);
 });
 
 // Break: a refusal lands on the wrong field or is lost (another file's, a quoted file name, an
