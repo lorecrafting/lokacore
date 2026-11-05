@@ -2,6 +2,7 @@
 // vignette, one at a time with the fatal hold and the spirit layer above them (heldLayer.ts).
 import { createContext, lazy, Suspense, useContext, useEffect, useRef, useState } from 'react';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { canDraw } from './canDraw.ts';
 import { onCue } from './cues.ts';
 import {
   curveOf,
@@ -29,8 +30,6 @@ import { usePalette, type Palette } from './palette.ts';
 import { color, motion, opacity } from './tokens.ts';
 
 const Gradient = lazy(() => import('./Gradient.tsx'));
-// No CanvasKit on the web (no WebAssembly, a story without its loader): no layer, the page unchanged.
-const canDraw = () => 'CanvasKit' in globalThis || globalThis.navigator?.product === 'ReactNative';
 
 const fill = { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 } as const; // mutate-skip: layout
 const reach = { glow: 0.4, vignetteFrom: 0.6 }; // of the page's width; of the vignette's radius -- mutate-skip: uncalibrated design value
