@@ -489,8 +489,12 @@ defmodule Loka.ContentLintTest do
     File.mkdir_p!(Path.join(dir, "actions"))
     File.write!(Path.join(dir, "actions/flamma.json"), Jason.encode!(%{"policy" => @refuses}))
 
-    ExUnit.CaptureIO.capture_io(:stderr, fn ->
-      assert catch_exit(Mix.Tasks.Loka.Lint.run([dir])) == {:shutdown, 1}
-    end)
+    said =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert catch_exit(Mix.Tasks.Loka.Lint.run([dir])) == {:shutdown, 1}
+      end)
+
+    # Break: the finding goes nowhere, or to stdout. A whole line: stderr is shared by async tests.
+    assert "actions/flamma.json: policy refuses with no reason" in String.split(said, "\n")
   end
 end

@@ -216,8 +216,8 @@ test('an artifact the kernel refuses is an error naming the refusal', () => {
 // pushes no diagnostics), or served to a foreign Host.
 test('GET /story: an ETag, 304 until the next compile pushes, and refused to a foreign Host', async (t) => {
   writeFileSync(join(dir, 'dev.json'), JSON.stringify(dev));
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const server = serve(port, src, join(dir, 'dev.json'));
+  const server = serve(0, src, join(dir, 'dev.json'));
+  const port = await server.port;
   t.after(() => server.close());
   const get = (headers: Record<string, string> = {}) =>
     fetch(`http://127.0.0.1:${port}/story`, { headers });
@@ -251,8 +251,8 @@ test('GET /story: an ETag, 304 until the next compile pushes, and refused to a f
 // file written mid-Hold, or a later push's diagnostics) instead of the model from its start (§7).
 test('GET /story carries the diagnostics, and a Hold keeps the last whole model', async (t) => {
   writeFileSync(join(dir, 'dev.json'), JSON.stringify(dev));
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const server = serve(port, src, join(dir, 'dev.json'));
+  const server = serve(0, src, join(dir, 'dev.json'));
+  const port = await server.port;
   t.after(() => server.close());
   type Model = { diagnostics: object; outline: { beats: unknown[] } };
   const body = async () => (await (await fetch(`http://127.0.0.1:${port}/story`)).json()) as Model;

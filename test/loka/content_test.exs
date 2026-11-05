@@ -459,7 +459,9 @@ defmodule Loka.ContentTest do
         assert catch_exit(Mix.Tasks.Loka.Compile.run([bad, missing])) == {:shutdown, 1}
       end)
 
-    assert said =~ "error: "
+    # stderr is shared by async tests: a whole line of it, not a substring or the whole buffer.
+    assert ("error: cartridge: There is no cartridge.json. Run `bin/loka new cartridge <name>`, " <>
+              "or point the tool at the cartridge's folder.") in String.split(said, "\n")
 
     refute File.exists?(missing)
 

@@ -9,11 +9,11 @@ import { test, type TestContext } from 'node:test';
 import { serve } from '../play/live.ts';
 
 /** A source tree with one text.json line, served; `ask` posts, `events` is what a new page gets. */
-function served(t: TestContext, release = () => {}) {
+async function served(t: TestContext, release = () => {}) {
   const src = realpathSync(mkdtempSync(join(tmpdir(), 'loka-told-')));
   writeFileSync(join(src, 'text.json'), '{\n  "room.a": "old words"\n}\n');
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const live = serve(port, src, join(src, 'none.json'), release);
+  const live = serve(0, src, join(src, 'none.json'), release);
+  const port = await live.port;
   t.after(() => (live.close(), rmSync(src, { recursive: true, force: true })));
   const call = (path: string, sent?: string, headers: Record<string, string> = {}) =>
     new Promise<{ status: number; text: string }>((done, fail) => {
@@ -42,7 +42,7 @@ test('/edit shows its words before the compile, marks them on a refused one, cle
   // Breaks: words that wait for the compile (the Book lags the save); a refused save shown; an
   // overlay push that drops them; a refused compile with no unconfirmed line; a good compile
   // that keeps the marks.
-  const { live, ask, events } = served(t);
+  const { live, ask, events } = await served(t);
   const was = '  "room.a": "old words"';
   const edit = { file: 'text.json', line: 2, key: 'room.a' };
   assert.equal(await ask('/edit', { ...edit, was: '  "room.a": "x"', words: 'no' }), 409);
@@ -70,7 +70,7 @@ test('a pagehide beacon (text/plain, the page origin) releases the Hold', async 
   // Break: a /hold that needs application/json or refuses the page origin: sendBeacon sends a
   // text/plain string, so a Hold the page set would outlive the page.
   let released = 0;
-  const { live, ask, call } = served(t, () => released++);
+  const { live, ask, call } = await served(t, () => released++);
   assert.equal(await ask('/hold', { on: true }), 200);
   const beacon = { origin: 'http://localhost:19009', 'content-type': 'text/plain;charset=UTF-8' };
   assert.equal((await call('/hold', '{"on":false}', beacon)).status, 200);
@@ -80,7 +80,7 @@ test('a pagehide beacon (text/plain, the page origin) releases the Hold', async 
 test('/line answers the source line a Book line writes, its words unbound, or why it has none', async (t) => {
   // Breaks: the field opening on the bound or escaped words (a save writes them into the source);
   // a scene line's `* ` kept in the field; a choice label opening a field.
-  const { call, src } = served(t);
+  const { call, src } = await served(t);
   writeFileSync(join(src, 'more.json'), '{\n  "room.q": "say \\"hi\\" ~",\n  "n": 1\n}\n');
   mkdirSync(join(src, 'scenes'));
   writeFileSync(join(src, 'scenes/s.scene'), 'dialogue s\n  * Rain ~\n  - Take it\n');
@@ -113,7 +113,7 @@ test("/line finds a `~` key's own line by the compile's map, among many `~` line
   // Breaks: every `~` line (each scene's, a cut's, a room's, text.json's) is a candidate, so with
   // two the field is refused (400) or opens another key's line; a one-line `{"prose": "~"}`
   // refused as not words.
-  const { live, call, src } = served(t);
+  const { live, call, src } = await served(t);
   writeFileSync(join(src, 'text.json'), '{\n  "room.a": "~",\n  "room.b": "~"\n}\n');
   mkdirSync(join(src, 'scenes'));
   mkdirSync(join(src, 'rooms'));
@@ -152,7 +152,7 @@ test("/line finds a `~` key's own line by the compile's map, among many `~` line
 test('an outside save that moves a `~` line before the compile: /line waits for the compile', async (t) => {
   // Break: /line trusts the map's line, or guesses the one `* ~` left, which names no key, so it
   // opens a line that may be another key's and /edit overwrites it.
-  const { live, call, src } = served(t);
+  const { live, call, src } = await served(t);
   mkdirSync(join(src, 'scenes'));
   const scene = join(src, 'scenes/s.scene');
   writeFileSync(scene, 'npc: bram\n* ~\nbram: Asked.\n');
@@ -165,7 +165,7 @@ test("an outside save that adds or drops a `~` line: /line stops trusting the ma
   // Break: /line trusts any `~` at the map's line, so a `* ~` pasted (or the key's own line cut)
   // there from outside opens another line in the key's field and /edit writes it; or the Book's own
   // fill of one `~` makes the map distrusted, so the next `~` in the run is refused before the compile.
-  const { live, call, ask, src } = served(t);
+  const { live, call, ask, src } = await served(t);
   mkdirSync(join(src, 'scenes'));
   const scene = join(src, 'scenes/s.scene');
   writeFileSync(scene, 'npc: bram\n* ~\n* ~\n* ~\n');
@@ -198,7 +198,7 @@ test("an outside save that adds or drops a `~` line: /line stops trusting the ma
 test('/line never trusts a place in a file it cannot read', async (t) => {
   // Break: a vanished placed file counts the same (unreadable) at the map and at /line, so the map
   // stays trusted and /line fails on the read instead of answering by the words.
-  const { live, call } = served(t);
+  const { live, call } = await served(t);
   live.push({ placeholders: { 'dialogue.g.a': 'scenes/gone.scene:2' } });
   const { status, text } = await call('/line?key=dialogue.g.a&words=~');
   assert.deepEqual([status, JSON.parse(text)], [404, 'no source line for dialogue.g.a']);
@@ -206,7 +206,7 @@ test('/line never trusts a place in a file it cannot read', async (t) => {
 
 test('a 200 /undo shows the old words it sent at once, before the compile', async (t) => {
   // Break: the Book keeps the undone words until the next compile (seconds when cold).
-  const { call, ask, events } = served(t);
+  const { call, ask, events } = await served(t);
   const was = '  "room.a": "old words"';
   const sent = { file: 'text.json', line: 2, key: 'room.a', was, words: 'new words' };
   const { id } = JSON.parse((await call('/edit', JSON.stringify(sent))).text);
