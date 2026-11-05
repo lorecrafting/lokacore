@@ -1,5 +1,5 @@
 // The panel's sections, each reading the Book's state or the watcher's API; no game logic here.
-import { Bookmark, Clock, FileCode2, PenLine } from 'lucide-react';
+import { Bookmark, Clock, FileCode2, PenLine, Pin } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ask, checkpoints, type Todo as TodoRow, todo } from './author.ts';
 import type { Line, State, Step } from './book.ts';
@@ -9,9 +9,10 @@ import { Button } from './components/ui/button.tsx';
 import { GoToRoom, SetFact } from './cheats.tsx';
 import { Input } from './components/ui/input.tsx';
 import { Separator } from './components/ui/separator.tsx';
+import { START } from './shell.ts';
 
 export const Heading = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="mb-2 flex items-center gap-1.5 font-caps text-xs tracking-caps text-muted-foreground">
+  <h2 className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
     {children}
   </h2>
 );
@@ -154,14 +155,24 @@ function Checkpoints({ state, send }: { state?: State; send: Send }) {
 }
 
 function CheckpointList({ names, jump }: { names: string[]; jump: (n: string) => void }) {
+  const [start, setStart] = useState(() => localStorage.getItem(START));
+  const pin = (n: string) => {
+    const next = start === n ? null : n;
+    if (next) localStorage.setItem(START, next);
+    else localStorage.removeItem(START);
+    setStart(next);
+  };
   if (names.length === 0)
     return <p className="mt-1 text-xs text-muted-foreground">Play to a beat, name it, Save; later, pick it to replay there.</p>;
   return (
     <ul className="mt-2 space-y-1">
       {names.map((n) => (
-        <li key={n}>
-          <Button variant="outline" size="sm" className="w-full justify-start font-mono" onClick={() => jump(n)}>
+        <li key={n} className="flex gap-1">
+          <Button variant="outline" size="sm" className="flex-1 justify-start font-mono" onClick={() => jump(n)}>
             {n}
+          </Button>
+          <Button variant="ghost" size="sm" aria-pressed={start === n} title="Start a fresh Book here" onClick={() => pin(n)}>
+            <Pin className={start === n ? 'text-primary' : 'text-muted-foreground'} />
           </Button>
         </li>
       ))}

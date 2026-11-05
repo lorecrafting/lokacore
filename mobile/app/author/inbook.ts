@@ -1,17 +1,20 @@
 // E5, prose in the Book (docs/design/prose-in-the-book-rulings.md): a double-click turns a line
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
-import { size, space, type } from '../book/tokens.ts';
 import type { Message } from './live.ts';
 import {
   noFieldNote,
   oneLine,
+  CSS,
   paletteNear,
+  paper,
   saving,
   step,
   textField,
   unwritten,
   walk,
+  selects,
+  shortcut,
 } from './prose_rules.ts';
 
 export { tagged } from './prose_rules.ts';
@@ -23,21 +26,7 @@ type Hooks = {
 };
 type At = { file: string; line: number; was: string; words: string };
 type Field = { el: HTMLElement; kept: Node[]; shown: string; key: string; at: At; busy?: boolean };
-
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
-const label = `${type.label.fontSize}px/${type.label.lineHeight}px ${type.label.fontFamily}`;
-const CSS = `
-[data-loka-todo]{position:relative}
-[data-loka-todo]::before{content:"";position:absolute;left:-${space.lg}px;top:0;bottom:0;width:${size.speechBar}px;background:var(--loka-warning)}
-[data-loka-landed]::before{background:var(--loka-action)}
-[data-loka-landed],[data-loka-field]{outline:${size.focus}px solid var(--loka-action);outline-offset:${size.focus}px}
-[data-loka-field]{background:var(--loka-card);color:var(--loka-fg);caret-color:var(--loka-action)}
-[data-loka-unconfirmed]{text-decoration:underline wavy var(--loka-warning)}
-[data-loka-a11y]::after{content:", " attr(data-loka-a11y);position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.loka-note{position:absolute;font:${label};letter-spacing:${type.label.letterSpacing}px;color:var(--loka-dim);z-index:10}
-.loka-note[data-warn]{color:var(--loka-warning)}
-.loka-note button{font:inherit;color:var(--loka-action);background:none;border:0;padding:0 0 0 ${space.md}px;cursor:pointer}`;
-
 const enc = encodeURIComponent;
 async function api(path: string, sent?: object): Promise<[number, any]> {
   const init = sent && { method: 'POST', body: JSON.stringify(sent) };
@@ -53,13 +42,13 @@ let unconfirmed = new Set<string>();
 let field: Field | undefined;
 let opening = false; // a /line in flight: a second double-click opens nothing
 let landed: HTMLElement | undefined;
+let selected = { kind: '', key: '' }; // the panel's selection: its lines are marked
 let counted = '';
 let note: HTMLDivElement;
 const observer =
   typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(reapply);
 const watch = () =>
   observer?.observe(document.body, { childList: true, subtree: true, characterData: true });
-
 const lines = () =>
   [...document.querySelectorAll<HTMLElement>('[dir="auto"]')].filter((el) =>
     hooks.seen.has(el.textContent ?? ''),
@@ -102,6 +91,10 @@ function reapply() {
     ].filter(Boolean);
     el.toggleAttribute('data-loka-todo', todo.includes(el));
     el.toggleAttribute('data-loka-unconfirmed', marks.includes('unconfirmed'));
+    el.toggleAttribute(
+      'data-loka-selected',
+      selects(hooks.seen.get(el.textContent!), selected.kind, selected.key),
+    );
     if (marks.length) el.setAttribute('data-loka-a11y', marks.join(', '));
     else el.removeAttribute('data-loka-a11y');
   }
@@ -124,8 +117,9 @@ async function openField(el: HTMLElement) {
   el.setAttribute('data-loka-field', '');
   el.focus();
   getSelection()?.selectAllChildren(el);
-  getSelection()?.collapseToEnd();
+  if (!unwritten(at.words)) getSelection()?.collapseToEnd(); // a bare `~` stays selected: typing replaces it
   el.addEventListener('keydown', onFieldKey);
+  el.addEventListener('keyup', onFieldUp);
   el.addEventListener('beforeinput', onInput);
   el.addEventListener('blur', onBlur);
   caption();
@@ -137,6 +131,7 @@ function close() {
   const had = document.activeElement === el; // not when a blur saved: focus stays where it went
   field = undefined;
   el.removeEventListener('keydown', onFieldKey);
+  el.removeEventListener('keyup', onFieldUp);
   el.removeEventListener('beforeinput', onInput);
   el.removeEventListener('blur', onBlur);
   el.replaceChildren(...kept); // React's own nodes, so its next render finds them
@@ -156,6 +151,8 @@ function onFieldKey(e: KeyboardEvent) {
   e.preventDefault(); // one line: Enter saves, Shift-Enter does nothing
   if (!e.shiftKey) void save();
 }
+// a space's keyup would press a button around the line (a room title's) and blur the field
+const onFieldUp = (e: KeyboardEvent) => e.key === ' ' && e.preventDefault();
 function onInput(e: InputEvent) {
   if (e.inputType === 'insertParagraph' || e.inputType === 'insertLineBreak') e.preventDefault();
   const text = e.dataTransfer?.getData('text/plain') ?? e.data;
@@ -165,7 +162,6 @@ function onInput(e: InputEvent) {
   }
 }
 const onBlur = () => void save();
-
 async function save() {
   if (!field || field.busy) return;
   const f = field;
@@ -210,6 +206,9 @@ async function putBack() {
 }
 /** A Book key outside any field: walk, Enter on the landed line, Cmd-Z. */
 function onKey(e: KeyboardEvent, inField = typing(e.target), relayed = false) {
+  const asks = !relayed && shortcut(e);
+  // the panel's, though the Book has the focus
+  if (asks) return void (e.preventDefault?.(), hooks.tell({ shortcut: asks }));
   if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 'z' && !inField) {
     e.preventDefault?.();
     return void putBack();
@@ -244,8 +243,18 @@ const onClick = () => {
   reapply();
 };
 const onRelay = (e: MessageEvent) => {
-  if (LOCAL.test(e.origin) && e.data?.op === 'key') onKey(e.data, !!field, true); // an open field holds the keys
+  if (!LOCAL.test(e.origin)) return;
+  if (e.data?.op === 'key') onKey(e.data, !!field, true); // an open field holds the keys
+  if (e.data?.op === 'select') ((selected = e.data), reapply()); // {kind, key}
+  if (e.data?.op === 'edit') edit(String(e.data.key));
 };
+/** Opens the field of text key `key`'s line; one not on this page opens in the owner's editor. */
+function edit(key: string) {
+  const el = lines().find((l) => hooks.seen.get(l.textContent!) === key);
+  if (el) return void openField(el);
+  hooks.tell({ note: `${key} is not on this page; opened in your editor.` });
+  open(key, hooks.said.get(key) ?? '');
+}
 /** The words a Book render shows for `key`: the open field's, held until it closes, else undefined. */
 export const frozen = (key: string) => (field?.key === key ? field.shown : undefined);
 /** Tells the counts again (a panel that just said hello missed them). */
@@ -288,13 +297,4 @@ export function start(given: Hooks) {
     style.remove();
     note.remove();
   };
-}
-
-/** The computed paper under `el`: its first ancestor with a background. */
-function paper(el: Element | null): string {
-  for (; el; el = el.parentElement) {
-    const bg = getComputedStyle(el).backgroundColor;
-    if (bg && bg !== 'transparent' && !bg.endsWith(', 0)')) return bg;
-  }
-  return 'rgb(235, 230, 215)';
 }

@@ -89,6 +89,8 @@ export type Logs = {
   closing?: boolean; // this view closed a fight (resetLogs), so a death in it is that fight's
   woke?: number; // where the last death's return receipt starts in the log (spirit.ts, end): held in the spirit state
   spirit?: Spirit; // the spirit state, from Let go to the rise (spirit.ts)
+  room?: { title: string; log: DetailLine[] }; // the room this view left, with its log (resetLogs): a death outside a fight keeps it
+  down?: Logs['room'] & { to?: number }; // the dead page's (book-ui.md, Dead page): the room died in, until Let go (spirit.ts)
   noted?: Set<string>; // the cue lines logged this room visit
 };
 
@@ -149,7 +151,7 @@ export const dropLines = (lines: DetailLine[], count = lines.length) => {
   const mark = logMark(lines);
   mark.gone += n;
   mark.rounds = mark.rounds.filter((r) => r > mark.gone);
-  lines.splice(0, n);
+  return lines.splice(0, n);
 };
 // The next lines pushed begin a new round (one receipt, one press or one update).
 export const newRound = (lines: readonly DetailLine[]) => {
@@ -198,9 +200,9 @@ export function restoredLogs(game: Game, text: Say): Logs {
 }
 
 // Each sense cue is one plain World line the first time it shows in a room visit (book-ui.md,
-// Sense cues details); one that stops and comes back is not logged again.
+// Sense cues details); one that stops and comes back is not logged again; none on the dead page.
 export function cueLines(s: Logs, view: GameView, text: Say) {
-  return (view.cues ?? []).flatMap((c) => {
+  return (s.down ? [] : (view.cues ?? [])).flatMap((c) => {
     const line = cueLine(c, text);
     if ((s.noted ??= new Set()).has(line)) return [];
     s.noted.add(line);
@@ -218,8 +220,9 @@ export function savedNarration(game: Game, s: Logs, command_id?: string) {
 
 export function resetLogs(s: Logs, now: GameView) {
   const was = s.projection.view;
+  s.room = undefined; // staying, a death's dead page is this room (spirit.ts fall)
   if (was.place.id !== now.place.id) {
-    dropLines(s.log);
+    markDrawn((s.room = { title: was.place.title.key, log: dropLines(s.log) }).log); // drawn: no dry
     s.noted = new Set();
     s.away = undefined; // held lines belong to the room left, as its log
   }

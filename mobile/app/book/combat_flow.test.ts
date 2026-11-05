@@ -104,8 +104,9 @@ test('each round on the clock begins its own block of the combat log', () => {
   );
 });
 
-// Breaks: a death that closes no fight (bled out on the clock) turns an earlier fight's closed page into a death's.
-test('a death after a closed fight keeps its Back to World', () => {
+// Breaks: a death that closes no fight (bled out on the clock) shows an earlier fight's closed page,
+// or its Back to World, instead of the dead page (book-ui.md, Dead page).
+test('a death after a closed fight shows the dead page, not the closed fight', () => {
   const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
   const h = mounted(view({ combat: undefined }));
   try {
@@ -116,9 +117,12 @@ test('a death after a closed fight keeps its Back to World', () => {
     assert.ok(h.texts().includes(TITLE));
     h.publish(view({ combat: undefined }), 'combat.result');
     assert.ok(h.texts().includes('Back to World'));
-    h.publish(view({ combat: undefined }), 'combat.death');
-    assert.ok(h.texts().includes('You wake at the shrine.'));
-    assert.equal(h.texts().includes('Let go'), false);
+    h.die(view({ combat: undefined }), ['bleed.tick', 'death.fell', 'combat.death']);
+    const t = h.texts();
+    assert.ok(t.includes('You wake at the shrine.') && t.includes('Let go'));
+    assert.equal(t.includes('Back to World') || t.includes(TITLE), false);
+    h.tap('Let go');
+    assert.equal(h.texts().includes(TITLE), false);
   } finally {
     h.close();
   }

@@ -15,7 +15,15 @@ import { useDry } from './press.ts';
 import type { presenter, Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 
-function Foot(p: { label: typeof LABEL.letGo | typeof LABEL.backToWorld; onPress: () => void }) {
+/**
+ * The one foot control of an ended page: Let go or Back to World, dry until the page is read.
+ * - Use: the closed Combat page's foot, the dead page's Let go.
+ * - Story: CombatPage.stories.tsx
+ */
+export function Foot(p: {
+  label: typeof LABEL.letGo | typeof LABEL.backToWorld;
+  onPress: () => void;
+}) {
   return (
     <Reanimated.View style={useDry()}>
       <Control label={p.label} onPress={p.onPress} />

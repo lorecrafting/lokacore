@@ -19,7 +19,7 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
-import { lintLines, serve, textOnly, type Canonical } from './live.ts';
+import { lintLines, serve, textOnly, type Canonical, type Timings } from './live.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const out = resolve(
@@ -67,7 +67,20 @@ function quick() {
   }
 }
 // A text-only change (against the artifact the page runs) is pushed in place; any other is written.
-function publish(canonicalText: string, sha256: string, said: string[], started: number) {
+const timed = (started: number, compiled: number, kind: Timings['kind'], sha256?: string) => ({
+  at: Date.now(),
+  compile: Math.round(compiled - started),
+  publish: Math.round(performance.now() - compiled),
+  kind,
+  ...(sha256 && { sha256 }),
+});
+function publish(
+  canonicalText: string,
+  sha256: string,
+  said: string[],
+  started: number,
+  compiled: number,
+) {
   failed = undefined;
   const ms = () => `in ${Math.round(performance.now() - started)} ms`;
   const canonical: Canonical = JSON.parse(canonicalText);
@@ -79,23 +92,23 @@ function publish(canonicalText: string, sha256: string, said: string[], started:
     return true;
   }
   if (overlay) {
-    live!.push({ text: overlay, said, compiled: true });
+    live!.push({ text: overlay, said, compiled: true, timings: timed(started, compiled, 'prose') });
     const n = Object.keys(overlay).length;
     console.log(n ? `Text updated in place: ${n} keys ${ms()}` : `Preview unchanged ${ms()}`);
     return true;
   }
-  write(canonicalText, sha256, said);
+  write(canonicalText, sha256, said, timed(started, compiled, 'structural', sha256));
   console.log(`Preview updated: ${sha256.slice(0, 12)} ${ms()}`); // mutate-skip: console notice
   return true;
 }
-function write(canonicalText: string, sha256: string, said: string[]) {
+function write(canonicalText: string, sha256: string, said: string[], timings?: Timings) {
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(`${out}.tmp`, JSON.stringify({ canonical: canonicalText, sha256 }));
   renameSync(`${out}.tmp`, out); // Metro never reads half a file
   written = JSON.parse(canonicalText);
   parked = undefined;
   pending = 0;
-  live?.push({ text: {}, said, compiled: true, pending });
+  live?.push({ text: {}, said, compiled: true, pending, ...(timings && { timings }) });
 }
 // The preview allows `~` placeholders; a release compile refuses them (mix loka.compile). Not
 // spawnSync: the watcher answers /source, /events and writes while it runs.
@@ -130,9 +143,9 @@ const parsed = (file: string, none: unknown) =>
   existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : none;
 // The last lint read older source, so it goes with the failed compile.
 let failed: string[] | undefined; // the last compile's lines, when it failed
-const notCompiled = (said: string[]) => {
+const notCompiled = (said: string[], timings?: Timings) => {
   failed = said;
-  live?.push({ said, compiled: false, lint: undefined });
+  live?.push({ said, compiled: false, lint: undefined, ...(timings && { timings }) });
 };
 
 async function build(): Promise<boolean> {
@@ -142,6 +155,7 @@ async function build(): Promise<boolean> {
     const artifact = join(tmp, 'artifact.json');
     const read = saves;
     const run = await compile(artifact);
+    const compiled = performance.now();
     // a save since (even inside the debounce) compiles next: these older words would undo its push
     if (saves !== read) return false;
     // none written (mix crashed before it): the last build's cards must not stay up
@@ -155,7 +169,7 @@ async function build(): Promise<boolean> {
       if (!said.length) said.push(run.error?.message ?? run.stderr);
       said.push(`Not compiled; ${keeps}`);
       console.error(said.at(-1));
-      notCompiled(said);
+      notCompiled(said, timed(started, compiled, 'refusal'));
       return false;
     }
     const bytes = readFileSync(artifact);
@@ -166,10 +180,10 @@ async function build(): Promise<boolean> {
       const why = loaded.ok ? 'not in canonical artifact form' : JSON.stringify(loaded);
       said.push(`The kernel refuses the compiled cartridge: ${why}`, keeps);
       console.error(said.slice(-2).join('\n'));
-      notCompiled(said);
+      notCompiled(said, timed(started, compiled, 'refusal'));
       return false;
     }
-    return publish(parts[1], parts[2], said, started);
+    return publish(parts[1], parts[2], said, started, compiled);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

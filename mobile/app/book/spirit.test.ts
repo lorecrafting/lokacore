@@ -35,6 +35,7 @@ test('the lines held to the rise survive a trim and a reset', () => {
   const s = {
     log: Array.from({ length: 201 }, (_, i) => line(`old${i}`)),
     projection: { view: { revival: { lines: [], seconds: 1 } } },
+    closing: true, // the fight's fall
   } as unknown as Logs;
   trimLog(s.log); // already trimmed before the death
   fall(s, 'death');

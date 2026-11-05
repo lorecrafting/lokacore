@@ -206,7 +206,7 @@ export const Death: StoryObj = {
     await expect(canvas.queryByText(/standing/)).toBeNull(); // no status line once dead (owner 2026-11-04)
     const layers = () => [...canvasElement.querySelectorAll('[aria-hidden="true"]')];
     const at = (e: Element) => Number(getComputedStyle(e).opacity);
-    await waitFor(() => expect(layers().some((e) => at(e) === opacity.fatal)).toBe(true), {
+    await waitFor(() => expect(layers().some((e) => at(e) === opacity.fatal.day)).toBe(true), {
       timeout: 3000,
     });
   },
@@ -218,7 +218,7 @@ export const FatalBlowHeld: StoryObj = {
     const held = canvasElement.querySelector<HTMLElement>('[aria-hidden="true"]')!;
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
     // Settled at its hold, so axe reads the resting colours (loka-gj82.10).
-    await waitFor(() => expect(Number(getComputedStyle(held).opacity)).toBe(opacity.fatal), {
+    await waitFor(() => expect(Number(getComputedStyle(held).opacity)).toBe(opacity.fatal.day), {
       timeout: 3000,
     });
   },

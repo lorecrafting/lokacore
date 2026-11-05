@@ -20,8 +20,8 @@ export function useCueSounds(s: Screen, turn: number, resumes?: number, riffle?:
   // This runs before useCues, so a fight or a new chapter's music has not started: no piece, none spent.
   // Waking is the exception: only the bed returns, and the room's piece is spent (plan 14).
   useEffect(() => {
-    // The fatal card is up: the bed waits for waking, not the room before it (a death off a fight keeps it).
-    if (s.ended && s.died !== fell.current) {
+    // The fatal card or the dead page is up: the bed waits for waking, not the room before or after it.
+    if ((s.ended || s.dead) && s.died !== fell.current) {
       fight('cut');
       return;
     }
@@ -32,7 +32,7 @@ export function useCueSounds(s: Screen, turn: number, resumes?: number, riffle?:
     const quiet = s.treatment ? 'silent' : woke ? 'woke' : !!s.view.combat || theme;
     // The spirit state: the bed muffled, opening at the rise; the room is never exposed (no thunder's open air).
     ambience(place?.sound, weather, !!place?.exposed && !spirit, quiet, spirit);
-  }, [s.view, s.ended, spirit, s.treatment]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [s.view, s.ended, s.dead, spirit, s.treatment]); // eslint-disable-line react-hooks/exhaustive-deps
   const reduced = useReducedMotion();
   useCues(
     s.view,

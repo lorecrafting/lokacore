@@ -1,99 +1,243 @@
-// The author panel page: the Book preview framed on the left, the writer's tools on the right
-// (docs/system/cartridge.md#author-preview, docs/guides/writing-the-game.md).
-import { BookOpen } from 'lucide-react';
-import { useRef, type RefObject } from 'react';
-import { useDiagnostics } from './author.ts';
-import { BOOK, useBook } from './book.ts';
-import { Badge } from './components/ui/badge.tsx';
+// The editor shell (docs/rnd/gui-editor-design-2026-11-04.md §11, editor-chrome-rulings.md §5):
+// Hierarchy | Project over the map slot, the Book strip, the inspector over the console; one
+// selection shared by the four; under 900 px the columns stack.
+import { PanelLeftClose, PanelRightClose } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { shortcut } from '../../../mobile/app/author/prose_rules.ts';
+import { ask, checkpoints, story as getStory, useDiagnostics, type Story } from './author.ts';
+import { useBook, type Heard } from './book.ts';
+import { BookStrip } from './centre.tsx';
+import { Divider, Rail, useLayout, type SetLayout } from './columns.tsx';
+import { Button } from './components/ui/button.tsx';
 import { ScrollArea } from './components/ui/scroll-area.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs.tsx';
-import { Numbers } from './numbers.tsx';
-import { Counts, Hold, Unconfirmed } from './prose.tsx';
-import { Facts, Find, Why } from './reading.tsx';
-import { Compile, Play, Source, Todo } from './sections.tsx';
+import { Hierarchy, MapSlot } from './left.tsx';
+import { Palette } from './palette.tsx';
+import { Project } from './project.tsx';
+import { Counts, Unconfirmed } from './prose.tsx';
+import { Feed, Inspector } from './right.tsx';
+import { Compile, Source } from './sections.tsx';
+import {
+  fold,
+  fromRef,
+  fromTextKey,
+  items,
+  places,
+  START,
+  type Item,
+  type Layout,
+  type Selection,
+} from './shell.ts';
 
-function Header({ title, hash, children }: { title?: string; hash?: string; children?: React.ReactNode }) {
+type Book = ReturnType<typeof useBook>;
+
+function Close({ side, set }: { side: 'left' | 'right'; set: SetLayout }) {
+  const Icon = side === 'left' ? PanelLeftClose : PanelRightClose;
+  const label = side === 'left' ? 'Fold the left column (Cmd-\\)' : 'Fold the right column (Cmd-/)';
   return (
-    <header className="flex items-center gap-2 border-b px-3 py-2">
-      <BookOpen className="size-4" aria-hidden />
-      <span className="font-heading text-base" title={hash && `chapter ${hash}`}>
-        {hash ? title : 'Loka author'}
-      </span>
-      {hash ? null : <Badge variant="secondary">waiting for the Book</Badge>}
-      {children}
-    </header>
+    <Button
+      variant="ghost"
+      size="icon-xs"
+      className="ml-auto"
+      aria-label={label}
+      title={label}
+      onClick={() => set((l) => fold(l, side === 'left' ? '\\' : '/'))}
+    >
+      <Icon />
+    </Button>
   );
 }
 
-function Book({ frame }: { frame: RefObject<HTMLIFrameElement | null> }) {
-  // allow: a cross-origin frame is only crossOriginIsolated (SharedArrayBuffer for the SQLite worker) when the parent delegates it
-  return (
-    <iframe
-      ref={frame}
-      title="Book preview"
-      src={`${BOOK}/?dev=1`}
-      allow="cross-origin-isolated"
-      className="min-h-0 flex-1 border-0 bg-background"
-    />
-  );
+/** A fresh Book (no steps yet) replays the pinned start checkpoint, once per load. */
+function useStart(book: Book) {
+  const done = useRef<number>(undefined);
+  useEffect(() => {
+    const name = localStorage.getItem(START);
+    if (!name || !book.loaded || book.state?.steps.length !== 0 || done.current === book.loaded.at)
+      return; // a state still the last Book's (steps) waits for the new one
+    done.current = book.loaded.at;
+    void checkpoints.get(name).then(({ steps }) => book.send({ op: 'jump', steps }));
+  }, [book]);
 }
 
-function Panels({ state, send, trace, said }: Pick<ReturnType<typeof useBook>, 'state' | 'send' | 'trace'> & { said?: string[] }) {
+/** Every editor shortcut, pressed here or relayed from the Book frame. */
+function useShortcuts(heard: React.RefObject<Heard>, act: (key: string) => void) {
+  heard.current.shortcut = act;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const key = shortcut(e);
+      if (key) (e.preventDefault(), heard.current.shortcut(key));
+    };
+    addEventListener('keydown', onKey);
+    return () => removeEventListener('keydown', onKey);
+  }, [heard]);
+}
+
+/** What each column reads: the layout, the last good /story, the Book and the stream. */
+type Shell = {
+  layout: Layout;
+  set: SetLayout;
+  story?: Story;
+  book: Book;
+  diag: ReturnType<typeof useDiagnostics>;
+  pick: (s?: Selection) => void;
+};
+
+function Left({ layout, set, story, book, diag, pick }: Shell) {
+  const picked = places(layout.selection, story?.graph.nodes ?? []).hierarchy;
+  const play = (room: string) => book.send({ op: 'go_to_room', room });
+  const tab = (tab: string) => set((l) => ({ ...l, tab: tab as Layout['tab'] }));
   return (
-    <Tabs defaultValue="play" className="min-h-0 flex-1 gap-0">
-      <TabsList className="mx-3 mt-2 grid w-auto grid-cols-6">
-        <TabsTrigger value="play">Play</TabsTrigger>
-        <TabsTrigger value="write">Write</TabsTrigger>
-        <TabsTrigger value="state">State</TabsTrigger>
-        <TabsTrigger value="why">Why</TabsTrigger>
-        <TabsTrigger value="find">Find</TabsTrigger>
-        <TabsTrigger value="numbers">Numbers</TabsTrigger>
-      </TabsList>
+    <Tabs value={layout.tab} onValueChange={tab} className="min-h-0 flex-1 gap-0">
+      <div className="flex h-8 items-center border-b px-2">
+        <TabsList>
+          <TabsTrigger value="hierarchy">Hierarchy</TabsTrigger>
+          <TabsTrigger value="project">Project</TabsTrigger>
+        </TabsList>
+        <Close side="left" set={set} />
+      </div>
       <ScrollArea className="min-h-0 flex-1">
-        <div className="p-3">
-          <TabsContent value="play">
-            <Play state={state} send={send} />
-          </TabsContent>
-          <TabsContent value="write">
-            <Todo said={said} />
-          </TabsContent>
-          <TabsContent value="state">
-            <Facts state={state} />
-          </TabsContent>
-          <TabsContent value="why" forceMount className="data-[state=inactive]:hidden">
-            <Why state={state} trace={trace} />
-          </TabsContent>
-          <TabsContent value="find" forceMount className="data-[state=inactive]:hidden">
-            <Find />
-          </TabsContent>
-          <TabsContent value="numbers" forceMount className="data-[state=inactive]:hidden">
-            <Numbers hash={state?.hash} />
-          </TabsContent>
-        </div>
+        <TabsContent value="hierarchy">
+          <Hierarchy
+            story={story}
+            picked={picked}
+            here={book.state?.shown.here}
+            pick={pick}
+            play={play}
+          />
+        </TabsContent>
+        <TabsContent value="project" forceMount className="data-[state=inactive]:hidden">
+          <Project state={book.state} send={book.send} trace={book.trace} said={diag.said} />
+        </TabsContent>
       </ScrollArea>
     </Tabs>
   );
 }
 
-export default function App() {
-  const frame = useRef<HTMLIFrameElement>(null);
-  const book = useBook(frame);
-  const { said, compiled, lint, held, pending, unconfirmed } = useDiagnostics();
+function Right({ layout, set, story, book, diag }: Shell) {
+  const { said, compiled, lint, unconfirmed } = diag;
   return (
-    <div className="flex h-full bg-background text-foreground max-[900px]:flex-col">
-      <Book frame={frame} />
-      <aside className="flex w-[400px] shrink-0 flex-col border-l max-[900px]:h-1/2 max-[900px]:w-full max-[900px]:border-t max-[900px]:border-l-0">
-        <Header title={book.state?.title} hash={book.state?.hash}>
-          <Hold held={held} pending={pending} />
-        </Header>
+    <>
+      <div className="flex h-8 items-center border-b px-3 text-xs">
+        Inspector
+        <Close side="right" set={set} />
+      </div>
+      <Inspector sel={layout.selection} story={story} />
+      <ScrollArea className="min-h-0 flex-1 border-t" aria-label="Console">
         <Compile said={said} compiled={compiled} lint={lint} state={book.state} send={book.send} />
         <section className="border-b px-3 pb-2">
           <Counts prose={book.prose} said={said} />
           <Unconfirmed prose={book.prose} unconfirmed={unconfirmed} said={said} />
         </section>
-        <Panels state={book.state} send={book.send} trace={book.trace} said={said} />
+        <Feed changes={diag.changes} />
         <Source line={book.line} />
+      </ScrollArea>
+    </>
+  );
+}
+
+/** An open column with its divider on the inner edge, or a folded column's rail. */
+function Side({
+  side,
+  s,
+  children,
+}: {
+  side: 'left' | 'right';
+  s: Shell;
+  children: React.ReactNode;
+}) {
+  if (!s.layout[side === 'left' ? 'leftOpen' : 'rightOpen'])
+    return <Rail side={side} set={s.set} />;
+  const w = { '--w': `${s.layout[side]}px` } as React.CSSProperties;
+  const divider = <Divider side={side} layout={s.layout} set={s.set} />;
+  return (
+    <>
+      {side === 'right' ? divider : null}
+      <aside className={COLUMN} style={w} aria-label={`${side} column`}>
+        {children}
       </aside>
+      {side === 'left' ? divider : null}
+    </>
+  );
+}
+
+/** The shared selection, the Book's mark, the start checkpoint and every shortcut. */
+function useWiring(
+  book: Book,
+  heard: React.RefObject<Heard>,
+  layout: Layout,
+  set: SetLayout,
+  open: () => void,
+) {
+  const pick = (s?: Selection) => s && set((l) => ({ ...l, selection: s }));
+  heard.current.select = (textKey) => pick(fromTextKey(textKey));
+  const mark = places(layout.selection, []).book;
+  useEffect(() => void (mark && book.send(mark)), [mark?.kind, mark?.key, book.loaded]); // eslint-disable-line react-hooks/exhaustive-deps
+  useStart(book);
+  const run = command(book, layout.selection, pick);
+  useShortcuts(heard, (key) => {
+    if (key === 'k') open();
+    else if (key === 'e' && layout.selection) void ask('open', { key: layout.selection.key });
+    else if (key === '.') run({ kind: 'command', id: 'hold', label: '', detail: '' });
+    else set((l) => fold(l, key));
+  });
+  return { pick, run };
+}
+
+const COLUMN =
+  'flex min-h-0 shrink-0 flex-col bg-background w-(--w) max-[900px]:h-1/2 max-[900px]:w-full';
+
+export default function App() {
+  const frame = useRef<HTMLIFrameElement>(null);
+  const heard = useRef<Heard>({ select: () => {}, shortcut: () => {} });
+  const book = useBook(frame, heard);
+  const diag = useDiagnostics();
+  const [layout, set] = useLayout();
+  const [story, setStory] = useState<Story>();
+  const [palette, setPalette] = useState(false);
+  useEffect(() => void getStory().then(setStory, () => {}), [diag.said]); // a failed fetch keeps the last good
+  const { pick, run } = useWiring(book, heard, layout, set, () => setPalette(true));
+  const s: Shell = { layout, set, story, book, diag, pick };
+  const all = (text: Record<string, string>) =>
+    items(story?.graph.nodes ?? [], text, diag.placeholders ?? {});
+  return (
+    <div className="flex h-full bg-background text-foreground max-[900px]:flex-col">
+      <Side side="left" s={s}>
+        <Left {...s} />
+        <MapSlot layout={layout} set={set} story={story} />
+      </Side>
+      <BookStrip
+        frame={frame}
+        layout={layout}
+        set={set}
+        held={diag.held}
+        pending={diag.pending}
+        last={diag.timings[0]}
+        loaded={book.loaded}
+      />
+      <Side side="right" s={s}>
+        <Right {...s} />
+      </Side>
+      {palette ? <Palette all={all} run={run} close={() => setPalette(false)} /> : null}
     </div>
   );
+}
+
+/** What a palette row does: a command runs, a key or text key selects, a `~` opens in the Book. */
+function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) => void) {
+  return (i: Item) => {
+    if (i.kind === 'key') return pick(fromRef(i.id));
+    if (i.kind === 'text') return pick(fromTextKey(i.id));
+    if (i.kind === 'todo') return (pick(fromTextKey(i.id)), book.send({ op: 'edit', key: i.id }));
+    if (i.id === 'hold') return document.querySelector<HTMLButtonElement>('[data-hold]')?.click();
+    if (i.id === 'undo')
+      return book.send({ op: 'key', key: 'z', metaKey: true, ctrlKey: false, altKey: false });
+    const name =
+      i.id === 'go' && sel?.kind === 'room'
+        ? sel.key
+        : prompt(i.id === 'new' ? 'New room key' : 'Room key');
+    if (!name) return;
+    if (i.id === 'new') void ask('new', { kind: 'room', name });
+    else book.send({ op: 'go_to_room', room: name });
+  };
 }
