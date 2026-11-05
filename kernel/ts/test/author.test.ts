@@ -73,7 +73,8 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   mkdirSync(src);
   const which = join(dir, 'which');
   writeFileSync(which, good);
-  const port = 20000 + Math.floor(Math.random() * 20000);
+  // Below Linux's ephemeral range (32768+), where serve(0) in other test files binds.
+  const port = 20000 + Math.floor(Math.random() * 12000);
   const watcher = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, src, '--watch'], {
     env: {
       PATH: `${dir}:${process.env.PATH}`,
@@ -231,7 +232,8 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
     `{"cartridge":${rest.canonical},"content_hash":"${rest.sha256}"}`,
   );
   const artifact = join(dir, 'queued.json');
-  const port = 20000 + Math.floor(Math.random() * 20000);
+  // Below Linux's ephemeral range (32768+), where serve(0) in other test files binds.
+  const port = 20000 + Math.floor(Math.random() * 12000);
   const watcher = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, src, '--watch'], {
     env: {
       PATH: `${dir}:${process.env.PATH}`,

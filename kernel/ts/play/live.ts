@@ -15,7 +15,8 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
@@ -238,6 +239,14 @@ function column(
   return false;
 }
 
+/** A watcher's close, and the port it bound: a test passes 0 for a free one (random ones collided). */
+const bound = (server: Server) => ({
+  close: () => server.close(),
+  port: new Promise<number>((done) =>
+    server.once('listening', () => done((server.address() as AddressInfo).port)),
+  ),
+});
+
 /** Serves `GET /events` (each client gets the current message on connect and every push after),
  * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, the column's `POST /open` and
  * `POST /why`, `GET /story` (story.ts), and the editor's routes (editing.ts) after its Host and Origin checks. */
@@ -279,5 +288,5 @@ export function serve(port: number, source: string, artifact: string, release = 
       process.exit(1);
     })
     .listen(port, '127.0.0.1');
-  return { push: said.push, held: editor.held, seen: editor.seen, close: () => server.close() };
+  return { push: said.push, held: editor.held, seen: editor.seen, ...bound(server) };
 }
