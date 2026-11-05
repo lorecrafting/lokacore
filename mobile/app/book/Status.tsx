@@ -16,8 +16,9 @@ import { motion, size, space } from './tokens.ts';
 
 // The line: the sky glyph (sun by day, moon by night), the position, then the resource button,
 // which shows the condition pools coloured by band when GameView carries them (the room-view
-// status line, an owner-ruled departure) and opens Contents, the index of the existing book sections. Too wide, the pools move to a second line, whole; then the position
-// truncates (polish pick mv1j35ltxddx; loka-x6t.86). Below it and its experience rule, the status
+// status line, an owner-ruled departure) and opens Contents, the index of the existing book
+// sections. Too wide, the pools move to a second line, whole; then the position truncates
+// (polish pick mv1j35ltxddx; loka-x6t.86). Below it and its experience rule, the status
 // icon row (StatusIcon.tsx, bleeding first) when any status is on.
 type StatusProps = {
   time: number;

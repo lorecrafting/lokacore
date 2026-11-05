@@ -114,18 +114,16 @@ export const ringFraction = (c: Condition, time: number) =>
  * - Rules: a tap opens Character; a hold, hover or focus shows a Tooltip; cap, order and ring are
  *   Conditions details. A 22 px disc in a 44 px box, boxes abutting (no gap, no hitSlop). Its
  *   drawing, keyed by label (statusGlyphs.ts), is a Skia stroke path in the look's ink: viewBox 24,
- *   drawn in the centred 14 px area (size.statusIcon − space.md), stroke 2.5 units, round caps and joins, no fill, inside 3 to 21,
- *   aria-hidden; no letters or emoji. No drawing: the polarity fallback (status-line-rulings.md).
+ *   drawn in the centred 14 px area (size.statusIcon − space.md), stroke 2.5 units, round caps
+ *   and joins, no fill, inside 3 to 21, aria-hidden; no letters or emoji. No drawing: the polarity fallback (status-line-rulings.md).
  * - States: bleeding (first, debuff look, no ring); buff; debuff; neutral; permanent; overflow
  *   (six show, seven or more show five and a +N disc whose tip lists the rest); held; focused; locked
  *   (pictures, not pressable); ring full, near empty, draining. Pops on arrival, fades on expiry;
  *   behind the disc neither (arriving, pushed or revealed); ticks are silent.
  * - Story: StatusIcon.stories.tsx
  */
-// size: allow 45, each icon's six props take a line each
 export function StatusIcons(p: Props) {
-  // The held icon's label, so the tip follows the clock and goes with the icon or the lock.
-  const [held, setHeld] = useState<string>();
+  const [held, setHeld] = useState<string>(); // the held icon's label: its tip follows the clock
   const items = itemsOf(p);
   const shown = items.length > CAP ? CAP - 1 : items.length;
   const hidden = items.slice(shown).map((x) => x.word);

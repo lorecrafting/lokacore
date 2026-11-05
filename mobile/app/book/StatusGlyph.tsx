@@ -9,7 +9,7 @@ const SIDE = size.statusIcon - space.md; // 14 px, no token of its own (status-l
  * One statusGlyphs.ts drawing: stroked, round caps and joins, no fill, in the look's ink.
  * - Use: StatusIcon's Disc only.
  * - Rules: aria-hidden; the icon's name carries the label.
- * - Story: StatusIcon.stories.tsx (Drawings)
+ * - Story: StatusIcon.stories.tsx
  */
 export default function StatusGlyph(p: { d: string; ink: string }) {
   return (

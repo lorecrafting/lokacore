@@ -17,6 +17,7 @@ const EXEMPT: Record<string, string> = {
   'book/people.tsx:Here': 'the room page lines, shown through the RoomPage stories',
   'book/StatusIcon.tsx:Tooltip':
     'the status icon tip, shown through the StatusIcon Held and Focused stories',
+  'book/StatusGlyph.tsx:StatusGlyph': "an icon's drawing, shown through StatusIcon Drawings",
   'book/Chip.tsx:Row': 'a titled chip row, shown through Chip ReadingSize',
   'book/StatusIcon.tsx:Ring':
     'shown through StatusIcon Ring*, and the rise card through ActionCard Waiting',
