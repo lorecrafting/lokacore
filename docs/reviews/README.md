@@ -12,7 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Second review: revival contract and save effect, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-revival-second-review.md): **APPROVE WITH NOTES**
 - [Review: world.death.revival and the Wayside Shrine keeper, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-review.md): **APPROVE**
-- [Review: one consume command and one effect block, PR #605 (loka-kgd.209)](2026-11-04-loka-kgd.209-consume-review.md): **CHANGES REQUIRED**
+- [Review: one consume command and one effect block, PR #605 (loka-kgd.209)](2026-11-04-loka-kgd.209-consume-review.md): **APPROVE**
 - [Review: corpses name their victim, decay and spill, PR #593 (loka-kgd.203)](2026-11-04-corpses-review.md): **APPROVE**
 - [Second review: corpse decay save and delta contract, PR #593 (loka-kgd.203)](2026-11-04-corpse-decay-second-review.md): **CHANGES REQUIRED**
 - [Second review: consume contract and save effect, PR #605 (loka-kgd.209)](2026-11-04-consume-one-effect-second-review.md): **APPROVE WITH NOTES**
