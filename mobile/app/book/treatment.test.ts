@@ -37,3 +37,18 @@ test('a fault shows a treated scene plain', () => {
   assert.ok(p.screen().fault);
   assert.equal(p.screen().treatment, undefined);
 });
+
+// Breaks: a treated scene keeps the status line (book-ui.md, Book treatments).
+test('a treated scene draws no status line', async () => {
+  const { view: base } = await import('./__tests__/combat-book.test.ts');
+  const { mounted } = await import('./__tests__/mounted.ts');
+  const scene = (treatment?: string) =>
+    mounted(
+      base({
+        combat: undefined,
+        scene: { scene: { key: 's' }, line: 'l', index: 1, count: 2, treatment },
+      }),
+    );
+  assert.ok(scene().texts().includes('sitting'), 'a plain scene keeps it (the position)');
+  assert.deepEqual(scene('reverie').texts(), ['l']); // the line alone
+});
