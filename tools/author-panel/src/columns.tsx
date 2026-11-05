@@ -15,13 +15,19 @@ export function useLayout(): [Layout, SetLayout] {
   return [layout, setLayout];
 }
 
-/** The divider on a column's inner edge. */
-export function Divider({ side, layout, set }: { side: 'left' | 'right'; layout: Layout; set: SetLayout }) {
-  const width = (px: number) => set((l) => ({ ...l, [side]: px }));
+/** The divider on a column's inner edge, or above the map slot (it grows upwards, at most to the
+ * column less its 32 px tab strip). */
+export function Divider({ side, layout, set }: { side: 'left' | 'right' | 'slot'; layout: Layout; set: SetLayout }) {
+  const size = (px: number) => set((l) => ({ ...l, [side]: px }));
+  const across = side === 'slot';
+  const most = (el: HTMLElement) => (across ? el.parentElement!.clientHeight - 32 : undefined);
   const drag = (e: React.PointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId); // a release over the Book frame still ends the drag
-    const [from, start] = [e.clientX, layout[side]];
-    const move = (m: PointerEvent) => width(clamp(side, start + (m.clientX - from) * (side === 'left' ? 1 : -1)));
+    const top = most(e.currentTarget);
+    const at = (m: { clientX: number; clientY: number }) => (across ? -m.clientY : m.clientX);
+    const [from, start] = [at(e), clamp(side, layout[side], top)];
+    const move = (m: PointerEvent) =>
+      size(clamp(side, start + (at(m) - from) * (side === 'right' ? -1 : 1), top));
     const up = () => (removeEventListener('pointermove', move), removeEventListener('pointerup', up));
     addEventListener('pointermove', move);
     addEventListener('pointerup', up);
@@ -29,14 +35,18 @@ export function Divider({ side, layout, set }: { side: 'left' | 'right'; layout:
   return (
     <div
       role="separator"
-      aria-orientation="vertical"
-      aria-label={`${side} column width`}
+      aria-orientation={across ? 'horizontal' : 'vertical'}
+      aria-label={across ? 'Map slot height' : `${side} column width`}
       aria-valuenow={layout[side]}
       tabIndex={0}
-      className="relative w-px shrink-0 cursor-col-resize bg-border before:absolute before:inset-y-0 before:-left-1 before:w-2 hover:bg-ring max-[900px]:hidden"
+      className={
+        across
+          ? 'relative h-px shrink-0 cursor-row-resize bg-border before:absolute before:inset-x-0 before:-top-1 before:h-2 hover:bg-ring'
+          : 'relative w-px shrink-0 cursor-col-resize bg-border before:absolute before:inset-y-0 before:-left-1 before:w-2 hover:bg-ring max-[900px]:hidden'
+      }
       onPointerDown={drag}
-      onDoubleClick={() => width(reset(side))}
-      onKeyDown={(e) => width(nudge(side, layout[side], e.key, e.shiftKey))}
+      onDoubleClick={() => size(reset(side))}
+      onKeyDown={(e) => size(nudge(side, layout[side], e.key, e.shiftKey, most(e.currentTarget)))}
     />
   );
 }

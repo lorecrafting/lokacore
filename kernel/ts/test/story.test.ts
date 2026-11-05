@@ -47,6 +47,23 @@ put('areas/town/rooms/attic.json', {
   description: prose('Dust.'),
   exits: {},
 });
+put('areas/yard.json', {
+  rooms: {
+    shed: {
+      name: prose('Shed'),
+      description: prose('Tools.'),
+      exits: { up: { to: 'attic', hidden_until: { fact: 'bell_heard', equals: true } } },
+    },
+  },
+});
+const cart = JSON.parse(readFileSync(join(src, 'cartridge.json'), 'utf8'));
+cart.requires.capabilities.knowledge = 1; // layout.json's
+put('cartridge.json', cart);
+const cells = { village_green: [2, -1], ferry_landing: [2, 0], attic: [0, 0], shed: [1, 0] };
+put(
+  'layout.json',
+  Object.entries(cells).map(([room, [x, y]]) => ({ room, x, y, z: 0 })),
+);
 put('reactions/asked.json', {
   on: { event: 'choice_resolved', choice: 'ask' },
   steps: [{ op: 'fact.assign', fact: 'bell_heard', value: true }],
@@ -169,6 +186,36 @@ test('then and choice_resolved edges: then: end draws none, then: hub one', () =
       },
     ],
   );
+});
+
+// Break: a room's area taken from its file name, not its folder or bundle; a root room given one;
+// a hidden exit or a layout cell dropped or misplaced; exits named by ref, not key.
+test("the map's rooms: file, area by folder or bundle, exits and layout cell", () => {
+  const { map } = story(src, dev, []);
+  const by = (key: string) => map.find((r) => r.key === key);
+  assert.deepEqual(by('shed'), {
+    ref: ref('room', 'shed'),
+    key: 'shed',
+    file: 'areas/yard.json',
+    area: 'yard',
+    title: 'Shed',
+    exits: [{ dir: 'up', to: 'attic', hidden: true }],
+    at: { x: 1, y: 0, z: 0 },
+  });
+  assert.deepEqual(
+    [by('attic')?.file, by('attic')?.area, by('village_green')?.area, by('village_green')?.at],
+    ['areas/town/rooms/attic.json', 'town', null, { x: 2, y: -1, z: 0 }],
+  );
+  assert.deepEqual(by('village_green')?.exits, [{ dir: 'south', to: 'ferry_landing' }]);
+  // Break: a half-typed bundle on disk (the model rebuilds after a failed compile) throws the map away.
+  const yard = readFileSync(join(src, 'areas/yard.json'), 'utf8');
+  writeFileSync(join(src, 'areas/yard.json'), '{"rooms": {');
+  try {
+    const shed = story(src, dev, []).map.find((r) => r.key === 'shed');
+    assert.deepEqual([shed?.file, shed?.area], [undefined, null]);
+  } finally {
+    writeFileSync(join(src, 'areas/yard.json'), yard);
+  }
 });
 
 // Break: rows keyed by the wrong node (an area folder's, a `.scene` as other than its dialogue),

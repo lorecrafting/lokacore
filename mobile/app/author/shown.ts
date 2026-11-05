@@ -22,6 +22,7 @@ export function shown(
   return {
     room: say(view.place.title.key),
     here: Object.keys(roomIds).find((ref) => roomIds[ref] === view.place.id), // the editor's highlight
+    visited: visited(view, roomIds),
     people: view.entities.filter((e) => e.kind === 'npc').map((e) => say(e.name)),
     held: view.inventory.map((e) => say(e.name)),
     quests: view.journal.map((q) => ({ quest: q.quest.key, state: q.state })),
@@ -38,19 +39,33 @@ export function shown(
       prompt: say(view.choice.prompt.key),
       options: view.choice.choices.map((c) => say(c.label)),
     },
-    offers: {
-      action: Object.values(canon.scripted_actions ?? {})
-        .filter(
-          ({ target: t }) =>
-            t?.kind !== 'detail' || (t.room && roomIds[refString(t.room)] === view.place.id),
-        )
-        .map((a) => a.key),
-      dialogue: Object.values(canon.dialogues ?? {})
-        .filter((d) => view.entities.some((e) => e.id === ids[refString(d.npc)]))
-        .map((d) => d.key),
-    },
+    offers: offers(view, canon, ids, roomIds),
   };
 }
+
+/** What this room offers: its details' actions (and any tool or spell), the dialogues of who is here. */
+function offers(
+  view: GameView,
+  canon: Canon,
+  ids: Readonly<Record<string, string>>,
+  roomIds: Readonly<Record<string, string>>,
+) {
+  return {
+    action: Object.values(canon.scripted_actions ?? {})
+      .filter(
+        ({ target: t }) =>
+          t?.kind !== 'detail' || (t.room && roomIds[refString(t.room)] === view.place.id),
+      )
+      .map((a) => a.key),
+    dialogue: Object.values(canon.dialogues ?? {})
+      .filter((d) => view.entities.some((e) => e.id === ids[refString(d.npc)]))
+      .map((d) => d.key),
+  };
+}
+
+/** The map's inked path: rooms this character has been in (the view lists them only with a layout). */
+const visited = (view: GameView, roomIds: Readonly<Record<string, string>>) =>
+  Object.keys(roomIds).filter((ref) => view.map?.rooms.some((r) => r.id === roomIds[ref]));
 
 /** The clock in words: the calendar's day, hour and sky, else the logical time (seconds) as hours and minutes. */
 export function clockWords({
