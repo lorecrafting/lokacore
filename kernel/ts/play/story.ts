@@ -58,9 +58,9 @@ function links(c: Obj) {
           });
   for (const [to, r] of Object.entries((c.reactions ?? {}) as Record<string, Obj>)) {
     const on = r.on as Obj;
-    if (on?.event !== 'choice_resolved' || typeof on.choice !== 'string') continue;
+    if (on?.event !== 'choice_resolved') continue; // the kernel's load checks choice is a string
     for (const [from, d] of dialogues)
-      if (isObj(d.choices) && on.choice in d.choices)
+      if (isObj(d.choices) && (on.choice as string) in d.choices)
         edges.push({ from, to, path: '.on.choice', op: 'choice_resolved' });
   }
   return edges;

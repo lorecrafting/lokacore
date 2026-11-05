@@ -2,7 +2,7 @@
 // of scene_sampler: two dialogues joined by `then` (one in an area folder), a choice_resolved
 // reaction, a room no exit reaches and an outline.json.
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import {
   chmodSync,
   cpSync,
@@ -72,8 +72,8 @@ const outline = {
     },
     {
       beats: [
-        { n: 3, nodes: ['rooms/village_green'], pays: ['lantern', 'oath'] },
-        { n: 4, nodes: ['rooms/attic'] },
+        { n: 3, nodes: ['rooms/village_green'], pays: ['lantern', 'oath'], seeds: ['ring'] },
+        { n: 4, nodes: ['rooms/attic'], pays: ['ring'] }, // paid in the very next beat
       ],
     },
   ],
@@ -91,8 +91,8 @@ const dev = { canonical: canonical!, sha256: sha256! };
 const ref = (kind: string, key: string) => `scene_sampler@0.0.1:${kind}/${key}`;
 const green = ref('room', 'village_green');
 
-// Break: the seeds-and-payoffs check counts a beat's own seed as paid, or ignores the
-// order across parts.
+// Break: the seeds-and-payoffs check counts a beat's own seed as paid, misses a payoff in the
+// very next beat, or ignores the order across parts.
 test('a seed with no later payoff and a payoff with no earlier seed are listed', () => {
   const { outline } = story(src, dev, []) as { outline: { unpaid: unknown; unseeded: unknown } };
   assert.deepEqual(outline.unpaid, [
@@ -180,15 +180,31 @@ test("the compile's diagnostics by node", () => {
   });
 });
 
-// Break: a bad outline.json throws (a 500 for the whole map) instead of a refusal in the model.
+// Break: a bad outline.json throws (a 500 for the whole map) instead of a refusal in the model
+// that names the cause, or a cartridge with no outline.json reads as refused.
 test('a bad outline.json is a refusal in the model, the graph still built', () => {
-  for (const bad of ['{"parts": [', '{"parts": [{"beats": [{"n": "one"}]}]}']) {
+  const bads: [string, RegExp][] = [
+    ['{"parts": [', /JSON/],
+    ['{"parts": [{"beats": [{"n": "one"}]}]}', /not the shape/],
+    ['{"parts": [{"beats": [{"n": 1, "nodes": "rooms/attic"}]}]}', /not the shape/],
+  ];
+  for (const [bad, why] of bads) {
     writeFileSync(join(src, 'outline.json'), bad);
     const model = story(src, dev, []);
-    assert.match(String((model.outline as { refused: string }).refused), /^outline\.json: /);
+    assert.match(String((model.outline as { refused: string }).refused), why);
     assert.ok(model.graph.nodes.length > 0);
   }
+  rmSync(join(src, 'outline.json'));
+  assert.equal(story(src, dev, []).outline, null); // no outline is no beats, not a refusal
   put('outline.json', outline);
+});
+
+// Break: an artifact the kernel refuses yields some other crash, not the kernel's refusal.
+test('an artifact the kernel refuses is an error naming the refusal', () => {
+  assert.throws(
+    () => story(src, { canonical: '{}', sha256: '0'.repeat(64) }, []),
+    /refuses the artifact/,
+  );
 });
 
 // Break: the model rebuilt on every request (no 304), kept across a publish (a hold's release
@@ -223,9 +239,11 @@ test('GET /story: an ETag, 304 until the next compile pushes, and refused to a f
     ),
   );
   assert.equal(rebound, 403); // a DNS-rebound page: E1's Host check
+  assert.equal((await fetch(`http://127.0.0.1:${port}/story`, { method: 'POST' })).status, 405);
 });
 
-// Break: the CLI's hash is not the artifact's (another build, or the source's hash).
+// Break: the CLI's hash is not the artifact's (another build, or the source's hash), or a
+// usage error or a failed compile exits 0.
 test('bin/loka story prints the model with the compiled artifact hash', () => {
   // mise is stubbed as CI has none (as check.test.ts); mix comes from PATH.
   const bin = join(dir, 'bin');
@@ -235,4 +253,9 @@ test('bin/loka story prints the model with the compiled artifact hash', () => {
   const env = { ...process.env, PATH: `${bin}:${process.env.PATH}` };
   const out = execFileSync(join(root, 'bin/loka'), ['story', src], { encoding: 'utf8', env });
   assert.equal(JSON.parse(out).hash, sha256);
+  const story = (...args: string[]) =>
+    spawnSync(join(root, 'bin/loka'), ['story', ...args], { env }).status;
+  assert.equal(story(), 2); // usage
+  assert.equal(story(src, 'extra'), 2);
+  assert.equal(story(join(dir, 'nowhere')), 1); // the compile failed
 });
