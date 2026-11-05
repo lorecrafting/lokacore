@@ -68,5 +68,8 @@
   },
   "enabledMcpjsonServers": [
     "storybook"
-  ]
+  ],
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true
+  }
 }
