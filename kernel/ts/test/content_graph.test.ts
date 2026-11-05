@@ -144,6 +144,9 @@ test('the graph holds every DefinitionRef with its path, and the op of the step 
       },
     ],
   );
+  // Break: an object with a cartridge_id and no kind is taken for a DefinitionRef.
+  const loose = contentGraph({ rooms: { hall: { note: { cartridge_id: 'f' } } } });
+  assert.deepEqual(loose.edges, []);
 });
 
 // A cartridge without rooms or an entry. Each fact is read by a quest's policy; the
