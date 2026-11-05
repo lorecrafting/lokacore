@@ -208,7 +208,7 @@ function beats(source: string, bound: Bound) {
  * `keep()` builds it now if none is built: a Hold serves that whole model to its end (§7). */
 export function storyRoute(source: string, artifact: string) {
   let model: { etag: string; body: string } | undefined;
-  const keep = (diagnostics: unknown[]) => {
+  const build = (diagnostics: unknown[]) => {
     if (model) return model;
     const dev = JSON.parse(readFileSync(artifact, 'utf8')) as Dev;
     const body = JSON.stringify(story(source, dev, diagnostics as Diagnostic[]));
@@ -216,10 +216,11 @@ export function storyRoute(source: string, artifact: string) {
   };
   return {
     stale: () => (model = undefined),
-    keep,
+    // With no artifact yet there is no model to keep; a GET then answers as it did before.
+    keep: (diagnostics: unknown[]) => existsSync(artifact) && build(diagnostics),
     answer(request: IncomingMessage, response: ServerResponse, diagnostics: unknown[]) {
       if (request.method !== 'GET') return response.writeHead(405).end();
-      const model = keep(diagnostics);
+      const model = build(diagnostics);
       if (request.headers['if-none-match'] === model.etag)
         return response.writeHead(304, { etag: model.etag }).end();
       response.writeHead(200, { 'content-type': 'application/json', etag: model.etag });
