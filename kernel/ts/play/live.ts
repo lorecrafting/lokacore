@@ -81,7 +81,12 @@ export function textOnly(written: Canonical, next: Canonical): Record<string, st
 const NAME = /^\/checkpoints\/([a-z0-9][a-z0-9_-]{0,63})$/; // a file name, never a path
 
 /** `GET /checkpoints` lists names; `GET|PUT /checkpoints/<name>` reads or writes `{steps}`. */
-async function checkpoints(request: IncomingMessage, response: ServerResponse, source: string) {
+async function checkpoints(
+  request: IncomingMessage,
+  response: ServerResponse,
+  source: string,
+  busy: () => boolean,
+) {
   const dir = join(source, 'checkpoints');
   if (request.url === '/checkpoints' && request.method === 'GET') {
     const names = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.json')) : [];
@@ -95,6 +100,8 @@ async function checkpoints(request: IncomingMessage, response: ServerResponse, s
       ? json(response, 200, JSON.parse(readFileSync(file, 'utf8')))
       : response.writeHead(404).end();
   if (request.method !== 'PUT') return response.writeHead(405).end();
+  // a checkpoint saved mid /new would land in its snapshot diff, as a write would (write.ts)
+  if (busy()) return json(response, 409, 'a /new is running');
   let steps: unknown;
   try {
     steps = (JSON.parse(await body(request)) as { steps?: unknown }).steps;
@@ -228,8 +235,9 @@ function column(
   response: ServerResponse,
   source: string,
   artifact: string,
+  busy: () => boolean,
 ) {
-  if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source);
+  if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source, busy);
   if (request.url === '/todo') return json(response, 200, todo(source));
   if (request.url === '/numbers') return reply(response, artifact);
   if (request.url?.startsWith('/find?'))
@@ -267,7 +275,7 @@ export function serve(port: number, source: string, artifact: string, on: Hooks 
   const route = async (request: IncomingMessage, response: ServerResponse) => {
     if (foreign(request, response) || (await editor.route(request, response))) return;
     if (request.url === '/story') return map.answer(request, response, last.diagnostics ?? []);
-    const answered = column(request, response, source, artifact);
+    const answered = column(request, response, source, artifact, editor.busy);
     if (answered !== false) return answered;
     if (request.url !== '/events') return response.writeHead(404).end();
     response.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });

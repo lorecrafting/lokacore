@@ -95,7 +95,7 @@ function New({ all, go }: { all: Worlds; go: Go }) {
       <input
         name="name"
         required
-        pattern="[a-z][a-z0-9_]{0,63}"
+        pattern="[a-z][a-z0-9_]{0,31}"
         aria-label="New world folder"
         placeholder="new_world"
         className="h-7 rounded border bg-background px-2 font-mono text-xs"

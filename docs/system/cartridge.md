@@ -947,7 +947,7 @@ build. The author tools below are reachable only in that bundle (a production ex
   `GET /world` lists the sibling cartridge folders (`name`, the `cartridge.json` title) and the
   `current` one; `POST /world {name, new?, from?}` switches to a listed sibling, or with `new`
   first runs `mix loka.new cartridge` (`from` its `--from`, a listed sibling) for a free folder
-  name `[a-z0-9_]+`, refused while a write is in flight. The watcher then exits 75 and
+  name `[a-z][a-z0-9_]{0,31}` (`mix loka.new`'s 32), refused while a write is in flight. The watcher then exits 75 and
   `bin/loka dev` restarts it on that world, remembered in `.dev-cartridge/world` for the next
   `bin/author.sh` with no folder; journal, Hold and the panel's selection start empty.
   `was` is the sha256 of the whole file (for `/edit`, the line's text): a file

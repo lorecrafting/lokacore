@@ -249,6 +249,7 @@ export function writer(
       answered(() => (t.busy ? refuse(409, 'a /new is running') : POSTS[url](t, sent))),
     /** After an fs burst: what changed outside the editor is journaled and pushed `outside`.
      * ponytail: rereads every source file per burst; fine at showcase size, hash by mtime when not. */
+    busy: () => t.busy > 0,
     seen() {
       if (t.busy) return;
       const changes = diff(t.cache, t.snapshot());

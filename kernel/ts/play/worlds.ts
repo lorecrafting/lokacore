@@ -18,9 +18,9 @@ export const loka = (args: string[]) =>
 
 // Worlds are the cartridges beside the open one (cartridges/). A name is one folder there, never a
 // path, by mix loka.new's rule; a world is a real folder (no link) with a cartridge.json.
-const NAME = /^[a-z][a-z0-9_]{0,63}$/;
+const NAME = /^[a-z][a-z0-9_]{0,31}$/;
 const sibling = (root: string, name: unknown) => {
-  if (typeof name !== 'string' || !NAME.test(name)) refuse(400, 'name: [a-z][a-z0-9_]{0,63}');
+  if (typeof name !== 'string' || !NAME.test(name)) refuse(400, 'name: [a-z][a-z0-9_]{0,31}');
   return join(dirname(root), name as string);
 };
 const real = (path: string) =>

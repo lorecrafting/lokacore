@@ -81,6 +81,7 @@ test('/world lists real worlds, refuses names that are paths, and makes one as b
     [400, { name: '../x', new: true }],
     [400, { name: 'x.y', new: true }],
     [400, { name: '1x', new: true }],
+    [400, { name: 'x'.repeat(33), new: true }], // mix loka.new's cap is 32
     [409, { name: 'b', new: true }],
     [400, { name: 'x', new: true, from: '../worlds/b' }],
     [404, { name: 'x', new: true, from: 'linked' }],
@@ -99,6 +100,10 @@ test('/world lists real worlds, refuses names that are paths, and makes one as b
   await new Promise((r) => setTimeout(r, 200));
   // Break: a switch, or an edit, while the new world is being made.
   assert.equal((await ask(port, '/world', { name: 'b' })).status, 409);
+  const put = { method: 'PUT', headers: { host: `localhost:${port}` }, body: '{"steps": []}' };
+  const saved = await fetch(`http://127.0.0.1:${port}/checkpoints/c`, put);
+  assert.equal(saved.status, 409, 'a checkpoint saved into the snapshot diff');
+  assert.equal(existsSync(join(a, 'checkpoints')), false);
   assert.deepEqual(await making, { status: 200, body: { world: 'd' } });
   const worlds_ = join(dir, 'worlds');
   assert.equal(

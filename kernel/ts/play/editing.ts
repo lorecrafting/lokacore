@@ -74,5 +74,5 @@ export function editing(source: string, said: Said, once: Push, on: Hooks) {
       response.on('finish', () => on.leave?.(join(dirname(realpathSync(source)), sent.name))); // as write.ts's root
     return true;
   }
-  return { route, held: () => held, seen: editor.seen };
+  return { route, held: () => held, seen: editor.seen, busy: editor.busy };
 }
