@@ -6,7 +6,9 @@ defmodule Loka.Content.LintLayout do
 
   @doc "The layout findings for `Source.load` entries, with their real source paths."
   @spec run([{String.t(), term(), term()}]) :: [String.t()]
-  def run(files) do
+  def run(files), do: layout(for({_, _, v} = f <- files, is_map(v), do: f))
+
+  defp layout(files) do
     entry =
       Enum.find(files, &match?({"cartridge.json", _, _}, &1)) |> elem(2) |> Map.get("entry")
 
@@ -25,7 +27,7 @@ defmodule Loka.Content.LintLayout do
     real =
       for {"areas/" <> _ = rel, _, _} <- files,
           [_, _ | lr] = Path.split(rel),
-          length(lr) == 2,
+          lr != [],
           into: %{},
           do: {Path.join(lr), rel}
 
