@@ -10,6 +10,7 @@ import { Ajv2020 } from 'ajv/dist/2020.js';
 import {
   FORM_DEFAULTS,
   addable,
+  apart,
   applied,
   branchOf,
   choices,
@@ -18,6 +19,7 @@ import {
   fieldErrors,
   hidden,
   proseKey,
+  rebase,
   start,
 } from '../play/card.ts';
 import { change } from '../play/edit_model.ts';
@@ -81,8 +83,56 @@ test('an edit through the card round-trips to the file, one op per changed field
     [{ path: ['steps', 1, 'n'], value: 2 }],
   );
   assert.deepEqual(diff(steps, { steps: [{ op: 'wait' }] }), [
-    { path: ['steps'], value: [{ op: 'wait' }] },
+    { path: ['steps', 1], delete: true },
   ]);
+});
+
+// Break: an array whose length changed diffs to one replace at its own path, which is [] for a
+// file that is an array (layout, scenes, outline) and the edit model refuses, so no row is added.
+test('a row added to or dropped from an array is one op the edit model applies, root arrays too', () => {
+  const rows = [{ a: 1 }, { a: 2 }, { a: 3 }];
+  assert.deepEqual(diff(rows, [...rows, { a: 4, b: {} }]), [{ path: [3], value: { a: 4, b: {} } }]);
+  assert.deepEqual(diff(rows, [{ a: 1 }]), [
+    { path: [2], delete: true },
+    { path: [1], delete: true },
+  ]);
+  for (const draft of [[...rows, { a: 4 }, { a: 5 }], [{ a: 9 }], []]) {
+    const doc = structuredClone(rows);
+    change(doc, diff(rows, draft));
+    assert.deepEqual(doc, draft);
+  }
+});
+
+// Break: the reload after a post sets the file over the draft, so what was typed into the next
+// field while the post was in flight is lost; or an edit the file refused comes back.
+test('a reload keeps the edits that were not sent and drops the sent ones', () => {
+  const base = { value: 5, keywords: ['weak'] };
+  const now = { value: 8, keywords: ['weakzz'] };
+  const sent = diff(base, { value: 8, keywords: ['weak'] });
+  assert.deepEqual(rebase(base, now, { value: 8, keywords: ['weak'] }, sent), now);
+  // a refused send: the file is unchanged, the sent edit is dropped, the later one kept
+  assert.deepEqual(rebase(base, now, base, sent), { value: 5, keywords: ['weakzz'] });
+  // the file lost what the kept edit changes: the reloaded file alone
+  assert.deepEqual(rebase(base, now, { value: 8 }, sent), { value: 8 });
+  assert.deepEqual(rebase(undefined, undefined, base, []), base);
+});
+
+// Break: a half-made branch's schema error holds every later edit, so a step edit is never written;
+// or an edit inside the errored field, or a root error, is written anyway.
+test('a schema error holds only the edits inside its top-level field', () => {
+  const ops = diff(
+    { policy: { items: 'any' }, steps: [{ fact: 'a' }] },
+    { policy: { items: {} }, steps: [{ fact: 'b' }] },
+  );
+  assert.deepEqual(apart(ops, [{ property: '.policy.items' }]), [
+    { path: ['steps', 0, 'fact'], value: 'b' },
+  ]);
+  assert.deepEqual(apart(ops, []), ops);
+  assert.deepEqual(apart(ops, [{ property: '' }]), []);
+  assert.deepEqual(
+    apart(diff([{ x: 1 }, { x: 2 }], [{ x: 0 }, { x: 3 }]), [{ property: '.0.x' }]),
+    [{ path: [1, 'x'], value: 3 }],
+  );
 });
 
 // Break: a refusal lands on the wrong field or is lost (another file's, a quoted file name, an

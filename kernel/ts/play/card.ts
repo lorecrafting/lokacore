@@ -18,8 +18,8 @@ export const FORM_DEFAULTS = {
 
 /**
  * The ops that turn `saved` into `draft`: plain objects are walked key by key (a key the draft
- * dropped is deleted, an added tree of empty objects is not added), as are arrays of one length;
- * any other value that differs is replaced whole.
+ * dropped is deleted, an added tree of empty objects is not added), arrays item by item (a new
+ * item is appended, a dropped one deleted from the end); any other value that differs is replaced.
  */
 export function diff(saved: unknown, draft: unknown, path: Step[] = []): Op[] {
   if (plain(saved) && plain(draft)) {
@@ -36,9 +36,18 @@ export function diff(saved: unknown, draft: unknown, path: Step[] = []): Op[] {
             : [{ path: [...path, k], value: draft[k] }],
     );
   }
-  // an array of the same length is walked item by item, so an item's `{}` fills are not written
-  if (Array.isArray(saved) && Array.isArray(draft) && saved.length === draft.length)
-    return saved.flatMap((s, i) => diff(s, draft[i], [...path, i]));
+  if (Array.isArray(saved) && Array.isArray(draft))
+    return [
+      ...saved.slice(0, draft.length).flatMap((s, i) => diff(s, draft[i], [...path, i])),
+      ...draft
+        .slice(saved.length)
+        .flatMap((value, j) =>
+          value === undefined ? [] : [{ path: [...path, saved.length + j], value }],
+        ),
+      ...saved
+        .slice(draft.length)
+        .map((_, j) => ({ path: [...path, saved.length - 1 - j], delete: true })),
+    ];
   return JSON.stringify(saved) === JSON.stringify(draft) ? [] : [{ path, value: draft }];
 }
 
@@ -47,6 +56,34 @@ export function applied(saved: unknown, draft: unknown): unknown {
   const out = structuredClone(saved);
   change(out, diff(saved, draft));
   return out;
+}
+
+/**
+ * The draft after a reload: the reloaded `doc` with the edits from `base` to `now` that were not
+ * `sent` (typed while a post was in flight, or held back by `apart`); `doc` alone if they no longer apply.
+ */
+export function rebase(base: unknown, now: unknown, doc: unknown, sent: Op[]): unknown {
+  const done = new Set(sent.map((o) => JSON.stringify(o)));
+  const out = structuredClone(doc);
+  try {
+    change(
+      out,
+      diff(base, now).filter((o) => !done.has(JSON.stringify(o))),
+    );
+  } catch {
+    // refused: change applies all or nothing, so `out` is still the reloaded file
+  }
+  return out;
+}
+
+/**
+ * The ops a schema error does not hold: those outside every errored top-level field (`property`
+ * is rjsf's `.policy.items`, `.0.room`), so a half-made branch never blocks an edit elsewhere.
+ */
+export function apart(ops: Op[], errors: { property?: string }[]): Op[] {
+  const held = errors.map((e) => (e.property ?? '').replace(/^\./, '').split('.')[0]);
+  if (held.includes('')) return [];
+  return ops.filter((o) => !held.includes(String(o.path[0])));
 }
 
 type Diagnostic = { rel?: string; path?: string; words?: string };
