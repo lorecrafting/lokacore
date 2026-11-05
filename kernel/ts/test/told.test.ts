@@ -1,7 +1,7 @@
 // E5 on the stream (docs/design/prose-in-the-book-rulings.md): an /edit's words show before the
 // compile, a refused compile marks them unconfirmed, and the page's pagehide beacon ends its Hold.
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -146,6 +146,22 @@ test("/line finds a `~` key's own line by the compile's map, among many `~` line
     { file: 'rooms/green.json', line: 2, was: '  "description": {"prose": "~"},', words: '~' },
   ]);
   assert.deepEqual((await line('room.b'))[1].line, 3); // a defined key: its own `"key":` line
+});
+
+test("an outside save that moves a `~` line before the compile: /line and /edit miss the map's stale line", async (t) => {
+  // Break: /line trusts the map's line, so it opens the moved-in line's words and /edit
+  // overwrites them.
+  const { live, call, ask, src } = served(t);
+  mkdirSync(join(src, 'scenes'));
+  const scene = join(src, 'scenes/s.scene');
+  writeFileSync(scene, 'npc: bram\n* ~\nbram: Asked.\n');
+  live.push({ placeholders: { 'dialogue.s.choices.yes.prompt': 'scenes/s.scene:2' } });
+  writeFileSync(scene, 'npc: bram\n* Hello.\n* ~\nbram: Asked.\n'); // no compile yet
+  const found = JSON.parse((await call('/line?key=dialogue.s.choices.yes.prompt&words=~')).text);
+  assert.deepEqual(found, { file: 'scenes/s.scene', line: 3, was: '* ~', words: '~' });
+  const edit = { ...found, key: 'dialogue.s.choices.yes.prompt', words: 'Aye.' };
+  assert.equal(await ask('/edit', edit), 200);
+  assert.equal(readFileSync(scene, 'utf8'), 'npc: bram\n* Hello.\n* Aye.\nbram: Asked.\n');
 });
 
 test('a 200 /undo shows the old words it sent at once, before the compile', async (t) => {

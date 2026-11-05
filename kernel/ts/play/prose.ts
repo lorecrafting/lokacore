@@ -77,11 +77,18 @@ export function located(
   words: string,
   places: Record<string, string> = {},
 ): Answer {
-  const placed = Object.hasOwn(places, key) ? [places[key]] : sourcesOf(root, key, words);
-  const [at = refuse(404, `no source line for ${key}`), other] = placed;
+  const lineAt = (at: string) => {
+    const [file, n] = [at.slice(0, at.lastIndexOf(':')), Number(at.slice(at.lastIndexOf(':') + 1))];
+    return [file, n, readFileSync(guarded(root, file, 'read'), 'utf8').split('\n')[n - 1]] as const;
+  };
+  // an outside save that moved lines before the compile: the map's line no longer holds the words
+  const fresh =
+    Object.hasOwn(places, key) && lineAt(places[key])[2]?.includes(words.split('\n')[0]);
+  const [at = refuse(404, `no source line for ${key}`), other] = fresh
+    ? [places[key]]
+    : sourcesOf(root, key, words);
   if (other) refuse(400, `more than one source line holds ${key}'s words`); // two `* ~` lines: which?
-  const [file, n] = [at.slice(0, at.lastIndexOf(':')), Number(at.slice(at.lastIndexOf(':') + 1))];
-  const was = readFileSync(guarded(root, file, 'read'), 'utf8').split('\n')[n - 1];
+  const [file, n, was] = lineAt(at);
   worded(file, was, ''); // refuses a line that is not words
   const literal = file.endsWith('.json') && LITERAL.exec(was);
   const own = literal
