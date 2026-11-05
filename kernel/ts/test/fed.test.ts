@@ -14,7 +14,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { commands, ctx } from './harness.ts';
+import { cmd, commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fed-sampler-'));
 let artifact: Uint8Array;
@@ -45,11 +45,11 @@ function wait(w: World, target: number): World {
     const run_id = 'aaaaaaaa-0000-4000-8000-000000000061';
     const r = stepElapsed(
       w,
-      {
-        id: elapsedCommandId(run_id, w.context, w.state.clock, until) as never,
+      cmd({
+        id: elapsedCommandId(run_id, w.context, w.state.clock, until),
         world_context_id: w.context,
         payload: { type: 'elapsed', actor_id: w.character, run_id, from: w.state.clock, until },
-      } as never,
+      }),
       stream.n,
     );
     assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
