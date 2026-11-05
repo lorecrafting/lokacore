@@ -197,7 +197,7 @@ async function create(t: Tree, { kind, name, from, area }: Sent): Promise<Answer
 }
 
 let defs: { $defs: unknown } | undefined;
-function get(t: Tree, url: string): Answer | undefined {
+function get(t: Tree, url: string, places: Record<string, string>): Answer | undefined {
   const { pathname, searchParams } = new URL(url, 'http://localhost');
   if (pathname === '/source') {
     const rel = searchParams.get('file');
@@ -220,7 +220,7 @@ function get(t: Tree, url: string): Answer | undefined {
     ];
   }
   if (pathname === '/line')
-    return located(t.root, searchParams.get('key') ?? '', searchParams.get('words') ?? '');
+    return located(t.root, searchParams.get('key') ?? '', searchParams.get('words') ?? '', places);
   if (pathname === '/journal')
     return [200, t.journal.map(({ files: fs, ...e }) => ({ ...e, files: fs.map((c) => c.file) }))];
 }
@@ -244,11 +244,16 @@ async function answered<A extends Answer | undefined>(run: () => A | Promise<A>)
   }
 }
 
-/** The write path over one source tree; `push` carries each write's `changed` to the page. */
-export function writer(source: string, push: (changed: Changed[]) => void) {
+/** The write path over one source tree; `push` carries each write's `changed` to the page and
+ * `places` is the last compile's `~` key => file:line. */
+export function writer(
+  source: string,
+  push: (changed: Changed[]) => void,
+  places: () => Record<string, string> = () => ({}),
+) {
   const t = tree(source, push);
   return {
-    get: (url: string) => answered(() => get(t, url)),
+    get: (url: string) => answered(() => get(t, url, places())),
     // a write during /new's seconds-long run would land in its snapshot diff, and so its undo
     post: (url: string, sent: Sent) =>
       answered(() => (t.busy ? refuse(409, 'a /new is running') : POSTS[url](t, sent))),

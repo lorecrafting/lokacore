@@ -8,17 +8,22 @@ defmodule Mix.Tasks.Loka.Compile do
   file and line that wrote it, unless `--allow-placeholders` is given (the author preview always
   gives it). `--json <path>` also writes every printed diagnostic, split, to that file as
   `[{severity, code, path, rel, line, column, words}]` (the author preview's cards place them).
+  `--placeholders <path>` (after `--allow-placeholders --json <path>`) writes each placeholder's
+  text key => `file:line` (Loka.Content.placeholder_lines/2), for the in-Book editor.
   """
   use Mix.Task
   use Boundary, top_level?: true, deps: [Loka.Content, Mix]
 
-  @usage "usage: mix loka.compile <source dir> <artifact path> [--allow-placeholders] [--json <path>]"
+  @usage "usage: mix loka.compile <source dir> <artifact path> [--allow-placeholders] [--json <path>] [--placeholders <path>]"
 
   @impl Mix.Task
   def run([dir, out | opts]) do
-    {allow, json} = options(opts)
+    {allow, json, held} = options(opts)
     if !File.dir?(dir), do: Mix.raise("mix loka.compile: #{dir} is not a directory")
     compiled(Loka.Content.compile(dir), dir, out, allow, json)
+
+    if held,
+      do: File.write!(held, JSON.encode!(Loka.Content.placeholder_lines(File.read!(out), dir)))
   end
 
   def run(_), do: Mix.raise(@usage)
@@ -39,10 +44,14 @@ defmodule Mix.Tasks.Loka.Compile do
     exit({:shutdown, 1})
   end
 
-  defp options([]), do: {false, nil}
-  defp options(["--allow-placeholders"]), do: {true, nil}
-  defp options(["--json", json]), do: {false, json}
-  defp options(["--allow-placeholders", "--json", json]), do: {true, json}
+  defp options([]), do: {false, nil, nil}
+  defp options(["--allow-placeholders"]), do: {true, nil, nil}
+  defp options(["--json", json]), do: {false, json, nil}
+  defp options(["--allow-placeholders", "--json", json]), do: {true, json, nil}
+
+  defp options(["--allow-placeholders", "--json", json, "--placeholders", held]),
+    do: {true, json, held}
+
   defp options(_), do: Mix.raise(@usage)
 
   defp said(diags, dir),

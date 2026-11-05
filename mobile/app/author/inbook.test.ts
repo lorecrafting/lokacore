@@ -181,7 +181,8 @@ test('a click ends the landing; the panel relays the walk keys', async () => {
   await page.locator('[data-loka-field]').waitFor();
 });
 
-// Breaks: Cmd-Z puts back nothing, the wrong id, or hides a 409 behind a success note.
+// Breaks: Cmd-Z puts back nothing, the wrong id, or hides a 409 behind a success note; or sends
+// not the old words, so the Book shows them only after the next compile.
 test('Cmd-Z puts back this page`s edits one per press, then says none are left', async () => {
   await openFirst();
   await page.keyboard.type('!');
@@ -194,7 +195,7 @@ test('Cmd-Z puts back this page`s edits one per press, then says none are left',
   assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+z')), {
     note: 'put back a.loka:3',
   });
-  assert.deepEqual(posted('/undo'), [{ id: 7 }]);
+  assert.deepEqual(posted('/undo'), [{ ...RAIN, id: 7, key: 'a.rain', draft: 'Rain falls.!' }]);
   assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+z')), {
     note: 'Nothing of yours to put back.',
   });
@@ -212,6 +213,12 @@ test('a 409 put-back names the file and offers its source', async () => {
     note: 'a.loka changed since; not put back.',
     open: { key: 'a.rain', words: 'Rain falls.!' },
   });
+  // Break: the refused edit leaves the stack, so a Cmd-Z after a fix says none are left.
+  await told1(() => page.keyboard.press('ControlOrMeta+z'));
+  assert.deepEqual(
+    posted('/undo').map((s: { id: number }) => s.id),
+    [7, 7],
+  );
 });
 
 // Breaks: a 409 drops the draft, Keep mine writes against the stale line, or a refused re-read

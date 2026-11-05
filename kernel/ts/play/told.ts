@@ -5,12 +5,13 @@ import type { Message } from './live.ts';
 
 /** Wraps the stream's `push`. */
 export function told(push: (message: Partial<Message>) => void) {
-  // ponytail: an /undo leaves its words up until the next good compile; drop them by file if it shows
   const words = new Map<string, { words: string; at: string }>(); // a Map: the page names the key
   let text: Record<string, string> = {}; // the overlay as pushed, before these words
+  let places: Record<string, string> = {}; // the last compile's `~` key => file:line (/line)
   const over = (message: Partial<Message>) => {
     if (message.compiled && !message.pending) words.clear(); // a held compile is not written
     if (message.text) text = message.text;
+    if (message.placeholders) places = message.placeholders;
     const shown = Object.fromEntries([...words].map(([key, t]) => [key, t.words]));
     if (message.text) message = { ...message, text: { ...message.text, ...shown } };
     if (message.compiled === false)
@@ -22,5 +23,5 @@ export function told(push: (message: Partial<Message>) => void) {
     words.set(key, { words: said, at });
     over({ text });
   };
-  return { push: over, tell };
+  return { push: over, tell, places: () => places };
 }

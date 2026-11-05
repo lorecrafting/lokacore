@@ -107,3 +107,56 @@ test('/line answers the source line a Book line writes, its words unbound, or wh
   writeFileSync(join(src, 'scenes/u.scene'), 'dialogue u\n  * ~\n');
   assert.equal((await line('dialogue.u.prompt', '~'))[0], 400);
 });
+
+test("/line finds a `~` key's own line by the compile's map, among many `~` lines", async (t) => {
+  // Breaks: every `~` line (each scene's, a cut's, a room's, text.json's) is a candidate, so with
+  // two the field is refused (400) or opens another key's line; a one-line `{"prose": "~"}`
+  // refused as not words.
+  const { live, call, src } = served(t);
+  writeFileSync(join(src, 'text.json'), '{\n  "room.a": "~",\n  "room.b": "~"\n}\n');
+  mkdirSync(join(src, 'scenes'));
+  mkdirSync(join(src, 'rooms'));
+  writeFileSync(join(src, 'scenes/s.scene'), 'npc: bram\n* ~\nbram: Asked.\n- Yes\n  * ~\n');
+  writeFileSync(join(src, 'scenes/bell.cut'), 'Written.\n\n~\n---\n');
+  writeFileSync(
+    join(src, 'rooms/green.json'),
+    '{\n  "description": {"prose": "~"},\n  "x": 1\n}\n',
+  );
+  live.push({
+    placeholders: {
+      'dialogue.s.choices.yes.prompt': 'scenes/s.scene:5',
+      'scene.bell.steps.1.text': 'scenes/bell.cut:3',
+      'room.green.description': 'rooms/green.json:2',
+    },
+  });
+  const line = async (key: string) => {
+    const { status, text } = await call(`/line?key=${key}&words=~`);
+    return [status, JSON.parse(text)];
+  };
+  assert.deepEqual(await line('dialogue.s.choices.yes.prompt'), [
+    200,
+    { file: 'scenes/s.scene', line: 5, was: '  * ~', words: '~' },
+  ]);
+  assert.deepEqual(await line('scene.bell.steps.1.text'), [
+    200,
+    { file: 'scenes/bell.cut', line: 3, was: '~', words: '~' },
+  ]);
+  assert.deepEqual(await line('room.green.description'), [
+    200,
+    { file: 'rooms/green.json', line: 2, was: '  "description": {"prose": "~"},', words: '~' },
+  ]);
+  assert.deepEqual((await line('room.b'))[1].line, 3); // a defined key: its own `"key":` line
+});
+
+test('a 200 /undo shows the old words it sent at once, before the compile', async (t) => {
+  // Break: the Book keeps the undone words until the next compile (seconds when cold).
+  const { call, ask, events } = served(t);
+  const was = '  "room.a": "old words"';
+  const sent = { file: 'text.json', line: 2, key: 'room.a', was, words: 'new words' };
+  const { id } = JSON.parse((await call('/edit', JSON.stringify(sent))).text);
+  const back = { id, file: 'text.json', line: 2, key: 'room.a', words: 'old words' };
+  assert.equal(await ask('/undo', { ...back, id: id + 1 }), 404); // a refused one shows nothing
+  assert.equal((await events()).text['room.a'], 'new words');
+  assert.equal(await ask('/undo', back), 200);
+  assert.equal((await events()).text['room.a'], 'old words');
+});

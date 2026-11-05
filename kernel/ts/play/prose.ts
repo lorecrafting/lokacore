@@ -6,7 +6,9 @@ import { guarded, refuse, stale } from './guard.ts';
 import { files } from './todo.ts';
 import type { Answer, Change } from './write.ts';
 
-const LITERAL = /^(\s*(?:"(?:[^"\\]|\\.)*"\s*:\s*)?)("(?:[^"\\]|\\.)*")(\s*,?\s*)$/;
+// a JSON string line, its key optional; an inline `"field": {"prose": "..."}` on one line too
+const LITERAL =
+  /^(\s*(?:"(?:[^"\\]|\\.)*"\s*:\s*)?(?:\{\s*"prose"\s*:\s*)?)("(?:[^"\\]|\\.)*")(\s*\}?\s*,?\s*)$/;
 
 /** The line with its words replaced, or the reason it is not a line of words. */
 export function worded(rel: string, line: string, words: string) {
@@ -66,10 +68,17 @@ export function sourcesOf(source: string, key: string, words?: string) {
 export const sourceOf = (source: string, key: string, words?: string) =>
   sourcesOf(source, key, words)[0];
 
-/** GET /line?key=&words=: the source line a Book line's field writes (`sourceOf`), with its words
- * as written, or the reason it holds none (`worded`'s). */
-export function located(root: string, key: string, words: string): Answer {
-  const [at = refuse(404, `no source line for ${key}`), other] = sourcesOf(root, key, words);
+/** GET /line?key=&words=: the source line a Book line's field writes (the compile's `places` for
+ * a `~` key: every `~` line holds the same words; else `sourceOf`), with its words as written, or
+ * the reason it holds none (`worded`'s). */
+export function located(
+  root: string,
+  key: string,
+  words: string,
+  places: Record<string, string> = {},
+): Answer {
+  const placed = Object.hasOwn(places, key) ? [places[key]] : sourcesOf(root, key, words);
+  const [at = refuse(404, `no source line for ${key}`), other] = placed;
   if (other) refuse(400, `more than one source line holds ${key}'s words`); // two `* ~` lines: which?
   const [file, n] = [at.slice(0, at.lastIndexOf(':')), Number(at.slice(at.lastIndexOf(':') + 1))];
   const was = readFileSync(guarded(root, file, 'read'), 'utf8').split('\n')[n - 1];

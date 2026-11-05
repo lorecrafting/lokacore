@@ -114,6 +114,8 @@ const compile = (artifact: string) =>
         '--allow-placeholders',
         '--json',
         diagnostics(artifact),
+        '--placeholders',
+        placeholders(artifact),
       ],
       { cwd: root, stdio: ['ignore', 'ignore', 'pipe'] }, // a launcher may have closed stdin (EBADF otherwise)
     );
@@ -123,6 +125,9 @@ const compile = (artifact: string) =>
     run.on('close', (status) => done({ status, stderr, error }));
   });
 const diagnostics = (artifact: string) => join(dirname(artifact), 'diagnostics.json');
+const placeholders = (artifact: string) => join(dirname(artifact), 'placeholders.json');
+const parsed = (file: string, none: unknown) =>
+  existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : none;
 // The last lint read older source, so it goes with the failed compile.
 let failed: string[] | undefined; // the last compile's lines, when it failed
 const notCompiled = (said: string[]) => {
@@ -140,8 +145,10 @@ async function build(): Promise<boolean> {
     // a save since (even inside the debounce) compiles next: these older words would undo its push
     if (saves !== read) return false;
     // none written (mix crashed before it): the last build's cards must not stay up
-    const file = diagnostics(artifact);
-    live?.push({ diagnostics: existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : [] });
+    live?.push({
+      diagnostics: parsed(diagnostics(artifact), []),
+      placeholders: parsed(placeholders(artifact), {}),
+    });
     const said = run.stderr.split('\n').filter((l) => /^(error|warning|info): /.test(l));
     for (const line of said) console.error(line);
     if (run.status !== 0) {
@@ -216,7 +223,9 @@ if (flag === '--watch')
       enqueue();
     }, 100);
   });
-const ok = await build();
+const first = build();
+queue = first.catch(() => {}); // a save during the first compile compiles after it
+const ok = await first;
 if (flag !== '--watch') process.exit(ok ? 0 : 1);
 if (ok) lint();
 console.log(`Watching ${dir}`);

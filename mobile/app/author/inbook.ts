@@ -36,7 +36,7 @@ const CSS = `
 [data-loka-a11y]::after{content:", " attr(data-loka-a11y);position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .loka-note{position:absolute;font:${label};letter-spacing:${type.label.letterSpacing}px;color:var(--loka-dim);z-index:10}
 .loka-note[data-warn]{color:var(--loka-warning)}
-.loka-note button{font:inherit;color:var(--loka-action);background:none;border:0;padding:0 ${space.md}px 0 0;cursor:pointer}`;
+.loka-note button{font:inherit;color:var(--loka-action);background:none;border:0;padding:0 0 0 ${space.md}px;cursor:pointer}`;
 
 const enc = encodeURIComponent;
 async function api(path: string, sent?: object): Promise<[number, any]> {
@@ -48,7 +48,7 @@ const typing = (t: EventTarget | null) => t instanceof HTMLElement && textField(
 
 // One editor per page: its state lives here, set by start().
 let hooks: Hooks = { seen: new Map(), said: new Map(), tell: () => {}, redraw: () => {} };
-const edits: { id: number; at: string; file: string; key: string; words: string }[] = []; // this page's /edit answers
+const edits: (At & { id: number; key: string; draft: string })[] = []; // /edit answers, its At
 let unconfirmed = new Set<string>();
 let field: Field | undefined;
 let opening = false; // a /line in flight: a second double-click opens nothing
@@ -177,8 +177,7 @@ async function save() {
   const { file, line, was } = f.at;
   const [status, answer] = await api('/edit', { file, line, was, words: draft, key: f.key });
   f.busy = false;
-  if (status === 200)
-    edits.push({ id: answer.id, at: `${file}:${line}`, file, key: f.key, words: draft });
+  if (status === 200) edits.push({ ...f.at, id: answer.id, key: f.key, draft });
   if (field !== f) return; // closed (Esc), or another line opened, while it saved
   if (status === 200) return close();
   if (status === 409) return conflict(f);
@@ -193,7 +192,7 @@ async function conflict(f: Field) {
       ['Open source', () => open(f.key, f.at.words)],
     ]);
   say(f.el, `Changed on disk since you opened it. ${theirs.words}`, true, [
-    ['Keep mine', () => ((f.at = { ...theirs, words: '' }), void save())],
+    ['Keep mine', () => ((f.at = theirs), void save())],
     ['Take theirs', close],
   ]);
 }
@@ -201,11 +200,12 @@ async function conflict(f: Field) {
 async function putBack() {
   const last = edits.pop();
   if (!last) return hooks.tell({ note: 'Nothing of yours to put back.' });
-  const [status] = await api('/undo', { id: last.id });
-  if (status === 200) return hooks.tell({ note: `put back ${last.at}` });
+  const [status] = await api('/undo', last); // its key and old words: the Book shows them at once
+  if (status === 200) return hooks.tell({ note: `put back ${last.file}:${last.line}` });
+  if (status === 409) edits.push(last); // still the latest of yours: put back after a fix
   hooks.tell({
     note: `${last.file} changed since; not put back.`,
-    open: { key: last.key, words: last.words },
+    open: { key: last.key, words: last.draft },
   });
 }
 /** A Book key outside any field: walk, Enter on the landed line, Cmd-Z. */

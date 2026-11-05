@@ -44,6 +44,7 @@ export type Message = {
   changed?: Changed[]; // sent once with its write or burst, never kept for a later message
   // the lines /edit pushed that the last compile refused (file:line); a good compile clears them
   unconfirmed?: { key: string; at: string }[];
+  placeholders?: Record<string, string>; // each `~` key's file:line, from the compile (/line)
 };
 
 /** `mix loka.lint`'s findings (`rel: words`, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */
