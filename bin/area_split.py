@@ -1,34 +1,23 @@
 #!/usr/bin/env python3
-"""Moves cartridges/toolbox_showcase into area folders (docs/rnd/cartridge-area-layout-design-2026-11-04.md
-§9): each room goes to its district in ROOMS; any other definition goes to the one area every file
-naming it (and every room it names) is in, else stays at the root. Moves by `git mv` (bytes
-unchanged), then compiles and exits 1 unless the content_hash equals the fixture's sha256.
-Usage: bin/area_split.py CARTRIDGE FIXTURE (run from the repo root on an unsplit tree)."""
+"""Moves a flat cartridge into area folders (docs/rnd/cartridge-area-layout-design-2026-11-04.md §9).
+Each room goes to its area in ROOMS_JSON (room -> area). Any other definition goes to the one area it
+touches: the rooms it names (an NPC: only its home room, §3.6) and the definitions it names or that
+name it; two areas or none leave it at the root. Moves by `git mv` (bytes unchanged), compiles again
+and exits 1, printing the first differing definition, unless the content_hash is unchanged.
+Usage: bin/area_split.py CARTRIDGE ROOMS_JSON (run from the repo root on an unsplit tree).
+toolbox_showcase: bin/area_split_toolbox_showcase.json."""
 import json
 import os
 import subprocess
 import sys
 import tempfile
 
-ROOMS = {
-    "hub": "crossroads_inn",
-    "fell_road": "fell_gate fell_top shepherd_hut still_room the_fold smithy woodstore",
-    "tidewater": "shore_steps cliff_path cliff_top smugglers_stair sea_cave tide_pools wayside_shrine",
-    "low_wardle": "village_green warden_gate tollhouse mill church moot_hall hall_closet",
-    "combat": "drill_yard boar_run gate_yard goblin_pit tilt_yard",
-    "traps": "sapper_stair plate_passage chief_den lever_hall lever_vault dial_vault sapper_cellar",
-    "homestead": "holding_lane carpenter_shop farm_yard farm_kitchen glade pond holding_croft larder "
-    "midden pond_deep timber_yard woodpile stall",
-    "economy_law": "undercroft market_row cell drain counting_house pawn_alley strongroom vault_yard "
-    "forge_stall forge_back storeroom",
-    "magic": "reading_room crypt_stair crypt loft loft_attic golem_yard",
-}
-ROOT = "~root"  # sorts after every area name: a definition two areas name stays shared
+ROOT = "~root"
 DIRS = {"status": "statuses", "replenish": "replenish", "scripted_action": "actions"}
 SHARED = {"fact", "attribute", "resource", "story_point"}  # defined in root files, never moved
 
 
-def compile_hash(cart):
+def compile_cart(cart):
     with tempfile.TemporaryDirectory() as tmp:
         out = os.path.join(tmp, "a.json")
         r = subprocess.run(["mix", "loka.compile", cart, out], capture_output=True, text=True)
@@ -50,49 +39,67 @@ def refs(value, found):
     return found
 
 
-def main(cart, fixture):
-    room_area = {r: a for a, rs in ROOMS.items() for r in rs.split()}
+def first_difference(before, after):
+    for section in sorted(before.keys() | after.keys()):
+        b, a = before.get(section), after.get(section)
+        if isinstance(b, dict) and isinstance(a, dict):
+            for key in sorted(b.keys() | a.keys()):
+                if b.get(key) != a.get(key):
+                    return key
+        if b != a:
+            return section
+    return "no definition (the hash differs elsewhere)"
+
+
+def main(cart, rooms_json):
+    with open(rooms_json, encoding="utf-8") as f:
+        room_area = json.load(f)
     on_disk = {f[:-5] for f in os.listdir(os.path.join(cart, "rooms")) if f.endswith(".json")}
     if on_disk != room_area.keys():
-        sys.exit(f"area_split: ROOMS is not the room set: {sorted(on_disk ^ room_area.keys())}")
+        sys.exit(f"area_split: {rooms_json} is not the room set: {sorted(on_disk ^ room_area.keys())}")
 
-    art = compile_hash(cart)["cartridge"]
-    by_key = {}  # (kind, key) => source dir
-    edges = []  # (referrer node, named node); a node is (dir, key) or ROOT
-    for section, defs in art.items():
-        if not isinstance(defs, dict) or not all(":" in k for k in defs):
-            edges += [(ROOT, r) for r in refs(defs, set())]  # a whole-section root file
-            continue
-        for full, d in defs.items():
+    before = compile_cart(cart)
+    defs = {}  # node (dir, key) => its refs; shared kinds are the node ROOT and never move
+    by_key = {}  # (kind, key) => node
+    homes = {}  # npc node => home room key
+    for section, ds in before["cartridge"].items():
+        if not isinstance(ds, dict) or not all(":" in k for k in ds):
+            continue  # a whole-section root file; the root may name any area
+        for full, d in ds.items():
             kind, key = full.split(":", 1)[1].split("/")
             node = ROOT if kind in SHARED else (DIRS.get(section, DIRS.get(kind, kind + "s")), key)
             by_key.setdefault((kind, key), node)
-            edges += [(node, r) for r in refs(d, set())]
-    # A ref with no definition is a KeyError before any move. An abstract `extends` parent is in no
-    # section, so it stays at the root, which any child may name.
-    edges = [(a, by_key[b]) for a, b in edges]
+            if node != ROOT:
+                defs[node] = refs(d, set())
+                if kind == "npc":  # its home room decides its area; its schedule may walk anywhere
+                    homes[node] = d["room"]["key"]
+
+    # An abstract `extends` parent is in no section: by_key[r] is then a KeyError before any move.
     area = {("rooms", r): a for r, a in room_area.items()}
-    for _ in range(len(by_key) + 2):  # monotone: None < one area < ROOT, so each pass only widens
-        touched = {}
-        for a, b in edges:
-            if b != ROOT and b[0] != "rooms":  # b is named from a's area
-                touched.setdefault(b, set()).add(ROOT if a == ROOT else area.get(a))
-            elif a != ROOT and a[0] != "rooms" and b != ROOT:  # a names a room: a is in its area
-                touched.setdefault(a, set()).add(area[b])
-        new = dict(area)
-        for n, s in touched.items():
-            s.discard(None)
-            new[n] = s.pop() if len(s) == 1 else (ROOT if s else None)
-        if new == area:
+    area |= {n: room_area[r] for n, r in homes.items()}
+    links = {n: set() for n in defs}  # the definitions each one names or is named by
+    for n, rs in defs.items():
+        for m in {by_key[r] for r in rs} - {ROOT}:
+            if n not in homes or m[0] != "rooms":  # an NPC's other rooms are walks, not its area
+                links[n].add(m)
+                links[m].add(n)
+
+    def touched(n):
+        return {area[m] for m in links[n] if m in area}
+
+    # Place in rounds outward from the rooms and NPCs. A placed definition never moves, and one is
+    # placed only when everything placed around it is in one area, so every area file names only
+    # its own area, a room or the root. Two areas around it, or none: it stays at the root.
+    while True:
+        ready = [n for n in sorted(links) if n not in area and len(touched(n)) == 1]
+        for n in ready:
+            if len(touched(n)) == 1:  # recheck: an earlier one in this round may have added an area
+                area[n] = touched(n).pop()
+        if not ready:
             break
-        area = new
-    else:
-        sys.exit("area_split: placement did not settle")
 
     moved = 0
-    for (d, key), a in sorted(area.items(), key=lambda x: x[0]):
-        if a in (None, ROOT):
-            continue
+    for (d, key), a in sorted(area.items()):
         for f in sorted(os.listdir(os.path.join(cart, d))):
             if f.split(".")[0] == key:
                 os.makedirs(os.path.join(cart, "areas", a, d), exist_ok=True)
@@ -102,11 +109,11 @@ def main(cart, fixture):
     for r, a in room_area.items():
         assert os.path.exists(os.path.join(cart, "areas", a, "rooms", r + ".json")), r
 
-    with open(fixture, encoding="utf-8") as f:
-        want = json.load(f)["sha256"]
-    got = compile_hash(cart)["content_hash"]
-    print(f"area_split: {moved} files moved; content_hash {got}; fixture {want}")
-    sys.exit(0 if got == want else 1)
+    after = compile_cart(cart)
+    want, got = before["content_hash"], after["content_hash"]
+    print(f"area_split: {moved} files moved; content_hash {got}; before {want}")
+    if got != want:
+        sys.exit(f"area_split: first differing definition {first_difference(before['cartridge'], after['cartridge'])}")
 
 
 if __name__ == "__main__":

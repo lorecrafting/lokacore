@@ -25,10 +25,11 @@ function cartridge(ash = 0, den = false, luxCooldown = 0) {
     edit('facts.json', (j) => {
       j.facts.known_here = { ...j.facts.lux_known, value_type: { type: 'bool', default: true } };
     });
-    for (const spell of ['flamma', 'lux'])
-      edit(`actions/${spell}.json`, (j) => (j.target.learned = 'known_here'));
+    for (const spell of ['areas/magic/actions/flamma', 'actions/lux'])
+      edit(`${spell}.json`, (j) => (j.target.learned = 'known_here'));
     edit('cartridge.json', (j) => (j.entry = den ? 'chief_den' : 'crypt'));
-    if (den) edit('actions/flamma.json', (j) => (j.policy = { op: 'not', item: j.policy }));
+    if (den)
+      edit('areas/magic/actions/flamma.json', (j) => (j.policy = { op: 'not', item: j.policy }));
     if (luxCooldown) edit('actions/lux.json', (j) => (j.cooldown = luxCooldown));
     edit('resources.json', (j) => (j.resources.ash.start = ash));
     edit('areas/magic/rooms/crypt.json', (j) => delete j.dark_description);

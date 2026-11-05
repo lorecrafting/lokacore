@@ -420,7 +420,7 @@ defmodule Loka.ContentLintTest do
   } do
     File.cp_r!("cartridges/toolbox_showcase", dir)
     {:ok, plain, _} = Loka.Content.compile(dir)
-    rule = Path.join(dir, "reactions/attic_drench.json")
+    rule = Loka.ContentSource.path(dir, "reactions/attic_drench.json")
     File.write!(rule, Jason.encode!(Map.put(Jason.decode!(File.read!(rule)), "silent", true)))
     assert {:ok, ^plain, _} = Loka.Content.compile(dir)
   end
@@ -443,7 +443,12 @@ defmodule Loka.ContentLintTest do
 
   test "a reaction's silent mark is true or absent (reaction.schema.json ReactionRule)" do
     # The source form fails other compiled-form rules; only the /silent errors matter here.
-    rule = Jason.decode!(File.read!("cartridges/toolbox_showcase/reactions/attic_drench.json"))
+    rule =
+      Jason.decode!(
+        File.read!(
+          Loka.ContentSource.path("cartridges/toolbox_showcase", "reactions/attic_drench.json")
+        )
+      )
 
     silent =
       &for(

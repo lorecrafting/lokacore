@@ -34,12 +34,7 @@ defmodule Loka.ContentSource do
   end
 
   @doc "The one area folder's copy of `rel` (`areas/<area>/<rel>`) under `dir`, else `dir/rel`."
-  def path(dir, rel) do
-    case Path.wildcard(Path.join([dir, "areas/*", rel])) do
-      [found] -> found
-      _ -> Path.join(dir, rel)
-    end
-  end
+  def path(dir, rel), do: Path.join(dir, Loka.Content.Starters.home(dir, rel))
 
   @doc """
   Drops the hint data (`valid`, `expected`) from a refusal: the hints quote the schema, so a
