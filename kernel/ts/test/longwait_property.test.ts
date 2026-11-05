@@ -15,7 +15,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
@@ -159,6 +159,20 @@ for (const [file, bytes] of artifacts) {
           id: uuid('cccccccc'),
           world_context_id: w0.context,
           payload: { type: 'choose_ancestry', actor_id: w0.character, ancestry },
+        } as never,
+        seq,
+      );
+      assert.equal(r.decision.kind, 'accepted');
+      w0 = r.world;
+    }
+    // An opening scene (scene@1) admits only Continue, so play it to its end before waiting.
+    for (let s = gameView(w0).scene, i = 0; s; s = gameView(w0).scene, i++) {
+      const r = step(
+        w0,
+        {
+          id: uuid(`dddddd${String(i).padStart(2, '0')}`),
+          world_context_id: w0.context,
+          payload: { type: 'continue', actor_id: w0.character, scene: s.scene, line: s.index },
         } as never,
         seq,
       );
