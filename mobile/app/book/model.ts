@@ -1,4 +1,4 @@
-// size: allow 306, the condition line names one tick or several (loka-kgd.209)
+// size: allow 310, the condition line names one tick or several (loka-kgd.209); bleeding's parts
 import { dreamPages, dreamAt } from './dreams.ts';
 import type {
   ActionInput,
@@ -14,8 +14,12 @@ import { cap, doorSentence, dur, message, reasonOf, refusedSentence, why } from 
 import { opens, things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
-export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) =>
-  `${text(b.label)} · ${dur(Math.max(0, b.ends_at - time))} remaining · ${b.hp_loss} HP each ${dur(b.tick_every)}`;
+// Bleeding's label, time left and cadence: the status icon's tip takes two, its name all three.
+export const bleedingParts = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) => [
+  text(b.label),
+  `${dur(Math.max(0, b.ends_at - time))} remaining`,
+  `${b.hp_loss} HP each ${dur(b.tick_every)}`,
+];
 // Toolbox row W24 Journal countdown (wording proposed; designer to approve).
 export const timeLeft = (remaining: number) => `Time left: ${dur(remaining)}`;
 type Condition = NonNullable<GameView['conditions']>[number];

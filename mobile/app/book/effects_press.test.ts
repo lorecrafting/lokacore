@@ -1,3 +1,4 @@
+// size: allow 526, status icon motion and press cases share this file's hook rig and cue publisher
 // Press feedback, ink drying, status and head arrivals, error haptics: real components on a small hook
 // rig that keeps slots and honours effect deps, as React does.
 import assert from 'node:assert/strict';
@@ -398,6 +399,67 @@ test('status icons key by label and count; only the held icon lets go of its tip
   assert.equal(tip(), true, "another icon's blur");
   hold(0)(false);
   assert.equal(tip(), false);
+});
+
+// Breaks: an arrival behind the +N disc pops (the log line is its only announcement)
+// (status-line-rulings.md).
+test('a status arriving behind the +N disc does not pop; one in view does', (t) => {
+  effects(t);
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let now = 1000;
+  t.mock.method(performance, 'now', () => now);
+  const c = (label: string, kind = 'buff') => ({ label, kind, ends_at: 100 });
+  const six = ['a', 'b', 'c', 'd', 'e', 'f'].map((l) => c(l));
+  const seven = [c('x', 'debuff'), ...six];
+  const draw = rig(t);
+  draw(() =>
+    nodes(
+      StatusIcons({ conditions: seven, time: 10, text: (s: any) => s, open: () => {} } as never),
+    ),
+  );
+  const cue = publish(t);
+  cue(view({ conditions: six.slice(0, 5) }));
+  now += 1000;
+  cue(view({ conditions: [...six.slice(0, 5), c('f')] }));
+  assert.deepEqual(g.timings, [], 'f arrives behind the disc');
+  now += 1000;
+  cue(view({ conditions: seven }));
+  assert.deepEqual(g.timings, [220], 'x arrives in view');
+});
+
+// Breaks: an icon pushed behind the disc unmounts (and fades), or the disc's tip lists other than
+// the hidden labels in row order, or bleeding's tip loses its time left or gains its cadence
+// (status-line-rulings.md).
+test('status icons: a pushed icon stays mounted, hidden; the +N tip lists the hidden labels', (t) => {
+  effects(t);
+  const c = (label: string, kind = 'buff') => ({ label, kind, ends_at: 100 });
+  const six = ['a', 'b', 'c', 'd', 'e', 'f'].map((l) => c(l));
+  const bleeding = { label: 'bleeding', ends_at: 47, hp_loss: 1, tick_every: 60 };
+  const draw = rig(t);
+  const row = (conditions: unknown[], more = {}) =>
+    draw(
+      () =>
+        StatusIcons({
+          conditions,
+          time: 10,
+          text: (s: any) => s,
+          open: () => {},
+          ...more,
+        } as never) as any,
+    ).props.children;
+  const shown = (conditions: unknown[]) =>
+    row(conditions)[0].map((e: any) => [e.key, e.props.hidden]);
+  assert.deepEqual(shown(six).at(-1), ['f-0', false]);
+  const pushed = [c('x', 'debuff'), ...six];
+  assert.deepEqual(shown(pushed).slice(-2), [
+    ['e-0', true],
+    ['f-0', true],
+  ]);
+  row(pushed)[1].props.hold(true);
+  assert.equal(row(pushed)[2].props.text, 'e, f');
+  row(pushed)[1].props.hold(false);
+  row(six, { bleeding })[0][0].props.children.props.hold(true);
+  assert.equal(row(six, { bleeding })[2].props.text, 'bleeding, 37s remaining');
 });
 
 // Breaks: an exit's name shows on no direction, or labels the empty one; its press-in lags or runs long.

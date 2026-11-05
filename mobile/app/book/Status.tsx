@@ -4,7 +4,7 @@ import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import { ExperienceRule, type ExperienceRuleProps } from './ExperienceRule.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bleedingLine, branch, pools, said, sky, toneOf, type Pool } from './model.ts';
+import { branch, pools, said, sky, toneOf, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import { onCue } from './cues.ts';
@@ -14,7 +14,7 @@ import { StatusIcons } from './StatusIcon.tsx';
 import { mixInk, usePalette, useType, washInk, type Palette, type Type } from './palette.ts';
 import { motion, size, space } from './tokens.ts';
 
-// The status icon row (StatusIcon.tsx) when any condition is on, then the line: the sky glyph (sun by day, moon by night), the position, bleeding, then
+// The status icon row (StatusIcon.tsx, bleeding first) when any status is on, then the line: the sky glyph (sun by day, moon by night), the position, then
 // the resource button, which shows the condition pools coloured by band when GameView carries them
 // (the room-view status line, an owner-ruled departure) and opens Contents, the index of the
 // existing book sections. Too wide, the pools move to a second line, whole; then the position
@@ -69,12 +69,12 @@ const skyText = (p: StatusProps) =>
     .join(' ');
 
 /**
- * A centred line: the sky glyph and weather, position and bleeding, then hp, ma and mv
+ * A centred line: the sky glyph and weather, position, then hp, ma and mv
  * (book-ui.md, World and status entry); no say icon in single-player (book-ui.md, Word bar).
  * - Use: under the footer on every page.
  * - Rules: at most two lines, nothing dropped: too wide, the pools take the second line whole
- *   (the only break falls before hp); still too wide, position and bleeding end in an ellipsis,
- *   the longer giving up more. The glyph and pools never shrink. The pools are one unbreakable
+ *   (the only break falls before hp); still too wide, position ends in an ellipsis (bleeding is
+ *   the first status icon above, book-ui.md Conditions details). The glyph and pools never shrink. The pools are one unbreakable
  *   run: no-break spaces as text, never a margin, so the shown words lead the button's name. A
  *   gap, not a dot, sets the pools apart.
  *   Every role scales with the Reading size. The sky glyphs are model.ts `sky`: ink is
@@ -94,6 +94,7 @@ export function StatusLine(p: StatusProps) {
       {/* Mounted when empty too, so the last icon's fade plays. */}
       <StatusIcons
         conditions={p.conditions ?? []}
+        bleeding={p.bleeding}
         time={p.time}
         text={p.text}
         open={p.locked ? undefined : p.openCharacter}
@@ -115,7 +116,7 @@ export function StatusLine(p: StatusProps) {
   );
 }
 
-// The items before the pools: the sky glyph and weather, then position and bleeding when present.
+// The items before the pools: the sky glyph and weather, then position when present.
 const leading = (c: Palette, t: Type, p: StatusProps) =>
   [
     <Text
@@ -126,15 +127,10 @@ const leading = (c: Palette, t: Type, p: StatusProps) =>
       {skyText(p)}
     </Text>,
     p.position && <Position key="position" value={p.position} open={p.openPosition} />,
-    p.bleeding && (
-      <Text key="bleeding" numberOfLines={1} style={{ ...t.small, color: c.danger }}>
-        {bleedingLine(p.bleeding, p.time, p.text)}
-      </Text>
-    ),
   ].filter(Boolean) as ReactElement[];
 
-// Each " · " belongs to the item after it, so the line never starts with a lone dot; position and
-// bleeding may shrink (they truncate).
+// Each " · " belongs to the item after it, so the line never starts with a lone dot; position may
+// shrink (it truncates).
 const joined = (c: Palette, t: Type, item: ReactElement) => (
   <View key={item.key} style={{ ...group, ...shrink }}>
     <Text aria-hidden style={{ ...t.small, color: c.dim }}>

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { bleedingLine, buttonsOf, group, intentOf } from './model.ts';
+import { bleedingParts, buttonsOf, group, intentOf } from './model.ts';
 import { lineText, replyLine, subject } from './words.ts';
 import type { GameView, Reply } from '../../packages/game-view/session.ts';
 const view = {
@@ -79,12 +79,12 @@ test('a press that changed nothing logs a plain sentence', () => {
   assert.equal(line('unauthorized'), "That isn't yours to do.");
 });
 
-// Breaks: the bleeding line shows raw seconds (360s) instead of the conditions' durations (loka-ozu).
-test('the bleeding line reads its time left and cadence like a condition', () => {
+// Breaks: bleeding shows raw seconds (360s) instead of the conditions' durations (loka-ozu).
+test('bleeding reads its time left and cadence like a condition', () => {
   const bleeding = { label: 'bleeding', ends_at: 1260, hp_loss: 1, tick_every: 180 } as never;
-  assert.equal(
-    bleedingLine(bleeding, 900, (s) => s),
-    'bleeding · 6m remaining · 1 HP each 3m',
+  assert.deepEqual(
+    bleedingParts(bleeding, 900, (s) => s),
+    ['bleeding', '6m remaining', '1 HP each 3m'],
   );
 });
 
