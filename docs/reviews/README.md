@@ -10,11 +10,13 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: retire hunger and thirst (PR #618, loka-vduxr.61)](2026-11-05-retire-hunger-review.md): **APPROVE WITH NOTES**
 - [Second review: revival contract and save effect, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-revival-second-review.md): **APPROVE WITH NOTES**
 - [Review: world.death.revival and the Wayside Shrine keeper, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-review.md): **APPROVE**
 - [Review: generated toolbox page, PR #612 (loka-vduxr.59)](2026-11-04-toolbox-page-review.md): **APPROVE WITH NOTES**
 - [Review: Book treatments T1 (spirit extracted, reverie added), PR #611 (loka-wfrgk.9)](2026-11-04-t1-book-treatments-review.md): **APPROVE WITH NOTES**
 - [Review: status line icons, PR #613 (loka-15g, loka-kgd.7)](2026-11-04-status-line-icons-review.md): **APPROVE WITH NOTES**
+- [Review: status icons below the line, smaller, drawn with Skia, PR #616 (loka-x6t.134)](2026-11-04-status-icons-review.md): **APPROVE**
 - [Design review: the Book's spirit state, PR #604 (loka-kgd.205)](2026-11-04-spirit-state-design-review.md): **CHANGES REQUIRED**
 - [Review: one consume command and one effect block, PR #605 (loka-kgd.209)](2026-11-04-loka-kgd.209-consume-review.md): **APPROVE**
 - [Review: Editor E1 write path, PR #610 (loka-wfrgk.2, vduxr.51, vduxr.53 `/edit`)](2026-11-04-e1-write-path-review.md): **APPROVE**
@@ -24,6 +26,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Combat round two, PR #596 (loka-kgd.202 a and b)](2026-11-04-combat-round-two-review.md): **APPROVE WITH NOTES**
 - [Review: area layout S2, showcase in area folders, PR #609 (loka-vduxr.58.2)](2026-11-04-area-layout-s2-review.md): **APPROVE**
 - [Review: area layout S1, the compiler reads area folders, PR #603 (loka-vduxr.58.1)](2026-11-04-area-folders-s1-review.md): **APPROVE WITH NOTES**
+- [Review: ambient emotes, PR #614 (loka-8ghm)](2026-11-04-ambient-emotes-review.md): **APPROVE WITH NOTES**
 - [Review: Swings, PR #591 (loka-kgd.200)](2026-11-02-swings-review.md): **APPROVE**
 - [Review: opt-in Diku rounds, PR #590 (loka-kgd.197)](2026-11-02-diku-rounds-review.md): **APPROVE**
 - [Second review: writer follow-ups, PR #568 (loka-vduxr.27, .22, .28)](2026-11-01-writer-followups-second-review.md): **CHANGES REQUIRED**

@@ -299,6 +299,9 @@
         "cues": {"description":"Sense cues reaching nearby rooms from this item: 1 to 4 of {sense, text, range, when?}.",
           "$ref": "entity.schema.json#/$defs/Cues"
         },
+        "ambient": {"description":"Ambient lines told while the player is in this item's room and sees it: 1 to 4 of {lines, every, chance?, when?}.",
+          "$ref": "entity.schema.json#/$defs/AmbientSets"
+        },
         "locks": {
           "description": "Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied.",
           "type": "object",
@@ -763,6 +766,9 @@
         },
         "cues": {"description":"Sense cues reaching nearby rooms from this NPC: 1 to 4 of {sense, text, range, when?}.",
           "$ref": "entity.schema.json#/$defs/Cues"
+        },
+        "ambient": {"description":"Ambient lines or emotes told while the player is in this NPC's room and sees it: 1 to 4 of {lines | emotes, every, chance?, when?}.",
+          "$ref": "entity.schema.json#/$defs/NpcAmbientSets"
         },
         "locks": {
           "description": "Toolbox row 33 (mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
@@ -1609,6 +1615,109 @@
       "items": {
         "$ref": "#/$defs/Cue"
       }
+    },
+    "AmbientSet": {
+      "description": "An ambient set (emote@1; mechanics.md Ambient emotes): one of its lines is told, at most one per entity per advance, when the clock crosses a multiple of every and the chance roll passes, chosen by SHA-256 of \"<entity ref>:<set index>:<boundary>\", never the authority RNG.",
+      "examples": [
+        {
+          "lines": ["room.cave.drip"],
+          "every": 600
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "lines": {"description":"The lines, 1 to 8 text keys.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "text.schema.json#/$defs/TextKey"
+          }
+        },
+        "every": {"description":"Logical seconds between chances; a set is due when the clock crosses a multiple of it.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "chance": {"description":"Percent chance it fires when due, 1 to 100; 100 when absent.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "when": {"description":"A condition read with the entity as target (a room has none); the first set whose when holds is the active one.",
+          "$ref": "policy.schema.json#/$defs/Policy"
+        }
+      },
+      "required": [
+        "lines",
+        "every"
+      ],
+      "additionalProperties": false
+    },
+    "NpcAmbientSet": {
+      "description": "An NPC's ambient set (emote@1): as AmbientSet, with exactly one of lines or emotes (the compiler refuses both or neither); an emote pick is told by emote.performed with the NPC as actor.",
+      "examples": [
+        {
+          "emotes": [{"cartridge_id": "emote_sampler", "cartridge_version": "0.0.1", "kind": "emote", "key": "glance"}],
+          "every": 300
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "lines": {"description":"The lines, 1 to 8 text keys.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "text.schema.json#/$defs/TextKey"
+          }
+        },
+        "emotes": {"description":"The emotes, 1 to 8 EmoteDefinitions.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          }
+        },
+        "every": {"description":"Logical seconds between chances; a set is due when the clock crosses a multiple of it.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "chance": {"description":"Percent chance it fires when due, 1 to 100; 100 when absent.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "when": {"description":"A condition read with the entity as target (a room has none); the first set whose when holds is the active one.",
+          "$ref": "policy.schema.json#/$defs/Policy"
+        }
+      },
+      "required": [
+        "every"
+      ],
+      "additionalProperties": false
+    },
+    "AmbientSets": {
+      "description": "A room's or item's ambient sets (AmbientSet), in authored order.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/AmbientSet"
+      },
+      "examples": [[{"lines": ["room.cave.drip"], "every": 600, "chance": 50}]]
+    },
+    "NpcAmbientSets": {
+      "description": "An NPC's ambient sets, each lines or emotes, in authored order.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/NpcAmbientSet"
+      },
+      "examples": [[{"emotes": [{"cartridge_id": "emote_sampler", "cartridge_version": "0.0.1", "kind": "emote", "key": "glance"}], "every": 300}, {"lines": ["npc.goblin.mutter"], "every": 600}]]
     }
   }
 }

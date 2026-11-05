@@ -236,7 +236,7 @@ test('GET /numbers: reports on the dev artifact', async (t) => {
     rmSync(dir, { recursive: true, force: true });
   });
   const url = `http://127.0.0.1:${port}/numbers`;
-  execFileSync('mix', ['loka.compile', 'cartridges/needs_sampler', join(dir, 'c.json')], {
+  execFileSync('mix', ['loka.compile', 'test/fixtures/drain_cartridge', join(dir, 'c.json')], {
     cwd: ROOT,
     stdio: 'pipe',
   });

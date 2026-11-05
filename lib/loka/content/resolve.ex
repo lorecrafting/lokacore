@@ -4,7 +4,7 @@ defmodule Loka.Content.Resolve do
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
 
-  alias Loka.Content.{Barriers, Dialogues, Entities, Exits, Quests, Reactions, RoomParts}
+  alias Loka.Content.{Barriers, Dialogues, Emotes, Entities, Exits, Quests, Reactions, RoomParts}
   alias Loka.Content.ScriptedActions
   alias Loka.Core.Canonical
 
@@ -432,7 +432,7 @@ defmodule Loka.Content.Resolve do
       Dialogues.conditions(defs),
       Loka.Content.Skills.conditions(defs),
       Loka.Content.Barriers.conditions(defs),
-      Loka.Content.Cues.conditions(defs),
+      Loka.Content.Cues.conditions(defs) ++ Emotes.conditions(defs),
       Loka.Content.Population.conditions(defs)
     ])
   end

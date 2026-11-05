@@ -1,0 +1,12 @@
+{
+  "duration": 1800,
+  "tick_every": 600,
+  "resource": "mv",
+  "per_tick": 5,
+  "name": "condition.refreshed",
+  "narration": {
+    "applied": "narration.refreshed.applied",
+    "tick": "narration.refreshed.tick",
+    "expired": "narration.refreshed.expired"
+  }
+}

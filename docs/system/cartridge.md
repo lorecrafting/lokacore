@@ -1353,9 +1353,9 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 [Sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) add one optional field, `cues` (`Cues`: 1 to 4 `Cue {sense, text, range, when?}`, `protocol/entity.schema.json`), on a room, a room's detail, an item or NPC definition, an item's source `fuel`, a status and an action outcome (`outcomes.success` or `.failure`), and one leaf, `cue_perceived {npc, sense}`. Both are owned by `sense_cue@1` (UNDECLARED_CAPABILITY at the cue, `rooms/forge.cues[0]`, or at the leaf's op). A cue's `text` without a catalog entry is UNRESOLVED_REFERENCE at it (`actions/pick_lock.outcomes.failure.cues[0].text`); its `when` is checked and short references in it expand like any condition (`Loka.Content.Resolve.expand/2` expands every `cues` list), and the leaf's `npc` takes a short key through `Loka.Content.LeafRefs`. Compiler `lib/loka/content/cues.ex`. Sampler: `cartridges/senses_sampler`.
 
-## Need declarations
+## Liquid effect declarations
 
-[Hunger, thirst and dry days](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) add one field: a liquid's optional `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status), ended by a Drink of it. [Consume](mechanics.md#consume-loka-kgd209) adds the restore pair (`resource`, `amount`) and `applies` beside it, with an edible item's rules; an edible's `resource` and `amount` become optional (both or neither). The compiler (`lib/loka/content/status.ex`) refuses an unresolved name (UNRESOLVED_REFERENCE at the entry). Needs themselves are [status declarations](#status-declarations) on cartridge pools. Sampler: `cartridges/needs_sampler`.
+A liquid kind declares [Consume](mechanics.md#consume-loka-kgd209)'s effect block in its `LiquidDefinition`, with an edible item's rules: the restore pair (`resource`, `amount`), `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status, ended by a Drink of it) and `applies`. An edible's `resource` and `amount` are optional (both or neither). The compiler (`lib/loka/content/status.ex`) refuses an unresolved name (UNRESOLVED_REFERENCE at the entry). Need pools are [retired](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry). Sampler: `cartridges/fed_sampler`.
 
 ## Dialogue check declarations
 
@@ -1409,6 +1409,10 @@ The optional `time_policy.away_cap_hours` (an integer from 1 to 168, in-game hou
 ## Emote declarations
 
 [NPC emotes](mechanics.md#npc-emotes-g9) are a cartridge table owned by `emote@1` (`protocol/capability_registry.json`; the section without it is UNDECLARED_CAPABILITY). `emotes` (`protocol/cartridge.schema.json` `EmoteDefinition`) maps `id@version:emote/key` to `{key, others, to?}`, one file per entry under `emotes/` (the key is the file name). `others` is the TextKey the room sees, its text with `{actor}` ("{actor} cowers in fear."); `to`, when present, has both `others` ("{actor} bows to {target}.") and `you` ("{actor} bows to you."), else SCHEMA_VIOLATION. Every form must be in the text catalog (UNRESOLVED_REFERENCE at it). A [reaction@1](mechanics.md#reaction1-kerneltssrcmechanicsreactionts) step `{op: "emote", emote, npc?, to?: "subject"}` plays one (`protocol/step.schema.json`); `emote` and `npc` are short keys. An unknown `emote` is UNRESOLVED_REFERENCE at it, a `to` on an emote without `to` forms UNRESOLVED_REFERENCE at the step's `to` (`target` the emote's ref), and a spawn-template `npc` is refused as for every step `npc`.
+
+## Ambient declarations
+
+[Ambient emotes](mechanics.md#ambient-emotes) are owned by `emote@1`. A room (`protocol/room.schema.json`), NPC or item (`protocol/entity.schema.json`) may declare `ambient`, one to four sets. A room's or item's set is `AmbientSet` `{lines, every, chance?, when?}`; an NPC's is `NpcAmbientSet`, with `lines` or `emotes` (short emote keys), exactly one. `lines` and `emotes` hold one to eight entries; `every` is at least 1; `chance` is 1 to 100, default 100; `when` is a [policy](mechanics.md#target_resolution1-policy1-fact1) read with the entity as target. Refusals: `ambient` without `emote@1` is UNDECLARED_CAPABILITY at the holder's `ambient`; `every` or `chance` out of range is SCHEMA_VIOLATION at the field; an NPC set with both or neither of `lines` and `emotes` is SCHEMA_VIOLATION at the set; `emotes` on a room or item set is UNKNOWN_FIELD; a line not in the text catalog or an unknown emote is UNRESOLVED_REFERENCE at it.
 
 ## Use declarations
 

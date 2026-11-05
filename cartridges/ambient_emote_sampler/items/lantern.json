@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "lantern"
+  ],
+  "name": "item.lantern.short",
+  "room_line": "item.lantern.room",
+  "description": "item.lantern.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "cave"
+  },
+  "ambient": [
+    {
+      "lines": [
+        "item.lantern.gutter"
+      ],
+      "every": 900,
+      "chance": 50
+    }
+  ]
+}

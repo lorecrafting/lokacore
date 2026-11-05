@@ -1,0 +1,20 @@
+{
+  "room.cave.title": "~",
+  "room.cave.description": "~",
+  "room.cave.drip": "~",
+  "room.passage.title": "~",
+  "room.passage.description": "~",
+  "item.lantern.short": "~",
+  "item.lantern.room": "~",
+  "item.lantern.description": "~",
+  "item.lantern.gutter": "~",
+  "npc.goblin.short": "~",
+  "npc.goblin.room": "~",
+  "npc.goblin.description": "~",
+  "emote.glance.others": "~",
+  "emote.scratch.others": "~",
+  "condition.afraid": "~",
+  "narration.afraid.applied": "~",
+  "narration.afraid.expired": "~",
+  "narration.afraid.tick": "~"
+}

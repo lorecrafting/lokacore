@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "spoken",
+    "word": "begone",
+    "loudness": "shout"
+  },
+  "steps": [
+    {
+      "op": "status.apply",
+      "status": "afraid"
+    }
+  ]
+}

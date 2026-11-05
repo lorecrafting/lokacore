@@ -210,6 +210,7 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Scene` | `book/ScenePage.tsx` | ChapterPages |
 | `ShelfPage` | `book/Shelf.tsx` | NpcPage |
 | `StatusLine` | `book/Status.tsx` | StatusLine |
+| `StatusGlyph` | `book/StatusGlyph.tsx` | StatusIcon |
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
 | `Ring` | `book/StatusIcon.tsx` | StatusIcon |
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
