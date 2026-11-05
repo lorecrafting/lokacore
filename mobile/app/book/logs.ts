@@ -81,6 +81,7 @@ export type Logs = {
   open?: string;
   merged?: string[]; // quiet lines merged since the last screen, read again by the live region
   fault?: string;
+  title?: { id: string; said?: string }; // the Combat page's: a page turn remounts the page (combat-title.ts)
   // An open elapsed settlement's held World entries, one per line.
   away?: { from: number; log: string[] };
   ended?: GameView['combat']; // a closed encounter's page, until Back to World (book-ui.md, Closure)

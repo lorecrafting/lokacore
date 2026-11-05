@@ -47,6 +47,7 @@ export const screenFrom = (
     detail: (id: string) => saved.details[id] ?? [],
     leave: (id: string) => void saved.details[id]?.splice(0),
     chronicle: () => saved.chronicle ?? [],
+    title: undefined, // a static page has no opening receipt: no title (combat-title.ts)
     pending: false,
     catchingUp: false,
     fault: undefined,

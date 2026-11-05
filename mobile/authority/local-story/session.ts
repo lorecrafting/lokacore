@@ -165,6 +165,7 @@ function sharedGame(
     text: (key) => cartridge.text[key as Key],
     lastNarration: (command_id) => (unsettled() ? undefined : story.narration(command_id)),
     chronicle: () => story.chronicle(),
+    opener: (encounter_id) => (unsettled() ? undefined : story.opener(encounter_id)),
   };
 }
 

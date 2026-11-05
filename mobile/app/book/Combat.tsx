@@ -108,7 +108,12 @@ export function Combat(p: Props) {
     // Paper behind the running head too: the leaving page fades over the arriving one.
     <Blow under={<UnderInk view={view} />}>
       <RunningHead view={view} text={text} />
-      <Page paperless title="Combat" foot={foot} scrollToEnd={combatLog.length > 0}>
+      <Page
+        paperless
+        title={p.screen.title ?? 'Combat'}
+        foot={foot}
+        scrollToEnd={combatLog.length > 0}
+      >
         <LogLines lines={combatLog} rounds />
         {view.combat && <Responses {...p} shown={shown} />}
       </Page>
