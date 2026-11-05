@@ -397,6 +397,17 @@ test('a reverie line rises, then Continue shows; no clock sends it', async (t) =
   assert.deepEqual(sent, []);
 });
 
+// Breaks: the rise starts under the page curl, not after the page lands.
+test('a reverie line waits for the curl', async (t) => {
+  (curlContext as any)._currentValue = 660;
+  t.after(() => ((curlContext as any)._currentValue = 0));
+  const { button, tick } = await reverie(t);
+  tick(660 + 2799);
+  assert.equal(button(), undefined);
+  tick(1);
+  assert.ok(button());
+});
+
 // Breaks: a tap mid-rise sends Continue, or leaves the line half drawn.
 test('a tap completes the rise and sends nothing', async (t) => {
   const { sent, page, inks, button, tick, next } = await reverie(t);

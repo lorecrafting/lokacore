@@ -252,3 +252,11 @@ test('a treated scene fades the bed, weather and music out; the room after it co
   b.ambience('inn', 'rain', true);
   assert.deepEqual(urlsOf(b.els).sort(), ['inn.m4a', 'rain.m4a']);
 });
+
+// Breaks: the first gesture, inside a treated scene, opens the room's piece (book-ui.md, Book treatments: Sound).
+test('the first gesture in a treated scene plays nothing', async () => {
+  const b = await browser();
+  b.ambience('inn', undefined, true, 'silent');
+  b.gesture();
+  assert.deepEqual(urlsOf(b.els), []);
+});

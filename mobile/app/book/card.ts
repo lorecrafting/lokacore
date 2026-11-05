@@ -9,6 +9,7 @@ import {
   withDelay,
   withTiming,
 } from './fade.ts';
+import { curlContext } from './press.ts';
 import { motion } from './tokens.ts';
 
 /** `waiting`: a picture is being taken; `picture`: it is down; none: no blur, the ink is simply there. */
@@ -101,6 +102,7 @@ export function useArrival(on: boolean) {
   const ink = useSharedValue(on ? 0 : 1);
   const next = useSharedValue(on ? 0 : 1);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const curl = useContext(curlContext); // the line starts after the page lands
   // A tap or a reader shows Continue at once; the line's own end settles it in.
   const done = (settle: boolean) => {
     clearTimeout(timer.current);
@@ -115,7 +117,8 @@ export function useArrival(on: boolean) {
   useEffect(() => {
     if (reader === undefined) return;
     if (reader) return complete();
-    const { lag, duration, easing } = motion.reverie;
+    const { duration, easing } = motion.reverie;
+    const lag = curl + motion.reverie.lag;
     const reduceMotion = ReduceMotion.Never; // an opacity rise, ruled unchanged under reduced motion
     ink.value = withDelay(
       lag,

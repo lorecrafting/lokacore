@@ -37,7 +37,7 @@ const unlock = () => {
       for (const file of cached) void globalThis.fetch?.(file).catch(() => {});
       if (inFight) loop(); // a fight reopened before the first gesture
       settleRoom(motion.bed.duration);
-      if (room && !inFight) explore(room.tag);
+      if (room && !inFight && !room.silent) explore(room.tag);
     }
     if (audio.ctx.state !== 'running') audio.ctx.resume().catch(() => {});
   } catch {} // no audio in this browser

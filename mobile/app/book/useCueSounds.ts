@@ -28,7 +28,7 @@ export function useCueSounds(s: Screen, turn: number, resumes?: number, riffle?:
     const quiet = s.treatment ? 'silent' : woke ? 'woke' : !!s.view.combat || theme;
     // The spirit state: the bed muffled, opening at the rise; the room is never exposed (no thunder's open air).
     ambience(place?.sound, weather, !!place?.exposed && !spirit, quiet, spirit);
-  }, [s.view, s.ended, spirit]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [s.view, s.ended, spirit, s.treatment]); // eslint-disable-line react-hooks/exhaustive-deps
   const reduced = useReducedMotion();
   useCues(
     s.view,
