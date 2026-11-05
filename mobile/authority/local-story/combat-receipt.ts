@@ -45,12 +45,12 @@ export function opener(s: Story, encounter_id: string): Opener | undefined {
   const known = openers.get(s) ?? openers.set(s, new Map()).get(s)!;
   const id = `${scope(s)} ${encounter_id}`; // a new game is a new lineage, its ids minted afresh
   if (known.has(id)) return known.get(id); // an opening receipt never changes
-  if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
+  if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted
   const r = s.db.getFirstSync<{ type: string; npc_id: string }>(
     `SELECT json_extract(command, '$.payload.type') AS type, json_extract(o.value, '$.npc_id') AS npc_id
      FROM receipt, json_each(response, '$.delta.ops') o
-     WHERE scope = ? AND instr(response, ?) > 0 AND json_extract(o.value, '$.op') = 'encounter.open'
-       AND json_extract(o.value, '$.encounter_id') = ? LIMIT 1`,
+     WHERE scope = ? AND instr(response, ?) AND json_extract(o.value, '$.op') = 'encounter.open'
+       AND json_extract(o.value, '$.encounter_id') = ?`,
     scope(s),
     encounter_id,
     encounter_id,

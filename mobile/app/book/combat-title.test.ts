@@ -47,14 +47,24 @@ test('a fight keeps its title while its opener is unread; the next fight has its
   const h = mounted(
     view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
   );
+  // The page scrolls to its newest line when its content grows, and only once it has one.
+  const scrolled = () => {
+    const view = h.node((n) => n.props?.onContentSizeChange);
+    let to = false;
+    view.ref.current = { scrollToEnd: () => (to = true) };
+    view.props.onContentSizeChange(0, 1000);
+    return to;
+  };
   try {
     assert.ok(h.texts().includes(TITLE));
+    assert.equal(scrolled(), false); // no line yet: nothing to scroll to
     h.game.opener = () => undefined;
     h.publish(
       view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
       'combat.hit',
     );
     assert.ok(h.texts().includes(TITLE));
+    assert.equal(scrolled(), true); // the page opens at its newest line
     h.publish(
       view({
         combat: {
