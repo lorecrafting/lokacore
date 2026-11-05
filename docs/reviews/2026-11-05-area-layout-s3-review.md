@@ -73,3 +73,36 @@ Hand mutants, run against `content_lint_layout_test.exs`, `content_lint_test.exs
 ## Verdict
 
 CHANGES REQUIRED: findings 1 to 4.
+
+## Re-check at `98e80d50f576a7e9a911550621f43aa150a34c01`
+
+Fix commit 98e80d50f. CI at that head (`gh run list --commit 98e80d50f...`): ci success, book-e2e success, graph-diff success.
+
+Each mutant was run against `content_lint_layout_test.exs`, `content_lint_test.exs`, `content_starters_test.exs` and, for the last row, `write.test.ts`. Each one was RED:
+
+| Finding | Mutant | Result |
+|---|---|---|
+| 1 | `lint_layout.ex:53` entry-area exemption set to `true` | 1 fail |
+| 1 | `:44` drop the `site` exemption | 1 fail |
+| 1 | `:81` population `[p["home"]]` | 1 fail |
+| 2 | `:66` `other != own` | 1 fail |
+| 3 | `starters.ex` `own_files(dir, kind)` (any area) | 1 fail |
+| 5 | delete the `areas` + `--area` refusal clause | 1 fail |
+| 4 | delete `if (link) refuse(...)` in `write.ts` `create()` | 1 fail (`write.test.ts` symlink test) |
+
+Finding 4: the refusal is broader than `guarded()` on one path. That deviation is accepted, for these reasons:
+- mix also writes companions and the `--from` neighbour, which no single guarded path covers.
+- No cartridge in the repo contains a symlink (`find cartridges -type l` is empty).
+- The editor already refuses a symlink on any path it reads or writes, so a tree with links was never fully editable.
+- `files()` skips `checkpoints/`, where mix never writes.
+
+As proof, a test that shows the refusal is enough:
+- The refusal runs before mix is spawned, so no write can happen.
+- In round 1, the reviewer showed the actual outside write without the refusal.
+- Deleting the refusal turns the test red.
+
+A link made between the check and mix's run is author-side.
+
+Finding 6: `cartridge.md:946` now names `area?` and the refusal. Finding 7 (self-exit orphan) is still open, as a nit.
+
+Verdict after re-check: APPROVE WITH NOTES (nit 7).
