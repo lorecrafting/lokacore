@@ -1,6 +1,8 @@
-// size: allow 315, initial visible knowledge joins existing genesis before the first receipt; the clock-0 currency rows share genesis
+// size: allow 340, initial visible knowledge and an opening scene's line 1 join existing genesis before the first receipt; the clock-0 currency rows share genesis
 import { record } from '../mechanics/knowledge/shared.ts';
 import { apply } from './apply.ts';
+import { assigned } from '../mechanics/fact.ts';
+import { fact } from '../mechanics/scene/shared.ts';
 // A fresh world from a loaded loka-cartridge-v2 artifact (03 §1, §3, §23; numeric profile,
 // Initial world ids), split from runtime/world.ts, which re-exports newWorld.
 import type { CharacterId, EntityId, ResourceSpec, WorldContextId } from '../contracts.gen.ts';
@@ -8,7 +10,14 @@ import type { DefinitionRef } from '../contracts.gen.ts';
 import { initialPopulation } from '../mechanics/population/shared.ts';
 import { initialLiquids } from '../mechanics/liquid/shared.ts';
 import { key } from '../foundation/compose.ts';
-import { refString, type Cartridge, type Detail, type Entity, type World } from './decision.ts';
+import {
+  refString,
+  values,
+  type Cartridge,
+  type Detail,
+  type Entity,
+  type World,
+} from './decision.ts';
 import { firstJobs } from '../mechanics/schedule/daily.ts';
 import { id } from '../foundation/id_source.ts';
 import type { RngState } from '../foundation/rng.ts';
@@ -25,14 +34,28 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
  * its location, the calendar's start time (0 without one), each NPC's first job pending at its
  * schedule's first listed hour strictly after that time (mechanics/schedule/daily.ts next; 04 §5.4: a job is
  * scheduled strictly later than now), each fact's default by its canonical DefinitionRef text
- * and no fact set. A world after 0 stores the body's resource rows at start (an unset legacy one
+ * and no fact set but an opening scene's line 1 (scene@1). A world after 0 stores the body's resource rows at start (an unset legacy one
  * regenerates from 0); at clock 0 only opted (standing rate, no remainder) and currency rows.
  */
 export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
   let ordinal = 0;
   const mint = () => id(context, NIL, ordinal++) as EntityId;
   const world = initialPopulation(baseWorld(cartridge, context, seed, mint), mint, NIL as never);
+  // scene@1 opening scene: play starts on its first line (mechanics.md scene@1).
+  const opening = values(cartridge.scenes ?? {}).find(
+    (s) => s.control === 'modal' && 'start' in s.on,
+  );
   const ops = record(world, world.character, true, { n: 0 });
+  if (opening)
+    ops.push(
+      ...assigned(
+        world,
+        world.character,
+        { ops: [], position: 0, facts: {} }, // mutate-skip: only .ops of this accumulator is read
+        { fact: fact(world, opening), value: 1 },
+        'scene',
+      ).ops,
+    );
   if (!ops.length) return world;
   const known = apply(world, ops);
   if ('fault' in known) throw new Error('invalid initial knowledge');

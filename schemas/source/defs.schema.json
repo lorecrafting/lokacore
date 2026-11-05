@@ -10314,13 +10314,14 @@
             "extends": { "$ref": "#/$defs/Key" },
             "on": {
               "additionalProperties": false,
-              "description": "What starts the scene: a story point reached, a quest outcome, or a scripted action's success; an action start names the scripted action's room and detail.",
+              "description": "What starts the scene: a story point reached, a quest outcome, a scripted action's success, or `start` (an opening scene, started at world creation, without outcome); an action start names the scripted action's room and detail.",
               "properties": {
                 "action": { "$ref": "#/$defs/partial.DefinitionRef" },
                 "detail": { "$ref": "#/$defs/Key" },
                 "outcome": { "$ref": "#/$defs/Key" },
                 "quest": { "$ref": "#/$defs/partial.DefinitionRef" },
                 "room": { "$ref": "#/$defs/partial.DefinitionRef" },
+                "start": { "const": true },
                 "story_point": { "$ref": "#/$defs/partial.DefinitionRef" }
               },
               "type": "object"
@@ -13316,22 +13317,36 @@
                       "required": [
                         "action"
                       ]
+                    },
+                    {
+                      "required": [
+                        "start"
+                      ]
                     }
                   ]
                 }
               ],
-              "description": "What starts the scene: a story point reached, a quest outcome, or a scripted action's success; an action start names the scripted action's room and detail.",
+              "dependentRequired": {
+                "action": [
+                  "outcome"
+                ],
+                "quest": [
+                  "outcome"
+                ],
+                "story_point": [
+                  "outcome"
+                ]
+              },
+              "description": "What starts the scene: a story point reached, a quest outcome, a scripted action's success, or `start` (an opening scene, started at world creation, without outcome); an action start names the scripted action's room and detail.",
               "properties": {
                 "action": { "$ref": "#/$defs/DefinitionRef" },
                 "detail": { "$ref": "#/$defs/Key" },
                 "outcome": { "$ref": "#/$defs/Key" },
                 "quest": { "$ref": "#/$defs/DefinitionRef" },
                 "room": { "$ref": "#/$defs/DefinitionRef" },
+                "start": { "const": true },
                 "story_point": { "$ref": "#/$defs/DefinitionRef" }
               },
-              "required": [
-                "outcome"
-              ],
               "type": "object"
             },
             "on_end": {
