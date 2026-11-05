@@ -127,7 +127,7 @@ type Props = { view: GameView; treatment?: Treatment; dead?: boolean };
 
 /**
  * The spirit layer, the lamp glow and the low-health vignette under a page's ink.
- * - Use: behind a `paperless` Page, on World and Combat.
+ * - Use: behind a `paperless` Page, on World, Combat and the dead page.
  * - Rules: paper, not a part: draws no block, holds no words, takes no touch. Only the highest of
  *   the fatal hold, the vignette and the glow shows; a lower one fades out over `motion.settle` and
  *   returns the same way. Storm's light cuts it for the strike; it returns over `motion.settle`.

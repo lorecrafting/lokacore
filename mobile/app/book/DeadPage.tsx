@@ -19,8 +19,8 @@ type Props = {
  * The dead page (book-ui.md, Dead page): a death outside a fight, on the World page of the room died
  * in, over any page, scene or treatment open.
  * - Use: Body, while the presenter's `dead` is set (until Let go, a fault or a reopen).
- * - Rules: the kept room title; that room's log then the death receipt's lines; one foot, Let go; no
- *   paragraphs, people, links or running head. The fatal hold and rim rise as it mounts (Blow `dead`).
+ * - Rules: the kept room title; that room's log then the death receipt's lines (a later
+ *   receipt's wait for Let go); one foot, Let go; no paragraphs, people, links or running head. The fatal hold and rim rise as it mounts (Blow `dead`).
  * - States: dead.
  * - Story: DeadPage.stories.tsx
  */
