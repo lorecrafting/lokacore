@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { serve } from '../play/live.ts';
-import { sha256 } from '../play/guard.ts';
+import { guarded, placed, sha256, type Refused } from '../play/guard.ts';
 
 const ROOM = '{\n  "name": "room.a",\n  "exits": {}\n}\n';
 type Reply = { status: number; body: any };
@@ -66,7 +66,23 @@ test('a path outside the source tree is refused before any file is read', async 
   }
   const sibling = await ask('/source?file=../src-evil/rooms/x.json');
   assert.match(sibling.body, /^outside the source tree/);
-  assert.equal((await ask('/source?file=rooms/a.json')).body.bytes, ROOM);
+  const own = await ask('/source?file=rooms/a.json');
+  assert.deepEqual(
+    [own.status, own.body.bytes, own.body.kind, own.body.key],
+    [200, ROOM, 'rooms', 'a'],
+  );
+});
+
+test('GET /schema/<kind> is the source schema with its defs inlined; another name is a 404', async (t) => {
+  // Break: the panel's form validating against a schema whose $ref points at a file it cannot load.
+  const { ask } = tree(t);
+  const rooms = await ask('/schema/rooms');
+  assert.deepEqual(
+    [rooms.status, rooms.body.$ref.startsWith('#'), typeof rooms.body.$defs],
+    [200, true, 'object'],
+  );
+  assert.equal((await ask('/schema/defs')).status, 404);
+  assert.equal((await ask('/schema/../defs')).status, 404);
 });
 
 test('a symlink on the way, or as the file, is refused for reads and writes', async (t) => {
@@ -243,7 +259,7 @@ test('POST /hold sets held on the stream and its release writes what was parked'
   let released = 0;
   const { ask, live } = tree(t, () => released++);
   assert.equal((await ask('/hold', { on: 'yes' })).status, 400);
-  assert.deepEqual((await ask('/hold', { on: true })).body, { held: true });
+  assert.deepEqual(await ask('/hold', { on: true }), { status: 200, body: { held: true } });
   assert.deepEqual([live.held(), released], [true, 0]);
   await ask('/hold', { on: false });
   assert.deepEqual([live.held(), released], [false, 1]);
@@ -262,4 +278,49 @@ test('the journal drops its oldest entries past its byte cap', async (t) => {
     [second.body.id],
   );
   assert.equal((await ask('/undo', { id: first.body.id })).status, 404);
+});
+
+test('a new file may take only a place Source.classify reads; a taken or unlisted one is refused', async (t) => {
+  // Breaks: /move or /new writing a file the compile never reads (a `.cut` beside a dialogue, a
+  // folder that is no area, a dir with no schema), or the wrong status for a taken or absent file.
+  const { src } = tree(t);
+  const at = (dir: string, key: string, ext: string, area: string | null = null) => ({
+    dir,
+    key,
+    ext,
+    area,
+  });
+  assert.deepEqual(placed('rooms/a.json'), at('rooms', 'a', 'json'));
+  assert.deepEqual(placed('areas/north/rooms/a.json'), at('rooms', 'a', 'json', 'north'));
+  assert.deepEqual(placed('dialogues/b.scene'), at('dialogues', 'b', 'scene'));
+  assert.deepEqual(placed('scenes/c.cut'), at('scenes', 'c', 'cut'));
+  for (const rel of [
+    'areas/North/rooms/a.json',
+    'lands/north/rooms/a.json',
+    'rooms/x/a.json',
+    'rooms/a.scene',
+    'dialogues/a.cut',
+    'rooms/a.txt',
+    'bogus/a.json',
+    'rooms',
+  ])
+    assert.equal(placed(rel), undefined, rel);
+  const status = (rel: string, mode: 'read' | 'create') => {
+    try {
+      guarded(src, rel, mode);
+      return 200;
+    } catch (e) {
+      return (e as Refused).status;
+    }
+  };
+  assert.deepEqual(
+    ['facts.json', 'areas/north.json', 'scenes/c.cut', 'notes.json', 'areas/x/y.json'].map((r) =>
+      status(r, 'create'),
+    ),
+    [200, 200, 200, 400, 400],
+  );
+  assert.deepEqual(
+    [status('rooms/a.json', 'create'), status('rooms/z.json', 'read'), status('rooms', 'read')],
+    [409, 404, 404],
+  );
 });
