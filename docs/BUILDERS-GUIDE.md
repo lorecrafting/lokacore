@@ -174,19 +174,8 @@ says why a rule did or did not run at that step ([rule explainer](system/cartrid
 
 ## What the current builder can express
 
-The installed core covers deterministic IDs and decisions, typed commands/events and
-deltas, admission, save receipts and replay. Its content mechanics include movement,
-barriers, containment, carrying and equipment, position, inspection, facts and policies,
-resources and attributes, checks and scripted actions, quests and dialogue, journal and chapters,
-scenes, reactions, schedules, combat, death and same-body return, narration and the
-shared GameView. Consult the
-[capability map](features.gen.md) for the current installed list and
-[mechanics](system/mechanics.md) for exact behavior.
-
-Current quests have one objective, evidenced by
-a current-state policy or a post-activation item-acquired event. Dialogues have bounded
-choices rather than an arbitrary dialogue graph, and scenes
-support authored narration/acknowledgement steps. There is no general live
-spawner or respawn system: the five cellar rats are five authored static NPC definitions.
+The [toolbox page](TOOLBOX.gen.md) lists every installed mechanic with what it does, what you
+declare, its sampler cartridge and its showcase district; read it before asking for a new mechanic.
+[Mechanics](system/mechanics.md) has the exact behavior.
 
 Before a district or area plan, read the [area authoring checklist](guides/area-authoring.md).

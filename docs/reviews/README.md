@@ -12,6 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Second review: revival contract and save effect, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-revival-second-review.md): **APPROVE WITH NOTES**
 - [Review: world.death.revival and the Wayside Shrine keeper, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-review.md): **APPROVE**
+- [Review: generated toolbox page, PR #612 (loka-vduxr.59)](2026-11-04-toolbox-page-review.md): **APPROVE WITH NOTES**
 - [Review: Book treatments T1 (spirit extracted, reverie added), PR #611 (loka-wfrgk.9)](2026-11-04-t1-book-treatments-review.md): **APPROVE WITH NOTES**
 - [Design review: the Book's spirit state, PR #604 (loka-kgd.205)](2026-11-04-spirit-state-design-review.md): **CHANGES REQUIRED**
 - [Review: one consume command and one effect block, PR #605 (loka-kgd.209)](2026-11-04-loka-kgd.209-consume-review.md): **APPROVE**
