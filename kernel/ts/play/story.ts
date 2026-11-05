@@ -7,7 +7,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createHash } from 'node:crypto';
-import { join } from 'node:path';
+import { join, resolve as absolute } from 'node:path';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
 import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
@@ -204,18 +204,22 @@ function beats(source: string, bound: Bound) {
 }
 
 /** live.ts's `GET /story`: the model built on the first ask after each compile (`stale()`), with
- * an ETag by its body's hash (an outline.json edit recompiles to the same artifact hash). */
+ * an ETag by its body's hash (an outline.json edit recompiles to the same artifact hash).
+ * `keep()` builds it now if none is built: a Hold serves that whole model to its end (§7). */
 export function storyRoute(source: string, artifact: string) {
   let model: { etag: string; body: string } | undefined;
+  const keep = (diagnostics: unknown[]) => {
+    if (model) return model;
+    const dev = JSON.parse(readFileSync(artifact, 'utf8')) as Dev;
+    const body = JSON.stringify(story(source, dev, diagnostics as Diagnostic[]));
+    return (model = { etag: `"${createHash('sha256').update(body).digest('hex')}"`, body });
+  };
   return {
     stale: () => (model = undefined),
+    keep,
     answer(request: IncomingMessage, response: ServerResponse, diagnostics: unknown[]) {
       if (request.method !== 'GET') return response.writeHead(405).end();
-      if (!model) {
-        const dev = JSON.parse(readFileSync(artifact, 'utf8')) as Dev;
-        const body = JSON.stringify(story(source, dev, diagnostics as Diagnostic[]));
-        model = { etag: `"${createHash('sha256').update(body).digest('hex')}"`, body };
-      }
+      const model = keep(diagnostics);
       if (request.headers['if-none-match'] === model.etag)
         return response.writeHead(304, { etag: model.etag }).end();
       response.writeHead(200, { 'content-type': 'application/json', etag: model.etag });
@@ -230,7 +234,7 @@ if (import.meta.main) {
     console.error('usage: bin/loka story <cartridge dir>');
     process.exit(2);
   }
-  const dev = compiled(source);
+  const dev = compiled(absolute(source)); // mise runs mix from the kernel, not this cwd
   if (typeof dev === 'string') {
     console.error(dev);
     process.exit(1);

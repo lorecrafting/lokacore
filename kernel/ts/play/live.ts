@@ -257,8 +257,10 @@ export function serve(port: number, source: string, artifact: string, release = 
     client.write(`data: ${JSON.stringify({ ...last, ...once })}\n\n`);
   const map = storyRoute(source, artifact);
   const push = (message: Partial<Message>) => {
-    map.stale(); // a compile, or a hold's release, may have published a new artifact
     last = { ...last, ...message };
+    // §7: a Hold serves the last whole model; a compile's pushes, or the release, make a new one.
+    if (last.held) map.keep(last.diagnostics ?? []);
+    else if ('compiled' in message || 'diagnostics' in message || 'held' in message) map.stale();
     for (const client of clients) send(client);
   };
   const editor = editing(source, push, (once) => clients.forEach((c) => send(c, once)), release);

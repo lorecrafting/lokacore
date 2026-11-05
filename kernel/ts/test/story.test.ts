@@ -14,7 +14,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { get as httpGet } from 'node:http';
-import { join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { after, test } from 'node:test';
 import { serve } from '../play/live.ts';
 import { story } from '../play/story.ts';
@@ -74,6 +74,8 @@ const outline = {
       beats: [
         { n: 3, nodes: ['rooms/village_green'], pays: ['lantern', 'oath'], seeds: ['ring'] },
         { n: 4, nodes: ['rooms/attic'], pays: ['ring'] }, // paid in the very next beat
+        { n: 5 }, // planned, no node yet
+        { n: 6, nodes: ['rooms/attic', 'rooms/village_green'] }, // one node reached
       ],
     },
   ],
@@ -109,7 +111,8 @@ type Beats = { outline: { beats: { n: number; status: string; missing?: string[]
 // Break: a ref the artifact lacks (an unknown key, a choice the dialogue does not have, a choice
 // path on a room) reads as built; a beat no exit reaches reads as built.
 // Break: a `~` in text.json under a key the node names, or in an area folder's file, does not
-// mark its node, or marks it once the words are in.
+// mark its node, or marks it once the words are in; a beat with no node yet not missing, or
+// one with any reached node unreached (§5c: unreached only when every node is).
 test('a beat is missing with the refs not in the artifact, `~` while its node has one', () => {
   const beats = () => (story(src, dev, []) as Beats).outline.beats;
   assert.deepEqual(
@@ -119,6 +122,8 @@ test('a beat is missing with the refs not in the artifact, `~` while its node ha
       [2, 'missing', ['items/nowhere', 'dialogues/greet/nope', 'rooms/village_green/door']],
       [3, 'built', undefined],
       [4, 'unreached', undefined],
+      [5, 'missing', undefined],
+      [6, 'built', undefined],
     ],
   );
   const text = readFileSync(join(src, 'text.json'), 'utf8');
@@ -242,8 +247,35 @@ test('GET /story: an ETag, 304 until the next compile pushes, and refused to a f
   assert.equal((await fetch(`http://127.0.0.1:${port}/story`, { method: 'POST' })).status, 405);
 });
 
+// Break: GET /story drops the watcher's diagnostics (S2's badges), or a Hold serves a mix (a
+// file written mid-Hold, or a later push's diagnostics) instead of the model from its start (§7).
+test('GET /story carries the diagnostics, and a Hold keeps the last whole model', async (t) => {
+  writeFileSync(join(dir, 'dev.json'), JSON.stringify(dev));
+  const port = 20000 + Math.floor(Math.random() * 20000);
+  const server = serve(port, src, join(dir, 'dev.json'));
+  t.after(() => server.close());
+  type Model = { diagnostics: object; outline: { beats: unknown[] } };
+  const body = async () => (await (await fetch(`http://127.0.0.1:${port}/story`)).json()) as Model;
+  const row = { rel: 'rooms/village_green.json' };
+  server.push({ diagnostics: [row] });
+  server.push({ held: true }); // no GET yet: the model is the one at the Hold's start
+  put('outline.json', { parts: [] });
+  try {
+    server.push({ diagnostics: [], compiled: true });
+    const held = await body();
+    assert.deepEqual(held.diagnostics, { [green]: [row] });
+    assert.equal(held.outline.beats.length, 6);
+    server.push({ held: false });
+    const released = await body();
+    assert.deepEqual(released.diagnostics, {});
+    assert.deepEqual(released.outline.beats, []);
+  } finally {
+    put('outline.json', outline);
+  }
+});
+
 // Break: the CLI's hash is not the artifact's (another build, or the source's hash), or a
-// usage error or a failed compile exits 0.
+// usage error or a failed compile exits 0, or a relative path is read from the kernel's dir.
 test('bin/loka story prints the model with the compiled artifact hash', () => {
   // mise is stubbed as CI has none (as check.test.ts); mix comes from PATH.
   const bin = join(dir, 'bin');
@@ -258,4 +290,10 @@ test('bin/loka story prints the model with the compiled artifact hash', () => {
   assert.equal(story(), 2); // usage
   assert.equal(story(src, 'extra'), 2);
   assert.equal(story(join(dir, 'nowhere')), 1); // the compile failed
+  const near = execFileSync(join(root, 'bin/loka'), ['story', basename(src)], {
+    cwd: dirname(src),
+    encoding: 'utf8',
+    env,
+  });
+  assert.equal(JSON.parse(near).hash, sha256); // a path relative to the cwd, not the kernel's
 });
