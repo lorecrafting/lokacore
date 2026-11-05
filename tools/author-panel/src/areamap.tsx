@@ -3,7 +3,8 @@
 import { ChevronDown, ChevronUp, Maximize, Play, ZoomIn, ZoomOut } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from '../../../mobile/app/book/tokens.ts';
-import type { MapRoom, Story } from './author.ts';
+import type { Story } from './author.ts';
+import type { MapRoom } from './map.ts';
 import { Button } from './components/ui/button.tsx';
 import * as map from './map.ts';
 import { M, type Box as Size, type View } from './map.ts';

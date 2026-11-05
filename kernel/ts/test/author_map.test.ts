@@ -2,7 +2,7 @@
 // E3a table (docs/design/editor-map-and-story-rulings.md), not from the code.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { MapRoom } from '../../../tools/author-panel/src/author.ts';
+import type { MapRoom } from '../../../tools/author-panel/src/map.ts';
 import * as map from '../../../tools/author-panel/src/map.ts';
 import { places } from '../../../tools/author-panel/src/shell.ts';
 

@@ -2,7 +2,7 @@
 // buttons, wheel and drag pans, Cmd/Ctrl-wheel zooms, and the keyboard row.
 import { useEffect, useRef, useState } from 'react';
 import type { Level, MapProps, Reach } from './areamap.tsx';
-import type { MapRoom } from './author.ts';
+import type { MapRoom } from './map.ts';
 import * as map from './map.ts';
 import { M } from './map.ts';
 import { Box, Edges, Hulls, Pills, Stubs, type Marks } from './mapdraw.tsx';

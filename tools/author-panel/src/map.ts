@@ -1,7 +1,17 @@
 // The editor map's rules (docs/design/editor-map-and-story-rulings.md E3a): which rooms a level
 // draws, its edges, stubs and hulls, labels, the view's zoom and pan, the arrow keys' next room and
 // each room's accessible name. No React here: tested from kernel/ts/test/author_map.test.ts.
-import type { MapRoom } from './author.ts';
+
+/** A room as the map draws it (kernel/ts/play/story.ts `rooms`): `at` is absent when unplaced. */
+export type MapRoom = {
+  ref: string;
+  key: string;
+  file?: string;
+  area: string | null;
+  title: string;
+  exits: { dir: string; to: string; barrier?: string; hidden?: boolean }[];
+  at?: { x: number; y: number; z: number };
+};
 
 /** Drawing constants in px at zoom 1, exempt from the space tokens as DiscoveredMap's are. */
 export const M = {

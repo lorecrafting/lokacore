@@ -1,5 +1,6 @@
 // `bin/loka dev --watch`'s API (kernel/ts/play/live.ts), proxied at /__author by vite.config.ts.
 import { useEffect, useState } from 'react';
+import type { MapRoom } from './map.ts';
 import type { Timings } from './shell.ts';
 import type { Numbers } from '../../../kernel/ts/play/numbers.ts';
 
@@ -94,16 +95,6 @@ export type Story = {
   todo: Record<string, unknown[]>;
   diagnostics: Record<string, unknown[]>;
   map: MapRoom[];
-};
-/** A room as the map draws it (kernel/ts/play/story.ts `rooms`): `at` is absent when unplaced. */
-export type MapRoom = {
-  ref: string;
-  key: string;
-  file?: string;
-  area: string | null;
-  title: string;
-  exits: { dir: string; to: string; barrier?: string; hidden?: boolean }[];
-  at?: { x: number; y: number; z: number };
 };
 /** The Story map's model (kernel/ts/play/story.ts): the definitions, their `~` and diagnostics. */
 export const story = () =>
