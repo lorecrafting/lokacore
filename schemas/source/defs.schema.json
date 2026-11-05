@@ -10254,6 +10254,12 @@
               "items": { "$ref": "#/$defs/SceneStep" },
               "type": "array"
             },
+            "treatment": {
+              "description": "Presentation only: the Book treatment that draws this scene (book-ui.md, Book treatments).",
+              "enum": [
+                "reverie"
+              ]
+            },
             "with": { "type": "object" }
           },
           "type": "object"
@@ -13249,6 +13255,12 @@
             "steps": {
               "items": { "$ref": "#/$defs/SceneStep" },
               "type": "array"
+            },
+            "treatment": {
+              "description": "Presentation only: the Book treatment that draws this scene (book-ui.md, Book treatments).",
+              "enum": [
+                "reverie"
+              ]
             }
           },
           "required": [

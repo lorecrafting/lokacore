@@ -78,19 +78,29 @@ function Type() {
 function Measures() {
   const c = usePalette();
   const label = { ...type.small, color: c.fg };
-  const rows = (group: string, values: Record<string, number>, shape: (v: number) => object) =>
-    Object.entries(values).map(([name, v]) => (
-      <View
-        key={group + name}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}
-      >
-        <Text
-          // ast-grep-ignore: mobile-book-raw-values -- the specimen's name column, not Book UI
-          style={{ ...label, width: '40%' }}
-        >{`${group}.${name} ${v}`}</Text>
-        <View style={{ backgroundColor: c.dim, ...shape(v) }} />
-      </View>
-    ));
+  const rows = (
+    group: string,
+    values: Record<string, number | Record<string, number>>,
+    shape: (v: number) => object,
+  ) =>
+    Object.entries(values)
+      .flatMap(([k, v]) =>
+        typeof v === 'number'
+          ? [[k, v] as const]
+          : Object.entries(v).map(([p, n]) => [`${k}.${p}`, n] as const),
+      )
+      .map(([name, v]) => (
+        <View
+          key={group + name}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}
+        >
+          <Text
+            // ast-grep-ignore: mobile-book-raw-values -- the specimen's name column, not Book UI
+            style={{ ...label, width: '40%' }}
+          >{`${group}.${name} ${v}`}</Text>
+          <View style={{ backgroundColor: c.dim, ...shape(v) }} />
+        </View>
+      ));
   return (
     <View style={{ padding: space.page, gap: space.sm }}>
       {rows('space', space, (v) => ({ width: v, height: space.md }))}

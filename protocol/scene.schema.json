@@ -60,6 +60,12 @@
                 "$ref": "#/$defs/SceneStep"
               }
             },
+            "treatment": {
+              "enum": [
+                "reverie"
+              ],
+              "description": "Presentation only: the Book treatment that draws this scene (book-ui.md, Book treatments)."
+            },
             "on_end": {
               "type": "object",
               "properties": {

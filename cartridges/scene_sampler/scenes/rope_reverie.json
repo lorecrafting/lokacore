@@ -1,0 +1,26 @@
+{
+  "on": {
+    "action": "coil_rope",
+    "room": "ferry_landing",
+    "detail": "mooring_post",
+    "outcome": "success"
+  },
+  "control": "modal",
+  "treatment": "reverie",
+  "steps": [
+    {
+      "type": "narrate",
+      "text": "narration.coil_rope.actor"
+    },
+    {
+      "type": "narrate",
+      "text": "detail.mooring_post"
+    },
+    {
+      "type": "await_ack"
+    },
+    {
+      "type": "end"
+    }
+  ]
+}

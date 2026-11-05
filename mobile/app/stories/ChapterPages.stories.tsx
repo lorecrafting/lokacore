@@ -1,7 +1,8 @@
 // C row Pages, Chapter title, Scene(design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
-import { ChapterPage, ScenePage } from '../book/sections.tsx';
+import { ChapterPage } from '../book/sections.tsx';
+import { ScenePage } from '../book/ScenePage.tsx';
 import { motion } from '../book/tokens.ts';
 import { DreamPage } from '../book/DreamPage.tsx';
 import { chapterLabel } from '../book/words.ts';
@@ -53,6 +54,29 @@ export const ChapterTitleLong: StoryObj = {
   ),
 };
 export const Scene: StoryObj = { ...pageStory(SceneView), name: 'Scene' };
+
+// The showcase authors no reverie yet, so the scene view takes the treatment (book-ui.md, Book
+// treatments). Breaks: Continue is offered while the line rises, or never shows once it has.
+const reverie = {
+  ...SceneView,
+  view: { ...SceneView.view, scene: { ...SceneView.view.scene, treatment: 'reverie' } },
+};
+const risen = motion.reverie.lag + motion.reverie.duration + motion.settle.duration + 200;
+const arriving: StoryObj = {
+  ...pageStory(reverie, { treatment: 'reverie' }), // the screen's, as the presenter derives it
+  play: async ({ canvas }) => {
+    await expect(canvas.queryByRole('button', { name: 'Continue' })).toBeNull();
+  },
+};
+const shown: StoryObj = {
+  ...pageStory(reverie, { treatment: 'reverie' }), // the screen's, as the presenter derives it
+  play: async ({ canvas }) => {
+    await new Promise((r) => setTimeout(r, risen));
+    await expect(await canvas.findByRole('button', { name: 'Continue' })).toBeVisible();
+  },
+};
+export const ReverieArriving: StoryObj = { ...arriving, name: 'Reverie arriving' };
+export const ReverieShown: StoryObj = { ...shown, name: 'Reverie, Continue shown' };
 
 // The showcase authors no dream, so the page takes a synthetic screen (words are their own keys).
 export const Dream: StoryObj = {

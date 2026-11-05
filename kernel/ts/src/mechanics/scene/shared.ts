@@ -33,7 +33,13 @@ export function running(world: World, actor: CharacterId): SceneView | undefined
     if (typeof index !== 'number' || index < 1 || index > count) continue;
     const line = s.steps[index - 1]!;
     if (line.type === 'narrate')
-      return { scene: reference(world, 'scene', s.key), line: line.text, index, count };
+      return {
+        scene: reference(world, 'scene', s.key),
+        line: line.text,
+        index,
+        count,
+        ...(s.treatment && { treatment: s.treatment }),
+      };
   }
 }
 

@@ -1,10 +1,10 @@
 // The Contents sections (Character, Ancestry, Carrying, Map, Settings; Journal: journal.tsx) and
-// the chapter and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
+// the chapter page (the scene page: ScenePage.tsx). Each is only drawing; what a tap does is passed in by Book.tsx.
 import { useContext } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bandPhrase, cap, conditionLine, plain, isPool, toneOf, type Thing } from './model.ts';
+import { bandPhrase, cap, conditionLine, isPool, toneOf, type Thing } from './model.ts';
 import type { Button } from './presenter.ts';
 import { cardContext, useCardInk, useCardTurn } from './card.ts';
 import { InkText, Reanimated } from './fade.ts';
@@ -260,28 +260,5 @@ export function ChapterPage(p: { label: string; title: string; done: () => void 
         )}
       </Page>
     </Pressable>
-  );
-}
-
-/**
- * A modal scene: its text, then Continue (book-ui.md, Chapters, scenes and recovery).
- * - Use: while a scene holds the foreground.
- * - Story: ChapterPages.stories.tsx
- */
-export function ScenePage(p: {
-  scene: NonNullable<GameView['scene']>;
-  text: Say;
-  next?: Button;
-  press: (b: Button) => void;
-}) {
-  const c = usePalette();
-  const t = useType();
-  return (
-    <Page>
-      <Text {...useTitleFocus()} style={prose(c, t)}>
-        {plain(p.text(p.scene.line))}
-      </Text>
-      {p.next && <ContinueButton label={p.next.label} onPress={() => p.press(p.next!)} />}
-    </Page>
   );
 }

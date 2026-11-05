@@ -45,6 +45,15 @@ wandering populations (`mechanics/population/`), scripted actions with luck and 
 (`mechanics/scripted_action/rule.ts`), and discovered places, map and Knock
 ([D10](system/mechanics.md#d10-discovered-places-observations-and-knock-selected-contract)).
 
+### Book treatments
+
+Named, designed wholes the Book draws over a host ([book-ui.md](system/book-ui.md#book-treatments)); a cartridge names one, never its parts.
+
+| Treatment | Host | Sampler |
+|---|---|---|
+| `spirit` | revival, implicitly (not selectable on a scene) | `cartridges/toolbox_showcase` |
+| `reverie` | a modal scene's optional `treatment` | `cartridges/scene_sampler/scenes/rope_reverie.json` |
+
 ## Owner decisions (2026-10-08, paraphrased)
 
 Answers to the plan's open questions ([record](decisions/owner-decision-mechanics-toolbox-2026-10-08.md#answers-to-the-open-questions)):

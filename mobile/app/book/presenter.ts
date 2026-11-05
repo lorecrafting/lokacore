@@ -254,6 +254,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     ended: s.ended,
     fell: !!s.ended && s.fell === s.ended, // the closed page is your death's (book-ui.md, Falling)
     spirit: ghost,
+    treatment: s.fault ? undefined : view.scene?.treatment, // a fault shows the scene plain (book-ui.md, Book treatments)
   };
 }
 
