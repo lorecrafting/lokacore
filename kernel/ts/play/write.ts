@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path';
 import { files } from './todo.ts';
 import { type Bytes, current, DIRS, guarded, named, placed, refuse, Refused } from './guard.ts';
 import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
+import { apply } from './edit_model.ts';
 import { edit, located } from './prose.ts';
 import { loka, opened, worlds } from './worlds.ts';
 
@@ -19,7 +20,6 @@ type Sent = Record<string, any>;
 type Tree = ReturnType<typeof tree>;
 
 const CAP = 64 * 1024 * 1024; // journal characters, every entry's before and after
-const OWN = new Set(['__proto__', 'constructor', 'prototype']); // never a field to set
 export const json = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`;
 const diff = (a: Map<string, Bytes>, b: Map<string, Bytes>): Change[] =>
   [...new Set([...a.keys(), ...b.keys()])]
@@ -72,29 +72,6 @@ function fresh(path: string, was: unknown) {
   return sha256(bytes) === was ? bytes : stale(bytes);
 }
 
-/** One path op on a parsed file: `{path, value}` sets, `{path, delete: true}` removes. */
-function applied(doc: unknown, op: Sent) {
-  const path = op?.path;
-  const step = (s: unknown) => ['string', 'number'].includes(typeof s) && !OWN.has(s as string);
-  if (!Array.isArray(path) || !path.length || !path.every(step))
-    refuse(400, `a path is a non-empty array of field names and indexes: ${JSON.stringify(path)}`);
-  let at = doc as Record<string, unknown>;
-  for (const s of path.slice(0, -1)) {
-    if (typeof at !== 'object' || at === null) break;
-    at = at[s] as Record<string, unknown>;
-  }
-  if (typeof at !== 'object' || at === null)
-    refuse(400, `a path through a non-object: ${JSON.stringify(path)}`);
-  const last = path.at(-1);
-  // an array step is an index in it, or one past its end to append a value
-  const end = Array.isArray(at) && at.length - (op.delete === true ? 1 : 0);
-  if (end !== false && !(Number.isInteger(last) && last >= 0 && last <= end))
-    refuse(400, `not an index of the array: ${last}`);
-  if (op.delete === true) Array.isArray(at) ? at.splice(last, 1) : delete at[last];
-  else if (op.value === undefined) refuse(400, 'an op sets a value or deletes');
-  else at[last] = op.value;
-}
-
 function change(t: Tree, { file, was, ops }: Sent) {
   const path = guarded(t.root, file, 'read');
   if (!file.endsWith('.json')) refuse(400, 'a scene file changes by /edit, a line at a time');
@@ -106,7 +83,11 @@ function change(t: Tree, { file, was, ops }: Sent) {
     refuse(400, `${file} is not JSON: fix it first`);
   }
   if (!Array.isArray(ops)) refuse(400, 'ops: an array');
-  for (const op of ops) applied(doc, op);
+  try {
+    for (const op of ops) apply(doc, op);
+  } catch (e) {
+    refuse(400, (e as Error).message); // apply throws only its Refused, which names the reason
+  }
   return done(t, `change ${file}`, [{ file, before, after: json(doc) }]);
 }
 
