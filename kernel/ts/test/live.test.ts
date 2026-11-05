@@ -216,6 +216,7 @@ test('find is served from the source and artifact the watcher was given', async 
   const server = serve(port, dir, join(dir, 'none.json'));
   t.after(() => server.close());
   const found = await fetch(`http://127.0.0.1:${port}/find?q=${encodeURIComponent('old maud')}`);
+  assert.equal(found.status, 200);
   assert.deepEqual(await found.json(), {
     hits: [{ at: 'text.json:1', text: '{"a": "Old Maud"}' }],
     total: 1,

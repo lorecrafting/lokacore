@@ -70,6 +70,7 @@ m elixir bin/contracts.exs
 (cd kernel/ts && LOKA_WRITE_GEN=1 m node --test --test-reporter=dot test/state_sections.test.ts >/dev/null)
 m elixir bin/contracts.exs # the System graph reads docs/state-sections.gen.json
 m elixir bin/features.exs
+m elixir bin/toolbox_page.exs
 sh bin/review_index.sh
 (cd mobile/app && LOKA_WRITE_GEN=1 m node --test --test-reporter=dot catalogue.test.ts >/dev/null) # docs/BOOK-UI-COMPONENTS.md index
 if touched '^(mobile/|kernel/ts/src/|protocol/)'; then (cd mobile/app && m npm run -s stories:views); fi

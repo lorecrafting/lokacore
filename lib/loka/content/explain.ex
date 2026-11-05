@@ -7,6 +7,7 @@ defmodule Loka.Content.Explain do
   compile, so the compile itself never pays for it.
   """
 
+  alias Loka.Content.Explain.Place
   alias Loka.Content.SourceLines
 
   # One row per line: key | what is wrong | what to do. A key is a code, a schema `error`, a scene
@@ -158,10 +159,19 @@ defmodule Loka.Content.Explain do
 
   @doc "Each diagnostic as its one line, against the source tree at `dir`."
   @spec lines([map()], Path.t()) :: [String.t()]
-  # mutate-skip: the empty clause only spares a clean compile the file scan; same answer
-  def lines([], _), do: []
-
   def lines(diags, dir) do
+    diags
+    |> entries(dir)
+    |> Enum.map(&String.replace_invalid("#{&1["severity"]}: #{Place.text(&1)} #{&1["words"]}"))
+    |> Enum.uniq()
+  end
+
+  @doc "Each diagnostic split for `--json`: severity, code, path, rel, line, column (invalid JSON), words."
+  @spec entries([map()], Path.t()) :: [map()]
+  # mutate-skip: the empty clause only spares a clean compile the file scan; same answer
+  def entries([], _), do: []
+
+  def entries(diags, dir) do
     index = SourceLines.index(dir)
 
     diags
@@ -169,13 +179,19 @@ defmodule Loka.Content.Explain do
     |> without_follow_ons()
     # Errors first: readers (the author panel) take the first line for the build's state.
     |> Enum.sort_by(&(&1["severity"] != "error"))
-    |> Enum.map(&String.replace_invalid("#{&1["severity"]}: #{place(&1, index)} #{words(&1)}"))
+    |> Enum.map(fn d ->
+      d
+      |> Map.take(~w(severity code path))
+      |> Map.merge(Place.of(d, index))
+      |> Map.put("words", words(d))
+      |> Map.new(fn {k, v} -> {k, if(is_binary(v), do: String.replace_invalid(v), else: v)} end)
+    end)
     |> Enum.uniq()
   end
 
   # A scene's `when:` or `needs:` names its fact last on its line; facts.json gives its type.
   defp scene_fact(%{"code" => "FACT_TYPE_MISMATCH", "path" => path} = d, index, dir) do
-    with {file, n} <- index[prefix(path, index)],
+    with {file, n} <- index[Place.prefix(path, index)],
          true <- String.ends_with?(file, ".scene"),
          {:ok, facts} <- facts(dir) do
       fact = last_word(Path.join(dir, file), n)
@@ -378,22 +394,4 @@ defmodule Loka.Content.Explain do
   end
 
   defp extra(_, _, _), do: ""
-
-  defp place(%{"path" => path, "data" => data}, index) do
-    case index[prefix(path, index)] do
-      nil -> if path == "", do: "the cartridge:", else: "#{path}:"
-      {file, line, column} -> "#{file}:#{line}:#{column}"
-      {file, line} -> "#{file}:#{data["line"] || line}"
-    end
-  end
-
-  # The longest indexed path this path starts with, on a step boundary (a missing field has no line).
-  defp prefix(path, index) do
-    index
-    |> Map.keys()
-    |> Enum.filter(fn k ->
-      path == k or String.starts_with?(path, k <> ".") or String.starts_with?(path, k <> "[")
-    end)
-    |> Enum.max_by(&byte_size/1, fn -> nil end)
-  end
 end
