@@ -2,6 +2,7 @@
 import { fillSlots } from '../../packages/game-view/line_words.ts';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
 import { LABEL } from './labels.ts';
+import type { Logs } from './logs.ts';
 
 type Foe = { name: string; words?: { bare: string; article?: string } };
 type Say = (key: string) => string;
@@ -23,4 +24,12 @@ export function combatTitle(c: NonNullable<GameView['combat']>, text: Say, opene
     : ['combat.title_attacks_you', 'attacker'];
   const said = text(key);
   return said && said !== key ? fillSlots(said, { [slot]: named(foe, text) }, String) : undefined;
+}
+
+// The encounter's title, kept while its opener cannot be read (a save in flight, the opener fallen)
+// and on the closed page; a new encounter starts afresh.
+export function keptTitle(s: Logs, c: GameView['combat'], text: Say, opener: Game['opener']) {
+  const said = c && combatTitle(c, text, opener);
+  if (c && (said || s.title?.id !== c.encounter_id)) s.title = { id: c.encounter_id, said };
+  return s.title?.said;
 }

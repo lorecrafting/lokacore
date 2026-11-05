@@ -1,5 +1,5 @@
 // A full reading page with the offered actions following its combat history.
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import type { group } from './model.ts';
 import { ActionCard, Cards, PickLists, type Shown } from './actions.tsx';
 import { picks } from './pick.ts';
@@ -14,7 +14,7 @@ import { Reanimated } from './fade.ts';
 import { useDry } from './press.ts';
 import type { presenter, Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
-import { combatTitle, named } from './combat-title.ts';
+import { named } from './combat-title.ts';
 
 function Foot(p: { label: typeof LABEL.letGo | typeof LABEL.backToWorld; onPress: () => void }) {
   return (
@@ -94,11 +94,6 @@ function Responses(p: Props & { shown: Shown }) {
 export function Combat(p: Props) {
   const { view, text, combatLog, ended, fell } = p.screen;
   const shown: Shown = useState(); // one for every foe's list: one list open at a time (book-ui.md)
-  // Kept while its fight's opener cannot be read (a save in flight, the opener fallen) and on the closed page.
-  const title = useRef<{ id: string; said?: string }>(undefined);
-  const said = view.combat && combatTitle(view.combat, text, p.screen.opener);
-  if (view.combat && (said || title.current?.id !== view.combat.encounter_id))
-    title.current = { id: view.combat.encounter_id, said };
   if (!view.combat && !ended) return null;
   // A closed encounter keeps its page: no actions, one foot control (book-ui.md, Closure).
   // Let go goes to World; with `revival` the presenter's leaveCombat makes it the spirit state.
@@ -109,7 +104,7 @@ export function Combat(p: Props) {
     // Paper behind the running head too: the leaving page fades over the arriving one.
     <Blow under={<UnderInk view={view} />}>
       <RunningHead view={view} text={text} />
-      <Page paperless title={title.current?.said} foot={foot} scrollToEnd={combatLog.length > 0}>
+      <Page paperless title={p.screen.title} foot={foot} scrollToEnd={combatLog.length > 0}>
         <LogLines lines={combatLog} rounds />
         {view.combat && <Responses {...p} shown={shown} />}
       </Page>
