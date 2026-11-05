@@ -25,6 +25,7 @@ const story = (outline: Story['outline']): Story => ({
     nodes,
     edges: [
       { from: ref('reaction', 'ring'), to: f1, path: '/steps/0', op: 'fact.assign', set: true },
+      { from: ref('reaction', 'ring'), to: f1, path: '/steps/2', op: 'fact.assign', set: true },
       { from: d1, to: f1, path: '/when', op: 'fact_compare' },
       { from: ref('reaction', 'wait'), to: f1, path: '/when', op: 'time_since' },
       { from: d1, to: q1, path: '/steps/1', op: 'quest.start' },
@@ -127,8 +128,8 @@ test('a selection opens the folded part and beat that hold it and focuses its ro
   assert.equal(list.reveal(planted, clicked, d1), clicked);
 });
 
-// Break: Trace mixes writers with readers, loses the reader's beat or the clock read's dash, or
-// says nothing of a fact no one sets.
+// Break: Trace mixes writers with readers, loses the reader's beat or the clock read's dash, lists
+// a node once per step that sets the fact, or says nothing of a fact no one sets.
 test('Trace follows a fact from where it is set to where it is read, with each beat', () => {
   assert.deepEqual(list.trace(planted, f1), [
     { label: 'set at', ref: ref('reaction', 'ring'), key: 'ring', beat: undefined },

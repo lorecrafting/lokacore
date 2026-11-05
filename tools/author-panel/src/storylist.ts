@@ -191,7 +191,10 @@ export function trace(s: Story, ref: string): TraceRow[] {
     beat: beats.find((b) => b.nodes.includes(e.from))?.n,
     ...(DASHED.has(e.op ?? '') && { dashed: true }),
   });
-  const into = s.graph.edges.filter((e) => e.to === ref);
+  // one row per node and role: a dialogue that sets the fact in two choices is one writer
+  const into = s.graph.edges.filter(
+    (e, i, all) => e.to === ref && all.findIndex((x) => x.to === ref && x.from === e.from && x.op === e.op) === i,
+  );
   if (fromRef(ref)?.kind !== 'fact') return into.map((e) => row(e.op ?? 'used at', e));
   const o = s.report.orphan_facts;
   const never = (
