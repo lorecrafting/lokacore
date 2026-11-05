@@ -658,8 +658,8 @@ test("level lines move up only for the actor's level; a penalty line stays last"
   const reached = (character_id: string) =>
     ({ payload: { type: 'level_reached', character_id, level: 2 } }) as unknown as DomainEvent;
   const at = (character_id: string) => {
-    const p: { narration: Text[]; levelAt?: number } = { narration: [{ key: 'a' }] };
-    say(p, w.character, reached(character_id), [{ key: 'b' }]);
+    const p: { narration: Text[]; levelAt?: number } = { narration: [{ key: 'a' } as Text] };
+    say(p, w.character, reached(character_id), [{ key: 'b' } as Text]);
     return p.levelAt;
   };
   assert.equal(at(w.character), 1);
