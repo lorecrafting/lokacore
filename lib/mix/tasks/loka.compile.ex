@@ -43,7 +43,7 @@ defmodule Mix.Tasks.Loka.Compile do
   def run(args) do
     {status, lines} = compile(args)
     Enum.each(lines, &IO.puts(:stderr, &1))
-    if status != 0, do: exit({:shutdown, status})
+    if status != 0, do: exit({:shutdown, status}), else: :ok
   end
 
   defp compile([dir, out | opts]) do
