@@ -62,6 +62,7 @@ defmodule Loka.ContentLintTest do
 
     talk = "text.json: action.talk has no text, yet a dialogue has no name of its own"
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{}}) == [talk]
+    assert lint(%{"scenes/bram.scene" => %{}, "text.json" => %{}}) == [talk]
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{"action.talk" => ""}}) == [talk]
 
     assert lint(%{"dialogues/bram.json" => %{}, "text.json" => %{"action.talk" => "Talk to"}}) ==
@@ -166,6 +167,12 @@ defmodule Loka.ContentLintTest do
 
     assert Lint.findings(talk.(%{"label" => "l", "narration" => "n"})) == bad
     assert Lint.findings(talk.(%{"label" => "c"})) == bad
+    {t, scene} = Map.pop(talk.(%{"label" => "l"}), "dialogues/t.json")
+
+    assert Lint.findings(Map.put(scene, "scenes/t.scene", t)) == [
+             "scenes/t.scene: choice leave only leaves; the page's own Leave control ends the talk"
+           ]
+
     # an asked mark does nothing of its own, so it does not make an exit a real choice
     assert Lint.findings(talk.(%{"label" => "l", "asked" => true})) == bad
     # only a label that starts with Leave or Close is an exit
@@ -349,6 +356,8 @@ defmodule Loka.ContentLintTest do
           {"npcs/n.json", shop.(%{"item" => "x", "stock" => %{"items" => ["lamp_oil"]}})},
           {"services/s.json", %{"benefit" => %{"escrow" => %{"items" => ["lamp_oil"]}}}},
           {"dialogues/d.json",
+           %{"name" => "d", "choices" => %{"give" => %{"hand_over" => %{"item" => "lamp_oil"}}}}},
+          {"scenes/d.scene",
            %{"name" => "d", "choices" => %{"give" => %{"hand_over" => %{"item" => "lamp_oil"}}}}},
           {"npcs/n.json", shop.(%{"item" => "lamp_oil", "buy" => 2, "sell" => 1})}
         ],
