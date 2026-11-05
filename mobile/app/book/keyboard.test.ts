@@ -1,4 +1,4 @@
-// size: allow 640, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
+// size: allow 645, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
 import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -393,7 +393,8 @@ test('the spirit state and the reverie hide the status row, bleeding included', 
     const b = book.props.children.props.children.props.children[0].props.children[1].props.children;
     return b.type(b.props);
   };
-  assert.notEqual(bottom({}), null);
+  const drawn = [bottom({}).props.children].flat().find((c: any) => c?.props?.bleeding);
+  assert.equal(drawn.props.bleeding.label, 'bleeding'); // drawn outside both
   assert.equal(bottom({ spirit: true }), null);
   assert.equal(bottom({ treatment: 'reverie' }), null);
 });

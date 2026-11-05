@@ -12,7 +12,7 @@ import { fixture, sampler } from '../../../kernel/ts/test/c5_bleed_fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 import type { Db } from './store.ts';
-import { bleedingLine, buttonsOf, group } from '../../app/book/model.ts';
+import { bleedingParts, buttonsOf, group } from '../../app/book/model.ts';
 
 function managedBleedBundle() {
   const change = (c: any) => {
@@ -324,13 +324,13 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
   );
   const row = a.story.world().state.bleeds![fresh.body]!;
   assert.ok(row.active);
-  assert.equal(
-    bleedingLine(
+  assert.deepEqual(
+    bleedingParts(
       gameView(a.story.world()).bleeding!,
       64950,
-      (k) => a.story.world().cartridge.text[k],
+      (k: string) => a.story.world().cartridge.text[k]!,
     ),
-    'Bleeding · 5m remaining · 1 HP each 100s',
+    ['Bleeding', '5m remaining', '1 HP each 100s'],
   );
   assert.deepEqual(
     group(

@@ -125,7 +125,7 @@ const preview: Preview = {
   afterEach: ({ canvasElement }) => {
     const words = (s: string) => s.replace(/\s+/g, ' ').trim();
     for (const b of canvasElement.querySelectorAll<HTMLElement>('[role="button"], button')) {
-      if (!b.checkVisibility()) continue;
+      if (b.closest('[aria-hidden="true"]') && !b.checkVisibility()) continue;
       const hidden = [...b.querySelectorAll<HTMLElement>('[aria-hidden="true"]')];
       hidden.forEach((n) => (n.style.display = 'none'));
       const shown = words(b.innerText); // innerText: laid-out lines, so blocks keep their break
