@@ -124,7 +124,7 @@ test('after a switch the restarted watcher writes into the new world only', asyn
   t.after(() => process.kill(-dev.pid!));
   const current = () =>
     ask(port, '/world').then(
-      (r) => r.body.current,
+      (r) => (r.body as { current: string }).current,
       () => undefined,
     );
   const now = async (name: string) => {
