@@ -72,9 +72,10 @@ function useLevel(p: MapProps) {
   const all = map.levels(rooms);
   const sel = rooms.find((r) => r.ref === p.selected);
   const here = rooms.find((r) => r.ref === p.here);
-  const [z, setZ] = useState(() =>
+  const [picked, setZ] = useState(() =>
     map.levelOf(rooms, sel?.key, map.levelOf(rooms, here?.key, all[0] ?? 0)),
   );
+  const z = all.includes(picked) ? picked : (all[0] ?? 0); // a recompile can empty the level picked
   const level = map.onLevel(rooms, z);
   const [ref, size] = useSize();
   const v = useView();
@@ -97,7 +98,7 @@ function useLevel(p: MapProps) {
 }
 export type Level = ReturnType<typeof useLevel>;
 
-/** When `r` becomes the selected or current room: its level, and a pan only if it is off screen. */
+/** When `r` becomes the selected or current room, or moves level: its level, and a pan only if it is off screen. */
 function useFollow(
   rooms: MapRoom[],
   r: MapRoom | undefined,
@@ -111,7 +112,7 @@ function useFollow(
     const nz = map.levelOf(rooms, r.key, z);
     if (nz !== z) toLevel(nz, r.at);
     else v.ease(map.show(v.now.current, size, r.at));
-  }, [r?.ref, size.w > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [r?.ref, r?.at?.z, size.w > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 export function AreaMap(p: MapProps) {

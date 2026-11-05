@@ -77,7 +77,7 @@ test('dividers move 16 px, 64 with Shift, inside their range; Cmd-\\ and Cmd-/ f
   assert.equal(shell.nudge('slot', 240, 'ArrowRight', false, 600), 240);
   assert.equal(shell.reset('slot'), 240);
   assert.deepEqual([shell.reset('left'), shell.reset('right')], [280, 360]);
-  assert.deepEqual([shell.LAYOUT.left, shell.LAYOUT.right], [280, 360]);
+  assert.deepEqual([shell.LAYOUT.left, shell.LAYOUT.right, shell.LAYOUT.slot], [280, 360, 240]);
   const l = shell.LAYOUT;
   assert.deepEqual([shell.fold(l, '\\').leftOpen, shell.fold(l, '\\').rightOpen], [false, true]);
   assert.deepEqual([shell.fold(l, '/').leftOpen, shell.fold(l, '/').rightOpen], [true, false]);

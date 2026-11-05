@@ -148,7 +148,12 @@ function rooms(source: string, c: Obj, refs: Map<string, string>) {
       if (ref) file.set(ref, [rel, placed(rel)!.area]);
       continue;
     }
-    const held = JSON.parse(readFileSync(join(source, rel), 'utf8')) as Obj;
+    let held: Obj;
+    try {
+      held = JSON.parse(readFileSync(join(source, rel), 'utf8')) as Obj;
+    } catch {
+      continue; // a half-typed bundle is the compiler's to report; its rooms keep no file
+    }
     for (const key of Object.keys(held.rooms ?? {}))
       file.set(refs.get(`rooms/${key}`) ?? '', [rel, bundle]);
   }

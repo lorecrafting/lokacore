@@ -209,14 +209,14 @@ function Slot({ layout, set, story, book, pick, refused }: Shell & { refused?: s
 function useStory(said: unknown[] | undefined) {
   const [story, setStory] = useState<Story>();
   const [refused, setRefused] = useState<string>();
-  useEffect(
-    () =>
-      void getStory().then(
-        (s) => (setStory(s), setRefused(undefined)),
-        (e: Error) => setRefused(said?.length ? e.message.split('\n')[0] : undefined), // no watcher yet: waiting
-      ),
-    [said],
-  );
+  useEffect(() => {
+    let live = true; // a later compile's fetch supersedes this one
+    void getStory().then(
+      (s) => live && (setStory(s), setRefused(undefined)),
+      (e: Error) => live && setRefused(said?.length ? e.message.split('\n')[0] : undefined), // no watcher yet: waiting
+    );
+    return () => void (live = false);
+  }, [said]);
   return [story, refused] as const;
 }
 

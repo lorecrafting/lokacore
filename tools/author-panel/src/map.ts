@@ -8,13 +8,13 @@ export const M = {
   cell: 64,
   w: 48,
   h: 24,
-  char: 7.2, // type.code at 12 px, mono
-  inset: 4,
-  disc: 6,
-  stub: 12,
-  tri: 5,
-  tick: 6,
-  lock: 14,
+  char: 7.2, // type.code's mono advance
+  inset: 4, // mutate-skip: uncalibrated design value
+  disc: 6, // mutate-skip: uncalibrated design value
+  stub: 12, // mutate-skip: uncalibrated design value
+  tri: 5, // mutate-skip: uncalibrated design value
+  tick: 6, // mutate-skip: uncalibrated design value
+  lock: 14, // mutate-skip: uncalibrated design value
   pad: 12, // space.lg
   min: 0.25,
   max: 3,
@@ -39,7 +39,8 @@ export const onLevel = (rooms: MapRoom[], z: number) =>
   rooms
     .filter((r) => r.at?.z === z)
     .sort((a, b) => cmp(a.area ?? '', b.area ?? '') || cmp(a.key, b.key));
-const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+const cmp = (a: string, b: string) => Number(a > b) - Number(a < b);
+const byKey = (a: MapRoom, b: MapRoom) => cmp(a.key, b.key);
 
 export const centre = (at: At) => ({ x: (at.x + 0.5) * M.cell, y: (at.y + 0.5) * M.cell });
 
@@ -54,7 +55,7 @@ export function edges(level: MapRoom[]) {
       if (VERTICAL.has(e.dir) || !on.has(e.to) || e.to === r.key) continue;
       const back = on.get(e.to)!.exits.find((b) => b.to === r.key && !VERTICAL.has(b.dir));
       const pair = [r.key, e.to].sort().join(' ');
-      if (back && seen.has(pair)) continue;
+      if (seen.has(pair)) continue; // a reciprocal pair, or a second one-way exit to the same room
       seen.add(pair);
       out.push({
         from: r.key,
@@ -84,10 +85,8 @@ export function hulls(level: MapRoom[], all: string[]) {
   });
 }
 
-/** A room's label at `zoom`: the full key in a pill when it is marked (selected, here, hovered),
- * else from zoom 1 the key clipped to its box with `…`, else none. */
-export function label(key: string, zoom: number, marked: boolean) {
-  if (marked) return { pill: key };
+/** A room's label at `zoom`: from zoom 1 the key clipped to its box with `…`, else none. */
+export function label(key: string, zoom: number) {
   if (zoom < M.labels) return undefined;
   const fits = Math.floor((M.w * zoom - 2 * M.inset) / M.char);
   return { text: key.length <= fits ? key : `${key.slice(0, Math.max(fits - 1, 0))}…` };
@@ -152,22 +151,23 @@ const ARROW: Record<string, [number, number]> = {
 };
 /** The arrow key's next room: the nearest on the level within 45° of its direction (ties by key). */
 export function nearest(level: MapRoom[], from: MapRoom, key: string) {
-  const [dx, dy] = ARROW[key] ?? [0, 0];
-  let best: [number, MapRoom] | undefined;
-  for (const r of level) {
+  const [dx, dy] = ARROW[key];
+  let [best, far] = [undefined as MapRoom | undefined, Infinity];
+  for (const r of [...level].sort(byKey)) {
     const [x, y] = [r.at!.x - from.at!.x, r.at!.y - from.at!.y];
     const d = Math.hypot(x, y);
-    if (!d || x * dx + y * dy < d * Math.SQRT1_2 - 1e-9) continue;
-    if (!best || d < best[0] || (d === best[0] && r.key < best[1].key)) best = [d, r];
+    // within 45°: ahead at least as far as aside (cells are integers, so exact)
+    if (!d || x * dx + y * dy < Math.abs(x * dy - y * dx)) continue;
+    if (d < far) [best, far] = [r, d];
   }
-  return best?.[1];
+  return best;
 }
 
 /** Tab's way in: the selected room on the level, else the current one, else the first by key. */
 export const entry = (level: MapRoom[], selected?: string, here?: string) =>
   level.find((r) => r.key === selected) ??
   level.find((r) => r.key === here) ??
-  [...level].sort((a, b) => cmp(a.key, b.key))[0];
+  [...level].sort(byKey)[0];
 
 export type Marks = { unreached?: boolean; locked?: boolean; here?: boolean; selected?: boolean };
 /** A room's accessible name: key, title, area, level, every exit, then its marks. */

@@ -207,6 +207,15 @@ test("the map's rooms: file, area by folder or bundle, exits and layout cell", (
     ['areas/town/rooms/attic.json', 'town', null, { x: 2, y: -1, z: 0 }],
   );
   assert.deepEqual(by('village_green')?.exits, [{ dir: 'south', to: 'ferry_landing' }]);
+  // Break: a half-typed bundle on disk (the model rebuilds after a failed compile) throws the map away.
+  const yard = readFileSync(join(src, 'areas/yard.json'), 'utf8');
+  writeFileSync(join(src, 'areas/yard.json'), '{"rooms": {');
+  try {
+    const shed = story(src, dev, []).map.find((r) => r.key === 'shed');
+    assert.deepEqual([shed?.file, shed?.area], [undefined, null]);
+  } finally {
+    writeFileSync(join(src, 'areas/yard.json'), yard);
+  }
 });
 
 // Break: rows keyed by the wrong node (an area folder's, a `.scene` as other than its dialogue),

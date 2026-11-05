@@ -15,17 +15,12 @@ export function Drawing(d: DrawProps) {
   const [focus, setFocus] = useState<string>();
   const view = d.l.v.view!;
   useWheel(svg, d);
-  const sel = d.l.level.find((r) => r.ref === d.p.selected);
-  const tab =
-    d.l.level.find((r) => r.key === focus) ??
-    map.entry(d.l.level, sel?.key, d.l.level.find((r) => r.ref === d.p.here)?.key);
-  const pills = d.l.level.filter(
-    (r) => r.ref === d.p.selected || r.ref === d.p.here || r.key === hover,
-  );
+  const tab = tabOf(d, focus);
   return (
     <svg
       ref={svg}
       role="group"
+      tabIndex={-1}
       aria-label={`Area map, level ${d.l.z}`}
       className="absolute inset-0 size-full touch-none select-none"
       onKeyDown={(e) => keys(e, d, tab, setFocus)}
@@ -45,10 +40,19 @@ export function Drawing(d: DrawProps) {
           hover={setHover}
         />
       ))}
-      <Pills rooms={pills} v={view} here={d.p.here} />
+      <Pills
+        rooms={d.l.level.filter((r) => [d.p.selected, d.p.here].includes(r.ref) || r.key === hover)}
+        v={view}
+        here={d.p.here}
+      />
     </svg>
   );
 }
+
+/** The one room in the tab order: the focused one, else the map's way in. */
+const tabOf = (d: DrawProps, focus?: string) =>
+  d.l.level.find((r) => r.key === focus) ??
+  map.entry(d.l.level, d.l.sel?.key, d.l.level.find((r) => r.ref === d.p.here)?.key);
 
 const marks = (r: MapRoom, d: DrawProps): Marks => ({
   unreached: d.reach.unreached.has(r.ref),
@@ -154,8 +158,9 @@ function keys(
     (setFocus(r.key), svg.querySelector<SVGElement>(`[data-key="${CSS.escape(r.key)}"]`)?.focus());
   const act: Record<string, (() => unknown) | undefined> = {
     Enter: () => from && (e.shiftKey ? d.p.go(from.key) : d.p.pick(map.select(from))),
-    PageUp: () => i < d.l.all.length - 1 && d.l.toLevel(d.l.all[i + 1]),
-    PageDown: () => i > 0 && d.l.toLevel(d.l.all[i - 1]),
+    // the focused room leaves with its level: focus stays in the map
+    PageUp: () => i < d.l.all.length - 1 && (svg.focus(), d.l.toLevel(d.l.all[i + 1])),
+    PageDown: () => i > 0 && (svg.focus(), d.l.toLevel(d.l.all[i - 1])),
     '+': () => d.l.zoom(M.step),
     '=': () => d.l.zoom(M.step),
     '-': () => d.l.zoom(1 / M.step),

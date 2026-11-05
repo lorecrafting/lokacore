@@ -140,14 +140,19 @@ const RING = 'hidden fill-none stroke-ring stroke-2 group-focus-visible:block'; 
 /** The box (or overview disc) with its state's stroke and fill, the pin, the lock and the label. */
 export function Box({ r, v, m }: { r: MapRoom; v: View; m: Marks }) {
   const c = at(r, v);
-  const look = m.unreached
-    ? `fill-none stroke-muted-foreground ${DASH}`
-    : `${m.selected ? 'fill-accent' : 'fill-card'} ${m.visited ? 'stroke-foreground' : 'stroke-input'}`;
-  const ring = m.selected ? 'stroke-2 stroke-ring' : '';
+  // one stroke colour each: selected, else unreached, else visited, else the default
+  const stroke = m.selected
+    ? 'stroke-2 stroke-ring'
+    : m.unreached
+      ? `stroke-muted-foreground ${DASH}`
+      : m.visited
+        ? 'stroke-foreground'
+        : 'stroke-input';
+  const look = `${m.selected ? 'fill-accent' : m.unreached ? 'fill-none' : 'fill-card'} ${stroke}`;
   if (v.zoom < M.overview)
     return (
       <>
-        <circle cx={c.x} cy={c.y} r={M.disc / 2} className={`${look} ${ring}`} />
+        <circle cx={c.x} cy={c.y} r={M.disc / 2} className={look} />
         <circle cx={c.x} cy={c.y} r={M.disc / 2 + 3} className={RING} />
       </>
     );
@@ -155,7 +160,7 @@ export function Box({ r, v, m }: { r: MapRoom; v: View; m: Marks }) {
   const [x, y] = [c.x - w / 2, c.y - h / 2];
   return (
     <>
-      <rect x={x} y={y} width={w} height={h} rx={6} className={`${look} ${ring}`} />
+      <rect x={x} y={y} width={w} height={h} rx={6} className={look} />
       <rect x={x - 2} y={y - 2} width={w + 4} height={h + 4} rx={8} className={RING} />
       <Inside r={r} zoom={v.zoom} m={m} c={c} x={x} w={w} />
     </>
@@ -172,7 +177,7 @@ function Inside(i: {
   w: number;
 }) {
   const { m, c } = i;
-  const text = label(i.r.key, i.zoom, false);
+  const text = label(i.r.key, i.zoom);
   const lock = M.lock;
   return (
     <>
