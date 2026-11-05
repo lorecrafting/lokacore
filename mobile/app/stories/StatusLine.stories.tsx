@@ -25,7 +25,7 @@ const meta = {
   args: {
     time: 3,
     resources: rested,
-    text: (key: string) => key,
+    text: (key: string) => key.replace('condition.', ''),
     locked: false,
     pending: false,
     open: fn(),
@@ -138,7 +138,7 @@ export const DangerHp: Story = {
 export const Bleeding: Story = {
   args: {
     bleeding: {
-      label: 'bleeding',
+      label: 'condition.bleeding', // as kernel/ts/src/view/bleed.ts sends it
       ends_at: 40,
       hp_loss: 1,
       tick_every: 60,
@@ -275,7 +275,6 @@ export const PrologueNarrow: Story = {
     ),
   ],
   args: {
-    text: (key: string) => key.replace('condition.', ''),
     calendar: { day: 1, hour: 6, subdivision: 0, solar: 'dawn', lunar: 'full' },
     position: 'standing' as never,
     openPosition: fn(),

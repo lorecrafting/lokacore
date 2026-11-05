@@ -1,4 +1,4 @@
-// size: allow 315, one story per StatusIcons doc-comment state, and the drawings' contact sheet
+// size: allow 330, one story per StatusIcons doc-comment state, and the drawings' contact sheet
 // StatusIcons: the round, graphic-only condition icons below the status line
 // (StatusIcons' doc comment). Time 720 in every story. CanvasKit loads first, served locally;
 // without it the discs are empty.
@@ -300,7 +300,8 @@ export const Drawings: Story = {
       )}
     </View>
   ),
-  // Breaks: a drawing Skia cannot parse (it draws nothing), or a disc that draws no canvas.
+  // Breaks: a drawing Skia cannot parse (it draws nothing), a disc that draws no canvas, or a
+  // canvas left blank, as when it keeps a WebGL context past the browser's cap and loses it.
   play: async ({ canvasElement }) => {
     const { Skia } = await import('@shopify/react-native-skia');
     const bad = [...Object.values(glyphs), ...Object.values(fallback)].filter(
@@ -309,6 +310,16 @@ export const Drawings: Story = {
     await expect(bad).toEqual([]);
     await waitFor(() =>
       expect(canvasElement.querySelectorAll('canvas')).toHaveLength(labels.length * kinds.length),
+    );
+    const inked = (c: HTMLCanvasElement) =>
+      c
+        .getContext('2d')
+        ?.getImageData(0, 0, c.width, c.height)
+        .data.some((v, i) => i % 4 === 3 && v > 0);
+    await waitFor(
+      () =>
+        expect([...canvasElement.querySelectorAll('canvas')].filter((c) => !inked(c))).toEqual([]),
+      { timeout: 5000 },
     );
   },
 };

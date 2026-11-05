@@ -13,7 +13,8 @@ const SIDE = size.statusIcon - space.md; // 14 px, no token of its own (status-l
  */
 export default function StatusGlyph(p: { d: string; ink: string }) {
   return (
-    <Canvas aria-hidden style={{ width: SIDE, height: SIDE }}>
+    // Static: draw once and release the WebGL context (the browser keeps about 16 live).
+    <Canvas aria-hidden __destroyWebGLContextAfterRender style={{ width: SIDE, height: SIDE }}>
       <Group transform={[{ scale: SIDE / BOX }]}>
         <Path
           path={p.d}

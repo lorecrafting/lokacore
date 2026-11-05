@@ -446,6 +446,9 @@ test('status icons: debuffs first, six or five then +N, drawn by label, time and
   const fed = glyphs['condition.fed'];
   assert.deepEqual(shown.map(glyphOf), [down, down, ring, fed, up]);
   assert.equal(drawingOf('condition.chilled', 'debuff'), glyphs['condition.cold']);
+  delete g.CanvasKit; // a page without CanvasKit loads no Skia: the disc stays empty
+  assert.equal(discOf(icons(five)[0]).props.children, false);
+  g.CanvasKit = {};
   const c = color.light;
   const look = (e: any) => {
     const disc = discOf(e).props;
