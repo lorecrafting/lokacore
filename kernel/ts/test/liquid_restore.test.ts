@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { step, type World } from '../src/index.ts';
+import type { CommandId } from '../src/contracts.gen.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { id, liquidFresh } from './liquid_fixture.ts';
 
@@ -40,7 +41,7 @@ test('a liquid restoring mv raises it by its amount and stops at the pool maximu
     const next = step(
       world,
       {
-        id: `aaaaaaaa-0000-4000-8000-00000000000${n}`,
+        id: `aaaaaaaa-0000-4000-8000-00000000000${n}` as CommandId,
         world_context_id: world.context,
         payload,
       },
