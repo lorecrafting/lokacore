@@ -104,6 +104,14 @@ export const COMMANDS: Item[] = [
   ['hold', 'Hold or release compiles'],
   ['undo', 'Undo the last edit'],
   ['go', 'Go to room'],
+  // the map's edits on the selected room (mapwire.ts `mapCommand`)
+  ['map-grow', 'New room from here'],
+  ['map-area', 'Move room to area'],
+  ['map-unlink', 'Delete exit'],
+  ['map-one-way', 'One-way exit (toggle)'],
+  ['map-door', 'Door on exit'],
+  ['map-lock', 'Lock on exit'],
+  ['map-undo', 'Undo the last map edit'],
 ].map(([id, label]) => ({ kind: 'command', label, detail: 'command', id }));
 /** The palette's rows: commands, /story's definitions, /find's text keys and the `~` keys. */
 export function items(
