@@ -20,6 +20,9 @@ No new component or page type. Reverie reuses the scene page (`ScenePage`), `Con
 | Impatience | A tap anywhere before Continue shows completes the line and shows Continue; sends nothing | The chapter title's tap-to-skip precedent |
 | Reduced motion, Flashes off | Unchanged | An opacity rise has no movement and no peak |
 | Screen reader | Line and Continue at once; title focus reads the line once | The chapter title keeps an explicit Continue for readers the same way |
+| Kept place (PR #611) | The kept place is Continue itself, drawn but invisible, not pressable and hidden from touch and focus, so a wrapped label reserves its own height; a shift on wrap is a bug | The spec says nothing moves; a fixed card height breaks it at large type |
+| Exit (PR #611) | No fade out: the layer goes with the page turn off the last line, as it came with the turn in | The turn is the transition; a second fade over it would muddy it |
+| The opening action's cues (PR #611) | Dropped for good, every kind: its sounds, their haptics, its washes and flashes, its first-time gilt. Never held for the end, never played at the open. The press's own selection haptic stays | The reverie replaces that moment; a held clang after the dream would land out of context. The log and status row still carry what happened |
 | Sound | Bed, weather and music fade over `motion.bed` on the turn in; no sound inside, page turns and Continue included; the next bed opens after the turn out. The selection haptic stays | "Silence" is about sound; a haptic is felt |
 | Words | None new. Continue's label is the engine's offered button | No chrome word is needed |
 
