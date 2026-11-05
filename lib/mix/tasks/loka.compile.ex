@@ -10,40 +10,61 @@ defmodule Mix.Tasks.Loka.Compile do
   `[{severity, code, path, rel, line, column, words}]` (the author preview's cards place them).
   `--placeholders <path>` (after `--allow-placeholders --json <path>`) writes each placeholder's
   text key => `file:line` (Loka.Content.placeholder_lines/2), for the in-Book editor.
+
+  `mix loka.compile --serve` (the author preview's resident compiler, docs/system/cartridge.md,
+  Author preview): each stdin line is the arguments above, tab-separated; each compile writes the
+  same files and answers one stdout line `loka.compile {"status":0|1,"stderr":<the lines it would
+  print>}`. Before each it recompiles the project's Elixir code and halts (75) if that compiled
+  anything, so no request is served by stale modules: the caller reruns it one-shot, on the new
+  code. It halts on any other failure too, and at the end of stdin.
   """
   use Mix.Task
   use Boundary, top_level?: true, deps: [Loka.Content, Mix]
 
-  @usage "usage: mix loka.compile <source dir> <artifact path> [--allow-placeholders] [--json <path>] [--placeholders <path>]"
+  @usage "usage: mix loka.compile <source dir> <artifact path> [--allow-placeholders] [--json <path>] [--placeholders <path>] | mix loka.compile --serve"
+  # mix itself writes to stdout too ("Compiling 1 file"): a reply is the line with this prefix
+  @reply "loka.compile "
 
   @impl Mix.Task
-  def run([dir, out | opts]) do
+  def run(["--serve"]) do
+    for line <- IO.stream(:stdio, :line) do
+      if !match?({:noop, _}, Mix.Task.rerun("compile.elixir")), do: System.halt(75)
+      {status, lines} = compile(String.split(String.trim_trailing(line, "\n"), "\t"))
+      stderr = Enum.map_join(lines, &(&1 <> "\n"))
+      IO.puts(@reply <> JSON.encode!(%{status: status, stderr: stderr}))
+    end
+  end
+
+  def run(args) do
+    {status, lines} = compile(args)
+    Enum.each(lines, &IO.puts(:stderr, &1))
+    if status != 0, do: exit({:shutdown, status})
+  end
+
+  defp compile([dir, out | opts]) do
     {allow, json, held} = options(opts)
     if !File.dir?(dir), do: Mix.raise("mix loka.compile: #{dir} is not a directory")
     result = compiled(Loka.Content.compile(dir), dir, out, allow, json)
 
-    if held,
+    if held && elem(result, 0) == 0,
       do: File.write!(held, JSON.encode!(Loka.Content.placeholder_lines(File.read!(out), dir)))
 
     result
   end
 
-  def run(_), do: Mix.raise(@usage)
+  defp compile(_), do: Mix.raise(@usage)
 
   defp compiled({:ok, bytes, warnings}, dir, out, allow, json) do
     left = if allow, do: [], else: Loka.Content.placeholders(bytes, dir)
     # Warnings, then the placeholder refusals, each its own sorted block as before --json.
-    said(warnings, dir)
-    said(left, dir)
     split(json, warnings ++ left, dir)
-    if left != [], do: exit({:shutdown, 1})
-    File.write!(out, bytes)
+    if left == [], do: File.write!(out, bytes)
+    {if(left == [], do: 0, else: 1), said(warnings, dir) ++ said(left, dir)}
   end
 
   defp compiled({:error, diags}, dir, _, _, json) do
-    said(diags, dir)
     split(json, diags, dir)
-    exit({:shutdown, 1})
+    {1, said(diags, dir)}
   end
 
   defp options([]), do: {false, nil, nil}
@@ -56,8 +77,7 @@ defmodule Mix.Tasks.Loka.Compile do
 
   defp options(_), do: Mix.raise(@usage)
 
-  defp said(diags, dir),
-    do: diags |> Loka.Content.explained(dir) |> Enum.each(&IO.puts(:stderr, &1))
+  defp said(diags, dir), do: Loka.Content.explained(diags, dir)
 
   defp split(nil, _, _), do: :ok
 
