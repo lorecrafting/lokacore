@@ -45,7 +45,7 @@ const hash = (ref: string, set: number, n: number) =>
 /** The in-test roll: does `ref`'s set fire at boundary n under `chance`. */
 const fires = (ref: string, set: number, n: number, chance: number) =>
   hash(ref, set, n).readUInt32BE(4) % 100 < chance;
-const drip: Text = { key: 'room.cave.drip' };
+const drip = { key: 'room.cave.drip' } as Text;
 const AMBIENT = new Set(['room.cave.drip', 'item.lantern.gutter', 'emote.performed']);
 
 let n = 0;
@@ -91,7 +91,7 @@ test('wait 60000: exactly one line per present entity, as the in-test rolls say'
     ...(fires(LANTERN, 0, 66, 50) ? ['item.lantern.gutter'] : []),
     'scratch',
   ];
-  assert.deepEqual(r.lines.toSorted(), want.toSorted());
+  assert.deepEqual([...r.lines].sort(), [...want].sort());
 });
 
 // Breaks: entities in another room tell ambient lines to the reader.
@@ -157,8 +157,8 @@ test('two-entry sets tell list[u32(bytes 0-3) % 2] at each boundary', () => {
   const want: string[][] = [];
   for (let k = 1; k <= 12; k++) {
     const r = wait(w, 1200);
-    got.push(r.lines.toSorted());
-    want.push([pick(CAVE, 0, 2 * k, lines), pick(GOBLIN, 1, k, ['glance', 'scratch'])].toSorted());
+    got.push([...r.lines].sort());
+    want.push([pick(CAVE, 0, 2 * k, lines), pick(GOBLIN, 1, k, ['glance', 'scratch'])].sort());
     w = r.w;
   }
   assert.ok(new Set(want.flat()).size === 4, 'every entry is picked somewhere');
@@ -175,7 +175,13 @@ test('an elapsed advance across 50 boundaries tells one drip', () => {
     {
       id: elapsedCommandId(run_id, w.context, 0, 30000) as never,
       world_context_id: w.context,
-      payload: { type: 'elapsed', actor_id: w.character, run_id, from: 0, until: 30000 },
+      payload: {
+        type: 'elapsed',
+        actor_id: w.character,
+        run_id: run_id as never,
+        from: 0,
+        until: 30000,
+      },
     },
     1,
   );
