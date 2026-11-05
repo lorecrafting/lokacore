@@ -139,8 +139,8 @@ test('.dark and color-scheme follow a forced OS scheme and its changes', () => {
       toggle: (c: string, on: boolean) => void (on ? classes.add(c) : classes.delete(c)),
     },
     style: { colorScheme: '' },
-  } as unknown as HTMLElement;
-  const unfollow = shell.follow(scheme as unknown as MediaQueryList, root);
+  };
+  const unfollow = shell.follow(scheme, root);
   assert.deepEqual([classes.has('dark'), root.style.colorScheme], [true, 'dark']);
   scheme.matches = false;
   for (const f of heard) f();

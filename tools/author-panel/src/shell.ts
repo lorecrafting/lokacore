@@ -156,11 +156,16 @@ export const loadOf = (t: Timings, loaded?: Loaded) =>
     ? loaded.at - t.at
     : 0;
 
+type Scheme = {
+  matches: boolean;
+  addEventListener(type: 'change', f: () => void): void;
+  removeEventListener(type: 'change', f: () => void): void;
+};
+// Shapes, not the DOM's types: the kernel tests that import this have no DOM lib.
+type Root = { classList: { toggle(c: string, on: boolean): unknown }; style: { colorScheme: string } };
+
 /** `.dark` and color-scheme follow the OS setting, now and on each change; returns the unfollow. */
-export function follow(
-  scheme: Pick<MediaQueryList, 'matches' | 'addEventListener' | 'removeEventListener'>,
-  root: HTMLElement,
-) {
+export function follow(scheme: Scheme, root: Root) {
   const apply = () => {
     root.classList.toggle('dark', scheme.matches);
     root.style.colorScheme = scheme.matches ? 'dark' : 'light';
