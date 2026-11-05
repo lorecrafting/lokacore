@@ -6,7 +6,7 @@ import { existsSync, symlinkSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { test } from 'node:test';
+import { test, type TestContext } from 'node:test';
 import { serve } from '../play/live.ts';
 import { guarded, placed, sha256, type Refused } from '../play/guard.ts';
 
@@ -14,7 +14,7 @@ const ROOM = '{\n  "name": "room.a",\n  "exits": {}\n}\n';
 type Reply = { status: number; body: any };
 
 /** A source tree `src/` (rooms/a.json, layout.json) beside a sibling `src-evil/`, served. */
-function tree(t: { after: (f: () => void) => void }, release = () => {}) {
+function tree(t: TestContext, release = () => {}) {
   const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-write-')));
   const src = join(dir, 'src');
   mkdirSync(join(src, 'rooms'), { recursive: true });
@@ -24,8 +24,10 @@ function tree(t: { after: (f: () => void) => void }, release = () => {}) {
   writeFileSync(join(src, 'layout.json'), '[\n  { "room": "a", "x": 0, "y": 0, "z": 0 }\n]\n');
   const port = 20000 + Math.floor(Math.random() * 20000);
   const live = serve(port, src, join(dir, 'none.json'), release);
+  const errors = t.mock.method(console, 'error', () => {});
   t.after(() => {
     live.close();
+    assert.deepEqual(errors.mock.calls, []); // no route ran on after its answer
     rmSync(dir, { recursive: true, force: true });
   });
   const ask = (path: string, sent?: unknown, headers: Record<string, string> = {}) =>
@@ -45,7 +47,7 @@ function tree(t: { after: (f: () => void) => void }, release = () => {}) {
           body: res.headers['content-type'] ? JSON.parse(text) : text,
         });
       });
-      req.end(sent === undefined ? undefined : JSON.stringify(sent));
+      req.end(typeof sent === 'string' ? sent : JSON.stringify(sent)); // a string goes raw
     });
   const read = (rel: string) => readFileSync(join(src, rel), 'utf8');
   return { dir, src, ask, read, live };
@@ -259,6 +261,7 @@ test('POST /hold sets held on the stream and its release writes what was parked'
   let released = 0;
   const { ask, live } = tree(t, () => released++);
   assert.equal((await ask('/hold', { on: 'yes' })).status, 400);
+  assert.deepEqual(await ask('/hold', '{on'), { status: 400, body: 'a JSON body' });
   assert.deepEqual(await ask('/hold', { on: true }), { status: 200, body: { held: true } });
   assert.deepEqual([live.held(), released], [true, 0]);
   await ask('/hold', { on: false });

@@ -268,13 +268,13 @@ export function serve(port: number, source: string, artifact: string, release = 
     clients.add(response);
     request.on('close', () => clients.delete(response));
   };
-  // A half-saved or hand-edited file is the author's to fix, not the watcher's to die of.
+  // A bad file is the author's to fix, not the watcher's to die of; a throw after an answer: logged.
   const server = createServer((request, response) =>
     Promise.resolve()
       .then(() => route(request, response))
-      .catch((e: unknown) => {
-        if (!response.headersSent) response.writeHead(500).end(String(e));
-      }),
+      .catch((e) =>
+        response.headersSent ? console.error(e) : response.writeHead(500).end(`${e}`),
+      ),
   )
     .on('error', (e: NodeJS.ErrnoException) => {
       console.error(`author stream: port ${port} ${e.code}; set LOKA_AUTHOR_PORT to a free port`);
