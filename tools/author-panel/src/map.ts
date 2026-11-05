@@ -1,0 +1,207 @@
+// The editor map's rules (docs/design/editor-map-and-story-rulings.md E3a): which rooms a level
+// draws, its edges, stubs and hulls, labels, the view's zoom and pan, the arrow keys' next room and
+// each room's accessible name. No React here: tested from kernel/ts/test/author_map.test.ts.
+import type { MapRoom } from './author.ts';
+
+/** Drawing constants in px at zoom 1, exempt from the space tokens as DiscoveredMap's are. */
+export const M = {
+  cell: 64,
+  w: 48,
+  h: 24,
+  char: 7.2, // type.code at 12 px, mono
+  inset: 4,
+  disc: 6,
+  stub: 12,
+  tri: 5,
+  tick: 6,
+  lock: 14,
+  pad: 12, // space.lg
+  min: 0.25,
+  max: 3,
+  step: 1.25,
+  labels: 1, // labels hide below this zoom
+  overview: 0.5, // rooms are discs below this zoom
+}; // mutate-skip: uncalibrated design value
+
+export type At = NonNullable<MapRoom['at']>;
+export type View = { zoom: number; x: number; y: number };
+export type Box = { w: number; h: number };
+const VERTICAL = new Set(['up', 'down']);
+
+/** The levels any placed room is on, lowest first. */
+export const levels = (rooms: MapRoom[]) =>
+  [...new Set(rooms.flatMap((r) => (r.at ? [r.at.z] : [])))].sort((a, b) => a - b);
+/** The level to show once `key` is selected: its own, else the one shown. */
+export const levelOf = (rooms: MapRoom[], key: string | undefined, z: number) =>
+  rooms.find((r) => r.key === key)?.at?.z ?? z;
+/** The rooms one level draws, in DOM order: area, then key. */
+export const onLevel = (rooms: MapRoom[], z: number) =>
+  rooms
+    .filter((r) => r.at?.z === z)
+    .sort((a, b) => cmp(a.area ?? '', b.area ?? '') || cmp(a.key, b.key));
+const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
+export const centre = (at: At) => ({ x: (at.x + 0.5) * M.cell, y: (at.y + 0.5) * M.cell });
+
+/** One line per reciprocal pair on the level, else one per one-way exit; up and down are stubs. */
+export function edges(level: MapRoom[]) {
+  const on = new Map(level.map((r) => [r.key, r]));
+  const seen = new Set<string>();
+  const out: { from: string; to: string; oneWay: boolean; barrier?: string; hidden: boolean }[] =
+    [];
+  for (const r of level)
+    for (const e of r.exits) {
+      if (VERTICAL.has(e.dir) || !on.has(e.to) || e.to === r.key) continue;
+      const back = on.get(e.to)!.exits.find((b) => b.to === r.key && !VERTICAL.has(b.dir));
+      const pair = [r.key, e.to].sort().join(' ');
+      if (back && seen.has(pair)) continue;
+      seen.add(pair);
+      out.push({
+        from: r.key,
+        to: e.to,
+        oneWay: !back,
+        barrier: e.barrier ?? back?.barrier,
+        hidden: Boolean(e.hidden || back?.hidden),
+      });
+    }
+  return out;
+}
+
+/** Every area id, sorted: its index picks the hue (mod 6), and the seventh on draw dashed. */
+export const areas = (rooms: MapRoom[]) =>
+  [...new Set(rooms.flatMap((r) => (r.area ? [r.area] : [])))].sort(cmp);
+
+/** One rect per area on the level: its rooms' boxes padded `space.lg`. */
+export function hulls(level: MapRoom[], all: string[]) {
+  return all.flatMap((area, i) => {
+    const mine = level.filter((r) => r.area === area).map((r) => centre(r.at!));
+    if (!mine.length) return [];
+    const x = Math.min(...mine.map((c) => c.x)) - M.w / 2 - M.pad;
+    const y = Math.min(...mine.map((c) => c.y)) - M.h / 2 - M.pad;
+    const w = Math.max(...mine.map((c) => c.x)) + M.w / 2 + M.pad - x;
+    const h = Math.max(...mine.map((c) => c.y)) + M.h / 2 + M.pad - y;
+    return [{ area, x, y, w, h, hue: (i % 6) + 1, dashed: i >= 6 }];
+  });
+}
+
+/** A room's label at `zoom`: the full key in a pill when it is marked (selected, here, hovered),
+ * else from zoom 1 the key clipped to its box with `…`, else none. */
+export function label(key: string, zoom: number, marked: boolean) {
+  if (marked) return { pill: key };
+  if (zoom < M.labels) return undefined;
+  const fits = Math.floor((M.w * zoom - 2 * M.inset) / M.char);
+  return { text: key.length <= fits ? key : `${key.slice(0, Math.max(fits - 1, 0))}…` };
+}
+
+const clampZoom = (z: number) => Math.min(M.max, Math.max(M.min, z));
+const within = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+/** The level's extent: its rooms' cells. */
+export function bounds(level: MapRoom[]) {
+  const xs = level.map((r) => r.at!.x);
+  const ys = level.map((r) => r.at!.y);
+  return {
+    x0: Math.min(...xs) * M.cell,
+    y0: Math.min(...ys) * M.cell,
+    x1: (Math.max(...xs) + 1) * M.cell,
+    y1: (Math.max(...ys) + 1) * M.cell,
+  };
+}
+type Bounds = ReturnType<typeof bounds>;
+
+/** The whole level centred in `box`, as large as the zoom limits allow. */
+export function fit(b: Bounds, box: Box): View {
+  const zoom = clampZoom(Math.min(box.w / (b.x1 - b.x0), box.h / (b.y1 - b.y0)));
+  return {
+    zoom,
+    x: box.w / 2 - (zoom * (b.x0 + b.x1)) / 2,
+    y: box.h / 2 - (zoom * (b.y0 + b.y1)) / 2,
+  };
+}
+
+/** `v` moved the least that keeps one cell of the level inside `box`. */
+export function keep(v: View, b: Bounds, box: Box): View {
+  const c = M.cell * v.zoom;
+  return {
+    zoom: v.zoom,
+    x: within(v.x, c - b.x1 * v.zoom, box.w - c - b.x0 * v.zoom),
+    y: within(v.y, c - b.y1 * v.zoom, box.h - c - b.y0 * v.zoom),
+  };
+}
+
+/** Zoom by `factor` about the screen point `p`, within 0.25 to 3. */
+export function zoomAt(v: View, factor: number, p: { x: number; y: number }): View {
+  const zoom = clampZoom(v.zoom * factor);
+  const k = zoom / v.zoom;
+  return { zoom, x: p.x - (p.x - v.x) * k, y: p.y - (p.y - v.y) * k };
+}
+
+/** `v` unchanged when the room's centre is on screen, else centred on it. */
+export function show(v: View, box: Box, at: At): View {
+  const c = centre(at);
+  const [sx, sy] = [c.x * v.zoom + v.x, c.y * v.zoom + v.y];
+  if (sx >= 0 && sx <= box.w && sy >= 0 && sy <= box.h) return v;
+  return { zoom: v.zoom, x: box.w / 2 - c.x * v.zoom, y: box.h / 2 - c.y * v.zoom };
+}
+
+const ARROW: Record<string, [number, number]> = {
+  ArrowRight: [1, 0],
+  ArrowLeft: [-1, 0],
+  ArrowUp: [0, -1], // layout y grows south
+  ArrowDown: [0, 1],
+};
+/** The arrow key's next room: the nearest on the level within 45° of its direction (ties by key). */
+export function nearest(level: MapRoom[], from: MapRoom, key: string) {
+  const [dx, dy] = ARROW[key] ?? [0, 0];
+  let best: [number, MapRoom] | undefined;
+  for (const r of level) {
+    const [x, y] = [r.at!.x - from.at!.x, r.at!.y - from.at!.y];
+    const d = Math.hypot(x, y);
+    if (!d || x * dx + y * dy < d * Math.SQRT1_2 - 1e-9) continue;
+    if (!best || d < best[0] || (d === best[0] && r.key < best[1].key)) best = [d, r];
+  }
+  return best?.[1];
+}
+
+/** Tab's way in: the selected room on the level, else the current one, else the first by key. */
+export const entry = (level: MapRoom[], selected?: string, here?: string) =>
+  level.find((r) => r.key === selected) ??
+  level.find((r) => r.key === here) ??
+  [...level].sort((a, b) => cmp(a.key, b.key))[0];
+
+export type Marks = { unreached?: boolean; locked?: boolean; here?: boolean; selected?: boolean };
+/** A room's accessible name: key, title, area, level, every exit, then its marks. */
+export function name(r: MapRoom, m: Marks) {
+  const exits = r.exits.map((e) => `${e.dir} to ${e.to}`).join(', ');
+  return [
+    r.key,
+    r.title,
+    r.area,
+    r.at && `level ${r.at.z}`,
+    exits && `exits: ${exits}`,
+    m.unreached && 'unreached',
+    m.locked && 'behind a lock',
+    m.here && 'here',
+    m.selected && 'selected',
+  ]
+    .filter(Boolean)
+    .join(', ');
+}
+
+/** The footer: rooms, areas, unreached, behind lock, unplaced; a zero count is left out. */
+export function footer(rooms: MapRoom[], unreached: Set<string>, locked: Set<string>) {
+  const n = (count: number, one: string, many = one) =>
+    count ? `${count} ${count === 1 ? one : many}` : '';
+  return [
+    n(rooms.length, 'room', 'rooms'),
+    n(areas(rooms).length, 'area', 'areas'),
+    n(rooms.filter((r) => unreached.has(r.ref)).length, 'unreached'),
+    n(rooms.filter((r) => locked.has(r.ref)).length, 'behind lock'),
+    n(rooms.filter((r) => !r.at).length, 'unplaced'),
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
+
+/** The shared selection a room click makes (the hierarchy and Book follow it). */
+export const select = (r: MapRoom) => ({ file: r.file, kind: 'room', key: r.key });
