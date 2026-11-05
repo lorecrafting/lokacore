@@ -196,6 +196,15 @@ test("an outside save that adds or drops a `~` line: /line stops trusting the ma
   assert.deepEqual(await line('dialogue.s.b'), refused);
 });
 
+test('/line never trusts a place in a file it cannot read', async (t) => {
+  // Break: a vanished placed file counts the same (unreadable) at the map and at /line, so the map
+  // stays trusted and /line fails on the read instead of answering by the words.
+  const { live, call } = served(t);
+  live.push({ placeholders: { 'dialogue.g.a': 'scenes/gone.scene:2' } });
+  const { status, text } = await call('/line?key=dialogue.g.a&words=~');
+  assert.deepEqual([status, JSON.parse(text)], [404, 'no source line for dialogue.g.a']);
+});
+
 test('a 200 /undo shows the old words it sent at once, before the compile', async (t) => {
   // Break: the Book keeps the undone words until the next compile (seconds when cold).
   const { call, ask, events } = served(t);
