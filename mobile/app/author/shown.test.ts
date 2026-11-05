@@ -61,6 +61,7 @@ test('the view reads with its words, a key standing in for a line with none', ()
   const { offers: _, ...state } = shown(view, (k) => words[k], canon, ids, rooms);
   assert.deepEqual(state, {
     room: 'Cellar',
+    here: 'c@1:room/r',
     people: ['Maud'],
     held: ['item.lamp'],
     quests: [{ quest: 'lantern', state: 'active' }],

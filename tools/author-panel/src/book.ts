@@ -1,6 +1,7 @@
 // The framed Book preview, over postMessage (mobile/app/author/panel.tsx is the other end): the
 // Book says `ready` when its bridge mounts, the panel says hello, the Book posts `state` on every
-// session update, answers `trace`, and posts `line` for an Alt-clicked Book line.
+// session update, answers `trace`, posts `line` for an Alt-clicked Book line, `select` for a
+// clicked one and `shortcut` for an editor key pressed in the Book (all postMessage, not protocol).
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { Step as PlaceStep } from '../../../mobile/app/author/place.ts';
 import { relays } from '../../../mobile/app/author/prose_rules.ts';
@@ -21,8 +22,22 @@ export type State = {
 };
 export type Line = { key?: string; words: string };
 /** What the Book's editor tells (mobile/app/author/inbook.ts): its `~` counts and its last note. */
-export type Prose = { todoHere?: { here: number; at: number }; note?: string; open?: { key: string; words: string } };
-type Told = { loka: 'author'; ready?: true; state?: State; trace?: string[]; id?: number; line?: Line } & Prose;
+export type Prose = {
+  todoHere?: { here: number; at: number };
+  note?: string;
+  open?: { key: string; words: string };
+};
+type Told = {
+  loka: 'author';
+  ready?: true;
+  sha256?: string;
+  select?: string;
+  shortcut?: string;
+  state?: State;
+  trace?: string[];
+  id?: number;
+  line?: Line;
+} & Prose;
 type Asked =
   | { op: 'hello' }
   | { op: 'advance'; minutes: number }
@@ -31,10 +46,16 @@ type Asked =
   | { op: 'go_to_room'; room: string }
   | { op: 'set_fact'; fact: string; value: boolean | number | string }
   | { op: 'trace'; id: number }
+  | { op: 'select'; kind: string; key: string }
+  | { op: 'edit'; key: string }
   | { op: 'key'; key: string; metaKey: boolean; ctrlKey: boolean; altKey: boolean };
 
-export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
+/** What the shell does with a Book click (its text key) and a relayed editor key. */
+export type Heard = { select: (textKey: string) => void; shortcut: (key: string) => void };
+
+export function useBook(frame: RefObject<HTMLIFrameElement | null>, heard: RefObject<Heard>) {
   const [state, setState] = useState<State>();
+  const [loaded, setLoaded] = useState<{ sha256?: string; at: number }>();
   const [line, setLine] = useState<Line>();
   const [prose, setProse] = useState<Prose>({});
   const waiting = useRef(new Map<number, (rows: string[]) => void>());
@@ -46,7 +67,10 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
   useEffect(() => {
     const onMessage = (e: MessageEvent<Told>) => {
       if (e.origin !== BOOK || e.data?.loka !== 'author') return;
-      if (e.data.ready) send({ op: 'hello' });
+      if (e.data.ready)
+        (send({ op: 'hello' }), setLoaded({ sha256: e.data.sha256, at: Date.now() }));
+      if (e.data.select) heard.current.select(e.data.select);
+      if (e.data.shortcut) heard.current.shortcut(e.data.shortcut);
       if (e.data.state) setState(e.data.state);
       if (e.data.trace && e.data.id !== undefined) waiting.current.get(e.data.id)?.(e.data.trace);
       if (e.data.line) setLine(e.data.line);
@@ -55,7 +79,8 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
     };
     const onKey = (e: KeyboardEvent) => {
       const { key, metaKey, ctrlKey, altKey } = e;
-      if (e.target instanceof HTMLElement && relays(e, e.target)) send({ op: 'key', key, metaKey, ctrlKey, altKey });
+      if (e.target instanceof HTMLElement && relays(e, e.target))
+        send({ op: 'key', key, metaKey, ctrlKey, altKey });
     };
     window.addEventListener('message', onMessage);
     window.addEventListener('keydown', onKey);
@@ -63,7 +88,7 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>) {
       window.removeEventListener('message', onMessage);
       window.removeEventListener('keydown', onKey);
     };
-  }, [send]);
+  }, [send, heard]);
   const trace = () => askTrace(waiting.current, (id) => send({ op: 'trace', id }), ++asked.current);
-  return { state, line, prose, send, trace };
+  return { state, line, prose, loaded, send, trace };
 }

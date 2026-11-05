@@ -5,7 +5,7 @@ import { ask, todo } from './author.ts';
 import type { Prose } from './book.ts';
 import { Button } from './components/ui/button.tsx';
 
-const WARNING = 'text-(--book-warning)';
+const WARNING = 'text-warning';
 
 /** The header's Hold toggle and `Held · N waiting`; leaving the page releases a Hold it set. */
 export function Hold({ held, pending }: { held?: boolean; pending?: number }) {
@@ -30,6 +30,8 @@ export function Hold({ held, pending }: { held?: boolean; pending?: number }) {
         size="sm"
         variant="outline"
         aria-pressed={!!held}
+        data-hold
+        title="Hold (Cmd-.)"
         onClick={toggle}
       >
         Hold
