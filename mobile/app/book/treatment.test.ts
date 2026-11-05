@@ -42,13 +42,16 @@ test('a fault shows a treated scene plain', () => {
 test('a treated scene draws no status line', async () => {
   const { view: base } = await import('./__tests__/combat-book.test.ts');
   const { mounted } = await import('./__tests__/mounted.ts');
-  const scene = (treatment?: string) =>
-    mounted(
-      base({
-        combat: undefined,
-        scene: { scene: { key: 's' }, line: 'l', index: 1, count: 2, treatment },
-      }),
-    );
+  const { validate } = await import('../../authority/local-story/__tests__/validate.ts');
+  const id = '00000000-0000-4000-8000-000000000000'; // the harness's ids are not schema ids
+  const ref = { cartridge_id: 'c', cartridge_version: '0.0.1', kind: 'scene', key: 's' };
+  const at = (treatment?: string) =>
+    base({ combat: undefined, scene: { scene: ref, line: 'l', index: 1, count: 2, treatment } });
+  const { combat: _, ...wire } = at('reverie');
+  const { place } = wire as { place: object };
+  const valid = { ...wire, actor_id: id, place: { ...place, id }, entities: [] };
+  assert.deepEqual(validate('GameView', valid), []);
+  const scene = (treatment?: string) => mounted(at(treatment));
   assert.ok(scene().texts().includes('sitting'), 'a plain scene keeps it (the position)');
   assert.deepEqual(scene('reverie').texts(), ['l']); // the line alone
 });
