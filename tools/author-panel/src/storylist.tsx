@@ -162,7 +162,7 @@ function keyDown(a: Act, list: L.Row[], e: React.KeyboardEvent<HTMLElement>) {
   act?.();
 }
 
-// Selection from elsewhere reveals its row; a new focus scrolls to it, and takes focus if the tree had it.
+// Selection from elsewhere reveals its row (useSync returns its ref); a new focus scrolls to it, and takes focus if the tree had it.
 function useSync(props: Props, tree: React.RefObject<HTMLUListElement | null>, a: Act) {
   const sel = props.layout.selection;
   const selRef = props.story.graph.nodes.find((n) => {
@@ -184,6 +184,7 @@ function useSync(props: Props, tree: React.RefObject<HTMLUListElement | null>, a
     const here = document.activeElement;
     if (el && (here === document.body || tree.current?.contains(here))) el.focus();
   }, [a.st.focus]); // eslint-disable-line react-hooks/exhaustive-deps
+  return selRef;
 }
 
 function TreeRow({ row, a, chosen, tab }: { row: L.Row; a: Act; chosen: boolean; tab: boolean }) {
