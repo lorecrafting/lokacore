@@ -37,3 +37,15 @@ Open items ruled: (b) ring 28 on the rise card is intended by the ruling; (c), (
 ## Verdict
 
 CHANGES REQUIRED: findings 1 to 3, one fix round. Findings 2 and 3 are small; finding 1 changes the renderer.
+
+## Re-check, 2026-11-05, at `db001c3b238a6b5e354dcc33e8823d514ae878b1`
+
+Commits `55978ab1c` and `db001c3b2` only. CI at this head: ci, book-e2e, graph-diff success.
+
+- Finding 1: `StatusGlyph.tsx:17` passes `__destroyWebGLContextAfterRender`; Drawings (developer's sheet) shows every disc drawn. The play's `inked` check (`StatusIcon.stories.tsx:314`): in Skia's static renderer a failed or lost WebGL surface makes `renderPictureToSurface` return null and `draw` return before the blit, so the visible canvas's fresh 2d context stays all-alpha-zero, which the check reports; with the prop removed the canvas holds a live WebGL context, `getContext('2d')` is null and the check reports that too. Both failure modes end in the same assertion, so the different red-control reason is fine. Held.
+- Finding 2: `StatusLine.stories.tsx:141` is `'condition.bleeding'`; the meta `text` strips the prefix, so every story's tip reads the same. Held.
+- Finding 3: `keyboard.test.ts:449` deletes `CanvasKit` and pins the empty disc; hand mutant `canDraw() &&` to `true &&` is red. Held.
+- New: `StatusIcon.tsx:148` draws nothing behind the +N disc (the hidden Arrival lays out at zero size and the static renderer's `OffscreenCanvas(0, 0)` throws). `keyboard.test.ts:472` pins the two hidden icons at `d` undefined; hand mutant restoring `drawingOf` for every icon is red. The revealed icon (seven down to six) gets its drawing on the next render by the same expression. Held.
+- Rendered myself at 360 px, light and dark: Overflow shows five discs and "+2", every glyph canvas inked; CombatPage bleeding shows the drop and the gored U below the line and rule, both canvases inked (the only uninked canvas is the full-page starfield, not a glyph).
+
+Verdict: APPROVE. Nits 4 to 6 stand as noted.
