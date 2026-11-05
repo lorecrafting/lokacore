@@ -69,7 +69,12 @@ export interface Game {
   lastNarration(command_id?: string): NarrationRecord | undefined;
   /** Every committed narration of this story, by day (mechanics.md, Chronicle). */
   chronicle(): readonly ChronicleEntry[];
+  /** Who opened an open encounter, from its opening receipt; none when no receipt holds it. */
+  opener?(encounter_id: string): Opener | undefined;
 }
+
+/** The NPC on the encounter.open op, and whether the player's own command opened it. */
+export type Opener = { npc_id: string; player: boolean };
 
 /**
  * Why there is no game: the save's kind (none: untyped), its message, a `code` for a start over

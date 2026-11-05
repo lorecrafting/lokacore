@@ -961,9 +961,13 @@ or words mark a round.
 Combat takes precedence over ordinary navigation until the encounter closes. **Opening.** The
 receipt that opens an encounter (a move's or Sleep's `engage`, Attack, a cast's fight-back)
 draws all of its narration in the combat log (and the World log), so the page opens with the engage line as its
-first log line, which names the foe ("You attack a boar!" / "A boar attacks you!", loka-kgd.202). No
-foe name, band phrase or target line sits above the log (owner 2026-11-02, loka-kgd.204): the log
-opens the page, and each live foe's **Cast a spell on** list ("Cast a spell on the goblin…") comes last among the cards. Your own bleeding and condition lines draw nowhere on the Combat page: they stay
+first log line, which names the foe ("You attack a boar!" / "A boar attacks you!", loka-kgd.202). The
+page title names who opened the fight, in the cartridge's words (`combat.title_you_attack` {target},
+`combat.title_attacks_you` {attacker}, each bound to the foe's short name as the engage line binds it; owner 2026-11-02, loka-kgd.204 notes: "title like 'You attack
+a boar!' / 'A boar attacks you!'"; loka-kgd.207). It is kept for the encounter, its closed page too, and
+reads **Combat** when the opener is unknown (an old save, a fallen pack opener after a reload, a
+cartridge without the keys or the foe's name words). Nothing else names the foe above the log: no foe
+name, band phrase or target line (owner 2026-11-02, loka-kgd.204); the log opens the page, and each live foe's **Cast a spell on** list ("Cast a spell on the goblin…") comes last among the cards. Your own bleeding and condition lines draw nowhere on the Combat page: they stay
 on the status icon row and Character, so a reader never takes your hunger for the raider's
 (pass-1 C2b, as loka-x6t.15). **Closure.** On
 every committed closure (opponent death, player death and inn return, successful Flee, any
