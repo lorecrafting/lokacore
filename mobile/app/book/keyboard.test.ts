@@ -1,4 +1,4 @@
-// size: allow 665, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
+// size: allow 675, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
 import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -468,6 +468,13 @@ test('status icons: debuffs first, six or five then +N, drawn by label, time and
   const seven = icons([...six, at('sharp', 'buff')], open);
   assert.deepEqual(seven.map(glyphOf), [down, down, ring, fed, up, '+2']);
   assert.equal(seven[5].props.accessibilityLabel, '+2 more, mighty, sharp, opens Character');
+  // Behind the disc, no drawing: a canvas laid out at zero size throws when it draws.
+  const behind = StatusIcons({ conditions: [...six, at('sharp', 'buff')], time: 720, text, open })
+    .props.children[1];
+  assert.deepEqual(
+    behind.filter((a: any) => a.props.hidden).map((a: any) => a.props.children.props.d),
+    [undefined, undefined],
+  );
   seven[5].props.onPress();
   assert.deepEqual(opened, ['character']);
   // Reduced motion (the fade stub): the tip shows at once, no fade started (no Animated.timing here).

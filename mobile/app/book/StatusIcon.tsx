@@ -145,7 +145,7 @@ export function StatusIcons(p: Props) {
             fraction={x.fraction}
             hold={hold(x.key)}
             open={p.open}
-            d={drawingOf(x.label, x.look)}
+            d={i < shown ? drawingOf(x.label, x.look) : undefined} // a hidden canvas has no size to draw at
           />
         </Arrival>
       ))}
