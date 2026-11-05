@@ -206,8 +206,8 @@ a new component needs a real consumer, its comment and its line here in the same
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |
 | `RunningHead` | `book/RunningHead.tsx` | Page |
 | `SayField` | `book/SayField.tsx` | SayField |
-| `ScenePage` | `book/ScenePage.tsx` | undefined |
-| `Scene` | `book/ScenePage.tsx` | undefined |
+| `ScenePage` | `book/ScenePage.tsx` | ChapterPages |
+| `Scene` | `book/ScenePage.tsx` | ChapterPages |
 | `ShelfPage` | `book/Shelf.tsx` | NpcPage |
 | `StatusLine` | `book/Status.tsx` | StatusLine |
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |

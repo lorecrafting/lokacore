@@ -15,13 +15,6 @@ import { Page, useTitleFocus } from './pages.tsx';
 
 type Say = (key: string) => string;
 
-/**
- * A modal scene: its text, then Continue (book-ui.md, Chapters, scenes and recovery). A treated
- * scene (book-ui.md, Book treatments) draws over its treatment's held layer: the line rises, a tap
- * completes it, and Continue shows once it is whole; only Continue sends.
- * - Use: while a scene holds the foreground.
- * - Story: ChapterPages.stories.tsx
- */
 type Props = {
   view: GameView;
   text: Say;
@@ -30,12 +23,23 @@ type Props = {
   treatment?: Treatment; // the screen's: none under a fault
 };
 
+/**
+ * A modal scene: its text, then Continue (book-ui.md, Chapters, scenes and recovery). A treated
+ * scene (book-ui.md, Book treatments) draws over its treatment's held layer: the line rises, a tap
+ * completes it, and Continue shows once it is whole; only Continue sends.
+ * - Use: while a scene holds the foreground.
+ * - Story: ChapterPages.stories.tsx
+ */
 export function ScenePage(p: Props) {
   const s = p.view.scene!;
   return <Scene key={`${s.scene.key}:${s.index}`} {...p} />; // each line arrives afresh
 }
 
-/** One line of it, unkeyed (the hook rig in effects_turn.test.ts draws this). */
+/**
+ * One line of it, unkeyed (the hook rig in effects_turn.test.ts draws this).
+ * - Use: inside ScenePage only.
+ * - Story: ChapterPages.stories.tsx
+ */
 export function Scene(p: Props) {
   const c = usePalette();
   const t = useType();

@@ -25,6 +25,7 @@ const EXEMPT: Record<string, string> = {
   'book/MapDrawing.tsx:MapDrawing': 'a drawing, shown through the map pages',
   'book/Riddle.tsx:RightWord': 'shown after a submitted answer, which no story sends',
   'book/lines.tsx:Fault': 'a press that threw; reached live only, no story throws one',
+  'book/ScenePage.tsx:Scene': 'one line of ScenePage, shown through the ChapterPages scene stories',
 };
 
 // Every exported component, with its doc comment (stories/specs.ts, shared with the specs page).
