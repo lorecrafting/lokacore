@@ -226,6 +226,8 @@ test('a death or the Book going cancels a held level haptic', async () => {
   playCue({ name: 'level' });
   playCue({ name: 'level' }); // a second held one: the first is still cancelled
   playCue({ name: 'death', fight: false });
+  await wait(60);
+  assert.deepEqual(felt(), [['haptic', 'heavy']]);
   const off = hearCues();
   curlFor(40);
   playCue({ name: 'level' });
