@@ -130,6 +130,12 @@ test('the view: fit, keep one cell in, zoom about the cursor, show an off-screen
     x: 192,
     y: -64,
   });
+  // The other corner: the level's last cell stays at the left and bottom edges.
+  assert.deepEqual(map.keep({ zoom: 1, x: -1000, y: 1000 }, b, { w: 256, h: 128 }), {
+    zoom: 1,
+    x: -64,
+    y: 64,
+  });
   assert.deepEqual(map.zoomAt({ zoom: 1, x: 0, y: 0 }, 2, { x: 100, y: 50 }), {
     zoom: 2,
     x: -100,

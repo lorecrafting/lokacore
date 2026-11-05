@@ -182,7 +182,7 @@ function Header({ p, l }: { p: MapProps; l: Level }) {
             run={() => l.toLevel(l.all[i + 1])}
             off={i === l.all.length - 1}
           />
-          <span className="px-0.5 font-mono text-xs">{l.z}</span>
+          <span className="w-[3ch] text-center font-mono text-xs">{l.z}</span>
           <Icon
             label="Level down"
             icon={ChevronDown}

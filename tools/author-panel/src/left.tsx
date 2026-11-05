@@ -143,7 +143,7 @@ function Segment({ layout, set }: { layout: Layout; set: SetLayout }) {
           type="button"
           role="radio"
           aria-checked={layout.map === v}
-          className={`px-2 text-xs capitalize ${layout.map === v ? 'bg-accent' : ''}`}
+          className={`px-1 text-xs capitalize ${layout.map === v ? 'bg-accent' : ''}`}
           onClick={() => set((l) => ({ ...l, map: v }))}
         >
           {v}
