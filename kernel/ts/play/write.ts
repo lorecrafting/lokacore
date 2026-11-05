@@ -2,23 +2,13 @@
 // and `/journal`, and the POST routes that change the source tree. Every path a body names goes
 // through `guarded` (guard.ts) once; every write is a `.tmp` and a rename, recorded in the journal
 // `/undo` puts back from. live.ts checks Host and Origin first.
-import { execFile } from 'node:child_process';
 import { mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { files } from './todo.ts';
-import {
-  type Bytes,
-  current,
-  DIRS,
-  guarded,
-  named,
-  placed,
-  REPO,
-  refuse,
-  Refused,
-} from './guard.ts';
+import { type Bytes, current, DIRS, guarded, named, placed, refuse, Refused } from './guard.ts';
 import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
 import { edit, located } from './prose.ts';
+import { loka, opened, worlds } from './worlds.ts';
 
 type By = 'editor' | 'outside';
 export type Changed = { file: string; sha256: string | null; by: By };
@@ -162,12 +152,6 @@ function undo(t: Tree, { id }: Sent) {
   return done(t, `undo ${entry.what}`, back);
 }
 
-const loka = (args: string[]) =>
-  new Promise<string | undefined>((resolve) =>
-    execFile('mise', ['exec', '--', 'mix', 'loka.new', ...args], { cwd: REPO }, (error, _, err) =>
-      resolve(error ? `${err}`.trim().split('\n').at(-1) || error.message : undefined),
-    ),
-  );
 async function create(t: Tree, { kind, name, from, area }: Sent): Promise<Answer> {
   const fromOk = from === undefined || (named(from?.room) && named(from?.direction));
   if (!named(kind) || !named(name) || !fromOk || !(area == null || named(area)))
@@ -225,6 +209,7 @@ function get(t: Tree, url: string, places: Record<string, string>): Answer | und
   }
   if (pathname === '/line')
     return located(t.root, searchParams.get('key') ?? '', searchParams.get('words') ?? '', places);
+  if (pathname === '/world') return worlds(t.root);
   if (pathname === '/journal')
     return [200, t.journal.map(({ files: fs, ...e }) => ({ ...e, files: fs.map((c) => c.file) }))];
 }
@@ -236,6 +221,7 @@ const POSTS: Record<string, (t: Tree, sent: Sent) => Answer | Promise<Answer>> =
   '/move': move,
   '/undo': undo,
   '/new': create,
+  '/world': opened,
 };
 export const writes = (url: string) => Object.hasOwn(POSTS, url);
 
@@ -263,6 +249,7 @@ export function writer(
       answered(() => (t.busy ? refuse(409, 'a /new is running') : POSTS[url](t, sent))),
     /** After an fs burst: what changed outside the editor is journaled and pushed `outside`.
      * ponytail: rereads every source file per burst; fine at showcase size, hash by mtime when not. */
+    busy: () => t.busy > 0,
     seen() {
       if (t.busy) return;
       const changes = diff(t.cache, t.snapshot());

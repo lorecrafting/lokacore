@@ -5,7 +5,8 @@ defmodule Mix.Tasks.Loka.New do
   (`scene <npc> <key>` for a pair's scene): writes
   each pair's starter (every line a `~` placeholder) into the cartridge (default `.`; a `cartridge
   <dir>` pair makes one and targets it for the pairs after it), prints each file it wrote and ends
-  with what to fill (`bin/loka todo`'s list) and the next command. `--from` follows a `rooms` pair and
+  with what to fill (`bin/loka todo`'s list) and the next command. `--from` follows a `rooms` pair
+  (`--from <cartridge dir>` a `cartridge` pair: a copy with its own id, checkpoints left out) and
   `--area` (the `areas/<area>/` folder for the pair's file) any pair but a scene;
   `--cwd` is the directory relative paths resolve against. One line names what is missing and exits
   1, and then nothing is written: the files the earlier pairs wrote are put back.
@@ -13,7 +14,7 @@ defmodule Mix.Tasks.Loka.New do
   use Mix.Task
   use Boundary, top_level?: true, deps: [Loka.Content, Mix]
 
-  @usage "usage: mix loka.new <kind> <name> [--from <room> <direction>] [--area <area>] ... [cartridge dir] (scene <npc> <key>)"
+  @usage "usage: mix loka.new <kind> <name> [--from <room> <direction>] [--from <cartridge dir>] [--area <area>] ... [cartridge dir] (scene <npc> <key>)"
 
   @impl Mix.Task
   def run(["--cwd", cwd | args]), do: new(args, cwd)
@@ -74,7 +75,14 @@ defmodule Mix.Tasks.Loka.New do
   end
 
   defp starter({"cartridge", path, from, area}, {_, paths}, cwd),
-    do: starter("cartridge", Path.expand(path, cwd), from, area, {Path.expand(path, cwd), paths})
+    do:
+      starter(
+        "cartridge",
+        Path.expand(path, cwd),
+        from && Path.expand(from, cwd),
+        area,
+        {Path.expand(path, cwd), paths}
+      )
 
   defp starter({kind, name, from, area}, state, _cwd), do: starter(kind, name, from, area, state)
 
@@ -112,6 +120,9 @@ defmodule Mix.Tasks.Loka.New do
 
   defp plan(["--from", room, way | rest], [{"rooms", name, nil, area} | done]),
     do: plan(rest, [{"rooms", name, {room, way}, area} | done])
+
+  defp plan(["--from", cartridge | rest], [{"cartridge", path, nil, nil} | done]),
+    do: plan(rest, [{"cartridge", path, cartridge, nil} | done])
 
   defp plan(["--area", area | rest], [{kind, name, from, nil} | done]) when kind != "scene",
     do: plan(rest, [{kind, name, from, area} | done])

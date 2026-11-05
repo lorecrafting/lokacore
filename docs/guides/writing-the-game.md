@@ -42,7 +42,7 @@ It starts the cartridge watcher (`bin/loka dev … --watch`), the Book preview (
 `npm run author`) and the author panel (`tools/author-panel`, installed on its first run). Open
 http://localhost:19009: the Book fills the page and the panel is the pane on the right (the cartridge's title,
 then Compile with its lint notes folded behind their count, then Play, Write, State, Why, Find and Numbers;
-the source line at the foot). It wears the Book's light palette and type. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book, 19006), `LOKA_PANEL_PORT` (panel, 19009).
+the source line at the foot). The globe at the left of the Book's toolbar switches worlds or makes a new one (blank, or a copy); `bin/author.sh` with no folder reopens the last world. It wears the Book's light palette and type. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book, 19006), `LOKA_PANEL_PORT` (panel, 19009).
 
 ## Write a scene
 
@@ -340,7 +340,7 @@ when you run `mix loka.compile` by hand.
 | `barriers` | [`position_sampler`](../../cartridges/position_sampler/) | nothing |
 | `behaviours` | [`fishing_sampler`](../../cartridges/fishing_sampler/) | nothing |
 | `bleeds` | [`bleed_sampler`](../../cartridges/bleed_sampler/) | a resource |
-| `cartridge` | [`cellar_sampler`](../../cartridges/cellar_sampler/) | nothing: `bin/loka new cartridge cartridges/<id>` makes the manifest and a `start` room |
+| `cartridge` | [`cellar_sampler`](../../cartridges/cellar_sampler/) | nothing: `bin/loka new cartridge cartridges/<id>` makes the manifest and a `start` room; `--from cartridges/<other>` copies that world under the new id |
 | `cutscene` | [`scene_sampler`](../../cartridges/scene_sampler/) | an item (it writes its own quest and `scenes/<name>.json`) |
 | `dialogues` | [`ask_sampler`](../../cartridges/ask_sampler/) | an NPC |
 | `emotes` | [`emote_sampler`](../../cartridges/emote_sampler/) | nothing |
