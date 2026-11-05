@@ -1706,7 +1706,8 @@
       "maxItems": 4,
       "items": {
         "$ref": "#/$defs/AmbientSet"
-      }
+      },
+      "examples": [[{"lines": ["room.cave.drip"], "every": 600, "chance": 50}]]
     },
     "NpcAmbientSets": {
       "description": "An NPC's ambient sets, each lines or emotes, in authored order.",
@@ -1715,7 +1716,8 @@
       "maxItems": 4,
       "items": {
         "$ref": "#/$defs/NpcAmbientSet"
-      }
+      },
+      "examples": [[{"emotes": [{"cartridge_id": "emote_sampler", "cartridge_version": "0.0.1", "kind": "emote", "key": "glance"}], "every": 300}, {"lines": ["npc.goblin.mutter"], "every": 600}]]
     }
   }
 }

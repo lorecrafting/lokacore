@@ -172,17 +172,11 @@ test('an elapsed advance across 50 boundaries tells one drip', () => {
   const run_id = 'bbbbbbbb-8888-4888-8888-000000000001';
   const r = stepElapsed(
     w,
-    {
-      id: elapsedCommandId(run_id, w.context, 0, 30000) as never,
+    cmd({
+      id: elapsedCommandId(run_id, w.context, 0, 30000),
       world_context_id: w.context,
-      payload: {
-        type: 'elapsed',
-        actor_id: w.character,
-        run_id: run_id as never,
-        from: 0,
-        until: 30000,
-      },
-    },
+      payload: { type: 'elapsed', actor_id: w.character, run_id, from: 0, until: 30000 },
+    }),
     1,
   );
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
