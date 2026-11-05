@@ -6,7 +6,7 @@ defmodule Loka.ContentLintLayoutTest do
   @moduletag :tmp_dir
 
   defp plant(dir, files) do
-    for {rel, body} <- Map.put(files, "cartridge.json", %{"entry" => "a"}) do
+    for {rel, body} <- Map.put_new(files, "cartridge.json", %{"entry" => "a"}) do
       File.mkdir_p!(Path.dirname(Path.join(dir, rel)))
       File.write!(Path.join(dir, rel), Jason.encode!(body))
     end
@@ -16,8 +16,9 @@ defmodule Loka.ContentLintLayoutTest do
 
   defp room(exits), do: %{"exits" => Map.new(exits, fn {way, to} -> {way, %{"to" => to}} end)}
 
-  # Breaks: a room nothing reaches and nothing is kept in passes, a room kept by an NPC or population is
-  # called an orphan, or a room file mid-edit (broken JSON) crashes the whole lint.
+  # Breaks: a room nothing reaches and nothing is kept in passes, a room kept by an NPC, a population's
+  # home or area, or a structure site is called an orphan, or a room file mid-edit (broken JSON)
+  # crashes the whole lint.
   test "orphan room: an area room no exit reaches, unless something is kept there", %{
     tmp_dir: dir
   } do
@@ -32,12 +33,20 @@ defmodule Loka.ContentLintLayoutTest do
            ]
 
     assert plant(dir, Map.put(files, "npcs/hermit.json", %{"room" => "old_well"})) == []
+    # plant keeps earlier files: each keeper is removed before the next is tried
+    File.rm!(Path.join(dir, "npcs/hermit.json"))
     assert plant(dir, Map.put(files, "populations/bats.json", %{"home" => "old_well"})) == []
+    bats = %{"home" => "h", "area" => [%{"key" => "old_well"}]}
+    assert plant(dir, Map.put(files, "populations/bats.json", bats)) == []
+    File.rm!(Path.join(dir, "populations/bats.json"))
+    site = Map.put(room([]), "site", %{})
+    assert plant(dir, Map.put(files, "areas/hollow/rooms/old_well.json", site)) == []
     File.write!(Path.join(dir, "areas/hollow/rooms/broken.json"), "{")
     assert plant(dir, Map.put(files, "npcs/hermit.json", %{"room" => "old_well"})) == []
   end
 
-  # Breaks: an area entered only from inside itself passes, or a transport into it is not counted.
+  # Breaks: an area entered only from inside itself passes, a transport into it is not counted, or
+  # the area holding the entry room (the prologue's case) is flagged.
   test "unreachable area: no exit or transport from outside leads in", %{tmp_dir: dir} do
     files = %{
       "rooms/a.json" => room(north: "b"),
@@ -52,10 +61,12 @@ defmodule Loka.ContentLintLayoutTest do
 
     ferry = %{"room" => %{"key" => "b"}, "destination" => "d2"}
     assert plant(dir, Map.put(files, "transports/ferry.json", ferry)) == []
+    File.rm!(Path.join(dir, "transports/ferry.json"))
+    assert plant(dir, Map.put(files, "cartridge.json", %{"entry" => "d1"})) == []
   end
 
-  # Breaks: a room whose every exit crosses into one other area passes, or a room with one exit
-  # (a dead end) is flagged.
+  # Breaks: a room whose every exit crosses into one other area passes, a room with one exit
+  # (a dead end) is flagged, or an area room whose exits all lead to the root is called astray.
   test "astray room: two or more exits, all into one other area", %{tmp_dir: dir} do
     files = %{
       "rooms/a.json" => room(north: "thinning", east: "e1"),
@@ -70,5 +81,12 @@ defmodule Loka.ContentLintLayoutTest do
 
     one_exit = Map.put(files, "areas/hollow/rooms/thinning.json", room(north: "e1"))
     assert plant(dir, one_exit) == []
+
+    to_root = %{
+      "rooms/b.json" => room(west: "a"),
+      "areas/edge/rooms/e2.json" => room(n: "a", s: "b")
+    }
+
+    assert plant(dir, Map.merge(one_exit, to_root)) == []
   end
 end

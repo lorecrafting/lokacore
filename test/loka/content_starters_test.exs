@@ -1,4 +1,4 @@
-# size: allow 553, one case per starter kind and refusal; the area placement cases join them
+# size: allow 562, one case per starter kind and refusal; the area placement cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -451,6 +451,11 @@ defmodule Loka.ContentStartersTest do
     run.(~w(--cwd #{tmp} cartridge mine areas marsh rooms reeds --from marsh east))
     run.(~w(--cwd #{tmp} rooms bog --area marsh items rope --area marsh rooms w --area m mine))
     run.(~w(--cwd #{tmp} rooms ford --from start north --area marsh mine))
+
+    run.(
+      ~w(--cwd #{tmp} areas edge npcs brennan --area edge npcs zed dialogues hi --area marsh mine)
+    )
+
     dir = Path.join(tmp, "mine")
 
     assert read(dir, "areas/marsh/rooms/marsh.json")["exits"] == %{"east" => %{"to" => "reeds"}}
@@ -461,6 +466,8 @@ defmodule Loka.ContentStartersTest do
     assert read(dir, "areas/marsh/items/rope.json")["location"]["room"] == "bog"
     assert read(dir, "areas/marsh/rooms/ford.json")["exits"] == %{"south" => %{"to" => "start"}}
     assert read(dir, "rooms/start.json")["exits"] == %{"north" => %{"to" => "ford"}}
+    # Break: an area file naming another area's NPC (brennan sorts first), so compile refuses it.
+    assert read(dir, "areas/marsh/dialogues/hi.json")["npc"] == "zed"
 
     assert Path.wildcard(Path.join(dir, "{rooms,items}/*.json")) == [
              Path.join(dir, "rooms/start.json")
@@ -475,6 +482,8 @@ defmodule Loka.ContentStartersTest do
       "mix loka.new: --area: an area is lowercase letters, digits and _, 64 at most (got ../..)"
 
     assert_raise Mix.Error, bad, fn -> run.(~w(--cwd #{tmp} rooms x --area ../.. mine)) end
+    own = "mix loka.new: areas x is its own area: drop --area marsh"
+    assert_raise Mix.Error, own, fn -> run.(~w(--cwd #{tmp} areas x --area marsh mine)) end
 
     assert_raise Mix.Error,
                  "mix loka.new: no rooms in areas/fen yet: bin/loka new areas fen first",

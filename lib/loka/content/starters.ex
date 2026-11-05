@@ -41,6 +41,9 @@ defmodule Loka.Content.Starters do
   # An area is a folder that starts with a room of its own name.
   def write(dir, "areas", name, from, hook, nil), do: write(dir, "rooms", name, from, hook, name)
 
+  def write(_, "areas", name, _, _, area),
+    do: {:error, "areas #{name} is its own area: drop --area #{area}"}
+
   def write(dir, kind, name, from, hook, area) do
     with :ok <- valid_name(name, kind),
          :ok <- in_cartridge(dir),
@@ -120,7 +123,7 @@ defmodule Loka.Content.Starters do
     }
 
     Enum.reduce_while(needs, {:ok, start}, fn kind, {:ok, acc} ->
-      case first(dir, kind, start["entry"]) do
+      case first(dir, kind, start["entry"], area) do
         nil ->
           {:halt, {:error, "no #{missing(kind)} yet: bin/loka new #{missing(kind)} <name> first"}}
 
@@ -215,7 +218,7 @@ defmodule Loka.Content.Starters do
   defp placed_row?(row), do: is_map(row) and Enum.all?(~w(x y z), &is_number(row[&1]))
 
   @single ~w(facts resources attributes)
-  defp first(dir, kind, _) when kind in @single do
+  defp first(dir, kind, _, _) when kind in @single do
     case read(Path.join(dir, "#{kind}.json")) do
       %{^kind => defs} when map_size(defs) > 0 -> defs |> Map.keys() |> Enum.min()
       _ -> nil
@@ -223,17 +226,18 @@ defmodule Loka.Content.Starters do
   end
 
   # "entry" is a room reference, bundled or not; "rooms" is a room with its own file to merge into.
-  defp first(dir, "entry", entry), do: entry || first(dir, "rooms", entry)
+  defp first(dir, "entry", entry, area), do: entry || first(dir, "rooms", entry, area)
 
-  defp first(dir, kind, entry) do
-    keys = for p <- own_files(dir, kind), do: Path.basename(p, ".json")
+  # An area file may name only the root's and its own area's definitions (area_crossing).
+  defp first(dir, kind, entry, area) do
+    keys = for p <- own_files(dir, kind, area || "*"), do: Path.basename(p, ".json")
     if kind == "rooms" and entry in keys, do: entry, else: List.first(keys)
   end
 
-  # One file per definition, at the root or in an area folder; sorted by key.
-  defp own_files(dir, kind) do
+  # One file per definition, at the root or in an area folder (`area`, or any); sorted by key.
+  defp own_files(dir, kind, area \\ "*") do
     (Path.wildcard(Path.join([dir, kind, "*.json"])) ++
-       Path.wildcard(Path.join([dir, "areas/*", kind, "*.json"])))
+       Path.wildcard(Path.join([dir, "areas", area, kind, "*.json"])))
     |> Enum.sort_by(&Path.basename/1)
   end
 

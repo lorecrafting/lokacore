@@ -1,8 +1,9 @@
+// size: allow 511, the write path's guard, journal and /new cases share the tree helper above them
 // The editor's write path (docs/system/cartridge.md#author-preview): the one path guard, the Host
 // and Origin checks, the whole-file `was`, the journal and undo, on controlled source trees.
 import assert from 'node:assert/strict';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync } from 'node:fs';
-import { existsSync, symlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, renameSync, symlinkSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -111,6 +112,16 @@ test('a symlink on the way, or as the file, is refused for reads and writes', as
   assert.equal(existsSync(join(dir, 'outside/evil')), false);
   const linked = await ask('/source?file=rooms/b.json');
   assert.deepEqual([linked.status, linked.body], [400, 'not a regular file: rooms/b.json']);
+  // Breaks: /new running mix through `areas -> outside` or a linked rooms/, writing outside the
+  // tree where the journal cannot see it (mix is never reached: a refusal comes first).
+  const den = await ask('/new', { kind: 'rooms', name: 'den', area: 'evil' });
+  assert.deepEqual([den.status, den.body], [400, 'a symlink on the way to areas']);
+  rmSync(join(src, 'areas'));
+  rmSync(join(src, 'rooms/b.json'));
+  renameSync(join(src, 'rooms'), join(dir, 'outside/rooms'));
+  symlinkSync(join(dir, 'outside/rooms'), join(src, 'rooms'));
+  const cellar = await ask('/new', { kind: 'rooms', name: 'cellar' });
+  assert.deepEqual([cellar.status, cellar.body], [400, 'a symlink on the way to rooms']);
 });
 
 test('only the author page may ask: a foreign Host on any route, a foreign Origin on a POST', async (t) => {
