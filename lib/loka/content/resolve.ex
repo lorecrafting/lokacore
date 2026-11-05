@@ -311,16 +311,14 @@ defmodule Loka.Content.Resolve do
   defp nesting(_), do: 0
 
   @doc """
-  Diagnostics for a v2 source (`{entry, text}`; nil for v1): the entry is present, each room's,
+  Diagnostics for the source's `{entry, text}`: the entry is present, each room's,
   item's and NPC's owning capability is required, exits and the entry name rooms of this
   cartridge, items' locations and NPCs' rooms name definitions of their kind, items and NPCs
   start without a containment cycle or over capacity, each room's, item's, NPC's and action's
   text keys have a catalog entry (unless the catalog was rejected, `:unknown`). Scripted actions and
   rooms' action contributions are `Loka.Content.ScriptedActions.check/4`.
   """
-  @spec rooms(map() | nil, map(), {map() | nil, map() | :unknown} | nil, [map()]) :: [map()]
-  def rooms(_, _, nil, _), do: []
-
+  @spec rooms(map() | nil, map(), {map() | nil, map() | :unknown}, [map()]) :: [map()]
   def rooms(m, defs, {entry, text}, registry) do
     rooms = for {_, {rel, [], r}} <- defs["room"], do: {rel, r}
 

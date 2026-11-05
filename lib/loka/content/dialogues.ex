@@ -10,11 +10,11 @@ defmodule Loka.Content.Dialogues do
 
   defp all(defs), do: for({_, {rel, [], d}} <- defs["dialogue"], do: {rel, d})
 
-  @doc "Diagnostics for dialogues, story points and chapter settings of a v2 source (else none)."
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, {term(), map()}, [map()]) :: [
+  @doc "Diagnostics for dialogues, story points and chapter settings of a source with a manifest (else none)."
+  @spec check(map() | nil, map(), {term(), map() | :unknown}, {term(), map()}, [map()]) :: [
           map()
         ]
-  def check(m, _, v2, _, _) when m == nil or v2 == nil, do: []
+  def check(nil, _, _, _, _), do: []
 
   def check(m, defs, {_, text}, {_, settings}, registry) do
     caps = m["requires"]["capabilities"]

@@ -3,7 +3,7 @@ defmodule Loka.Content.Resources do
   `resources.json` and the engine's default pools (resource.schema.json ResourceSpec; 00 §4
   amendment, owner decision HP/MA/MV). The file is `{"resources": {key: fields}}`: a default
   pool's key (hp, ma, mv) overrides any of its fields, another key declares a whole
-  ResourceSpec without `key`. Every loka-cartridge-v2 cartridge gets the three pools and
+  ResourceSpec without `key`. Every cartridge gets the three pools and
   resource@1 and schedule@1 (`requires/1`), with or without the file. `attributes.json`, the
   cartridge's attributes (attribute@1), loads here too (`attributes/1`), the same way.
   """
@@ -84,13 +84,13 @@ defmodule Loka.Content.Resources do
 
   @doc """
   Diagnostics of the condition band tables (resource.schema.json BandTable: each pool's `bands`
-  and cartridge.json's `world.bands`) and of `world.movement.cost`, given a manifest and a v2
+  and cartridge.json's `world.bands`) and of `world.movement.cost`, given a manifest and the
   source: cuts not strictly descending to a last 0, or a repeated key, is RESOURCE_SPEC_INVALID at
   the table; a band key without `band.<key>` in the catalog (unless it was rejected) or a cost
   naming no resource of this cartridge is UNRESOLVED_REFERENCE; an attribute without attribute@1
   in `m`'s requires is UNDECLARED_CAPABILITY.
   """
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, {term(), map()}, [map()]) ::
+  @spec check(map() | nil, map(), {term(), map() | :unknown}, {term(), map()}, [map()]) ::
           [map()]
   def check(m, defs, {_, text}, {_, settings}, registry) when m != nil do
     world = Map.get(settings, "world", %{})

@@ -263,4 +263,4 @@ if (flag !== '--watch') process.exit(ok ? 0 : 1);
 if (ok) lint();
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(remembered, source);
-console.log(`Watching ${dir}`);
+console.log(`Watching ${dir}, author API on port ${await live!.port}`);

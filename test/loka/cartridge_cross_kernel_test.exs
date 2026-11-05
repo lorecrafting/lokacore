@@ -1,16 +1,16 @@
 defmodule Loka.CartridgeCrossKernelTest do
   # ADR-074 §3, 14 §R4: artifacts the Elixir compiler (mix loka.compile) writes load in the
   # TypeScript loader (kernel/ts/test/cartridge_peer.ts) with identical canonical bytes, hash
-  # and lock; a source the compiler rejects writes no artifact. The hello source is also held
-  # to the Python known answer (protocol/fixtures/cartridge_hash.json), never only to the
+  # and lock; a source the compiler rejects writes no artifact. The harvest source is also held
+  # to the Python known answer (protocol/fixtures/harvest_sampler_hash.json), never only to the
   # other kernel.
   use ExUnit.Case, async: true
   import ExUnit.CaptureIO
 
   @moduletag :tmp_dir
   @peer "kernel/ts/test/cartridge_peer.ts"
-  @hello "cartridges/hello_sampler"
-  @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_hash.json"))
+  @harvest "cartridges/harvest_sampler"
+  @kat JSON.decode!(File.read!("protocol/fixtures/harvest_sampler_hash.json"))
   @installed %{
     "kernel_api" => "1.0",
     "capabilities" =>
@@ -36,24 +36,24 @@ defmodule Loka.CartridgeCrossKernelTest do
     end)
   end
 
-  # hello's source copied to `dir` with `files` (relative path => JSON value) written over it.
+  # harvest's source copied to `dir` with `files` (relative path => JSON value) written over it.
   defp variant(dir, files) do
-    File.cp_r!(@hello, dir)
+    File.cp_r!(@harvest, dir)
     for {rel, v} <- files, do: File.write!(Path.join(dir, rel), JSON.encode!(v))
     dir
   end
 
-  defp read(rel), do: JSON.decode!(File.read!(Path.join(@hello, rel)))
+  defp read(rel), do: JSON.decode!(File.read!(Path.join(@harvest, rel)))
 
   defp fact(key),
     do: %{
-      "cartridge_id" => "hello_sampler",
+      "cartridge_id" => "harvest_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => "fact",
       "key" => key
     }
 
-  # More shapes than hello: enum and int facts under dotted names, nested all/any/not, a
+  # More shapes than harvest: enum and int facts under dotted names, nested all/any/not, a
   # second action whose command another capability owns.
   defp rich(dir) do
     facts = read("facts.json")
@@ -89,22 +89,19 @@ defmodule Loka.CartridgeCrossKernelTest do
       ]
     }
 
-    look =
-      Map.merge(read("actions/talk.json"), %{
-        "name" => "actions.look",
-        "command" => "look",
-        "accessibility" => "actions.look.a11y",
-        "policy" => root
-      })
+    take =
+      Map.merge(read("actions/mine_carefully.json"), %{"command" => "take", "policy" => root})
 
     variant(Path.join(dir, "rich"), %{
+      "cartridge.json" =>
+        put_in(read("cartridge.json"), ["requires", "capabilities", "target_resolution"], 1),
       "facts.json" =>
         put_in(
           facts,
           ["facts"],
           Map.merge(facts["facts"], %{"bram.mood" => mood, "lantern.oil" => oil})
         ),
-      "actions/look.json" => look
+      "actions/take.json" => take
     })
   end
 
@@ -170,7 +167,7 @@ defmodule Loka.CartridgeCrossKernelTest do
   } do
     paths =
       for {name, src} <- [
-            {"hello", @hello},
+            {"harvest", @harvest},
             {"rich", rich(tmp)},
             {"numbered", numbered(tmp)},
             {"attributed", attributed(tmp)},
@@ -194,10 +191,10 @@ defmodule Loka.CartridgeCrossKernelTest do
     )
 
     {stdout, 0} = System.cmd("node", [@peer, input])
-    [hello | _] = loaded = JSON.decode!(stdout)
+    [harvest | _] = loaded = JSON.decode!(stdout)
 
-    assert hello["hash"] == @kat["sha256"]
-    assert hello["lock"] == @kat["value"]["lock"]
+    assert harvest["hash"] == @kat["sha256"]
+    assert harvest["lock"] == @kat["value"]["lock"]
 
     for {theirs, path} <- Enum.zip(loaded, paths) do
       bytes = File.read!(path)
@@ -235,13 +232,13 @@ defmodule Loka.CartridgeCrossKernelTest do
   # Breaks: the task writes the artifact (or a partial file) before or despite diagnostics.
   test "a source the compiler rejects writes no artifact", %{tmp_dir: tmp} do
     manifest = read("cartridge.json")
-    undeclared = update_in(manifest, ["requires", "capabilities"], &Map.delete(&1, "dialogue"))
+    undeclared = update_in(manifest, ["requires", "capabilities"], &Map.delete(&1, "skill"))
     has_item = %{"op" => "has_item", "item" => %{fact("lantern") | "kind" => "item"}}
-    talk = put_in(read("actions/talk.json"), ["policy"], has_item)
+    mine = put_in(read("actions/mine_carefully.json"), ["policy"], has_item)
 
     for {name, files, words} <- [
           {"undeclared", %{"cartridge.json" => undeclared}, "does not lock"},
-          {"unresolved", %{"actions/talk.json" => talk}, "Nothing defines"}
+          {"unresolved", %{"actions/mine_carefully.json" => mine}, "Nothing defines"}
         ] do
       out = Path.join(tmp, "#{name}.artifact.json")
       stderr = compile(variant(Path.join(tmp, name), files), out)

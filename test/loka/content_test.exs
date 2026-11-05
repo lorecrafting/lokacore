@@ -1,14 +1,14 @@
 defmodule Loka.ContentTest do
   # The R4 cartridge compiler (14 §R4; 05 §3-§8, §11, §20; 15 CAR-02, CAR-04). Expected
   # diagnostics are hand-written literals from protocol/cartridge.schema.json; the known
-  # answer is protocol/fixtures/cartridge_hash.json (Python), decoded with the stdlib JSON.
+  # answer is protocol/fixtures/harvest_sampler_hash.json (Python), decoded with the stdlib JSON.
   use ExUnit.Case, async: true
   alias Loka.Core.{Canonical, Contracts}
 
   @moduletag :tmp_dir
-  @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_hash.json"))
-  @hello_artifact ~s({"cartridge":) <>
-                    @kat["canonical"] <> ~s(,"content_hash":"#{@kat["sha256"]}"})
+  @kat JSON.decode!(File.read!("protocol/fixtures/harvest_sampler_hash.json"))
+  @harvest "cartridges/harvest_sampler"
+  @artifact ~s({"cartridge":) <> @kat["canonical"] <> ~s(,"content_hash":"#{@kat["sha256"]}"})
 
   @manifest %{
     "api_version" => "loka/v3",
@@ -19,10 +19,11 @@ defmodule Loka.ContentTest do
       "kernel_api" => %{"at_least" => "1.0", "below" => "2.0"},
       "content_schema" => 1,
       "rule_ir" => 1,
-      "capabilities" => %{"fact" => 1, "policy" => 1, "target_resolution" => 1, "dialogue" => 1},
+      "capabilities" => Map.new(~w(fact policy target_resolution dialogue movement), &{&1, 1}),
       "client_features" => []
     },
-    "supported_profiles" => ["offline_private"]
+    "supported_profiles" => ["offline_private"],
+    "entry" => "r"
   }
   @fact %{
     "version" => 1,
@@ -41,13 +42,15 @@ defmodule Loka.ContentTest do
     "accessibility" => "a"
   }
 
-  # Writes the base source (manifest, fact a.b, action talk) with `files` merged over it:
+  # Writes the base source (manifest, fact, action, room, text) with `files` merged over it:
   # a value is encoded, {:raw, text} is written as is, nil removes the file.
   defp source(dir, files) do
     base = %{
       "cartridge.json" => @manifest,
       "facts.json" => %{"facts" => %{"a.b" => @fact}},
-      "actions/talk.json" => @talk
+      "actions/talk.json" => @talk,
+      "rooms/r.json" => %{"name" => "a", "description" => "a", "exits" => %{}},
+      "text.json" => %{"a" => "a"}
     }
 
     for {rel, v} <- Map.merge(base, files), v != nil do
@@ -84,19 +87,14 @@ defmodule Loka.ContentTest do
   defp act(root), do: %{@talk | "policy" => root}
   defp manifest(path, value), do: put_in(@manifest, path, value)
 
-  # Break: wrong key mapping, key order, hash input or artifact framing.
-  test "the hello subset source compiles to the Python known answer" do
-    assert Loka.Content.compile("cartridges/hello_sampler") == {:ok, @hello_artifact, []}
-  end
-
   # Break: the compiler reads outline.json (the Story map's author notes) as content: a stray
   # root file refused, a JSON decode error, or a changed hash.
-  test "an outline.json, well-formed or not, leaves the hello artifact unchanged", %{tmp_dir: tmp} do
-    File.cp_r!("cartridges/hello_sampler", tmp)
+  test "an outline.json, well-formed or not, leaves the artifact unchanged", %{tmp_dir: tmp} do
+    File.cp_r!(@harvest, tmp)
 
     for outline <- [~s({"parts":[]}), "{not json"] do
       File.write!(Path.join(tmp, "outline.json"), outline)
-      assert Loka.Content.compile(tmp) == {:ok, @hello_artifact, []}
+      assert Loka.Content.compile(tmp) == {:ok, @artifact, []}
     end
   end
 
@@ -391,7 +389,7 @@ defmodule Loka.ContentTest do
     end
 
     test "UNDECLARED_CAPABILITY: an action's command and a policy op", %{tmp_dir: tmp} do
-      caps = %{"fact" => 1, "policy" => 1}
+      caps = %{"fact" => 1, "policy" => 1, "movement" => 1}
 
       assert errors(tmp, %{"cartridge.json" => manifest(["requires", "capabilities"], caps)}) == [
                %{
@@ -429,12 +427,11 @@ defmodule Loka.ContentTest do
     end
 
     test "ARTIFACT_TOO_LARGE above the cap, never at it" do
-      size = byte_size(@hello_artifact)
+      size = byte_size(@artifact)
+      # At the cap, the Python known answer. Break: key mapping, key order, hash or framing.
+      assert Loka.Content.compile(@harvest, max_bytes: size) == {:ok, @artifact, []}
 
-      assert Loka.Content.compile("cartridges/hello_sampler", max_bytes: size) ==
-               {:ok, @hello_artifact, []}
-
-      assert Loka.Content.compile("cartridges/hello_sampler", max_bytes: size - 1) ==
+      assert Loka.Content.compile(@harvest, max_bytes: size - 1) ==
                {:error, [d("ARTIFACT_TOO_LARGE", "", %{"bytes" => size, "maximum" => size - 1})]}
     end
   end
@@ -446,9 +443,9 @@ defmodule Loka.ContentTest do
 
   # Break: the task writes other bytes than compile/2 returns, or writes on error.
   test "mix loka.compile writes the artifact, and nothing on error", %{tmp_dir: tmp} do
-    out = Path.join(tmp, "hello.json")
-    Mix.Tasks.Loka.Compile.run(["cartridges/hello_sampler", out])
-    assert File.read!(out) == @hello_artifact
+    out = Path.join(tmp, "harvest.json")
+    Mix.Tasks.Loka.Compile.run([@harvest, out])
+    assert File.read!(out) == @artifact
 
     bad = source(Path.join(tmp, "bad"), %{"cartridge.json" => nil})
     missing = Path.join(tmp, "bad.json")

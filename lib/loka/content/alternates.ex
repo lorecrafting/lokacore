@@ -13,7 +13,7 @@ defmodule Loka.Content.Alternates do
 
   def check(m, defs, {_, settings}, {v2, registry}) do
     alternates = settings["alternates"]
-    text = if is_tuple(v2), do: elem(v2, 1), else: :unknown
+    text = elem(v2, 1)
     leaf = leaf?(defs) or leaf?(settings)
 
     owner(m, alternates, registry) ++

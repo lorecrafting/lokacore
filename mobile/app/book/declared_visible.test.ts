@@ -93,10 +93,8 @@ const spellPoolBesideMa = (w: World) => {
 
 for (const [name, bytes] of artifacts()) {
   const w = open(bytes);
-  // hello_sampler is a text-only greeting with no entry room; any other cartridge must open.
   if (!w) {
-    test(`${name} has no entry room only if it is hello_sampler`, () =>
-      assert.equal(name, 'hello_sampler'));
+    test(`${name} opens at its entry room`, () => assert.fail('no world'));
     continue;
   }
   const c = w.cartridge;

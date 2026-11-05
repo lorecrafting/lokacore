@@ -29,8 +29,7 @@ file outside these recognized root files and definition directories is `UNKNOWN_
 definition may sit in an area bundle, may name a parent of its own kind with `"extends"` and may
 be marked `"abstract": true`; the compiler opens bundles and flattens the rest away first
 ([Source shortcuts](#source-shortcuts)). A
-source with rooms, text or an entry compiles to
-`loka-cartridge-v2`; v1 (manifest, facts, actions) is the R4 form.
+source compiles to `loka-cartridge-v2`, the one format; it needs rooms, an entry and text.
 
 ## Current bundled chapter
 
@@ -548,7 +547,7 @@ being objects (they hold parameter markers).
 
 `loadCartridge(bytes, installed)` (`kernel/ts/src/content/cartridge.ts:23`) returns the decoded
 cartridge and its hash, or the first diagnostic of the first failing stage (`:15`): size
-(`ARTIFACT_TOO_LARGE`), JSON (`INVALID_JSON`), format (`UNKNOWN_FORMAT`: v1 or v2), the
+(`ARTIFACT_TOO_LARGE`), JSON (`INVALID_JSON`), format (`UNKNOWN_FORMAT`: not `loka-cartridge-v2`), the
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:109`), the
 lock (`:134`: `LOCK_MANIFEST_MISMATCH`), and the installed kernel
