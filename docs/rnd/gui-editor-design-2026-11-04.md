@@ -1,5 +1,10 @@
 # GUI editor: every mechanic with create, edit and delete (design, loka-wfrgk.1)
 
+**Amended 2026-11-04** by the [authoring editor plan](../decisions/owner-decision-authoring-editor-plan-2026-11-04.md)
+(the owner's planning session and a Fable audit). Where they differ, the record wins: the layout is
+three columns, the order and slices are new (section 9), and section 11 lists the technical changes.
+Section 8 marks each ruling kept or changed.
+
 Design only. No code, no repo changes beyond this file. Paths are repo-relative; `file:line` is main
 at `6391c1f7a`. Owner goal (2026-11-04, paraphrased): a world-class GUI editor where every mechanic
 eventually has a hand-built way to create, edit, update and delete it; contextual actions count;
@@ -214,38 +219,28 @@ What the gate proves: every mechanic has a named, present surface for each verb.
 
 | # | Ruling | Recommendation |
 |---|---|---|
-| 1 | Hand-built blocks per mechanic, a schema-generic card as the bootstrap, every generic row in a shrink-only baseline. | Yes. The generic card gives every mechanic CRUD in one slice; the baseline makes "eventually hand-built" a CI number that only goes down. |
-| 2 | Surfaces: Book contextual actions, the Map, one Edit tab in the right pane; no third column; the pane may widen to 480 px above 1400 px windows. | Yes. The studio audit's cut stands; a card is a list of blocks and reads fine at 400-480 px. |
-| 3 | Structural edits re-serialize the one file (`JSON.stringify(v, null, 2) + '\n'`), reformatting about 70 files once; prose edits stay line-exact. No JSON CST dependency. | Yes. 97 % of files already have that shape; the compiler reads maps. |
-| 4 | Whole-file `was` on every write, 409 and reload on mismatch, no merge. | Yes. One writer at a time is the real case (the owner, VS Code, the panel). |
-| 5 | Undo is a watcher-memory journal plus git; no history UI, no redo. | Yes. |
-| 6 | Create runs `mix loka.new` through the watcher. | Yes. Starters already write placeholders, the capability lock, layout rows and `--area`/`--from`; a second scaffolder would drift. |
-| 7 | `mix loka.compile --json` is the diagnostics contract for the panel. No new DiagnosticCode, no protocol change. | Yes. The Diagnostic already carries `path`; only the printing changes. |
-| 8 | Delete a file with referrers: confirm with the count and delete; the compiler's `UNRESOLVED_REFERENCE` then shows on the referrers' cards. | Yes. Refusing would force the owner to hunt referrers by hand; the undo journal and the diagnostics make it safe. |
-| 9 | Rename a key is out of v1; the card shows referrers and refuses. | Yes. Every referrer, `then:`, checkpoint and text key changes; the Find tab plus the editor covers it until a slice earns it. |
-| 10 | No component test framework for the panel now; route tests in `kernel/ts/test`, the registry gate, and one owner walk per slice. | Yes, under the Pro plan. Revisit after the first three cards. |
-| 11 | Dialogue choice labels are not edited in the Book or the card (the slug is the key); the Scene text block is the way. | Yes (the studio audit's open question 2). |
-| 12 | A `.scene` dialogue is edited as text with the lowered tree beside it; structured fields a scene cannot say go to the same-key JSON twin. | Yes. The scene file is the owner's writing format; a tree editor that rewrites it would reflow the owner's lines. |
-| 13 | The Book in edit mode shows one "add here" menu per page and a select on click; nothing else changes in the Book. | Yes. Keeps the Book a snapshot and the `mobile-book-*` rules intact. |
-| 14 | Slice order below: write path and gate first, then Room with the Book's add-here, then NPC and Item, then Rules, then Story, then Map edits, then World. | Yes. The Room card plus "add here" is where the owner builds a district; rules and story are where a schema form is worst. |
+| 1 | **Kept, narrowed:** generic only for the existing backlog; a new mechanic ships its hand-built editor; rjsf 6. Hand-built blocks per mechanic, a schema-generic card as the bootstrap, every generic row in a shrink-only baseline. | Yes. The generic card gives every mechanic CRUD in one slice; the baseline makes "eventually hand-built" a CI number that only goes down. |
+| 2 | **Changed:** three columns (hierarchy and map left, the Book a phone strip, inspector and console right). Surfaces: Book contextual actions, the Map, one Edit tab in the right pane; no third column; the pane may widen to 480 px above 1400 px windows. | Yes. The studio audit's cut stands; a card is a list of blocks and reads fine at 400-480 px. |
+| 3 | **Kept.** Structural edits re-serialize the one file (`JSON.stringify(v, null, 2) + '\n'`), reformatting about 70 files once; prose edits stay line-exact. No JSON CST dependency. | Yes. 97 % of files already have that shape; the compiler reads maps. |
+| 4 | **Kept;** every fs change is pushed with its attribution (section 11). Whole-file `was` on every write, 409 and reload on mismatch, no merge. | Yes. One writer at a time is the real case (the owner, VS Code, the panel). |
+| 5 | **Changed:** the journal also covers outside changes, one entry per burst, capped by bytes; the console's feed is the history list. Undo is a watcher-memory journal plus git; no history UI, no redo. | Yes. |
+| 6 | **Kept;** `/new` journals every file it touched from the snapshot diff. Create runs `mix loka.new` through the watcher. | Yes. Starters already write placeholders, the capability lock, layout rows and `--area`/`--from`; a second scaffolder would drift. |
+| 7 | **Kept.** `mix loka.compile --json` is the diagnostics contract for the panel. No new DiagnosticCode, no protocol change. | Yes. The Diagnostic already carries `path`; only the printing changes. |
+| 8 | **Kept.** Delete a file with referrers: confirm with the count and delete; the compiler's `UNRESOLVED_REFERENCE` then shows on the referrers' cards. | Yes. Refusing would force the owner to hunt referrers by hand; the undo journal and the diagnostics make it safe. |
+| 9 | **Kept.** Rename a key is out of v1; the card shows referrers and refuses. | Yes. Every referrer, `then:`, checkpoint and text key changes; the Find tab plus the editor covers it until a slice earns it. |
+| 10 | **Kept.** No component test framework for the panel now; route tests in `kernel/ts/test`, the registry gate, and one owner walk per slice. | Yes, under the Pro plan. Revisit after the first three cards. |
+| 11 | **Kept.** Dialogue choice labels are not edited in the Book or the card (the slug is the key); the Scene text block is the way. | Yes (the studio audit's open question 2). |
+| 12 | **Kept.** A `.scene` dialogue is edited as text with the lowered tree beside it; structured fields a scene cannot say go to the same-key JSON twin. | Yes. The scene file is the owner's writing format; a tree editor that rewrites it would reflow the owner's lines. |
+| 13 | **Changed:** no edit mode; a Book click plays and selects, double-click edits prose, Alt-click opens source; "add here" lives in the hierarchy and inspector. The Book in edit mode shows one "add here" menu per page and a select on click; nothing else changes in the Book. | Yes. Keeps the Book a snapshot and the `mobile-book-*` rules intact. |
+| 14 | **Changed:** see section 9. Slice order below: write path and gate first, then Room with the Book's add-here, then NPC and Item, then Rules, then Story, then Map edits, then World. | Yes. The Room card plus "add here" is where the owner builds a district; rules and story are where a schema form is worst. |
 
 ## 9. Slice plan
 
-Sizes under the Pro plan (from about 2026-11-10): S is one lean session, M two. Every slice: no diff under `protocol/`, `kernel/ts/src/` or `mobile/app/book/` (a dev-only attribute in `mobile/app/author` is allowed); a diff there is a finding.
-
-| Slice | Size | Content | Review |
-|---|---|---|---|
-| G1 write path and gate | M | `live.ts` routes of 5.1 with the one path guard, the journal, `POST /new` over `mix loka.new`; `mix loka.compile --json`; `author.ts` helpers; `registry.json` with every implemented capability `generic`; `Generic.tsx` card and `EditTab.tsx` picker; the gate checks and baseline in loka-vduxr.59's generator; route tests on a controlled tree (each a red control: remove the guard, the test fails). | One fresh reviewer: a trust boundary (file writes) and a `lib/` change. |
-| G2 Room and the Book | M | Room card (exits table with pickers, details, tags, variants through the Policy block, prose through loka-vduxr.53's block); the Picker block; Book edit mode: select on click, "add here" (exit, item, NPC, detail, reaction, action); diagnostics placed at fields. Needs loka-vduxr.51 merged; loka-vduxr.53's route may land here if not yet merged. | Designer pass on the Book edit-mode pattern (`docs/design/interaction-patterns.md` entry); one reviewer on the final head (panel and author bridge only). |
-| G3 NPC and Item | M | NPC and Item cards; Combat numbers block beside `GET /numbers`; Schedule block (Map-linked rows); Offer table (shop, services); placement pickers; behaviours holder list. Baseline shrinks by those declarations. | Lean default; one reviewer on the final head. |
-| G4 Rules | M | Policy, Steps, Trigger and Check blocks; Reaction and Action cards; behaviours rules; `facts.json` table in the World card (needed by the Policy block's fact picker). | One fresh reviewer: these blocks carry the most semantics (26 leaves, 35 ops, trigger filters). |
-| G5 Story | M | Quest card; Dialogue card (tree from the artifact, choice blocks); Scene text block with the lowered tree; modal scene card; chapters and story points. | Lean default; designer pass on the tree view only if its pattern is new. |
-| G6 Map edits | S | On loka-vduxr.52: drag writes layout rows, draw and delete edges, one-way, barrier drop, "new room from here", "move to area" (`POST /move`). | Lean default. |
-| G7 World and the rest | S | World card (`cartridge.json` calendar, combat and death settings, world, chapters; `resources.json`; `attributes.json`); Population card; Transport and Barrier pickers on the Map; the remaining generic cards promoted where a block already exists. Baseline at its floor; the toolbox page's Editor column mostly `bespoke`. | One review on the final head. |
-
-Order: G1, G2, G3, G4, G5, G6, G7. G1 first because every later slice is a card over its routes and because the gate makes the generic baseline visible from day one. G2 before G3 because "add here" on the room is the owner's first ask. G6 waits for loka-vduxr.52. Each slice ends with the baseline file shorter, the owner's walk, and a `docs/system/cartridge.md` Author preview bullet for what the panel can now write.
-
-Dependencies on open work: loka-vduxr.51 (keys on Book lines) before G2's Book selection; loka-vduxr.52 (Map tab) before G6; loka-vduxr.53 (prose route) is reused by the Prose block and may land inside G2; loka-vduxr.58.3 (`--area`) before `POST /new` accepts `area`; loka-vduxr.59 (toolbox generator) before G1's gate extends it.
+Superseded by the [plan's slice order](../decisions/owner-decision-authoring-editor-plan-2026-11-04.md#slice-order).
+The old G1 to G7 map onto it: G1 is E1 (routes) plus E4a (registry and gate) and E4b (the generic
+card); G2 to G5 and G7 are the five E6 slices; G6 is E3b. Each slice still ends with the
+fallback list shorter, the owner's walk, and an Author preview bullet in `docs/system/cartridge.md`.
+The original table is at [`e278f6a86`](https://github.com/lorecrafting/lokacore/blob/e278f6a86/docs/rnd/gui-editor-design-2026-11-04.md#9-slice-plan).
 
 ## 10. Not checked, and risks
 
@@ -258,3 +253,45 @@ Dependencies on open work: loka-vduxr.51 (keys on Book lines) before G2's Book s
 - Edit mode in the Book adds a click handler and a menu to `mobile/app/author/panel.tsx`; the release bundle keeps dead strings (`cartridge.md:895`) but no behavior. The `mobile-book-*` ast-grep rules must be run on G2; a menu rendered inside `mobile/app/book/` would be a finding.
 - The gate counts a surface as present when its file exists. A card that renders an empty block passes the gate; the baseline, the owner's walk and the route tests are the honest checks, and the toolbox page's Editor column makes a hollow `bespoke` claim visible.
 - Token cost: seven slices at M/S under the Pro plan is roughly two weeks of agent slots; the owner may stop after G4 with the world, things, people and rules hand-built and story still generic, which is a usable floor.
+
+## 11. Audit changes (2026-11-04)
+
+From the Fable audit of the plan; each is binding on its slice.
+
+- **Hold and the badge live in the watcher.** A structural compile rewrites the artifact and Metro
+  reloads the frame (`kernel/ts/play/author.ts:71-75`, `mobile/app/metro.config.js:38-44`), so the
+  watcher parks the artifact, answers `POST /hold {on}`, and puts `pending` on the SSE message.
+  A held structural change blocks later text overlays; the badge counts every waiting change.
+- **Commit points.** Fields write on Enter, blur or picker close; the card shows "compiling" until the SSE answers.
+- **Generic card: rjsf 6 with Ajv2020.** JSON Forms 3.8 resolves no `if/then/else` (our top level
+  per kind) and has no `anyOf` renderer. rjsf validates a real room with zero errors but its
+  defaults invent content, so it mounts with `emptyObjectFields: 'skipDefaults'` and
+  `arrayMinItems.populate: 'never'`, and a test pins that an empty room's defaults are `{}`. A pure
+  schema walker emits the `ui:field` claims (by `$ref`: TextKey, DefinitionRef, Policy, Step; and by
+  registry path), gives `anyOf` branches titles, and is the gate's path list. rjsf owns branch
+  switching inside the generic card; the edit model owns block add and remove, the prose or key
+  toggle, pickers and the path ops.
+- **The gate keys on schema paths** (top-level fields of each source definition and root file,
+  plus treatment names), not on the registry's `definitions` field, which is wrong today
+  (`protocol/capability_registry.json`: `quest`, `combat`, `death` null).
+- **Every fs burst is pushed** as `changed: [{file, sha256, by}]`, `by` being `editor` or
+  `outside`, so a card open on a file an agent changed (a `text.json` overlay included) reloads or
+  marks its fields. The journal takes one entry per burst and is capped by bytes (about 64 MB).
+- **`/new`** journals every file `mix loka.new` touched by diffing the snapshot (it merges into
+  `cartridge.json`, `layout.json`, `text.json` and the `--from` room, `lib/loka/content/starters.ex:53-55`).
+  Its `area` waits for S3; S3's `--from` and first-room lookups across area folders
+  (`starters.ex:141`, `:207-209`) move into S2 so "new room from here" works on area rooms.
+- **Guards:** a `Host` check (`localhost` or `127.0.0.1`) beside the Origin check against DNS
+  rebinding; the symlink guard checks `realpath` of the parent and `lstat` of the file, for reads
+  and writes. Loopback is the trust boundary; Origin only stops browsers.
+- **`compile --json`:** `explain.ex` splits its place formatting into a function returning
+  `{rel, line}`; the line form stays byte-identical, tested on a planted refusal in both forms.
+- **Treatments:** `treatment` is an optional enum on the source scene, `protocol/scene.schema.json`
+  SceneDefinition and the GameView's SceneView (the Book has no cartridge definitions in a
+  release, so the view must carry it). Revival stays implicitly `spirit`. A treatment's layer sits
+  where the spirit layer sits in the under-ink chooser; scene precedence is unchanged.
+- **Jank to design out:** a failed compile keeps the card's draft with the refusal at its field;
+  a selected file deleted outside shows "deleted, put it back"; `POST /move` answers the new path
+  and re-selects; the hierarchy keeps scroll and selection across reloads; pickers after a failed
+  compile are labelled stale; keyboard shortcuts while the Book frame has focus need a relay; a
+  long recorded path makes every reload slow, so the console offers "trim to a checkpoint".
