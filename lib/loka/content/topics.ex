@@ -4,7 +4,6 @@ defmodule Loka.Content.Topics do
   import Loka.Content.Refs, only: [reference: 6, resolve: 4]
 
   def check(nil, _, _), do: []
-  def check(_, _, nil), do: []
 
   def check(m, defs, {_, text}) do
     ts = for {_, {rel, _, d}} <- defs["topic"], do: {rel, d}

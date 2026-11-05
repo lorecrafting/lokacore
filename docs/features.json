@@ -117,7 +117,7 @@
   "target_resolution": {
     "summary": "Matches what the player names to the thing they mean.",
     "declares": "engine-only: the engine resolves keywords and names the cartridge already declares",
-    "sampler": "hello_sampler",
+    "sampler": "rivals_sampler",
     "showcase": "areas/hub",
     "spec": "21 §7 TargetSpec / TargetResolution; 04 §17-§18",
     "contracts": [
@@ -129,7 +129,7 @@
       "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/cartridge_hash.json"
+      "protocol/fixtures/toolbox_showcase_hash.json"
     ],
     "invariants": [
       "target_candidates_ordered"
@@ -463,7 +463,7 @@
   "narration": {
     "summary": "The engine's own lines around commands (arrivals, refusals, prompts).",
     "declares": "engine-only: the engine writes these lines; a cartridge words them through its text file",
-    "sampler": "hello_sampler",
+    "sampler": "none: narration is engine prose every cartridge runs; no cartridge declares the capability since hello_sampler was retired",
     "showcase": "none: every room shows it; no one district owns it",
     "spec": "06 §43; 04 §5.2 steps 7-8, §15; 21 §4 NarrationSpec",
     "contracts": [

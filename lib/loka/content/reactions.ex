@@ -1,7 +1,7 @@
 # size: allow 305, one clause per reaction op; the consequence table reads together
 defmodule Loka.Content.Reactions do
   @moduledoc """
-  Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14):
+  Reaction rules in a source (reaction.schema.json ReactionRule; 21 §11; 06 §14):
   each rule's owner (reaction@1) and its trigger event's owner is required, and each trigger
   filter names a definition of this cartridge. Its steps' ops, owning events and references are
   `Loka.Content.Steps` (context :reaction); this module adds the reaction-only rules. Its `when`
@@ -17,9 +17,9 @@ defmodule Loka.Content.Reactions do
 
   defp all(defs), do: for({_, {rel, [], r}} <- defs["reaction"], do: {rel, r})
 
-  @doc "Diagnostics for the schema-valid reactions of a v2 source with a valid manifest (else none)."
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
-  def check(m, _, v2, _) when m == nil or v2 == nil, do: []
+  @doc "Diagnostics for the schema-valid reactions of a source with a valid manifest (else none)."
+  @spec check(map() | nil, map(), {term(), map() | :unknown}, [map()]) :: [map()]
+  def check(nil, _, _, _), do: []
 
   def check(m, defs, {_, text}, registry) do
     caps = m["requires"]["capabilities"]

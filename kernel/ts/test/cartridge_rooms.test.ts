@@ -86,15 +86,6 @@ test("a room map key that disagrees with the room's key is ARTIFACT_DEFINITION_K
     { field: 'key', declared: 'ferry_landing', expected: 'dock' },
   ));
 
-// Breaks: v1 accepts v2's fields (the v1 hash domain would change meaning).
-test('a v1 artifact carrying rooms is UNKNOWN_FIELD', () =>
-  fails(
-    mutant((c) => (c.format = 'loka-cartridge-v1')),
-    'UNKNOWN_FIELD',
-    '.cartridge.entry',
-    {},
-  ));
-
 // R5 S2 details (room.schema.json InspectableDetail), from cartridge_details_hash.json.
 const details = read('protocol/fixtures/cartridge_details_hash.json');
 const DFL = 'details_sampler@0.0.1:room/ferry_landing';

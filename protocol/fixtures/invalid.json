@@ -6306,7 +6306,35 @@
     "value": {},
     "errors": [
       {
+        "path": "/actions",
+        "code": "missing_property"
+      },
+      {
+        "path": "/entry",
+        "code": "missing_property"
+      },
+      {
+        "path": "/facts",
+        "code": "missing_property"
+      },
+      {
         "path": "/format",
+        "code": "missing_property"
+      },
+      {
+        "path": "/lock",
+        "code": "missing_property"
+      },
+      {
+        "path": "/manifest",
+        "code": "missing_property"
+      },
+      {
+        "path": "/rooms",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
         "code": "missing_property"
       }
     ]
@@ -6314,7 +6342,7 @@
   {
     "contract": "CompiledCartridge",
     "value": {
-      "format": "loka-cartridge-v1",
+      "format": "loka-cartridge-v2",
       "facts": {
         "hello_sampler@0.0.1:policy/village_arrived": {
           "key": "village_arrived",
@@ -6355,6 +6383,10 @@
         "code": "pattern_mismatch"
       },
       {
+        "path": "/entry",
+        "code": "missing_property"
+      },
+      {
         "path": "/facts/hello_sampler@0.0.1:policy~1village_arrived",
         "code": "pattern_mismatch"
       },
@@ -6364,6 +6396,14 @@
       },
       {
         "path": "/manifest",
+        "code": "missing_property"
+      },
+      {
+        "path": "/rooms",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
         "code": "missing_property"
       }
     ]
@@ -6375,8 +6415,36 @@
     },
     "errors": [
       {
+        "path": "/actions",
+        "code": "missing_property"
+      },
+      {
+        "path": "/entry",
+        "code": "missing_property"
+      },
+      {
+        "path": "/facts",
+        "code": "missing_property"
+      },
+      {
         "path": "/format",
-        "code": "unknown_variant"
+        "code": "const_mismatch"
+      },
+      {
+        "path": "/lock",
+        "code": "missing_property"
+      },
+      {
+        "path": "/manifest",
+        "code": "missing_property"
+      },
+      {
+        "path": "/rooms",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
       }
     ]
   },
@@ -9113,7 +9181,7 @@
   {
     "contract": "CompiledCartridge",
     "value": {
-      "format": "loka-cartridge-v1",
+      "format": "loka-cartridge-v2",
       "facts": {
         "c@1.0.0:fact/x": 1
       },
@@ -9127,6 +9195,10 @@
         "code": "invalid_type"
       },
       {
+        "path": "/entry",
+        "code": "missing_property"
+      },
+      {
         "path": "/facts/c@1.0.0:fact~1x",
         "code": "invalid_type"
       },
@@ -9136,6 +9208,14 @@
       },
       {
         "path": "/manifest",
+        "code": "missing_property"
+      },
+      {
+        "path": "/rooms",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
         "code": "missing_property"
       }
     ]
@@ -9783,30 +9863,6 @@
       {
         "path": "/npcs/c@1.0.0:item~1x",
         "code": "pattern_mismatch"
-      }
-    ]
-  },
-  {
-    "contract": "CompiledCartridge",
-    "value": {
-      "format": "loka-cartridge-v1"
-    },
-    "errors": [
-      {
-        "path": "/actions",
-        "code": "missing_property"
-      },
-      {
-        "path": "/facts",
-        "code": "missing_property"
-      },
-      {
-        "path": "/lock",
-        "code": "missing_property"
-      },
-      {
-        "path": "/manifest",
-        "code": "missing_property"
       }
     ]
   },

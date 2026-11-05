@@ -421,7 +421,7 @@ Each goal names the samplers that already do it; copy their files or start with 
 |---|---|
 | A shop | [`prices_sampler`](../../cartridges/prices_sampler/) (buy and sell), [`escrow_sampler`](../../cartridges/escrow_sampler/) (pay now, get later) |
 | An item | [`items_sampler`](../../cartridges/items_sampler/); wear it: [`wear_sampler`](../../cartridges/wear_sampler/) |
-| An NPC that talks | [`hello_sampler`](../../cartridges/hello_sampler/), [`ask_sampler`](../../cartridges/ask_sampler/) (topics), [`voices_sampler`](../../cartridges/voices_sampler/) |
+| An NPC that talks | [`ask_sampler`](../../cartridges/ask_sampler/) (topics), [`voices_sampler`](../../cartridges/voices_sampler/) |
 | A room and an area | [`rooms_sampler`](../../cartridges/rooms_sampler/), [`details_sampler`](../../cartridges/details_sampler/) (things to look at), [`speech_sampler`](../../cartridges/speech_sampler/) (`areas/` bundle) |
 | A quest | [`quest_sampler`](../../cartridges/quest_sampler/), [`errand_sampler`](../../cartridges/errand_sampler/), [`chapters_sampler`](../../cartridges/chapters_sampler/) |
 | A cutscene | [`scene_sampler`](../../cartridges/scene_sampler/) |

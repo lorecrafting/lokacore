@@ -4,7 +4,6 @@ defmodule Loka.Content.Bleed do
   alias Loka.Content.Refs
 
   def check(nil, _, _), do: []
-  def check(_, _, nil), do: []
 
   def check(m, defs, {_, text}) do
     bleeds = defs["bleed"] || %{}

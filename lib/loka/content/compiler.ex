@@ -19,7 +19,7 @@ defmodule Loka.Content.Compiler do
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3, of_kind: 2]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
 
-  # v2 manifest settings, beside entry, calendar and world
+  # manifest settings, beside entry, calendar and world
   @v2_settings ~w(chapters ancestries alternates speech)
   @engine_facts [
     Scenes,
@@ -59,9 +59,7 @@ defmodule Loka.Content.Compiler do
     {text, d3} = text(of(files, :text))
     {positions, d4} = Loka.Content.Layout.source(of(files, :layout), manifest, defs)
     located = Loka.Content.Layout.settings(located, positions)
-    v2 = v2(defs, located, text, files)
-
-    {located, v2, d3 ++ d4}
+    {located, {elem(located, 0), text || %{}}, d3 ++ d4}
   end
 
   # {warnings, errors}; a refused bundle or actions/ file holds back UNRESOLVED_REFERENCE (Area
@@ -93,14 +91,14 @@ defmodule Loka.Content.Compiler do
       timed_checks(manifest, defs, v2, located),
       Loka.Content.Transports.check(manifest, defs, v2),
       Water.check(manifest, defs, located, v2),
-      Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
+      Loka.Content.Skills.check(manifest, defs, located, elem(v2, 1)),
       Loka.Content.Death.check(manifest, defs, located, v2),
       Loka.Content.Combat.check(manifest, defs, located, v2),
       Loka.Content.Theft.check(manifest, defs, located, v2),
       Loka.Content.Mounts.check(manifest, defs, located),
       Loka.Content.Asks.check(manifest, defs),
       Loka.Content.Emotes.check(manifest, defs, v2, registry),
-      Resolve.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry),
+      Resolve.check(manifest, defs, registry),
       Resolve.rooms(manifest, defs, v2, registry),
       ScriptedActions.check(manifest, defs, v2, registry),
       Quests.check(manifest, defs, v2, registry),
@@ -125,24 +123,12 @@ defmodule Loka.Content.Compiler do
         Loka.Content.Trails.check(manifest, defs, v2, located, registry) ++
         Loka.Content.Spells.check(manifest, defs, registry, elem(located, 1)) ++
         Scenes.check(manifest, defs, v2, registry) ++
-        Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
+        Ancestries.check(manifest, defs, located, elem(v2, 1)) ++
         Loka.Content.Standing.check(manifest, defs) ++
         Loka.Content.Replenish.check(manifest, defs) ++
         Loka.Content.Delayed.check(manifest, defs, Resolve.trees(defs)) ++
         Loka.Content.Construction.check(manifest, defs, v2, located, registry) ++
         Loka.Content.AreaRules.check(manifest, defs)
-
-  # v2 when the source declares world content, entry/settings, text, resources or attributes.
-  defp v2(defs, {entry, settings}, text, files) do
-    if Enum.any?(
-         ~w(room item npc scripted_action barrier quest reaction dialogue scene liquid service transport population replenish structure),
-         &(defs[&1] != %{})
-       ) or
-         entry != nil or
-         settings != %{} or text != nil or
-         Enum.any?(files, &(elem(&1, 1) in [:resources, :attributes])),
-       do: {entry, text || %{}}
-  end
 
   # cartridge.json calendar is owned by calendar@1.
   defp calendar(m, cal, registry) when cal != nil do
@@ -158,7 +144,7 @@ defmodule Loka.Content.Compiler do
   defp manifest([{_, :invalid}], _), do: {nil, {nil, %{}}, []}
 
   # cartridge.json is the CartridgeManifest plus the optional entry room (00a §12), calendar and
-  # world (WorldSettings) and chapters; settings travel beside the manifest in the v2 cartridge.
+  # world (WorldSettings) and chapters; settings travel beside the manifest in the cartridge.
   defp manifest([{rel, m}], registry) do
     defs = Loka.Content.Source.contracts()
 
@@ -179,7 +165,7 @@ defmodule Loka.Content.Compiler do
 
   @doc false
   def manifest_file(defs) do
-    v2 = get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties"])
+    v2 = defs["CompiledCartridge"]["properties"]
 
     defs["CartridgeManifest"]
     |> put_in(["properties", "entry"], %{

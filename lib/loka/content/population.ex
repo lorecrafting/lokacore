@@ -60,14 +60,13 @@ defmodule Loka.Content.Population do
   end
 
   def check(nil, _, _, _), do: []
-  def check(_, _, nil, _), do: []
 
   def check(manifest, defs, v2, {_, settings}) do
     plans = defs["population"] || %{}
     calendar = settings["calendar"]
 
     for {_key, {rel, steps, plan}} <- plans, is_map(plan) do
-      errors = plan_errors(manifest, defs, calendar, if(v2, do: elem(v2, 1), else: %{}), plan)
+      errors = plan_errors(manifest, defs, calendar, elem(v2, 1), plan)
 
       refs(rel, steps, plan, manifest, defs) ++
         for(error <- errors, do: diag("SCHEMA_VIOLATION", at(rel, steps ++ error)))

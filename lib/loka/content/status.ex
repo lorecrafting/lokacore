@@ -5,7 +5,6 @@ defmodule Loka.Content.Status do
   alias Loka.Content.Refs
 
   def check(nil, _, _, _), do: []
-  def check(_, _, nil, _), do: []
 
   def check(m, defs, {_, text}, settings) do
     statuses = defs["status"] || %{}
