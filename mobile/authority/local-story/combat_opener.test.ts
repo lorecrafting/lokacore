@@ -95,6 +95,6 @@ test('no opener is read while the opening press is unsettled', (t) => {
   h.fault.armed = true;
   const attack = { action_key: 'attack', target_ids: [rat(fresh)], input: {} };
   assert.equal(h.game.invoke(attack as never).kind, 'pending');
-  assert.equal(h.game.opener('any-fight'), undefined); // any lookup not yet cached reads the save
+  assert.equal(h.game.opener!('any-fight'), undefined); // any lookup not yet cached reads the save
   h.sql.close();
 });
