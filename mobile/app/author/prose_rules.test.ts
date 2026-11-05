@@ -38,6 +38,7 @@ test('two `~` lines are told apart, and both still read as unwritten', () => {
 test('walk keys wrap, and stay out of text fields and Cmd, Ctrl, Alt', () => {
   assert.deepEqual([step(3, -1, 1), step(3, -1, -1), step(3, 2, 1), step(3, 0, -1)], [0, 2, 0, 2]);
   assert.equal(step(0, -1, 1), -1);
+  assert.equal(step(3, 0, 1), 1);
   const key = (k: string, mod = {}) => ({
     key: k,
     metaKey: false,
@@ -48,7 +49,8 @@ test('walk keys wrap, and stay out of text fields and Cmd, Ctrl, Alt', () => {
   assert.deepEqual(walk(key(']'), false), [true, 1]);
   assert.deepEqual(walk(key('{'), false), [false, -1]);
   assert.equal(walk(key(']'), true), undefined);
-  assert.equal(walk(key(']', { altKey: true }), false), undefined);
+  for (const held of ['altKey', 'ctrlKey', 'metaKey'])
+    assert.equal(walk(key(']', { [held]: true }), false), undefined);
   assert.equal(walk(key('toString'), false), undefined);
 });
 

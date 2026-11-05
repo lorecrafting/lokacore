@@ -12,20 +12,20 @@ export const saving = (draft: string, words: string) =>
 
 // A `~` line's words are tagged with its key's number in zero-width marks, so two `~` lines on one
 // page name two keys (the Book shows `~` alike; `seen` would resolve both to one).
-const MARK = /[​‌]+$/;
+const MARK = /[\u200b\u200c]+$/;
 const ids = new Map<string, number>();
 export function tagged(key: string, words: string) {
   if (words.trim() !== '~') return words;
   if (!ids.has(key)) ids.set(key, ids.size);
-  return words + [...ids.get(key)!.toString(2)].map((b) => (b === '0' ? '​' : '‌')).join('') + '​';
+  return words + '\u200b'.repeat(ids.get(key)!) + '\u200c'; // the key's number, in unary
 }
 /** True for a line still to write: its words, marks aside, trim to `~`. */
 export const unwritten = (shown: string) => shown.replace(MARK, '').trim() === '~';
 
 /** Where a walk key lands among `count` lines from `at` (-1: none yet), wrapping; -1 with none. */
-export function step(count: number, at: number, by: 1 | -1) {
+export function step(count: number, at: number, by: number) {
   if (!count) return -1;
-  if (at < 0) return by > 0 ? 0 : count - 1;
+  if (at < 0) return by === 1 ? 0 : count - 1;
   return (at + by + count) % count;
 }
 
@@ -65,11 +65,13 @@ export function noFieldNote(key: string | undefined, refusal?: string) {
 
 /** The palette whose paper is nearest `rgb` (the page's computed background), for the marks. */
 export function paletteNear(rgb: string) {
-  const [r, g, b] = (rgb.match(/\d+/g) ?? []).map(Number);
+  const page = (rgb.match(/\d+/g) ?? []).map(Number);
   const far = (hex: string) =>
-    [1, 3, 5].reduce(
-      (sum, i, n) => sum + (parseInt(hex.slice(i, i + 2), 16) - [r, g, b][n]) ** 2,
-      0,
+    Math.hypot(
+      ...hex
+        .slice(1)
+        .match(/../g)!
+        .map((h, n) => parseInt(h, 16) - page[n]),
     );
-  return Object.values(color).reduce((near, p) => (far(p.bg) < far(near.bg) ? p : near));
+  return Object.values(color).sort((a, b) => far(a.bg) - far(b.bg))[0];
 }
