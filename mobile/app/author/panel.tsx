@@ -33,6 +33,9 @@ export const devClock =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' &&
   Platform.OS === 'web' &&
   new URLSearchParams(location.search).get('dev') === '1';
+// the in-Book editor (E5) is required only in the author preview, so a player build drops it
+const inBook: typeof import('./inbook.ts') | undefined =
+  process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;
 if (devClock) worded.note = (words, key) => seen.set(words, key); // a line as shown, bound too
 const g = globalThis as { loka_dev_skew?: number }; // ms the dev clock has moved both host clocks
 export const skew = () => g.loka_dev_skew ?? 0;
@@ -117,9 +120,10 @@ export function played(game: Opened | undefined) {
       ...game,
       text: (key) => {
         const words = overlay[key] ?? game.text(key);
-        seen.set(words, key);
+        const shown = inBook?.tagged(key, words) ?? words; // two `~` lines show apart
+        seen.set(shown, key);
         said.set(key, words);
-        return words;
+        return shown;
       },
       invoke: recording(game, keep),
     });
@@ -221,7 +225,11 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     window.addEventListener('message', onMessage);
     document.addEventListener('click', onClick, true);
     const unsubscribe = game.subscribe(state);
-    const unlisten = listen(() => latest.current.redraw({})); // a text overlay redraws in place
+    const unlisten = listen((message) => {
+      inBook?.heard(message);
+      latest.current.redraw({}); // a text overlay redraws in place
+    });
+    const stop = inBook?.start({ seen, said, tell });
     if (panel) state();
     else if (window.parent !== window)
       window.parent.postMessage({ loka: 'author', ready: true }, '*');
@@ -230,6 +238,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       document.removeEventListener('click', onClick, true);
       unsubscribe();
       unlisten();
+      stop?.();
     };
   }, [game]);
 }
