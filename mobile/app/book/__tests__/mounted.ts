@@ -87,6 +87,7 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
       .map(words);
   return {
     texts,
+    game: g, // a test may change what the Game answers between draws
     footer: () => draw().some((n) => n.type?.name === 'Footer'),
     said: () => draw().find((n) => n.type?.name === 'Heard').props.said.text as string,
     control: (shown: string | RegExp) => control(draw(), shown),

@@ -3,6 +3,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { combatTitle } from './combat-title.ts';
+import { view } from './__tests__/combat-book.test.ts';
+import { mounted } from './__tests__/mounted.ts';
+
+const TITLE = 'You attack a marsh rat!';
 
 const words: Record<string, string> = {
   'combat.title_you_attack': 'You attack {target}!',
@@ -29,4 +33,40 @@ test('the title names who opened each fight, and nothing when that is not known'
   // Breaks: an old save with no opening receipt guesses a title (the Book names no opener it cannot read).
   assert.equal(combatTitle(fight('three') as never, text, opener), undefined);
   assert.equal(combatTitle(fight('one') as never, text, undefined), undefined);
+  // Breaks: a cartridge with no words for the key (the prologue) shows the raw key as its title.
+  assert.equal(
+    combatTitle(fight('one') as never, (k) => (k.startsWith('combat') ? k : text(k)), opener),
+    undefined,
+  );
+});
+
+// Breaks: the title blanks while the opener cannot be read (a save in flight, the opener fallen),
+// or a new fight with no known opener keeps the last fight's title.
+test('a fight keeps its title while its opener is unread; the next fight has its own', () => {
+  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
+  const h = mounted(
+    view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
+  );
+  try {
+    assert.ok(h.texts().includes(TITLE));
+    h.game.opener = () => undefined;
+    h.publish(
+      view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
+      'combat.hit',
+    );
+    assert.ok(h.texts().includes(TITLE));
+    h.publish(
+      view({
+        combat: {
+          ...rat,
+          encounter_id: 'next',
+          active_opponents: [{ id: 'rat', name: 'npc.rat' }],
+        },
+      }),
+      'combat.hit',
+    );
+    assert.equal(h.texts().includes(TITLE), false);
+  } finally {
+    h.close();
+  }
 });

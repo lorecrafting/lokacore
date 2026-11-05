@@ -38,7 +38,7 @@ export function combatReceipts(db: Db, scope: string) {
 
 const openers = new WeakMap<Story, Map<string, Opener>>(); // the Combat page asks each render
 
-// The receipt whose encounter.open op opened this encounter (book-ui.md, Combat title). Attack, cast and
+// The receipt whose encounter.open op opened this encounter (book-ui.md, Live combat response). Attack, cast and
 // perform are the player's commands that open one (combat engage, a spell's fight-back); any other
 // (a move into a hostile, a run job, an expedition) is the NPC's. None after a replaced world.
 export function opener(s: Story, encounter_id: string): Opener | undefined {

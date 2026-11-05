@@ -94,8 +94,11 @@ function Responses(p: Props & { shown: Shown }) {
 export function Combat(p: Props) {
   const { view, text, combatLog, ended, fell } = p.screen;
   const shown: Shown = useState(); // one for every foe's list: one list open at a time (book-ui.md)
-  const title = useRef<string>(undefined); // kept on the closed page, its foe gone from the view
-  if (view.combat) title.current = combatTitle(view.combat, text, p.screen.opener);
+  // Kept while its fight's opener cannot be read (a save in flight, the opener fallen) and on the closed page.
+  const title = useRef<{ id: string; said?: string }>(undefined);
+  const said = view.combat && combatTitle(view.combat, text, p.screen.opener);
+  if (view.combat && (said || title.current?.id !== view.combat.encounter_id))
+    title.current = { id: view.combat.encounter_id, said };
   if (!view.combat && !ended) return null;
   // A closed encounter keeps its page: no actions, one foot control (book-ui.md, Closure).
   // Let go goes to World; with `revival` the presenter's leaveCombat makes it the spirit state.
@@ -106,7 +109,7 @@ export function Combat(p: Props) {
     // Paper behind the running head too: the leaving page fades over the arriving one.
     <Blow under={<UnderInk view={view} />}>
       <RunningHead view={view} text={text} />
-      <Page paperless title={title.current} foot={foot} scrollToEnd={combatLog.length > 0}>
+      <Page paperless title={title.current?.said} foot={foot} scrollToEnd={combatLog.length > 0}>
         <LogLines lines={combatLog} rounds />
         {view.combat && <Responses {...p} shown={shown} />}
       </Page>

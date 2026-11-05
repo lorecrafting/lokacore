@@ -47,8 +47,6 @@ export const screenFrom = (
     detail: (id: string) => saved.details[id] ?? [],
     leave: (id: string) => void saved.details[id]?.splice(0),
     chronicle: () => saved.chronicle ?? [],
-    // a saved page keeps no receipt: its fight reads as the player's, so the page shows its title
-    opener: () => saved.view.combat && { npc_id: saved.view.combat.opponent_id, player: true },
     pending: false,
     catchingUp: false,
     fault: undefined,
