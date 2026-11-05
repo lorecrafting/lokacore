@@ -11,14 +11,14 @@ where it can, and gives each value's reason.
 
 | Role | Face | Size / line | Use |
 |---|---|---|---|
-| `type.body` | `chrome.sans` (system UI) | 13 / 18 | rows, fields, buttons, feed lines |
-| `type.label` | `chrome.sans`, semibold, uppercase, tracking 0.06em, `dim` | 11 / 16 | panel headers, group headings, captions |
-| `type.code` | `chrome.mono`, `font-variant-numeric: tabular-nums` | 12 / 16 | ids, keys, file paths, timings, lint codes, kbd chips |
-| `type.prose` | the Book's `font.body` (EB Garamond) | 15 / 22 | the player's words only: a prose field in the inspector |
+| `chrome.type.body` | `chrome.sans` (system UI) | 13 / 18 | rows, fields, buttons, feed lines |
+| `chrome.type.label` | `chrome.sans`, semibold, uppercase, tracking 0.06em, `dim` | 11 / 16 | panel headers, group headings, captions |
+| `chrome.type.code` | `chrome.mono`, `font-variant-numeric: tabular-nums` | 12 / 16 | ids, keys, file paths, timings, lint codes, kbd chips |
+| `chrome.type.prose` | the Book's `font.body` (EB Garamond) | 15 / 22 | the player's words only: a prose field in the inspector |
 
-- The chrome is a tool, not the Book: no Book face anywhere except `type.prose`. Today's panel set
+- The chrome is a tool, not the Book: no Book face anywhere except `chrome.type.prose`. Today's panel set
   the Book faces on everything; E2 replaces that.
-- Density: a row, an input and a button are `size.row` (28) tall; a panel header `size.header` (32).
+- Density: a row, an input and a button are `chrome.size.row` (28) tall; a panel header `chrome.size.header` (32).
   Spacing reuses the Book's `space`: `xs` (4) inside a control, `md` (8) between controls and as row
   side padding, `lg` (12) panel padding, `xl` (16) between groups. Radius `chrome.radius` (6);
   the Cmd-K palette 8; kbd chips 4.
@@ -62,8 +62,10 @@ Dark mode:
 
 Every text role is at least 4.5:1 on every fill it is used on.
 
-E2 maps the kit's variables in `index.css` onto the chrome (set from `tokens.ts` as `--chrome-*`
-by `main.tsx`, one block for `:root`, one for `.dark`), replacing the `--book-*` mapping:
+E2 replaces the `--book-*` mapping. `main.tsx` sets both palettes as inline variables,
+`--chrome-light-<role>` and `--chrome-dark-<role>` (inline, so never a `.dark` rule that sets the same
+variable: inline wins). In `index.css` the `:root` block maps each kit variable to
+`var(--chrome-light-<role>)` and the `.dark` block to `var(--chrome-dark-<role>)`:
 
 | shadcn variable | chrome role |
 |---|---|
@@ -134,7 +136,7 @@ A chip's area shows only as a 3 px band in its area hue on the chip's left edge;
 
 ## 5. Layout chrome
 
-- **Dividers.** 1 px `line`. The drag handle's hit area is `size.handle` (8) centred on it; on hover
+- **Dividers.** 1 px `line`. The drag handle's hit area is `chrome.size.handle` (8) centred on it; on hover
   or drag it shows a 2 px `accent` line and the `col-resize` cursor. Double-click restores the
   default width. Each divider is `role="separator"` with `aria-orientation="vertical"` and
   `aria-valuenow`, focusable: Left and Right move 16 px, Shift with them 64 px. Left column default
@@ -143,16 +145,16 @@ A chip's area shows only as a 3 px band in its area hue on the chip's left edge;
 - **Collapse.** Cmd-\ (left) and Cmd-/ (right), and a `panel-left-close` / `panel-right-close`
   button in each header. A collapsed column is a 28 px `sunken` rail of its panels' icons (each
   opens the column at that panel). Widths and collapse are remembered in localStorage.
-- **Panel header.** `size.header`, `bg`, a 1 px `line` below. Title in `type.label`; tabs are text
-  in `type.label`, the selected one `fg` with a 2 px `accent` underline, the rest `dim`. Header
+- **Panel header.** `chrome.size.header`, `bg`, a 1 px `line` below. Title in `chrome.type.label`; tabs are text
+  in `chrome.type.label`, the selected one `fg` with a 2 px `accent` underline, the rest `dim`. Header
   buttons are 24 px square, ghost, with a 16 px icon and a tooltip naming the shortcut.
 - **Centre.** The `sunken` well: a 32 px toolbar (phone / tablet segmented toggle, the reload badge
-  in `accent`, the Hold toggle and badge, the timings in `type.code`, each `ok` or `warning` against
+  in `accent`, the Hold toggle and badge, the timings in `chrome.type.code`, each `ok` or `warning` against
   its budget) above the Book strip at 0.75 scale, centred.
-- **Cmd-K palette.** `size.palette` (560) wide, top at 15vh, `surface`, 1 px `line` border, radius 8,
+- **Cmd-K palette.** `chrome.size.palette` (560) wide, top at 15vh, `surface`, 1 px `line` border, radius 8,
   shadow `0 8px 24px` black at 0.12 (light) or 0.5 (dark); backdrop black at 0.2 (light) or 0.5
-  (dark). A 40 px input with a `search` icon; result rows 28 px with `type.label` group headings and
-  the path in `type.code` `dim` on the right; the active row `accentSoft`. Kbd chips `type.code` at
+  (dark). A 40 px input with a `search` icon; result rows 28 px with `chrome.type.label` group headings and
+  the path in `chrome.type.code` `dim` on the right; the active row `accentSoft`. Kbd chips `chrome.type.code` at
   11 px, 1 px `strong` border, radius 4. It fades in over `motion.quick`; no motion under reduced
   motion. No match: one line "No match." in `dim`.
 - **Empty states.** One `dim` line saying how to get content there, and at most one button. No
@@ -164,7 +166,7 @@ A chip's area shows only as a 3 px band in its area hue on the chip's left edge;
 ## 6. Iconography
 
 - lucide-react, already installed (`components.json` names it); no other icon source.
-- 16 px (`size.icon`) in headers, buttons and rails; 14 px inline in a row.
+- 16 px (`chrome.size.icon`) in headers, buttons and rails; 14 px inline in a row.
 - Always `strokeWidth={1.5} absoluteStrokeWidth`, round caps and joins (lucide's default): about
   the drawn line of the Book's status glyphs (2.5 in a 24 box at 14 px is about 1.46 px).
 - Icon colour follows its text (`currentColor`); an icon alone has an `aria-label` and a tooltip.
@@ -180,4 +182,5 @@ A chip's area shows only as a 3 px band in its area hue on the chip's left edge;
 ## Known limits
 
 - An added area can shift the hues of the areas sorted after it.
+- On the Story map areas 7 to 12 share their bands with areas 1 to 6 (a 3 px band cannot be dashed); the hull and label tell them apart.
 - `dim` on `warningSoft` in dark mode is 4.72:1, the lowest pair; keep `dim` text off badges.
