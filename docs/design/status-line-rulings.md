@@ -1,6 +1,6 @@
 # Status line: design rulings for loka-15g, loka-kgd.7, loka-x6t.63 and loka-x6t.134
 
-Decided, one pass, before the prologue stacks hunger, thirst, cold, tiredness and bleeding at once (beats 9 to 41). The spec is [Conditions details](../system/book-ui.md#conditions-details); this record holds the reasons. No new component, token or page type: the status icon row ([StatusIcon.tsx](../../mobile/app/book/StatusIcon.tsx)), its Tooltip and disc, and the Character page carry it all.
+Decided, one pass, before the prologue stacks fed, refreshed, cold, tired and bleeding at once (beats 9 to 41). The spec is [Conditions details](../system/book-ui.md#conditions-details); this record holds the reasons. No new component, token or page type: the status icon row ([StatusIcon.tsx](../../mobile/app/book/StatusIcon.tsx)), its Tooltip and disc, and the Character page carry it all.
 
 ## Rulings
 
@@ -23,7 +23,7 @@ Decided, one pass, before the prologue stacks hunger, thirst, cold, tiredness an
 
 ## Slice tests
 
-- At 360 px (galaxyS25), Standard size, the five prologue states (bleeding, hungry, thirsty, cold, tired) and a position: the status line is one line and the row under it shows five icons, bleeding first.
+- At 360 px (galaxyS25), Standard size, the five prologue states (bleeding, fed, refreshed, cold, tired) and a position: the status line is one line and the row under it shows five icons, bleeding first.
 - Seven statuses: five icons and "+2"; the disc's name lists the two hidden labels. Red control: cap at seven.
 - A buff arriving while the row is full: no pop; a debuff arriving pushes a buff behind the disc with no fade.
 - Seven statuses down to six: the revealed icon shows without a pop.

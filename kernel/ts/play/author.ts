@@ -27,21 +27,39 @@ const out = resolve(
   'mobile/app',
   process.env.LOKA_DEV_CARTRIDGE ?? '.dev-cartridge/current.json',
 );
-const [dir, flag, ...rest] = process.argv.slice(2);
-if (!dir || (flag !== undefined && flag !== '--watch') || rest.length) {
-  console.error('usage: bin/loka dev <cartridge dir> [--watch]');
+// The world the watcher last opened (POST /world switches by exiting 75 for bin/loka to restart).
+const remembered = join(dirname(out), 'world');
+const args = process.argv.slice(2);
+if (args.join() === '--watch' && existsSync(remembered))
+  args.unshift(readFileSync(remembered, 'utf8'));
+const [dir, flag, ...rest] = args;
+if (!dir || dir === '--watch' || (flag !== undefined && flag !== '--watch') || rest.length) {
+  console.error(
+    'usage: bin/loka dev <cartridge dir> [--watch] | bin/loka dev --watch (the last one watched)',
+  );
   process.exit(2);
 }
 const source = resolve(dir);
 const port = Number(process.env.LOKA_AUTHOR_PORT || 19008); // mutate-skip: dev port default
 const live =
   flag === '--watch'
-    ? serve(port, source, out, () => {
-        if (!parked) return;
-        write(...parked);
-        if (failed) notCompiled(failed); // the source on disk is the failed save's, not the parked
+    ? serve(port, source, out, {
+        release() {
+          if (!parked) return;
+          write(...parked);
+          if (failed) notCompiled(failed); // the source on disk is the failed save's, not the parked
+        },
+        leave,
       })
     : undefined;
+// Another world: no late compile of this one may overwrite the artifact after the next one's.
+async function leave(world: string) {
+  if (watcher) watcher.close();
+  clearTimeout(timer);
+  await queue;
+  writeFileSync(remembered, world);
+  process.exit(75);
+}
 // While the editor holds (POST /hold), a structural compile waits here, and every compile after
 // it (the newest replaces it), so Metro does not reload the frame mid-edit.
 let parked: [canonicalText: string, sha256: string, said: string[]] | undefined;
@@ -224,7 +242,8 @@ function enqueue() {
 }
 let timer: ReturnType<typeof setTimeout> | undefined;
 // before the first compile: a save the moment its artifact lands is not lost while FSEvents starts
-if (flag === '--watch')
+const watcher =
+  flag === '--watch' &&
   watch(source, { recursive: true }, (_, file) => {
     if (file?.startsWith('checkpoints/')) return; // the page's own save, not content
     saves++;
@@ -242,4 +261,6 @@ queue = first.catch(() => {}); // a save during the first compile compiles after
 const ok = await first;
 if (flag !== '--watch') process.exit(ok ? 0 : 1);
 if (ok) lint();
-console.log(`Watching ${dir}`);
+mkdirSync(dirname(out), { recursive: true });
+writeFileSync(remembered, source);
+console.log(`Watching ${dir}, author API on port ${await live!.port}`);

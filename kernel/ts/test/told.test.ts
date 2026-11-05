@@ -12,7 +12,7 @@ import { serve } from '../play/live.ts';
 async function served(t: TestContext, release = () => {}) {
   const src = realpathSync(mkdtempSync(join(tmpdir(), 'loka-told-')));
   writeFileSync(join(src, 'text.json'), '{\n  "room.a": "old words"\n}\n');
-  const live = serve(0, src, join(src, 'none.json'), release);
+  const live = serve(0, src, join(src, 'none.json'), { release });
   const port = await live.port;
   t.after(() => (live.close(), rmSync(src, { recursive: true, force: true })));
   const call = (path: string, sent?: string, headers: Record<string, string> = {}) =>

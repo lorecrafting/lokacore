@@ -25,9 +25,13 @@ defmodule Loka.Content.Starters.Parts do
   # Two-space JSON the author edits and the column's source finder reads one `"key":` per line.
   def pretty(value), do: IO.iodata_to_binary([pretty(value, ""), "\n"])
 
-  defp pretty(map, pad) when is_map(map) and map_size(map) > 0 do
+  defp pretty(map, pad) when is_map(map) and map_size(map) > 0,
+    do: pretty({:obj, Enum.sort(map)}, pad)
+
+  # An object in its own key order (Copy keeps the author's).
+  defp pretty({:obj, pairs}, pad) when pairs != [] do
     rows =
-      for {k, v} <- Enum.sort(map), do: [pad, "  ", JSON.encode!(k), ": ", pretty(v, pad <> "  ")]
+      for {k, v} <- pairs, do: [pad, "  ", JSON.encode!(k), ": ", pretty(v, pad <> "  ")]
 
     ["{\n", Enum.intersperse(rows, ",\n"), "\n", pad, "}"]
   end
@@ -37,5 +41,6 @@ defmodule Loka.Content.Starters.Parts do
     ["[\n", Enum.intersperse(rows, ",\n"), "\n", pad, "]"]
   end
 
+  defp pretty({:obj, []}, _), do: "{}"
   defp pretty(value, _), do: JSON.encode!(value)
 end

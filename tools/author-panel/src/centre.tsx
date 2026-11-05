@@ -5,6 +5,7 @@ import { BOOK } from './book.ts';
 import type { SetLayout } from './columns.tsx';
 import { Hold } from './prose.tsx';
 import { BUDGET, loadOf, total, within, type Layout, type Loaded, type Timings } from './shell.ts';
+import { World } from './world.tsx';
 
 /** The last edit: compile + publish (+ the Book's load), `ok` within its budget, `warning` over. */
 export function Timing({ t, loaded }: { t?: Timings; loaded?: Loaded }) {
@@ -27,6 +28,7 @@ type Bar = { layout: Layout; set: SetLayout; held?: boolean; pending?: number; l
 function Toolbar({ layout, set, held, pending, last, loaded }: Bar) {
   return (
     <div className="flex h-8 shrink-0 items-center gap-3 px-2">
+      <World set={set} />
       <div role="radiogroup" aria-label="Book size" className="inline-flex rounded-md border">
         {(['phone', 'tablet'] as const).map((v) => (
           <button

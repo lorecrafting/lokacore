@@ -1,6 +1,7 @@
 #!/bin/sh
 # Loka's command line. `loka play <artifact> [script | --replay <transcript>]`: kernel/ts/play.
-# `loka dev <cartridge dir> [--watch]`: the author preview's artifact, kernel/ts/play/author.ts.
+# `loka dev [<cartridge dir>] [--watch]`: the author preview's artifact, kernel/ts/play/author.ts
+# (`--watch` with no dir: the last one watched).
 # `loka new <kind> <name> [--from <room> <direction>] [--area <area>] ... [cartridge dir]` (`scene <npc> <key>` for a scene): compiling starter files,
 # mix loka.new (any cwd; the cartridge dir, default the cwd, and a new cartridge's path resolve
 # against the caller's cwd).
@@ -12,7 +13,14 @@
 export NODE_OPTIONS="${NODE_OPTIONS-} --disable-warning=MODULE_TYPELESS_PACKAGE_JSON"
 case "${1-}" in
 play) shift; exec node "$(dirname "$0")/../kernel/ts/play/main.ts" "$@" ;;
-dev) shift; exec node "$(dirname "$0")/../kernel/ts/play/author.ts" "$@" ;;
+dev)
+  shift
+  # 75: the editor opened another world (POST /world); start again on it, the one remembered.
+  while :; do
+    node "$(dirname "$0")/../kernel/ts/play/author.ts" "$@" && exit 0 || status=$?
+    [ "$status" -eq 75 ] || exit "$status"
+    set -- --watch
+  done ;;
 todo) shift; exec node "$(dirname "$0")/../kernel/ts/play/todo.ts" "$@" ;;
 story) shift; exec node "$(dirname "$0")/../kernel/ts/play/story.ts" "$@" ;;
 check) shift; exec node "$(dirname "$0")/../kernel/ts/play/check.ts" "$@" ;;
@@ -21,5 +29,5 @@ new)
   shift
   caller="$PWD"
   cd "$(dirname "$0")/.." && exec mix loka.new --cwd "$caller" "$@" ;;
-*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev <cartridge dir> [--watch] | bin/loka new <kind> <name> [--from <room> <direction>] [--area <area>] ... [cartridge dir] (scene <npc> <key>) | bin/loka todo <cartridge dir> | bin/loka story <cartridge dir> | bin/loka check <cartridge dir> | bin/loka sim <cartridge dir> [--seeds N] [--days D]" >&2; exit 2 ;;
+*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev [<cartridge dir>] [--watch] | bin/loka new <kind> <name> [--from <room> <direction>] [--from <cartridge dir>] [--area <area>] ... [cartridge dir] (scene <npc> <key>) | bin/loka todo <cartridge dir> | bin/loka story <cartridge dir> | bin/loka check <cartridge dir> | bin/loka sim <cartridge dir> [--seeds N] [--days D]" >&2; exit 2 ;;
 esac
