@@ -4,6 +4,7 @@
 import { PanelLeftClose, PanelRightClose } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { shortcut } from '../../../mobile/app/author/prose_rules.ts';
+import { mapCommand } from './mapwire.ts';
 import { ask, checkpoints, story as getStory, useDiagnostics, type Story } from './author.ts';
 import { useBook, type Heard } from './book.ts';
 import { BookStrip } from './centre.tsx';
@@ -265,6 +266,7 @@ function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) =
     if (i.kind === 'text') return pick(fromTextKey(i.id));
     if (i.kind === 'todo') return (pick(fromTextKey(i.id)), book.send({ op: 'edit', key: i.id }));
     if (i.id === 'hold') return document.querySelector<HTMLButtonElement>('[data-hold]')?.click();
+    if (i.id.startsWith('map-')) return mapCommand(i.id, sel?.kind === 'room' ? sel.key : undefined);
     if (i.id === 'undo')
       return book.send({ op: 'key', key: 'z', metaKey: true, ctrlKey: false, altKey: false });
     const name =

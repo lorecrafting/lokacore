@@ -6,8 +6,11 @@ import type { MapRoom } from './map.ts';
 import * as map from './map.ts';
 import { M } from './map.ts';
 import { Box, Edges, Hulls, Pills, Stubs, type Marks } from './mapdraw.tsx';
+import { cellAt, dragged, toward } from './mapedit.ts';
+import { edit, shown } from './mapwire.ts';
 
-export type DrawProps = { p: MapProps; l: Level; reach: Reach };
+/** `locked`: the map's drag lock (areamap.tsx); rooms do not move while it is on. */
+export type DrawProps = { p: MapProps; l: Level; reach: Reach; locked: boolean };
 
 export function Drawing(d: DrawProps) {
   const svg = useRef<SVGSVGElement>(null);
@@ -122,9 +125,11 @@ function useWheel(svg: React.RefObject<SVGSVGElement | null>, d: DrawProps) {
   }, [svg]);
 }
 
-/** A drag that starts on empty ground (not a room) pans. */
+/** A drag that starts on empty ground pans; one that starts on a room moves it, unless the map is locked. */
 function pan(e: React.PointerEvent<SVGSVGElement>, d: DrawProps) {
-  if ((e.target as Element).closest('[data-key]')) return;
+  const key = (e.target as Element).closest('[data-key]')?.getAttribute('data-key');
+  const r = d.l.level.find((o) => o.key === key);
+  if (r) return d.locked ? undefined : drag(e, d, r); // locked: a press only clicks
   const el = e.currentTarget;
   el.setPointerCapture(e.pointerId);
   const [x0, y0, start] = [e.clientX, e.clientY, d.l.v.now.current!];
@@ -142,6 +147,34 @@ function pan(e: React.PointerEvent<SVGSVGElement>, d: DrawProps) {
   );
   el.addEventListener('pointermove', move);
   el.addEventListener('pointerup', up);
+}
+
+/** A room dragged past a few pixels: to an empty cell moves it there; Shift onto another room on the
+ * level draws an exit both ways. Window listeners, not pointer capture: a capture would send the
+ * ending click to the SVG, and a plain click must still select. The click that ends a drag does not. */
+function drag(e: React.PointerEvent<SVGSVGElement>, d: DrawProps, r: MapRoom) {
+  const [p0, box] = [{ x: e.clientX, y: e.clientY }, e.currentTarget.getBoundingClientRect()];
+  const end = () => (
+    window.removeEventListener('pointerup', up),
+    window.removeEventListener('pointercancel', end)
+  );
+  const up = (u: PointerEvent) => {
+    end();
+    if (!dragged(p0, { x: u.clientX, y: u.clientY })) return;
+    const stop = (c: MouseEvent) => c.stopPropagation();
+    window.addEventListener('click', stop, { capture: true, once: true });
+    setTimeout(() => window.removeEventListener('click', stop, { capture: true }));
+    const [x, y] = [u.clientX - box.left, u.clientY - box.top];
+    if (x < 0 || y < 0 || x > box.width || y > box.height) return; // let go off the map: no edit
+    const at = { ...cellAt(d.l.v.now.current!, { x, y }), z: d.l.z };
+    if (!u.shiftKey) return edit((ed) => ed.place(r, at));
+    const to = d.l.level.find((o) => o.at!.x === at.x && o.at!.y === at.y);
+    const dir = to && toward(r.at!, to.at!);
+    if (!to || !dir) return shown.tell('Shift-drag onto another room on this level draws an exit');
+    edit((ed) => ed.link(r, dir, to));
+  };
+  window.addEventListener('pointerup', up);
+  window.addEventListener('pointercancel', end);
 }
 
 /** Arrows, PageUp and PageDown, Enter, Shift-Enter, `+` `-` `0` and Esc, per the E3a keyboard row. */
