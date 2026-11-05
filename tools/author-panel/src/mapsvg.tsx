@@ -152,20 +152,27 @@ const DRAG = 4; // mutate-skip: px a press moves before it is a drag, uncalibrat
 /** A room dragged past a few pixels: to an empty cell moves it there; Shift onto another room on the
  * level draws an exit both ways. The click that ends a drag does not select. */
 function drag(e: React.PointerEvent<SVGSVGElement>, d: DrawProps, r: MapRoom) {
-  const [x0, y0, box] = [e.clientX, e.clientY, e.currentTarget.getBoundingClientRect()];
+  const el = e.currentTarget;
+  el.setPointerCapture(e.pointerId); // a release off the map still ends here, and pointercancel drops it
+  const [x0, y0, box] = [e.clientX, e.clientY, el.getBoundingClientRect()];
+  const end = () => (el.removeEventListener('pointerup', up), el.removeEventListener('pointercancel', end));
   const up = (u: PointerEvent) => {
+    end();
     if (Math.hypot(u.clientX - x0, u.clientY - y0) < DRAG) return;
     const stop = (c: MouseEvent) => c.stopPropagation();
     window.addEventListener('click', stop, { capture: true, once: true });
     setTimeout(() => window.removeEventListener('click', stop, { capture: true }));
-    const at = { ...cellAt(d.l.v.view!, { x: u.clientX - box.left, y: u.clientY - box.top }), z: d.l.z };
+    const [x, y] = [u.clientX - box.left, u.clientY - box.top];
+    if (x < 0 || y < 0 || x > box.width || y > box.height) return; // let go off the map: no edit
+    const at = { ...cellAt(d.l.v.now.current!, { x, y }), z: d.l.z };
     if (!u.shiftKey) return edit((ed) => ed.place(r, at));
     const to = d.l.level.find((o) => o.at!.x === at.x && o.at!.y === at.y);
     const dir = to && toward(r.at!, to.at!);
     if (!to || !dir) return shown.tell('Shift-drag onto another room on this level draws an exit');
     edit((ed) => ed.link(r, dir, to));
   };
-  window.addEventListener('pointerup', up, { once: true });
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', end);
 }
 
 /** Arrows, PageUp and PageDown, Enter, Shift-Enter, `+` `-` `0` and Esc, per the E3a keyboard row. */

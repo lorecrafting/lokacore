@@ -12,15 +12,16 @@ const ed = editor({
     ),
 });
 /** What the mounted map shows: its footer line and its rooms (the palette's map commands need both). */
-export const shown = { tell: (why: string) => alert(why), rooms: [] as MapRoom[] };
+export const alone = (why: string) => why && alert(why);
+export const shown = { tell: alone, rooms: [] as MapRoom[] };
 
-/** Runs one map gesture; a refusal is told, not thrown. */
+let queue = Promise.resolve();
+/** Runs one map gesture after the ones before it (so undo stays in order); a refusal is told, not thrown. */
 export const edit = (gesture: (ed: Editor) => Promise<unknown>) =>
-  void gesture(ed).then(
+  void (queue = queue.then(() => gesture(ed)).then(
     () => shown.tell(''),
     (e: Error) => shown.tell(e.message),
-  );
-
+  ));
 
 /** A map command (shell.ts COMMANDS `map-*`) on the selected room, its arguments by `prompt` (the plainest; see the PR's list). */
 export function mapCommand(id: string, key: string | undefined) {

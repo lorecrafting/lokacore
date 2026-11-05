@@ -1,7 +1,7 @@
 // The map's edits (editor-map-and-story-rulings.md, Left to E3b; gui-editor-design §3): each gesture
 // as write-route calls (§5.1) in order, undone together. No React or fetch here: the panel passes its
 // routes in; tested from kernel/ts/test/author_mapedit.test.ts.
-import type { At, MapRoom } from './map.ts';
+import { M, type At, type MapRoom } from './map.ts';
 
 type Told = { ok: boolean; told: unknown };
 export type Io = {
@@ -49,8 +49,8 @@ const roomOf = (rooms: MapRoom[], key: string) =>
 
 /** The layout cell under a point of the map's SVG (the inverse of mapdraw.tsx `at`). */
 export const cellAt = (v: { zoom: number; x: number; y: number }, p: { x: number; y: number }) => ({
-  x: Math.floor((p.x - v.x) / (v.zoom * 64)),
-  y: Math.floor((p.y - v.y) / (v.zoom * 64)),
+  x: Math.floor((p.x - v.x) / (v.zoom * M.cell)),
+  y: Math.floor((p.y - v.y) / (v.zoom * M.cell)),
 });
 /** The compass direction from one cell toward another on the same level: the larger axis wins. */
 export function toward(a: At, b: At) {
@@ -107,7 +107,9 @@ async function oneWay(s: Run, a: MapRoom, dir: string, rooms: MapRoom[]) {
 
 /** Barrier drop: a new barrier `key` (`~` words, closed or locked) named on both faces of the exit. */
 async function barrier(s: Run, a: MapRoom, dir: string, rooms: MapRoom[], key: string, locked: boolean) {
-  const b = roomOf(rooms, (await faceOf(s, a, dir)).to);
+  const face = await faceOf(s, a, dir);
+  if (face.barrier) no(`${a.key}'s exit ${dir} already has ${face.barrier}`);
+  const b = roomOf(rooms, face.to);
   const reverse = (await s.read<Doc>(fileOf(b))).doc.exits?.[back(dir)];
   if (reverse?.to !== a.key) no('a barrier needs the exit both ways: a one-way exit has none');
   // a barrier is owned: in the rooms' area when they share one, else at the root (border rule)
@@ -165,7 +167,8 @@ async function gesture(io: Io, done: number[][], steps: (s: Run) => Promise<unkn
   try {
     await steps({ call, read, change });
   } catch (e) {
-    await undo(io, ids); // ponytail: a put-back refused here (a Hold, an outside edit) is reported, not retried
+    // ponytail: a put-back refused here (a Hold, an outside edit) is reported with the refusal, not retried
+    await undo(io, ids).catch((u: Error) => no(`${(e as Error).message}; ${u.message}`));
     throw e;
   }
   if (ids.length) done.push(ids);

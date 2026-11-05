@@ -11,7 +11,13 @@ import { join, relative } from 'node:path';
 import { after, before, test } from 'node:test';
 import { serve } from '../play/live.ts';
 import type { MapRoom } from '../../../tools/author-panel/src/map.ts';
-import { editor, type Editor, type Io } from '../../../tools/author-panel/src/mapedit.ts';
+import {
+  cellAt,
+  editor,
+  toward,
+  type Editor,
+  type Io,
+} from '../../../tools/author-panel/src/mapedit.ts';
 
 const REPO = join(import.meta.dirname, '../../..');
 const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-mapedit-')));
@@ -127,6 +133,8 @@ test('new room from here makes a ~ room linked both ways and placed beside it', 
   assert.deepEqual(json('rooms/start.json').exits, { south: { to: 'cellar' } });
   assert.deepEqual(json('layout.json')[2], { room: 'cellar', x: 0, y: 2, z: 0 });
   await assert.rejects(ed.grow(start, 'south', 'cellar2'), /start already has an exit south/);
+  // Breaks: the server's own refusal text replaced by the stale-file message
+  await assert.rejects(ed.grow(start, 'west', 'Cellar'), /kind, name, area/);
 });
 
 test('move to area moves the file and the cartridge still compiles', async () => {
@@ -155,6 +163,58 @@ test('a barrier drop writes a locked barrier named on both faces, and refuses a 
   assert.deepEqual(json('rooms/start.json').exits.south, { to: 'cellar', barrier: 'hatch' });
   assert.deepEqual(json('rooms/cellar.json').exits.north, { to: 'start', barrier: 'hatch' });
   await assert.rejects(ed.barrier(c, 'south', rooms(), 'gate', false), /needs the exit both ways/);
+  await assert.rejects(ed.barrier(start, 'south', rooms(), 'trap', false), /already has hatch/);
+  assert.equal(existsSync(join(src, 'barriers/trap.json')), false);
+});
+
+test("a barrier between two rooms of one area is that area's; a refusal leaves no barrier file", async () => {
+  // Breaks: a shared-area barrier put at the root, or a second barrier overwriting the first.
+  await ed.grow(c, 'east', 'shed');
+  const shed = room('shed', 'areas/yard/rooms/shed.json', 'yard');
+  await ed.barrier(c, 'east', [...rooms(), shed], 'gate', false);
+  assert.deepEqual(json('areas/yard/barriers/gate.json').initial, 'closed');
+  assert.equal(existsSync(join(src, 'barriers/gate.json')), false);
+});
+
+test('a map point maps to its layout cell, and a drag between cells to a compass direction', () => {
+  // Breaks: the cell size or pan offset wrong in the inverse of mapdraw.tsx; a diagonal or
+  // cross-level drag read as an exit.
+  assert.deepEqual(cellAt({ zoom: 1, x: 10, y: 20 }, { x: 74, y: 84 }), { x: 1, y: 1 });
+  assert.deepEqual(cellAt({ zoom: 2, x: 0, y: 0 }, { x: 127, y: 128 }), { x: 0, y: 1 });
+  const o = { x: 0, y: 0, z: 0 };
+  const to = (x: number, y: number, z = 0) => toward(o, { x, y, z });
+  assert.deepEqual(
+    [
+      to(1, 0),
+      to(-1, 0),
+      to(0, 1),
+      to(0, -1),
+      to(1, 1),
+      to(-2, 1),
+      to(1, -2),
+      to(1, 0, 1),
+      to(0, 0),
+    ],
+    ['east', 'west', 'south', 'north', 'east', 'west', 'north', undefined, undefined],
+  );
+});
+
+test('a refused put-back is told with the refusal that stopped the gesture', async () => {
+  // Breaks: the put-back's refusal hiding why the gesture stopped, or a refusal sent as text
+  // reported as a stale file.
+  const io: Io = {
+    post: async (route) =>
+      route === 'undo' ? { ok: false, told: 'held' } : { ok: true, told: { id: 1 } },
+    source: async (file) => ({
+      bytes: file === 'y.json' ? '{"exits":{"west":{"to":"z"}}}' : '{}',
+      sha256: '',
+    }),
+  };
+  const [x, y] = [room('x', 'x.json'), room('y', 'y.json')];
+  await assert.rejects(
+    editor(io).link(x, 'east', y),
+    /y already has an exit west; put back stopped: held$/,
+  );
 });
 
 test('undo puts every gesture back: the files are byte-identical to the start', async () => {

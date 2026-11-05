@@ -10,7 +10,7 @@ import * as map from './map.ts';
 import { M, type Box as Size, type View } from './map.ts';
 import { Drawing } from './mapsvg.tsx';
 import { cellAt } from './mapedit.ts';
-import { edit, shown } from './mapwire.ts';
+import { alone, edit, shown } from './mapwire.ts';
 import type { Selection } from './shell.ts';
 
 export type MapProps = {
@@ -123,7 +123,8 @@ export function AreaMap(p: MapProps) {
   const reach = reachOf(p);
   const [told, tell] = useState('');
   shown.rooms = p.story.map;
-  useEffect(() => void (shown.tell = tell), []);
+  useEffect(() => tell(''), [p.story]); // a recompile clears the last refusal
+  useEffect(() => ((shown.tell = tell), () => void (shown.tell = alone)), []);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Header p={p} l={l} />
@@ -148,8 +149,9 @@ export function AreaMap(p: MapProps) {
 function drop(e: React.DragEvent<HTMLDivElement>, p: MapProps, l: Level) {
   const r = p.story.map.find((o) => o.key === e.dataTransfer.getData('text/x-loka-room'));
   const box = e.currentTarget.getBoundingClientRect();
-  if (!r || !l.v.view) return;
-  const at = cellAt(l.v.view, { x: e.clientX - box.left, y: e.clientY - box.top });
+  if (!r) return;
+  if (!l.v.view) return shown.tell('Place one room in layout.json first: the map has no cells yet');
+  const at = cellAt(l.v.now.current!, { x: e.clientX - box.left, y: e.clientY - box.top });
   edit((ed) => ed.place(r, { ...at, z: l.z }));
 }
 
