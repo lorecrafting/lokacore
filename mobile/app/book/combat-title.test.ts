@@ -35,7 +35,7 @@ test('the title names who opened each fight, and nothing when that is not known'
   // Breaks: an old save with no opening receipt guesses a title (the Book names no opener it cannot read).
   assert.equal(combatTitle(fight('three') as never, text, opener), undefined);
   assert.equal(combatTitle(fight('one') as never, text, undefined), undefined);
-  // Breaks: a foe with no words for its name is titled "You attack the undefined!" or by its raw key.
+  // Breaks: a foe with no words for its name is titled "You attack undefined!" or by its raw key.
   const nameless = (k: string) => (k === 'npc.goblin.short' ? undefined : text(k)) as string;
   assert.equal(combatTitle(fight('one') as never, nameless, opener), undefined);
   const raw = (k: string) => (k === 'npc.goblin.short' ? k : text(k));

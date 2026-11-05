@@ -76,7 +76,7 @@ test("a foe's list casts on the Combat page, into its log, until the foe dies", 
   b.tap('Cast a spell on the wight…'); // named by the foe, with no foe line above it
   b.tap('Flamma, cast flamma on a wight'); // the wight lives: the fight goes on
   assert.ok(
-    b.game.view().view.combat && b.text().includes('You attack the wight!'),
+    b.game.view().view.combat && b.text().includes('You attack a wight!'),
     'still the Combat page, titled by its opener',
   );
   assert.ok(b.p.screen().combatLog.includes(FLAMMA));
