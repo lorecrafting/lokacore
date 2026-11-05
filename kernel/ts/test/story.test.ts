@@ -1,8 +1,9 @@
 // The Story map's model (docs/rnd/story-map-design-2026-11-05.md section 11 S1) over a planted copy
-// of scene_sampler: two dialogues joined by `then`, a choice_resolved reaction and an outline.json.
+// of scene_sampler: two dialogues joined by `then` (one in an area folder), a choice_resolved
+// reaction, a room no exit reaches and an outline.json.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { get as httpGet } from 'node:http';
 import { join, resolve } from 'node:path';
@@ -25,11 +26,18 @@ put('dialogues/greet.json', {
   roles,
   choices: { ask: choice('hub'), bye: choice('end') },
 });
-put('dialogues/hub.json', {
+for (const d of ['dialogues', 'rooms']) mkdirSync(join(src, 'areas/town', d), { recursive: true });
+const hub = 'areas/town/dialogues/hub.json';
+put(hub, {
   npc: 'bram',
   prompt: prose('Here.'),
   roles,
   choices: { bye: choice() },
+});
+put('areas/town/rooms/attic.json', {
+  name: prose('Attic'),
+  description: prose('Dust.'),
+  exits: {},
 });
 put('reactions/asked.json', {
   on: { event: 'choice_resolved', choice: 'ask' },
@@ -43,13 +51,23 @@ const outline = {
         { n: 1, nodes: ['dialogues/greet/ask'], seeds: ['lantern', 'debt'] },
         {
           n: 2,
-          nodes: ['rooms/village_green', 'items/nowhere', 'dialogues/greet/nope'],
+          nodes: [
+            'rooms/village_green',
+            'items/nowhere',
+            'dialogues/greet/nope',
+            'rooms/village_green/door',
+          ],
           seeds: ['coin'],
           pays: ['coin'], // a beat cannot pay its own seed
         },
       ],
     },
-    { beats: [{ n: 3, nodes: ['rooms/village_green'], pays: ['lantern', 'oath'] }] },
+    {
+      beats: [
+        { n: 3, nodes: ['rooms/village_green'], pays: ['lantern', 'oath'] },
+        { n: 4, nodes: ['rooms/attic'] },
+      ],
+    },
   ],
 };
 put('outline.json', outline);
@@ -80,25 +98,39 @@ test('a seed with no later payoff and a payoff with no earlier seed are listed',
 });
 
 type Beats = { outline: { beats: { n: number; status: string; missing?: string[] }[] } };
-// Break: a ref the artifact lacks (an unknown key, a choice the dialogue does not have) reads as built.
-// Break: a `~` in a bound node's file does not mark its beat, or marks it once the words are in.
-test("a beat is missing with the refs not in the artifact, `~` while its node's file has one", () => {
+// Break: a ref the artifact lacks (an unknown key, a choice the dialogue does not have, a choice
+// path on a room) reads as built; a beat no exit reaches reads as built.
+// Break: a `~` in text.json under a key the node names, or in an area folder's file, does not
+// mark its node, or marks it once the words are in.
+test('a beat is missing with the refs not in the artifact, `~` while its node has one', () => {
   const beats = () => (story(src, dev, []) as Beats).outline.beats;
   assert.deepEqual(
     beats().map(({ n, status, missing }) => [n, status, missing]),
     [
       [1, 'built', undefined],
-      [2, 'missing', ['items/nowhere', 'dialogues/greet/nope']],
+      [2, 'missing', ['items/nowhere', 'dialogues/greet/nope', 'rooms/village_green/door']],
       [3, 'built', undefined],
+      [4, 'unreached', undefined],
     ],
   );
-  const room = readFileSync(join(src, 'rooms/village_green.json'), 'utf8');
-  put('rooms/village_green.json', { ...JSON.parse(room), description: prose('~') });
+  const text = readFileSync(join(src, 'text.json'), 'utf8');
+  const spoken = readFileSync(join(src, hub), 'utf8');
+  put('text.json', { ...JSON.parse(text), 'room.village_green.description': '~' });
+  put(hub, { ...JSON.parse(spoken), prompt: prose('~') });
   try {
     assert.equal(beats()[2]!.status, '~');
-    assert.deepEqual(Object.keys(story(src, dev, []).todo), [green]);
+    const { todo } = story(src, dev, []);
+    assert.deepEqual(
+      todo[green]!.map((t) => [t.file, t.placeholders]),
+      [['text.json', ['room.village_green.description']]],
+    );
+    assert.deepEqual(
+      todo[ref('dialogue', 'hub')]!.map((t) => t.file),
+      [hub],
+    );
   } finally {
-    writeFileSync(join(src, 'rooms/village_green.json'), room);
+    writeFileSync(join(src, 'text.json'), text);
+    writeFileSync(join(src, hub), spoken);
   }
 });
 
@@ -126,11 +158,18 @@ test('then and choice_resolved edges: then: end draws none, then: hub one', () =
   );
 });
 
-// Break: rows keyed by the wrong node, or a row of a file with no node (text.json) given one.
+// Break: rows keyed by the wrong node (an area folder's, a `.scene` as other than its dialogue),
+// or a row of a file with no node (text.json) given one.
 test("the compile's diagnostics by node", () => {
-  const near = { rel: 'rooms/village_green.json', message: 'x' };
-  const model = story(src, dev, [near, { rel: 'text.json', message: 'y' }]);
-  assert.deepEqual(model.diagnostics, { [green]: [near] });
+  const [near, far, scene] = ['rooms/village_green.json', hub, 'scenes/greet.scene'].map((rel) => ({
+    rel,
+  }));
+  const model = story(src, dev, [near!, far!, scene!, { rel: 'text.json' }]);
+  assert.deepEqual(model.diagnostics, {
+    [green]: [near],
+    [ref('dialogue', 'hub')]: [far],
+    [ref('dialogue', 'greet')]: [scene],
+  });
 });
 
 // Break: a bad outline.json throws (a 500 for the whole map) instead of a refusal in the model.
@@ -144,7 +183,8 @@ test('a bad outline.json is a refusal in the model, the graph still built', () =
   put('outline.json', outline);
 });
 
-// Break: the model rebuilt on every request (no 304), kept across a compile, or served to a foreign Host.
+// Break: the model rebuilt on every request (no 304), kept across a publish (a hold's release
+// pushes no diagnostics), or served to a foreign Host.
 test('GET /story: an ETag, 304 until the next compile pushes, and refused to a foreign Host', async (t) => {
   writeFileSync(join(dir, 'dev.json'), JSON.stringify(dev));
   const port = 20000 + Math.floor(Math.random() * 20000);
@@ -158,7 +198,7 @@ test('GET /story: an ETag, 304 until the next compile pushes, and refused to a f
   put('outline.json', { parts: [] });
   try {
     assert.equal((await get({ 'if-none-match': etag })).status, 304); // no compile yet
-    server.push({ diagnostics: [] });
+    server.push({ text: {}, compiled: true }); // what a hold's release pushes
     const next = await get({ 'if-none-match': etag });
     assert.equal(next.status, 200);
     assert.deepEqual(((await next.json()) as { outline: unknown }).outline, {

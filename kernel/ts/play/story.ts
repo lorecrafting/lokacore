@@ -13,7 +13,8 @@ import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { artifactBytes, compiled } from './compiled.ts';
 import { contentGraph, reachReport } from './reach.ts';
-import { files, todo } from './todo.ts';
+import { placed } from './guard.ts';
+import { todo, type Todo } from './todo.ts';
 
 type Dev = { canonical: string; sha256: string };
 type Diagnostic = { rel?: string };
@@ -65,21 +66,49 @@ function links(c: Obj) {
   return edges;
 }
 
-// short ref (`<dir>/<key>`, scripted actions under actions/) => DefinitionRefString, and each ref's file
-function shortRefs(c: Obj, nodes: { ref: string }[], source: string) {
+// short ref (`<dir>/<key>`, scripted actions under actions/) => DefinitionRefString, and each ref's definition
+function shortRefs(c: Obj, nodes: { ref: string }[]) {
   const refs = new Map<string, string>();
+  const defs = new Map<string, unknown>();
   for (const { ref } of nodes) {
     const section = Object.keys(c).find((s) => isObj(c[s]) && ref in (c[s] as Obj))!;
     const dir = section.replace(/^scripted_actions$/, 'actions');
     refs.set(`${dir}/${ref.slice(ref.lastIndexOf('/') + 1)}`, ref);
+    defs.set(ref, (c[section] as Obj)[ref]);
   }
-  const rels = files(source);
-  const fileOf = new Map<string, string>();
-  for (const [short, ref] of refs) {
-    const file = rels.find((r) => r.startsWith(`${short}.`));
-    if (file) fileOf.set(ref, file);
-  }
-  return { refs, fileOf };
+  return { refs, defs };
+}
+
+// A source file's node by guard.ts's placed() (area folders too); a `.scene` is a dialogue (Source.placed).
+function nodeOf(rel: string | undefined, refs: Map<string, string>) {
+  const at = rel === undefined ? undefined : placed(rel);
+  return at && refs.get(`${at.ext === 'scene' ? 'dialogues' : at.dir}/${at.key}`);
+}
+
+// Every string in a definition: among them, the text keys it names.
+const keysIn = (v: unknown): string[] =>
+  typeof v === 'string'
+    ? [v]
+    : isObj(v) || Array.isArray(v)
+      ? Object.values(v).flatMap(keysIn)
+      : [];
+
+const add = <T>(into: Record<string, T[]>, ref: string | undefined, row: T) => {
+  if (ref) (into[ref] ??= []).push(row);
+};
+
+/** `/todo` by node: a definition's own file's rows, and text.json's `~` keys the definition names. */
+function todoByNode(source: string, refs: Map<string, string>, defs: Map<string, unknown>) {
+  const out: Record<string, Todo[]> = {};
+  for (const row of todo(source))
+    if (row.file !== 'text.json') add(out, nodeOf(row.file, refs), row);
+    else
+      for (const [ref, def] of defs) {
+        const named = new Set(keysIn(def));
+        const placeholders = row.placeholders.filter((k) => named.has(k));
+        if (placeholders.length) add(out, ref, { ...row, placeholders });
+      }
+  return out;
 }
 
 /** The model for `source` compiled to `dev`, with the compile's diagnostics. */
@@ -89,33 +118,38 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   const c = loaded.cartridge as unknown as Obj;
   const graph = contentGraph(c);
   graph.edges.push(...links(c));
-  const { refs, fileOf } = shortRefs(c, graph.nodes, source);
-  const byNode = <T>(rows: T[], rel: (row: T) => string | undefined) => {
-    const out: Record<string, T[]> = {};
-    for (const [ref, file] of fileOf) {
-      const mine = rows.filter((row) => rel(row) === file);
-      if (mine.length) out[ref] = mine;
-    }
-    return out;
-  };
-  const todos = byNode(todo(source), (t) => t.file);
+  const report = reachReport(c);
+  const { refs, defs } = shortRefs(c, graph.nodes);
+  const todos = todoByNode(source, refs, defs);
+  const byNode: Record<string, Diagnostic[]> = {};
+  for (const d of diagnostics) add(byNode, nodeOf(d.rel, refs), d);
+  const unreached = new Set(Object.values(report.unreachable).flat());
   return {
     hash: dev.sha256,
     graph,
-    report: reachReport(c),
+    report,
     todo: todos,
-    diagnostics: byNode(diagnostics, (d) => d.rel),
-    outline: beats(source, c, refs, todos),
+    diagnostics: byNode,
+    outline: beats(source, { refs, defs, todos, unreached }),
   };
 }
 
+type Bound = {
+  refs: Map<string, string>;
+  defs: Map<string, unknown>;
+  todos: Record<string, unknown>;
+  unreached: Set<string>;
+};
+
 // A short ref's node: a dialogue choice `dialogues/<d>/<c>` is its dialogue's, when it has that choice.
-function resolve(short: string, c: Obj, refs: Map<string, string>) {
+function resolve(short: string, { refs, defs }: Bound) {
   const [dir, key, choice] = short.split('/');
   const ref = refs.get(`${dir}/${key}`);
-  if (choice === undefined) return ref;
-  const choices = ref && (c.dialogues as Obj)[ref] && ((c.dialogues as Obj)[ref] as Obj).choices;
-  return dir === 'dialogues' && isObj(choices) && choice in choices ? ref : undefined;
+  if (choice === undefined || !ref) return ref;
+  const d = defs.get(ref);
+  return dir === 'dialogues' && isObj(d) && isObj(d.choices) && choice in d.choices
+    ? ref
+    : undefined;
 }
 
 function readOutline(source: string): Outline | { refused: string } | null {
@@ -132,15 +166,21 @@ function readOutline(source: string): Outline | { refused: string } | null {
     : { refused: 'outline.json: not the shape of schemas/source/outline.schema.json' };
 }
 
-function beats(source: string, c: Obj, refs: Map<string, string>, todos: Record<string, unknown>) {
+function beats(source: string, bound: Bound) {
   const outline = readOutline(source);
   if (!outline || 'refused' in outline) return outline;
   const all = outline.parts.flatMap((p, part) => p.beats.map((b) => ({ ...b, part })));
   const rows = all.map(({ part, n, title, nodes = [] }) => {
-    const bound = nodes.map((short) => resolve(short, c, refs));
-    const missing = nodes.filter((_, i) => !bound[i]);
+    const refs = nodes.map((short) => resolve(short, bound));
+    const missing = nodes.filter((_, i) => !refs[i]);
     const status =
-      !nodes.length || missing.length ? 'missing' : bound.some((r) => r! in todos) ? '~' : 'built';
+      !nodes.length || missing.length
+        ? 'missing'
+        : refs.some((r) => r! in bound.todos)
+          ? '~'
+          : refs.every((r) => bound.unreached.has(r!))
+            ? 'unreached'
+            : 'built';
     return {
       part,
       n,

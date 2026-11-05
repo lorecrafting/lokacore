@@ -257,7 +257,7 @@ export function serve(port: number, source: string, artifact: string, release = 
     client.write(`data: ${JSON.stringify({ ...last, ...once })}\n\n`);
   const map = storyRoute(source, artifact);
   const push = (message: Partial<Message>) => {
-    if ('diagnostics' in message) map.stale(); // every compile pushes its diagnostics
+    map.stale(); // a compile, or a hold's release, may have published a new artifact
     last = { ...last, ...message };
     for (const client of clients) send(client);
   };
