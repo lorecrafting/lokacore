@@ -180,7 +180,7 @@ function useWiring(
   // a palette story row shows Story and reveals its row (rulings S2 Cmd-K)
   const run = (i: Item) =>
     i.kind === 'story'
-      ? story && set((l) => ({ ...l, map: 'story', story: go(story, l.story ?? LIST, i.id) }))
+      ? story && set((l) => ({ ...l, leftOpen: true, map: 'story', story: go(story, l.story ?? LIST, i.id) }))
       : base(i);
   useShortcuts(heard, (key) => {
     if (key === 'k') open();

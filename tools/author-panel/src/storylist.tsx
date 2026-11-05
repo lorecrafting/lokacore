@@ -110,7 +110,7 @@ const click = (a: Act, row: L.Row, alt: boolean) => {
 // The tree's keys (rulings S2 Keyboard): arrows, Enter selects, `f` traces, Esc closes Trace then leaves.
 function keyDown(a: Act, list: L.Row[], e: React.KeyboardEvent<HTMLElement>) {
   const row = list.find((r) => r.id === (e.target as HTMLElement).dataset.id);
-  if (!row) return;
+  if (!row || e.metaKey || e.ctrlKey) return; // leave Cmd-F and the shortcuts to the browser and App
   const m = L.move(list, row.id, e.key);
   const run: Record<string, () => void> = {
     Enter: () => click(a, row, e.altKey),
@@ -146,13 +146,13 @@ function TracePanel({ story, at, a }: { story: Story; at: string; a: Act }) {
           <li key={i}>
             <button
               type="button"
-              disabled={!r.ref}
+              disabled={!(r.ref && fromRef(r.ref))}
               className="flex h-7 w-full items-center gap-2 px-4 text-left text-muted-foreground"
               onClick={() => r.ref && a.pick(fromRef(r.ref)!)}
             >
               {r.label}
               {r.key ? <code className={`text-foreground ${r.dashed ? 'underline decoration-dashed' : ''}`}>{r.key}</code> : null}
-              {r.beat ? <span>· beat {r.beat}</span> : null}
+              {r.beat !== undefined ? <span>· beat {r.beat}</span> : null}
               {r.dashed ? <span className="sr-only">(a clock read)</span> : null}
             </button>
           </li>
@@ -164,6 +164,10 @@ function TracePanel({ story, at, a }: { story: Story; at: string; a: Act }) {
 
 // Selection from elsewhere reveals its row; a new focus scrolls to it, and takes focus if the tree had it.
 function useSync(props: Props, tree: React.RefObject<HTMLUListElement | null>, a: Act, selRef?: string) {
+  // restore the saved scroll first, so a revealed row's scroll below wins on mount
+  useEffect(() => {
+    if (tree.current) tree.current.scrollTop = Number(localStorage.getItem(SCROLL) ?? 0);
+  }, [tree]);
   useEffect(() => {
     if (selRef) a.put(L.reveal(props.story, a.st, selRef));
   }, [selRef]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -175,9 +179,6 @@ function useSync(props: Props, tree: React.RefObject<HTMLUListElement | null>, a
     const here = document.activeElement;
     if (el && (here === document.body || tree.current?.contains(here))) el.focus();
   }, [a.st.focus]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (tree.current) tree.current.scrollTop = Number(localStorage.getItem(SCROLL) ?? 0);
-  }, [tree]);
 }
 
 function TreeRow({ row, a, chosen, tab }: { row: L.Row; a: Act; chosen: boolean; tab: boolean }) {
@@ -233,7 +234,7 @@ export function StoryList(props: Props) {
             row={row}
             a={a}
             chosen={row.ref !== undefined && row.ref === selRef}
-            tab={row.id === (st.focus ?? list[0]?.id)}
+            tab={row.id === (list.some((r) => r.id === st.focus) ? st.focus : list[0]?.id)}
           />
         ))}
       </ul>

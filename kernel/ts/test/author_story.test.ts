@@ -26,6 +26,7 @@ const story = (outline: Story['outline']): Story => ({
     edges: [
       { from: ref('reaction', 'ring'), to: f1, path: '/steps/0', op: 'fact.assign', set: true },
       { from: ref('reaction', 'ring'), to: f1, path: '/steps/2', op: 'fact.assign', set: true },
+      { from: ref('reaction', 'toll'), to: f1, path: '/steps/0', op: 'fact.assign', set: true },
       { from: d1, to: f1, path: '/when', op: 'fact_compare' },
       { from: ref('reaction', 'wait'), to: f1, path: '/when', op: 'time_since' },
       { from: d1, to: q1, path: '/steps/1', op: 'quest.start' },
@@ -66,6 +67,10 @@ test('with no outline every story node is Unplaced, open, and the note says why'
     rows.map((r) => r.label),
     ['Unplaced (5)', 'q1', 'd1', 'f1', 'f2', 'sp'],
   );
+  assert.deepEqual(
+    rows.map((r) => r.level),
+    [1, 2, 2, 2, 2, 2],
+  );
   assert.equal(list.note(bare), 'No outline.json; every node is unplaced.');
 });
 
@@ -95,6 +100,10 @@ test('the outline lists parts, shut beats, Seeds and a shut Unplaced; a folded p
       ['Unplaced (3)', false],
     ],
   );
+  assert.deepEqual(
+    rows.map((r) => r.level),
+    [1, 2, 2, 1, 2, 1, 2, 1],
+  );
   const folded = list.toggle(list.LIST, 'part:0');
   assert.deepEqual(folded.fold, ['part:0']);
   assert.deepEqual(ids(planted, folded).slice(0, 3), ['part:0', 'part:1', 'beat:3']);
@@ -115,7 +124,7 @@ test('a beat names its status and what is missing; a bound node its refusals, ~ 
 });
 
 // Break: a selection on the map or in the Book leaves its row shut inside a folded part and beat,
-// or a click on a node's second beat jumps the focus to its first.
+// or a click on a node's second beat jumps the focus to its first or leaves that beat shut.
 test('a selection opens the folded part and beat that hold it and focuses its row', () => {
   const shut = list.toggle(list.LIST, 'part:0');
   const st = list.reveal(planted, shut, d1);
@@ -124,8 +133,9 @@ test('a selection opens the folded part and beat that hold it and focuses its ro
   const loose = list.reveal(planted, list.LIST, f1);
   assert.ok(ids(planted, loose).includes(`unplaced/${f1}`));
   assert.equal(list.reveal(planted, shut, ref('room', 'hall')), shut);
-  const clicked = { ...list.LIST, focus: `beat:3/${d1}` };
-  assert.equal(list.reveal(planted, clicked, d1), clicked);
+  const clicked = list.reveal(planted, { ...list.LIST, focus: `beat:3/${d1}` }, d1);
+  assert.equal(clicked.focus, `beat:3/${d1}`);
+  assert.ok(ids(planted, clicked).includes(`beat:3/${d1}`));
 });
 
 // Break: Trace mixes writers with readers, loses the reader's beat or the clock read's dash, lists
@@ -133,6 +143,7 @@ test('a selection opens the folded part and beat that hold it and focuses its ro
 test('Trace follows a fact from where it is set to where it is read, with each beat', () => {
   assert.deepEqual(list.trace(planted, f1), [
     { label: 'set at', ref: ref('reaction', 'ring'), key: 'ring', beat: undefined },
+    { label: 'set at', ref: ref('reaction', 'toll'), key: 'toll', beat: undefined },
     { label: 'read at', ref: d1, key: 'd1', beat: 1 },
     { label: 'read at', ref: ref('reaction', 'wait'), key: 'wait', beat: undefined, dashed: true },
   ]);
@@ -171,6 +182,10 @@ test('the arrows walk the tree: down, open, into, back to the parent, shut', () 
   assert.deepEqual(at('beat:1', 'ArrowRight'), { toggle: 'beat:1' });
   st = list.toggle(st, 'beat:1');
   assert.deepEqual(at('beat:1', 'ArrowRight'), { focus: `beat:1/${q1}` });
+  assert.equal(list.rows(planted, st)[2]?.level, 3);
+  assert.deepEqual(at('beat:1', 'ArrowUp'), { focus: 'part:0' });
+  assert.deepEqual(at('gone', 'ArrowDown'), {});
+  assert.deepEqual(at('beat:1', 'Home'), {});
   assert.deepEqual(at(`beat:1/${q1}`, 'ArrowLeft'), { focus: 'beat:1' });
   assert.deepEqual(at('beat:1', 'ArrowLeft'), { toggle: 'beat:1' });
   assert.deepEqual(at('beat:2', 'ArrowRight'), {});

@@ -160,9 +160,11 @@ const opened = (st: ListState, path: string[], id: string, outlined: boolean) =>
 
 /** A selection from elsewhere: open the node's first beat (or Unplaced) and focus its row; a kind the list does not hold changes nothing. */
 export function reveal(s: Story, st: ListState, ref: string): ListState {
-  if (st.focus?.endsWith(`/${ref}`)) return st; // the row clicked: keep it, not the node's first beat
   const o = outlineOf(s);
-  const b = o?.beats.find((x) => x.nodes.includes(ref));
+  // the row clicked keeps its beat, not the node's first one
+  const b =
+    o?.beats.find((x) => st.focus === `beat:${x.n}/${ref}` && x.nodes.includes(ref)) ??
+    o?.beats.find((x) => x.nodes.includes(ref));
   if (b) return opened(st, [`part:${b.part}`, `beat:${b.n}`], `beat:${b.n}/${ref}`, true);
   const kind = s.graph.nodes.find((n) => n.ref === ref)?.kind;
   return kind && KINDS.includes(kind) ? opened(st, ['unplaced'], `unplaced/${ref}`, !!o) : st;
@@ -193,7 +195,7 @@ export function trace(s: Story, ref: string): TraceRow[] {
   });
   // one row per node and role: a dialogue that sets the fact in two choices is one writer
   const into = s.graph.edges.filter(
-    (e, i, all) => e.to === ref && all.findIndex((x) => x.to === ref && x.from === e.from && x.op === e.op) === i,
+    (e, i, all) => e.to === ref && all.findIndex((x) => x.to === ref && x.from === e.from && x.op === e.op && x.set === e.set) === i,
   );
   if (fromRef(ref)?.kind !== 'fact') return into.map((e) => row(e.op ?? 'used at', e));
   const o = s.report.orphan_facts;
