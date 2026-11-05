@@ -21,10 +21,11 @@ import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { artifactBytes } from './compiled.ts';
 import type { FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
 import { replayRecords } from './replay.ts';
-import { files, todo } from './todo.ts';
+import { todo } from './todo.ts';
 import { find } from './find.ts';
 import { why } from './why.ts';
 import { body, editing, foreign, json } from './editing.ts';
+import { sourceOf } from './prose.ts';
 import type { Changed } from './write.ts';
 import { sentences } from './why_words.ts';
 import { told } from './told.ts';
@@ -92,27 +93,6 @@ async function checkpoints(request: IncomingMessage, response: ServerResponse, s
 /** `rel:line` of the first line defining `key` (`"key":`), else of the first holding `words` as a
  * JSON string (inline prose has no key in the source), else of the scene line that says their
  * first line (`maud: words`, `- words`); undefined when none is in `source`. */
-export function sourceOf(source: string, key: string, words?: string) {
-  const all = files(source);
-  const find = (hit: (line: string) => boolean, rels = all) => {
-    for (const rel of rels) {
-      const i = readFileSync(join(source, rel), 'utf8').split('\n').findIndex(hit);
-      if (i >= 0) return `${rel}:${i + 1}`;
-    }
-  };
-  const defined = find((l) => l.includes(`"${key}":`));
-  const first = words?.trim().split('\n')[0];
-  if (defined || !first) return defined;
-  return (
-    find((l) => l.includes(JSON.stringify(words))) ??
-    find(
-      (l) =>
-        l.trimEnd().endsWith(`: ${first}`) ||
-        [`- ${first}`, `* ${first}`, first].includes(l.trim()),
-      all.filter((rel) => /\.(scene|cut)$/.test(rel)),
-    )
-  );
-}
 
 /** The rows of the last run in a trace table dump (a start over begins a new run; the explainer
  * takes one run). */

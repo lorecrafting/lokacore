@@ -15,7 +15,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { ROOT } from '../play/obs.ts';
-import { lastRun, limited, lintLines, serve, sourceOf, textOnly } from '../play/live.ts';
+import { lastRun, limited, lintLines, serve, textOnly } from '../play/live.ts';
+import { sourceOf } from '../play/prose.ts';
 
 const was = { format: 1, rooms: { a: { name: 'room.a' } }, text: { 'room.a': 'line one' } };
 

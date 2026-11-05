@@ -1,7 +1,7 @@
 // E5 on the stream (docs/design/prose-in-the-book-rulings.md): an /edit's words show before the
 // compile, a refused compile marks them unconfirmed, and the page's pagehide beacon ends its Hold.
 import assert from 'node:assert/strict';
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -35,7 +35,7 @@ function served(t: TestContext, release = () => {}) {
   const ask = async (path: string, sent: unknown) =>
     (await call(path, JSON.stringify(sent))).status;
   const events = async () => JSON.parse((await call('/events')).text.replace(/^data: /, ''));
-  return { live, call, ask, events };
+  return { live, call, ask, events, src };
 }
 
 test('/edit shows its words before the compile, marks them on a refused one, clears on a good one', async (t) => {
@@ -70,4 +70,30 @@ test('a pagehide beacon (text/plain, the page origin) releases the Hold', async 
   const beacon = { origin: 'http://localhost:19009', 'content-type': 'text/plain;charset=UTF-8' };
   assert.equal((await call('/hold', '{"on":false}', beacon)).status, 200);
   assert.deepEqual([live.held(), released], [false, 1]);
+});
+
+test('/line answers the source line a Book line writes, its words unbound, or why it has none', async (t) => {
+  // Breaks: the field opening on the bound or escaped words (a save writes them into the source);
+  // a scene line's `* ` kept in the field; a choice label opening a field.
+  const { call, src } = served(t);
+  writeFileSync(join(src, 'more.json'), '{\n  "room.q": "say \\"hi\\" ~",\n  "n": 1\n}\n');
+  mkdirSync(join(src, 'scenes'));
+  writeFileSync(join(src, 'scenes/s.scene'), 'dialogue s\n  * Rain ~\n  - Take it\n');
+  const line = async (key: string, words: string) => {
+    const { status, text } = await call(`/line?key=${key}&words=${encodeURIComponent(words)}`);
+    return [status, JSON.parse(text)];
+  };
+  assert.deepEqual(await line('room.q', 'say "hi" ~'), [
+    200,
+    { file: 'more.json', line: 2, was: '  "room.q": "say \\"hi\\" ~",', words: 'say "hi" ~' },
+  ]);
+  assert.deepEqual(await line('dialogue.s.prompt', 'Rain ~'), [
+    200,
+    { file: 'scenes/s.scene', line: 2, was: '  * Rain ~', words: 'Rain ~' },
+  ]);
+  assert.deepEqual(await line('dialogue.s.label', 'Take it'), [
+    400,
+    'a choice label: its key is its words',
+  ]);
+  assert.equal((await line('room.none', 'nowhere'))[0], 404);
 });

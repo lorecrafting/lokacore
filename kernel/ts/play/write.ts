@@ -18,7 +18,7 @@ import {
   Refused,
 } from './guard.ts';
 import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
-import { edit } from './prose.ts';
+import { edit, located } from './prose.ts';
 
 type By = 'editor' | 'outside';
 export type Changed = { file: string; sha256: string | null; by: By };
@@ -219,6 +219,8 @@ function get(t: Tree, url: string): Answer | undefined {
       { ...stub, $ref: stub.$ref.replace(/^defs\.schema\.json/, ''), $defs: defs!.$defs },
     ];
   }
+  if (pathname === '/line')
+    return located(t.root, searchParams.get('key') ?? '', searchParams.get('words') ?? '');
   if (pathname === '/journal')
     return [200, t.journal.map(({ files: fs, ...e }) => ({ ...e, files: fs.map((c) => c.file) }))];
 }
