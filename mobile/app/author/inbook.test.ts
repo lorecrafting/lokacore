@@ -119,7 +119,7 @@ test('a double-click opens the source words; Enter saves them to that line and c
 const TILDE = { file: 'a.loka', line: 4, was: '~', words: '~' };
 
 // Breaks: a bare `~` opens with the caret after it, so typing saves "~Ab, c'd": a stray `~` in
-// the prose, and the line drops out of Still to write (kernel/ts/play/todo.ts counts only `~`).
+// the prose, and the line drops out of Still to write (a placeholder is a line that trims to `~`).
 test('typing in a bare ~ line replaces the ~', async () => {
   answer = (path) => (path.startsWith('/line') ? [200, TILDE] : [200, { id: 7 }]);
   await page.locator('p').nth(1).dblclick();
