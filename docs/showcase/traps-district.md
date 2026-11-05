@@ -36,7 +36,7 @@ cellars." (`combat-district.md`'s `sign_combat` text; combat 1 pins the key, not
   `duration` 600, `tick_every` 60, `resource` hp, `fear: true`, no `per_tick`, label "Afraid".
 - Skill `disarm`: growth `[1]`, empty qualification (`traps_sampler/skills/disarm.json`). Not
   hidden: nothing in this district is an elite profession.
-- Liquid `bitters`: `cures: [poisoned]` (`needs_sampler` `water`'s shape).
+- Liquid `bitters`: `cures: [poisoned]` (the liquid `cures` shape in `test/fixtures/drain_cartridge`).
 - Facts: `plate_found` (player bool); `plate_sprung`, `plate_disarmed` (instance bool); `lever_stage`
   (instance int 0..3); `wheel_1`, `wheel_2`, `wheel_3` (instance int 0..10); `cellar_found`
   (player), `cellar_sprung`, `cellar_disarmed` (instance) for the sandbox (`traps_sampler/facts.json`,

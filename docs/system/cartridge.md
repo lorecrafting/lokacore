@@ -1353,9 +1353,9 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 [Sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) add one optional field, `cues` (`Cues`: 1 to 4 `Cue {sense, text, range, when?}`, `protocol/entity.schema.json`), on a room, a room's detail, an item or NPC definition, an item's source `fuel`, a status and an action outcome (`outcomes.success` or `.failure`), and one leaf, `cue_perceived {npc, sense}`. Both are owned by `sense_cue@1` (UNDECLARED_CAPABILITY at the cue, `rooms/forge.cues[0]`, or at the leaf's op). A cue's `text` without a catalog entry is UNRESOLVED_REFERENCE at it (`actions/pick_lock.outcomes.failure.cues[0].text`); its `when` is checked and short references in it expand like any condition (`Loka.Content.Resolve.expand/2` expands every `cues` list), and the leaf's `npc` takes a short key through `Loka.Content.LeafRefs`. Compiler `lib/loka/content/cues.ex`. Sampler: `cartridges/senses_sampler`.
 
-## Need declarations
+## Liquid effect declarations
 
-[Hunger, thirst and dry days](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) add one field: a liquid's optional `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status), ended by a Drink of it. [Consume](mechanics.md#consume-loka-kgd209) adds the restore pair (`resource`, `amount`) and `applies` beside it, with an edible item's rules; an edible's `resource` and `amount` become optional (both or neither). The compiler (`lib/loka/content/status.ex`) refuses an unresolved name (UNRESOLVED_REFERENCE at the entry). Needs themselves are [status declarations](#status-declarations) on cartridge pools. Sampler: `cartridges/needs_sampler`.
+A liquid kind declares [Consume](mechanics.md#consume-loka-kgd209)'s effect block in its `LiquidDefinition`, with an edible item's rules: the restore pair (`resource`, `amount`), `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status, ended by a Drink of it) and `applies`. An edible's `resource` and `amount` are optional (both or neither). The compiler (`lib/loka/content/status.ex`) refuses an unresolved name (UNRESOLVED_REFERENCE at the entry). Need pools are [retired](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry). Sampler: `cartridges/fed_sampler`.
 
 ## Dialogue check declarations
 

@@ -30,7 +30,7 @@ const saves = mkdtempSync(join(tmpdir(), 'loka-permanent-tick-saves-'));
 const file = join(scratch, 'artifact.json');
 let artifact: any;
 try {
-  execFileSync('mix', ['loka.compile', 'cartridges/needs_sampler', file], {
+  execFileSync('mix', ['loka.compile', 'test/fixtures/drain_cartridge', file], {
     cwd: fileURLToPath(new URL('../../../', import.meta.url)),
     stdio: 'pipe',
   });
