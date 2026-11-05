@@ -1,3 +1,4 @@
+# size: allow 326, the area folder lookups (a room or starter file in any areas/<area>/) join the starter writer
 defmodule Loka.Content.Starters do
   @moduledoc """
   `bin/loka new <kind> <name>`: writes a compiling starter for one source kind with every line a
@@ -40,9 +41,13 @@ defmodule Loka.Content.Starters do
          {:ok, {caps, needs, make}} <- Map.fetch(Templates.kinds(), kind) |> or_unknown(kind),
          {:ok, context} <- context(dir, needs),
          {:ok, context} <- placed(context, dir, kind, name, from) do
-      files = with_capabilities(make.(name, context), caps)
-      own = if !from, do: "#{dir_of(kind)}/#{name}.json"
-      put(dir, files |> kept_lines(dir, kind) |> with_layout(dir, context, name), own, hook)
+      files =
+        make.(name, context)
+        |> with_capabilities(caps)
+        |> kept_lines(dir, kind)
+        |> with_layout(dir, context, name)
+
+      put(dir, files, own(dir, kind, name, from), hook)
     end
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
@@ -53,6 +58,17 @@ defmodule Loka.Content.Starters do
   defp with_capabilities(files, caps) do
     declared = capabilities(caps)
     Map.update(files, "cartridge.json", declared, &Merge.merge(&1, declared))
+  end
+
+  defp own(dir, kind, name, nil), do: home(dir, "#{dir_of(kind)}/#{name}.json")
+  defp own(_, _, _, _from), do: nil
+
+  @doc "The one area folder's copy of `rel` (`areas/<area>/<rel>`), else the root one (a new file)."
+  def home(dir, rel) do
+    case Path.wildcard(Path.join([dir, "areas/*", rel])) do
+      [found] -> Path.relative_to(found, dir)
+      _ -> rel
+    end
   end
 
   # A cutscene is a `scenes/` file; `scene` would name the writer's `.scene` format.
@@ -117,7 +133,7 @@ defmodule Loka.Content.Starters do
   # A rerun finds its own file; another file holding the room would be a duplicate definition.
   defp new_room(dir, kind, name, c) do
     if kind in ~w(rooms areas) and name in c["room_list"] and
-         !File.exists?(Path.join(dir, "#{kind}/#{name}.json")),
+         !File.exists?(Path.join(dir, home(dir, "#{kind}/#{name}.json"))),
        do: {:error, "a room #{name} already exists in another file"},
        else: :ok
   end
@@ -138,7 +154,7 @@ defmodule Loka.Content.Starters do
       room == name ->
         {:error, "--from: a room cannot join itself"}
 
-      !File.exists?(Path.join(dir, "rooms/#{room}.json")) ->
+      !File.exists?(Path.join(dir, home(dir, "rooms/#{room}.json"))) ->
         {:error, "--from: no rooms/#{room}.json"}
 
       true ->
@@ -151,7 +167,9 @@ defmodule Loka.Content.Starters do
   defp with_layout(files, dir, c, name) do
     if File.exists?(Path.join(dir, "layout.json")) do
       rooms =
-        Enum.uniq(c["room_list"] ++ Enum.flat_map(files, fn {rel, b} -> rooms_in(rel, b) end))
+        Enum.uniq(
+          c["room_list"] ++ Enum.flat_map(files, fn {rel, b} -> rooms_in(Path.split(rel), b) end)
+        )
 
       Map.put(files, "layout.json", Templates.with_rows(c["layout"], rooms, name, c["from"]))
     else
@@ -159,8 +177,8 @@ defmodule Loka.Content.Starters do
     end
   end
 
-  defp rooms_in("rooms/" <> file, _), do: [Path.basename(file, ".json")]
-  defp rooms_in("areas/" <> _, body), do: Map.keys(body["rooms"])
+  defp rooms_in(["rooms", file], _), do: [Path.basename(file, ".json")]
+  defp rooms_in(["areas", _], body), do: Map.keys(body["rooms"])
   defp rooms_in(_, _), do: []
 
   defp rooms(dir) do
@@ -169,7 +187,7 @@ defmodule Loka.Content.Starters do
           r <- area_rooms(a),
           do: r
 
-    plain = for r <- Path.wildcard(Path.join(dir, "rooms/*.json")), do: Path.basename(r, ".json")
+    plain = for r <- own_files(dir, "rooms"), do: Path.basename(r, ".json")
     Enum.sort(bundled ++ plain)
   end
 
@@ -205,8 +223,15 @@ defmodule Loka.Content.Starters do
   defp first(dir, "entry", entry), do: entry || first(dir, "rooms", entry)
 
   defp first(dir, kind, entry) do
-    keys = for p <- Path.wildcard(Path.join([dir, kind, "*.json"])), do: Path.basename(p, ".json")
+    keys = for p <- own_files(dir, kind), do: Path.basename(p, ".json")
     if kind == "rooms" and entry in keys, do: entry, else: List.first(keys)
+  end
+
+  # One file per definition, at the root or in an area folder; sorted by key.
+  defp own_files(dir, kind) do
+    (Path.wildcard(Path.join([dir, kind, "*.json"])) ++
+       Path.wildcard(Path.join([dir, "areas/*", kind, "*.json"])))
+    |> Enum.sort_by(&Path.basename/1)
   end
 
   defp missing("entry"), do: "rooms"
@@ -227,10 +252,13 @@ defmodule Loka.Content.Starters do
   defp kept_lines(files, _, _), do: files
 
   # `own`, the file this starter names, is the author's once it exists: a rerun checks it, and never
-  # adds back what the author removed.
+  # adds back what the author removed. A file an area folder holds is written there.
   def put(dir, files, own, hook) do
     touched =
-      for {rel, new} <- files, path = Path.join(dir, rel), do: {rel, path, read(path), new}
+      for {rel, new} <- files,
+          rel = home(dir, rel),
+          path = Path.join(dir, rel),
+          do: {rel, path, read(path), new}
 
     case Enum.find_value(touched, fn {rel, _, old, new} -> Merge.clash(old, new, rel <> ":") end) do
       nil ->

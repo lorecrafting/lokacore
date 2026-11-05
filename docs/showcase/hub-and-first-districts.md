@@ -22,7 +22,7 @@ Two developer slices, one PR each:
    statuses, garments, the hub inn, the Fell Road and Tidewater Steps, their tests.
 2. **Slice B: social.** Low Wardle: facts, NPCs, dialogues, the letter quest and scene, Tam's
    schedule and rumour, codex, pick and force, the recap threshold; it also adds Wat's letter
-   dialogue (`dialogues/wat_letter.json`) to the shepherd slice A created.
+   dialogue (`areas/fell_road/dialogues/wat_letter.json`) to the shepherd slice A created.
 
 Pins: one kernel test per district (`kernel/ts/test/showcase_body.test.ts`, `showcase_world.test.ts`,
 `showcase_social.test.ts`) walking the guided steps below and asserting each expected outcome, plus

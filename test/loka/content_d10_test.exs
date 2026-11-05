@@ -3,19 +3,19 @@ defmodule Loka.ContentD10Test do
   alias Loka.ContentSource
   setup_all do: %{dir: ContentSource.copy("cartridges/toolbox_showcase")}
 
-  # Showcase plus an inline Knock on the Smithy's south store door, answered by the smith.
+  # Showcase plus an inline Knock on the Smithy's south store door, answered by Orla (an NPC of its area).
   defp knock do
     [
       {"rooms/smithy.json",
        &put_in(&1, ["exits", "south", "knock"], %{
-         "npc" => "smith",
+         "npc" => "orla",
          "room" => "woodstore",
          "answered" => "knock.store.answered",
          "unanswered" => "knock.store.unanswered"
        })},
       {"text.json",
        &Map.merge(&1, %{
-         "knock.store.answered" => "The smith calls back.",
+         "knock.store.answered" => "Orla calls back.",
          "knock.store.unanswered" => "No one answers."
        })}
     ]
@@ -44,16 +44,16 @@ defmodule Loka.ContentD10Test do
            &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "knowledge") end),
            "UNDECLARED_CAPABILITY", "layout"},
           {"rooms/smithy.json", &knock.(&1, "npc", "absent"), "UNRESOLVED_REFERENCE",
-           "rooms/smithy.exits.south.knock.npc"},
+           "areas/fell_road/rooms/smithy.exits.south.knock.npc"},
           {"rooms/smithy.json", &knock.(&1, "room", "smithy"), "BARRIER_MISMATCH",
-           "rooms/smithy.exits.south.knock"},
+           "areas/fell_road/rooms/smithy.exits.south.knock"},
           {"rooms/smithy.json",
            &put_in(&1, ["exits", "north", "knock"], %{
              &1["exits"]["south"]["knock"]
              | "room" => &1["exits"]["north"]["to"]
-           }), "BARRIER_MISMATCH", "rooms/smithy.exits.north.knock"},
+           }), "BARRIER_MISMATCH", "areas/fell_road/rooms/smithy.exits.north.knock"},
           {"rooms/smithy.json", &knock.(&1, "answered", "absent"), "UNRESOLVED_REFERENCE",
-           "rooms/smithy.exits.south.knock.answered"}
+           "areas/fell_road/rooms/smithy.exits.south.knock.answered"}
         ] do
       assert {:error, diags} = ContentSource.compile(dir, knock() ++ [{file, change}])
       assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]})

@@ -26,6 +26,9 @@ To re-pin a `walk_*` transcript after a content change, run `node kernel/ts/play
   freely.
 - **Quests and scenes** get their own guided loop in the social district: a quest with a deadline
   and hints, and a scene whose dialogue choices drive reactions.
+- **Area folders**: each district's rooms, and the definitions only that district names, live in
+  `areas/<district>/` ([area layout](rnd/cartridge-area-layout-design-2026-11-04.md)); anything two
+  districts share stays in the root folders. `bin/area_split.py` did the move with the hash unchanged.
 
 ## Pairwise mechanic matrix
 

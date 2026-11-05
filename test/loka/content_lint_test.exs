@@ -363,6 +363,7 @@ defmodule Loka.ContentLintTest do
   # tag, or a new tag query, enters unreviewed.
   test "toolbox_showcase target and tool tag queries match exactly the pinned items and NPCs" do
     {files, _} = Loka.Content.Source.load("cartridges/toolbox_showcase")
+    files = for {rel, k, v} <- files, do: {String.replace(rel, ~r{^areas/[^/]+/}, ""), k, v}
 
     holders = fn tag ->
       for {rel, _, %{"tags" => tags}} <- files,
@@ -419,7 +420,7 @@ defmodule Loka.ContentLintTest do
   } do
     File.cp_r!("cartridges/toolbox_showcase", dir)
     {:ok, plain, _} = Loka.Content.compile(dir)
-    rule = Path.join(dir, "reactions/attic_drench.json")
+    rule = Loka.ContentSource.path(dir, "reactions/attic_drench.json")
     File.write!(rule, Jason.encode!(Map.put(Jason.decode!(File.read!(rule)), "silent", true)))
     assert {:ok, ^plain, _} = Loka.Content.compile(dir)
   end
@@ -442,7 +443,12 @@ defmodule Loka.ContentLintTest do
 
   test "a reaction's silent mark is true or absent (reaction.schema.json ReactionRule)" do
     # The source form fails other compiled-form rules; only the /silent errors matter here.
-    rule = Jason.decode!(File.read!("cartridges/toolbox_showcase/reactions/attic_drench.json"))
+    rule =
+      Jason.decode!(
+        File.read!(
+          Loka.ContentSource.path("cartridges/toolbox_showcase", "reactions/attic_drench.json")
+        )
+      )
 
     silent =
       &for(

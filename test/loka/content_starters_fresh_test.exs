@@ -173,6 +173,34 @@ defmodule Loka.ContentStartersFreshTest do
     assert row_at(dir, "yard") == {1, 0, 0}
   end
 
+  # Breaks: --from or a starter needing a room seeing only rooms/ (refused, or a second root copy
+  # of an area folder's room), a rerun adding back what the author cut there, or the map's room
+  # list crashing on an area folder's room file or missing a new area bundle's room.
+  test "--from and the first room find rooms in any area folder", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    File.mkdir_p!(Path.join(dir, "areas/a/rooms"))
+    File.mkdir_p!(Path.join(dir, "areas/b/rooms"))
+    File.rename!(Path.join(dir, "rooms/start.json"), Path.join(dir, "areas/a/rooms/start.json"))
+    File.cp!(Path.join(dir, "areas/a/rooms/start.json"), Path.join(dir, "areas/b/rooms/far.json"))
+    {:ok, _} = Starters.write(dir, "layout", "layout")
+
+    assert {:ok, _} = Starters.write(dir, "rooms", "yard", {"far", "east"})
+    assert read(dir, "areas/b/rooms/far.json")["exits"]["east"]["to"] == "yard"
+    assert {:ok, _} = Starters.write(dir, "actions", "poke")
+    assert Map.has_key?(read(dir, "areas/a/rooms/start.json")["details"], "poke")
+    # A new area bundle's room joins the map.
+    assert {:ok, _} = Starters.write(dir, "areas", "moor")
+    assert Enum.any?(read(dir, "layout.json"), &(&1["room"] == "moor"))
+    assert Path.wildcard(Path.join(dir, "rooms/*.json")) == [Path.join(dir, "rooms/yard.json")]
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+    # A rerun on an area folder's room is that file's rerun: no root copy, and what the author cut
+    # stays cut.
+    edit(dir, "areas/b/rooms/far.json", &Map.delete(&1, "description"))
+    assert {:ok, []} = Starters.write(dir, "rooms", "far")
+    refute Map.has_key?(read(dir, "areas/b/rooms/far.json"), "description")
+    assert Path.wildcard(Path.join(dir, "rooms/*.json")) == [Path.join(dir, "rooms/yard.json")]
+  end
+
   # Breaks: a stack trace from an areas file whose top level is not an object.
   test "an area that is not an object is a plain refusal", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
@@ -195,7 +223,8 @@ defmodule Loka.ContentStartersFreshTest do
   end
 
   # Breaks: a scene starter whose file fails the dev compile, passes a release build with its `~`,
-  # writes for a missing NPC or over a file, misses a bundled NPC, or survives a failed run.
+  # writes for a missing NPC or over a file (an area folder's too), misses a bundled or area folder
+  # NPC, or survives a failed run.
   test "a scene starter compiles in dev, refuses in release and never overwrites", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
     follow(dir, "npcs", "maud")
@@ -248,6 +277,14 @@ defmodule Loka.ContentStartersFreshTest do
     File.mkdir_p!(Path.join(dir, "areas"))
     File.write!(Path.join(dir, "areas/yard.json"), JSON.encode!(%{"npcs" => %{"ada" => %{}}}))
     assert {:ok, _} = Scene.write(dir, "ada_talk", "ada")
+
+    # An area folder's NPC is an NPC, and an area folder's dialogue holds its key.
+    File.mkdir_p!(Path.join(dir, "areas/a/npcs"))
+    File.cp!(Path.join(dir, "npcs/maud.json"), Path.join(dir, "areas/a/npcs/wat.json"))
+    assert {:ok, _} = Scene.write(dir, "wat_talk", "wat")
+    File.mkdir_p!(Path.join(dir, "areas/a/dialogues"))
+    File.write!(Path.join(dir, "areas/a/dialogues/bye.json"), "{}")
+    assert {:error, "areas/a/dialogues/bye.json exists" <> _} = Scene.write(dir, "bye", "maud")
 
     assert_raise Mix.Error, ~r/no rooms\/nowhere/, fn ->
       ExUnit.CaptureIO.capture_io(fn ->

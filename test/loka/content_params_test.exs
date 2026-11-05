@@ -180,8 +180,9 @@ defmodule Loka.ContentParamsTest do
              {"items/apple.json", &Map.put(&1, "params", "x")},
              {"items/kid.json", %{"extends" => "apple"}}
            ]) == [
-             {"SCHEMA_VIOLATION", "items/apple.params", %{"error" => "invalid_type"}},
-             {"UNKNOWN_FIELD", "items/apple.params", %{}}
+             {"SCHEMA_VIOLATION", "areas/low_wardle/items/apple.params",
+              %{"error" => "invalid_type"}},
+             {"UNKNOWN_FIELD", "areas/low_wardle/items/apple.params", %{}}
            ]
   end
 
