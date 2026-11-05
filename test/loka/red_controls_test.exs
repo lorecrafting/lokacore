@@ -9,7 +9,8 @@ defmodule Loka.RedControlsTest do
     # What the script reads before its guard; without one it crashes first, a false green.
     for rel <-
           ~w(bin/red_controls.exs protocol/capability_registry.json docs/features.json
-                  docs/MECHANICS-TOOLBOX.md cartridges/toolbox_showcase/transcripts/walk_combat.jsonl) do
+                  docs/MECHANICS-TOOLBOX.md cartridges/toolbox_showcase/transcripts/walk_combat.jsonl
+                  tools/author-panel/src/edit/registry.json test/loka/editor_generic_baseline.txt) do
       File.mkdir_p!(Path.dirname(Path.join(root, rel)))
       File.cp!(rel, Path.join(root, rel))
     end

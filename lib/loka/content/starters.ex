@@ -9,7 +9,7 @@ defmodule Loka.Content.Starters do
   starter, before any write. Every starter adds the rows an existing layout.json lacks.
   """
   alias Loka.Content.Barriers
-  alias Loka.Content.Starters.{Area, Merge, Parts, Templates}
+  alias Loka.Content.Starters.{Area, Copy, Merge, Parts, Templates}
 
   @doc """
   Writes the starter; `{:ok, paths it changed}` or `{:error, one line for the author}`. `from` is
@@ -28,10 +28,11 @@ defmodule Loka.Content.Starters do
         ) :: {:ok, [Path.t()]} | {:error, String.t()}
   def write(dir, kind, name, from \\ nil, before_write \\ fn _, _ -> :ok end, area \\ nil)
 
-  def write(_dir, "cartridge", path, _from, hook, _area) do
+  def write(_dir, "cartridge", path, from, hook, _area) do
     cond do
       File.exists?(Path.join(path, "cartridge.json")) -> {:error, "#{path}/cartridge.json exists"}
       valid_name(Path.basename(path)) != :ok -> valid_name(Path.basename(path))
+      from -> Copy.cartridge(from, path, hook)
       true -> put(path, Templates.cartridge(Path.basename(path)), nil, hook)
     end
   catch

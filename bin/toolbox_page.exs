@@ -1,3 +1,4 @@
+# size: allow 377, the editor gate shares the source-schema walk and argv of the toolbox gate
 # Generates docs/TOOLBOX.gen.md, the builder's toolbox page (loka-vduxr.59): one row per
 # implemented capability of protocol/capability_registry.json (its docs/features.json row names
 # implemented_in, which bin/features.exs requires of every implemented one) and one per Book
@@ -12,14 +13,16 @@
 #             "none: <reason>";
 #   mechanics an anchor in docs/system/mechanics.md, only when no `## <key>@N` heading exists.
 # Treatment rows come from the "Book treatments" table of docs/MECHANICS-TOOLBOX.md, which must
-# name every value of the scene `treatment` enum. Row ids (`key@N`, `treatment:<name>`) are stable:
-# the editor registry keys on them. Halts on a missing or broken cell. `--check` regenerates in
-# memory and exits 1 if the committed file differs; a second, third and fourth argument read the
-# rows, the treatments doc and the ranked toolbox rows from those files instead (red controls).
+# name every value of the scene `treatment` enum. Row ids (`key@N`, `treatment:<name>`) are stable.
+# It also gates the editor registry (see "The editor gate" below). Halts on a missing or broken
+# cell. `--check` regenerates in memory and exits 1 if the committed file differs; the arguments
+# after it read the rows, the treatments doc, the ranked toolbox rows, the editor registry, the
+# generic baseline and main's baseline from those files instead (red controls).
 # A last table lists every done row of docs/toolbox.gen.json (bin/contracts.exs writes it from
 # docs/MECHANICS-TOOLBOX.md), most of which add no capability of their own.
 #
-#   elixir bin/toolbox_page.exs [--check [rows.json [toolbox.md [toolbox.gen.json]]]]
+#   elixir bin/toolbox_page.exs [--check [rows.json [toolbox.md [toolbox.gen.json
+#     [registry.json [baseline.txt [main_baseline.txt]]]]]]]
 defmodule SchemaPath do
   # The {field, subschema} pairs a node offers, through $ref (not partial.*), branches and
   # array or map members.
@@ -185,6 +188,97 @@ problems =
     for [t, _, s] <- treatments,
         not File.exists?(Path.join(root, s)),
         do: "#{toolbox_path}: treatment:#{t}: no sampler #{s}"
+
+# The editor gate (gui-editor-design §7, §11): every top-level field of each source kind (a kind
+# with none, the text catalog, is its own path) and every treatment has a create, edit and delete
+# surface, a component under tools/author-panel/src/edit/ or `generic`. areas/ bundles the other
+# kinds, so their paths cover it. Generic surfaces are exactly the baseline, which only shrinks
+# against main's copy (absent there: this gate's first change), so a new path ships hand-built.
+schema_paths =
+  for f <- File.ls!(Path.join(root, "schemas/source")),
+      f not in ["defs.schema.json", "areas.schema.json"],
+      kind = String.replace_suffix(f, ".schema.json", ""),
+      def = json.("schemas/source/" <> f)["$ref"] |> String.split("/") |> List.last(),
+      fields = for({field, _} <- SchemaPath.props(defs[def], defs, []), uniq: true, do: field),
+      p <- if(fields == [], do: [kind], else: Enum.map(fields, &"#{kind}.#{&1}")),
+      do: p
+
+schema_paths = Enum.sort(schema_paths ++ for(t <- enum, do: "treatment:#{t}"))
+editor_path = Enum.at(System.argv(), 4, "tools/author-panel/src/edit/registry.json")
+editor = json.(editor_path)
+baseline_path = Enum.at(System.argv(), 5, "test/loka/editor_generic_baseline.txt")
+lines = &MapSet.new(String.split(&1, "\n", trim: true))
+baseline = lines.(read.(baseline_path))
+
+# shrink-only gates --check; generating (merge_resolve, no origin/main) skips it
+reference =
+  case {System.argv(), Enum.at(System.argv(), 6)} do
+    {["--check" | _], nil} ->
+      git = &System.cmd("git", &1, cd: root, stderr_to_stdout: true)
+
+      if elem(git.(~w(rev-parse --verify -q origin/main)), 1) != 0,
+        do: raise("no origin/main to hold #{baseline_path} to: git fetch origin main")
+
+      case git.(["show", "origin/main:" <> baseline_path]) do
+        {text, 0} -> lines.(text)
+        _ -> nil
+      end
+
+    {_, nil} ->
+      nil
+
+    {_, path} ->
+      lines.(read.(path))
+  end
+
+generic =
+  for p <- schema_paths,
+      v <- ~w(create edit delete),
+      editor[p][v] == "generic",
+      into: MapSet.new(),
+      do: "#{p}.#{v}"
+
+# a surface is "generic" or a component file in the edit folder, never a path out of it
+surface? = fn
+  "generic" ->
+    true
+
+  s when is_binary(s) ->
+    String.ends_with?(s, ".tsx") and match?({:ok, _}, Path.safe_relative(s)) and
+      File.regular?(Path.join(root, "tools/author-panel/src/edit/" <> s))
+
+  _ ->
+    false
+end
+
+problems =
+  problems ++
+    for(
+      p <- schema_paths,
+      v <- ~w(create edit delete),
+      # a binding here filters out nil, so the surface is read inside the condition
+      not surface?.(editor[p][v]),
+      do: "#{editor_path}: #{p}: no #{v} surface (a new path ships its hand-built editor)"
+    ) ++
+    for(
+      p <- Map.keys(editor),
+      p not in schema_paths,
+      do: "#{editor_path}: #{p}: no such source-schema path"
+    ) ++
+    for(
+      l <- MapSet.difference(generic, baseline),
+      do:
+        "#{baseline_path}: #{l}: generic but not in the baseline (a new path ships its hand-built editor)"
+    ) ++
+    for(
+      l <- MapSet.difference(baseline, generic),
+      do: "#{baseline_path}: #{l}: no longer generic, delete the line"
+    ) ++
+    for(
+      l <- MapSet.difference(baseline, reference || baseline),
+      do:
+        "#{baseline_path}: #{l}: not in main's baseline; generic only shrinks; rebase if main shrank"
+    )
 
 if problems != [] do
   Enum.each(problems, &IO.puts(:stderr, &1))
