@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 
-const { cuesOf, QUIET, step } = await import('./cues.ts');
+const { cuesOf, curlFor, QUIET, step } = await import('./cues.ts');
 const { hearCues, playCue } = await import('./cueSounds.ts');
 await import('./samples.web.ts');
 const g = globalThis as any;
@@ -190,6 +190,20 @@ test('a blow dealt is an impact, with no haptic', () => {
   const log: [string, string][] = g.bookDevice;
   g.bookDevice = undefined;
   assert.deepEqual(log, [['play', 'impact']]);
+});
+
+// Breaks (book-ui.md, A level is never dropped; loka-g5hh.2.11): a level landing under a page curl
+// loses its haptic, or feels it at once under the curl; a blow's haptic is still dropped, not held.
+test('a level under a page curl is felt once the curl ends; a blow there is not', async () => {
+  g.bookDevice = [];
+  curlFor(40);
+  playCue({ name: 'level' });
+  playCue({ name: 'hp_loss', loss: 1 });
+  const felt = () => (g.bookDevice as string[][]).filter((l) => l[0] === 'haptic');
+  assert.deepEqual(felt(), []);
+  await new Promise((r) => setTimeout(r, 80));
+  assert.deepEqual(felt(), [['haptic', 'medium']]);
+  g.bookDevice = undefined;
 });
 
 // Breaks: the loop outlives the Book, so Start over mid-fight plays it over the new game.

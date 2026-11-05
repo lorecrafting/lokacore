@@ -99,11 +99,15 @@ const gathered = (cues: Cue[]) =>
     return out;
   }, []);
 
-const holdCard = (q: Queue, now: number): Queue => ({
+const isLevel = (cue?: Cue) => cue?.name === 'level';
+// A level is never dropped (book-ui.md): it waits out a page turn or a chapter card in the pending slot.
+const kept = (cue?: Cue) => (isLevel(cue) ? cue : undefined);
+
+const holdCard = (q: Queue, now: number, level?: Cue): Queue => ({
   ...q,
   card: true,
   playing: undefined,
-  pending: undefined,
+  pending: level ?? kept(q.pending),
   until: now + motion.card.duration,
 });
 
@@ -137,11 +141,11 @@ function fall(s: Queue, death: Cue, now: number) {
 
 export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
   const s: Queue = turned
-    ? { ...q, card: false, playing: undefined, pending: undefined }
+    ? { ...q, card: false, playing: undefined, pending: kept(q.pending) }
     : { ...q };
   s.merged = { ...q.merged };
   const fired: Cue[] = [];
-  s.held = [...(turned ? [] : q.held), ...arriving];
+  s.held = [...(turned ? q.held.filter(isLevel) : q.held), ...arriving];
   const death = s.held.find((c) => c.name === 'death');
   if (death) return { q: s, fired: fall(s, death, now) };
   if (turned) s.heldUntil = now + motion.quick.duration;
@@ -149,10 +153,13 @@ export function step(q: Queue, arriving: Cue[], now: number, turned = false) {
   const cues = gathered(s.held);
   s.held = [];
   const chapter = cues.find((c) => c.name === 'chapter');
-  if (s.card && now < s.until) return { q: s, fired };
+  if (s.card && now < s.until) {
+    s.pending = cues.find(isLevel) ?? s.pending;
+    return { q: s, fired };
+  }
   s.card = false;
-  if (chapter) return { q: holdCard(s, now), fired: [chapter] };
-  if (s.playing && s.until <= now) {
+  if (chapter) return { q: holdCard(s, now, cues.find(isLevel)), fired: [chapter] };
+  if (!s.playing || s.until <= now) {
     const next = s.pending;
     s.playing = s.pending = undefined;
     if (next) play(s, fired, next, now);

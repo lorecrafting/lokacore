@@ -2,7 +2,6 @@
 import type { CharacterId, DeltaOp, DomainEvent, Text } from '../../contracts.gen.ts';
 import type { World } from '../../runtime/decision.ts';
 import { levelUp } from '../levelling/shared.ts';
-import { triggered } from '../reaction.ts';
 
 /** A player's fall line outside a combat round: the death's own, else combat's. */
 export function fallLine(world: World): Text[] {
@@ -35,11 +34,10 @@ export function closing(
   return lines;
 }
 
-/** Where the actor's level lines go: before the lines of a level_reached its rules answer, at `length`. */
-export function levelAt(world: World, actor: CharacterId, cause: DomainEvent, length: number) {
+/** Where the actor's level lines go: before the first lines a rule answering its level_reached says, at `length`. */
+export function levelAt(actor: CharacterId, cause: DomainEvent, length: number) {
   const { payload } = cause;
-  if (payload.type !== 'level_reached' || payload.character_id !== actor) return;
-  return triggered(world, cause).length ? length : undefined;
+  if (payload.type === 'level_reached' && payload.character_id === actor) return length;
 }
 
 /** Once after any player's death (an NPC victim carries its definition), combat included. */

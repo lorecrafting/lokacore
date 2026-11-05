@@ -1,3 +1,4 @@
+// size: allow 525, the queue's cases share one step() harness and hand-written views
 // Named breaks for the cue bus, over minimal views; every expected value is written by hand.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -345,9 +346,32 @@ test('a page turn cancels what is queued; the arriving cues start at the picture
   assert.deepEqual(names(step(chapter.q, [], 1200 + QUICK).fired), ['chapter']);
 });
 
+// Breaks (book-ui.md, A level is never dropped; loka-g5hh.2.11): a page turn, a second turn inside
+// the hold, or a chapter card (arriving with the level, after it, or over it) drops the level.
+test('a pending or held level outlives a page turn and a chapter card, then plays', () => {
+  let r = step(QUIET, [blow(1)], 1000);
+  r = step(r.q, [{ name: 'level' }], 1100);
+  const turned = step(step(r.q, [], 1200, true).q, [], 1300, true);
+  assert.deepEqual(names(step(turned.q, [], 1300 + QUICK).fired), ['level']);
+  const held = step(step(QUIET, [{ name: 'level' }], 1000, true).q, [], 1100, true);
+  assert.deepEqual(names(step(held.q, [], 1100 + QUICK).fired), ['level']);
+  const card = motion.card.duration;
+  for (const [before, with_] of [
+    [[{ name: 'level' }], []],
+    [[], [{ name: 'level' }]],
+  ] as Cue[][][]) {
+    const c = step(step(r.q, before, 1150).q, [{ name: 'chapter' }, ...with_], 1200);
+    assert.deepEqual(names(c.fired), ['chapter']);
+    assert.deepEqual(step(c.q, [], 1199 + card).fired, []);
+    assert.deepEqual(names(step(c.q, [], 1200 + card).fired), ['level']);
+  }
+  const over = step(step(QUIET, [{ name: 'chapter' }], 1000).q, [{ name: 'level' }], 1100);
+  assert.deepEqual(names(step(over.q, [], 1000 + card).fired), ['level']);
+});
+
 // Breaks: a second turn lets the first arriving page's cue play on the page after it.
 test('another turn inside the hold cancels the held cues', () => {
-  const first = step(QUIET, [{ name: 'level' }], 1000, true);
+  const first = step(QUIET, [blow(1)], 1000, true);
   const second = step(first.q, [], 1100, true);
   assert.deepEqual(step(second.q, [], 1100 + QUICK).fired, []);
 });

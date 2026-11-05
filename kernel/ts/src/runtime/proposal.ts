@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/alternates.ts';
-// size: allow 361, typed quest reactions, deadline pairing and group merging share FIFO admission; ambient lines read the advanced state
+// size: allow 362, typed quest reactions, deadline pairing and group merging share FIFO admission; ambient lines read the advanced state
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -207,7 +207,6 @@ const cause = (p: P, logical_time: number, id: string) => ({
 });
 
 function creditDelivery(p: P, next: Queued): Admitted | undefined {
-  p.levelAt ??= levelAt(p.world, p.command.payload.actor_id, next.cause, p.narration.length);
   if (next.cause.payload.type !== 'entity_died') return;
   if (!next.cause.payload.victim_definition) p.wokeAt ??= p.narration.length;
   const at = now(p);
@@ -238,7 +237,7 @@ function earnedExit(p: P, instance_id: QuestInstanceId, at: Parameters<typeof st
 }
 
 // The queue's deliveries to quiescence, or the fault that ends them.
-// size: allow 41, each delivery names the bodies dead after its cause once (loka-kgd.105)
+// size: allow 43, each delivery names the bodies dead after its cause once (loka-kgd.105); a level's lines go before its first spoken rule's
 function react(p: P, ran = false): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
@@ -272,6 +271,8 @@ function react(p: P, ran = false): Admitted | undefined {
       if (!own) continue;
       const delivered = admit('reaction', own);
       if (delivered.kind !== 'accepted') return delivered;
+      if (delivered.narration?.length)
+        p.levelAt ??= levelAt(p.command.payload.actor_id, next.cause, p.narration.length);
       p.narration.push(...(delivered.narration ?? []));
       p.group++;
       const base = cause(p, next.cause.logical_time, next.cause.id);

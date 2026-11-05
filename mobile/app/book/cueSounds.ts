@@ -6,9 +6,12 @@ import { haptic, type HapticKind } from './haptic';
 import { fight, play } from './sound';
 import { mix, motion, sound } from './tokens.ts';
 
-// No haptic during a page turn: dropped, not held, for one felt late is felt as nothing's.
-const feel = (kind: HapticKind) => {
-  if (performance.now() >= curlEnds) haptic(kind);
+// No haptic during a page turn: dropped, not held, for one felt late is felt as nothing's; a level's
+// is held to the curl's end, for a level is never dropped (book-ui.md).
+const feel = (kind: HapticKind, held = false) => {
+  const wait = curlEnds - performance.now();
+  if (wait <= 0) haptic(kind);
+  else if (held) setTimeout(() => haptic(kind), wait);
 };
 
 export const playTurn = () => play('pageTurn');
@@ -75,11 +78,12 @@ export const playCue = (cue: Cue) => {
   const name = soundOf(cue);
   if (!name) return;
   const felt = (sound[name] as { haptic?: HapticKind }).haptic;
+  const held = cue.name === 'level';
   if (!cue.first) {
     play(name);
-    if (felt) feel(felt);
+    if (felt) feel(felt, held);
     return;
   }
   play(name, stronger(TIERS, sound[name].tier));
-  if (felt) feel(stronger(HAPTICS, felt as (typeof HAPTICS)[number]));
+  if (felt) feel(stronger(HAPTICS, felt as (typeof HAPTICS)[number]), held);
 };
