@@ -24,6 +24,8 @@ defmodule Mix.Tasks.Loka.Compile do
 
   @usage "usage: mix loka.compile <source dir> <artifact path> [--allow-placeholders] [--json <path>] [--placeholders <path>] | mix loka.compile --serve"
   # mix itself writes to stdout too ("Compiling 1 file"): a reply is the line with this prefix
+  # mutate-skip: the watcher treats every exit alike (EX_TEMPFAIL by convention)
+  @stale 75
   @reply "loka.compile "
 
   @impl Mix.Task
@@ -31,7 +33,7 @@ defmodule Mix.Tasks.Loka.Compile do
     built = built()
 
     for line <- IO.stream(:stdio, :line) do
-      if built() != built, do: System.halt(75)
+      if built() != built, do: System.halt(@stale)
       {status, lines} = compile(String.split(String.trim_trailing(line, "\n"), "\t"))
       stderr = Enum.map_join(lines, &(&1 <> "\n"))
       IO.puts(@reply <> JSON.encode!(%{status: status, stderr: stderr}))
