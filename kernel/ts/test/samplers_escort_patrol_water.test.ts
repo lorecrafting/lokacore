@@ -16,10 +16,15 @@ import { commands, ctx } from './harness.ts';
 const scratch = mkdtempSync(join(tmpdir(), 'loka-samplers-'));
 function sampler(name: string): { w: World; ref: (kind: string, key: string) => object } {
   const file = join(scratch, `${name}.json`);
-  execFileSync('mix', ['loka.compile', `cartridges/${name}`, file, '--allow-placeholders'], {
-    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
-    stdio: 'pipe',
-  });
+  try {
+    execFileSync('mix', ['loka.compile', `cartridges/${name}`, file, '--allow-placeholders'], {
+      cwd: fileURLToPath(new URL('../../../', import.meta.url)),
+      stdio: 'pipe',
+    });
+  } catch (e) {
+    const out = e as { stdout?: Buffer; stderr?: Buffer };
+    throw new Error(`mix loka.compile ${name} failed:\n${out.stdout}${out.stderr}`);
+  }
   const loaded = loadCartridge(readFileSync(file), INSTALLED);
   assert.ok(loaded.ok, JSON.stringify(loaded));
   const w = newWorld(
@@ -36,7 +41,7 @@ function sampler(name: string): { w: World; ref: (kind: string, key: string) => 
   return { w, ref };
 }
 after(() => rmSync(scratch, { recursive: true }));
-const { play, send } = commands('dddddddd-6060-4333-8444');
+const { play, send, elapsed } = commands('dddddddd-6060-4333-8444');
 const id = (w: World, kind: string, key: string) =>
   w.entityIds[Object.keys(w.entityIds).find((k) => k.endsWith(`:${kind}/${key}`))!]!;
 const room = (w: World, key: string) =>
@@ -49,21 +54,34 @@ const choose = (w: World, choice_id: string, extra: object = {}) =>
     continuation_id: gameView(w).choice!.continuation_id,
     ...extra,
   });
+const offered = (w: World) =>
+  gameView(w)
+    .choice!.choices.filter((c) => c.available)
+    .map((c) => c.choice_id);
 const talk = (w: World, npc: string) => play(w, { type: 'talk', target_id: id(w, 'npc', npc) });
 
 // Breaks: the escort start, the follow on Move or the complete choice stops working in a
-// cartridge a builder copies (the child stays behind, or the quest never resolves).
+// cartridge a builder copies (the child stays behind, or the quest never resolves), or the
+// quest's objective stops holding after Complete (it un-resolves) or Rescue is offered again.
 test('escort_sampler: the child follows a Move and Complete hands it over', () => {
   const { w: fresh, ref } = sampler('escort_sampler');
   let w = play(fresh, { type: 'accept_quest', quest: ref('quest', 'homeward') });
   w = choose(talk(w, 'child'), 'rescue');
   const child = id(w, 'npc', 'child');
+  const quest = (x: World) => Object.values(x.state.quests ?? {}).map((q) => q.state);
+  assert.deepEqual(quest(w), ['active']);
   assert.equal(w.state.escorts![w.character]!.status, 'following');
   assert.equal(where(w, child), room(w, 'green'));
   w = play(w, { type: 'move', direction: 'south' });
   assert.deepEqual([where(w, w.body), where(w, child)], [room(w, 'quay'), room(w, 'quay')]);
   w = choose(talk(w, 'keeper'), 'home');
   assert.equal(w.state.escorts![w.character]!.status, 'completed');
+  assert.deepEqual(quest(w), ['resolved']);
+  w = play(w, { type: 'move', direction: 'north' });
+  w = play(w, { type: 'move', direction: 'south' });
+  assert.deepEqual(quest(w), ['resolved']);
+  // No choice is available from the child any more: Rescue is not offered again.
+  assert.equal(send(w, { type: 'talk', target_id: child }).decision.kind, 'rejected');
 });
 
 // Breaks: Tobin does not walk on Continue, or the player's arrival at the checkpoint earns no
@@ -86,17 +104,21 @@ test('patrol_sampler: Tobin walks to the gate, the player joins him and the roun
       }),
     });
   };
+  const only = (w: World) => offered(talk(w, 'tobin'));
+  assert.deepEqual(only(fresh), ['start']);
   let w = pick(fresh, 'start');
   assert.equal(patrol(w)!.status, 'together');
+  assert.deepEqual(only(w), ['continue']);
   w = pick(w, 'continue');
   assert.deepEqual([patrol(w)!.status, where(w, tobin)], ['awaiting', room(w, 'gate')]);
   w = play(w, { type: 'move', direction: 'east' });
   assert.equal(patrol(w)!.status, 'completed');
+  assert.deepEqual(only(w), []);
 });
 
-// Breaks: the water route is not a working descent: the skill gate or entry cost is dropped, or
-// the sampler's route no longer reaches its bottom room.
-test('water_sampler: down is refused until Sedge teaches swim, then costs the entry fare', () => {
+// Breaks: the water route is not a working descent: the skill gate or entry cost is dropped, the
+// route no longer reaches its bottom room, or the deadline no longer drowns the swimmer.
+test('water_sampler: down needs swim and costs the fare, and the deadline drowns', () => {
   const { w: fresh } = sampler('water_sampler');
   const mv = (w: World) => level(w, w.body, resourceRef(w, 'mv'));
   const refused = send(fresh, { type: 'move', direction: 'down' });
@@ -104,4 +126,9 @@ test('water_sampler: down is refused until Sedge teaches swim, then costs the en
   let w = choose(talk(fresh, 'sedge'), 'learn');
   w = play(w, { type: 'move', direction: 'down' });
   assert.deepEqual([where(w, w.body), mv(w)], [room(w, 'pool_bottom'), 40]);
+  const remaining = gameView(w).water!.remaining;
+  assert.ok(remaining > 0);
+  // Water@1's liquid is the pool itself: at the deadline the swimmer drowns and wakes at the shrine.
+  w = elapsed(w, w.state.clock + remaining);
+  assert.equal(where(w, w.body), room(w, 'pool'));
 });

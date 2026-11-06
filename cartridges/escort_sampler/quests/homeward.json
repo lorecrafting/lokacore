@@ -11,9 +11,19 @@
   "objective": {
     "evidence": "current_state",
     "policy": {
-      "op": "escort_state",
-      "quest": "homeward",
-      "state": "following"
+      "op": "any",
+      "items": [
+        {
+          "op": "escort_state",
+          "quest": "homeward",
+          "state": "following"
+        },
+        {
+          "op": "escort_state",
+          "quest": "homeward",
+          "state": "completed"
+        }
+      ]
     }
   }
 }
