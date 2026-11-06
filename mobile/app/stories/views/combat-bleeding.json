@@ -285,7 +285,8 @@
     "article": "the",
     "bare": "npc.boar.bare"
    },
-   "band": "hurt"
+   "band": "hurt",
+   "interval": 150
   },
   "conditions": [
    {

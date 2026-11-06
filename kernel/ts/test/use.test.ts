@@ -16,6 +16,7 @@ import { currentStatus } from '../src/mechanics/status/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-use-sampler-'));
@@ -153,7 +154,8 @@ test('a burning item in an open crate is neither offered nor quenched', () => {
 });
 
 // Breaks: a pair blocked by the scripted action's cooldown is listed available (or dropped), or its reason
-// differs from the rule's rejection.
+// differs from the rule's rejection; or it projects no cooldown end and length (oiled at 0, cooldown
+// 600: ends 600; loka-x6t.135).
 test('a cooling-down oil pair is listed unavailable with the code the step returns', () => {
   const cooled = structuredClone(content) as Cartridge & { scripted_actions: Record<string, any> };
   cooled.scripted_actions['use_sampler@0.0.1:action/oil'].cooldown = 600;
@@ -167,6 +169,8 @@ test('a cooling-down oil pair is listed unavailable with the code the step retur
     .actions.find((a) => a.action_key === 'oil')!;
   assert.deepEqual([shown.available, shown.target_ids], [false, ids]);
   assert.equal(shown.available === false && shown.reason.code, 'cooldown');
+  assert.deepEqual(shown.available === false && [shown.ends_at, shown.duration], [600, 600]);
+  assert.deepEqual(validate('GameView', gameView(w)), []);
   assert.equal(code(invoke(w, 'oil', ids)), 'cooldown');
 });
 

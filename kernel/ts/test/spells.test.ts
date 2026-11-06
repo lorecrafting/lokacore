@@ -13,6 +13,7 @@ import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index
 import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { level } from '../src/mechanics/resource.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { noticeAction } from './notice_action.ts';
 import { cartridgeOf, ctx, reload, verdict } from './harness.ts';
 
@@ -190,6 +191,34 @@ test('spell_words lists learned spells only, with cast admission as availability
     words(w, other).map(([word]) => word),
     ['lux'],
   );
+});
+
+// Breaks (loka-x6t.135, Combat hotbar sweep): a cooling spell word projects no end or length, its
+// end comes from the clock instead of the cast (cast at 0, cooldown 30: ends 30), or a word refused
+// for another reason (lux short of ash, before any cast) carries an end.
+test('a cooling spell word shows its cooldown end and length', () => {
+  const key = 'spells_sampler@0.0.1:action/lux';
+  const lux = { ...content.scripted_actions![key as never]!, cooldown: 30 };
+  const scripted_actions = {
+    ...content.scripted_actions,
+    [key]: lux,
+  } as Cartridge['scripted_actions'];
+  const v = newWorld(
+    { ...content, scripted_actions },
+    ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55'),
+    [1],
+  );
+  const unlit = gameView(v).spell_words?.[0];
+  assert.deepEqual(unlit && !unlit.available && Object.keys(unlit), [
+    'word',
+    'available',
+    'reason',
+  ]);
+  const lit = ok(cast(gather(v), 'lux'));
+  assert.deepEqual(gameView(lit).spell_words, [
+    { word: 'lux', available: false, reason: { code: 'cooldown' }, ends_at: 30, duration: 30 },
+  ]);
+  assert.deepEqual(validate('GameView', gameView(lit)), []);
 });
 
 // Breaks (loka-j64e): the authored reason is dropped from spell_words or the offered action, the

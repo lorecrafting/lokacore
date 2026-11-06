@@ -248,10 +248,14 @@ test('a resource.adjust step stops at the maximum; at full value it changes noth
 });
 
 // Breaks: the cooldown end computed as last + cooldown, which overflows for a huge cooldown
-// (an evaluator_error fault instead of the cooldown refusal).
+// (an evaluator_error fault instead of the cooldown refusal, or a GameView that throws or
+// projects an unsafe ends_at).
 test('a cooldown of 2^53 - 1 refuses with cooldown, not a fault', () => {
   const once = world((c) => (c.scripted_actions[PRAY].cooldown = Number.MAX_SAFE_INTEGER));
-  rejects(run(once, move('east'), wait(3600), perform('pray')), perform('pray'), 'cooldown');
+  const cooling = run(once, move('east'), wait(3600), perform('pray'));
+  rejects(cooling, perform('pray'), 'cooldown');
+  assert.deepEqual(noticeAction(gameView(cooling), 'pray')!.reason, { code: 'cooldown' });
+  assert.equal('ends_at' in noticeAction(gameView(cooling), 'pray')!, false);
 });
 
 // Breaks: < and <= swapped at the cooldown boundary, or no cooldown.start.
@@ -278,25 +282,29 @@ test('a failed attempt starts the cooldown too', () => {
   rejects(failed.world, perform('shove_cart'), 'cooldown');
 });
 
-// Astra A2. Breaks: the GameView advertising a scripted action under cooldown or with unaffordable costs,
-// or an exit the body cannot pay for, as available (the same world rejects them).
+// Astra A2, loka-x6t.135. Breaks: the GameView advertising a scripted action under cooldown or with
+// unaffordable costs, or an exit the body cannot pay for, as available (the same world rejects them);
+// a cooling action projecting no end, an end from the clock instead of the last attempt (prayed at
+// 100, cooldown 3600: ends 3700), the length as the time left, or a pair on a refusal that is not cooldown.
 test('the GameView shows cooldowns, unaffordable costs and exhaustion as unavailable', () => {
   const pray = (w: World) => noticeAction(gameView(w), 'pray');
-  const prayed = run(world(), move('east'), perform('pray'));
-  assert.deepEqual(pray(prayed), {
+  const prayed = run(world(), move('east'), wait(100), perform('pray'));
+  const shown = { action_key: 'pray', label: 'actions.pray', target: { kind: 'none' }, input: [] };
+  assert.deepEqual(pray(run(prayed, wait(150))), {
     available: false,
-    action_key: 'pray',
-    label: 'actions.pray',
-    target: { kind: 'none' },
-    input: [],
+    ...shown,
     reason: { code: 'cooldown' },
+    ends_at: 3700,
+    duration: 3600,
   });
-  assert.equal(pray(run(prayed, wait(3600)))!.available, true);
+  assert.deepEqual(validate('GameView', gameView(prayed)), []);
+  assert.equal(pray(run(prayed, wait(3700)))!.available, true);
   const poor = world(
     (c) => (c.scripted_actions[PRAY].costs = [{ resource: ref('ma'), amount: 101 }]),
   );
   assert.deepEqual(pray(run(poor, move('east')))!, {
-    ...pray(prayed)!,
+    available: false,
+    ...shown,
     reason: { code: 'insufficient_resource', message: short('ma', 101) },
   });
   const tired = run(world(), move('east'), move('west'), move('east'));

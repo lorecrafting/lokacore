@@ -77,10 +77,12 @@ test('attack on the only co-present goblin opens a valid one-member encounter', 
 });
 
 // Breaks: a pack member's band is missing, copied from the primary, or read from the wrong goblin
-// (hp 0..8: h2 at 4 is the exact hurt cut, 400 >= 50*8; h1 untouched reads ready).
+// (hp 0..8: h2 at 4 is the exact hurt cut, 400 >= 50*8; h1 untouched reads ready); or the
+// combat view dropping the cartridge's round interval (fixture combat.interval 5, loka-x6t.135).
 test('each pack member shows its own hp band', () => {
   const view = gameView(wounded(begun(fixture()), 4));
   assert.deepEqual(validate('GameView', view), []);
+  assert.equal(view.combat?.interval, 5);
   assert.equal(view.combat?.band, 'hurt');
   assert.deepEqual(
     view.combat?.active_opponents?.map(({ id, band }) => [id, band]),

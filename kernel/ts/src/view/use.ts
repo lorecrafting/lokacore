@@ -4,12 +4,13 @@
 // perform's target_id, item_id.
 import { LIMITS } from '../contracts.gen.ts';
 import type { AdvertisedAction, CharacterId, EntityId, Key } from '../contracts.gen.ts';
-import { admission, refusal, type ActionSet } from '../commands/actions.ts';
+import { admission, cooling, refusal, type ActionSet } from '../commands/actions.ts';
 import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
 import { toolHeld } from '../mechanics/lookups.ts';
 import { fits } from '../mechanics/scripted_action/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 
+// size: allow 45, a cooling pair carries its cooldown's end and length (loka-x6t.135)
 export function useActions(
   world: World,
   actor: CharacterId,
@@ -41,7 +42,12 @@ export function useActions(
         const listed = { ...shown, target_ids: [ids.target_id, ids.item_id] };
         pairs.push(
           typeof admitted === 'string'
-            ? { ...listed, available: false, reason: { code: admitted } }
+            ? {
+                ...listed,
+                available: false,
+                reason: { code: admitted },
+                ...(admitted === 'cooldown' && cooling(world, a.scripted!, actor)),
+              }
             : { ...listed, available: true },
         );
       }

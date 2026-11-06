@@ -50,5 +50,6 @@ export function combatView(world: World, actor: CharacterId, fight: Fight, steps
     ...(fight.row.active_ids && {
       active_opponents: fight.row.active_ids.map((id) => ({ id, ...foe(id) })),
     }),
+    interval: world.cartridge.world!.combat!.interval, // the round job's spacing (mechanics/combat/rule.ts)
   };
 }

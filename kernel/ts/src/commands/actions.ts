@@ -21,6 +21,7 @@ import { detailOf, questOffers } from './quest_offers.ts';
 import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
 import { permits } from '../mechanics/status/permits.ts';
 import { sub } from '../foundation/int.ts';
+import { SAFE } from '../foundation/canonical.ts';
 import { pay } from '../mechanics/resource.ts';
 import { accepts, aimedOffers, hiddenTarget, primaryTarget } from './action_input.ts';
 import * as scene from '../mechanics/scene/shared.ts';
@@ -264,6 +265,18 @@ const keyed = (world: World) => allScripted(world).filter((r) => r.target.kind !
 const scriptedKeys = (world: World) => keyed(world).map((r) => r.key);
 
 /**
+ * The actor's running cooldown on a scripted action, or undefined when none runs: its end (the last
+ * admitted attempt plus the cooldown, the first time admission passes again) and length, the
+ * GameView's projection (protocol GameView ends_at/duration); {} when that end passes 2^53 - 1.
+ */
+export function cooling(world: World, scripted: ScriptedAction, actor_id: CharacterId) {
+  const last = world.state.cooldowns?.[key({ kind: 'cooldown', actor_id, action: scripted.key })];
+  const duration = scripted.cooldown;
+  if (!duration || last === undefined || sub(world.state.clock, last) >= duration) return undefined;
+  return duration <= SAFE - last ? { ends_at: last + duration, duration } : {};
+}
+
+/**
  * A scripted action's admission for `actor_id` acting through `body`, after its policy and target, shared
  * by the rule and the GameView: cooldown while the time since the actor's last admitted attempt
  * is below the scripted action's cooldown (never overflows: 0 <= last <= now), then insufficient_resource
@@ -278,8 +291,7 @@ export function admission(
 ) {
   const from = world.state.clock;
   const last = world.state.cooldowns?.[key({ kind: 'cooldown', actor_id, action: scripted.key })];
-  if (scripted.cooldown && last !== undefined && sub(from, last) < scripted.cooldown)
-    return 'cooldown' as const;
+  if (cooling(world, scripted, actor_id)) return 'cooldown' as const;
   const paid = pay(world, body, scripted.costs ?? []);
   return paid ? { paid, last, from } : ('insufficient_resource' as const);
 }

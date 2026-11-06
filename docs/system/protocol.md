@@ -404,6 +404,16 @@ the name is present either way and no hp number is sent
 (loka-y6yg.49). Composition record: reads the encounter row, the opponent's hp level and spec,
 the band table, `visible` and `living`; writes, events, jobs and save rows: none; no version bump (an
 optional view field, as ConditionView `duration`).
+The `combat` view carries `interval`, the cartridge's `world.combat.interval` that spaces the round jobs
+(`kernel/ts/src/view/combat.ts`), and an offered action or `spell_words` entry refused `cooldown` carries
+`ends_at` (the actor's last admitted attempt plus the scripted action's `cooldown`: the first time admission
+passes again) and `duration` (that `cooldown`), the ConditionView clock pair, for the Book's
+[Combat hotbar](book-ui.md#combat-hotbar). The pair comes from `cooling` beside `admission`
+(`kernel/ts/src/commands/actions.ts`), the check admission itself runs, so the view and the rule cannot
+disagree; it is absent on any other refusal (a policy refusal wins and carries none), and absent while the
+cooldown still refuses when the end would pass 2^53 - 1. Reads: the cooldown row, the scripted action's
+`cooldown`, the clock, the combat settings; writes, events, jobs and save rows: none; kernel_api 1.159
+(loka-x6t.135).
 Each visible living NPC with hp (its own `hp`, the test of `living`) carries in `entities` the `band` key of its `hp` pool by the
 same rule and table, for the Book's Look page; an NPC without hp, an item and the body carry none, and no hp number,
 maximum or tone is sent (loka-ysbt). Reads: the NPC's `hp` level and spec, the band table, `visible`; writes

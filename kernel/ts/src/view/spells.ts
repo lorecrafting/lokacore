@@ -4,7 +4,7 @@
 // costs. And the cartridge's static speech.phrases (say's word chips), absent without them, and its emote table
 // (G9: the client words an emote.performed line from it), absent when empty.
 import type { CharacterId, Key, SpellWord, Word } from '../contracts.gen.ts';
-import { admission, refusalReason, resolved } from '../commands/actions.ts';
+import { admission, cooling, refusalReason, resolved } from '../commands/actions.ts';
 import { value as factValue } from '../mechanics/fact.ts';
 import { unpaid } from '../mechanics/resource.ts';
 import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
@@ -34,6 +34,7 @@ function spellWords(world: World, actor: CharacterId, steps: Steps): SpellWord[]
       (typeof admitted === 'string'
         ? { code: admitted, ...(body && unpaid(world, body, admitted, r.costs ?? [])) }
         : undefined);
-    return [reason ? { word, available: false, reason } : { word, available: true }];
+    const cooled = reason?.code === 'cooldown' && cooling(world, r, actor);
+    return [reason ? { word, available: false, reason, ...cooled } : { word, available: true }];
   });
 }
