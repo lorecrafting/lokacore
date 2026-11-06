@@ -34,7 +34,7 @@ export type MapProps = {
 };
 
 /** The view, set at once or eased over `motion.quick` (a cut under reduced motion). */
-function useView() {
+export function useView() {
   const [view, setView] = useState<View>();
   const now = useRef(view);
   const frame = useRef(0);
@@ -66,7 +66,7 @@ function useView() {
 }
 
 /** The drawing's size in px, followed as the slot or column resizes. */
-function useSize() {
+export function useSize() {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<Size>({ w: 0, h: 0 });
   useLayoutEffect(() => {
@@ -180,7 +180,7 @@ const reachOf = (p: MapProps) => ({
 });
 export type Reach = ReturnType<typeof reachOf>;
 
-function Icon({
+export function Icon({
   label,
   icon: I,
   run,
