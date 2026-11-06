@@ -15,7 +15,7 @@ import { customizeValidator } from '@rjsf/validator-ajv8';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import { applied, apart, diff, FORM_DEFAULTS } from '../play/card.ts';
 import type { Op, Step } from '../play/edit_model.ts';
-import { DIRS, placed, REPO, ROOTS } from '../play/guard.ts';
+import { DIRS, placed, REPO, rootFile } from '../play/guard.ts';
 import { writer } from '../play/write.ts';
 
 const validator = customizeValidator<unknown, RJSFSchema>({ AjvClass: Ajv2020 });
@@ -27,13 +27,13 @@ const walk = (at: string): string[] =>
   readdirSync(at, { withFileTypes: true }).flatMap((e) =>
     e.isDirectory() ? walk(join(at, e.name)) : [join(at, e.name)],
   );
-// the files a card opens: a definition (guard.ts placed) or a root file /schema serves
+// the files a card opens: a definition (guard.ts placed), a root file or an area bundle (rootFile)
 const cards = (root: string) =>
   walk(root)
     .map((f) => relative(root, f))
     .filter((rel) => {
       const at = placed(rel);
-      return at ? at.ext === 'json' && DIRS.includes(at.dir) : ROOTS.includes(rel.slice(0, -5));
+      return at ? at.ext === 'json' && DIRS.includes(at.dir) : rootFile(rel);
     })
     .sort();
 const original = new Map(
@@ -120,6 +120,8 @@ test('a one-leaf edit writes that leaf only, and its undo gives the file back by
   // branch); /undo restoring a re-encoded document instead of the journal's bytes.
   const files = [...original.keys()];
   let wrote = 0;
+  let tables = 0;
+  const dropped: string[] = [];
   for (let i = 0; i < SAMPLE; i++) {
     const at = files[draw(files.length)];
     const c = at.slice(0, at.indexOf('/'));
@@ -127,14 +129,20 @@ test('a one-leaf edit writes that leaf only, and its undo gives the file back by
     const before = readFileSync(join(tmp, at), 'utf8'); // a no-change save may have rewritten it
     const { s, doc, commit } = await opened(c, rel);
     const all = leaves(doc);
-    if (!all.length) continue; // an empty table: no leaf to edit
+    if (!all.length) {
+      tables++; // an empty table: no leaf to edit
+      continue;
+    }
     const [path, value] = all[draw(all.length)];
     const want = structuredClone(doc);
     let box: any = want;
     for (const k of path.slice(0, -1)) box = box[k];
     if (path.length) box[path.at(-1)!] = edited(value);
     const ops = commit(path.length ? want : edited(value));
-    if (!ops.length) continue; // the form held the value back (a refusal stands): nothing written
+    if (!ops.length) {
+      dropped.push(`${at} ${path.join('.')} (${typeof value})`);
+      continue;
+    }
     const { id } = await post(c, '/change', { file: rel, was: s.sha256, ops });
     wrote++;
     assert.deepEqual(
@@ -145,5 +153,6 @@ test('a one-leaf edit writes that leaf only, and its undo gives the file back by
     await post(c, '/undo', { id });
     assert.equal(readFileSync(join(tmp, at), 'utf8'), before, `${at} ${path.join('.')}: undo`);
   }
-  assert.ok(wrote > SAMPLE / 2, `only ${wrote} of ${SAMPLE} edits wrote: a commit drops the edit`);
+  assert.deepEqual(dropped, [], 'a commit dropped these edits (file leaf (type))');
+  assert.equal(wrote, SAMPLE - tables, 'every sampled edit with a leaf writes');
 });

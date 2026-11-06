@@ -89,6 +89,7 @@ test('every server route has a client caller or an exemption', () => {
           : [],
     );
   const called = new Set<string>();
+  const unread: string[] = []; // fetch calls whose method is not a literal
   for (const f of [
     ...files(join(REPO, 'tools/author-panel/src')),
     ...files(join(REPO, 'mobile/app/author')),
@@ -107,16 +108,32 @@ test('every server route has a client caller or an exemption', () => {
       if (name === 'sendBeacon') called.add(`POST ${path}`);
       if (name === 'EventSource') called.add(`GET ${path}`);
       if (name === 'fetch') {
-        const method =
-          second && ts.isObjectLiteralExpression(second)
-            ? second.properties.find((p) => p.name?.getText() === 'method')
-            : undefined;
-        const m = method && ts.isPropertyAssignment(method) ? pathOf(method.initializer) : 'GET';
-        called.add(`${m} ${path}`);
+        // GET only with no init or an init literal with no method and no spread; else the method as written
+        const props =
+          second && ts.isObjectLiteralExpression(second) ? second.properties : undefined;
+        const method = props?.find(
+          (p) => ts.isSpreadAssignment(p) || p.name?.getText() === 'method',
+        );
+        const m = !second
+          ? 'GET'
+          : !props
+            ? undefined
+            : !method
+              ? 'GET'
+              : ts.isPropertyAssignment(method)
+                ? pathOf(method.initializer)
+                : undefined;
+        if (m) called.add(`${m} ${path}`);
+        // a wrapper's own fetch (path `*`): its callers are read above (inbook.ts api)
+        else if (path !== '*')
+          unread.push(
+            `${f.slice(REPO.length + 1)}:${n.getSourceFile().getLineAndCharacterOfPosition(n.getStart()).line + 1} fetch ${path}`,
+          );
       }
     });
   const uncalled = Object.entries(ROUTES)
     .flatMap(([path, methods]) => methods.map((m) => `${m} ${path}`))
     .filter((r) => !called.has(r) && !(r in UNCALLED));
   assert.deepEqual(uncalled, [], 'routes no client calls');
+  assert.deepEqual(unread, [], 'fetch calls with a method this scan cannot read');
 });
