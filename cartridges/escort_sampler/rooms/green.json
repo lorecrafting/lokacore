@@ -1,0 +1,17 @@
+{
+  "name": "room.green.title",
+  "description": "room.green.description",
+  "exits": {
+    "south": {
+      "to": "quay"
+    }
+  },
+  "details": {
+    "bench": {
+      "aliases": [
+        "bench"
+      ],
+      "description": "detail.bench"
+    }
+  }
+}
