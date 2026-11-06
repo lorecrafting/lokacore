@@ -22,6 +22,7 @@ import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
 import { ask, type useDiagnostics } from '../author.ts';
 import { Button } from '../components/ui/button.tsx';
 import { fields, type Context } from './fields.tsx';
+import { Refusal, templates } from './templates.tsx';
 import registry from './registry.json';
 
 const validator = customizeValidator({ AjvClass: Ajv2020 });
@@ -84,7 +85,7 @@ export function AddMenu({ fields: menu, reveal }: { fields: string[]; reveal: (f
   return (
     <select
       aria-label="Add a field"
-      className="rounded-md border bg-background px-1"
+      className="form-control"
       value=""
       onChange={(e) => reveal(e.target.value)}
     >
@@ -129,7 +130,7 @@ export function Generic({ rel, context, diag }: { rel: string; context: Context;
   return (
     <div className="grid gap-2 px-3 text-xs" aria-label="Card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
-      {card.refused ? <p className="text-destructive">{card.refused}</p> : null}
+      {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <div onBlur={card.commit}>
         <Form
           schema={saved.schema}
@@ -137,6 +138,8 @@ export function Generic({ rel, context, diag }: { rel: string; context: Context;
           formData={draft}
           validator={validator}
           fields={fields}
+          templates={templates}
+          showErrorList={false}
           formContext={context}
           experimental_defaultFormStateBehavior={FORM_DEFAULTS}
           extraErrors={fieldErrors((diag.diagnostics ?? []) as never, rel) as never}

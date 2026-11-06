@@ -14,6 +14,8 @@ the [audio listening list](audio-listening-list.md) and [other placeholder candi
 ink shadows, lamp glow, moon palette, drop capitals) are not adopted; the page curl and paper
 sound are. Each effect waits for its own owner decision.
 
+Round ink action buttons for the combat hotbar (loka-x6t.131, awaiting the owner's pick): [exploration](ink-buttons-exploration.md), drawn in Storybook `Docs/Ink buttons`.
+
 The editor's chrome (dev only, never the Book): [editor chrome rulings](editor-chrome-rulings.md); its left-column map and Story list: [map and story rulings](editor-map-and-story-rulings.md).
 
 Rules: [component catalogue](../BOOK-UI-COMPONENTS.md). Values: [tokens](../../mobile/app/book/tokens.ts).

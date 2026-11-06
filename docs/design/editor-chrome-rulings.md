@@ -173,11 +173,35 @@ A chip's area shows only as a 3 px band in its area hue on the chip's left edge;
 - Story map kinds use the icons named in Story map §10 (`flag`, `scroll`, `message-circle`, `film`,
   `zap`, `hand`, `tag`, `book-open`, `user`).
 
+## 7. Inspector card fields (2026-11-05, loka-wfrgk.23)
+
+The generic card's rjsf templates (`tools/author-panel/src/edit/templates.tsx`).
+
+| Part | Look |
+|---|---|
+| Field label | the file's key verbatim (never uppercased: it must read as in the file), `text-xs`, `dim` |
+| Legend (an object or list) | the key verbatim, `text-xs`, weight 500, `fg` |
+| Array item | no visible label or legend; a reader hears the list's key and the item number, counted from 1 |
+| Required mark | ` *` in `dim` after the label or legend. Hidden from readers only where the native control carries `required`; on a legend it is read as "required" (sr-only text) |
+| Description | one `dim` `text-xs` line, cut off with an ellipsis; the whole text in its tooltip, and the whole line unwraps while its field has focus (keyboard users cannot hover). It stays in the DOM whole, so the control's `aria-describedby` reads it in full |
+| Input, select, textarea | `chrome.size.row` tall (textarea grows), `surface` fill, 1 px `strong` border, `chrome.type.body`, placeholder `dim`; disabled at 0.5 opacity |
+| Field refusal | as section 3, under its field; the border is on that field's own control only |
+| Card refusal (names no field) | above the fields: `circle-alert` and the message in `refusal`, inside a 1 px `refusal` border, radius `chrome.radius`, no fill |
+| Item buttons | Add, Remove, Move up, Move down, Copy: header-button size (24 px, ghost, 16 px icon), each with an `aria-label` and tooltip |
+
+**Union option labels.** Each branch in a kind picker is named by the first of: its schema `title`;
+the value of its discriminating key (the property that is a different `const` in every branch, such
+as `op` or `kind`); its single required key; `option n`, counted from 1. Never a JSON type name
+(`object`, `string`) unless the branches differ only by type. Within one picker the labels are distinct.
+Any number the owner sees or hears (item labels, picker names, `option n`) counts from 1.
+
 ## Proposed checks (for E2)
 
 - A node:test over `chrome`: every text role at least 4.5:1 on `bg`, `surface` and `sunken` in both
   modes, `strong` at least 3:1 on `bg` and `surface`, each `area` hue at least 3:1 on `bg`.
 - No hex colour literal in `tools/author-panel/src` outside `index.css` and the token mapping.
+- A test over `uiSchema()` on every registry kind: within each union, branch titles are distinct and
+  none is a bare JSON type name unless the branches differ only by type.
 
 ## Known limits
 

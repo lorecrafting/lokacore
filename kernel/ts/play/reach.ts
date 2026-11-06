@@ -8,8 +8,9 @@ import { engineWrittenRefs, expectedFacts } from '../src/content/cartridge_posit
 import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { refString } from '../src/runtime/decision.ts';
+import { reads } from './reads.ts';
 
-type Edge = { from: string; to: string; path: string; op?: string };
+type Edge = { from: string; to: string; path: string; op?: string; set?: true; cleared?: true };
 
 const REF = /^[^@]+@[^:]+:([a-z_]+)\/[^/]+$/; // DefinitionRefString
 const kindOf = (ref: string) => REF.exec(ref)?.[1];
@@ -30,21 +31,24 @@ const SITES: [string, RegExp][] = [
 const isWrite = (e: Edge) =>
   e.op === 'fact.assign' ||
   e.op === 'fact.adjust' ||
+  e.op === 'fact.stamp' ||
   SITES.some(([at, path]) => (kindOf(e.from) ?? e.from) === at && path.test(e.path));
-// a topic's fact is also read: the codex (GameView topics) lists the topics whose fact holds
-const isRead = (e: Edge) => !isWrite(e) || kindOf(e.from) === 'topic';
+const isRead = (e: Edge) => reads(isWrite(e), kindOf(e.from));
 
 /** Nodes: every definition of a map keyed by DefinitionRefString; edges: every DefinitionRef in it. */
 export function contentGraph(c: Obj): { nodes: { ref: string; kind: string }[]; edges: Edge[] } {
   const nodes: { ref: string; kind: string }[] = [];
   const edges: Edge[] = [];
-  // op: the `op` of the object directly holding this value (through arrays), when it has one
-  const walk = (v: unknown, from: string, path: string, op?: string) => {
+  // op: the `op` of the object directly holding this value (through arrays), when it has one; at: that object (not through arrays)
+  const walk = (v: unknown, from: string, path: string, op?: string, at?: Obj) => {
     if (Array.isArray(v)) v.forEach((x, i) => walk(x, from, `${path}[${i}]`, op));
     if (!isObj(v)) return;
-    if (typeof v.cartridge_id === 'string' && typeof v.kind === 'string')
-      return void edges.push({ from, to: refString(v as never), path, ...(op && { op }) });
-    for (const [k, x] of Object.entries(v)) walk(x, from, `${path}${step(k)}`, v.op);
+    if (typeof v.cartridge_id === 'string' && typeof v.kind === 'string') {
+      const e: Edge = { from, to: refString(v as never), path, ...(op && { op }) };
+      const cleared = op === 'fact.assign' && at?.value === false; // Knowledge: a false assign does not make it known
+      return void edges.push(isWrite(e) ? { ...e, set: true, ...(cleared && { cleared }) } : e); // `set`: the edge writes its fact
+    }
+    for (const [k, x] of Object.entries(v)) walk(x, from, `${path}${step(k)}`, v.op, v);
   };
   for (const [section, v] of Object.entries(c)) {
     const keys = isObj(v) ? Object.keys(v) : [];

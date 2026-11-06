@@ -18,6 +18,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { after, test } from 'node:test';
 import { serve } from '../play/live.ts';
 import { story } from '../play/story.ts';
+import { wordsByNode } from '../play/story_counts.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const dir = mkdtempSync(join(tmpdir(), 'loka-story-'));
@@ -164,6 +165,57 @@ test('a beat is missing with the refs not in the artifact, `~` while its node ha
   }
 });
 
+// Break: the List (S2) puts a beat's nodes under the wrong beat: a choice ref not folded into its
+// dialogue, a ref the artifact lacks kept, a node bound twice listed twice; a part's title shifted
+// to another part or an untitled part given one.
+test('a beat lists its bound nodes once each, parts their titles', () => {
+  const { outline } = story(src, dev, []) as {
+    outline: { parts: unknown[]; beats: { n: number; nodes: string[] }[] };
+  };
+  assert.deepEqual(outline.parts, ['One', null]);
+  assert.deepEqual(
+    outline.beats.map(({ n, nodes }) => [n, nodes]),
+    [
+      [1, [ref('dialogue', 'greet')]],
+      [2, [green]],
+      [3, [green]],
+      [4, [ref('room', 'attic')]],
+      [5, []],
+      [6, [ref('room', 'attic'), green]],
+    ],
+  );
+});
+
+// Break: Trace (S2) reads a fact's writer as a reader or its reader as a writer: the `set` flag
+// missing on a step that assigns the fact, or put on a condition that reads it.
+test('an edge that assigns a fact is set, one that reads it is not', () => {
+  const { graph } = story(src, dev, []);
+  const bell = (graph.edges as { to: string; from: string; set?: true }[]).filter(
+    (e) => e.to === ref('fact', 'bell_heard'),
+  );
+  assert.deepEqual(bell.map((e) => [e.from, e.set]).sort(), [
+    [ref('reaction', 'asked'), true],
+    [ref('reaction', 'bell_after'), true], // scene_sampler's own fact.assign
+    [ref('room', 'shed'), undefined],
+  ]);
+});
+
+// Break: Pacing counts a key's words twice, a `~` as a word, misses scene or inline prose, or
+// Knowledge counts a dialogue's choices wrong (it tells "every choice" from "one of several").
+test('words by node from the text keys it names; choices by dialogue', () => {
+  const { words, choices } = story(src, dev, []);
+  assert.equal(words[ref('dialogue', 'greet')], 5); // Well? + Go Gone twice
+  assert.equal(words[ref('room', 'attic')], 2);
+  assert.equal(choices[ref('dialogue', 'greet')], 2);
+  assert.equal(choices[ref('dialogue', 'hub')], 1);
+});
+
+// Break: a key one definition names twice counted twice, or a `~` line counted as a word.
+test('words by node count each named key once and skip a ~ line', () => {
+  const defs = new Map([['rooms/a', { name: 'k1', description: 'k1', note: 'k2' }]]);
+  assert.deepEqual(wordsByNode(defs, { k1: 'one two', k2: 'three\n~' }), { 'rooms/a': 3 });
+});
+
 // Break: `then: end` drawn as an edge to a dialogue named end, a `then` dropped, or a
 // choice_resolved reaction linked from a dialogue without that choice.
 test('then and choice_resolved edges: then: end draws none, then: hub one', () => {
@@ -291,6 +343,7 @@ test('GET /story: an ETag, 304 until the next compile pushes, and refused to a f
     const next = await get({ 'if-none-match': etag });
     assert.equal(next.status, 200);
     assert.deepEqual(((await next.json()) as { outline: unknown }).outline, {
+      parts: [],
       beats: [],
       unpaid: [],
       unseeded: [],
