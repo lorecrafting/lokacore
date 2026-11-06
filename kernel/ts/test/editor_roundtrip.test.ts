@@ -18,7 +18,7 @@ import type { Op, Step } from '../play/edit_model.ts';
 import { DIRS, placed, REPO, ROOTS } from '../play/guard.ts';
 import { writer } from '../play/write.ts';
 
-const validator = customizeValidator({ AjvClass: Ajv2020 });
+const validator = customizeValidator<unknown, RJSFSchema>({ AjvClass: Ajv2020 });
 const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'loka-roundtrip-')));
 after(() => rmSync(tmp, { recursive: true, force: true }));
 cpSync(join(REPO, 'cartridges'), tmp, { recursive: true }); // the writes land in the copy
@@ -56,7 +56,17 @@ async function opened(c: string, rel: string) {
     apart(
       diff(
         doc,
-        applied(doc, getDefaultFormState(validator, schema, draft, schema, false, FORM_DEFAULTS)),
+        applied(
+          doc,
+          getDefaultFormState<unknown, RJSFSchema>(
+            validator,
+            schema,
+            draft,
+            schema,
+            false,
+            FORM_DEFAULTS,
+          ),
+        ),
       ),
       [],
     );
@@ -109,6 +119,7 @@ test('a one-leaf edit writes that leaf only, and its undo gives the file back by
   // Breaks: a commit writing more than the author's edit (rjsf defaults, a union read as its const
   // branch); /undo restoring a re-encoded document instead of the journal's bytes.
   const files = [...original.keys()];
+  let wrote = 0;
   for (let i = 0; i < SAMPLE; i++) {
     const at = files[draw(files.length)];
     const c = at.slice(0, at.indexOf('/'));
@@ -116,6 +127,7 @@ test('a one-leaf edit writes that leaf only, and its undo gives the file back by
     const before = readFileSync(join(tmp, at), 'utf8'); // a no-change save may have rewritten it
     const { s, doc, commit } = await opened(c, rel);
     const all = leaves(doc);
+    if (!all.length) continue; // an empty table: no leaf to edit
     const [path, value] = all[draw(all.length)];
     const want = structuredClone(doc);
     let box: any = want;
@@ -124,6 +136,7 @@ test('a one-leaf edit writes that leaf only, and its undo gives the file back by
     const ops = commit(path.length ? want : edited(value));
     if (!ops.length) continue; // the form held the value back (a refusal stands): nothing written
     const { id } = await post(c, '/change', { file: rel, was: s.sha256, ops });
+    wrote++;
     assert.deepEqual(
       JSON.parse(readFileSync(join(tmp, at), 'utf8')),
       path.length ? want : edited(value),
@@ -132,4 +145,5 @@ test('a one-leaf edit writes that leaf only, and its undo gives the file back by
     await post(c, '/undo', { id });
     assert.equal(readFileSync(join(tmp, at), 'utf8'), before, `${at} ${path.join('.')}: undo`);
   }
+  assert.ok(wrote > SAMPLE / 2, `only ${wrote} of ${SAMPLE} edits wrote: a commit drops the edit`);
 });

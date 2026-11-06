@@ -103,7 +103,7 @@ const open = async (rel: string) => {
 };
 
 before(() => {
-  tree = execFileSync('git', ['status', '--porcelain'], { cwd: REPO, encoding: 'utf8' });
+  tree = status();
   // CI has mix but no mise: the stub runs the command (as ci.yml's kernel job does)
   mkdirSync(join(dir, 'bin'));
   writeFileSync(join(dir, 'bin/mise'), '#!/bin/sh\nshift 2\nexec "$@"\n');
@@ -114,6 +114,15 @@ before(() => {
   compiles('scaffold');
 });
 after(() => rmSync(dir, { recursive: true, force: true }));
+
+test('every GAPS and EXEMPT row names a registry kind or field and a verb', () => {
+  // Breaks: a misspelt row (it exempts nothing and hides nothing) or one left for a dropped kind.
+  const bad = [...Object.keys(GAPS), ...Object.keys(EXEMPT)].filter((row) => {
+    const [what, verb] = row.split(' ');
+    return verb === 'edit' ? !Object.hasOwn(registry, what) : !kinds.includes(what);
+  });
+  assert.deepEqual(bad, []);
+});
 
 test('every registry kind is created through /new and compiles', async () => {
   reds.length = 0; // each test reports its own
@@ -147,27 +156,36 @@ test('every registry kind is created through /new and compiles', async () => {
 
 test('every field a card draws takes its add-menu value through /change and compiles', async () => {
   reds.length = 0; // each test reports its own
+  let posted = 0;
   // Breaks: an add-menu value (card.ts added) the compiler refuses, or a /change the writer refuses.
   for (const [k, { file }] of made) {
     if (!placed(file)) continue; // a row file's rows are its one registry field
     for (const f of Object.keys(registry)
       .filter((r) => r.startsWith(`${k}.`))
       .map((r) => r.slice(k.length + 1))) {
-      if (GAPS[`${k}.${f} edit`]) continue;
+      const gap = GAPS[`${k}.${f} edit`];
       const { doc, was } = await open(file);
       const edited = added(doc, f, defs, definitionOf(defs, k, doc));
       if (!edited) continue; // present, or the author picks it (a string, an enum, a key)
       const r = await post('/change', { file, was, ops: diff(doc, edited) });
-      if (!r.ok) reds.push(`${k}.${f} edit: ${String(r.told).slice(0, 200)}`);
-      else {
-        const before = reds.length;
-        compiles(`${k}.${f} edit`);
-        if (reds.length > before) await post('/undo', { id: r.told.id }); // the next field starts green
+      posted++;
+      if (!r.ok) {
+        if (!gap) reds.push(`${k}.${f} edit: ${String(r.told).slice(0, 200)}`);
+        continue;
       }
+      const before = reds.length;
+      compiles(`${k}.${f} edit`);
+      if (gap) {
+        // a gap still red stays out of the list; one now green must leave GAPS
+        if (reds.length > before) reds.length = before;
+        else reds.push(`${k}.${f} edit: compiles now, drop its GAPS row (${gap})`);
+      }
+      if (reds.length > before || gap) await post('/undo', { id: r.told.id }); // the next field starts green
     }
   }
   compiles('edits');
   assert.deepEqual(reds, []);
+  assert.ok(posted > 50, `only ${posted} add-menu values were sent: added() offers nothing`);
 });
 
 test('a definition another names is refused, then every one deletes through /delete and compiles', async () => {
@@ -192,12 +210,16 @@ test('a definition another names is refused, then every one deletes through /del
     else compiles(`${k} delete`);
   }
   assert.deepEqual(reds, []);
-  assert.equal(
-    execFileSync('git', ['status', '--porcelain'], { cwd: REPO, encoding: 'utf8' }),
-    tree,
-    'a write outside the scratch cartridge',
-  );
+  assert.equal(status(), tree, 'a write outside the scratch cartridge');
 });
+
+/** The repo's changed files past Beads, which flushes on its own (a /new writing to the repo shows). */
+function status() {
+  return execFileSync('git', ['status', '--porcelain', '--', '.', ':!.beads'], {
+    cwd: REPO,
+    encoding: 'utf8',
+  });
+}
 
 /** author.ts drop(): the file's sha from /source, then /delete with the row key for a root file. */
 async function del(k: string) {
