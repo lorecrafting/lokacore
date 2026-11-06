@@ -2,7 +2,7 @@
 // file:line, and each definition whose refs name that key. The refs come from the compiled artifact,
 // where the compiler has already expanded every short ref (lib/loka/content/leaf_refs.ex, resolve.ex).
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { placed } from './guard.ts';
 import { files } from './todo.ts';
 
@@ -99,3 +99,43 @@ export function users(source: string, artifact: string, section: string, key: st
   );
   return [...refs, ...extending];
 }
+
+const read = (source: string, rel: string) => {
+  try {
+    return JSON.parse(readFileSync(join(source, rel), 'utf8'));
+  } catch {
+    return null; // a missing file, or one that is not JSON, is the compile's to report
+  }
+};
+type Member = { rel: string; dir: string; key: string };
+/** What a delete of `file` (`at`: its kind and key) takes with it in one entry, so it leaves nothing
+ * dangling, and what outside that set still names a member: a transport's return leg that names it
+ * back (each leg's `reverse` names the other), and each template only the set names (death.ex:121-131
+ * refuses a template item no population or death names). The deleted file is the set's first. */
+export function taken(
+  source: string,
+  artifact: string,
+  file: string,
+  at: { dir: string; key: string },
+) {
+  const set: Member[] = [{ rel: file, ...at }];
+  const add = (rel: string) => set.push({ rel, dir: placed(rel)!.dir, key: placed(rel)!.key });
+  const ids = () => set.map((m) => `${m.dir}/${m.key}`);
+  const back = at.dir === 'transports' && read(source, file)?.reverse;
+  const leg = back && join(dirname(file), `${back}.json`);
+  if (leg && leg !== file && read(source, leg)?.reverse === at.key) add(leg);
+  for (const rel of files(source)) {
+    const p = placed(rel);
+    if (p?.ext !== 'json' || (p.dir !== 'npcs' && p.dir !== 'items')) continue;
+    const doc = read(source, rel);
+    if (doc?.spawn_template !== true && doc?.location?.in !== 'template') continue;
+    const by = users(source, artifact, p.dir, p.key).map((r) => r.by);
+    if (by.length && by.every((b) => ids().includes(b))) add(rel);
+  }
+  const left = set
+    .flatMap((m) => users(source, artifact, m.dir, m.key))
+    .filter((r) => !ids().includes(r.by.replace(/^scripted_actions\//, 'actions/')));
+  return { set, left };
+}
+export const still = (set: Member[], left: Referrer[]) =>
+  `${set[1] ? 'are' : 'is'} still named by ${left.map((r) => r.at ?? r.by).join(', ')}: change those first`;

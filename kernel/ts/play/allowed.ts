@@ -18,12 +18,13 @@ const OWNERS: Record<string, string> = {
   'items.edible': 'food',
   'items.fuel': 'light',
   'items.name_variants': VARIANT,
-  'items.readable': 'readable',
+  'items.readable': 'readable', // resolve.ex:338-344 via entities.ex:54; capability_registry.json:463
   'items.room_line_variants': VARIANT,
   'items.slot': 'equipment',
   'items.tags': 'tag',
   'items.weapon': 'skill', // its skill is a skill definition (skills.ex weapon)
   'rooms.cues': 'sense_cue',
+  // resolve.ex:391-394 via room_parts.ex:83 (darkness, capability_registry.json:428)
   'rooms.dark': 'light',
   'rooms.dark_description': 'light',
   'rooms.details': 'inspectable_detail',

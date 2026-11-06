@@ -1,4 +1,4 @@
-// size: allow 570, the write path's guard, journal, /new and /delete cases share the tree helper above them
+// size: allow 623, the write path's guard, journal, /new and /delete cases share the tree helper above them
 // The editor's write path (docs/system/cartridge.md#author-preview): the one path guard, the Host
 // and Origin checks, the whole-file `was`, the journal and undo, on controlled source trees.
 import assert from 'node:assert/strict';
@@ -6,7 +6,7 @@ import { chmodSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync }
 import { existsSync, renameSync, symlinkSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { test, type TestContext } from 'node:test';
 import { serve } from '../play/live.ts';
 import { guarded, placed, sha256, type Refused } from '../play/guard.ts';
@@ -267,6 +267,65 @@ test('a delete another definition still names is refused and writes nothing', as
     200,
   );
   assert.equal(read('facts.json'), '{\n  "facts": {\n    "lit": {}\n  }\n}\n');
+});
+
+test('a delete takes the set a /new wrote with it, or refuses naming the set', async (t) => {
+  // Breaks (loka-wfrgk.87): a population delete leaving its template npc and item unnamed (the
+  // compile refuses an unnamed template item, death.ex:121-131), or taking a template another
+  // population still names; a transport leg that can never be deleted because its return leg
+  // names it back, or a set delete that drops the legs while a room still names one.
+  const { ask, dir, src, read } = await tree(t);
+  const ref = (kind: string, key: string) => ({ cartridge_id: 'c', kind, key });
+  const canonical = {
+    populations: {
+      'c@1:population/p': {
+        npc: ref('npc', 'n'),
+        item: ref('item', 'i'),
+        corpse: ref('item', 'k'),
+      },
+      'c@1:population/q': { corpse: ref('item', 'k') },
+    },
+    npcs: { 'c@1:npc/n': {} },
+    items: { 'c@1:item/i': {}, 'c@1:item/k': {} },
+    transports: {
+      'c@1:transport/go': { reverse: ref('transport', 'back') },
+      'c@1:transport/back': { reverse: ref('transport', 'go') },
+      'c@1:transport/up': { reverse: ref('transport', 'down') },
+      'c@1:transport/down': { reverse: ref('transport', 'up') },
+    },
+    rooms: { 'c@1:room/a': { route: ref('transport', 'back') } },
+  };
+  writeFileSync(join(dir, 'none.json'), JSON.stringify({ canonical: JSON.stringify(canonical) }));
+  const TEMPLATE = '{\n  "location": {\n    "in": "template"\n  }\n}\n';
+  const put = (rel: string, text: string) => {
+    mkdirSync(join(src, dirname(rel)), { recursive: true });
+    writeFileSync(join(src, rel), text);
+  };
+  put('populations/p.json', '{}\n');
+  put('populations/q.json', '{}\n');
+  put('npcs/n.json', '{\n  "spawn_template": true\n}\n');
+  put('items/i.json', TEMPLATE);
+  put('items/k.json', TEMPLATE);
+  for (const [a, b] of [
+    ['go', 'back'],
+    ['back', 'go'],
+    ['up', 'down'],
+    ['down', 'up'],
+  ])
+    put(`transports/${a}.json`, `{\n  "reverse": "${b}"\n}\n`);
+  const del = (file: string) => ask('/delete', { file, was: sha256(read(file)) });
+  const files = async () =>
+    (await ask('/journal')).body.find((e: { by: string }) => e.by === 'editor').files.sort();
+  assert.equal((await del('populations/p.json')).status, 200);
+  assert.deepEqual(await files(), ['items/i.json', 'npcs/n.json', 'populations/p.json']);
+  assert.equal(read('items/k.json'), TEMPLATE);
+  assert.equal((await del('transports/up.json')).status, 200);
+  assert.deepEqual(await files(), ['transports/down.json', 'transports/up.json']);
+  assert.deepEqual(await del('transports/go.json'), {
+    status: 400,
+    body: 'go, back are still named by rooms/a: change those first',
+  });
+  assert.equal(read('transports/back.json'), '{\n  "reverse": "go"\n}\n');
 });
 
 test('undo puts the files back, refuses one changed since, and knows no other id', async (t) => {
