@@ -22,7 +22,11 @@ const SCENE = 'scenes/stranger_talk.scene';
 function loaded(root: string) {
   const out = compiled(root);
   assert.equal(typeof out, 'object', String(out));
-  return (loadCartridge(artifactBytes(out as never), INSTALLED) as { cartridge: Obj }).cartridge;
+  return (
+    loadCartridge(artifactBytes(out as { canonical: string; sha256: string }), INSTALLED) as {
+      cartridge: Obj;
+    }
+  ).cartridge;
 }
 
 /** A copy of identity_sampler (two NPCs, one .scene), its sibling `src-evil/` with a scene, and
