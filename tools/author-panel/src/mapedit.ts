@@ -145,15 +145,34 @@ async function grow(s: Run, a: MapRoom, dir: string, key: string) {
   await s.call('new', { kind: 'rooms', name: key, from, ...(a.area ? { area: a.area } : {}) });
 }
 
-/** New NPC or item here (`bin/loka new <kind> <key>`, its words `~`), in the room's area, placed in it. */
-async function made(s: Run, r: MapRoom, kind: 'npcs' | 'items', key: string) {
-  const told = await s.call('new', { kind, name: key, ...(r.area ? { area: r.area } : {}) });
+/** New NPC or item here (`bin/loka new <kind> <key>`, its words `~`), in the room's area, placed in it;
+ * with `up`, a child of that template (`--extends`: the engine refuses a crossing or concrete parent). */
+async function made(s: Run, r: MapRoom, kind: 'npcs' | 'items', key: string, up?: string) {
+  const area = r.area ? { area: r.area } : {};
+  const told = await s.call('new', { kind, name: key, ...area, ...(up ? { extends: up } : {}) });
   const file = told.files?.find((f) => f.endsWith(`${kind}/${key}.json`));
   await s.change(file ?? no(`no ${kind}/${key}.json was made`), () => [
     kind === 'npcs'
       ? { path: ['room'], value: r.key }
       : { path: ['location'], value: { in: 'room', room: r.key } },
   ]);
+}
+
+/** A dropped template's child key, no name chosen: the first `<template>_<n>` from 1 that no NPC
+ * (or item) in the graph and no template holds. */
+export function freeKey(t: { dir: 'npcs' | 'items'; key: string }, nodes: { kind: string; ref: string }[], templates: string[]) {
+  const kind = t.dir === 'npcs' ? 'npc' : 'item';
+  const taken = new Set([...templates, ...nodes.filter((o) => o.kind === kind).map((o) => o.ref.split('/')[1])]);
+  let n = 1;
+  while (taken.has(`${t.key}_${n}`)) n++;
+  return `${t.key}_${n}`;
+}
+
+/** The palette's map-npc/map-item answer: `<key>`, or `~<template>` for that template's child at its free key. */
+export function childOf(answer: string, dir: 'npcs' | 'items', nodes: { kind: string; ref: string }[], templates: string[]): [string, string?] {
+  if (!answer.startsWith('~')) return [answer];
+  const up = answer.slice(1);
+  return [freeKey({ dir, key: up }, nodes, templates), up];
 }
 
 /** Move to area: the file moves to `areas/<area>/rooms/`, or to the root for null. */
@@ -227,7 +246,8 @@ export function editor(io: Io) {
     barrier: (a: MapRoom, dir: string, rooms: MapRoom[], key: string, locked: boolean) =>
       run((s) => barrier(s, a, dir, rooms, key, locked)),
     grow: (a: MapRoom, dir: string, key: string) => run((s) => grow(s, a, dir, key)),
-    made: (r: MapRoom, kind: 'npcs' | 'items', key: string) => run((s) => made(s, r, kind, key)),
+    made: (r: MapRoom, kind: 'npcs' | 'items', key: string, up?: string) =>
+      run((s) => made(s, r, kind, key, up)),
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
     bind: (part: number, n: number, short: string) => run((s) => bind(s, part, n, short)),
   };

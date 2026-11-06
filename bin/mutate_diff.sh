@@ -2,7 +2,8 @@
 # Diff-derived mutants (developer.md step 2, reviewer.md step 3): one bin/mutate.sh mutant per change
 # on each line <base>...HEAD added to a TS (.ts .tsx .mjs) or Elixir (.ex) source file, run against
 # the test files that reach the module one import hop away (TS: a test whose relative import resolves
-# to it or to a source importing it; Elixir: an .exs file naming it or a `mix xref callers` caller).
+# to it or to a source importing it, and for a .tsx a test marked `mutate-covers: <dir>`, <dir> from the
+# test's package, holding it: a browser test renders them all; Elixir: an .exs file naming it or a `mix xref callers` caller).
 # Prints the mutant count first, then one row per mutant: the result
 # (red-narrow = killed, SURVIVED, NO-TESTS when no test imports it, NOT-UNIQUE when the line is not
 # unique in its file, BASELINE-RED when the unmutated tests already fail), file:line, the change,
@@ -98,6 +99,9 @@ def imports(path, stem):  # path has a relative import resolving to stem (or ste
         p = re.sub(r'\.(ts|tsx|mjs|js)$', '', os.path.normpath(os.path.join(os.path.dirname(path), s)))
         if stem in (p, p + '/index'):
             return True
+def covers(test, mod):  # a browser test's `mutate-covers: <dir>` (from its package): every .tsx under it
+    return mod.endswith('.tsx') and any(mod.startswith(os.path.normpath(os.path.join(home(test, 'package.json'), d)) + '/')
+                                        for d in re.findall(r'mutate-covers: (\S+)', text[test]))
 def modules(path):
     return re.findall(r'defmodule\s+([\w.]+)', open(path, errors='replace').read())
 cmds = {}
@@ -115,7 +119,7 @@ def narrow(mod, log):
         else:
             stems = [os.path.splitext(mod)[0]]
             stems += [os.path.splitext(s)[0] for s in sources if imports(s, stems[0])]
-            hit = [t for t in tests if not t.endswith('.exs') and any(imports(t, s) for s in stems)]
+            hit = [t for t in tests if not t.endswith('.exs') and (any(imports(t, s) for s in stems) or covers(t, mod))]
             pkgs = {}
             for t in hit:
                 pkgs.setdefault(home(t, 'package.json'), []).append(t)

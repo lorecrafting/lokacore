@@ -1,8 +1,8 @@
 // The panel's one map editor (mapedit.ts over /__author) and the palette's map commands; a refusal
 // shows on the map's footer line (areamap.tsx registers it), else in an alert.
-import { ask } from './author.ts';
+import { ask, templates, type Story } from './author.ts';
 import type { MapRoom } from './map.ts';
-import { editor, type Editor } from './mapedit.ts';
+import { childOf, editor, type Editor } from './mapedit.ts';
 
 const ed = editor({
   post: ask,
@@ -13,7 +13,7 @@ const ed = editor({
 });
 /** What the mounted map shows: its footer line and its rooms (the palette's map commands need both). */
 export const alone = (why: string): void => void (why && alert(why));
-export const shown = { tell: alone, rooms: [] as MapRoom[] };
+export const shown = { tell: alone, rooms: [] as MapRoom[], nodes: [] as Story['graph']['nodes'] };
 
 let queue = Promise.resolve();
 /** Runs one map gesture after the ones before it (so undo stays in order); a refusal is told, not thrown. */
@@ -36,8 +36,12 @@ export function mapCommand(id: string, key: string | undefined, given?: string) 
   }
   if (id === 'map-npc' || id === 'map-item') {
     const kind = id === 'map-npc' ? 'npcs' : 'items';
-    const name = prompt(`New ${kind === 'npcs' ? 'NPC' : 'item'} key in ${r.key}`);
-    return name ? edit((e) => e.made(r, kind, name)) : undefined;
+    const name = prompt(`New ${kind === 'npcs' ? 'NPC' : 'item'} key in ${r.key} (~<template>)`);
+    if (!name) return;
+    return edit(async (e) => {
+      const [key, up] = childOf(name, kind, shown.nodes, name.startsWith('~') ? (await templates()).map((t) => t.key) : []);
+      return e.made(r, kind, key, up);
+    });
   }
   const dir = given ?? prompt(`${r.key}: which direction?`);
   if (!dir) return;

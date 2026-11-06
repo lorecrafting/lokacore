@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync } from 'node:fs';
-import { realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
@@ -15,6 +15,8 @@ import type { MapRoom } from '../../../tools/author-panel/src/map.ts';
 import {
   cellAt,
   editor,
+  freeKey,
+  childOf,
   toward,
   dragged,
   type Editor,
@@ -43,6 +45,7 @@ let c = room('c');
 const rooms = () => [start, b, c, cellar];
 let ed: Editor;
 let close = () => {};
+let ask: (path: string) => Promise<{ ok: boolean; told: any }>;
 let snapshot: Record<string, string>;
 
 before(async () => {
@@ -79,6 +82,7 @@ before(async () => {
       });
       req.end(sent && JSON.stringify(sent));
     });
+  ask = http;
   const io: Io = {
     post: (route, sent) => http(`/${route}`, sent),
     source: async (file) => (await http(`/source?file=${encodeURIComponent(file)}`)).told,
@@ -182,6 +186,56 @@ test("an NPC given hp by the card's Add compiles", () => {
   assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
 });
 
+test('a template dropped on a room makes its child there; a refused drop writes nothing; undo removes it', async () => {
+  // Breaks: --extends not passed (the child lacks the parent's hp), the child left unplaced, a
+  // refused drop leaving a file, or /templates missing an area's or an item abstract, or listing a
+  // concrete NPC or an abstract room, or reading through a link to an abstract file outside the tree.
+  const tpl = 'areas/barn/npcs/goat.json';
+  mkdirSync(join(src, 'areas/barn/npcs'), { recursive: true });
+  const hp = { minimum: 0, maximum: 1, start: 1, gain: 0 };
+  writeFileSync(join(src, tpl), JSON.stringify({ abstract: true, hp }));
+  mkdirSync(join(src, 'items'));
+  writeFileSync(join(src, 'items/sack.json'), '{ "abstract": true }');
+  writeFileSync(join(src, 'areas/barn/npcs/cow.json'), '{ "abstract": false }');
+  writeFileSync(join(src, 'rooms/mould.json'), '{ "abstract": true }');
+  const ox = join(mkdtempSync(join(tmpdir(), 'outside-')), 'ox.json');
+  writeFileSync(ox, '{ "abstract": true }');
+  symlinkSync(ox, join(src, 'items/ox.json'));
+  const listed = await ask('/templates');
+  assert.deepEqual(
+    [listed.ok, listed.told],
+    [
+      true,
+      [
+        { dir: 'npcs', key: 'goat' },
+        { dir: 'items', key: 'sack' },
+      ],
+    ],
+  );
+  rmSync(join(src, 'items'), { recursive: true });
+  for (const f of ['areas/barn/npcs/cow.json', 'rooms/mould.json']) rmSync(join(src, f));
+  const was = files();
+  // c is in the area yard; a root room may extend any area's template
+  await assert.rejects(ed.made(c, 'npcs', 'goat_1', 'goat'), /belongs to the area barn/);
+  assert.deepEqual(files(), was);
+  await ed.made(start, 'npcs', 'goat_1', 'goat');
+  const out = join(dir, 'out.json');
+  const compiled = spawnSync('mix', ['loka.compile', src, out, '--allow-placeholders'], {
+    cwd: REPO,
+    encoding: 'utf8',
+  });
+  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
+  const npcs = JSON.parse(readFileSync(out, 'utf8')).cartridge.npcs;
+  const child = Object.entries(npcs).find(([ref]) => ref.endsWith(':npc/goat_1'))?.[1] as any;
+  assert.deepEqual([child?.hp, child?.room?.key], [hp, 'start']);
+  await ed.undo();
+  rmSync(join(src, 'areas/barn'), { recursive: true });
+  assert.deepEqual(
+    files(),
+    was.filter((f) => f !== tpl),
+  );
+});
+
 test('a barrier drop writes a locked barrier named on both faces, and refuses a one-way exit', async () => {
   // Breaks: one face left without the barrier (BARRIER_MISMATCH); `initial` not locked; a barrier
   // on a one-way exit.
@@ -238,6 +292,37 @@ test('a map point maps to its layout cell, and a drag between cells to a compass
       to(0, 0),
     ],
     ['east', 'west', 'south', 'north', 'east', 'west', 'north', undefined, undefined],
+  );
+});
+
+test("a dropped template's child takes the first free <template>_<n>", () => {
+  // Breaks: a child key reusing a compiled one (the starter refuses the drop), or starting past _1.
+  // Also: an item's key counted against an NPC child, or a template's key (no node holds it) missed.
+  const node = (kind: string, key: string) => ({ kind, ref: `cart@0:${kind}/${key}` });
+  const nodes = [
+    node('npc', 'wild'),
+    node('npc', 'wild_1'),
+    node('item', 'wild_2'),
+    node('npc', 'wild_4'),
+  ];
+  const wild = { dir: 'npcs' as const, key: 'wild' };
+  assert.deepEqual(
+    [freeKey(wild, [], []), freeKey(wild, nodes, []), freeKey(wild, nodes, ['wild_2'])],
+    ['wild_1', 'wild_2', 'wild_3'],
+  );
+});
+
+test('the palette makes a template child from `~<template>`, a plain key otherwise', () => {
+  // Breaks: map-npc/map-item (the keyboard path to a template child) passing no extends, the `~`
+  // kept in the parent's key, or a plain key read as a template.
+  const nodes = [{ kind: 'npc', ref: 'cart@0:npc/wild_1' }];
+  assert.deepEqual(
+    [
+      childOf('~wild', 'npcs', nodes, []),
+      childOf('~wild', 'items', nodes, []),
+      childOf('bob', 'npcs', nodes, []),
+    ],
+    [['wild_2', 'wild'], ['wild_1', 'wild'], ['bob']],
   );
 });
 

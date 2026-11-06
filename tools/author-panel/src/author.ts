@@ -31,6 +31,11 @@ export const find = (q: string) =>
 /** The `~` placeholders still to write, by file (kernel/ts/play/todo.ts). */
 export const todo = () => fetch('/__author/todo').then((r) => r.json() as Promise<Todo[]>);
 
+/** The abstract NPCs and items a map drop may extend (kernel/ts/play/write.ts `templates`). */
+export type Template = { dir: 'npcs' | 'items'; key: string };
+export const templates = () =>
+  fetch('/__author/templates').then((r) => r.json() as Promise<Template[]>);
+
 /** The balancing reports, each bounded by the watcher (kernel/ts/play/live.ts). */
 export const numbers = () =>
   fetch('/__author/numbers').then(async (r) => {
