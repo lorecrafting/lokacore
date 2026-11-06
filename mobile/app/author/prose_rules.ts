@@ -99,7 +99,7 @@ export const CSS = `
 [data-loka-field]{background:var(--loka-card);color:var(--loka-fg);caret-color:var(--loka-action)}
 [data-loka-unconfirmed]{text-decoration:underline wavy var(--loka-warning)}
 [data-loka-a11y]::after{content:", " attr(data-loka-a11y);position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.loka-note{position:absolute;font:${label};letter-spacing:${type.label.letterSpacing}px;color:var(--loka-dim);z-index:10}
+.loka-note{position:absolute;font:${label};letter-spacing:${type.label.letterSpacing}px;color:var(--loka-dim);background:var(--loka-card);z-index:10}
 .loka-note[data-warn]{color:var(--loka-warning)}
 .loka-note button{font:inherit;color:var(--loka-action);background:none;border:0;padding:0 0 0 ${space.md}px;cursor:pointer}`;
 

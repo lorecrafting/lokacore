@@ -39,7 +39,9 @@ type Props = {
   offer: (add: string[]) => void;
 };
 type Card = ReturnType<typeof useCard>;
-type Doc = Record<string, unknown> & { exits?: Record<string, { to: string; barrier?: string }> };
+type Doc = Record<string, unknown> & {
+  exits?: Record<string, { to: string | { key: string }; barrier?: string }>;
+};
 
 export function Room({ rel, context, diag, offer }: Props) {
   const card = useCard(rel, diag);
@@ -81,7 +83,7 @@ function Exits({ room, exits }: { room: string; exits: NonNullable<Doc['exits']>
       {Object.entries(exits).map(([dir, exit]) => (
         <div key={dir} className="flex flex-wrap items-center gap-1">
           <span className="min-w-0 flex-1 truncate">
-            {dir} → {exit.to}
+            {dir} → {typeof exit.to === 'string' ? exit.to : exit.to.key}
             {exit.barrier ? ` (${exit.barrier})` : ''}
           </span>
           {EXIT_EDITS.map(([id, label]) => (
