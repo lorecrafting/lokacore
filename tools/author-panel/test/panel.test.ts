@@ -548,6 +548,42 @@ test('level 0 opens whole, zooms out no further, and only a pill marks the selec
   await page.close();
 });
 
+// Breaks: palette New sends a kind the server does not know or hides its refusal
+// (loka-wfrgk.60), or Delete sends another file, a row key with a definition file, an unread
+// `was`, or hides the refusal.
+test('palette New and Delete send the starter and the selected file; refusals show', async () => {
+  const page = await open(QUEST);
+  const sent: unknown[] = [];
+  const told: string[] = [];
+  page.on('dialog', (d) => {
+    if (d.type() === 'prompt') return void d.accept('zz');
+    told.push(d.message());
+    void d.accept();
+  });
+  await page.route(/\/__author\/(new|delete)$/, (r) => {
+    sent.push([new URL(r.request().url()).pathname, r.request().postDataJSON()]);
+    return r.fulfill({ status: 400, json: 'refused here' });
+  });
+  const run = async (command: string, alerts: number) => {
+    await page.keyboard.press('Control+k');
+    await page.getByLabel('Find a key, a ~ or a command').fill(command);
+    await page.keyboard.press('Enter');
+    while (told.length < alerts) await page.waitForTimeout(50);
+  };
+  await run('New room', 1);
+  await run('Delete the selected definition', 2);
+  await page.route('**/__author/source?file=*', (r) => r.fulfill({ status: 404, json: {} }));
+  await run('Delete the selected definition', 3);
+  const file = 'quests/carry_letter.json';
+  const was = createHash('sha256').update(readFileSync(join(dir, 'showcase', file))).digest('hex');
+  assert.deepEqual(sent, [
+    ['/__author/new', { kind: 'rooms', name: 'zz' }],
+    ['/__author/delete', { file, was }],
+  ]);
+  assert.deepEqual(told, ['refused here', 'refused here', `${file}: not found`]);
+  await page.close();
+});
+
 // Last: it switches the world. Breaks: a `.scene` dialogue routed to no card or the generic one, a
 // value line without its picker or its verb's keys, a words line without its Book edit, an unknown
 // key or the line's own value sent, Enter not sending, a refusal or a write's Undo not shown, or a
@@ -613,40 +649,4 @@ test('a .scene dialogue opens its text card: a picker per value line, words to t
   const rope = await open({ selection: { kind: 'scene', key: 'rope_reverie' } });
   assert.equal(await rope.getByLabel('treatment').inputValue(), 'reverie'); // the file's, not none
   await rope.close();
-});
-
-// Breaks: palette New sends a kind the server does not know or hides its refusal
-// (loka-wfrgk.60), or Delete sends another file, a row key with a definition file, an unread
-// `was`, or hides the refusal.
-test('palette New and Delete send the starter and the selected file; refusals show', async () => {
-  const page = await open(QUEST);
-  const sent: unknown[] = [];
-  const told: string[] = [];
-  page.on('dialog', (d) => {
-    if (d.type() === 'prompt') return void d.accept('zz');
-    told.push(d.message());
-    void d.accept();
-  });
-  await page.route(/\/__author\/(new|delete)$/, (r) => {
-    sent.push([new URL(r.request().url()).pathname, r.request().postDataJSON()]);
-    return r.fulfill({ status: 400, json: 'refused here' });
-  });
-  const run = async (command: string, alerts: number) => {
-    await page.keyboard.press('Control+k');
-    await page.getByLabel('Find a key, a ~ or a command').fill(command);
-    await page.keyboard.press('Enter');
-    while (told.length < alerts) await page.waitForTimeout(50);
-  };
-  await run('New room', 1);
-  await run('Delete the selected definition', 2);
-  await page.route('**/__author/source?file=*', (r) => r.fulfill({ status: 404, json: {} }));
-  await run('Delete the selected definition', 3);
-  const file = 'quests/carry_letter.json';
-  const was = createHash('sha256').update(readFileSync(join(dir, 'showcase', file))).digest('hex');
-  assert.deepEqual(sent, [
-    ['/__author/new', { kind: 'rooms', name: 'zz' }],
-    ['/__author/delete', { file, was }],
-  ]);
-  assert.deepEqual(told, ['refused here', 'refused here', `${file}: not found`]);
-  await page.close();
 });
