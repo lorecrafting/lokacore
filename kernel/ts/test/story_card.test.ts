@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import { added, allowed, awaits, minimal, pickKind } from '../play/card.ts';
-import { choiceMenu, refuseChoices, refuseRemove } from '../play/choice.ts';
+import { choiceMenu, nested, refuseChoices, refuseRemove } from '../play/choice.ts';
 import { refuseLink } from '../play/link.ts';
 import { hiddenSkills, unlinkable } from '../play/story_counts.ts';
 
@@ -268,13 +268,19 @@ test("a dialogue's choices are refused as the compiler refuses them, and only th
 
 // Break: a choice's add menu offers a field the compiler refuses beside the dialogue's other parts,
 // hides one it accepts, re-offers one present, or offers `order` (the compiler's scene mark:
-// scene_merge.ex:56-57); or the last choice or the riddle's answer is removed (dialogues.ex:315, :288).
+// scene_merge.ex:56-57), or `receive` / `escort` without the capability that owns them
+// (dialogues.ex:383 containment, escort.ex:10 escort); or the last choice or the riddle's answer is
+// removed (dialogues.ex:315, :288).
 test('a choice offers only the fields it can take, and keeps the ones the dialogue needs', () => {
   const menu = ['accept', 'hand_over', 'receive', 'then_failed', 'asked', 'once', 'order', 'steps'];
   const doc = { quest: 'q', riddle: { choice_id: 'b' }, choices: { a: { receive: {} }, b: {} } };
-  assert.deepEqual(choiceMenu(doc, 'a', menu), ['asked', 'once', 'steps']);
-  assert.deepEqual(choiceMenu(doc, 'b', menu), ['hand_over', 'receive', 'once', 'steps']);
-  assert.deepEqual(choiceMenu({ choices: { a: {} } }, 'a', menu), [
+  const caps = { containment: 1 };
+  assert.deepEqual(choiceMenu(doc, 'a', menu, caps), ['asked', 'once', 'steps']);
+  assert.deepEqual(choiceMenu(doc, 'b', menu, caps), ['hand_over', 'receive', 'once', 'steps']);
+  assert.deepEqual(choiceMenu(doc, 'b', menu, {}), ['hand_over', 'once', 'steps']);
+  assert.deepEqual(choiceMenu({ choices: { a: {} } }, 'a', ['escort', 'once'], {}), ['once']);
+  assert.deepEqual(choiceMenu({ choices: { a: {} } }, 'a', ['escort'], { escort: 1 }), ['escort']);
+  assert.deepEqual(choiceMenu({ choices: { a: {} } }, 'a', menu, caps), [
     'accept',
     'hand_over',
     'receive',
@@ -285,4 +291,20 @@ test('a choice offers only the fields it can take, and keeps the ones the dialog
   assert.equal(refuseRemove(doc, 'b'), "the riddle's answer is b");
   assert.equal(refuseRemove(doc, 'a'), undefined);
   assert.equal(refuseRemove({ choices: { a: {} } }, 'a'), 'a dialogue keeps one choice at least');
+});
+
+// Break: a dialogue the player can open shows as a nested set, or a nested set loses its prompt,
+// a label, the generated key of an unset prompt or label, or where a choice leads (mechanics.md:504).
+test('a nested set shows its prompt, labels and links; an entry dialogue is not one', () => {
+  const doc = { entry: false, choices: { a: { label: 'k.a', then: 'deeper' }, b: {} } };
+  assert.deepEqual(nested(doc, 'lesson'), {
+    prompt: 'dialogue.lesson.prompt',
+    choices: [
+      { label: 'k.a', then: 'deeper' },
+      { label: 'dialogue.lesson.choices.b.label', then: undefined },
+    ],
+  });
+  assert.equal(nested({ ...doc, entry: true }, 'lesson'), undefined);
+  assert.equal(nested({ prompt: 'p', choices: {} }, 'lesson'), undefined);
+  assert.equal(nested(undefined, 'lesson'), undefined);
 });

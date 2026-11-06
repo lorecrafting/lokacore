@@ -186,14 +186,22 @@ export function RoomForm({
 
 /** cartridge.json (its `requires.capabilities` and `world`), read again when it changes. */
 export function useCartridge(diag: Props['diag']) {
-  const [cart, setCart] = useState<{ requires?: { capabilities?: object }; world?: Doc }>();
-  const sha = diag.changes.find((c) => c.file === 'cartridge.json')?.sha256;
+  return useSource(diag, 'cartridge.json') as
+    { requires?: { capabilities?: object }; world?: Doc } | undefined;
+}
+
+/** A `.json` source `file`'s document, read again on each write to it (undefined: none). */
+export function useSource(diag: Props['diag'], file?: string) {
+  const [doc, setDoc] = useState<Doc>();
+  const sha = diag.changes.find((c) => c.file === file)?.sha256;
   useEffect(() => {
-    void fetch('/__author/source?file=cartridge.json')
-      .then((r) => r.json())
-      .then((s) => setCart(JSON.parse(s.bytes)));
-  }, [sha]);
-  return cart;
+    if (file?.endsWith('.json'))
+      void fetch(`/__author/source?file=${encodeURIComponent(file)}`)
+        .then((r) => r.json())
+        .then((s) => setDoc(JSON.parse(s.bytes)));
+    else setDoc(undefined);
+  }, [file, sha]);
+  return doc;
 }
 
 /** The definition's words as text keys; Edit opens each line in the Book (agents write no words). */

@@ -1,6 +1,7 @@
 // The Dialogue card's choice tree (docs/rnd/gui-editor-design-2026-11-04.md §4.4): what a dialogue's
 // choices hold together, as the compiler accepts them. The card draws; this decides.
-import { teaches } from './allowed.ts';
+import { allowed, teaches } from './allowed.ts';
+import { proseKey } from './card.ts';
 
 type Obj = Record<string, unknown>;
 const has = (o: Obj, f: string) => Object.hasOwn(o, f);
@@ -19,28 +20,36 @@ export const RENAME =
  */
 export function refuseChoices(doc: Obj, hidden: string[] = []): string | undefined {
   for (const [k, c] of Object.entries(choicesOf(doc))) {
+    // dialogues.ex:367
     if (has(c, 'accept') && has(doc, 'quest'))
-      return `${k}: accept would resolve this dialogue's own quest`; // dialogues.ex:367
+      return `${k}: accept would resolve this dialogue's own quest`;
+    // dialogues.ex:368
     if (has(c, 'accept') && has(c, 'hand_over'))
-      return `${k}: accept and hand_over do not go together`; // dialogues.ex:368
+      return `${k}: accept and hand_over do not go together`;
+    // dialogues.ex:386
     if (has(c, 'receive') && has(c, 'hand_over'))
-      return `${k}: receive and hand_over do not go together`; // dialogues.ex:386
-    if (has(c, 'then_failed') && !has(c, 'check')) return `${k}: then_failed needs a check`; // dialogue_links.ex:45
+      return `${k}: receive and hand_over do not go together`;
+    // dialogue_links.ex:45
+    if (has(c, 'then_failed') && !has(c, 'check')) return `${k}: then_failed needs a check`;
+    // dialogue_links.ex:393
     if (has(c, 'patrol') && [c.then, c.then_failed].some((t) => t !== undefined && t !== 'end'))
-      return `${k}: a patrol ends the talk: no then`; // dialogue_links.ex:393
+      return `${k}: a patrol ends the talk: no then`;
+    // dialogue_asked.ex:32
     if (has(c, 'asked') && (doc.riddle as Obj | undefined)?.choice_id === k)
-      return `${k}: the riddle's answer is never asked`; // dialogue_asked.ex:32
+      return `${k}: the riddle's answer is never asked`;
   }
   const named = ['name', 'riddle'].find((f) => has(doc, f));
+  // skills.ex:157-158
   return teaches(doc, hidden) && named
     ? `a dialogue with a ${named} teaches no hidden skill`
-    : undefined; // skills.ex:157-158
+    : undefined;
 }
 
 /** Why choice `k` cannot be removed from `doc`; undefined when it can. */
 export function refuseRemove(doc: Obj, k: string): string | undefined {
-  if (Object.keys(choicesOf(doc)).length === 1) return 'a dialogue keeps one choice at least'; // dialogues.ex:315
-  if ((doc.riddle as Obj | undefined)?.choice_id === k) return `the riddle's answer is ${k}`; // dialogues.ex:288
+  // dialogues.ex:315, :288
+  if (Object.keys(choicesOf(doc)).length === 1) return 'a dialogue keeps one choice at least';
+  if ((doc.riddle as Obj | undefined)?.choice_id === k) return `the riddle's answer is ${k}`;
   return undefined;
 }
 
@@ -51,11 +60,31 @@ export function withChoice(doc: Obj, k: string, c?: Obj): Obj {
 }
 
 /** The fields of `menu` choice `k` can take without refusal, each tried present as `[]` (steps is
- * read as a list); never `order`, a scene's mark the compiler writes (scene_merge.ex:56-57). */
-export const choiceMenu = (doc: Obj, k: string, menu: string[], hidden: string[] = []) =>
-  menu.filter(
+ * read as a list) and its capability declared in `caps` (allowed.ts); never `order`, a scene's mark
+ * the compiler writes (scene_merge.ex:56-57). */
+export const choiceMenu = (
+  doc: Obj,
+  k: string,
+  menu: string[],
+  caps: object,
+  hidden: string[] = [],
+) =>
+  allowed('dialogues.choices', menu, caps).filter(
     (f) =>
       f !== 'order' &&
       !has(choicesOf(doc)[k], f) &&
       !refuseChoices(withChoice(doc, k, { ...choicesOf(doc)[k], [f]: [] }), hidden),
   );
+
+/** What a `then` to dialogue `key` (`doc`) shows folded when it is a nested set, `entry: false`, which
+ * only a then opens (mechanics.md Links): its prompt's and choices' text keys, and where those lead. */
+export const nested = (doc: Obj | undefined, key: string) =>
+  doc?.entry === false
+    ? {
+        prompt: proseKey(doc.prompt, 'dialogue', key, ['prompt']),
+        choices: Object.entries(choicesOf(doc)).map(([k, c]) => ({
+          label: proseKey(c.label, 'dialogue', key, ['choices', k, 'label']),
+          then: c.then as string | undefined,
+        })),
+      }
+    : undefined;

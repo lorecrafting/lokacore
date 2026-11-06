@@ -139,6 +139,34 @@ test('a quest and a dialogue open their cards; a link to no dialogue is refused'
   await page.close();
 });
 
+// Breaks: a choice whose link leads to a nested set (entry: false, mechanics.md:504) loses the
+// set's read-only prompt and labels, folds a second level, or a link inside it no longer opens
+// that dialogue's own card.
+test('a link to a nested set shows its prompt and labels and opens its card', async () => {
+  const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
+  await page.route('**/__author/change', (r) => r.abort()); // nothing drafted here is written
+  await page.route('**/__author/source?file=*aldous_lesson*', async (r) => {
+    const s = await (await r.fetch()).json();
+    const doc = JSON.parse(s.bytes);
+    doc.entry = false;
+    doc.choices.learn.then = 'aldous_yard'; // a second level: its button, never a fold
+    await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }) });
+  });
+  const bounty = page.locator('[aria-label="choice bounty"]');
+  await bounty.locator('summary').click();
+  await page.getByLabel('bounty then').fill('aldous_lesson');
+  const set = bounty.locator('[aria-label="nested aldous_lesson"]');
+  await set.waitFor({ timeout: boot });
+  const keys = await set.locator('code').allTextContents();
+  assert.deepEqual(keys.slice(0, 2), ['dialogue.aldous_lesson.prompt', 'dialogue.aldous_lesson.learn']);
+  assert.equal(await page.locator('[aria-label^="nested "]').count(), 1);
+  await set.getByRole('button', { name: 'Open aldous_yard' }).click();
+  const title = page.locator('[aria-label="Inspector"]').getByText('aldous_yard', { exact: true });
+  await title.waitFor({ timeout: boot }); // the inspector's title is the opened dialogue's key
+  await page.unrouteAll({ behavior: 'ignoreErrors' }); // its own card reads the source too
+  await page.close();
+});
+
 // Breaks: a control in the shell loses its accessible name, label or contrast (axe serious or
 // critical; the Book frame is another page, tested by the Book's own axe runs).
 test('the shell has no serious or critical axe violations', async () => {

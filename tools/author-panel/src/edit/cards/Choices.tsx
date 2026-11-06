@@ -8,6 +8,7 @@ import { added, minimal, refuseKey, removed } from '../../../../../kernel/ts/pla
 import {
   BADGES,
   choiceMenu,
+  nested,
   RENAME,
   refuseRemove,
   withChoice,
@@ -15,9 +16,11 @@ import {
 import { Badge } from '../../components/ui/badge.tsx';
 import { Button } from '../../components/ui/button.tsx';
 import { Input } from '../../components/ui/input.tsx';
+import type { useDiagnostics } from '../../author.ts';
+import type { Context } from '../fields.tsx';
 import { AddMenu, type useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
-import { HIDE } from './Room.tsx';
+import { HIDE, useSource } from './Room.tsx';
 
 export const LINKS = ['then', 'then_failed'] as const;
 const CHOICE = 'DialogueChoice';
@@ -29,11 +32,15 @@ type Card = ReturnType<typeof useCard>;
 type Doc = Record<string, unknown>;
 
 type Def = { properties: Record<string, unknown>; required: string[] };
-export const Tree = createContext<{ card: Card; defs: Record<string, never>; hidden: string[] }>(
-  null!,
-);
+export const Tree = createContext<{
+  card: Card;
+  defs: Record<string, never>;
+  hidden: string[];
+  caps?: object; // undefined while cartridge.json loads: nothing is offered
+  context: Context;
+  diag: ReturnType<typeof useDiagnostics>;
+}>(null!);
 
-/** `choices`, as a tree: one folded block per choice, a new one added by its key. */
 /** `choices`, as a tree: one folded block per choice, a new one added by its key. */
 export function Choices(p: FieldProps) {
   const { defs } = useContext(Tree);
@@ -116,6 +123,7 @@ function Choice({ p, k, c, optional }: ChoiceProps) {
           absent={optional.filter((f) => !seen(f))}
         />
         <Body p={p} k={k} c={c} ui={ui} />
+        {LINKS.map((f) => (c[f] && c[f] !== 'end' ? <Nested key={f} to={c[f] as string} /> : null))}
         <div className="flex gap-1">
           <Act onClick={() => setSaid(RENAME)}>Rename</Act>
           <Act onClick={remove}>Remove choice</Act>
@@ -130,7 +138,7 @@ type FieldsProps = { k: string; c: Doc; shown: string[]; absent: string[] };
 
 /** Choice `k`'s optional fields: each shown one removable, each absent one the compiler accepts addable. */
 function ChoiceFields({ k, c, shown, absent }: FieldsProps) {
-  const { card, defs, hidden } = useContext(Tree);
+  const { card, defs, hidden, caps } = useContext(Tree);
   const draft = card.draft as Doc;
   const put = (doc: Doc) => (card.change(doc), card.commit());
   const reveal = (f: string) => {
@@ -150,8 +158,38 @@ function ChoiceFields({ k, c, shown, absent }: FieldsProps) {
           <Act onClick={() => drop(f)}>Remove</Act>
         </div>
       ))}
-      <AddMenu fields={choiceMenu(draft, k, absent, hidden)} reveal={reveal} />
+      <AddMenu fields={caps ? choiceMenu(draft, k, absent, caps, hidden) : []} reveal={reveal} />
     </>
+  );
+}
+
+/** A link's target, when a nested set (choice.ts `nested`): its prompt and choice labels read-only
+ * and a button to its own card; one level only, a deeper link is that button alone. */
+function Nested({ to }: { to: string }) {
+  const { context, diag } = useContext(Tree);
+  const node = context.nodes.find((n) => n.ref.endsWith(`:dialogue/${to}`));
+  const set = nested(useSource(diag, node && context.files?.[node.ref]), to);
+  const open = (key: string) => (
+    <Act onClick={() => context.open?.({ kind: 'dialogue', key })}>Open {key}</Act>
+  );
+  if (!set) return null;
+  return (
+    <section
+      aria-label={`nested ${to}`}
+      className="grid gap-1 rounded border border-dashed px-2 py-1"
+    >
+      <div className="flex items-center gap-1">
+        <Badge variant="outline">entry: false</Badge>
+        {open(to)}
+      </div>
+      <code className="truncate">{set.prompt}</code>
+      {set.choices.map((c) => (
+        <div key={c.label} className="flex items-center gap-1">
+          <code className="min-w-0 flex-1 truncate">{c.label}</code>
+          {c.then && c.then !== 'end' ? open(c.then) : null}
+        </div>
+      ))}
+    </section>
   );
 }
 

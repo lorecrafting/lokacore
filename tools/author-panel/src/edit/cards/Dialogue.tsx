@@ -43,8 +43,8 @@ function useGated(base: Card, hidden: string[]) {
 /** The fields the Mechanics menu offers: allowed, and none that a choice refuses (a quest beside a
  * choice's accept). */
 function mechanics(dir: string, cart: Cart, draft: Doc, revealed: string[], hidden: string[]) {
-  const caps = cart && (cart.requires?.capabilities ?? {});
   const offered = addable(dir, registry, draft, revealed);
+  const caps = cart && (cart.requires?.capabilities ?? {});
   return (caps ? allowed(dir, offered, caps, draft, cart?.world, hidden) : []).filter(
     (f) => !refuseChoices({ ...draft, [f]: true }, hidden),
   );
@@ -75,7 +75,7 @@ export function Dialogue({ rel, context, diag }: Props) {
         add={adder(card, defs, DEF)}
         fixed={required} // a name is removable
       />
-      <Tree.Provider value={{ card, defs, hidden }}>
+      <Tree.Provider value={{ card, defs, hidden, caps: cart && (cart.requires?.capabilities ?? {}), context, diag }}>
         <RoomForm
           key={resets}
           rel={rel}

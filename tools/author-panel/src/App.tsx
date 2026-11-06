@@ -118,7 +118,7 @@ function Left({ layout, set, story, book, diag, pick }: Shell) {
   );
 }
 
-function Right({ layout, set, story, book, diag, offer }: Shell) {
+function Right({ layout, set, story, book, diag, offer, pick }: Shell) {
   const { said, compiled, lint, unconfirmed } = diag;
   return (
     <>
@@ -131,7 +131,7 @@ function Right({ layout, set, story, book, diag, offer }: Shell) {
         story={story}
         diag={diag}
         edit={(key) => book.send({ op: 'edit', key })}
-        offer={offer}
+        {...{ offer, pick }}
       />
       <ScrollArea className="min-h-0 flex-1 border-t" aria-label="Console">
         <Compile said={said} compiled={compiled} lint={lint} state={book.state} send={book.send} />
