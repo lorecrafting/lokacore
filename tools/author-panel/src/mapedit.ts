@@ -206,7 +206,8 @@ const addBeat = (s: Run, part: number, n: number) =>
     if (doc.parts.some((p) => p.beats.some((b) => b.n === n))) no(`outline.json already has beat ${n}`);
     const beats = partOf(doc, part);
     const j = beats.findIndex((b) => b.n > n); // in number order, as play reads them
-    return [{ path: ['parts', part, 'beats'], value: beats.toSpliced(j < 0 ? beats.length : j, 0, { n }) }];
+    const at = j < 0 ? beats.length : j;
+    return [{ path: ['parts', part, 'beats'], value: [...beats.slice(0, at), { n }, ...beats.slice(at)] }];
   });
 const titleBeat = (s: Run, part: number, n: number, title: string) =>
   s.change<Outline>('outline.json', (doc) => {

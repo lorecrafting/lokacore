@@ -313,7 +313,7 @@ test('a delete takes the set a /new wrote with it, or refuses naming the set', a
     ['down', 'up'],
   ])
     put(`transports/${a}.json`, `{\n  "reverse": "${b}"\n}\n`);
-  const del = (file: string, also?: Record<string, string>) =>
+  const del = (file: string, also?: Record<string, string | null>) =>
     ask('/delete', { file, was: sha256(read(file)), also });
   const files = async () =>
     (await ask('/journal')).body.find((e: { by: string }) => e.by === 'editor').files.sort();

@@ -132,7 +132,7 @@ function unrow(
   was: unknown,
   artifact: string,
 ) {
-  if (!named(key)) refuse(400, 'key: [a-z0-9_]+');
+  if (!named(key)) return refuse(400, 'key: [a-z0-9_]+');
   const left = users(t.root, artifact, section, key);
   if (left.length) refuse(400, `${key} ${still([], left)}`);
   const before = fresh(path, was);
