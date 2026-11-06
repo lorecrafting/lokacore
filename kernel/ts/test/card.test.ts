@@ -532,7 +532,8 @@ test("an action's and a reaction's add menus offer only fields the compiler acce
 });
 
 // Break: an action's check is added or removed but its failure outcome is not (OUTCOME_MISMATCH,
-// scripted_actions.ex:109), or pairing overwrites an author's failure or touches a paired action.
+// scripted_actions.ex:109), or pairing overwrites an author's failure, touches a paired action or an
+// extends child (its pair may be inherited), or counts a cleared (undefined) check as present.
 test("an action's failure outcome comes and goes with its check", () => {
   const success = { steps: [] };
   const check = { key: 'fish', kind: 'luck', chance: 50 };
@@ -547,6 +548,12 @@ test("an action's failure outcome comes and goes with its check", () => {
   assert.equal(paired(both, defs), both);
   const neither = { outcomes: { success } };
   assert.equal(paired(neither, defs), neither);
+  const child = { extends: 'fish', outcomes: { success, failure: mine } };
+  assert.equal(paired(child, defs), child);
+  assert.deepEqual(paired({ check: undefined, outcomes: { success, failure } }, defs), {
+    check: undefined,
+    outcomes: { success },
+  });
 });
 
 // Break: a reorder, remove or add of shop offer rows diffs to ops that leave a moved row's field

@@ -29,7 +29,7 @@ export function Reaction({ rel, context, diag }: Props) {
         card={card}
         menu={menu}
         add={adder(card, defs, 'source.ReactionRule')}
-        fixed={['on', 'steps']}
+        fixed={(defs['source.ReactionRule'] as { required?: string[] } | undefined)?.required ?? []}
       />
       <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} own={[]} />
     </div>

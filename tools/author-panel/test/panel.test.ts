@@ -118,8 +118,8 @@ test('the shell has no serious or critical axe violations', async () => {
 // Breaks: a reaction or a scripted action routed to the generic card, or its card failing to draw
 // its form on the showcase's own files.
 test('a reaction and an action open their own cards', async () => {
-  await open({ selection: { kind: 'reaction', key: 'cellar_rearms' } }, 'reaction card');
-  await open({ selection: { kind: 'action', key: 'fish' } }, 'action card');
+  await (await open({ selection: { kind: 'reaction', key: 'cellar_rearms' } }, 'reaction card')).close();
+  await (await open({ selection: { kind: 'action', key: 'fish' } }, 'action card')).close();
 });
 
 /** The Flow graph in the left slot, warm: the first open compiles the story on the server (a cold open
