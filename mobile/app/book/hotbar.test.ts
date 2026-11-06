@@ -292,9 +292,10 @@ function points(d: string) {
   return { out, subpaths };
 }
 
-// The showcase's scripted actions drawn with the neutral mark until the designer draws them (loka-x6t.138).
+// The showcase's scripted actions left to the neutral mark on purpose (icon-style-guide.md, "Drawings":
+// none is offered in a room a hostile NPC stands in, so none reaches a slot today).
 const neutral =
-  'carve_spoon chop cook_feast cook_stew cook_stew_croft disarm_cellar disarm_plate fish_croft force_grate force_hall_cupboard force_iron_door force_strongbox force_tollhouse_door gather_ash gather_attic_ash hide lift_store_bar look_about mend pick_hall_strongbox pick_strongbox play_fold_song play_song pull_a pull_b pull_c raise_timbered_hut saw search_cellar search_cleft search_floor search_pool_cleft shout_begone shout_begone_cellar shout_warning shove_drover think_hall_lectern think_lectern think_letter throw_bones throw_fold_bones turn_wheel_1 turn_wheel_2 turn_wheel_3 yard_hide'.split(
+  'carve_spoon chop disarm_cellar disarm_plate fish_croft raise_timbered_hut saw shove_drover'.split(
     ' ',
   );
 
