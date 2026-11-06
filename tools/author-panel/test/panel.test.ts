@@ -115,11 +115,19 @@ test('the shell has no serious or critical axe violations', async () => {
   ]);
 });
 
-// Breaks: a reaction or a scripted action routed to the generic card, or its card failing to draw
-// its form on the showcase's own files.
+// Breaks: a reaction or a scripted action routed to the generic card, its card failing to draw its
+// form on the showcase's own files, or its add menu not gated by the cartridge's declared capabilities
+// (the showcase declares policy and fact, so `when` and `tip` are offered).
 test('a reaction and an action open their own cards', async () => {
-  await (await open({ selection: { kind: 'reaction', key: 'cellar_rearms' } }, 'reaction card')).close();
-  await (await open({ selection: { kind: 'action', key: 'fish' } }, 'action card')).close();
+  for (const [kind, key, field] of [
+    ['reaction', 'letter_late', 'when'],
+    ['action', 'fish', 'tip'],
+  ]) {
+    const page = await open({ selection: { kind, key } }, `${kind} card`);
+    const menu = page.getByLabel(`${kind} card`).getByLabel('Add a field').locator('option');
+    assert.ok((await menu.allTextContents()).includes(field), `${kind} ${key} offers ${field}`);
+    await page.close();
+  }
 });
 
 /** The Flow graph in the left slot, warm: the first open compiles the story on the server (a cold open
