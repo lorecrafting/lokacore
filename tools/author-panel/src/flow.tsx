@@ -146,14 +146,24 @@ function useSay(p: Props, f: Flow, dot: (ref: string) => unknown, follow?: strin
   return say;
 }
 
+/** The hover card: open after F.hoverDelay on a chip; leaving the chip or the card closes it after
+ * the same delay unless the focus is on its chip or in it (rulings S3 Hover card). */
+function useCard(chip: (id: string) => boolean) {
+  const [card, setCard] = useState<string>();
+  const timer = useRef(0);
+  const kept = (c?: string) => (c && (document.activeElement?.getAttribute('data-id') === c || document.activeElement?.closest('[data-flow-card]')) ? c : undefined);
+  const later = (run: () => void) => (clearTimeout(timer.current), (timer.current = window.setTimeout(run, F.hoverDelay)));
+  const hover = (id?: string) => (id ? chip(id) && later(() => setCard(id)) : later(() => setCard(kept)));
+  return { card, setCard, hover };
+}
+
 /** The graph's state and its moves: ink, card, roving tab, view and the actions chips call. */
 function useGraph(p: Props, f: Flow, sel: string | undefined, setOpen: (u: (o: string[]) => string[]) => void) {
   const [el, size] = useSize();
   const v = useView();
   const ink = useInk(p, sel);
-  const [card, setCard] = useState<string>();
+  const { card, setCard, hover } = useCard((id) => f.chips.some((c) => c.id === id));
   const [tab, setTab] = useState<string>();
-  const timer = useRef(0);
   const box = useRef<HTMLInputElement>(null);
   const burst = useBurst(p.story, p.changes);
   const dot = (ref: string) => burst.get(p.story.files[ref] ?? '');
@@ -165,7 +175,6 @@ function useGraph(p: Props, f: Flow, sel: string | undefined, setOpen: (u: (o: s
   const select = (ref: string) => (p.pick({ file: p.story.files[ref], ...fromRef(ref)! }), ink.setMark({ ref, hops: 1 }));
   const chipEl = (id?: string) => (id ? el.current?.querySelector<HTMLElement>(`[data-id="${CSS.escape(id)}"]`) : undefined);
   const focusChip = (id = entry(f, sel)) => chipEl(id)?.focus();
-  const hover = (id?: string) => (clearTimeout(timer.current), id && chip(id) && (timer.current = window.setTimeout(() => setCard(id), F.hoverDelay)));
   const enter = (id: string) => {
     if (chip(id)) return select(id);
     if (id.startsWith('more:')) return setOpen((o) => [...o, id.slice(5)]);

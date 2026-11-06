@@ -133,6 +133,7 @@ export type CardAct = {
   follow?: () => void;
   unfollow?: () => void;
   back: () => void;
+  hover: (id?: string) => void;
 };
 
 /** The hover card's body (rulings S3 Hover card); Play to here and Jump here wait for S4. */
@@ -150,7 +151,7 @@ export function Card({ s, f, ref: r, a }: { s: Story; f: Flow; ref: string; a: C
     </Button>
   );
   return (
-    <PopoverContent data-flow-card align="start" className="w-[280px] p-2 text-xs" onOpenAutoFocus={(e) => e.preventDefault()} onInteractOutside={stay} onEscapeKeyDown={(e) => e.preventDefault()} onKeyDown={keys}>
+    <PopoverContent data-flow-card align="start" className="w-[280px] p-2 text-xs" onOpenAutoFocus={(e) => e.preventDefault()} onInteractOutside={stay} onEscapeKeyDown={(e) => e.preventDefault()} onKeyDown={keys} onMouseEnter={() => a.hover(r)} onMouseLeave={() => a.hover()}>
       <p className="flex items-center gap-1">
         {I ? <I {...ICONED} /> : null}
         <span className="font-mono">{key(r)}</span>

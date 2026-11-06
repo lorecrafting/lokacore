@@ -6,61 +6,30 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
-import { F, layout, type Flow } from '../../../tools/author-panel/src/flow.ts';
+import { cmp, F, layers, layout, type Flow } from '../../../tools/author-panel/src/flow.ts';
 import * as read from '../../../tools/author-panel/src/flowread.ts';
 import { LAYOUT } from '../../../tools/author-panel/src/shell.ts';
-import type { Edge, Story } from '../../../tools/author-panel/src/storylist.ts';
+import type { Story } from '../../../tools/author-panel/src/storylist.ts';
 import { story as build } from '../play/story.ts';
-
-const ref = (kind: string, key: string) => `demo@1:${kind}/${key}`;
-const [q, d1, d2, d3, r1, thera, f] = [
-  ref('quest', 'q'),
-  ref('dialogue', 'd1'),
-  ref('dialogue', 'd2'),
-  ref('dialogue', 'd3'),
-  ref('reaction', 'r1'),
-  ref('reaction', 'thera_greets'),
-  ref('fact', 'f'),
-];
-const model = (refs: string[], edges: Edge[], outline: Story['outline'] = null): Story => ({
-  hash: 'h',
-  graph: { nodes: refs.map((r) => ({ ref: r, kind: r.split(':')[1]!.split('/')[0]! })), edges },
-  report: {
-    unreachable: {},
-    behind_lock: { rooms: [] },
-    orphan_facts: { unused: [], write_only: [], read_only: [f] },
-  },
+import {
+  col,
+  d1,
+  d2,
+  d3,
+  edges,
+  f,
+  line,
+  model,
+  OPEN,
   outline,
-  todo: {},
-  diagnostics: {},
-  map: [],
-  words: {},
-  choices: {},
-  files: {},
-});
-// Beat 1 holds q and d1, beat 2 d2 and d3; d1 `then` d2, forks to d3 by `check` and reads f, as r1
-// does; d2 and d3 `then` back to d1 (two loops). f is a read_only fact; thera_greets is unrelated.
-const edges: Edge[] = [
-  { from: d1, to: d2, path: '.choices.a.then', op: 'then' }, // story.ts links() shape
-  { from: d1, to: d3, path: '/check/fail' },
-  { from: d1, to: f, path: '/when', op: 'fact_compare' },
-  { from: d2, to: d1, path: '/then' },
-  { from: d3, to: d1, path: '/then' },
-  { from: r1, to: f, path: '/when', op: 'fact_compare' },
-];
-const outline: Story['outline'] = {
-  parts: ['Arrival'],
-  beats: [
-    { part: 0, n: 1, title: 'Gate', status: 'built', nodes: [q, d1] },
-    { part: 0, n: 2, title: 'Mill', status: 'built', nodes: [d2, d3] },
-  ],
-  unpaid: [],
-  unseeded: [],
-};
-const planted = model([q, d1, d2, d3, r1, thera, f], edges, outline);
-const OPEN = { fold: [] };
-const line = (fl: Flow, a: string, b: string) => fl.lines.find((l) => l.from === a && l.to === b)!;
-const col = (fl: Flow, id: string) => [...fl.chips, ...fl.stubs].find((c) => c.id === id)!.col;
+  planted,
+  q,
+  r1,
+  ref,
+  thera,
+  V,
+  xy,
+} from './author_flow_fixture.ts';
 
 // Breaks: the cap is off by one, the stub counts the kept chips, or opening the cell keeps the cap.
 test('20 reactions with no inbound edge: 12 chips and +8; opened, 20 and the lane grows', () => {
@@ -234,4 +203,180 @@ test('the showcase: layout under 20 ms, equal across runs, loops exactly the bac
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+// Breaks: a layer starts at 1 or steps by 2, a back edge or self edge raises its target, or an
+// edge to a ref outside the set adds it.
+test('layers: longest path, the back edge and the self edge ignored, outside refs dropped', () => {
+  const e = (from: string, to: string) => ({ from, to, path: '' });
+  const got = layers(
+    ['a', 'b', 'c'],
+    [e('a', 'b'), e('b', 'c'), e('a', 'c'), e('c', 'c'), e('c', 'a'), e('b', 'x')],
+  );
+  assert.deepEqual(
+    [...got],
+    [
+      ['a', 0],
+      ['b', 1],
+      ['c', 2],
+    ],
+  );
+  assert.deepEqual([cmp('a', 'a'), cmp('a', 'b'), cmp('b', 'a')], [0, -1, 1]);
+});
+
+// Breaks: a part, column, lane or chip moves off the S3 grid (beats 160 apart, chips centred,
+// lanes 32 a row plus 12, a shut part one column of count stubs).
+test('the planted grid: parts, columns, lanes, chips and count stubs at their worked places', () => {
+  const fl = layout(planted, OPEN);
+  assert.deepEqual(
+    fl.parts.map((p) => [p.id, p.label, p.open, p.x, p.w]),
+    [
+      ['part:0', 'Part 1  Arrival', true, 0, 320],
+      ['unplaced', 'Unplaced (3)', false, 320, 160],
+    ],
+  );
+  assert.deepEqual(
+    fl.columns.map((c) => [c.id, c.x]),
+    [
+      ['beat:1', 0],
+      ['beat:2', 160],
+      ['unplaced', 320],
+    ],
+  );
+  assert.deepEqual(
+    fl.lanes.map((l) => [l.lane, l.y, l.h]),
+    [
+      ['quest', 32, 44],
+      ['dialogue', 76, 76],
+      ['reaction', 152, 44],
+      ['fact', 196, 44],
+    ],
+  );
+  assert.equal(fl.h, 240);
+  assert.equal(fl.w, 480);
+  assert.deepEqual(xy(fl), [
+    [d1, 8, 76, 0],
+    [d2, 168, 76, 1],
+    [d3, 168, 108, 1],
+    [q, 8, 32, 0],
+    ['count:unplaced|fact', 328, 196, 2],
+    ['count:unplaced|reaction', 328, 152, 2],
+  ]);
+  assert.deepEqual(
+    fl.stubs.map((x) => [x.kind, x.icon, x.n]),
+    [
+      ['count', 'fact', 1],
+      ['count', 'reaction', 2],
+    ],
+  );
+  const shut = layout(planted, { fold: ['part:0'] });
+  assert.deepEqual(
+    shut.columns.map((c) => c.id),
+    ['part:0', 'unplaced'],
+  );
+  assert.deepEqual(
+    shut.stubs.map((x) => [x.id, x.n]),
+    [
+      ['count:part:0|dialogue', 3],
+      ['count:unplaced|fact', 1],
+      ['count:part:0|quest', 1],
+      ['count:unplaced|reaction', 2],
+    ],
+  );
+  assert.equal(shut.lanes.find((l) => l.lane === 'dialogue')!.h, 44);
+});
+
+// Breaks: Unplaced's dependency layers do not become columns, or the path of a forward, a
+// same-column or a back line changes shape.
+test('V with Unplaced open: two layer columns and the three path shapes', () => {
+  const fl = layout(V, { fold: ['unplaced'] });
+  assert.deepEqual(fl.columns.map((c) => [c.id, c.x]).slice(2), [
+    ['layer:0', 320],
+    ['layer:1', 480],
+  ]);
+  assert.deepEqual(
+    xy(fl).filter(([id]) => [r1, thera, f].includes(id as string)),
+    [
+      [f, 328, 196, 2],
+      [r1, 328, 152, 2],
+      [thera, 488, 152, 3],
+    ],
+  );
+  assert.equal(line(fl, d1, d3).d, 'M152,90 C160,90 160,122 168,122');
+  assert.equal(line(fl, d2, d3).d, 'M312,90 C324,90 324,122 312,122');
+  assert.equal(line(fl, d2, d3).loop, false);
+  assert.equal(line(fl, d2, d1).d, 'M312,90 C324,8 -4,8 8,90');
+  assert.equal(line(fl, r1, thera).d, 'M472,166 C480,166 480,166 488,166');
+  assert.equal(read.footer(fl, f), 'following f · 7 nodes · 9 edges · 2 loops · 0 hidden');
+  assert.equal(
+    fl.chips.find((c) => c.id === d1)!.name,
+    'd1, dialogue, beat 1, 5 outbound, 3 inbound',
+  );
+});
+
+// Breaks: a self edge, an edge inside one stub or an edge to an anchor draws a line, or the
+// footer counts lines instead of edges.
+test('V shut: no self line and no line inside a stub; the footer counts edges', () => {
+  const fl = layout(V, OPEN);
+  assert.deepEqual(
+    fl.lines.map((l) => l.id).sort(),
+    [
+      `${d1}>${d2}>s`,
+      `${d1}>${d3}>d`,
+      `${d1}>count:unplaced|fact>d`,
+      `${d2}>${d1}>s`,
+      `${d2}>${d3}>s`,
+      `${d3}>${d1}>s`,
+      'count:unplaced|reaction>count:unplaced|fact>d',
+    ].sort(),
+  );
+  assert.equal(fl.edges, 8);
+  assert.equal(read.footer(fl), '7 nodes · 8 edges · 2 loops · 0 hidden');
+});
+
+// Breaks: the cap is off by one at 12 and 13, the stub's icon is not the first hidden kind, or
+// revealing a hidden ref keeps the cap.
+test('12 reactions: no stub; 13: 12 and a +1 of the next kind, the lane 13 rows; reveal opens', () => {
+  const twelve = Array.from({ length: 12 }, (_, i) =>
+    ref('reaction', `r${String(i).padStart(2, '0')}`),
+  );
+  assert.deepEqual(layout(model(twelve, []), OPEN).stubs, []);
+  const s = model([...twelve, ref('action', 'zz')], []);
+  const fl = layout(s, OPEN);
+  assert.deepEqual(
+    fl.stubs.map((x) => [x.id, x.kind, x.icon, x.n, x.y]),
+    [['more:layer:0|reaction', 'more', 'action', 1, 416]],
+  );
+  assert.equal(fl.lanes[0]!.h, 13 * 32 + 12);
+  assert.equal(layout(s, { fold: [], reveal: ref('action', 'zz') }).chips.length, 13);
+  assert.deepEqual([F.cap, F.rows, F.hoverDelay], [12, 6, 300]);
+});
+
+// Breaks: a filter keeps a node without words to write or without a problem, or a name drops
+// its `~` count, refusals or `unreached`.
+test('filters: needs words keeps the node with placeholders; potential problems keeps the three', () => {
+  const words = {
+    ...planted,
+    todo: { [d2]: [{ file: 'd2.json', words: 0, placeholders: ['a', 'b'] }] },
+  };
+  const fl = layout(words, { fold: [], filters: ['needs words'] });
+  assert.deepEqual(
+    fl.chips.map((c) => c.name),
+    ['d2, dialogue, beat 2, 2 ~, 1 outbound, 1 inbound'],
+  );
+  assert.equal(read.footer(fl), '1 node · 0 edges · 0 loops · 6 hidden');
+  const bad = {
+    ...planted,
+    diagnostics: { [d3]: [{ code: 'x' }] },
+    report: { ...planted.report, unreachable: { quest: [r1] } },
+  };
+  const pp = layout(bad, { fold: ['unplaced'], filters: ['potential problems'] });
+  assert.deepEqual([...pp.at.keys()].sort(), [d3, f, r1].sort());
+  assert.deepEqual(
+    pp.chips.map((c) => c.name).filter((n) => !n.startsWith('f,')),
+    [
+      'd3, dialogue, beat 2, 1 refusal, 1 outbound, 1 inbound',
+      'r1, reaction, unreached, 1 outbound, 0 inbound',
+    ],
+  );
 });

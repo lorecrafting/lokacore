@@ -120,6 +120,7 @@ const cardAct = (p: P, g: Graph, ref: string): CardAct => {
     follow: fact && g.follow !== ref ? () => g.setFollow(ref) : undefined,
     unfollow: fact && g.follow === ref ? () => g.setFollow(undefined) : undefined,
     back: () => g.focusChip(ref),
+    hover: g.act.hover,
   };
 };
 

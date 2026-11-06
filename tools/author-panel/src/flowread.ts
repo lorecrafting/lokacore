@@ -4,13 +4,15 @@ import { reads } from '../../../kernel/ts/play/reads.ts';
 import { cmp, F, key, laneOf, plural, solid, type Chip, type Flow, type Part, type Stub } from './flow.ts';
 import { nearest, type MapRoom } from './map.ts';
 import { fromRef, type Item, type Layout } from './shell.ts';
-import { isOpen, LIST, outlineOf, toggle, type Edge, type Story } from './storylist.ts';
+import { go, isOpen, LIST, outlineOf, toggle, type Edge, type Story } from './storylist.ts';
 
-/** The refs inked by a focus: the node and `hops` steps of edges either way. */
+/** The refs inked by a focus: the node and `hops` steps of edges either way, between lane refs
+ * only (a room, NPC or item is not a node; walking through one would ink unrelated nodes). */
 export function focusInk(s: Story, ref: string, hops: number) {
   const ink = new Set([ref]);
+  const lanes = s.graph.edges.filter((x) => laneOf(x.from) && laneOf(x.to));
   for (let i = 0; i < hops; i++)
-    for (const e of s.graph.edges.filter((x) => ink.has(x.from) || ink.has(x.to)))
+    for (const e of lanes.filter((x) => ink.has(x.from) || ink.has(x.to)))
       ink.add(e.from).add(e.to);
   return ink;
 }
@@ -125,7 +127,9 @@ export function flowItems(s: Story): Item[] {
   ];
 }
 
-/** A Flow palette row applied to the layout (Flow shown), or undefined for any other id. */
+/** A Flow palette row applied to the layout (Flow shown), or undefined for any other id. While
+ * Flow is shown a story row selects its node and a beat row opens its part, in Flow (rulings S3:
+ * Flow never changes the layout on its own). */
 export function flowGo(s: Story, l: Layout, id: string): Layout | undefined {
   const o = outlineOf(s);
   const ids = [...(o?.parts ?? []).map((_, i) => `part:${i}`), 'unplaced'];
@@ -136,5 +140,9 @@ export function flowGo(s: Story, l: Layout, id: string): Layout | undefined {
   if (id === 'flow:expand') return { ...flow, story: all(true) };
   if (id.startsWith('follow:')) return { ...flow, flow: { ...l.flow, follow: id.slice(7) } };
   if (id === 'unfollow') return { ...flow, flow: { ...l.flow, follow: undefined } };
+  if (l.map !== 'flow') return undefined;
+  const ref = id.slice(6);
+  if (id.startsWith('story:')) return { ...flow, selection: { file: s.files[ref], ...fromRef(ref)! } };
+  if (id.startsWith('beat:')) return { ...flow, story: go(s, l.story ?? LIST, id) };
   return undefined;
 }

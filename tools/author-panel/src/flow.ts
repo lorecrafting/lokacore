@@ -6,20 +6,20 @@ import { isOpen, LIST, outlineOf, type Edge, type Story } from './storylist.ts';
 
 /** Drawing constants in px at zoom 1, exempt from the space tokens as the map's `M` is. */
 export const F = {
-  col: 160,
-  w: 144,
-  h: 28,
-  pitch: 32,
-  pad: 12, // space.lg, under a lane's tallest cell
-  top: 32, // room above the top lane for the loops' back arcs
+  col: 160, // mutate-skip: drawing constant
+  w: 144, // mutate-skip: drawing constant
+  h: 28, // mutate-skip: drawing constant
+  pitch: 32, // mutate-skip: drawing constant
+  pad: 12, // mutate-skip: drawing constant (space.lg, under a lane's tallest cell)
+  top: 32, // mutate-skip: drawing constant (room above the top lane for the loops' back arcs)
   cap: 12,
-  chars: 20,
+  chars: 20, // mutate-skip: drawing constant
   dim: 0.3,
   hoverDelay: 300,
-  overview: 0.5, // chips are discs below this zoom
+  overview: 0.5, // mutate-skip: drawing constant (chips are discs below this zoom)
   rows: 6, // the hover card's edge rows before `+N more`
-  gutter: 56, // the opening pan: room for the lane labels left of the first column
-}; // mutate-skip: uncalibrated design value
+  gutter: 56, // mutate-skip: drawing constant (the opening pan: room for the lane labels)
+};
 
 /** Design 5a's five lanes in order; the lane decides a chip's corners (pill, rounded, square). */
 export const LANES = [
@@ -78,7 +78,7 @@ export function layers(refs: string[], edges: Edge[]) {
   const inside = new Set(refs);
   const out = new Map<string, string[]>();
   for (const e of edges)
-    if (inside.has(e.from) && inside.has(e.to) && e.from !== e.to)
+    if (inside.has(e.to))
       out.set(e.from, [...(out.get(e.from) ?? []), e.to].sort(cmp));
   const seen = new Set<string>();
   const post: string[] = [];
