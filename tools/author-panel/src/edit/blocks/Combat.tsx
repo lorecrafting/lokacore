@@ -22,10 +22,9 @@ function Fights({ npc }: { npc: string }) {
         variant="outline"
         className="justify-self-start"
         onClick={() =>
-          numbers().then(
-            (r) => show(fightOf(r.fights, npc)),
-            (e: Error) => show(e),
-          )
+          numbers()
+            .then((r) => show(fightOf(r.fights, npc)))
+            .catch((e: Error) => show(e))
         }
       >
         Run fights
