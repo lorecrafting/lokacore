@@ -185,8 +185,9 @@ test("a new NPC or item lands in the selected room's area, placed in that room",
   // Breaks: the area dropped (the file at the root), or the placement left as the scaffold's.
   await ed.made(c, 'npcs', 'hen');
   await ed.made(c, 'items', 'pail');
-  assert.equal(json('areas/yard/npcs/hen.json').room, 'c');
-  assert.deepEqual(json('areas/yard/items/pail.json').location, { in: 'room', room: 'c' });
+  const [hen, pail] = [json('areas/yard/npcs/hen.json'), json('areas/yard/items/pail.json')];
+  assert.deepEqual([hen.room, hen.location], ['c', undefined]);
+  assert.deepEqual([pail.location, pail.room], [{ in: 'room', room: 'c' }, undefined]);
   assert.equal(existsSync(join(src, 'npcs/hen.json')), false);
   assert.equal(existsSync(join(src, 'items/pail.json')), false);
 });

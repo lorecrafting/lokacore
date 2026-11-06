@@ -76,6 +76,7 @@ export function Entity({ rel, context, diag }: Props) {
 function Placement({ card, dir, rooms }: { card: Card; dir: string; rooms: string[] }) {
   const [bad, setBad] = useState<string>(); // a refused room: shown, never sent
   const draft = card.draft as Doc;
+  const [kept, keep] = useState(draft); // the draft at focus: a refused keystroke puts it back
   const loc = draft.location;
   if (draft.spawn_template !== undefined || loc?.in === 'template') return null;
   const room = dir === 'npcs' ? draft.room : loc?.in === 'room' ? loc.room : undefined;
@@ -96,8 +97,9 @@ function Placement({ card, dir, rooms }: { card: Card; dir: string; rooms: strin
           const v = e.target.value;
           const no = refusePick({ kind: 'room', keys: rooms }, v);
           setBad(no || !v ? v : undefined);
-          if (v && !no) card.change(placed(draft, dir, v));
+          card.change(v && !no ? placed(draft, dir, v) : kept);
         }}
+        onFocus={() => keep(draft)}
         onBlur={card.commit}
       />
       <datalist id="placement-rooms">

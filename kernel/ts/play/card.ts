@@ -262,8 +262,7 @@ export const removed = (doc: Obj, f: string): Obj => {
 export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
   a.room === key && menu.includes(a.kind) ? a.kind : undefined;
 
-// Each field's owning capabilities, as the compiler checks them (UNDECLARED_CAPABILITY: content/room_parts.ex
-// and entities.ex parts/1, cues.ex:54, construction.ex:101, asks.ex:21); a field it omits needs none.
+// Each field's owning capabilities, as UNDECLARED_CAPABILITY checks them (content/); a field it omits needs none.
 const VARIANT = 'description_variant';
 const OWNERS: Record<string, string> = {
   'npcs.ask': 'speech topic',
@@ -273,6 +272,8 @@ const OWNERS: Record<string, string> = {
   'npcs.description_variants': VARIANT,
   'npcs.name_variants': VARIANT,
   'npcs.shop': 'commerce',
+  'items.affects': 'attribute', // derived.ex owner/2
+  'items.bandage': 'bleed combat skill food', // bleed.ex gate/1
   'items.cues': 'sense_cue',
   'items.description_variants': VARIANT,
   'items.edible': 'food',

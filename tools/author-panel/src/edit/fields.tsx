@@ -46,6 +46,7 @@ function DefinitionRef(p: FieldProps) {
   const kind = pickKind(p.fieldPathId.path);
   const keys = choices(kind, context(p).nodes);
   const [bad, setBad] = useState<string>(); // a refused id: shown, never sent
+  const [kept, keep] = useState<unknown>(); // the value at focus: a refused keystroke puts it back
   if (p.formData !== undefined && typeof p.formData !== 'string')
     return <code className="text-xs">{JSON.stringify(p.formData)}</code>; // a global ref: edit as text
   const refused = bad === undefined ? undefined : refusePick({ kind, keys }, bad);
@@ -62,8 +63,9 @@ function DefinitionRef(p: FieldProps) {
           const v = e.target.value;
           const no = refusePick({ kind, keys }, v);
           setBad(no ? v : undefined);
-          if (!no) p.onChange(v || undefined, p.fieldPathId.path);
+          p.onChange(no ? kept : v || undefined, p.fieldPathId.path);
         }}
+        onFocus={() => keep(p.formData)}
         onBlur={(e) => p.onBlur(p.fieldPathId.$id, e.target.value)}
       />
       <datalist id={list}>
@@ -76,6 +78,12 @@ function DefinitionRef(p: FieldProps) {
   );
 }
 
+/**
+ * Any union, and the Policy and Step blocks: an op picker, then the chosen branch's fields. A new
+ * branch starts as `{op}` and nothing else (rjsf's own switch would drop `op` under our defaults);
+ * a `wait` step draws the divider before the rules that run later. The picker's label counts an
+ * array item from 1, as the owner does; its name ends in the 0-based index (chrome rulings §7).
+ */
 function Union(p: FieldProps) {
   const { registry, schema, formData, fieldPathId } = p;
   const [picked, pick] = useState(-1);

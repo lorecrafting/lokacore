@@ -363,14 +363,16 @@ test("an NPC's and an item's add menus offer only fields every owning capability
     'hp',
     'name_variants',
   ]);
-  const item = ['edible', 'fuel', 'mass_grams', 'readable', 'slot', 'tags'];
+  const item = ['affects', 'bandage', 'edible', 'fuel', 'mass_grams', 'readable', 'slot', 'tags'];
   assert.deepEqual(allowed('items', item, {}), ['mass_grams']);
-  assert.deepEqual(allowed('items', item, { food: 1, light: 1, equipment: 1 }), [
-    'edible',
-    'fuel',
-    'mass_grams',
-    'slot',
-  ]);
+  assert.deepEqual(
+    allowed('items', item, { food: 1, light: 1, equipment: 1, bleed: 1, combat: 1 }),
+    ['edible', 'fuel', 'mass_grams', 'slot'],
+  );
+  assert.deepEqual(
+    allowed('items', item, { bleed: 1, combat: 1, skill: 1, food: 1, attribute: 1 }),
+    ['affects', 'bandage', 'edible', 'mass_grams'],
+  );
 });
 
 // Break: a reorder, remove or add of shop offer rows diffs to ops that leave a moved row's field
@@ -417,6 +419,7 @@ test('a reference picker takes the kind its field names and refuses an unknown i
   assert.equal(pickKind(['shop', 'offers', 0, 'item']), 'item');
   assert.equal(pickKind(['daily_schedule', '8', 'room']), 'room');
   assert.equal(pickKind(['services', 1]), 'service');
+  assert.equal(pickKind(['items', '2']), 'item'); // a form's index arrives as a digit string
   assert.equal(pickKind(['location', 'npc']), 'npc');
   const items = { kind: 'item', keys: ['rope', 'lamp'] };
   assert.ok(refusePick(items, 'ropes'));
