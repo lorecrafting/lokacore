@@ -8,6 +8,7 @@ import { join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { F, layout, type Flow } from '../../../tools/author-panel/src/flow.ts';
 import * as read from '../../../tools/author-panel/src/flowread.ts';
+import { LAYOUT } from '../../../tools/author-panel/src/shell.ts';
 import type { Edge, Story } from '../../../tools/author-panel/src/storylist.ts';
 import { story as build } from '../play/story.ts';
 
@@ -120,7 +121,7 @@ test('follow a read_only fact: its readers inked and no solid line; the palette 
   const lit = fl.lines.filter((l) => read.inked(fl, ink, l.from) && read.inked(fl, ink, l.to));
   assert.equal(lit.length, 2);
   assert.ok(lit.every((l) => !l.solid));
-  const l = read.flowGo(planted, { leftOpen: false, map: 'story' } as never, `follow:${f}`)!;
+  const l = read.flowGo(planted, { ...LAYOUT, leftOpen: false, map: 'story' }, `follow:${f}`)!;
   assert.equal(l.map, 'flow');
   assert.equal(l.flow?.follow, f);
 });
