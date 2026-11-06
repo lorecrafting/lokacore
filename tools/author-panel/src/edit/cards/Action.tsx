@@ -12,7 +12,8 @@ import registry from '../registry.json';
 import { adder, Mechanics, RoomForm, useCartridge, Words } from './Room.tsx';
 
 const DEF = 'source.ScriptedAction';
-const COMMAND = 'source.ActionDefinition'; // an action with `command` (source_schema.ex:212)
+// an action with `command` (source_schema.ex:212)
+const COMMAND = 'source.ActionDefinition';
 
 type Props = { rel: string; context: Context; diag: ReturnType<typeof useDiagnostics> };
 type Doc = Record<string, unknown>;
