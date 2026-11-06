@@ -10,6 +10,7 @@ import {
   type FieldErrorProps,
   type FieldTemplateProps,
   type IconButtonProps,
+  type ObjectFieldTemplateProps,
   type TitleFieldProps,
 } from '@rjsf/utils';
 import { ArrowDown, ArrowUp, CircleAlert, Copy, Plus, X, type LucideIcon } from 'lucide-react';
@@ -122,6 +123,26 @@ const FieldErrorTemplate = ({ errors = [], fieldPathId }: FieldErrorProps) => (
     ))}
   </div>
 );
+
+/** A map entry's fields with its optional absent ones folded (a new room detail, loka-wfrgk.76). */
+export function Folded(p: ObjectFieldTemplateProps) {
+  const Default = getTemplate('ObjectFieldTemplate', p.registry); // the registry's, not this one
+  const required = (p.schema.required ?? []) as string[];
+  const data = (p.formData ?? {}) as Record<string, unknown>;
+  const open = p.properties.filter((x) => required.includes(x.name) || data[x.name] !== undefined);
+  const rest = p.properties.filter((x) => !open.includes(x));
+  return (
+    <>
+      <Default {...p} properties={open} />
+      {rest.length ? (
+        <details className="text-muted-foreground">
+          <summary>Optional fields</summary>
+          {rest.map((x) => x.content)}
+        </details>
+      ) : null}
+    </>
+  );
+}
 
 export const templates: FormProps['templates'] = {
   FieldTemplate,

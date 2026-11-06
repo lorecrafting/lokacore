@@ -1,4 +1,4 @@
-// size: allow 410, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
+// size: allow 430, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -351,6 +351,25 @@ export function added(
   const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
   const value = node && (structuredClone(SEEDS[f]) ?? minimal(node, defs));
   return value === undefined ? undefined : { ...doc, [f]: value };
+}
+
+/** `doc` with each detail the saved room lacks given what InspectableDetail requires and no word
+ * invented (loka-wfrgk.76): a `~` description, and its key as its one alias once the key is one
+ * (starters/templates.ex:164 writes `aliases: [name]`); rjsf's `newKey` placeholder is not. */
+export function detailed(saved: Obj, doc: Obj, defs: Record<string, Obj>): Obj {
+  const was = plain(saved.details) ? saved.details : {};
+  if (!plain(doc.details)) return doc;
+  const alias = new RegExp(defs.Alias.pattern as string);
+  const fill = (k: string, d: Obj) => ({
+    ...d,
+    description: d.description ?? { prose: '~' },
+    ...(!(d.aliases as unknown[] | undefined)?.length && alias.test(k) ? { aliases: [k] } : {}),
+  });
+  const each = Object.entries(doc.details).map(([k, d]) => [
+    k,
+    Object.hasOwn(was, k) || !plain(d) ? d : fill(k, d),
+  ]);
+  return { ...doc, details: Object.fromEntries(each) };
 }
 
 /** The definition `doc` of `kind` is (`source.items` → `source.ItemDefinition`): the generated

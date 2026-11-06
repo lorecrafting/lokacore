@@ -7,6 +7,7 @@ import {
   addable,
   addedHere,
   allowed,
+  detailed,
   hidden,
   proseKey,
   removed,
@@ -18,7 +19,7 @@ import { Button } from '../../components/ui/button.tsx';
 import { mapCommand, mapNewest } from '../../mapwire.ts';
 import { fields, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, adder, useCard, useCartridge } from '../Generic.tsx';
-import { Refusal } from '../templates.tsx';
+import { Folded, Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 
 const OWN = ['name', 'description', 'exits']; // drawn above the form
@@ -82,7 +83,8 @@ export function Room({ rel, context, diag, offer }: Props) {
  * one-way toggle writes only the far room, loka-wfrgk.77), else the card's change. */
 const undoOf = (rel: string, card: Card) => {
   const map = mapNewest(rel);
-  if (map !== undefined && map > Number(card.undo ?? 0)) return () => mapCommand('map-undo', undefined);
+  if (map !== undefined && map > Number(card.undo ?? 0))
+    return () => mapCommand('map-undo', undefined);
   return card.undo ? card.back : undefined;
 };
 
@@ -170,10 +172,14 @@ export function RoomForm({
   // a union-rooted kind (a scene) draws its branch's uiSchema, not the root's (rjsf MultiSchemaField)
   for (const at of [ui, ...(ui.anyOf ?? [])]) for (const f of own) at[f] = HIDE;
   for (const f of Object.keys(extra)) ui[f] = { ...ui[f], 'ui:field': f }; // its items' widgets kept
+  ui.details = {
+    ...ui.details,
+    additionalProperties: { ...ui.details?.additionalProperties, 'ui:ObjectFieldTemplate': Folded },
+  };
   return (
     <CardForm
       rel={rel}
-      card={card}
+      card={{ ...card, change: (d) => card.change(detailed(saved.doc as Doc, d as Doc, defs)) }}
       context={context}
       diag={diag}
       ui={ui}
