@@ -54,7 +54,7 @@ async function source(rel: string): Promise<Saved> {
 /** `doc` without its emptied optional lists: removed, not refused by their minItems (loka-wfrgk.78). */
 const unlistedIn = ({ schema, dir }: Saved, doc: unknown) => {
   const defs = schema.$defs as never;
-  return unlisted(doc, defs[definitionOf(defs, dir, doc)], defs);
+  return unlisted(doc, defs[definitionOf(defs, dir, doc)] ?? {}, defs);
 };
 
 /** The card's file: loaded, reloaded on a write from outside (the Book's in-place edit too), changed by a blur and undone. */
@@ -150,10 +150,13 @@ type FormProps = {
   fields?: RegistryFieldsType;
 };
 
+const removes = (t: EventTarget) => !!(t as Element).closest?.('button[aria-label="Remove"]');
+
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
   return (
-    <div onBlur={card.commit}>
+    // rjsf's Remove drops the focused button, so no blur follows: it commits once its change lands
+    <div onBlur={card.commit} onClick={(e) => removes(e.target) && setTimeout(card.commit)}>
       <CardFormBase
         schema={card.saved!.schema}
         uiSchema={ui}

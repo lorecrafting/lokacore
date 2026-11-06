@@ -643,17 +643,15 @@ test('an hour switched to another kind survives a write elsewhere', async () => 
   await page.close();
 });
 
-// Breaks: removing a room's last variant leaves `variants: []`, refused by minItems 1, so the next
-// blur writes nothing and Undo replays an older change (loka-wfrgk.78); asserted on the file on disk.
+// Breaks: removing a room's last variant leaves `variants: []`, refused by minItems 1, or rjsf's
+// Remove, leaving no focus, never blurs: either way nothing is written and Undo replays an older
+// change (loka-wfrgk.78); asserted on the file on disk.
 test("removing a room's last variant writes it gone, and Undo brings it back", async () => {
   const page = await open({ right: 420, selection: { kind: 'room', key: 'sea_cave' } });
   const file = join(dir, 'showcase/areas/tidewater/rooms/sea_cave.json');
   const read = () => JSON.parse(readFileSync(file, 'utf8'));
   const was = read().variants;
   await page.locator('#root_variants').getByRole('button', { name: 'Remove' }).click();
-  const other = page.locator('form input:visible').first(); // the walk's next field: rjsf's Remove leaves focus nowhere
-  await other.focus();
-  await other.blur();
   for (let t = 0; 'variants' in read() && t < 50; t++) await page.waitForTimeout(100);
   assert.equal('variants' in read(), false);
   await page.getByRole('button', { name: 'Undo' }).click();
