@@ -7,7 +7,7 @@ defmodule Mix.Tasks.Loka.New do
   <dir>` pair makes one and targets it for the pairs after it), prints each file it wrote and ends
   with what to fill (`bin/loka todo`'s list) and the next command. `--from` follows a `rooms` pair
   (`--from <cartridge dir>` a `cartridge` pair: a copy with its own id, checkpoints left out) and
-  `--area` (the `areas/<area>/` folder for the pair's file) any pair but a scene;
+  `--area` (the `areas/<area>/` folder for every new file of the pair) any pair but a scene;
   `--cwd` is the directory relative paths resolve against. One line names what is missing and exits
   1, and then nothing is written: the files the earlier pairs wrote are put back.
   """
