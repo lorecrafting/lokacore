@@ -83,6 +83,7 @@ test('C4 CombatView roster bounds and member identity reject malformed rows', ()
     encounter_id: id,
     opponent_id: id,
     name: 'npc.hound',
+    interval: 5,
     active_opponents: [{ id, name: 'npc.hound' }],
   };
   const bad = [
