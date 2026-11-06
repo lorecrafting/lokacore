@@ -22,6 +22,7 @@ const OWNERS: Record<string, string> = {
   'items.room_line_variants': VARIANT,
   'items.slot': 'equipment',
   'items.tags': 'tag',
+  'items.weapon': 'skill', // its skill is a skill definition (skills.ex weapon)
   'rooms.cues': 'sense_cue',
   'rooms.dark': 'light',
   'rooms.dark_description': 'light',
@@ -45,6 +46,8 @@ const OWNERS: Record<string, string> = {
 // Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
 const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean> = {
   'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
+  'npcs.daily_schedule': (doc) => doc.spawn_template !== true, // calendar.ex template_schedules
+  'items.weapon': (doc) => doc.slot === 'wield', // skills.ex weapon
   'actions.duration': (d, w) => !w.time_policy && !/"status\.apply"/.test(JSON.stringify(d)), // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json; duration_status (:94); ponytail: also hides it beside a permanent status, which status.ex:72 lets through
   'actions.craft': (doc) => (doc.target as Obj | undefined)?.kind !== 'spell', // replenish.ex:59
   'reactions.zone': (doc) => (doc.on as Obj | undefined)?.room === undefined, // ReactionRule: a zone forbids on.room

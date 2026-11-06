@@ -12,12 +12,14 @@ chmod +x "$t/stub/mise"
 cd "$t/main"
 git init -q . && mkdir bin node_modules && cp "$src/worktree_setup.sh" bin/
 echo node_modules > .gitignore; echo A > package-lock.json && cksum < package-lock.json > node_modules/.loka-lock-cksum
+mkdir sub && echo S > sub/package-lock.json # a nested package main never installed
 git add -A . && git -c user.name=t -c user.email=t@t commit -qm init
 git worktree add -q "$t/wt" -b wt
 mkdir -p node_modules/.cache "$t/wt/node_modules.tmp/x" # main's cache; a partial clone left by an earlier run
 cd "$t/wt"
 PATH="$t/stub:$PATH" sh bin/worktree_setup.sh
 [ ! -L node_modules ] && [ -f node_modules/.loka-lock-cksum ] && [ ! -e node_modules.tmp ] || { echo 'worktree_setup control failed: matching lockfile not cloned' >&2; exit 1; }
+[ -f sub/node_modules/.loka-lock-cksum ] || { echo 'worktree_setup control failed: nested lockfile not installed' >&2; exit 1; }
 [ ! -e node_modules/.cache ] || { echo "worktree_setup control failed: main's .cache cloned" >&2; exit 1; }
 echo stale > node_modules/.loka-lock-cksum
 PATH="$t/stub:$PATH" sh bin/worktree_setup.sh

@@ -155,21 +155,19 @@ export function RoomForm({
   diag,
   defs,
   own = OWN,
+  blocks = {},
   extra = {},
 }: Omit<Props, 'offer'> & {
   card: Card;
   defs: Record<string, never>;
   own?: string[];
+  blocks?: Record<string, string>; // a field drawn by its block (fields.tsx), when present or added
   extra?: Record<string, (p: FieldProps) => ReactNode>; // a field the card draws itself, by its name
 }) {
   const saved = card.saved!;
-  const ui = hidden(
-    uiSchema(saved.dir, saved.schema as never, defs, {}),
-    saved.dir,
-    registry,
-    card.draft,
-    card.revealed,
-  );
+  const walked = uiSchema(saved.dir, saved.schema as never, defs, {});
+  for (const [f, block] of Object.entries(blocks)) walked[f] = { ...walked[f], 'ui:field': block };
+  const ui = hidden(walked, saved.dir, registry, card.draft, card.revealed);
   for (const f of own) ui[f] = HIDE;
   for (const f of Object.keys(extra)) ui[f] = { ...ui[f], 'ui:field': f }; // its items' widgets kept
   return (
@@ -187,7 +185,8 @@ export function RoomForm({
 /** cartridge.json (its `requires.capabilities` and `world`), read again when it changes. */
 export function useCartridge(diag: Props['diag']) {
   return useSource(diag, 'cartridge.json') as
-    { requires?: { capabilities?: object }; world?: Doc } | undefined;
+    | { requires?: { capabilities?: object }; world?: Doc; calendar?: { hours_per_day?: number } }
+    | undefined;
 }
 
 /** A `.json` source `file`'s document, read again on each write to it (undefined: none). */

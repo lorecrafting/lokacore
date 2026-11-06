@@ -4,7 +4,7 @@
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -36,7 +36,8 @@ before(async () => {
     LOKA_PREVIEW_PORT: `${preview}`, // nothing serves it: the Book frame stays empty
   };
   const io: SpawnOptions = { env, detached: true, stdio: ['ignore', 'ignore', 'inherit'] };
-  const showcase = join(ROOT, 'cartridges/toolbox_showcase');
+  const showcase = join(dir, 'showcase'); // a copy: the block tests write
+  cpSync(join(ROOT, 'cartridges/toolbox_showcase'), showcase, { recursive: true });
   procs.push(spawn(join(ROOT, 'bin/loka'), ['dev', showcase, '--watch'], io));
   procs.push(
     spawn(process.execPath, [join(PANEL, 'node_modules/vite/bin/vite.js')], { ...io, cwd: PANEL }),
@@ -86,6 +87,32 @@ test('at a 280 px inspector the quest card fits its width', async () => {
     .evaluate((e) => [e.scrollWidth, e.clientWidth]);
   assert.ok(client < 280, `inspector ${client} px wide: the kept 280 px layout was not applied`);
   assert.ok(scroll <= client, `card content ${scroll} px in a ${client} px inspector`);
+});
+
+// Breaks: the inspector column does not scroll (no overflow on the card's box, or a box that is not
+// positioned, which its absolute sr-only labels escape), so a tall room card stretches the page (loka-wfrgk.44);
+// or the tall card squeezes the console below it to a sliver.
+test('a tall room card scrolls inside the inspector, not the page', async () => {
+  const page = await open({ selection: { kind: 'room', key: 'tollhouse' } });
+  const [page_, box] = await page
+    .locator('[aria-label="Inspector"]')
+    .evaluate((e) => [
+      e.ownerDocument.scrollingElement!.scrollHeight - e.ownerDocument.defaultView!.innerHeight,
+      e.scrollHeight - e.clientHeight,
+    ]);
+  assert.equal(page_, 0, 'the page scrolls');
+  assert.ok(box > 0, 'the room card fits: this test no longer opens a tall card');
+  assert.ok((await page.getByLabel('Console').boundingBox())!.height >= 100, 'the console is squeezed to a sliver');
+});
+
+// Breaks: clicking the minutes field leaves its text, so typing appends (60 then 600 → 60600; loka-wfrgk.55).
+test('typing in the game minutes field replaces its text', async () => {
+  const page = await open(QUEST);
+  await page.getByRole('tab', { name: 'Project' }).click();
+  const field = page.getByLabel('Game minutes');
+  await field.click();
+  await page.keyboard.type('5');
+  assert.equal(await field.inputValue(), '5');
 });
 
 // Breaks: a quest or dialogue opens the generic card (right.tsx's dispatch), a quest's own name is
@@ -221,10 +248,65 @@ test('the shell has no serious or critical axe violations', async () => {
   );
   // The baseline at this slice, open for the designer: the Project tab's contrast and the journal
   // outcomes' unlabelled key inputs. A fix removes its line; anything new fails.
-  assert.deepEqual(found, [
+  assert.deepEqual(found.sort(), [
     'color-contrast: #radix--trigger-project',
     'label: #root_journal_outcomes_deliver-key, #root_journal_outcomes_burn-key, #root_journal_outcomes_late-key',
   ]);
+});
+
+// Breaks: the NPC card loses its blocks (a field not claimed, the claim lost to hidden(), a block not
+// registered), so hp, attack and the schedule fall back to the generic rows; an hour's room is
+// free text again, not the room picker; a second block write posts from the first's stale card
+// (rjsf keeps its first formContext: the server refuses it, Changed outside); a refused hour is
+// written or a moved one is not; or the fight rows' reason is hidden, or offered beside hp.
+test('an NPC card draws its Combat and Schedule blocks', async () => {
+  const page = await open({ right: 420, selection: { kind: 'npc', key: 'warden' } });
+  for (const f of ['hp', 'attack'])
+    await page.locator(`[aria-label="Combat ${f}"]`).waitFor({ timeout: boot });
+  const schedule = page.locator('fieldset[aria-label="Schedule"]');
+  const hours = schedule.getByRole('textbox', { name: /^hour / });
+  const read = await hours.all();
+  assert.deepEqual(await Promise.all(read.map((h) => h.inputValue())), ['13', '14']);
+  const room = schedule.locator('input[id$="_14"]'); // hour 14's lone room
+  const options = await page.locator(`datalist#${await room.getAttribute('id')}-keys option`).all();
+  const offered = await Promise.all(options.map((o) => o.getAttribute('value')));
+  assert.ok(offered.includes('warden_gate'), `rooms offered: ${offered}`);
+  const add = schedule.getByRole('button', { name: 'Add hour' });
+  const reread = page.waitForResponse((r) => r.url().includes('/__author/schema/')); // the card's reload after the write
+  await add.click();
+  await (await reread).finished();
+  await page.waitForTimeout(50); // the reload rendered
+  const again = page.waitForResponse((r) => r.url().includes('/__author/schema/'));
+  await add.click();
+  const file = join(dir, 'showcase/areas/low_wardle/npcs/warden.json');
+  const written = () => Object.keys(JSON.parse(readFileSync(file, 'utf8')).daily_schedule);
+  for (let t = 0; written().length < 4 && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual(written(), ['0', '1', '13', '14']);
+  await (await again).finished();
+  await page.waitForTimeout(50);
+  const hour = schedule.getByRole('textbox', { name: 'hour 14' });
+  await hour.fill('99');
+  await hour.blur();
+  await schedule.getByText('an hour is below 24').waitFor();
+  await hour.fill('15');
+  await hour.blur();
+  for (let t = 0; !written().includes('15') && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual(written(), ['0', '1', '13', '15']);
+  // Break: the hour field's blur reaches the card's onBlur commit too (Schedule.tsx stopPropagation),
+  // whose stale `was` the server refuses: Changed outside, and Undo cleared.
+  await page.waitForTimeout(1500);
+  assert.equal(await page.getByText('Changed outside').count(), 0);
+  assert.ok(await page.getByRole('button', { name: 'Undo', exact: true }).isEnabled());
+  await page.route('**/__author/numbers', (r) =>
+    r.fulfill({ json: { fights: { why: 'no world' } } }),
+  );
+  await page
+    .locator('[aria-label="Combat attack"]')
+    .getByRole('button', { name: 'Run fights' })
+    .click();
+  await page.locator('[aria-label="Combat attack"]').getByText('no world').waitFor();
+  assert.equal(await page.getByRole('button', { name: 'Run fights' }).count(), 1); // not on hp
+  await page.close();
 });
 
 // Breaks: a reaction or a scripted action routed to the generic card (a command action away from it),

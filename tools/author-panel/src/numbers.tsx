@@ -31,7 +31,7 @@ const Cols = ({ rows }: { rows: string[][] }) => (
   </table>
 );
 
-const Fight = ({ target }: { target: Target }) => (
+export const Fight = ({ target }: { target: Target }) => (
   <div>
     <p className="font-mono text-xs" title={target.target}>
       {shortName(target.target)}

@@ -5,8 +5,7 @@ set -eu
 cd "$(dirname "$0")/.."
 mise exec -- mix deps.get --check-locked
 main=$(git worktree list --porcelain | sed -n '1s/^worktree //p')
-for d in . kernel/ts mobile/app; do
-  [ -f "$d/package-lock.json" ] || continue
+for d in $(git ls-files package-lock.json '*/package-lock.json' | sed 's|/*package-lock.json$||; s|^$|.|'); do
   sum=$(cksum < "$d/package-lock.json")
   # Main's install was made from this lockfile (marker of bin/lib/serve.sh) and main's lockfile still is
   # that one (a stray npm install in main changes both, not the marker; loka-0ljs): clone, else install.

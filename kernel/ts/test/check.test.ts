@@ -205,7 +205,10 @@ function preview(dir: string) {
     { canonical: parts[1]!, sha256: parts[2]! },
     { ...host, newId: () => randomUUID(), time: frozenClock(() => moved) },
   );
-  return { game, replayed: (steps: Step[]) => replay(steps, game, (ms) => (moved += ms)).failed };
+  return {
+    game,
+    replayed: (steps: Step[]) => replay(steps, game, (ms) => (moved += ms), undefined).failed,
+  };
 }
 /** The recorded input for the action a room detail offers: its id comes from the world's context. */
 function onDetail(view: Pick<GameView, 'notices'>, action_key: string) {
