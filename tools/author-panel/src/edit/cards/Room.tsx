@@ -171,7 +171,7 @@ export function RoomForm({
     card.revealed,
   );
   for (const f of own) ui[f] = HIDE;
-  for (const f of Object.keys(extra)) ui[f] = { 'ui:field': f };
+  for (const f of Object.keys(extra)) ui[f] = { ...ui[f], 'ui:field': f }; // its items' widgets kept
   return (
     <CardForm
       rel={rel}
@@ -192,16 +192,15 @@ export function useCartridge(diag: Props['diag']) {
 
 /** A `.json` source `file`'s document, read again on each write to it (undefined: none). */
 export function useSource(diag: Props['diag'], file?: string) {
-  const [doc, setDoc] = useState<Doc>();
+  const [got, setGot] = useState<[string, Doc]>(); // the file read: a slower earlier read shows under no other
   const sha = diag.changes.find((c) => c.file === file)?.sha256;
   useEffect(() => {
     if (file?.endsWith('.json'))
       void fetch(`/__author/source?file=${encodeURIComponent(file)}`)
         .then((r) => r.json())
-        .then((s) => setDoc(JSON.parse(s.bytes)));
-    else setDoc(undefined);
+        .then((s) => setGot([file, JSON.parse(s.bytes)]));
   }, [file, sha]);
-  return doc;
+  return got && got[0] === file ? got[1] : undefined;
 }
 
 /** The definition's words as text keys; Edit opens each line in the Book (agents write no words). */

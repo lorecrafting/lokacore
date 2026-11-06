@@ -42,9 +42,8 @@ function useGated(base: Card, hidden: string[]) {
 
 /** The fields the Mechanics menu offers: allowed, and none that a choice refuses (a quest beside a
  * choice's accept). */
-function mechanics(dir: string, cart: Cart, draft: Doc, revealed: string[], hidden: string[]) {
+function mechanics(dir: string, cart: Cart, caps: object | undefined, draft: Doc, revealed: string[], hidden: string[]) {
   const offered = addable(dir, registry, draft, revealed);
-  const caps = cart && (cart.requires?.capabilities ?? {});
   return (caps ? allowed(dir, offered, caps, draft, cart?.world, hidden) : []).filter(
     (f) => !refuseChoices({ ...draft, [f]: true }, hidden),
   );
@@ -57,9 +56,9 @@ export function Dialogue({ rel, context, diag }: Props) {
   const draft = (card.draft ?? {}) as Doc;
   const defs = (saved?.schema as { $defs?: Record<string, never> } | undefined)?.$defs ?? {};
   const cart = useCartridge(diag);
+  const caps = cart && (cart.requires?.capabilities ?? {});
   if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
-  const menu = mechanics(saved.dir, cart, draft, card.revealed, hidden);
-  const keys = choices('dialogue', context.nodes);
+  const menu = mechanics(saved.dir, cart, caps, draft, card.revealed, hidden);
   const required = ((defs[DEF] as { required?: string[] } | undefined)?.required ?? []) as string[];
   const words = WORDS.filter((f) => draft[f] !== undefined);
   return (
@@ -68,14 +67,14 @@ export function Dialogue({ rel, context, diag }: Props) {
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       {no ? <Refusal boxed>{no}</Refusal> : null}
       <Words draft={draft} context={context} fields={words} />
-      <Links card={card} keys={keys} into={context.unlinkable} />
+      <Links card={card} keys={choices('dialogue', context.nodes)} into={context.unlinkable} />
       <Mechanics
         card={card}
         menu={menu}
         add={adder(card, defs, DEF)}
         fixed={required} // a name is removable
       />
-      <Tree.Provider value={{ card, defs, hidden, caps: cart && (cart.requires?.capabilities ?? {}), context, diag }}>
+      <Tree.Provider value={{ card, defs, hidden, caps, context, diag }}>
         <RoomForm
           key={resets}
           rel={rel}

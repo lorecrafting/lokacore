@@ -119,6 +119,8 @@ test('a quest and a dialogue open their cards; a link to no dialogue is refused'
   assert.deepEqual(tree, ['praise', 'insult', 'boast', 'lean']);
   const boast = bess.locator('[aria-label="choice boast"]');
   await boast.locator('summary').click();
+  // its words keep the form's widgets: Edit in Book, never a text input (fields.tsx TextKey)
+  await boast.getByRole('button', { name: 'Edit in Book' }).first().waitFor({ timeout: boot });
   await boast.getByRole('button', { name: 'Rename' }).click();
   await boast.getByText("a choice's key is its id").waitFor({ timeout: boot });
   await bess.close();
@@ -164,6 +166,30 @@ test('a link to a nested set shows its prompt and labels and opens its card', as
   const title = page.locator('[aria-label="Inspector"]').getByText('aldous_yard', { exact: true });
   await title.waitFor({ timeout: boot }); // the inspector's title is the opened dialogue's key
   await page.unrouteAll({ behavior: 'ignoreErrors' }); // its own card reads the source too
+  await page.close();
+});
+
+// Breaks: a nested set read late, after its link moved to another dialogue, shows under that one.
+test("a slow read of a link's old target never shows under its new one", async () => {
+  const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
+  await page.route('**/__author/change', (r) => r.abort());
+  let sent!: () => void;
+  const late = new Promise<void>((done) => (sent = done));
+  await page.route('**/__author/source?file=*aldous_lesson*', async (r) => {
+    const s = await (await r.fetch()).json();
+    await new Promise((t) => setTimeout(t, 1500)); // lands after aldous_yard's read
+    const bytes = JSON.stringify({ ...JSON.parse(s.bytes), entry: false });
+    await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes }) });
+    sent();
+  });
+  await page.locator('[aria-label="choice bounty"] summary').click();
+  const link = page.getByLabel('bounty then');
+  await link.fill('aldous_lesson');
+  await link.fill('aldous_yard');
+  await late;
+  await page.waitForTimeout(300); // the late read rendered, if it would
+  assert.equal(await page.locator('[aria-label^="nested "]').count(), 0);
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
   await page.close();
 });
 

@@ -183,8 +183,8 @@ function Nested({ to }: { to: string }) {
         {open(to)}
       </div>
       <code className="truncate">{set.prompt}</code>
-      {set.choices.map((c) => (
-        <div key={c.label} className="flex items-center gap-1">
+      {set.choices.map((c, i) => (
+        <div key={i} className="flex items-center gap-1">
           <code className="min-w-0 flex-1 truncate">{c.label}</code>
           {c.then && c.then !== 'end' ? open(c.then) : null}
         </div>
@@ -214,7 +214,7 @@ const Body = ({ p, k, c, ui }: { p: FieldProps; k: string; c: Doc; ui: Doc }) =>
   <p.registry.fields.SchemaField
     name={k}
     schema={p.schema.additionalProperties as never}
-    uiSchema={ui}
+    uiSchema={{ ...(p.uiSchema?.additionalProperties as Doc), ...ui }}
     fieldPathId={toFieldPathId(k, p.registry.globalFormOptions, p.fieldPathId)}
     formData={c}
     errorSchema={p.errorSchema?.[k] as never}
