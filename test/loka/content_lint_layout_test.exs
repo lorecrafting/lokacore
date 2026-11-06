@@ -89,4 +89,27 @@ defmodule Loka.ContentLintLayoutTest do
 
     assert plant(dir, Map.merge(one_exit, to_root)) == []
   end
+
+  # Break: a nested choice's finding names its made-up rel scenes/hal_stay.scene, no file (loka-vduxr.63),
+  # or a nested dialogue of the real hal_x.scene is named under the shorter real stem hal.scene.
+  test "a nested dialogue's finding names its scene file and its key", %{tmp_dir: dir} do
+    File.write!(Path.join(dir, "cartridge.json"), "{}")
+    File.mkdir_p!(Path.join(dir, "scenes"))
+
+    nested =
+      "- Stay\n  elder: words\n  - On\n    elder: words\n  - Leave her be.\n    elder: words\n"
+
+    File.write!(Path.join(dir, "scenes/hal.scene"), "npc: elder\n\nelder: words\n#{nested}")
+
+    File.write!(
+      Path.join(dir, "scenes/hal_x.scene"),
+      "npc: elder\n\nelder: words\n#{String.replace(nested, "Stay", "Go")}"
+    )
+
+    label = "label dialogue.hal_stay.choices.leave_her_be.label ends in a period"
+    findings = Loka.Content.Lint.run(dir)
+    assert "scenes/hal.scene (hal_stay): #{label}" in findings
+    label = "label dialogue.hal_x_go.choices.leave_her_be.label ends in a period"
+    assert "scenes/hal_x.scene (hal_x_go): #{label}" in findings
+  end
 end

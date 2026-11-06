@@ -10,11 +10,11 @@ import { refuseLink } from '../../../../../kernel/ts/play/link.ts';
 import type { useDiagnostics } from '../../author.ts';
 import { Input } from '../../components/ui/input.tsx';
 import type { Context } from '../fields.tsx';
-import { Header, useCard } from '../Generic.tsx';
+import { adder, Header, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 import { Choices, LINKS, Tree } from './Choices.tsx';
-import { adder, Mechanics, RoomForm, useCartridge, Words } from './Room.tsx';
+import { Mechanics, RoomForm, Words } from './Room.tsx';
 
 const WORDS = ['name', 'prompt'];
 const DEF = 'source.DialogueDefinition';

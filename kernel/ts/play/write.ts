@@ -199,7 +199,9 @@ function sceneText(artifact: string | undefined, key: string) {
   if (!artifact || !existsSync(artifact)) return {};
   const { text } = JSON.parse(JSON.parse(readFileSync(artifact, 'utf8')).canonical);
   return Object.fromEntries(
-    Object.entries(text as Record<string, string>).filter(([k]) => k.startsWith(`dialogue.${key}`)),
+    Object.entries(text as Record<string, string>).filter(([k]) =>
+      [`dialogue.${key}.`, `dialogue.${key}_`].some((p) => k.startsWith(p)),
+    ),
   );
 }
 type Last = { places: Record<string, string>; artifact?: string };

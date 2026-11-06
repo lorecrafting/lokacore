@@ -14,10 +14,10 @@ import {
 import type { useDiagnostics } from '../../author.ts';
 import { Input } from '../../components/ui/input.tsx';
 import type { Context } from '../fields.tsx';
-import { Header, useCard } from '../Generic.tsx';
+import { adder, Header, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
-import { adder, Mechanics, RoomForm, useCartridge, Words } from './Room.tsx';
+import { Mechanics, RoomForm, Words } from './Room.tsx';
 
 const WORDS = ['name', 'room_line', 'description'];
 const BLOCKS = { hp: 'Combat', attack: 'Combat', weapon: 'Combat', daily_schedule: 'Schedule' };

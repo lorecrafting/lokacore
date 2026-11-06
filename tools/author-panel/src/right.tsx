@@ -49,8 +49,9 @@ export function Inspector({ sel, story, diag, edit, offer, pick }: Props) {
       </CardHeader>
       <CardContent className="px-3">
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 text-xs">
-          <dt className="text-muted-foreground">ref</dt>
-          <dd className="truncate font-mono">{ref ?? 'not in the last good compile'}</dd>
+          {/* a World file has no ref: its file instead (rel without ref is fileOf's World file, author_shell.test.ts) */}
+          <dt className="text-muted-foreground">{ref || !rel ? 'ref' : 'file'}</dt>{/* mutate-skip: draw, see above */}
+          <dd className="truncate font-mono">{ref || rel || 'not in the last good compile'}</dd>{/* mutate-skip: draw */}
           <dt className="text-muted-foreground">~</dt>
           <dd className={count(story?.todo) ? 'text-warning' : ''}>{count(story?.todo)}</dd>
           <dt className="text-muted-foreground">diagnostics</dt>

@@ -1,4 +1,4 @@
-// size: allow 400, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts
+// size: allow 400, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -153,10 +153,6 @@ export function hidden(
   return out;
 }
 
-/** The keys of the nodes of the kind a reference field names (`room` lists rooms); [] is free text. */
-export const choices = (field: string, nodes: { ref: string; kind: string }[]) =>
-  nodes.filter((n) => n.kind === field).map((n) => n.ref.slice(n.ref.lastIndexOf('/') + 1));
-
 /** The node kind a reference field at `path` picks: its last named step, parent first (`patrol.route.0`). */
 export function pickKind(path: (string | number)[]) {
   const named = path.filter((s) => typeof s === 'string' && !/^\d+$/.test(s)).map(String);
@@ -164,88 +160,6 @@ export function pickKind(path: (string | number)[]) {
   const pick = [`${named.at(-2)}.${name}`, name].find((n) => Object.hasOwn(PICK_NAMES, n));
   return pick ? PICK_NAMES[pick] : name;
 }
-
-/** What a world file's reference field names, by its field (a transport's `reverse` is a transport). */
-const PICKS: Record<string, string> = {
-  ...Object.fromEntries(
-    'entry home area room rooms destination recovery_rooms corridor drop_rooms shrine surface bottom'
-      .split(' ')
-      .map((f) => [f, 'room']),
-  ),
-  ...Object.fromEntries(
-    'corpse npc_corpse player_corpse item items key_item nest'.split(' ').map((f) => [f, 'item']),
-  ),
-  ...Object.fromEntries('npc recipient allies with'.split(' ').map((f) => [f, 'npc'])),
-  reverse: 'transport',
-  currency: 'resource',
-  resource: 'resource',
-  attribute: 'attribute',
-};
-
-// every cartridge's resource pools, listed in resources.json or not (lib/loka/content/resources.ex @defaults)
-const POOLS = ['hp', 'ma', 'mv'];
-
-/**
- * The World card's picker at `path` (its last named step picks the kind): the keys it offers, from
- * the story's nodes or, for a resource or attribute, the root file's `named` keys; none when free.
- */
-export function pickable(
-  path: Step[],
-  nodes: { ref: string; kind: string }[],
-  named: Record<string, string[]>,
-  value?: unknown,
-) {
-  const kind = PICKS[path.filter((s) => typeof s === 'string').at(-1) ?? ''];
-  // a value that is not a key (a global ref's object) keeps its own field
-  if (!kind || (value !== undefined && typeof value !== 'string')) return undefined;
-  const keys = named[kind] ?? choices(kind, nodes);
-  return { kind, keys: kind === 'resource' ? [...new Set([...POOLS, ...keys])] : keys };
-}
-
-/** A key the picker refuses: one no definition of its kind has; none known yet (no compile) is free text. */
-export function refusePick(pick: ReturnType<typeof pickable>, value: string) {
-  return pick?.keys.length && value && !pick.keys.includes(value)
-    ? `no ${pick.kind} ${value}`
-    : undefined;
-}
-
-/** A new root-file entry's key: lowercase words joined by `_`, not one the file has. */
-export function refuseKey(key: string, taken: Record<string, unknown>) {
-  if (!/^[a-z][a-z0-9_]{0,63}$/.test(key))
-    return 'a key is up to 64 lowercase letters, digits and _';
-  return Object.hasOwn(taken, key) ? `already ${key}` : undefined;
-}
-
-/** The World card's keyed root files, each new entry's least fields (ResourceSpec, AttributeSpec) at 0. */
-export const ROOTS: { rel: string; field: string; blank: Record<string, number> }[] = [
-  {
-    rel: 'resources.json',
-    field: 'resources',
-    blank: { minimum: 0, maximum: 0, start: 0, gain: 0 },
-  },
-  { rel: 'attributes.json', field: 'attributes', blank: { start: 0 } },
-];
-
-/** A file the World card opens: a root file (`root`), or one population, transport or barrier. */
-export const worldFile = (rel: string, root = false) =>
-  /^(cartridge|resources|attributes)\.json$/.test(rel) ||
-  (!root && /(^|\/)(populations|transports|barriers)\/[^/]+\.json$/.test(rel));
-
-/** The resource and attribute keys the ROOTS docs (in order) hold: `{resource: [...], attribute: [...]}`. */
-export const rootNames = (docs: unknown[]): Record<string, string[]> =>
-  Object.fromEntries(
-    ROOTS.map(({ field }, i) => [
-      field.slice(0, -1),
-      Object.keys(((docs[i] ?? {}) as Obj)[field] ?? {}),
-    ]),
-  );
-
-/** What changes when a ROOTS file is written, so the card refetches its keys then only. */
-export const rootStamp = (changes: { file: string; sha256: string }[]) =>
-  changes
-    .filter((c) => ROOTS.some((r) => r.rel === c.file))
-    .map((c) => c.sha256)
-    .join();
 
 /** A typed field's value: an emptied field is unset, a number field's text a number. */
 export const entered = (text: string, number = false) =>
@@ -384,6 +298,24 @@ export function added(
   return value === undefined ? undefined : { ...doc, [f]: value };
 }
 
+/** The definition `doc` of `kind` is (`source.items` → `source.ItemDefinition`): the generated
+ * if/then/else on its present fields (`abstract`, `extends`, `command`) followed to its `$ref`. */
+export function definitionOf(defs: Record<string, Obj>, kind: string, doc: unknown): string {
+  let name = `source.${kind}`;
+  for (let n: Obj | undefined = defs[name]; n;) {
+    const ref = n.$ref as string | undefined;
+    if (ref) n = defs[(name = ref.slice(ref.lastIndexOf('/') + 1))];
+    else if (!n.if) break;
+    else {
+      const on = (((n.if as Obj).required ?? []) as string[]).every((f) =>
+        Object.hasOwn((doc ?? {}) as Obj, f),
+      );
+      n = (on ? n.then : n.else) as Obj | undefined;
+    }
+  }
+  return name;
+}
+
 /** A field `added` seeds into the draft only: written with the author's pick (a targetless offer: quests.ex:63-66). */
 export const awaits = (def: string, f: string) => `${def}.${f}` === 'source.QuestDefinition.offer';
 
@@ -397,4 +329,27 @@ export const removed = (doc: Obj, f: string): Obj => {
 export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
   a.room === key && menu.includes(a.kind) ? a.kind : undefined;
 
-export { allowed } from './allowed.ts';
+import { allowed } from './allowed.ts';
+export { allowed };
+
+/** The generic card's add menu (a command action's, right.tsx's fallback): `only` narrows the
+ * registry's fields, then the cartridge's capabilities gate them as the compiler does
+ * (UNDECLARED_CAPABILITY); none until cartridge.json is read. */
+export const cardMenu = (
+  kind: string,
+  registry: Record<string, Surfaces>,
+  doc: unknown,
+  revealed: string[],
+  cart: { requires?: { capabilities?: object }; world?: Record<string, unknown> } | undefined,
+  only = (fields: string[]) => fields,
+) =>
+  cart
+    ? allowed(
+        kind,
+        only(addable(kind, registry, doc, revealed)),
+        cart.requires?.capabilities ?? {},
+        plain(doc) ? doc : {},
+        cart.world,
+      )
+    : [];
+export * from './world_card.ts';

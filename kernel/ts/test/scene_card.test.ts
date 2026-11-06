@@ -109,7 +109,8 @@ test('/set refuses each thing that is not a real key on a value line', (t) => {
 });
 
 // Break: the served /set takes its keys from no compile (write.ts), or writes no journal; a
-// `.scene`'s /source carries none of its last compile's words (the push has only changed ones).
+// `.scene`'s /source carries none of its last compile's words (the push has only changed ones), or
+// another dialogue's whose key starts with this one's.
 test('POST /set is served, refusing an abstract NPC and undone by /undo', async (t) => {
   const { root, read } = sampler(t);
   const original = read();
@@ -126,6 +127,12 @@ test('POST /set is served, refusing an abstract NPC and undone by /undo', async 
     'dialogue.stranger_talk.choices.ask_their_name.narration',
     'dialogue.stranger_talk.prompt',
   ]);
+  // a nested set's words are the file's, a key that only starts the same (`stranger_talkx`) is not
+  const own = { 'dialogue.stranger_talk.prompt': 'a', 'dialogue.stranger_talk_ask.prompt': 'b' };
+  const text = { ...own, 'dialogue.stranger_talkx.prompt': 'c' };
+  writeFileSync(artifact, JSON.stringify({ canonical: JSON.stringify({ text }) }));
+  assert.deepEqual(await words(), own);
+  writeFileSync(artifact, JSON.stringify(compiled(join(SAMPLER)))); // /set's keys are the compile's
   const post = async (path: string, sent: object) => {
     const res = await fetch(url + path, { method: 'POST', body: JSON.stringify(sent) });
     return [res.status, await res.json()] as [number, any];

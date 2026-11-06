@@ -594,7 +594,7 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   topics); a scene's `on_end.assign[n].fact` and `on.rest.credit`; a quest's
   `expedition.survived_fact`, `expedition.faction`, `exchange.contribution`, `exchange.faction`,
   `deadline.fact` and `deadline.trust_fact`; an ancestry's `faction.fact`; an item's
-  `weapon.durability.fact` (a hit wears it); a service's `benefit.fact` (a repair restores it). Facts the engine owns
+  `weapon.durability.fact` (a hit wears it); a service's `benefit.fact` (a repair restores it) and `benefit.account` (a deposit or withdraw writes it). Facts the engine owns
   are left out: the [Compiler](#compiler)'s reserved facts (position, `scene_<key>`,
   `story_point_<key>`, `skill_<key>`, `uses_<key>`, `seen_tip_<key>`), a quest patrol's
   `trust_fact` and an entitlement service's fact, as RESERVED_FACT keeps them.

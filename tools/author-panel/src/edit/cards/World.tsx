@@ -10,6 +10,7 @@ import {
   entered,
   fieldErrors,
   hidden,
+  newEntry,
   pickable,
   refuseKey,
   refusePick,
@@ -129,7 +130,7 @@ function Keyed({ rel, field, blank, diag }: (typeof ROOTS)[number] & { diag: Dia
   const add = () => {
     const no = refuseKey(key, rows);
     setRefused(no);
-    if (!no) (put({ ...rows, [key]: blank }), card.commit(), setKey(''));
+    if (!no) (put({ ...rows, [key]: newEntry({ rel, field, blank }, key) }), card.commit(), setKey(''));
   };
   const remove = (k: string) => {
     const { [k]: _gone, ...rest } = rows;

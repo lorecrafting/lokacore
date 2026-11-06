@@ -18,9 +18,9 @@ import { Button } from '../../components/ui/button.tsx';
 import { Input } from '../../components/ui/input.tsx';
 import type { useDiagnostics } from '../../author.ts';
 import type { Context } from '../fields.tsx';
-import { AddMenu, type useCard } from '../Generic.tsx';
+import { AddMenu, type useCard, useSource } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
-import { HIDE, useSource } from './Room.tsx';
+import { HIDE } from './Room.tsx';
 
 export const LINKS = ['then', 'then_failed'] as const;
 const CHOICE = 'DialogueChoice';

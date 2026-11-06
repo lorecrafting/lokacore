@@ -30,7 +30,7 @@ defmodule Loka.Content.Lint do
     # ponytail: a bundled definition lints and prints under its root address; upgrade: Source.at/2.
     root = for {rel, kind, v} <- files, is_map(v), into: %{}, do: {lint_rel(rel, kind), v}
 
-    LintLayout.at_real(find.(root), files) ++ layout.(files)
+    LintLayout.at_real(find.(root), files, dir) ++ layout.(files)
   end
 
   defp lint_rel(_, {_, key, [dir, _]}), do: dir <> "/" <> key <> ".json"
