@@ -1,0 +1,8 @@
+id: author-panel-raw-colours
+valid:
+  - "const a = <path className='fill-none stroke-foreground' />;"
+  - "const a = <path fill={tone} />;"
+invalid:
+  - "const a = <path fill='#fff' />;"
+  - "const a = <path stroke='currentColor' />;"
+  - "const a = <span color='red' />;"

@@ -9,6 +9,7 @@ import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { after, before, test } from 'node:test';
+import { added } from '../play/card.ts';
 import { serve } from '../play/live.ts';
 import type { MapRoom } from '../../../tools/author-panel/src/map.ts';
 import {
@@ -156,6 +157,31 @@ test('move to area moves the file and the cartridge still compiles', async () =>
   assert.equal(compiled.status, 0, compiled.stderr);
 });
 
+test("an NPC given hp by the card's Add compiles", () => {
+  // Breaks: Add hp seeded at the schema's least value (BODY_BELOW_ZERO, resources.ex), so a
+  // combat NPC always starts from a file the compiler refuses.
+  const defs = JSON.parse(
+    readFileSync(join(REPO, 'schemas/source/defs.schema.json'), 'utf8'),
+  ).$defs;
+  const [prose, room] = [{ prose: '~' }, 'start'];
+  const ox = { keywords: ['ox'], name: prose, description: prose, room_line: prose, room };
+  mkdirSync(join(src, 'npcs'));
+  writeFileSync(
+    join(src, 'npcs/ox.json'),
+    JSON.stringify(added(ox, 'hp', defs, 'source.NpcDefinition')),
+  );
+  const compiled = spawnSync(
+    'mix',
+    ['loka.compile', src, join(dir, 'out.json'), '--allow-placeholders'],
+    {
+      cwd: REPO,
+      encoding: 'utf8',
+    },
+  );
+  rmSync(join(src, 'npcs'), { recursive: true });
+  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
+});
+
 test('a barrier drop writes a locked barrier named on both faces, and refuses a one-way exit', async () => {
   // Breaks: one face left without the barrier (BARRIER_MISMATCH); `initial` not locked; a barrier
   // on a one-way exit.
@@ -179,6 +205,17 @@ test("a barrier between two rooms of one area is that area's; a refusal leaves n
   await ed.barrier(c, 'east', [...rooms(), shed], 'gate', false);
   assert.deepEqual(json('areas/yard/barriers/gate.json').initial, 'closed');
   assert.equal(existsSync(join(src, 'barriers/gate.json')), false);
+});
+
+test("a new NPC or item lands in the selected room's area, placed in that room", async () => {
+  // Breaks: the area dropped (the file at the root), or the placement left as the scaffold's.
+  await ed.made(c, 'npcs', 'hen');
+  await ed.made(c, 'items', 'pail');
+  const [hen, pail] = [json('areas/yard/npcs/hen.json'), json('areas/yard/items/pail.json')];
+  assert.deepEqual([hen.room, hen.location], ['c', undefined]);
+  assert.deepEqual([pail.location, pail.room], [{ in: 'room', room: 'c' }, undefined]);
+  assert.equal(existsSync(join(src, 'npcs/hen.json')), false);
+  assert.equal(existsSync(join(src, 'items/pail.json')), false);
 });
 
 test('a map point maps to its layout cell, and a drag between cells to a compass direction', () => {

@@ -16,9 +16,10 @@ export type Layout = {
   rightOpen: boolean;
   tablet: boolean;
   tab: 'hierarchy' | 'project';
-  map: 'map' | 'story';
+  map: 'map' | 'story' | 'flow';
   selection?: Selection;
-  story?: ListState; // the Story list's folds, focus and trace
+  story?: ListState; // the Story list's folds, focus and trace (Flow shares the folds)
+  flow?: { follow?: string; filters?: string[] }; // the Flow graph's followed fact and filters
 };
 type Side = 'left' | 'right' | 'slot';
 
@@ -39,9 +40,7 @@ export const LAYOUT: Layout = {
 
 export const reset = (side: Side) => RANGE[side][2];
 export const clamp = (side: Side, px: number, most = RANGE[side][1]) =>
-  Number.isFinite(px)
-    ? Math.min(most, Math.max(RANGE[side][0], Math.round(px)))
-    : reset(side);
+  Number.isFinite(px) ? Math.min(most, Math.max(RANGE[side][0], Math.round(px))) : reset(side);
 const GROW: Record<Side, Record<string, number>> = {
   left: { ArrowRight: 1, ArrowLeft: -1 },
   right: { ArrowLeft: 1, ArrowRight: -1 },
@@ -67,7 +66,12 @@ export function load(storage: Pick<Storage, 'getItem'>): Layout {
     // a hand-edited or old value: the defaults
   }
   const l = { ...LAYOUT, ...kept };
-  return { ...l, left: clamp('left', l.left), right: clamp('right', l.right), slot: clamp('slot', l.slot) };
+  return {
+    ...l,
+    left: clamp('left', l.left),
+    right: clamp('right', l.right),
+    slot: clamp('slot', l.slot),
+  };
 }
 export const save = (storage: Pick<Storage, 'setItem'>, l: Layout) =>
   storage.setItem(STORE, JSON.stringify(l));
@@ -113,6 +117,8 @@ export const COMMANDS: Item[] = [
   // the map's edits on the selected room (mapwire.ts `mapCommand`)
   ['map-grow', 'New room from here'],
   ['map-area', 'Move room to area'],
+  ['map-npc', 'New NPC here'],
+  ['map-item', 'New item here'],
   ['map-unlink', 'Delete exit'],
   ['map-one-way', 'One-way exit (toggle)'],
   ['map-door', 'Door on exit'],
@@ -183,7 +189,7 @@ export type Timings = {
   kind: 'prose' | 'structural' | 'refusal';
   sha256?: string;
 };
-export const BUDGET = { prose: 300, structural: 1500, refusal: 1000, card: 100 }; // mutate-skip: uncalibrated design value
+export const BUDGET = { prose: 300, structural: 1500, refusal: 1000, card: 100, flowOpen: 300, flowUpdate: 100 }; // mutate-skip: uncalibrated design value
 /** One edit's milliseconds: compile and publish, and for a structural edit the Book's load until `ready`. */
 export const total = (t: Timings, load: number) => t.compile + t.publish + load;
 export const within = (t: Timings, load = 0) => total(t, load) <= BUDGET[t.kind];
