@@ -1,7 +1,8 @@
 // The Room card (docs/rnd/gui-editor-design-2026-11-04.md §6, E6a): the room's words open in the
 // Book, its exits take the map's edits, its mechanics are added (here or from the Book) and removed;
 // every write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, type ReactNode, useEffect, useState } from 'react';
+import type { FieldProps } from '@rjsf/utils';
 import {
   addable,
   addedHere,
@@ -15,13 +16,13 @@ import type { useDiagnostics } from '../../author.ts';
 import { addHere } from '../../book.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { mapCommand } from '../../mapwire.ts';
-import type { Context } from '../fields.tsx';
+import { fields, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, adder, useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 
 const OWN = ['name', 'description', 'exits']; // drawn above the form
-const HIDE = { 'ui:field': 'Hidden', 'ui:widget': 'hidden' };
+export const HIDE = { 'ui:field': 'Hidden', 'ui:widget': 'hidden' };
 const EXIT_EDITS = [
   ['map-unlink', 'Unlink'],
   ['map-one-way', 'One-way'],
@@ -148,13 +149,13 @@ export function RoomForm({
   defs,
   own = OWN,
   blocks = {},
-  nested = {},
+  extra = {},
 }: Omit<Props, 'offer'> & {
   card: Card;
   defs: Record<string, never>;
   own?: string[];
   blocks?: Record<string, string>; // a field drawn by its block (fields.tsx), when present or added
-  nested?: Record<string, string[]>; // a map's entry fields drawn above: `{choices: ['then']}`
+  extra?: Record<string, (p: FieldProps) => ReactNode>; // a field the card draws itself, by its name
 }) {
   const saved = card.saved!;
   const walked = uiSchema(saved.dir, saved.schema as never, defs, {});
@@ -162,27 +163,37 @@ export function RoomForm({
   const ui = hidden(walked, saved.dir, registry, card.draft, card.revealed);
   // a union-rooted kind (a scene) draws its branch's uiSchema, not the root's (rjsf MultiSchemaField)
   for (const at of [ui, ...(ui.anyOf ?? [])]) for (const f of own) at[f] = HIDE;
-  for (const [m, fs] of Object.entries(nested)) {
-    const entry = ((ui[m] ??= {}).additionalProperties ??= {});
-    for (const f of fs) entry[f] = HIDE;
-  }
-  return <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />;
+  for (const f of Object.keys(extra)) ui[f] = { ...ui[f], 'ui:field': f }; // its items' widgets kept
+  return (
+    <CardForm
+      rel={rel}
+      card={card}
+      context={context}
+      diag={diag}
+      ui={ui}
+      fields={{ ...fields, ...extra }}
+    />
+  );
 }
 
 /** cartridge.json (its `requires.capabilities` and `world`), read again when it changes. */
 export function useCartridge(diag: Props['diag']) {
-  const [cart, setCart] = useState<{
-    requires?: { capabilities?: object };
-    world?: Doc;
-    calendar?: { hours_per_day?: number };
-  }>();
-  const sha = diag.changes.find((c) => c.file === 'cartridge.json')?.sha256;
+  return useSource(diag, 'cartridge.json') as
+    | { requires?: { capabilities?: object }; world?: Doc; calendar?: { hours_per_day?: number } }
+    | undefined;
+}
+
+/** A `.json` source `file`'s document, read again on each write to it (undefined: none). */
+export function useSource(diag: Props['diag'], file?: string) {
+  const [got, setGot] = useState<[string, Doc]>(); // the file read: a slower earlier read shows under no other
+  const sha = diag.changes.find((c) => c.file === file)?.sha256;
   useEffect(() => {
-    void fetch('/__author/source?file=cartridge.json')
-      .then((r) => r.json())
-      .then((s) => setCart(JSON.parse(s.bytes)));
-  }, [sha]);
-  return cart;
+    if (file?.endsWith('.json'))
+      void fetch(`/__author/source?file=${encodeURIComponent(file)}`)
+        .then((r) => r.json())
+        .then((s) => setGot([file, JSON.parse(s.bytes)]));
+  }, [file, sha]);
+  return got && got[0] === file ? got[1] : undefined;
 }
 
 /** The definition's words as text keys; Edit opens each line in the Book (agents write no words). */
