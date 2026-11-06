@@ -149,6 +149,18 @@ async function grow(s: Run, a: MapRoom, dir: string, key: string) {
 const move = async (s: Run, r: MapRoom, area: string | null) =>
   s.call('move', { file: fileOf(r), was: (await s.read(fileOf(r))).was, area });
 
+type Outline = { parts: { beats: { n: number; nodes?: string[] }[] }[] };
+/** Bind (design 5c): `short` joins beat `n` of part `part` in outline.json. */
+const bind = (s: Run, part: number, n: number, short: string) =>
+  s.change<Outline>('outline.json', (doc) => {
+    const beats = doc.parts[part]?.beats ?? no(`outline.json has no part ${part + 1}`);
+    const j = beats.findIndex((b) => b.n === n);
+    if (j < 0) no(`part ${part + 1} has no beat ${n}`);
+    const nodes = beats[j].nodes ?? [];
+    if (nodes.includes(short)) no(`beat ${n} already binds ${short}`);
+    return [{ path: ['parts', part, 'beats', j, 'nodes'], value: [...nodes, short] }];
+  });
+
 /** Undoes `ids` newest first, dropping each as it goes, so a refusal leaves only what stands. */
 async function undo(io: Io, ids: number[]) {
   while (ids.length) {
@@ -205,6 +217,7 @@ export function editor(io: Io) {
       run((s) => barrier(s, a, dir, rooms, key, locked)),
     grow: (a: MapRoom, dir: string, key: string) => run((s) => grow(s, a, dir, key)),
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
+    bind: (part: number, n: number, short: string) => run((s) => bind(s, part, n, short)),
   };
 }
 export type Editor = ReturnType<typeof editor>;

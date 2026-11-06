@@ -153,3 +153,8 @@
     @apply min-w-0; /* a fieldset's min-content width would let a truncated description widen the card */
   }
 }
+
+/* A missing beat's swatch (chrome rulings section 4: hatched). */
+@utility hatch {
+  background: repeating-linear-gradient(45deg, var(--border) 0 1px, var(--background) 1px 4px);
+}

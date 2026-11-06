@@ -140,9 +140,13 @@ test('the graph holds every DefinitionRef with its path, and the op of the step 
         to: 'f@1:fact/f_wo',
         path: '.choices.yes.steps[2].fact',
         op: 'fact.assign',
+        set: true,
       },
     ],
   );
+  // Break: an object with a cartridge_id and no kind is taken for a DefinitionRef.
+  const loose = contentGraph({ rooms: { hall: { note: { cartridge_id: 'f' } } } });
+  assert.deepEqual(loose.edges, []);
 });
 
 // A cartridge without rooms or an entry. Each fact is read by a quest's policy; the
@@ -161,7 +165,16 @@ test('engine write sites and engine-owned facts are not reported read_only', () 
         expedition: { survived_fact: R('fact', 'survived') },
         policy: {
           op: 'all',
-          items: ['slain', 'ended', 'survived', 'trust', 'skill_blade', 'worn', 'mended'].map(read),
+          items: [
+            'slain',
+            'ended',
+            'survived',
+            'trust',
+            'skill_blade',
+            'worn',
+            'mended',
+            'sown',
+          ].map(read),
         },
       },
       walk: { patrol: { trust_fact: R('fact', 'trust') } },
@@ -170,6 +183,9 @@ test('engine write sites and engine-owned facts are not reported read_only', () 
       sword: { location: { in: 'template' }, weapon: { durability: { fact: R('fact', 'worn') } } },
     }),
     services: defs('service', { mend: { benefit: { op: 'repair', fact: R('fact', 'mended') } } }),
+    reactions: defs('reaction', {
+      sow: { steps: [{ op: 'fact.stamp', fact: R('fact', 'sown') }] },
+    }),
     facts: defs('fact', {
       slain: {},
       known: {},
@@ -179,6 +195,7 @@ test('engine write sites and engine-owned facts are not reported read_only', () 
       skill_blade: {},
       worn: {},
       mended: {},
+      sown: {},
     }),
   };
   assert.deepEqual(reachReport(c).orphan_facts, { unused: [], write_only: [], read_only: [] });

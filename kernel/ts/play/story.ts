@@ -15,6 +15,7 @@ import { artifactBytes, compiled } from './compiled.ts';
 import { contentGraph, reachReport } from './reach.ts';
 import { placed } from './guard.ts';
 import { files, todo, type Todo } from './todo.ts';
+import { choiceCounts, keysIn, wordsByNode } from './story_counts.ts';
 import { refString } from '../src/runtime/decision.ts';
 
 type Dev = { canonical: string; sha256: string };
@@ -86,14 +87,6 @@ function nodeOf(rel: string | undefined, refs: Map<string, string>) {
   return at && refs.get(`${at.ext === 'scene' ? 'dialogues' : at.dir}/${at.key}`);
 }
 
-// Every string in a definition: among them, the text keys it names.
-const keysIn = (v: unknown): string[] =>
-  typeof v === 'string'
-    ? [v]
-    : isObj(v) || Array.isArray(v)
-      ? Object.values(v).flatMap(keysIn)
-      : [];
-
 const add = <T>(into: Record<string, T[]>, ref: string | undefined, row: T) => {
   if (ref) (into[ref] ??= []).push(row);
 };
@@ -140,6 +133,8 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     diagnostics: byNode,
     outline: beats(source, { refs, defs, todos, unreached }),
     map: rooms(source, c, refs),
+    words: wordsByNode(defs, (c.text ?? {}) as Record<string, unknown>),
+    choices: choiceCounts(c),
   };
 }
 
@@ -236,6 +231,7 @@ function beats(source: string, bound: Bound) {
       ...(title !== undefined && { title }),
       status,
       ...(missing.length && { missing }),
+      nodes: [...new Set(refs.filter((r) => r !== undefined))],
     };
   });
   // each seed needs a pays in a later beat, each pays a seed in an earlier one (outline order)
@@ -249,7 +245,7 @@ function beats(source: string, bound: Bound) {
       .filter((p) => !all.slice(0, i).some((e) => e.seeds?.includes(p)))
       .map((pays) => ({ pays, n: b.n })),
   );
-  return { beats: rows, unpaid, unseeded };
+  return { parts: outline.parts.map((p) => p.title ?? null), beats: rows, unpaid, unseeded };
 }
 
 /** live.ts's `GET /story`: the model built on the first ask after each compile (`stale()`), with

@@ -1,6 +1,7 @@
 // `bin/loka dev --watch`'s API (kernel/ts/play/live.ts), proxied at /__author by vite.config.ts.
 import { useEffect, useState } from 'react';
-import type { MapRoom } from './map.ts';
+import type { Story, Todo } from './storylist.ts';
+export type { Edge, Beat, Outline, Story, Todo } from './storylist.ts';
 import type { Timings } from './shell.ts';
 import type { Numbers } from '../../../kernel/ts/play/numbers.ts';
 
@@ -27,7 +28,6 @@ export type Found = {
 export const find = (q: string) =>
   fetch(`/__author/find?q=${encodeURIComponent(q)}`).then((r) => r.json() as Promise<Found>);
 
-export type Todo = { file: string; words: number; placeholders: string[] };
 /** The `~` placeholders still to write, by file (kernel/ts/play/todo.ts). */
 export const todo = () => fetch('/__author/todo').then((r) => r.json() as Promise<Todo[]>);
 
@@ -88,15 +88,6 @@ export function useDiagnostics() {
   return { ...last, compiled: last.compiled ?? true, changes, timings };
 }
 
-export type Story = {
-  hash: string;
-  graph: { nodes: { ref: string; kind: string }[]; edges: unknown[] };
-  report: { unreachable: Record<string, string[]>; behind_lock: { rooms: string[] } };
-  todo: Record<string, unknown[]>;
-  diagnostics: Record<string, unknown[]>;
-  files: Record<string, string>;
-  map: MapRoom[];
-};
 /** The Story map's model (kernel/ts/play/story.ts): the definitions, their `~` and diagnostics. */
 export const story = () =>
   fetch('/__author/story').then(async (r) => {
