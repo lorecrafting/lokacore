@@ -107,7 +107,7 @@ test('each round on the clock begins its own block of the combat log', () => {
 // Breaks: a death that closes no fight (bled out on the clock) shows an earlier fight's closed page,
 // or its Back to World, instead of the dead page (book-ui.md, Dead page).
 test('a death after a closed fight shows the dead page, not the closed fight', () => {
-  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
+  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 };
   const h = mounted(view({ combat: undefined }));
   try {
     h.publish(
@@ -137,7 +137,7 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until i
       h.tap(CONTENTS);
       h.tap('Settings');
       assert.ok(h.texts().includes('Settings'));
-      const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
+      const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 };
       h.publish(
         view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
         'combat.hit',
@@ -409,7 +409,7 @@ test('a death with revival lands in the spirit state until Rise', () => {
     entities: [{ id, kind: 'npc', name: 'npc.rat', actions: [] }],
   });
   assert.deepEqual(validate('GameView', wire), []);
-  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
+  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 };
   const died = () => {
     const h = mounted(view({ combat: undefined }));
     h.texts(); // mounts the subscription

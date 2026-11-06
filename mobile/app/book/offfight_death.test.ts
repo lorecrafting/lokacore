@@ -128,7 +128,7 @@ test('an encounter ending the spirit state does not reread the death', () => {
 // Breaks (book-ui.md, Closure): a death that closes an encounter shows the dead page instead of
 // the Combat page.
 test('a death that closes a fight keeps the Combat page', () => {
-  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
+  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 };
   const h = cellar();
   try {
     h.publish(
