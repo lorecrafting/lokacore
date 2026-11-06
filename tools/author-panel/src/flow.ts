@@ -1,7 +1,6 @@
 // The Flow graph's layout (docs/design/editor-map-and-story-rulings.md S3): the story lanes on a
 // grid of beats (or dependency layers) and the drawn edges. No React and no layout library;
 // tested from kernel/ts/test/author_flow.test.ts. Ink, keys and the palette are in flowread.ts.
-import type { Change } from './author.ts';
 import { fromRef, type Layout } from './shell.ts';
 import { isOpen, LIST, outlineOf, type Edge, type Story } from './storylist.ts';
 
@@ -267,5 +266,5 @@ export const inColumn = (f: Flow, col: number) =>
   [...f.chips, ...f.stubs].filter((x) => x.col === col).sort((a, b) => a.y - b.y);
 
 /** The changes newer than `since`; before any story, the last burst (one message shares one `seen`). */
-export const burst = (changes: Change[], since?: number) =>
+export const burst = <C extends { seen: number }>(changes: C[], since?: number) =>
   changes.filter((c) => (since === undefined ? c.seen === changes[0]!.seen : c.seen > since));
