@@ -9,6 +9,7 @@ import { test } from 'node:test';
 import { diff } from '../play/card.ts';
 import { sha256 } from '../play/guard.ts';
 import { serve } from '../play/live.ts';
+import { reachable } from '../play/world_card.ts';
 
 // hand-formatted, not the canonical layout a write produces: undo must restore these bytes
 const CARTRIDGE = '{"id": "c", "title": "t",\n "world": {"theft": {"attribute": "grit"}}}\n';
@@ -59,4 +60,24 @@ test('a World card edit round-trips to its file and undo restores the bytes', as
     assert.equal((await ask('/undo', { id: done.body.id })).status, 200, file);
     assert.equal(read(file), bytes, file);
   }
+});
+
+// Break: a picker offers a def from another area, which area_rules.ex:27 refuses in an area file;
+// or hides a root def, an own-area def or a room (each allowed: areas.ex:70-73, area_rules.ex:27).
+test('the pickers offer an area file its own area, the root and every room', () => {
+  const nodes = ['hob', 'own', 'top', 'yard', 'bundled'].map((ref, i) => ({
+    ref,
+    kind: i === 3 ? 'room' : 'npc',
+  }));
+  const files = {
+    hob: 'areas/hub/npcs/hob.json',
+    own: 'areas/law/npcs/own.json',
+    top: 'npcs/top.json',
+    yard: 'areas/hub/rooms/yard.json',
+  };
+  const offered = (rel?: string) => reachable(nodes, files, rel).map((n) => n.ref);
+  assert.deepEqual(offered('areas/law/barriers/door.json'), ['own', 'top', 'yard', 'bundled']);
+  assert.deepEqual(offered('areas/law.json'), ['own', 'top', 'yard', 'bundled']);
+  assert.deepEqual(offered('barriers/door.json'), ['hob', 'own', 'top', 'yard', 'bundled']);
+  assert.deepEqual(offered(), ['hob', 'own', 'top', 'yard', 'bundled']);
 });

@@ -7,6 +7,25 @@ type Obj = Record<string, unknown>;
 /** The keys of the nodes of the kind a reference field names (`room` lists rooms); [] is free text. */
 export const choices = (field: string, nodes: { ref: string; kind: string }[]) =>
   nodes.filter((n) => n.kind === field).map((n) => n.ref.slice(n.ref.lastIndexOf('/') + 1));
+/** A source file's area (Areas.area_of, areas.ex:57-63): `<a>` for `areas/<a>.json` and `areas/<a>/<dir>/<file>`. */
+const areaOf = (rel = '') => {
+  const [top, area, ...rest] = rel.split('/');
+  if (top !== 'areas') return undefined;
+  return rest.length ? (rest.length === 2 ? area : undefined) : area?.replace(/\.[^.]*$/, '');
+};
+/** Another area's definition a file in `from` may not name (Areas.crossed, areas.ex:70-73): its area, else undefined. */
+export const crossed = (from?: string, to?: string) => {
+  const [a, b] = [areaOf(from), areaOf(to)];
+  return a && b && a !== b ? b : undefined;
+};
+/** The nodes a definition in file `rel` may name: any room, else not another area's (area_rules.ex:27).
+ * ponytail: a node in an `areas/<a>.json` bundle has no file here, so counts as the root's. */
+export const reachable = <N extends { ref: string; kind: string }>(
+  nodes: N[],
+  files: Record<string, string> = {},
+  rel?: string,
+) => nodes.filter((n) => n.kind === 'room' || !crossed(rel, files[n.ref]));
+
 /** What a world file's reference field names, by its field (a transport's `reverse` is a transport). */
 const PICKS: Record<string, string> = {
   ...Object.fromEntries(

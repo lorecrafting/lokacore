@@ -1,6 +1,6 @@
 // The shell's right column: the inspector (the selection's summary, then the generic card that edits
 // its `.json` source) over the console (the change feed, you or outside, and the last compile's diagnostics).
-import { editable, worldFile } from '../../../kernel/ts/play/card.ts';
+import { editable, reachable, worldFile } from '../../../kernel/ts/play/card.ts';
 import type { Change, Story, useDiagnostics } from './author.ts';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card.tsx';
 import { World } from './edit/cards/World.tsx';
@@ -35,7 +35,7 @@ export function Inspector({ sel, story, diag, edit, offer, pick }: Props) {
   const ref = places(sel, story?.graph.nodes ?? []).inspector?.ref;
   const rel = fileOf(sel, ref, story?.files);
   const { hidden, unlinkable, files } = story ?? {};
-  const nodes = story?.graph.nodes ?? [];
+  const nodes = reachable(story?.graph.nodes ?? [], files, rel); // every picker offers what the card's file may name
   const context = { kind: sel.kind, key: sel.key, nodes, edit, hidden, unlinkable, files, open: pick };
   const count = (rows?: Record<string, unknown[]>) => (ref && rows?.[ref]?.length) || 0;
   const unreached =
