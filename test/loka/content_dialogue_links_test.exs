@@ -427,10 +427,10 @@ defmodule Loka.ContentDialogueLinksTest do
     base = [
       {@guard, shut},
       {"dialogues/a_x.json", talk("guard")},
-      {"dialogues/b_y.json", talk("guard")}
+      {"dialogues/b_y.json", talk("guard")},
+      {"dialogues/z_open.json", talk("guard", %{"choices" => %{"x" => teach}})}
     ]
 
-    base = [{"dialogues/z_open.json", talk("guard", %{"choices" => %{"x" => teach}})} | base]
     skill = Jason.decode!(File.read!("cartridges/persuade_sampler/skills/intimidate.json"))
     hidden = Map.merge(skill, %{"hidden" => true, "prerequisite" => gate})
     guessed = &for(d <- &1, d["code"] == "ENTRY_GUESSED", do: d["data"]["target"])
