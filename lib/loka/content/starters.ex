@@ -1,4 +1,4 @@
-# size: allow 336, the area folder lookups (a room or starter file in any areas/<area>/) and --extends and the provider's resource start join the starter writer
+# size: allow 337, the area folder lookups (a room or starter file in any areas/<area>/) and --extends and the provider's resource start join the starter writer
 defmodule Loka.Content.Starters do
   @moduledoc """
   `bin/loka new <kind> <name>`: writes a compiling starter for one source kind with every line a
@@ -324,9 +324,10 @@ defmodule Loka.Content.Starters do
         []
 
       merged ->
-        hook.(path, if(File.exists?(path), do: File.read!(path)))
+        bytes = if File.exists?(path), do: File.read!(path)
+        hook.(path, bytes)
         File.mkdir_p!(Path.dirname(path))
-        File.write!(path, Parts.pretty(merged))
+        File.write!(path, Parts.pretty_over(merged, bytes))
         [path]
     end
   end

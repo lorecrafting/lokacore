@@ -1,4 +1,4 @@
-# size: allow 631, one case per starter kind and refusal; the area placement and companion cases join them
+# size: allow 660, one case per starter kind and refusal; the area placement, companion, provider start and key order cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -55,6 +55,34 @@ defmodule Loka.ContentStartersTest do
     assert Path.wildcard(Path.join(dir, "**/*.json")) |> length() == 2
     assert {:error, "no cartridge.json in " <> _} = Starters.write(tmp, "rooms", "r")
     assert {:ok, _} = Starters.write(dir, "text", "a.b")
+  end
+
+  # Breaks: a starter re-sorting the keys of a file it adds to; the editor writes insertion
+  # order, so every file a starter touched churned whole (loka-wfrgk.68).
+  test "a starter keeps a file's own key order and adds after it", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+
+    fact =
+      ~s({"version": 1, "scopes": ["player"], "value_type": {"type": "bool", "default": false}})
+
+    File.write!(Path.join(dir, "facts.json"), ~s({"facts": {"zz": #{fact}}}))
+    {:ok, _} = Starters.write(dir, "facts", "aa")
+
+    assert File.read!(Path.join(dir, "facts.json")) =~ """
+           {
+             "facts": {
+               "zz": {
+                 "version": 1,
+                 "scopes": [
+                   "player"
+                 ],
+                 "value_type": {
+                   "type": "bool",
+                   "default": false
+                 }
+               },
+               "aa": {
+           """
   end
 
   # Breaks: the service's provider seeded with a fixed 10 the resource's maximum refuses
