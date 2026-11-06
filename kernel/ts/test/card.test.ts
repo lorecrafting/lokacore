@@ -1,4 +1,4 @@
-// size: allow 716, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 727, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -43,6 +43,7 @@ import {
   constraintOnly,
   tagHidden,
   worldFile,
+  unlisted,
 } from '../play/card.ts';
 import { paired, menuOf } from '../play/action.ts';
 import { change } from '../play/edit_model.ts';
@@ -268,6 +269,16 @@ test('an hour switched to another kind keeps its room', () => {
   const list = [{ room: 'green', when: { kind: 'luck', chance: 5 } }, 'gate'];
   assert.equal(start(hour, 3, list, defs), list);
   assert.equal(start(hour, 0, list, defs), 'gate');
+});
+
+// Break: removing the last variant leaves `variants: []`, which minItems 1 refuses, so nothing is
+// written (loka-wfrgk.78); a required list (a detail's aliases) or one with no minimum stays.
+test('an emptied optional list leaves the file', () => {
+  const doc = { variants: [], details: { well: { aliases: [], variants: [] } }, zones: [] };
+  assert.deepEqual(unlisted(doc, defs['source.RoomDefinition'], defs), {
+    details: { well: { aliases: [] } },
+    zones: [],
+  });
 });
 
 // Break: an `extends` partial naming no kind (`check: {chance: 70}`) draws only the picker and

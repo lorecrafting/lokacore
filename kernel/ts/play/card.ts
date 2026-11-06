@@ -1,4 +1,4 @@
-// size: allow 400, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
+// size: allow 404, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -59,6 +59,30 @@ export function applied(saved: unknown, draft: unknown): unknown {
   change(out, diff(saved, draft));
   return out;
 }
+
+/**
+ * `doc` without each optional list the author emptied whose schema wants at least one item: a
+ * room's last variant removed deletes the field (loka-wfrgk.78), which `[]` would hold refused.
+ */
+export function unlisted(doc: unknown, node: Obj, defs: Record<string, Obj>): unknown {
+  if (!plain(doc)) return doc;
+  const n = deref(node, defs);
+  const props = (n.properties ?? {}) as Record<string, Obj>;
+  const each = plain(n.additionalProperties) ? n.additionalProperties : {};
+  const required = (n.required ?? []) as string[];
+  return Object.fromEntries(
+    Object.entries(doc).flatMap(([k, v]) => {
+      const s = deref(props[k] ?? each, defs);
+      const gone =
+        Array.isArray(v) && !v.length && (s.minItems as number) >= 1 && !required.includes(k);
+      return gone ? [] : [[k, unlisted(v, s, defs)]];
+    }),
+  );
+}
+const deref = (s: Obj, defs: Record<string, Obj>): Obj => {
+  const ref = s.$ref as string | undefined;
+  return ref ? deref(defs[ref.slice(ref.lastIndexOf('/') + 1)] ?? {}, defs) : s;
+};
 
 /**
  * The draft after a reload: the reloaded `doc` with the edits from `base` to `now` that were not

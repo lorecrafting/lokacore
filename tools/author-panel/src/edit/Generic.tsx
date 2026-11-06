@@ -20,6 +20,7 @@ import {
   hidden,
   rebase,
   status,
+  unlisted,
 } from '../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
 import { ask, type useDiagnostics } from '../author.ts';
@@ -49,6 +50,12 @@ async function source(rel: string): Promise<Saved> {
   const schema = await fetch(`/__author/schema/${s.kind}`).then((r) => r.json());
   return { doc: JSON.parse(s.bytes), sha256: s.sha256, dir: s.kind, schema };
 }
+
+/** `doc` without its emptied optional lists: removed, not refused by their minItems (loka-wfrgk.78). */
+const unlistedIn = ({ schema, dir }: Saved, doc: unknown) => {
+  const defs = schema.$defs as never;
+  return unlisted(doc, defs[definitionOf(defs, dir, doc)], defs);
+};
 
 /** The card's file: loaded, reloaded on a write from outside (the Book's in-place edit too), changed by a blur and undone. */
 export function useCard(rel: string, diag: Diag) {
@@ -84,7 +91,7 @@ export function useCard(rel: string, diag: Diag) {
     if (!ops.length) return void (held && setRefused(held)); // a refusal stays until the next write
     void post('change', { file: rel, was: saved!.sha256, ops }, 'Changed outside: reloaded.', held);
   };
-  const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, doc)));
+  const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, unlistedIn(saved!, doc))));
   const back = () => void post('undo', { id: undo }, 'Changed since: not undone.');
   const reveal = (f: string) => setRevealed([...revealed, f]);
   const unreveal = (f: string) => setRevealed(revealed.filter((r) => r !== f)); // back in the add menu
