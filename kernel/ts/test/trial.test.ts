@@ -217,6 +217,8 @@ test('paying the fine moves 5 pennies to the jailer and frees the prisoner', () 
     ['narration.jailer.paid'],
   );
   assert.equal(pennies(r.world, body(r.world)), 5);
+  // Break: pay without `then: end` reopens the hub it shut (every choice unavailable, only closing works).
+  assert.equal(pending(r.world, r.world.character), undefined);
   assert.equal(pennies(r.world, npc(r.world, 'jailer')), 5);
   // Break: the force policy also requires `wanted`, so a freed prisoner cannot force the grate.
   assert.equal(force(r.world)?.available, true);
