@@ -3,6 +3,7 @@
 // where the compiler has already expanded every short ref (lib/loka/content/leaf_refs.ex, resolve.ex).
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { placed } from './guard.ts';
 import { files } from './todo.ts';
 
 const CAP = 100; // a one-letter search answers at once; `total` says how many there were
@@ -66,4 +67,35 @@ export function find(source: string, artifact: string, q: string) {
         if (++total <= CAP) hits.push({ at: `${rel}:${i + 1}`, text: line.trim() });
       });
   return { hits, total, refs: referrers(source, artifact, q, rels) };
+}
+
+/** What a delete of `section/key` would leave dangling, so the compile would refuse it: the other
+ * definitions whose refs name it as its own kind, and the source files that extend it.
+ * ponytail: reads the last good compile, so a definition added under Hold or since a refused compile
+ * is not seen; recompile first when that bites. */
+export function users(source: string, artifact: string, section: string, key: string): Referrer[] {
+  const rels = files(source);
+  const extending = rels
+    .filter((rel) => placed(rel)?.dir === section && placed(rel)?.ext === 'json')
+    .filter((rel) => {
+      try {
+        return JSON.parse(readFileSync(join(source, rel), 'utf8'))?.extends === key;
+      } catch {
+        return false; // a file that is not JSON is the compile's to report
+      }
+    })
+    .map((rel) => ({ kind: 'extends', by: rel.replace(/\.json$/, ''), at: `${rel}:1` }));
+  if (!existsSync(artifact)) return extending;
+  const c = JSON.parse(JSON.parse(readFileSync(artifact, 'utf8')).canonical);
+  const defs = { ...c[section], ...(section === 'actions' && c.scripted_actions) }; // scripted actions are authored under actions/
+  const own = Object.keys(defs).find((k) => k.endsWith(`/${key}`)); // `<cartridge>@<version>:<kind>/<key>`
+  const kind = own?.slice(own.indexOf(':') + 1, own.lastIndexOf('/'));
+  // its own refs, and the layout row the delete drops with a room, leave nothing dangling
+  const refs = referrers(source, artifact, key, rels).filter(
+    (r) =>
+      r.kind === kind &&
+      r.by.replace(/^scripted_actions\//, 'actions/') !== `${section}/${key}` &&
+      r.by !== 'layout',
+  );
+  return [...refs, ...extending];
 }

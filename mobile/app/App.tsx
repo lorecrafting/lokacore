@@ -50,13 +50,13 @@ export const fonts = {
 // save name: web keeps a storage slot per file, so after a content change or a kernel_api bump the pinned-release
 // refusal offers Start over; earlier chapters' saves stay untouched.
 // ponytail: no story picker until the approved release needs one.
-// The author preview (metro.config.js) keeps one save per kernel_api and edited cartridge's hash: an edit starts
-// fresh without re-pinning the release save or meeting pinned_release_missing, and nothing is
-// deleted. ponytail: those dev saves pile up in the browser; clear the site's data to drop them.
+// The author preview (metro.config.js) keeps one save per kernel_api and clock, never the release save: the
+// browser's save pool holds six files, so a save per edit filled it within four edits (loka-wfrgk.58). A
+// dev save pinned to another edit starts over (its file and trace stay) and the place replays.
 const devCartridge = process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1';
 if (devCartridge && !__DEV__) throw new Error('a release build must bundle the pinned chapter');
 const NAME = devCartridge
-  ? `loka-dev${devClock ? '-frozen' : ''}-${INSTALLED.kernel_api}-${chapter.sha256.slice(0, 16)}.db` // two clocks never share a save
+  ? `loka-dev${devClock ? '-frozen' : ''}-${INSTALLED.kernel_api}.db` // two clocks never share a save
   : 'loka-showcase.db';
 // The build's kernel version (ADR-075 §3): the commit metro.config.js stamped, always -dirty in a
 // development bundle (it can change after the stamp); no stamp: the zero commit, -dirty.
@@ -240,7 +240,10 @@ function useWebSession() {
     let live = true;
     g.loka_web_opening.then((opened) => {
       session = opened;
-      if (devClock) bootPlace(opened);
+      const renewed =
+        devCartridge && !opened.game() && opened.failed()?.kind === 'pinned_release_missing';
+      if (renewed) opened.startOver();
+      if (devClock) bootPlace(opened, renewed);
       if (live) redrawBoot((n) => n + 1);
     });
     return () => {
