@@ -143,7 +143,7 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
         fields={picks}
         templates={templates}
         showErrorList={false}
-        formContext={{ ...context, stale: status(!!diag.held, !!diag.pending, diag.compiled) === 'stale' }}
+        formContext={{ ...context, stale: !diag.compiled }}
         experimental_defaultFormStateBehavior={FORM_DEFAULTS}
         extraErrors={fieldErrors((diag.diagnostics ?? []) as never, rel) as never}
         onChange={(e) => card.change(e.formData)}

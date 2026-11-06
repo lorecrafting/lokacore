@@ -43,8 +43,9 @@ const SCROLL = 'loka.editor.story.scroll';
 let saving: ReturnType<typeof setTimeout> | undefined;
 // the scroll is kept once it rests, not on every scroll event
 const save = (el: HTMLElement) => {
+  const top = String(el.scrollTop); // read now: a list gone by the timer reads 0
   clearTimeout(saving);
-  saving = setTimeout(() => localStorage.setItem(SCROLL, String(el.scrollTop)), 200);
+  saving = setTimeout(() => localStorage.setItem(SCROLL, top), 200);
 };
 
 type Props = {
@@ -104,8 +105,9 @@ const bind = (row: L.Row) => {
 };
 
 function Cells({ row, a, tab }: { row: L.Row; a: Act; tab: boolean }) {
+  const at = { ...a.st, focus: row.id }; // a ghost's run moves the tab row to its row, where it gave focus
   if (row.kind === 'node')
-    return <NodeCells row={row} tab={tab} trace={() => a.put({ ...a.st, lower: { panel: 'trace', at: row.ref! } })} />;
+    return <NodeCells row={row} tab={tab} trace={() => a.put({ ...at, lower: { panel: 'trace', at: row.ref! } })} />;
   if (row.kind === 'part') return <span className="truncate text-xs font-medium uppercase">{row.label}</span>;
   if (row.kind === 'seed')
     return (
@@ -119,12 +121,16 @@ function Cells({ row, a, tab }: { row: L.Row; a: Act; tab: boolean }) {
       <span className={`size-4 shrink-0 rounded-sm ${L.SWATCH[row.status!] ?? ''}`} />
       <code className="text-muted-foreground">{row.n}</code>
       <span className="flex-1 truncate">{row.label}</span>
-      <Ghost label={`Bind beat ${row.n}`} icon={Link} tab={tab} run={() => bind(row)} />
+      <Ghost label={`Bind beat ${row.n}`} icon={Link} tab={tab} run={() => {
+          a.put(at);
+          bind(row);
+        }}
+      />
       <Ghost
         label={`Knowledge at beat ${row.n}`}
         icon={Lightbulb}
         tab={tab}
-        run={() => a.put({ ...a.st, lower: { panel: 'knowledge', n: row.n! } })}
+        run={() => a.put({ ...at, lower: { panel: 'knowledge', n: row.n! } })}
       />
       <span className="text-xs text-muted-foreground">{row.status === 'built' ? '' : row.status}</span>
     </>
@@ -142,8 +148,10 @@ const click = (a: Act, row: L.Row, alt: boolean) => {
 
 // The tree's keys (rulings S2 Keyboard): arrows, Enter selects, `f` traces, Esc closes Trace then leaves.
 function keyDown(a: Act, list: L.Row[], e: React.KeyboardEvent<HTMLElement>) {
-  const row = list.find((r) => r.id === (e.target as HTMLElement).dataset.id);
+  const el = e.target as HTMLElement;
+  const row = list.find((r) => r.id === el.closest<HTMLElement>('[data-id]')?.dataset.id); // a row or its ghost
   if (!row || e.metaKey || e.ctrlKey) return; // leave Cmd-F and the shortcuts to the browser and App
+  if (e.key === 'Enter' && !el.dataset.id) return; // a ghost's Enter is its own click
   const m = L.move(list, row.id, e.key);
   const run: Record<string, () => void> = {
     Enter: () => click(a, row, e.altKey),

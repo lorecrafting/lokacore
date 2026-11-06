@@ -34,7 +34,7 @@ function useBurst(story: Story, changes: Change[]) {
   const last = useRef({ story: undefined as Story | undefined, since: undefined as number | undefined, by: new Map<string, Change['by']>() });
   if (last.current.story !== story) {
     const since = last.current.since;
-    last.current = { story, since: changes[0]?.seen ?? since, by: new Map(burst(changes, since).map((c) => [c.file, c.by])) };
+    last.current = { story, since: changes[0]?.seen ?? since ?? 0, by: new Map(burst(changes, since).map((c) => [c.file, c.by])) };
   }
   return last.current.by;
 }
