@@ -1,7 +1,5 @@
 {
-  "name": {
-    "prose": "~"
-  },
+  "name": "spell.mend",
   "aliases": [
     "mend"
   ],
@@ -28,9 +26,7 @@
         }
       ],
       "narration": {
-        "actor": {
-          "prose": "~"
-        }
+        "actor": "narration.mend"
       }
     }
   }
