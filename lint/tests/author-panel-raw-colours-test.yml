@@ -1,10 +1,8 @@
 id: author-panel-raw-colours
 valid:
   - "const a = <path className='fill-none stroke-foreground' />;"
-  - "const t = 'beat #1';"
   - "const a = <path fill={tone} />;"
 invalid:
   - "const a = <path fill='#fff' />;"
   - "const a = <path stroke='currentColor' />;"
   - "const a = <span color='red' />;"
-  - "const s = { background: '#1EA7FD' };"

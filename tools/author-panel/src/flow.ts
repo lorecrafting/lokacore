@@ -243,7 +243,7 @@ export function layout(s: Story, st: FlowState) {
   const lines = linesOf(edges, at, new Map([...chips, ...stubs].map((c) => [c.id, c])));
   return {
     columns,
-    parts,
+    parts: outlineOf(s) ? parts : [], // no outline: no part row (rulings S3 Grid)
     lanes,
     chips,
     stubs,
