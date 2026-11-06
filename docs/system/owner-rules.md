@@ -287,3 +287,4 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Away catch-up cap, Start over for old saves before launch: [owner decision](../decisions/owner-decision-away-catch-up-cap-2026-11-01.md).
 - Diku rounds (initiative, Attack strikes at once, named lines, damage tiers, condition after the round), showcase opts in: [owner decision](../decisions/owner-decision-diku-rounds-2026-11-01.md).
 - Corpses name their victim, cannot be carried, and decay when a world opts in (direct items spill to the room, nothing destroyed); showcase decay and respawn numbers: [owner decision](../decisions/owner-decision-corpses-respawn-2026-11-02.md).
+- NPC behaviours: NPCs act through the player's verb rules with the NPC's body, one behaviour at a time under four fixed layers, plans as bounded data, canned behaviours as compile-time shortcuts; no needs simulation; economy second: [owner decision](../decisions/owner-decision-npc-behaviours-2026-11-06.md).
