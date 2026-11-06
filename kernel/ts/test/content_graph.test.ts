@@ -144,6 +144,18 @@ test('the graph holds every DefinitionRef with its path, and the op of the step 
       },
     ],
   );
+  // Break: a deposit's account (services.ex:11, written by it) shows as a read in the Trace.
+  const bank = {
+    benefit: { op: 'deposit', account: R('fact', 'banked'), vault: R('npc', 'clerk') },
+  };
+  const paid = contentGraph({ services: defs('service', { bank }) }).edges;
+  assert.deepEqual(
+    paid.map((e) => [e.path, !!e.set]),
+    [
+      ['.benefit.account', true],
+      ['.benefit.vault', false],
+    ],
+  );
   // Break: an object with a cartridge_id and no kind is taken for a DefinitionRef.
   const loose = contentGraph({ rooms: { hall: { note: { cartridge_id: 'f' } } } });
   assert.deepEqual(loose.edges, []);
