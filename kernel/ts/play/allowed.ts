@@ -32,11 +32,18 @@ const OWNERS: Record<string, string> = {
   'quests.expedition': 'expedition movement quest fact combat death population', // expedition.ex:29-32
   'quests.patrol': 'patrol movement quest dialogue fact death', // patrol.ex:31-33
   'dialogues.keyword': 'speech', // keywords.ex:15: speech@1 owns `spoken`
+  'actions.check': 'check', // its check_passed (scripted_actions.ex:125)
+  'actions.tip': 'fact', // its fact_changed (action_tips.ex:40)
+  'actions.policy': 'policy', // its least `all` (resolve.ex:415)
+  'reactions.when': 'policy',
 };
 
 // Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
 const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean> = {
   'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
+  'actions.duration': (d, w) => !w.time_policy && !/"status\.apply"/.test(JSON.stringify(d)), // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json; duration_status (:94); ponytail: also hides it beside a permanent status, which status.ex:72 lets through
+  'actions.craft': (doc) => (doc.target as Obj | undefined)?.kind !== 'spell', // replenish.ex:59
+  'reactions.zone': (doc) => (doc.on as Obj | undefined)?.room === undefined, // ReactionRule: a zone forbids on.room
   'quests.repeatable': (doc) => doc.exchange !== undefined && !run(doc), // exchanges.ex:94-95
   'quests.offer': (doc) => !run(doc),
   'quests.deadline': (doc) => !run(doc),
