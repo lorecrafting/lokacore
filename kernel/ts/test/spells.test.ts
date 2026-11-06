@@ -197,12 +197,12 @@ test('spell_words lists learned spells only, with cast admission as availability
 // end comes from the clock instead of the cast (cast at 0, cooldown 30: ends 30), or a word refused
 // for another reason (lux short of ash, before any cast) carries an end.
 test('a cooling spell word shows its cooldown end and length', () => {
-  const key = 'spells_sampler@0.0.1:action/lux';
-  const lux = { ...content.scripted_actions![key as never]!, cooldown: 30 };
-  const scripted_actions = {
-    ...content.scripted_actions,
-    [key]: lux,
-  } as Cartridge['scripted_actions'];
+  const scripted_actions = Object.fromEntries(
+    Object.entries(content.scripted_actions!).map(([k, a]) => [
+      k,
+      k === 'spells_sampler@0.0.1:action/lux' ? { ...a, cooldown: 30 } : a,
+    ]),
+  ) as Cartridge['scripted_actions'];
   const v = newWorld(
     { ...content, scripted_actions },
     ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55'),
