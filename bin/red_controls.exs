@@ -1,4 +1,4 @@
-# size: allow 372, one table per gate; the editor gate adds seventeen planted files
+# size: allow 372, one table per gate; the editor gate plants one file per control
 # Red controls plant violations, require checks to fail, and clean their own files.
 # Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
