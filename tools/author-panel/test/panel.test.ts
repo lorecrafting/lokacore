@@ -117,7 +117,8 @@ test('the shell has no serious or critical axe violations', async () => {
 
 // Breaks: a reaction or a scripted action routed to the generic card (a command action away from it),
 // its card failing to draw its form on the showcase's own files, or its add menu not gated by the
-// cartridge's declared capabilities (the showcase declares policy and fact: `when` and `tip` offered).
+// cartridge's declared capabilities (the showcase declares policy and fact: `when` and `tip` offered),
+// or a scripted action's menu offering a command action's field.
 test('a reaction and an action open their own cards', async () => {
   for (const [kind, key, field] of [
     ['reaction', 'letter_late', 'when'],
@@ -125,7 +126,10 @@ test('a reaction and an action open their own cards', async () => {
   ]) {
     const page = await open({ selection: { kind, key } }, `${kind} card`);
     const menu = page.getByLabel(`${kind} card`).getByLabel('Add a field').locator('option');
-    assert.ok((await menu.allTextContents()).includes(field), `${kind} ${key} offers ${field}`);
+    const options = await menu.allTextContents();
+    assert.ok(options.includes(field), `${kind} ${key} offers ${field}`);
+    // a scripted action is never offered a command action's field (UNKNOWN_FIELD)
+    assert.ok(!options.includes('accessibility'), `${kind} ${key} offers accessibility`);
     await page.close();
   }
   // a built-in command action keeps the generic card
