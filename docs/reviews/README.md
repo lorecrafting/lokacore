@@ -32,6 +32,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Editor E6d part one, Quest and Dialogue cards (PR #669, loka-wfrgk.6)](2026-11-05-e6d-story-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6c part two, Reaction and Action inspector cards (PR #668, loka-wfrgk.46)](2026-11-05-e6c2-reaction-action-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6c part one, Rules block (PR #660, loka-wfrgk.5)](2026-11-05-e6c-rules-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6b.2, bespoke Combat and Schedule blocks (PR #672, loka-wfrgk.42)](2026-11-05-e6b2-combat-schedule-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6b, NPC and Item inspector cards (PR #656, loka-wfrgk.4)](2026-11-05-e6b-npc-item-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6a, Room inspector card and the Book's add-here (PR #649, loka-wfrgk.3)](2026-11-05-e6a-room-review.md): **CHANGES REQUIRED**
 - [Review: Editor E4b, generic inspector card on rjsf 6 (PR #645, loka-wfrgk.12)](2026-11-05-e4b-generic-card-review.md): **CHANGES REQUIRED**
