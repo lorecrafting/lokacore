@@ -133,10 +133,11 @@ function undo(t: Tree, { id }: Sent) {
   return done(t, `undo ${entry.what}`, back);
 }
 
-async function create(t: Tree, { kind, name, from, area }: Sent): Promise<Answer> {
+async function create(t: Tree, { kind, name, from, area, extends: up }: Sent): Promise<Answer> {
   const fromOk = from === undefined || (named(from?.room) && named(from?.direction));
-  if (!named(kind) || !named(name) || !fromOk || !(area == null || named(area)))
-    refuse(400, 'kind, name, area, from.room and from.direction: [a-z0-9_]+');
+  const optional = (v: unknown) => v == null || named(v);
+  if (!named(kind) || !named(name) || !fromOk || !optional(area) || !optional(up))
+    refuse(400, 'kind, name, area, extends, from.room and from.direction: [a-z0-9_]+');
   // mix writes past guarded() (the area, its companions, --from's folder); no link anywhere keeps
   // every write inside the tree and in the snapshot the journal diffs (a link reads as no file).
   const link = files(t.root).find((rel) => there(join(t.root, rel))?.isSymbolicLink());
@@ -149,6 +150,7 @@ async function create(t: Tree, { kind, name, from, area }: Sent): Promise<Answer
       name,
       ...(from ? ['--from', from.room, from.direction] : []),
       ...(area ? ['--area', area] : []),
+      ...(up ? ['--extends', up] : []),
       t.root,
     ]);
     if (refused !== undefined) refuse(400, refused);
@@ -164,6 +166,20 @@ async function create(t: Tree, { kind, name, from, area }: Sent): Promise<Answer
     t.busy--;
   }
 }
+
+/** The abstract NPCs and items a drag may extend (`bin/loka new --extends`): files at the root or
+ * in an area folder; the compile drops them, so /story has none. */
+const templates = (root: string) =>
+  files(root).flatMap((rel) => {
+    const at = placed(rel);
+    if (at?.ext !== 'json' || (at.dir !== 'npcs' && at.dir !== 'items')) return [];
+    try {
+      const doc = JSON.parse(readFileSync(join(root, rel), 'utf8'));
+      return doc?.abstract === true ? [{ dir: at.dir, key: at.key, area: at.area }] : [];
+    } catch {
+      return []; // mutate-skip: a half-written file is the compile's to report
+    }
+  });
 
 let defs: { $defs: unknown } | undefined;
 function get(t: Tree, url: string, places: Record<string, string>): Answer | undefined {
@@ -191,6 +207,7 @@ function get(t: Tree, url: string, places: Record<string, string>): Answer | und
   if (pathname === '/line')
     return located(t.root, searchParams.get('key') ?? '', searchParams.get('words') ?? '', places);
   if (pathname === '/world') return worlds(t.root);
+  if (pathname === '/templates') return [200, templates(t.root)];
   if (pathname === '/journal')
     return [200, t.journal.map(({ files: fs, ...e }) => ({ ...e, files: fs.map((c) => c.file) }))];
 }

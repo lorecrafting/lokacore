@@ -15,6 +15,7 @@ import type { MapRoom } from '../../../tools/author-panel/src/map.ts';
 import {
   cellAt,
   editor,
+  freeKey,
   toward,
   dragged,
   type Editor,
@@ -43,6 +44,7 @@ let c = room('c');
 const rooms = () => [start, b, c, cellar];
 let ed: Editor;
 let close = () => {};
+let ask: (path: string) => Promise<{ ok: boolean; told: any }>;
 let snapshot: Record<string, string>;
 
 before(async () => {
@@ -79,6 +81,7 @@ before(async () => {
       });
       req.end(sent && JSON.stringify(sent));
     });
+  ask = http;
   const io: Io = {
     post: (route, sent) => http(`/${route}`, sent),
     source: async (file) => (await http(`/source?file=${encodeURIComponent(file)}`)).told,
@@ -182,6 +185,36 @@ test("an NPC given hp by the card's Add compiles", () => {
   assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
 });
 
+test('a template dropped on a room makes its child there; a refused drop writes nothing; undo removes it', async () => {
+  // Breaks: --extends not passed (the child lacks the parent's hp), the child left unplaced, a
+  // refused drop leaving a file, or /templates missing an area's abstract or listing a concrete NPC.
+  const tpl = 'areas/barn/npcs/goat.json';
+  mkdirSync(join(src, 'areas/barn/npcs'), { recursive: true });
+  const hp = { minimum: 0, maximum: 1, start: 1, gain: 0 };
+  writeFileSync(join(src, tpl), JSON.stringify({ abstract: true, hp }));
+  assert.deepEqual((await ask('/templates')).told, [{ dir: 'npcs', key: 'goat', area: 'barn' }]);
+  const was = files();
+  // c is in the area yard; a root room may extend any area's template
+  await assert.rejects(ed.made(c, 'npcs', 'goat_1', 'goat'), /belongs to the area barn/);
+  assert.deepEqual(files(), was);
+  await ed.made(start, 'npcs', 'goat_1', 'goat');
+  const out = join(dir, 'out.json');
+  const compiled = spawnSync('mix', ['loka.compile', src, out, '--allow-placeholders'], {
+    cwd: REPO,
+    encoding: 'utf8',
+  });
+  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
+  const npcs = JSON.parse(readFileSync(out, 'utf8')).cartridge.npcs;
+  const child = Object.entries(npcs).find(([ref]) => ref.endsWith(':npc/goat_1'))?.[1] as any;
+  assert.deepEqual([child?.hp, child?.room?.key], [hp, 'start']);
+  await ed.undo();
+  rmSync(join(src, 'areas/barn'), { recursive: true });
+  assert.deepEqual(
+    files(),
+    was.filter((f) => f !== tpl),
+  );
+});
+
 test('a barrier drop writes a locked barrier named on both faces, and refuses a one-way exit', async () => {
   // Breaks: one face left without the barrier (BARRIER_MISMATCH); `initial` not locked; a barrier
   // on a one-way exit.
@@ -239,6 +272,12 @@ test('a map point maps to its layout cell, and a drag between cells to a compass
     ],
     ['east', 'west', 'south', 'north', 'east', 'west', 'north', undefined, undefined],
   );
+});
+
+test("a dropped template's child takes the first free <template>_<n>", () => {
+  // Breaks: a child key reusing a compiled one (the starter refuses the drop), or starting past _1.
+  assert.equal(freeKey('wild', new Set(['wild', 'crow'])), 'wild_1');
+  assert.equal(freeKey('wild', new Set(['wild_1', 'wild_2', 'wild_4'])), 'wild_3');
 });
 
 test('a press that stays within 4 px is a click (it selects); one that leaves is a drag', () => {

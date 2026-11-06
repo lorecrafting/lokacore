@@ -145,15 +145,24 @@ async function grow(s: Run, a: MapRoom, dir: string, key: string) {
   await s.call('new', { kind: 'rooms', name: key, from, ...(a.area ? { area: a.area } : {}) });
 }
 
-/** New NPC or item here (`bin/loka new <kind> <key>`, its words `~`), in the room's area, placed in it. */
-async function made(s: Run, r: MapRoom, kind: 'npcs' | 'items', key: string) {
-  const told = await s.call('new', { kind, name: key, ...(r.area ? { area: r.area } : {}) });
+/** New NPC or item here (`bin/loka new <kind> <key>`, its words `~`), in the room's area, placed in it;
+ * with `up`, a child of that template (`--extends`: the engine refuses a crossing or concrete parent). */
+async function made(s: Run, r: MapRoom, kind: 'npcs' | 'items', key: string, up?: string) {
+  const area = r.area ? { area: r.area } : {};
+  const told = await s.call('new', { kind, name: key, ...area, ...(up ? { extends: up } : {}) });
   const file = told.files?.find((f) => f.endsWith(`${kind}/${key}.json`));
   await s.change(file ?? no(`no ${kind}/${key}.json was made`), () => [
     kind === 'npcs'
       ? { path: ['room'], value: r.key }
       : { path: ['location'], value: { in: 'room', room: r.key } },
   ]);
+}
+
+/** The first `<base>_<n>` from 1 not in `taken`: a dropped template's child key, no name chosen. */
+export function freeKey(base: string, taken: Set<string>) {
+  let n = 1;
+  while (taken.has(`${base}_${n}`)) n++;
+  return `${base}_${n}`;
 }
 
 /** Move to area: the file moves to `areas/<area>/rooms/`, or to the root for null. */
@@ -227,7 +236,8 @@ export function editor(io: Io) {
     barrier: (a: MapRoom, dir: string, rooms: MapRoom[], key: string, locked: boolean) =>
       run((s) => barrier(s, a, dir, rooms, key, locked)),
     grow: (a: MapRoom, dir: string, key: string) => run((s) => grow(s, a, dir, key)),
-    made: (r: MapRoom, kind: 'npcs' | 'items', key: string) => run((s) => made(s, r, kind, key)),
+    made: (r: MapRoom, kind: 'npcs' | 'items', key: string, up?: string) =>
+      run((s) => made(s, r, kind, key, up)),
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
     bind: (part: number, n: number, short: string) => run((s) => bind(s, part, n, short)),
   };

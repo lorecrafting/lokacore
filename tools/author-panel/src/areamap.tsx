@@ -12,13 +12,13 @@ import {
 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from '../../../mobile/app/book/tokens.ts';
-import type { Story } from './author.ts';
+import { templates, type Story, type Template } from './author.ts';
 import type { MapRoom } from './map.ts';
 import { Button } from './components/ui/button.tsx';
 import * as map from './map.ts';
 import { M, type Box as Size, type View } from './map.ts';
 import { Drawing } from './mapsvg.tsx';
-import { cellAt } from './mapedit.ts';
+import { cellAt, freeKey } from './mapedit.ts';
 import { alone, edit, shown } from './mapwire.ts';
 import type { Selection } from './shell.ts';
 
@@ -149,6 +149,7 @@ export function AreaMap(p: MapProps) {
         {l.v.view && l.level.length ? <Drawing p={p} l={l} reach={reach} locked={locked} /> : null}
       </div>
       <Unplaced rooms={p.story.map.filter((r) => !r.at)} pick={p.pick} />
+      <Templates story={p.story} />
       <p
         role={told ? 'alert' : undefined}
         className={`truncate px-2 py-1 text-xs ${told ? 'text-destructive' : 'text-muted-foreground'}`}
@@ -163,14 +164,23 @@ export function AreaMap(p: MapProps) {
 const LOCK = 'loka.author.mapLock';
 const UNLOCK = 'The map is locked: unlock it in the map header to drag';
 
-/** An Unplaced chip dropped on the map: its room's layout row at the cell under the pointer. */
+/** An Unplaced chip dropped on the map: its room's layout row at the cell under the pointer. A
+ * template chip dropped on a room: a child of it there, keyed `<template>_<n>`. */
 function drop(e: React.DragEvent<HTMLDivElement>, p: MapProps, l: Level) {
   const r = p.story.map.find((o) => o.key === e.dataTransfer.getData('text/x-loka-room'));
+  const [dir, up] = e.dataTransfer.getData('text/x-loka-template').split('/');
   const box = e.currentTarget.getBoundingClientRect();
-  if (!r) return;
+  if (!r && !up) return;
   if (!l.v.view) return shown.tell('Place one room in layout.json first: the map has no cells yet');
   const at = cellAt(l.v.now.current!, { x: e.clientX - box.left, y: e.clientY - box.top });
-  edit((ed) => ed.place(r, { ...at, z: l.z }));
+  if (r) return edit((ed) => ed.place(r, { ...at, z: l.z }));
+  const room = l.level.find((o) => o.at?.x === at.x && o.at?.y === at.y);
+  if (!room) return; // a template dropped on an empty cell makes nothing
+  const kind = dir === 'npcs' ? 'npcs' : 'items';
+  const singular = kind === 'npcs' ? 'npc' : 'item';
+  const taken = p.story.graph.nodes.filter((n) => n.kind === singular).map((n) => n.ref.split('/')[1]);
+  const key = freeKey(up, new Set(taken)); // a key taken by an uncompiled file: the starter refuses
+  edit((ed) => ed.made(room, kind, key, up));
 }
 
 const reachOf = (p: MapProps) => ({
@@ -240,6 +250,28 @@ function Header({ p, l, locked, lock }: { p: MapProps; l: Level } & Lockable) {
       <Icon label="Zoom out" icon={ZoomOut} run={() => l.zoom(1 / M.step)} />
       <Icon label="Fit level" icon={Maximize} run={l.fit} />
       {l.sel ? <Icon label="Go here" icon={Play} run={() => p.go(l.sel!.key)} /> : null}
+    </div>
+  );
+}
+
+/** The abstract NPCs and items as chips (`~` label); a drag onto a room makes a child there. */
+function Templates({ story }: { story: Story }) {
+  const [all, set] = useState<Template[]>([]);
+  useEffect(() => void templates().then(set, () => set([])), [story]);
+  if (!all.length) return null;
+  return (
+    <div className="flex shrink-0 flex-wrap items-center gap-1 border-t px-2 py-1 text-xs">
+      <span className="text-muted-foreground">~</span>
+      {all.map((t) => (
+        <span
+          key={`${t.dir}/${t.key}`}
+          className="cursor-grab rounded-sm border px-1 font-mono"
+          draggable
+          onDragStart={(e) => e.dataTransfer.setData('text/x-loka-template', `${t.dir}/${t.key}`)}
+        >
+          {t.key}
+        </span>
+      ))}
     </div>
   );
 }
