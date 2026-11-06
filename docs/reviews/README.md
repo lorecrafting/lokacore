@@ -18,6 +18,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: retire hunger and thirst (PR #618, loka-vduxr.61)](2026-11-05-retire-hunger-review.md): **APPROVE WITH NOTES**
 - [Review: resident `mix loka.compile --serve` for the editor (loka-wfrgk.16)](2026-11-05-resident-compiler-review.md): **APPROVE WITH NOTES**
 - [Review: replay of failed and unknown commits, and a test hang (PR #627, loka-vduxr.42, loka-votey)](2026-11-05-replay-failed-unknown-review.md): **CHANGES REQUIRED**
+- [Review: author panel smoke in Chrome, `mutate-covers` (loka-wfrgk.41)](2026-11-05-panel-smoke-review.md): **APPROVE WITH NOTES**
 - [Review: scene@1 opening scene, `on {start: true}` (PR #622, loka-g5hh.3)](2026-11-05-opening-scene-review.md): **APPROVE WITH NOTES**
 - [Review: a death outside a fight shows the dead page, then Let go (PR #634, loka-kgd.210)](2026-11-05-offfight-death-review.md): **CHANGES REQUIRED**
 - [Review: `bin/loka new --extends <key>` (PR #659, loka-wfrgk.45)](2026-11-05-new-extends-review.md): **CHANGES REQUIRED**
