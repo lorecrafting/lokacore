@@ -288,7 +288,6 @@ defmodule Loka.Content.DialogueLinks do
   # sure, `spokenBy` goes on to what the unnamed ones that may fail lead to, so the list does too.
   defp upto_sure(links, shut, by_key, seen, opens?) do
     sure = free_links(shut, by_key, seen, &(free?(&1) and !&1["policy"]))
-
     {maybe, rest} = Enum.split_while(links, &(&1 not in sure or !opens?.(by_key[&1])))
     named = Enum.reject(maybe, &set?(by_key[&1]))
     named ++ if rest == [], do: beyond(maybe, by_key, seen, opens?), else: Enum.take(rest, 1)
@@ -296,19 +295,21 @@ defmodule Loka.Content.DialogueLinks do
 
   defp beyond(maybe, by_key, seen, opens?) do
     failed = for k <- maybe, !opens?.(by_key[k]), !by_key[k]["name"], do: by_key[k]
-    seen = seen ++ maybe
-    deeper = free_links(failed, by_key, seen, &free?/1)
-    if deeper == [], do: [], else: upto_sure(deeper, failed, by_key, seen, opens?)
+    deeper = free_links(failed, by_key, seen ++ maybe, &free?/1)
+    if deeper == [], do: [], else: upto_sure(deeper, failed, by_key, seen ++ maybe, opens?)
   end
 
-  # What shut dialogues fall through to, as `tried` grows in `spokenBy`: their own links, `entry: false` ones
-  # (which never open) in place, their links tried with the next level's; a level of only those passes through.
+  # What shut dialogues fall through to, as `tried` grows in `spokenBy`: their links. An `entry: false` one never
+  # opens: its links join the next level's, a named or link-less one is dropped, a level of only those passes on.
   defp free_links(shut, by_key, seen, way?) do
     level = shut |> Enum.flat_map(&ways_on(&1, by_key, seen, way?)) |> Enum.uniq()
-    through = for k <- level, !by_key[k]["name"], do: by_key[k]
+    seen = seen ++ level
+    level = Enum.filter(level, &(!set?(by_key[&1]) or on?(by_key[&1], by_key, seen, way?)))
     all_sets? = level != [] and Enum.all?(level, &set?(by_key[&1]))
-    if all_sets?, do: free_links(through, by_key, seen ++ level, way?), else: level
+    if all_sets?, do: free_links(Enum.map(level, &by_key[&1]), by_key, seen, way?), else: level
   end
+
+  defp on?(d, by_key, seen, way?), do: !d["name"] and ways_on(d, by_key, seen, way?) != []
 
   defp ways_on(d, by_key, seen, way?) do
     for {_, c} <- Enum.sort(d["choices"]),
