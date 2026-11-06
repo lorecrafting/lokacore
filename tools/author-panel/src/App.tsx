@@ -1,6 +1,5 @@
-// The editor shell (docs/rnd/gui-editor-design-2026-11-04.md §11, editor-chrome-rulings.md §5):
-// Hierarchy | Project over the map slot, the Book strip, the inspector over the console; one
-// selection shared by the four; under 900 px the columns stack.
+// The editor shell (gui-editor-design-2026-11-04.md §11, editor-chrome-rulings.md §5): Hierarchy |
+// Project over the map slot, the Book strip, the inspector over the console; under 900 px, stacked.
 import { PanelLeftClose, PanelRightClose } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { shortcut } from '../../../mobile/app/author/prose_rules.ts';
@@ -12,7 +11,7 @@ import { Divider, Rail, useLayout, type SetLayout } from './columns.tsx';
 import { Button } from './components/ui/button.tsx';
 import { ScrollArea } from './components/ui/scroll-area.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs.tsx';
-import { Hierarchy, MapSlot } from './left.tsx';
+import { Hierarchy, MapSlot, WorldButton } from './left.tsx';
 import { Palette } from './palette.tsx';
 import { Project } from './project.tsx';
 import { Counts, Unconfirmed } from './prose.tsx';
@@ -112,6 +111,7 @@ function Left({ layout, set, story, book, diag, pick }: Shell) {
         </TabsContent>
         <TabsContent value="project" forceMount className="data-[state=inactive]:hidden">
           <Project state={book.state} send={book.send} trace={book.trace} said={diag.said} />
+          <WorldButton pick={pick} />
         </TabsContent>
       </ScrollArea>
     </Tabs>
