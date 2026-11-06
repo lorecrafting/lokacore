@@ -94,8 +94,12 @@ export function useDiagnostics() {
 }
 
 /** The Story map's model (kernel/ts/play/story.ts): the definitions, their `~` and diagnostics. */
-export const story = () =>
-  fetch('/__author/story').then(async (r) => {
+export const story = () => {
+  const start = performance.now();
+  return fetch('/__author/story').then(async (r) => {
     if (!r.ok) throw new Error(await r.text());
-    return (await r.json()) as Story;
+    const s = (await r.json()) as Story;
+    performance.measure('flow:fetch', { start }); // Flow's budget reads it (rulings S3 Budgets)
+    return s;
   });
+};

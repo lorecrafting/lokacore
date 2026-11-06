@@ -1,6 +1,5 @@
-// The editor shell (docs/rnd/gui-editor-design-2026-11-04.md §11, editor-chrome-rulings.md §5):
-// Hierarchy | Project over the map slot, the Book strip, the inspector over the console; one
-// selection shared by the four; under 900 px the columns stack.
+// The editor shell (gui-editor-design-2026-11-04.md §11, editor-chrome-rulings.md §5): Hierarchy |
+// Project over the map slot, the Book strip, the inspector over the console; under 900 px, stacked.
 import { PanelLeftClose, PanelRightClose } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { shortcut } from '../../../mobile/app/author/prose_rules.ts';
@@ -16,6 +15,7 @@ import { Hierarchy, MapSlot, WorldButton } from './left.tsx';
 import { Palette } from './palette.tsx';
 import { Project } from './project.tsx';
 import { Counts, Unconfirmed } from './prose.tsx';
+import { flowGo, flowItems } from './flowread.ts';
 import { Feed, Inspector } from './right.tsx';
 import { Compile, Source } from './sections.tsx';
 import {
@@ -171,7 +171,7 @@ function Side({
   );
 }
 
-/** The shared selection, the Book's mark, the start checkpoint and every shortcut. */
+/** Selection, Book mark, start checkpoint, shortcuts; palette story rows (rulings S2, S3 Cmd-K). */
 function useWiring(
   book: Book,
   heard: React.RefObject<Heard>,
@@ -188,10 +188,9 @@ function useWiring(
   useEffect(() => void (mark && book.send({ ...mark, add })), sent); // eslint-disable-line react-hooks/exhaustive-deps
   useStart(book);
   const base = command(book, layout.selection, pick);
-  // a palette story row shows Story and reveals its row (rulings S2 Cmd-K)
   const run = (i: Item) =>
     i.kind === 'story'
-      ? story && set((l) => ({ ...l, leftOpen: true, map: 'story', story: { ...go(story, l.story ?? LIST, i.id), chosen: true } }))
+      ? story && set((l) => flowGo(story, l, i.id) ?? { ...l, leftOpen: true, map: 'story', story: { ...go(story, l.story ?? LIST, i.id), chosen: true } })
       : base(i);
   useShortcuts(heard, (key) => {
     if (key === 'k') open();
@@ -203,7 +202,7 @@ function useWiring(
 }
 
 /** The map slot under the left column, with its divider; the map's moves go to the Book. */
-function Slot({ layout, set, story, book, pick, refused }: Shell & { refused?: string }) {
+function Slot({ layout, set, story, book, pick, diag, refused }: Shell & { refused?: string }) {
   return (
     <>
       <Divider side="slot" layout={layout} set={set} />
@@ -218,6 +217,7 @@ function Slot({ layout, set, story, book, pick, refused }: Shell & { refused?: s
         pick={pick}
         go={(room) => book.send({ op: 'go_to_room', room })}
         open={(key) => void ask('open', { key })}
+        changes={diag.changes}
       />
     </>
   );
@@ -253,7 +253,7 @@ export default function App() {
   const s: Shell = { layout, set, story, book, diag, pick, offer };
   const all = (text: Record<string, string>) => [
     ...items(story?.graph.nodes ?? [], text, diag.placeholders ?? {}),
-    ...(story ? storyItems(story) : []),
+    ...(story ? [...storyItems(story), ...flowItems(story)] : []),
   ];
   return (
     <div className="flex h-full bg-background text-foreground max-[900px]:flex-col">
