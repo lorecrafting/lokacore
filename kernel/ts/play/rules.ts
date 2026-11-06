@@ -15,16 +15,16 @@ export const PICK_NAMES: Record<string, string> = {
   kind: 'liquid',
 };
 
-// the step context each kind's steps compile in (content/steps.ex `check/5` callers)
+// the step context each node kind's steps compile in (content/steps.ex `check/5` callers)
 const CONTEXT: Record<string, string> = {
-  reactions: 'reaction',
-  actions: 'action',
-  dialogues: 'choice',
-  services: 'service',
+  reaction: 'reaction',
+  action: 'action',
+  dialogue: 'choice',
+  service: 'service',
 };
 
 /**
- * Whether the picker offers branch `b` in a `kind` file: a step op the compiler refuses in that
+ * Whether the picker offers branch `b` on a `kind` node (the inspector's selection): a step op the compiler refuses in that
  * context (content/steps.ex:14 `@ops`; a reaction's `damage`) is not; every other branch is.
  */
 export function offered(b: { properties?: { op?: { const?: unknown } } }, kind: string) {

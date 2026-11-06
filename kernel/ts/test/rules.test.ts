@@ -32,13 +32,14 @@ test("a trigger's filters pick the kind the compiler resolves them to", () => {
 });
 
 // Break: a reaction is offered an op it can never compile (`damage`), an action loses one it can,
-// or a file whose steps the compiler does not gate (or a policy op) loses branches.
-test('the steps picker offers only the ops its file compiles', () => {
+// the table is keyed by file name where the inspector passes the node kind (`reaction`), or a kind
+// whose steps the compiler does not gate (or a policy op) loses branches.
+test('the steps picker offers only the ops its node kind compiles', () => {
   const at = (op: string) => defs.Step.anyOf[step(op)];
-  assert.equal(offered(at('damage'), 'reactions'), false);
-  assert.equal(offered(at('damage'), 'actions'), true);
-  assert.equal(offered(at('meal'), 'dialogues'), false);
-  assert.equal(offered(at('narrate'), 'dialogues'), true);
-  assert.equal(offered(defs.Policy.anyOf[0], 'reactions'), true);
-  assert.equal(offered(at('damage'), 'rooms'), true);
+  assert.equal(offered(at('damage'), 'reaction'), false);
+  assert.equal(offered(at('damage'), 'action'), true);
+  assert.equal(offered(at('meal'), 'dialogue'), false);
+  assert.equal(offered(at('narrate'), 'dialogue'), true);
+  assert.equal(offered(defs.Policy.anyOf[0], 'reaction'), true);
+  assert.equal(offered(at('damage'), 'room'), true);
 });
