@@ -5,7 +5,7 @@
 // compiler accepts of a dialogue's choices (kernel/ts/play/choice.ts).
 import { useState } from 'react';
 import { addable, allowed, choices } from '../../../../../kernel/ts/play/card.ts';
-import { refuseChoices } from '../../../../../kernel/ts/play/choice.ts';
+import { refuseNew } from '../../../../../kernel/ts/play/choice.ts';
 import { refuseLink } from '../../../../../kernel/ts/play/link.ts';
 import type { useDiagnostics } from '../../author.ts';
 import { Input } from '../../components/ui/input.tsx';
@@ -24,14 +24,14 @@ type Card = ReturnType<typeof useCard>;
 type Doc = Record<string, unknown>;
 type Cart = ReturnType<typeof useCartridge>;
 
-/** The card whose every change is refused when a dialogue's choices would not compile. */
+/** The card whose change is refused when it makes a dialogue's choices not compile anew. */
 function useGated(base: Card, hidden: string[]) {
   const [no, setNo] = useState<string>();
   const [resets, setResets] = useState(0); // a refused form edit remounts the form on the draft
   const card: Card = {
     ...base,
     change: (doc) => {
-      const why = refuseChoices(doc as Doc, hidden);
+      const why = refuseNew((base.draft ?? {}) as Doc, doc as Doc, hidden);
       setNo(why);
       if (why) setResets((n) => n + 1);
       else base.change(doc);
@@ -45,7 +45,7 @@ function useGated(base: Card, hidden: string[]) {
 function mechanics(dir: string, cart: Cart, caps: object | undefined, draft: Doc, revealed: string[], hidden: string[]) {
   const offered = addable(dir, registry, draft, revealed);
   return (caps ? allowed(dir, offered, caps, draft, cart?.world, hidden) : []).filter(
-    (f) => !refuseChoices({ ...draft, [f]: true }, hidden),
+    (f) => !refuseNew(draft, { ...draft, [f]: true }, hidden),
   );
 }
 

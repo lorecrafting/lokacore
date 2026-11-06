@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import { added, allowed, awaits, minimal, pickKind } from '../play/card.ts';
-import { choiceMenu, nested, refuseChoices, refuseRemove } from '../play/choice.ts';
+import { choiceMenu, nested, refuseChoices, refuseNew, refuseRemove } from '../play/choice.ts';
 import { refuseLink } from '../play/link.ts';
 import { hiddenSkills, unlinkable } from '../play/story_counts.ts';
 
@@ -253,6 +253,7 @@ test("a dialogue's choices are refused as the compiler refuses them, and only th
   assert.equal(one({ asked: true }, riddle), "a: the riddle's answer is never asked"); // dialogue_asked.ex:32
   assert.equal(one({ asked: true }, { riddle: { choice_id: 'b' } }), undefined);
   assert.equal(one({}, riddle), undefined);
+  assert.equal(one({ asked: false }, riddle), undefined); // :41 asks only `true`
   const teach = { steps: [{ op: 'skill.acquire', skill: 'joinery' }] };
   assert.equal(
     refuseChoices({ name: 'n', choices: { a: teach } }, ['joinery']),
@@ -266,11 +267,53 @@ test("a dialogue's choices are refused as the compiler refuses them, and only th
   assert.equal(refuseChoices({ choices: { a: teach } }, ['joinery']), undefined);
 });
 
+// Break: a check, patrol or lesson choice compiles in the card but not in the compiler, or is
+// refused where the compiler accepts it: refused one way, accepted with either side gone.
+test('a check, patrol or lesson choice is refused beside what the compiler refuses it with', () => {
+  const one = (c: object, d: object = {}) => refuseChoices({ ...d, choices: { a: c } });
+  const check = { check: {}, label: 'k', steps: [], then: 'x', then_failed: 'y', policy: {} };
+  assert.equal(one(check), undefined); // check_kinds.ex:18
+  assert.equal(one({ ...check, once: true }), 'a: a check choice carries no once'); // :151-157
+  assert.equal(one({ once: true }), undefined);
+  assert.equal(one(check, { quest: 'q' }), 'a: a check choice is never in a dialogue with a quest');
+  assert.equal(
+    one(check, { riddle: {} }),
+    'a: a check choice is never in a dialogue with a riddle',
+  );
+  assert.equal(one({}, { quest: 'q', riddle: {} }), undefined);
+  const patrol = { patrol: {}, once: true, policy: {} };
+  assert.equal(one(patrol), undefined);
+  for (const f of ['escort', 'sequence', 'payment', 'lesson_payment', 'receive', 'hand_over'])
+    assert.equal(one({ ...patrol, [f]: {} }), `a: patrol and ${f} do not go together`); // patrol.ex:165-168
+  assert.equal(one({ escort: {} }), undefined);
+  assert.equal(
+    one(patrol, { quest: 'q' }),
+    'a: a patrol choice is never in a dialogue with a quest',
+  ); // :160
+  const paid = { lesson_payment: {}, payment: {} };
+  assert.equal(one(paid), 'a: lesson_payment and payment do not go together'); // skills.ex:275
+  assert.equal(one({ lesson_payment: {} }), undefined);
+  assert.equal(one({ payment: {} }), undefined);
+});
+
+// Break: an edit to a dialogue already broken is refused for the old break, so the author cannot
+// fix it; or an edit that adds a break is let through because another one was there first.
+test('only a refusal an edit adds refuses it', () => {
+  const broken = { choices: { a: { then_failed: 'x' }, b: { receive: {}, hand_over: {} } } };
+  const fixA = { choices: { a: {}, b: broken.choices.b } };
+  assert.equal(refuseNew(broken, fixA), undefined);
+  assert.equal(refuseNew(broken, { choices: { a: {}, b: { receive: {} } } }), undefined);
+  assert.equal(refuseNew(broken, { ...broken, quest: 'q' }), undefined);
+  const worse = { choices: { ...broken.choices, c: { patrol: {}, then: 'x' } } };
+  assert.equal(refuseNew(broken, worse), 'c: a patrol ends the talk: no then');
+  assert.equal(refuseNew({}, broken), 'a: then_failed needs a check');
+});
+
 // Break: a choice's add menu offers a field the compiler refuses beside the dialogue's other parts,
 // hides one it accepts, re-offers one present, or offers `order` (the compiler's scene mark:
-// scene_merge.ex:56-57), or `receive` / `escort` without the capability that owns them
-// (dialogues.ex:383 containment, escort.ex:10 escort); or the last choice or the riddle's answer is
-// removed (dialogues.ex:315, :288).
+// scene_merge.ex:56-57), or `receive` / `escort` / `check` without the capability that owns them
+// (dialogues.ex:383 containment, escort.ex:10 escort, check_kinds.ex:26 check); or the last choice
+// or the riddle's answer is removed (dialogues.ex:315, :288).
 test('a choice offers only the fields it can take, and keeps the ones the dialogue needs', () => {
   const menu = ['accept', 'hand_over', 'receive', 'then_failed', 'asked', 'once', 'order', 'steps'];
   const doc = { quest: 'q', riddle: { choice_id: 'b' }, choices: { a: { receive: {} }, b: {} } };
@@ -288,6 +331,23 @@ test('a choice offers only the fields it can take, and keeps the ones the dialog
     'once',
     'steps',
   ]);
+  const offer = ['check', 'patrol', 'once', 'payment', 'lesson_payment', 'escort', 'steps'];
+  const all = { check: 1, patrol: 1, escort: 1, skills: 1, commerce: 1 };
+  const menuOf = (c: object, d: object = {}) =>
+    choiceMenu({ ...d, choices: { a: c } }, 'a', offer, all);
+  assert.deepEqual(menuOf({ check: {} }), ['steps']); // check_kinds.ex:18
+  assert.deepEqual(menuOf({ patrol: {} }), ['once', 'steps']); // patrol.ex:165-168
+  assert.deepEqual(menuOf({}, { quest: 'q' }), [
+    'once',
+    'payment',
+    'lesson_payment',
+    'escort',
+    'steps',
+  ]);
+  assert.deepEqual(menuOf({ payment: {} }), ['once', 'escort', 'steps']); // skills.ex:275
+  assert.deepEqual(menuOf({ lesson_payment: {} }), ['once', 'escort', 'steps']);
+  assert.deepEqual(menuOf({}), offer);
+  assert.deepEqual(choiceMenu({ choices: { a: {} } }, 'a', ['check'], {}), []); // check_kinds.ex:26
   assert.equal(refuseRemove(doc, 'b'), "the riddle's answer is b");
   assert.equal(refuseRemove(doc, 'a'), undefined);
   assert.equal(refuseRemove({ choices: { a: {} } }, 'a'), 'a dialogue keeps one choice at least');

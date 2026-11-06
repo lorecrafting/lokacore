@@ -203,6 +203,30 @@ test('a link to a nested set shows its prompt and labels and opens its card', as
   await page.close();
 });
 
+// Breaks: a dialogue already broken refuses every edit, its fix too, for the break it had
+// (Dialogue.tsx useGated); the review's record: praise holds receive and hand_over, insult a
+// then_failed with no check.
+test('a dialogue already broken takes the edit that fixes it', async () => {
+  const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'bess_talk' } });
+  await page.route('**/__author/change', (r) => r.abort());
+  await page.route('**/__author/source?file=*bess_talk*', async (r) => {
+    const s = await (await r.fetch()).json();
+    const doc = JSON.parse(s.bytes);
+    Object.assign(doc.choices.praise, { receive: { item: 'x' }, hand_over: { item: 'x' } });
+    doc.choices.insult.then_failed = 'end';
+    await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }) });
+  });
+  await page.reload(); // the card read its source before the route
+  const praise = page.locator('[aria-label="choice praise"]');
+  await praise.locator('summary').click();
+  const row = praise.locator('span.flex-1').getByText('hand_over', { exact: true });
+  await row.locator('..').getByRole('button', { name: 'Remove' }).click();
+  await row.waitFor({ state: 'detached', timeout: boot }); // the old gate kept it, refused
+  assert.equal(await page.getByText('then_failed needs a check').count(), 0);
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await page.close();
+});
+
 // Breaks: a nested set read late, after its link moved to another dialogue, shows under that one.
 test("a slow read of a link's old target never shows under its new one", async () => {
   const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
