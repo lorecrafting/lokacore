@@ -1,4 +1,4 @@
-# size: allow 580, one catalog walked row by row; each row is its own small test
+# size: allow 595, one catalog walked row by row; each row is its own small test
 defmodule Loka.ContentExplainTest do
   # What an author reads from a refused compile (loka-vduxr A1, A9). Expected fragments are
   # hand-written; wording around them may move.
@@ -242,6 +242,18 @@ defmodule Loka.ContentExplainTest do
     assert line_at(lines, "scenes/hi.scene:5") =~ ~r/`needs:`.*`coins` is a number/
     refute line_at(lines, "scenes/hi.scene:6") =~ "`needs:`"
     assert line_at(lines, "scenes/hi.scene:9") =~ ~r/`needs:`.*`pouch_gold` is a number/
+  end
+
+  # Break: `needs:` on a per_subject fact compiles, and only the loader refuses it, with no file
+  # line (FACT_SCOPE_UNSUPPORTED, cartridge.md#entity-and-pair-fact-declarations).
+  test "needs: on a per_subject fact is refused at its line", %{tmp_dir: dir} do
+    facts =
+      ~s({"facts":{"met":{"version":1,"meaning":"m","scopes":["player"],"per_subject":true,"value_type":{"type":"bool","default":false}}}})
+
+    lines =
+      scene(dir, "npc: bram\nbram: hi\n- Go\n  needs: met\n  bram: ok\n", %{"facts.json" => facts})
+
+    assert line_at(lines, "scenes/hi.scene:4") =~ "scope cannot be used here"
   end
 
   # Break: a file that cannot be read still lets the rest compile, so the writer also gets

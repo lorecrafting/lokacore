@@ -230,7 +230,7 @@ function useStory(said: unknown[] | undefined) {
   useEffect(() => {
     let live = true; // a later compile's fetch supersedes this one
     void getStory().then(
-      (s) => live && ((shown.rooms = s.map), (shown.nodes = s.graph.nodes), setStory(s), setRefused(undefined)), // the map's commands work while it is closed
+      (s) => live && ((shown.rooms = s.map), (shown.nodes = s.graph.nodes), (shown.shorts = s.shorts), setStory(s), setRefused(undefined)), // the map's commands work while it is closed
       (e: Error) => live && !kept(e) && setRefused(said?.length ? e.message.split('\n')[0] : undefined), // no watcher yet: waiting
     );
     return () => void (live = false);

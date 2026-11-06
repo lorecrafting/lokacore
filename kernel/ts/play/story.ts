@@ -15,7 +15,15 @@ import { artifactBytes, compiled } from './compiled.ts';
 import { contentGraph, reachReport } from './reach.ts';
 import { placed } from './guard.ts';
 import { files, todo, type Todo } from './todo.ts';
-import { choiceCounts, hiddenSkills, keysIn, unlinkable, wordsByNode } from './story_counts.ts';
+import {
+  choiceCounts,
+  hiddenSkills,
+  keysIn,
+  resolve,
+  shorts,
+  unlinkable,
+  wordsByNode,
+} from './story_counts.ts';
 import { refString } from '../src/runtime/decision.ts';
 
 type Dev = { canonical: string; sha256: string };
@@ -140,6 +148,7 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     choices: choiceCounts(c),
     hidden: hiddenSkills(c), // the cards' add menus and links (allowed.ts, link.ts)
     unlinkable: unlinkable(c),
+    shorts: shorts(refs, defs), // what Bind may write
   };
 }
 
@@ -190,17 +199,6 @@ type Bound = {
   unreached: Set<string>;
 };
 
-// A short ref's node: a dialogue choice `dialogues/<d>/<c>` is its dialogue's, when it has that choice.
-function resolve(short: string, { refs, defs }: Bound) {
-  const [dir, key, choice] = short.split('/');
-  const ref = refs.get(`${dir}/${key}`);
-  if (choice === undefined || !ref) return ref;
-  const d = defs.get(ref);
-  return dir === 'dialogues' && isObj(d) && isObj(d.choices) && choice in d.choices
-    ? ref
-    : undefined;
-}
-
 function readOutline(source: string): Outline | { refused: string } | null {
   const file = join(source, 'outline.json');
   if (!existsSync(file)) return null;
@@ -225,7 +223,7 @@ function beats(source: string, bound: Bound) {
   if (!outline || 'refused' in outline) return outline;
   const all = outline.parts.flatMap((p, part) => p.beats.map((b) => ({ ...b, part })));
   const rows = all.map(({ part, n, title, nodes = [] }) => {
-    const refs = nodes.map((short) => resolve(short, bound));
+    const refs = nodes.map((short) => resolve(short, bound.refs, bound.defs));
     const missing = nodes.filter((_, i) => !refs[i]);
     const status =
       !nodes.length || missing.length

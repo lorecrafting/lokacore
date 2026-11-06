@@ -144,6 +144,18 @@ test('a beat is missing with the refs not in the artifact, `~` while its node ha
       [6, 'built', undefined],
     ],
   );
+  // Break: Bind (mapedit.ts) is told a ref resolve() refuses is known, or a choice ref is not.
+  const { shorts } = story(src, dev, []) as { shorts: string[] };
+  assert.deepEqual(
+    [
+      'dialogues/greet/ask',
+      'rooms/village_green',
+      'items/nowhere',
+      'dialogues/greet/nope',
+      'rooms/village_green/door',
+    ].map((r) => shorts.includes(r)),
+    [true, true, false, false, false],
+  );
   const text = readFileSync(join(src, 'text.json'), 'utf8');
   const spoken = readFileSync(join(src, hub), 'utf8');
   put('text.json', { ...JSON.parse(text), 'room.village_green.description': '~' });

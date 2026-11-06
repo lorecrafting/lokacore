@@ -39,6 +39,7 @@ export type Story = {
   choices: Record<string, number>; // choice count by dialogue (Knowledge)
   hidden: string[]; // hidden skills' keys
   unlinkable: Record<string, string>; // dialogue key => the keyword, quest or riddle no then enters
+  shorts: string[]; // the short refs a beat may bind (story.ts resolve)
 };
 
 /** The kinds the list holds (design section 4.1); Trace opens on the fact, quest and story point. */

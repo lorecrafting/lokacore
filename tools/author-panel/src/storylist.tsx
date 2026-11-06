@@ -22,7 +22,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import type { SetLayout } from './columns.tsx';
-import { edit } from './mapwire.ts';
+import { edit, shown } from './mapwire.ts';
 import { fromRef, type Layout, type Selection } from './shell.ts';
 import * as L from './storylist.ts';
 import { ICONED, LowerPanel, PacingButton, type Act } from './storylower.tsx';
@@ -101,7 +101,7 @@ function Ghost({ label, icon: Icon, tab, run }: { label: string; icon: typeof Fl
 // ponytail: a prompt, not the design's Picker (the panel has none until E4b, PR 645); swap in its Picker then
 const bind = (row: L.Row) => {
   const short = prompt(`Bind beat ${row.n} to (a short ref, as outline.json writes it)`);
-  if (short) edit((e) => e.bind(Number(row.parent!.slice('part:'.length)), row.n!, short));
+  if (short) edit((e) => e.bind(Number(row.parent!.slice('part:'.length)), row.n!, short, shown.shorts));
 };
 
 function Cells({ row, a, tab }: { row: L.Row; a: Act; tab: boolean }) {
