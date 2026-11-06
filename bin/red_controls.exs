@@ -1,4 +1,4 @@
-# size: allow 372, one table per gate; the editor gate adds seventeen planted files
+# size: allow 376, one table per gate; the editor gate plants one file per control
 # Red controls plant violations, require checks to fail, and clean their own files.
 # Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
@@ -203,10 +203,10 @@ editor_registry = "tools/author-panel/src/edit/registry.json"
 editor_baseline = "test/loka/editor_generic_baseline.txt"
 editor = JSON.decode!(File.read!(Path.join(root, editor_registry)))
 base = File.read!(Path.join(root, editor_baseline))
-card = &Map.put(editor, "dialogues.name", Map.put(editor["dialogues.name"], "edit", &1))
-# a card unregistered: its rows generic again (as dialogues.name is), not in the shrunk baseline
+card = &Map.put(editor, "services.name", Map.put(editor["services.name"], "edit", &1))
+# a card unregistered: its rows generic again (as services.name is), not in the shrunk baseline
 uncard = fn re ->
-  Map.new(editor, &if(elem(&1, 0) =~ re, do: {elem(&1, 0), editor["dialogues.name"]}, else: &1))
+  Map.new(editor, &if(elem(&1, 0) =~ re, do: {elem(&1, 0), editor["services.name"]}, else: &1))
 end
 
 world = ~r/^(cartridge|resources|attributes|populations|transports|barriers)\./
@@ -224,15 +224,19 @@ editor_controls =
          "treatment:reverie: no create surface"},
         {"stale", %{registry: Map.put(editor, "rooms.nosuch", editor["rooms.name"])},
          "rooms.nosuch: no such source-schema path"},
-        {"component", %{registry: card.("nope.tsx")}, "dialogues.name: no edit surface"},
-        {"unlisted", %{baseline: String.replace(base, "dialogues.name.edit\n", "")},
-         "dialogues.name.edit: generic but not in the baseline"},
+        {"component", %{registry: card.("nope.tsx")}, "services.name: no edit surface"},
+        {"unlisted", %{baseline: String.replace(base, "services.name.edit\n", "")},
+         "services.name.edit: generic but not in the baseline"},
         {"room-card", %{registry: uncard.(~r/^rooms\./)},
          "rooms.name.edit: generic but not in the baseline"},
         {"npc-card", %{registry: uncard.(~r/^npcs\./)},
          "npcs.name.edit: generic but not in the baseline"},
         {"item-card", %{registry: uncard.(~r/^items\./)},
          "items.name.edit: generic but not in the baseline"},
+        {"quest-card", %{registry: uncard.(~r/^quests\./)},
+         "quests.name.edit: generic but not in the baseline"},
+        {"dialogue-card", %{registry: uncard.(~r/^dialogues\./)},
+         "dialogues.name.edit: generic but not in the baseline"},
         {"world-card", %{registry: uncard.(world)},
          "cartridge.title.edit: generic but not in the baseline"},
         {"rules-block",
@@ -242,11 +246,11 @@ editor_controls =
          "actions.cooldown.edit: generic but not in the baseline"},
         {"reaction-card", %{registry: uncard.(~r/^reactions\./)},
          "reactions.zone.edit: generic but not in the baseline"},
-        {"escape", %{registry: card.("../App.tsx")}, "dialogues.name: no edit surface"},
+        {"escape", %{registry: card.("../App.tsx")}, "services.name: no edit surface"},
         {"bespoke", %{registry: card.("RedCard.tsx"), card: ""},
-         "dialogues.name.edit: no longer generic"},
-        {"grown", %{main: String.replace(base, "dialogues.name.edit\n", "")},
-         "dialogues.name.edit: not in main's baseline"}
+         "services.name.edit: no longer generic"},
+        {"grown", %{main: String.replace(base, "services.name.edit\n", "")},
+         "services.name.edit: not in main's baseline"}
       ] do
     files =
       for {k, v} <- planted,

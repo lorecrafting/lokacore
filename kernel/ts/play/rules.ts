@@ -2,7 +2,8 @@
 import STEP_CONTEXTS from './step_contexts.json' with { type: 'json' };
 
 // a field named other than its kind (content/leaf_refs.ex: a policy's or step's `with`, `plan`;
-// content/reactions.ex:36: a trigger's filters)
+// content/reactions.ex:36: a trigger's filters; the quest schema's descriptions: an expedition's,
+// patrol's, exchange's and deadline's fields); `<parent>.<name>` first where one name means two kinds
 export const PICK_NAMES: Record<string, string> = {
   services: 'service',
   items: 'item',
@@ -13,6 +14,22 @@ export const PICK_NAMES: Record<string, string> = {
   target: 'npc',
   witness: 'npc',
   kind: 'liquid',
+  accept: 'quest', // dialogues.ex:362
+  'route.from': 'room',
+  'route.to': 'room',
+  'patrol.route': 'room',
+  'transport.route': 'transport', // an InspectableDetail transport's stop: the route it belongs to
+  start_room: 'room',
+  shelter_room: 'room',
+  footprint: 'room',
+  checkpoints: 'room',
+  trust_fact: 'fact',
+  survived_fact: 'fact',
+  faction: 'fact',
+  contribution: 'fact',
+  item_acquired: 'item',
+  incoming: 'item',
+  outgoing: 'item',
 };
 
 // the step context each node kind's steps compile in (content/steps.ex `check/5` callers)

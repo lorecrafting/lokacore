@@ -7,6 +7,7 @@ import {
   added,
   addedHere,
   allowed,
+  awaits,
   hidden,
   proseKey,
   removed,
@@ -142,7 +143,7 @@ export function Mechanics({
 export const adder = (card: Card, defs: Record<string, never>, def: string) => (f: string) => {
   const next = added((card.draft ?? {}) as Doc, f, defs, def);
   card.reveal(f);
-  if (next) (card.change(next), card.commit());
+  if (next) (card.change(next), awaits(def, f) || card.commit());
 };
 
 /** The other fields: the generic form, with the card's `own` fields (drawn above) hidden. */
@@ -153,7 +154,13 @@ export function RoomForm({
   diag,
   defs,
   own = OWN,
-}: Omit<Props, 'offer'> & { card: Card; defs: Record<string, never>; own?: string[] }) {
+  nested = {},
+}: Omit<Props, 'offer'> & {
+  card: Card;
+  defs: Record<string, never>;
+  own?: string[];
+  nested?: Record<string, string[]>; // a map's entry fields drawn above: `{choices: ['then']}`
+}) {
   const saved = card.saved!;
   const ui = hidden(
     uiSchema(saved.dir, saved.schema as never, defs, {}),
@@ -163,6 +170,10 @@ export function RoomForm({
     card.revealed,
   );
   for (const f of own) ui[f] = HIDE;
+  for (const [m, fs] of Object.entries(nested)) {
+    const entry = ((ui[m] ??= {}).additionalProperties ??= {});
+    for (const f of fs) entry[f] = HIDE;
+  }
   return <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />;
 }
 
@@ -196,9 +207,11 @@ export function Words({
           <Fragment key={f}>
             <dt className="text-muted-foreground">{f}</dt>
             <dd className="truncate font-mono">{key}</dd>
-            <Button type="button" size="xs" variant="outline" onClick={() => context.edit(key)}>
-              Edit in Book
-            </Button>
+            <dd>
+              <Button type="button" size="xs" variant="outline" onClick={() => context.edit(key)}>
+                Edit in Book
+              </Button>
+            </dd>
           </Fragment>
         );
       })}

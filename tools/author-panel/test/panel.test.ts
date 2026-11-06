@@ -57,7 +57,7 @@ after(async () => {
 });
 
 /** The panel with this layout kept, once the inspector's card has its form (the first compile and Vite's first optimise included). */
-async function open(layout: object, card = 'Card'): Promise<Page> {
+async function open(layout: object): Promise<Page> {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   await page.addInitScript(
     (l) => localStorage.setItem('loka.editor.layout', l),
@@ -72,7 +72,7 @@ async function open(layout: object, card = 'Card'): Promise<Page> {
       await new Promise((r) => setTimeout(r, 500));
     }
   }
-  await page.locator(`[aria-label="${card}"] form`).waitFor({ timeout: boot });
+  await page.locator('[aria-label="Inspector"] form').waitFor({ timeout: boot }); // any card's form
   return page;
 }
 const QUEST = { right: 280, selection: { kind: 'quest', key: 'carry_letter' } };
@@ -86,6 +86,48 @@ test('at a 280 px inspector the quest card fits its width', async () => {
     .evaluate((e) => [e.scrollWidth, e.clientWidth]);
   assert.ok(client < 280, `inspector ${client} px wide: the kept 280 px layout was not applied`);
   assert.ok(scroll <= client, `card content ${scroll} px in a ${client} px inspector`);
+});
+
+// Breaks: a quest or dialogue opens the generic card (right.tsx's dispatch), a quest's own name is
+// not a Book link (Quest.tsx's words), a dialogue's words list a field it lacks, a choice's then_failed row shows without a check (or hides
+// with one), a known target is not drafted, or a choice's link
+// takes a dialogue the story lacks (refuseLink not wired, or the refused text drafted and committed):
+// the compile's UNRESOLVED_REFERENCE.
+test('a quest and a dialogue open their cards; a link to no dialogue is refused', async () => {
+  const quest = await open(QUEST);
+  await quest.locator('[aria-label="quest card"]').waitFor({ timeout: boot });
+  const book = quest.locator('[aria-label="quest card"] dl').getByRole('button', { name: 'Edit in Book' });
+  assert.equal(await book.count(), 1); // its own name opens in the Book, never a text input
+  await quest.close();
+  const bess = await open({ right: 280, selection: { kind: 'dialogue', key: 'bess_talk' } });
+  const rows = bess.locator('[aria-label="links"] input');
+  await rows.first().waitFor({ timeout: boot });
+  const labels = await rows.evaluateAll((es) => es.map((e) => e.getAttribute('aria-label')));
+  // bess_talk.json: boast and lean carry a check, praise and insult none
+  assert.deepEqual(labels, [
+    'praise then',
+    'insult then',
+    'boast then',
+    'boast then_failed',
+    'lean then',
+    'lean then_failed',
+  ]);
+  await bess.close();
+  const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
+  const link = page.getByLabel('bounty then');
+  await link.waitFor({ timeout: boot });
+  const words = await page.locator('[aria-label="dialogue card"] dl dt').allTextContents();
+  assert.deepEqual(words, ['prompt']); // aldous_talk.json has a prompt and no name of its own
+  const saved = await link.inputValue();
+  await link.fill('end'); // a known target is drafted
+  assert.equal(await link.inputValue(), 'end');
+  await link.fill(saved);
+  await link.fill('nosuch');
+  await page.getByText('no dialogue nosuch').waitFor({ timeout: boot });
+  assert.equal(await link.getAttribute('aria-invalid'), 'true');
+  await link.blur(); // a refused target was never drafted: the blur's commit leaves the saved link
+  assert.notEqual(await link.inputValue(), 'nosuch');
+  await page.close();
 });
 
 // Breaks: a control in the shell loses its accessible name, label or contrast (axe serious or
@@ -124,7 +166,8 @@ test('a reaction and an action open their own cards', async () => {
     ['reaction', 'letter_late', 'when'],
     ['action', 'fish', 'tip'],
   ]) {
-    const page = await open({ selection: { kind, key } }, `${kind} card`);
+    const page = await open({ selection: { kind, key } });
+    await page.locator(`[aria-label="${kind} card"] form`).waitFor({ timeout: boot });
     const menu = page.getByLabel(`${kind} card`).getByLabel('Add a field').locator('option');
     const options = await menu.allTextContents();
     assert.ok(options.includes(field), `${kind} ${key} offers ${field}`);
@@ -133,7 +176,9 @@ test('a reaction and an action open their own cards', async () => {
     await page.close();
   }
   // a built-in command action keeps the generic card
-  await (await open({ selection: { kind: 'action', key: 'barter' } })).close();
+  const barter = await open({ selection: { kind: 'action', key: 'barter' } });
+  await barter.locator('[aria-label="Card"] form').waitFor({ timeout: boot });
+  await barter.close();
 });
 
 /** The Flow graph in the left slot, warm: the first open compiles the story on the server (a cold open
