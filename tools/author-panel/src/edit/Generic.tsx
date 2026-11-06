@@ -1,7 +1,7 @@
 // The generic inspector card (docs/rnd/gui-editor-design-2026-11-04.md §6, §11): rjsf draws the
 // definition's own file from its served schema; each blur posts the changed fields to
 // POST /change (kernel/ts/play/write.ts), Undo posts /undo, the compiler's refusals show at their field.
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import Form from '@rjsf/core';
 import type { RegistryFieldsType, RJSFSchema, UiSchema } from '@rjsf/utils';
 import type { Op } from '../../../../kernel/ts/play/edit_model.ts';
@@ -38,9 +38,9 @@ type Diag = ReturnType<typeof useDiagnostics>;
 // The last write's undo id per file: reselecting a card keeps it (the server refuses a stale one).
 const undos = new Map<string, string>();
 function useUndo(rel: string) {
-  const [, tick] = useState(0);
+  const [, tick] = useState({}); // a fresh object re-renders
   const set = (id?: string) =>
-    void (id ? undos.set(rel, id) : undos.delete(rel), tick((n) => n + 1));
+    void (id ? undos.set(rel, id) : undos.delete(rel), tick({}));
   return [undos.get(rel), set] as const;
 }
 
@@ -168,9 +168,10 @@ type FormProps = {
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
-  const [rows, remount] = useState(0); // rjsf keeps an added row's key in its own state: a renamed row redraws
+  // rjsf keeps an added row's key in its own state: a renamed row redraws
+  const [rows, remount] = useReducer((n: number) => n + 1, 0); // mutate-skip: a redraw key; any start or step redraws
   const change = (doc: unknown, row = capabilityRow(doc as never)) =>
-    void (row !== doc && remount(rows + 1), card.change(row));
+    void (row !== doc && remount(), card.change(row));
   return (
     // after the blur's own change lands: rjsf sends a map key's rename after its setState, past the blur
     <div onBlur={() => setTimeout(card.commit)}>

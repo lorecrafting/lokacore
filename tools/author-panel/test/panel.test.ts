@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 710, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
+// size: allow 740, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -294,6 +294,7 @@ test('a held edit gives way to its undoing, Undo and a reselect', async () => {
   for (let t = 0; (await field.inputValue()) !== '500' && t < 50; t++) await page.waitForTimeout(100); // the reload rendered
   assert.equal(await field.inputValue(), '500'); // not the held -1 put back
   assert.equal(await refusal.count(), 0);
+  assert.ok(await undo.isDisabled()); // an undone write offers no Undo of the undo
   await page.route('**/__author/change', (r) => r.abort());
   await page.route('**/__author/source?file=*oilskin*', async (r) => {
     const s = await (await r.fetch()).json();
@@ -584,16 +585,50 @@ test('Cmd-E asks to open the selected card’s file', async () => {
   await page.close();
 });
 
-// Breaks (App.tsx open, loka-wfrgk.69): a story row's Alt-click (the Flow and Map open share it) asks /open
-// with only a key, so the watcher, finding no source line for the key, opens nothing.
-test('Alt-click on a story row asks to open its file', async () => {
-  const page = await open({ ...QUEST, map: 'story' });
-  const sent: { file?: string }[] = [];
-  await page.route('**/__author/open', (r) => (sent.push(r.request().postDataJSON()), r.fulfill({ body: '{}' })));
-  await page.getByRole('treeitem', { name: 'barter, action', exact: true }).click({ modifiers: ['Alt'], timeout: boot });
-  for (let i = 0; i < 50 && !sent.length; i++) await page.waitForTimeout(100);
-  assert.deepEqual(sent.map((s) => s.file), ['actions/barter.json']);
+// Breaks (App.tsx open, loka-wfrgk.69): a story row's or a Flow chip's Alt-click asks /open with only a
+// key, so the watcher, finding no source line for the key, opens nothing; or a plain click opens too.
+test('Alt-click on a story row or a Flow chip asks to open its file, a plain click does not', async () => {
+  for (const [map, node] of [
+    ['story', (p: Page) => p.getByRole('treeitem', { name: 'barter, action', exact: true })],
+    ['flow', (p: Page) => p.locator('[data-id$=":action/barter"]')],
+  ] as const) {
+    const page = await open({ ...QUEST, leftOpen: true, map });
+    const sent: { file?: string }[] = [];
+    await page.route('**/__author/open', (r) => (sent.push(r.request().postDataJSON()), r.fulfill({ body: '{}' })));
+    await node(page).waitFor({ timeout: boot });
+    await node(page).dispatchEvent('click'); // a Flow chip may sit outside the viewport
+    await node(page).dispatchEvent('click', { altKey: true });
+    for (let i = 0; i < 50 && !sent.length; i++) await page.waitForTimeout(100);
+    assert.deepEqual(sent.map((s) => s.file), ['actions/barter.json'], map);
+    await page.close();
+  }
+});
+
+// Breaks (App.tsx useStory, loka-wfrgk.71): Bind not told the last compile's short refs, so it writes
+// an unknown ref into outline.json, or refuses a known one.
+test('Bind writes a short ref the last compile knows and refuses one it does not', async () => {
+  const file = join(dir, 'showcase/outline.json');
+  writeFileSync(file, '{ "parts": [{ "beats": [{ "n": 1 }] }] }\n');
+  const nodes = () => JSON.parse(readFileSync(file, 'utf8')).parts[0].beats[0].nodes;
+  const page = await open({ ...QUEST, leftOpen: true, map: 'story' });
+  const ghost = page.getByRole('button', { name: 'Bind beat 1', exact: true });
+  const bind = async (short: string) => {
+    const told = page.evaluate(
+      (s) => new Promise<string>((r) => ((window.prompt = () => s), (window.alert = (m) => r(String(m))))),
+      short,
+    ); // the story map tells by alert (mapwire.ts alone): stubbed, never a real dialog
+    await ghost.dispatchEvent('click');
+    return told;
+  };
+  await ghost.waitFor({ state: 'attached', timeout: boot });
+  assert.equal(await bind('nosuch/thing'), 'nosuch/thing is no definition in the last compile');
+  assert.equal(nodes(), undefined);
+  const told = bind('actions/barter').catch(() => 'nothing'); // a written bind tells nothing
+  for (let t = 0; !nodes() && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual(nodes(), ['actions/barter']);
+  rmSync(file);
   await page.close();
+  assert.equal(await told, 'nothing');
 });
 
 // Breaks: the checkpoint name's refusal shows for a good name, or not for a bad one (sections.tsx).
