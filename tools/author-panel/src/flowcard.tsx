@@ -139,6 +139,7 @@ export type CardAct = {
 /** The hover card's body (rulings S3 Hover card); Play to here and Jump here wait for S4. */
 export function Card({ s, f, ref: r, a }: { s: Story; f: Flow; ref: string; a: CardAct }) {
   const chip = f.chips.find((c) => c.id === r);
+  const words = chip?.name.split(', ').slice(2, -2).join(', '); // the state words: refusals, ~, unreached
   const I = ICON[chip?.kind ?? ''];
   const { rows, more, depends } = card(s, r);
   const keys = (e: React.KeyboardEvent) => {
@@ -156,7 +157,7 @@ export function Card({ s, f, ref: r, a }: { s: Story; f: Flow; ref: string; a: C
         {I ? <I {...ICONED} /> : null}
         <span className="font-mono">{key(r)}</span>
       </p>
-      <p className="text-muted-foreground">{chip?.name.split(', ').slice(2, -2).join(', ')}</p>
+      {words ? <p className="text-muted-foreground">{words}</p> : null}
       <ul className="my-1 font-mono">
         {rows.map((row) => <li key={row}>{row}</li>)}
         {more ? <li className="text-muted-foreground">+{more} more</li> : null}

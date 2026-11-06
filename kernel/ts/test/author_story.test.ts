@@ -288,7 +288,8 @@ test('knowledge: a fact assigned false is not known; set true and false up to n,
 });
 
 // Break: Pacing counts a node bound twice in a part twice, marks a part at half the median thin,
-// takes the lower middle of an even count as the median, misses the thin part, or does not list it first.
+// takes the lower middle of an even count as the median, misses the thin part, does not list it first,
+// or counts a bound node with no words as a word.
 test('pacing: words per part over its bound nodes, the thin part first', () => {
   const [x, y, z, w] = ['x', 'y', 'z', 'w'].map((k) => ref('room', k));
   const beat = (part: number, n: number, nodes: string[]) => ({ part, n, status: 'built', nodes });
@@ -297,7 +298,13 @@ test('pacing: words per part over its bound nodes, the thin part first', () => {
     words: { [x]: 100, [y]: 10, [z]: 90, [w]: 45 },
     outline: {
       parts: ['A', 'B', 'C', 'D'],
-      beats: [beat(0, 1, [x]), beat(0, 2, [x]), beat(1, 3, [y]), beat(2, 4, [z]), beat(3, 5, [w])],
+      beats: [
+        beat(0, 1, [x]),
+        beat(0, 2, [x, ref('room', 'bare')]),
+        beat(1, 3, [y]),
+        beat(2, 4, [z]),
+        beat(3, 5, [w]),
+      ],
       unpaid: [],
       unseeded: [],
     },

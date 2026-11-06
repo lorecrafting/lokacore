@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Icon, useSize, useView } from './areamap.tsx';
 import type { Change } from './author.ts';
 import { Input } from './components/ui/input.tsx';
-import { F, key, layout, stateOf, type Flow } from './flow.ts';
+import { burst, F, key, layout, stateOf, type Flow } from './flow.ts';
 import type { ChipAct } from './flowcard.tsx';
 import { Graph, Header } from './flowframe.tsx';
 import { entry, focusInk, followed, footer, inked, search } from './flowread.ts';
@@ -31,11 +31,10 @@ const refOf = (s: Story, sel?: Selection) =>
 
 /** The files changed since the story before this one, with who changed them (the feed's colour). */
 function useBurst(story: Story, changes: Change[]) {
-  const last = useRef({ story: undefined as Story | undefined, since: 0, by: new Map<string, Change['by']>() });
+  const last = useRef({ story: undefined as Story | undefined, since: undefined as number | undefined, by: new Map<string, Change['by']>() });
   if (last.current.story !== story) {
     const since = last.current.since;
-    const fresh = changes.filter((c) => c.seen > since);
-    last.current = { story, since: changes[0]?.seen ?? since, by: new Map(fresh.map((c) => [c.file, c.by])) };
+    last.current = { story, since: changes[0]?.seen ?? since ?? 0, by: new Map(burst(changes, since).map((c) => [c.file, c.by])) };
   }
   return last.current.by;
 }
