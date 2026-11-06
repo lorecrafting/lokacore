@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync } from 'node:fs';
-import { realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
@@ -16,6 +16,7 @@ import {
   cellAt,
   editor,
   freeKey,
+  childOf,
   toward,
   dragged,
   type Editor,
@@ -188,7 +189,7 @@ test("an NPC given hp by the card's Add compiles", () => {
 test('a template dropped on a room makes its child there; a refused drop writes nothing; undo removes it', async () => {
   // Breaks: --extends not passed (the child lacks the parent's hp), the child left unplaced, a
   // refused drop leaving a file, or /templates missing an area's or an item abstract, or listing a
-  // concrete NPC or an abstract room.
+  // concrete NPC or an abstract room, or reading through a link to an abstract file outside the tree.
   const tpl = 'areas/barn/npcs/goat.json';
   mkdirSync(join(src, 'areas/barn/npcs'), { recursive: true });
   const hp = { minimum: 0, maximum: 1, start: 1, gain: 0 };
@@ -197,6 +198,9 @@ test('a template dropped on a room makes its child there; a refused drop writes 
   writeFileSync(join(src, 'items/sack.json'), '{ "abstract": true }');
   writeFileSync(join(src, 'areas/barn/npcs/cow.json'), '{ "abstract": false }');
   writeFileSync(join(src, 'rooms/mould.json'), '{ "abstract": true }');
+  const ox = join(mkdtempSync(join(tmpdir(), 'outside-')), 'ox.json');
+  writeFileSync(ox, '{ "abstract": true }');
+  symlinkSync(ox, join(src, 'items/ox.json'));
   const listed = await ask('/templates');
   assert.deepEqual(
     [listed.ok, listed.told],
@@ -305,6 +309,20 @@ test("a dropped template's child takes the first free <template>_<n>", () => {
   assert.deepEqual(
     [freeKey(wild, [], []), freeKey(wild, nodes, []), freeKey(wild, nodes, ['wild_2'])],
     ['wild_1', 'wild_2', 'wild_3'],
+  );
+});
+
+test('the palette makes a template child from `~<template>`, a plain key otherwise', () => {
+  // Breaks: map-npc/map-item (the keyboard path to a template child) passing no extends, the `~`
+  // kept in the parent's key, or a plain key read as a template.
+  const nodes = [{ kind: 'npc', ref: 'cart@0:npc/wild_1' }];
+  assert.deepEqual(
+    [
+      childOf('~wild', 'npcs', nodes, []),
+      childOf('~wild', 'items', nodes, []),
+      childOf('bob', 'npcs', nodes, []),
+    ],
+    [['wild_2', 'wild'], ['wild_1', 'wild'], ['bob']],
   );
 });
 

@@ -168,6 +168,13 @@ export function freeKey(t: { dir: 'npcs' | 'items'; key: string }, nodes: { kind
   return `${t.key}_${n}`;
 }
 
+/** The palette's map-npc/map-item answer: `<key>`, or `~<template>` for that template's child at its free key. */
+export function childOf(answer: string, dir: 'npcs' | 'items', nodes: { kind: string; ref: string }[], templates: string[]): [string, string?] {
+  if (!answer.startsWith('~')) return [answer];
+  const up = answer.slice(1);
+  return [freeKey({ dir, key: up }, nodes, templates), up];
+}
+
 /** Move to area: the file moves to `areas/<area>/rooms/`, or to the root for null. */
 const move = async (s: Run, r: MapRoom, area: string | null) =>
   s.call('move', { file: fileOf(r), was: (await s.read(fileOf(r))).was, area });

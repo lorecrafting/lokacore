@@ -136,6 +136,7 @@ export function AreaMap(p: MapProps) {
   const [locked, lock] = useState(() => localStorage.getItem(LOCK) !== 'off');
   useEffect(() => localStorage.setItem(LOCK, locked ? 'on' : 'off'), [locked]);
   shown.rooms = p.story.map;
+  shown.nodes = p.story.graph.nodes;
   useEffect(() => tell(''), [p.story]); // a recompile clears the last refusal
   useEffect(() => ((shown.tell = tell), () => void (shown.tell = alone)), []);
   return (
@@ -150,7 +151,7 @@ export function AreaMap(p: MapProps) {
         {l.v.view && l.level.length ? <Drawing p={p} l={l} reach={reach} locked={locked} /> : null}
       </div>
       <Unplaced rooms={p.story.map.filter((r) => !r.at)} pick={p.pick} />
-      <Templates story={p.story} />
+      <Templates story={p.story} room={p.story.map.find((r) => r.ref === p.selected)} />
       <p
         role={told ? 'alert' : undefined}
         className={`truncate px-2 py-1 text-xs ${told ? 'text-destructive' : 'text-muted-foreground'}`}
