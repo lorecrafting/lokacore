@@ -18,8 +18,11 @@ import {
   editable,
   fieldErrors,
   hidden,
+  pickable,
   proseKey,
   rebase,
+  refuseKey,
+  refusePick,
   start,
 } from '../play/card.ts';
 import { change } from '../play/edit_model.ts';
@@ -222,6 +225,33 @@ test('a value with no op is drawn in the first branch its type fits', () => {
   assert.equal(branchOf(typed, null), 2);
   assert.equal(branchOf(typed, true), -1);
   assert.equal(branchOf([{}], true), 0);
+});
+
+// Break: the World card's picker takes a key no definition has (a typo'd room or resource is
+// written and only the compile refuses it), names the wrong kind for a field (an array item's
+// index, not its field, picks), or offers a story node for a root-file kind; a bad new key passes.
+test('a World picker refuses an unknown id at the field; a new entry key must be new and lowercase', () => {
+  const nodes = [
+    { ref: 'c@0.1:room/square', kind: 'room' },
+    { ref: 'c@0.1:npc/ada', kind: 'npc' },
+  ];
+  const room = pickable(['recovery_rooms', 0], nodes, {});
+  assert.deepEqual(room, { kind: 'room', keys: ['square'] });
+  assert.deepEqual(
+    [refusePick(room, 'squaer'), refusePick(room, 'square'), refusePick(room, '')],
+    ['no room squaer', undefined, undefined],
+  );
+  const theft = pickable(['world', 'theft', 'attribute'], nodes, { attribute: ['grit'] });
+  assert.deepEqual(
+    [refusePick(theft, 'grit'), refusePick(theft, 'ada')],
+    [undefined, 'no attribute ada'],
+  );
+  assert.equal(refusePick(pickable(['currency'], nodes, {}), 'gold'), 'no resource gold');
+  assert.equal(pickable(['title'], nodes, {}), undefined);
+  assert.deepEqual(
+    [refuseKey('gold', { coin: {} }), refuseKey('gold', { gold: {} }), refuseKey('Gold', {})],
+    [undefined, 'already gold', 'a key is lowercase letters, digits and _'],
+  );
 });
 
 // Break: a reference field offers another kind's keys, or the ref's cartridge prefix; a `.scene`

@@ -3,6 +3,7 @@
 import { editable } from '../../../kernel/ts/play/card.ts';
 import type { Change, Story, useDiagnostics } from './author.ts';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card.tsx';
+import { WORLD, World } from './edit/cards/World.tsx';
 import { Generic } from './edit/Generic.tsx';
 import { places, type Selection } from './shell.ts';
 
@@ -12,7 +13,7 @@ type Props = { sel?: Selection; story?: Story; diag: ReturnType<typeof useDiagno
 export function Inspector({ sel, story, diag, edit }: Props) {
   if (!sel) return <p className="p-3 text-muted-foreground">Select a definition in the hierarchy or a line in the Book.</p>;
   const ref = places(sel, story?.graph.nodes ?? []).inspector?.ref;
-  const rel = ref ? story?.files[ref] : undefined;
+  const rel = ref ? story?.files[ref] : sel.file; // the World row names its file
   const count = (rows?: Record<string, unknown[]>) => (ref && rows?.[ref]?.length) || 0;
   const unreached = !!ref && Object.values(story!.report.unreachable).some((refs) => refs.includes(ref));
   return (
@@ -33,10 +34,15 @@ export function Inspector({ sel, story, diag, edit }: Props) {
         </dl>
       </CardContent>
       {editable(rel) ? (
-        <Generic key={rel} rel={rel!} diag={diag} context={{ kind: sel.kind, key: sel.key, nodes: story!.graph.nodes, edit }} />
+        <Editor key={rel} rel={rel!} diag={diag} context={{ kind: sel.kind, key: sel.key, nodes: story?.graph.nodes ?? [], edit }} />
       ) : null}
     </Card>
   );
+}
+
+/** The file's card: a hand-built one where the registry routes its fields there, else the generic one. */
+function Editor(p: Parameters<typeof Generic>[0]) {
+  return WORLD.test(p.rel) ? <World {...p} /> : <Generic {...p} />;
 }
 
 const clock = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });

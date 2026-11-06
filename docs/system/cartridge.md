@@ -964,6 +964,14 @@ build. The author tools below are reachable only in that bundle (a production ex
   /hold {on}`: while held, a structural compile waits (`pending` counts them, the newest kept) and
   the Hold's end writes it, so the Book does not reload mid-edit; text overlays still push until one waits. Each
   compile also pushes `diagnostics`, `mix loka.compile --json <file>`.
+- **World card** ([GUI editor design §6](../rnd/gui-editor-design-2026-11-04.md), E6e): the inspector's hand-built card
+  for `cartridge.json`, `resources.json`, `attributes.json` and each population, transport and barrier
+  file (their rows in `tools/author-panel/src/edit/registry.json`), opened from the Hierarchy's and the
+  Project tab's World button or by selecting one of those definitions. It writes only through the
+  routes above (`/change`, `/undo`, Hold). A reference field is a picker of the keys its kind has
+  (rooms, items, NPCs and transports from the last good compile; resources and attributes from their
+  root files) and refuses any other key at the field, before it is written. A new resource or attribute
+  gets a lowercase key no entry has, with its required numbers at 0.
 - **Go to room, set fact** ([owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md), dev@1): the panel sends them as ordinary invocations `dev_go_to_room` and `dev_set_fact` the session decides, saves as receipts and records as steps, so a reopen and `bin/loka check` re-decide them under the fixed seed and clock and a checkpoint may hold them. Only a host with `dev` set (the preview, `bin/loka check`) reaches `stepDev`; any other host answers `unsupported_capability`, `step` answers `permission_denied`, and no cartridge action can name them. Go to room moves the body alone and is refused `invalid_state` when that would leave a world invariant wrong: already there, engaged, not standing, in water, with an escort, mount or group that would come along, on a patrol or expedition, in a modal scene or at an open choice. It runs no entry sight or arrival line. Set fact is refused `invalid_state` for a per-subject fact, a value of the wrong type or range, the value it already has, the position and scene facts, and a fact another mechanic owns. The panel states each refusal in one plain sentence.
 - **Still to write.** A text value with a line that trims to `~` is a placeholder, in JSON or in
   a scene file. The panel and

@@ -1,4 +1,4 @@
-# size: allow 352, one table per gate; the editor gate adds eleven planted files
+# size: allow 360, one table per gate; the editor gate adds twelve planted files
 # Red controls plant violations, require checks to fail, and clean their own files.
 # Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
@@ -205,6 +205,12 @@ editor = JSON.decode!(File.read!(Path.join(root, editor_registry)))
 base = File.read!(Path.join(root, editor_baseline))
 card = &Map.put(editor, "rooms.name", Map.put(editor["rooms.name"], "edit", &1))
 
+# the World card unregistered: its rows generic again (as npcs.name is), not in the shrunk baseline
+world = ~r/^(cartridge|resources|attributes|populations|transports|barriers)\./
+
+unworld =
+  Map.new(editor, &if(elem(&1, 0) =~ world, do: {elem(&1, 0), editor["npcs.name"]}, else: &1))
+
 editor_controls =
   for {name, planted, expect} <- [
         # the walker reaches the ambient fields emote@1 declares (loka-8ghm), under if/then/else
@@ -221,6 +227,8 @@ editor_controls =
         {"component", %{registry: card.("nope.tsx")}, "rooms.name: no edit surface"},
         {"unlisted", %{baseline: String.replace(base, "rooms.name.edit\n", "")},
          "rooms.name.edit: generic but not in the baseline"},
+        {"world-card", %{registry: unworld},
+         "cartridge.title.edit: generic but not in the baseline"},
         {"escape", %{registry: card.("../App.tsx")}, "rooms.name: no edit surface"},
         {"bespoke", %{registry: card.("RedCard.tsx"), card: ""},
          "rooms.name.edit: no longer generic"},

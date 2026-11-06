@@ -4,6 +4,8 @@
 // kernel/ts/test/author_shell.test.ts.
 
 export type Selection = { file?: string; kind: string; key: string };
+/** The World card's selection: cartridge.json, which no graph node names (its card opens the root files). */
+export const WORLD: Selection = { file: 'cartridge.json', kind: 'cartridge', key: 'world' };
 export type Layout = {
   left: number;
   right: number;

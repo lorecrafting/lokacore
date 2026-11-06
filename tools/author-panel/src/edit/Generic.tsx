@@ -38,7 +38,7 @@ async function source(rel: string): Promise<Saved> {
 }
 
 /** The card's file: loaded, reloaded on a write from outside, changed by a blur and undone. */
-function useCard(rel: string, diag: Diag) {
+export function useCard(rel: string, diag: Diag) {
   const [saved, setSaved] = useState<Saved>();
   const [draft, setDraft] = useState<unknown>();
   const [revealed, setRevealed] = useState<string[]>([]);
@@ -80,7 +80,7 @@ function useCard(rel: string, diag: Diag) {
 }
 
 /** The registry's fields this definition lacks: choosing one reveals its empty field. */
-function AddMenu({ fields: menu, reveal }: { fields: string[]; reveal: (f: string) => void }) {
+export function AddMenu({ fields: menu, reveal }: { fields: string[]; reveal: (f: string) => void }) {
   if (!menu.length) return null;
   return (
     <select
@@ -100,7 +100,7 @@ function AddMenu({ fields: menu, reveal }: { fields: string[]; reveal: (f: strin
 }
 
 /** The file, the compile state (held, compiling, stale) and Undo of the last change. */
-function Header({ rel, diag, undo }: { rel: string; diag: Diag; undo?: () => void }) {
+export function Header({ rel, diag, undo }: { rel: string; diag: Diag; undo?: () => void }) {
   const label = status(!!diag.held, !!diag.pending, diag.compiled);
   return (
     <div className="flex items-center gap-2">
