@@ -10,6 +10,9 @@ import { Ajv2020 } from 'ajv/dist/2020.js';
 import {
   FORM_DEFAULTS,
   addable,
+  added,
+  addedHere,
+  allowed,
   apart,
   applied,
   branchOf,
@@ -21,6 +24,7 @@ import {
   minimal,
   proseKey,
   rebase,
+  removed,
   start,
 } from '../play/card.ts';
 import { change } from '../play/edit_model.ts';
@@ -291,4 +295,50 @@ test("a room mechanic's added value is the least valid one, its words `~`", () =
     change(doc, [{ path: [f], value }]);
     assert.ok(validate(doc), `${f}: ${JSON.stringify(validate.errors)}`);
   }
+});
+
+// Break: the Room card's add overwrites a present field or writes one the author must choose, its
+// remove drops another field, or a Book "Add here" pick adds to another room or a field not offered.
+test('a room field is added once, removed alone, added here only in its room', () => {
+  const doc = { name: 'room.a.name', dark: false };
+  const R = 'source.RoomDefinition';
+  assert.deepEqual(added(doc, 'sanctuary', defs, R), { ...doc, sanctuary: true });
+  assert.equal(added(doc, 'dark', defs, R), undefined); // present
+  assert.equal(added(doc, 'sound', defs, R), undefined); // the author picks the tag
+  assert.equal(added(doc, 'abstract', defs, R), undefined); // not a RoomDefinition field
+  assert.deepEqual(removed(doc, 'dark'), { name: 'room.a.name' });
+  assert.equal(addedHere({ kind: 'dark', room: 'lane' }, 'lane', ['dark']), 'dark');
+  assert.equal(addedHere({ kind: 'dark', room: 'well' }, 'lane', ['dark']), undefined);
+  assert.equal(addedHere({ kind: 'tags', room: 'lane' }, 'lane', ['dark']), undefined);
+});
+
+// Break: the add menu offers a field whose owning capability the cartridge does not require, so the
+// world stops compiling (UNDECLARED_CAPABILITY), or hides one that needs none. Owners hand-copied
+// from lib/loka/content/room_parts.ex parts/1, cues.ex and construction.ex.
+test("a room's add menu offers only fields the cartridge's capabilities allow", () => {
+  const menu = [
+    'cues',
+    'dark',
+    'dark_description',
+    'details',
+    'sanctuary',
+    'site',
+    'tags',
+    'variants',
+  ];
+  assert.deepEqual(allowed('rooms', menu, { movement: 1 }), ['sanctuary']);
+  assert.deepEqual(allowed('rooms', menu, { light: 1, tag: 1 }), [
+    'dark',
+    'dark_description',
+    'sanctuary',
+    'tags',
+  ]);
+  const rest = { sense_cue: 1, inspectable_detail: 1, construction: 1, description_variant: 1 };
+  assert.deepEqual(allowed('rooms', menu, rest), [
+    'cues',
+    'details',
+    'sanctuary',
+    'site',
+    'variants',
+  ]);
 });

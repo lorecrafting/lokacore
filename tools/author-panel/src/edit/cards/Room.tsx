@@ -1,28 +1,26 @@
 // The Room card (docs/rnd/gui-editor-design-2026-11-04.md §6, E6a): the room's words open in the
 // Book, its exits take the map's edits, its mechanics are added (here or from the Book) and removed;
 // every write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
-import { Fragment, useEffect } from 'react';
-import Form from '@rjsf/core';
-import { customizeValidator } from '@rjsf/validator-ajv8';
-import { Ajv2020 } from 'ajv/dist/2020.js';
+import { Fragment, useEffect, useState } from 'react';
 import {
-  FORM_DEFAULTS,
   addable,
-  fieldErrors,
+  added,
+  addedHere,
+  allowed,
   hidden,
-  minimal,
   proseKey,
+  removed,
 } from '../../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../../kernel/ts/play/ui_schema.ts';
 import type { useDiagnostics } from '../../author.ts';
 import { addHere } from '../../book.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { mapCommand } from '../../mapwire.ts';
-import { fields, type Context } from '../fields.tsx';
-import { AddMenu, Header, useCard } from '../Generic.tsx';
+import type { Context } from '../fields.tsx';
+import { AddMenu, CardForm, Header, useCard } from '../Generic.tsx';
+import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 
-const validator = customizeValidator({ AjvClass: Ajv2020 });
 const OWN = ['name', 'description', 'exits']; // drawn above the form
 const HIDE = { 'ui:field': 'Hidden', 'ui:widget': 'hidden' };
 const EXIT_EDITS = [
@@ -48,27 +46,28 @@ export function Room({ rel, context, diag, offer }: Props) {
   const { saved } = card;
   const draft = (card.draft ?? {}) as Doc;
   const defs = (saved?.schema as { $defs?: Record<string, never> } | undefined)?.$defs ?? {};
-  const menu = saved ? addable(saved.dir, registry, draft, card.revealed) : [];
+  const caps = useCapabilities(diag);
+  const menu = saved && caps ? allowed(saved.dir, addable(saved.dir, registry, draft, card.revealed), caps) : [];
   /** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
   const add = (f: string) => {
-    if (f in draft) return; // a stale menu never overwrites a present field
-    const room = defs['source.RoomDefinition'] as { properties: Record<string, never> };
-    const node = room.properties[f]; // registry fields RoomDefinition lacks (abstract) are only revealed
-    const value = node && minimal(node, defs);
+    const next = added(draft, f, defs, 'source.RoomDefinition');
     card.reveal(f);
-    if (value !== undefined) (card.change({ ...draft, [f]: value }), card.commit());
+    if (next) (card.change(next), card.commit());
   };
   useEffect(() => void (saved && offer(menu)), [rel, !!saved, menu.join()]);
   useEffect(() => () => offer([]), []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    addHere.run = (a) => void (a.room === context.key && add(a.kind));
+    addHere.run = (a) => {
+      const f = addedHere(a, context.key, menu);
+      if (f) add(f);
+    };
     return () => void (addHere.run = () => {});
   });
   if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
   return (
-    <div className="grid gap-2 px-3 text-xs" aria-label="Room card">
+    <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="Room card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
-      {card.refused ? <p className="text-destructive">{card.refused}</p> : null}
+      {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <Words draft={draft} context={context} />
       <Exits room={context.key} exits={draft.exits ?? {}} />
       <Mechanics card={card} menu={menu} add={add} />
@@ -108,10 +107,7 @@ function Exits({ room, exits }: { room: string; exits: NonNullable<Doc['exits']>
 /** The present mechanics, each removable, and the registry's add menu. */
 function Mechanics({ card, menu, add }: { card: Card; menu: string[]; add: (f: string) => void }) {
   const draft = card.draft as Doc;
-  const remove = (f: string) => {
-    const { [f]: _gone, ...rest } = draft;
-    (card.change(rest), card.commit());
-  };
+  const remove = (f: string) => (card.unreveal(f), card.change(removed(draft, f)), card.commit());
   return (
     <section aria-label="Mechanics" className="grid gap-1">
       <h3 className="font-medium">Mechanics</h3>
@@ -147,30 +143,25 @@ function RoomForm({
     card.revealed,
   );
   for (const f of OWN) ui[f] = HIDE;
-  return (
-    <div onBlur={card.commit}>
-      <Form
-        schema={saved.schema}
-        uiSchema={ui}
-        formData={card.draft}
-        validator={validator}
-        fields={fields}
-        formContext={context}
-        experimental_defaultFormStateBehavior={FORM_DEFAULTS}
-        extraErrors={fieldErrors((diag.diagnostics ?? []) as never, rel) as never}
-        onChange={(e) => card.change(e.formData)}
-        onSubmit={card.commit}
-      >
-        <span />
-      </Form>
-    </div>
-  );
+  return <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />;
+}
+
+/** The cartridge's `requires.capabilities`, read again when cartridge.json changes. */
+function useCapabilities(diag: Props['diag']) {
+  const [caps, setCaps] = useState<object>();
+  const sha = diag.changes.find((c) => c.file === 'cartridge.json')?.sha256;
+  useEffect(() => {
+    void fetch('/__author/source?file=cartridge.json')
+      .then((r) => r.json())
+      .then((s) => setCaps(JSON.parse(s.bytes).requires?.capabilities ?? {}));
+  }, [sha]);
+  return caps;
 }
 
 /** The room's words as text keys; Edit opens each line in the Book (agents write no words). */
 function Words({ draft, context }: { draft: Doc; context: Context }) {
   return (
-    <dl className="grid grid-cols-[auto_1fr_auto] items-center gap-x-2 gap-y-1">
+    <dl className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1">
       {['name', 'description'].map((f) => {
         const key = proseKey(draft[f], context.kind, context.key, [f]);
         return (

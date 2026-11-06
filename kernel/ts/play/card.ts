@@ -221,3 +221,45 @@ export function minimal(node: Obj, defs: Record<string, Obj>, seen: string[] = [
   const pairs = ((node.required ?? []) as string[]).map((k) => [k, minimal(props[k], defs, seen)]);
   return pairs.some(([, v]) => v === undefined) ? undefined : Object.fromEntries(pairs);
 }
+
+/** `doc` with field `f` of definition `def` at its least value; undefined when present or the author must choose it. */
+export function added(
+  doc: Obj,
+  f: string,
+  defs: Record<string, Obj>,
+  def: string,
+): Obj | undefined {
+  if (Object.hasOwn(doc, f)) return undefined; // a stale menu never overwrites a present field
+  const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
+  const value = node && minimal(node, defs);
+  return value === undefined ? undefined : { ...doc, [f]: value };
+}
+
+/** `doc` without field `f`. */
+export const removed = (doc: Obj, f: string): Obj => {
+  const { [f]: _gone, ...rest } = doc;
+  return rest;
+};
+
+/** The field a Book "Add here" pick adds to the room `key`: only its own room's, only one on offer. */
+export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
+  a.room === key && menu.includes(a.kind) ? a.kind : undefined;
+
+// Each field's owning capability, as the compiler checks it (UNDECLARED_CAPABILITY: content/room_parts.ex
+// parts/1, cues.ex:54, construction.ex:101); a field it omits needs none.
+const OWNERS: Record<string, string> = {
+  'rooms.cues': 'sense_cue',
+  'rooms.dark': 'light',
+  'rooms.dark_description': 'light',
+  'rooms.details': 'inspectable_detail',
+  'rooms.site': 'construction',
+  'rooms.tags': 'tag',
+  'rooms.variants': 'description_variant',
+};
+
+/** The menu's fields whose capability `requires.capabilities` (`caps`) declares; others would not compile. */
+export const allowed = (kind: string, menu: string[], caps: object) =>
+  menu.filter((f) => {
+    const owner = OWNERS[`${kind}.${f}`];
+    return !owner || Object.hasOwn(caps, owner);
+  });
