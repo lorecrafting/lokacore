@@ -1,4 +1,4 @@
-// size: allow 700, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 716, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -251,6 +251,23 @@ test('a trigger and a check are drawn and switched by their event and kind', () 
   const luck = { kind: 'luck', key: 'fish', chance: 50 };
   assert.equal(branchOf(check, { kind: 'threshold', key: 'k' }), 1);
   assert.deepEqual(start(check, 1, luck), { kind: 'threshold', key: 'fish' });
+});
+
+// Break: picking another kind of an hour (an untagged union) writes nothing, so the hour hides and a
+// later write drops it (loka-wfrgk.74); a kind that already fits is rewritten; a case list is not one
+// case then the room it falls back to, or loses the old room.
+test('an hour switched to another kind keeps its room', () => {
+  const hour = defs[
+    'source.NpcDefinition'
+  ].properties.daily_schedule.additionalProperties.anyOf.map(
+    (b: any) => (b.$ref ? defs.Key : b), // rjsf hands the picker its branches resolved
+  );
+  assert.deepEqual(start(hour, 1, 'gate', defs), { room: 'gate', walks: true });
+  assert.deepEqual(start(hour, 2, 'gate', defs), { key: 'gate' });
+  assert.deepEqual(start(hour, 3, { room: 'gate', walks: true }, defs), [{ room: 'gate' }, 'gate']);
+  const list = [{ room: 'green', when: { kind: 'luck', chance: 5 } }, 'gate'];
+  assert.equal(start(hour, 3, list, defs), list);
+  assert.equal(start(hour, 0, list, defs), 'gate');
 });
 
 // Break: an `extends` partial naming no kind (`check: {chance: 70}`) draws only the picker and

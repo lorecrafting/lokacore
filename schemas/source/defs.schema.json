@@ -8875,7 +8875,10 @@
         "daily_schedule": {
           "additionalProperties": {
             "anyOf": [
-              { "$ref": "#/$defs/Key" },
+              {
+                "$ref": "#/$defs/Key",
+                "title": "room"
+              },
               {
                 "additionalProperties": false,
                 "description": "One case of the hour: where the NPC goes, and optionally why and how.",
@@ -8893,6 +8896,7 @@
                     "description": "Toolbox row W26 (mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
                   }
                 },
+                "title": "walk",
                 "type": "object"
               },
               {
@@ -8920,6 +8924,7 @@
                     "type": "string"
                   }
                 },
+                "title": "room ref",
                 "type": "object"
               },
               {
@@ -8953,6 +8958,7 @@
                 },
                 "maxItems": 9,
                 "minItems": 2,
+                "title": "cases",
                 "type": "array"
               }
             ]
@@ -11591,7 +11597,10 @@
         "daily_schedule": {
           "additionalProperties": {
             "anyOf": [
-              { "$ref": "#/$defs/Key" },
+              {
+                "$ref": "#/$defs/Key",
+                "title": "room"
+              },
               {
                 "additionalProperties": false,
                 "description": "One case of the hour: where the NPC goes, and optionally why and how.",
@@ -11613,6 +11622,7 @@
                   "room",
                   "walks"
                 ],
+                "title": "walk",
                 "type": "object"
               },
               {
@@ -11646,6 +11656,7 @@
                   "kind",
                   "key"
                 ],
+                "title": "room ref",
                 "type": "object"
               },
               {
@@ -11679,6 +11690,7 @@
                 },
                 "maxItems": 9,
                 "minItems": 2,
+                "title": "cases",
                 "type": "array"
               }
             ]

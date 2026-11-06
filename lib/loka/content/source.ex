@@ -1,4 +1,4 @@
-# size: allow 449, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, a JSON supplying a scene prompt, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code; an applies entry may be a bare status key (loka-kgd.209)
+# size: allow 450, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, a JSON supplying a scene prompt, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code; an applies entry may be a bare status key (loka-kgd.209); the hour kinds' titles (loka-wfrgk.74)
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -425,14 +425,15 @@ defmodule Loka.Content.Source do
     one = defs["ScheduleCases"]["items"]
 
     hour = [
-      %{"$ref" => "Key"},
+      %{"$ref" => "Key", "title" => "room"},
+      Map.merge(one, %{
+        "properties" => Map.delete(one["properties"], "when"),
+        "required" => ~w(room walks),
+        "title" => "walk"
+      }),
+      Map.put(defs["DefinitionRef"], "title", "room ref"),
       %{
-        one
-        | "properties" => Map.delete(one["properties"], "when"),
-          "required" => ~w(room walks)
-      },
-      defs["DefinitionRef"],
-      %{
+        "title" => "cases",
         "type" => "array",
         "items" => %{"anyOf" => [%{"$ref" => "Key"}, one]},
         "minItems" => 2,

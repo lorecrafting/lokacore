@@ -214,14 +214,39 @@ const shape = (node: unknown) => {
   return JSON.stringify(rest);
 };
 
+// the room key an untagged union's value names: a key, a case's room, a ref's key, a case list's fallback
+const roomOf = (v: unknown): unknown =>
+  Array.isArray(v) ? roomOf(v.at(-1)) : plain(v) ? (v.room ?? v.key) : v;
+
+/** Untagged branch `b`'s value, carrying the old value's room key (an hour's kinds), never empty. */
+function untagged(b: Obj, old: unknown, defs: Record<string, Obj>): unknown {
+  const room = roomOf(old);
+  if (room === undefined) return undefined;
+  if (b.type === 'array') return [{ room }, room]; // one case, then the room it falls back to (Schedules ordered?)
+  if (b.type !== 'object') return room;
+  const props = (b.properties ?? {}) as Record<string, Obj>;
+  const least = ((b.required ?? []) as string[])
+    .map((f) => [f, minimal(props[f], defs)])
+    .filter(([, v]) => v !== undefined);
+  return { ...Object.fromEntries(least), [Object.hasOwn(props, 'room') ? 'room' : 'key']: room };
+}
+
 /**
  * Branch `i`'s value when the author picks it: its tag, plus each old field the new branch declares
- * with the same schema (a check's `key`; any schema when no branch held the old value).
+ * with the same schema (a check's `key`; any schema when no branch held the old value); in an
+ * untagged union, the old value when it fits, else one carrying its room key (loka-wfrgk.74).
  */
-export function start(branches: Obj[], i: number, old?: unknown): Obj | undefined {
+export function start(
+  branches: Obj[],
+  i: number,
+  old?: unknown,
+  defs: Record<string, Obj> = {},
+): unknown {
   const k = tagOf(branches);
+  if (k === undefined)
+    return branchOf(branches, old) === i ? old : untagged(branches[i], old, defs);
   const tag = constOf(branches[i], k);
-  if (k === undefined || tag === undefined) return k ? {} : undefined; // `$ref Step`: picker asks
+  if (tag === undefined) return {}; // `$ref Step`: picker asks
   const from = branches[branchOf(branches, old)];
   const now = (branches[i].properties ?? {}) as Obj;
   const same = (f: string) => !from || shape(now[f]) === shape((from.properties as Obj)?.[f]);

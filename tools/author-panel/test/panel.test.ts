@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 629, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
+// size: allow 644, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -625,5 +625,20 @@ test('editing a status keeps its integer duration', async () => {
   const read = () => JSON.parse(readFileSync(file, 'utf8'));
   for (let t = 0; read().tick_every !== 901 && t < 50; t++) await page.waitForTimeout(100);
   assert.deepEqual([read().tick_every, read().duration], [901, 1800]);
+  await page.close();
+});
+
+// Breaks: picking another kind of an hour writes nothing over it, so the hour hides and the next
+// write (another hour removed) drops it from the file (loka-wfrgk.74); asserted on the file on disk.
+test('an hour switched to another kind survives a write elsewhere', async () => {
+  const page = await open({ right: 420, selection: { kind: 'npc', key: 'warden' } });
+  const schedule = page.locator('fieldset[aria-label="Schedule"]');
+  const kind = schedule.getByRole('combobox', { name: '14 kind' });
+  await kind.selectOption({ label: 'walk' });
+  await schedule.getByRole('button', { name: 'remove hour 13' }).click();
+  const file = join(dir, 'showcase/areas/low_wardle/npcs/warden.json');
+  const read = () => JSON.parse(readFileSync(file, 'utf8')).daily_schedule;
+  for (let t = 0; '13' in read() && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual(read(), { 14: { room: 'warden_gate', walks: true } });
   await page.close();
 });
