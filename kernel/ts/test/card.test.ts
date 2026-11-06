@@ -1,4 +1,4 @@
-// size: allow 630, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 650, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -41,7 +41,7 @@ import {
   tagHidden,
   worldFile,
 } from '../play/card.ts';
-import { paired } from '../play/action.ts';
+import { paired, scriptedMenu } from '../play/action.ts';
 import { change } from '../play/edit_model.ts';
 import { json } from '../play/write.ts';
 
@@ -533,6 +533,24 @@ test("an action's and a reaction's add menus offer only fields the compiler acce
     allowed('reactions', reaction, {}, { on: { event: 'entity_entered_room', room: 'cellar' } }),
     ['after', 'silent'],
   );
+});
+
+// Break: a scripted action's Add menu offers a command action's field (command, input,
+// accessibility), which the form never draws and the compiler refuses as UNKNOWN_FIELD.
+test("a scripted action's add menu offers only ScriptedAction fields", () => {
+  const registry = JSON.parse(
+    readFileSync(
+      join(import.meta.dirname, '../../../tools/author-panel/src/edit/registry.json'),
+      'utf8',
+    ),
+  );
+  const fields = Object.keys(defs['source.ScriptedAction'].properties);
+  const menu = scriptedMenu(addable('actions', registry, {}, []));
+  assert.deepEqual(
+    menu.filter((f) => f !== 'abstract' && !fields.includes(f)),
+    [],
+  ); // abstract: extends.ex
+  assert.ok(menu.includes('check') && menu.includes('abstract'));
 });
 
 // Break: an action's check is added or removed but its failure outcome is not (OUTCOME_MISMATCH,

@@ -18,3 +18,8 @@ export function paired(doc: Obj, defs: Record<string, Obj>): Obj {
   const failure = minimal((at.properties as Record<string, Obj>).failure, defs);
   return { ...doc, outcomes: { ...outcomes, failure } };
 }
+
+/** A scripted action's add menu: command, input and accessibility belong to a command action
+ * (action.schema.json ActionDefinition) and are UNKNOWN_FIELD on a ScriptedAction. */
+export const scriptedMenu = (menu: string[]) =>
+  menu.filter((f) => !['command', 'input', 'accessibility'].includes(f));
