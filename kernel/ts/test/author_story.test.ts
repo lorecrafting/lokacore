@@ -6,6 +6,7 @@ import type { Story } from '../../../tools/author-panel/src/storylist.ts';
 import { rank } from '../../../tools/author-panel/src/shell.ts';
 import * as list from '../../../tools/author-panel/src/storylist.ts';
 import { knowledge, pacing } from '../../../tools/author-panel/src/storyknow.ts';
+import { contentGraph } from '../play/reach.ts';
 
 const ref = (kind: string, key: string) => `demo@1:${kind}/${key}`;
 const [q1, d1, f1, f2] = [
@@ -52,6 +53,7 @@ const story = (outline: Story['outline']): Story => ({
   map: [],
   words: {},
   choices: {},
+  files: {},
 });
 const planted = story({
   parts: ['Arrival', null],
@@ -246,6 +248,41 @@ test('knowledge at a beat: knows, may know (one choice of two), not yet', () => 
   assert.deepEqual(knowledge(s, 1), { knows: [fb, fc, t], may: [fa], not: [fd] });
   assert.deepEqual(knowledge(s, 2), { knows: [fa, fb, fc, fd, t], may: [], not: [] });
   assert.deepEqual(knowledge(s, 9), { knows: [], may: [], not: [] }); // a beat gone from the outline
+});
+
+// Re-review S1: plate_rearms sets plate_sprung false, so a beat after both the spring and the reset
+// may know it (either value can hold), and a beat with only the false assign does not know it.
+test('knowledge: a fact assigned false is not known; set true and false up to n, may know', () => {
+  const fact = (key: string) => ({ cartridge_id: 'demo', cartridge_version: 1, kind: 'fact', key });
+  const assign = (id: string, value: unknown) => ({
+    steps: [{ op: 'fact.assign', fact: fact(id), value }],
+  });
+  const [springs, rearms, sets0] = ['springs', 'rearms', 'zero'].map((k) => ref('reaction', k));
+  const graph = contentGraph({
+    reactions: {
+      [springs]: assign('sprung', true),
+      [rearms]: assign('sprung', false),
+      [sets0]: assign('count', 0),
+    },
+  });
+  const beats = (...bs: string[][]) =>
+    bs.map((nodes, i) => ({ part: 0, n: i + 1, status: 'built' as const, nodes }));
+  const s = (b: Story['outline']): Story => ({ ...planted, graph, outline: b });
+  const outline = (...bs: string[][]) => ({
+    parts: [null],
+    beats: beats(...bs),
+    unpaid: [],
+    unseeded: [],
+  });
+  const [sprung, count] = [ref('fact', 'sprung'), ref('fact', 'count')];
+  const both = s(outline([springs], [rearms, sets0]));
+  assert.deepEqual(knowledge(both, 1), { knows: [sprung], may: [], not: [count] });
+  assert.deepEqual(knowledge(both, 2), { knows: [count], may: [sprung], not: [] }); // a 0 is not a false
+  assert.deepEqual(knowledge(s(outline([rearms], [springs])), 1), {
+    knows: [],
+    may: [],
+    not: [sprung],
+  });
 });
 
 // Break: Pacing counts a node bound twice in a part twice, marks a part at half the median thin,

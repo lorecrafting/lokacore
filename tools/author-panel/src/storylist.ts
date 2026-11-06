@@ -7,7 +7,7 @@ import { fromRef, type Item } from './shell.ts';
 
 export type Todo = { file: string; words: number; placeholders: string[] };
 /** A content-graph link (kernel/ts/play/reach.ts): `set` when it writes its fact. */
-export type Edge = { from: string; to: string; path: string; op?: string; set?: true };
+export type Edge = { from: string; to: string; path: string; op?: string; set?: true; cleared?: true };
 export type Beat = {
   part: number;
   n: number;
@@ -64,7 +64,8 @@ export type Row = {
 /** The lower section's one panel (rulings S2): Trace of a ref, Knowledge at a beat, or Pacing. */
 export type Lower = { panel: 'trace'; at: string } | { panel: 'knowledge'; n: number } | { panel: 'pacing' };
 /** The list's kept state (Layout.story): the ids toggled from their default, the lower panel, the row to focus. */
-export type ListState = { fold: string[]; lower?: Lower; focus?: string };
+// chosen: the palette picked the focus, so the selection's reveal on mount yields to it once
+export type ListState = { fold: string[]; lower?: Lower; focus?: string; chosen?: true };
 export const LIST: ListState = { fold: [] };
 
 export const outlineOf = (s: Story) => (s.outline && 'beats' in s.outline ? s.outline : undefined);

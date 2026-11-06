@@ -5,7 +5,8 @@ import { outlineOf, type Edge, type Story } from './storylist.ts';
 export type Known = { knows: string[]; may: string[]; not: string[] };
 const choiceOf = (e: Edge) => /^\.choices(?:\.([^.[]+)|\["([^"]+)"\])/.exec(e.path)?.slice(1).join('');
 /** Knowledge at beat `n` (design 5e): the facts set and topics granted by nodes bound to beats up to
- * it in outline order; `may` when one choice among several sets it, `not` when only a later beat does. */
+ * it in outline order; `may` when one choice among several sets it or a false assign up to n also clears it,
+ * `not` when only a later beat sets it. A fact only ever set false up to n is not listed as known. */
 export function knowledge(s: Story, n: number): Known {
   const beats = outlineOf(s)?.beats ?? [];
   const upto = beats.findIndex((b) => b.n === n);
@@ -13,7 +14,10 @@ export function knowledge(s: Story, n: number): Known {
   const first = new Map<string, number>(); // a node's first beat, by outline index
   beats.forEach((b, i) => b.nodes.forEach((r) => first.has(r) || first.set(r, i)));
   // ponytail: a set behind a dashed read and a readable item's topic are not told apart (design 5e); add when the outline has one
-  const sets = s.graph.edges.filter((e) => (e.set || e.op === 'topic.grant') && first.has(e.from));
+  const bound = s.graph.edges.filter((e) => first.has(e.from));
+  const sets = bound.filter((e) => (e.set && !e.cleared) || e.op === 'topic.grant');
+  // set false at or before n as well as true: it may hold either way, so `may` (re-review S1)
+  const cleared = new Set(bound.filter((e) => e.cleared && first.get(e.from)! <= upto).map((e) => e.to));
   // every choice of the dialogue sets it, or no choice scopes it (an on_end, a reaction, a site)
   const sure = (e: Edge) =>
     !choiceOf(e) ||
@@ -21,7 +25,7 @@ export function knowledge(s: Story, n: number): Known {
   const knows = new Set<string>();
   const may = new Set<string>();
   const later = new Set<string>();
-  for (const e of sets) (first.get(e.from)! > upto ? later : sure(e) ? knows : may).add(e.to);
+  for (const e of sets) (first.get(e.from)! > upto ? later : sure(e) && !cleared.has(e.to) ? knows : may).add(e.to);
   const sorted = (xs: Set<string>, minus: Set<string>[]) => [...xs].filter((x) => !minus.some((m) => m.has(x))).sort();
   return { knows: sorted(knows, []), may: sorted(may, [knows]), not: sorted(later, [knows, may]) };
 }

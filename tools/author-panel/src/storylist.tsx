@@ -173,7 +173,7 @@ function useSync(props: Props, tree: React.RefObject<HTMLUListElement | null>, a
     if (tree.current) tree.current.scrollTop = Number(localStorage.getItem(SCROLL) ?? 0);
   }, [tree]);
   useEffect(() => {
-    if (selRef) a.put(L.reveal(props.story, a.st, selRef));
+    if (selRef && !a.st.chosen) a.put(L.reveal(props.story, a.st, selRef));
   }, [selRef]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const el = [...(tree.current?.querySelectorAll<HTMLElement>('[role="treeitem"]') ?? [])].find(
@@ -182,7 +182,8 @@ function useSync(props: Props, tree: React.RefObject<HTMLUListElement | null>, a
     el?.scrollIntoView({ block: 'nearest' });
     const here = document.activeElement;
     if (el && (here === document.body || tree.current?.contains(here))) el.focus();
-  }, [a.st.focus]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (a.st.chosen) a.put({ ...a.st, chosen: undefined }); // the palette's focus is shown; selections reveal again
+  }, [a.st.focus, a.st.chosen]); // eslint-disable-line react-hooks/exhaustive-deps
   return selRef;
 }
 
