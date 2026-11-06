@@ -119,7 +119,7 @@ test('a path that names no field of the file is refused and changes nothing', ()
 });
 
 // Breaks: the validator answers [] for every file (an edit that breaks the schema is saved), or
-// checks against the wrong kind's schema.
+// checks against the wrong kind's schema, or takes `defs` (whose root accepts anything) for a kind.
 test("an edited file is checked against its kind's source schema", () => {
   const valid = validator(schemas());
   const room = { name: 'room.a.title', description: 'room.a.description', exits: {} };
@@ -128,4 +128,5 @@ test("an edited file is checked against its kind's source schema", () => {
   assert.ok(errors.includes("/ must have required property 'name'"), errors.join('\n'));
   assert.notDeepEqual(valid('items', room), []);
   assert.throws(() => valid('nosuch', room), Refused);
+  assert.throws(() => valid('defs', room), Refused);
 });

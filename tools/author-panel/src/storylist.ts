@@ -33,6 +33,7 @@ export type Story = {
   outline: Outline | { refused: string } | null;
   todo: Record<string, Todo[]>;
   diagnostics: Record<string, { code?: string; path?: string }[]>;
+  files: Record<string, string>;
   map: MapRoom[];
   words: Record<string, number>; // written words by node (Pacing)
   choices: Record<string, number>; // choice count by dialogue (Knowledge)

@@ -7,6 +7,7 @@ export type Ui = Record<string, any>;
 export type Surfaces = { create: string; edit: string; delete: string };
 
 const CLAIMED = /^(?:partial\.)?(TextKey|DefinitionRef|Policy|Step)$/;
+const DEPTH = 3;
 const named = (ref: string) => ref.slice(ref.lastIndexOf('/') + 1);
 
 function title(branch: Node, i: number): string {
@@ -22,8 +23,11 @@ function walk(node: unknown, defs: Record<string, Node>, seen: string[]): Ui {
   if (n.$ref) {
     const ref = named(n.$ref);
     const claim = CLAIMED.exec(ref);
-    if (claim) return { 'ui:field': claim[1] };
-    return seen.includes(ref) ? {} : walk(defs[ref], defs, [...seen, ref]);
+    // the hand-built field draws the whole union (TextKey, DefinitionRef, Policy and Step are anyOf), not under rjsf's selector
+    if (claim) return { 'ui:field': claim[1], 'ui:fieldReplacesAnyOrOneOf': true };
+    // a recursive definition is drawn DEPTH levels deep, then ends (no real kind recurses today)
+    if (seen.filter((s) => s === ref).length >= DEPTH) return {};
+    return walk(defs[ref], defs, [...seen, ref]);
   }
   const ui: Ui = {};
   const put = (k: string, v: Ui) => Object.keys(v).length && !(k in ui) && (ui[k] = v);
@@ -44,7 +48,9 @@ function walk(node: unknown, defs: Record<string, Node>, seen: string[]): Ui {
 
 /**
  * The uiSchema of one source kind: `schema` is its `schemas/source/<kind>.schema.json`, `defs` the
- * `$defs` of defs.schema.json, `registry` tools/author-panel/src/edit/registry.json.
+ * `$defs` of defs.schema.json, `registry` tools/author-panel/src/edit/registry.json. A hand-built
+ * row claims the whole card (`<kind>`), a field (`<kind>.<field>`, under `items` when the file is
+ * an array) or, for `treatment:<name>`, the kind's `treatment` field; `ui:field` names the card.
  */
 export function uiSchema(
   kind: string,
@@ -53,9 +59,15 @@ export function uiSchema(
   registry: Record<string, Surfaces>,
 ): Ui {
   const ui = walk(schema, defs, []);
+  const root = schema.$ref ? defs[named(schema.$ref)] : schema;
+  const at: Ui = root?.type === 'array' ? (ui.items ??= {}) : ui;
   for (const [path, { edit }] of Object.entries(registry)) {
+    if (edit === 'generic') continue;
+    const card = { 'ui:field': edit.replace(/\.tsx$/, '') };
     const [k, field] = path.split('.');
-    if (k === kind && field && edit !== 'generic') ui[field] = { 'ui:field': edit };
+    if (path === kind) Object.assign(ui, card);
+    else if (k === kind && field) at[field] = card;
+    else if (path.startsWith('treatment:') && `${kind}.treatment` in registry) at.treatment = card;
   }
   return ui;
 }

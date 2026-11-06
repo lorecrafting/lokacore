@@ -284,6 +284,19 @@ test("the compile's diagnostics by node", () => {
   });
 });
 
+// Break: a node given the wrong file (an area folder's path dropped, a dialogue's `.scene` over
+// its `.json`) or a file with no node (text.json) given one; the card would edit the wrong file.
+test('each node names its own .json source file', () => {
+  const scene = join(src, 'scenes/greet.scene');
+  writeFileSync(scene, '');
+  const { files } = story(src, dev, []);
+  rmSync(scene);
+  assert.equal(files[green], 'rooms/village_green.json');
+  assert.equal(files[ref('dialogue', 'hub')], hub);
+  assert.equal(files[ref('dialogue', 'greet')], 'dialogues/greet.json');
+  assert.ok(!Object.values(files).includes('text.json'));
+});
+
 // Break: a bad outline.json throws (a 500 for the whole map) instead of a refusal in the model
 // that names the cause, or a cartridge with no outline.json reads as refused.
 test('a bad outline.json is a refusal in the model, the graph still built', () => {

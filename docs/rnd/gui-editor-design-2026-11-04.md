@@ -183,7 +183,7 @@ The compile is 0.7 to 1 s warm (studio audit). A card write therefore shows its 
 
 Reused as is: the iframe and postMessage bridge (`book.ts`), the SSE diagnostics (`author.ts:40-67`), `ask` and `find` (`author.ts:5-26`), the Compile card and the tabs (`App.tsx:39-74`), shadcn `badge button card input scroll-area separator tabs textarea` (`src/components/ui/`), the Book tokens (`index.css`), `GoToRoom` as the Map's click (`cheats.tsx:8-29`).
 
-New, all under `tools/author-panel/src/edit/`:
+New, all under `tools/author-panel/src/edit/`. Amended 2026-11-05 (E4a review): each card's logic (edit model, schema walker, validator, card helpers) lives in `kernel/ts/play/`, where `node:test` runs it; `src/edit/` holds only components and `registry.json`.
 
 | Module | Holds |
 |---|---|

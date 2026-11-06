@@ -124,7 +124,7 @@ function Right({ layout, set, story, book, diag }: Shell) {
         Inspector
         <Close side="right" set={set} />
       </div>
-      <Inspector sel={layout.selection} story={story} />
+      <Inspector sel={layout.selection} story={story} diag={diag} edit={(key) => book.send({ op: 'edit', key })} />
       <ScrollArea className="min-h-0 flex-1 border-t" aria-label="Console">
         <Compile said={said} compiled={compiled} lint={lint} state={book.state} send={book.send} />
         <section className="border-b px-3 pb-2">
