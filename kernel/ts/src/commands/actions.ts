@@ -265,14 +265,14 @@ const keyed = (world: World) => allScripted(world).filter((r) => r.target.kind !
 const scriptedKeys = (world: World) => keyed(world).map((r) => r.key);
 
 /**
- * The GameView's projection of the actor's running cooldown on a scripted action (protocol GameView
- * ends_at/duration): its end (the last admitted attempt plus the cooldown, the first time admission
- * passes again) and length; undefined when none runs or that end passes 2^53 - 1.
+ * The GameView's projection of a running cooldown, for a scripted action whose admission refused with
+ * cooldown (so the cooldown and the actor's last attempt exist; protocol GameView ends_at/duration): its
+ * end (the last admitted attempt plus the cooldown, the first time admission passes again) and length;
+ * undefined when that end passes 2^53 - 1.
  */
 export function cooling(world: World, scripted: ScriptedAction, actor_id: CharacterId) {
-  const last = world.state.cooldowns?.[key({ kind: 'cooldown', actor_id, action: scripted.key })];
-  const duration = scripted.cooldown;
-  if (!duration || last === undefined || sub(world.state.clock, last) >= duration) return undefined;
+  const last = world.state.cooldowns![key({ kind: 'cooldown', actor_id, action: scripted.key })]!;
+  const duration = scripted.cooldown!;
   return duration <= SAFE - last ? { ends_at: last + duration, duration } : undefined;
 }
 
