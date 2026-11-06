@@ -615,7 +615,8 @@ test('Bind writes a short ref the last compile knows and refuses one it does not
   const ghost = page.getByRole('button', { name: 'Bind beat 1', exact: true });
   const bind = async (short: string) => {
     const told = page.evaluate(
-      (s) => new Promise<string>((r) => ((window.prompt = () => s), (window.alert = (m) => r(String(m))))),
+      (s) =>
+        new Promise<string>((r) => Object.assign(globalThis, { prompt: () => s, alert: (m: unknown) => r(String(m)) })),
       short,
     ); // the story map tells by alert (mapwire.ts alone): stubbed, never a real dialog
     await ghost.dispatchEvent('click');
