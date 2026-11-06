@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 655, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
+// size: allow 660, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
@@ -548,15 +548,16 @@ test('level 0 opens whole, zooms out no further, and only a pill marks the selec
   await page.close();
 });
 
-// Breaks: palette New sends a kind the server does not know or hides its refusal
-// (loka-wfrgk.60), or Delete sends another file, a row key with a definition file, an unread
+// Breaks: palette New sends a kind the server does not know, hides its refusal (loka-wfrgk.60) or
+// asks for a plural key, or Delete sends another file, a row key with a definition file, an unread
 // `was`, or hides the refusal.
 test('palette New and Delete send the starter and the selected file; refusals show', async () => {
   const page = await open(QUEST);
   const sent: unknown[] = [];
   const told: string[] = [];
+  const asked: string[] = [];
   page.on('dialog', (d) => {
-    if (d.type() === 'prompt') return void d.accept('zz');
+    if (d.type() === 'prompt') return void (asked.push(d.message()), d.accept('zz'));
     told.push(d.message());
     void d.accept();
   });
@@ -584,6 +585,7 @@ test('palette New and Delete send the starter and the selected file; refusals sh
     ['/__author/delete', { file, was }],
   ]);
   assert.deepEqual(told, ['refused here', 'refused here', `${file}: not found`]);
+  assert.deepEqual(asked, ['New room key']); // the starter is the plural dir
   await page.close();
 });
 

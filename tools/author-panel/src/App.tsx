@@ -291,7 +291,7 @@ function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) =
     if (i.id === 'undo')
       return book.send({ op: 'key', key: 'z', metaKey: true, ctrlKey: false, altKey: false });
     const kind = i.id.startsWith('new-') ? i.id.slice(4) : undefined;
-    const name = i.id === 'go' && sel?.kind === 'room' ? sel.key : prompt(kind ? `New ${kind} key` : 'Room key');
+    const name = i.id === 'go' && sel?.kind === 'room' ? sel.key : prompt(kind ? `New ${kind.replace(/(us)es$|s$/, '$1')} key` : 'Room key');
     if (!name) return;
     if (kind) void ask('new', { kind, name }).then(({ ok, told }) => ok || alert(String(told)));
     else book.send({ op: 'go_to_room', room: name });

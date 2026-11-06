@@ -1,4 +1,4 @@
-// size: allow 550, the write path's guard, journal and /new cases share the tree helper above them
+// size: allow 570, the write path's guard, journal, /new and /delete cases share the tree helper above them
 // The editor's write path (docs/system/cartridge.md#author-preview): the one path guard, the Host
 // and Origin checks, the whole-file `was`, the journal and undo, on controlled source trees.
 import assert from 'node:assert/strict';
@@ -230,15 +230,30 @@ test('a delete touches layout.json only when it holds the room', async (t) => {
 
 test('a delete another definition still names is refused and writes nothing', async (t) => {
   // Breaks: /delete writing a file or root row the compile would then refuse as a dangling ref
-  // (loka-wfrgk.58 walk B), or a row delete taking the root file or a neighbouring row with it.
+  // (loka-wfrgk.58 walk B), or a row delete taking the root file or a neighbouring row with it, or
+  // a .scene file looked up as a cutscene (it compiles to a dialogue), so its referrers are missed.
   const { ask, dir, src, read } = await tree(t);
   const ref = (kind: string, key: string) => ({ cartridge_id: 'c', kind, key });
-  const rooms = { 'c@1:room/a': { lit: ref('fact', 'lit') } };
+  const rooms = { 'c@1:room/a': { lit: ref('fact', 'lit'), str: ref('attribute', 'str') } };
   const facts = { 'c@1:fact/lit': {}, 'c@1:fact/spare': {} };
-  writeFileSync(
-    join(dir, 'none.json'),
-    JSON.stringify({ canonical: JSON.stringify({ rooms, facts }) }),
+  const attributes = { 'c@1:attribute/str': {} };
+  const dialogues = { 'c@1:dialogue/talk': {} };
+  const npcs = { 'c@1:npc/maud': { dialogues: [ref('dialogue', 'talk')] } };
+  const story_points = { 'c@1:story_point/p': { then: ref('dialogue', 'talk') } };
+  const canonical = { rooms, facts, attributes, dialogues, npcs, story_points };
+  writeFileSync(join(dir, 'none.json'), JSON.stringify({ canonical: JSON.stringify(canonical) }));
+  const ATTRS = '{\n  "attributes": {\n    "str": {}\n  }\n}\n';
+  writeFileSync(join(src, 'attributes.json'), ATTRS);
+  const str = await ask('/delete', { file: 'attributes.json', was: sha256(ATTRS), key: 'str' });
+  assert.deepEqual(str.body, 'str is still named by rooms/a: change those first');
+  mkdirSync(join(src, 'scenes'));
+  writeFileSync(join(src, 'scenes/talk.scene'), 'talk\n');
+  const talk = await ask('/delete', { file: 'scenes/talk.scene', was: sha256('talk\n') });
+  assert.deepEqual(
+    talk.body,
+    'talk is still named by npcs/maud, story_points/p: change those first',
   );
+  assert.equal(read('scenes/talk.scene'), 'talk\n');
   const FACTS = '{\n  "facts": {\n    "lit": {},\n    "spare": {}\n  }\n}\n';
   writeFileSync(join(src, 'facts.json'), FACTS);
   const lit = await ask('/delete', { file: 'facts.json', was: sha256(FACTS), key: 'lit' });
