@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "sedge"
+  ],
+  "name": "npc.sedge.short",
+  "room_line": "npc.sedge.room",
+  "description": "npc.sedge.description",
+  "room": "pool"
+}

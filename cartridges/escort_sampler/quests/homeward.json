@@ -1,0 +1,19 @@
+{
+  "name": "quest.homeward.title",
+  "offer": {
+    "label": "quest.homeward.accept",
+    "target": {
+      "kind": "detail",
+      "room": "green",
+      "detail": "bench"
+    }
+  },
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "op": "escort_state",
+      "quest": "homeward",
+      "state": "following"
+    }
+  }
+}

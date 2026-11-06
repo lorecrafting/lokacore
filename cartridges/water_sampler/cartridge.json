@@ -1,0 +1,64 @@
+{
+  "api_version": "loka/v3",
+  "id": "water_sampler",
+  "version": "0.0.1",
+  "title": "Water Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.37",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "policy": 1,
+      "fact": 1,
+      "dialogue": 1,
+      "resource": 1,
+      "position": 1,
+      "death": 1,
+      "schedule": 1,
+      "skill": 1,
+      "water": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "pool",
+  "world": {
+    "death": {
+      "player_corpse": "player_corpse",
+      "npc_corpse": "npc_corpse",
+      "shrine": "pool",
+      "restore": {
+        "hp": 20,
+        "mv": 100
+      }
+    },
+    "carry": {
+      "max_grams": 12000
+    },
+    "water": {
+      "skill": "swim",
+      "maximum_grams": 6000,
+      "entry_cost": 10,
+      "duration": 6000,
+      "warning": "water.warning",
+      "drowned": "water.drowned",
+      "routes": [
+        {
+          "surface": "pool",
+          "bottom": "pool_bottom"
+        }
+      ]
+    }
+  },
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  }
+}
