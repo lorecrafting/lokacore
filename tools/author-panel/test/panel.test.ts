@@ -125,11 +125,14 @@ test('typing in the game minutes field replaces its text', async () => {
   assert.equal(await field.inputValue(), '5');
 });
 
-// Breaks: the palette asks /find on every keystroke, not once the typing pauses (loka-vduxr.67).
+// Breaks: the palette asks /find on every keystroke, not once the typing pauses (loka-vduxr.67), or
+// drops its answer (palette.tsx useFound).
 test('the palette asks /find once per pause in the typing', async () => {
   const page = await open(QUEST);
   const asked: string[] = [];
   page.on('request', (r) => void (r.url().includes('/__author/find?') && asked.push(r.url())));
+  const hit = { at: 'text.json:1', text: '"quest.zz.name": "a stubbed carry line",' }; // its words become a row
+  await page.route('**/__author/find?*', (r) => r.fulfill({ json: { hits: [hit] } }));
   await page.keyboard.press('Control+k');
   await page.getByLabel('Find a key, a ~ or a command').pressSequentially('carry', { delay: 10 }); // keys well inside the 150 ms pause, even under load
   await page.waitForTimeout(600);
@@ -137,6 +140,7 @@ test('the palette asks /find once per pause in the typing', async () => {
     asked.map((u) => new URL(u).searchParams.get('q')),
     ['carry'],
   );
+  await page.getByText('a stubbed carry line').waitFor();
   await page.close();
 });
 
