@@ -167,7 +167,8 @@ export function RoomForm({
   const walked = uiSchema(saved.dir, saved.schema as never, defs, {});
   for (const [f, block] of Object.entries(blocks)) walked[f] = { ...walked[f], 'ui:field': block };
   const ui = hidden(walked, saved.dir, registry, card.draft, card.revealed);
-  for (const f of own) ui[f] = HIDE;
+  // a union-rooted kind (a scene) draws its branch's uiSchema, not the root's (rjsf MultiSchemaField)
+  for (const at of [ui, ...(ui.anyOf ?? [])]) for (const f of own) at[f] = HIDE;
   for (const [m, fs] of Object.entries(nested)) {
     const entry = ((ui[m] ??= {}).additionalProperties ??= {});
     for (const f of fs) entry[f] = HIDE;

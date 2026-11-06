@@ -285,15 +285,22 @@ test("the compile's diagnostics by node", () => {
 });
 
 // Break: a node given the wrong file (an area folder's path dropped, a dialogue's `.scene` over
-// its `.json`) or a file with no node (text.json) given one; the card would edit the wrong file.
-test('each node names its own .json source file', () => {
+// its `.json`, a lone `.scene` dropped) or a file with no node (text.json) given one; the card
+// would edit the wrong file.
+test('each node names its own source file, a .json over its .scene', () => {
   const scene = join(src, 'scenes/greet.scene');
   writeFileSync(scene, '');
   const { files } = story(src, dev, []);
+  const json = join(src, 'dialogues/greet.json');
+  const twin = readFileSync(json);
+  rmSync(json);
+  const lone = story(src, dev, []).files[ref('dialogue', 'greet')];
+  writeFileSync(json, twin);
   rmSync(scene);
   assert.equal(files[green], 'rooms/village_green.json');
   assert.equal(files[ref('dialogue', 'hub')], hub);
   assert.equal(files[ref('dialogue', 'greet')], 'dialogues/greet.json');
+  assert.equal(lone, 'scenes/greet.scene');
   assert.ok(!Object.values(files).includes('text.json'));
 });
 
