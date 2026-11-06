@@ -239,7 +239,7 @@ const onDouble = (e: MouseEvent) => {
   void openField(el && el !== document.body ? el : (e.target as HTMLElement));
 };
 const hush = () => field || say(undefined); // a note lasts until the next click or key
-/** The add-here menu under the selected line (Book UI "Author preview"): a pick goes to the panel's card. */
+/** The add-here menu under the selected line (Book UI "Author mode (dev only)"): a pick goes to the panel's card. */
 function offer() {
   const el = lines().find((l) => l.hasAttribute('data-loka-selected'));
   if (!asked || !el || !selected.add?.length) return;
