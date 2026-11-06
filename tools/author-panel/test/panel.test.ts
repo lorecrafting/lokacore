@@ -398,3 +398,17 @@ test('a .scene dialogue opens its text card: a picker per value line, words to t
   assert.equal(await rope.getByLabel('treatment').inputValue(), 'reverie'); // the file's, not none
   await rope.close();
 });
+
+// Breaks: a refused compile's /story 500 shows no refusal in the map slot, or shows more than its first
+// line (App.tsx useStory's failure rule, author.ts story's throw).
+test('a refused /story shows its first line in the map slot', async () => {
+  const page = await open(QUEST);
+  const said = JSON.stringify({ text: {}, said: ['refused'], compiled: false }); // the watcher spoke
+  await page.route('**/__author/events', (r) => r.fulfill({ contentType: 'text/event-stream', body: `data: ${said}\n\n` }));
+  await page.route('**/__author/story', (r) => r.fulfill({ status: 500, body: 'first line\nsecond line' }));
+  await page.reload();
+  const slot = page.getByLabel('Map slot');
+  await slot.getByText('first line').waitFor({ timeout: boot });
+  assert.equal(await slot.getByText('second line').count(), 0);
+  await page.close();
+});
