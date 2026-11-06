@@ -316,3 +316,12 @@ test('set level refuses what the row cannot hold', () => {
   } as World;
   assert.equal(code(level(none, 2)), 'invalid_state');
 });
+
+// Break: the cheat's write reaches the levelling closing or level_reached (dev@1 sets the row and
+// nothing more), so a preview tells a level_up line or springs a level reaction.
+test('set level tells no line and raises no level_reached', () => {
+  const { decision } = level(fresh(), 2, { cha: 1 });
+  assert.ok(decision.kind === 'accepted');
+  assert.equal(decision.narration, undefined);
+  assert.deepEqual(decision.events, []);
+});
