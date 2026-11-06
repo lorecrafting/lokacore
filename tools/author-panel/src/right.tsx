@@ -4,6 +4,7 @@ import { editable } from '../../../kernel/ts/play/card.ts';
 import type { Change, Story, useDiagnostics } from './author.ts';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card.tsx';
 import { Generic } from './edit/Generic.tsx';
+import { Entity } from './edit/cards/Entity.tsx';
 import { Room } from './edit/cards/Room.tsx';
 import { places, type Selection } from './shell.ts';
 
@@ -86,6 +87,8 @@ export function Feed({ changes }: { changes: Change[] }) {
 function Editor({ rel, offer, ...props }: Parameters<typeof Room>[0]) {
   return /(^|\/)rooms\/[^/]+\.json$/.test(rel) ? (
     <Room key={rel} rel={rel} offer={offer} {...props} />
+  ) : /(^|\/)(npcs|items)\/[^/]+\.json$/.test(rel) ? (
+    <Entity key={rel} rel={rel} {...props} />
   ) : (
     <Generic key={rel} rel={rel} {...props} />
   );

@@ -47,7 +47,10 @@ export function Room({ rel, context, diag, offer }: Props) {
   const draft = (card.draft ?? {}) as Doc;
   const defs = (saved?.schema as { $defs?: Record<string, never> } | undefined)?.$defs ?? {};
   const caps = useCapabilities(diag);
-  const menu = saved && caps ? allowed(saved.dir, addable(saved.dir, registry, draft, card.revealed), caps) : [];
+  const menu =
+    saved && caps
+      ? allowed(saved.dir, addable(saved.dir, registry, draft, card.revealed), caps)
+      : [];
   /** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
   const add = (f: string) => {
     const next = added(draft, f, defs, 'source.RoomDefinition');
@@ -68,7 +71,7 @@ export function Room({ rel, context, diag, offer }: Props) {
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="Room card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
-      <Words draft={draft} context={context} />
+      <Words draft={draft} context={context} fields={['name', 'description']} />
       <Exits room={context.key} exits={draft.exits ?? {}} />
       <Mechanics card={card} menu={menu} add={add} />
       <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} />
@@ -104,15 +107,25 @@ function Exits({ room, exits }: { room: string; exits: NonNullable<Doc['exits']>
   );
 }
 
-/** The present mechanics, each removable, and the registry's add menu. */
-function Mechanics({ card, menu, add }: { card: Card; menu: string[]; add: (f: string) => void }) {
+/** The present mechanics, each removable (but the `fixed` ones), and the registry's add menu. */
+export function Mechanics({
+  card,
+  menu,
+  add,
+  fixed = OWN,
+}: {
+  card: Card;
+  menu: string[];
+  add: (f: string) => void;
+  fixed?: string[];
+}) {
   const draft = card.draft as Doc;
   const remove = (f: string) => (card.unreveal(f), card.change(removed(draft, f)), card.commit());
   return (
     <section aria-label="Mechanics" className="grid gap-1">
       <h3 className="font-medium">Mechanics</h3>
       {Object.keys(draft)
-        .filter((f) => !OWN.includes(f))
+        .filter((f) => !fixed.includes(f))
         .map((f) => (
           <div key={f} className="flex items-center gap-1">
             <span className="flex-1">{f}</span>
@@ -126,14 +139,15 @@ function Mechanics({ card, menu, add }: { card: Card; menu: string[]; add: (f: s
   );
 }
 
-/** The other fields: the generic form, with the room's own fields drawn above hidden. */
-function RoomForm({
+/** The other fields: the generic form, with the card's `own` fields (drawn above) hidden. */
+export function RoomForm({
   rel,
   card,
   context,
   diag,
   defs,
-}: Omit<Props, 'offer'> & { card: Card; defs: Record<string, never> }) {
+  own = OWN,
+}: Omit<Props, 'offer'> & { card: Card; defs: Record<string, never>; own?: string[] }) {
   const saved = card.saved!;
   const ui = hidden(
     uiSchema(saved.dir, saved.schema as never, defs, {}),
@@ -142,7 +156,7 @@ function RoomForm({
     card.draft,
     card.revealed,
   );
-  for (const f of OWN) ui[f] = HIDE;
+  for (const f of own) ui[f] = HIDE;
   // a field's grid track sizes to a long text key; minmax(0,1fr) lets it truncate inside the inspector
   return (
     <div className="min-w-0 [&_.grid]:grid-cols-[minmax(0,1fr)]">
@@ -152,7 +166,7 @@ function RoomForm({
 }
 
 /** The cartridge's `requires.capabilities`, read again when cartridge.json changes. */
-function useCapabilities(diag: Props['diag']) {
+export function useCapabilities(diag: Props['diag']) {
   const [caps, setCaps] = useState<object>();
   const sha = diag.changes.find((c) => c.file === 'cartridge.json')?.sha256;
   useEffect(() => {
@@ -163,11 +177,19 @@ function useCapabilities(diag: Props['diag']) {
   return caps;
 }
 
-/** The room's words as text keys; Edit opens each line in the Book (agents write no words). */
-function Words({ draft, context }: { draft: Doc; context: Context }) {
+/** The definition's words as text keys; Edit opens each line in the Book (agents write no words). */
+export function Words({
+  draft,
+  context,
+  fields,
+}: {
+  draft: Doc;
+  context: Context;
+  fields: string[];
+}) {
   return (
     <dl className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1">
-      {['name', 'description'].map((f) => {
+      {fields.map((f) => {
         const key = proseKey(draft[f], context.kind, context.key, [f]);
         return (
           <Fragment key={f}>
