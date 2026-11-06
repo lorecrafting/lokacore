@@ -1,4 +1,4 @@
-// size: allow 545, the write path's guard, journal and /new cases share the tree helper above them
+// size: allow 550, the write path's guard, journal and /new cases share the tree helper above them
 // The editor's write path (docs/system/cartridge.md#author-preview): the one path guard, the Host
 // and Origin checks, the whole-file `was`, the journal and undo, on controlled source trees.
 import assert from 'node:assert/strict';
@@ -336,6 +336,8 @@ test('each refusal is a 400 that names its reason', async (t) => {
   writeFileSync(join(src, 'scenes/s.scene'), '* hello\n');
   writeFileSync(join(src, 'rooms/bad.json'), '{');
   writeFileSync(join(src, 'rooms/n.json'), '{"k": null}');
+  writeFileSync(join(src, 'facts.json'), '{');
+  writeFileSync(join(src, 'resources.json'), '{"resources": {}}');
   const TEXT = '{\n  "room.a": "old words"\n}\n';
   writeFileSync(join(src, 'text.json'), TEXT);
   mkdirSync(join(src, 'areas'));
@@ -366,8 +368,19 @@ test('each refusal is a 400 that names its reason', async (t) => {
     ['/change', { ...room, ops: [{ path: ['name'] }] }, 'an op sets a value or deletes'],
     [
       '/delete',
-      { file: 'text.json', was: sha256(TEXT) },
+      { file: 'text.json', was: sha256(TEXT), key: 'room.a' },
       'text.json is a root file: delete its rows, not the file',
+    ],
+    ['/delete', { file: 'facts.json', was: sha256('{'), key: 'Lit' }, 'key: [a-z0-9_]+'],
+    [
+      '/delete',
+      { file: 'facts.json', was: sha256('{'), key: 'lit' },
+      'facts.json is not JSON: fix it first',
+    ],
+    [
+      '/delete',
+      { file: 'resources.json', was: sha256('{"resources": {}}'), key: 'hp' },
+      'resources.json has no hp',
     ],
     [
       '/delete',
