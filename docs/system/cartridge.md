@@ -948,7 +948,7 @@ build. The author tools below are reachable only in that bundle (a production ex
   `/new {kind, name, from?, area?, extends?}` runs `mix loka.new` (`area` its `--area`, `extends`
   its `--extends`; refused while any symlink is in the tree) and journals the files it wrote, from
   a snapshot diff; `/undo {id}`. `GET /templates` lists the abstract NPC and item sources
-  (`dir`, `key`), which the compile drops.
+  (`dir`, `key`), which the compile drops; templates inside an area bundle file are not listed.
   `GET /world` lists the sibling cartridge folders (`name`, the `cartridge.json` title) and the
   `current` one; `POST /world {name, new?, from?}` switches to a listed sibling, or with `new`
   first runs `mix loka.new cartridge` (`from` its `--from`, a listed sibling) for a free folder
