@@ -667,7 +667,7 @@ test('placement writes one holder of the kind picked and reads back the file', (
 });
 
 // Break: a picker offers or accepts ids of another kind (an offer's item from the rooms), or an
-// unknown id is written to the file instead of refused at the field.
+// unknown id is written to the file instead of refused at the field; a step's plan picks a room.
 test('a reference picker takes the kind its field names and refuses an unknown id', () => {
   assert.equal(pickKind(['shop', 'offers', 0, 'item']), 'item');
   assert.equal(pickKind(['daily_schedule', '8', 'room']), 'room');
@@ -675,6 +675,7 @@ test('a reference picker takes the kind its field names and refuses an unknown i
   assert.equal(pickKind(['items', '2']), 'item'); // a form's index arrives as a digit string
   assert.equal(pickKind(['location', 'npc']), 'npc');
   assert.equal(pickKind(['policy', 'with']), 'npc'); // leaf_refs.ex: a policy's `with` names an npc
+  assert.equal(pickKind(['outcome', 0, 'plan']), 'population'); // leaf_refs.ex:48 population.spawn
   assert.equal(pickKind(['constructor']), 'constructor'); // a field name is never read off the prototype
   const items = { kind: 'item', keys: ['rope', 'lamp'] };
   assert.ok(refusePick(items, 'ropes'));
