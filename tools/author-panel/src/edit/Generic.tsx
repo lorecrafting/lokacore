@@ -149,18 +149,18 @@ type GenericProps = { rel: string; context: Context; diag: Diag; only?: (fields:
 export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
   const card = useCard(rel, diag);
   const { saved, draft } = card;
-  const defs = (saved?.schema as { $defs: never } | undefined)?.$defs;
-  const drawn = useMemo(() => saved && uiSchema(saved.dir, saved.schema as never, defs!, registry), [saved]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!saved || !drawn || !defs)
-    return <p className="px-3 text-xs text-muted-foreground">{card.refused ?? `Loading ${rel}`}</p>;
-  const def = definitionOf(defs, saved.dir, draft); // a prose field added writes its key `~`
-  const ui = hidden(drawn, saved.dir, registry, draft, card.revealed);
+  const defs = (saved?.schema as { $defs: never } | undefined)?.$defs as never;
+  const drawn = useMemo(() => saved && uiSchema(saved.dir, saved.schema as never, defs, registry), [saved]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!drawn) return <p className="px-3 text-xs text-muted-foreground">{card.refused ?? `Loading ${rel}`}</p>;
+  const { dir } = saved!; // drawn exactly when saved
+  const def = definitionOf(defs, dir, draft); // a prose field added writes its key `~`
+  const ui = hidden(drawn, dir, registry, draft, card.revealed);
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="Card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
-      <AddMenu fields={only(addable(saved.dir, registry, draft, card.revealed), defs)} reveal={adder(card, defs, def)} />
+      <AddMenu fields={only(addable(dir, registry, draft, card.revealed), defs)} reveal={adder(card, defs, def)} />
     </div>
   );
 }

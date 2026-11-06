@@ -262,6 +262,13 @@ test('a reaction and an action open their own cards', async () => {
     assert.ok(options.includes(field), `${kind} ${key} offers ${field}`);
     // a scripted action is never offered a command action's field (UNKNOWN_FIELD)
     assert.ok(!options.includes('accessibility'), `${kind} ${key} offers accessibility`);
+    if (kind === 'action') {
+      // Break: an added prose field is only revealed, never written (loka-wfrgk.24): it writes its key `~`
+      await page.getByLabel(`${kind} card`).getByLabel('Add a field').selectOption(field);
+      const tip = () => JSON.parse(readFileSync(join(dir, 'showcase/actions/fish.json'), 'utf8')).tip;
+      for (let t = 0; tip() === undefined && t < 50; t++) await page.waitForTimeout(100);
+      assert.equal(tip(), '~');
+    }
     await page.close();
   }
   // a built-in command action keeps the generic card
