@@ -1,4 +1,4 @@
-# size: allow 502, every whole-cartridge dialogue link check has its case here
+# size: allow 547, every whole-cartridge dialogue link check has its case here
 defmodule Loka.ContentDialogueLinksTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/persuade_sampler")}
@@ -363,7 +363,9 @@ defmodule Loka.ContentDialogueLinksTest do
     # Breaks: a policy-less keyword entry (a say's, never Talk's) counts as the entry Talk opens.
     z_k = d("z_k", "a", [], %{"keyword" => "w", "choices" => %{"bye" => %{}}})
     shut = d("g", "a", ["a_x", "z_y"], %{"policy" => %{}})
-    assert [{"warning", "ENTRY_GUESSED", _, "a_x"}] = entry_findings([shut, z_k | leaves])
+
+    assert entry_findings([shut, z_k | leaves]) ==
+             [{"warning", "ENTRY_GUESSED", "dialogues/g.npc", "a_x or z_y"}]
 
     # Breaks: a choice that can refuse or charge when taken counts as a way on.
     free = %{"then" => "z_y"}
@@ -390,12 +392,55 @@ defmodule Loka.ContentDialogueLinksTest do
     end
   end
 
+  defp source_gate(%{"gate" => "teach"} = c),
+    do:
+      c
+      |> Map.delete("gate")
+      |> Map.put("steps", [%{"op" => "skill.acquire", "skill" => "intimidate"}])
+
   defp source_gate(%{"gate" => gate} = c), do: c |> Map.delete("gate") |> Map.put(gate, %{})
   defp source_gate(c), do: c
 
   defp entry_findings(all) do
-    for x <- Loka.Content.DialogueLinks.entry_checks(all),
+    for x <- Loka.Content.DialogueLinks.entry_checks(all, &(&1 == "intimidate")),
         do: {x["severity"], x["code"], x["path"], x["data"]["target"]}
+  end
+
+  # Breaks: the compiler's hidden-skill test not reaching `opens?` (every taught skill counted as
+  # visible), or any taught skill counted as hidden. The answers are the shared row's (TS `offered`).
+  test "an entry whose only choice teaches a hidden skill leaves the shut entry's pick a guess",
+       %{
+         dir: dir
+       } do
+    gate = %{"op" => "fact_compare", "fact" => "gate_open", "equals" => true}
+    to = &%{"label" => @label, "narration" => @said, "then" => &1}
+
+    shut =
+      talk("guard", %{"policy" => gate, "choices" => %{"a" => to.("a_x"), "b" => to.("b_y")}})
+
+    teach = %{
+      "label" => @label,
+      "narration" => @said,
+      "steps" => [%{"op" => "skill.acquire", "skill" => "intimidate"}]
+    }
+
+    base = [
+      {@guard, shut},
+      {"dialogues/a_x.json", talk("guard")},
+      {"dialogues/b_y.json", talk("guard")},
+      {"dialogues/z_open.json", talk("guard", %{"choices" => %{"x" => teach}})}
+    ]
+
+    skill = Jason.decode!(File.read!("cartridges/persuade_sampler/skills/intimidate.json"))
+    hidden = Map.merge(skill, %{"hidden" => true, "prerequisite" => gate})
+    guessed = &for(d <- &1, d["code"] == "ENTRY_GUESSED", do: d["data"]["target"])
+    assert {:ok, _, warnings} = Loka.ContentSource.compile(dir, base)
+    assert guessed.(warnings) == []
+
+    assert {:ok, _, warnings} =
+             Loka.ContentSource.compile(dir, [{"skills/intimidate.json", hidden} | base])
+
+    assert guessed.(warnings) == ["a_x"]
   end
 
   defp guess(key), do: {"warning", "ENTRY_GUESSED", "dialogues/#{key}.npc", key}
