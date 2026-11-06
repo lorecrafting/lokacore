@@ -198,6 +198,11 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   await hour.blur();
   for (let t = 0; !written().includes('15') && t < 50; t++) await page.waitForTimeout(100);
   assert.deepEqual(written(), ['0', '1', '13', '15']);
+  // Break: the hour field's blur reaches the card's onBlur commit too (Schedule.tsx stopPropagation),
+  // whose stale `was` the server refuses: Changed outside, and Undo cleared.
+  await page.waitForTimeout(1500);
+  assert.equal(await page.getByText('Changed outside').count(), 0);
+  assert.ok(await page.getByRole('button', { name: 'Undo', exact: true }).isEnabled());
   await page.route('**/__author/numbers', (r) =>
     r.fulfill({ json: { fights: { why: 'no world' } } }),
   );

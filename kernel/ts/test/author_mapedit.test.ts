@@ -3,21 +3,12 @@
 // the last one undoes every gesture. Expected files are written by hand.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import {
-  chmodSync,
-  cpSync,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-} from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync } from 'node:fs';
 import { realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { after, before, test } from 'node:test';
-import { addHour, rehour } from '../play/blocks.ts';
 import { added } from '../play/card.ts';
 import { paired } from '../play/action.ts';
 import { serve } from '../play/live.ts';
@@ -193,32 +184,6 @@ test("an NPC given hp by the card's Add compiles", () => {
     },
   );
   rmSync(join(src, 'npcs'), { recursive: true });
-  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
-});
-
-test("the showcase warden given an attack and a moved, added hour by the card's adds compiles", () => {
-  // Breaks: the attack's add (card.ts minimal) or the Schedule block's writes (blocks.ts addHour,
-  // rehour) leave a value the compiler refuses, past the schema (blocks.test.ts reads the schema).
-  const defs = JSON.parse(
-    readFileSync(join(REPO, 'schemas/source/defs.schema.json'), 'utf8'),
-  ).$defs;
-  const copy = join(dir, 'showcase');
-  cpSync(join(REPO, 'cartridges/toolbox_showcase'), copy, { recursive: true });
-  const file = join(copy, 'areas/low_wardle/npcs/warden.json');
-  const { attack: _a, daily_schedule: _s, ...bare } = JSON.parse(readFileSync(file, 'utf8'));
-  const npc = ['attack', 'daily_schedule'].reduce(
-    (doc, f) => added(doc, f, defs, 'source.NpcDefinition')!,
-    bare,
-  );
-  const hour = addHour(npc.daily_schedule as Record<string, unknown>, npc.room)!;
-  npc.daily_schedule = rehour(addHour(hour, npc.room)!, '0', '23');
-  writeFileSync(file, JSON.stringify(npc));
-  const compiled = spawnSync(
-    'mix',
-    ['loka.compile', copy, join(dir, 'showcase.json'), '--allow-placeholders'],
-    { cwd: REPO, encoding: 'utf8' },
-  );
-  rmSync(copy, { recursive: true });
   assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
 });
 

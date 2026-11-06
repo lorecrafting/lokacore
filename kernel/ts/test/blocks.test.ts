@@ -1,6 +1,8 @@
 // The Combat and Schedule blocks' writes and reads (kernel/ts/play/blocks.ts).
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { Ajv2020 } from 'ajv/dist/2020.js';
@@ -104,4 +106,28 @@ test("a block's fields are offered only where they compile", () => {
   assert.deepEqual(allowed('npcs', ['daily_schedule'], sched, {}), ['daily_schedule']);
   assert.deepEqual(allowed('npcs', ['daily_schedule'], sched, { spawn_template: true }), []);
   assert.equal(pickKind(['daily_schedule', '8', '1']), 'room');
+});
+
+test("the showcase warden given an attack and a moved, added hour by the card's adds compiles", () => {
+  // Breaks: the attack's add (card.ts minimal) or the Schedule block's writes (blocks.ts addHour,
+  // rehour) leave a value the compiler refuses, past the schema (the test above reads the schema).
+  const dir = mkdtempSync(join(tmpdir(), 'loka-blocks-'));
+  const copy = join(dir, 'showcase');
+  cpSync(join(ROOT, 'cartridges/toolbox_showcase'), copy, { recursive: true });
+  const file = join(copy, 'areas/low_wardle/npcs/warden.json');
+  const { attack: _a, daily_schedule: _s, ...bare } = JSON.parse(readFileSync(file, 'utf8'));
+  const npc = ['attack', 'daily_schedule'].reduce(
+    (doc, f) => added(doc, f, defs, 'source.NpcDefinition')!,
+    bare,
+  );
+  const hour = addHour(npc.daily_schedule as Record<string, unknown>, npc.room)!;
+  npc.daily_schedule = rehour(addHour(hour, npc.room)!, '0', '23');
+  writeFileSync(file, JSON.stringify(npc));
+  const compiled = spawnSync(
+    'mix',
+    ['loka.compile', copy, join(dir, 'showcase.json'), '--allow-placeholders'],
+    { cwd: ROOT, encoding: 'utf8' },
+  );
+  rmSync(dir, { recursive: true });
+  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
 });
