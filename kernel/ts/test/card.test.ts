@@ -258,8 +258,8 @@ test('a World picker refuses an unknown id at the field; a new entry key must be
     [undefined, 'already gold', 'a key is up to 64 lowercase letters, digits and _'],
   );
   assert.deepEqual(
-    [refuseKey('g'.repeat(64), {}), refuseKey('g'.repeat(65), {})],
-    [undefined, 'a key is up to 64 lowercase letters, digits and _'],
+    [refuseKey('g', {}), refuseKey('g'.repeat(64), {}), refuseKey('g'.repeat(65), {})],
+    [undefined, undefined, 'a key is up to 64 lowercase letters, digits and _'],
   );
 });
 
