@@ -17,7 +17,7 @@ import { type Bytes, current, DIRS, guarded, named, placed, refuse, Refused } fr
 import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
 import { apply } from './edit_model.ts';
 import { edit, located } from './prose.ts';
-import { ids, set } from './scene_card.ts';
+import { compiledCartridge, ids, set } from './scene_card.ts';
 import { loka, opened, worlds } from './worlds.ts';
 
 type By = 'editor' | 'outside';
@@ -234,18 +234,17 @@ function get(t: Tree, url: string, { places, artifact }: Last): Answer | undefin
     return [200, t.journal.map(({ files: fs, ...e }) => ({ ...e, files: fs.map((c) => c.file) }))];
 }
 
-const POSTS: Record<string, (t: Tree, sent: Sent) => Answer | Promise<Answer>> = {
+type Post = (t: Tree, sent: Sent, artifact?: string) => Answer | Promise<Answer>;
+const POSTS: Record<string, Post> = {
   '/change': change,
   '/edit': (t, sent) => edit(t.root, sent, (what, c) => done(t, what, [c])),
-  '/set': (t, sent) => {
-    const abstract = () => templates(t.root).flatMap((x) => (x.dir === 'npcs' ? [x.key] : []));
-    return set(
+  '/set': (t, sent, artifact) =>
+    set(
       t.root,
       sent,
-      () => ids(t.root, abstract()),
+      () => ids(compiledCartridge(artifact)),
       (what, c) => done(t, what, [c]),
-    );
-  },
+    ),
   '/delete': remove,
   '/move': move,
   '/undo': undo,
@@ -276,7 +275,7 @@ export function writer(
     get: (url: string) => answered(() => get(t, url, { places: places(), artifact })),
     // a write during /new's seconds-long run would land in its snapshot diff, and so its undo
     post: (url: string, sent: Sent) =>
-      answered(() => (t.busy ? refuse(409, 'a /new is running') : POSTS[url](t, sent))),
+      answered(() => (t.busy ? refuse(409, 'a /new is running') : POSTS[url](t, sent, artifact))),
     /** After an fs burst: what changed outside the editor is journaled and pushed `outside`.
      * ponytail: rereads every source file per burst; fine at showcase size, hash by mtime when not. */
     busy: () => t.busy > 0,

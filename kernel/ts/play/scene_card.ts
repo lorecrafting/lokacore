@@ -1,19 +1,34 @@
 // POST /set (docs/system/cartridge.md, Editor write path): a `.scene` file's one `npc:`, `with:`
 // or `then:` value in place, a real key; POST /edit stays words only (prose.ts).
-import { readFileSync } from 'node:fs';
-import { files } from './todo.ts';
+import { existsSync, readFileSync } from 'node:fs';
+import { INSTALLED, loadCartridge } from '../src/index.ts';
+import type { Obj } from '../src/content/cartridge_refs.ts';
+import { artifactBytes } from './compiled.ts';
 import { guarded, named, placed, refuse, stale } from './guard.ts';
-import { VALUE, type Verb } from './scene_lines.ts';
+import { contentGraph } from './reach.ts';
+import { picks, VALUE, type Verb } from './scene_lines.ts';
+import { unlinkable } from './story_counts.ts';
 import type { Answer, Change } from './write.ts';
 
-/** The keys a value line may name (the compile's npc and dialogue keys, by their files): an
- * NPC's for `npc:` and `with:` (no abstract one, the compile drops it); a dialogue's or `end`. */
-export function ids(root: string, abstract: string[]): Record<Verb, string[]> {
-  const at = files(root).flatMap((rel) => placed(rel) ?? []);
-  const npcs = at.filter((p) => p.dir === 'npcs' && p.ext === 'json').map((p) => p.key);
-  const said = at.filter((p) => p.dir === 'dialogues' || p.ext === 'scene').map((p) => p.key);
-  const real = npcs.filter((k) => !abstract.includes(k));
-  return { npc: real, with: real, then: [...said, 'end'] };
+/** The last good compile's cartridge, loaded as the panel's story model loads it (story.ts). */
+export function compiledCartridge(artifact: string | undefined) {
+  if (!artifact || !existsSync(artifact)) return undefined;
+  const loaded = loadCartridge(
+    artifactBytes(JSON.parse(readFileSync(artifact, 'utf8'))),
+    INSTALLED,
+  );
+  return loaded.ok ? (loaded.cartridge as unknown as Obj) : undefined;
+}
+
+/** The keys a value line may name: the last good compile's (`c`, the loaded artifact), as the card
+ * picks them; before a compile, only `end`. */
+export function ids(c: Obj = {}): Record<Verb, string[]> {
+  const { nodes } = contentGraph(c);
+  return {
+    npc: picks('npc', nodes),
+    with: picks('with', nodes),
+    then: picks('then', nodes, unlinkable(c)),
+  };
 }
 
 export function set(

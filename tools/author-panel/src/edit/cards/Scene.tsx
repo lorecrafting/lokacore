@@ -2,8 +2,8 @@
 // line by line, its speakers and links picked in place (POST /set) and its words opened in the Book;
 // a modal scene's treatment picked from the schema's (its steps' words keep the form's Book edit).
 import { useCallback, useEffect, useState } from 'react';
-import { choices, refusePick } from '../../../../../kernel/ts/play/card.ts';
-import { sceneLines, type Line } from '../../../../../kernel/ts/play/scene_lines.ts';
+import { refusePick } from '../../../../../kernel/ts/play/card.ts';
+import { picks, sceneLines, type Line } from '../../../../../kernel/ts/play/scene_lines.ts';
 import { ask, type useDiagnostics } from '../../author.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { Input } from '../../components/ui/input.tsx';
@@ -14,10 +14,6 @@ import { RoomForm } from './Room.tsx';
 
 type Props = { rel: string; context: Context; diag: ReturnType<typeof useDiagnostics> };
 type Doc = Record<string, unknown>;
-
-/** The keys a value line's verb picks: the compile's NPCs, or its dialogues and `end`. */
-const picks = (verb: string, nodes: Context['nodes']) =>
-  verb === 'then' ? [...choices('dialogue', nodes), 'end'] : choices('npc', nodes);
 
 export function SceneText({ rel, context, diag }: Props) {
   const [file, setFile] = useState<{ bytes: string; sha256: string; text: Record<string, string> }>();
@@ -59,7 +55,7 @@ function Lines({ lines, context, set }: { lines: Line[]; context: Context; set: 
         <li key={`${l.n}:${l.text}`} className="flex min-w-0 items-center gap-2">
           <span className="w-6 shrink-0 text-right text-muted-foreground">{l.n}</span>
           {l.verb ? (
-            <Value line={l} keys={picks(l.verb, context.nodes)} set={(value) => set(l, value)} />
+            <Value line={l} keys={picks(l.verb, context.nodes, context.unlinkable)} set={(value) => set(l, value)} />
           ) : (
             <span className="min-w-0 flex-1 truncate whitespace-pre">{l.text}</span>
           )}

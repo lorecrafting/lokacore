@@ -949,9 +949,10 @@ build. The author tools below are reachable only in that bundle (a production ex
   `/edit {file, line, was, words}` replaces the words of one line (a JSON string literal, or a
   scene's `* ` line; a key line, a choice label and words with a newline or tab are refused);
   `/set {file, line, was, value}` ([`scene_card.ts`](../../kernel/ts/play/scene_card.ts)) replaces
-  the value of one `.scene` `npc:`, `with:` or `then:` line with a `[a-z0-9_]+` key the compile
-  could resolve: a non-abstract NPC source's key for `npc:` and `with:`, a dialogue's or `end` for
-  `then:` (any other line, value or file is refused 400; `was` is the line's text);
+  the value of one `.scene` `npc:`, `with:` or `then:` line with a key from the last good compile's
+  artifact, the keys the card's picker offers: an NPC's for `npc:` and `with:`; for `then:` `end` or
+  a dialogue a then can enter (not a keyword, quest or riddle one, `dialogue_links.ex`), so only
+  `end` before any compile (any other line, value or file is refused 400; `was` is the line's text);
   `/delete {file, was}` (a room's `layout.json` row goes with it); `/move {file, was, area}`;
   `/new {kind, name, from?, area?, extends?}` runs `mix loka.new` (`area` its `--area`, `extends`
   its `--extends`; refused while any symlink is in the tree) and journals the files it wrote, from

@@ -1,12 +1,14 @@
 // POST /set and the Scene card's lines (kernel/ts/play/scene_card.ts): a `.scene` value line
 // changed in place to a real key, everything else refused; the file's other bytes kept.
 import assert from 'node:assert/strict';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, realpathSync, rmSync } from 'node:fs';
 import { writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
-import { compiled } from '../play/compiled.ts';
+import { INSTALLED, loadCartridge } from '../src/index.ts';
+import type { Obj } from '../src/content/cartridge_refs.ts';
+import { artifactBytes, compiled } from '../play/compiled.ts';
 import { serve } from '../play/live.ts';
 import type { Refused } from '../play/guard.ts';
 import { ids, set } from '../play/scene_card.ts';
@@ -16,8 +18,15 @@ import type { Change } from '../play/write.ts';
 const SAMPLER = resolve(import.meta.dirname, '../../../cartridges/identity_sampler');
 const SCENE = 'scenes/stranger_talk.scene';
 
+/** `root` compiled and loaded, as the served /set loads its last artifact (write.ts). */
+function loaded(root: string) {
+  const out = compiled(root);
+  assert.equal(typeof out, 'object', String(out));
+  return (loadCartridge(artifactBytes(out as never), INSTALLED) as { cartridge: Obj }).cartridge;
+}
+
 /** A copy of identity_sampler (two NPCs, one .scene), its sibling `src-evil/` with a scene, and
- * (unless only the sampler) an abstract NPC and a JSON dialogue. */
+ * (unless only the sampler) an abstract NPC and a second scene; /set's keys its first compile's. */
 function sampler(t: { after: (f: () => void) => void }, only = false) {
   const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-set-')));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -26,14 +35,14 @@ function sampler(t: { after: (f: () => void) => void }, only = false) {
   cpSync(join(SAMPLER, 'scenes'), join(dir, 'src-evil/scenes'), { recursive: true });
   if (!only) {
     writeFileSync(join(root, 'npcs/kind.json'), '{ "abstract": true }\n');
-    mkdirSync(join(root, 'dialogues'));
-    writeFileSync(join(root, 'dialogues/aside.json'), '{}\n');
+    writeFileSync(join(root, 'scenes/aside.scene'), 'npc: guard\n\n* Hm.\n- Go\n  * Off.\n');
   }
+  let c: Obj | undefined;
   const write = (sent: object) =>
     set(
       root,
       sent,
-      () => ids(root, ['kind']),
+      () => ids((c ??= loaded(root))),
       (_what, c: Change) => {
         writeFileSync(join(root, c.file), c.after!);
         return [200, c.file];
@@ -76,6 +85,7 @@ test('/set refuses each thing that is not a real key on a value line', (t) => {
     400,
     'a value line is a .scene file’s',
   ]);
+  rmSync(join(root, 'scenes/s.json')); // not a scene the compiler takes
   const outside = at({ file: '../src-evil/' + SCENE, value: 'guard' });
   assert.match(String(outside[1]), /^outside the source tree/);
   for (const value of ['guard\nnpc: x', 'a/b', 'Guard', '', 7])
@@ -94,7 +104,7 @@ test('/set refuses each thing that is not a real key on a value line', (t) => {
   assert.equal(read(), original); // nothing written by any refusal
 });
 
-// Break: the served /set reads no abstract NPC out (write.ts templates), or writes no journal; a
+// Break: the served /set takes its keys from no compile (write.ts), or writes no journal; a
 // `.scene`'s /source carries none of its last compile's words (the push has only changed ones).
 test('POST /set is served, refusing an abstract NPC and undone by /undo', async (t) => {
   const { root, read } = sampler(t);
@@ -125,26 +135,28 @@ test('POST /set is served, refusing an abstract NPC and undone by /undo', async 
   assert.equal(read(), original);
 });
 
-// Break: `then:` offers or takes a key that is not a dialogue (dialogue_links.ex), or not `end`; a
-// file's last line, with no newline after it, cannot be set.
-test('a then: takes a dialogue key or end, a with: an NPC key', (t) => {
+// Break: /set's keys are not the compile's (the card's): a nested set's dialogue or a bundle's NPC
+// refused, a keyword, quest or riddle dialogue a then cannot enter (dialogue_links.ex:387-394)
+// offered, an NPC on then:; a file's last line, with no newline after it, cannot be set.
+test('a then: takes a compiled dialogue a then enters, or end; a with: an NPC key', (t) => {
   const { root, write, read } = sampler(t);
-  writeFileSync(join(root, SCENE), 'npc: stranger\nwith: guard\n- Go\n  then: end');
-  assert.deepEqual(ids(root, ['kind']), {
-    npc: ['guard', 'stranger'],
-    with: ['guard', 'stranger'],
-    then: ['aside', 'stranger_talk', 'end'],
-  });
+  const nested = '\n* Hm.\n- Ask\n  * Well.\n  - Thank them\n    * Fine.\n- Go\n  * Off.\n';
+  writeFileSync(join(root, SCENE), `npc: stranger\nwith: guard\n${nested}  then: end`);
   const at = (line: number, was: string, value: string) =>
     refusal(() => write({ file: SCENE, line, was, value }));
-  assert.deepEqual(at(4, '  then: end', 'guard'), [400, 'then: no such key guard']);
+  assert.deepEqual(at(11, '  then: end', 'guard'), [400, 'then: no such key guard']);
   assert.deepEqual(at(2, 'with: guard', 'aside'), [400, 'with: no such key aside']);
-  assert.equal(at(4, '  then: end', 'aside'), 'written');
+  assert.equal(at(11, '  then: end', 'stranger_talk_ask'), 'written'); // the nested set
   assert.equal(at(2, 'with: guard', 'stranger'), 'written');
-  assert.equal(read(), 'npc: stranger\nwith: stranger\n- Go\n  then: aside');
+  assert.equal(read(), `npc: stranger\nwith: stranger\n${nested}  then: stranger_talk_ask`);
+  // speech_sampler: NPCs only in an area bundle; its one dialogue a keyword one
+  const speech = ids(loaded(resolve(SAMPLER, '../speech_sampler')));
+  assert.deepEqual(speech.npc, ['elder', 'miller', 'smith', 'watchman']);
+  assert.deepEqual(speech.then, ['end']); // not elder_ward
 });
 
-// Break: the card shows a words line without the text key the Book edits, or a key line as words.
+// Break: the card shows a `* ` line without the text key the Book edits, or a key line or a
+// `<role>: ` line (POST /edit refuses both, prose.ts) with one.
 test("the card's lines: each value line its verb, each words line its text key", () => {
   const bytes =
     'npc: stranger\n\n* The stranger waits.\n- Ask\n  sets: knows\n  stranger: Tamsin.\n';
@@ -153,7 +165,6 @@ test("the card's lines: each value line its verb, each words line its text key",
     'dialogue.stranger_talk.prompt': 'The stranger waits.',
     'dialogue.stranger_talk.choices.ask.reply': 'Tamsin.',
     'dialogue.other.prompt': 'Tamsin.',
-    'dialogue.stranger_talk.choices.ask.narration': 'knows', // as line 5's flag: still a key line
   };
   const lines = sceneLines(SCENE, bytes, 'dialogue', text, {});
   assert.deepEqual(
@@ -164,7 +175,7 @@ test("the card's lines: each value line its verb, each words line its text key",
       [3, 'dialogue.stranger_talk.prompt'],
       [4, null],
       [5, null],
-      [6, 'dialogue.stranger_talk.choices.ask.reply'],
+      [6, null], // a role line: its words, but no Edit in Book
       [7, null],
     ],
   );
