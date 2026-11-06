@@ -33,6 +33,12 @@ const OWNERS: Record<string, string> = {
   'quests.expedition': 'expedition movement quest fact combat death population', // expedition.ex:29-32
   'quests.patrol': 'patrol movement quest dialogue fact death', // patrol.ex:31-33
   'dialogues.keyword': 'speech', // keywords.ex:15: speech@1 owns `spoken`
+  // check_kinds.ex:26: check@1 owns check_passed
+  'dialogues.choices.check': 'check',
+  // escort.ex:10: escort@1 owns the escort definition
+  'dialogues.choices.escort': 'escort',
+  // dialogues.ex:383: containment@1 owns item_acquired
+  'dialogues.choices.receive': 'containment',
   'actions.check': 'check', // its check_passed (scripted_actions.ex:125)
   'actions.tip': 'fact', // its fact_changed (action_tips.ex:40)
   'actions.policy': 'policy', // its least `all` (resolve.ex:415)
@@ -70,7 +76,7 @@ const solo = (doc: Obj, by: string, not: string) =>
 const run = (doc: Obj) => Object.hasOwn(doc, 'patrol') || Object.hasOwn(doc, 'expedition');
 const choicesOf = (doc: Obj) => Object.values((doc.choices ?? {}) as Record<string, Obj>);
 // skills.ex:166-170 teaches?: a choice's top-level step acquires a hidden skill (`hidden` are its keys)
-const teaches = (doc: Obj, hidden: string[]) =>
+export const teaches = (doc: Obj, hidden: string[]) =>
   choicesOf(doc).some((c) =>
     ((c.steps ?? []) as Obj[]).some((s) => hidden.includes(s.skill as string)),
   );
