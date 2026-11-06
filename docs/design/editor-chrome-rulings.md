@@ -156,7 +156,15 @@ A chip's area shows only as a 3 px band in its area hue on the chip's left edge;
   (dark). A 40 px input with a `search` icon; result rows 28 px with `chrome.type.label` group headings and
   the path in `chrome.type.code` `dim` on the right; the active row `accentSoft`. Kbd chips `chrome.type.code` at
   11 px, 1 px `strong` border, radius 4. It fades in over `motion.quick`; no motion under reduced
-  motion. No match: one line "No match." in `dim`.
+  motion. No match: one line "No match." in `dim`. A palette entry that asks a question asks it in one prompt,
+  and the prompt's parenthetical is `(<answer form>: <meaning>)`, as the existing `(empty: the root)`; so the
+  map-npc and map-item entries read `New NPC key in <room> (~<template>: a child of that template)`
+  (designer, 2026-11-05, loka-wfrgk.48; the `~` is the same template mark as the chips in section 3).
+- **Map lock.** The map's lock (`Lock map dragging`, locked by default) guards pointer gestures that move or drop
+  something on the map: room drags, template chip drags, and any future drag. It does not guard a deliberate edit
+  made by a click or a typed answer: a template chip click and the palette's map-npc / map-item entries pass
+  while locked, as the inspector cards do. The locked drop's one-line refusal is the only lock message; a click or
+  palette edit never shows it (designer, 2026-11-05, loka-wfrgk.48).
 - **Empty states.** One `dim` line saying how to get content there, and at most one button. No
   illustration, no icon larger than 16 px.
 - **Keyboard focus.** Every control is reachable by Tab in reading order (left, centre, right);
