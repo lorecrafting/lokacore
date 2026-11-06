@@ -2,90 +2,15 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 660, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
+// size: allow 714, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
-import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { createServer } from 'node:net';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { after, before, test, type TestContext } from 'node:test';
+import { appendFileSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+import { test, type TestContext } from 'node:test';
 import axe from 'axe-core';
-import { chromium, type Browser, type Page } from 'playwright';
-
-const PANEL = resolve(import.meta.dirname, '..');
-const ROOT = resolve(PANEL, '../..');
-const free = () =>
-  new Promise<number>((done) => {
-    const s = createServer().listen(0, () => {
-      const { port } = s.address() as { port: number };
-      s.close(() => done(port));
-    });
-  });
-
-let browser: Browser, url: string, author: number;
-let boot = 120_000; // the first compile and Vite's first optimise
-const procs: ChildProcess[] = [];
-const dir = mkdtempSync(join(tmpdir(), 'loka-panel-'));
-before(async () => {
-  const [a, panel, preview] = await Promise.all([free(), free(), free()]);
-  author = a;
-  const env = {
-    ...process.env,
-    LOKA_DEV_CARTRIDGE: join(dir, 'current.json'),
-    LOKA_AUTHOR_PORT: `${author}`,
-    LOKA_PANEL_PORT: `${panel}`,
-    LOKA_PREVIEW_PORT: `${preview}`, // nothing serves it: the Book frame stays empty
-  };
-  const io: SpawnOptions = { env, detached: true, stdio: ['ignore', 'ignore', 'inherit'] };
-  const showcase = join(dir, 'showcase'); // a copy: the block tests write
-  cpSync(join(ROOT, 'cartridges/toolbox_showcase'), showcase, { recursive: true });
-  for (const w of ['identity_sampler', 'scene_sampler'])
-    // the scene test's POST /world siblings
-    cpSync(join(ROOT, 'cartridges', w), join(dir, w), { recursive: true });
-  procs.push(spawn(join(ROOT, 'bin/loka'), ['dev', showcase, '--watch'], io));
-  procs.push(
-    spawn(process.execPath, [join(PANEL, 'node_modules/vite/bin/vite.js')], { ...io, cwd: PANEL }),
-  );
-  url = `http://localhost:${panel}/`;
-  browser = await chromium.launch({ channel: 'chrome' });
-  await (await open(QUEST)).close();
-  boot = 10_000; // booted: a mutant that blanks the card fails each open in seconds, inside mutate.sh's cap
-});
-after(async () => {
-  await browser?.close();
-  for (const p of procs) {
-    try {
-      process.kill(-p.pid!); // the process groups: mix and esbuild children too
-    } catch {} // already gone: kill the rest
-  }
-  rmSync(dir, { recursive: true, force: true });
-});
-
-/** The panel with this layout kept, once the inspector's card has its form (the first compile and Vite's first optimise included). */
-async function open(layout: object, ready = 'Inspector'): Promise<Page> {
-  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-  await page.addInitScript(
-    (l) => localStorage.setItem('loka.editor.layout', l),
-    JSON.stringify(layout),
-  );
-  for (let i = 0; ; i++) {
-    try {
-      await page.goto(url);
-      break;
-    } catch (e) {
-      if (i === 120) throw e; // Vite not listening yet
-      await new Promise((r) => setTimeout(r, 500));
-    }
-  }
-  // any card's form, or the named control (a `.scene` card has no form)
-  const at =
-    ready === 'Inspector' ? page.locator('[aria-label="Inspector"] form') : page.getByLabel(ready);
-  await at.waitFor({ timeout: boot });
-  return page;
-}
-const QUEST = { right: 280, selection: { kind: 'quest', key: 'carry_letter' } };
+import type { Page } from 'playwright';
+import { author, boot, dir, open, QUEST } from './harness.ts';
 
 // Breaks: a card's field grid sizes its track to its content (an auto track, not grid-cols-1's
 // minmax(0,1fr)), so a long text key pushes the card past the narrowest inspector (loka-wfrgk.40.1).
@@ -215,7 +140,10 @@ test('a link to a nested set shows its prompt and labels and opens its card', as
     doc.entry = false;
     doc.choices.learn.then = 'aldous_yard'; // a second level: its button, never a fold
     doc.choices.leave = { label: 'k.leave', then: 'end' }; // the talk ends: no button
-    await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }) });
+    await r.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }),
+    });
   });
   const bounty = page.locator('[aria-label="choice bounty"]');
   await bounty.locator('summary').click();
@@ -223,7 +151,10 @@ test('a link to a nested set shows its prompt and labels and opens its card', as
   const set = bounty.locator('[aria-label="nested aldous_lesson"]');
   await set.waitFor({ timeout: boot });
   const keys = await set.locator('code').allTextContents();
-  assert.deepEqual(keys.slice(0, 2), ['dialogue.aldous_lesson.prompt', 'dialogue.aldous_lesson.learn']);
+  assert.deepEqual(keys.slice(0, 2), [
+    'dialogue.aldous_lesson.prompt',
+    'dialogue.aldous_lesson.learn',
+  ]);
   assert.equal(await page.locator('[aria-label^="nested "]').count(), 1);
   const opens = await set.getByRole('button').allTextContents();
   assert.deepEqual(opens, ['Open aldous_lesson', 'Open aldous_yard']);
@@ -245,13 +176,16 @@ test('a dialogue already broken takes the edit that fixes it', async () => {
     const doc = JSON.parse(s.bytes);
     Object.assign(doc.choices.praise, { receive: { item: 'x' }, hand_over: { item: 'x' } });
     doc.choices.insult.then_failed = 'end';
-    await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }) });
+    await r.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }),
+    });
   });
   await page.reload(); // the card read its source before the route
   const praise = page.locator('[aria-label="choice praise"]');
   await praise.locator('summary').click();
   const row = praise.locator('span.flex-1').getByText('hand_over', { exact: true });
-  await row.locator('..').getByRole('button', { name: 'Remove' }).click();
+  await row.locator('..').getByRole('button', { name: 'Remove' }).first().click();
   await row.waitFor({ state: 'detached', timeout: boot }); // the old gate kept it, refused
   assert.equal(await page.getByText('then_failed needs a check').count(), 0);
   await page.unrouteAll({ behavior: 'ignoreErrors' });
@@ -352,15 +286,28 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   await page.waitForTimeout(1500);
   assert.equal(await page.getByText('Changed outside').count(), 0);
   assert.ok(await page.getByRole('button', { name: 'Undo', exact: true }).isEnabled());
-  await page.route('**/__author/numbers', (r) =>
-    r.fulfill({ json: { fights: { why: 'no world' } } }),
-  );
-  await page
-    .locator('[aria-label="Combat attack"]')
-    .getByRole('button', { name: 'Run fights' })
-    .click();
-  await page.locator('[aria-label="Combat attack"]').getByText('no world').waitFor();
+  // Break: no sign while the fights run, a click then starts another, a retry keeps the last answer (loka-wfrgk.79).
+  // Break: Run fights waits on the pacing sim too, minutes on the showcase (review 683 #2).
+  let paced = 0;
+  for (const route of ['fights', 'numbers'])
+    await page.route(`**/__author/${route}`, async (r) => {
+      paced += route === 'numbers' ? 1 : 0;
+      await new Promise((d) => setTimeout(d, 800));
+      await r.fulfill({ json: { fights: { why: 'no world' } } });
+    });
+  const combat = page.locator('[aria-label="Combat attack"]');
+  for (const run of [1, 2]) {
+    await combat.getByRole('button', { name: 'Run fights' }).click();
+    await combat.getByText('running the fights').waitFor({ timeout: 500 });
+    assert.ok(
+      await combat.getByRole('button', { name: 'Run fights' }).isDisabled(),
+      `run ${run}: one at a time`,
+    );
+    assert.equal(await combat.getByText('no world').count(), 0, `run ${run}`);
+    await combat.getByText('no world').waitFor();
+  }
   assert.equal(await page.getByRole('button', { name: 'Run fights' }).count(), 1); // not on hp
+  assert.equal(paced, 0, 'Run fights asked for the pacing sim');
   await page.close();
 });
 
@@ -383,7 +330,8 @@ test('a reaction and an action open their own cards', async () => {
     if (kind === 'action') {
       // Break: an added prose field is only revealed, never written (loka-wfrgk.24): it writes its key `~`
       await page.getByLabel(`${kind} card`).getByLabel('Add a field').selectOption(field);
-      const tip = () => JSON.parse(readFileSync(join(dir, 'showcase/actions/fish.json'), 'utf8')).tip;
+      const tip = () =>
+        JSON.parse(readFileSync(join(dir, 'showcase/actions/fish.json'), 'utf8')).tip;
       for (let t = 0; tip() === undefined && t < 50; t++) await page.waitForTimeout(100);
       assert.deepEqual(tip(), { prose: '~' });
     }
@@ -450,7 +398,10 @@ test('the flow graph opens within 300 ms', async (t) => {
   await within(t, 300, async () => {
     if (run++) {
       await page.reload();
-      await page.getByLabel('left column', { exact: true }).locator('footer', { hasText: / ms$/ }).waitFor();
+      await page
+        .getByLabel('left column', { exact: true })
+        .locator('footer', { hasText: / ms$/ })
+        .waitFor();
     }
     return took(['flow:fetch', 'flow:layout', 'flow:commit']);
   });
@@ -462,9 +413,14 @@ test('the flow graph refilters within 100 ms', async (t) => {
   await left.getByLabel(/^~ Filters/).click();
   const filter = page.getByRole('dialog').locator('button[aria-pressed]').first(); // a filter: a relayout (the showcase has no parts to fold)
   const relayout = async () => {
-    const before = await page.evaluate(() => performance.getEntriesByName('flow:commit').at(-1)!.startTime);
+    const before = await page.evaluate(
+      () => performance.getEntriesByName('flow:commit').at(-1)!.startTime,
+    );
     await filter.click();
-    await page.waitForFunction((t) => performance.getEntriesByName('flow:commit').at(-1)!.startTime > t, before);
+    await page.waitForFunction(
+      (t) => performance.getEntriesByName('flow:commit').at(-1)!.startTime > t,
+      before,
+    );
   };
   // every run measures the filter turned on, then turns it off untimed
   await within(t, 100, async () => {
@@ -530,21 +486,110 @@ test('level 0 opens whole, zooms out no further, and only a pill marks the selec
   const page = await open({ selection: { kind: 'room', key: 'tollhouse' } });
   await page.emulateMedia({ reducedMotion: 'reduce' }); // each zoom lands at once
   const slot = page.getByLabel('Map slot');
-  const pills = slot.locator('g.pointer-events-none text'), pill = pills.filter({ hasText: 'tollhouse' });
-  const zoom = async (name: string, n = 12) => { for (let i = 0; i < n; i++) await slot.getByRole('button', { name }).click({ timeout: boot }); };
-  const seen = () => slot.locator('svg [data-key]').evaluateAll((gs) => { // the width between room centres (zoom times cells); every room in the drawing
-    const s = gs[0].closest('svg')!.getBoundingClientRect(), b = gs.map((g) => g.getBoundingClientRect()), x = b.map((r) => r.x + r.width / 2);
-    return [Math.round(Math.max(...x) - Math.min(...x)), b.every((r) => r.left >= s.left && r.right <= s.right && r.top >= s.top && r.bottom <= s.bottom)];
-  });
+  const pills = slot.locator('g.pointer-events-none text'),
+    pill = pills.filter({ hasText: 'tollhouse' });
+  const zoom = async (name: string, n = 12) => {
+    for (let i = 0; i < n; i++) await slot.getByRole('button', { name }).click({ timeout: boot });
+  };
+  const seen = () =>
+    slot.locator('svg [data-key]').evaluateAll((gs) => {
+      // the width between room centres (zoom times cells); every room in the drawing
+      const s = gs[0].closest('svg')!.getBoundingClientRect(),
+        b = gs.map((g) => g.getBoundingClientRect()),
+        x = b.map((r) => r.x + r.width / 2);
+      return [
+        Math.round(Math.max(...x) - Math.min(...x)),
+        b.every(
+          (r) => r.left >= s.left && r.right <= s.right && r.top >= s.top && r.bottom <= s.bottom,
+        ),
+      ];
+    });
   await slot.getByText(/^\d+ rooms/).waitFor({ timeout: boot });
-  const fit = await seen(); assert.equal(fit[1], true); // whole, below 0.25: a disc, no label
-  await pill.waitFor(), assert.deepEqual(await pills.allTextContents(), ['tollhouse']); // no other room is marked
-  await zoom('Zoom in'), await pill.waitFor({ state: 'detached' }); // 3: the box shows the whole key
-  await zoom('Zoom out'), assert.deepEqual(await seen(), fit);
+  const fit = await seen();
+  assert.equal(fit[1], true); // whole, below 0.25: a disc, no label
+  (await pill.waitFor(), assert.deepEqual(await pills.allTextContents(), ['tollhouse'])); // no other room is marked
+  (await zoom('Zoom in'), await pill.waitFor({ state: 'detached' })); // 3: the box shows the whole key
+  (await zoom('Zoom out'), assert.deepEqual(await seen(), fit));
   const b = (await slot.getByRole('group', { name: /^Area map/ }).boundingBox())!;
-  await zoom('Zoom in', 1), await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2), await page.keyboard.down('Meta');
+  (await zoom('Zoom in', 1),
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2),
+    await page.keyboard.down('Meta'));
   for (let i = 0; i < 6; i++) await page.mouse.wheel(0, 200); // Cmd-wheel out about the centre
   assert.deepEqual(await seen(), fit);
+  await page.close();
+});
+
+// Breaks: an edit elsewhere in a status card writes its integer `duration` as the other anyOf
+// branch's `permanent` (loka-wfrgk.75); asserted on the file on disk.
+test('editing a status keeps its integer duration', async () => {
+  const page = await open({ right: 420, selection: { kind: 'status', key: 'bleeding' } });
+  const file = join(dir, 'showcase/areas/combat/statuses/bleeding.json');
+  const tick = page.locator('#root_tick_every');
+  await tick.fill('901');
+  await tick.blur();
+  const read = () => JSON.parse(readFileSync(file, 'utf8'));
+  for (let t = 0; read().tick_every !== 901 && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual([read().tick_every, read().duration], [901, 1800]);
+  await page.close();
+});
+
+// Breaks: picking another kind of an hour writes nothing over it, so the hour hides and the next
+// write (another hour removed) drops it from the file (loka-wfrgk.74); asserted on the file on disk.
+test('an hour switched to another kind survives a write elsewhere', async () => {
+  const file = join(dir, 'showcase/areas/low_wardle/npcs/warden.json');
+  const read = () => JSON.parse(readFileSync(file, 'utf8')).daily_schedule;
+  const other = Object.keys(read()).findLast((h) => h !== '13')!; // 14, or 15 after the NPC card test
+  const page = await open({ right: 420, selection: { kind: 'npc', key: 'warden' } });
+  const schedule = page.locator('fieldset[aria-label="Schedule"]');
+  await schedule.getByRole('combobox', { name: `${other} kind` }).selectOption({ label: 'walk' });
+  await schedule.getByRole('button', { name: 'remove hour 13' }).click();
+  for (let t = 0; '13' in read() && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual([read()[13], read()[other]], [undefined, { room: 'warden_gate', walks: true }]);
+  await page.close();
+});
+
+// Breaks: removing a room's last variant leaves `variants: []`, refused by minItems 1, or rjsf's
+// Remove, leaving no focus, never blurs: either way nothing is written and Undo replays an older
+// change (loka-wfrgk.78); asserted on the file on disk.
+test("removing a room's last variant writes it gone, and Undo brings it back", async () => {
+  const page = await open({ right: 420, selection: { kind: 'room', key: 'sea_cave' } });
+  const file = join(dir, 'showcase/areas/tidewater/rooms/sea_cave.json');
+  const read = () => JSON.parse(readFileSync(file, 'utf8'));
+  const was = read().variants;
+  await page.locator('#root_variants').getByRole('button', { name: 'Remove' }).click();
+  for (let t = 0; 'variants' in read() && t < 50; t++) await page.waitForTimeout(100);
+  assert.equal('variants' in read(), false);
+  await page.getByRole('button', { name: 'Undo' }).click();
+  for (let t = 0; !('variants' in read()) && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual(read().variants, was);
+  await page.close();
+});
+
+// Breaks: a one-way toggle writes only the far room, so neither room's card Undo knew of it: Undo
+// did nothing or undid an older change, and the reverse exit stayed gone (loka-wfrgk.77).
+test("a one-way exit's reverse comes back by Undo on either room's card", async () => {
+  const page = await open({ right: 420, selection: { kind: 'room', key: 'cliff_path' } });
+  const file = join(dir, 'showcase/areas/tidewater/rooms/cliff_top.json');
+  const south = () => 'south' in JSON.parse(readFileSync(file, 'utf8')).exits;
+  const toggle = async (gone: boolean) => {
+    for (let t = 0; south() === gone && t < 50; t++) await page.waitForTimeout(100);
+    assert.equal(south(), !gone);
+  };
+  const row = page.getByLabel('Exits').locator('div', { hasText: 'north → cliff_top' });
+  await row.getByRole('button', { name: 'One-way' }).click();
+  await toggle(true);
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await toggle(false);
+  await row.getByRole('button', { name: 'One-way' }).click();
+  await toggle(true);
+  await page.keyboard.press('Control+k');
+  await page
+    .getByLabel('Find a key, a ~ or a command')
+    .pressSequentially('cliff_top', { delay: 10 });
+  await page.keyboard.press('Enter');
+  await page.locator('[aria-label="Room card"] code', { hasText: 'cliff_top.json' }).waitFor();
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await toggle(false);
   await page.close();
 });
 
@@ -579,7 +624,9 @@ test('palette New and Delete send the starter and the selected file; refusals sh
   await page.route('**/__author/source?file=*', (r) => r.fulfill({ status: 404, json: {} }));
   await run('Delete the selected definition', 3);
   const file = 'quests/carry_letter.json';
-  const was = createHash('sha256').update(readFileSync(join(dir, 'showcase', file))).digest('hex');
+  const was = createHash('sha256')
+    .update(readFileSync(join(dir, 'showcase', file)))
+    .digest('hex');
   assert.deepEqual(sent, [
     ['/__author/new', { kind: 'rooms', name: 'zz' }],
     ['/__author/delete', { file, was }],
@@ -596,6 +643,13 @@ test('palette New and Delete send the starter and the selected file; refusals sh
 // context.unlinkable dropped).
 test('a .scene dialogue opens its text card: a picker per value line, words to the Book', async () => {
   appendFileSync(join(dir, 'identity_sampler/scenes/stranger_talk.scene'), '  then: end\n'); // line 7
+  // the block tests' last write compiled first: a switch mid-compile leaves this card unopened
+  const at = (f: string) => statSync(join(dir, f)).mtimeMs;
+  const last = Math.max(
+    ...readdirSync(join(dir, 'showcase'), { recursive: true }).map((f) => at(`showcase/${f}`)),
+  );
+  for (let t = 0; at('current.json') < last && t < 100; t++)
+    await new Promise((r) => setTimeout(r, 100));
   const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
   assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
   const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
@@ -642,7 +696,10 @@ test('a .scene dialogue opens its text card: a picker per value line, words to t
   // then: offers no dialogue the story names unlinkable (a keyword one, dialogue_links.ex:387-394)
   await page.route('**/__author/story', async (r) => {
     const res = await r.fetch();
-    r.fulfill({ response: res, json: { ...(await res.json()), unlinkable: { stranger_talk: 'keyword' } } });
+    r.fulfill({
+      response: res,
+      json: { ...(await res.json()), unlinkable: { stranger_talk: 'keyword' } },
+    });
   });
   await page.reload();
   const then = page.locator('#scene-7-keys option');

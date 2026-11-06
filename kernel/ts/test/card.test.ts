@@ -1,4 +1,4 @@
-// size: allow 700, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 733, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -43,6 +43,7 @@ import {
   constraintOnly,
   tagHidden,
   worldFile,
+  unlisted,
 } from '../play/card.ts';
 import { paired, menuOf } from '../play/action.ts';
 import { change } from '../play/edit_model.ts';
@@ -251,6 +252,39 @@ test('a trigger and a check are drawn and switched by their event and kind', () 
   const luck = { kind: 'luck', key: 'fish', chance: 50 };
   assert.equal(branchOf(check, { kind: 'threshold', key: 'k' }), 1);
   assert.deepEqual(start(check, 1, luck), { kind: 'threshold', key: 'fish' });
+});
+
+// Break: picking another kind of an hour (an untagged union) writes nothing, so the hour hides and a
+// later write drops it (loka-wfrgk.74); a fitting kind is rewritten; a room ref or a non-hour union
+// gets an invented value; a case list is not one case then its fallback room, or loses the room.
+test('an hour switched to another kind keeps its room', () => {
+  const hour = defs[
+    'source.NpcDefinition'
+  ].properties.daily_schedule.additionalProperties.anyOf.map(
+    (b: any) => (b.$ref ? defs.Key : b), // rjsf hands the picker its branches resolved
+  );
+  assert.deepEqual(start(hour, 1, 'gate', defs), { room: 'gate', walks: true });
+  assert.equal(start(hour, 2, 'gate', defs), 'gate'); // a room ref needs its cartridge, not invented
+  const ref = { cartridge_id: 'c', cartridge_version: '1', kind: 'room', key: 'gate' };
+  assert.equal(start(hour, 0, { room: ref, walks: true }, defs), 'gate'); // a ref's key, not the ref
+  const duration = defs['source.StatusDefinition'].properties.duration.anyOf;
+  // Break: not an hour, so no room: a deleted required duration the compiler refuses (review 683 #1)
+  assert.equal(start(duration, 1, 1800, defs), 'permanent');
+  assert.equal(start(duration, 0, 'permanent', defs), 1);
+  assert.deepEqual(start(hour, 3, { room: 'gate', walks: true }, defs), [{ room: 'gate' }, 'gate']);
+  const list = [{ room: 'green', when: { kind: 'luck', chance: 5 } }, 'gate'];
+  assert.equal(start(hour, 3, list, defs), list);
+  assert.equal(start(hour, 0, list, defs), 'gate');
+});
+
+// Break: removing the last variant leaves `variants: []`, which minItems 1 refuses, so nothing is
+// written (loka-wfrgk.78); a required list (a detail's aliases) or one with no minimum stays.
+test('an emptied optional list leaves the file', () => {
+  const doc = { variants: [], details: { well: { aliases: [], variants: [] } }, zones: [] };
+  assert.deepEqual(unlisted(doc, defs['source.RoomDefinition'], defs), {
+    details: { well: { aliases: [] } },
+    zones: [],
+  });
 });
 
 // Break: an `extends` partial naming no kind (`check: {chance: 70}`) draws only the picker and

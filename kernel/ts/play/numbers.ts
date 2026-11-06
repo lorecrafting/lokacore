@@ -51,11 +51,10 @@ export type Target = {
 export type FightsReport = { seeds: number; rounds: number; targets: Target[] };
 
 /** What the watcher's GET /numbers answers; a report that could not run says why. */
-export type Numbers = {
-  hash: string;
-  pacing: Section<{ pools: PoolsReport; levels: LevelRows }>;
-  fights: Section<FightsReport>;
-};
+export type Numbers = Fights & { pacing: Section<{ pools: PoolsReport; levels: LevelRows }> };
+
+/** GET /fights: the fight rows alone, in seconds where the pacing sim takes minutes. */
+export type Fights = { hash: string; fights: Section<FightsReport> };
 
 // What the writer reads, here so the tab and bin/loka sim say one thing and a test can hold it. The
 // matrix's own percents and rating count unborn runs as lost fights, so these do not read them.

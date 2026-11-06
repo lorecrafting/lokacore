@@ -20,6 +20,7 @@ import {
   hidden,
   rebase,
   status,
+  unlisted,
 } from '../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
 import { ask, type useDiagnostics } from '../author.ts';
@@ -29,6 +30,16 @@ import { Refusal, templates } from './templates.tsx';
 import registry from './registry.json';
 
 const validator = customizeValidator({ AjvClass: Ajv2020 });
+
+/** rjsf's sanitizing, run on each leaf edit, rewrites values the author never touched: a union with
+ * a `const` branch is read as that const's enum, so `duration: 1800` became `permanent`
+ * (loka-wfrgk.75); a card writes only the author's edits, and the compiler reports the rest. */
+class CardFormBase extends Form {
+  getStateFromProps(...a: Parameters<Form['getStateFromProps']>) {
+    a[6] = false; // shouldSanitize
+    return super.getStateFromProps(...a);
+  }
+}
 type Saved = { doc: unknown; sha256: string; dir: string; schema: RJSFSchema };
 type Sent = { ops?: Op[]; [k: string]: unknown }; // the /change or /undo body
 
@@ -39,6 +50,12 @@ async function source(rel: string): Promise<Saved> {
   const schema = await fetch(`/__author/schema/${s.kind}`).then((r) => r.json());
   return { doc: JSON.parse(s.bytes), sha256: s.sha256, dir: s.kind, schema };
 }
+
+/** `doc` without its emptied optional lists: removed, not refused by their minItems (loka-wfrgk.78). */
+const unlistedIn = ({ schema, dir }: Saved, doc: unknown) => {
+  const defs = schema.$defs as never;
+  return unlisted(doc, defs[definitionOf(defs, dir, doc)] ?? {}, defs);
+};
 
 /** The card's file: loaded, reloaded on a write from outside (the Book's in-place edit too), changed by a blur and undone. */
 export function useCard(rel: string, diag: Diag) {
@@ -74,7 +91,7 @@ export function useCard(rel: string, diag: Diag) {
     if (!ops.length) return void (held && setRefused(held)); // a refusal stays until the next write
     void post('change', { file: rel, was: saved!.sha256, ops }, 'Changed outside: reloaded.', held);
   };
-  const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, doc)));
+  const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, unlistedIn(saved!, doc))));
   const back = () => void post('undo', { id: undo }, 'Changed since: not undone.');
   const reveal = (f: string) => setRevealed([...revealed, f]);
   const unreveal = (f: string) => setRevealed(revealed.filter((r) => r !== f)); // back in the add menu
@@ -133,11 +150,14 @@ type FormProps = {
   fields?: RegistryFieldsType;
 };
 
+const removes = (t: EventTarget) => !!(t as Element).closest?.('button[aria-label="Remove"]');
+
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
   return (
-    <div onBlur={card.commit}>
-      <Form
+    // rjsf's Remove drops the focused button, so no blur follows: it commits once its change lands
+    <div onBlur={card.commit} onClick={(e) => removes(e.target) && setTimeout(card.commit)}>
+      <CardFormBase
         schema={card.saved!.schema}
         uiSchema={ui}
         formData={card.draft}
@@ -152,7 +172,7 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
         onSubmit={card.commit}
       >
         <span />
-      </Form>
+      </CardFormBase>
     </div>
   );
 }

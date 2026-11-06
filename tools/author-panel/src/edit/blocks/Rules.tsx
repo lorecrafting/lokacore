@@ -50,7 +50,7 @@ export function Rules(p: FieldProps) {
         onChange={(e) => {
           const i = Number(e.target.value);
           pick(i);
-          p.onChange(start(branches as never, i, formData), fieldPathId.path);
+          p.onChange(start(branches as never, i, formData, registry.rootSchema.$defs as never), fieldPathId.path);
         }}
       >
         {at < 0 ? <option value={-1}>choose</option> : null}
