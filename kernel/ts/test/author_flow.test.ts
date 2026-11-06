@@ -193,13 +193,12 @@ test('the showcase: layout under 20 ms, equal across runs, loops exactly the bac
     const s = build(src, { canonical: canonical!, sha256: sha256! }, []) as unknown as Story;
     const first = layout(s, OPEN);
     // the best of three runs: load only adds time, so a busy machine still passes while a layout past 20 ms fails all three
-    let second = first;
     let ms = Infinity;
     for (let run = 0; run < 3; run++) {
       const t = performance.now();
-      second = layout(s, OPEN);
+      const again = layout(s, OPEN);
       ms = Math.min(ms, performance.now() - t);
-      assert.deepEqual(second, first);
+      assert.deepEqual(again, first);
     }
     assert.ok(ms < 20, `${ms.toFixed(1)} ms`);
     assert.ok(first.chips.length > 20, `${first.chips.length} chips`);

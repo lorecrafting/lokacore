@@ -93,12 +93,10 @@ defmodule Loka.Content.DialogueLinks do
 
   defp closed(sorted, next), do: return_closed(sorted, next) ++ hub_shut(sorted, next)
 
-  defp hub_shut(sorted, next),
-    do:
-      for(
-        {rel, k, d} <- Loka.Content.Hub.shut(sorted, next),
+  defp hub_shut(sorted, next) do
+    for {rel, k, d} <- Loka.Content.Hub.shut(sorted, next),
         do: warning("HUB_SHUT", rel, ["choices", k], d)
-      )
+  end
 
   defp live_keys(sorted), do: for({_, d} <- live(sorted), do: d["key"])
 
@@ -284,19 +282,20 @@ defmodule Loka.Content.DialogueLinks do
     end
   end
 
-  # The links in try order up to the first that always opens: reached by a choice with no policy. With none
-  # sure, `spokenBy` goes on to what the unnamed ones that may fail lead to, so the list does too.
+  # The links in try order up to the first that always opens: reached by a choice with no policy. With none sure,
+  # `spokenBy` goes on to what the unnamed ones that may fail lead to (one behind a policy may be untried yet).
   defp upto_sure(links, shut, by_key, seen, opens?) do
     sure = free_links(shut, by_key, seen, &(free?(&1) and !&1["policy"]))
     {maybe, rest} = Enum.split_while(links, &(&1 not in sure or !opens?.(by_key[&1])))
-    named = Enum.reject(maybe, &set?(by_key[&1]))
-    named ++ if rest == [], do: beyond(maybe, by_key, seen, opens?), else: Enum.take(rest, 1)
+    more = if rest == [], do: beyond(maybe, sure, by_key, seen, opens?), else: Enum.take(rest, 1)
+    Enum.uniq(Enum.reject(maybe, &set?(by_key[&1])) ++ more)
   end
 
-  defp beyond(maybe, by_key, seen, opens?) do
+  defp beyond(maybe, sure, by_key, seen, opens?) do
     failed = for k <- maybe, !opens?.(by_key[k]), !by_key[k]["name"], do: by_key[k]
-    deeper = free_links(failed, by_key, seen ++ maybe, &free?/1)
-    if deeper == [], do: [], else: upto_sure(deeper, failed, by_key, seen ++ maybe, opens?)
+    seen = seen ++ Enum.filter(maybe, &(&1 in sure or !opens?.(by_key[&1])))
+    deeper = free_links(failed, by_key, seen, &free?/1)
+    if deeper == [], do: [], else: upto_sure(deeper, failed, by_key, seen, opens?)
   end
 
   # What shut dialogues fall through to, as `tried` grows in `spokenBy`: their links. An `entry: false` one never
