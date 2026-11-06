@@ -64,3 +64,62 @@ Hand mutants (`bin/mutate.sh`, `author_story.test.ts`):
 | Dedupe without `set` | red |
 | Beat id from `part` | red |
 | Topic clause -> `false` | SURVIVED (B2) |
+
+## Re-review at `315968f9ff4a99651ab39e43c8b2ffc4b5781deb`
+
+Scope: B1, B2, and Q1 (the Knowledge, Pacing and Bind panels, `2a6a1ce47..315968f9f`), reviewed in full against the [design S2 row](../rnd/story-map-design-2026-11-05.md) and [rulings S2](../design/editor-map-and-story-rulings.md). CI (`gh run list --commit 315968f9f...`): ci success, book-e2e success.
+
+**Verdict: APPROVE WITH NOTES.**
+
+Must be true for the new panels:
+
+1. Knowledge at beat N splits the sets bound at or before N into knows (every choice, or no choice) and may know (some choices). Facts first set later go under "not yet".
+2. Pacing marks the thin parts.
+3. Bind writes `outline.json` through the E4a `change` model, and map undo restores the file byte for byte.
+
+Dispositions:
+
+- B1 fixed: `kernel/ts/play/reach.ts:34` counts `fact.stamp`. The hand mutant that drops it is red in `content_graph.test.ts`.
+- B2 fixed: `kernel/ts/play/reads.ts` is the one read rule, and Trace uses it. The `lore` topic case in `author_story.test.ts` covers it. N1 is resolved.
+- Q1 resolved: the panels are built.
+
+Findings:
+
+- **Should-fix S1** `tools/author-panel/src/storyknow.ts:16,24`: any `set` edge counts as "knows", including a set to false. Failure on the toolbox outline: at beat 3, Knowledge says "knows plate_sprung", but `reactions/plate_rearms` sets it false. The fix is to carry the value on the graph edge, or to leave false sets out of the panel.
+- **Should-fix S2** `tools/author-panel/src/storylist.tsx:175-177`: the developer's open item reproduces.
+  - Steps: select `hob` from the Book, switch to Map, then choose Cmd-K "beat 3 Rumour". Focus lands on `unplaced/...npc/hob`, not on `beat:3`, because the reveal effect on mount overwrites the palette's focus.
+  - Fix: reveal only when `selRef` changes after mount, or skip it when the palette has set the focus.
+- Nit `storylist.tsx:83-96`: the Ghost button keeps focus after Bind. If you then run Cmd-K "Undo the last map edit" with Enter, the palette's focus restore sends the same Enter back to Bind, and the prompt reopens. An empty prompt writes nothing.
+- Nit `storyknow.ts:36`: the hand mutant `s.words[r] ?? 1` survives, because no test has a bound node without words.
+- Nit: the Ghost buttons have `tabIndex -1`, so the keyboard cannot reach Bind or Knowledge, and there is no key for them in the tree.
+
+Rulings on the developer's open items:
+
+- Accepted:
+  - the thin cutoff, below half the median, with its ponytail note;
+  - "not yet";
+  - word counts, which the rulings row sets in place of the design's words per minute;
+  - Bind through `prompt()` until the E4b Picker, with its ponytail note.
+- The useSync focus loss is S2 above.
+
+Walk (real Chrome, a Book at the head, a planted outline that was not committed):
+
+- Book to list sync: clicking "Hob, the innkeeper" selects `hob, npc` in the list, and the inspector follows.
+- Knowledge at beat 3:
+  - knows: plate_sprung, topic_fire_known, warden_lets_pass;
+  - may know: wardle_standing (2 of 4 choices).
+- Pacing: "Coda 0 words, thin" comes first, in the warning colour.
+- Bind: `topics/fire` lands through `/change`, and a repeat bind is refused. Undo gives byte-identical output (`cmp`).
+
+`bin/mutate_diff.sh origin/main`:
+
+| Run | red-narrow | SURVIVED | NOT-UNIQUE |
+| --- | --- | --- | --- |
+| 63 | 35 | 28 | 1 |
+
+- The core logic is red.
+- Survivors:
+  - view `.tsx`;
+  - the error text at `mapedit.ts:156`;
+  - `storyknow.ts:20,33,36` (the `??` defaults and the `!o` guard).
+- The hand mutant "Pacing median index -1" is red, which backs the PR claim.
