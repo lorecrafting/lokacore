@@ -143,7 +143,7 @@ test('the flow graph opens within 300 ms', async (t) => {
   assert.ok(sum(ms) <= 300, `open ${ms.join(' + ')} ms`);
 });
 
-// Breaks: a filter's relayout grows past BUDGET.flowUpdate 100, or a filter no longer relayouts (no new commit).
+// Breaks: a filter's relayout grows past BUDGET.flowUpdate 100 (an open, under 300, still passes).
 test('the flow graph refilters within 100 ms', async (t) => {
   const { page, left, took } = await flow();
   const before = await page.evaluate(
