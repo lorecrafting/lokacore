@@ -44,8 +44,8 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
   'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
   'npcs.daily_schedule': (doc) => doc.spawn_template !== true, // calendar.ex template_schedules
   'items.weapon': (doc) => doc.slot === 'wield', // skills.ex weapon
-  'items.affects': (doc) => doc.slot !== undefined, // derived.ex:77
-  // a bandage is no container, worn or eaten thing (bleed.ex:88-91)
+  // affects need a slot (derived.ex:77); a bandage is no container, worn or eaten thing (bleed.ex:88-91)
+  'items.affects': (doc) => doc.slot !== undefined,
   'items.bandage': (doc) =>
     doc.slot === undefined && doc.edible === undefined && doc.container !== true,
   'items.slot': (doc) => doc.bandage === undefined,
