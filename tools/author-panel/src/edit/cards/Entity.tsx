@@ -142,7 +142,7 @@ function Kinds({ value, pick }: { value: string; pick: (kind: string) => void })
   return (
     <select
       aria-label="placed in"
-      className="form-control"
+      className="form-control w-auto"
       value={value}
       onChange={(e) => pick(e.target.value)}
     >
