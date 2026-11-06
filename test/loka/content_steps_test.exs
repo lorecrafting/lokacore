@@ -77,4 +77,11 @@ defmodule Loka.ContentStepsTest do
     assert CheckKinds.context("dialogues/g.json", ["check"], check, :choice) ==
              refused("dialogues/g.check.failure")
   end
+
+  # Breaks: the author panel's copy of the context table (its steps picker) drifts from @ops, so
+  # it offers an op the compiler refuses or hides one it runs.
+  test "the panel's step contexts are the compiler's" do
+    assert "kernel/ts/play/step_contexts.json" |> File.read!() |> Jason.decode!() ==
+             Steps.contexts()
+  end
 end
