@@ -11,7 +11,8 @@
 # 0-minute budget still runs setup (a BASELINE-RED row, not TIMEBOX) or exits other than 3; a 1-minute
 # budget lets bin/mutate.sh run mutants after setup used part of it; or a
 # non-integer or leading-zero MUTATE_MINUTES is not a usage error; or a SURVIVED row next to a TIMEBOX
-# row (bin/mutate.sh exit 3) does not exit 1.
+# row (bin/mutate.sh exit 3) does not exit 1; a .tsx under a test's `mutate-covers:` dir is not run against
+# it, or one outside it (or a .ts inside it, src/lonely.ts) is.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
@@ -65,6 +66,10 @@ printf '%s\n' "import { test } from 'node:test';" "import assert from 'node:asse
 printf '%s\n' 'export type Pos = number;' 'export const pos = (n: number) => n > 0;' > src/pkg/index.ts
 printf '%s\n' "import { test } from 'node:test';" "import type { Pos } from '../src/pkg';" "test('typed', () => { const p: Pos = 1; void p; });" > test/pkg.test.ts
 echo 'export const near = 1 < 2;' > src/near.test.ts
+# A browser test marked `mutate-covers: src` (this stand-in reads the file): it covers src's .tsx only.
+mkdir other; echo 'export const big = (n: number) => n > 1;' > src/view.tsx; cp src/view.tsx other/away.tsx
+printf '%s\n' "import { test } from 'node:test';" "import assert from 'node:assert/strict';" "import { readFileSync } from 'node:fs';" \
+  '// mutate-covers: src' "test('renders', () => assert.match(readFileSync('src/view.tsx', 'utf8'), / n > 1;/));" > test/view.test.ts
 echo 'export const both = (a: number, b: number) => a < 1 && b < 2;' > src/two.ts
 cat > lib/gate.ex <<'EX'
 defmodule Gate do
@@ -110,6 +115,8 @@ row 'src/gate.ts:11' 'negate n > 5' red-narrow || bad 'an } else if guard: negat
 row 'src/inner.ts:1' '>= -> >' red-narrow || bad 'a module tested one import hop away: not run'
 row 'src/pkg/index.ts:2' '> -> >=' SURVIVED || bad 'a directory import of pkg/index: its test not found'
 ! grep -q 'src/near.test.ts' out || bad 'a co-located .test. file was mutated'
+row 'src/view.tsx:1' '> -> >=' red-narrow || bad 'a .tsx under a mutate-covers dir: its browser test not run'
+row 'other/away.tsx:1' '> -> >=' NO-TESTS || bad 'a .tsx outside the mutate-covers dir: covered'
 row 'src/two.ts:1' '< -> <= #1' NO-TESTS && row 'src/two.ts:1' '< -> <= #2' NO-TESTS || bad 'two < on one line: rows not distinct'
 row 'lib/gate.ex:6' 'and -> or' red-narrow && grep -F 'lib/gate.ex:6	and -> or' out | grep -q 'test/caller_test.exs:3' \
   || bad 'Elixir module tested through an xref caller: not killed with its failing test line'

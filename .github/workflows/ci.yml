@@ -230,6 +230,16 @@ jobs:
       - name: Author panel types
         run: npm ci --no-audit --no-fund && npx tsc -b
         working-directory: tools/author-panel
+      # The author server runs `mise exec -- mix ...`; the runner has mix on PATH, not mise.
+      - run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          printf '#!/bin/sh\nshift 2\nexec "$@"\n' > "$RUNNER_TEMP/bin/mise"
+          chmod +x "$RUNNER_TEMP/bin/mise"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      # The real panel in stable Chrome on the showcase: overflow, axe, the Flow budget (test/panel.test.ts).
+      - name: Author panel smoke
+        run: npm test
+        working-directory: tools/author-panel
       - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 npx prettier --check
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
