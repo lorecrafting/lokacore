@@ -1,4 +1,6 @@
 // The add menu's gates: which fields a card offers, as the compiler accepts them (split from card.ts).
+import REGISTRY from '../../../protocol/capability_registry.json' with { type: 'json' };
+
 type Obj = Record<string, unknown>;
 
 // Each field's owning capabilities, as UNDECLARED_CAPABILITY checks them (content/); a field it omits needs none.
@@ -113,3 +115,17 @@ export const allowed = (
     const need = NEEDS[`${kind}.${f}`];
     return owners.every((o) => Object.hasOwn(caps, o)) && (!need || need(doc, world, hidden));
   });
+
+// rjsf names an added map row `newKey`, which requires.capabilities refuses (requires.ex:52
+// UNKNOWN_CAPABILITY): the row takes the registry's first portable capability not yet listed, at its version
+export const capabilityRow = (doc: Obj) => {
+  const caps = ((doc.requires as Obj | undefined)?.capabilities ?? {}) as Obj;
+  if (!Object.hasOwn(caps, 'newKey')) return doc;
+  const { newKey: _row, ...rest } = caps;
+  const next = REGISTRY.find((c) => c.portability !== 'server_only' && !Object.hasOwn(rest, c.key));
+  if (!next) return doc; // every capability listed: the schema refuses newKey at the field
+  return {
+    ...doc,
+    requires: { ...(doc.requires as Obj), capabilities: { ...rest, [next.key]: next.version } },
+  };
+};

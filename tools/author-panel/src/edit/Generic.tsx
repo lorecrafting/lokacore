@@ -22,6 +22,7 @@ import {
   status,
 } from '../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
+import { capabilityRow } from '../../../../kernel/ts/play/allowed.ts';
 import { ask, type useDiagnostics } from '../author.ts';
 import { Button } from '../components/ui/button.tsx';
 import { fields, type Context } from './fields.tsx';
@@ -34,51 +35,85 @@ type Sent = { ops?: Op[]; [k: string]: unknown }; // the /change or /undo body
 
 type Diag = ReturnType<typeof useDiagnostics>;
 
+// The last write's undo id per file: reselecting a card keeps it (the server refuses a stale one).
+const undos = new Map<string, string>();
+function useUndo(rel: string) {
+  const [, tick] = useState(0);
+  const set = (id?: string) =>
+    void (id ? undos.set(rel, id) : undos.delete(rel), tick((n) => n + 1));
+  return [undos.get(rel), set] as const;
+}
+
+/** The schema's errors in `doc` the saved file does not already have: only those hold (#675). */
+function fresh(saved: Saved, doc: unknown) {
+  // rjsf's own live errors would name its `{}` fills; the schema's first error shows on top instead
+  const errors = (d: unknown) => validator.validateFormData(d, saved.schema).errors;
+  const was = errors(saved.doc).map((e) => e.stack);
+  return errors(doc).filter((e) => !was.includes(e.stack));
+}
+
 async function source(rel: string): Promise<Saved> {
   const s = await fetch(`/__author/source?file=${encodeURIComponent(rel)}`).then((r) => r.json());
   const schema = await fetch(`/__author/schema/${s.kind}`).then((r) => r.json());
   return { doc: JSON.parse(s.bytes), sha256: s.sha256, dir: s.kind, schema };
 }
 
-/** The card's file: loaded, reloaded on a write from outside (the Book's in-place edit too), changed by a blur and undone. */
-export function useCard(rel: string, diag: Diag) {
+/** The card's file: loaded, and reloaded on a write from outside (the Book's in-place edit too). */
+function useFile(rel: string, diag: Diag) {
   const [saved, setSaved] = useState<Saved>();
   const [draft, setDraft] = useState<unknown>();
-  const [revealed, setRevealed] = useState<string[]>([]);
-  const [undo, setUndo] = useState<string>();
-  const [refused, setRefused] = useState<string>();
+  const [refused, setRefused] = useState<string>(); // the server's: stays until the next write
   const latest = useRef<unknown>(undefined);
   const load = useCallback(
     async (base?: unknown, sent: Op[] = []) => {
-      const s = await source(rel).catch((e: Error) => void setRefused(`${rel} not loaded: ${e.message}`));
+      const s = await source(rel).catch(
+        (e: Error) => void setRefused(`${rel} not loaded: ${e.message}`),
+      );
       if (s) (setSaved(s), setDraft((latest.current = rebase(base, latest.current, s.doc, sent)))); // keeps edits not yet sent
     },
     [rel],
   );
-  useEffect(() => void (setRevealed([]), load()), [load]); // a new file starts with nothing revealed
+  useEffect(() => void load(), [load]);
   const outside = diag.changes.find((c) => c.file === rel);
   useEffect(() => {
     if (saved && outside?.file === rel && outside.sha256 !== saved.sha256) void load(saved.doc);
   }, [outside]); // eslint-disable-line react-hooks/exhaustive-deps
-  const post = async (path: string, sent: Sent, otherwise: string, held?: string) => {
+  return { saved, draft, setDraft, refused, setRefused, latest, load };
+}
+
+/** The card's file, changed by a blur and undone. */
+export function useCard(rel: string, diag: Diag) {
+  const { saved, draft, setDraft, refused, setRefused, latest, load } = useFile(rel, diag);
+  const [revealed, setRevealed] = useState<string[]>([]);
+  const [undo, setUndo] = useUndo(rel);
+  const [held, setHeld] = useState<string>(); // the schema's first new error: the draft not sent
+  useEffect(() => void (setRevealed([]), setHeld(undefined)), [rel]); // a new file starts with nothing revealed
+  const post = async (path: string, sent: Sent, otherwise: string) => {
     const { ok, told } = await ask(path, sent);
-    setRefused(ok ? held : typeof told === 'string' ? told : otherwise);
-    setUndo(ok && path === 'change' ? (told as { id: string }).id : undefined);
+    setRefused(ok ? undefined : typeof told === 'string' ? told : otherwise);
+    // a refused change wrote nothing, so the last write's Undo still stands
+    if (ok || path === 'undo')
+      setUndo(ok && path === 'change' ? (told as { id: string }).id : undefined);
     await load(saved!.doc, sent.ops);
   };
   const commit = () => {
-    // rjsf's own live errors would name its `{}` fills; the schema's first error shows on top instead
-    const errors = saved ? validator.validateFormData(latest.current, saved.schema).errors : [];
-    const held = errors[0] && `${errors[0].property} ${errors[0].message}`;
-    const ops = saved ? apart(diff(saved.doc, latest.current), errors) : [];
-    if (!ops.length) return void (held && setRefused(held)); // a refusal stays until the next write
-    void post('change', { file: rel, was: saved!.sha256, ops }, 'Changed outside: reloaded.', held);
+    if (!saved) return;
+    const errors = fresh(saved, latest.current);
+    setHeld(errors[0] && `${errors[0].property} ${errors[0].message}`);
+    const ops = apart(diff(saved.doc, latest.current), errors);
+    if (ops.length)
+      void post('change', { file: rel, was: saved.sha256, ops }, 'Changed outside: reloaded.');
   };
   const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, doc)));
-  const back = () => void post('undo', { id: undo }, 'Changed since: not undone.');
+  // Undo drops the held draft too: rebasing it onto the undone file would put the refusal straight back
+  const back = () =>
+    void (setHeld(undefined),
+    (latest.current = saved!.doc),
+    post('undo', { id: undo }, 'Changed since: not undone.'));
   const reveal = (f: string) => setRevealed([...revealed, f]);
   const unreveal = (f: string) => setRevealed(revealed.filter((r) => r !== f)); // back in the add menu
-  return { saved, draft, revealed, undo, refused, change, commit, back, reveal, unreveal };
+  const card = { saved, draft, revealed, undo, change, commit, back, reveal, unreveal };
+  return { ...card, refused: held ?? refused };
 }
 
 /** The registry's fields this definition lacks: choosing one reveals its empty field. */
@@ -135,9 +170,14 @@ type FormProps = {
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
+  const [rows, remount] = useState(0); // rjsf keeps an added row's key in its own state: a renamed row redraws
+  const change = (doc: unknown, row = capabilityRow(doc as never)) =>
+    void (row !== doc && remount(rows + 1), card.change(row));
   return (
-    <div onBlur={card.commit}>
+    // after the blur's own change lands: rjsf sends a map key's rename after its setState, past the blur
+    <div onBlur={() => setTimeout(card.commit)}>
       <Form
+        key={rows}
         schema={card.saved!.schema}
         uiSchema={ui}
         formData={card.draft}
@@ -148,7 +188,7 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
         formContext={{ ...context, stale: !diag.compiled }}
         experimental_defaultFormStateBehavior={FORM_DEFAULTS}
         extraErrors={fieldErrors((diag.diagnostics ?? []) as never, rel) as never}
-        onChange={(e) => card.change(e.formData)}
+        onChange={(e) => change(e.formData)}
         onSubmit={card.commit}
       >
         <span />
@@ -157,15 +197,24 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
   );
 }
 
-type GenericProps = { rel: string; context: Context; diag: Diag; only?: (fields: string[], defs: never) => string[] };
+type GenericProps = {
+  rel: string;
+  context: Context;
+  diag: Diag;
+  only?: (fields: string[], defs: never) => string[];
+};
 /** A definition's card from its schema; `only` filters its add menu (a command action's, Action.tsx). */
 export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
   const card = useCard(rel, diag);
   const cart = useCartridge(diag);
   const { saved, draft } = card;
   const defs = (saved?.schema as { $defs: never } | undefined)?.$defs as never;
-  const drawn = useMemo(() => saved && uiSchema(saved.dir, saved.schema as never, defs, registry), [saved]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!drawn) return <p className="px-3 text-xs text-muted-foreground">{card.refused ?? `Loading ${rel}`}</p>;
+  const drawn = useMemo(
+    () => saved && uiSchema(saved.dir, saved.schema as never, defs, registry),
+    [saved],
+  ); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!drawn)
+    return <p className="px-3 text-xs text-muted-foreground">{card.refused ?? `Loading ${rel}`}</p>;
   const { dir } = saved!; // drawn exactly when saved
   const def = definitionOf(defs, dir, draft); // a prose field added writes its key `~`
   const ui = hidden(drawn, dir, registry, draft, card.revealed);
@@ -190,7 +239,11 @@ export const adder = (card: Card, defs: Record<string, never>, def: string) => (
 /** cartridge.json (its `requires.capabilities` and `world`), read again when it changes. */
 export function useCartridge(diag: Diag) {
   return useSource(diag, 'cartridge.json') as
-    | { requires?: { capabilities?: object }; world?: Record<string, unknown>; calendar?: { hours_per_day?: number } }
+    | {
+        requires?: { capabilities?: object };
+        world?: Record<string, unknown>;
+        calendar?: { hours_per_day?: number };
+      }
     | undefined;
 }
 
