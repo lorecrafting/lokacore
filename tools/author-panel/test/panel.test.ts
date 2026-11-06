@@ -568,7 +568,10 @@ test('palette New and Delete send the starter and the selected file; refusals sh
     await page.keyboard.press('Control+k');
     await page.getByLabel('Find a key, a ~ or a command').fill(command);
     await page.keyboard.press('Enter');
-    while (told.length < alerts) await page.waitForTimeout(50);
+    for (let i = 0; told.length < alerts; i++) {
+      assert.ok(i < 100, `alert ${alerts} never shown after ${command}: ${told}`);
+      await page.waitForTimeout(50);
+    }
   };
   await run('New room', 1);
   await run('Delete the selected definition', 2);
