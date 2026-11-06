@@ -9,6 +9,7 @@ import { type Bytes, current, DIRS, guarded, named, placed, refuse, Refused } fr
 import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
 import { apply } from './edit_model.ts';
 import { edit, located } from './prose.ts';
+import { ids, set } from './scene_card.ts';
 import { loka, opened, worlds } from './worlds.ts';
 
 type By = 'editor' | 'outside';
@@ -217,6 +218,15 @@ function get(t: Tree, url: string, places: Record<string, string>): Answer | und
 const POSTS: Record<string, (t: Tree, sent: Sent) => Answer | Promise<Answer>> = {
   '/change': change,
   '/edit': (t, sent) => edit(t.root, sent, (what, c) => done(t, what, [c])),
+  '/set': (t, sent) => {
+    const abstract = () => templates(t.root).flatMap((x) => (x.dir === 'npcs' ? [x.key] : []));
+    return set(
+      t.root,
+      sent,
+      () => ids(t.root, abstract()),
+      (what, c) => done(t, what, [c]),
+    );
+  },
   '/delete': remove,
   '/move': move,
   '/undo': undo,
