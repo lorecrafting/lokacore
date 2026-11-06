@@ -1,4 +1,4 @@
-# size: allow 330, the area folder lookups (a room or starter file in any areas/<area>/) and --extends join the starter writer
+# size: allow 336, the area folder lookups (a room or starter file in any areas/<area>/) and --extends and the provider's resource start join the starter writer
 defmodule Loka.Content.Starters do
   @moduledoc """
   `bin/loka new <kind> <name>`: writes a compiling starter for one source kind with every line a
@@ -135,10 +135,16 @@ defmodule Loka.Content.Starters do
           {:halt, {:error, "no #{missing(kind)} yet: bin/loka new #{missing(kind)} <name> first"}}
 
         key ->
-          {:cont, {:ok, Map.put(acc, kind, key)}}
+          {:cont, {:ok, acc |> Map.put(kind, key) |> Map.merge(starts(dir, kind, key))}}
       end
     end)
   end
+
+  # A provider holds the resource's own start: resources.ex:109-116 refuses one outside min..max.
+  defp starts(dir, "resources", key),
+    do: %{"resource_start" => read(Path.join(dir, "resources.json"))["resources"][key]["start"]}
+
+  defp starts(_, _, _), do: %{}
 
   defp placed(context, dir, kind, name, from, own) do
     with :ok <- new_room(dir, kind, name, context, own), do: joined(context, dir, name, from)

@@ -1,4 +1,4 @@
-# size: allow 612, one case per starter kind and refusal; the area placement and companion cases join them
+# size: allow 631, one case per starter kind and refusal; the area placement and companion cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -55,6 +55,28 @@ defmodule Loka.ContentStartersTest do
     assert Path.wildcard(Path.join(dir, "**/*.json")) |> length() == 2
     assert {:error, "no cartridge.json in " <> _} = Starters.write(tmp, "rooms", "r")
     assert {:ok, _} = Starters.write(dir, "text", "a.b")
+  end
+
+  # Breaks: the service's provider seeded with a fixed 10 the resource's maximum refuses
+  # (RESOURCE_SPEC_INVALID, resources.ex:109-116) instead of the resource's own start.
+  test "a service's provider starts with the currency's own start", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    for k <- ~w(npcs resources), do: {:ok, _} = Starters.write(dir, k, "my_#{k}")
+
+    edit(
+      dir,
+      "resources.json",
+      &put_in(&1, ~w(resources my_resources), %{
+        "minimum" => 0,
+        "maximum" => 5,
+        "start" => 3,
+        "gain" => 0
+      })
+    )
+
+    {:ok, _} = Starters.write(dir, "services", "s")
+    assert read(dir, "npcs/my_npcs.json")["resource_starts"] == %{"my_resources" => 3}
+    assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
   # Breaks: a second service on the same npc replacing its first (list merge as replace); the
