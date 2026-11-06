@@ -523,24 +523,27 @@ test('a bad checkpoint name is refused, a good one is not', async () => {
 
 // Breaks: a selected room's pill shows while its box already shows the whole key (loka-vduxr.73), or
 // hides when zoomed out where the box shows none (mapsvg.tsx Drawing's Pills filter); or the footer
-// loses its counts when nothing is refused (areamap.tsx's footer line).
-test('the selected room has a pill only where its box shows no whole key', async () => {
+// loses its counts when nothing is refused (areamap.tsx's footer line). Map rulings, minimum zoom: level 0
+// opens clipped at 0.25 (no M.floor in `fitted`), or a button or Cmd-wheel zoom out stops at 0.25 (no `least`).
+test('level 0 opens whole, zooms out no further, and only a pill marks the selected disc', async () => {
   const page = await open({ selection: { kind: 'room', key: 'tollhouse' } });
+  await page.emulateMedia({ reducedMotion: 'reduce' }); // each zoom lands at once
   const slot = page.getByLabel('Map slot');
-  const pills = slot.locator('g.pointer-events-none text');
-  const pill = pills.filter({ hasText: 'tollhouse' });
-  const zoom = async (name: string) => {
-    for (let i = 0; i < 12; i++) {
-      await slot.getByRole('button', { name }).click({ timeout: boot });
-      await page.waitForTimeout(100); // each step eases from where the last one is
-    }
-  };
+  const pills = slot.locator('g.pointer-events-none text'), pill = pills.filter({ hasText: 'tollhouse' });
+  const zoom = async (name: string, n = 12) => { for (let i = 0; i < n; i++) await slot.getByRole('button', { name }).click({ timeout: boot }); };
+  const seen = () => slot.locator('svg [data-key]').evaluateAll((gs) => { // the width between room centres (zoom times cells); every room in the drawing
+    const s = gs[0].closest('svg')!.getBoundingClientRect(), b = gs.map((g) => g.getBoundingClientRect()), x = b.map((r) => r.x + r.width / 2);
+    return [Math.round(Math.max(...x) - Math.min(...x)), b.every((r) => r.left >= s.left && r.right <= s.right && r.top >= s.top && r.bottom <= s.bottom)];
+  });
   await slot.getByText(/^\d+ rooms/).waitFor({ timeout: boot });
-  await zoom('Zoom out'); // 0.25: a disc, no label
-  await pill.waitFor();
-  assert.deepEqual(await pills.allTextContents(), ['tollhouse']); // no other room is marked
-  await zoom('Zoom in'); // 3: the box shows the whole key
-  await pill.waitFor({ state: 'detached' });
+  const fit = await seen(); assert.equal(fit[1], true); // whole, below 0.25: a disc, no label
+  await pill.waitFor(), assert.deepEqual(await pills.allTextContents(), ['tollhouse']); // no other room is marked
+  await zoom('Zoom in'), await pill.waitFor({ state: 'detached' }); // 3: the box shows the whole key
+  await zoom('Zoom out'), assert.deepEqual(await seen(), fit);
+  const b = (await slot.getByRole('group', { name: /^Area map/ }).boundingBox())!;
+  await zoom('Zoom in', 1), await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2), await page.keyboard.down('Meta');
+  for (let i = 0; i < 6; i++) await page.mouse.wheel(0, 200); // Cmd-wheel out about the centre
+  assert.deepEqual(await seen(), fit);
   await page.close();
 });
 

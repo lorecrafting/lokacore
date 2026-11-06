@@ -105,10 +105,10 @@ function useLevel(p: MapProps) {
   useFollow(rooms, sel, z, size, v, toLevel);
   useFollow(rooms, here, z, size, v, toLevel);
   const centre = { x: size.w / 2, y: size.h / 2 };
+  const least = map.least(map.bounds(level), size); // every zoom path's floor (map rulings, minimum zoom)
   const zoom = (f: number) =>
-    v.now.current &&
-    v.ease(map.keep(map.zoomAt(v.now.current, f, centre, map.least(map.bounds(level), size)), map.bounds(level), size));
-  return { all, sel, z, level, ref, size, v, toLevel, zoom, fit: () => v.ease(fitted(z)) };
+    v.now.current && v.ease(map.keep(map.zoomAt(v.now.current, f, centre, least), map.bounds(level), size));
+  return { all, sel, z, level, ref, size, v, toLevel, zoom, least, fit: () => v.ease(fitted(z)) };
 }
 export type Level = ReturnType<typeof useLevel>;
 
