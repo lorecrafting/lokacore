@@ -911,6 +911,13 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, until
   the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
   `The engine writes this line.`, else `Not a line of words. Alt-click opens its source.`
+- **Add here** (E6a, #649). While the panel's selection is a room, a click on that room's line in the
+  Book (the line the panel's `select` marks) shows the no-field note under it: `Add here`, then one
+  button per registry field the room lacks, in the panel's order; nothing when it lacks none. It is
+  the same note ([author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue)) and lasts until
+  the next click or key. A pick is the panel's card writing that field's least valid value (a text key is `~`; a
+  key or choice the author must make is only revealed, not written), undone by the card's Undo, and
+  asks for no second note. Nothing is added from the Book without a pick.
 - Nothing here animates (the scroll to a landed line is instant under reduced motion).
 
 ## Future boundaries
@@ -1009,7 +1016,7 @@ a boar!' / 'A boar attacks you!'"; loka-kgd.207). It is kept for the encounter, 
 reads **Combat** when the opener is unknown (an old save, a fallen pack opener after a reload, a
 cartridge without the keys or the foe's name words). Nothing else names the foe above the log: no foe
 name, band phrase or target line (owner 2026-11-02, loka-kgd.204); the log opens the page, and each live foe's **Cast a spell on** list ("Cast a spell on the goblin…") comes last among the cards. Your own bleeding and condition lines draw nowhere on the Combat page: they stay
-on the status icon row and Character, so a reader never takes your hunger for the raider's
+on the status icon row and Character, so a reader never takes your wound for the raider's
 (pass-1 C2b, as loka-x6t.15). **Closure.** On
 every committed closure (opponent death, player death and inn return, successful Flee, any
 other end) the Combat page stays the shown page, as a one-reply conversation does: its log ending with the closing
@@ -1144,12 +1151,13 @@ once, as an unavailable card does. Cooling: barred until the cooldown ends; the 
 
 **Cooldown timing.** The wedge shows the share of the cooldown already elapsed and reaches full ink at the end;
 the presenter keeps no clock and projects from the confirmed view's `time`, as the condition ring does
-(ConditionView `ends_at`, `duration`). What the GameView gives today: an unavailable action or word carries only
-`reason.code` (`cooldown`, `insufficient_resource`, `invalid_state`), no end or length, and CombatView carries no
-round interval. **Engine gap:** until the GameView projects the cooldown's end and length on each offered action and
-spell word (the ConditionView pair, same clock), a cooling slot shows the barred form with its reason word, and the
-screen reader's rounds-left count (ceil of remaining over the round interval) is also unavailable. The Book never
-estimates a cooldown from the cartridge or from the last press.
+(ConditionView `ends_at`, `duration`). The GameView gives the same pair on the slot's entry: an AdvertisedAction or
+SpellWord refused `cooldown` carries `ends_at` and `duration` (kernel_api 1.159, [protocol](protocol.md#gameview);
+the pair is together or absent, and absent when the end would overflow), and CombatView carries the round
+`interval`. The wedge's share is `(time - (ends_at - duration)) / duration`, clamped to 0..1; the screen reader's
+rounds-left count is `ceil((ends_at - time) / interval)`. A cooling entry with no pair (the overflow case) shows the
+barred form with its reason word and no count. The Book never estimates a cooldown from the cartridge or from the
+last press.
 
 **Keyboard and screen reader.** The strip is one group named by its label key (a `LABEL` key, proposed:
 `LABEL.hotbar`), after the scroll's last card in the Tab order; slots left to right; empty slots skipped; Enter or
