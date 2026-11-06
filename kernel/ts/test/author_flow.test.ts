@@ -334,13 +334,14 @@ test('V shut: no self line and no line inside a stub; the footer counts edges', 
   assert.equal(read.footer(fl), '7 nodes · 8 edges · 2 loops · 0 hidden');
 });
 
-// Breaks: the cap is off by one at 12 and 13, the stub's icon is not the first hidden kind, or
-// revealing a hidden ref keeps the cap.
+// Breaks: the cap is off by one at 12 and 13 (a 13th row or a second layer column at 12), the stub's icon is not the first hidden kind, or
+// revealing a hidden ref keeps the cap, or any reveal opens every cell.
 test('12 reactions: no stub; 13: 12 and a +1 of the next kind, the lane 13 rows; reveal opens', () => {
   const twelve = Array.from({ length: 12 }, (_, i) =>
     ref('reaction', `r${String(i).padStart(2, '0')}`),
   );
-  assert.deepEqual(layout(model(twelve, []), OPEN).stubs, []);
+  const fl12 = layout(model(twelve, []), OPEN);
+  assert.deepEqual([fl12.stubs, fl12.lanes[0]!.h, fl12.columns.length], [[], 12 * 32 + 12, 1]);
   const s = model([...twelve, ref('action', 'zz')], []);
   const fl = layout(s, OPEN);
   assert.deepEqual(
@@ -349,20 +350,21 @@ test('12 reactions: no stub; 13: 12 and a +1 of the next kind, the lane 13 rows;
   );
   assert.equal(fl.lanes[0]!.h, 13 * 32 + 12);
   assert.equal(layout(s, { fold: [], reveal: ref('action', 'zz') }).chips.length, 13);
+  assert.equal(layout(s, { fold: [], reveal: ref('action', 'elsewhere') }).chips.length, 12);
   assert.deepEqual([F.cap, F.rows, F.hoverDelay], [12, 6, 300]);
 });
 
-// Breaks: a filter keeps a node without words to write or without a problem, or a name drops
+// Breaks: a filter keeps a node without words to write (or drops one with a single `~`) or without a problem, or a name drops
 // its `~` count, refusals or `unreached`.
 test('filters: needs words keeps the node with placeholders; potential problems keeps the three', () => {
   const words = {
     ...planted,
-    todo: { [d2]: [{ file: 'd2.json', words: 0, placeholders: ['a', 'b'] }] },
+    todo: { [d2]: [{ file: 'd2.json', words: 0, placeholders: ['a'] }] },
   };
   const fl = layout(words, { fold: [], filters: ['needs words'] });
   assert.deepEqual(
     fl.chips.map((c) => c.name),
-    ['d2, dialogue, beat 2, 2 ~, 1 outbound, 1 inbound'],
+    ['d2, dialogue, beat 2, 1 ~, 1 outbound, 1 inbound'],
   );
   assert.equal(read.footer(fl), '1 node · 0 edges · 0 loops · 6 hidden');
   const bad = {

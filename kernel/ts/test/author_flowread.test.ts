@@ -35,7 +35,7 @@ test("d1's card in V: six of seven rows, the condition and the NPC in depends", 
 });
 
 // Breaks: a key from a missing id moves, PageUp/PageDown miss the next part, Backspace takes the
-// unsorted first inbound, an arrow reads the wrong grid row, or Tab ignores the selection.
+// unsorted first inbound or a node that is not inbound, an arrow reads the wrong grid row, or Tab ignores the selection.
 test('keys: missing id, PageUp/PageDown, Backspace, arrows over lanes, Tab with a selection', () => {
   const fl = layout(planted, OPEN);
   assert.equal(read.step(planted, fl, 'nope', 'Home'), undefined);
@@ -44,6 +44,7 @@ test('keys: missing id, PageUp/PageDown, Backspace, arrows over lanes, Tab with 
   assert.equal(read.step(planted, fl, d1, 'PageUp'), undefined);
   assert.equal(read.step(V, layout(V, OPEN), d1, 'Backspace'), d1);
   assert.equal(read.step(planted, fl, d2, 'Backspace'), d1);
+  assert.equal(read.step(V, layout(V, { fold: ['unplaced'] }), thera, 'Backspace'), r1);
   assert.equal(read.step(planted, fl, d2, 'ArrowDown'), d3);
   assert.equal(read.step(planted, fl, d3, 'ArrowDown'), 'count:unplaced|reaction');
   assert.equal(read.step(planted, fl, 'count:unplaced|fact', 'ArrowUp'), 'count:unplaced|reaction');

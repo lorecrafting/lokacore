@@ -83,7 +83,7 @@ const first = (list: Edge[], end: 'from' | 'to') =>
 function grid(f: Flow) {
   const drawn = [...f.chips, ...f.stubs];
   const top = new Map<string, number>();
-  let row = 0;
+  let row = 0; // mutate-skip: origin; the arrow rule reads only relative positions
   for (const l of f.lanes) top.set(l.lane, row), (row += (l.h - F.pad) / F.pitch);
   const room = (c: Chip | Stub) => {
     const lane = f.lanes.find((l) => l.lane === c.lane)!;
@@ -143,6 +143,5 @@ export function flowGo(s: Story, l: Layout, id: string): Layout | undefined {
   if (l.map !== 'flow') return undefined;
   const ref = id.slice(6);
   if (id.startsWith('story:')) return { ...flow, selection: { file: s.files[ref], ...fromRef(ref)! } };
-  if (id.startsWith('beat:')) return { ...flow, story: go(s, l.story ?? LIST, id) };
-  return undefined;
+  return id.startsWith('beat:') ? { ...flow, story: go(s, l.story ?? LIST, id) } : undefined;
 }

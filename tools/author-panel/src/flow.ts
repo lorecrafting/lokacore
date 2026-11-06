@@ -148,7 +148,7 @@ function cellsOf(st: FlowState, columns: Column[], parts: Part[], colOf: Map<str
   for (const r of order) {
     const [col, lane] = [colOf.get(r)!, laneOf(r)!.lane];
     const id = `${columns[col].id}|${lane}`;
-    const cell = cells.get(id) ?? { id, col, lane, refs: [], rows: 0, keep: 0 };
+    const cell = cells.get(id) ?? { id, col, lane, refs: [], rows: 0, keep: 0 }; // mutate-skip: placeholders, set below
     cell.refs.push(r);
     cells.set(id, cell);
   }
