@@ -152,10 +152,10 @@ export function AreaMap(p: MapProps) {
       <Templates story={p.story} room={p.story.map.find((r) => r.ref === p.selected)} />
       <p
         role={told ? 'alert' : undefined}
-        className={`flex items-center gap-1 truncate px-2 py-1 text-xs ${told ? 'text-destructive' : 'text-muted-foreground'}`}
+        className={`flex items-center gap-1 px-2 py-1 text-xs ${told ? 'text-destructive' : 'text-muted-foreground'}`}
       >
         {told ? <CircleAlert className="size-3.5 shrink-0" aria-hidden /> : null}
-        {told || map.footer(p.story.map, reach.unreached, reach.locked)}
+        <span className="truncate">{told || map.footer(p.story.map, reach.unreached, reach.locked)}</span>
       </p>
       <p aria-live="polite" className="sr-only">{`level ${l.z}, ${l.level.length} rooms`}</p>
     </div>

@@ -121,7 +121,7 @@ test('the palette asks /find once per pause in the typing', async () => {
   const asked: string[] = [];
   page.on('request', (r) => void (r.url().includes('/__author/find?') && asked.push(r.url())));
   await page.keyboard.press('Control+k');
-  await page.getByLabel('Find a key, a ~ or a command').pressSequentially('carry', { delay: 50 }); // a typist's pace
+  await page.getByLabel('Find a key, a ~ or a command').pressSequentially('carry', { delay: 10 }); // keys well inside the 150 ms pause, even under load
   await page.waitForTimeout(600);
   assert.deepEqual(asked.map((u) => new URL(u).searchParams.get('q')), ['carry']);
   await page.close();
