@@ -27,6 +27,8 @@ export const model = (refs: string[], edges: Edge[], outline: Story['outline'] =
   map: [],
   words: {},
   choices: {},
+  hidden: [],
+  unlinkable: {},
   files: {},
 });
 // Beat 1 holds q and d1, beat 2 d2 and d3; d1 `then` d2, forks to d3 by `check` and reads f, as r1
