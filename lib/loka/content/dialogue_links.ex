@@ -255,9 +255,9 @@ defmodule Loka.Content.DialogueLinks do
   end
 
   # `spokenBy`: no policy of its own and a choice with none that `offered` keeps (it teaches no hidden
-  # skill), so it always opens (a keyword one never for Talk).
+  # skill), so it always opens (a keyword or `entry: false` one never for Talk).
   defp opens?(d, hidden?) do
-    !d["policy"] && !d["keyword"] &&
+    !d["policy"] && !d["keyword"] && !set?(d) &&
       Enum.any?(d["choices"], fn {_, c} -> !c["policy"] && !teaches_hidden?(c, hidden?) end)
   end
 
@@ -265,6 +265,7 @@ defmodule Loka.Content.DialogueLinks do
     do: Enum.any?(c["steps"] || [], &(&1["op"] == "skill.acquire" && hidden?.(&1["skill"])))
 
   defp shut?(d), do: d["policy"] && !d["name"] && !d["keyword"]
+  defp set?(d), do: d["entry"] == false
 
   # Down a line of shut dialogues to the first with more than one way on: the ones it can open, or `[]`.
   # `seen` (entries and shut dialogues passed) are tried already, as `tried.includes` in `spokenBy`.
@@ -289,26 +290,24 @@ defmodule Loka.Content.DialogueLinks do
     sure = free_links(shut, by_key, seen, &(free?(&1) and !&1["policy"]))
 
     {maybe, rest} = Enum.split_while(links, &(&1 not in sure or !opens?.(by_key[&1])))
-    maybe ++ if rest == [], do: beyond(maybe, by_key, seen, opens?), else: Enum.take(rest, 1)
+    named = Enum.reject(maybe, &set?(by_key[&1]))
+    named ++ if rest == [], do: beyond(maybe, by_key, seen, opens?), else: Enum.take(rest, 1)
   end
 
   defp beyond(maybe, by_key, seen, opens?) do
     failed = for k <- maybe, !opens?.(by_key[k]), !by_key[k]["name"], do: by_key[k]
     seen = seen ++ maybe
-
-    case free_links(failed, by_key, seen, &free?/1) do
-      [] -> []
-      deeper -> upto_sure(deeper, failed, by_key, seen, opens?)
-    end
+    deeper = free_links(failed, by_key, seen, &free?/1)
+    if deeper == [], do: [], else: upto_sure(deeper, failed, by_key, seen, opens?)
   end
 
-  # What shut dialogues fall through to, as `tried` grows in `spokenBy`: their own links first, then what the
-  # `entry: false` ones among them lead to, which never open themselves; a named one stops there.
+  # What shut dialogues fall through to, as `tried` grows in `spokenBy`: their own links, `entry: false` ones
+  # (which never open) in place, their links tried with the next level's; a level of only those passes through.
   defp free_links(shut, by_key, seen, way?) do
     level = shut |> Enum.flat_map(&ways_on(&1, by_key, seen, way?)) |> Enum.uniq()
-    {sets, keys} = Enum.split_with(level, &(by_key[&1]["entry"] == false))
-    through = for k <- sets, !by_key[k]["name"], do: by_key[k]
-    if through == [], do: keys, else: keys ++ free_links(through, by_key, seen ++ level, way?)
+    through = for k <- level, !by_key[k]["name"], do: by_key[k]
+    all_sets? = level != [] and Enum.all?(level, &set?(by_key[&1]))
+    if all_sets?, do: free_links(through, by_key, seen ++ level, way?), else: level
   end
 
   defp ways_on(d, by_key, seen, way?) do
