@@ -942,11 +942,17 @@ build. The author tools below are reachable only in that bundle (a production ex
 - **Editor write path** ([`write.ts`](../../kernel/ts/play/write.ts), [GUI editor design §11](../rnd/gui-editor-design-2026-11-04.md)): the only way the editor changes the source tree.
   Every request whose `Host` is not `localhost` or `127.0.0.1` (any port) is answered 403, and so is
   any non-GET whose `Origin` is not one of those. `GET /source?file=` answers the file's bytes, its
-  sha256 and its kind, key and area; `GET /schema/<dir>` the source schema with its `$defs` inlined;
+  sha256 and its kind, key and area, and for a `.scene` its dialogue's words in the last compile's
+  artifact (`text`, `dialogue.<key>.` and `dialogue.<key>_` keys); `GET /schema/<dir>` the source schema with its `$defs` inlined;
   `GET /journal` the entries, newest first. `POST /change {file, was, ops}` sets or deletes JSON
   fields by path and writes the file in the house format (two-space JSON, a final newline);
   `/edit {file, line, was, words}` replaces the words of one line (a JSON string literal, or a
   scene's `* ` line; a key line, a choice label and words with a newline or tab are refused);
+  `/set {file, line, was, value}` ([`scene_card.ts`](../../kernel/ts/play/scene_card.ts)) replaces
+  the value of one `.scene` `npc:`, `with:` or `then:` line with a key from the last good compile's
+  artifact, the keys the card's picker offers: an NPC's for `npc:` and `with:`; for `then:` `end` or
+  a dialogue a then can enter (not a keyword, quest or riddle one, `dialogue_links.ex`), so only
+  `end` before any compile (any other line, value or file is refused 400; `was` is the line's text);
   `/delete {file, was}` (a room's `layout.json` row goes with it); `/move {file, was, area}`;
   `/new {kind, name, from?, area?, extends?}` runs `mix loka.new` (`area` its `--area`, `extends`
   its `--extends`; refused while any symlink is in the tree) and journals the files it wrote, from

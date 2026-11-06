@@ -210,7 +210,7 @@
   "scenes.on": { "create": "generic", "edit": "generic", "delete": "generic" },
   "scenes.on_end": { "create": "generic", "edit": "generic", "delete": "generic" },
   "scenes.steps": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "scenes.treatment": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "scenes.treatment": { "create": "cards/Scene.tsx", "edit": "cards/Scene.tsx", "delete": "cards/Scene.tsx" },
   "services.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
   "services.action": { "create": "generic", "edit": "generic", "delete": "generic" },
   "services.benefit": { "create": "generic", "edit": "blocks/Rules.tsx", "delete": "generic" },
@@ -273,5 +273,5 @@
   "transports.recovery_rooms": { "create": "cards/World.tsx", "edit": "cards/World.tsx", "delete": "cards/World.tsx" },
   "transports.reverse": { "create": "cards/World.tsx", "edit": "cards/World.tsx", "delete": "cards/World.tsx" },
   "transports.room": { "create": "cards/World.tsx", "edit": "cards/World.tsx", "delete": "cards/World.tsx" },
-  "treatment:reverie": { "create": "generic", "edit": "generic", "delete": "generic" }
+  "treatment:reverie": { "create": "cards/Scene.tsx", "edit": "cards/Scene.tsx", "delete": "cards/Scene.tsx" }
 }
