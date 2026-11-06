@@ -86,11 +86,16 @@ export function users(source: string, artifact: string, section: string, key: st
     })
     .map((rel) => ({ kind: 'extends', by: rel.replace(/\.json$/, ''), at: `${rel}:1` }));
   if (!existsSync(artifact)) return extending;
-  const defs = JSON.parse(JSON.parse(readFileSync(artifact, 'utf8')).canonical)[section] ?? {};
+  const c = JSON.parse(JSON.parse(readFileSync(artifact, 'utf8')).canonical);
+  const defs = { ...c[section], ...(section === 'actions' && c.scripted_actions) }; // scripted actions are authored under actions/
   const own = Object.keys(defs).find((k) => k.endsWith(`/${key}`)); // `<cartridge>@<version>:<kind>/<key>`
   const kind = own?.slice(own.indexOf(':') + 1, own.lastIndexOf('/'));
+  // its own refs, and the layout row the delete drops with a room, leave nothing dangling
   const refs = referrers(source, artifact, key, rels).filter(
-    (r) => r.kind === kind && r.by !== `${section}/${key}`,
+    (r) =>
+      r.kind === kind &&
+      r.by.replace(/^scripted_actions\//, 'actions/') !== `${section}/${key}` &&
+      r.by !== 'layout',
   );
   return [...refs, ...extending];
 }

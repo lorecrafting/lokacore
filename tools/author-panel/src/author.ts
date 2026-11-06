@@ -16,8 +16,9 @@ export const ask = (path: string, sent: object) =>
 export async function drop(key: string, file?: string) {
   if (!file) return alert(`${key}: no source file`);
   const { sha256 } = await fetch(`/__author/source?file=${encodeURIComponent(file)}`).then((r) =>
-    r.json(),
+    r.ok ? r.json() : {},
   );
+  if (!sha256) return alert(`${file}: not found`);
   const { ok, told } = await ask('delete', {
     file,
     was: sha256,

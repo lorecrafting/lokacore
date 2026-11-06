@@ -70,8 +70,8 @@ export const resetPlace = () => {
   placeNote = '';
   savePlace();
 };
-/** At page load: a path due a replay gets a fresh game, as a hash seen before keeps its old save (an edit
- * undone). `renewed`: the save, pinned to another edit, was just started over, so every path replays. */
+/** At page load: a path due a replay gets a fresh game. `renewed`: the one dev save, pinned to another
+ * edit (an undo included), was just started over, so every path replays. */
 export function bootPlace(
   session: {
     game(): Opened | undefined;

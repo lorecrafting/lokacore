@@ -104,7 +104,10 @@ test('a definition is used by refs to it as its kind and by the files extending 
   const canonical = {
     npcs: { 'c@1:npc/maud': { friend: ref('npc', 'maud') } },
     items: { 'c@1:item/maud': {} },
-    quests: { 'c@1:quest/q': { giver: ref('npc', 'maud') } },
+    quests: { 'c@1:quest/q': { giver: ref('npc', 'maud'), verb: ref('action', 'chop') } },
+    scripted_actions: { 'c@1:action/chop': { again: ref('action', 'chop') } },
+    rooms: { 'c@1:room/yard': {} },
+    layout: [{ room: ref('room', 'yard') }],
   };
   writeFileSync(artifact, JSON.stringify({ canonical: JSON.stringify(canonical) }));
   mkdirSync(join(source, 'npcs'));
@@ -114,4 +117,8 @@ test('a definition is used by refs to it as its kind and by the files extending 
     { kind: 'extends', by: 'npcs/guard', at: 'npcs/guard.json:1' },
   ]);
   assert.deepEqual(users(source, artifact, 'items', 'maud'), []);
+  assert.deepEqual(users(source, artifact, 'actions', 'chop'), [
+    { kind: 'action', by: 'quests/q' },
+  ]);
+  assert.deepEqual(users(source, artifact, 'rooms', 'yard'), []); // its layout row goes with it
 });
