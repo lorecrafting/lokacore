@@ -246,11 +246,20 @@ test('a World picker refuses an unknown id at the field; a new entry key must be
     [refusePick(theft, 'grit'), refusePick(theft, 'ada')],
     [undefined, 'no attribute ada'],
   );
-  assert.equal(refusePick(pickable(['currency'], nodes, {}), 'gold'), 'no resource gold');
+  // a default pool is a resource with no resources.json entry; no keys yet (no compile) is free text
+  const coin = pickable(['currency'], nodes, { resource: ['coin'] });
+  assert.deepEqual(
+    [refusePick(coin, 'mv'), refusePick(coin, 'gold'), refusePick(pickable(['room'], [], {}), 'x')],
+    [undefined, 'no resource gold', undefined],
+  );
   assert.equal(pickable(['title'], nodes, {}), undefined);
   assert.deepEqual(
     [refuseKey('gold', { coin: {} }), refuseKey('gold', { gold: {} }), refuseKey('Gold', {})],
-    [undefined, 'already gold', 'a key is lowercase letters, digits and _'],
+    [undefined, 'already gold', 'a key is up to 64 lowercase letters, digits and _'],
+  );
+  assert.deepEqual(
+    [refuseKey('g'.repeat(64), {}), refuseKey('g'.repeat(65), {})],
+    [undefined, 'a key is up to 64 lowercase letters, digits and _'],
   );
 });
 

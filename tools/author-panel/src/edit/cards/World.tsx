@@ -91,9 +91,10 @@ function Pick(p: FieldProps) {
         aria-invalid={!!refused}
         value={shown}
         onChange={(e) => {
-          setText(e.target.value);
-          if (!refusePick(pick, e.target.value))
-            p.onChange(e.target.value || undefined, p.fieldPathId.path);
+          // only a refused key is held here: an accepted one is the form's, so Undo or a reload shows
+          const no = refusePick(pick, e.target.value);
+          setText(no ? e.target.value : undefined);
+          if (!no) p.onChange(e.target.value || undefined, p.fieldPathId.path);
         }}
         onBlur={(e) => p.onBlur(p.fieldPathId.$id, e.target.value)}
       />
@@ -173,7 +174,7 @@ function Keyed({ rel, field, blank, diag }: (typeof ROOTS)[number] & { diag: Dia
       ))}
       <form className="flex items-center gap-1" onSubmit={(e) => (e.preventDefault(), add())}>
         <Input aria-label={`New ${one} key`} aria-invalid={!!refused} className="h-7 flex-1 text-xs" value={key} onChange={(e) => setKey(e.target.value)} />
-        <Button type="submit" size="xs" variant="outline">
+        <Button type="submit" size="xs" variant="outline" onMouseDown={keep}>
           Add {one}
         </Button>
       </form>
@@ -181,6 +182,9 @@ function Keyed({ rel, field, blank, diag }: (typeof ROOTS)[number] & { diag: Dia
     </section>
   );
 }
+
+// a click keeps focus: a blur's commit and the click's own would both post from one sha (the second refused)
+const keep = (e: { preventDefault: () => void }) => e.preventDefault();
 
 type RowProps = {
   id: string;
@@ -199,7 +203,7 @@ function Row({ id, row, blank, errors, commit, remove, set }: RowProps) {
     <fieldset className="grid gap-1" onBlur={commit}>
       <legend className="flex w-full items-center font-medium">
         <span className="flex-1">{id}</span>
-        <Button type="button" size="xs" variant="ghost" aria-label={`Remove ${id}`} onClick={remove}>
+        <Button type="button" size="xs" variant="ghost" aria-label={`Remove ${id}`} onMouseDown={keep} onClick={remove}>
           Remove
         </Button>
       </legend>

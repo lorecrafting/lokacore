@@ -158,18 +158,22 @@ export const choices = (field: string, nodes: { ref: string; kind: string }[]) =
 /** What a world file's reference field names, by its field (a transport's `reverse` is a transport). */
 const PICKS: Record<string, string> = {
   ...Object.fromEntries(
-    'entry home area room destination recovery_rooms corridor drop_rooms'
+    'entry home area room rooms destination recovery_rooms corridor drop_rooms shrine surface bottom'
       .split(' ')
       .map((f) => [f, 'room']),
   ),
-  ...Object.fromEntries('corpse item items key_item nest'.split(' ').map((f) => [f, 'item'])),
-  npc: 'npc',
-  recipient: 'npc',
+  ...Object.fromEntries(
+    'corpse npc_corpse player_corpse item items key_item nest'.split(' ').map((f) => [f, 'item']),
+  ),
+  ...Object.fromEntries('npc recipient allies with'.split(' ').map((f) => [f, 'npc'])),
   reverse: 'transport',
   currency: 'resource',
   resource: 'resource',
   attribute: 'attribute',
 };
+
+// every cartridge's resource pools, listed in resources.json or not (lib/loka/content/resources.ex @defaults)
+const POOLS = ['hp', 'ma', 'mv'];
 
 /**
  * The World card's picker at `path` (its last named step picks the kind): the keys it offers, from
@@ -181,17 +185,22 @@ export function pickable(
   named: Record<string, string[]>,
 ) {
   const kind = PICKS[path.filter((s) => typeof s === 'string').at(-1) ?? ''];
-  return kind ? { kind, keys: named[kind] ?? choices(kind, nodes) } : undefined;
+  if (!kind) return undefined;
+  const keys = named[kind] ?? choices(kind, nodes);
+  return { kind, keys: kind === 'resource' ? [...new Set([...POOLS, ...keys])] : keys };
 }
 
-/** A key the picker refuses: one no definition of its kind has (an empty one is no key). */
+/** A key the picker refuses: one no definition of its kind has; none known yet (no compile) is free text. */
 export function refusePick(pick: ReturnType<typeof pickable>, value: string) {
-  return pick && value && !pick.keys.includes(value) ? `no ${pick.kind} ${value}` : undefined;
+  return pick?.keys.length && value && !pick.keys.includes(value)
+    ? `no ${pick.kind} ${value}`
+    : undefined;
 }
 
 /** A new root-file entry's key: lowercase words joined by `_`, not one the file has. */
 export function refuseKey(key: string, taken: Record<string, unknown>) {
-  if (!/^[a-z][a-z0-9_]*$/.test(key)) return 'a key is lowercase letters, digits and _';
+  if (!/^[a-z][a-z0-9_]{0,63}$/.test(key))
+    return 'a key is up to 64 lowercase letters, digits and _';
   return Object.hasOwn(taken, key) ? `already ${key}` : undefined;
 }
 

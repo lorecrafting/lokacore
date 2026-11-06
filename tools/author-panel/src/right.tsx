@@ -13,7 +13,7 @@ type Props = { sel?: Selection; story?: Story; diag: ReturnType<typeof useDiagno
 export function Inspector({ sel, story, diag, edit }: Props) {
   if (!sel) return <p className="p-3 text-muted-foreground">Select a definition in the hierarchy or a line in the Book.</p>;
   const ref = places(sel, story?.graph.nodes ?? []).inspector?.ref;
-  const rel = ref ? story?.files[ref] : sel.file; // the World row names its file
+  const rel = ref ? story?.files[ref] : sel.kind === 'cartridge' ? sel.file : undefined; // the World row
   const count = (rows?: Record<string, unknown[]>) => (ref && rows?.[ref]?.length) || 0;
   const unreached = !!ref && Object.values(story!.report.unreachable).some((refs) => refs.includes(ref));
   return (
