@@ -25,6 +25,10 @@ test('one selection, from the hierarchy or a Book line, is the same in all four 
   });
   assert.equal(shell.places({ kind: 'npc', key: 'hut' }, NODES).hierarchy, undefined);
   assert.equal(shell.fromTextKey('title'), undefined);
+  // Breaks: the World row (no node) opens no card, or any nodeless selection opens its file.
+  assert.equal(shell.fileOf(shell.WORLD), 'cartridge.json');
+  assert.equal(shell.fileOf({ ...shell.WORLD, kind: 'room' }), undefined);
+  assert.equal(shell.fileOf(fromTree!, HUT, { [HUT]: 'rooms/hut.json' }), 'rooms/hut.json');
 });
 
 // Breaks: a reload forgets the widths, the folded column, the tab or the selection; a stored

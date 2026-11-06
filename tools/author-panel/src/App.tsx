@@ -12,7 +12,7 @@ import { Divider, Rail, useLayout, type SetLayout } from './columns.tsx';
 import { Button } from './components/ui/button.tsx';
 import { ScrollArea } from './components/ui/scroll-area.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs.tsx';
-import { Hierarchy, MapSlot } from './left.tsx';
+import { Hierarchy, MapSlot, WorldButton } from './left.tsx';
 import { Palette } from './palette.tsx';
 import { Project } from './project.tsx';
 import { Counts, Unconfirmed } from './prose.tsx';
@@ -83,6 +83,7 @@ type Shell = {
   book: Book;
   diag: ReturnType<typeof useDiagnostics>;
   pick: (s?: Selection) => void;
+  offer: (add: string[]) => void;
 };
 
 function Left({ layout, set, story, book, diag, pick }: Shell) {
@@ -110,13 +111,14 @@ function Left({ layout, set, story, book, diag, pick }: Shell) {
         </TabsContent>
         <TabsContent value="project" forceMount className="data-[state=inactive]:hidden">
           <Project state={book.state} send={book.send} trace={book.trace} said={diag.said} />
+          <WorldButton pick={pick} />
         </TabsContent>
       </ScrollArea>
     </Tabs>
   );
 }
 
-function Right({ layout, set, story, book, diag }: Shell) {
+function Right({ layout, set, story, book, diag, offer }: Shell) {
   const { said, compiled, lint, unconfirmed } = diag;
   return (
     <>
@@ -124,7 +126,13 @@ function Right({ layout, set, story, book, diag }: Shell) {
         Inspector
         <Close side="right" set={set} />
       </div>
-      <Inspector sel={layout.selection} story={story} diag={diag} edit={(key) => book.send({ op: 'edit', key })} />
+      <Inspector
+        sel={layout.selection}
+        story={story}
+        diag={diag}
+        edit={(key) => book.send({ op: 'edit', key })}
+        offer={offer}
+      />
       <ScrollArea className="min-h-0 flex-1 border-t" aria-label="Console">
         <Compile said={said} compiled={compiled} lint={lint} state={book.state} send={book.send} />
         <section className="border-b px-3 pb-2">
@@ -174,8 +182,10 @@ function useWiring(
 ) {
   const pick = (s?: Selection) => s && set((l) => ({ ...l, selection: s }));
   heard.current.select = (textKey) => pick(fromTextKey(textKey));
+  const [add, offer] = useState<string[]>([]); // the selected room's add-here menu, from its card
   const mark = places(layout.selection, []).book;
-  useEffect(() => void (mark && book.send(mark)), [mark?.kind, mark?.key, book.loaded]); // eslint-disable-line react-hooks/exhaustive-deps
+  const sent = [mark?.kind, mark?.key, book.loaded, add.join()];
+  useEffect(() => void (mark && book.send({ ...mark, add })), sent); // eslint-disable-line react-hooks/exhaustive-deps
   useStart(book);
   const base = command(book, layout.selection, pick);
   // a palette story row shows Story and reveals its row (rulings S2 Cmd-K)
@@ -189,7 +199,7 @@ function useWiring(
     else if (key === '.') run({ kind: 'command', id: 'hold', label: '', detail: '' });
     else set((l) => fold(l, key));
   });
-  return { pick, run };
+  return { pick, run, offer };
 }
 
 /** The map slot under the left column, with its divider; the map's moves go to the Book. */
@@ -239,8 +249,8 @@ export default function App() {
   const [layout, set] = useLayout();
   const [story, refused] = useStory(diag.said);
   const [palette, setPalette] = useState(false);
-  const { pick, run } = useWiring(book, heard, layout, set, () => setPalette(true), story);
-  const s: Shell = { layout, set, story, book, diag, pick };
+  const { pick, run, offer } = useWiring(book, heard, layout, set, () => setPalette(true), story);
+  const s: Shell = { layout, set, story, book, diag, pick, offer };
   const all = (text: Record<string, string>) => [
     ...items(story?.graph.nodes ?? [], text, diag.placeholders ?? {}),
     ...(story ? storyItems(story) : []),
@@ -275,7 +285,8 @@ function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) =
     if (i.kind === 'text') return pick(fromTextKey(i.id));
     if (i.kind === 'todo') return (pick(fromTextKey(i.id)), book.send({ op: 'edit', key: i.id }));
     if (i.id === 'hold') return document.querySelector<HTMLButtonElement>('[data-hold]')?.click();
-    if (i.id.startsWith('map-')) return mapCommand(i.id, sel?.kind === 'room' ? sel.key : undefined);
+    if (i.id.startsWith('map-'))
+      return mapCommand(i.id, sel?.kind === 'room' ? sel.key : undefined);
     if (i.id === 'undo')
       return book.send({ op: 'key', key: 'z', metaKey: true, ctrlKey: false, altKey: false });
     const name =

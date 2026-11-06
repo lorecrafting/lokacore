@@ -10,17 +10,30 @@ import { Ajv2020 } from 'ajv/dist/2020.js';
 import {
   FORM_DEFAULTS,
   addable,
+  added,
+  addedHere,
+  allowed,
   apart,
   applied,
   branchOf,
   choices,
   diff,
   editable,
+  entered,
   fieldErrors,
   hidden,
+  minimal,
+  pickable,
   proseKey,
   rebase,
+  refuseKey,
+  refusePick,
+  removed,
+  rootNames,
+  rootStamp,
+  ROOTS,
   start,
+  worldFile,
 } from '../play/card.ts';
 import { change } from '../play/edit_model.ts';
 import { json } from '../play/write.ts';
@@ -224,6 +237,75 @@ test('a value with no op is drawn in the first branch its type fits', () => {
   assert.equal(branchOf([{}], true), 0);
 });
 
+// Break: the World card's picker takes a key no definition has (a typo'd room or resource is
+// written and only the compile refuses it), names the wrong kind for a field (an array item's
+// index, not its field, picks), or offers a story node for a root-file kind; a bad new key passes.
+test('a World picker refuses an unknown id at the field; a new entry key must be new and lowercase', () => {
+  const nodes = [
+    { ref: 'c@0.1:room/square', kind: 'room' },
+    { ref: 'c@0.1:npc/ada', kind: 'npc' },
+  ];
+  const room = pickable(['recovery_rooms', 0], nodes, {});
+  assert.deepEqual(room, { kind: 'room', keys: ['square'] });
+  assert.deepEqual(
+    [refusePick(room, 'squaer'), refusePick(room, 'square'), refusePick(room, '')],
+    ['no room squaer', undefined, undefined],
+  );
+  const theft = pickable(['world', 'theft', 'attribute'], nodes, { attribute: ['grit'] });
+  assert.deepEqual(
+    [refusePick(theft, 'grit'), refusePick(theft, 'ada')],
+    [undefined, 'no attribute ada'],
+  );
+  // a default pool is a resource with no resources.json entry; no keys yet (no compile) is free text
+  const coin = pickable(['currency'], nodes, { resource: ['coin'] });
+  assert.deepEqual(
+    [refusePick(coin, 'mv'), refusePick(coin, 'gold'), refusePick(pickable(['room'], [], {}), 'x')],
+    [undefined, 'no resource gold', undefined],
+  );
+  assert.equal(pickable(['title'], nodes, {}), undefined);
+  assert.equal(pickable(['room'], nodes, {}, { global: 'x' }), undefined); // a global ref's object
+  assert.deepEqual(
+    [refuseKey('gold', { coin: {} }), refuseKey('gold', { gold: {} }), refuseKey('Gold', {})],
+    [undefined, 'already gold', 'a key is up to 64 lowercase letters, digits and _'],
+  );
+  assert.deepEqual(
+    [refuseKey('g', {}), refuseKey('g'.repeat(64), {}), refuseKey('g'.repeat(65), {})],
+    [undefined, undefined, 'a key is up to 64 lowercase letters, digits and _'],
+  );
+});
+
+// Break: the World card opens the wrong files (a room, or a nested population folder missed), reads
+// its picker's keys from the wrong field, misses a root-file write (stale keys) or refetches on any
+// write, writes '' into an emptied field, or a new entry starts at an invented non-zero amount.
+test('the World card opens the world files, keys its pickers from the root files, and enters typed values', () => {
+  assert.deepEqual(
+    [
+      'cartridge.json',
+      'areas/a/populations/goblins.json',
+      'transports/boat.json',
+      'rooms/hut.json',
+      'npcs/cartridge.json',
+    ].map((r) => worldFile(r)),
+    [true, true, true, false, false],
+  );
+  assert.deepEqual(
+    [worldFile('resources.json', true), worldFile('barriers/gate.json', true)],
+    [true, false],
+  );
+  assert.deepEqual(rootNames([{ resources: { coin: {} } }, {}]), {
+    resource: ['coin'],
+    attribute: [],
+  });
+  const write = (file: string) => ({ file, sha256: file.length.toString() });
+  assert.equal(rootStamp([write('rooms/hut.json')]), '');
+  assert.notEqual(rootStamp([write('attributes.json')]), '');
+  assert.deepEqual(
+    [entered(''), entered('a'), entered('', true), entered('7', true)],
+    [undefined, 'a', undefined, 7],
+  );
+  assert.ok(ROOTS.every((r) => Object.values(r.blank).every((v) => v === 0)));
+});
+
 // Break: a reference field offers another kind's keys, or the ref's cartridge prefix; a `.scene`
 // (or no file) gets a card.
 test('a picker offers the bare keys of its kind; only .json files have a card', () => {
@@ -252,4 +334,88 @@ test("a prose field opens its text key (cartridge.md's examples)", () => {
   );
   assert.equal(proseKey({ prose: 'x' }, 'npc', 'bram', ['room_line']), 'npc.bram.room');
   assert.equal(proseKey('npc.ada.title', 'npc', 'bram', ['name']), 'npc.ada.title');
+});
+
+// Break: the Room card's add (and the Book's add-here) writes a mechanic the compiler refuses, or
+// invents words or choices: each new text key is `~`, a key or enum the author has to pick leaves
+// the field unwritten (only revealed). Literals hand-checked against source.RoomDefinition.
+test("a room mechanic's added value is the least valid one, its words `~`", () => {
+  const room = defs['source.RoomDefinition'].properties;
+  const tilde = { prose: '~' };
+  const added = Object.fromEntries(
+    Object.keys(room).map((f) => [f, minimal(room[f], defs)] as const),
+  );
+  assert.deepEqual(added, {
+    actions: undefined, // an action's key is the author's
+    ambient: [{ lines: [tilde], every: 1 }],
+    cues: undefined, // a cue's sense is chosen
+    dark: true,
+    dark_description: tilde,
+    description: tilde,
+    details: {},
+    exits: {},
+    locks: {},
+    name: tilde,
+    sanctuary: true,
+    site: undefined,
+    sound: undefined,
+    tags: undefined,
+    variants: [{ description: tilde }],
+    zones: [],
+  });
+  // a branch that has no least value gives way to the next one
+  assert.equal(minimal({ anyOf: [{ type: 'string' }, { type: 'boolean' }] }, defs), true);
+  const validate = new Ajv2020({ strict: false }).compile(served('rooms'));
+  for (const [f, value] of Object.entries(added)) {
+    if (value === undefined) continue;
+    const doc = { name: 'room.a.name', description: 'room.a.description', exits: {} };
+    change(doc, [{ path: [f], value }]);
+    assert.ok(validate(doc), `${f}: ${JSON.stringify(validate.errors)}`);
+  }
+});
+
+// Break: the Room card's add overwrites a present field or writes one the author must choose, its
+// remove drops another field, or a Book "Add here" pick adds to another room or a field not offered.
+test('a room field is added once, removed alone, added here only in its room', () => {
+  const doc = { name: 'room.a.name', dark: false };
+  const R = 'source.RoomDefinition';
+  assert.deepEqual(added(doc, 'sanctuary', defs, R), { ...doc, sanctuary: true });
+  assert.equal(added(doc, 'dark', defs, R), undefined); // present
+  assert.equal(added(doc, 'sound', defs, R), undefined); // the author picks the tag
+  assert.equal(added(doc, 'abstract', defs, R), undefined); // not a RoomDefinition field
+  assert.deepEqual(removed(doc, 'dark'), { name: 'room.a.name' });
+  assert.equal(addedHere({ kind: 'dark', room: 'lane' }, 'lane', ['dark']), 'dark');
+  assert.equal(addedHere({ kind: 'dark', room: 'well' }, 'lane', ['dark']), undefined);
+  assert.equal(addedHere({ kind: 'tags', room: 'lane' }, 'lane', ['dark']), undefined);
+});
+
+// Break: the add menu offers a field whose owning capability the cartridge does not require, so the
+// world stops compiling (UNDECLARED_CAPABILITY), or hides one that needs none. Owners hand-copied
+// from lib/loka/content/room_parts.ex parts/1, cues.ex and construction.ex.
+test("a room's add menu offers only fields the cartridge's capabilities allow", () => {
+  const menu = [
+    'cues',
+    'dark',
+    'dark_description',
+    'details',
+    'sanctuary',
+    'site',
+    'tags',
+    'variants',
+  ];
+  assert.deepEqual(allowed('rooms', menu, { movement: 1 }), ['sanctuary']);
+  assert.deepEqual(allowed('rooms', menu, { light: 1, tag: 1 }), [
+    'dark',
+    'dark_description',
+    'sanctuary',
+    'tags',
+  ]);
+  const rest = { sense_cue: 1, inspectable_detail: 1, construction: 1, description_variant: 1 };
+  assert.deepEqual(allowed('rooms', menu, rest), [
+    'cues',
+    'details',
+    'sanctuary',
+    'site',
+    'variants',
+  ]);
 });

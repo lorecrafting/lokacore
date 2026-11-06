@@ -1,3 +1,4 @@
+// size: allow 360, every card's logic lives here (cards hold no logic): the generic, Room and World cards' steps
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -155,6 +156,92 @@ export function hidden(
 export const choices = (field: string, nodes: { ref: string; kind: string }[]) =>
   nodes.filter((n) => n.kind === field).map((n) => n.ref.slice(n.ref.lastIndexOf('/') + 1));
 
+/** What a world file's reference field names, by its field (a transport's `reverse` is a transport). */
+const PICKS: Record<string, string> = {
+  ...Object.fromEntries(
+    'entry home area room rooms destination recovery_rooms corridor drop_rooms shrine surface bottom'
+      .split(' ')
+      .map((f) => [f, 'room']),
+  ),
+  ...Object.fromEntries(
+    'corpse npc_corpse player_corpse item items key_item nest'.split(' ').map((f) => [f, 'item']),
+  ),
+  ...Object.fromEntries('npc recipient allies with'.split(' ').map((f) => [f, 'npc'])),
+  reverse: 'transport',
+  currency: 'resource',
+  resource: 'resource',
+  attribute: 'attribute',
+};
+
+// every cartridge's resource pools, listed in resources.json or not (lib/loka/content/resources.ex @defaults)
+const POOLS = ['hp', 'ma', 'mv'];
+
+/**
+ * The World card's picker at `path` (its last named step picks the kind): the keys it offers, from
+ * the story's nodes or, for a resource or attribute, the root file's `named` keys; none when free.
+ */
+export function pickable(
+  path: Step[],
+  nodes: { ref: string; kind: string }[],
+  named: Record<string, string[]>,
+  value?: unknown,
+) {
+  const kind = PICKS[path.filter((s) => typeof s === 'string').at(-1) ?? ''];
+  // a value that is not a key (a global ref's object) keeps its own field
+  if (!kind || (value !== undefined && typeof value !== 'string')) return undefined;
+  const keys = named[kind] ?? choices(kind, nodes);
+  return { kind, keys: kind === 'resource' ? [...new Set([...POOLS, ...keys])] : keys };
+}
+
+/** A key the picker refuses: one no definition of its kind has; none known yet (no compile) is free text. */
+export function refusePick(pick: ReturnType<typeof pickable>, value: string) {
+  return pick?.keys.length && value && !pick.keys.includes(value)
+    ? `no ${pick.kind} ${value}`
+    : undefined;
+}
+
+/** A new root-file entry's key: lowercase words joined by `_`, not one the file has. */
+export function refuseKey(key: string, taken: Record<string, unknown>) {
+  if (!/^[a-z][a-z0-9_]{0,63}$/.test(key))
+    return 'a key is up to 64 lowercase letters, digits and _';
+  return Object.hasOwn(taken, key) ? `already ${key}` : undefined;
+}
+
+/** The World card's keyed root files, each new entry's least fields (ResourceSpec, AttributeSpec) at 0. */
+export const ROOTS: { rel: string; field: string; blank: Record<string, number> }[] = [
+  {
+    rel: 'resources.json',
+    field: 'resources',
+    blank: { minimum: 0, maximum: 0, start: 0, gain: 0 },
+  },
+  { rel: 'attributes.json', field: 'attributes', blank: { start: 0 } },
+];
+
+/** A file the World card opens: a root file (`root`), or one population, transport or barrier. */
+export const worldFile = (rel: string, root = false) =>
+  /^(cartridge|resources|attributes)\.json$/.test(rel) ||
+  (!root && /(^|\/)(populations|transports|barriers)\/[^/]+\.json$/.test(rel));
+
+/** The resource and attribute keys the ROOTS docs (in order) hold: `{resource: [...], attribute: [...]}`. */
+export const rootNames = (docs: unknown[]): Record<string, string[]> =>
+  Object.fromEntries(
+    ROOTS.map(({ field }, i) => [
+      field.slice(0, -1),
+      Object.keys(((docs[i] ?? {}) as Obj)[field] ?? {}),
+    ]),
+  );
+
+/** What changes when a ROOTS file is written, so the card refetches its keys then only. */
+export const rootStamp = (changes: { file: string; sha256: string }[]) =>
+  changes
+    .filter((c) => ROOTS.some((r) => r.rel === c.file))
+    .map((c) => c.sha256)
+    .join();
+
+/** A typed field's value: an emptied field is unset, a number field's text a number. */
+export const entered = (text: string, number = false) =>
+  text === '' ? undefined : number ? Number(text) : text;
+
 const opOf = (branch: Obj): unknown => (branch.properties as any)?.op?.const;
 const typeOf = (v: unknown) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v);
 
@@ -191,3 +278,75 @@ export const proseKey = (value: unknown, kind: string, key: string, path: Step[]
 
 /** Only a definition's `.json` source has a card; a `.scene` or `.cut` is edited as text. */
 export const editable = (rel: string | undefined) => rel?.endsWith('.json') === true;
+
+/**
+ * The least value of a newly added field the schema allows, nothing invented: each text key `~`
+ * (cartridge.md "Inline prose"), each `const`, `true`, each `minimum`, `minItems` copies; a
+ * string, enum or key leaves the whole field undefined: the card only reveals it for the author.
+ */
+export function minimal(node: Obj, defs: Record<string, Obj>, seen: string[] = []): unknown {
+  const ref = node.$ref as string | undefined;
+  if (ref) {
+    const name = ref.slice(ref.lastIndexOf('/') + 1);
+    if (name === 'TextKey') return { prose: '~' };
+    return seen.includes(name) ? undefined : minimal(defs[name], defs, [...seen, name]);
+  }
+  if ('const' in node) return node.const;
+  for (const branch of (node.anyOf ?? node.oneOf ?? []) as Obj[]) {
+    const v = minimal(branch, defs, seen);
+    if (v !== undefined) return v;
+  }
+  if (node.type === 'boolean') return true;
+  if (node.type === 'integer' || node.type === 'number') return node.minimum;
+  if (node.type === 'array') {
+    const n = (node.minItems as number) ?? 0;
+    const item = n ? minimal(node.items as Obj, defs, seen) : undefined;
+    return n && item === undefined ? undefined : Array.from({ length: n }, () => item);
+  }
+  if (node.type !== 'object') return undefined;
+  const props = (node.properties ?? {}) as Record<string, Obj>;
+  const pairs = ((node.required ?? []) as string[]).map((k) => [k, minimal(props[k], defs, seen)]);
+  return pairs.some(([, v]) => v === undefined) ? undefined : Object.fromEntries(pairs);
+}
+
+/** `doc` with field `f` of definition `def` at its least value; undefined when present or the author must choose it. */
+export function added(
+  doc: Obj,
+  f: string,
+  defs: Record<string, Obj>,
+  def: string,
+): Obj | undefined {
+  if (Object.hasOwn(doc, f)) return undefined; // a stale menu never overwrites a present field
+  const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
+  const value = node && minimal(node, defs);
+  return value === undefined ? undefined : { ...doc, [f]: value };
+}
+
+/** `doc` without field `f`. */
+export const removed = (doc: Obj, f: string): Obj => {
+  const { [f]: _gone, ...rest } = doc;
+  return rest;
+};
+
+/** The field a Book "Add here" pick adds to the room `key`: only its own room's, only one on offer. */
+export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
+  a.room === key && menu.includes(a.kind) ? a.kind : undefined;
+
+// Each field's owning capability, as the compiler checks it (UNDECLARED_CAPABILITY: content/room_parts.ex
+// parts/1, cues.ex:54, construction.ex:101); a field it omits needs none.
+const OWNERS: Record<string, string> = {
+  'rooms.cues': 'sense_cue',
+  'rooms.dark': 'light',
+  'rooms.dark_description': 'light',
+  'rooms.details': 'inspectable_detail',
+  'rooms.site': 'construction',
+  'rooms.tags': 'tag',
+  'rooms.variants': 'description_variant',
+};
+
+/** The menu's fields whose capability `requires.capabilities` (`caps`) declares; others would not compile. */
+export const allowed = (kind: string, menu: string[], caps: object) =>
+  menu.filter((f) => {
+    const owner = OWNERS[`${kind}.${f}`];
+    return !owner || Object.hasOwn(caps, owner);
+  });

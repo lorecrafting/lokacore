@@ -3,7 +3,7 @@
 // POST /change (kernel/ts/play/write.ts), Undo posts /undo, the compiler's refusals show at their field.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Form from '@rjsf/core';
-import type { RJSFSchema } from '@rjsf/utils';
+import type { RJSFSchema, UiSchema } from '@rjsf/utils';
 import type { Op } from '../../../../kernel/ts/play/edit_model.ts';
 import { customizeValidator } from '@rjsf/validator-ajv8';
 import { Ajv2020 } from 'ajv/dist/2020.js';
@@ -37,8 +37,8 @@ async function source(rel: string): Promise<Saved> {
   return { doc: JSON.parse(s.bytes), sha256: s.sha256, dir: s.kind, schema };
 }
 
-/** The card's file: loaded, reloaded on a write from outside, changed by a blur and undone. */
-function useCard(rel: string, diag: Diag) {
+/** The card's file: loaded, reloaded on a write from outside (the Book's in-place edit too), changed by a blur and undone. */
+export function useCard(rel: string, diag: Diag) {
   const [saved, setSaved] = useState<Saved>();
   const [draft, setDraft] = useState<unknown>();
   const [revealed, setRevealed] = useState<string[]>([]);
@@ -54,7 +54,6 @@ function useCard(rel: string, diag: Diag) {
     [rel],
   );
   useEffect(() => void (setRevealed([]), load()), [load]); // a new file starts with nothing revealed
-  // a write from outside (or the Book's in-place edit) reloads the card
   const outside = diag.changes.find((c) => c.file === rel);
   useEffect(() => {
     if (saved && outside?.file === rel && outside.sha256 !== saved.sha256) void load(saved.doc);
@@ -76,11 +75,12 @@ function useCard(rel: string, diag: Diag) {
   const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, doc)));
   const back = () => void post('undo', { id: undo }, 'Changed since: not undone.');
   const reveal = (f: string) => setRevealed([...revealed, f]);
-  return { saved, draft, revealed, undo, refused, change, commit, back, reveal };
+  const unreveal = (f: string) => setRevealed(revealed.filter((r) => r !== f)); // back in the add menu
+  return { saved, draft, revealed, undo, refused, change, commit, back, reveal, unreveal };
 }
 
 /** The registry's fields this definition lacks: choosing one reveals its empty field. */
-function AddMenu({ fields: menu, reveal }: { fields: string[]; reveal: (f: string) => void }) {
+export function AddMenu({ fields: menu, reveal }: { fields: string[]; reveal: (f: string) => void }) {
   if (!menu.length) return null;
   return (
     <select
@@ -100,7 +100,7 @@ function AddMenu({ fields: menu, reveal }: { fields: string[]; reveal: (f: strin
 }
 
 /** The file, the compile state (held, compiling, stale) and Undo of the last change. */
-function Header({ rel, diag, undo }: { rel: string; diag: Diag; undo?: () => void }) {
+export function Header({ rel, diag, undo }: { rel: string; diag: Diag; undo?: () => void }) {
   const label = status(!!diag.held, !!diag.pending, diag.compiled);
   return (
     <div className="flex items-center gap-2">
@@ -111,6 +111,33 @@ function Header({ rel, diag, undo }: { rel: string; diag: Diag; undo?: () => voi
       <Button type="button" size="xs" variant="outline" disabled={!undo} onClick={undo}>
         Undo
       </Button>
+    </div>
+  );
+}
+
+type Card = ReturnType<typeof useCard>;
+type FormProps = { rel: string; card: Card; context: Context; diag: Diag; ui: UiSchema; fields?: typeof fields };
+
+/** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
+export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
+  return (
+    <div onBlur={card.commit}>
+      <Form
+        schema={card.saved!.schema}
+        uiSchema={ui}
+        formData={card.draft}
+        validator={validator}
+        fields={picks}
+        templates={templates}
+        showErrorList={false}
+        formContext={context}
+        experimental_defaultFormStateBehavior={FORM_DEFAULTS}
+        extraErrors={fieldErrors((diag.diagnostics ?? []) as never, rel) as never}
+        onChange={(e) => card.change(e.formData)}
+        onSubmit={card.commit}
+      >
+        <span />
+      </Form>
     </div>
   );
 }
@@ -131,24 +158,7 @@ export function Generic({ rel, context, diag }: { rel: string; context: Context;
     <div className="grid gap-2 px-3 text-xs" aria-label="Card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
-      <div onBlur={card.commit}>
-        <Form
-          schema={saved.schema}
-          uiSchema={ui}
-          formData={draft}
-          validator={validator}
-          fields={fields}
-          templates={templates}
-          showErrorList={false}
-          formContext={context}
-          experimental_defaultFormStateBehavior={FORM_DEFAULTS}
-          extraErrors={fieldErrors((diag.diagnostics ?? []) as never, rel) as never}
-          onChange={(e) => card.change(e.formData)}
-          onSubmit={card.commit}
-        >
-          <span />
-        </Form>
-      </div>
+      <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
       <AddMenu fields={addable(saved.dir, registry, draft, card.revealed)} reveal={card.reveal} />
     </div>
   );

@@ -23,8 +23,8 @@ export const edit = (gesture: (ed: Editor) => Promise<unknown>) =>
     (e: Error) => shown.tell(e.message),
   ));
 
-/** A map command (shell.ts COMMANDS `map-*`) on the selected room, its arguments by `prompt` (the plainest; see the PR's list). */
-export function mapCommand(id: string, key: string | undefined) {
+/** A map command (shell.ts COMMANDS `map-*`) on the selected room, its arguments by `prompt` (the plainest; see the PR's list) unless given. */
+export function mapCommand(id: string, key: string | undefined, given?: string) {
   if (id === 'map-undo') return edit((e) => e.undo());
   const r = shown.rooms.find((o) => o.key === key);
   if (!r) return shown.tell('Select a room on the map first');
@@ -32,7 +32,7 @@ export function mapCommand(id: string, key: string | undefined) {
     const area = prompt(`Move ${r.key} to area (empty: the root)`);
     return area === null ? undefined : edit((e) => e.move(r, area || null));
   }
-  const dir = prompt(`${r.key}: which direction?`);
+  const dir = given ?? prompt(`${r.key}: which direction?`);
   if (!dir) return;
   if (id === 'map-unlink') return edit((e) => e.unlink(r, dir, shown.rooms));
   if (id === 'map-one-way') return edit((e) => e.oneWay(r, dir, shown.rooms));
