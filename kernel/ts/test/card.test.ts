@@ -350,10 +350,11 @@ test("a room's add menu offers only fields the cartridge's capabilities allow", 
 // world stops compiling), or an ask that needs speech but not topic. Owners hand-copied from
 // lib/loka/content/entities.ex parts/1, cues.ex @holders, asks.ex:21 and capability_registry.json.
 test("an NPC's and an item's add menus offer only fields every owning capability allows", () => {
-  const npc = ['ask', 'daily_schedule', 'hp', 'name_variants', 'shop'];
+  const npc = ['ask', 'attack', 'daily_schedule', 'hp', 'name_variants', 'shop'];
   assert.deepEqual(allowed('npcs', npc, { speech: 1 }), ['hp']);
-  assert.deepEqual(allowed('npcs', npc, { speech: 1, topic: 1, commerce: 1 }), [
+  assert.deepEqual(allowed('npcs', npc, { speech: 1, topic: 1, commerce: 1, combat: 1 }), [
     'ask',
+    'attack',
     'hp',
     'shop',
   ]);

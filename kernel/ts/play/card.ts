@@ -267,6 +267,7 @@ export const addedHere = (a: { kind: string; room: string }, key: string, menu: 
 const VARIANT = 'description_variant';
 const OWNERS: Record<string, string> = {
   'npcs.ask': 'speech topic',
+  'npcs.attack': 'combat', // world.combat needs it (combat.ex requirements), attack needs world.combat
   'npcs.cues': 'sense_cue',
   'npcs.daily_schedule': 'schedule',
   'npcs.description_variants': VARIANT,
