@@ -1,20 +1,22 @@
 defmodule Mix.Tasks.Loka.New do
   @shortdoc "Writes compiling starters of source kinds into a cartridge"
   @moduledoc """
-  `mix loka.new [--cwd <dir>] <kind> <name> [--from <room> <direction>] [--area <area>] ... [cartridge dir]`
+  `mix loka.new [--cwd <dir>] <kind> <name> [--from <room> <direction>] [--area <area>] [--extends <template>] ... [cartridge dir]`
   (`scene <npc> <key>` for a pair's scene): writes
   each pair's starter (every line a `~` placeholder) into the cartridge (default `.`; a `cartridge
   <dir>` pair makes one and targets it for the pairs after it), prints each file it wrote and ends
   with what to fill (`bin/loka todo`'s list) and the next command. `--from` follows a `rooms` pair
   (`--from <cartridge dir>` a `cartridge` pair: a copy with its own id, checkpoints left out) and
-  `--area` (the `areas/<area>/` folder for every new file of the pair) any pair but a scene;
+  `--area` (the `areas/<area>/` folder for every new file of the pair) and `--extends` (the pair's
+  own file holds `"extends"` and only the fields the abstract parent of its kind lacks; not a
+  population or a transport) any pair but a scene or a cartridge;
   `--cwd` is the directory relative paths resolve against. One line names what is missing and exits
   1, and then nothing is written: the files the earlier pairs wrote are put back.
   """
   use Mix.Task
   use Boundary, top_level?: true, deps: [Loka.Content, Mix]
 
-  @usage "usage: mix loka.new <kind> <name> [--from <room> <direction>] [--from <cartridge dir>] [--area <area>] ... [cartridge dir] (scene <npc> <key>)"
+  @usage "usage: mix loka.new <kind> <name> [--from <room> <direction>] [--from <cartridge dir>] [--area <area>] [--extends <template>] ... [cartridge dir] (scene <npc> <key>)"
 
   @impl Mix.Task
   def run(["--cwd", cwd | args]), do: new(args, cwd)
@@ -65,7 +67,7 @@ defmodule Mix.Tasks.Loka.New do
   end
 
   # Before any write: a surplus argument reads as a kind.
-  defp known_kind({kind, _, _, _}) do
+  defp known_kind({kind, _, _, _, _}) do
     # `scene` is no source schema kind: Starters.kinds/0 lists those.
     kinds = Enum.sort(["scene" | Loka.Content.kinds()])
 
@@ -74,20 +76,21 @@ defmodule Mix.Tasks.Loka.New do
         Mix.raise("mix loka.new: unknown kind #{inspect(kind)}; one of: #{Enum.join(kinds, " ")}")
   end
 
-  defp starter({"cartridge", path, from, area}, {_, paths}, cwd),
+  defp starter({"cartridge", path, from, area, nil}, {_, paths}, cwd),
     do:
       starter(
         "cartridge",
         Path.expand(path, cwd),
         from && Path.expand(from, cwd),
-        area,
+        {area, nil},
         {Path.expand(path, cwd), paths}
       )
 
-  defp starter({kind, name, from, area}, state, _cwd), do: starter(kind, name, from, area, state)
+  defp starter({kind, name, from, area, up}, state, _cwd),
+    do: starter(kind, name, from, {area, up}, state)
 
-  defp starter(kind, name, from, area, {target, paths}) do
-    case Loka.Content.new(target, kind, name, from, &record/2, area) do
+  defp starter(kind, name, from, place, {target, paths}) do
+    case Loka.Content.new(target, kind, name, from, &record/2, place) do
       {:ok, written} ->
         {target, paths ++ written}
 
@@ -118,19 +121,26 @@ defmodule Mix.Tasks.Loka.New do
     end
   end
 
-  defp plan(["--from", room, way | rest], [{"rooms", name, nil, area} | done]),
-    do: plan(rest, [{"rooms", name, {room, way}, area} | done])
+  defp plan(["--from", room, way | rest], [{"rooms", name, nil, area, up} | done]),
+    do: plan(rest, [{"rooms", name, {room, way}, area, up} | done])
 
-  defp plan(["--from", cartridge | rest], [{"cartridge", path, nil, nil} | done]),
-    do: plan(rest, [{"cartridge", path, cartridge, nil} | done])
+  defp plan(["--from", cartridge | rest], [{"cartridge", path, nil, nil, nil} | done]),
+    do: plan(rest, [{"cartridge", path, cartridge, nil, nil} | done])
 
-  defp plan(["--area", area | rest], [{kind, name, from, nil} | done]) when kind != "scene",
-    do: plan(rest, [{kind, name, from, area} | done])
+  defp plan(["--area", area | rest], [{kind, name, from, nil, up} | done]) when kind != "scene",
+    do: plan(rest, [{kind, name, from, area, up} | done])
+
+  defp plan(["--extends", up | rest], [{kind, name, from, area, nil} | done])
+       when kind not in ~w(scene cartridge),
+       do: plan(rest, [{kind, name, from, area, up} | done])
 
   defp plan(["--" <> _ | _], _), do: Mix.raise(@usage)
-  defp plan(["scene", npc, key | rest], done), do: plan(rest, [{"scene", key, npc, nil} | done])
+
+  defp plan(["scene", npc, key | rest], done),
+    do: plan(rest, [{"scene", key, npc, nil, nil} | done])
+
   # A lone trailing `scene` stays a cartridge dir.
   defp plan(["scene", _], _), do: Mix.raise(@usage)
-  defp plan([kind, name | rest], done), do: plan(rest, [{kind, name, nil, nil} | done])
+  defp plan([kind, name | rest], done), do: plan(rest, [{kind, name, nil, nil, nil} | done])
   defp plan(rest, done), do: {Enum.reverse(done), List.first(rest)}
 end

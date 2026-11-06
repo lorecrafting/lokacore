@@ -1,4 +1,4 @@
-# size: allow 326, the area folder lookups (a room or starter file in any areas/<area>/) join the starter writer
+# size: allow 330, the area folder lookups (a room or starter file in any areas/<area>/) and --extends join the starter writer
 defmodule Loka.Content.Starters do
   @moduledoc """
   `bin/loka new <kind> <name>`: writes a compiling starter for one source kind with every line a
@@ -9,14 +9,15 @@ defmodule Loka.Content.Starters do
   starter, before any write. Every starter adds the rows an existing layout.json lacks.
   """
   alias Loka.Content.Barriers
-  alias Loka.Content.Starters.{Area, Copy, Merge, Parts, Templates}
+  alias Loka.Content.Starters.{Area, Child, Copy, Merge, Parts, Templates}
 
   @doc """
   Writes the starter; `{:ok, paths it changed}` or `{:error, one line for the author}`. `from` is
   `{room, direction}`: a new room joined to an existing one by exits both ways, in that room's area
   folder. `before_write.(path, old bytes or nil)` runs before each file is written, so a caller can
   undo; a refusal calls it for none. `area` places every new file of the starter in `areas/<area>/`,
-  and a room it needs is that area's first room; with `from`, it wins (a border room).
+  and a room it needs is that area's first room; with `from`, it wins (a border room). `extends`
+  makes the starter's own file a child of that abstract parent (Starters.Child).
   """
   @spec write(
           Path.t(),
@@ -24,11 +25,11 @@ defmodule Loka.Content.Starters do
           String.t(),
           {String.t(), String.t()} | nil,
           (Path.t(), binary() | nil -> any()),
-          String.t() | nil
+          {String.t() | nil, String.t() | nil}
         ) :: {:ok, [Path.t()]} | {:error, String.t()}
-  def write(dir, kind, name, from \\ nil, before_write \\ fn _, _ -> :ok end, area \\ nil)
+  def write(dir, kind, name, from \\ nil, hook \\ fn _, _ -> :ok end, place \\ {nil, nil})
 
-  def write(_dir, "cartridge", path, from, hook, _area) do
+  def write(_dir, "cartridge", path, from, hook, _place) do
     cond do
       File.exists?(Path.join(path, "cartridge.json")) -> {:error, "#{path}/cartridge.json exists"}
       valid_name(Path.basename(path)) != :ok -> valid_name(Path.basename(path))
@@ -40,29 +41,32 @@ defmodule Loka.Content.Starters do
   end
 
   # An area is a folder that starts with a room of its own name.
-  def write(dir, "areas", name, from, hook, nil), do: write(dir, "rooms", name, from, hook, name)
+  def write(dir, "areas", name, from, hook, {nil, up}),
+    do: write(dir, "rooms", name, from, hook, {name, up})
 
-  def write(_, "areas", name, _, _, area),
+  def write(_, "areas", name, _, _, {area, _}),
     do: {:error, "areas #{name} is its own area: drop --area #{area}"}
 
-  def write(dir, kind, name, from, hook, area) do
+  def write(dir, kind, name, from, hook, {area, extends}) do
     with :ok <- valid_name(name, kind),
          :ok <- in_cartridge(dir),
          {:ok, template} <- Map.fetch(Templates.kinds(), kind) |> or_unknown(kind),
          {:ok, area} <- Area.pick(dir, kind, area, from),
-         do: build(dir, {kind, name, from, area, own(dir, kind, name, area)}, template, hook)
+         own = own(dir, kind, name, area),
+         {:ok, up} <- Child.parent(dir, dir_of(kind), extends, own),
+         do: build(dir, {kind, name, from, area, own}, template, hook, up)
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
     :bad_layout -> {:error, "layout.json: every row needs a number x, y and z: fix it first"}
     {:bad_area, file} -> {:error, "#{file} needs a rooms object: fix it first"}
   end
 
-  defp build(dir, {kind, name, from, area, own}, {caps, needs, make}, hook) do
+  defp build(dir, {kind, name, from, area, own}, {caps, needs, make}, hook, up) do
     with {:ok, context} <- context(dir, needs, area),
          {:ok, context} <- placed(context, dir, kind, name, from, own) do
       files =
         make.(name, context)
-        |> Area.moved(dir, own)
+        |> owned(dir, own, up)
         |> with_capabilities(caps)
         |> kept_lines(dir, kind)
         |> with_layout(dir, context, name)
@@ -70,6 +74,8 @@ defmodule Loka.Content.Starters do
       put(dir, files, if(from, do: nil, else: own), hook)
     end
   end
+
+  defp owned(files, dir, own, up), do: files |> Area.moved(dir, own) |> Child.extending(own, up)
 
   defp with_capabilities(files, caps) do
     declared = capabilities(caps)
