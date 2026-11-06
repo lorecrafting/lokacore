@@ -1,4 +1,4 @@
-# size: allow 612, one case per starter kind and refusal; the area placement and companion cases join them
+# size: allow 623, one case per starter kind and refusal; the area placement and companion cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -231,6 +231,17 @@ defmodule Loka.ContentStartersTest do
     for kind <- order, do: assert({:ok, []} = Starters.write(dir, kind, "my_#{kind}"), kind)
     assert {:ok, []} = Starters.write(dir, "rooms", "yard", {"start", "up"})
     assert snapshot(dir) == before
+  end
+
+  # Breaks: a New outline the Story list refuses (readOutline wants outline.schema.json: an
+  # object of parts, each with a beats list), or one that lands in a folder.
+  test "a new outline is one part with no beats at the root", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    assert {:ok, _} = Starters.write(dir, "outline", "story")
+
+    assert File.read!(Path.join(dir, "outline.json")) |> Jason.decode!() == %{
+             "parts" => [%{"beats" => []}]
+           }
   end
 
   # Breaks: a starter reporting success on a cartridge the compile then refuses (a duplicate room,
