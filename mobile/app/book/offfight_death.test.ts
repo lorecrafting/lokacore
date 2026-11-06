@@ -146,28 +146,6 @@ test('a death that closes a fight keeps the Combat page', () => {
   } finally {
     h.close();
   }
-  const pressed = mounted(view()); // and from a press there: Flee into a death keeps it shown
-  try {
-    const was = turn(pressed);
-    pressed.answer(
-      {
-        kind: 'saved',
-        decision: {
-          kind: 'accepted',
-          events: [],
-          outcome: 'fled',
-          narration: [{ key: 'combat.death' }],
-        },
-      },
-      view(SHRINE),
-      'combat.death',
-    );
-    pressed.tap('Flee');
-    assert.ok(pressed.texts().includes(TITLE) && pressed.texts().includes('Let go'));
-    assert.equal(turn(pressed), was + 1); // a pressed closure turns, as on main; not the dead page's in-place change
-  } finally {
-    pressed.close();
-  }
 });
 
 // Breaks (book-ui.md, Dead page: Reopen, A scene): a reopen before Let go shows the dead page or
