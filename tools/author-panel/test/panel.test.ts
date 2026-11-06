@@ -23,6 +23,7 @@ const free = () =>
   });
 
 let browser: Browser, url: string;
+let boot = 120_000; // the first compile and Vite's first optimise
 const procs: ChildProcess[] = [];
 const dir = mkdtempSync(join(tmpdir(), 'loka-panel-'));
 before(async () => {
@@ -42,6 +43,8 @@ before(async () => {
   );
   url = `http://localhost:${panel}/`;
   browser = await chromium.launch({ channel: 'chrome' });
+  await (await open({})).close();
+  boot = 10_000; // booted: a mutant that blanks the card fails each open in seconds, inside mutate.sh's cap
 });
 after(async () => {
   await browser?.close();
@@ -69,7 +72,7 @@ async function open(layout: object): Promise<Page> {
       await new Promise((r) => setTimeout(r, 500));
     }
   }
-  await page.locator('[aria-label="Card"] form').waitFor({ timeout: 120_000 });
+  await page.locator('[aria-label="Card"] form').waitFor({ timeout: boot });
   return page;
 }
 const QUEST = { right: 280, selection: { kind: 'quest', key: 'carry_letter' } };
