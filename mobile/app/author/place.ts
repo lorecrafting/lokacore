@@ -34,10 +34,12 @@ export function caughtUp(game: Pulsed) {
   return why ? `${last.kind} ${why}` : last.kind;
 }
 
-// The browser's safety budget for one advance: delivery is synchronous, and on the toolbox showcase
-// 72,720,000 ms took 14 s and 1094 view emits while 3,600,000 ms took 0.3 s (loka-wfrgk.55). The check
-// replays checkpoints off the browser and passes Infinity.
-export const ADVANCE_BUDGET_MS = 3_600_000;
+// The browser's budget for one advance, in game minutes: delivery is synchronous and its cost follows game
+// time; on the toolbox showcase (rate 50) 60,600 minutes took 14 s and 1094 view emits while 3000 took 0.3 s
+// (loka-wfrgk.55). `bin/loka check` replays off the browser with no budget.
+export const ADVANCE_BUDGET_MINUTES = 3000;
+// The panel's ceil(minutes * 60000 / rate), so the whole budget converts to an ms the limit accepts.
+const limit = (rate: number) => Math.ceil((ADVANCE_BUDGET_MINUTES * 60_000) / rate);
 
 /** The dev clock moved by `ms`, delivered now and recorded only if delivered; else what stopped it. */
 export function advanced(
@@ -45,9 +47,10 @@ export function advanced(
   moveClock: (ms: number) => void,
   game: Pulsed,
   keep: (step: Step) => void,
+  rate: number,
 ) {
-  if (ms > ADVANCE_BUDGET_MS)
-    return `Advance: ${ms} ms is over the ${ADVANCE_BUDGET_MS} ms budget for one advance; advance less.`;
+  if (ms > limit(rate))
+    return `Advance: ${Math.floor((ms * rate) / 60_000)} game minutes is over the ${ADVANCE_BUDGET_MINUTES}-minute budget for one advance; advance less.`;
   moveClock(ms);
   const how = caughtUp(game);
   if (how !== 'ready') return `Advance: ${how}; not recorded.`;
@@ -255,7 +258,7 @@ export function replay(
   steps: Step[],
   game: Replayable,
   moveClock: (ms: number) => void,
-  budget = ADVANCE_BUDGET_MS,
+  rate: number | undefined, // the cartridge's time_policy rate; undefined: no budget (off the browser)
 ): Outcome {
   for (const [i, step] of steps.entries()) {
     if (!wellFormed(step))
@@ -268,8 +271,12 @@ export function replay(
       const name = `step ${i + 1} (advance ${step.advance})`;
       if (!Number.isSafeInteger(step.advance) || step.advance < 0)
         return { done: i, failed: `${name}: not whole milliseconds`, refused: true };
-      if (step.advance > budget)
-        return { done: i, failed: `${name}: over the ${budget} ms budget`, refused: true };
+      if (rate !== undefined && step.advance > limit(rate))
+        return {
+          done: i,
+          failed: `${name}: over the ${ADVANCE_BUDGET_MINUTES}-minute budget`,
+          refused: true,
+        };
       moveClock(step.advance);
       const after = caughtUp(game);
       if (after !== 'ready') return { done: i, failed: `${name}: ${after}` };
