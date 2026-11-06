@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: engine follow-ups (loka-vduxr.35, loka-vduxr.78, loka-wfrgk.51, loka-kgd.220)](2026-11-06-engine-followups-review.md): **CHANGES REQUIRED**
 - [Review: editor world picker and New world (loka-vduxr.65)](2026-11-05-world-picker-review.md): **APPROVE WITH NOTES**
 - [Review: Story map S2, the List view and Trace in the map slot (PR #646, loka-wfrgk.18.2)](2026-11-05-story-map-s2-review.md): **APPROVE WITH NOTES**
 - [Review: Story map S1, the story model (PR #620, loka-wfrgk.18)](2026-11-05-story-map-s1-review.md): **APPROVE WITH NOTES**
@@ -43,6 +44,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Editor E2, the three-column shell (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-review.md): **CHANGES REQUIRED**
 - [Review: Editor E2 shell, fix round and owner walk (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-fable-review.md): **APPROVE WITH NOTES**
 - [Review: dialogue warnings match Talk (loka-vduxr.32, loka-69yuw)](2026-11-05-dialogue-warning-parity-review.md): **APPROVE WITH NOTES**
+- [Review: Dialogue choice tree on the Dialogue card (loka-wfrgk.53)](2026-11-05-dialogue-choice-tree-review.md): **CHANGES REQUIRED**
 - [Review: dev cheat Set level and attribute points (loka-x6t.137 part 2)](2026-11-05-dev-set-level-review.md): **APPROVE WITH NOTES**
 - [Review: death and level bug batch (PR #623; loka-3tc7, loka-g5hh.2.11, loka-dbtxr (a))](2026-11-05-death-level-bugs-review.md): **CHANGES REQUIRED**
 - [Review: one cartridge format, drop v1 and `Topics.grants/2` (PR #635, loka-9x5y, loka-1b68q)](2026-11-05-compiler-one-format-review.md): **APPROVE WITH NOTES**

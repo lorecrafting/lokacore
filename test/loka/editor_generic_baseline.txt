@@ -41,9 +41,6 @@ bleeds.narration.delete
 bleeds.tick_every.create
 bleeds.tick_every.edit
 bleeds.tick_every.delete
-dialogues.choices.create
-dialogues.choices.edit
-dialogues.choices.delete
 emotes.abstract.create
 emotes.abstract.edit
 emotes.abstract.delete
