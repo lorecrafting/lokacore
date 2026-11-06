@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "watch_trusts_player": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Only a completed patrol writes it."
+    }
+  }
+}
