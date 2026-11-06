@@ -190,7 +190,7 @@ test('an oil pair refused for its cost after the cooldown carries no cooldown en
   w = ok(play(w, { type: 'take', item_id: e(w, 'oilcan') }));
   const ids = [e(w, 'winch'), e(w, 'oilcan')];
   w = ok(invoke(w, 'oil', ids));
-  w = { ...w, state: { ...w.state, clock: 1000 as never } };
+  w = { ...w, state: { ...w.state, clock: 1000 } };
   const view = gameView(w);
   const shown = view.inventory
     .find((i) => i.id === ids[1])!
