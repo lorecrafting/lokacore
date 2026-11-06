@@ -643,7 +643,8 @@ test('a delete takes a template only taken templates name, across folders; a row
   // Breaks: one pass over the templates missing one named only by a template it reaches later
   // (items/b sorts before npcs/z), a scripted action never owning the template it names
   // (its ref is by scripted_actions/, its file under actions/), or a facts row delete
-  // reaching for a template only the row names, a file it never deletes.
+  // reaching for a template only the row names, a file it never deletes, or an area file's
+  // extends referrer (areas/x/npcs/w) never matching its member (npcs/w).
   const { ask, dir, src, read } = await tree(t);
   const ref = (kind: string, key: string) => ({ cartridge_id: 'c', kind, key });
   const canonical = {
@@ -661,7 +662,8 @@ test('a delete takes a template only taken templates name, across folders; a row
   };
   put('populations/p.json', '{}\n');
   put('npcs/z.json', '{\n  "spawn_template": true\n}\n');
-  put('areas/x/npcs/w.json', '{\n  "spawn_template": true\n}\n');
+  put('areas/x/npcs/w.json', '{\n  "extends": "t",\n  "spawn_template": true\n}\n');
+  put('areas/x/npcs/t.json', '{\n  "spawn_template": true\n}\n');
   put('actions/s.json', '{}\n');
   put('facts.json', '{\n  "facts": {\n    "f": {}\n  }\n}\n');
   for (const k of ['b', 'm', 'r']) put(`items/${k}.json`, TEMPLATE);
@@ -670,6 +672,7 @@ test('a delete takes a template only taken templates name, across folders; a row
     return r.status === 409 ? r.body.set.map((m: { file: string }) => m.file).sort() : r.status;
   };
   assert.deepEqual(await taken('populations/p.json'), [
+    'areas/x/npcs/t.json',
     'areas/x/npcs/w.json',
     'items/b.json',
     'npcs/z.json',

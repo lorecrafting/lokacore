@@ -109,7 +109,9 @@ const read = (source: string, rel: string) => {
 };
 export type Member = { rel: string; dir: string; key: string };
 // a ref's `by` names its artifact section; a scripted action's source dir is actions/
-const own = (by: string) => by.replace(/^scripted_actions\//, 'actions/');
+// an extends referrer is its file (areas/<a>/ prefixed), an artifact one its section
+const own = (by: string) =>
+  by.replace(/^areas\/\w+\//, '').replace(/^scripted_actions\//, 'actions/');
 /** What a delete of `file` (`at`: its kind and key) takes with it in one entry, so it leaves nothing
  * dangling, and what outside that set still names a member: a transport's return leg that names it
  * back (each leg's `reverse` names the other), and each template only the set names (death.ex:121-131
