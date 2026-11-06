@@ -32,7 +32,7 @@ export const find = (q: string) =>
 export const todo = () => fetch('/__author/todo').then((r) => r.json() as Promise<Todo[]>);
 
 /** The abstract NPCs and items a map drop may extend (kernel/ts/play/write.ts `templates`). */
-export type Template = { dir: 'npcs' | 'items'; key: string; area: string | null };
+export type Template = { dir: 'npcs' | 'items'; key: string };
 export const templates = () =>
   fetch('/__author/templates').then((r) => r.json() as Promise<Template[]>);
 

@@ -187,12 +187,21 @@ test("an NPC given hp by the card's Add compiles", () => {
 
 test('a template dropped on a room makes its child there; a refused drop writes nothing; undo removes it', async () => {
   // Breaks: --extends not passed (the child lacks the parent's hp), the child left unplaced, a
-  // refused drop leaving a file, or /templates missing an area's abstract or listing a concrete NPC.
+  // refused drop leaving a file, or /templates missing an area's or an item abstract, or listing a
+  // concrete NPC.
   const tpl = 'areas/barn/npcs/goat.json';
   mkdirSync(join(src, 'areas/barn/npcs'), { recursive: true });
   const hp = { minimum: 0, maximum: 1, start: 1, gain: 0 };
   writeFileSync(join(src, tpl), JSON.stringify({ abstract: true, hp }));
-  assert.deepEqual((await ask('/templates')).told, [{ dir: 'npcs', key: 'goat', area: 'barn' }]);
+  mkdirSync(join(src, 'items'));
+  writeFileSync(join(src, 'items/sack.json'), '{ "abstract": true }');
+  writeFileSync(join(src, 'areas/barn/npcs/cow.json'), '{ "abstract": false }');
+  assert.deepEqual((await ask('/templates')).told, [
+    { dir: 'npcs', key: 'goat' },
+    { dir: 'items', key: 'sack' },
+  ]);
+  rmSync(join(src, 'items'), { recursive: true });
+  rmSync(join(src, 'areas/barn/npcs/cow.json'));
   const was = files();
   // c is in the area yard; a root room may extend any area's template
   await assert.rejects(ed.made(c, 'npcs', 'goat_1', 'goat'), /belongs to the area barn/);

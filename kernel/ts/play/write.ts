@@ -168,14 +168,16 @@ async function create(t: Tree, { kind, name, from, area, extends: up }: Sent): P
 }
 
 /** The abstract NPCs and items a drag may extend (`bin/loka new --extends`): files at the root or
- * in an area folder; the compile drops them, so /story has none. */
+ * in an area folder; the compile drops them, so /story has none.
+ * ponytail: walks and parses every npcs/items file per story change; cache by the watcher's bursts when slow. */
 const templates = (root: string) =>
   files(root).flatMap((rel) => {
     const at = placed(rel);
     if (at?.ext !== 'json' || (at.dir !== 'npcs' && at.dir !== 'items')) return [];
+    if (there(join(root, rel))?.isSymbolicLink()) return []; // read nothing outside the tree
     try {
       const doc = JSON.parse(readFileSync(join(root, rel), 'utf8'));
-      return doc?.abstract === true ? [{ dir: at.dir, key: at.key, area: at.area }] : [];
+      return doc?.abstract === true ? [{ dir: at.dir, key: at.key }] : [];
     } catch {
       return []; // mutate-skip: a half-written file is the compile's to report
     }
