@@ -43,7 +43,7 @@ before(async () => {
   );
   url = `http://localhost:${panel}/`;
   browser = await chromium.launch({ channel: 'chrome' });
-  await (await open({})).close();
+  await (await open(QUEST)).close();
   boot = 10_000; // booted: a mutant that blanks the card fails each open in seconds, inside mutate.sh's cap
 });
 after(async () => {
