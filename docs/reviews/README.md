@@ -20,6 +20,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: a death outside a fight shows the dead page, then Let go (PR #634, loka-kgd.210)](2026-11-05-offfight-death-review.md): **CHANGES REQUIRED**
 - [Review: an open conversation re-words an edited line; stale `~` map by line count (PR #625, loka-wfrgk.19)](2026-11-05-loka-wfrgk.19-review.md): **APPROVE WITH NOTES**
 - [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
+- [Review: Editor E6a, Room inspector card and the Book's add-here (PR #649, loka-wfrgk.3)](2026-11-05-e6a-room-review.md): **CHANGES REQUIRED**
 - [Review: Editor E4b, generic inspector card on rjsf 6 (PR #645, loka-wfrgk.12)](2026-11-05-e4b-generic-card-review.md): **CHANGES REQUIRED**
 - [Review: Editor E4a, edit model, schema walker, registry and strict gate (PR #642, loka-wfrgk.11)](2026-11-05-e4a-edit-model-review.md): **APPROVE WITH NOTES**
 - [Review: Editor E3b, map edits in the left column (PR #644, loka-wfrgk.7)](2026-11-05-e3b-map-edits-review.md): **CHANGES REQUIRED**
