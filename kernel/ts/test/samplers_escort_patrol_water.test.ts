@@ -75,9 +75,15 @@ test('patrol_sampler: Tobin walks to the gate, the player joins him and the roun
   const pick = (w: World, choice_id: string) => {
     const talked = talk(w, 'tobin');
     const p = patrol(talked);
-    const { quest_instance_id, attempt_id, cursor, status } = p ?? ({} as never);
     return choose(talked, choice_id, {
-      ...(p && { patrol: { quest_instance_id, attempt_id, cursor, status } }),
+      ...(p && {
+        patrol: {
+          quest_instance_id: p.quest_instance_id,
+          attempt_id: p.attempt_id,
+          cursor: p.cursor,
+          status: p.status,
+        },
+      }),
     });
   };
   let w = pick(fresh, 'start');
