@@ -19,6 +19,8 @@ export type Context = {
   hours?: number; // the calendar's hours_per_day, when the cartridge has one
   room?: unknown; // the NPC's own room: an added hour's first value
   put?: (field: string, value: unknown) => void; // writes a field and commits it
+  hidden?: string[]; // the story model's (kernel/ts/play/story_counts.ts)
+  unlinkable?: Record<string, string>;
 };
 const context = (p: FieldProps) => p.registry.formContext as Context;
 

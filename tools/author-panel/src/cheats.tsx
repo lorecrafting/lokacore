@@ -1,4 +1,4 @@
-// The panel's two dev-only forms (docs/system/cartridge.md#author-preview).
+// The panel's dev-only forms (docs/system/cartridge.md#author-preview).
 import { useState } from 'react';
 import type { State } from './book.ts';
 import { Button } from './components/ui/button.tsx';
@@ -62,6 +62,23 @@ export function SetFact({ state, send }: { state?: State; send: Send }) {
       />
       <Button type="submit" variant="secondary" disabled={!state || !fact || !value}>
         Set fact
+      </Button>
+    </form>
+  );
+}
+
+export function SetLevel({ state, send }: { state?: State; send: Send }) {
+  const [level, setLevel] = useState('');
+  const [attribute, setAttribute] = useState('');
+  const [points, setPoints] = useState('');
+  const sent = () => send({ op: 'set_level', level: Number(level), points: attribute ? { [attribute]: Number(points) } : {} });
+  return (
+    <form className="mt-2 flex gap-2" onSubmit={(e) => (e.preventDefault(), sent())}>
+      <Input aria-label="Level" placeholder="level" inputMode="numeric" value={level} onChange={(e) => setLevel(e.target.value)} />
+      <Input aria-label="Attribute key" placeholder="attribute key" value={attribute} onChange={(e) => setAttribute(e.target.value)} />
+      <Input aria-label="Attribute points" placeholder="points" inputMode="numeric" value={points} onChange={(e) => setPoints(e.target.value)} />
+      <Button type="submit" variant="secondary" disabled={!state || !level || (!!attribute && !points)}>
+        Set level
       </Button>
     </form>
   );

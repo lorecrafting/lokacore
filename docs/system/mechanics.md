@@ -46,11 +46,13 @@ and trusted elapsed updates; world time starts at selection.
 
 ## dev@1 (`kernel/ts/src/mechanics/dev/rule.ts`)
 
-The author preview's `dev_go_to_room` and `dev_set_fact`, with their refusals, in
+The author preview's `dev_go_to_room`, `dev_set_fact` and `dev_set_level`, with their refusals, in
 [cartridge.md](cartridge.md#author-preview). `stepDev` alone reaches the rule; `step` answers
 `permission_denied`, and only a host with `dev` set calls `stepDev`. Accepted: `dev_moved`
-(`entity.transfer`, `entity_entered_room`, no line, no entry sight) or `dev_fact_set` (the fact's
-ordinary assignment). Composes `movement` for the room event.
+(`entity.transfer`, `entity_entered_room`, no line, no entry sight), `dev_fact_set` (the fact's
+ordinary assignment) or `dev_level_set` (one `levelling.set`, after the resource maxima settle;
+no levelling line, no `level_reached`). Composes `movement` for the room event and `levelling` for
+the row.
 
 ## movement@1 (`kernel/ts/src/mechanics/movement/rule.ts`)
 

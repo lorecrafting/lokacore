@@ -53,6 +53,8 @@ const story = (outline: Story['outline']): Story => ({
   map: [],
   words: {},
   choices: {},
+  hidden: [],
+  unlinkable: {},
   files: {},
 });
 const planted = story({

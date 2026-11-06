@@ -1,5 +1,5 @@
 // The story model's counts (kernel/ts/play/story.ts): Pacing's words by node and Knowledge's
-// choices by dialogue (docs/design/editor-map-and-story-rulings.md S2).
+// choices by dialogue (docs/design/editor-map-and-story-rulings.md S2); the story cards' gates' facts.
 import { isObj, type Obj } from '../src/content/cartridge_refs.ts';
 
 // Every string in a definition: among them, the text keys it names.
@@ -32,4 +32,20 @@ export const choiceCounts = (c: Obj) =>
       r,
       Object.keys(d.choices ?? {}).length,
     ]),
+  );
+
+// ponytail: by key, as a source names them; two areas' same-key skills or dialogues merge (upgrade: refs)
+const short = (r: string) => r.slice(r.lastIndexOf('/') + 1);
+/** The hidden skills' keys (skills.ex hidden/2), as a choice's `skill.acquire` step names them. */
+export const hiddenSkills = (c: Obj) =>
+  Object.entries((c.skills ?? {}) as Record<string, Obj>)
+    .filter(([, s]) => s.hidden === true)
+    .map(([r]) => short(r));
+/** Each dialogue a then cannot enter, by key, with the part that refuses it (dialogue_links.ex:388). */
+export const unlinkable = (c: Obj) =>
+  Object.fromEntries(
+    Object.entries((c.dialogues ?? {}) as Record<string, Obj>).flatMap(([r, d]) => {
+      const part = ['keyword', 'quest', 'riddle'].find((f) => d[f] !== undefined);
+      return part ? [[short(r), part]] : [];
+    }),
   );

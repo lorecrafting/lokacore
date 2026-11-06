@@ -15,7 +15,7 @@ import { artifactBytes, compiled } from './compiled.ts';
 import { contentGraph, reachReport } from './reach.ts';
 import { placed } from './guard.ts';
 import { files, todo, type Todo } from './todo.ts';
-import { choiceCounts, keysIn, wordsByNode } from './story_counts.ts';
+import { choiceCounts, hiddenSkills, keysIn, unlinkable, wordsByNode } from './story_counts.ts';
 import { refString } from '../src/runtime/decision.ts';
 
 type Dev = { canonical: string; sha256: string };
@@ -135,6 +135,8 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     map: rooms(source, c, refs),
     words: wordsByNode(defs, (c.text ?? {}) as Record<string, unknown>),
     choices: choiceCounts(c),
+    hidden: hiddenSkills(c), // the cards' add menus and links (allowed.ts, link.ts)
+    unlinkable: unlinkable(c),
   };
 }
 

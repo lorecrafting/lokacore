@@ -47,6 +47,8 @@
         "room": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
         "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
         "value": { "$ref": "delta.schema.json#/$defs/FactValue" },
+        "level": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+        "allocated": { "$ref": "command.schema.json#/$defs/DevAllocated" },
         "scene": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },

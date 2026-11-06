@@ -5,7 +5,9 @@ import type { Change, Story, useDiagnostics } from './author.ts';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card.tsx';
 import { World } from './edit/cards/World.tsx';
 import { Generic } from './edit/Generic.tsx';
+import { Dialogue } from './edit/cards/Dialogue.tsx';
 import { Entity } from './edit/cards/Entity.tsx';
+import { Quest } from './edit/cards/Quest.tsx';
 import { Room } from './edit/cards/Room.tsx';
 import { fileOf, places, type Selection } from './shell.ts';
 
@@ -27,7 +29,8 @@ export function Inspector({ sel, story, diag, edit, offer }: Props) {
     );
   const ref = places(sel, story?.graph.nodes ?? []).inspector?.ref;
   const rel = fileOf(sel, ref, story?.files);
-  const context = { kind: sel.kind, key: sel.key, nodes: story?.graph.nodes ?? [], edit };
+  const { hidden, unlinkable } = story ?? {};
+  const context = { kind: sel.kind, key: sel.key, nodes: story?.graph.nodes ?? [], edit, hidden, unlinkable };
   const count = (rows?: Record<string, unknown[]>) => (ref && rows?.[ref]?.length) || 0;
   const unreached =
     !!ref && Object.values(story!.report.unreachable).some((refs) => refs.includes(ref));
@@ -90,6 +93,10 @@ function Editor({ rel, offer, ...props }: Parameters<typeof Room>[0]) {
     <Room key={rel} rel={rel} offer={offer} {...props} />
   ) : /(^|\/)(npcs|items)\/[^/]+\.json$/.test(rel) ? (
     <Entity key={rel} rel={rel} {...props} />
+  ) : /(^|\/)quests\/[^/]+\.json$/.test(rel) ? (
+    <Quest key={rel} rel={rel} {...props} />
+  ) : /(^|\/)dialogues\/[^/]+\.json$/.test(rel) ? (
+    <Dialogue key={rel} rel={rel} {...props} />
   ) : worldFile(rel) ? ( // mutate-skip: draw; the choice is worldFile, pinned in card.test.ts
     <World key={rel} rel={rel} {...props} />
   ) : (

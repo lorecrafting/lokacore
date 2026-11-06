@@ -1,4 +1,4 @@
-// size: allow 450, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
+// size: allow 400, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -157,10 +157,12 @@ export function hidden(
 export const choices = (field: string, nodes: { ref: string; kind: string }[]) =>
   nodes.filter((n) => n.kind === field).map((n) => n.ref.slice(n.ref.lastIndexOf('/') + 1));
 
-/** The node kind a reference field at `path` picks: its last named step (`shop.offers.0.item`). */
+/** The node kind a reference field at `path` picks: its last named step, parent first (`patrol.route.0`). */
 export function pickKind(path: (string | number)[]) {
-  const name = [...path].reverse().find((s) => typeof s === 'string' && !/^\d+$/.test(s));
-  return Object.hasOwn(PICK_NAMES, String(name)) ? PICK_NAMES[String(name)] : String(name ?? '');
+  const named = path.filter((s) => typeof s === 'string' && !/^\d+$/.test(s)).map(String);
+  const name = named.at(-1) ?? '';
+  const pick = [`${named.at(-2)}.${name}`, name].find((n) => Object.hasOwn(PICK_NAMES, n));
+  return pick ? PICK_NAMES[pick] : name;
 }
 
 /** What a world file's reference field names, by its field (a transport's `reverse` is a transport). */
@@ -382,6 +384,9 @@ export function added(
   return value === undefined ? undefined : { ...doc, [f]: value };
 }
 
+/** A field `added` seeds into the draft only: written with the author's pick (a targetless offer: quests.ex:63-66). */
+export const awaits = (def: string, f: string) => `${def}.${f}` === 'source.QuestDefinition.offer';
+
 /** `doc` without field `f`. */
 export const removed = (doc: Obj, f: string): Obj => {
   const { [f]: _gone, ...rest } = doc;
@@ -392,55 +397,4 @@ export const removed = (doc: Obj, f: string): Obj => {
 export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
   a.room === key && menu.includes(a.kind) ? a.kind : undefined;
 
-// Each field's owning capabilities, as UNDECLARED_CAPABILITY checks them (content/); a field it omits needs none.
-const VARIANT = 'description_variant';
-const OWNERS: Record<string, string> = {
-  'npcs.ask': 'speech topic',
-  'npcs.attack': 'combat', // world.combat needs it (combat.ex requirements); NEEDS has the rest
-  'npcs.cues': 'sense_cue',
-  'npcs.daily_schedule': 'schedule',
-  'npcs.description_variants': VARIANT,
-  'npcs.name_variants': VARIANT,
-  'npcs.shop': 'commerce',
-  'items.affects': 'attribute', // derived.ex owner/2
-  'items.bandage': 'bleed combat skill food', // bleed.ex gate/1
-  'items.cues': 'sense_cue',
-  'items.description_variants': VARIANT,
-  'items.edible': 'food',
-  'items.fuel': 'light',
-  'items.name_variants': VARIANT,
-  'items.readable': 'readable',
-  'items.room_line_variants': VARIANT,
-  'items.slot': 'equipment',
-  'items.tags': 'tag',
-  'items.weapon': 'skill', // its skill is a skill definition (skills.ex weapon)
-  'rooms.cues': 'sense_cue',
-  'rooms.dark': 'light',
-  'rooms.dark_description': 'light',
-  'rooms.details': 'inspectable_detail',
-  'rooms.site': 'construction',
-  'rooms.tags': 'tag',
-  'rooms.variants': VARIANT,
-};
-
-// Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
-const NEEDS: Record<string, (doc: Obj, world: Obj) => boolean> = {
-  'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
-  'npcs.daily_schedule': (doc) => doc.spawn_template !== true, // calendar.ex template_schedules
-  'items.weapon': (doc) => doc.slot === 'wield', // skills.ex weapon
-};
-
-/** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs
- * the definition (`doc`) and cartridge.json's `world` meet; others would not compile. */
-export const allowed = (
-  kind: string,
-  menu: string[],
-  caps: object,
-  doc: Obj = {},
-  world: Obj = {},
-) =>
-  menu.filter((f) => {
-    const owners = OWNERS[`${kind}.${f}`]?.split(' ') ?? [];
-    const need = NEEDS[`${kind}.${f}`];
-    return owners.every((o) => Object.hasOwn(caps, o)) && (!need || need(doc, world));
-  });
+export { allowed } from './allowed.ts';
