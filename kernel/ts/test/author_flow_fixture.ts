@@ -39,7 +39,7 @@ export const edges: Edge[] = [
   { from: d3, to: d1, path: '/then' },
   { from: r1, to: f, path: '/when', op: 'fact_compare' },
 ];
-export const outline: Story['outline'] = {
+export const outline = {
   parts: ['Arrival'],
   beats: [
     { part: 0, n: 1, title: 'Gate', status: 'built', nodes: [q, d1] },
@@ -47,7 +47,7 @@ export const outline: Story['outline'] = {
   ],
   unpaid: [],
   unseeded: [],
-};
+} satisfies Story['outline'];
 export const planted = model([q, d1, d2, d3, r1, thera, f], edges, outline);
 export const OPEN = { fold: [] };
 export const line = (fl: Flow, a: string, b: string) =>
