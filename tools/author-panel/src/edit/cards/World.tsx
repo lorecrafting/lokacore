@@ -9,12 +9,17 @@ import { customizeValidator } from '@rjsf/validator-ajv8';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import {
   FORM_DEFAULTS,
+  ROOTS,
   addable,
+  entered,
   fieldErrors,
   hidden,
   pickable,
   refuseKey,
   refusePick,
+  rootNames,
+  rootStamp,
+  worldFile,
 } from '../../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../../kernel/ts/play/ui_schema.ts';
 import type { useDiagnostics } from '../../author.ts';
@@ -30,19 +35,11 @@ type Diag = ReturnType<typeof useDiagnostics>;
 type Named = Record<string, string[]>; // resource and attribute keys, from the root files
 type Props = { rel: string; context: Context; diag: Diag };
 type Entries = Record<string, Record<string, unknown>>;
-// a new entry's least fields (the compiler's ResourceSpec and AttributeSpec), all numbers
-const ROOTS: { rel: string; field: string; blank: Record<string, number> }[] = [
-  { rel: 'resources.json', field: 'resources', blank: { minimum: 0, maximum: 0, start: 0, gain: 0 } },
-  { rel: 'attributes.json', field: 'attributes', blank: { start: 0 } },
-];
-
-/** The world files the card opens: the root three, or one population, transport or barrier. */
-export const WORLD = /^(cartridge|resources|attributes)\.json$|(^|\/)(populations|transports|barriers)\/[^/]+\.json$/;
 
 export function World({ rel, context, diag }: Props) {
   const named = useNamed(diag);
-  if (!/^(cartridge|resources|attributes)\.json$/.test(rel))
-    return <Settings rel={rel} context={context} diag={diag} named={named} />;
+  if (!worldFile(rel, true))
+    return <Settings rel={rel} context={context} diag={diag} named={named} />; // mutate-skip: draw; the choice is worldFile(rel, true), pinned in card.test.ts
   return (
     <div className="grid gap-3" aria-label="World card">
       <Settings rel="cartridge.json" context={context} diag={diag} named={named} />
@@ -56,27 +53,23 @@ export function World({ rel, context, diag }: Props) {
 /** The resource and attribute keys the root files hold now (refetched after a write to either). */
 function useNamed(diag: Diag): Named {
   const [named, setNamed] = useState<Named>({});
-  const stamp = diag.changes
-    .filter((c) => ROOTS.some((r) => r.rel === c.file))
-    .map((c) => c.sha256)
-    .join();
+  const stamp = rootStamp(diag.changes);
   useEffect(() => {
-    const keys = async ({ rel, field }: (typeof ROOTS)[number]) => {
+    const doc = async ({ rel }: (typeof ROOTS)[number]) => {
       const r = await fetch(`/__author/source?file=${rel}`);
-      const doc = r.ok ? JSON.parse((await r.json()).bytes) : {};
-      return [field.slice(0, -1), Object.keys(doc[field] ?? {})];
+      return r.ok ? JSON.parse((await r.json()).bytes) : {};
     };
-    void Promise.all(ROOTS.map(keys)).then((e) => setNamed(Object.fromEntries(e)));
+    void Promise.all(ROOTS.map(doc)).then((docs) => setNamed(rootNames(docs)));
   }, [stamp]);
-  return named;
+  return named; // mutate-skip: the hook's result; its keys are rootNames', pinned in card.test.ts
 }
 
 /** A reference field with a known kind: offers its keys and refuses any other at the field. */
 function Pick(p: FieldProps) {
   const { nodes, named } = p.registry.formContext as Context & { named: Named };
   const [text, setText] = useState<string>();
-  const pick = pickable(p.fieldPathId.path, nodes, named);
-  if (!pick || (p.formData !== undefined && typeof p.formData !== 'string'))
+  const pick = pickable(p.fieldPathId.path, nodes, named, p.formData);
+  if (!pick)
     return <fields.DefinitionRef {...p} />; // a free field, or a global ref
   const shown = text ?? p.formData ?? '';
   const refused = refusePick(pick, shown);
@@ -94,7 +87,7 @@ function Pick(p: FieldProps) {
           // only a refused key is held here: an accepted one is the form's, so Undo or a reload shows
           const no = refusePick(pick, e.target.value);
           setText(no ? e.target.value : undefined);
-          if (!no) p.onChange(e.target.value || undefined, p.fieldPathId.path);
+          if (!no) p.onChange(entered(e.target.value), p.fieldPathId.path);
         }}
         onBlur={(e) => p.onBlur(p.fieldPathId.$id, e.target.value)}
       />
@@ -113,7 +106,7 @@ const picking = { ...fields, DefinitionRef: Pick };
 function Settings({ rel, context, diag, named }: Props & { named: Named }) {
   const card = useCard(rel, diag);
   const { saved, draft } = card;
-  if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
+  if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>; // mutate-skip: a loading line, draw only
   const defs = (saved.schema as { $defs: never }).$defs;
   // an empty registry: the card's own fields draw as the generic walker draws them
   const ui = hidden(uiSchema(saved.dir, saved.schema as never, defs, {}), saved.dir, registry, draft, card.revealed);
@@ -149,7 +142,7 @@ function Keyed({ rel, field, blank, diag }: (typeof ROOTS)[number] & { diag: Dia
   const card = useCard(rel, diag);
   const [key, setKey] = useState('');
   const [refused, setRefused] = useState<string>();
-  if (!card.saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
+  if (!card.saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>; // mutate-skip: a loading line, draw only
   const doc = (card.draft ?? {}) as Record<string, Entries>;
   const rows = doc[field] ?? {};
   const errors = (fieldErrors((diag.diagnostics ?? []) as never, rel)[field] ?? {}) as Record<string, any>;
@@ -163,7 +156,7 @@ function Keyed({ rel, field, blank, diag }: (typeof ROOTS)[number] & { diag: Dia
     const { [k]: _gone, ...rest } = rows;
     (put(rest), card.commit());
   };
-  const one = field.slice(0, -1);
+  const one = field.slice(0, -1); // mutate-skip: a label word (resources: resource)
   return (
     <section className="grid gap-2 px-3 text-xs" aria-label={rel}>
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
@@ -216,7 +209,7 @@ function Row({ id, row, blank, errors, commit, remove, set }: RowProps) {
               className="h-7 text-xs"
               aria-invalid={!!errors?.[f]}
               value={String(row[f] ?? '')}
-              onChange={(e) => set({ ...row, [f]: e.target.value === '' ? undefined : Number(e.target.value) })}
+              onChange={(e) => set({ ...row, [f]: entered(e.target.value, true) })}
             />
             {errors?.[f] ? <Refusal>{errors[f].__errors.join(' ')}</Refusal> : null}
           </label>

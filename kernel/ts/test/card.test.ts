@@ -16,6 +16,7 @@ import {
   choices,
   diff,
   editable,
+  entered,
   fieldErrors,
   hidden,
   pickable,
@@ -23,7 +24,11 @@ import {
   rebase,
   refuseKey,
   refusePick,
+  rootNames,
+  rootStamp,
+  ROOTS,
   start,
+  worldFile,
 } from '../play/card.ts';
 import { change } from '../play/edit_model.ts';
 import { json } from '../play/write.ts';
@@ -253,6 +258,7 @@ test('a World picker refuses an unknown id at the field; a new entry key must be
     [undefined, 'no resource gold', undefined],
   );
   assert.equal(pickable(['title'], nodes, {}), undefined);
+  assert.equal(pickable(['room'], nodes, {}, { global: 'x' }), undefined); // a global ref's object
   assert.deepEqual(
     [refuseKey('gold', { coin: {} }), refuseKey('gold', { gold: {} }), refuseKey('Gold', {})],
     [undefined, 'already gold', 'a key is up to 64 lowercase letters, digits and _'],
@@ -261,6 +267,38 @@ test('a World picker refuses an unknown id at the field; a new entry key must be
     [refuseKey('g', {}), refuseKey('g'.repeat(64), {}), refuseKey('g'.repeat(65), {})],
     [undefined, undefined, 'a key is up to 64 lowercase letters, digits and _'],
   );
+});
+
+// Break: the World card opens the wrong files (a room, or a nested population folder missed), reads
+// its picker's keys from the wrong field, misses a root-file write (stale keys) or refetches on any
+// write, writes '' into an emptied field, or a new entry starts at an invented non-zero amount.
+test('the World card opens the world files, keys its pickers from the root files, and enters typed values', () => {
+  assert.deepEqual(
+    [
+      'cartridge.json',
+      'areas/a/populations/goblins.json',
+      'transports/boat.json',
+      'rooms/hut.json',
+      'npcs/cartridge.json',
+    ].map((r) => worldFile(r)),
+    [true, true, true, false, false],
+  );
+  assert.deepEqual(
+    [worldFile('resources.json', true), worldFile('barriers/gate.json', true)],
+    [true, false],
+  );
+  assert.deepEqual(rootNames([{ resources: { coin: {} } }, {}]), {
+    resource: ['coin'],
+    attribute: [],
+  });
+  const write = (file: string) => ({ file, sha256: file.length.toString() });
+  assert.equal(rootStamp([write('rooms/hut.json')]), '');
+  assert.notEqual(rootStamp([write('attributes.json')]), '');
+  assert.deepEqual(
+    [entered(''), entered('a'), entered('', true), entered('7', true)],
+    [undefined, 'a', undefined, 7],
+  );
+  assert.ok(ROOTS.every((r) => Object.values(r.blank).every((v) => v === 0)));
 });
 
 // Break: a reference field offers another kind's keys, or the ref's cartridge prefix; a `.scene`

@@ -183,9 +183,11 @@ export function pickable(
   path: Step[],
   nodes: { ref: string; kind: string }[],
   named: Record<string, string[]>,
+  value?: unknown,
 ) {
   const kind = PICKS[path.filter((s) => typeof s === 'string').at(-1) ?? ''];
-  if (!kind) return undefined;
+  // a value that is not a key (a global ref's object) keeps its own field
+  if (!kind || (value !== undefined && typeof value !== 'string')) return undefined;
   const keys = named[kind] ?? choices(kind, nodes);
   return { kind, keys: kind === 'resource' ? [...new Set([...POOLS, ...keys])] : keys };
 }
@@ -203,6 +205,41 @@ export function refuseKey(key: string, taken: Record<string, unknown>) {
     return 'a key is up to 64 lowercase letters, digits and _';
   return Object.hasOwn(taken, key) ? `already ${key}` : undefined;
 }
+
+/** The World card's keyed root files, each new entry's least fields (ResourceSpec, AttributeSpec) at 0. */
+export const ROOTS: { rel: string; field: string; blank: Record<string, number> }[] = [
+  {
+    rel: 'resources.json',
+    field: 'resources',
+    blank: { minimum: 0, maximum: 0, start: 0, gain: 0 },
+  },
+  { rel: 'attributes.json', field: 'attributes', blank: { start: 0 } },
+];
+
+/** A file the World card opens: a root file (`root`), or one population, transport or barrier. */
+export const worldFile = (rel: string, root = false) =>
+  /^(cartridge|resources|attributes)\.json$/.test(rel) ||
+  (!root && /(^|\/)(populations|transports|barriers)\/[^/]+\.json$/.test(rel));
+
+/** The resource and attribute keys the ROOTS docs (in order) hold: `{resource: [...], attribute: [...]}`. */
+export const rootNames = (docs: unknown[]): Record<string, string[]> =>
+  Object.fromEntries(
+    ROOTS.map(({ field }, i) => [
+      field.slice(0, -1),
+      Object.keys(((docs[i] ?? {}) as Obj)[field] ?? {}),
+    ]),
+  );
+
+/** What changes when a ROOTS file is written, so the card refetches its keys then only. */
+export const rootStamp = (changes: { file: string; sha256: string }[]) =>
+  changes
+    .filter((c) => ROOTS.some((r) => r.rel === c.file))
+    .map((c) => c.sha256)
+    .join();
+
+/** A typed field's value: an emptied field is unset, a number field's text a number. */
+export const entered = (text: string, number = false) =>
+  text === '' ? undefined : number ? Number(text) : text;
 
 const opOf = (branch: Obj): unknown => (branch.properties as any)?.op?.const;
 const typeOf = (v: unknown) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v);
