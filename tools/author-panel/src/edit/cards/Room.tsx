@@ -2,7 +2,7 @@
 // Book, its exits take the map's edits, its mechanics are added (here or from the Book) and removed;
 // every write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
 import { Fragment, type ReactNode, useEffect } from 'react';
-import type { FieldProps } from '@rjsf/utils';
+import type { FieldProps, UiSchema } from '@rjsf/utils';
 import {
   addable,
   addedHere,
@@ -74,7 +74,7 @@ export function Room({ rel, context, diag, offer }: Props) {
       <Words draft={draft} context={context} fields={['name', 'description']} />
       <Exits room={context.key} exits={draft.exits ?? {}} />
       <Mechanics card={card} menu={menu} add={add} />
-      <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} />
+      <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} details />
     </div>
   );
 }
@@ -148,6 +148,12 @@ export function Mechanics({
   );
 }
 
+/** A room's details, each folded (templates.tsx Folded). */
+const folded = (at: UiSchema | undefined): UiSchema => ({
+  ...at,
+  additionalProperties: { ...at?.additionalProperties, 'ui:ObjectFieldTemplate': Folded },
+});
+
 /** The other fields: the generic form, with the card's `own` fields (drawn above) hidden. */
 export function RoomForm({
   rel,
@@ -158,12 +164,14 @@ export function RoomForm({
   own = OWN,
   blocks = {},
   extra = {},
+  details = false,
 }: Omit<Props, 'offer'> & {
   card: Card;
   defs: Record<string, never>;
   own?: string[];
   blocks?: Record<string, string>; // a field drawn by its block (fields.tsx), when present or added
   extra?: Record<string, (p: FieldProps) => ReactNode>; // a field the card draws itself, by its name
+  details?: boolean; // the Room card's details: folded, and a new one filled (detailed)
 }) {
   const saved = card.saved!;
   const walked = uiSchema(saved.dir, saved.schema as never, defs, {});
@@ -172,14 +180,12 @@ export function RoomForm({
   // a union-rooted kind (a scene) draws its branch's uiSchema, not the root's (rjsf MultiSchemaField)
   for (const at of [ui, ...(ui.anyOf ?? [])]) for (const f of own) at[f] = HIDE;
   for (const f of Object.keys(extra)) ui[f] = { ...ui[f], 'ui:field': f }; // its items' widgets kept
-  ui.details = {
-    ...ui.details,
-    additionalProperties: { ...ui.details?.additionalProperties, 'ui:ObjectFieldTemplate': Folded },
-  };
+  if (details) ui.details = folded(ui.details);
+  const was = (card.draft ?? saved.doc) as Doc;
   return (
     <CardForm
       rel={rel}
-      card={{ ...card, change: (d) => card.change(detailed(saved.doc as Doc, d as Doc, defs)) }}
+      card={details ? { ...card, change: (d) => card.change(detailed(was, d as Doc, defs)) } : card}
       context={context}
       diag={diag}
       ui={ui}

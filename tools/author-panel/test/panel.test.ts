@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 740, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 745, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFileSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -649,6 +649,7 @@ test('palette New and Delete send the starter and the selected file; refusals sh
   await run('Delete the selected definition', 2);
   await page.route('**/__author/source?file=*', (r) => r.fulfill({ status: 404, json: {} }));
   await run('Delete the selected definition', 3);
+  await run('New outline', 4); // one outline per world: no key asked
   const file = 'quests/carry_letter.json';
   const was = createHash('sha256')
     .update(readFileSync(join(dir, 'showcase', file)))
@@ -656,8 +657,9 @@ test('palette New and Delete send the starter and the selected file; refusals sh
   assert.deepEqual(sent, [
     ['/__author/new', { kind: 'rooms', name: 'zz' }],
     ['/__author/delete', { file, was }],
+    ['/__author/new', { kind: 'outline', name: 'outline' }],
   ]);
-  assert.deepEqual(told, ['refused here', 'refused here', `${file}: not found`]);
+  assert.deepEqual(told, ['refused here', 'refused here', `${file}: not found`, 'refused here']);
   assert.deepEqual(asked, ['New room key']); // the starter is the plural dir
   await page.close();
 });

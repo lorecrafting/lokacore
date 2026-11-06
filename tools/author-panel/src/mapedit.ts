@@ -202,14 +202,17 @@ const beatOf = (doc: Outline, part: number, n: number) => {
 // a beat's n is unique across the outline: readOutline (kernel/ts/play/story.ts) refuses a repeat
 const addBeat = (s: Run, part: number, n: number) =>
   s.change<Outline>('outline.json', (doc) => {
-    if (!Number.isInteger(n)) no(`a beat's number is a whole number, not ${n}`);
+    if (!Number.isInteger(n) || n < 1) no(`a beat's number is a whole number from 1, not ${n}`);
     if (doc.parts.some((p) => p.beats.some((b) => b.n === n))) no(`outline.json already has beat ${n}`);
-    return [{ path: ['parts', part, 'beats', partOf(doc, part).length], value: { n } }];
+    const beats = partOf(doc, part);
+    const j = beats.findIndex((b) => b.n > n); // in number order, as play reads them
+    return [{ path: ['parts', part, 'beats'], value: beats.toSpliced(j < 0 ? beats.length : j, 0, { n }) }];
   });
 const titleBeat = (s: Run, part: number, n: number, title: string) =>
   s.change<Outline>('outline.json', (doc) => {
     const path = [...beatOf(doc, part, n), 'title'];
-    return [title ? { path, value: title } : { path, delete: true }];
+    const had = partOf(doc, part).some((b) => b.n === n && 'title' in b);
+    return title ? [{ path, value: title }] : had ? [{ path, delete: true }] : []; // none: nothing to remove
   });
 const dropBeat = (s: Run, part: number, n: number) =>
   s.change<Outline>('outline.json', (doc) => [{ path: beatOf(doc, part, n), delete: true }]);

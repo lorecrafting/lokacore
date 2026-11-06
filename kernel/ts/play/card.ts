@@ -1,4 +1,4 @@
-// size: allow 450, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
+// size: allow 450, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts, the room details' in room_card.ts
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -342,17 +342,25 @@ const t = () => ({ prose: '~' });
 // a `~` per exit direction: every one out of an area room needs a key (population.ex:139, :149), others are let be
 const away = () =>
   Object.fromEntries(['north', 'south', 'east', 'west', 'up', 'down'].map((d) => [d, t()]));
+// keyed by definition and field, as `awaits` is: an item's or a room's field of the same name is not an NPC's
 const SEEDS: Record<string, (doc: Obj) => unknown> = {
-  hp: () => ({ minimum: 0, maximum: 20, start: 20, gain: 5 }),
-  ambient: () => [{ every: 1, lines: [t()] }], // an NPC set has exactly one of lines or emotes (emotes.ex:52)
-  pack: () => ({
+  'source.NpcDefinition.hp': () => ({ minimum: 0, maximum: 20, start: 20, gain: 5 }),
+  // a set has exactly one of lines or emotes (emotes.ex:52)
+  ...Object.fromEntries(
+    ['Npc', 'Item', 'Room'].map((k) => [
+      `source.${k}Definition.ambient`,
+      () => [{ every: 1, lines: [t()] }],
+    ]),
+  ),
+  'source.PopulationPlan.pack': () => ({
     flight_below_percent: 1,
     flight_fare: 0,
     narration: { helper_joined: t(), enemy_fled: away(), primary_changed: t(), pack_withdrew: t() },
   }),
-  sight: () => ({ delay: 1, narration: away() }),
+  'source.PopulationPlan.sight': () => ({ delay: 1, narration: away() }),
   // one rank per level: growth.length + 1 (skills.ex:107-108)
-  ranks: (doc) => ((doc.growth ?? []) as unknown[]).concat([0]).map(() => ({ name: t() })),
+  'source.SkillDefinition.ranks': (doc) =>
+    ((doc.growth ?? []) as unknown[]).concat([0]).map(() => ({ name: t() })),
 };
 
 /** `doc` with field `f` of definition `def` at its least value; undefined when present or the author must choose it. */
@@ -364,27 +372,9 @@ export function added(
 ): Obj | undefined {
   if (Object.hasOwn(doc, f)) return undefined; // a stale menu never overwrites a present field
   const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
-  const value = node && (SEEDS[f]?.(doc) ?? minimal(node, defs));
+  const value =
+    node && (SEEDS[`${def.replace(/^partial\./, '')}.${f}`]?.(doc) ?? minimal(node, defs));
   return value === undefined ? undefined : { ...doc, [f]: value };
-}
-
-/** `doc` with each detail the saved room lacks given what InspectableDetail requires and no word
- * invented (loka-wfrgk.76): a `~` description, and its key as its one alias once the key is one
- * (starters/templates.ex:164 writes `aliases: [name]`); rjsf's `newKey` placeholder is not. */
-export function detailed(saved: Obj, doc: Obj, defs: Record<string, Obj>): Obj {
-  const was = plain(saved.details) ? saved.details : {};
-  if (!plain(doc.details)) return doc;
-  const alias = new RegExp(defs.Alias.pattern as string);
-  const fill = (k: string, d: Obj) => ({
-    ...d,
-    description: d.description ?? { prose: '~' },
-    ...(!(d.aliases as unknown[] | undefined)?.length && alias.test(k) ? { aliases: [k] } : {}),
-  });
-  const each = Object.entries(doc.details).map(([k, d]) => [
-    k,
-    Object.hasOwn(was, k) || !plain(d) ? d : fill(k, d),
-  ]);
-  return { ...doc, details: Object.fromEntries(each) };
 }
 
 /** The definition `doc` of `kind` is (`source.items` → `source.ItemDefinition`): the generated
@@ -442,3 +432,4 @@ export const cardMenu = (
       )
     : [];
 export * from './world_card.ts';
+export * from './room_card.ts';

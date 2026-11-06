@@ -1,4 +1,4 @@
-// size: allow 748, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 738, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -14,7 +14,6 @@ import {
   added,
   addedHere,
   definitionOf,
-  detailed,
   allowed,
   cardMenu,
   apart,
@@ -488,6 +487,10 @@ test('a field is added once (hp at the sampler pool), removed alone, added here 
   const hp = { minimum: 0, maximum: 20, start: 20, gain: 5 };
   assert.deepEqual(added({}, 'hp', defs, 'source.NpcDefinition'), { hp });
   assert.equal(added({}, 'hp', defs, R), undefined); // no room hp
+  assert.deepEqual(added({}, 'hp', defs, 'partial.source.NpcDefinition'), { hp }); // an abstract NPC too
+  // a seed is the NPC's field, not every field of its name (loka-wfrgk.84)
+  const other = { ...defs, 'source.X': { properties: { hp: { type: 'integer', minimum: 3 } } } };
+  assert.deepEqual(added({}, 'hp', other, 'source.X'), { hp: 3 });
   assert.deepEqual(removed(doc, 'dark'), { name: 'room.a.name' });
   assert.equal(addedHere({ kind: 'dark', room: 'lane' }, 'lane', ['dark']), 'dark');
   assert.equal(addedHere({ kind: 'dark', room: 'well' }, 'lane', ['dark']), undefined);
@@ -732,17 +735,4 @@ test('a reference picker takes the kind its field names and refuses an unknown i
   assert.equal(refusePick(items, 'rope'), undefined);
   assert.equal(refusePick(items, ''), undefined); // cleared: the field is removed, not refused
   assert.equal(refusePick({ kind: 'fact', keys: [] }, 'any'), undefined); // no keys known: free text
-});
-
-// Break: a detail added on the Room card stays refused (InspectableDetail requires aliases and a
-// description; the description's Book edit is "not on this page"), or a saved one is rewritten
-// (loka-wfrgk.76). rjsf's placeholder key is no alias, so `newKey` gets only the `~`.
-test('a new room detail takes a `~` description and its key as alias; a saved one is kept', () => {
-  const cleft = { aliases: ['cleft'], description: { prose: 'k' } };
-  const doc = { details: { cleft: { aliases: [] }, newKey: {}, well: { aliases: [] } } };
-  assert.deepEqual(detailed({ details: { cleft } }, doc, defs).details, {
-    cleft: { aliases: [] },
-    newKey: { description: { prose: '~' } },
-    well: { aliases: ['well'], description: { prose: '~' } },
-  });
 });
