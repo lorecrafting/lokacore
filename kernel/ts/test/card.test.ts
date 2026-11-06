@@ -577,8 +577,7 @@ test("an NPC's and an item's add menus offer only fields every owning capability
   ]);
   assert.deepEqual(allowed('items', item, caps, { bandage: {} }), ['bandage', 'mass_grams']);
   assert.deepEqual(allowed('items', ['container'], caps, { bandage: {} }), []);
-  // the other way: readable@1 locked, so the compiler takes it (loka-wfrgk.85)
-  assert.deepEqual(allowed('items', ['readable'], { readable: 1 }), ['readable']);
+  assert.deepEqual(allowed('items', ['readable'], { readable: 1 }), ['readable']); // the other way
 });
 
 // Break: an action or reaction card's add menu offers a field the compiler refuses: a check without
