@@ -65,3 +65,23 @@
 ## Questions
 
 - `editor_routes.test.ts:13-38`: the methods in `ROUTES` are hand-written and not checked against the servers.
+
+## Fix round: `2d7562db6..9135d71ba`
+
+- Reviewed commit: `9135d71ba9c7c02d0377541f061167a90ab92680` (one commit, test files only). CI at head: ci success, book-e2e success,
+  graph-diff success.
+- Verdict: **APPROVE**
+- 1, fixed (`editor_crud.test.ts:188,256`): planted `'emotes create'` and `'rooms delete'` rows now go
+  red with "works now, stale gap: drop its GAPS row".
+- 2, fixed (`editor_crud.test.ts:200-201`): each kind is edited in a fresh copy of the scaffold. With the
+  `items.ambient` row dropped, it goes red with "needs a capability ... (`emote`)".
+- 3, fixed (`editor_roundtrip.test.ts:143,156`): the `card.ts:53` number-drop mutant goes red on this
+  file alone ("a commit dropped these edits").
+- 4, fixed: `cards()` uses guard.ts `rootFile`, which includes `areas/*.json`.
+- 6, fixed (`editor_routes.test.ts:110-138`): a planted `fetch('/__author/world', { method: verb })` goes red
+  with "fetch calls with a method this scan cannot read", and `uncalled` stays empty.
+- New gap rows (8 × loka-wfrgk.85 capability fields; `items delete` and the other loka-wfrgk.87 deletes): each is
+  rerun and goes red once it works (control above), so they cannot go stale. At head, all of them still fail.
+- CI cost: the kernel job took 459 s at `9135d71ba` (900 s timeout, 441 s headroom); mobile (498 s) is the
+  critical path. Locally the CRUD file takes 245 s. Keep the tests in the PR lane; nightly would let an editor
+  regression merge.
