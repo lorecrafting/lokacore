@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import type { Story, Todo } from './storylist.ts';
 export type { Edge, Beat, Outline, Story, Todo } from './storylist.ts';
 import type { Timings } from './shell.ts';
-import type { Numbers } from '../../../kernel/ts/play/numbers.ts';
+import type { Fights, Numbers } from '../../../kernel/ts/play/numbers.ts';
 
 export const ask = (path: string, sent: object) =>
   fetch(`/__author/${path}`, { method: 'POST', body: JSON.stringify(sent) }).then(async (r) => ({
@@ -52,12 +52,15 @@ export type Template = { dir: 'npcs' | 'items'; key: string };
 export const templates = () =>
   fetch('/__author/templates').then((r) => r.json() as Promise<Template[]>);
 
-/** The balancing reports, each bounded by the watcher (kernel/ts/play/live.ts). */
-export const numbers = () =>
-  fetch('/__author/numbers').then(async (r) => {
+const report = <T>(route: string) =>
+  fetch(`/__author/${route}`).then(async (r) => {
     if (!r.ok) throw new Error(await r.text());
-    return (await r.json()) as Numbers;
+    return (await r.json()) as T;
   });
+/** The balancing reports, each bounded by the watcher (kernel/ts/play/live.ts). */
+export const numbers = () => report<Numbers>('numbers');
+/** The fight rows alone, without the pacing sim's minutes (loka-wfrgk.79). */
+export const fights = () => report<Fights>('fights');
 
 type Message = {
   text: Record<string, string>;

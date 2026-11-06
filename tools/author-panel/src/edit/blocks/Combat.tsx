@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import type { FieldProps } from '@rjsf/utils';
 import { fightOf } from '../../../../../kernel/ts/play/blocks.ts';
-import { numbers } from '../../author.ts';
+import { fights } from '../../author.ts';
 import { Fight } from '../../numbers.tsx';
 import { Button } from '../../components/ui/button.tsx';
 import type { Context } from '../fields.tsx';
@@ -25,7 +25,7 @@ function Fights({ npc }: { npc: string }) {
         disabled={shown === RUNNING} // one run at a time: each runs every fight
         onClick={() => {
           show(RUNNING); // the last answer goes while the next runs (loka-wfrgk.79)
-          numbers()
+          fights()
             .then((r) => show(fightOf(r.fights, npc)))
             .catch((e: Error) => show(e));
         }}
@@ -39,7 +39,9 @@ function Fights({ npc }: { npc: string }) {
       ) : shown ? (
         <Fight target={shown} />
       ) : (
-        <p className="text-muted-foreground">not a fight target (an NPC with an attack, alive at start)</p>
+        <p className="text-muted-foreground">
+          not a fight target (an NPC with an attack, alive at start)
+        </p>
       )}
     </div>
   );

@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 709, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 714, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFileSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -287,10 +287,14 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   assert.equal(await page.getByText('Changed outside').count(), 0);
   assert.ok(await page.getByRole('button', { name: 'Undo', exact: true }).isEnabled());
   // Break: no sign while the fights run, a click then starts another, a retry keeps the last answer (loka-wfrgk.79).
-  await page.route('**/__author/numbers', async (r) => {
-    await new Promise((d) => setTimeout(d, 800));
-    await r.fulfill({ json: { fights: { why: 'no world' } } });
-  });
+  // Break: Run fights waits on the pacing sim too, minutes on the showcase (review 683 #2).
+  let paced = 0;
+  for (const route of ['fights', 'numbers'])
+    await page.route(`**/__author/${route}`, async (r) => {
+      paced += route === 'numbers' ? 1 : 0;
+      await new Promise((d) => setTimeout(d, 800));
+      await r.fulfill({ json: { fights: { why: 'no world' } } });
+    });
   const combat = page.locator('[aria-label="Combat attack"]');
   for (const run of [1, 2]) {
     await combat.getByRole('button', { name: 'Run fights' }).click();
@@ -303,6 +307,7 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
     await combat.getByText('no world').waitFor();
   }
   assert.equal(await page.getByRole('button', { name: 'Run fights' }).count(), 1); // not on hp
+  assert.equal(paced, 0, 'Run fights asked for the pacing sim');
   await page.close();
 });
 
@@ -531,15 +536,15 @@ test('editing a status keeps its integer duration', async () => {
 // Breaks: picking another kind of an hour writes nothing over it, so the hour hides and the next
 // write (another hour removed) drops it from the file (loka-wfrgk.74); asserted on the file on disk.
 test('an hour switched to another kind survives a write elsewhere', async () => {
-  const page = await open({ right: 420, selection: { kind: 'npc', key: 'warden' } });
-  const schedule = page.locator('fieldset[aria-label="Schedule"]');
-  const kind = schedule.getByRole('combobox', { name: '15 kind' }); // the NPC card test moved 14 to 15
-  await kind.selectOption({ label: 'walk' });
-  await schedule.getByRole('button', { name: 'remove hour 13' }).click();
   const file = join(dir, 'showcase/areas/low_wardle/npcs/warden.json');
   const read = () => JSON.parse(readFileSync(file, 'utf8')).daily_schedule;
+  const other = Object.keys(read()).findLast((h) => h !== '13')!; // 14, or 15 after the NPC card test
+  const page = await open({ right: 420, selection: { kind: 'npc', key: 'warden' } });
+  const schedule = page.locator('fieldset[aria-label="Schedule"]');
+  await schedule.getByRole('combobox', { name: `${other} kind` }).selectOption({ label: 'walk' });
+  await schedule.getByRole('button', { name: 'remove hour 13' }).click();
   for (let t = 0; '13' in read() && t < 50; t++) await page.waitForTimeout(100);
-  assert.deepEqual([read()[13], read()[15]], [undefined, { room: 'warden_gate', walks: true }]);
+  assert.deepEqual([read()[13], read()[other]], [undefined, { room: 'warden_gate', walks: true }]);
   await page.close();
 });
 
