@@ -19,7 +19,7 @@ const served = (dir: string) => {
 
 // Break: a quest's or dialogue's reference field is free text (or the wrong kind's picker): a
 // choice's accept, an expedition's rooms, a patrol's route; or `patrol.route` leaks to a detail's
-// transport route. Kinds from the fields' descriptions in source.QuestDefinition and dialogues.ex:362.
+// transport route (a transport). Kinds from the fields' descriptions in source.QuestDefinition and dialogues.ex:362.
 test("a quest's and a dialogue's reference fields pick their kind", () => {
   assert.equal(pickKind(['choices', 'bounty', 'accept']), 'quest');
   assert.equal(pickKind(['expedition', 'route', '1', 'from']), 'room');
@@ -31,7 +31,7 @@ test("a quest's and a dialogue's reference fields pick their kind", () => {
   assert.equal(pickKind(['patrol', 'trust_fact']), 'fact');
   assert.equal(pickKind(['exchange', 'incoming', '0']), 'item');
   assert.equal(pickKind(['objective', 'item_acquired']), 'item');
-  assert.equal(pickKind(['details', 'gate', 'transport', 'route']), 'route'); // not a room
+  assert.equal(pickKind(['details', 'gate', 'transport', 'route']), 'transport'); // not a room
   assert.equal(pickKind(['exits', 'north', 'to']), 'to'); // only a route's to is a room
 });
 

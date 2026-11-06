@@ -17,7 +17,8 @@ export const PICK_NAMES: Record<string, string> = {
   accept: 'quest', // dialogues.ex:362
   'route.from': 'room',
   'route.to': 'room',
-  'patrol.route': 'room', // an InspectableDetail transport's `route` is free text, not a room
+  'patrol.route': 'room',
+  'transport.route': 'transport', // an InspectableDetail transport's stop: the route it belongs to
   start_room: 'room',
   shelter_room: 'room',
   footprint: 'room',
