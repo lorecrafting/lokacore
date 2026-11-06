@@ -115,9 +115,9 @@ test('the shell has no serious or critical axe violations', async () => {
   ]);
 });
 
-// Breaks: a reaction or a scripted action routed to the generic card, its card failing to draw its
-// form on the showcase's own files, or its add menu not gated by the cartridge's declared capabilities
-// (the showcase declares policy and fact, so `when` and `tip` are offered).
+// Breaks: a reaction or a scripted action routed to the generic card (a command action away from it),
+// its card failing to draw its form on the showcase's own files, or its add menu not gated by the
+// cartridge's declared capabilities (the showcase declares policy and fact: `when` and `tip` offered).
 test('a reaction and an action open their own cards', async () => {
   for (const [kind, key, field] of [
     ['reaction', 'letter_late', 'when'],
@@ -128,6 +128,8 @@ test('a reaction and an action open their own cards', async () => {
     assert.ok((await menu.allTextContents()).includes(field), `${kind} ${key} offers ${field}`);
     await page.close();
   }
+  // a built-in command action keeps the generic card
+  await (await open({ selection: { kind: 'action', key: 'barter' } })).close();
 });
 
 /** The Flow graph in the left slot, warm: the first open compiles the story on the server (a cold open
