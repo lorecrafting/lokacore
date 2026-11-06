@@ -1,4 +1,4 @@
-// size: allow 407, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
+// size: allow 410, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -242,11 +242,14 @@ const shape = (node: unknown) => {
 const roomOf = (v: unknown): unknown =>
   Array.isArray(v) ? roomOf(v.at(-1)) : plain(v) ? roomOf(v.room ?? v.key) : v;
 
-/** An hour's (source.ex) branch `i`, carrying the old value's room key; other untagged unions: rjsf's own. */
+/** An hour's (source.ex) branch `i`, carrying the old value's room key; other untagged unions: below. */
 function untagged(branches: Obj[], i: number, old: unknown, defs: Record<string, Obj>): unknown {
   const room = roomOf(old);
   const b = branches[i];
-  if (room === undefined || !branches.some((h) => h.title === 'cases')) return undefined;
+  // not an hour (a status duration): a const branch writes its const, a number its least; else the value stays
+  if (!branches.some((h) => h.title === 'cases'))
+    return 'const' in b ? b.const : (b.minimum ?? old);
+  if (room === undefined) return undefined;
   if (b.type === 'array') return [{ room }, room]; // one case, then its fallback room (schedules.ex `fallback`)
   if (b.type !== 'object') return room;
   const props = (b.properties ?? {}) as Record<string, Obj>;

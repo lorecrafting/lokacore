@@ -1,4 +1,4 @@
-// size: allow 731, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 733, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -268,7 +268,9 @@ test('an hour switched to another kind keeps its room', () => {
   const ref = { cartridge_id: 'c', cartridge_version: '1', kind: 'room', key: 'gate' };
   assert.equal(start(hour, 0, { room: ref, walks: true }, defs), 'gate'); // a ref's key, not the ref
   const duration = defs['source.StatusDefinition'].properties.duration.anyOf;
-  assert.equal(start(duration, 1, 1800, defs), undefined); // not an hour: no room carried
+  // Break: not an hour, so no room: a deleted required duration the compiler refuses (review 683 #1)
+  assert.equal(start(duration, 1, 1800, defs), 'permanent');
+  assert.equal(start(duration, 0, 'permanent', defs), 1);
   assert.deepEqual(start(hour, 3, { room: 'gate', walks: true }, defs), [{ room: 'gate' }, 'gate']);
   const list = [{ room: 'green', when: { kind: 'luck', chance: 5 } }, 'gate'];
   assert.equal(start(hour, 3, list, defs), list);
