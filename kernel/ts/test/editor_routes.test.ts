@@ -29,6 +29,7 @@ const ROUTES: Record<string, string[]> = {
   '/checkpoints/*': ['GET', 'PUT'],
   '/todo': ['GET'],
   '/numbers': ['GET'],
+  '/fights': ['GET'],
   '/find': ['GET'],
   '/open': ['POST'],
   '/why': ['POST'],
@@ -101,6 +102,7 @@ test('every server route has a client caller or an exemption', () => {
       // ask (author.ts) and the cards' and map's post/call wrappers over it take a bare route name
       if (['ask', 'post', 'call'].includes(name!) && !path.startsWith('/'))
         called.add(`POST /${path}`);
+      if (name === 'report' && !path.startsWith('/')) called.add(`GET /${path}`); // author.ts reports
       if (name === 'api') called.add(`${second ? 'POST' : 'GET'} ${path}`); // inbook.ts
       if (name === 'sendBeacon') called.add(`POST ${path}`);
       if (name === 'EventSource') called.add(`GET ${path}`);
