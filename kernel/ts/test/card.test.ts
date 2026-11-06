@@ -528,6 +528,7 @@ test("an NPC's and an item's add menus offer only fields every owning capability
     'fuel mass_grams slot',
   );
   const caps = { bleed: 1, combat: 1, skill: 1, food: 1, attribute: 1, equipment: 1, resource: 1 };
+  assert.equal(on(caps), 'bandage mass_grams slot'); // edible needs containment too (food.ex:46)
   Object.assign(caps, { containment: 1 });
   assert.equal(on(caps), 'bandage edible mass_grams slot');
   // affects and equip need a slot (derived.ex:64, :77); a bandage is not worn or eaten (bleed.ex:88-91);

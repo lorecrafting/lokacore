@@ -51,7 +51,8 @@ export const unlinkable = (c: Obj) =>
     }),
   );
 
-const choicesOf = (d: unknown) => (isObj(d) && isObj(d.choices) ? Object.keys(d.choices) : []);
+// A compiled dialogue always has choices (none is SCHEMA_VIOLATION too_few_items).
+const choicesOf = (d: unknown) => Object.keys((d as Obj | undefined)?.choices ?? {});
 
 // A short ref's node: a dialogue choice `dialogues/<d>/<c>` is its dialogue's, when it has that choice.
 export function resolve(short: string, refs: Map<string, string>, defs: Map<string, unknown>) {

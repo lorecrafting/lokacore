@@ -1,4 +1,4 @@
-# size: allow 660, one case per starter kind and refusal; the area placement, companion, provider start and key order cases join them
+# size: allow 670, one case per starter kind and refusal; the area placement, companion, provider start and key order and shape cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -83,6 +83,15 @@ defmodule Loka.ContentStartersTest do
                },
                "aa": {
            """
+  end
+
+  # Break: a value whose shape differs from the file's (an object where the file has a list) is
+  # walked as the old list, which crashes or writes the object as a list.
+  test "a value of another shape than the file's is written as given", %{tmp_dir: tmp} do
+    path = Path.join(tmp, "f.json")
+    File.write!(path, ~s({"a": [1]}))
+    value = %{"a" => %{"b" => 1}}
+    assert JSON.decode!(Loka.Content.Starters.Parts.pretty_over(value, path)) == value
   end
 
   # Breaks: the service's provider seeded with a fixed 10 the resource's maximum refuses
