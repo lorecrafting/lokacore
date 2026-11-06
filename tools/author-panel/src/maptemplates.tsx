@@ -43,9 +43,7 @@ export function Templates({ story }: { story: Story }) {
 
 /** A template chip dropped on `room`: its child there, keyed `<template>_<n>`. */
 export function dropped(t: Dragged, room: MapRoom, story: Story) {
-  const singular = t.dir === 'npcs' ? 'npc' : 'item';
-  const keys = story.graph.nodes.filter((n) => n.kind === singular).map((n) => n.ref.split('/')[1]);
   // ponytail: a key only an uncompiled file holds is the starter's to refuse (told on the footer)
-  const key = freeKey(t.key, new Set([...keys, ...t.templates]));
+  const key = freeKey(t, story.graph.nodes, t.templates);
   void edit((ed) => ed.made(room, t.dir, key, t.key));
 }

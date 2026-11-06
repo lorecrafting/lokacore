@@ -188,7 +188,7 @@ test("an NPC given hp by the card's Add compiles", () => {
 test('a template dropped on a room makes its child there; a refused drop writes nothing; undo removes it', async () => {
   // Breaks: --extends not passed (the child lacks the parent's hp), the child left unplaced, a
   // refused drop leaving a file, or /templates missing an area's or an item abstract, or listing a
-  // concrete NPC.
+  // concrete NPC or an abstract room.
   const tpl = 'areas/barn/npcs/goat.json';
   mkdirSync(join(src, 'areas/barn/npcs'), { recursive: true });
   const hp = { minimum: 0, maximum: 1, start: 1, gain: 0 };
@@ -196,12 +196,20 @@ test('a template dropped on a room makes its child there; a refused drop writes 
   mkdirSync(join(src, 'items'));
   writeFileSync(join(src, 'items/sack.json'), '{ "abstract": true }');
   writeFileSync(join(src, 'areas/barn/npcs/cow.json'), '{ "abstract": false }');
-  assert.deepEqual((await ask('/templates')).told, [
-    { dir: 'npcs', key: 'goat' },
-    { dir: 'items', key: 'sack' },
-  ]);
+  writeFileSync(join(src, 'rooms/mould.json'), '{ "abstract": true }');
+  const listed = await ask('/templates');
+  assert.deepEqual(
+    [listed.ok, listed.told],
+    [
+      true,
+      [
+        { dir: 'npcs', key: 'goat' },
+        { dir: 'items', key: 'sack' },
+      ],
+    ],
+  );
   rmSync(join(src, 'items'), { recursive: true });
-  rmSync(join(src, 'areas/barn/npcs/cow.json'));
+  for (const f of ['areas/barn/npcs/cow.json', 'rooms/mould.json']) rmSync(join(src, f));
   const was = files();
   // c is in the area yard; a root room may extend any area's template
   await assert.rejects(ed.made(c, 'npcs', 'goat_1', 'goat'), /belongs to the area barn/);
@@ -285,8 +293,19 @@ test('a map point maps to its layout cell, and a drag between cells to a compass
 
 test("a dropped template's child takes the first free <template>_<n>", () => {
   // Breaks: a child key reusing a compiled one (the starter refuses the drop), or starting past _1.
-  assert.equal(freeKey('wild', new Set(['wild', 'crow'])), 'wild_1');
-  assert.equal(freeKey('wild', new Set(['wild_1', 'wild_2', 'wild_4'])), 'wild_3');
+  // Also: an item's key counted against an NPC child, or a template's key (no node holds it) missed.
+  const node = (kind: string, key: string) => ({ kind, ref: `cart@0:${kind}/${key}` });
+  const nodes = [
+    node('npc', 'wild'),
+    node('npc', 'wild_1'),
+    node('item', 'wild_2'),
+    node('npc', 'wild_4'),
+  ];
+  const wild = { dir: 'npcs' as const, key: 'wild' };
+  assert.deepEqual(
+    [freeKey(wild, [], []), freeKey(wild, nodes, []), freeKey(wild, nodes, ['wild_2'])],
+    ['wild_1', 'wild_2', 'wild_3'],
+  );
 });
 
 test('a press that stays within 4 px is a click (it selects); one that leaves is a drag', () => {
