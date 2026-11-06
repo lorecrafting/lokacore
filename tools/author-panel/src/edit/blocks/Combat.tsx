@@ -21,11 +21,12 @@ function Fights({ npc }: { npc: string }) {
         size="xs"
         variant="outline"
         className="justify-self-start"
-        onClick={() =>
+        onClick={() => {
+          show('running the fights…'); // the last answer goes while the next runs (loka-wfrgk.79)
           numbers()
             .then((r) => show(fightOf(r.fights, npc)))
-            .catch((e: Error) => show(e))
-        }
+            .catch((e: Error) => show(e));
+        }}
       >
         Run fights
       </Button>

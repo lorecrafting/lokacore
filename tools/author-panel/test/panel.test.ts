@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 725, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
+// size: allow 730, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -360,14 +360,18 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   await page.waitForTimeout(1500);
   assert.equal(await page.getByText('Changed outside').count(), 0);
   assert.ok(await page.getByRole('button', { name: 'Undo', exact: true }).isEnabled());
-  await page.route('**/__author/numbers', (r) =>
-    r.fulfill({ json: { fights: { why: 'no world' } } }),
-  );
-  await page
-    .locator('[aria-label="Combat attack"]')
-    .getByRole('button', { name: 'Run fights' })
-    .click();
-  await page.locator('[aria-label="Combat attack"]').getByText('no world').waitFor();
+  // Break: no sign while the fights run, and a retry keeps the last answer (loka-wfrgk.79).
+  await page.route('**/__author/numbers', async (r) => {
+    await new Promise((d) => setTimeout(d, 800));
+    await r.fulfill({ json: { fights: { why: 'no world' } } });
+  });
+  const combat = page.locator('[aria-label="Combat attack"]');
+  for (const run of [1, 2]) {
+    await combat.getByRole('button', { name: 'Run fights' }).click();
+    await combat.getByText('running the fights').waitFor({ timeout: 500 });
+    assert.equal(await combat.getByText('no world').count(), 0, `run ${run}`);
+    await combat.getByText('no world').waitFor();
+  }
   assert.equal(await page.getByRole('button', { name: 'Run fights' }).count(), 1); // not on hp
   await page.close();
 });
