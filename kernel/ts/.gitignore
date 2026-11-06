@@ -1,1 +1,3 @@
 node_modules
+# tsc -b incremental state (the author panel keeps its own under node_modules/.tmp)
+tsconfig.tsbuildinfo

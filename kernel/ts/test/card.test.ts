@@ -508,7 +508,7 @@ test("an NPC's and an item's add menus offer only fields every owning capability
 
 // Break: an action or reaction card's add menu offers a field the compiler refuses: a check without
 // the check capability (scripted_actions.ex:125), a tip without fact (action_tips.ex:40), a duration
-// under a top-level time_policy (scripted_actions.ex:88), craft on a spell (replenish.ex:59), or a
+// under a top-level time_policy (scripted_actions.ex:88) or beside a status.apply step (:94), craft on a spell (replenish.ex:59), or a
 // zone beside on.room (source_schema.ex ReactionRule), or a policy or when (their least `all`) without
 // the policy capability (resolve.ex:415).
 test("an action's and a reaction's add menus offer only fields the compiler accepts", () => {
@@ -521,6 +521,8 @@ test("an action's and a reaction's add menus offer only fields the compiler acce
     allowed('actions', ['check', 'policy', 'tip'], { [cap]: 1 }, use, {});
   assert.deepEqual([only('check'), only('fact'), only('policy')], [['check'], ['tip'], ['policy']]);
   assert.deepEqual(allowed('actions', action, {}, use, { time_policy: {} }), ['cooldown', 'craft']);
+  const status = { outcomes: { success: { steps: [{ op: 'say' }, { op: 'status.apply' }] } } };
+  assert.deepEqual(allowed('actions', action, {}, status, {}), ['cooldown', 'craft']);
   assert.deepEqual(allowed('actions', action, {}, { target: { kind: 'spell' } }), [
     'cooldown',
     'duration',

@@ -429,7 +429,7 @@ const OWNERS: Record<string, string> = {
 // Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
 const NEEDS: Record<string, (doc: Obj, world: Obj) => boolean> = {
   'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
-  'actions.duration': (_, cart) => cart.time_policy === undefined, // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json
+  'actions.duration': (d, w) => !w.time_policy && !/"status\.apply"/.test(JSON.stringify(d)), // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json; duration_status (:94); ponytail: also hides it beside a permanent status, which status.ex:72 lets through
   'actions.craft': (doc) => (doc.target as Obj | undefined)?.kind !== 'spell', // replenish.ex:59
   'reactions.zone': (doc) => (doc.on as Obj | undefined)?.room === undefined, // ReactionRule: a zone forbids on.room
 };
