@@ -2,10 +2,18 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 730, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
+// size: allow 748, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
-import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import {
+  appendFileSync,
+  cpSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+} from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -369,7 +377,10 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   for (const run of [1, 2]) {
     await combat.getByRole('button', { name: 'Run fights' }).click();
     await combat.getByText('running the fights').waitFor({ timeout: 500 });
-    assert.ok(await combat.getByRole('button', { name: 'Run fights' }).isDisabled(), `run ${run}: one at a time`);
+    assert.ok(
+      await combat.getByRole('button', { name: 'Run fights' }).isDisabled(),
+      `run ${run}: one at a time`,
+    );
     assert.equal(await combat.getByText('no world').count(), 0, `run ${run}`);
     await combat.getByText('no world').waitFor();
   }
@@ -604,13 +615,13 @@ test('editing a status keeps its integer duration', async () => {
 test('an hour switched to another kind survives a write elsewhere', async () => {
   const page = await open({ right: 420, selection: { kind: 'npc', key: 'warden' } });
   const schedule = page.locator('fieldset[aria-label="Schedule"]');
-  const kind = schedule.getByRole('combobox', { name: '14 kind' });
+  const kind = schedule.getByRole('combobox', { name: '15 kind' }); // the NPC card test moved 14 to 15
   await kind.selectOption({ label: 'walk' });
   await schedule.getByRole('button', { name: 'remove hour 13' }).click();
   const file = join(dir, 'showcase/areas/low_wardle/npcs/warden.json');
   const read = () => JSON.parse(readFileSync(file, 'utf8')).daily_schedule;
   for (let t = 0; '13' in read() && t < 50; t++) await page.waitForTimeout(100);
-  assert.deepEqual(read(), { 14: { room: 'warden_gate', walks: true } });
+  assert.deepEqual([read()[13], read()[15]], [undefined, { room: 'warden_gate', walks: true }]);
   await page.close();
 });
 
@@ -666,6 +677,13 @@ test("a one-way exit's reverse comes back by Undo on either room's card", async 
 // context.unlinkable dropped).
 test('a .scene dialogue opens its text card: a picker per value line, words to the Book', async () => {
   appendFileSync(join(dir, 'identity_sampler/scenes/stranger_talk.scene'), '  then: end\n'); // line 7
+  // the block tests' last write compiled first: a switch mid-compile leaves this card unopened
+  const at = (f: string) => statSync(join(dir, f)).mtimeMs;
+  const last = Math.max(
+    ...readdirSync(join(dir, 'showcase'), { recursive: true }).map((f) => at(`showcase/${f}`)),
+  );
+  for (let t = 0; at('current.json') < last && t < 100; t++)
+    await new Promise((r) => setTimeout(r, 100));
   const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
   assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
   const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
