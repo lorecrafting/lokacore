@@ -192,14 +192,7 @@ export type Timings = {
   kind: 'prose' | 'structural' | 'refusal';
   sha256?: string;
 };
-export const BUDGET = {
-  prose: 300,
-  structural: 1500,
-  refusal: 1000,
-  card: 100,
-  flowOpen: 300,
-  flowUpdate: 100,
-}; // mutate-skip: uncalibrated design value
+export const BUDGET = { prose: 300, structural: 1500, refusal: 1000, card: 100, flowOpen: 300, flowUpdate: 100 }; // mutate-skip: uncalibrated design value
 /** One edit's milliseconds: compile and publish, and for a structural edit the Book's load until `ready`. */
 export const total = (t: Timings, load: number) => t.compile + t.publish + load;
 export const within = (t: Timings, load = 0) => total(t, load) <= BUDGET[t.kind];
