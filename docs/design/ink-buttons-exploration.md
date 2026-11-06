@@ -5,8 +5,12 @@ The sheet: Storybook `Docs/Ink buttons` (story `docs-ink-buttons--sheet`; day an
 ([mobile/app/stories/InkButtons.stories.tsx](../../mobile/app/stories/InkButtons.stories.tsx), drawing in
 [inkButtons.tsx](../../mobile/app/stories/inkButtons.tsx)). Three showcase skills (`skill.blade`,
 `spell.flamma`, `spell.ward`) by nine styles at hotbar size on a mock Combat page bottom; the fourth
-button of each row (`~`) is its still cooldown or disabled frame. Nothing here is a Book rule yet:
-the owner picks, then the pick becomes the style guide for every future icon.
+button of each row (`~`) is its still cooldown or disabled frame.
+
+**Picked: Inked** (owner 2026-11-05). The rule is now the [Inked icon style guide](icon-style-guide.md) and the
+[Combat hotbar](../system/book-ui.md#combat-hotbar) section; the questions below are answered there (fixed strip,
+four slots at `space.xl`, author order, wedge for cooling and no wedge for barred, the list from the last slot, no
+captions). The sheet stays as the record of what was compared; the `Hotbar` story shows the pick in every state.
 
 Constants every variant shares (so they compare on style alone): one touch target
 (`size.touch`), the glyph in the status glyphs' frame ([statusGlyphs.ts](../../mobile/app/book/statusGlyphs.ts):

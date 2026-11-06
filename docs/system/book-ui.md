@@ -982,13 +982,14 @@ and foregrounds its own full Book page, like dialogue, including when another or
 or menu was open and when reopening a saved encounter. The page shows
 committed combat narration, and renders only currently available Stand and directionless Flee actions as complete typed
 invocations. The kernel still permits Look and Scan in a fight; the page offers neither (Look:
-owner 2026-11-04, until the combat hotbar is designed). The combat restriction is applied after all
+owner 2026-11-04; the [hotbar](#combat-hotbar) holds skills and spell words, not Look). The combat restriction is applied after all
 ordinary contributions, so no blocked action or alias is exposed by a hidden ordinary page.
 Attack initiates combat from the NPC page; it is not usable again during an open encounter
 and is not shown on the combat page.
 Flee lets the engine choose a random currently legal exit; success shows the actual resulting
-room. All offered combat actions appear as a vertical dialogue-style list below the log inside
-the same ScrollView, not a fixed strip. No unavailable or future skill actions are invented. World time continues
+room. Stand, Flee, a bandage and each foe's pick lists appear as a vertical dialogue-style list below the log inside
+the same ScrollView; the player's skills and untargeted spell words are the page's one fixed strip, the
+[Combat hotbar](#combat-hotbar) (owner 2026-11-05). No unavailable or future skill actions are invented. World time continues
 while the combat page is open.
 
 **Rounds.** The page follows its newest line as other growing pages do (Page: it follows the end
@@ -1030,8 +1031,10 @@ structured committed receipt metadata (an encounter present after the receipt th
 pre-command view lacked, or gone after it), never rendered prose; ordinary room events draw
 only in the World log even when delivered in the same receipt as combat, except the closing receipt,
 whose lines all draw on the ended page too (the arrival room's description after a Flee or inn
-return reads there, once). This replaces the earlier
-persistent bottom strip; see the [owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md).
+return reads there, once). This replaced the earlier
+persistent action strip ([owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md));
+the [Combat hotbar](#combat-hotbar) (owner 2026-11-05) brings back a strip for skills and spell words only, and the
+cards stay in the scroll.
 
 A committed dodge or block reads once from the structured attack result and authored text; a
 miss has its own line. During an encounter a held item's legal combat use (a bandage on a bleed)
@@ -1103,6 +1106,63 @@ The GameView may offer these; the Book draws no control for them, on any page:
 Any other World-level action (a door verb or an action with no target) with no control fails the
 Book harness's stranded-verb check, which lists this section (`UNDRAWN_VERBS`).
 
+## Combat hotbar
+
+The Combat page's one fixed strip (owner 2026-11-05, paraphrased: Inked style, fixed at the page's bottom,
+four slots, author order for v1, the list from the last slot, no captions). Its look is the
+[Inked icon style guide](../design/icon-style-guide.md); this section is what it holds and does.
+
+**Why a strip here and cards everywhere else.** The [combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md)
+put every action in the scroll because a card carries a target and a reason sentence and belongs beside the line
+it answers. A skill or an untargeted spell word has neither: it is the same press every round, and the player's hand
+rests on it while the log grows. So the hotbar is fixed under the scroll on the Combat page only; Stand, Flee, a
+bandage and each foe's **Cast a spell on…** list stay cards in the scroll ([Live combat response](#live-combat-response-m6-a)),
+and no other page gets a strip. The scroll ends above the strip, so its last card and the newest line are never
+under it.
+
+**Slots.** Four, left to right, in the GameView's order (the cartridge's authoring order; configurable later,
+loka-x6t.111). They fill from the player's offered untargeted scripted actions (the GameView `actions` with no
+target that are not the page's own verbs: stand, flee, bandage, cast, look, scan, move), then the untargeted
+learned words of `spell_words`, available or [unavailable](#unavailable-actions) alike (a barred skill keeps its
+place; a vanished one gives it up). The first three take the first three slots; the fourth is the opener. A slot
+with nothing to hold shows the style guide's empty form: not focusable, no name, so the row keeps its positions.
+No skill and no word: no strip (the page is as before the hotbar). An aimed spell (cartridge `aimed`) is never a
+slot: it stays in its target's **Cast a spell on…** list ([Word bar](#word-bar)).
+
+**The opener.** The fourth slot opens the skill and spell list (loka-x6t.110) over the cards as a
+[PickList](../BOOK-UI-COMPONENTS.md): every untargeted skill and spell word, slots included, each in its ActionCard
+form (available, or unavailable with its reason sentence), in the same order. It shares the page's one-open-list
+state, so opening it closes a foe's list and the reverse; it opens at the scroll's end and the page follows it.
+The opener is never barred or cooling; with nothing beyond the three slots it still opens (the list is the
+long form of the strip, with the words the strip omits). Escape or a second press closes it.
+
+**A press.** Ready: sends the slot's invocation as its card would (the scripted action; or the GameView's
+wordless twin of Cast with that word); the receipt's lines land in the log and the page keeps the strip. Barred:
+exposed disabled, still focusable and pressable; the press sends nothing and shows the slot's `reasonSentence`
+once, as an unavailable card does. Cooling: barred until the cooldown ends; the engine refuses an early press
+(action `cooldown`), and the Book never lets one through to be refused.
+
+**Cooldown timing.** The wedge shows the share of the cooldown already elapsed and reaches full ink at the end;
+the presenter keeps no clock and projects from the confirmed view's `time`, as the condition ring does
+(ConditionView `ends_at`, `duration`). What the GameView gives today: an unavailable action or word carries only
+`reason.code` (`cooldown`, `insufficient_resource`, `invalid_state`), no end or length, and CombatView carries no
+round interval. **Engine gap:** until the GameView projects the cooldown's end and length on each offered action and
+spell word (the ConditionView pair, same clock), a cooling slot shows the barred form with its reason word, and the
+screen reader's rounds-left count (ceil of remaining over the round interval) is also unavailable. The Book never
+estimates a cooldown from the cartridge or from the last press.
+
+**Keyboard and screen reader.** The strip is one group named by its label key (a `LABEL` key, proposed:
+`LABEL.hotbar`), after the scroll's last card in the Tab order; slots left to right; empty slots skipped; Enter or
+Space presses; the opener's list takes Tab, Shift-Tab, Enter, Space and Escape as a PickList does. Each slot is a
+button named by its action's text (the key's words, no caption); a barred or cooling slot adds its reason word
+to the name and exposes disabled, as [unavailable actions](#unavailable-actions) do. A cooldown ending is silent (no
+announcement; the ink is back); a refused press reads its reason sentence once in the polite region, as cards do.
+
+**Word bar and chips.** No chip row in the game-world pane (owner 2026-10-23); the hotbar is the only in-fight
+place a spell word is cast from, and the Skills page's **Spells** section ([Word bar](#word-bar)) is unchanged
+outside a fight. Spell words cast from the hotbar follow the Word bar's send rule; their lines land in the Combat log.
+loka-x6t.69's engaged-state chips are superseded by the hotbar.
+
 ## Word bar
 
 The World page has no Word block (owner, mvl9qy5ut2x2). Saying is never a chip row (owner,
@@ -1121,6 +1181,8 @@ twin of Cast with that word; an accepted cast turns to World, where its line lan
 An aimed spell (cartridge `aimed`, loka-x6t.109) is never a Spells line: the GameView offers it
 on each admitted target's entry (`command: cast`, `target_ids: [target]`) and the Book lists it in
 that page's **Cast a spell…** pick list ([World](#world-and-status-entry), owner 2026-10-23).
+In a fight the same untargeted words also fill the [Combat hotbar](#combat-hotbar)'s slots and its
+opener's list, with the same send; the Skills page's section is unchanged.
 
 The one-word field ([SayField](../../mobile/app/book/SayField.tsx)) is kept, with no opener, for
 the Realm's room speech; its rules (sends, the bad-word Note, chips that only fill, closing) are
