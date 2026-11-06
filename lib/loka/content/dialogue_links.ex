@@ -1,4 +1,4 @@
-# size: allow 429, every whole-cartridge dialogue link check in one graph
+# size: allow 441, every whole-cartridge dialogue link check in one graph
 defmodule Loka.Content.DialogueLinks do
   @moduledoc "A dialogue choice's policy and narration variants as roots, and its then and then_failed checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -224,7 +224,7 @@ defmodule Loka.Content.DialogueLinks do
   # fall_through.ts `onward`: a default Talk whose entries all fail opens the first dialogue of their speaker
   # that a free choice leads to, nearest first, the entries pooled. More than one is a guess; the warning
   # names, on the speaker's first shut entry, the ones it can open: each in try order up to the first that
-  # always opens (no condition on its way or itself).
+  # always opens (no condition on its way or itself), and on through what they lead to when none does.
   defp fall_through(open, sorted, hidden?) do
     opens? = &opens?(&1, hidden?)
     by_key = Map.new(sorted, fn {_, d} -> {d["key"], d} end)
@@ -274,11 +274,23 @@ defmodule Loka.Content.DialogueLinks do
     end
   end
 
-  # The links in try order up to the first that always opens: reached by a choice with no policy.
+  # The links in try order up to the first that always opens: reached by a choice with no policy. With none
+  # sure, `spokenBy` goes on to what the unnamed ones that may fail lead to, so the list does too.
   defp upto_sure(links, shut, by_key, seen, opens?) do
     sure = free_links(shut, by_key, seen, &(free?(&1) and !&1["policy"]))
+
     {maybe, rest} = Enum.split_while(links, &(&1 not in sure or !opens?.(by_key[&1])))
-    maybe ++ Enum.take(rest, 1)
+    maybe ++ if rest == [], do: beyond(maybe, by_key, seen, opens?), else: Enum.take(rest, 1)
+  end
+
+  defp beyond(maybe, by_key, seen, opens?) do
+    failed = for k <- maybe, !opens?.(by_key[k]), !by_key[k]["name"], do: by_key[k]
+    seen = seen ++ maybe
+
+    case free_links(failed, by_key, seen, &free?/1) do
+      [] -> []
+      deeper -> upto_sure(deeper, failed, by_key, seen, opens?)
+    end
   end
 
   # What shut dialogues fall through to, as `tried` grows in `spokenBy`: their own links first, then what the
