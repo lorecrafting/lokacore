@@ -1,3 +1,4 @@
+// size: allow 320, the write routes share one tree, guard and journal; /delete's reference gate and row delete join them
 // The editor's write path (docs/system/cartridge.md#author-preview): `GET /source`, `/schema/<dir>`
 // and `/journal`, and the POST routes that change the source tree. Every path a body names goes
 // through `guarded` (guard.ts) once; every write is a `.tmp` and a rename, recorded in the journal
@@ -16,6 +17,7 @@ import { files } from './todo.ts';
 import { type Bytes, current, DIRS, guarded, named, placed, refuse, Refused } from './guard.ts';
 import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
 import { apply } from './edit_model.ts';
+import { users } from './find.ts';
 import { edit, located } from './prose.ts';
 import { compiledCartridge, ids, set } from './scene_card.ts';
 import { loka, opened, worlds } from './worlds.ts';
@@ -100,11 +102,36 @@ function change(t: Tree, { file, was, ops }: Sent) {
   return done(t, `change ${file}`, [{ file, before, after: json(doc) }]);
 }
 
-function remove(t: Tree, { file, was }: Sent) {
+const ROWS = ['facts', 'resources', 'attributes']; // root files of `{"<name>": {"<key>": definition}}`
+/** Delete one definition: its file, or with `key` its row of a ROWS file; refused while another
+ * definition still names it (the compile would refuse the dangling ref). */
+function remove(t: Tree, { file, was, key }: Sent, artifact = '') {
   const path = guarded(t.root, file, 'read');
-  if (!file.includes('/') || rootFile(file))
+  const section = String(file).replace(/\.json$/, '');
+  const row = key !== undefined && ROWS.includes(section);
+  if (!row && (!file.includes('/') || rootFile(file)))
     refuse(400, `${file} is a root file: delete its rows, not the file`);
-  const changes: Change[] = [{ file, before: fresh(path, was), after: null }];
+  if (row && !named(key)) refuse(400, 'key: [a-z0-9_]+');
+  const at = row ? { dir: section, key } : placed(file);
+  const left = at ? users(t.root, artifact, at.dir, at.key) : [];
+  if (left.length)
+    refuse(
+      400,
+      `${at!.key} is still named by ${left.map((r) => r.at ?? r.by).join(', ')}: change those first`,
+    );
+  const before = fresh(path, was);
+  if (row) {
+    let doc: any;
+    try {
+      doc = JSON.parse(before);
+    } catch {
+      refuse(400, `${file} is not JSON: fix it first`);
+    }
+    if (!Object.hasOwn(doc?.[section] ?? {}, key)) refuse(400, `${file} has no ${key}`);
+    delete doc[section][key];
+    return done(t, `delete ${section} ${key}`, [{ file, before, after: json(doc) }]);
+  }
+  const changes: Change[] = [{ file, before, after: null }];
   const room = placed(file)?.dir === 'rooms' ? placed(file)!.key : undefined;
   const layout = current(join(t.root, 'layout.json')); // another file's room matches no row
   try {

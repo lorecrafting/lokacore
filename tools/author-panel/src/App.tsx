@@ -4,7 +4,7 @@ import { PanelLeftClose, PanelRightClose } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { shortcut } from '../../../mobile/app/author/prose_rules.ts';
 import { kept, mapCommand, shown } from './mapwire.ts';
-import { ask, checkpoints, story as getStory, useDiagnostics, type Story } from './author.ts';
+import { ask, checkpoints, drop, story as getStory, useDiagnostics, type Story } from './author.ts';
 import { useBook, type Heard } from './book.ts';
 import { BookStrip } from './centre.tsx';
 import { Divider, Rail, useLayout, type SetLayout } from './columns.tsx';
@@ -187,7 +187,7 @@ function useWiring(
   const sent = [mark?.kind, mark?.key, book.loaded, add.join()];
   useEffect(() => void (mark && book.send({ ...mark, add })), sent); // eslint-disable-line react-hooks/exhaustive-deps
   useStart(book);
-  const base = command(book, layout.selection, pick);
+  const base = command(book, layout.selection, pick, story);
   const run = (i: Item) =>
     i.kind === 'story'
       ? story && set((l) => flowGo(story, l, i.id) ?? { ...l, leftOpen: true, map: 'story', story: { ...go(story, l.story ?? LIST, i.id), chosen: true } })
@@ -279,7 +279,7 @@ export default function App() {
 }
 
 /** What a palette row does: a command runs, a key or text key selects, a `~` opens in the Book. */
-function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) => void) {
+function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) => void, story?: Story) {
   return (i: Item) => {
     if (i.kind === 'key') return pick(fromRef(i.id));
     if (i.kind === 'text') return pick(fromTextKey(i.id));
@@ -287,6 +287,7 @@ function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) =
     if (i.id === 'hold') return document.querySelector<HTMLButtonElement>('[data-hold]')?.click();
     if (i.id.startsWith('map-'))
       return mapCommand(i.id, sel?.kind === 'room' ? sel.key : undefined);
+    if (i.id === 'delete') return void (sel && drop(sel.key, fileOf(sel, places(sel, story?.graph.nodes ?? []).inspector?.ref, story?.files)));
     if (i.id === 'undo')
       return book.send({ op: 'key', key: 'z', metaKey: true, ctrlKey: false, altKey: false });
     const kind = i.id.startsWith('new-') ? i.id.slice(4) : undefined;

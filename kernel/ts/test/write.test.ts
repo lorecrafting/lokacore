@@ -1,4 +1,4 @@
-// size: allow 511, the write path's guard, journal and /new cases share the tree helper above them
+// size: allow 545, the write path's guard, journal and /new cases share the tree helper above them
 // The editor's write path (docs/system/cartridge.md#author-preview): the one path guard, the Host
 // and Origin checks, the whole-file `was`, the journal and undo, on controlled source trees.
 import assert from 'node:assert/strict';
@@ -226,6 +226,32 @@ test('a delete touches layout.json only when it holds the room', async (t) => {
     assert.equal((await ask('/delete', sent)).status, 200);
     assert.deepEqual(await files(), gone);
   }
+});
+
+test('a delete another definition still names is refused and writes nothing', async (t) => {
+  // Breaks: /delete writing a file or root row the compile would then refuse as a dangling ref
+  // (loka-wfrgk.58 walk B), or a row delete taking the root file or a neighbouring row with it.
+  const { ask, dir, src, read } = await tree(t);
+  const ref = (kind: string, key: string) => ({ cartridge_id: 'c', kind, key });
+  const rooms = { 'c@1:room/a': { lit: ref('fact', 'lit') } };
+  const facts = { 'c@1:fact/lit': {}, 'c@1:fact/spare': {} };
+  writeFileSync(
+    join(dir, 'none.json'),
+    JSON.stringify({ canonical: JSON.stringify({ rooms, facts }) }),
+  );
+  const FACTS = '{\n  "facts": {\n    "lit": {},\n    "spare": {}\n  }\n}\n';
+  writeFileSync(join(src, 'facts.json'), FACTS);
+  const lit = await ask('/delete', { file: 'facts.json', was: sha256(FACTS), key: 'lit' });
+  assert.deepEqual(lit, {
+    status: 400,
+    body: 'lit is still named by rooms/a: change those first',
+  });
+  assert.equal(read('facts.json'), FACTS);
+  assert.equal(
+    (await ask('/delete', { file: 'facts.json', was: sha256(FACTS), key: 'spare' })).status,
+    200,
+  );
+  assert.equal(read('facts.json'), '{\n  "facts": {\n    "lit": {}\n  }\n}\n');
 });
 
 test('undo puts the files back, refuses one changed since, and knows no other id', async (t) => {
