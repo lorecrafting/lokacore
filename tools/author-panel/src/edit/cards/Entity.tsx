@@ -1,6 +1,6 @@
 // The NPC and Item cards (docs/rnd/gui-editor-design-2026-11-04.md §6, E6b): the words open in the
 // Book, the placement takes a room, NPC or container picker, the mechanics are added and removed; the combat numbers,
-// schedule and offer table are the form's (pickers by kind, rows added, removed and moved). Every
+// schedule are their blocks (blocks/Combat.tsx, blocks/Schedule.tsx); the offer table is the form's. Every
 // write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
 import { useState } from 'react';
 import {
@@ -20,6 +20,7 @@ import registry from '../registry.json';
 import { adder, Mechanics, RoomForm, useCartridge, Words } from './Room.tsx';
 
 const WORDS = ['name', 'room_line', 'description'];
+const BLOCKS = { hp: 'Combat', attack: 'Combat', weapon: 'Combat', daily_schedule: 'Schedule' };
 const DEF: Record<string, string> = {
   npcs: 'source.NpcDefinition',
   items: 'source.ItemDefinition',
@@ -28,6 +29,12 @@ const DEF: Record<string, string> = {
 type Props = { rel: string; context: Context; diag: ReturnType<typeof useDiagnostics> };
 type Card = ReturnType<typeof useCard>;
 type Doc = Record<string, unknown>;
+
+/** A block's write (blocks/Schedule.tsx): the field set and committed at once. */
+const putter = (card: Card) => (f: string, v: unknown) => (
+  card.change({ ...(card.draft as Doc), [f]: v }),
+  card.commit()
+);
 
 export function Entity({ rel, context, diag }: Props) {
   const card = useCard(rel, diag);
@@ -60,10 +67,11 @@ export function Entity({ rel, context, diag }: Props) {
       <RoomForm
         rel={rel}
         card={card}
-        context={context}
+        context={{ ...context, hours: cart?.calendar?.hours_per_day, room: draft.room, put: putter(card) }}
         diag={diag}
         defs={defs}
         own={[...WORDS, at]}
+        blocks={BLOCKS}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-# size: allow 368, one table per gate; the editor gate adds fifteen planted files
+# size: allow 371, one table per gate; the editor gate adds sixteen planted files
 # Red controls plant violations, require checks to fail, and clean their own files.
 # Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
@@ -238,6 +238,9 @@ editor_controls =
         {"rules-block",
          %{registry: uncard.(~r/^(actions\.(policy|check)|reactions\.(on|when|steps))$/)},
          "reactions.on.edit: generic but not in the baseline"},
+        {"combat-schedule-blocks",
+         %{registry: uncard.(~r/^(npcs\.(hp|attack|daily_schedule)|items\.weapon)$/)},
+         "npcs.daily_schedule.edit: generic but not in the baseline"},
         {"escape", %{registry: card.("../App.tsx")}, "dialogues.name: no edit surface"},
         {"bespoke", %{registry: card.("RedCard.tsx"), card: ""},
          "dialogues.name.edit: no longer generic"},

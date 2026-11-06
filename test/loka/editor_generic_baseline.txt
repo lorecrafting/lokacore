@@ -111,9 +111,6 @@ emotes.to.delete
 facts.facts.create
 facts.facts.edit
 facts.facts.delete
-items.weapon.create
-items.weapon.edit
-items.weapon.delete
 layout.room.create
 layout.room.edit
 layout.room.delete
@@ -152,15 +149,6 @@ liquids.resource.delete
 liquids.unit_label.create
 liquids.unit_label.edit
 liquids.unit_label.delete
-npcs.attack.create
-npcs.attack.edit
-npcs.attack.delete
-npcs.daily_schedule.create
-npcs.daily_schedule.edit
-npcs.daily_schedule.delete
-npcs.hp.create
-npcs.hp.edit
-npcs.hp.delete
 outline.parts.create
 outline.parts.edit
 outline.parts.delete

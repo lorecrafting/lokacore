@@ -72,7 +72,7 @@ async function open(layout: object): Promise<Page> {
       await new Promise((r) => setTimeout(r, 500));
     }
   }
-  await page.locator('[aria-label="Card"] form').waitFor({ timeout: boot });
+  await page.locator('[aria-label="Inspector"] form').waitFor({ timeout: boot });
   return page;
 }
 const QUEST = { right: 280, selection: { kind: 'quest', key: 'carry_letter' } };
@@ -113,6 +113,27 @@ test('the shell has no serious or critical axe violations', async () => {
     'color-contrast: #radix--trigger-project',
     'label: #root_journal_outcomes_deliver-key, #root_journal_outcomes_burn-key, #root_journal_outcomes_late-key',
   ]);
+});
+
+// Breaks: the NPC card loses its blocks (a field not claimed, the claim lost to hidden(), a block not
+// registered), so hp, attack and the schedule fall back to the generic rows; or an hour's room is
+// free text again, not the room picker.
+test("an NPC card draws its Combat and Schedule blocks", async () => {
+  const page = await open({ right: 420, selection: { kind: 'npc', key: 'warden' } });
+  for (const f of ['hp', 'attack'])
+    await page.locator(`[aria-label="Combat ${f}"]`).waitFor({ timeout: boot });
+  const schedule = page.locator('fieldset[aria-label="Schedule"]');
+  const hours = schedule.getByRole('textbox', { name: /^hour / });
+  assert.deepEqual(await hours.evaluateAll((es) => es.map((e) => (e as HTMLInputElement).value)), [
+    '13',
+    '14',
+  ]);
+  const room = schedule.locator('input[id$="_14"]'); // hour 14's lone room
+  const offered = await page
+    .locator(`datalist#${await room.getAttribute('id')}-keys option`)
+    .evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+  assert.ok(offered.includes('warden_gate'), `rooms offered: ${offered}`);
+  await page.close();
 });
 
 /** The Flow graph in the left slot, warm: the first open compiles the story on the server (a cold open
