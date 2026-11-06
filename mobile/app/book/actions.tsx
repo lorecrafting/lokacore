@@ -109,7 +109,7 @@ function Available(
 }
 
 // An open list's rows, inset as the option's children; Escape anywhere in it closes it.
-const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () => void) => (
+export const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () => void) => (
   <View style={{ paddingLeft: space.lg }} {...onKey((key) => key === 'Escape' && close())}>
     <Cards>
       {k.rows.map((r, i) => (

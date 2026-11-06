@@ -1,7 +1,7 @@
 // The ink buttons exploration sheet (InkButtons.stories.tsx): three skills by nine styles at hotbar
 // size on a mock Combat page bottom, each style with one still cooldown or disabled frame (the fourth
 // button, captioned ~). Imports Skia, so the story loads it lazily after CanvasKit (as StatusIcon
-// does its glyph). Every colour and size is a token.
+// does its glyph). Every colour and size is a token; the shared drawing is the Book's HotbarGlyph.tsx.
 import {
   BlurMask,
   Canvas,
@@ -15,88 +15,30 @@ import {
 } from '@shopify/react-native-skia';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
+import { arc, disc, frame, glyph, inked, ring, still } from '../book/HotbarGlyph.tsx';
 import { usePalette, useType, type Palette } from '../book/palette.ts';
 import { glyphs } from '../book/statusGlyphs.ts';
 import { Text } from '../book/Text.tsx';
 import { opacity, size, space } from '../book/tokens.ts';
+
+const { SIDE, MID, R, W } = frame;
 import CombatOneFoeView from './views/combat-one-foe.json';
 
 // The showcase's three common skills, drawn in the status glyphs' frame (statusGlyphs.ts: a 24 box,
 // stroke 2.5, round caps). Flamma and ward share their condition's motif; the blade is new.
-export const skills = [
+const skills = [
   { key: 'skill.blade', d: 'M10 15.5V7.5L12 4.5 14 7.5V15.5zM7.5 15.5h9M12 15.5v4' },
   { key: 'spell.flamma', d: glyphs['condition.burning']! },
   { key: 'spell.ward', d: glyphs['condition.warded']! },
 ];
 
-const DISC = size.touch; // the button: one touch target
-export const SIDE = DISC + space.md; // the canvas, room for a bleed
-const MID = SIDE / 2;
-const R = DISC / 2;
-const INK = DISC - 2 * space.md; // the glyph's box, scaled from statusGlyphs' 24
-const BOX = 24;
-const W = 2.5; // the status glyphs' stroke
 const BOLD = 3.5;
-export const LEFT = 0.6; // the cooldown share each still frame draws (Inked: elapsed, the ink returned)
-
-const glyph = (d: string, ink: string, w = W, effect?: ReactNode) => (
-  <Group
-    transform={[{ translateX: MID - INK / 2 }, { translateY: MID - INK / 2 }, { scale: INK / BOX }]}
-  >
-    <Path path={d} style="stroke" strokeWidth={w} strokeCap="round" strokeJoin="round" color={ink}>
-      {effect}
-    </Path>
-  </Group>
-);
-const disc = (r: number, color: string, effect?: ReactNode) => (
-  <Circle cx={MID} cy={MID} r={r} color={color}>
-    {effect}
-  </Circle>
-);
-const ring = (r: number, w: number, color: string, effect?: ReactNode) => (
-  <Circle cx={MID} cy={MID} r={r} style="stroke" strokeWidth={w} strokeCap="round" color={color}>
-    {effect}
-  </Circle>
-);
-// A clockwise arc from 12 o'clock over `f` of the turn (the Ring's countdown direction, StatusIcon);
-// `wedge` closes it through the centre.
-const arc = (r: number, f: number, wedge = false) => {
-  const a = 2 * Math.PI * f;
-  const sweep = `A${r} ${r} 0 ${f > 0.5 ? 1 : 0} 1 ${MID + r * Math.sin(a)} ${MID - r * Math.cos(a)}`;
-  return wedge ? `M${MID} ${MID}L${MID} ${MID - r}${sweep}Z` : `M${MID} ${MID - r}${sweep}`;
-};
+const LEFT = 0.6; // the cooldown share each still frame draws (Inked: elapsed, the ink returned)
 const left = (r: number, w: number, color: string, effect?: ReactNode) => (
   <Path path={arc(r, LEFT)} style="stroke" strokeWidth={w} color={color}>
     {effect}
   </Path>
 );
-
-// The Inked rule (docs/design/icon-style-guide.md, States): fg disc and bg glyph; pressed thins by
-// opacity.press; cooling is a dim disc with a fg wedge from 12 whose radii are seamed in bg (fg on dim
-// is under 3:1); barred is the dim disc with no wedge; empty is a line hairline ring; focused adds the
-// document ring's size and offset in action (drawn here only: the real one is palette.ts useFocusRing).
-export type State = 'ready' | 'pressed' | 'cooling' | 'barred' | 'focused' | 'empty';
-const radii = (f: number) => {
-  const a = 2 * Math.PI * f;
-  return `M${MID} ${MID}L${MID} ${MID - R}M${MID} ${MID}L${MID + R * Math.sin(a)} ${MID - R * Math.cos(a)}`;
-};
-export const inked = (c: Palette, d: string, state: State, share = LEFT): ReactNode => {
-  if (state === 'empty') return ring(R - size.rule / 2, size.rule, c.line);
-  const off = state === 'cooling' || state === 'barred';
-  return (
-    <Group opacity={state === 'pressed' ? 1 - opacity.press : 1}>
-      {disc(R, off ? c.dim : c.fg)}
-      {state === 'cooling' && <Path path={arc(R, share, true)} color={c.fg} />}
-      {state === 'cooling' && (
-        <Path path={radii(share)} style="stroke" strokeWidth={size.rule} color={c.bg} />
-      )}
-      {glyph(d, c.bg)}
-      {state === 'focused' && ring(R + size.focus + size.focus / 2, size.focus, c.action)}
-    </Group>
-  );
-};
-// The opener's glyph: three dots on the midline (statusGlyphs.ts `dot`, not exported).
-export const OPENER = [7, 12, 17].map((x) => `M${x} 12a.75.75 0 1 0 .01 0`).join('');
 
 type Draw = (c: Palette, d: string, off: boolean) => ReactNode;
 const dots = <DashPathEffect intervals={[0.1, W * 1.6]} />;
@@ -119,7 +61,7 @@ const variants: { name: string; draw: Draw; chosen?: true }[] = [
     // (2026-11-05): docs/design/icon-style-guide.md; `inked` below is the ruled drawing.
     name: 'Inked',
     chosen: true,
-    draw: (c, d, off) => inked(c, d, off ? 'cooling' : 'ready', LEFT),
+    draw: (c, d, off) => inked(c, d, off ? 'cooling' : 'ready', still(LEFT)),
   },
   {
     // The action role as a seal: outline and glyph in action, paper inside; barred goes line and dim.
@@ -218,7 +160,7 @@ function Slot({ label, d, draw, off }: { label: string; d: string; draw: Draw; o
   );
 }
 
-export const lines = CombatOneFoeView.combatLog.slice(-3);
+const lines = CombatOneFoeView.combatLog.slice(-3);
 function Row({ name, draw, chosen }: { name: string; draw: Draw; chosen?: true }) {
   const c = usePalette();
   const t = useType();
@@ -251,7 +193,7 @@ function Row({ name, draw, chosen }: { name: string; draw: Draw; chosen?: true }
   );
 }
 
-export const sheet = {
+const sheet = {
   paddingHorizontal: space.page,
   maxWidth: size.column,
   alignSelf: 'center',

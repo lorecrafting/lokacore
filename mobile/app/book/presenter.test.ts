@@ -404,7 +404,9 @@ test('combat receipt history is once-only when completion follows an already dis
   for (const [key, after] of [
     [
       'combat.result',
-      view({ combat: { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' } }),
+      view({
+        combat: { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 },
+      }),
     ],
     [
       'combat.result',

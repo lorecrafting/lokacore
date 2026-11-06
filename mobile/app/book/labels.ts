@@ -75,6 +75,9 @@ export const LABEL = {
   giveTo: 'Give to…',
   castASpell: 'Cast a spell…',
   castASpellOn: (foe: string) => `Cast a spell on ${foe}…`, // a Combat foe's list, its projected name
+  hotbar: '~', // the Combat hotbar's group name (book-ui.md, Combat hotbar); words to come from the owner
+  wordCast: (word: string) => `${word}, cast`, // a hotbar word slot: the Skills page's card name (skills.tsx)
+  hotbarOpener: '~', // its fourth slot, which opens the skill and spell list; words to come from the owner
   castOn: 'Cast on…', // a Skills page Spells line's list of the aimed spell's targets (loka-x6t.109.5)
   // The NPC page's Talk and shop cards, the shop page's Sell card (owner picks mvlrlvappy4w, mvlymuams73l).
   talk: 'Talk',
