@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 732, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 740, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFileSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -566,7 +566,8 @@ test("removing a room's last variant writes it gone, and Undo brings it back", a
 });
 
 // Breaks: a detail added on the Room card is held refused (no description or alias; the Book's
-// Edit answers "not on this page"), or opens with every optional sub-field drawn (loka-wfrgk.76).
+// Edit answers "not on this page"), or opens with every optional sub-field drawn (loka-wfrgk.76), or
+// a folded field leaves its fold on the first keystroke and drops the next ones.
 test('a new room detail saves with a `~` description, its optional fields folded', async () => {
   const page = await open({ right: 420, selection: { kind: 'room', key: 'sea_cave' } });
   const file = join(dir, 'showcase/areas/tidewater/rooms/sea_cave.json');
@@ -579,6 +580,13 @@ test('a new room detail saves with a `~` description, its optional fields folded
   for (let t = 0; !well() && t < 50; t++) await page.waitForTimeout(100);
   assert.deepEqual(well(), { aliases: ['well'], description: { prose: '~' } });
   assert.equal(await page.locator('#root_details_well_bed').isVisible(), false);
+  // a folded field typed into stays in its fold with the focus: each key lands
+  const rating = page.locator('#root_details_well_rating');
+  await page.locator('details', { has: rating }).locator('summary').click();
+  await rating.pressSequentially('12', { delay: 50 });
+  await page.keyboard.press('Tab');
+  for (let t = 0; well().rating !== 12 && t < 50; t++) await page.waitForTimeout(100);
+  assert.equal(well().rating, 12);
   writeFileSync(file, was);
   await page.close();
 });

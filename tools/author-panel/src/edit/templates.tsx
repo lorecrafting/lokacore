@@ -14,7 +14,7 @@ import {
   type TitleFieldProps,
 } from '@rjsf/utils';
 import { ArrowDown, ArrowUp, CircleAlert, Copy, Plus, X, type LucideIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { FormProps } from '@rjsf/core';
 import { Button } from '../components/ui/button.tsx';
 
@@ -129,8 +129,17 @@ export function Folded(p: ObjectFieldTemplateProps) {
   const Default = getTemplate('ObjectFieldTemplate', p.registry); // the registry's, not this one
   const required = (p.schema.required ?? []) as string[];
   const data = (p.formData ?? {}) as Record<string, unknown>;
-  const open = p.properties.filter((x) => required.includes(x.name) || data[x.name] !== undefined);
-  const rest = p.properties.filter((x) => !open.includes(x));
+  // decided once: a field typed into stays in its fold, or it would remount and lose the focus
+  const [folded] = useState(
+    () =>
+      new Set(
+        p.properties
+          .filter((x) => !required.includes(x.name) && data[x.name] === undefined)
+          .map((x) => x.name),
+      ),
+  );
+  const open = p.properties.filter((x) => !folded.has(x.name));
+  const rest = p.properties.filter((x) => folded.has(x.name));
   return (
     <>
       <Default {...p} properties={open} />
