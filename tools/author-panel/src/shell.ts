@@ -40,9 +40,7 @@ export const LAYOUT: Layout = {
 
 export const reset = (side: Side) => RANGE[side][2];
 export const clamp = (side: Side, px: number, most = RANGE[side][1]) =>
-  Number.isFinite(px)
-    ? Math.min(most, Math.max(RANGE[side][0], Math.round(px)))
-    : reset(side);
+  Number.isFinite(px) ? Math.min(most, Math.max(RANGE[side][0], Math.round(px))) : reset(side);
 const GROW: Record<Side, Record<string, number>> = {
   left: { ArrowRight: 1, ArrowLeft: -1 },
   right: { ArrowLeft: 1, ArrowRight: -1 },
@@ -68,7 +66,12 @@ export function load(storage: Pick<Storage, 'getItem'>): Layout {
     // a hand-edited or old value: the defaults
   }
   const l = { ...LAYOUT, ...kept };
-  return { ...l, left: clamp('left', l.left), right: clamp('right', l.right), slot: clamp('slot', l.slot) };
+  return {
+    ...l,
+    left: clamp('left', l.left),
+    right: clamp('right', l.right),
+    slot: clamp('slot', l.slot),
+  };
 }
 export const save = (storage: Pick<Storage, 'setItem'>, l: Layout) =>
   storage.setItem(STORE, JSON.stringify(l));
@@ -114,6 +117,8 @@ export const COMMANDS: Item[] = [
   // the map's edits on the selected room (mapwire.ts `mapCommand`)
   ['map-grow', 'New room from here'],
   ['map-area', 'Move room to area'],
+  ['map-npc', 'New NPC here'],
+  ['map-item', 'New item here'],
   ['map-unlink', 'Delete exit'],
   ['map-one-way', 'One-way exit (toggle)'],
   ['map-door', 'Door on exit'],
