@@ -121,7 +121,8 @@ export function StubButton({ c, a }: { c: Stub; a: ChipAct }) {
   );
 }
 
-// focus or a press on another chip moves the card; Radix would close it after the chip opened it
+// focus or a press on another chip moves the card; Radix would close it after the chip opened it.
+// Esc is the graph's (one thing per press), not Radix's document-level dismiss.
 const stay = (e: Event) => (e.target as Element).closest?.('[data-id]') && e.preventDefault();
 
 export type CardAct = {
@@ -149,7 +150,7 @@ export function Card({ s, f, ref: r, a }: { s: Story; f: Flow; ref: string; a: C
     </Button>
   );
   return (
-    <PopoverContent data-flow-card align="start" className="w-[280px] p-2 text-xs" onOpenAutoFocus={(e) => e.preventDefault()} onInteractOutside={stay} onKeyDown={keys}>
+    <PopoverContent data-flow-card align="start" className="w-[280px] p-2 text-xs" onOpenAutoFocus={(e) => e.preventDefault()} onInteractOutside={stay} onEscapeKeyDown={(e) => e.preventDefault()} onKeyDown={keys}>
       <p className="flex items-center gap-1">
         {I ? <I {...ICONED} /> : null}
         <span className="font-mono">{key(r)}</span>
