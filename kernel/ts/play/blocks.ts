@@ -33,7 +33,7 @@ export const fightOf = (fights: Section<FightsReport>, key: string) =>
 /** An hour's walker ui with its room keys (a lone room, a case list's fallback) drawn by the room picker. */
 export function roomPicks(ui: Ui): Ui {
   const each = (b: Ui): Ui =>
-    b?.['ui:title'] === 'Key'
+    ['room key', 'Key'].includes(b?.['ui:title'] as string) // a lone room (source.ex), a case's fallback
       ? { ...b, 'ui:field': 'DefinitionRef' }
       : b?.items
         ? { ...b, items: roomPicks(b.items) }

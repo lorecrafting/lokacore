@@ -8877,7 +8877,7 @@
             "anyOf": [
               {
                 "$ref": "#/$defs/Key",
-                "title": "room"
+                "title": "room key"
               },
               {
                 "additionalProperties": false,
@@ -11599,7 +11599,7 @@
             "anyOf": [
               {
                 "$ref": "#/$defs/Key",
-                "title": "room"
+                "title": "room key"
               },
               {
                 "additionalProperties": false,

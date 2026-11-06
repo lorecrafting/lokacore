@@ -425,7 +425,7 @@ defmodule Loka.Content.Source do
     one = defs["ScheduleCases"]["items"]
 
     hour = [
-      %{"$ref" => "Key", "title" => "room"},
+      %{"$ref" => "Key", "title" => "room key"},
       Map.merge(one, %{
         "properties" => Map.delete(one["properties"], "when"),
         "required" => ~w(room walks),
