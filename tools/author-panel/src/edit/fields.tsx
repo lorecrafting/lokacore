@@ -81,6 +81,5 @@ export const fields = {
   Step: Rules,
   AnyOfField: Rules,
   OneOfField: Rules,
-  'blocks/Rules': Rules,
   Hidden,
 };
