@@ -57,7 +57,7 @@ function useNamed(diag: Diag): Named {
   useEffect(() => {
     const doc = async ({ rel }: (typeof ROOTS)[number]) => {
       const r = await fetch(`/__author/source?file=${rel}`);
-      return r.ok ? JSON.parse((await r.json()).bytes) : {};
+      return r.ok ? JSON.parse((await r.json()).bytes) : {}; // mutate-skip: the fetch, walked in Chrome; its keys are rootNames'
     };
     void Promise.all(ROOTS.map(doc)).then((docs) => setNamed(rootNames(docs)));
   }, [stamp]);
