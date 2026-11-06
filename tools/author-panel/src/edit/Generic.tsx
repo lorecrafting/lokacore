@@ -116,10 +116,10 @@ export function Header({ rel, diag, undo }: { rel: string; diag: Diag; undo?: ()
 }
 
 type Card = ReturnType<typeof useCard>;
-type FormProps = { rel: string; card: Card; context: Context; diag: Diag; ui: UiSchema };
+type FormProps = { rel: string; card: Card; context: Context; diag: Diag; ui: UiSchema; fields?: typeof fields };
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
-export function CardForm({ rel, card, context, diag, ui }: FormProps) {
+export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
   return (
     <div onBlur={card.commit}>
       <Form
@@ -127,7 +127,7 @@ export function CardForm({ rel, card, context, diag, ui }: FormProps) {
         uiSchema={ui}
         formData={card.draft}
         validator={validator}
-        fields={fields}
+        fields={picks}
         templates={templates}
         showErrorList={false}
         formContext={context}

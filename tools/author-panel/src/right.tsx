@@ -1,11 +1,12 @@
 // The shell's right column: the inspector (the selection's summary, then the generic card that edits
 // its `.json` source) over the console (the change feed, you or outside, and the last compile's diagnostics).
-import { editable } from '../../../kernel/ts/play/card.ts';
+import { editable, worldFile } from '../../../kernel/ts/play/card.ts';
 import type { Change, Story, useDiagnostics } from './author.ts';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card.tsx';
+import { World } from './edit/cards/World.tsx';
 import { Generic } from './edit/Generic.tsx';
 import { Room } from './edit/cards/Room.tsx';
-import { places, type Selection } from './shell.ts';
+import { fileOf, places, type Selection } from './shell.ts';
 
 type Props = {
   sel?: Selection;
@@ -24,7 +25,7 @@ export function Inspector({ sel, story, diag, edit, offer }: Props) {
       </p>
     );
   const ref = places(sel, story?.graph.nodes ?? []).inspector?.ref;
-  const rel = ref ? story?.files[ref] : undefined;
+  const rel = fileOf(sel, ref, story?.files);
   const context = { kind: sel.kind, key: sel.key, nodes: story?.graph.nodes ?? [], edit };
   const count = (rows?: Record<string, unknown[]>) => (ref && rows?.[ref]?.length) || 0;
   const unreached =
@@ -86,6 +87,8 @@ export function Feed({ changes }: { changes: Change[] }) {
 function Editor({ rel, offer, ...props }: Parameters<typeof Room>[0]) {
   return /(^|\/)rooms\/[^/]+\.json$/.test(rel) ? (
     <Room key={rel} rel={rel} offer={offer} {...props} />
+  ) : worldFile(rel) ? ( // mutate-skip: draw; the choice is worldFile, pinned in card.test.ts
+    <World key={rel} rel={rel} {...props} />
   ) : (
     <Generic key={rel} rel={rel} {...props} />
   );

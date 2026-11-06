@@ -1,3 +1,4 @@
+// size: allow 360, every card's logic lives here (cards hold no logic): the generic, Room and World cards' steps
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -154,6 +155,92 @@ export function hidden(
 /** The keys of the nodes of the kind a reference field names (`room` lists rooms); [] is free text. */
 export const choices = (field: string, nodes: { ref: string; kind: string }[]) =>
   nodes.filter((n) => n.kind === field).map((n) => n.ref.slice(n.ref.lastIndexOf('/') + 1));
+
+/** What a world file's reference field names, by its field (a transport's `reverse` is a transport). */
+const PICKS: Record<string, string> = {
+  ...Object.fromEntries(
+    'entry home area room rooms destination recovery_rooms corridor drop_rooms shrine surface bottom'
+      .split(' ')
+      .map((f) => [f, 'room']),
+  ),
+  ...Object.fromEntries(
+    'corpse npc_corpse player_corpse item items key_item nest'.split(' ').map((f) => [f, 'item']),
+  ),
+  ...Object.fromEntries('npc recipient allies with'.split(' ').map((f) => [f, 'npc'])),
+  reverse: 'transport',
+  currency: 'resource',
+  resource: 'resource',
+  attribute: 'attribute',
+};
+
+// every cartridge's resource pools, listed in resources.json or not (lib/loka/content/resources.ex @defaults)
+const POOLS = ['hp', 'ma', 'mv'];
+
+/**
+ * The World card's picker at `path` (its last named step picks the kind): the keys it offers, from
+ * the story's nodes or, for a resource or attribute, the root file's `named` keys; none when free.
+ */
+export function pickable(
+  path: Step[],
+  nodes: { ref: string; kind: string }[],
+  named: Record<string, string[]>,
+  value?: unknown,
+) {
+  const kind = PICKS[path.filter((s) => typeof s === 'string').at(-1) ?? ''];
+  // a value that is not a key (a global ref's object) keeps its own field
+  if (!kind || (value !== undefined && typeof value !== 'string')) return undefined;
+  const keys = named[kind] ?? choices(kind, nodes);
+  return { kind, keys: kind === 'resource' ? [...new Set([...POOLS, ...keys])] : keys };
+}
+
+/** A key the picker refuses: one no definition of its kind has; none known yet (no compile) is free text. */
+export function refusePick(pick: ReturnType<typeof pickable>, value: string) {
+  return pick?.keys.length && value && !pick.keys.includes(value)
+    ? `no ${pick.kind} ${value}`
+    : undefined;
+}
+
+/** A new root-file entry's key: lowercase words joined by `_`, not one the file has. */
+export function refuseKey(key: string, taken: Record<string, unknown>) {
+  if (!/^[a-z][a-z0-9_]{0,63}$/.test(key))
+    return 'a key is up to 64 lowercase letters, digits and _';
+  return Object.hasOwn(taken, key) ? `already ${key}` : undefined;
+}
+
+/** The World card's keyed root files, each new entry's least fields (ResourceSpec, AttributeSpec) at 0. */
+export const ROOTS: { rel: string; field: string; blank: Record<string, number> }[] = [
+  {
+    rel: 'resources.json',
+    field: 'resources',
+    blank: { minimum: 0, maximum: 0, start: 0, gain: 0 },
+  },
+  { rel: 'attributes.json', field: 'attributes', blank: { start: 0 } },
+];
+
+/** A file the World card opens: a root file (`root`), or one population, transport or barrier. */
+export const worldFile = (rel: string, root = false) =>
+  /^(cartridge|resources|attributes)\.json$/.test(rel) ||
+  (!root && /(^|\/)(populations|transports|barriers)\/[^/]+\.json$/.test(rel));
+
+/** The resource and attribute keys the ROOTS docs (in order) hold: `{resource: [...], attribute: [...]}`. */
+export const rootNames = (docs: unknown[]): Record<string, string[]> =>
+  Object.fromEntries(
+    ROOTS.map(({ field }, i) => [
+      field.slice(0, -1),
+      Object.keys(((docs[i] ?? {}) as Obj)[field] ?? {}),
+    ]),
+  );
+
+/** What changes when a ROOTS file is written, so the card refetches its keys then only. */
+export const rootStamp = (changes: { file: string; sha256: string }[]) =>
+  changes
+    .filter((c) => ROOTS.some((r) => r.rel === c.file))
+    .map((c) => c.sha256)
+    .join();
+
+/** A typed field's value: an emptied field is unset, a number field's text a number. */
+export const entered = (text: string, number = false) =>
+  text === '' ? undefined : number ? Number(text) : text;
 
 const opOf = (branch: Obj): unknown => (branch.properties as any)?.op?.const;
 const typeOf = (v: unknown) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v);
