@@ -100,9 +100,11 @@ export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
 function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubscription) {
   const { current, setStack, setFlip, redraw } = s;
   const before = current.current;
+  const fell = pr.died();
   const terminal = pr.update(update);
   const after = pr.screen();
-  let next = pagesAfter(before.stack, before.view, after.view);
+  const died = !!after.dead && after.died !== fell; // the dead page, not a fight's close: turn to it from any page
+  let next = died ? [] : pagesAfter(before.stack, before.view, after.view);
   next = restoredCompletion(p, s, update, after, next);
   if (terminal) next = resultPages(next, after);
   if (terminal && update.kind === 'completion')
@@ -112,7 +114,8 @@ function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubs
   current.current = { stack: next, view: after.view };
   visit(pr, next);
   setStack(next);
-  if (terminal && next !== before.stack) setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
+  if ((terminal || died) && next !== before.stack && (!died || before.stack.length))
+    setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
   redraw((n) => n + 1);
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);

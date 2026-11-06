@@ -6,5 +6,8 @@ files: [tools/author-panel/src/**]
 rule:
   kind: jsx_attribute
   has: { kind: property_identifier, regex: '^(fill|stroke|color)$' }
-  all:
+  # a literal, braced or not: stroke="red", stroke={'red'}, stroke={`red`}
+  any:
     - has: { kind: string }
+    - has: { kind: jsx_expression, has: { kind: string } }
+    - has: { kind: jsx_expression, has: { kind: template_string, not: { has: { kind: template_substitution } } } }

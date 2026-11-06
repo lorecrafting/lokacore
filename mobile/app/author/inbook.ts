@@ -1,22 +1,10 @@
-// size: allow 330, the field, its saves, walk keys, add-here menu and note room share its state
+// size: allow 320, the field's open, save, put-back, walk keys and add-here menu share its state
 // E5, prose in the Book (docs/design/prose-in-the-book-rulings.md): a double-click turns a line
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
 import type { Message } from './live.ts';
-import {
-  noFieldNote,
-  oneLine,
-  CSS,
-  paletteNear,
-  paper,
-  saving,
-  step,
-  textField,
-  unwritten,
-  walk,
-  selects,
-  shortcut,
-} from './prose_rules.ts';
+import { noFieldNote, oneLine, CSS, paletteNear, paper, saving, step } from './prose_rules.ts';
+import { textField, unwritten, walk, selects, shortcut } from './prose_rules.ts';
 
 export { tagged } from './prose_rules.ts';
 type Hooks = {
@@ -46,8 +34,7 @@ let landed: HTMLElement | undefined;
 let selected: { kind: string; key: string; add?: string[] } = { kind: '', key: '' }; // the panel's selection: its lines are marked
 let asked = false; // a Book click: the selection's add-here menu shows once the panel offers it
 let counted = '';
-let note: HTMLDivElement;
-let spaced: [HTMLElement, string] | undefined; // the line the note sits under, and its own bottom margin
+let note: HTMLDivElement, spaced: HTMLElement | undefined; // spaced: the line the note sits under
 const observer =
   typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(reapply);
 const watch = () =>
@@ -67,14 +54,12 @@ function say(
   note.replaceChildren(text, ...buttons.map(([name, run]) => button(name, run)));
   note.toggleAttribute('data-warn', warn);
   note.hidden = !el || !text;
-  if (spaced) spaced[0].style.marginBottom = spaced[1];
-  spaced = undefined;
+  spaced?.style.removeProperty('margin-bottom');
+  spaced = note.hidden ? undefined : el; // book-ui.md, No field: the lines below make room
   if (!el) return;
   const r = el.getBoundingClientRect();
   Object.assign(note.style, { left: `${r.left + scrollX}px`, top: `${r.bottom + scrollY}px` });
-  if (note.hidden) return;
-  spaced = [el, el.style.marginBottom]; // book-ui.md, No field: the lines below make room, never covered
-  el.style.marginBottom = `${note.offsetHeight}px`;
+  if (spaced) el.style.marginBottom = `${note.offsetHeight}px`;
 }
 const button = (name: string, run: () => void) => {
   const b = document.createElement('button');
@@ -259,7 +244,7 @@ function offer() {
   );
 }
 const onClick = (e: Event) => {
-  asked = !note.contains(e.target as Node); // a pick from the menu asks for no second one
+  asked = lines().some((l) => l.contains(e.target as Node)); // a Book line asks; the menu, nothing
   hush(); // (it empties the note)
   if ((e.target as Element).closest?.('[data-loka-selected]')) offer();
   if (!landed) return;
@@ -321,6 +306,7 @@ export function start(given: Hooks) {
     for (const [target, name, run] of on) target.removeEventListener(name, run, true);
     observer?.disconnect();
     style.remove();
+    say(undefined); // gives the line its margin back
     note.remove();
   };
 }

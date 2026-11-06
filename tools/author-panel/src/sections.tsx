@@ -9,6 +9,7 @@ import { Button } from './components/ui/button.tsx';
 import { GoToRoom, SetFact, SetLevel } from './cheats.tsx';
 import { Input } from './components/ui/input.tsx';
 import { Separator } from './components/ui/separator.tsx';
+import { Refusal } from './edit/templates.tsx';
 import { START } from './shell.ts';
 
 export const Heading = ({ children }: { children: React.ReactNode }) => (
@@ -147,10 +148,8 @@ function Checkpoints({ state, send }: { state?: State; send: Send }) {
           Save
         </Button>
       </form>
-      {name && !named ? (
-        <p className="mt-1 text-xs text-destructive">A name is up to 64 lower-case letters, digits, - and _, starting with a letter or digit.</p>
-      ) : null}
-      {note ? <p className="mt-1 text-xs text-destructive">{note}</p> : null}
+      {name && !named ? <div className="mt-1 text-xs"><Refusal>A name is up to 64 lower-case letters, digits, - and _, starting with a letter or digit.</Refusal></div> : null}
+      {note ? <div className="mt-1 text-xs"><Refusal>{note}</Refusal></div> : null}
       <CheckpointList names={names} jump={jump} />
     </div>
   );

@@ -102,6 +102,12 @@ export function label(key: string, zoom: number) {
   const fits = Math.floor((M.w * zoom - 2 * M.inset) / M.char);
   return { text: key.length <= fits ? key : `${key.slice(0, Math.max(fits - 1, 0))}…` };
 }
+/** A marked room's pill: where its box shows no whole key; the current room's box draws the pin, not its key. */
+export const pill = (key: string, zoom: number, here: boolean) => here || label(key, zoom)?.text !== key;
+
+/** A failed /story that keeps the last map (map ruling: only a refusal replaces it): no answer, or
+ * vite's 502 with the watcher down. The watcher's own refusal is its 500 with the sentence. */
+export const kept = (e: Error & { status?: number }) => e.status === undefined || e.status >= 502;
 
 const clampZoom = (z: number, min: number) => Math.min(M.max, Math.max(min, z));
 const within = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -144,7 +150,7 @@ export const least = (b: Bounds, box: Box) => Math.min(M.min, fit(b, box, M.floo
 
 /** Zoom by `factor` about the screen point `p`, within `min` to 3. */
 export function zoomAt(v: View, factor: number, p: { x: number; y: number }, min = M.min): View {
-  const zoom = clampZoom(v.zoom * factor, min);
+  const zoom = clampZoom(v.zoom * factor, Math.min(min, v.zoom)); // a view under `min` only zooms in
   const k = zoom / v.zoom;
   return { zoom, x: p.x - (p.x - v.x) * k, y: p.y - (p.y - v.y) * k };
 }

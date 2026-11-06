@@ -210,9 +210,14 @@ function readOutline(source: string): Outline | { refused: string } | null {
   } catch (e) {
     return { refused: `outline.json: ${(e as Error).message}` };
   }
-  return isOutline(outline)
+  if (!isOutline(outline))
+    return { refused: 'outline.json: not the shape of schemas/source/outline.schema.json' };
+  // a beat's n is its row id, its palette target and the beat Bind writes to: two of one n are refused
+  const ns = outline.parts.flatMap((p) => p.beats.map((b) => b.n));
+  const twice = ns.find((n, i) => ns.indexOf(n) !== i);
+  return twice === undefined
     ? outline
-    : { refused: 'outline.json: not the shape of schemas/source/outline.schema.json' };
+    : { refused: `outline.json: beat ${twice} is numbered twice` };
 }
 
 function beats(source: string, bound: Bound) {

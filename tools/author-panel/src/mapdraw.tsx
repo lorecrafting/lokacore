@@ -152,7 +152,7 @@ export function Box({ r, v, m }: { r: MapRoom; v: View; m: Marks }) {
   if (v.zoom < M.overview)
     return (
       <>
-        <circle cx={c.x} cy={c.y} r={M.disc / 2} className={look} />
+        <circle cx={c.x} cy={c.y} r={M.disc / 2} className={`${m.unreached ? 'fill-none' : 'fill-input'} ${stroke}`} />
         <circle cx={c.x} cy={c.y} r={M.disc / 2 + 3} className={RING} />
       </>
     );

@@ -6,7 +6,15 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
-import { cmp, F, layers, layout, type Flow } from '../../../tools/author-panel/src/flow.ts';
+import {
+  burst,
+  cmp,
+  F,
+  inColumn,
+  layers,
+  layout,
+  type Flow,
+} from '../../../tools/author-panel/src/flow.ts';
 import * as read from '../../../tools/author-panel/src/flowread.ts';
 import { LAYOUT } from '../../../tools/author-panel/src/shell.ts';
 import type { Story } from '../../../tools/author-panel/src/storylist.ts';
@@ -356,6 +364,42 @@ test('12 reactions: no stub; 13: 12 and a +1 of the next kind, the lane 13 rows;
   assert.equal(layout(s, { fold: [], reveal: ref('action', 'zz') }).chips.length, 13);
   assert.equal(layout(s, { fold: [], reveal: ref('action', 'elsewhere') }).chips.length, 12);
   assert.deepEqual([F.cap, F.rows, F.hoverDelay], [12, 6, 300]);
+});
+
+// Break: a column draws its stubs after every lane's chips, so a reaction lane's +1 follows the
+// fact lane's chip below it in the DOM and the tab order.
+test("a column lists a lane's stub before the next lane's chips", () => {
+  const twelve = Array.from({ length: 12 }, (_, i) =>
+    ref('reaction', `r${String(i).padStart(2, '0')}`),
+  );
+  const fl = layout(model([...twelve, ref('action', 'zz'), ref('fact', 'f9')], []), OPEN);
+  assert.deepEqual(
+    inColumn(fl, 0)
+      .slice(-2)
+      .map((x) => x.id),
+    ['more:layer:0|reaction', ref('fact', 'f9')],
+  );
+});
+
+// Break: the first story dots every change since page load, not the last burst; or a later one
+// dots a change it already showed.
+test('burst: the first story takes the last burst, a later one only what is newer', () => {
+  const c = (file: string, seen: number) => ({ file, seen });
+  const changes = [c('b.json', 20), c('c.json', 20), c('a.json', 10)];
+  assert.deepEqual(
+    burst(changes).map((x) => x.file),
+    ['b.json', 'c.json'],
+  );
+  assert.deepEqual(
+    burst(changes, 10).map((x) => x.file),
+    ['b.json', 'c.json'],
+  );
+  assert.deepEqual(burst(changes, 20), []);
+  assert.deepEqual(
+    burst([c('d.json', 30), c('a.json', 10)]).map((x) => x.file),
+    ['d.json'],
+  );
+  assert.deepEqual(burst([]), []);
 });
 
 // Breaks: a filter keeps a node without words to write (or drops one with a single `~`) or without a problem, or a name drops

@@ -260,3 +260,11 @@ export function layout(s: Story, st: FlowState) {
     h,
   };
 }
+
+/** A column's chips and stubs top to bottom, so a lane's stub comes before the next lane's chips. */
+export const inColumn = (f: Flow, col: number) =>
+  [...f.chips, ...f.stubs].filter((x) => x.col === col).sort((a, b) => a.y - b.y);
+
+/** The changes newer than `since`; before any story, the last burst (one message shares one `seen`). */
+export const burst = <C extends { seen: number }>(changes: C[], since?: number) =>
+  changes.filter((c) => (since === undefined ? c.seen === changes[0]!.seen : c.seen > since));

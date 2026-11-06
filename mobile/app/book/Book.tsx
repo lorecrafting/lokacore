@@ -73,12 +73,13 @@ export function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, 
       ? s.restoreInvocation.current
       : undefined;
   const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
-  const fell = pr.screen().died;
+  const fell = pr.died();
   pr.press(b, detail);
   if (stale && !pr.recovered()) return s.redraw((n) => n + 1);
   const after = pr.screen(),
     before = s.current.current;
-  let next = pagesAfter(before.stack, before.view, after.view);
+  const died = !!after.dead && fell !== after.died; // as updates.ts: the dead page clears the stack
+  let next = died ? [] : pagesAfter(before.stack, before.view, after.view);
   if (
     restoring &&
     s.restoreInvocation.current === restoring &&
@@ -99,13 +100,12 @@ export function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, 
     npcPage(before.stack.at(-1), before.view) ||
     ['shelf', 'sale'].includes(before.stack.at(-1)?.kind ?? '') ||
     POSITION_ACTIONS.includes(b.command ?? b.action_key);
-  if (next === before.stack && inline && !before.view.scene && !after.view.scene)
-    s.redraw((n) => n + 1);
-  else {
-    s.setStack(next);
-    const riffle = riffles(b.command, before.view, after.view, fell !== after.died);
-    s.setFlip((f) => ({ turn: f.turn + 1, dir: 1, riffle }));
-  }
+  s.setStack(next);
+  const fresh = died && !before.stack.length; // the World page changes in place
+  if (fresh || (next === before.stack && inline && !before.view.scene && !after.view.scene))
+    return s.redraw((n) => n + 1);
+  const riffle = riffles(b.command, before.view, after.view, fell !== after.died);
+  s.setFlip((f) => ({ turn: f.turn + 1, dir: 1, riffle }));
 }
 
 // The spirit state's clock: a redraw as its next line dries or its next second passes; Rise ends it.

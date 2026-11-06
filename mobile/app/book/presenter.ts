@@ -63,9 +63,7 @@ function background(
   s: Logs,
   text: Say,
 ) {
-  s.status = update.status;
-  s.returnWorld = false;
-  s.returnDetail = undefined;
+  [s.status, s.returnWorld, s.returnDetail] = [update.status, false, undefined];
   if (update.status.kind === 'error') s.fault = update.status.message;
   if (update.status.kind === 'fault') s.fault = `Time stopped: ${update.status.code}`;
   if (update.status.kind === 'replaced') s.fault = 'This game has been replaced; reopen it.';
@@ -282,6 +280,7 @@ export function presenter(game: Game) {
       return terminal;
     },
     recovered: () => !!s.recovered,
+    died: () => s.died, // screen() moves the live region's mark: read the death bare
     // A pending retry keeps the original detail, even when retried from the world.
     press: (b: Button, detail?: string) => {
       newRound(s.combatLog);

@@ -72,6 +72,8 @@ const place = (s: Run, r: MapRoom, at: At) =>
     );
     if (taken) no(`${taken.room} is in that cell`);
     const i = rows.findIndex((o) => o.room === r.key);
+    const was = rows[i];
+    if (was && was.x === at.x && was.y === at.y && was.z === at.z) return []; // its own cell: no write
     return [{ path: [i < 0 ? rows.length : i], value: { room: r.key, ...at } }];
   });
 

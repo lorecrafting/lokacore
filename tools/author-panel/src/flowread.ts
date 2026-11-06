@@ -1,7 +1,7 @@
 // What the Flow graph reads off its layout (rulings S3): focus and follow ink, search, the footer,
 // the hover card, the keys and the palette rows. No React; tested from kernel/ts/test/author_flow.test.ts.
 import { reads } from '../../../kernel/ts/play/reads.ts';
-import { cmp, F, key, laneOf, plural, solid, type Chip, type Flow, type Part, type Stub } from './flow.ts';
+import { cmp, F, inColumn, key, laneOf, plural, solid, type Chip, type Flow, type Part, type Stub } from './flow.ts';
 import { nearest, type MapRoom } from './map.ts';
 import { fromRef, type Item, type Layout } from './shell.ts';
 import { go, isOpen, LIST, outlineOf, toggle, type Edge, type Story } from './storylist.ts';
@@ -97,7 +97,7 @@ export function step(s: Story, f: Flow, id: string, k: string, shift = false): s
   const { drawn, room } = grid(f);
   const from = drawn.find((c) => c.id === id);
   if (!from) return undefined;
-  const top = (col: number) => drawn.filter((c) => c.col === col).sort((a, b) => a.y - b.y)[0]?.id;
+  const top = (col: number) => inColumn(f, col)[0]?.id;
   const ofPart = (p?: Part) => p && top(f.columns.findIndex((c) => c.part === p.id));
   const partAt = f.parts.findIndex((p) => p.id === f.columns[from.col].part);
   if (k.startsWith('Arrow')) return nearest(drawn.map(room), room(from), k)?.key;

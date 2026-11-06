@@ -48,6 +48,7 @@ let ed: Editor;
 let close = () => {};
 let ask: (path: string) => Promise<{ ok: boolean; told: any }>;
 let snapshot: Record<string, string>;
+let io: Io;
 
 before(async () => {
   // CI has mix but no mise: the stub runs the command (as ci.yml's kernel job does)
@@ -84,7 +85,7 @@ before(async () => {
       req.end(sent && JSON.stringify(sent));
     });
   ask = http;
-  const io: Io = {
+  io = {
     post: (route, sent) => http(`/${route}`, sent),
     source: async (file) => (await http(`/source?file=${encodeURIComponent(file)}`)).told,
   };
@@ -105,6 +106,14 @@ test('a drag writes the layout cell, appends an unplaced room, and refuses a tak
     { room: 'start', x: 0, y: 1, z: 0 },
     { room: 'b', x: 1, y: 0, z: 0 },
   ]);
+});
+
+test("a drop on the room's own cell writes nothing", async () => {
+  // Breaks: the drop writing its identical layout row (a recompile and an undo step for nothing).
+  let posts = 0;
+  const counted = editor({ ...io, post: (route, sent) => (posts++, io.post(route, sent)) });
+  await counted.place(start, { x: 0, y: 1, z: 0 });
+  assert.equal(posts, 0);
 });
 
 test('an exit draw writes both faces, a one-way draw one, and a refused draw puts its first face back', async () => {

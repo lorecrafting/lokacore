@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 540, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
+// size: allow 615, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -40,7 +40,8 @@ before(async () => {
   const io: SpawnOptions = { env, detached: true, stdio: ['ignore', 'ignore', 'inherit'] };
   const showcase = join(dir, 'showcase'); // a copy: the block tests write
   cpSync(join(ROOT, 'cartridges/toolbox_showcase'), showcase, { recursive: true });
-  for (const w of ['identity_sampler', 'scene_sampler']) // the scene test's POST /world siblings
+  for (const w of ['identity_sampler', 'scene_sampler'])
+    // the scene test's POST /world siblings
     cpSync(join(ROOT, 'cartridges', w), join(dir, w), { recursive: true });
   procs.push(spawn(join(ROOT, 'bin/loka'), ['dev', showcase, '--watch'], io));
   procs.push(
@@ -78,7 +79,8 @@ async function open(layout: object, ready = 'Inspector'): Promise<Page> {
     }
   }
   // any card's form, or the named control (a `.scene` card has no form)
-  const at = ready === 'Inspector' ? page.locator('[aria-label="Inspector"] form') : page.getByLabel(ready);
+  const at =
+    ready === 'Inspector' ? page.locator('[aria-label="Inspector"] form') : page.getByLabel(ready);
   await at.waitFor({ timeout: boot });
   return page;
 }
@@ -108,7 +110,10 @@ test('a tall room card scrolls inside the inspector, not the page', async () => 
     ]);
   assert.equal(page_, 0, 'the page scrolls');
   assert.ok(box > 0, 'the room card fits: this test no longer opens a tall card');
-  assert.ok((await page.getByLabel('Console').boundingBox())!.height >= 100, 'the console is squeezed to a sliver');
+  assert.ok(
+    (await page.getByLabel('Console').boundingBox())!.height >= 100,
+    'the console is squeezed to a sliver',
+  );
 });
 
 // Breaks: clicking the minutes field leaves its text, so typing appends (60 then 600 → 60600; loka-wfrgk.55).
@@ -119,6 +124,25 @@ test('typing in the game minutes field replaces its text', async () => {
   await field.click();
   await page.keyboard.type('5');
   assert.equal(await field.inputValue(), '5');
+});
+
+// Breaks: the palette asks /find on every keystroke, not once the typing pauses (loka-vduxr.67), or
+// drops its answer (palette.tsx useFound).
+test('the palette asks /find once per pause in the typing', async () => {
+  const page = await open(QUEST);
+  const asked: string[] = [];
+  page.on('request', (r) => void (r.url().includes('/__author/find?') && asked.push(r.url())));
+  const hit = { at: 'text.json:1', text: '"quest.zz.name": "a stubbed carry line",' }; // its words become a row
+  await page.route('**/__author/find?*', (r) => r.fulfill({ json: { hits: [hit] } }));
+  await page.keyboard.press('Control+k');
+  await page.getByLabel('Find a key, a ~ or a command').pressSequentially('carry', { delay: 10 }); // keys well inside the 150 ms pause, even under load
+  await page.waitForTimeout(600);
+  assert.deepEqual(
+    asked.map((u) => new URL(u).searchParams.get('q')),
+    ['carry'],
+  );
+  await page.getByText('a stubbed carry line').waitFor();
+  await page.close();
 });
 
 // Breaks: a quest or dialogue opens the generic card (right.tsx's dispatch), a quest's own name is
@@ -448,6 +472,76 @@ test('the flow graph refilters within 100 ms', async (t) => {
     await relayout();
     return ms;
   });
+});
+
+// Breaks: a refused compile's /story 500 shows no refusal in the map slot, or shows more than its first
+// line (App.tsx useStory's failure rule, author.ts story's throw).
+test('a refused /story shows its first line in the map slot', async () => {
+  const page = await open(QUEST);
+  const said = JSON.stringify({ text: {}, said: ['refused'], compiled: false }); // the watcher spoke
+  await page.route('**/__author/events', (r) =>
+    r.fulfill({ contentType: 'text/event-stream', body: `data: ${said}\n\n` }),
+  );
+  await page.route('**/__author/story', (r) =>
+    r.fulfill({ status: 500, body: 'first line\nsecond line' }),
+  );
+  await page.reload();
+  const slot = page.getByLabel('Map slot');
+  await slot.getByText('first line').waitFor({ timeout: boot });
+  assert.equal(await slot.getByText('second line').count(), 0);
+  await page.close();
+});
+
+// Breaks: Cmd-E opens nothing for the selection (App.tsx's shortcut, loka-wfrgk.21).
+test('Cmd-E asks to open the selected card’s file', async () => {
+  const page = await open(QUEST);
+  const sent: { key?: string }[] = [];
+  await page.route(
+    '**/__author/open',
+    (r) => (sent.push(r.request().postDataJSON()), r.fulfill({ body: '{}' })),
+  ); // no editor opens
+  await page.keyboard.press('Control+e');
+  for (let i = 0; i < 50 && !sent.length; i++) await page.waitForTimeout(100);
+  assert.deepEqual(
+    sent.map((s) => s.key),
+    ['carry_letter'],
+  );
+  await page.close();
+});
+
+// Breaks: the checkpoint name's refusal shows for a good name, or not for a bad one (sections.tsx).
+test('a bad checkpoint name is refused, a good one is not', async () => {
+  const page = await open({ ...QUEST, leftOpen: true, tab: 'project' });
+  const name = page.getByLabel('Checkpoint name');
+  const refusal = page.getByText('A name is up to 64');
+  await name.fill('Bad Name');
+  await refusal.waitFor();
+  await name.fill('good_name');
+  await refusal.waitFor({ state: 'detached' });
+  await page.close();
+});
+
+// Breaks: a selected room's pill shows while its box already shows the whole key (loka-vduxr.73), or
+// hides when zoomed out where the box shows none (mapsvg.tsx Drawing's Pills filter); or the footer
+// loses its counts when nothing is refused (areamap.tsx's footer line).
+test('the selected room has a pill only where its box shows no whole key', async () => {
+  const page = await open({ selection: { kind: 'room', key: 'tollhouse' } });
+  const slot = page.getByLabel('Map slot');
+  const pills = slot.locator('g.pointer-events-none text');
+  const pill = pills.filter({ hasText: 'tollhouse' });
+  const zoom = async (name: string) => {
+    for (let i = 0; i < 12; i++) {
+      await slot.getByRole('button', { name }).click({ timeout: boot });
+      await page.waitForTimeout(100); // each step eases from where the last one is
+    }
+  };
+  await slot.getByText(/^\d+ rooms/).waitFor({ timeout: boot });
+  await zoom('Zoom out'); // 0.25: a disc, no label
+  await pill.waitFor();
+  assert.deepEqual(await pills.allTextContents(), ['tollhouse']); // no other room is marked
+  await zoom('Zoom in'); // 3: the box shows the whole key
+  await pill.waitFor({ state: 'detached' });
+  await page.close();
 });
 
 // Last: it switches the world. Breaks: a `.scene` dialogue routed to no card or the generic one, a

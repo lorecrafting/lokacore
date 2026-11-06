@@ -44,7 +44,7 @@ export function Drawing(d: DrawProps) {
         />
       ))}
       <Pills
-        rooms={d.l.level.filter((r) => [d.p.selected, d.p.here].includes(r.ref) || r.key === hover)}
+        rooms={d.l.level.filter((r) => ([d.p.selected, d.p.here].includes(r.ref) || r.key === hover) && map.pill(r.key, view.zoom, r.ref === d.p.here))}
         v={view}
         here={d.p.here}
       />
@@ -143,10 +143,12 @@ function pan(e: React.PointerEvent<SVGSVGElement>, d: DrawProps) {
     );
   const up = () => (
     el.removeEventListener('pointermove', move),
-    el.removeEventListener('pointerup', up)
+    el.removeEventListener('pointerup', up),
+    el.removeEventListener('pointercancel', up)
   );
   el.addEventListener('pointermove', move);
   el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', up); // a cancelled pan ends where it is, as a release does
 }
 
 /** A room dragged past a few pixels: to an empty cell moves it there; Shift onto another room on the
