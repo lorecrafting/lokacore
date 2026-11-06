@@ -39,7 +39,7 @@ function replayed(bundled: Bundled, steps: Step[]): string | undefined {
       time: frozenClock(() => moved),
       dev: true, // a recorded cheat replays here as in the preview
     });
-    return replay(steps, game, (ms) => (moved += ms)).failed;
+    return replay(steps, game, (ms) => (moved += ms), undefined).failed; // off the browser: no budget
   } finally {
     sql.close();
   }

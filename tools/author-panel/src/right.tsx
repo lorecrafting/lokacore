@@ -37,7 +37,8 @@ export function Inspector({ sel, story, diag, edit, offer }: Props) {
   const unreached =
     !!ref && Object.values(story!.report.unreachable).some((refs) => refs.includes(ref));
   return (
-    <Card className="m-2 gap-2 py-3" aria-label="Inspector">
+    // a tall card scrolls itself, not the page; relative, or its absolute sr-only labels escape (loka-wfrgk.44)
+    <Card className="relative m-2 min-h-0 gap-2 overflow-y-auto py-3" aria-label="Inspector">
       <CardHeader className="px-3">
         <CardTitle className="text-sm">{sel.key}</CardTitle>
         <p className="text-xs text-muted-foreground">{sel.kind}</p>

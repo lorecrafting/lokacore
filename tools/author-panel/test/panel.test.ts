@@ -88,6 +88,32 @@ test('at a 280 px inspector the quest card fits its width', async () => {
   assert.ok(scroll <= client, `card content ${scroll} px in a ${client} px inspector`);
 });
 
+// Breaks: the inspector column does not scroll (no overflow on the card's box, or a box that is not
+// positioned, which its absolute sr-only labels escape), so a tall room card stretches the page (loka-wfrgk.44);
+// or the tall card squeezes the console below it to a sliver.
+test('a tall room card scrolls inside the inspector, not the page', async () => {
+  const page = await open({ selection: { kind: 'room', key: 'tollhouse' } });
+  const [page_, box] = await page
+    .locator('[aria-label="Inspector"]')
+    .evaluate((e) => [
+      e.ownerDocument.scrollingElement!.scrollHeight - e.ownerDocument.defaultView!.innerHeight,
+      e.scrollHeight - e.clientHeight,
+    ]);
+  assert.equal(page_, 0, 'the page scrolls');
+  assert.ok(box > 0, 'the room card fits: this test no longer opens a tall card');
+  assert.ok((await page.getByLabel('Console').boundingBox())!.height >= 100, 'the console is squeezed to a sliver');
+});
+
+// Breaks: clicking the minutes field leaves its text, so typing appends (60 then 600 → 60600; loka-wfrgk.55).
+test('typing in the game minutes field replaces its text', async () => {
+  const page = await open(QUEST);
+  await page.getByRole('tab', { name: 'Project' }).click();
+  const field = page.getByLabel('Game minutes');
+  await field.click();
+  await page.keyboard.type('5');
+  assert.equal(await field.inputValue(), '5');
+});
+
 // Breaks: a quest or dialogue opens the generic card (right.tsx's dispatch), a quest's own name is
 // not a Book link (Quest.tsx's words), a dialogue's words list a field it lacks, a choice's then_failed row shows without a check (or hides
 // with one), a known target is not drafted, or a choice's link
@@ -151,7 +177,7 @@ test('the shell has no serious or critical axe violations', async () => {
   );
   // The baseline at this slice, open for the designer: the Project tab's contrast and the journal
   // outcomes' unlabelled key inputs. A fix removes its line; anything new fails.
-  assert.deepEqual(found, [
+  assert.deepEqual(found.sort(), [
     'color-contrast: #radix--trigger-project',
     'label: #root_journal_outcomes_deliver-key, #root_journal_outcomes_burn-key, #root_journal_outcomes_late-key',
   ]);

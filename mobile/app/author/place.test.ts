@@ -476,6 +476,7 @@ test('an advance is delivered and recorded only if delivered', () => {
       (ms) => moved.push(ms),
       delivered,
       (s) => steps.push(s),
+      1,
     ),
     undefined,
   );
@@ -487,6 +488,7 @@ test('an advance is delivered and recorded only if delivered', () => {
       () => {},
       stuck,
       (s) => steps.push(s),
+      1,
     ),
     'Advance: failed write; not recorded.',
   );

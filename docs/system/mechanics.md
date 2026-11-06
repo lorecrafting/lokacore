@@ -2005,7 +2005,8 @@ isle return. No general remote Take or replacement-gear system.
 
 The compiler validates `world.water`. It requires `water@1`, `skill@1`, `resource@1`,
 `schedule@1`, `death@1`, `containment@1`, `movement@1` and `position@1`, the `real_elapsed`
-time policy and the world's death and carry settings. Each route's surface room has a down exit
+time policy, the world's death and carry settings and an `hp` resource whose minimum is 0 (drowning lowers
+HP to 0; loka-kgd.219). Each route's surface room has a down exit
 to its bottom and the bottom an up exit back, neither through a barrier, and a bottom has no
 other exit. No room belongs to two routes. The swim skill is a declared skill, and the warning
 and drowned texts are declared text keys.

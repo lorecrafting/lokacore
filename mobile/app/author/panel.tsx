@@ -94,9 +94,14 @@ export function restorePlace(game: Opened | undefined) {
   }
   let outcome: ReturnType<typeof replay>;
   try {
-    outcome = replay(place.steps, game, (ms) => {
-      g.loka_dev_skew = skew() + ms;
-    });
+    outcome = replay(
+      place.steps,
+      game,
+      (ms) => {
+        g.loka_dev_skew = skew() + ms;
+      },
+      canon().manifest.time_policy?.rate,
+    );
   } catch (e) {
     // a hand-edited checkpoint or stale place with a malformed step must not stop the boot
     outcome = { done: 0, failed: `malformed step (${(e as Error).message})` };
@@ -148,7 +153,7 @@ function advance(minutes: number, game: Opened) {
     placeNote = 'This cartridge has no clock (no time_policy); there is no time to advance.';
   if (!rate || !Number.isSafeInteger(minutes) || minutes <= 0) return;
   const ms = Math.ceil((minutes * 60_000) / rate);
-  const stopped = advanced(ms, (by) => (g.loka_dev_skew = skew() + by), game, keep);
+  const stopped = advanced(ms, (by) => (g.loka_dev_skew = skew() + by), game, keep, rate);
   if (stopped) placeNote = stopped;
 }
 
