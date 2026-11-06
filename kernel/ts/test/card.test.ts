@@ -13,6 +13,7 @@ import {
   addable,
   added,
   addedHere,
+  definitionOf,
   allowed,
   apart,
   applied,
@@ -455,6 +456,18 @@ test('a field is added once (hp at the sampler pool), removed alone, added here 
   assert.equal(addedHere({ kind: 'dark', room: 'lane' }, 'lane', ['dark']), 'dark');
   assert.equal(addedHere({ kind: 'dark', room: 'well' }, 'lane', ['dark']), undefined);
   assert.equal(addedHere({ kind: 'tags', room: 'lane' }, 'lane', ['dark']), undefined);
+});
+
+// Break: the generic card's add seeds a field from the wrong definition (a prose field's key never
+// written, loka-wfrgk.24) or from a branch the file is not (an abstract, partial or command one).
+test("the generic card's file is the definition its present fields pick", () => {
+  assert.equal(definitionOf(defs, 'items', { name: 'item.a.name' }), 'source.ItemDefinition');
+  assert.equal(definitionOf(defs, 'items', { extends: 'b' }), 'partial.source.ItemDefinition');
+  assert.equal(definitionOf(defs, 'items', { abstract: true }), 'source.items');
+  assert.equal(definitionOf(defs, 'actions', { command: 'look' }), 'source.ActionDefinition');
+  assert.equal(definitionOf(defs, 'areas', {}), 'source.areas');
+  const doc = added({}, 'description', defs, definitionOf(defs, 'items', {}));
+  assert.deepEqual(doc, { description: { prose: '~' } });
 });
 
 // Break: the add menu offers a field whose owning capability the cartridge does not require, so the

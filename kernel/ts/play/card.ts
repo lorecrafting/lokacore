@@ -298,6 +298,24 @@ export function added(
   return value === undefined ? undefined : { ...doc, [f]: value };
 }
 
+/** The definition `doc` of `kind` is (`source.items` → `source.ItemDefinition`): the generated
+ * if/then/else on its present fields (`abstract`, `extends`, `command`) followed to its `$ref`. */
+export function definitionOf(defs: Record<string, Obj>, kind: string, doc: unknown): string {
+  let name = `source.${kind}`;
+  for (let n: Obj | undefined = defs[name]; n;) {
+    const ref = n.$ref as string | undefined;
+    if (ref) n = defs[(name = ref.slice(ref.lastIndexOf('/') + 1))];
+    else if (!n.if) break;
+    else {
+      const on = (((n.if as Obj).required ?? []) as string[]).every((f) =>
+        Object.hasOwn((doc ?? {}) as Obj, f),
+      );
+      n = (on ? n.then : n.else) as Obj | undefined;
+    }
+  }
+  return name;
+}
+
 /** A field `added` seeds into the draft only: written with the author's pick (a targetless offer: quests.ex:63-66). */
 export const awaits = (def: string, f: string) => `${def}.${f}` === 'source.QuestDefinition.offer';
 

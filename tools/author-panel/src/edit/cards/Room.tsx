@@ -4,10 +4,8 @@
 import { Fragment, useEffect, useState } from 'react';
 import {
   addable,
-  added,
   addedHere,
   allowed,
-  awaits,
   hidden,
   proseKey,
   removed,
@@ -139,12 +137,7 @@ export function Mechanics({
   );
 }
 
-/** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
-export const adder = (card: Card, defs: Record<string, never>, def: string) => (f: string) => {
-  const next = added((card.draft ?? {}) as Doc, f, defs, def);
-  card.reveal(f);
-  if (next) (card.change(next), awaits(def, f) || card.commit());
-};
+export { adder } from '../Generic.tsx';
 
 /** The other fields: the generic form, with the card's `own` fields (drawn above) hidden. */
 export function RoomForm({

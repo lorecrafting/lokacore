@@ -1,7 +1,7 @@
 // The generic inspector card (docs/rnd/gui-editor-design-2026-11-04.md §6, §11): rjsf draws the
 // definition's own file from its served schema; each blur posts the changed fields to
 // POST /change (kernel/ts/play/write.ts), Undo posts /undo, the compiler's refusals show at their field.
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Form from '@rjsf/core';
 import type { RJSFSchema, UiSchema } from '@rjsf/utils';
 import type { Op } from '../../../../kernel/ts/play/edit_model.ts';
@@ -10,7 +10,9 @@ import { Ajv2020 } from 'ajv/dist/2020.js';
 import {
   FORM_DEFAULTS,
   addable,
+  added,
   apart,
+  awaits,
   applied,
   diff,
   fieldErrors,
@@ -47,9 +49,8 @@ export function useCard(rel: string, diag: Diag) {
   const latest = useRef<unknown>(undefined);
   const load = useCallback(
     async (base?: unknown, sent: Op[] = []) => {
-      const s = await source(rel);
-      setSaved(s);
-      setDraft((latest.current = rebase(base, latest.current, s.doc, sent))); // keeps edits not yet sent
+      const s = await source(rel).catch((e: Error) => void setRefused(`${rel} not loaded: ${e.message}`));
+      if (s) (setSaved(s), setDraft((latest.current = rebase(base, latest.current, s.doc, sent)))); // keeps edits not yet sent
     },
     [rel],
   );
@@ -147,21 +148,25 @@ type GenericProps = { rel: string; context: Context; diag: Diag; only?: (fields:
 export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
   const card = useCard(rel, diag);
   const { saved, draft } = card;
-  if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
-  const defs = (saved.schema as { $defs: never }).$defs;
-  const ui = hidden(
-    uiSchema(saved.dir, saved.schema as never, defs, registry),
-    saved.dir,
-    registry,
-    draft,
-    card.revealed,
-  );
+  const defs = (saved?.schema as { $defs: never } | undefined)?.$defs;
+  const drawn = useMemo(() => saved && uiSchema(saved.dir, saved.schema as never, defs!, registry), [saved]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!saved || !drawn || !defs)
+    return <p className="px-3 text-xs text-muted-foreground">{card.refused ?? `Loading ${rel}`}</p>;
+  const def = definitionOf(defs, saved.dir, draft); // a prose field added writes its key `~`
+  const ui = hidden(drawn, saved.dir, registry, draft, card.revealed);
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="Card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
-      <AddMenu fields={only(addable(saved.dir, registry, draft, card.revealed), defs)} reveal={card.reveal} />
+      <AddMenu fields={only(addable(saved.dir, registry, draft, card.revealed), defs)} reveal={adder(card, defs, def)} />
     </div>
   );
 }
+
+/** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
+export const adder = (card: Card, defs: Record<string, never>, def: string) => (f: string) => {
+  const next = added((card.draft ?? {}) as Record<string, unknown>, f, defs, def);
+  card.reveal(f);
+  if (next) (card.change(next), awaits(def, f) || card.commit());
+};
