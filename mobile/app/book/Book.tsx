@@ -73,7 +73,7 @@ export function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, 
       ? s.restoreInvocation.current
       : undefined;
   const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
-  const fell = pr.died();
+  const fell = pr.screen().died;
   pr.press(b, detail);
   if (stale && !pr.recovered()) return s.redraw((n) => n + 1);
   const after = pr.screen(),

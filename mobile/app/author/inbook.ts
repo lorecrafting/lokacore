@@ -306,7 +306,6 @@ export function start(given: Hooks) {
     for (const [target, name, run] of on) target.removeEventListener(name, run, true);
     observer?.disconnect();
     style.remove();
-    say(undefined); // gives the line its margin back
     note.remove();
   };
 }
