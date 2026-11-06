@@ -37,6 +37,7 @@ type Told = {
   trace?: string[];
   id?: number;
   line?: Line;
+  add?: AddHere;
 } & Prose;
 type Asked =
   | { op: 'hello' }
@@ -46,12 +47,15 @@ type Asked =
   | { op: 'go_to_room'; room: string }
   | { op: 'set_fact'; fact: string; value: boolean | number | string }
   | { op: 'trace'; id: number }
-  | { op: 'select'; kind: string; key: string }
+  | { op: 'select'; kind: string; key: string; add?: string[] }
   | { op: 'edit'; key: string }
   | { op: 'key'; key: string; metaKey: boolean; ctrlKey: boolean; altKey: boolean };
 
 /** What the shell does with a Book click (its text key) and a relayed editor key. */
 export type Heard = { select: (textKey: string) => void; shortcut: (key: string) => void };
+/** A Book add-here pick (`select` with `add` offers the menu): the mounted room card writes it. */
+export type AddHere = { kind: string; room: string };
+export const addHere = { run: (_: AddHere) => {} };
 
 export function useBook(frame: RefObject<HTMLIFrameElement | null>, heard: RefObject<Heard>) {
   const [state, setState] = useState<State>();
@@ -71,6 +75,7 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>, heard: RefOb
         (send({ op: 'hello' }), setLoaded({ sha256: e.data.sha256, at: Date.now() }));
       if (e.data.select) heard.current.select(e.data.select);
       if (e.data.shortcut) heard.current.shortcut(e.data.shortcut);
+      if (e.data.add) addHere.run(e.data.add);
       if (e.data.state) setState(e.data.state);
       if (e.data.trace && e.data.id !== undefined) waiting.current.get(e.data.id)?.(e.data.trace);
       if (e.data.line) setLine(e.data.line);
