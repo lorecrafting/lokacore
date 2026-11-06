@@ -1,6 +1,6 @@
 defmodule Loka.Content.Starters.Parts do
   @moduledoc false
-  alias Loka.Content.Starters.{Area, Copy}
+  alias Loka.Content.Starters.Area
   # The pieces Templates and World share: the placeholder and the smallest valid shapes.
   def p, do: %{"prose" => "~"}
   def combat_lines, do: ~w(player_hit player_miss npc_hit npc_miss player_died npc_died)
@@ -34,12 +34,18 @@ defmodule Loka.Content.Starters.Parts do
   # Two-space JSON the author edits and the column's source finder reads one `"key":` per line.
   def pretty(value), do: IO.iodata_to_binary([pretty(value, ""), "\n"])
 
+  # JSON.decode options that keep an object's key order: {:obj, pairs}.
+  def ordered, do: [object_push: &push/3, object_finish: &finish/2]
+  @doc false
+  def push(key, value, acc), do: [{key, value} | acc]
+  @doc false
+  def finish(acc, old), do: {{:obj, Enum.reverse(acc)}, old}
+
   # Over an existing file: its own key order, then new keys sorted, so only added lines show in a
   # diff (the editor writes JSON.stringify's insertion order; loka-wfrgk.68).
   def pretty_over(value, path) do
     with {:ok, bytes} <- File.read(path),
-         {tree, [], ""} <-
-           JSON.decode(bytes, [], object_push: &Copy.push/3, object_finish: &Copy.finish/2) do
+         {tree, [], ""} <- JSON.decode(bytes, [], ordered()) do
       pretty(kept(value, tree))
     else
       _ -> pretty(value)
@@ -59,7 +65,7 @@ defmodule Loka.Content.Starters.Parts do
   defp pretty(map, pad) when is_map(map) and map_size(map) > 0,
     do: pretty({:obj, Enum.sort(map)}, pad)
 
-  # An object in its own key order (Copy keeps the author's).
+  # An object in its own key order (as Copy keeps the author's).
   defp pretty({:obj, pairs}, pad) when pairs != [] do
     rows =
       for {k, v} <- pairs, do: [pad, "  ", JSON.encode!(k), ": ", pretty(v, pad <> "  ")]
