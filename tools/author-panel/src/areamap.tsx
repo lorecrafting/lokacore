@@ -19,6 +19,7 @@ import * as map from './map.ts';
 import { M, type Box as Size, type View } from './map.ts';
 import { Drawing } from './mapsvg.tsx';
 import { cellAt } from './mapedit.ts';
+import { DRAGGED, dropped, Templates } from './maptemplates.tsx';
 import { alone, edit, shown } from './mapwire.ts';
 import type { Selection } from './shell.ts';
 
@@ -135,6 +136,7 @@ export function AreaMap(p: MapProps) {
   const [locked, lock] = useState(() => localStorage.getItem(LOCK) !== 'off');
   useEffect(() => localStorage.setItem(LOCK, locked ? 'on' : 'off'), [locked]);
   shown.rooms = p.story.map;
+  shown.nodes = p.story.graph.nodes;
   useEffect(() => tell(''), [p.story]); // a recompile clears the last refusal
   useEffect(() => ((shown.tell = tell), () => void (shown.tell = alone)), []);
   return (
@@ -149,6 +151,7 @@ export function AreaMap(p: MapProps) {
         {l.v.view && l.level.length ? <Drawing p={p} l={l} reach={reach} locked={locked} /> : null}
       </div>
       <Unplaced rooms={p.story.map.filter((r) => !r.at)} pick={p.pick} />
+      <Templates story={p.story} room={p.story.map.find((r) => r.ref === p.selected)} />
       <p
         role={told ? 'alert' : undefined}
         className={`truncate px-2 py-1 text-xs ${told ? 'text-destructive' : 'text-muted-foreground'}`}
@@ -163,14 +166,18 @@ export function AreaMap(p: MapProps) {
 const LOCK = 'loka.author.mapLock';
 const UNLOCK = 'The map is locked: unlock it in the map header to drag';
 
-/** An Unplaced chip dropped on the map: its room's layout row at the cell under the pointer. */
+/** An Unplaced chip dropped on the map: its room's layout row at the cell under the pointer. A
+ * template chip dropped on a room: a child of it there, keyed `<template>_<n>`. */
 function drop(e: React.DragEvent<HTMLDivElement>, p: MapProps, l: Level) {
   const r = p.story.map.find((o) => o.key === e.dataTransfer.getData('text/x-loka-room'));
+  const t = e.dataTransfer.getData(DRAGGED);
   const box = e.currentTarget.getBoundingClientRect();
-  if (!r) return;
+  if (!r && !t) return;
   if (!l.v.view) return shown.tell('Place one room in layout.json first: the map has no cells yet');
   const at = cellAt(l.v.now.current!, { x: e.clientX - box.left, y: e.clientY - box.top });
-  edit((ed) => ed.place(r, { ...at, z: l.z }));
+  if (r) return edit((ed) => ed.place(r, { ...at, z: l.z }));
+  const room = l.level.find((o) => o.at?.x === at.x && o.at?.y === at.y);
+  if (room) dropped(JSON.parse(t), room, p.story); // on an empty cell a template makes nothing
 }
 
 const reachOf = (p: MapProps) => ({

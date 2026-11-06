@@ -392,11 +392,10 @@ test('/new refuses a name that is a flag before it runs anything, and journals w
   const path = process.env.PATH;
   process.env.PATH = `${bin}:${path}`;
   t.after(() => (process.env.PATH = path));
-  assert.equal((await ask('/new', { kind: 'room', name: '--cwd' })).status, 400);
   const from = { room: 'a', direction: 'North' };
-  assert.equal((await ask('/new', { kind: 'room', name: 'b', from })).status, 400);
-  // Break: an area name that climbs out of the cartridge reaching mix as `--area ../x`.
-  assert.equal((await ask('/new', { kind: 'room', name: 'b', area: '../x' })).status, 400);
+  // Break: also an area that climbs out of the cartridge (`--area ../x`), or a template read as a flag.
+  for (const odd of [{ name: '--cwd' }, { from }, { area: '../x' }, { extends: '--cwd' }])
+    assert.equal((await ask('/new', { kind: 'room', name: 'b', ...odd })).status, 400);
   assert.equal(existsSync(join(bin, 'mise.ran')), false);
   // Break: loka.new's refusal answered as another status, or by other words than its last line.
   const taken = { status: 400, body: 'rooms/taken.json exists' };
