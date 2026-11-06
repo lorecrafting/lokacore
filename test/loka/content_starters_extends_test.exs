@@ -38,7 +38,12 @@ defmodule Loka.ContentStartersExtendsTest do
   # Breaks: an object the parent fills in part losing the starter's other fields, or an emptied
   # object left behind.
   test "the child keeps the part of an object the parent lacks" do
-    starter = %{"hp" => %{"start" => 1, "gain" => 0}, "name" => %{"prose" => "~"}, "x" => %{}}
+    starter = %{
+      "hp" => %{"start" => 1, "gain" => 0},
+      "name" => %{"prose" => "~"},
+      "x" => %{"y" => 1}
+    }
+
     parent = %{"hp" => %{"gain" => 2}, "name" => %{"prose" => "Elk"}, "x" => 1}
 
     assert Starters.Child.extending(%{"o" => starter}, "o", {"p", parent}) ==
