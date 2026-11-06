@@ -35,7 +35,7 @@ function sampler(t: { after: (f: () => void) => void }, only = false) {
       sent,
       () => ids(root, ['kind']),
       (_what, c: Change) => {
-        writeFileSync(join(root, c.file), c.after);
+        writeFileSync(join(root, c.file), c.after!);
         return [200, c.file];
       },
     );
@@ -102,7 +102,7 @@ test('POST /set is served, refusing an abstract NPC and undone by /undo', async 
   const url = `http://localhost:${await live.port}`;
   const post = async (path: string, sent: object) => {
     const res = await fetch(url + path, { method: 'POST', body: JSON.stringify(sent) });
-    return [res.status, await res.json()];
+    return [res.status, await res.json()] as [number, any];
   };
   const sent = { file: SCENE, line: 1, was: 'npc: stranger' };
   assert.deepEqual(await post('/set', { ...sent, value: 'kind' }), [400, 'npc: no such key kind']);
