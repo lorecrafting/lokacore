@@ -121,6 +121,9 @@ test('a quest and a dialogue open their cards; a link to no dialogue is refused'
   await boast.locator('summary').click();
   // its words keep the form's widgets: Edit in Book, never a text input (fields.tsx TextKey)
   await boast.getByRole('button', { name: 'Edit in Book' }).first().waitFor({ timeout: boot });
+  // bess_talk.json's boast: check and steps are removable rows; label and narration, its words, never
+  const shown = await boast.locator('span.flex-1').allTextContents();
+  assert.deepEqual(shown.sort(), ['check', 'steps']);
   await boast.getByRole('button', { name: 'Rename' }).click();
   await boast.getByText("a choice's key is its id").waitFor({ timeout: boot });
   await bess.close();
@@ -130,6 +133,7 @@ test('a quest and a dialogue open their cards; a link to no dialogue is refused'
   const words = await page.locator('[aria-label="dialogue card"] dl dt').allTextContents();
   assert.deepEqual(words, ['prompt']); // aldous_talk.json has a prompt and no name of its own
   const saved = await link.inputValue();
+  assert.equal(await page.getByRole('button', { name: 'Add choice' }).isDisabled(), true); // no key yet
   await link.fill('end'); // a known target is drafted
   assert.equal(await link.inputValue(), 'end');
   await link.fill(saved);
@@ -152,6 +156,7 @@ test('a link to a nested set shows its prompt and labels and opens its card', as
     const doc = JSON.parse(s.bytes);
     doc.entry = false;
     doc.choices.learn.then = 'aldous_yard'; // a second level: its button, never a fold
+    doc.choices.leave = { label: 'k.leave', then: 'end' }; // the talk ends: no button
     await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }) });
   });
   const bounty = page.locator('[aria-label="choice bounty"]');
@@ -162,6 +167,8 @@ test('a link to a nested set shows its prompt and labels and opens its card', as
   const keys = await set.locator('code').allTextContents();
   assert.deepEqual(keys.slice(0, 2), ['dialogue.aldous_lesson.prompt', 'dialogue.aldous_lesson.learn']);
   assert.equal(await page.locator('[aria-label^="nested "]').count(), 1);
+  const opens = await set.getByRole('button').allTextContents();
+  assert.deepEqual(opens, ['Open aldous_lesson', 'Open aldous_yard']);
   await set.getByRole('button', { name: 'Open aldous_yard' }).click();
   const title = page.locator('[aria-label="Inspector"]').getByText('aldous_yard', { exact: true });
   await title.waitFor({ timeout: boot }); // the inspector's title is the opened dialogue's key

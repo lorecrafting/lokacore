@@ -49,8 +49,9 @@ export function refuseChoices(doc: Obj, hidden: string[] = []): string | undefin
 export function refuseRemove(doc: Obj, k: string): string | undefined {
   // dialogues.ex:315, :288
   if (Object.keys(choicesOf(doc)).length === 1) return 'a dialogue keeps one choice at least';
-  if ((doc.riddle as Obj | undefined)?.choice_id === k) return `the riddle's answer is ${k}`;
-  return undefined;
+  return (doc.riddle as Obj | undefined)?.choice_id === k
+    ? `the riddle's answer is ${k}`
+    : undefined;
 }
 
 /** `doc` with choice `k` set to `c` (undefined: removed). */

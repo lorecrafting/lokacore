@@ -123,7 +123,7 @@ function Choice({ p, k, c, optional }: ChoiceProps) {
           absent={optional.filter((f) => !seen(f))}
         />
         <Body p={p} k={k} c={c} ui={ui} />
-        {LINKS.map((f) => (c[f] && c[f] !== 'end' ? <Nested key={f} to={c[f] as string} /> : null))}
+        {LINKS.map((f) => <Nested key={f} to={c[f] as string} />)}
         <div className="flex gap-1">
           <Act onClick={() => setSaid(RENAME)}>Rename</Act>
           <Act onClick={remove}>Remove choice</Act>
@@ -164,7 +164,8 @@ function ChoiceFields({ k, c, shown, absent }: FieldsProps) {
 }
 
 /** A link's target, when a nested set (choice.ts `nested`): its prompt and choice labels read-only
- * and a button to its own card; one level only, a deeper link is that button alone. */
+ * and a button to its own card; one level only, a deeper link is that button alone. An unset or
+ * `end` link names no node, so shows nothing. */
 function Nested({ to }: { to: string }) {
   const { context, diag } = useContext(Tree);
   const node = context.nodes.find((n) => n.ref.endsWith(`:dialogue/${to}`));

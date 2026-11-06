@@ -32,8 +32,10 @@ const OWNERS: Record<string, string> = {
   'quests.expedition': 'expedition movement quest fact combat death population', // expedition.ex:29-32
   'quests.patrol': 'patrol movement quest dialogue fact death', // patrol.ex:31-33
   'dialogues.keyword': 'speech', // keywords.ex:15: speech@1 owns `spoken`
-  'dialogues.choices.escort': 'escort', // escort.ex:10: escort@1 owns the escort definition
-  'dialogues.choices.receive': 'containment', // dialogues.ex:383: containment@1 owns item_acquired
+  // escort.ex:10: escort@1 owns the escort definition
+  'dialogues.choices.escort': 'escort',
+  // dialogues.ex:383: containment@1 owns item_acquired
+  'dialogues.choices.receive': 'containment',
   'actions.check': 'check', // its check_passed (scripted_actions.ex:125)
   'actions.tip': 'fact', // its fact_changed (action_tips.ex:40)
   'actions.policy': 'policy', // its least `all` (resolve.ex:415)
