@@ -429,14 +429,9 @@ test('the flow graph refilters within 100 ms', async (t) => {
   await left.getByLabel(/^~ Filters/).click();
   const filter = page.getByRole('dialog').locator('button[aria-pressed]').first(); // a filter: a relayout (the showcase has no parts to fold)
   const relayout = async () => {
-    const before = await page.evaluate(
-      () => performance.getEntriesByName('flow:commit').at(-1)!.startTime,
-    );
+    const before = await page.evaluate(() => performance.getEntriesByName('flow:commit').at(-1)!.startTime);
     await filter.click();
-    await page.waitForFunction(
-      (t) => performance.getEntriesByName('flow:commit').at(-1)!.startTime > t,
-      before,
-    );
+    await page.waitForFunction((t) => performance.getEntriesByName('flow:commit').at(-1)!.startTime > t, before);
   };
   // every run measures the filter turned on, then turns it off untimed
   await within(t, 100, async () => {
