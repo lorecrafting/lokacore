@@ -9,6 +9,6 @@ export const actionGlyphs: Record<string, string> = {
 };
 
 // The opener's drawing: three dots on the midline (statusGlyphs.ts `dot`).
-export const OPENER = [7, 12, 17].map((x) => `M${x} 12a.75.75 0 1 0 .01 0`).join('');
+export const OPENER = [7, 12, 17].map((x) => `M${x} 12a.75.75 0 1 0 .01 0`).join(''); // mutate-skip: drawing coordinates
 
 export const actionGlyph = (key: string) => actionGlyphs[key] ?? fallback.neutral;

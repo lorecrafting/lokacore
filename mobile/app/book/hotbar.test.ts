@@ -176,7 +176,14 @@ test("the opener's list and a foe's list share the one open list", () => {
       }),
     ],
   };
-  const h = mounted(fight([act('shove'), act('kick', barred)], undefined, { entities: [rat] }));
+  const cooling = {
+    word: 'ward',
+    available: false,
+    reason: { code: 'cooldown' },
+    ends_at: 20,
+    duration: 40,
+  };
+  const h = mounted(fight([act('shove'), act('kick', barred)], [cooling], { entities: [rat] }));
   const expanded = () => h.control(LABEL.hotbarOpener).props['aria-expanded'];
   assert.equal(expanded(), false);
   h.tap(LABEL.hotbarOpener);
@@ -189,9 +196,13 @@ test("the opener's list and a foe's list share the one open list", () => {
   h.tap(LABEL.hotbarOpener);
   assert.deepEqual([expanded(), foe()], [true, false]);
   const kicks = all(h).filter(
-    (n) => n.type === 'Pressable' && /kick/.test(n.props.accessibilityLabel),
+    (n) => n.type === 'Pressable' && /kick|ward/.test(n.props.accessibilityLabel),
   );
-  assert.deepEqual(kicks.map(pressable), [false, false], 'a barred filler: its list row and slot');
+  assert.deepEqual(
+    kicks.map(pressable),
+    [false, false, false, false],
+    'barred and cooling: row and slot',
+  );
   h.answer({ kind: 'pending' });
   h.tap('action.shove'); // the list's row: sends, closes, and the action is pending
   h.tap(LABEL.hotbarOpener);
