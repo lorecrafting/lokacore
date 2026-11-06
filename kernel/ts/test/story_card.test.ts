@@ -91,23 +91,39 @@ test("a quest's and a dialogue's added fields are the least valid ones, their wo
 });
 
 // Break: the Quest card offers an expedition or patrol the cartridge's capabilities do not declare
-// (UNDECLARED_CAPABILITY; owners from expedition.ex:29 and patrol.ex:31), repeatable without an
-// exchange (exchanges.ex:94-95), or the Dialogue card entry on a keyword dialogue (dialogue_links.ex:205-206).
-test("a quest's add menu offers an expedition or a patrol only with every owning capability", () => {
+// (UNDECLARED_CAPABILITY; owners from expedition.ex:29 and patrol.ex:31) or on a quest the mechanic
+// cannot take (OUTCOME_MISMATCH), repeatable without an exchange (exchanges.ex:94-95); or the Dialogue
+// card entry on a keyword dialogue (dialogue_links.ex:205-206), a keyword without speech@1 or beside
+// an entry or riddle (keywords.ex:15-16).
+test("a quest's and a dialogue's add menus offer only what the compiler accepts there", () => {
   const menu = ['deadline', 'expedition', 'patrol'];
   const exp = { expedition: 1, movement: 1, quest: 1, fact: 1, combat: 1, death: 1, population: 1 };
   const pat = { patrol: 1, movement: 1, quest: 1, dialogue: 1, fact: 1, death: 1 };
-  assert.deepEqual(allowed('quests', menu, {}), ['deadline']);
-  assert.deepEqual(allowed('quests', menu, exp), ['deadline', 'expedition']);
-  assert.deepEqual(allowed('quests', menu, pat), ['deadline', 'patrol']);
+  const by = (evidence: string, more = {}) => ({ objective: { evidence }, ...more });
+  assert.deepEqual(allowed('quests', menu, {}, by('expedition')), ['deadline']);
+  assert.deepEqual(allowed('quests', menu, exp, by('expedition')), ['deadline', 'expedition']);
+  assert.deepEqual(allowed('quests', menu, pat, by('patrol')), ['deadline', 'patrol']);
   const { population: _, ...noPopulation } = exp;
   const { dialogue: __, ...noDialogue } = pat;
-  assert.deepEqual(allowed('quests', menu, { ...noPopulation, ...noDialogue }), ['deadline']);
+  const most = { ...noPopulation, ...noDialogue };
+  assert.deepEqual(allowed('quests', menu, most, by('expedition')), ['deadline']);
+  // expedition.ex:99-100, patrol.ex:18-19: the evidence names it, and no offer, deadline or other mechanic
+  const all = { ...exp, ...pat };
+  assert.deepEqual(allowed('quests', menu, all, by('current_state')), ['deadline']);
+  assert.deepEqual(allowed('quests', menu, all, by('patrol', { deadline: {} })), ['deadline']);
+  assert.deepEqual(allowed('quests', menu, all, by('expedition', { patrol: {} })), ['deadline']);
   const caps = { quest: 1, dialogue: 1 };
   assert.deepEqual(allowed('quests', ['repeatable'], caps, {}), []);
   assert.deepEqual(allowed('quests', ['repeatable'], caps, { exchange: {} }), ['repeatable']);
   assert.deepEqual(allowed('dialogues', ['entry'], caps, { keyword: 'ash' }), []);
   assert.deepEqual(allowed('dialogues', ['entry'], caps, {}), ['entry']);
+  // keywords.ex:15-16: a keyword needs speech@1, and no entry or riddle beside it
+  const said = ['keyword', 'riddle'];
+  assert.deepEqual(allowed('dialogues', said, caps, {}), ['riddle']);
+  assert.deepEqual(allowed('dialogues', said, { ...caps, speech: 1 }, {}), said);
+  assert.deepEqual(allowed('dialogues', said, { speech: 1 }, { entry: true }), ['riddle']);
+  assert.deepEqual(allowed('dialogues', ['keyword'], { speech: 1 }, { riddle: {} }), []);
+  assert.deepEqual(allowed('dialogues', ['riddle'], { speech: 1 }, { keyword: 'ash' }), []);
 });
 
 // Break: the link picker writes a `then` the compiler refuses (dialogue_links.ex): an unknown
