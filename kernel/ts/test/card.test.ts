@@ -254,6 +254,7 @@ test('a trigger and a check are drawn and switched by their event and kind', () 
 test('a tagless or unknown value keeps its fields', () => {
   assert.equal(branchOf(defs['partial.Check'].anyOf, { chance: 70 }), 0);
   assert.equal(branchOf([{ type: 'string' }, { properties: { a: {} } }], { a: 1 }), 1);
+  assert.equal(branchOf(defs.Check.anyOf, null), -1);
   assert.deepEqual(start(defs.Check.anyOf, 1, { key: 'fish', zz: 1 }), {
     kind: 'threshold',
     key: 'fish',
