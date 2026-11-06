@@ -524,10 +524,22 @@ test("an NPC's and an item's add menus offer only fields every owning capability
     allowed('items', item, { food: 1, light: 1, equipment: 1, bleed: 1, combat: 1 }),
     ['edible', 'fuel', 'mass_grams', 'slot'],
   );
-  assert.deepEqual(
-    allowed('items', item, { bleed: 1, combat: 1, skill: 1, food: 1, attribute: 1 }),
-    ['affects', 'bandage', 'edible', 'mass_grams'],
-  );
+  const caps = { bleed: 1, combat: 1, skill: 1, food: 1, attribute: 1, equipment: 1 };
+  assert.deepEqual(allowed('items', item, caps), ['bandage', 'edible', 'mass_grams', 'slot']);
+  // affects need a slot (derived.ex:77); a bandage is not worn or eaten (bleed.ex:88-91)
+  assert.deepEqual(allowed('items', item, caps, { slot: 'head' }), [
+    'affects',
+    'edible',
+    'mass_grams',
+    'slot',
+  ]);
+  assert.deepEqual(allowed('items', item, caps, { edible: {} }), ['edible', 'mass_grams', 'slot']);
+  assert.deepEqual(allowed('items', item, caps, { container: true }), [
+    'edible',
+    'mass_grams',
+    'slot',
+  ]);
+  assert.deepEqual(allowed('items', item, caps, { bandage: {} }), ['bandage', 'mass_grams']);
 });
 
 // Break: an action or reaction card's add menu offers a field the compiler refuses: a check without
