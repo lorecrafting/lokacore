@@ -290,6 +290,11 @@ test('a check, patrol or lesson choice is refused beside what the compiler refus
     one(patrol, { quest: 'q' }),
     'a: a patrol choice is never in a dialogue with a quest',
   ); // :160
+  const pq = (transition: string) => ({ patrol: { quest: 'q', transition }, accept: 'q' });
+  assert.equal(one(pq('end')), 'a: only a patrol start accepts'); // :161-163
+  assert.equal(one(pq('start')), undefined);
+  const end = { choices: { a: { patrol: { transition: 'end' } } } };
+  assert.deepEqual(choiceMenu(end, 'a', ['accept', 'once'], { quest: 1 }), ['once']);
   const paid = { lesson_payment: {}, payment: {} };
   assert.equal(one(paid), 'a: lesson_payment and payment do not go together'); // skills.ex:275
   assert.equal(one({ lesson_payment: {} }), undefined);

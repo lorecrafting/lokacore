@@ -58,6 +58,9 @@ function* refusedChoice(doc: Obj, k: string, c: Obj) {
   // patrol.ex:160
   if (has(c, 'patrol') && has(doc, 'quest'))
     yield `${k}: a patrol choice is never in a dialogue with a quest`;
+  // patrol.ex:161-163
+  if (has(c, 'patrol') && has(c, 'accept') && (c.patrol as Obj | null)?.transition !== 'start')
+    yield `${k}: only a patrol start accepts`;
   const off = has(c, 'patrol') && UNPATROLLED.find((f) => has(c, f));
   if (off) yield `${k}: patrol and ${off} do not go together`;
   // skills.ex:275
