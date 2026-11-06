@@ -19,6 +19,7 @@ import { join, relative } from 'node:path';
 import { after, before, test } from 'node:test';
 import { addHour, rehour } from '../play/blocks.ts';
 import { added } from '../play/card.ts';
+import { paired } from '../play/action.ts';
 import { serve } from '../play/live.ts';
 import type { MapRoom } from '../../../tools/author-panel/src/map.ts';
 import {
@@ -218,6 +219,63 @@ test("the showcase warden given an attack and a moved, added hour by the card's 
     { cwd: REPO, encoding: 'utf8' },
   );
   rmSync(copy, { recursive: true });
+  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
+});
+
+test("an action and a reaction built by their cards' adds compile", () => {
+  // Breaks: an Action or Reaction card Add (or the check's paired failure) seeded at a value the
+  // compiler refuses (OUTCOME_MISMATCH, a cooldown or delay below its minimum, an empty tip or
+  // when, a craft with neither consume nor yield set), so every such add leaves a world that does
+  // not compile. A craft has no least value: the author chooses its consume or yield.
+  const defs = JSON.parse(
+    readFileSync(join(REPO, 'schemas/source/defs.schema.json'), 'utf8'),
+  ).$defs;
+  const prose = { prose: '~' };
+  const adds = (doc: object, fields: string[], def: string) =>
+    fields.reduce((d, f) => added(d, f, defs, def)!, doc as Record<string, unknown>);
+  assert.equal(added({}, 'craft', defs, 'source.ScriptedAction'), undefined);
+  let action = adds(
+    {
+      ...{ name: prose, aliases: ['ponder'], target: { kind: 'use', tool: { tag: 'rod' } } },
+      ...{
+        priority: 1,
+        outcomes: {
+          success: { steps: [{ op: 'event.emit', event: 'bite' }], narration: { actor: prose } },
+        },
+      },
+    },
+    ['cooldown', 'duration', 'reason', 'tip', 'policy'],
+    'source.ScriptedAction',
+  );
+  action = paired({ ...action, check: { key: 'ponder', kind: 'luck', chance: 50 } }, defs);
+  const reaction = adds(
+    { on: { event: 'clock_hour' }, steps: [] },
+    ['after', 'silent', 'when'],
+    'source.ReactionRule',
+  );
+  const kept = read('cartridge.json');
+  const cartridge = JSON.parse(kept);
+  Object.assign(cartridge.requires.capabilities, {
+    scripted_action: 1,
+    check: 1,
+    fact: 1,
+    reaction: 1,
+    schedule: 1,
+    policy: 1,
+  });
+  writeFileSync(join(src, 'cartridge.json'), JSON.stringify(cartridge));
+  mkdirSync(join(src, 'actions'));
+  mkdirSync(join(src, 'reactions'));
+  writeFileSync(join(src, 'actions/ponder.json'), JSON.stringify(action));
+  writeFileSync(join(src, 'reactions/chime.json'), JSON.stringify(reaction));
+  const compiled = spawnSync(
+    'mix',
+    ['loka.compile', src, join(dir, 'out.json'), '--allow-placeholders'],
+    { cwd: REPO, encoding: 'utf8' },
+  );
+  rmSync(join(src, 'actions'), { recursive: true });
+  rmSync(join(src, 'reactions'), { recursive: true });
+  writeFileSync(join(src, 'cartridge.json'), kept);
   assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
 });
 

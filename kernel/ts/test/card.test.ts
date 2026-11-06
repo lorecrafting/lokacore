@@ -1,4 +1,4 @@
-// size: allow 575, one suite per card step; the generic, Room, World, NPC and item cards and the Rules block share the pure helpers
+// size: allow 650, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -41,6 +41,7 @@ import {
   tagHidden,
   worldFile,
 } from '../play/card.ts';
+import { paired, scriptedMenu } from '../play/action.ts';
 import { change } from '../play/edit_model.ts';
 import { json } from '../play/write.ts';
 
@@ -503,6 +504,82 @@ test("an NPC's and an item's add menus offer only fields every owning capability
     allowed('items', item, { bleed: 1, combat: 1, skill: 1, food: 1, attribute: 1 }),
     ['affects', 'bandage', 'edible', 'mass_grams'],
   );
+});
+
+// Break: an action or reaction card's add menu offers a field the compiler refuses: a check without
+// the check capability (scripted_actions.ex:125), a tip without fact (action_tips.ex:40), a duration
+// under a top-level time_policy (scripted_actions.ex:88) or beside a status.apply step (:94), craft on a spell (replenish.ex:59), or a
+// zone beside on.room (source_schema.ex ReactionRule), or a policy or when (their least `all`) without
+// the policy capability (resolve.ex:415).
+test("an action's and a reaction's add menus offer only fields the compiler accepts", () => {
+  const action = ['check', 'cooldown', 'craft', 'duration', 'policy', 'tip'];
+  assert.deepEqual(allowed('actions', action, {}), ['cooldown', 'craft', 'duration']);
+  const use = { target: { kind: 'use' } };
+  assert.deepEqual(allowed('actions', action, { check: 1, fact: 1, policy: 1 }, use, {}), action);
+  // each capability opens only its own field
+  const only = (cap: string) =>
+    allowed('actions', ['check', 'policy', 'tip'], { [cap]: 1 }, use, {});
+  assert.deepEqual([only('check'), only('fact'), only('policy')], [['check'], ['tip'], ['policy']]);
+  assert.deepEqual(allowed('actions', action, {}, use, { time_policy: {} }), ['cooldown', 'craft']);
+  const status = { outcomes: { success: { steps: [{ op: 'say' }, { op: 'status.apply' }] } } };
+  assert.deepEqual(allowed('actions', action, {}, status, {}), ['cooldown', 'craft']);
+  assert.deepEqual(allowed('actions', action, {}, { target: { kind: 'spell' } }), [
+    'cooldown',
+    'duration',
+  ]);
+  const reaction = ['after', 'silent', 'when', 'zone'];
+  const hour = { on: { event: 'clock_hour' } };
+  assert.deepEqual(allowed('reactions', reaction, {}, hour), ['after', 'silent', 'zone']);
+  assert.deepEqual(allowed('reactions', reaction, { policy: 1 }, hour), reaction);
+  assert.deepEqual(
+    allowed('reactions', reaction, {}, { on: { event: 'entity_entered_room', room: 'cellar' } }),
+    ['after', 'silent'],
+  );
+});
+
+// Break: a scripted action's Add menu offers a command action's field (command, input,
+// accessibility), which the form never draws and the compiler refuses as UNKNOWN_FIELD.
+test("a scripted action's add menu offers only ScriptedAction fields", () => {
+  const registry = JSON.parse(
+    readFileSync(
+      join(import.meta.dirname, '../../../tools/author-panel/src/edit/registry.json'),
+      'utf8',
+    ),
+  );
+  const fields = Object.keys(defs['source.ScriptedAction'].properties);
+  const menu = scriptedMenu(addable('actions', registry, {}, []), defs);
+  assert.deepEqual(
+    menu.filter((f) => f !== 'abstract' && !fields.includes(f)),
+    [],
+  ); // abstract: extends.ex
+  assert.ok(menu.includes('check') && menu.includes('abstract'));
+});
+
+// Break: an action's check is added or removed but its failure outcome is not (OUTCOME_MISMATCH,
+// scripted_actions.ex:109), or pairing overwrites an author's failure, touches a paired action or an
+// extends child (its pair may be inherited) or non-object outcomes, or counts a cleared (undefined) check as present.
+test("an action's failure outcome comes and goes with its check", () => {
+  const success = { steps: [] };
+  const check = { key: 'fish', kind: 'luck', chance: 50 };
+  const failure = { steps: [], narration: { actor: { prose: '~' } } };
+  assert.deepEqual(paired({ check, outcomes: { success } }, defs), {
+    check,
+    outcomes: { success, failure },
+  });
+  assert.deepEqual(paired({ outcomes: { success, failure } }, defs), { outcomes: { success } });
+  const mine = { steps: [{ op: 'say' }] };
+  const both = { check, outcomes: { success, failure: mine } };
+  assert.equal(paired(both, defs), both);
+  const neither = { outcomes: { success } };
+  assert.equal(paired(neither, defs), neither);
+  const child = { extends: 'fish', outcomes: { success, failure: mine } };
+  assert.equal(paired(child, defs), child);
+  const listed = { check, outcomes: [] }; // not an object: the schema refuses it, pairing leaves it
+  assert.equal(paired(listed, defs), listed);
+  assert.deepEqual(paired({ check: undefined, outcomes: { success, failure } }, defs), {
+    check: undefined,
+    outcomes: { success },
+  });
 });
 
 // Break: a reorder, remove or add of shop offer rows diffs to ops that leave a moved row's field

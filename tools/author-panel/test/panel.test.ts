@@ -210,6 +210,30 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   await page.close();
 });
 
+// Breaks: a reaction or a scripted action routed to the generic card (a command action away from it),
+// its card failing to draw its form on the showcase's own files, its add menu losing a field the
+// declared capabilities allow (the showcase declares policy and fact: `when` and `tip`; the refusal
+// side is card.test's), or a scripted action's menu offering a command action's field.
+test('a reaction and an action open their own cards', async () => {
+  for (const [kind, key, field] of [
+    ['reaction', 'letter_late', 'when'],
+    ['action', 'fish', 'tip'],
+  ]) {
+    const page = await open({ selection: { kind, key } });
+    await page.locator(`[aria-label="${kind} card"] form`).waitFor({ timeout: boot });
+    const menu = page.getByLabel(`${kind} card`).getByLabel('Add a field').locator('option');
+    const options = await menu.allTextContents();
+    assert.ok(options.includes(field), `${kind} ${key} offers ${field}`);
+    // a scripted action is never offered a command action's field (UNKNOWN_FIELD)
+    assert.ok(!options.includes('accessibility'), `${kind} ${key} offers accessibility`);
+    await page.close();
+  }
+  // a built-in command action keeps the generic card
+  const barter = await open({ selection: { kind: 'action', key: 'barter' } });
+  await barter.locator('[aria-label="Card"] form').waitFor({ timeout: boot });
+  await barter.close();
+});
+
 /** The Flow graph in the left slot, warm: the first open compiles the story on the server (a cold open
  * measured 319 ms here), so the budget is read on a second. `took` reads the latest `flow:*` measures. */
 async function flow() {
