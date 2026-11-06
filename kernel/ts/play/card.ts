@@ -1,4 +1,4 @@
-// size: allow 450, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
+// size: allow 450, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -360,7 +360,7 @@ export function minimal(node: Obj, defs: Record<string, Obj>, seen: string[] = [
     const item = n ? minimal(node.items as Obj, defs, seen) : undefined;
     return n && item === undefined ? undefined : Array.from({ length: n }, () => item);
   }
-  if (node.type !== 'object') return undefined;
+  if (node.type !== 'object' || node.allOf) return undefined; // allOf: a required set the author picks (a craft's consume or yield)
   const props = (node.properties ?? {}) as Record<string, Obj>;
   const pairs = ((node.required ?? []) as string[]).map((k) => [k, minimal(props[k], defs, seen)]);
   return pairs.some(([, v]) => v === undefined) ? undefined : Object.fromEntries(pairs);
@@ -420,11 +420,18 @@ const OWNERS: Record<string, string> = {
   'rooms.site': 'construction',
   'rooms.tags': 'tag',
   'rooms.variants': VARIANT,
+  'actions.check': 'check', // its check_passed (scripted_actions.ex:125)
+  'actions.tip': 'fact', // its fact_changed (action_tips.ex:40)
+  'actions.policy': 'policy', // its least `all` (resolve.ex:415)
+  'reactions.when': 'policy',
 };
 
 // Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
 const NEEDS: Record<string, (doc: Obj, world: Obj) => boolean> = {
   'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
+  'actions.duration': (_, cart) => cart.time_policy === undefined, // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json
+  'actions.craft': (doc) => (doc.target as Obj | undefined)?.kind !== 'spell', // replenish.ex:59
+  'reactions.zone': (doc) => (doc.on as Obj | undefined)?.room === undefined, // ReactionRule: a zone forbids on.room
 };
 
 /** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs

@@ -5,7 +5,9 @@ import type { Change, Story, useDiagnostics } from './author.ts';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card.tsx';
 import { World } from './edit/cards/World.tsx';
 import { Generic } from './edit/Generic.tsx';
+import { Action } from './edit/cards/Action.tsx';
 import { Entity } from './edit/cards/Entity.tsx';
+import { Reaction } from './edit/cards/Reaction.tsx';
 import { Room } from './edit/cards/Room.tsx';
 import { fileOf, places, type Selection } from './shell.ts';
 
@@ -90,6 +92,10 @@ function Editor({ rel, offer, ...props }: Parameters<typeof Room>[0]) {
     <Room key={rel} rel={rel} offer={offer} {...props} />
   ) : /(^|\/)(npcs|items)\/[^/]+\.json$/.test(rel) ? (
     <Entity key={rel} rel={rel} {...props} />
+  ) : /(^|\/)actions\/[^/]+\.json$/.test(rel) ? (
+    <Action key={rel} rel={rel} {...props} />
+  ) : /(^|\/)reactions\/[^/]+\.json$/.test(rel) ? (
+    <Reaction key={rel} rel={rel} {...props} />
   ) : worldFile(rel) ? ( // mutate-skip: draw; the choice is worldFile, pinned in card.test.ts
     <World key={rel} rel={rel} {...props} />
   ) : (

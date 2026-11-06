@@ -57,7 +57,7 @@ after(async () => {
 });
 
 /** The panel with this layout kept, once the inspector's card has its form (the first compile and Vite's first optimise included). */
-async function open(layout: object): Promise<Page> {
+async function open(layout: object, card = 'Card'): Promise<Page> {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   await page.addInitScript(
     (l) => localStorage.setItem('loka.editor.layout', l),
@@ -72,7 +72,7 @@ async function open(layout: object): Promise<Page> {
       await new Promise((r) => setTimeout(r, 500));
     }
   }
-  await page.locator('[aria-label="Card"] form').waitFor({ timeout: boot });
+  await page.locator(`[aria-label="${card}"] form`).waitFor({ timeout: boot });
   return page;
 }
 const QUEST = { right: 280, selection: { kind: 'quest', key: 'carry_letter' } };
@@ -113,6 +113,13 @@ test('the shell has no serious or critical axe violations', async () => {
     'color-contrast: #radix--trigger-project',
     'label: #root_journal_outcomes_deliver-key, #root_journal_outcomes_burn-key, #root_journal_outcomes_late-key',
   ]);
+});
+
+// Breaks: a reaction or a scripted action routed to the generic card, or its card failing to draw
+// its form on the showcase's own files.
+test('a reaction and an action open their own cards', async () => {
+  await open({ selection: { kind: 'reaction', key: 'cellar_rearms' } }, 'reaction card');
+  await open({ selection: { kind: 'action', key: 'fish' } }, 'action card');
 });
 
 /** The Flow graph in the left slot, warm: the first open compiles the story on the server (a cold open
