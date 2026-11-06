@@ -51,12 +51,12 @@ const OWNERS: Record<string, string> = {
 const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean> = {
   'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
   'npcs.daily_schedule': (doc) => doc.spawn_template !== true, // calendar.ex template_schedules
-  'items.weapon': (doc) => doc.slot === 'wield', // skills.ex weapon
+  'items.weapon': (doc) => doc.slot === 'wield' && doc.edible === undefined, // skills.ex weapon
   // affects need a slot (derived.ex:77); a bandage is no container, worn or eaten thing (bleed.ex:88-91)
   'items.affects': (doc) => doc.slot !== undefined,
   'items.bandage': (doc) =>
     doc.slot === undefined && doc.edible === undefined && doc.container !== true,
-  'items.slot': (doc) => doc.bandage === undefined,
+  'items.slot': (doc) => doc.bandage === undefined && doc.edible === undefined,
   // food.ex:43-46 valid?: nothing eaten is a container, worn, a weapon, a fuel or a vessel
   'items.edible': (doc) =>
     doc.bandage === undefined &&
@@ -65,7 +65,10 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
       Object.hasOwn(doc, f),
     ),
   'items.equip': (doc) => doc.slot !== undefined, // derived.ex:64
-  'items.container': (doc) => doc.bandage === undefined,
+  'items.container': (doc) => doc.bandage === undefined && doc.edible === undefined,
+  ...Object.fromEntries(
+    ['capacity', 'block_chance', 'fuel', 'vessel'].map((f) => [`items.${f}`, uneaten]),
+  ),
   'actions.duration': (d, w) => !w.time_policy && !/"status\.apply"/.test(JSON.stringify(d)), // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json; duration_status (:94); ponytail: also hides it beside a permanent status, which status.ex:72 lets through
   'actions.craft': (doc) => (doc.target as Obj | undefined)?.kind !== 'spell', // replenish.ex:59
   'reactions.zone': (doc) => (doc.on as Obj | undefined)?.room === undefined, // ReactionRule: a zone forbids on.room
@@ -85,6 +88,9 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
     solo(doc, 'expedition', 'offer repeatable deadline exchange patrol'),
   'quests.patrol': (doc) => solo(doc, 'patrol', 'offer repeatable deadline exchange'),
 };
+function uneaten(doc: Obj) {
+  return doc.edible === undefined; // food.ex:43-46, the other way round
+}
 const solo = (doc: Obj, by: string, not: string) =>
   (doc.objective as Obj | undefined)?.evidence === by &&
   !not.split(' ').some((f) => Object.hasOwn(doc, f));

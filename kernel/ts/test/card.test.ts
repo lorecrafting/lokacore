@@ -533,7 +533,8 @@ test("an NPC's and an item's add menus offer only fields every owning capability
   // food is no container, worn thing or fuel (food.ex:43-46)
   assert.equal(on(caps, { slot: 'head' }), 'affects equip mass_grams slot');
   assert.equal(on({ ...caps, light: 1 }, { fuel: {} }), 'bandage fuel mass_grams slot');
-  assert.equal(on(caps, { edible: {} }), 'edible mass_grams slot');
+  assert.equal(on(caps, { edible: {} }), 'edible mass_grams');
+  assert.equal(on({ ...caps, light: 1 }, { edible: {} }), 'edible mass_grams');
   assert.equal(on(caps, { container: true }), 'mass_grams slot');
   assert.equal(on(caps, { bandage: {} }), 'bandage mass_grams');
   assert.deepEqual(allowed('items', ['container'], caps, { bandage: {} }), []);
