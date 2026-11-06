@@ -22,7 +22,6 @@ export function addHour(schedule: Schedule, room: unknown, perDay = 24) {
   if (typeof room !== 'string' || !room) return undefined; // nothing invented: the author places it first
   for (let h = 0; h < perDay; h++)
     if (!Object.hasOwn(schedule, String(h))) return { ...schedule, [String(h)]: room };
-  return undefined;
 }
 
 /** The NPC `key`'s fight rows in GET /numbers, or why the report did not run; none when it has no attack. */

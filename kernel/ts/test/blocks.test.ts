@@ -21,6 +21,7 @@ test('an hour moves to a free whole hour below the day, keeping its value', () =
   const s = { '8': 'gate', '13': 'green' };
   assert.deepEqual(rehour(s, '8', '9', 24), { '9': 'gate', '13': 'green' });
   assert.deepEqual(rehour(s, '8', '23', 24), { '23': 'gate', '13': 'green' });
+  assert.deepEqual(rehour(s, '8', '0', 24), { '0': 'gate', '13': 'green' });
   assert.deepEqual(rehour(s, '8', '8', 24), s); // the same hour, retyped
   assert.equal(typeof rehour(s, '8', '24', 24), 'string');
   assert.equal(typeof rehour(s, '8', '13', 24), 'string');
@@ -40,6 +41,7 @@ test("an added hour is the first free one, at the NPC's own room", () => {
   });
   assert.equal(addHour({ '0': 'a', '1': 'b' }, 'gate', 2), undefined);
   assert.equal(addHour({}, undefined, 24), undefined);
+  assert.equal(addHour({}, '', 24), undefined);
   const day = Object.fromEntries(Array.from({ length: 24 }, (_, h) => [String(h), 'a']));
   assert.equal(addHour(day, 'gate'), undefined); // no calendar: the compiler's 24
 });

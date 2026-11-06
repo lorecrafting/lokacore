@@ -4,7 +4,7 @@
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -36,7 +36,8 @@ before(async () => {
     LOKA_PREVIEW_PORT: `${preview}`, // nothing serves it: the Book frame stays empty
   };
   const io: SpawnOptions = { env, detached: true, stdio: ['ignore', 'ignore', 'inherit'] };
-  const showcase = join(ROOT, 'cartridges/toolbox_showcase');
+  const showcase = join(dir, 'showcase'); // a copy: the block tests write
+  cpSync(join(ROOT, 'cartridges/toolbox_showcase'), showcase, { recursive: true });
   procs.push(spawn(join(ROOT, 'bin/loka'), ['dev', showcase, '--watch'], io));
   procs.push(
     spawn(process.execPath, [join(PANEL, 'node_modules/vite/bin/vite.js')], { ...io, cwd: PANEL }),
@@ -116,9 +117,10 @@ test('the shell has no serious or critical axe violations', async () => {
 });
 
 // Breaks: the NPC card loses its blocks (a field not claimed, the claim lost to hidden(), a block not
-// registered), so hp, attack and the schedule fall back to the generic rows; or an hour's room is
-// free text again, not the room picker.
-test("an NPC card draws its Combat and Schedule blocks", async () => {
+// registered), so hp, attack and the schedule fall back to the generic rows; an hour's room is
+// free text again, not the room picker; or a second block write posts from the first's stale card
+// (rjsf keeps its first formContext: the server refuses it, Changed outside).
+test('an NPC card draws its Combat and Schedule blocks', async () => {
   const page = await open({ right: 420, selection: { kind: 'npc', key: 'warden' } });
   for (const f of ['hp', 'attack'])
     await page.locator(`[aria-label="Combat ${f}"]`).waitFor({ timeout: boot });
@@ -130,6 +132,16 @@ test("an NPC card draws its Combat and Schedule blocks", async () => {
   const options = await page.locator(`datalist#${await room.getAttribute('id')}-keys option`).all();
   const offered = await Promise.all(options.map((o) => o.getAttribute('value')));
   assert.ok(offered.includes('warden_gate'), `rooms offered: ${offered}`);
+  const add = schedule.getByRole('button', { name: 'Add hour' });
+  const reread = page.waitForResponse((r) => r.url().includes('/__author/schema/')); // the card's reload after the write
+  await add.click();
+  await (await reread).finished();
+  await page.waitForTimeout(50); // the reload rendered
+  await add.click();
+  const file = join(dir, 'showcase/areas/low_wardle/npcs/warden.json');
+  const written = () => Object.keys(JSON.parse(readFileSync(file, 'utf8')).daily_schedule);
+  for (let t = 0; written().length < 4 && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual(written(), ['0', '1', '13', '14']);
   await page.close();
 });
 
