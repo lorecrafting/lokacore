@@ -89,7 +89,6 @@ type LinkProps = { card: Card; choice: string; field: (typeof LINKS)[number]; ke
 function Link({ card, choice, field, keys }: LinkProps) {
   const [bad, setBad] = useState<string>();
   const draft = card.draft as Doc;
-  const [kept, keep] = useState(draft); // the draft at focus: a refused keystroke puts it back
   const all = (draft.choices ?? {}) as Record<string, Doc>;
   const value = bad ?? all[choice]?.[field] ?? '';
   const refused = bad && refuseLink(field, bad, all[choice], draft, keys);
@@ -112,9 +111,8 @@ function Link({ card, choice, field, keys }: LinkProps) {
           const v = e.target.value;
           const no = refuseLink(field, v, all[choice], draft, keys);
           setBad(no ? v : undefined);
-          card.change(no ? kept : write(v));
+          if (!no) card.change(write(v)); // a refused keystroke leaves the draft as it was
         }}
-        onFocus={() => keep(draft)}
         onBlur={() => (setBad(undefined), card.commit())}
       />
       {refused ? <Refusal>{refused}</Refusal> : null}

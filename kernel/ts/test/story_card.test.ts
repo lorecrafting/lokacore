@@ -36,7 +36,7 @@ test("a quest's and a dialogue's reference fields pick their kind", () => {
 });
 
 // Break: the Quest or Dialogue card's add writes a value the compiler refuses (an offer without its
-// target: quests.ex:63-66; repeatable without an exchange: exchanges.ex:94-95), or invents a key
+// target: quests.ex:63-66), or invents a key
 // the author picks. Each written value was compiled into the showcase (mix loka.compile, no diagnostic).
 test("a quest's and a dialogue's added fields are the least valid ones, their words `~`", () => {
   const tilde = { prose: '~' };
@@ -60,7 +60,7 @@ test("a quest's and a dialogue's added fields are the least valid ones, their wo
         },
         offer: undefined,
         patrol: undefined,
-        repeatable: undefined,
+        repeatable: true, // offered only with an exchange (allowed)
       },
     ],
     [
@@ -91,7 +91,8 @@ test("a quest's and a dialogue's added fields are the least valid ones, their wo
 });
 
 // Break: the Quest card offers an expedition or patrol the cartridge's capabilities do not declare
-// (UNDECLARED_CAPABILITY). Owners hand-copied from expedition.ex:29 and patrol.ex:31.
+// (UNDECLARED_CAPABILITY; owners from expedition.ex:29 and patrol.ex:31), repeatable without an
+// exchange (exchanges.ex:94-95), or the Dialogue card entry on a keyword dialogue (dialogue_links.ex:205-206).
 test("a quest's add menu offers an expedition or a patrol only with every owning capability", () => {
   const menu = ['deadline', 'expedition', 'patrol'];
   const exp = { expedition: 1, movement: 1, quest: 1, fact: 1, combat: 1, death: 1, population: 1 };
@@ -102,6 +103,11 @@ test("a quest's add menu offers an expedition or a patrol only with every owning
   const { population: _, ...noPopulation } = exp;
   const { dialogue: __, ...noDialogue } = pat;
   assert.deepEqual(allowed('quests', menu, { ...noPopulation, ...noDialogue }), ['deadline']);
+  const caps = { quest: 1, dialogue: 1 };
+  assert.deepEqual(allowed('quests', ['repeatable'], caps, {}), []);
+  assert.deepEqual(allowed('quests', ['repeatable'], caps, { exchange: {} }), ['repeatable']);
+  assert.deepEqual(allowed('dialogues', ['entry'], caps, { keyword: 'ash' }), []);
+  assert.deepEqual(allowed('dialogues', ['entry'], caps, {}), ['entry']);
 });
 
 // Break: the link picker writes a `then` the compiler refuses (dialogue_links.ex): an unknown

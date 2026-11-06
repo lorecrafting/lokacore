@@ -25,18 +25,19 @@ export function Quest({ rel, context, diag }: Props) {
   const offered = addable(saved.dir, registry, draft, card.revealed);
   const menu = caps ? allowed(saved.dir, offered, caps, draft, cart?.world) : [];
   const required = ((defs[DEF] as { required?: string[] } | undefined)?.required ?? []) as string[];
+  const words = WORDS.filter((f) => draft[f] !== undefined); // an inherited name is the parent's
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="quest card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
-      <Words draft={draft} context={context} fields={WORDS} />
+      <Words draft={draft} context={context} fields={words} />
       <Mechanics
         card={card}
         menu={menu}
         add={adder(card, defs, DEF)}
         fixed={required}
       />
-      <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} own={WORDS} />
+      <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} own={words} />
     </div>
   );
 }

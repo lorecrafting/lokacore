@@ -370,8 +370,6 @@ export function minimal(node: Obj, defs: Record<string, Obj>, seen: string[] = [
 
 // a field whose schema minimum does not compile starts at the sampler's value (resources.ex @defaults hp; BODY_BELOW_ZERO)
 const SEEDS: Record<string, unknown> = { hp: { minimum: 0, maximum: 20, start: 20, gain: 5 } };
-// refused at its least value until the author picks more: only revealed (quests.ex:63-66; exchanges.ex:94-95)
-const CHOSEN = ['source.QuestDefinition.offer', 'source.QuestDefinition.repeatable'];
 
 /** `doc` with field `f` of definition `def` at its least value; undefined when present or the author must choose it. */
 export function added(
@@ -382,7 +380,7 @@ export function added(
 ): Obj | undefined {
   if (Object.hasOwn(doc, f)) return undefined; // a stale menu never overwrites a present field
   const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
-  if (CHOSEN.includes(`${def}.${f}`)) return undefined;
+  if (`${def}.${f}` === 'source.QuestDefinition.offer') return undefined; // targetless: quests.ex:63-66
   const value = node && (structuredClone(SEEDS[f]) ?? minimal(node, defs));
   return value === undefined ? undefined : { ...doc, [f]: value };
 }
@@ -432,6 +430,8 @@ const OWNERS: Record<string, string> = {
 // Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
 const NEEDS: Record<string, (doc: Obj, world: Obj) => boolean> = {
   'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
+  'quests.repeatable': (doc) => doc.exchange !== undefined, // exchanges.ex:94-95
+  'dialogues.entry': (doc) => doc.keyword === undefined, // dialogue_links.ex:205-206; one per npc: the compile's
 };
 
 /** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs
