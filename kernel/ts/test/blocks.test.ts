@@ -75,7 +75,7 @@ test("an NPC's fight rows are its own target's", () => {
       targets: [t('c@1:npc/old_warden'), t('c@1:population/warden'), t('c@1:npc/warden')],
     },
   };
-  assert.equal(fightOf(report, 'warden')?.target, 'c@1:npc/warden');
+  assert.deepEqual(fightOf(report, 'warden'), t('c@1:npc/warden'));
   assert.equal(fightOf(report, 'rat'), undefined);
   assert.equal(fightOf({ why: 'no world' }, 'warden'), 'no world');
 });
