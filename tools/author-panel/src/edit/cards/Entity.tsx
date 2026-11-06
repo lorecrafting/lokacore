@@ -1,8 +1,8 @@
 // The NPC and Item cards (docs/rnd/gui-editor-design-2026-11-04.md §6, E6b): the words open in the
 // Book, the placement takes a room, NPC or container picker, the mechanics are added and removed; the combat numbers,
-// schedule and offer table are the form's (pickers by kind, rows added, removed and moved). Every
+// schedule are their blocks (blocks/Combat.tsx, blocks/Schedule.tsx); the offer table is the form's. Every
 // write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   addable,
   allowed,
@@ -20,6 +20,7 @@ import registry from '../registry.json';
 import { adder, Mechanics, RoomForm, useCartridge, Words } from './Room.tsx';
 
 const WORDS = ['name', 'room_line', 'description'];
+const BLOCKS = { hp: 'Combat', attack: 'Combat', weapon: 'Combat', daily_schedule: 'Schedule' };
 const DEF: Record<string, string> = {
   npcs: 'source.NpcDefinition',
   items: 'source.ItemDefinition',
@@ -29,8 +30,22 @@ type Props = { rel: string; context: Context; diag: ReturnType<typeof useDiagnos
 type Card = ReturnType<typeof useCard>;
 type Doc = Record<string, unknown>;
 
-export function Entity({ rel, context, diag }: Props) {
+/** The card and a block's write (blocks/Schedule.tsx): the field set and committed at once. rjsf keeps
+ * its first formContext (its deepEquals counts every function equal), so the write reads the live card. */
+function useBlockCard(rel: string, diag: Props['diag']) {
   const card = useCard(rel, diag);
+  const live = useRef(card);
+  live.current = card;
+  const put = (f: string, v: unknown) => {
+    const c = live.current;
+    c.change({ ...(c.draft as Doc), [f]: v });
+    c.commit();
+  };
+  return [card, put] as const;
+}
+
+export function Entity({ rel, context, diag }: Props) {
+  const [card, put] = useBlockCard(rel, diag);
   const { saved } = card;
   const draft = (card.draft ?? {}) as Doc;
   const defs = (saved?.schema as { $defs?: Record<string, never> } | undefined)?.$defs ?? {};
@@ -60,10 +75,11 @@ export function Entity({ rel, context, diag }: Props) {
       <RoomForm
         rel={rel}
         card={card}
-        context={context}
+        context={{ ...context, hours: cart?.calendar?.hours_per_day, room: draft.room, put }}
         diag={diag}
         defs={defs}
         own={[...WORDS, at]}
+        blocks={BLOCKS}
       />
     </div>
   );
