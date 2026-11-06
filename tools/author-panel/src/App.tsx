@@ -3,8 +3,8 @@
 import { PanelLeftClose, PanelRightClose } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { shortcut } from '../../../mobile/app/author/prose_rules.ts';
-import { mapCommand, shown } from './mapwire.ts';
-import { ask, checkpoints, kept, story as getStory, useDiagnostics, type Story } from './author.ts';
+import { kept, mapCommand, shown } from './mapwire.ts';
+import { ask, checkpoints, story as getStory, useDiagnostics, type Story } from './author.ts';
 import { useBook, type Heard } from './book.ts';
 import { BookStrip } from './centre.tsx';
 import { Divider, Rail, useLayout, type SetLayout } from './columns.tsx';

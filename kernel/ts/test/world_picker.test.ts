@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
 import { EventEmitter } from 'node:events';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import { Readable } from 'node:stream';
 import { editing } from '../play/editing.ts';
 import { serve } from '../play/live.ts';
@@ -134,7 +135,10 @@ test('a switch whose client is gone before the 200 flushes still restarts', asyn
     url: '/world',
   });
   const response = Object.assign(new EventEmitter(), { writeHead: () => response, end() {} });
-  assert.equal(await route(request as never, response as never), true);
+  assert.equal(
+    await route(request as unknown as IncomingMessage, response as unknown as ServerResponse),
+    true,
+  );
   response.emit('close'); // no 'finish'
   assert.deepEqual(left, [join(dir, 'worlds/b')]);
 });

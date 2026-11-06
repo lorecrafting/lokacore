@@ -213,3 +213,13 @@ test("a room's accessible name and the footer's counts", () => {
   );
   assert.equal(map.footer([A], new Set(), new Set()), '1 room · 1 area');
 });
+
+// Breaks: a /story failure with no answer or vite's 502 replaces the map, or the watcher's own
+// refusal (its 500) keeps the stale map (loka-vduxr.76).
+test('a /story failure keeps the map unless the watcher refused', () => {
+  const failed = (status?: number) => Object.assign(new Error('x'), { status });
+  assert.deepEqual(
+    [undefined, 502, 504, 500].map((s) => map.kept(failed(s))),
+    [true, true, true, false],
+  );
+});

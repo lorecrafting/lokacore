@@ -93,10 +93,6 @@ export function useDiagnostics() {
   return { ...last, compiled: last.compiled ?? true, changes, timings };
 }
 
-/** A failed /story that keeps the last map (map ruling: only a refusal replaces it): no answer, or
- * vite's 502 with the watcher down. The watcher's own refusal is its 500 with the sentence. */
-export const kept = (e: Error & { status?: number }) => e.status === undefined || e.status >= 502;
-
 /** The Story map's model (kernel/ts/play/story.ts): the definitions, their `~` and diagnostics. */
 export const story = () => {
   const start = performance.now();
