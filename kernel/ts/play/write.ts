@@ -113,8 +113,8 @@ function remove(t: Tree, { file, was, key }: Sent, artifact = '') {
     refuse(400, `${file} is a root file: delete its rows, not the file`);
   if (row && !named(key)) refuse(400, 'key: [a-z0-9_]+');
   const at = row ? { dir: section, key } : placed(file);
-  // a .scene file compiles to a dialogue, under scenes/ too (source.ex placed/1)
-  const left = at ? users(t.root, artifact, at.ext === 'scene' ? 'dialogues' : at.dir, at.key) : [];
+  const kind = file.endsWith('.scene') ? 'dialogues' : at?.dir; // .scene: a dialogue (source.ex)
+  const left = at && kind ? users(t.root, artifact, kind, at.key) : [];
   if (left.length)
     refuse(
       400,
