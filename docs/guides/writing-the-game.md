@@ -323,7 +323,7 @@ Every kind's fields are in [source kinds](../reference/source-kinds.gen.md); ste
 compiling file for each pair on one Mix boot (name several pairs in one call; if any is refused, nothing is written), with every line a `~` placeholder, merged into the files it touches
 (it never replaces a value already there: it refuses, names the value and writes nothing; a shared `text.json` line you filled, such as `transport.unaffordable`, just stays),
 plus the capabilities it needs in `cartridge.json`; it prints what it changed, then what to fill (the list `bin/loka todo` prints) and the
-next command. `rooms <name> --from <room> <direction>` writes the exit both ways and, when `layout.json` exists, places the new room's row that way from its source; the new room goes into the source room's area folder. `--area <area>` writes the pair's own file into `areas/<area>/` (with `--from`, it wins: a border room), and a room it refers to is that area's first room. `areas <name>` starts an area folder with its first room, `areas/<name>/rooms/<name>.json`. `cartridge <dir>` stands alone: run it first, then the other pairs with the dir last. A rerun leaves the file it names as you left it, and refuses when that file's steps differ. A kind that refers
+next command. `rooms <name> --from <room> <direction>` writes the exit both ways and, when `layout.json` exists, places the new room's row that way from its source; the new room goes into the source room's area folder. `--area <area>` writes every new file of the pair (a population's or transport's companions too) into `areas/<area>/` (with `--from`, it wins: a border room), and a room it refers to is that area's first room. `areas <name>` starts an area folder with its first room, `areas/<name>/rooms/<name>.json`. `cartridge <dir>` stands alone: run it first, then the other pairs with the dir last. A rerun leaves the file it names as you left it, and refuses when that file's steps differ. A kind that refers
 to another takes the first one you have (for a room, the entry) and refuses with the command to run first. The shapes
 come from the samplers; the rules from the [Builders' Guide](../BUILDERS-GUIDE.md#authoring-paths-and-examples).
 
@@ -355,7 +355,7 @@ when you run `mix loka.compile` by hand.
 | `replenish` | [`decay_sampler`](../../cartridges/decay_sampler/) | an item, a room and an NPC |
 | `resources` | [`affects_sampler`](../../cartridges/affects_sampler/) | nothing |
 | `rooms` | [`rooms_sampler`](../../cartridges/rooms_sampler/) | nothing |
-| `scene` | [`identity_sampler`](../../cartridges/identity_sampler/scenes/stranger_talk.scene) | an NPC, file or bundled: `bin/loka new scene <npc> <key>` writes `scenes/<key>.scene` (one line, one `- ~` choice and its reply) and refuses over an existing one |
+| `scene` | [`identity_sampler`](../../cartridges/identity_sampler/scenes/stranger_talk.scene) | an NPC, file or bundled: `bin/loka new scene <npc> <key>` writes `scenes/<key>.scene`, in the NPC's area folder when it has one (one line, one `- ~` choice and its reply) and refuses over an existing one |
 | `services` | [`durability_sampler`](../../cartridges/durability_sampler/) | an NPC and a resource (the currency); also writes the `use_service` action and the service text keys |
 | `skills` | [`damage_sampler`](../../cartridges/damage_sampler/) | nothing |
 | `statuses` | [`pen_sampler`](../../cartridges/pen_sampler/) | a resource |

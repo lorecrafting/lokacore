@@ -58,13 +58,20 @@ defmodule Loka.Content.Starters.Area do
     end
   end
 
-  @doc "Moves the template's root body for `own` (`areas/<area>/<rel>`) to `own`."
-  def moved(files, "areas/" <> _ = own) do
-    case Map.pop(files, own |> Path.split() |> Enum.drop(2) |> Path.join()) do
-      {nil, files} -> files
-      {body, files} -> Map.put(files, own, body)
-    end
+  @doc """
+  When `own` is `areas/<area>/<rel>`, moves it and every other new definition file of the template
+  into `areas/<area>/` (section 7); a file that already exists (at the root or in an area folder)
+  stays where it is.
+  """
+  def moved(files, dir, "areas/" <> _ = own) do
+    [_, area | rest] = Path.split(own)
+    root_own = Path.join(rest)
+
+    Map.new(files, fn {rel, body} ->
+      new? = rel == root_own or !File.exists?(Path.join(dir, home(dir, rel)))
+      if new? and rel =~ "/", do: {"areas/#{area}/#{rel}", body}, else: {rel, body}
+    end)
   end
 
-  def moved(files, _root), do: files
+  def moved(files, _dir, _root), do: files
 end

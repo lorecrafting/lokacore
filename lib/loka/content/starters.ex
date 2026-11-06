@@ -15,8 +15,8 @@ defmodule Loka.Content.Starters do
   Writes the starter; `{:ok, paths it changed}` or `{:error, one line for the author}`. `from` is
   `{room, direction}`: a new room joined to an existing one by exits both ways, in that room's area
   folder. `before_write.(path, old bytes or nil)` runs before each file is written, so a caller can
-  undo; a refusal calls it for none. `area` places the starter's own file in `areas/<area>/`, and a
-  room it needs is that area's first room; with `from`, it wins (a border room).
+  undo; a refusal calls it for none. `area` places every new file of the starter in `areas/<area>/`,
+  and a room it needs is that area's first room; with `from`, it wins (a border room).
   """
   @spec write(
           Path.t(),
@@ -62,7 +62,7 @@ defmodule Loka.Content.Starters do
          {:ok, context} <- placed(context, dir, kind, name, from, own) do
       files =
         make.(name, context)
-        |> Area.moved(own)
+        |> Area.moved(dir, own)
         |> with_capabilities(caps)
         |> kept_lines(dir, kind)
         |> with_layout(dir, context, name)
