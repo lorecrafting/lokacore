@@ -746,7 +746,7 @@
   "escort": {
     "summary": "An NPC follows the player for a wage until delivered.",
     "declares": ["dialogues.choices.escort"],
-    "sampler": "none: escort lives only in test fragments (kernel/ts/test); a sampler needs owner prose",
+    "sampler": "escort_sampler",
     "showcase": "none: the showcase cartridge does not require escort",
     "spec": "docs/system/mechanics.md escort@1; docs/system/protocol.md Typed escort relation",
     "contracts": [
@@ -848,7 +848,7 @@
   "patrol": {
     "summary": "A paid watch route the player walks in order.",
     "declares": ["quests.patrol", "dialogues.choices.patrol"],
-    "sampler": "none: patrol lives only in test fragments (kernel/ts/test); a sampler needs owner prose",
+    "sampler": "patrol_sampler",
     "showcase": "none: the showcase cartridge does not require patrol",
     "mechanics": "#s3-finite-watch-patrol-c2-selected-contract",
     "spec": "docs/system/mechanics.md#s3-finite-watch-patrol-c2-selected-contract",
@@ -1136,7 +1136,7 @@
   "water": {
     "summary": "Water depths, swimming and recovering a drowned corpse.",
     "declares": ["cartridge.world.water"],
-    "sampler": "none: water lives only in test fragments (kernel/ts/test); a sampler needs owner prose",
+    "sampler": "water_sampler",
     "showcase": "none: the showcase cartridge does not require water",
     "mechanics": "#d6-water-depths-and-owned-corpse-recovery-selected-contract",
     "spec": "docs/system/mechanics.md D6 water depths and owned-corpse recovery; docs/system/protocol.md Water movement and corpse selection",
