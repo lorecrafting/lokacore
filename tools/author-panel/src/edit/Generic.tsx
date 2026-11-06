@@ -44,7 +44,7 @@ function useUndo(rel: string) {
   return [undos.get(rel), set] as const;
 }
 
-/** The schema's errors in `doc` the saved file does not already have: only those hold (#675). */
+/** The schema's errors in `doc` the saved file does not already have: only those hold (PR 675). */
 function fresh(saved: Saved, doc: unknown) {
   // rjsf's own live errors would name its `{}` fills; the schema's first error shows on top instead
   const errors = (d: unknown) => validator.validateFormData(d, saved.schema).errors;

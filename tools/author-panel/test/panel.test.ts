@@ -2,10 +2,10 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 700, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
+// size: allow 710, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
-import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -291,7 +291,7 @@ test('a held edit gives way to its undoing, Undo and a reselect', async () => {
   await undo.click();
   for (let t = 0; mass() !== 500 && t < 50; t++) await page.waitForTimeout(100);
   assert.equal(mass(), 500);
-  await page.waitForTimeout(300); // the reload rendered
+  for (let t = 0; (await field.inputValue()) !== '500' && t < 50; t++) await page.waitForTimeout(100); // the reload rendered
   assert.equal(await field.inputValue(), '500'); // not the held -1 put back
   assert.equal(await refusal.count(), 0);
   await page.route('**/__author/change', (r) => r.abort());
@@ -315,6 +315,7 @@ test('a held edit gives way to its undoing, Undo and a reselect', async () => {
 test('an added capability row starts at a registry key and its rename writes', async () => {
   const page = await open({ right: 420, selection: { kind: 'item', key: 'oilskin' } });
   const file = join(dir, 'showcase/cartridge.json');
+  const before = readFileSync(file);
   const caps = () => JSON.parse(readFileSync(file, 'utf8')).requires.capabilities;
   await page.getByRole('button', { name: 'World', exact: true }).click();
   const box = page.locator('#root_requires_capabilities');
@@ -325,7 +326,9 @@ test('an added capability row starts at a registry key and its rename writes', a
   await key.fill('tide');
   await key.press('Tab');
   for (let t = 0; caps().tide === undefined && t < 50; t++) await page.waitForTimeout(100);
-  assert.deepEqual([caps().tide, caps().dev, caps().newKey], [1, undefined, undefined]);
+  const now = caps();
+  writeFileSync(file, before); // tide is not installed: the later tests need a cartridge that compiles
+  assert.deepEqual([now.tide, now.dev, now.newKey], [1, undefined, undefined]);
   await page.close();
 });
 
