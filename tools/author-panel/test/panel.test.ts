@@ -39,7 +39,8 @@ before(async () => {
   const io: SpawnOptions = { env, detached: true, stdio: ['ignore', 'ignore', 'inherit'] };
   const showcase = join(dir, 'showcase'); // a copy: the block tests write
   cpSync(join(ROOT, 'cartridges/toolbox_showcase'), showcase, { recursive: true });
-  for (const w of ['identity_sampler', 'scene_sampler']) // the scene test's POST /world siblings
+  for (const w of ['identity_sampler', 'scene_sampler'])
+    // the scene test's POST /world siblings
     cpSync(join(ROOT, 'cartridges', w), join(dir, w), { recursive: true });
   procs.push(spawn(join(ROOT, 'bin/loka'), ['dev', showcase, '--watch'], io));
   procs.push(
@@ -77,7 +78,8 @@ async function open(layout: object, ready = 'Inspector'): Promise<Page> {
     }
   }
   // any card's form, or the named control (a `.scene` card has no form)
-  const at = ready === 'Inspector' ? page.locator('[aria-label="Inspector"] form') : page.getByLabel(ready);
+  const at =
+    ready === 'Inspector' ? page.locator('[aria-label="Inspector"] form') : page.getByLabel(ready);
   await at.waitFor({ timeout: boot });
   return page;
 }
@@ -107,7 +109,10 @@ test('a tall room card scrolls inside the inspector, not the page', async () => 
     ]);
   assert.equal(page_, 0, 'the page scrolls');
   assert.ok(box > 0, 'the room card fits: this test no longer opens a tall card');
-  assert.ok((await page.getByLabel('Console').boundingBox())!.height >= 100, 'the console is squeezed to a sliver');
+  assert.ok(
+    (await page.getByLabel('Console').boundingBox())!.height >= 100,
+    'the console is squeezed to a sliver',
+  );
 });
 
 // Breaks: clicking the minutes field leaves its text, so typing appends (60 then 600 → 60600; loka-wfrgk.55).
@@ -128,7 +133,10 @@ test('the palette asks /find once per pause in the typing', async () => {
   await page.keyboard.press('Control+k');
   await page.getByLabel('Find a key, a ~ or a command').pressSequentially('carry', { delay: 10 }); // keys well inside the 150 ms pause, even under load
   await page.waitForTimeout(600);
-  assert.deepEqual(asked.map((u) => new URL(u).searchParams.get('q')), ['carry']);
+  assert.deepEqual(
+    asked.map((u) => new URL(u).searchParams.get('q')),
+    ['carry'],
+  );
   await page.close();
 });
 
@@ -404,11 +412,44 @@ test('a .scene dialogue opens its text card: a picker per value line, words to t
 test('a refused /story shows its first line in the map slot', async () => {
   const page = await open(QUEST);
   const said = JSON.stringify({ text: {}, said: ['refused'], compiled: false }); // the watcher spoke
-  await page.route('**/__author/events', (r) => r.fulfill({ contentType: 'text/event-stream', body: `data: ${said}\n\n` }));
-  await page.route('**/__author/story', (r) => r.fulfill({ status: 500, body: 'first line\nsecond line' }));
+  await page.route('**/__author/events', (r) =>
+    r.fulfill({ contentType: 'text/event-stream', body: `data: ${said}\n\n` }),
+  );
+  await page.route('**/__author/story', (r) =>
+    r.fulfill({ status: 500, body: 'first line\nsecond line' }),
+  );
   await page.reload();
   const slot = page.getByLabel('Map slot');
   await slot.getByText('first line').waitFor({ timeout: boot });
   assert.equal(await slot.getByText('second line').count(), 0);
+  await page.close();
+});
+
+// Breaks: Cmd-E opens nothing for the selection (App.tsx's shortcut, loka-wfrgk.21).
+test('Cmd-E asks to open the selected card’s file', async () => {
+  const page = await open(QUEST);
+  const sent: { key?: string }[] = [];
+  await page.route(
+    '**/__author/open',
+    (r) => (sent.push(r.request().postDataJSON()), r.fulfill({ body: '{}' })),
+  ); // no editor opens
+  await page.keyboard.press('Control+e');
+  for (let i = 0; i < 50 && !sent.length; i++) await page.waitForTimeout(100);
+  assert.deepEqual(
+    sent.map((s) => s.key),
+    ['carry_letter'],
+  );
+  await page.close();
+});
+
+// Breaks: the checkpoint name's refusal shows for a good name, or not for a bad one (sections.tsx).
+test('a bad checkpoint name is refused, a good one is not', async () => {
+  const page = await open({ ...QUEST, leftOpen: true, tab: 'project' });
+  const name = page.getByLabel('Checkpoint name');
+  const refusal = page.getByText('A name is up to 64');
+  await name.fill('Bad Name');
+  await refusal.waitFor();
+  await name.fill('good_name');
+  await refusal.waitFor({ state: 'detached' });
   await page.close();
 });
