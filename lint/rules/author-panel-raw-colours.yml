@@ -1,0 +1,13 @@
+id: author-panel-raw-colours
+language: tsx
+severity: error
+message: 'The editor draws in chrome classes only (map, story and flow rulings, Proposed checks): no hex literal and no literal fill, stroke or color attribute.'
+files: [tools/author-panel/src/**]
+rule:
+  any:
+    - kind: string_fragment
+      regex: '#[0-9a-fA-F]{3,8}\b'
+    - kind: jsx_attribute
+      has: { kind: property_identifier, regex: '^(fill|stroke|color)$' }
+      all:
+        - has: { kind: string }
