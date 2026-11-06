@@ -267,7 +267,7 @@ test('a reaction and an action open their own cards', async () => {
       await page.getByLabel(`${kind} card`).getByLabel('Add a field').selectOption(field);
       const tip = () => JSON.parse(readFileSync(join(dir, 'showcase/actions/fish.json'), 'utf8')).tip;
       for (let t = 0; tip() === undefined && t < 50; t++) await page.waitForTimeout(100);
-      assert.equal(tip(), '~');
+      assert.deepEqual(tip(), { prose: '~' });
     }
     await page.close();
   }
