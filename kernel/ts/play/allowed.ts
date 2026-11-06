@@ -42,6 +42,8 @@ const OWNERS: Record<string, string> = {
   'dialogues.choices.receive': 'containment',
   'actions.check': 'check', // its check_passed (scripted_actions.ex:125)
   'actions.tip': 'fact', // its fact_changed (action_tips.ex:40)
+  'populations.trail': 'fact', // its fact_changed (trails.ex:139; capability_registry.json:143)
+  'populations.hunts': 'fact',
   'actions.policy': 'policy', // its least `all` (resolve.ex:415)
   'reactions.when': 'policy',
 };
@@ -65,6 +67,14 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
   'quests.offer': (doc) => !run(doc),
   'quests.deadline': (doc) => !run(doc),
   'quests.exchange': (doc) => !run(doc),
+  'liquids.amount': (doc) => doc.resource !== undefined, // dependentRequired, defs.schema.json:11423
+  'skills.hidden': (doc) => doc.prerequisite !== undefined, // dependentRequired, defs.schema.json:13641
+  'skills.ranks': (doc) => Array.isArray(doc.growth), // skills.ex:107-108; card.ts SEEDS sizes it
+  'items.intended_level': (doc) => doc.affects !== undefined, // derived.ex:70-71
+  'populations.floor': (doc) => doc.chance === undefined && (doc.day_target as number) >= 1, // population.ex:117
+  'populations.sight': (doc) => doc.member_role === 'prey', // population.ex:153
+  'populations.trail': (_, world) => world.trails !== undefined, // trails.ex:140
+  'populations.hunts': (_, world) => world.trails !== undefined,
   'dialogues.entry': (doc) => doc.keyword === undefined, // dialogue_links.ex:205-206; one per npc: the compile's
   'dialogues.keyword': (doc) => doc.entry === undefined && doc.riddle === undefined, // keywords.ex:16
   'dialogues.name': (doc, _, hidden) => !teaches(doc, hidden), // skills.ex:157
