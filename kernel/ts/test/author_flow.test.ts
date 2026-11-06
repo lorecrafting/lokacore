@@ -385,7 +385,7 @@ test("a column lists a lane's stub before the next lane's chips", () => {
 // dots a change it already showed.
 test('burst: the first story takes the last burst, a later one only what is newer', () => {
   const c = (file: string, seen: number) =>
-    ({ file, by: 'author', seen }) as Parameters<typeof burst>[0][number];
+    ({ file, by: 'author', seen }) as unknown as Parameters<typeof burst>[0][number];
   const changes = [c('b.json', 20), c('c.json', 20), c('a.json', 10)];
   assert.deepEqual(
     burst(changes).map((x) => x.file),
