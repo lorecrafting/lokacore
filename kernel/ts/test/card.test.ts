@@ -282,6 +282,8 @@ test("a room mechanic's added value is the least valid one, its words `~`", () =
     variants: [{ description: tilde }],
     zones: [],
   });
+  // a branch that has no least value gives way to the next one
+  assert.equal(minimal({ anyOf: [{ type: 'string' }, { type: 'boolean' }] }, defs), true);
   const validate = new Ajv2020({ strict: false }).compile(served('rooms'));
   for (const [f, value] of Object.entries(added)) {
     if (value === undefined) continue;

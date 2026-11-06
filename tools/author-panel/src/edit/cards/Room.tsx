@@ -40,7 +40,7 @@ type Props = {
 };
 type Card = ReturnType<typeof useCard>;
 type Doc = Record<string, unknown> & {
-  exits?: Record<string, { to: string | { key: string }; barrier?: string }>;
+  exits?: Record<string, { to?: string | { key: string }; barrier?: string }>; // `to` may come from extends
 };
 
 export function Room({ rel, context, diag, offer }: Props) {
@@ -51,8 +51,10 @@ export function Room({ rel, context, diag, offer }: Props) {
   const menu = saved ? addable(saved.dir, registry, draft, card.revealed) : [];
   /** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
   const add = (f: string) => {
+    if (f in draft) return; // a stale menu never overwrites a present field
     const room = defs['source.RoomDefinition'] as { properties: Record<string, never> };
-    const value = minimal(room.properties[f], defs);
+    const node = room.properties[f]; // registry fields RoomDefinition lacks (abstract) are only revealed
+    const value = node && minimal(node, defs);
     card.reveal(f);
     if (value !== undefined) (card.change({ ...draft, [f]: value }), card.commit());
   };
@@ -83,7 +85,7 @@ function Exits({ room, exits }: { room: string; exits: NonNullable<Doc['exits']>
       {Object.entries(exits).map(([dir, exit]) => (
         <div key={dir} className="flex flex-wrap items-center gap-1">
           <span className="min-w-0 flex-1 truncate">
-            {dir} → {typeof exit.to === 'string' ? exit.to : exit.to.key}
+            {dir} → {typeof exit.to === 'string' ? exit.to : exit.to?.key}
             {exit.barrier ? ` (${exit.barrier})` : ''}
           </span>
           {EXIT_EDITS.map(([id, label]) => (
