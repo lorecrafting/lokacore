@@ -81,6 +81,7 @@ test('/set refuses each thing that is not a real key on a value line', (t) => {
   for (const value of ['guard\nnpc: x', 'a/b', 'Guard', '', 7])
     assert.deepEqual(at({ value }), [400, 'was: the line; value: [a-z0-9_]+'], String(value));
   assert.deepEqual(at({ line: 99, value: 'guard' }), [400, 'no such line']);
+  assert.deepEqual(at({ line: 0, value: 'guard' }), [400, 'no such line']);
   assert.equal(at({ was: 'npc: guard', value: 'guard' })[0], 409);
   assert.deepEqual(at({ value: 'nobody' }), [400, 'npc: no such key nobody']);
   assert.deepEqual(at({ value: 'kind' }), [400, 'npc: no such key kind']); // abstract
@@ -99,12 +100,14 @@ test('POST /set is served, refusing an abstract NPC and undone by /undo', async 
   const { root, read } = sampler(t);
   const original = read();
   const artifact = join(root, '../dev.json');
-  writeFileSync(artifact, JSON.stringify(compiled(join(SAMPLER))));
   const live = serve(0, root, artifact);
   t.after(() => live.close());
   const url = `http://localhost:${await live.port}`;
-  const source = (await (await fetch(`${url}/source?file=${SCENE}`)).json()) as { text: object };
-  assert.deepEqual(Object.keys(source.text).sort(), [
+  const words = async () =>
+    ((await (await fetch(`${url}/source?file=${SCENE}`)).json()) as { text: object }).text;
+  assert.deepEqual(await words(), {}); // no compile yet: no words, not a fault
+  writeFileSync(artifact, JSON.stringify(compiled(join(SAMPLER))));
+  assert.deepEqual(Object.keys(await words()).sort(), [
     'dialogue.stranger_talk.choices.ask_their_name.label',
     'dialogue.stranger_talk.choices.ask_their_name.narration',
     'dialogue.stranger_talk.prompt',
@@ -122,10 +125,11 @@ test('POST /set is served, refusing an abstract NPC and undone by /undo', async 
   assert.equal(read(), original);
 });
 
-// Break: `then:` offers or takes a key that is not a dialogue (dialogue_links.ex), or not `end`.
+// Break: `then:` offers or takes a key that is not a dialogue (dialogue_links.ex), or not `end`; a
+// file's last line, with no newline after it, cannot be set.
 test('a then: takes a dialogue key or end, a with: an NPC key', (t) => {
   const { root, write, read } = sampler(t);
-  writeFileSync(join(root, SCENE), 'npc: stranger\nwith: guard\n- Go\n  then: end\n');
+  writeFileSync(join(root, SCENE), 'npc: stranger\nwith: guard\n- Go\n  then: end');
   assert.deepEqual(ids(root, ['kind']), {
     npc: ['guard', 'stranger'],
     with: ['guard', 'stranger'],
@@ -137,7 +141,7 @@ test('a then: takes a dialogue key or end, a with: an NPC key', (t) => {
   assert.deepEqual(at(2, 'with: guard', 'aside'), [400, 'with: no such key aside']);
   assert.equal(at(4, '  then: end', 'aside'), 'written');
   assert.equal(at(2, 'with: guard', 'stranger'), 'written');
-  assert.equal(read(), 'npc: stranger\nwith: stranger\n- Go\n  then: aside\n');
+  assert.equal(read(), 'npc: stranger\nwith: stranger\n- Go\n  then: aside');
 });
 
 // Break: the card shows a words line without the text key the Book edits, or a key line as words.
@@ -149,6 +153,7 @@ test("the card's lines: each value line its verb, each words line its text key",
     'dialogue.stranger_talk.prompt': 'The stranger waits.',
     'dialogue.stranger_talk.choices.ask.reply': 'Tamsin.',
     'dialogue.other.prompt': 'Tamsin.',
+    'dialogue.stranger_talk.choices.ask.narration': 'knows', // as line 5's flag: still a key line
   };
   const lines = sceneLines(SCENE, bytes, 'dialogue', text, {});
   assert.deepEqual(

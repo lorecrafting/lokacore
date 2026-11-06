@@ -246,7 +246,9 @@ test('the flow graph refilters within 100 ms', async (t) => {
 });
 
 // Last: it switches the world. Breaks: a `.scene` dialogue routed to no card or the generic one, a
-// value line without its picker, a words line without its Book edit, or an unknown key sent.
+// value line without its picker or its verb's keys, a words line without its Book edit, an unknown
+// key or the line's own value sent, Enter not sending, a refusal or a write's Undo not shown, or a
+// modal scene's treatment shown as none.
 test('a .scene dialogue opens its text card: a picker per value line, words to the Book', async () => {
   const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
   assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
@@ -262,5 +264,39 @@ test('a .scene dialogue opens its text card: a picker per value line, words to t
   await card.getByText('no npc nobody').waitFor();
   await npc.blur();
   assert.deepEqual(sent, []); // refused here, never sent
+  const keys = page.locator('#scene-1-keys option');
+  assert.deepEqual(await keys.evaluateAll((os) => os.map((o) => o.getAttribute('value'))), [
+    'guard',
+    'stranger',
+  ]); // npc: an NPC key, never a dialogue or end
+  assert.equal(await card.locator('li label > span').first().textContent(), 'npc:');
+  await npc.fill('stranger');
+  await npc.blur(); // the line's own value: nothing to send
+  // /set answered here, never by the repo's file: first a refusal, then a write
+  const posted: unknown[] = [];
+  const answers = [
+    { status: 400, json: 'refused by the server' },
+    { status: 200, json: { id: 'u1' } },
+  ];
+  await page.route('**/__author/set', (r) => {
+    posted.push(r.request().postDataJSON());
+    return r.fulfill(answers.shift()!);
+  });
+  const undo = card.getByRole('button', { name: 'Undo' });
+  await npc.fill('guard');
+  await npc.press('Enter'); // Enter sends
+  await card.getByText('refused by the server').waitFor();
+  assert.equal(await undo.isEnabled(), false);
+  await npc.focus();
+  await npc.blur();
+  await card.getByText('refused by the server').waitFor({ state: 'detached' });
+  assert.equal(await undo.isEnabled(), true); // a write's id is the card's Undo
+  const one = { file: 'scenes/stranger_talk.scene', line: 1, was: 'npc: stranger', value: 'guard' };
+  assert.deepEqual(posted, [one, one]);
   await page.close();
+  const sampler = { method: 'POST', body: JSON.stringify({ name: 'scene_sampler' }) };
+  assert.equal((await fetch(`http://localhost:${author}/world`, sampler)).status, 200);
+  const rope = await open({ selection: { kind: 'scene', key: 'rope_reverie' } });
+  assert.equal(await rope.getByLabel('treatment').inputValue(), 'reverie'); // the file's, not none
+  await rope.close();
 });
