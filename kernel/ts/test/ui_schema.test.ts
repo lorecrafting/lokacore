@@ -15,10 +15,18 @@ const ui = (kind: string, registry = {}) =>
   uiSchema(kind, read(`${kind}.schema.json`), defs, registry);
 
 // Breaks: the walker stops at the kind's if/then/else (abstract, extends) and claims nothing, keeps
-// the `partial.` prefix of an extending definition, or does not follow a $ref into a definition.
+// the `partial.` prefix of an extending definition, does not follow a $ref into a definition, or a
+// block's row replaces the walker's claims it draws through (the policy's definition, the events).
 test('a real kind claims its text keys, definition references, policies and steps', () => {
   const rooms = ui('rooms');
   assert.deepEqual(rooms.name, { 'ui:field': 'TextKey', 'ui:fieldReplacesAnyOrOneOf': true });
+  const rules = {
+    'reactions.on': card('blocks/Rules.tsx'),
+    'reactions.when': card('blocks/Rules.tsx'),
+  };
+  const reactions = ui('reactions', rules);
+  assert.equal(reactions.when['ui:field'], 'Policy');
+  assert.equal(reactions.on.anyOf[2]['ui:title'], 'spoken');
   assert.deepEqual(rooms.exits.north.barrier, {
     'ui:field': 'DefinitionRef',
     'ui:fieldReplacesAnyOrOneOf': true,

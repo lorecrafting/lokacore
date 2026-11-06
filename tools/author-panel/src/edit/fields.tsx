@@ -1,18 +1,11 @@
 // The generic card's hand-built fields (docs/rnd/gui-editor-design-2026-11-04.md §4.5, §11): they
 // draw only; the logic is kernel/ts/play/card.ts. The walker names them by `ui:field`.
 import { useState } from 'react';
-import type { FieldProps, RJSFSchema } from '@rjsf/utils';
-import {
-  branchOf,
-  choices,
-  pickKind,
-  proseKey,
-  refusePick,
-  start,
-} from '../../../../kernel/ts/play/card.ts';
-import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
+import type { FieldProps } from '@rjsf/utils';
+import { choices, pickKind, proseKey, refusePick } from '../../../../kernel/ts/play/card.ts';
 import { Button } from '../components/ui/button.tsx';
 import { Input } from '../components/ui/input.tsx';
+import { Rules } from './blocks/Rules.tsx';
 import { Refusal } from './templates.tsx';
 
 /** What the fields read beyond rjsf's props: the selection, the story's nodes and the Book. */
@@ -78,62 +71,15 @@ function DefinitionRef(p: FieldProps) {
   );
 }
 
-/**
- * Any union, and the Policy and Step blocks: an op picker, then the chosen branch's fields. A new
- * branch starts as `{op}` and nothing else (rjsf's own switch would drop `op` under our defaults);
- * a `wait` step draws the divider before the rules that run later. The picker's label counts an
- * array item from 1, as the owner does; its name ends in the 0-based index (chrome rulings §7).
- */
-function Union(p: FieldProps) {
-  const { registry, schema, formData, fieldPathId } = p;
-  const [picked, pick] = useState(-1);
-  const raw = (schema.anyOf ?? schema.oneOf) as RJSFSchema[];
-  const branches = raw.map((b) => registry.schemaUtils.retrieveSchema(b, formData));
-  const ui =
-    p.uiSchema?.anyOf || p.uiSchema?.oneOf
-      ? p.uiSchema!
-      : uiSchema('', schema as never, registry.rootSchema.$defs as never, {});
-  const each: Record<string, unknown>[] = ui.anyOf ?? ui.oneOf ?? [];
-  const found = branchOf(branches as never, formData);
-  const at = found >= 0 ? found : picked;
-  const { SchemaField } = registry.fields;
-  const wait = formData?.op === 'wait';
-  return (
-    <div className={wait ? 'mt-1 border-t-2 border-dashed pt-1' : ''}>
-      {wait ? <p className="text-xs text-muted-foreground">later rules</p> : null}
-      <select
-        aria-label={`${p.name.replace(/-(\d+)$/, (_, n) => ` ${Number(n) + 1}`)} kind`}
-        className="form-control"
-        value={at}
-        onChange={(e) => {
-          const i = Number(e.target.value);
-          pick(i);
-          p.onChange(start(branches[i] as never), fieldPathId.path);
-        }}
-      >
-        {at < 0 ? <option value={-1}>choose</option> : null}
-        {branches.map((_, i) => (
-          <option key={i} value={i}>
-            {(each[i]?.['ui:title'] as string) ?? `option ${i + 1}`}
-          </option>
-        ))}
-      </select>
-      {at >= 0 ? (
-        <SchemaField {...p} schema={branches[at]} uiSchema={{ ...each[at], 'ui:label': false }} />
-      ) : null}
-    </div>
-  );
-}
-
 /** A field the definition does not have yet: nothing until the add menu reveals it. */
 const Hidden = () => null;
 
 export const fields = {
   TextKey,
   DefinitionRef,
-  Policy: Union,
-  Step: Union,
-  AnyOfField: Union,
-  OneOfField: Union,
+  Policy: Rules,
+  Step: Rules,
+  AnyOfField: Rules,
+  OneOfField: Rules,
   Hidden,
 };

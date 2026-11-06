@@ -89,7 +89,8 @@ export function uiSchema(
     const card = { 'ui:field': edit.replace(/\.tsx$/, '') };
     const [k, field] = path.split('.');
     if (path === kind) Object.assign(ui, card);
-    else if (k === kind && field) at[field] = card;
+    // a block (blocks/) draws through the walker's own claims (Policy, Step, a union's branch titles)
+    else if (k === kind && field && !edit.startsWith('blocks/')) at[field] = card;
     else if (path.startsWith('treatment:') && `${kind}.treatment` in registry) at.treatment = card;
   }
   return ui;

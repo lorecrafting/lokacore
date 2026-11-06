@@ -1,4 +1,4 @@
-// size: allow 530, one suite per card step; the generic, Room, World, NPC and item cards share the pure helpers
+// size: allow 575, one suite per card step; the generic, Room, World, NPC and item cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -37,6 +37,8 @@ import {
   rootStamp,
   ROOTS,
   start,
+  constraintOnly,
+  tagHidden,
   worldFile,
 } from '../play/card.ts';
 import { change } from '../play/edit_model.ts';
@@ -218,7 +220,8 @@ test('absent fields are hidden until revealed; a revealed one keeps its card', (
 });
 
 // Break: a step is drawn as the wrong op (first branch, or by shape), a `wait` is not told apart
-// from a step, or a step whose op the outer union does not name falls out as -1.
+// from a step, a step whose op the outer union does not name falls out as -1, or picking `Step` over
+// a `wait` writes no object (a null array item).
 test('a value is drawn in the branch its op names', () => {
   const step = defs.Step.anyOf;
   assert.equal(branchOf(step, { op: 'quest.activate', quest: 'q' }), 2);
@@ -227,8 +230,52 @@ test('a value is drawn in the branch its op names', () => {
   assert.equal(branchOf(outer, { op: 'narrate' }), 0);
   assert.equal(branchOf(outer, undefined), -1);
   assert.equal(branchOf(step, { op: 'fact.assign' }), 0);
-  assert.deepEqual(start(step[2]), { op: 'quest.activate' });
-  assert.equal(start(outer[0]), undefined);
+  assert.deepEqual(start(step, 2), { op: 'quest.activate' });
+  assert.deepEqual(start(outer, 0, { op: 'wait', seconds: 5 }), {});
+});
+
+// Break: a trigger or check is drawn in the first branch whatever its event or kind (it names no
+// `op`), a new pick writes no tag at all, or a check's key is lost (or a field of another schema
+// kept) when the author switches its kind.
+test('a trigger and a check are drawn and switched by their event and kind', () => {
+  const on = defs['source.ReactionRule'].properties.on.anyOf;
+  assert.equal(branchOf(on, { event: 'spoken', word: 'hello' }), 2);
+  assert.deepEqual(start(on, 15, { event: 'spoken', npc: 'ada', word: 'hi' }), {
+    event: 'action_completed',
+  });
+  const check = defs.Check.anyOf;
+  const luck = { kind: 'luck', key: 'fish', chance: 50 };
+  assert.equal(branchOf(check, { kind: 'threshold', key: 'k' }), 1);
+  assert.deepEqual(start(check, 1, luck), { kind: 'threshold', key: 'fish' });
+});
+
+// Break: an `extends` partial naming no kind (`check: {chance: 70}`) draws only the picker and
+// hides its fields; a switch from a value no branch fits drops its fields; a field whose schema
+// differs between the two branches is kept; an untagged union hides an `op` field; a prototype key
+// (`constructor`) counts as a declared field.
+test('a tagless or unknown value keeps its fields', () => {
+  assert.equal(branchOf(defs['partial.Check'].anyOf, { chance: 70 }), 0);
+  assert.equal(branchOf(defs['partial.Check'].anyOf, { constructor: 1 }), -1);
+  assert.equal(branchOf([{ type: 'string' }, { properties: { a: {} } }], { a: 1 }), 1);
+  assert.equal(branchOf(defs.Check.anyOf, null), -1);
+  assert.deepEqual(start(defs.Check.anyOf, 1, { key: 'fish', zz: 1 }), {
+    kind: 'threshold',
+    key: 'fish',
+  });
+  const two = [
+    { properties: { kind: { const: 'a' }, n: { type: 'string' } } },
+    { properties: { kind: { const: 'b' }, n: { type: 'integer' } } },
+  ];
+  assert.deepEqual(start(two, 1, { kind: 'a', n: 'x' }), { kind: 'b' });
+  assert.deepEqual(tagHidden([{ type: 'object', properties: { op: { type: 'string' } } }]), {});
+});
+
+// Break: has_tag's one-subject rule (branches that only require a field) is drawn as a picker of
+// empty forms, which rjsf cannot draw.
+test('a union of bare requirements draws nothing', () => {
+  assert.equal(constraintOnly([{ required: ['subject'] }, { required: ['item'] }]), true);
+  assert.equal(constraintOnly(defs.Check.anyOf), false);
+  assert.equal(constraintOnly([{ properties: { a: {} } }]), false);
 });
 
 // Break: an untagged value is drawn in a branch of another type (a number not taken as integer,
@@ -516,6 +563,8 @@ test('a reference picker takes the kind its field names and refuses an unknown i
   assert.equal(pickKind(['services', 1]), 'service');
   assert.equal(pickKind(['items', '2']), 'item'); // a form's index arrives as a digit string
   assert.equal(pickKind(['location', 'npc']), 'npc');
+  assert.equal(pickKind(['policy', 'with']), 'npc'); // leaf_refs.ex: a policy's `with` names an npc
+  assert.equal(pickKind(['constructor']), 'constructor'); // a field name is never read off the prototype
   const items = { kind: 'item', keys: ['rope', 'lamp'] };
   assert.ok(refusePick(items, 'ropes'));
   assert.equal(refusePick(items, 'rope'), undefined);
