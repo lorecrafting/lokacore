@@ -457,3 +457,26 @@ test('a bad checkpoint name is refused, a good one is not', async () => {
   await refusal.waitFor({ state: 'detached' });
   await page.close();
 });
+
+// Breaks: a selected room's pill shows while its box already shows the whole key (loka-vduxr.73), or
+// hides when zoomed out where the box shows none (mapsvg.tsx Drawing's Pills filter); or the footer
+// loses its counts when nothing is refused (areamap.tsx's footer line).
+test('the selected room has a pill only where its box shows no whole key', async () => {
+  const page = await open({ selection: { kind: 'room', key: 'tollhouse' } });
+  const slot = page.getByLabel('Map slot');
+  const pills = slot.locator('g.pointer-events-none text');
+  const pill = pills.filter({ hasText: 'tollhouse' });
+  const zoom = async (name: string) => {
+    for (let i = 0; i < 12; i++) {
+      await slot.getByRole('button', { name }).click({ timeout: boot });
+      await page.waitForTimeout(100); // each step eases from where the last one is
+    }
+  };
+  await slot.getByText(/^\d+ rooms/).waitFor({ timeout: boot });
+  await zoom('Zoom out'); // 0.25: a disc, no label
+  await pill.waitFor();
+  assert.deepEqual(await pills.allTextContents(), ['tollhouse']); // no other room is marked
+  await zoom('Zoom in'); // 3: the box shows the whole key
+  await pill.waitFor({ state: 'detached' });
+  await page.close();
+});
