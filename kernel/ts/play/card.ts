@@ -312,7 +312,7 @@ const shape = (node: unknown) => {
 export function start(branches: Obj[], i: number, old?: unknown): Obj | undefined {
   const k = tagOf(branches);
   const tag = constOf(branches[i], k);
-  if (tag === undefined) return k === undefined ? undefined : {}; // `$ref Step`: its picker asks
+  if (k === undefined || tag === undefined) return k ? {} : undefined; // `$ref Step`: picker asks
   const from = branches[branchOf(branches, old)];
   const now = (branches[i].properties ?? {}) as Obj;
   const same = (f: string) => !from || shape(now[f]) === shape((from.properties as Obj)?.[f]);
