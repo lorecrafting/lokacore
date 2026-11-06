@@ -289,12 +289,10 @@ function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) =
       return mapCommand(i.id, sel?.kind === 'room' ? sel.key : undefined);
     if (i.id === 'undo')
       return book.send({ op: 'key', key: 'z', metaKey: true, ctrlKey: false, altKey: false });
-    const name =
-      i.id === 'go' && sel?.kind === 'room'
-        ? sel.key
-        : prompt(i.id === 'new' ? 'New room key' : 'Room key');
+    const kind = i.id.startsWith('new-') ? i.id.slice(4) : undefined;
+    const name = i.id === 'go' && sel?.kind === 'room' ? sel.key : prompt(kind ? `New ${kind} key` : 'Room key');
     if (!name) return;
-    if (i.id === 'new') void ask('new', { kind: 'room', name });
+    if (kind) void ask('new', { kind, name }).then(({ ok, told }) => ok || alert(String(told)));
     else book.send({ op: 'go_to_room', room: name });
   };
 }
