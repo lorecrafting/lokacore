@@ -1,4 +1,4 @@
-// size: allow 650, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 700, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -24,6 +24,7 @@ import {
   fieldErrors,
   hidden,
   minimal,
+  newEntry,
   pickKind,
   pickable,
   placed,
@@ -314,6 +315,11 @@ test('a World picker refuses an unknown id at the field; a new entry key must be
     [refusePick(coin, 'mv'), refusePick(coin, 'gold'), refusePick(pickable(['room'], [], {}), 'x')],
     [undefined, 'no resource gold', undefined],
   );
+  // a transport's `with` is the npc it travels with, its `reverse` the transport back
+  assert.deepEqual(
+    [pickable(['with'], nodes, {})?.kind, pickable(['reverse'], nodes, {})?.kind],
+    ['npc', 'transport'],
+  );
   assert.equal(pickable(['title'], nodes, {}), undefined);
   assert.equal(pickable(['room'], nodes, {}, { global: 'x' }), undefined); // a global ref's object
   assert.deepEqual(
@@ -328,7 +334,8 @@ test('a World picker refuses an unknown id at the field; a new entry key must be
 
 // Break: the World card opens the wrong files (a room, or a nested population folder missed), reads
 // its picker's keys from the wrong field, misses a root-file write (stale keys) or refetches on any
-// write, writes '' into an emptied field, or a new entry starts at an invented non-zero amount.
+// write, writes '' into an emptied field, a new entry starts at an invented non-zero amount, or a
+// new default pool (`ma`) writes numbers over the compiler's @defaults (resources.ex:15-19).
 test('the World card opens the world files, keys its pickers from the root files, and enters typed values', () => {
   assert.deepEqual(
     [
@@ -355,7 +362,11 @@ test('the World card opens the world files, keys its pickers from the root files
     [entered(''), entered('a'), entered('', true), entered('7', true)],
     [undefined, 'a', undefined, 7],
   );
-  assert.ok(ROOTS.every((r) => Object.values(r.blank).every((v) => v === 0)));
+  const [resources, attributes] = ROOTS;
+  assert.deepEqual(
+    [newEntry(resources, 'ma'), newEntry(resources, 'coin'), newEntry(attributes, 'hp')],
+    [{}, { minimum: 0, maximum: 0, start: 0, gain: 0 }, { start: 0 }],
+  );
 });
 
 // Break: a reference field offers another kind's keys, or the ref's cartridge prefix; a `.scene`

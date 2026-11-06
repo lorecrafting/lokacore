@@ -4,7 +4,7 @@
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -334,8 +334,10 @@ test('the flow graph refilters within 100 ms', async (t) => {
 // Last: it switches the world. Breaks: a `.scene` dialogue routed to no card or the generic one, a
 // value line without its picker or its verb's keys, a words line without its Book edit, an unknown
 // key or the line's own value sent, Enter not sending, a refusal or a write's Undo not shown, or a
-// modal scene's treatment shown as none.
+// modal scene's treatment shown as none, or then: offering an unlinkable dialogue (Scene.tsx's
+// context.unlinkable dropped).
 test('a .scene dialogue opens its text card: a picker per value line, words to the Book', async () => {
+  appendFileSync(join(dir, 'identity_sampler/scenes/stranger_talk.scene'), '  then: end\n'); // line 7
   const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
   assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
   const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
@@ -379,6 +381,15 @@ test('a .scene dialogue opens its text card: a picker per value line, words to t
   assert.equal(await undo.isEnabled(), true); // a write's id is the card's Undo
   const one = { file: 'scenes/stranger_talk.scene', line: 1, was: 'npc: stranger', value: 'guard' };
   assert.deepEqual(posted, [one, one]);
+  // then: offers no dialogue the story names unlinkable (a keyword one, dialogue_links.ex:387-394)
+  await page.route('**/__author/story', async (r) => {
+    const res = await r.fetch();
+    r.fulfill({ response: res, json: { ...(await res.json()), unlinkable: { stranger_talk: 'keyword' } } });
+  });
+  await page.reload();
+  const then = page.locator('#scene-7-keys option');
+  await page.getByLabel('line 7 then').waitFor();
+  assert.deepEqual(await then.evaluateAll((os) => os.map((o) => o.getAttribute('value'))), ['end']);
   await page.close();
   const sampler = { method: 'POST', body: JSON.stringify({ name: 'scene_sampler' }) };
   assert.equal((await fetch(`http://localhost:${author}/world`, sampler)).status, 200);
