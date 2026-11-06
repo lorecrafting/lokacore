@@ -2,10 +2,11 @@
 // selection shared) and the map slot under it, its Map | Story segment (E3a and S2 fill them).
 import { CircleAlert, MapPin, Play } from 'lucide-react';
 import { AreaMap, type MapProps } from './areamap.tsx';
-import type { Story } from './author.ts';
+import type { Change, Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import type { SetLayout } from './columns.tsx';
 import { fromRef, WORLD, type Layout, type Selection } from './shell.ts';
+import { FlowView } from './flow.tsx';
 import { StoryList } from './storylist.tsx';
 
 type Pick = (s: Selection) => void;
@@ -104,11 +105,9 @@ export function MapSlot({
   set,
   story,
   refused,
+  changes,
   ...m
-}: { layout: Layout; set: SetLayout; story?: Story; refused?: string } & Omit<
-  MapProps,
-  'story' | 'segment'
->) {
+}: { layout: Layout; set: SetLayout; story?: Story; refused?: string; changes: Change[] } & Omit<MapProps, 'story' | 'segment'>) {
   const segment = <Segment layout={layout} set={set} />;
   return (
     <section
@@ -126,6 +125,8 @@ export function MapSlot({
         </div>
       ) : layout.map === 'map' && story ? (
         <AreaMap story={story} segment={segment} {...m} />
+      ) : layout.map === 'flow' && story ? (
+        <FlowView story={story} layout={layout} set={set} segment={segment} pick={m.pick} open={m.open} changes={changes} />
       ) : story ? (
         <StoryList story={story} layout={layout} set={set} segment={segment} pick={m.pick} open={m.open} />
       ) : (
@@ -138,11 +139,11 @@ export function MapSlot({
   );
 }
 
-/** The Map | Story segment (Esc in the map returns here). */
+/** The Map | Story | Flow segment (Esc in the map returns here). */
 function Segment({ layout, set }: { layout: Layout; set: SetLayout }) {
-  const views = ['map', 'story'] as const;
+  const views = ['map', 'story', 'flow'] as const;
   return (
-    <div role="radiogroup" aria-label="Map or Story" className="inline-flex rounded-md border">
+    <div role="radiogroup" aria-label="Map, Story or Flow" className="inline-flex rounded-md border">
       {views.map((v) => (
         <button
           key={v}

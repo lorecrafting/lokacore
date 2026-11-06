@@ -27,9 +27,10 @@ import { fromRef, type Layout, type Selection } from './shell.ts';
 import * as L from './storylist.ts';
 import { ICONED, LowerPanel, PacingButton, type Act } from './storylower.tsx';
 
-const ICON: Record<string, typeof Flag> = {
-  quest: Flag,
-  story_point: Scroll,
+/** Each story kind's icon (the List's rows and Flow's chips): a quest is a scroll, a story point a flag. */
+export const ICON: Record<string, typeof Flag> = {
+  quest: Scroll,
+  story_point: Flag,
   dialogue: MessageCircle,
   scene: Film,
   reaction: Zap,
