@@ -27,6 +27,7 @@ export const M = {
   lock: 14, // mutate-skip: uncalibrated design value
   pad: 12, // space.lg
   min: 0.25,
+  floor: 0.1, // the map's least zoom when a level fits only below `min` (map rulings, minimum zoom)
   max: 3,
   step: 1.25,
   labels: 1, // labels hide below this zoom
@@ -102,7 +103,7 @@ export function label(key: string, zoom: number) {
   return { text: key.length <= fits ? key : `${key.slice(0, Math.max(fits - 1, 0))}…` };
 }
 
-const clampZoom = (z: number) => Math.min(M.max, Math.max(M.min, z));
+const clampZoom = (z: number, min: number) => Math.min(M.max, Math.max(min, z));
 const within = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 /** The level's extent: its rooms' cells. */
@@ -118,9 +119,9 @@ export function bounds(level: MapRoom[]) {
 }
 type Bounds = ReturnType<typeof bounds>;
 
-/** The whole level centred in `box`, as large as the zoom limits allow. */
-export function fit(b: Bounds, box: Box): View {
-  const zoom = clampZoom(Math.min(box.w / (b.x1 - b.x0), box.h / (b.y1 - b.y0)));
+/** The whole level centred in `box`, as large as the zoom limits (`min` to 3) allow. */
+export function fit(b: Bounds, box: Box, min = M.min): View {
+  const zoom = clampZoom(Math.min(box.w / (b.x1 - b.x0), box.h / (b.y1 - b.y0)), min);
   return {
     zoom,
     x: box.w / 2 - (zoom * (b.x0 + b.x1)) / 2,
@@ -138,9 +139,12 @@ export function keep(v: View, b: Bounds, box: Box): View {
   };
 }
 
-/** Zoom by `factor` about the screen point `p`, within 0.25 to 3. */
-export function zoomAt(v: View, factor: number, p: { x: number; y: number }): View {
-  const zoom = clampZoom(v.zoom * factor);
+/** The map's minimum zoom: `min`, or the level's fit in `box` where that is less, down to `floor`. */
+export const least = (b: Bounds, box: Box) => Math.min(M.min, fit(b, box, M.floor).zoom);
+
+/** Zoom by `factor` about the screen point `p`, within `min` to 3. */
+export function zoomAt(v: View, factor: number, p: { x: number; y: number }, min = M.min): View {
+  const zoom = clampZoom(v.zoom * factor, min);
   const k = zoom / v.zoom;
   return { zoom, x: p.x - (p.x - v.x) * k, y: p.y - (p.y - v.y) * k };
 }

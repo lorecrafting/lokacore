@@ -110,6 +110,41 @@ test('an off-fight death without revival: Let go turns to the recovery room, its
   }
 });
 
+// Breaks (book-ui.md, A second death): a second death before Let go retitles the dead page or
+// drops its log, draws or reads its own lines there, or Let go (with or without the rise) drops or
+// reorders a waiting line, or reads the first death again.
+test('a second death before Let go keeps the first on the dead page; its lines wait', () => {
+  const clock = Date.now;
+  for (const revival of [undefined, SHRINE.revival]) {
+    let now = 0;
+    Date.now = () => now;
+    const h = cellar();
+    try {
+      const shrine = view({ ...SHRINE, revival });
+      h.die(shrine, RECEIPT);
+      h.publish(shrine, 'road.crows');
+      h.die(shrine, ['death.fell']);
+      assert.ok(h.texts().includes('The cellar'));
+      assert.deepEqual(these(h, ['Water drips.', 'Crows lift off the road.', ...DEATH]), [
+        'Water drips.',
+        ...DEATH,
+      ]);
+      assert.equal(h.said(), DEATH.join(' ')); // the first death's, read once
+      h.tap('Let go');
+      if (revival) ((now = 60_000), h.tap('Rise'));
+      assert.deepEqual(these(h, [...DEATH, 'Crows lift off the road.']), [
+        ...DEATH,
+        'Crows lift off the road.',
+        'You die.',
+      ]);
+      assert.match(h.said(), /Crows lift off the road\. You die\.$/);
+    } finally {
+      h.close();
+      Date.now = clock;
+    }
+  }
+});
+
 // Breaks (book-ui.md, Spirit state): an encounter that ends the spirit state reads the dead page's
 // lines again.
 test('an encounter ending the spirit state does not reread the death', () => {

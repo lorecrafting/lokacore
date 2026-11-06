@@ -116,7 +116,7 @@ function useWheel(svg: React.RefObject<SVGSVGElement | null>, d: DrawProps) {
           ? map.zoomAt(now, Math.exp(-e.deltaY / 100), {
               x: e.clientX - box.left,
               y: e.clientY - box.top,
-            })
+            }, map.least(map.bounds(level), size))
           : { ...now, x: now.x - e.deltaX, y: now.y - e.deltaY };
       v.set(map.keep(moved, map.bounds(level), size));
     };
@@ -197,7 +197,7 @@ function keys(
     '+': () => d.l.zoom(M.step),
     '=': () => d.l.zoom(M.step),
     '-': () => d.l.zoom(1 / M.step),
-    '0': () => d.l.v.ease(map.fit(map.bounds(d.l.level), d.l.size)),
+    '0': d.l.fit,
     Escape: () =>
       svg
         .closest('section')

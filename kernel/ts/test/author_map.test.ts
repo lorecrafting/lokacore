@@ -118,6 +118,19 @@ test('labels: the key clipped to its box from zoom 1, none below', () => {
   assert.equal(map.label('village_green', 0.5), undefined);
 });
 
+// Breaks (map rulings, minimum zoom): `0` leaves a level the slot fits only below 0.25 cut off, `-`
+// shrinks it past its fit, the floor lets a huge level vanish, or a level that fits keeps no 0.25.
+test('the map zooms out to fit the showcase level, and no further', () => {
+  const b = { x0: 0, y0: 0, x1: 13 * map.M.cell, y1: 13 * map.M.cell }; // showcase level 0: 13 by 13 cells
+  const box = { w: 280, h: 184 };
+  const whole = map.fit(b, box, map.M.floor);
+  assert.equal(whole.zoom, 184 / 832); // about 0.22
+  assert.equal(map.least(b, box), whole.zoom);
+  assert.deepEqual(map.zoomAt(whole, 1 / map.M.step, { x: 140, y: 92 }, map.least(b, box)), whole);
+  assert.equal(map.least(b, { w: 16, h: 16 }), map.M.floor);
+  assert.equal(map.least(map.bounds(LEVEL0), { w: 256, h: 128 }), map.M.min);
+});
+
 // Breaks: fit leaves the level off-centre or past the zoom limits, keep lets the level leave the
 // view, a cursor zoom drifts the point under the cursor, or follow-here moves a visible room.
 test('the view: fit, keep one cell in, zoom about the cursor, show an off-screen room', () => {

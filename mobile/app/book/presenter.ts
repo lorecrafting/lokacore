@@ -87,7 +87,7 @@ function background(
   }
   if (last && last.command_id === s.narrationId) return;
   if (last) narrate(s, closing(last, was, now), was, now, away, text);
-  if (last?.died) s.woke = from; // the arrival's entries are the return's too (spirit state)
+  if (last?.died && s.down?.to === undefined) s.woke = from; // spirit state; a second death: fall
 }
 
 // A new receipt's lines: World (or the open settlement's lines), and its detail or conversation.

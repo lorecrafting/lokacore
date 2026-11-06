@@ -1,4 +1,4 @@
-// size: allow 545, one editor's keys, saves, conflicts and add-here walked over one stubbed page
+// size: allow 555, one editor's keys, saves, conflicts and add-here walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -260,7 +260,8 @@ test('the selection marks its lines; the panel`s shortcuts and edits reach it fr
 
 // Breaks: a Book click on a room offers no add-here menu (when the card's offer follows the click, or
 // when the room is already selected), a pick tells another field or room, or an offer no Book click
-// asked for (the card's next list after a pick) or an empty one pops the menu.
+// asked for (the card's next list after a pick) or an empty one pops the menu; or the note covers
+// the next line, or that line stays moved once the note hides (book-ui.md, No field).
 test('a Book click on the selected room offers add-here; a pick tells the panel', async () => {
   const offer = () =>
     postMessage({ op: 'select', kind: 'room', key: 'hut', add: ['ambient', 'dark'] }, '*');
@@ -270,15 +271,24 @@ test('a Book click on the selected room offers add-here; a pick tells the panel'
     el.dir = 'auto';
     el.textContent = 'A hut.';
     w.seen.set('A hut.', 'room.hut.title');
+    const next = el.insertAdjacentElement('afterend', document.createElement('p'))!;
+    next.textContent = 'Below.';
+    for (const p of [el, next]) (p as HTMLElement).style.margin = '0'; // no default margin hides the room
   });
   const hut = page.locator('p', { hasText: 'A hut.' });
+  const top = () =>
+    page.locator('p', { hasText: 'Below.' }).evaluate((p) => p.getBoundingClientRect().top);
+  const at = await top();
   await hut.click(); // the click selects in the panel first; its card's offer follows
   await page.evaluate(offer);
   await noteSays('Add hereambientdark');
+  const under = await page.locator('.loka-note').evaluate((n) => n.getBoundingClientRect().bottom);
+  assert.ok((await top()) >= under && under > at, `${await top()} >= ${under}`);
   assert.deepEqual(
     await told1(() => page.locator('.loka-note button', { hasText: 'dark' }).click()),
     { add: { kind: 'dark', room: 'hut' } },
   );
+  assert.equal(await top(), at); // back with the note hidden
   await page.evaluate(offer);
   await page.waitForTimeout(200); // the offer has landed
   assert.equal(await page.locator('.loka-note').isHidden(), true);

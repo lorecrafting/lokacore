@@ -1,4 +1,4 @@
-// size: allow 320, the field's open, save, put-back, walk keys and add-here menu share its state
+// size: allow 330, the field, its saves, walk keys, add-here menu and note room share its state
 // E5, prose in the Book (docs/design/prose-in-the-book-rulings.md): a double-click turns a line
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
@@ -47,6 +47,7 @@ let selected: { kind: string; key: string; add?: string[] } = { kind: '', key: '
 let asked = false; // a Book click: the selection's add-here menu shows once the panel offers it
 let counted = '';
 let note: HTMLDivElement;
+let spaced: [HTMLElement, string] | undefined; // the line the note sits under, and its own bottom margin
 const observer =
   typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(reapply);
 const watch = () =>
@@ -66,9 +67,14 @@ function say(
   note.replaceChildren(text, ...buttons.map(([name, run]) => button(name, run)));
   note.toggleAttribute('data-warn', warn);
   note.hidden = !el || !text;
+  if (spaced) spaced[0].style.marginBottom = spaced[1];
+  spaced = undefined;
   if (!el) return;
   const r = el.getBoundingClientRect();
   Object.assign(note.style, { left: `${r.left + scrollX}px`, top: `${r.bottom + scrollY}px` });
+  if (note.hidden) return;
+  spaced = [el, el.style.marginBottom]; // book-ui.md, No field: the lines below make room, never covered
+  el.style.marginBottom = `${note.offsetHeight}px`;
 }
 const button = (name: string, run: () => void) => {
   const b = document.createElement('button');
