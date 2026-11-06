@@ -140,7 +140,7 @@ export function Mechanics({
 
 /** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
 export const adder = (card: Card, defs: Record<string, never>, def: string) => (f: string) => {
-  const next = added(card.draft ?? {}, f, defs, def);
+  const next = added((card.draft ?? {}) as Doc, f, defs, def);
   card.reveal(f);
   if (next) (card.change(next), card.commit());
 };
