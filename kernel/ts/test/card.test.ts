@@ -516,6 +516,10 @@ test("an action's and a reaction's add menus offer only fields the compiler acce
   assert.deepEqual(allowed('actions', action, {}), ['cooldown', 'craft', 'duration']);
   const use = { target: { kind: 'use' } };
   assert.deepEqual(allowed('actions', action, { check: 1, fact: 1, policy: 1 }, use, {}), action);
+  // each capability opens only its own field
+  const only = (cap: string) =>
+    allowed('actions', ['check', 'policy', 'tip'], { [cap]: 1 }, use, {});
+  assert.deepEqual([only('check'), only('fact'), only('policy')], [['check'], ['tip'], ['policy']]);
   assert.deepEqual(allowed('actions', action, {}, use, { time_policy: {} }), ['cooldown', 'craft']);
   assert.deepEqual(allowed('actions', action, {}, { target: { kind: 'spell' } }), [
     'cooldown',
