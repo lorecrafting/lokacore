@@ -36,7 +36,7 @@
             },
             "ends_at": {
               "$ref": "command.schema.json#/$defs/LogicalTime",
-              "description": "loka-x6t.135: the projected time the running cooldown ends (the actor's last admitted attempt plus the scripted action's cooldown, commands/actions.ts cooling), the ConditionView clock; present exactly when reason.code is cooldown, absent when that end passes 2^53 - 1."
+              "description": "loka-x6t.135: the projected time the running cooldown ends (the actor's last admitted attempt plus the scripted action's cooldown, commands/actions.ts cooling), the ConditionView clock; present only when reason.code is cooldown, and absent then too when that end passes 2^53 - 1."
             },
             "duration": {
               "type": "integer",
@@ -154,7 +154,7 @@
             },
             "ends_at": {
               "$ref": "command.schema.json#/$defs/LogicalTime",
-              "description": "loka-x6t.135: the projected time the running cooldown ends (the actor's last admitted attempt plus the scripted action's cooldown, commands/actions.ts cooling), the ConditionView clock; present exactly when reason.code is cooldown, absent when that end passes 2^53 - 1."
+              "description": "loka-x6t.135: the projected time the running cooldown ends (the actor's last admitted attempt plus the scripted action's cooldown, commands/actions.ts cooling), the ConditionView clock; present only when reason.code is cooldown, and absent then too when that end passes 2^53 - 1."
             },
             "duration": {
               "type": "integer",

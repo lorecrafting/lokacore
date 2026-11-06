@@ -10,7 +10,6 @@ import { toolHeld } from '../mechanics/lookups.ts';
 import { fits } from '../mechanics/scripted_action/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 
-// size: allow 45, a cooling pair carries its cooldown's end and length (loka-x6t.135)
 export function useActions(
   world: World,
   actor: CharacterId,
@@ -29,6 +28,7 @@ export function useActions(
     .flatMap((a) => {
       const shown = { action_key: a.key, label: a.label, target: a.target, input: a.input };
       const admitted = admission(world, a.scripted!, actor, body);
+      const cooled = admitted === 'cooldown' && cooling(world, a.scripted!, actor);
       const pairs: AdvertisedAction[] = [];
       for (const id of Object.keys(world.entities)) {
         if (++steps.n > LIMITS.query_steps)
@@ -42,12 +42,7 @@ export function useActions(
         const listed = { ...shown, target_ids: [ids.target_id, ids.item_id] };
         pairs.push(
           typeof admitted === 'string'
-            ? {
-                ...listed,
-                available: false,
-                reason: { code: admitted },
-                ...(admitted === 'cooldown' && cooling(world, a.scripted!, actor)),
-              }
+            ? { ...listed, available: false, reason: { code: admitted }, ...cooled }
             : { ...listed, available: true },
         );
       }

@@ -265,15 +265,15 @@ const keyed = (world: World) => allScripted(world).filter((r) => r.target.kind !
 const scriptedKeys = (world: World) => keyed(world).map((r) => r.key);
 
 /**
- * The actor's running cooldown on a scripted action, or undefined when none runs: its end (the last
- * admitted attempt plus the cooldown, the first time admission passes again) and length, the
- * GameView's projection (protocol GameView ends_at/duration); {} when that end passes 2^53 - 1.
+ * The GameView's projection of the actor's running cooldown on a scripted action (protocol GameView
+ * ends_at/duration): its end (the last admitted attempt plus the cooldown, the first time admission
+ * passes again) and length; undefined when none runs or that end passes 2^53 - 1.
  */
 export function cooling(world: World, scripted: ScriptedAction, actor_id: CharacterId) {
   const last = world.state.cooldowns?.[key({ kind: 'cooldown', actor_id, action: scripted.key })];
   const duration = scripted.cooldown;
   if (!duration || last === undefined || sub(world.state.clock, last) >= duration) return undefined;
-  return duration <= SAFE - last ? { ends_at: last + duration, duration } : {};
+  return duration <= SAFE - last ? { ends_at: last + duration, duration } : undefined;
 }
 
 /**
@@ -291,7 +291,8 @@ export function admission(
 ) {
   const from = world.state.clock;
   const last = world.state.cooldowns?.[key({ kind: 'cooldown', actor_id, action: scripted.key })];
-  if (cooling(world, scripted, actor_id)) return 'cooldown' as const;
+  if (scripted.cooldown && last !== undefined && sub(from, last) < scripted.cooldown)
+    return 'cooldown' as const;
   const paid = pay(world, body, scripted.costs ?? []);
   return paid ? { paid, last, from } : ('insufficient_resource' as const);
 }

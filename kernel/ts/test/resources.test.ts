@@ -254,8 +254,9 @@ test('a cooldown of 2^53 - 1 refuses with cooldown, not a fault', () => {
   const once = world((c) => (c.scripted_actions[PRAY].cooldown = Number.MAX_SAFE_INTEGER));
   const cooling = run(once, move('east'), wait(3600), perform('pray'));
   rejects(cooling, perform('pray'), 'cooldown');
-  assert.deepEqual(noticeAction(gameView(cooling), 'pray')!.reason, { code: 'cooldown' });
-  assert.equal('ends_at' in noticeAction(gameView(cooling), 'pray')!, false);
+  const shown = noticeAction(gameView(cooling), 'pray')!;
+  assert.deepEqual(shown.available === false && shown.reason, { code: 'cooldown' });
+  assert.equal('ends_at' in shown, false);
 });
 
 // Breaks: < and <= swapped at the cooldown boundary, or no cooldown.start.
@@ -290,14 +291,15 @@ test('the GameView shows cooldowns, unaffordable costs and exhaustion as unavail
   const pray = (w: World) => noticeAction(gameView(w), 'pray');
   const prayed = run(world(), move('east'), wait(100), perform('pray'));
   const shown = { action_key: 'pray', label: 'actions.pray', target: { kind: 'none' }, input: [] };
-  assert.deepEqual(pray(run(prayed, wait(150))), {
+  const waited = run(prayed, wait(150));
+  assert.deepEqual(pray(waited), {
     available: false,
     ...shown,
     reason: { code: 'cooldown' },
     ends_at: 3700,
     duration: 3600,
   });
-  assert.deepEqual(validate('GameView', gameView(prayed)), []);
+  assert.deepEqual(validate('GameView', gameView(waited)), []);
   assert.equal(pray(run(prayed, wait(3700)))!.available, true);
   const poor = world(
     (c) => (c.scripted_actions[PRAY].costs = [{ resource: ref('ma'), amount: 101 }]),
