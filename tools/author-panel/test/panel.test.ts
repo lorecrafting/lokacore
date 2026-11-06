@@ -10,6 +10,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { after, before, test } from 'node:test';
 import axe from 'axe-core';
+import { kept } from '../src/author.ts';
 import { chromium, type Browser, type Page } from 'playwright';
 
 const PANEL = resolve(import.meta.dirname, '..');
@@ -323,4 +324,11 @@ test('the flow graph refilters within 100 ms', async (t) => {
   const ms = await took(['flow:layout', 'flow:commit']);
   t.diagnostic(`flow refilter ${ms.map(Math.round).join(' + ')} ms`);
   assert.ok(sum(ms) <= 100, `refilter ${ms.join(' + ')} ms`);
+});
+
+// Breaks: a /story failure with no answer or vite's 502 replaces the map, or the watcher's own
+// refusal (its 500) keeps the stale map (loka-vduxr.76).
+test('a /story failure keeps the map unless the watcher refused', () => {
+  const failed = (status?: number) => Object.assign(new Error('x'), { status });
+  assert.deepEqual([undefined, 502, 504, 500].map((s) => kept(failed(s))), [true, true, true, false]);
 });
