@@ -181,6 +181,19 @@ test('a reaction and an action open their own cards', async () => {
   await barter.close();
 });
 
+// Breaks: a modal scene routed to the generic card, its treatment select missing or offering other
+// than the schema's (none, reverie), or the generic form drawing treatment a second time.
+test('a modal scene opens its card: one treatment picker, the schema’s', async () => {
+  const page = await open({ selection: { kind: 'scene', key: 'letter_ash' } });
+  const card = page.getByLabel('scene card');
+  await card.locator('form').waitFor({ timeout: boot });
+  assert.deepEqual(await card.getByLabel('treatment').locator('option').allTextContents(), [
+    'none',
+    'reverie',
+  ]);
+  await page.close();
+});
+
 /** The Flow graph in the left slot, warm: the first open compiles the story on the server (a cold open
  * measured 319 ms here), so the budget is read on a second. `took` reads the latest `flow:*` measures. */
 async function flow() {

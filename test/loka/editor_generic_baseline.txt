@@ -149,9 +149,6 @@ scenes.on_end.delete
 scenes.steps.create
 scenes.steps.edit
 scenes.steps.delete
-scenes.treatment.create
-scenes.treatment.edit
-scenes.treatment.delete
 services.abstract.create
 services.abstract.edit
 services.abstract.delete
@@ -298,6 +295,3 @@ topics.fact.delete
 topics.name.create
 topics.name.edit
 topics.name.delete
-treatment:reverie.create
-treatment:reverie.edit
-treatment:reverie.delete

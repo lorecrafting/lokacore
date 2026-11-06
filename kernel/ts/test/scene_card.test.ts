@@ -159,3 +159,21 @@ test("the card's lines: each value line its verb, each words line its text key",
   const opens = ['scenes/a.scene', 'areas/n/dialogues/b.scene', 'rooms/a.scene', 'scenes/a.cut'];
   assert.deepEqual(opens.map(scened), [true, true, false, false]); // the card's files
 });
+
+// Break: the modal scene card's treatment picker offers a value the compiler refuses, or the one it
+// offers (the schema's enum, `reverie`) does not reach the artifact.
+test("the modal scene card's treatment compiles; one outside the schema's does not", (t) => {
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-treat-')));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  cpSync(resolve(SAMPLER, '../toolbox_showcase'), dir, { recursive: true });
+  const ash = join(dir, 'scenes/letter_ash.json');
+  const with_ = (treatment: string) => {
+    const doc = JSON.parse(readFileSync(ash, 'utf8'));
+    writeFileSync(ash, JSON.stringify({ ...doc, treatment }, null, 2) + '\n');
+    return compiled(dir);
+  };
+  const out = with_('reverie');
+  assert.equal(typeof out, 'object', String(out));
+  assert.match((out as { canonical: string }).canonical, /"treatment":"reverie"/);
+  assert.match(String(with_('spirit')), /treatment/);
+});
