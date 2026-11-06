@@ -1,4 +1,4 @@
-// size: allow 700, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 710, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -46,6 +46,7 @@ import {
 } from '../play/card.ts';
 import { paired, menuOf } from '../play/action.ts';
 import { change } from '../play/edit_model.ts';
+import { capabilityRow } from '../play/allowed.ts';
 import { json } from '../play/write.ts';
 
 const SOURCE = join(import.meta.dirname, '../../../schemas/source');
@@ -538,6 +539,15 @@ test("an NPC's and an item's add menus offer only fields every owning capability
   assert.equal(on(caps, { container: true }), 'mass_grams slot');
   assert.equal(on(caps, { bandage: {} }), 'bandage mass_grams');
   assert.deepEqual(allowed('items', ['container'], caps, { bandage: {} }), []);
+});
+
+// Break: an added capability row stays `newKey` (UNKNOWN_CAPABILITY, requires.ex:52), takes a key already
+// listed, or a doc with no new row gains one.
+test('an added capability row takes the first registry key not yet listed', () => {
+  const doc = (caps: object) => ({ requires: { capabilities: caps } });
+  assert.deepEqual(capabilityRow(doc({ dev: 1, newKey: 1 })), doc({ dev: 1, movement: 1 }));
+  const kept = doc({ dev: 1 });
+  assert.equal(capabilityRow(kept), kept);
 });
 
 // Break: an action or reaction card's add menu offers a field the compiler refuses: a check without
