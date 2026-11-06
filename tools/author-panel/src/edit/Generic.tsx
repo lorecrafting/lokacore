@@ -114,7 +114,8 @@ export function useCard(rel: string, diag: Diag) {
   const commit = () => {
     if (!saved) return;
     const errors = fresh(saved, latest.current);
-    setHeld(errors[0] && `${errors[0].property} ${errors[0].message}`);
+    const [first] = errors;
+    setHeld(first && `${first.property} ${first.message}`);
     const ops = apart(diff(saved.doc, latest.current), errors);
     if (ops.length)
       void post('change', { file: rel, was: saved.sha256, ops }, 'Changed outside: reloaded.');
