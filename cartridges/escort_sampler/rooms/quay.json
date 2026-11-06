@@ -1,0 +1,9 @@
+{
+  "name": "room.quay.title",
+  "description": "room.quay.description",
+  "exits": {
+    "north": {
+      "to": "green"
+    }
+  }
+}

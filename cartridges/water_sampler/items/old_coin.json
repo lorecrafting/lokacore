@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "coin",
+    "old_coin"
+  ],
+  "name": "item.old_coin.short",
+  "room_line": "item.old_coin.room",
+  "description": "item.old_coin.description",
+  "location": {
+    "in": "room",
+    "room": "pool_bottom"
+  },
+  "mass_grams": 10
+}
