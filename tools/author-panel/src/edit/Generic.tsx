@@ -14,6 +14,7 @@ import {
   apart,
   awaits,
   applied,
+  definitionOf,
   diff,
   fieldErrors,
   hidden,

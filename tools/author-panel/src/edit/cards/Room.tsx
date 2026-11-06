@@ -16,7 +16,7 @@ import { addHere } from '../../book.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { mapCommand } from '../../mapwire.ts';
 import type { Context } from '../fields.tsx';
-import { AddMenu, CardForm, Header, useCard } from '../Generic.tsx';
+import { AddMenu, CardForm, Header, adder, useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 
