@@ -107,9 +107,10 @@ function pan(e: React.PointerEvent<HTMLDivElement>, v: ReturnType<typeof useView
     moved ||= Math.abs(m.clientX - x0) + Math.abs(m.clientY - y0) > 2;
     v.set(keep({ ...start, x: start.x + m.clientX - x0, y: start.y + m.clientY - y0 }, bound(f), size));
   };
-  const up = () => (el.removeEventListener('pointermove', move), el.removeEventListener('pointerup', up), moved || clear());
+  // lost capture follows pointerup and pointercancel alike
+  const up = () => (el.removeEventListener('pointermove', move), el.removeEventListener('lostpointercapture', up), moved || clear());
   el.addEventListener('pointermove', move);
-  el.addEventListener('pointerup', up);
+  el.addEventListener('lostpointercapture', up);
 }
 
 /** What is inked: search text, else the focus and its hops, else the followed fact. */
@@ -118,6 +119,7 @@ function useInk(p: Props, sel: string | undefined) {
   const [q, setQ] = useState<string>();
   useEffect(() => setMark(sel ? { ref: sel, hops: 1 } : undefined), [sel]);
   const follow = p.layout.flow?.follow;
+  useEffect(() => void (follow && setMark(undefined)), [follow]); // a new follow replaces the focus ink
   const ink = (q && search(p.story, q)) || (mark ? focusInk(p.story, mark.ref, mark.hops) : follow ? followed(p.story, follow) : undefined);
   const setFollow = (fact?: string) => p.set((l) => ({ ...l, flow: { ...l.flow, follow: fact } }));
   return { mark, setMark, q, setQ, ink, follow, setFollow };

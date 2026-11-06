@@ -40,7 +40,7 @@ const model = (refs: string[], edges: Edge[], outline: Story['outline'] = null):
 // Beat 1 holds q and d1, beat 2 d2 and d3; d1 `then` d2, forks to d3 by `check` and reads f, as r1
 // does; d2 and d3 `then` back to d1 (two loops). f is a read_only fact; thera_greets is unrelated.
 const edges: Edge[] = [
-  { from: d1, to: d2, path: '/then' },
+  { from: d1, to: d2, path: '.choices.a.then', op: 'then' }, // story.ts links() shape
   { from: d1, to: d3, path: '/check/fail' },
   { from: d1, to: f, path: '/when', op: 'fact_compare' },
   { from: d2, to: d1, path: '/then' },

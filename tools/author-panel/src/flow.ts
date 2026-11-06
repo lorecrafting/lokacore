@@ -32,11 +32,13 @@ export const LANES = [
 const LANE = new Map(LANES.flatMap((l) => l.kinds.map((k) => [k, l])));
 export const laneOf = (ref: string) => LANE.get(fromRef(ref)?.kind ?? '');
 
+// story.ts `links()` ops: the dialogue chain, which the compiler checks
+const CHAIN = new Set(['then', 'then_failed', 'choice_resolved']);
 /** Solid: an edge the compiler could refuse. Dashed (design 4.3): a `check` fork, a condition's
  * read (an op without a dot: fact_compare, quest_state, time_since) or a fact read. */
 export const solid = (e: Edge) =>
   !e.path.split(/[./]/).includes('check') &&
-  !(e.op && !e.op.includes('.')) &&
+  !(e.op && !e.op.includes('.') && !CHAIN.has(e.op)) &&
   (fromRef(e.to)?.kind !== 'fact' || !!e.set);
 
 export type FlowState = { fold: string[]; filters?: string[]; open?: string[]; reveal?: string };
