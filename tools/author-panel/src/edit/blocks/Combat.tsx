@@ -4,12 +4,13 @@
 import { useState } from 'react';
 import type { FieldProps } from '@rjsf/utils';
 import { fightOf } from '../../../../../kernel/ts/play/blocks.ts';
-import { numbers } from '../../author.ts';
+import { fights } from '../../author.ts';
 import { Fight } from '../../numbers.tsx';
 import { Button } from '../../components/ui/button.tsx';
 import type { Context } from '../fields.tsx';
 
 type Shown = ReturnType<typeof fightOf> | Error;
+const RUNNING = 'running the fights…';
 
 /** The NPC's fight rows, measured on asking (the report runs the fights: seconds, not keystrokes). */
 function Fights({ npc }: { npc: string }) {
@@ -21,11 +22,13 @@ function Fights({ npc }: { npc: string }) {
         size="xs"
         variant="outline"
         className="justify-self-start"
-        onClick={() =>
-          numbers()
+        disabled={shown === RUNNING} // one run at a time: each runs every fight
+        onClick={() => {
+          show(RUNNING); // the last answer goes while the next runs (loka-wfrgk.79)
+          fights()
             .then((r) => show(fightOf(r.fights, npc)))
-            .catch((e: Error) => show(e))
-        }
+            .catch((e: Error) => show(e));
+        }}
       >
         Run fights
       </Button>
@@ -36,7 +39,9 @@ function Fights({ npc }: { npc: string }) {
       ) : shown ? (
         <Fight target={shown} />
       ) : (
-        <p className="text-muted-foreground">not a fight target (an NPC with an attack, alive at start)</p>
+        <p className="text-muted-foreground">
+          not a fight target (an NPC with an attack, alive at start)
+        </p>
       )}
     </div>
   );

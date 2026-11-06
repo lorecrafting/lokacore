@@ -20,6 +20,7 @@ import {
   hidden,
   rebase,
   status,
+  unlisted,
 } from '../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
 import { capabilityRow } from '../../../../kernel/ts/play/allowed.ts';
@@ -30,6 +31,16 @@ import { Refusal, templates } from './templates.tsx';
 import registry from './registry.json';
 
 const validator = customizeValidator({ AjvClass: Ajv2020 });
+
+/** rjsf's sanitizing, run on each leaf edit, rewrites values the author never touched: a union with
+ * a `const` branch is read as that const's enum, so `duration: 1800` became `permanent`
+ * (loka-wfrgk.75); a card writes only the author's edits, and the compiler reports the rest. */
+class CardFormBase extends Form {
+  getStateFromProps(...a: Parameters<Form['getStateFromProps']>) {
+    a[6] = false; // shouldSanitize
+    return super.getStateFromProps(...a);
+  }
+}
 type Saved = { doc: unknown; sha256: string; dir: string; schema: RJSFSchema };
 type Sent = { ops?: Op[]; [k: string]: unknown }; // the /change or /undo body
 
@@ -57,6 +68,12 @@ async function source(rel: string): Promise<Saved> {
   const schema = await fetch(`/__author/schema/${s.kind}`).then((r) => r.json());
   return { doc: JSON.parse(s.bytes), sha256: s.sha256, dir: s.kind, schema };
 }
+
+/** `doc` without its emptied optional lists: removed, not refused by their minItems (loka-wfrgk.78). */
+const unlistedIn = ({ schema, dir }: Saved, doc: unknown) => {
+  const defs = schema.$defs as never;
+  return unlisted(doc, defs[definitionOf(defs, dir, doc)] ?? {}, defs);
+};
 
 /** The card's file: loaded, and reloaded on a write from outside (the Book's in-place edit too). */
 function useFile(rel: string, diag: Diag) {
@@ -102,7 +119,7 @@ export function useCard(rel: string, diag: Diag) {
     if (ops.length)
       void post('change', { file: rel, was: saved.sha256, ops }, 'Changed outside: reloaded.');
   };
-  const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, doc)));
+  const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, unlistedIn(saved!, doc))));
   // Undo drops the held draft too: rebasing it onto the undone file would put the refusal straight back
   const back = () =>
     void (setHeld(undefined),
@@ -166,6 +183,8 @@ type FormProps = {
   fields?: RegistryFieldsType;
 };
 
+const removes = (t: EventTarget) => !!(t as Element).closest?.('button[aria-label="Remove"]');
+
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
   // rjsf keeps an added row's key in its own state: a renamed row redraws
@@ -173,9 +192,13 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
   const change = (doc: unknown, row = capabilityRow(doc as never)) =>
     void (row !== doc && remount(), card.change(row));
   return (
-    // after the blur's own change lands: rjsf sends a map key's rename after its setState, past the blur
-    <div onBlur={() => setTimeout(card.commit)}>
-      <Form
+    // after the blur's own change lands: rjsf sends a map key's rename after its setState, past the blur;
+    // rjsf's Remove drops the focused button, so no blur follows: it commits once its change lands
+    <div
+      onBlur={() => setTimeout(card.commit)}
+      onClick={(e) => removes(e.target) && setTimeout(card.commit)}
+    >
+      <CardFormBase
         key={rows}
         schema={card.saved!.schema}
         uiSchema={ui}
@@ -191,7 +214,7 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
         onSubmit={card.commit}
       >
         <span />
-      </Form>
+      </CardFormBase>
     </div>
   );
 }

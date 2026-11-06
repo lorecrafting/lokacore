@@ -1,4 +1,4 @@
-# size: allow 670, one case per starter kind and refusal; the area placement, companion, provider start and key order and shape cases join them
+# size: allow 675, one case per starter kind and refusal; the area placement, companion, provider start and key order and shape cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -13,10 +13,13 @@ defmodule Loka.ContentStartersTest do
                 |> Enum.map(&if(&1 == "scenes", do: "cutscene", else: &1))
   @guide File.read!("docs/guides/writing-the-game.md")
 
-  # Breaks: a source kind the owner cannot start from the tools, or one the guide's coverage
-  # table leaves out (a new schema file lands without either).
-  test "every source schema kind has a starter and a coverage row" do
+  # Breaks: a source kind the owner cannot start from the tools, one the guide's coverage table
+  # leaves out (a new schema file lands without either), or one the editor's palette does not offer
+  # or names wrongly (`New room` once sent `room`, which no starter has: loka-wfrgk.60).
+  test "every source schema kind has a starter, a coverage row and a palette New" do
     assert @schema_kinds -- Starters.kinds() == []
+    offered = "tools/author-panel/src/edit/new.json" |> File.read!() |> Jason.decode!()
+    assert Enum.sort(offered) == Starters.kinds() -- ["cartridge"]
     for kind <- @schema_kinds, do: assert(@guide =~ "\n| `#{kind}` |", "no coverage row: #{kind}")
   end
 

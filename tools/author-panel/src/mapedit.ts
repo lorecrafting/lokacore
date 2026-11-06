@@ -203,18 +203,23 @@ async function undo(io: Io, ids: number[]) {
   }
 }
 
+type Done = { ids: number[]; files: Set<string> };
+
 /** Runs one gesture's calls in order; a refusal puts back the calls before it, then throws. */
-async function gesture(io: Io, done: number[][], steps: (s: Run) => Promise<unknown>) {
+async function gesture(io: Io, done: Done[], steps: (s: Run) => Promise<unknown>) {
   const ids: number[] = [];
+  const files = new Set<string>(); // read or written: the rooms whose Undo it is (loka-wfrgk.77)
   const call: Run['call'] = async (route, sent) => {
     const r = await io.post(route, sent);
     if (!r.ok) no(said(r.told));
     const told = r.told as { id: number; files?: string[] };
     ids.push(told.id);
+    told.files?.forEach((f) => files.add(f));
     return told;
   };
   const read: Run['read'] = async (file) => {
     const got = await io.source(file);
+    files.add(file);
     return { doc: JSON.parse(got.bytes), was: got.sha256 };
   };
   const change: Run['change'] = async (file, edit) => {
@@ -229,19 +234,21 @@ async function gesture(io: Io, done: number[][], steps: (s: Run) => Promise<unkn
     await undo(io, ids).catch((u: Error) => no(`${(e as Error).message}; ${u.message}`));
     throw e;
   }
-  if (ids.length) done.push(ids);
+  if (ids.length) done.push({ ids, files });
 }
 
 /** The map's gestures over the panel's routes, and an undo of the last whole gesture. */
 export function editor(io: Io) {
-  const done: number[][] = []; // the journal ids of each gesture, oldest first
+  const done: Done[] = []; // each gesture's journal ids and files, oldest first
   const run = (steps: (s: Run) => Promise<unknown>) => gesture(io, done, steps);
   return {
     undoable: () => done.length > 0,
     async undo() {
-      await undo(io, done.at(-1) ?? no('no map edit to undo'));
+      await undo(io, done.at(-1)?.ids ?? no('no map edit to undo'));
       done.pop();
     },
+    /** The last gesture's newest journal id if it read or wrote `file`: a card's Undo runs it when newer than its own. */
+    newest: (file: string) => (done.at(-1)?.files.has(file) ? done.at(-1)!.ids.at(-1) : undefined),
     place: (r: MapRoom, at: At) => run((s) => place(s, r, at)),
     link: (a: MapRoom, dir: string, b: MapRoom, one = false) => run((s) => link(s, a, dir, b, one)),
     unlink: (a: MapRoom, dir: string, rooms: MapRoom[]) => run((s) => unlink(s, a, dir, rooms)),

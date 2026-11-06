@@ -152,6 +152,9 @@ test('new room from here makes a ~ room linked both ways and placed beside it', 
   assert.deepEqual(made.exits, { north: { to: 'start' } });
   assert.deepEqual(json('rooms/start.json').exits, { south: { to: 'cellar' } });
   assert.deepEqual(json('layout.json')[2], { room: 'cellar', x: 0, y: 2, z: 0 });
+  // Break: the new room's own card cannot Undo its making (review 683 nit 2, mapedit.ts told.files)
+  const id = ed.newest('rooms/cellar.json');
+  assert.ok(id !== undefined && id === ed.newest('rooms/start.json'));
   await assert.rejects(ed.grow(start, 'south', 'cellar2'), /start already has an exit south/);
   // Breaks: the server's own refusal text replaced by the stale-file message
   await assert.rejects(ed.grow(start, 'west', 'Cellar'), /kind, name, area/);

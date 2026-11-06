@@ -21,7 +21,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { artifactBytes } from './compiled.ts';
-import type { FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
+import type { Fights, FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
 import { replayRecords } from './replay.ts';
 import { todo } from './todo.ts';
 import { find } from './find.ts';
@@ -183,7 +183,7 @@ async function post(
   }
 }
 
-const SECONDS = 30; // the panel waits this long for each report; `bin/loka sim` has no limit
+const SECONDS = 90; // the panel waits this long per report: fight.ts --seeds 8 took 46 s on the showcase (M1, loka-wfrgk.79); mutate-skip: a measured limit
 const OPTS = { maxBuffer: 256 * 1024 * 1024, killSignal: 'SIGKILL' } as const;
 
 /** A report in a child, so a slow cartridge blocks no other route and is killed at the limit. */
@@ -204,21 +204,19 @@ export const limited = <T>(args: string[], seconds: number) =>
     });
   });
 
-async function numbers(artifact: string): Promise<Numbers> {
+/** The reports on the dev artifact; `fights` alone skips the pacing sim, which takes minutes (loka-wfrgk.79). */
+async function numbers(artifact: string, fights = false): Promise<Numbers | Fights> {
   const dev = JSON.parse(readFileSync(artifact, 'utf8'));
   const tmp = mkdtempSync(join(tmpdir(), 'loka-numbers-')); // the reports read a compiled artifact
   try {
     const file = join(tmp, 'artifact.json');
     writeFileSync(file, artifactBytes(dev));
     const play = (name: string) => join(import.meta.dirname, name);
-    const [pacing, fought] = await Promise.all([
-      limited<{ pools: PoolsReport; levels: LevelRows }>(
-        [play('sim.ts'), '--artifact', file, '--seeds', '4'],
-        SECONDS,
-      ),
-      limited<FightsReport>([play('fight.ts'), file, '--seeds', '8'], SECONDS),
-    ]);
-    return { hash: dev.sha256, pacing, fights: fought };
+    const fought = limited<FightsReport>([play('fight.ts'), file, '--seeds', '8'], SECONDS);
+    if (fights) return { hash: dev.sha256, fights: await fought };
+    const pace = [play('sim.ts'), '--artifact', file, '--seeds', '4'];
+    const pacing = limited<{ pools: PoolsReport; levels: LevelRows }>(pace, SECONDS);
+    return { hash: dev.sha256, pacing: await pacing, fights: await fought };
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
@@ -226,8 +224,8 @@ async function numbers(artifact: string): Promise<Numbers> {
 
 const asked = (url: string) => new URL(url, 'http://x').searchParams.get('q') ?? '';
 
-const reply = (response: ServerResponse, artifact: string) =>
-  numbers(artifact).then((n) => json(response, 200, n));
+const reply = (response: ServerResponse, artifact: string, fights?: boolean) =>
+  numbers(artifact, fights).then((n) => json(response, 200, n));
 
 /** The column's routes, or false for a request that is not one. */
 function column(
@@ -240,6 +238,7 @@ function column(
   if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source, busy);
   if (request.url === '/todo') return json(response, 200, todo(source));
   if (request.url === '/numbers') return reply(response, artifact);
+  if (request.url === '/fights') return reply(response, artifact, true);
   if (request.url?.startsWith('/find?'))
     return json(response, 200, find(source, artifact, asked(request.url)));
   if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
@@ -256,7 +255,7 @@ const bound = (server: Server) => ({
 });
 
 /** Serves `GET /events` (each client gets the current message on connect and every push after),
- * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, the column's `POST /open` and
+ * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, `GET /fights` (the fight rows alone), the column's `POST /open` and
  * `POST /why`, `GET /story` (story.ts), and the editor's routes (editing.ts) after its Host and Origin checks. */
 export function serve(port: number, source: string, artifact: string, on: Hooks = {}) {
   const clients = new Set<ServerResponse>();

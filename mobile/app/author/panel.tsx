@@ -70,24 +70,29 @@ export const resetPlace = () => {
   placeNote = '';
   savePlace();
 };
-/** At page load: a path due a replay gets a fresh game, as a hash seen before keeps its old save (an edit undone). */
-export function bootPlace(session: {
-  game(): Opened | undefined;
-  startOver(): string | undefined;
-}) {
+/** At page load: a path due a replay gets a fresh game. `renewed`: the one dev save, pinned to another
+ * edit (an undo included), was just started over, so every path replays. */
+export function bootPlace(
+  session: {
+    game(): Opened | undefined;
+    startOver(): string | undefined;
+  },
+  renewed = false,
+) {
+  if (renewed) return restorePlace(session.game(), true);
   const due = place.hash !== chapter.sha256 && place.stopped?.hash !== chapter.sha256;
   const why = due && session.game() ? session.startOver() : undefined; // no game: a save that did not open stays as evidence
   if (why) placeNote = `Place: not replayed (${why}); this is the old save.`;
   else restorePlace(session.game());
 }
-export function restorePlace(game: Opened | undefined) {
+export function restorePlace(game: Opened | undefined, renewed = false) {
   if (!game) return;
-  if (place.hash === chapter.sha256) {
+  if (!renewed && place.hash === chapter.sha256) {
     // an edit undone: a stop recorded for that edit no longer describes the path
     delete place.stopped;
     return savePlace();
   }
-  if (place.stopped?.hash === chapter.sha256) {
+  if (!renewed && place.stopped?.hash === chapter.sha256) {
     // this save holds the path up to the stop: replaying would re-send those steps
     ({ at: refused, note: placeNote } = place.stopped);
     return;

@@ -15,7 +15,7 @@ import { uiSchema } from '../../../../../kernel/ts/play/ui_schema.ts';
 import type { useDiagnostics } from '../../author.ts';
 import { addHere } from '../../book.ts';
 import { Button } from '../../components/ui/button.tsx';
-import { mapCommand } from '../../mapwire.ts';
+import { mapCommand, mapNewest } from '../../mapwire.ts';
 import { fields, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, adder, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
@@ -68,7 +68,7 @@ export function Room({ rel, context, diag, offer }: Props) {
   if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="Room card">
-      <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
+      <Header rel={rel} diag={diag} undo={undoOf(rel, card)} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <Words draft={draft} context={context} fields={['name', 'description']} />
       <Exits room={context.key} exits={draft.exits ?? {}} />
@@ -77,6 +77,14 @@ export function Room({ rel, context, diag, offer }: Props) {
     </div>
   );
 }
+
+/** The card's Undo: the last map edit when it touched this room after the card's own change (a
+ * one-way toggle writes only the far room, loka-wfrgk.77), else the card's change. */
+const undoOf = (rel: string, card: Card) => {
+  const map = mapNewest(rel);
+  if (map !== undefined && map > Number(card.undo ?? 0)) return () => mapCommand('map-undo', undefined);
+  return card.undo ? card.back : undefined;
+};
 
 /** Each exit with the map's edits for it (mapwire's commands, the direction given). */
 function Exits({ room, exits }: { room: string; exits: NonNullable<Doc['exits']> }) {

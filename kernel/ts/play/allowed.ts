@@ -109,6 +109,11 @@ export const teaches = (doc: Obj, hidden: string[]) =>
 const linked = (doc: Obj) =>
   choicesOf(doc).some((c) => ['then', 'then_failed'].some((f) => c[f] && c[f] !== 'end'));
 
+/** A field `added` seeds into the draft only: written with the author's pick (a targetless offer: quests.ex:63-66;
+ * food without a restore, cure or status: food.ex:21 effect?). */
+export const awaits = (def: string, f: string) =>
+  ['source.QuestDefinition.offer', 'source.ItemDefinition.edible'].includes(`${def}.${f}`);
+
 /** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs
  * the definition (`doc`), cartridge.json's `world` and the hidden skills' keys meet; others would not compile. */
 export const allowed = (
