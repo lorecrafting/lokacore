@@ -191,3 +191,33 @@ export const proseKey = (value: unknown, kind: string, key: string, path: Step[]
 
 /** Only a definition's `.json` source has a card; a `.scene` or `.cut` is edited as text. */
 export const editable = (rel: string | undefined) => rel?.endsWith('.json') === true;
+
+/**
+ * The least value of a newly added field the schema allows, nothing invented: each text key `~`
+ * (cartridge.md "Inline prose"), each `const`, `true`, each `minimum`, `minItems` copies; a
+ * string, enum or key leaves the whole field undefined: the card only reveals it for the author.
+ */
+export function minimal(node: Obj, defs: Record<string, Obj>, seen: string[] = []): unknown {
+  const ref = node.$ref as string | undefined;
+  if (ref) {
+    const name = ref.slice(ref.lastIndexOf('/') + 1);
+    if (name === 'TextKey') return { prose: '~' };
+    return seen.includes(name) ? undefined : minimal(defs[name], defs, [...seen, name]);
+  }
+  if ('const' in node) return node.const;
+  for (const branch of (node.anyOf ?? node.oneOf ?? []) as Obj[]) {
+    const v = minimal(branch, defs, seen);
+    if (v !== undefined) return v;
+  }
+  if (node.type === 'boolean') return true;
+  if (node.type === 'integer' || node.type === 'number') return node.minimum;
+  if (node.type === 'array') {
+    const n = (node.minItems as number) ?? 0;
+    const item = n ? minimal(node.items as Obj, defs, seen) : undefined;
+    return n && item === undefined ? undefined : Array.from({ length: n }, () => item);
+  }
+  if (node.type !== 'object') return undefined;
+  const props = (node.properties ?? {}) as Record<string, Obj>;
+  const pairs = ((node.required ?? []) as string[]).map((k) => [k, minimal(props[k], defs, seen)]);
+  return pairs.some(([, v]) => v === undefined) ? undefined : Object.fromEntries(pairs);
+}

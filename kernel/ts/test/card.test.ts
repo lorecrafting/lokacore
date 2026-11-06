@@ -18,6 +18,7 @@ import {
   editable,
   fieldErrors,
   hidden,
+  minimal,
   proseKey,
   rebase,
   start,
@@ -252,4 +253,40 @@ test("a prose field opens its text key (cartridge.md's examples)", () => {
   );
   assert.equal(proseKey({ prose: 'x' }, 'npc', 'bram', ['room_line']), 'npc.bram.room');
   assert.equal(proseKey('npc.ada.title', 'npc', 'bram', ['name']), 'npc.ada.title');
+});
+
+// Break: the Room card's add (and the Book's add-here) writes a mechanic the compiler refuses, or
+// invents words or choices: each new text key is `~`, a key or enum the author has to pick leaves
+// the field unwritten (only revealed). Literals hand-checked against source.RoomDefinition.
+test("a room mechanic's added value is the least valid one, its words `~`", () => {
+  const room = defs['source.RoomDefinition'].properties;
+  const tilde = { prose: '~' };
+  const added = Object.fromEntries(
+    Object.keys(room).map((f) => [f, minimal(room[f], defs)] as const),
+  );
+  assert.deepEqual(added, {
+    actions: undefined, // an action's key is the author's
+    ambient: [{ lines: [tilde], every: 1 }],
+    cues: undefined, // a cue's sense is chosen
+    dark: true,
+    dark_description: tilde,
+    description: tilde,
+    details: {},
+    exits: {},
+    locks: {},
+    name: tilde,
+    sanctuary: true,
+    site: undefined,
+    sound: undefined,
+    tags: undefined,
+    variants: [{ description: tilde }],
+    zones: [],
+  });
+  const validate = new Ajv2020({ strict: false }).compile(served('rooms'));
+  for (const [f, value] of Object.entries(added)) {
+    if (value === undefined) continue;
+    const doc = { name: 'room.a.name', description: 'room.a.description', exits: {} };
+    change(doc, [{ path: [f], value }]);
+    assert.ok(validate(doc), `${f}: ${JSON.stringify(validate.errors)}`);
+  }
 });

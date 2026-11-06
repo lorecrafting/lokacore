@@ -1,4 +1,4 @@
-// size: allow 304, the field's open, save, put-back and walk keys share its state
+// size: allow 320, the field's open, save, put-back, walk keys and add-here menu share its state
 // E5, prose in the Book (docs/design/prose-in-the-book-rulings.md): a double-click turns a line
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
@@ -43,7 +43,8 @@ let unconfirmed = new Set<string>();
 let field: Field | undefined;
 let opening = false; // a /line in flight: a second double-click opens nothing
 let landed: HTMLElement | undefined;
-let selected = { kind: '', key: '' }; // the panel's selection: its lines are marked
+let selected: { kind: string; key: string; add?: string[] } = { kind: '', key: '' }; // the panel's selection: its lines are marked
+let asked = false; // a Book click: the selection's add-here menu shows once the panel offers it
 let counted = '';
 let note: HTMLDivElement;
 const observer =
@@ -238,8 +239,23 @@ const onDouble = (e: MouseEvent) => {
   void openField(el && el !== document.body ? el : (e.target as HTMLElement));
 };
 const hush = () => field || say(undefined); // a note lasts until the next click or key
-const onClick = () => {
-  hush();
+/** The add-here menu under the selected line (Book UI "Author preview"): a pick goes to the panel's card. */
+function offer() {
+  const el = lines().find((l) => l.hasAttribute('data-loka-selected'));
+  if (!asked || !el || !selected.add?.length) return;
+  asked = false;
+  const room = selected.key;
+  say(
+    el,
+    'Add here',
+    false,
+    selected.add.map((f) => [f, () => hooks.tell({ add: { kind: f, room } })]),
+  );
+}
+const onClick = (e: Event) => {
+  asked = !note.contains(e.target as Node); // a pick from the menu asks for no second one
+  hush(); // (it empties the note)
+  if ((e.target as Element).closest?.('[data-loka-selected]')) offer();
   if (!landed) return;
   landed.removeAttribute('data-loka-landed');
   landed = undefined; // Enter is the page's again
@@ -248,7 +264,7 @@ const onClick = () => {
 const onRelay = (e: MessageEvent) => {
   if (!LOCAL.test(e.origin)) return;
   if (e.data?.op === 'key') onKey(e.data, !!field, true); // an open field holds the keys
-  if (e.data?.op === 'select') ((selected = e.data), reapply()); // {kind, key}
+  if (e.data?.op === 'select') ((selected = e.data), reapply(), offer()); // {kind, key, add?}
   if (e.data?.op === 'edit') edit(String(e.data.key));
 };
 const lineOf = (key: string) => lines().find((l) => hooks.seen.get(l.textContent!) === key);
