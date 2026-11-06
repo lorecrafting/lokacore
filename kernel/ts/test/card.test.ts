@@ -27,6 +27,7 @@ import {
   pickKind,
   pickable,
   placed,
+  placement,
   proseKey,
   rebase,
   refuseKey,
@@ -377,15 +378,20 @@ test("a room mechanic's added value is the least valid one, its words `~`", () =
   }
 });
 
-// Break: the Room card's add overwrites a present field or writes one the author must choose, its
+// Break: the Room card's add overwrites a present field or writes one the author must choose, an NPC's hp
+// starts below zero, its
 // remove drops another field, or a Book "Add here" pick adds to another room or a field not offered.
-test('a room field is added once, removed alone, added here only in its room', () => {
+test('a field is added once (hp at the sampler pool), removed alone, added here only in its room', () => {
   const doc = { name: 'room.a.name', dark: false };
   const R = 'source.RoomDefinition';
   assert.deepEqual(added(doc, 'sanctuary', defs, R), { ...doc, sanctuary: true });
   assert.equal(added(doc, 'dark', defs, R), undefined); // present
   assert.equal(added(doc, 'sound', defs, R), undefined); // the author picks the tag
   assert.equal(added(doc, 'abstract', defs, R), undefined); // not a RoomDefinition field
+  // the schema's least hp (-2147483648) is BODY_BELOW_ZERO (resources.ex:246): the sampler's pool instead
+  const hp = { minimum: 0, maximum: 20, start: 20, gain: 5 };
+  assert.deepEqual(added({}, 'hp', defs, 'source.NpcDefinition'), { hp });
+  assert.equal(added({}, 'hp', defs, R), undefined); // no room hp
   assert.deepEqual(removed(doc, 'dark'), { name: 'room.a.name' });
   assert.equal(addedHere({ kind: 'dark', room: 'lane' }, 'lane', ['dark']), 'dark');
   assert.equal(addedHere({ kind: 'dark', room: 'well' }, 'lane', ['dark']), undefined);
@@ -478,16 +484,28 @@ test('offer rows reordered, removed or added write exactly the table drawn', () 
   }
 });
 
-// Break: placing an item in a room keeps its old holder (location.npc beside location.room, which
-// the schema refuses), or an NPC is placed through an item's location.
-test('placement writes the room and nothing of the old holder', () => {
+// Break: placing an item keeps its old holder (location.npc beside location.room, which the schema
+// refuses), writes the key under the wrong kind, an NPC is placed through an item's location, or the
+// card shows a holder other than the file's (training_sword held by aldous over an empty room box).
+test('placement writes one holder of the kind picked and reads back the file', () => {
   const sword = { name: 'item.sword.name', location: { in: 'npc', npc: 'smith' } };
-  const draft = placed(sword, 'items', 'yard');
+  const draft = placed(sword, 'items', 'room', 'yard');
   assert.deepEqual(draft, { name: 'item.sword.name', location: { in: 'room', room: 'yard' } });
   const doc = structuredClone(sword);
   change(doc, diff(sword, draft));
   assert.deepEqual(doc, draft);
-  assert.deepEqual(placed({ room: 'start' }, 'npcs', 'yard'), { room: 'yard' });
+  assert.deepEqual(placed(draft, 'items', 'item', 'chest').location, { in: 'item', item: 'chest' });
+  assert.deepEqual(placed({ room: 'start' }, 'npcs', 'room', 'yard'), { room: 'yard' });
+  assert.deepEqual(placement(sword, 'items'), { kind: 'npc', key: 'smith' });
+  assert.deepEqual(placement({ location: { in: 'template' } }, 'items'), {
+    kind: 'template',
+    key: undefined,
+  });
+  assert.deepEqual(placement({}, 'items'), { kind: 'room', key: undefined });
+  assert.deepEqual(placement({ room: 'yard', location: sword.location }, 'npcs'), {
+    kind: 'room',
+    key: 'yard',
+  });
 });
 
 // Break: a picker offers or accepts ids of another kind (an offer's item from the rooms), or an

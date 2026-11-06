@@ -1,4 +1,4 @@
-// size: allow 400, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
+// size: allow 410, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -248,9 +248,17 @@ export const rootStamp = (changes: { file: string; sha256: string }[]) =>
 export const entered = (text: string, number = false) =>
   text === '' ? undefined : number ? Number(text) : text;
 
-/** `doc` placed in `room`: an NPC's `room`, an item's whole `location`, so no `npc` or `item` stays. */
-export const placed = (doc: Obj, dir: string, room: string): Obj =>
-  dir === 'npcs' ? { ...doc, room } : { ...doc, location: { in: 'room', room } };
+/** `doc` placed at `key` of kind `kind` (room, npc, item): an NPC's `room`, an item's whole `location`, so no old holder stays. */
+export const placed = (doc: Obj, dir: string, kind: string, key: string): Obj =>
+  dir === 'npcs' ? { ...doc, room: key } : { ...doc, location: { in: kind, [kind]: key } };
+
+/** Where `doc` starts as the file says: the holder's kind (room, npc, item, template) and key. */
+export function placement(doc: Obj, dir: string): { kind: string; key?: unknown } {
+  if (dir === 'npcs') return { kind: 'room', key: doc.room };
+  const loc = plain(doc.location) ? doc.location : {};
+  const kind = typeof loc.in === 'string' ? loc.in : 'room';
+  return { kind, key: loc[kind] };
+}
 
 const opOf = (branch: Obj): unknown => (branch.properties as any)?.op?.const;
 const typeOf = (v: unknown) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v);
@@ -319,6 +327,9 @@ export function minimal(node: Obj, defs: Record<string, Obj>, seen: string[] = [
   return pairs.some(([, v]) => v === undefined) ? undefined : Object.fromEntries(pairs);
 }
 
+// a field whose schema minimum does not compile starts at the sampler's value (resources.ex @defaults hp; BODY_BELOW_ZERO)
+const SEEDS: Record<string, unknown> = { hp: { minimum: 0, maximum: 20, start: 20, gain: 5 } };
+
 /** `doc` with field `f` of definition `def` at its least value; undefined when present or the author must choose it. */
 export function added(
   doc: Obj,
@@ -328,7 +339,7 @@ export function added(
 ): Obj | undefined {
   if (Object.hasOwn(doc, f)) return undefined; // a stale menu never overwrites a present field
   const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
-  const value = node && minimal(node, defs);
+  const value = node && (structuredClone(SEEDS[f]) ?? minimal(node, defs));
   return value === undefined ? undefined : { ...doc, [f]: value };
 }
 
