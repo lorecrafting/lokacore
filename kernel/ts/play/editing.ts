@@ -35,8 +35,8 @@ type Said = {
 /** `push` keeps the message for later clients and `tell` shows an /edit's words by the text key
  * the page names, before the compile (told.ts); `once` sends `changed` without keeping it.
  * `on.release` runs when the Hold ends, to write what the watcher parked; `on.leave` once a POST
- * /world's answer is sent, with the world's folder (author.ts restarts on it: a fresh guard root,
- * journal and Hold). */
+ * /world's answer is sent or its client is gone, with the world's folder (author.ts restarts on
+ * it: a fresh guard root, journal and Hold). */
 export type Hooks = { release?: () => void; leave?: (world: string) => void };
 export function editing(source: string, said: Said, once: Push, on: Hooks) {
   const { push, tell, places } = said;
@@ -71,7 +71,7 @@ export function editing(source: string, said: Said, once: Push, on: Hooks) {
       if (typeof words === 'string') tell(key, words, `${sent.file}:${sent.line}`);
     json(response, ...answer);
     if (url === '/world' && answer[0] === 200)
-      response.on('finish', () => on.leave?.(join(dirname(realpathSync(source)), sent.name))); // as write.ts's root
+      response.on('close', () => on.leave?.(join(dirname(realpathSync(source)), sent.name))); // as write.ts's root
     return true;
   }
   return { route, held: () => held, seen: editor.seen, busy: editor.busy };

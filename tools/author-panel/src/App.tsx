@@ -3,8 +3,8 @@
 import { PanelLeftClose, PanelRightClose } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { shortcut } from '../../../mobile/app/author/prose_rules.ts';
-import { mapCommand } from './mapwire.ts';
-import { ask, checkpoints, story as getStory, useDiagnostics, type Story } from './author.ts';
+import { mapCommand, shown } from './mapwire.ts';
+import { ask, checkpoints, kept, story as getStory, useDiagnostics, type Story } from './author.ts';
 import { useBook, type Heard } from './book.ts';
 import { BookStrip } from './centre.tsx';
 import { Divider, Rail, useLayout, type SetLayout } from './columns.tsx';
@@ -19,7 +19,7 @@ import { flowGo, flowItems } from './flowread.ts';
 import { Feed, Inspector } from './right.tsx';
 import { Compile, Source } from './sections.tsx';
 import {
-  fold,
+  fileOf, fold,
   fromRef,
   fromTextKey,
   items,
@@ -192,9 +192,9 @@ function useWiring(
     i.kind === 'story'
       ? story && set((l) => flowGo(story, l, i.id) ?? { ...l, leftOpen: true, map: 'story', story: { ...go(story, l.story ?? LIST, i.id), chosen: true } })
       : base(i);
-  useShortcuts(heard, (key) => {
+  useShortcuts(heard, (key, sel = layout.selection) => {
     if (key === 'k') open();
-    else if (key === 'e' && layout.selection) void ask('open', { key: layout.selection.key });
+    else if (key === 'e' && sel) void ask('open', { key: sel.key, file: fileOf(sel, places(sel, story?.graph.nodes ?? []).inspector?.ref, story?.files) });
     else if (key === '.') run({ kind: 'command', id: 'hold', label: '', detail: '' });
     else set((l) => fold(l, key));
   });
@@ -230,8 +230,8 @@ function useStory(said: unknown[] | undefined) {
   useEffect(() => {
     let live = true; // a later compile's fetch supersedes this one
     void getStory().then(
-      (s) => live && (setStory(s), setRefused(undefined)),
-      (e: Error) => live && setRefused(said?.length ? e.message.split('\n')[0] : undefined), // no watcher yet: waiting
+      (s) => live && ((shown.rooms = s.map), (shown.nodes = s.graph.nodes), setStory(s), setRefused(undefined)), // the map's commands work while it is closed
+      (e: Error) => live && !kept(e) && setRefused(said?.length ? e.message.split('\n')[0] : undefined), // no watcher yet: waiting
     );
     return () => void (live = false);
   }, [said]);

@@ -28,7 +28,7 @@ import { find } from './find.ts';
 import { why } from './why.ts';
 import { storyRoute } from './story.ts';
 import { body, editing, foreign, type Hooks, json } from './editing.ts';
-import { sourceOf } from './prose.ts';
+import { openAt } from './prose.ts';
 import type { Changed } from './write.ts';
 import { sentences } from './why_words.ts';
 import { told } from './told.ts';
@@ -164,7 +164,7 @@ async function post(
     return json(response, 400, 'a JSON body');
   }
   if (request.url === '/open') {
-    const at = sourceOf(source, String(sent.key), sent.words);
+    const at = openAt(source, sent);
     if (!at) return json(response, 404, `no source line for ${sent.key ?? sent.words}`);
     const [editor, ...flags] = (process.env.LOKA_EDITOR ?? 'code --goto').split(' ');
     spawn(editor, [...flags, join(source, at)], { stdio: 'ignore', detached: true })

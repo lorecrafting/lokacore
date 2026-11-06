@@ -38,9 +38,11 @@ const titled = (path: string) => {
     return undefined; // a broken cartridge.json is listed by its folder name
   }
 };
+// A frozen conformance fixture, never a world to author (docs/system/cartridge.md, the samplers).
+const FROZEN = 'lantern_proof';
 export function worlds(root: string): Answer {
   const names = readdirSync(dirname(root))
-    .filter((name) => NAME.test(name) && real(join(dirname(root), name)))
+    .filter((name) => NAME.test(name) && name !== FROZEN && real(join(dirname(root), name)))
     .sort();
   const list = names.map((name) => ({ name, title: titled(join(dirname(root), name)) ?? name }));
   return [200, { current: basename(root), worlds: list }];

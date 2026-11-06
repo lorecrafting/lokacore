@@ -10,8 +10,9 @@ function useFound(q: string) {
   const [text, setText] = useState<Record<string, string>>({});
   useEffect(() => {
     let live = true; // a slower reply to an older query never overwrites a newer one
-    if (q.trim()) find(q.trim()).then((f) => live && setText(words(f.hits)), () => {});
-    return () => void (live = false);
+    const ask = () => find(q.trim()).then((f) => live && setText(words(f.hits)), () => {});
+    const typing = q.trim() ? setTimeout(ask, 150) : undefined; // one /find per pause, not per key
+    return () => ((live = false), clearTimeout(typing));
   }, [q]);
   return q.trim() ? text : {};
 }

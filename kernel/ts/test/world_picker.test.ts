@@ -7,6 +7,9 @@ import { realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
+import { EventEmitter } from 'node:events';
+import { Readable } from 'node:stream';
+import { editing } from '../play/editing.ts';
 import { serve } from '../play/live.ts';
 import { sha256 } from '../play/guard.ts';
 import { ROOT } from '../play/obs.ts';
@@ -24,6 +27,7 @@ function worlds(t: TestContext) {
     ['b', 'Bee'],
     ['c', '~'],
     ['Big', 'Big'], // not a name mix loka.new takes: not listed
+    ['lantern_proof', 'Lantern'], // the frozen fixture: not listed
   ]) {
     mkdirSync(join(dir, 'worlds', name, 'rooms'), { recursive: true });
     writeFileSync(join(dir, 'worlds', name, 'cartridge.json'), JSON.stringify({ id: name, title }));
@@ -62,7 +66,8 @@ test('/world lists real worlds, refuses names that are paths, and makes one as b
   const live = serve(0, a, join(dir, 'none.json'), { leave: (world) => left.push(world) });
   t.after(() => live.close());
   const port = await live.port;
-  // Break: a link or a folder with no cartridge.json listed; a `~` title shown instead of the name.
+  // Break: a link, a folder with no cartridge.json or the frozen lantern_proof listed; a `~` title
+  // shown instead of the name.
   const list = [
     { name: 'a', title: 'A' },
     { name: 'b', title: 'Bee' },
@@ -115,6 +120,23 @@ test('/world lists real worlds, refuses names that are paths, and makes one as b
   // Break: a second switch (or an edit) accepted while the watcher is leaving for d.
   assert.equal((await ask(port, '/world', { name: 'b' })).status, 409);
   assert.deepEqual(left, [`${worlds_}/d`]);
+});
+
+test('a switch whose client is gone before the 200 flushes still restarts', async (t) => {
+  // Breaks: leave waiting for 'finish', which a closed connection never sends: busy stays raised.
+  const { dir, a } = worlds(t);
+  const left: string[] = [];
+  const route = editing(a, { push() {}, tell() {} }, () => {}, {
+    leave: (world) => left.push(world),
+  }).route;
+  const request = Object.assign(Readable.from([JSON.stringify({ name: 'b' })]), {
+    method: 'POST',
+    url: '/world',
+  });
+  const response = Object.assign(new EventEmitter(), { writeHead: () => response, end() {} });
+  assert.equal(await route(request as never, response as never), true);
+  response.emit('close'); // no 'finish'
+  assert.deepEqual(left, [join(dir, 'worlds/b')]);
 });
 
 test('after a switch the restarted watcher writes into the new world only', async (t) => {

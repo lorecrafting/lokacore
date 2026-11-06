@@ -11,7 +11,8 @@ const ed = editor({
       r.ok ? r.json() : Promise.reject(new Error(await r.text())),
     ),
 });
-/** What the mounted map shows: its footer line and its rooms (the palette's map commands need both). */
+/** The mounted map's footer line, else an alert; the last story's rooms (App.tsx useStory), so the
+ * palette's and the Room card's map commands work with the map closed. */
 export const alone = (why: string): void => void (why && alert(why));
 export const shown = { tell: alone, rooms: [] as MapRoom[], nodes: [] as Story['graph']['nodes'] };
 

@@ -115,6 +115,18 @@ test('typing in the game minutes field replaces its text', async () => {
   assert.equal(await field.inputValue(), '5');
 });
 
+// Breaks: the palette asks /find on every keystroke, not once the typing pauses (loka-vduxr.67).
+test('the palette asks /find once per pause in the typing', async () => {
+  const page = await open(QUEST);
+  const asked: string[] = [];
+  page.on('request', (r) => void (r.url().includes('/__author/find?') && asked.push(r.url())));
+  await page.keyboard.press('Control+k');
+  await page.getByLabel('Find a key, a ~ or a command').pressSequentially('carry', { delay: 50 }); // a typist's pace
+  await page.waitForTimeout(600);
+  assert.deepEqual(asked.map((u) => new URL(u).searchParams.get('q')), ['carry']);
+  await page.close();
+});
+
 // Breaks: a quest or dialogue opens the generic card (right.tsx's dispatch), a quest's own name is
 // not a Book link (Quest.tsx's words), a dialogue's words list a field it lacks, a choice's then_failed row shows without a check (or hides
 // with one), a known target is not drafted, or a choice's link

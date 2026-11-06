@@ -175,3 +175,35 @@ test('a reopen shows the recovery room solid; a scene shows after Let go', () =>
     open.forEach((x) => x.close());
   }
 });
+
+// Breaks (book-ui.md, Dead page, Turn): a background death turns no page from Contents
+// (loka-kgd.216), or one on the World page, from the clock or a press there, turns the page
+// instead of changing it in place (loka-kgd.217).
+test('a death turns to the dead page from another page; on the World page it changes in place', () => {
+  const turn = (h: ReturnType<typeof mounted>) =>
+    h.node((n) => n.type?.name === 'PageTurn').props.turn as number;
+  const stood = { kind: 'saved', decision: { kind: 'accepted', events: [], outcome: 'stood' } };
+  const dies = { ...stood, decision: { ...stood.decision, narration: [{ key: 'combat.death' }] } };
+  for (const [from, death] of [
+    [CONTENTS, (h: ReturnType<typeof mounted>) => h.die(view(SHRINE), RECEIPT)],
+    [undefined, (h: ReturnType<typeof mounted>) => h.die(view(SHRINE), RECEIPT)],
+    [
+      undefined,
+      (h: ReturnType<typeof mounted>) => (
+        h.answer(dies, view(SHRINE), 'combat.death'),
+        h.tap('sitting')
+      ),
+    ],
+  ] as const) {
+    const h = cellar();
+    try {
+      if (from) h.tap(from);
+      const was = turn(h);
+      death(h);
+      assert.ok(h.texts().includes('Let go'));
+      assert.equal(turn(h), was + (from ? 1 : 0));
+    } finally {
+      h.close();
+    }
+  }
+});
