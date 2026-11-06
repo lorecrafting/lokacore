@@ -154,21 +154,19 @@ export function RoomForm({
   diag,
   defs,
   own = OWN,
+  blocks = {},
   nested = {},
 }: Omit<Props, 'offer'> & {
   card: Card;
   defs: Record<string, never>;
   own?: string[];
+  blocks?: Record<string, string>; // a field drawn by its block (fields.tsx), when present or added
   nested?: Record<string, string[]>; // a map's entry fields drawn above: `{choices: ['then']}`
 }) {
   const saved = card.saved!;
-  const ui = hidden(
-    uiSchema(saved.dir, saved.schema as never, defs, {}),
-    saved.dir,
-    registry,
-    card.draft,
-    card.revealed,
-  );
+  const walked = uiSchema(saved.dir, saved.schema as never, defs, {});
+  for (const [f, block] of Object.entries(blocks)) walked[f] = { ...walked[f], 'ui:field': block };
+  const ui = hidden(walked, saved.dir, registry, card.draft, card.revealed);
   // a union-rooted kind (a scene) draws its branch's uiSchema, not the root's (rjsf MultiSchemaField)
   for (const at of [ui, ...(ui.anyOf ?? [])]) for (const f of own) at[f] = HIDE;
   for (const [m, fs] of Object.entries(nested)) {
@@ -180,7 +178,11 @@ export function RoomForm({
 
 /** cartridge.json (its `requires.capabilities` and `world`), read again when it changes. */
 export function useCartridge(diag: Props['diag']) {
-  const [cart, setCart] = useState<{ requires?: { capabilities?: object }; world?: Doc }>();
+  const [cart, setCart] = useState<{
+    requires?: { capabilities?: object };
+    world?: Doc;
+    calendar?: { hours_per_day?: number };
+  }>();
   const sha = diag.changes.find((c) => c.file === 'cartridge.json')?.sha256;
   useEffect(() => {
     void fetch('/__author/source?file=cartridge.json')

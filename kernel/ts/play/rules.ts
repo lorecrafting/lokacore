@@ -7,6 +7,7 @@ import STEP_CONTEXTS from './step_contexts.json' with { type: 'json' };
 export const PICK_NAMES: Record<string, string> = {
   services: 'service',
   items: 'item',
+  daily_schedule: 'room', // an hour's room key (blocks.ts roomPicks)
   with: 'npc',
   plan: 'population',
   victim: 'npc',

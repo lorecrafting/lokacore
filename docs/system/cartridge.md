@@ -901,7 +901,10 @@ build. The author tools below are reachable only in that bundle (a production ex
   path through the normal command path, one step at a time; the first step the session does not
   save and accept stops the replay and is named by its ordinal and reply. Nothing writes state directly.
   The dev cartridge plays one fixed seed; at `?dev=1`, on a frozen clock that moves only with the dev clock, as
-  `bin/loka check` does, so a recording replays alike in both; a release is untouched.
+  `bin/loka check` does, so a recording replays alike in both, but for one budget; a release is untouched.
+  The browser refuses one advance over 3000 game minutes, on record and on replay, because delivery
+  is synchronous and its cost follows game time (loka-wfrgk.55); `bin/loka check` replays off the
+  browser with no budget, so a step it passes can be refused in the panel.
 - **Fast loop.** A `text.json` save is pushed to the open page as a text overlay before its
   compile and shows at once: no compile, reload or replay. The compile still runs after it and
   reports its diagnostics to the page; an edit whose compiled cartridge differs from the page's
@@ -919,8 +922,8 @@ build. The author tools below are reachable only in that bundle (a production ex
   (`GET /__author/checkpoints`, `GET|PUT /__author/checkpoints/<name>`); the compiler and the
   watcher's rebuild skip the directory. The panel lists them; jumping to one starts the game over
   and replays it, and a refused step offers dropping it and replaying the rest. `bin/loka check
-  <cartridge>` replays each one headless on a fresh session through the same replay and exits 1 on
-  any refusal; CI runs it for every cartridge with the directory.
+  <cartridge>` replays each one headless on a fresh session through the same replay, without the
+  browser's advance budget, and exits 1 on any refusal; CI runs it for every cartridge with the directory.
 - **Author panel** (`tools/author-panel`, its own web page framing the Book at `?dev=1`; nothing of it enters the app's dependencies or bundles): the last compile's diagnostics in plain words
   (`severity: file:line message`, which is what `mix loka.compile` prints: one sentence and one fix
   per diagnostic code, from `Loka.Content.Explain`, the path mapped to its line by the source JSON;

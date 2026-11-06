@@ -25,12 +25,14 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: an open conversation re-words an edited line; stale `~` map by line count (PR #625, loka-wfrgk.19)](2026-11-05-loka-wfrgk.19-review.md): **APPROVE WITH NOTES**
 - [Review: hotbar engine data, cooldown end and length, round interval (PR #658, loka-x6t.135)](2026-11-05-hotbar-engine-data-review.md): **APPROVE WITH NOTES**
 - [Review: generic inspector card fits on long text keys (loka-wfrgk.40)](2026-11-05-generic-card-overflow-review.md): **APPROVE**
+- [Review: fix batch (loka-kgd.219, loka-wfrgk.55, loka-wfrgk.44, loka-wfrgk.49)](2026-11-05-fix-batch-674-review.md): **CHANGES REQUIRED**
 - [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
 - [Review: editor drag a template into a room (loka-wfrgk.13)](2026-11-05-editor-drag-template-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6e, World inspector card (PR #651, loka-wfrgk.8)](2026-11-05-e6e-world-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6d part one, Quest and Dialogue cards (PR #669, loka-wfrgk.6)](2026-11-05-e6d-story-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6c part two, Reaction and Action inspector cards (PR #668, loka-wfrgk.46)](2026-11-05-e6c2-reaction-action-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6c part one, Rules block (PR #660, loka-wfrgk.5)](2026-11-05-e6c-rules-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6b.2, bespoke Combat and Schedule blocks (PR #672, loka-wfrgk.42)](2026-11-05-e6b2-combat-schedule-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6b, NPC and Item inspector cards (PR #656, loka-wfrgk.4)](2026-11-05-e6b-npc-item-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6a, Room inspector card and the Book's add-here (PR #649, loka-wfrgk.3)](2026-11-05-e6a-room-review.md): **CHANGES REQUIRED**
 - [Review: Editor E4b, generic inspector card on rjsf 6 (PR #645, loka-wfrgk.12)](2026-11-05-e4b-generic-card-review.md): **CHANGES REQUIRED**

@@ -5,7 +5,9 @@ import type { FieldProps } from '@rjsf/utils';
 import { choices, pickKind, proseKey, refusePick } from '../../../../kernel/ts/play/card.ts';
 import { Button } from '../components/ui/button.tsx';
 import { Input } from '../components/ui/input.tsx';
+import { Combat } from './blocks/Combat.tsx';
 import { Rules } from './blocks/Rules.tsx';
+import { Schedule } from './blocks/Schedule.tsx';
 import { Refusal } from './templates.tsx';
 
 /** What the fields read beyond rjsf's props: the selection, the story's nodes and the Book. */
@@ -14,6 +16,9 @@ export type Context = {
   key: string;
   nodes: { ref: string; kind: string }[];
   edit: (key: string) => void;
+  hours?: number; // the calendar's hours_per_day, when the cartridge has one
+  room?: unknown; // the NPC's own room: an added hour's first value
+  put?: (field: string, value: unknown) => void; // writes a field and commits it
   hidden?: string[]; // the story model's (kernel/ts/play/story_counts.ts)
   unlinkable?: Record<string, string>;
 };
@@ -84,4 +89,6 @@ export const fields = {
   AnyOfField: Rules,
   OneOfField: Rules,
   Hidden,
+  Combat,
+  Schedule,
 };

@@ -107,7 +107,7 @@ function GameTime({ state, send }: { state?: State; send: Send }) {
           send({ op: 'advance', minutes: Number(minutes) });
         }}
       >
-        <Input aria-label="Game minutes" inputMode="numeric" value={minutes} onChange={(e) => setMinutes(e.target.value)} className="w-24" />
+        <Input aria-label="Game minutes" inputMode="numeric" value={minutes} onFocus={(e) => e.target.select()} onChange={(e) => setMinutes(e.target.value)} className="w-24" />
         <Button type="submit" variant="secondary" disabled={!state}>
           Advance minutes
         </Button>
