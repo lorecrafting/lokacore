@@ -240,14 +240,14 @@ const shape = (node: unknown) => {
 
 // the room key an untagged union's value names: a key, a case's room, a ref's key, a case list's fallback
 const roomOf = (v: unknown): unknown =>
-  Array.isArray(v) ? roomOf(v.at(-1)) : plain(v) ? (v.room ?? v.key) : v;
+  Array.isArray(v) ? roomOf(v.at(-1)) : plain(v) ? roomOf(v.room ?? v.key) : v;
 
 /** An hour's (source.ex) branch `i`, carrying the old value's room key; other untagged unions: rjsf's own. */
 function untagged(branches: Obj[], i: number, old: unknown, defs: Record<string, Obj>): unknown {
   const room = roomOf(old);
   const b = branches[i];
   if (room === undefined || !branches.some((h) => h.title === 'cases')) return undefined;
-  if (b.type === 'array') return [{ room }, room]; // one case, then the room it falls back to (Schedules ordered?)
+  if (b.type === 'array') return [{ room }, room]; // one case, then its fallback room (schedules.ex `fallback`)
   if (b.type !== 'object') return room;
   const props = (b.properties ?? {}) as Record<string, Obj>;
   const at = Object.hasOwn(props, 'room') ? 'room' : 'key';
