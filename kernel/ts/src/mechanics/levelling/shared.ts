@@ -39,6 +39,12 @@ export function levelling(world: World, actor: CharacterId) {
   };
 }
 
+/** `ops` without the levelling writes of a set level cheat, which sets the row and nothing more (dev@1). */
+export const quiet = (command: { payload: object }, ops: readonly DeltaOp[]) =>
+  (command.payload as { type?: string }).type === 'dev_set_level'
+    ? ops.filter((o) => o.op !== 'levelling.set')
+    : ops;
+
 /**
  * The cartridge's gained line when `ops` (a whole proposal from `world`) add to `actor`'s
  * experience, then its level_up line when they raise the level, or its death penalty narration

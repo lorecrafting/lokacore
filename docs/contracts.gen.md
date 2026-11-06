@@ -219,6 +219,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `elapsed`: Authority-only elapsed logical interval (M1-A); admitted only by stepElapsed, never an invocation. Durable run scopes its distinct CommandId.
   - `dev_go_to_room`: Author preview only (cartridge.md Author preview): put the actor's body in a room. Admitted only by stepDev, which only a dev host calls; step refuses it.
   - `dev_set_fact`: Author preview only (cartridge.md Author preview): set one fact the actor reads. Admitted only by stepDev, which only a dev host calls; step refuses it.
+  - `dev_set_level`: Author preview only (cartridge.md Author preview): set the actor's level and allocated attribute points (toolbox row 4). Admitted only by stepDev, which only a dev host calls; step refuses it.
   - `attack`
   - `shoo`
   - `flee`: Escape an active encounter through one randomly selected currently legal exit; no direction is supplied.
@@ -240,6 +241,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `expedition`
   - `where`
   - `knock`
+- **DevAllocated**: dev_set_level's allocated points (cartridge.md Author preview): each listed attribute's allocated count becomes points.
 - **LogicalTime**: Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).
 
 ## Decision contracts (`protocol/decision.schema.json`)

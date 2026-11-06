@@ -109,7 +109,8 @@ const describe = (reply: Reply) => {
 /** The panel's dev-only ask (docs/system/cartridge.md#author-preview), by definition key. */
 export type Cheat =
   | { op: 'go_to_room'; room: string }
-  | { op: 'set_fact'; fact: string; value: boolean | number | string };
+  | { op: 'set_fact'; fact: string; value: boolean | number | string }
+  | { op: 'set_level'; level: number; points: Record<string, number> };
 
 /** A cheat as the ordinary invocation the session decides and records. */
 export function cheatIntent(
@@ -123,13 +124,22 @@ export function cheatIntent(
     kind,
     key,
   });
+  const input =
+    cheat.op === 'go_to_room'
+      ? { room: ref('room', cheat.room) }
+      : cheat.op === 'set_fact'
+        ? { fact: ref('fact', cheat.fact), value: cheat.value }
+        : {
+            level: cheat.level,
+            allocated: Object.entries(cheat.points).map(([key, points]) => ({
+              attribute: ref('attribute', key),
+              points,
+            })),
+          };
   return {
-    action_key: cheat.op === 'go_to_room' ? 'dev_go_to_room' : 'dev_set_fact',
+    action_key: `dev_${cheat.op}`,
     target_ids: [],
-    input:
-      cheat.op === 'go_to_room'
-        ? { room: ref('room', cheat.room) }
-        : { fact: ref('fact', cheat.fact), value: cheat.value },
+    input,
     view_freshness_token: token,
   } as unknown as Intent;
 }
@@ -145,14 +155,26 @@ const REFUSED: Record<Cheat['op'], Record<string, string>> = {
     invalid_state:
       'already that value, the wrong type or range, per subject, owned by a mechanic, or the ancestry choice is still open',
   },
+  set_level: {
+    not_found: 'no such attribute in this cartridge',
+    invalid_state:
+      'already that level and those points, no levelling, past the top level, fewer points than already allocated, or more points than the level grants',
+  },
 };
+const LABEL: Record<Cheat['op'], string> = {
+  go_to_room: 'Go to room',
+  set_fact: 'Set fact',
+  set_level: 'Set level',
+};
+/** Whether the panel's message is a cheat the Book sends as an intent. */
+export const isCheat = (asked: { op: string }): asked is Cheat => Object.hasOwn(LABEL, asked.op);
 
 /** The author's plain words for a cheat's reply; empty when it was accepted. */
 export function cheatNote(op: Cheat['op'], reply: Reply) {
   if (reply.kind === 'saved' && reply.decision.kind === 'accepted') return '';
   const code =
     reply.kind === 'saved' && reply.decision.kind === 'rejected' && reply.decision.error.code;
-  return `${op === 'go_to_room' ? 'Go to room' : 'Set fact'} ${reply.kind === 'pending' ? 'not confirmed' : 'refused'}: ${(code && REFUSED[op][code]) || describe(reply)}.`;
+  return `${LABEL[op]} ${reply.kind === 'pending' ? 'not confirmed' : 'refused'}: ${(code && REFUSED[op][code]) || describe(reply)}.`;
 }
 
 /**

@@ -32825,6 +32825,97 @@
     "errors": [{ "path": "/payload/value", "code": "missing_property" }]
   },
   {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_level", "level": 2 }
+    },
+    "errors": [{ "path": "/payload/actor_id", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_level", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f" }
+    },
+    "errors": [{ "path": "/payload/level", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_level", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "level": 0 }
+    },
+    "errors": [{ "path": "/payload/level", "code": "below_minimum" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_level", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "level": 2147483648 }
+    },
+    "errors": [{ "path": "/payload/level", "code": "above_maximum" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_level", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "level": 2, "allocated": { "cha": 1 } }
+    },
+    "errors": [{ "path": "/payload/allocated", "code": "invalid_type" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_level", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "level": 2, "allocated": [{ "points": 1 }] }
+    },
+    "errors": [{ "path": "/payload/allocated/0/attribute", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_level", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "level": 2, "allocated": [{ "attribute": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "attribute", "key": "cha" } }] }
+    },
+    "errors": [{ "path": "/payload/allocated/0/points", "code": "missing_property" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_level", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "level": 2, "allocated": [{ "attribute": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "attribute", "key": "cha" }, "points": -1, "extra": 1 }] }
+    },
+    "errors": [{ "path": "/payload/allocated/0/extra", "code": "unknown_property" }, { "path": "/payload/allocated/0/points", "code": "below_minimum" }]
+  },
+  {
+    "contract": "Command",
+    "value": {
+      "id": "e5f6a7b8-c9d0-4e1f-8a2b-4c5d6e7f8a9b",
+      "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+      "payload": { "type": "dev_set_level", "actor_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f", "level": 2, "allocated": [{ "attribute": { "cartridge_id": "c", "cartridge_version": "1.0.0", "kind": "attribute", "key": "cha" }, "points": 2147483648 }] }
+    },
+    "errors": [{ "path": "/payload/allocated/0/points", "code": "above_maximum" }]
+  },
+  {
+    "contract": "ActionInput",
+    "value": { "level": 0 },
+    "errors": [{ "path": "/level", "code": "below_minimum" }]
+  },
+  {
+    "contract": "ActionInput",
+    "value": { "level": 2147483648, "allocated": [{ "points": 1 }] },
+    "errors": [{ "path": "/allocated/0/attribute", "code": "missing_property" }, { "path": "/level", "code": "above_maximum" }]
+  },
+  {
     "name": "fact_at_least_missing",
     "contract": "Policy",
     "value": {

@@ -9,6 +9,7 @@ import {
   asRefs,
   cheatIntent,
   cheatNote,
+  isCheat,
   sendCheat,
   steps,
   caughtUp,
@@ -305,6 +306,22 @@ test('a cheat is the ordinary invocation, by definition ref', () => {
     input: { fact: ref('fact', 'f'), value: 2 },
     view_freshness_token: 't',
   });
+  assert.deepEqual(cheatIntent({ op: 'set_level', level: 2, points: { cha: 1 } }, m, 't'), {
+    action_key: 'dev_set_level',
+    target_ids: [],
+    input: { level: 2, allocated: [{ attribute: ref('attribute', 'cha'), points: 1 }] },
+    view_freshness_token: 't',
+  });
+});
+
+// Break: the Book drops a panel cheat (set_level never sent) or treats a panel op as a cheat.
+test('only the cheat ops are sent as cheats', () => {
+  assert.deepEqual(
+    ['go_to_room', 'set_fact', 'set_level', 'hello', 'jump', 'toString'].map((op) =>
+      isCheat({ op }),
+    ),
+    [true, true, true, false, false, false],
+  );
 });
 
 // Break: an accepted cheat shows a refusal, or a refusal comes back blank or as a bare code.
@@ -316,6 +333,13 @@ test('a refused cheat says why in plain words', () => {
       decision: { kind: 'rejected', error: { code: 'not_found' } },
     } as Reply),
     'Set fact refused: no such fact in this cartridge.',
+  );
+  assert.equal(
+    cheatNote('set_level', {
+      kind: 'saved',
+      decision: { kind: 'rejected', error: { code: 'not_found' } },
+    } as Reply),
+    'Set level refused: no such attribute in this cartridge.',
   );
   assert.equal(
     cheatNote('go_to_room', { kind: 'saved', decision: { kind: 'fault', code: 'x' } } as Reply),

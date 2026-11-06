@@ -33,6 +33,36 @@
         }
       ]
     },
+    "DevAllocated": {
+      "description": "dev_set_level's allocated points (cartridge.md Author preview): each listed attribute's allocated count becomes points.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "points": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          }
+        },
+        "required": [
+          "attribute",
+          "points"
+        ],
+        "additionalProperties": false
+      },
+      "examples": [
+        [
+          {
+            "attribute": { "cartridge_id": "toolbox_showcase", "cartridge_version": "0.0.1", "kind": "attribute", "key": "cha" },
+            "points": 1
+          }
+        ]
+      ]
+    },
     "LogicalTime": {
       "description": "Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).",
       "type": "integer",
@@ -156,6 +186,12 @@
           "type": "dev_go_to_room",
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
           "room": { "cartridge_id": "toolbox_showcase", "cartridge_version": "0.0.1", "kind": "room", "key": "boar_run" }
+        },
+        {
+          "type": "dev_set_level",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "level": 2,
+          "allocated": [{ "attribute": { "cartridge_id": "toolbox_showcase", "cartridge_version": "0.0.1", "kind": "attribute", "key": "cha" }, "points": 1 }]
         },
         {
           "type": "elapsed",
@@ -920,6 +956,32 @@
             "actor_id",
             "fact",
             "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Author preview only (cartridge.md Author preview): set the actor's level and allocated attribute points (toolbox row 4). Admitted only by stepDev, which only a dev host calls; step refuses it.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "dev_set_level"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "level": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "allocated": {
+              "$ref": "#/$defs/DevAllocated"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "level"
           ],
           "additionalProperties": false
         },

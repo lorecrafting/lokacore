@@ -46,6 +46,7 @@ type Asked =
   | { op: 'drop' }
   | { op: 'go_to_room'; room: string }
   | { op: 'set_fact'; fact: string; value: boolean | number | string }
+  | { op: 'set_level'; level: number; points: Record<string, number> }
   | { op: 'trace'; id: number }
   | { op: 'select'; kind: string; key: string; add?: string[] }
   | { op: 'edit'; key: string }
