@@ -599,6 +599,7 @@ test('Alt-click on a story row or a Flow chip asks to open its file, a plain cli
     await node(page).dispatchEvent('click'); // a Flow chip may sit outside the viewport
     await node(page).dispatchEvent('click', { altKey: true });
     for (let i = 0; i < 50 && !sent.length; i++) await page.waitForTimeout(100);
+    await page.waitForTimeout(500); // a plain click's open, if any, lands too
     assert.deepEqual(sent.map((s) => s.file), ['actions/barter.json'], map);
     await page.close();
   }
