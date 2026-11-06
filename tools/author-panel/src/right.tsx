@@ -29,7 +29,8 @@ export function Inspector({ sel, story, diag, edit, offer }: Props) {
     );
   const ref = places(sel, story?.graph.nodes ?? []).inspector?.ref;
   const rel = fileOf(sel, ref, story?.files);
-  const context = { kind: sel.kind, key: sel.key, nodes: story?.graph.nodes ?? [], edit };
+  const { hidden, unlinkable } = story ?? {};
+  const context = { kind: sel.kind, key: sel.key, nodes: story?.graph.nodes ?? [], edit, hidden, unlinkable };
   const count = (rows?: Record<string, unknown[]>) => (ref && rows?.[ref]?.length) || 0;
   const unreached =
     !!ref && Object.values(story!.report.unreachable).some((refs) => refs.includes(ref));

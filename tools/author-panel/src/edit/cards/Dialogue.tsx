@@ -30,7 +30,7 @@ export function Dialogue({ rel, context, diag }: Props) {
   if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
   const caps = cart && (cart.requires?.capabilities ?? {});
   const offered = addable(saved.dir, registry, draft, card.revealed);
-  const menu = caps ? allowed(saved.dir, offered, caps, draft, cart?.world) : [];
+  const menu = caps ? allowed(saved.dir, offered, caps, draft, cart?.world, context.hidden) : [];
   const required = ((defs[DEF] as { required?: string[] } | undefined)?.required ?? []) as string[];
   const words = WORDS.filter((f) => draft[f] !== undefined);
   return (
@@ -38,7 +38,7 @@ export function Dialogue({ rel, context, diag }: Props) {
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <Words draft={draft} context={context} fields={words} />
-      <Links card={card} keys={choices('dialogue', context.nodes)} />
+      <Links card={card} keys={choices('dialogue', context.nodes)} into={context.unlinkable} />
       <Mechanics
         card={card}
         menu={menu}
@@ -59,7 +59,15 @@ export function Dialogue({ rel, context, diag }: Props) {
 }
 
 /** Each choice's `then` and, with a check (or one already written), `then_failed`. */
-function Links({ card, keys }: { card: Card; keys: string[] }) {
+function Links({
+  card,
+  keys,
+  into = {},
+}: {
+  card: Card;
+  keys: string[];
+  into?: Record<string, string>;
+}) {
   const draft = card.draft as Doc;
   const all = (draft.choices ?? {}) as Record<string, Doc>;
   const rows = Object.entries(all).flatMap(([k, c]) =>
@@ -71,10 +79,10 @@ function Links({ card, keys }: { card: Card; keys: string[] }) {
     <section aria-label="links" className="grid gap-1">
       <h3 className="text-muted-foreground">Links</h3>
       {rows.map(([k, f]) => (
-        <Link key={`${k}.${f}`} card={card} choice={k} field={f} keys={keys} />
+        <Link key={`${k}.${f}`} card={card} choice={k} field={f} keys={keys} into={into} />
       ))}
       <datalist id="dialogue-keys">
-        {[...keys, 'end'].map((k) => (
+        {[...keys.filter((k) => !Object.hasOwn(into, k)), 'end'].map((k) => (
           <option key={k} value={k} />
         ))}
       </datalist>
@@ -82,15 +90,21 @@ function Links({ card, keys }: { card: Card; keys: string[] }) {
   );
 }
 
-type LinkProps = { card: Card; choice: string; field: (typeof LINKS)[number]; keys: string[] };
+type LinkProps = {
+  card: Card;
+  choice: string;
+  field: (typeof LINKS)[number];
+  keys: string[];
+  into: Record<string, string>;
+};
 
 /** One link: a refused target is shown, never sent; a cleared one removes the field. */
-function Link({ card, choice, field, keys }: LinkProps) {
+function Link({ card, choice, field, keys, into }: LinkProps) {
   const [bad, setBad] = useState<string>();
   const draft = card.draft as Doc;
   const all = (draft.choices ?? {}) as Record<string, Doc>;
   const value = bad ?? all[choice]?.[field] ?? '';
-  const refused = bad && refuseLink(field, bad, all[choice], draft, keys);
+  const refused = bad && refuseLink(field, bad, all[choice], draft, keys, into);
   const write = (v: string) => {
     const { [field]: _, ...rest } = all[choice];
     return { ...draft, choices: { ...all, [choice]: v ? { ...rest, [field]: v } : rest } };
@@ -108,7 +122,7 @@ function Link({ card, choice, field, keys }: LinkProps) {
         value={String(value)}
         onChange={(e) => {
           const v = e.target.value;
-          const no = refuseLink(field, v, all[choice], draft, keys);
+          const no = refuseLink(field, v, all[choice], draft, keys, into);
           setBad(no ? v : undefined);
           if (!no) card.change(write(v)); // a refused keystroke leaves the draft as it was
         }}

@@ -14,6 +14,8 @@ export type Context = {
   key: string;
   nodes: { ref: string; kind: string }[];
   edit: (key: string) => void;
+  hidden?: string[]; // the story model's (kernel/ts/play/story_counts.ts)
+  unlinkable?: Record<string, string>;
 };
 const context = (p: FieldProps) => p.registry.formContext as Context;
 

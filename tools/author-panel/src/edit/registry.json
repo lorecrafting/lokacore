@@ -46,7 +46,7 @@
   "cartridge.version": { "create": "cards/World.tsx", "edit": "cards/World.tsx", "delete": "cards/World.tsx" },
   "cartridge.world": { "create": "cards/World.tsx", "edit": "cards/World.tsx", "delete": "cards/World.tsx" },
   "dialogues.abstract": { "create": "cards/Dialogue.tsx", "edit": "cards/Dialogue.tsx", "delete": "cards/Dialogue.tsx" },
-  "dialogues.choices": { "create": "cards/Dialogue.tsx", "edit": "cards/Dialogue.tsx", "delete": "cards/Dialogue.tsx" },
+  "dialogues.choices": { "create": "generic", "edit": "generic", "delete": "generic" },
   "dialogues.entry": { "create": "cards/Dialogue.tsx", "edit": "cards/Dialogue.tsx", "delete": "cards/Dialogue.tsx" },
   "dialogues.keyword": { "create": "cards/Dialogue.tsx", "edit": "cards/Dialogue.tsx", "delete": "cards/Dialogue.tsx" },
   "dialogues.name": { "create": "cards/Dialogue.tsx", "edit": "cards/Dialogue.tsx", "delete": "cards/Dialogue.tsx" },

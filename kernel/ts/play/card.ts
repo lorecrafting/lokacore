@@ -380,10 +380,12 @@ export function added(
 ): Obj | undefined {
   if (Object.hasOwn(doc, f)) return undefined; // a stale menu never overwrites a present field
   const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
-  if (`${def}.${f}` === 'source.QuestDefinition.offer') return undefined; // targetless: quests.ex:63-66
   const value = node && (structuredClone(SEEDS[f]) ?? minimal(node, defs));
   return value === undefined ? undefined : { ...doc, [f]: value };
 }
+
+/** A field `added` seeds into the draft only: written with the author's pick (a targetless offer: quests.ex:63-66). */
+export const awaits = (def: string, f: string) => `${def}.${f}` === 'source.QuestDefinition.offer';
 
 /** `doc` without field `f`. */
 export const removed = (doc: Obj, f: string): Obj => {

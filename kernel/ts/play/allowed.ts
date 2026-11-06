@@ -35,12 +35,19 @@ const OWNERS: Record<string, string> = {
 };
 
 // Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
-const NEEDS: Record<string, (doc: Obj, world: Obj) => boolean> = {
+const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean> = {
   'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
-  'quests.repeatable': (doc) => doc.exchange !== undefined, // exchanges.ex:94-95
+  'quests.repeatable': (doc) => doc.exchange !== undefined && !run(doc), // exchanges.ex:94-95
+  'quests.offer': (doc) => !run(doc),
+  'quests.deadline': (doc) => !run(doc),
+  'quests.exchange': (doc) => !run(doc),
   'dialogues.entry': (doc) => doc.keyword === undefined, // dialogue_links.ex:205-206; one per npc: the compile's
   'dialogues.keyword': (doc) => doc.entry === undefined && doc.riddle === undefined, // keywords.ex:16
-  'dialogues.riddle': (doc) => doc.keyword === undefined, // keywords.ex:16
+  'dialogues.name': (doc, _, hidden) => !teaches(doc, hidden), // skills.ex:157
+  // keywords.ex:16; skills.ex:158; a quest or riddle ends the talk, so no then leaves it (dialogue_links.ex:394)
+  'dialogues.riddle': (doc, _, hidden) =>
+    doc.keyword === undefined && !teaches(doc, hidden) && !linked(doc),
+  'dialogues.quest': (doc) => !linked(doc), // dialogue_links.ex:394
   // the quest's evidence names the mechanic and it has none of the others: expedition.ex:99-100, patrol.ex:18-19
   'quests.expedition': (doc) =>
     solo(doc, 'expedition', 'offer repeatable deadline exchange patrol'),
@@ -49,18 +56,30 @@ const NEEDS: Record<string, (doc: Obj, world: Obj) => boolean> = {
 const solo = (doc: Obj, by: string, not: string) =>
   (doc.objective as Obj | undefined)?.evidence === by &&
   !not.split(' ').some((f) => Object.hasOwn(doc, f));
+// a patrol or expedition quest takes no offer, repeatable, deadline or exchange (the same lines, the other way)
+const run = (doc: Obj) => Object.hasOwn(doc, 'patrol') || Object.hasOwn(doc, 'expedition');
+const choicesOf = (doc: Obj) => Object.values((doc.choices ?? {}) as Record<string, Obj>);
+// skills.ex:166-170 teaches?: a choice's top-level step acquires a hidden skill (`hidden` are its keys)
+const teaches = (doc: Obj, hidden: string[]) =>
+  choicesOf(doc).some((c) =>
+    ((c.steps ?? []) as Obj[]).some((s) => hidden.includes(s.skill as string)),
+  );
+// a then or then_failed to a dialogue; `end` is never checked (dialogue_links.ex:402-404)
+const linked = (doc: Obj) =>
+  choicesOf(doc).some((c) => ['then', 'then_failed'].some((f) => c[f] && c[f] !== 'end'));
 
 /** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs
- * the definition (`doc`) and cartridge.json's `world` meet; others would not compile. */
+ * the definition (`doc`), cartridge.json's `world` and the hidden skills' keys meet; others would not compile. */
 export const allowed = (
   kind: string,
   menu: string[],
   caps: object,
   doc: Obj = {},
   world: Obj = {},
+  hidden: string[] = [],
 ) =>
   menu.filter((f) => {
     const owners = OWNERS[`${kind}.${f}`]?.split(' ') ?? [];
     const need = NEEDS[`${kind}.${f}`];
-    return owners.every((o) => Object.hasOwn(caps, o)) && (!need || need(doc, world));
+    return owners.every((o) => Object.hasOwn(caps, o)) && (!need || need(doc, world, hidden));
   });
