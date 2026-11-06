@@ -2,6 +2,7 @@
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
+import { PICK_NAMES } from './rules.ts';
 import { change, type Op, type Step } from './edit_model.ts';
 import type { Surfaces, Ui } from './ui_schema.ts';
 
@@ -155,14 +156,6 @@ export function hidden(
 /** The keys of the nodes of the kind a reference field names (`room` lists rooms); [] is free text. */
 export const choices = (field: string, nodes: { ref: string; kind: string }[]) =>
   nodes.filter((n) => n.kind === field).map((n) => n.ref.slice(n.ref.lastIndexOf('/') + 1));
-
-// a field named other than its kind (content/leaf_refs.ex: a policy's or step's `with`, `plan`)
-const PICK_NAMES: Record<string, string> = {
-  services: 'service',
-  items: 'item',
-  with: 'npc',
-  plan: 'population',
-};
 
 /** The node kind a reference field at `path` picks: its last named step (`shop.offers.0.item`). */
 export function pickKind(path: (string | number)[]) {

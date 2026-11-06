@@ -42,7 +42,6 @@ actions.reason.create
 actions.reason.edit
 actions.reason.delete
 actions.target.create
-actions.target.edit
 actions.target.delete
 actions.tip.create
 actions.tip.edit
@@ -87,7 +86,6 @@ dialogues.npc.create
 dialogues.npc.edit
 dialogues.npc.delete
 dialogues.policy.create
-dialogues.policy.edit
 dialogues.policy.delete
 dialogues.prompt.create
 dialogues.prompt.edit
@@ -135,7 +133,6 @@ liquids.amount.create
 liquids.amount.edit
 liquids.amount.delete
 liquids.applies.create
-liquids.applies.edit
 liquids.applies.delete
 liquids.cures.create
 liquids.cures.edit
@@ -186,7 +183,6 @@ quests.name.create
 quests.name.edit
 quests.name.delete
 quests.objective.create
-quests.objective.edit
 quests.objective.delete
 quests.offer.create
 quests.offer.edit
@@ -228,13 +224,11 @@ replenish.every.create
 replenish.every.edit
 replenish.every.delete
 replenish.from.create
-replenish.from.edit
 replenish.from.delete
 replenish.items.create
 replenish.items.edit
 replenish.items.delete
 replenish.to.create
-replenish.to.edit
 replenish.to.delete
 scenes.abstract.create
 scenes.abstract.edit
@@ -267,7 +261,6 @@ services.action.create
 services.action.edit
 services.action.delete
 services.benefit.create
-services.benefit.edit
 services.benefit.delete
 services.currency.create
 services.currency.edit
@@ -300,13 +293,11 @@ skills.name.create
 skills.name.edit
 skills.name.delete
 skills.prerequisite.create
-skills.prerequisite.edit
 skills.prerequisite.delete
 skills.profession.create
 skills.profession.edit
 skills.profession.delete
 skills.qualification.create
-skills.qualification.edit
 skills.qualification.delete
 skills.ranks.create
 skills.ranks.edit
@@ -330,7 +321,6 @@ statuses.cues.create
 statuses.cues.edit
 statuses.cues.delete
 statuses.duration.create
-statuses.duration.edit
 statuses.duration.delete
 statuses.fear.create
 statuses.fear.edit

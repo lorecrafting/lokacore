@@ -3,12 +3,8 @@
 // kernel/ts/play/card.ts. Every other union in a generic card is drawn by it too.
 import { useState } from 'react';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
-import {
-  branchOf,
-  constraintOnly,
-  start,
-  tagHidden,
-} from '../../../../../kernel/ts/play/card.ts';
+import { branchOf, constraintOnly, start, tagHidden } from '../../../../../kernel/ts/play/card.ts';
+import { offered } from '../../../../../kernel/ts/play/rules.ts';
 import { uiSchema } from '../../../../../kernel/ts/play/ui_schema.ts';
 
 /** Each branch's titles and claims: the walker's beneath a registry block, else the claimed definition walked. */
@@ -21,6 +17,12 @@ function branchUi({ registry, schema, uiSchema: given }: FieldProps): Record<str
       : uiSchema('', (defs[given?.['ui:field'] as string] ?? schema) as never, defs, {});
   return ui.anyOf ?? ui.oneOf ?? [];
 }
+
+const option = (each: Record<string, unknown>[], i: number) => (
+  <option key={i} value={i}>
+    {(each[i]?.['ui:title'] as string) ?? `option ${i + 1}`}
+  </option>
+);
 
 /**
  * An op (event, kind) picker, then the chosen branch's fields. A new branch starts as its tag and
@@ -52,11 +54,9 @@ export function Rules(p: FieldProps) {
         }}
       >
         {at < 0 ? <option value={-1}>choose</option> : null}
-        {branches.map((_, i) => (
-          <option key={i} value={i}>
-            {(each[i]?.['ui:title'] as string) ?? `option ${i + 1}`}
-          </option>
-        ))}
+        {branches.map((b, i) =>
+          i === at || offered(b as never, registry.formContext.kind) ? option(each, i) : null,
+        )}
       </select>
       {at >= 0 ? (
         <registry.fields.SchemaField
