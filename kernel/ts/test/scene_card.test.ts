@@ -136,6 +136,7 @@ test("the card's lines: each value line its verb, each words line its text key",
   const bytes =
     'npc: stranger\n\n* The stranger waits.\n- Ask\n  sets: knows\n  stranger: Tamsin.\n';
   const text = {
+    'dialogue.stranger_talk_old.prompt': 'The stranger waits.', // a sibling file, listed first
     'dialogue.stranger_talk.prompt': 'The stranger waits.',
     'dialogue.stranger_talk.choices.ask.reply': 'Tamsin.',
     'dialogue.other.prompt': 'Tamsin.',

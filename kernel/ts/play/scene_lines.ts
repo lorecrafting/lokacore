@@ -22,9 +22,12 @@ export function sceneLines(
   places: Record<string, string>,
 ): Line[] {
   const key = rel.slice(rel.lastIndexOf('/') + 1, -'.scene'.length);
-  const own = Object.keys(text).filter(
-    (k) => k.startsWith(`${kind}.${key}.`) || k.startsWith(`${kind}.${key}_`),
-  );
+  // the file's own set first: a sibling `<key>_x` file shares the nested sets' prefix
+  const keys = Object.keys(text);
+  const own = [
+    ...keys.filter((k) => k.startsWith(`${kind}.${key}.`)),
+    ...keys.filter((k) => k.startsWith(`${kind}.${key}_`)),
+  ];
   const at = new Map(Object.entries(places).map(([k, p]) => [p, k]));
   return bytes.split('\n').map((t, i) => {
     const n = i + 1;

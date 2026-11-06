@@ -36,7 +36,7 @@ export function SceneText({ rel, context, diag }: Props) {
   const post = async (path: string, sent: object) => {
     const { ok, told } = await ask(path, sent);
     setRefused(ok ? undefined : typeof told === 'string' ? told : 'Changed outside: reloaded.');
-    setUndo(ok && path === 'set' ? (told as { id: string }).id : undefined);
+    if (ok) setUndo(path === 'set' ? (told as { id: string }).id : undefined); // a refusal keeps the last undo
     await load();
   };
   const lines = sceneLines(rel, file.bytes, 'dialogue', diag.text ?? {}, diag.placeholders ?? {});
@@ -89,6 +89,7 @@ function Value({ line, keys, set }: { line: Line; keys: string[]; set: (value: s
         aria-invalid={!!refused}
         onChange={(e) => setValue(e.target.value)}
         onBlur={() => value !== line.value && !refused && set(value)}
+        onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
       />
       <datalist id={list}>
         {keys.map((k) => (
