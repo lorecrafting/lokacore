@@ -16,7 +16,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { ROOT } from '../play/obs.ts';
 import { lastRun, limited, lintLines, serve, textOnly } from '../play/live.ts';
-import { sourceOf, sourcesOf } from '../play/prose.ts';
+import { openAt, sourceOf, sourcesOf } from '../play/prose.ts';
 
 const was = { format: 1, rooms: { a: { name: 'room.a' } }, text: { 'room.a': 'line one' } };
 
@@ -89,6 +89,10 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   assert.equal(sourceOf(dir, 'room.a'), 'text.json:2');
   assert.equal(sourceOf(dir, 'rooms.a.name', 'line two'), 'rooms/a.json:3');
   assert.equal(sourceOf(dir, 'room.c'), 'one.json:1');
+  // Breaks (Flow/Map open sends the node's file, loka-wfrgk.69): a file's open lands on its line 1,
+  // not its key's line there; or a key elsewhere pulls the open out of the file.
+  assert.equal(openAt(dir, { key: 'room.a', file: 'text.json' }), 'text.json:2');
+  assert.equal(openAt(dir, { key: 'room.a', file: 'one.json' }), 'one.json:1');
   assert.equal(sourceOf(dir, 'room.b', 'line five'), undefined);
   // Break: Alt-click on a scene line answers 404, since a scene holds neither `"key":` nor a JSON
   // string; a prompt arrives joined, a choice label as itself.
