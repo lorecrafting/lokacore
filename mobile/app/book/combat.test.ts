@@ -36,6 +36,7 @@ const combatLines = (combat: object, extra = {}, ended = false) => {
 test('the Combat page draws no foe line, band or condition of yours, live or closed', () => {
   const pack = {
     encounter_id: 'fight',
+    interval: 150,
     opponent_id: 'a',
     name: 'npc.goblin',
     band: 'hurt',

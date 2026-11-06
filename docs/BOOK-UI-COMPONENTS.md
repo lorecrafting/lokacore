@@ -192,6 +192,9 @@ a new component needs a real consumer, its comment and its line here in the same
 | `GiltLine` | `book/GiltLine.tsx` | LogLines |
 | `Gradient` | `book/Gradient.tsx` | UnderInk |
 | `HapticPulse` | `book/HapticPulse.tsx` | HapticPulse |
+| `Hotbar` | `book/Hotbar.tsx` | CombatPage |
+| `HotbarList` | `book/Hotbar.tsx` | CombatPage |
+| `HotbarGlyph` | `book/HotbarGlyph.tsx` | CombatPage |
 | `ItemPop` | `book/ItemPop.tsx` | LogLines |
 | `Leaf` | `book/Leaf.tsx` | CombatPage |
 | `LevelWash` | `book/LevelWash.tsx` | LevelWash |

@@ -102,7 +102,7 @@ export const view = (extra = {}) =>
       { direction: 'north', available: true },
       { direction: 'west', available: false, reason: { code: 'exit_locked' } },
     ],
-    combat: { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' },
+    combat: { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 },
     ...extra,
   }) as unknown as GameView;
 export const game = (current: GameView): Game => ({
