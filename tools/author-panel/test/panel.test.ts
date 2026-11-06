@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 615, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
+// size: allow 629, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -612,4 +612,18 @@ test('a .scene dialogue opens its text card: a picker per value line, words to t
   const rope = await open({ selection: { kind: 'scene', key: 'rope_reverie' } });
   assert.equal(await rope.getByLabel('treatment').inputValue(), 'reverie'); // the file's, not none
   await rope.close();
+});
+
+// Breaks: an edit elsewhere in a status card writes its integer `duration` as the other anyOf
+// branch's `permanent` (loka-wfrgk.75); asserted on the file on disk.
+test('editing a status keeps its integer duration', async () => {
+  const page = await open({ right: 420, selection: { kind: 'status', key: 'bleeding' } });
+  const file = join(dir, 'showcase/areas/combat/statuses/bleeding.json');
+  const tick = page.locator('#root_tick_every');
+  await tick.fill('901');
+  await tick.blur();
+  const read = () => JSON.parse(readFileSync(file, 'utf8'));
+  for (let t = 0; read().tick_every !== 901 && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual([read().tick_every, read().duration], [901, 1800]);
+  await page.close();
 });

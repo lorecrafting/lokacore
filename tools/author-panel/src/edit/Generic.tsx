@@ -29,6 +29,16 @@ import { Refusal, templates } from './templates.tsx';
 import registry from './registry.json';
 
 const validator = customizeValidator({ AjvClass: Ajv2020 });
+
+/** rjsf's sanitizing, run on each leaf edit, rewrites values the author never touched: a union with
+ * a `const` branch is read as that const's enum, so `duration: 1800` became `permanent`
+ * (loka-wfrgk.75); a card writes only the author's edits, and the compiler reports the rest. */
+class CardFormBase extends Form {
+  getStateFromProps(...a: Parameters<Form['getStateFromProps']>) {
+    a[6] = false; // shouldSanitize
+    return super.getStateFromProps(...a);
+  }
+}
 type Saved = { doc: unknown; sha256: string; dir: string; schema: RJSFSchema };
 type Sent = { ops?: Op[]; [k: string]: unknown }; // the /change or /undo body
 
@@ -137,7 +147,7 @@ type FormProps = {
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
   return (
     <div onBlur={card.commit}>
-      <Form
+      <CardFormBase
         schema={card.saved!.schema}
         uiSchema={ui}
         formData={card.draft}
@@ -152,7 +162,7 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
         onSubmit={card.commit}
       >
         <span />
-      </Form>
+      </CardFormBase>
     </div>
   );
 }
