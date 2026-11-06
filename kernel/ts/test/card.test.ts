@@ -549,7 +549,7 @@ test("an action's and a reaction's add menus offer only fields the compiler acce
 });
 
 // Break: a scripted action's Add menu offers a command action's field (command, input,
-// accessibility), which the form never draws and the compiler refuses as UNKNOWN_FIELD.
+// accessibility), or a command action's a scripted one's (check), which the compiler refuses as UNKNOWN_FIELD.
 test("a scripted action's add menu offers only ScriptedAction fields", () => {
   const registry = JSON.parse(
     readFileSync(
@@ -564,6 +564,16 @@ test("a scripted action's add menu offers only ScriptedAction fields", () => {
     [],
   ); // abstract: extends.ex
   assert.ok(menu.includes('check') && menu.includes('abstract'));
+  // and a command action's offers no scripted field (check, outcomes): loka-wfrgk.54
+  const command = scriptedMenu(
+    addable('actions', registry, { command: 'x' }, []),
+    defs,
+    'source.ActionDefinition',
+  );
+  assert.deepEqual(
+    ['check', 'outcomes', 'input', 'abstract'].map((f) => command.includes(f)),
+    [false, false, true, true],
+  );
 });
 
 // Break: an action's check is added or removed but its failure outcome is not (OUTCOME_MISMATCH,

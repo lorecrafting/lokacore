@@ -142,7 +142,9 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
   );
 }
 
-export function Generic({ rel, context, diag }: { rel: string; context: Context; diag: Diag }) {
+type GenericProps = { rel: string; context: Context; diag: Diag; only?: (fields: string[], defs: never) => string[] };
+/** A definition's card from its schema; `only` filters its add menu (a command action's, Action.tsx). */
+export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
   const card = useCard(rel, diag);
   const { saved, draft } = card;
   if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
@@ -159,7 +161,7 @@ export function Generic({ rel, context, diag }: { rel: string; context: Context;
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
-      <AddMenu fields={addable(saved.dir, registry, draft, card.revealed)} reveal={card.reveal} />
+      <AddMenu fields={only(addable(saved.dir, registry, draft, card.revealed), defs)} reveal={card.reveal} />
     </div>
   );
 }
