@@ -1,4 +1,4 @@
-// size: allow 530, one suite per card step; the generic, Room, World, NPC and item cards share the pure helpers
+// size: allow 550, one suite per card step; the generic, Room, World, NPC and item cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -37,6 +37,7 @@ import {
   rootStamp,
   ROOTS,
   start,
+  constraintOnly,
   worldFile,
 } from '../play/card.ts';
 import { change } from '../play/edit_model.ts';
@@ -227,8 +228,30 @@ test('a value is drawn in the branch its op names', () => {
   assert.equal(branchOf(outer, { op: 'narrate' }), 0);
   assert.equal(branchOf(outer, undefined), -1);
   assert.equal(branchOf(step, { op: 'fact.assign' }), 0);
-  assert.deepEqual(start(step[2]), { op: 'quest.activate' });
-  assert.equal(start(outer[0]), undefined);
+  assert.deepEqual(start(step, 2), { op: 'quest.activate' });
+  assert.equal(start(outer, 0), undefined);
+});
+
+// Break: a trigger or check is drawn in the first branch whatever its event or kind (it names no
+// `op`), a new pick writes no tag at all, or a check's key is lost (or a field of another schema
+// kept) when the author switches its kind.
+test('a trigger and a check are drawn and switched by their event and kind', () => {
+  const on = defs['source.ReactionRule'].properties.on.anyOf;
+  assert.equal(branchOf(on, { event: 'spoken', word: 'hello' }), 2);
+  assert.deepEqual(start(on, 15, { event: 'spoken', npc: 'ada', word: 'hi' }), {
+    event: 'action_completed',
+  });
+  const check = defs.Check.anyOf;
+  const luck = { kind: 'luck', key: 'fish', chance: 50 };
+  assert.equal(branchOf(check, { kind: 'threshold', key: 'k' }), 1);
+  assert.deepEqual(start(check, 1, luck), { kind: 'threshold', key: 'fish' });
+});
+
+// Break: has_tag's one-subject rule (branches that only require a field) is drawn as a picker of
+// empty forms, which rjsf cannot draw.
+test('a union of bare requirements draws nothing', () => {
+  assert.equal(constraintOnly([{ required: ['subject'] }, { required: ['item'] }]), true);
+  assert.equal(constraintOnly(defs.Check.anyOf), false);
 });
 
 // Break: an untagged value is drawn in a branch of another type (a number not taken as integer,
@@ -516,6 +539,7 @@ test('a reference picker takes the kind its field names and refuses an unknown i
   assert.equal(pickKind(['services', 1]), 'service');
   assert.equal(pickKind(['items', '2']), 'item'); // a form's index arrives as a digit string
   assert.equal(pickKind(['location', 'npc']), 'npc');
+  assert.equal(pickKind(['policy', 'with']), 'npc'); // leaf_refs.ex: a policy's `with` names an npc
   const items = { kind: 'item', keys: ['rope', 'lamp'] };
   assert.ok(refusePick(items, 'ropes'));
   assert.equal(refusePick(items, 'rope'), undefined);

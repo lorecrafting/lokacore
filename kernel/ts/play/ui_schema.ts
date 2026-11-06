@@ -89,7 +89,9 @@ export function uiSchema(
     const card = { 'ui:field': edit.replace(/\.tsx$/, '') };
     const [k, field] = path.split('.');
     if (path === kind) Object.assign(ui, card);
-    else if (k === kind && field) at[field] = card;
+    // a field's block draws its whole union and keeps the walker's branch titles and claims beneath it
+    else if (k === kind && field)
+      at[field] = { ...at[field], ...card, 'ui:fieldReplacesAnyOrOneOf': true };
     else if (path.startsWith('treatment:') && `${kind}.treatment` in registry) at.treatment = card;
   }
   return ui;

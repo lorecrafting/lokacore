@@ -1,4 +1,4 @@
-// size: allow 410, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
+// size: allow 450, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -156,10 +156,18 @@ export function hidden(
 export const choices = (field: string, nodes: { ref: string; kind: string }[]) =>
   nodes.filter((n) => n.kind === field).map((n) => n.ref.slice(n.ref.lastIndexOf('/') + 1));
 
+// a field named other than its kind (content/leaf_refs.ex: a policy's or step's `with`, `plan`)
+const PICK_NAMES: Record<string, string> = {
+  services: 'service',
+  items: 'item',
+  with: 'npc',
+  plan: 'population',
+};
+
 /** The node kind a reference field at `path` picks: its last named step (`shop.offers.0.item`). */
 export function pickKind(path: (string | number)[]) {
   const name = [...path].reverse().find((s) => typeof s === 'string' && !/^\d+$/.test(s));
-  return name === 'services' ? 'service' : name === 'items' ? 'item' : String(name ?? '');
+  return PICK_NAMES[String(name)] ?? String(name ?? '');
 }
 
 /** What a world file's reference field names, by its field (a transport's `reverse` is a transport). */
@@ -260,29 +268,59 @@ export function placement(doc: Obj, dir: string): { kind: string; key?: unknown 
   return { kind, key: loc[kind] };
 }
 
-const opOf = (branch: Obj): unknown => (branch.properties as any)?.op?.const;
 const typeOf = (v: unknown) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v);
+// the key a branch names itself by: a Step or Policy `op`, a trigger's `event`, a check's or target's `kind`
+const tagOf = (branches: Obj[]) =>
+  ['op', 'event', 'kind'].find((k) => branches.some((b) => constOf(b, k) !== undefined)) ?? 'op';
+const constOf = (branch: Obj | undefined, k: string): unknown =>
+  (branch?.properties as any)?.[k]?.const;
 
 /**
- * The branch of a union (`anyOf`, `oneOf`) that `value` is in: the one whose `op` const it names,
- * else the first with no `op` const its type fits (a `$ref Step` beside `wait`); -1 for none.
+ * The branch of a union (`anyOf`, `oneOf`) that `value` is in: the one whose tag const (`op`,
+ * `event`, `kind`) it names, else the first untagged one its type fits (a `$ref Step` beside
+ * `wait`); -1 for none.
  */
 export function branchOf(branches: Obj[], value: unknown): number {
   if (value === undefined) return -1;
-  const op = plain(value) ? value.op : undefined;
-  const named = branches.findIndex((b) => opOf(b) !== undefined && opOf(b) === op);
+  const k = tagOf(branches);
+  const tag = plain(value) ? value[k] : undefined;
+  const named = branches.findIndex((b) => constOf(b, k) !== undefined && constOf(b, k) === tag);
   if (named >= 0) return named;
   const t = typeOf(value);
   return branches.findIndex(
     (b) =>
-      opOf(b) === undefined &&
+      constOf(b, k) === undefined &&
       (!b.type || b.type === t || (b.type === 'integer' && t === 'number')),
   );
 }
 
-/** A newly chosen branch's value: its `op` and nothing else, since no default is invented. */
-export const start = (branch: Obj) =>
-  opOf(branch) === undefined ? undefined : { op: opOf(branch) };
+const shape = (node: unknown) => {
+  const { description: _d, ...rest } = (node ?? {}) as Obj;
+  return JSON.stringify(rest);
+};
+
+/**
+ * Branch `i`'s value when the author picks it: its tag, plus each field of the old value that the
+ * new branch declares with the same schema (a check's `key`, a step's `fact`); nothing invented.
+ */
+export function start(branches: Obj[], i: number, old?: unknown): Obj | undefined {
+  const k = tagOf(branches);
+  const tag = constOf(branches[i], k);
+  if (tag === undefined) return undefined;
+  const was = (branches[branchOf(branches, old)]?.properties ?? {}) as Obj;
+  const now = (branches[i].properties ?? {}) as Obj;
+  const kept = Object.entries(plain(old) ? old : {}).filter(
+    ([f]) => f !== k && f in now && f in was && shape(now[f]) === shape(was[f]),
+  );
+  return { [k]: tag, ...Object.fromEntries(kept) };
+}
+
+/** A union whose branches only require a field each (`has_tag`'s one subject): nothing to draw. */
+export const constraintOnly = (branches: Obj[]) =>
+  branches.every((b) => !b.type && !b.properties && !b.anyOf && !b.oneOf && !b.$ref);
+
+/** A branch's own tag field is drawn by the picker, so its form hides it. */
+export const tagHidden = (branches: Obj[]) => ({ [tagOf(branches)]: { 'ui:widget': 'hidden' } });
 
 /** The card's state label: Hold first, then a compile in flight, then an artifact older than the source. */
 export const status = (held: boolean, pending: boolean, compiled: boolean) =>

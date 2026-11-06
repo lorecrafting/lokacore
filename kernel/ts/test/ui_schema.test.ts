@@ -35,15 +35,20 @@ test('a real kind claims its text keys, definition references, policies and step
 });
 
 // Breaks: a hand-built card in the registry is not drawn, `generic` replaces rjsf's own field, the
-// card keeps its `.tsx` (rjsf's fields map has no such name), or another kind's row lands here.
+// card keeps its `.tsx` (rjsf's fields map has no such name), another kind's row lands here, or a
+// field's block drops the walker's branch titles beneath it (the Trigger block's events).
 test("the registry's hand-built edit card claims its field; generic and other kinds do not", () => {
   const rooms = ui('rooms', {
     'rooms.exits': card('ExitsCard.tsx'),
     'rooms.name': card('generic'),
     'npcs.name': card('NpcName.tsx'),
   });
-  assert.deepEqual(rooms.exits, { 'ui:field': 'ExitsCard' });
+  assert.equal(rooms.exits['ui:field'], 'ExitsCard');
+  assert.equal(rooms.exits['ui:fieldReplacesAnyOrOneOf'], true);
   assert.deepEqual(rooms.name, { 'ui:field': 'TextKey', 'ui:fieldReplacesAnyOrOneOf': true });
+  const on = ui('reactions', { 'reactions.on': card('blocks/Rules.tsx') }).on;
+  assert.equal(on['ui:field'], 'blocks/Rules');
+  assert.equal(on.anyOf[2]['ui:title'], 'spoken');
 });
 
 // Breaks (loka-wfrgk.11 review 2, 5): a root-level row (no field) is dropped, so the text catalog
@@ -52,7 +57,10 @@ test("the registry's hand-built edit card claims its field; generic and other ki
 test('a whole-kind, an array-file field and a treatment card are each claimed where rjsf reads', () => {
   assert.equal(ui('text', { text: card('Catalog.tsx') })['ui:field'], 'Catalog');
   const layout = ui('layout', { 'layout.room': card('RoomSpot.tsx') });
-  assert.deepEqual(layout.items.room, { 'ui:field': 'RoomSpot' });
+  assert.deepEqual(layout.items.room, {
+    'ui:field': 'RoomSpot',
+    'ui:fieldReplacesAnyOrOneOf': true,
+  });
   assert.equal(layout.room, undefined);
   const scenes = ui('scenes', {
     'scenes.treatment': card('generic'),

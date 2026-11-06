@@ -8,7 +8,6 @@ actions.aliases.create
 actions.aliases.edit
 actions.aliases.delete
 actions.check.create
-actions.check.edit
 actions.check.delete
 actions.command.create
 actions.command.edit
@@ -35,7 +34,6 @@ actions.outcomes.create
 actions.outcomes.edit
 actions.outcomes.delete
 actions.policy.create
-actions.policy.edit
 actions.policy.delete
 actions.priority.create
 actions.priority.edit
@@ -206,16 +204,13 @@ reactions.after.create
 reactions.after.edit
 reactions.after.delete
 reactions.on.create
-reactions.on.edit
 reactions.on.delete
 reactions.silent.create
 reactions.silent.edit
 reactions.silent.delete
 reactions.steps.create
-reactions.steps.edit
 reactions.steps.delete
 reactions.when.create
-reactions.when.edit
 reactions.when.delete
 reactions.zone.create
 reactions.zone.edit
