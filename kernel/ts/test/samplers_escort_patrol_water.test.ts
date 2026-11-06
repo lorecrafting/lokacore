@@ -85,7 +85,7 @@ test('escort_sampler: the child follows a Move and Complete hands it over', () =
 });
 
 // Breaks: Tobin does not walk on Continue, or the player's arrival at the checkpoint earns no
-// credit, so the one-checkpoint round never completes and never writes the trust fact.
+// credit, so the one-checkpoint round never completes.
 test('patrol_sampler: Tobin walks to the gate, the player joins him and the round completes', () => {
   const { w: fresh } = sampler('patrol_sampler');
   const tobin = id(fresh, 'npc', 'tobin');
