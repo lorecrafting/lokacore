@@ -5,7 +5,6 @@
 import {
   BlurMask,
   Canvas,
-  Circle,
   DashPathEffect,
   DiscretePathEffect,
   Group,
@@ -20,9 +19,9 @@ import { usePalette, useType, type Palette } from '../book/palette.ts';
 import { glyphs } from '../book/statusGlyphs.ts';
 import { Text } from '../book/Text.tsx';
 import { opacity, size, space } from '../book/tokens.ts';
+import CombatOneFoeView from './views/combat-one-foe.json';
 
 const { SIDE, MID, R, W } = frame;
-import CombatOneFoeView from './views/combat-one-foe.json';
 
 // The showcase's three common skills, drawn in the status glyphs' frame (statusGlyphs.ts: a 24 box,
 // stroke 2.5, round caps). Flamma and ward share their condition's motif; the blade is new.
@@ -160,7 +159,7 @@ function Slot({ label, d, draw, off }: { label: string; d: string; draw: Draw; o
   );
 }
 
-const lines = CombatOneFoeView.combatLog.slice(-3);
+const lines = CombatOneFoeView.combatLog.slice(-3); // mutate-skip: the sheet's sample lines
 function Row({ name, draw, chosen }: { name: string; draw: Draw; chosen?: true }) {
   const c = usePalette();
   const t = useType();

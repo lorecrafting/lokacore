@@ -2,6 +2,7 @@
 // on the mounted Book over controlled, schema-valid fight views.
 import assert from 'node:assert/strict';
 import { globSync, readFileSync } from 'node:fs';
+import { registerHooks } from 'node:module';
 import { test } from 'node:test';
 import { validate } from '../../authority/local-story/__tests__/validate.ts';
 import { nodes, view } from './__tests__/combat-book.test.ts';
@@ -10,8 +11,31 @@ import { pressable } from './__tests__/control.test.ts';
 import { actionGlyphs, OPENER } from './actionGlyphs.ts';
 import { LABEL } from './labels.ts';
 import { fallback, glyphs } from './statusGlyphs.ts';
+import { opacity, size, space } from './tokens.ts';
 
-const { share, wedgeMs } = await import('./Hotbar.tsx');
+// The slot drawing's hosts as leaves, so its Inked elements are readable (as effects_turn.test.ts).
+const stubs: Record<string, string> = {
+  '@shopify/react-native-skia':
+    "export const Canvas='Canvas',Circle='Circle',Group='Group',Path='Path';",
+  'react-native-reanimated':
+    'export const Easing={linear:t=>t},useDerivedValue=f=>({value:f()}),useReducedMotion=()=>false,' +
+    'useSharedValue=value=>({value}),withTiming=v=>v;',
+};
+registerHooks({
+  resolve: (specifier, context, next) =>
+    stubs[specifier]
+      ? { url: `data:text/javascript,${encodeURIComponent(stubs[specifier])}`, shortCircuit: true }
+      : next(specifier, context),
+});
+const { share } = await import('./Hotbar.tsx');
+const {
+  arc,
+  default: HotbarGlyph,
+  frame,
+  inked,
+  still,
+  wedgeMs,
+} = await import('./HotbarGlyph.tsx');
 const { AccessibilityInfo } = (await import('react-native')) as any;
 (globalThis as any).CanvasKit = {}; // so the slots' lazy drawings are drawn, their props readable
 
@@ -90,9 +114,12 @@ test('the slots fill in GameView order; a barred one keeps its place', () => {
   const sent = sends(h);
   h.tap('ward, cast');
   assert.deepEqual([sent[0].action_key, sent[0].input], ['cast', { word: 'ward' }]);
+  h.tap('action.shove');
+  assert.equal(sent[1].action_key, 'shove', 'a scripted slot sends its own action');
 });
 
-// Breaks: an empty slot drawn as a button or focusable, or a strip with nothing to hold.
+// Breaks: an empty slot drawn as a button or focusable, or a strip with nothing to hold (a page verb,
+// a refused Cast's words, a fight over).
 test('fewer than three fillers leave hairline rings; no filler, no strip', () => {
   const h = mounted(fight([], [{ word: 'ward', available: true }]));
   assert.deepEqual(
@@ -109,7 +136,15 @@ test('fewer than three fillers leave hairline rings; no filler, no strip', () =>
     );
   assert.ok(strip(fight([act('shove')])));
   assert.ok(!strip(fight([act('look')])), 'a page verb and no word: no strip');
+  assert.ok(!strip(fight([act('peer', { command: 'look' })])), 'a page verb by its command');
+  const ward = [{ word: 'ward', available: true }];
+  const castBarred = view({
+    actions: [...(view() as any).actions, act('cast', barred)],
+    spell_words: ward,
+  });
+  assert.ok(!strip(castBarred), 'Cast listed but refused: no word slot');
   assert.ok(!strip(view({ spell_words: [{ word: 'ward', available: true }] })), 'no Cast offered');
+  assert.ok(!strip(fight([act('shove')], undefined, { combat: undefined })), 'the fight over');
 });
 
 // Breaks: a barred slot that sends, or reads its sentence twice or never.
@@ -141,7 +176,7 @@ test("the opener's list and a foe's list share the one open list", () => {
       }),
     ],
   };
-  const h = mounted(fight([act('shove')], undefined, { entities: [rat] }));
+  const h = mounted(fight([act('shove'), act('kick', barred)], undefined, { entities: [rat] }));
   const expanded = () => h.control(LABEL.hotbarOpener).props['aria-expanded'];
   assert.equal(expanded(), false);
   h.tap(LABEL.hotbarOpener);
@@ -153,6 +188,15 @@ test("the opener's list and a foe's list share the one open list", () => {
   assert.ok(!h.texts().includes('action.shove'), "the foe's list closed the hotbar's");
   h.tap(LABEL.hotbarOpener);
   assert.deepEqual([expanded(), foe()], [true, false]);
+  const kicks = all(h).filter(
+    (n) => n.type === 'Pressable' && /kick/.test(n.props.accessibilityLabel),
+  );
+  assert.deepEqual(kicks.map(pressable), [false, false], 'a barred filler: its list row and slot');
+  h.answer({ kind: 'pending' });
+  h.tap('action.shove'); // the list's row: sends, closes, and the action is pending
+  h.tap(LABEL.hotbarOpener);
+  h.tap('action.shove');
+  assert.equal(expanded(), true, 'a row pressed while an action is pending keeps the list');
 });
 
 // Breaks: a share measured from the wrong end, a cooling slot drawn barred, or a wedge that tweens
@@ -161,6 +205,7 @@ test('a cooling slot draws the elapsed share; reduced motion steps it', () => {
   assert.equal(share({ ends_at: 40, duration: 20 }, 25), 0.25);
   assert.equal(share({ ends_at: 40, duration: 20 }, 50), 1);
   assert.equal(share({}, 25), undefined);
+  assert.equal(share({ ends_at: 40, duration: 0 }, 25), undefined, 'no duration, no wedge');
   const h = mounted(
     fight(
       [],
@@ -239,5 +284,83 @@ test('every action drawing keeps the frame, and every showcase slot key has one'
   assert.deepEqual(
     keys.filter((k) => !(k in actionGlyphs)),
     [],
+  );
+});
+
+// Every element a drawing holds, depth first.
+const tree = (n: any): any[] =>
+  n?.props ? [n, ...[n.props.children].flat(Infinity).flatMap(tree)] : [];
+const c = { fg: 'fg', dim: 'dim', bg: 'bg', line: 'line', action: 'action' } as any;
+const end = (d: string) =>
+  d
+    .match(/(-?[\d.]+) (-?[\d.]+)Z?$/)!
+    .slice(1)
+    .map(Number);
+
+// Breaks: a wedge not from 12 o'clock or not clockwise, a large-arc flag on the wrong side of half, a
+// seam on the wrong radius, or a slot off the touch target or the glyph off the disc's centre.
+test('the cooling wedge sweeps clockwise from 12; the drawing sits centred in a touch-sized disc', () => {
+  const { SIDE, MID, R } = frame;
+  assert.deepEqual([MID * 2, R * 2], [SIDE, size.touch]);
+  const close = (a: number[], b: number[]) => a.every((v, i) => Math.abs(v - b[i]!) < 1e-9);
+  assert.ok(close(end(arc(R, 0.25)), [MID + R, MID]), "a quarter ends at 3 o'clock");
+  assert.ok(arc(R, 0.25).startsWith(`M${MID} ${MID - R}`), 'an arc starts at 12');
+  assert.ok(
+    arc(R, 0.25, true).startsWith(`M${MID} ${MID}L${MID} ${MID - R}`),
+    'a wedge from the centre',
+  );
+  assert.match(arc(R, 0.75), / 0 1 1 /, 'past half: the large arc');
+  assert.match(arc(R, 0.5), / 0 0 1 /, 'half: the small arc');
+  assert.ok(
+    close(end(still(0.25).seams as string), [MID + R, MID]),
+    'the second seam on the share',
+  );
+  const g = tree(inked(c, 'M3 3', 'ready')).find((n) => n.props.transform);
+  const [{ translateX }, { translateY }, { scale }] = g.props.transform;
+  assert.equal(translateX, translateY);
+  assert.equal(translateX + 12 * scale, MID, 'the 24 box centred');
+  assert.equal(translateX, MID - R + space.md, 'the glyph inset in the disc');
+});
+
+// Breaks: a state drawn with another's disc, wedge, ring or thinning (icon-style-guide.md, States), or a
+// still slot that keeps its WebGL context.
+test('each Inked state draws its own disc, wedge and ring', () => {
+  const { R } = frame;
+  const drawn = (state: any) =>
+    tree(
+      inked(c, 'M3 3', state, state === 'barred' || state === 'cooling' ? still(0.5) : undefined),
+    ).map((n) => [n.type, n.props.color ?? n.props.opacity, n.props.r ?? n.props.style ?? null]);
+  const empty = inked(c, 'M3 3', 'empty') as any;
+  assert.deepEqual(
+    [empty.type, empty.props.color, empty.props.r + size.rule / 2],
+    ['Circle', 'line', R],
+  );
+  const disc = (color: string) => ['Circle', color, R];
+  const glyph = ['Path', 'bg', 'stroke'];
+  assert.deepEqual(drawn('ready'), [
+    ['Group', 1, null],
+    disc('fg'),
+    ['Group', undefined, null],
+    glyph,
+  ]);
+  assert.equal(drawn('pressed')[0]![1], 1 - opacity.press);
+  assert.deepEqual(drawn('barred').slice(1), [disc('dim'), ['Group', undefined, null], glyph]);
+  assert.deepEqual(drawn('cooling').slice(1, 4), [
+    disc('dim'),
+    ['Path', 'fg', null],
+    ['Path', 'bg', 'stroke'],
+  ]);
+  const ring = drawn('focused').at(-1)!;
+  assert.deepEqual(
+    [ring[0], ring[1], (ring[2] as number) - size.focus / 2 - R],
+    ['Circle', 'action', size.focus],
+  );
+  const canvas = (state: any) => (HotbarGlyph({ d: 'M3 3', state, share: 0.5 }) as any).props;
+  assert.deepEqual(
+    [
+      canvas('cooling').__destroyWebGLContextAfterRender,
+      canvas('ready').__destroyWebGLContextAfterRender,
+    ],
+    [false, true],
   );
 });

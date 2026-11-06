@@ -10,7 +10,7 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import { usePalette, type Palette } from './palette.ts';
-import { wedgeMs } from './Hotbar.tsx';
+import { drainMs } from './StatusIcon.tsx';
 import { opacity, size, space } from './tokens.ts';
 
 const DISC = size.touch; // the button: one touch target
@@ -20,6 +20,11 @@ const R = DISC / 2;
 const INK = DISC - 2 * space.md; // the glyph's box, scaled from statusGlyphs' 24
 const BOX = 24;
 const W = 2.5; // the status glyphs' stroke
+
+// How long the wedge grows to a new share: the Ring's drain rule on the time left, so reduced motion
+// and a fresh cooldown (a smaller share) step.
+export const wedgeMs = (from: number, to: number, gap: number, reduced: boolean) =>
+  drainMs(1 - from, 1 - to, gap, reduced);
 
 // The drawing's measures, for the exploration sheets (one lowercase export: the catalogue reads capitals as
 // components).

@@ -3,9 +3,9 @@ import { lazy, Suspense, useState, type RefObject } from 'react';
 import { AccessibilityInfo, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { rows, useFocus, type Shown } from './actions.tsx';
+import { commandOf } from './buttons.ts';
 import { actionGlyph, OPENER } from './actionGlyphs.ts';
 import { canDraw } from './canDraw.ts';
-import { drainMs } from './StatusIcon.tsx';
 import { LiftPressable } from './fade.ts';
 import { haptic } from './haptic';
 import type { State } from './HotbarGlyph.tsx';
@@ -22,7 +22,7 @@ import { why } from './words.ts';
 
 const HotbarGlyph = lazy(() => import('./HotbarGlyph.tsx'));
 
-// The Combat page's own verbs: their cards stay in the scroll, never a slot.
+// The Combat page's own verbs, by command: their cards stay in the scroll, never a slot.
 const VERBS = ['stand', 'flee', 'bandage', 'cast', 'look', 'scan', 'move'];
 const PAGE = 'hotbar'; // the opener's list in Combat's one-open-list state
 
@@ -31,17 +31,17 @@ type Cooldown = { ends_at?: number; duration?: number };
 export type Slot = { key: string; label: string; reason: string; b?: Button } & Cooldown;
 
 // The fillers in GameView order: untargeted scripted actions not the page's own, then the untargeted
-// spell words (the kernel lists no aimed word) while Cast is offered, each sending Cast with its word as
+// spell words (the kernel lists no aimed word) while Cast is available, each sending Cast with its word as
 // the Skills page's cards do, with no pick mark, so the page keeps the strip. A fight is wordless
 // (buttons.ts), so no Cast twin is projected: the press is built here, under the view's token.
 export const slotsOf = (view: GameView, buttons: Button[], text: (key: string) => string) => {
-  const cast = view.actions.some((a) => a.action_key === 'cast');
+  const cast = view.actions.some((a) => a.action_key === 'cast' && a.available);
   const token = buttons[0]?.token;
   const cooldown = (e: { available: boolean } & Cooldown) =>
     e.ends_at === undefined ? {} : { ends_at: e.ends_at, duration: e.duration };
   const slots: Slot[] = [
     ...view.actions
-      .filter((a) => a.target.kind === 'none' && !VERBS.includes(a.action_key))
+      .filter((a) => a.target.kind === 'none' && !VERBS.includes(commandOf(a)))
       .map((a) => ({
         key: a.action_key,
         label: text(a.label),
@@ -68,11 +68,6 @@ export const share = (s: Cooldown, time: number) =>
   s.ends_at === undefined || !s.duration
     ? undefined
     : Math.min(1, Math.max(0, (time - (s.ends_at - s.duration)) / s.duration));
-
-// How long the wedge grows to a new share: the Ring's drain rule on the time left, so reduced motion
-// and a fresh cooldown (a smaller share) step.
-export const wedgeMs = (from: number, to: number, gap: number, reduced: boolean) =>
-  drainMs(1 - from, 1 - to, gap, reduced);
 
 const drawing = (d: string, state: State, at?: number) =>
   canDraw() && (
