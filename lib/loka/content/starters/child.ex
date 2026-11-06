@@ -14,7 +14,8 @@ defmodule Loka.Content.Starters.Child do
   @doc """
   The resolved parent when a starter whose own file is `own` may extend `key`, else
   `{:error, line}`: a bad key, an own file already there without that `extends`, no such parent,
-  one of another kind, one not abstract, one with `params` (the child's `with` is the author's), or
+  a population or transport (their keys are derived per kind), one of another kind, one not
+  abstract, one with `params` (the child's `with` is the author's), or
   an area crossing.
   """
   def parent(_, _, nil, _), do: {:ok, nil}
@@ -23,6 +24,9 @@ defmodule Loka.Content.Starters.Child do
     path = Path.join(dir, own)
 
     cond do
+      kind_dir in ~w(populations transports) ->
+        {:error, "--extends: #{kind_dir} derive their keys per kind; write the child by hand"}
+
       Contracts.validate("Key", key) != :ok ->
         {:error, "--extends: a key is lowercase letters, digits and _, 64 at most (got #{key})"}
 
@@ -36,7 +40,7 @@ defmodule Loka.Content.Starters.Child do
 
   defp found(dir, kind_dir, key, own) do
     case find(dir, kind_dir, key) do
-      {rel, %{"abstract" => true, "params" => _}} ->
+      {rel, %{"abstract" => true, "params" => [_ | _]}} ->
         {:error, "--extends #{key}: #{rel} has params; write the child and its \"with\" by hand"}
 
       {rel, %{"abstract" => true} = parent} ->
@@ -75,7 +79,9 @@ defmodule Loka.Content.Starters.Child do
 
   defp resolved(_, _, parent, _), do: parent
 
-  defp deep(a, b), do: Map.merge(a, b, fn _, x, y -> if is_map(x), do: deep(x, y), else: y end)
+  # As Extends.merge: objects merge, anything else replaces.
+  defp deep(a, b) when is_map(a) and is_map(b), do: Map.merge(a, b, fn _, x, y -> deep(x, y) end)
+  defp deep(_, b), do: b
 
   @doc "Rewrites the starter's own file as the child of `parent`: `extends` and the fields it lacks."
   def extending(files, _, nil), do: files

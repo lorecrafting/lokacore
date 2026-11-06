@@ -11,10 +11,16 @@ defmodule Loka.ContentStartersExtendsTest do
   }
 
   # Breaks: the child copying the parent's fields (or a `~` over one a grandparent gives, which
-  # wins the merge), losing its own name keyword or room, or a child the compiler cannot resolve.
+  # wins the merge), losing its own name keyword or room, a chain whose middle parent puts a list
+  # over an object crashing the merge, or a child the compiler cannot resolve.
   test "a child of an abstract NPC holds extends and its own fields and compiles", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
-    put(dir, "npcs/beast.json", %{"abstract" => true, "description" => %{"prose" => "Furry."}})
+
+    put(dir, "npcs/beast.json", %{
+      "abstract" => true,
+      "description" => %{"prose" => "Furry."},
+      "keywords" => %{"not" => "a list"}
+    })
 
     put(
       dir,
@@ -75,7 +81,8 @@ defmodule Loka.ContentStartersExtendsTest do
     refute Map.has_key?(den, "description")
   end
 
-  # Breaks: a refused parent writing a child the compiler then rejects, or a vague message.
+  # Breaks: a refused parent writing a child the compiler then rejects, a vague message, a room
+  # refused across areas, or empty params refused.
   test "--extends refuses a parent the compiler would refuse, writing nothing", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
     put(dir, "npcs/wild.json", @wild)
@@ -84,6 +91,14 @@ defmodule Loka.ContentStartersExtendsTest do
     put(dir, "areas/a/npcs/f.json", @wild)
     put(dir, "areas/a/rooms/a.json", Starters.Parts.room())
     put(dir, "areas/b/rooms/b.json", Starters.Parts.room())
+
+    put(dir, "areas/a/rooms/cellar.json", %{
+      "abstract" => true,
+      "description" => %{"prose" => "~"}
+    })
+
+    put(dir, "populations/herd.json", %{"abstract" => true})
+    put(dir, "npcs/open.json", Map.put(@wild, "params", []))
     before = snapshot(dir)
 
     for {args, line} <- [
@@ -98,6 +113,8 @@ defmodule Loka.ContentStartersExtendsTest do
            ~s(--extends kin: npcs/kin.json has params; write the child and its "with" by hand)},
           {~w(npcs tame --extends wild),
            ~s(--extends wild: npcs/tame.json exists; add "extends" there by hand)},
+          {~w(populations deer --extends herd),
+           "--extends: populations derive their keys per kind; write the child by hand"},
           {~w(npcs deer --extends ../x),
            "--extends: a key is lowercase letters, digits and _, 64 at most (got ../x)"}
         ] do
@@ -105,9 +122,13 @@ defmodule Loka.ContentStartersExtendsTest do
       assert snapshot(dir) == before, line
     end
 
-    # The same area may extend it.
-    for k <- ~w(tame kin), do: File.rm!(Path.join(dir, "npcs/#{k}.json"))
+    # The same area may extend it; any room may extend any room.
+    for k <- ~w(npcs/tame npcs/kin populations/herd), do: File.rm!(Path.join(dir, "#{k}.json"))
     new(tmp, ~w(npcs deer --area a --extends f mine))
+    new(tmp, ~w(rooms x --area b --extends cellar mine))
+    assert read(dir, "areas/b/rooms/x.json")["extends"] == "cellar"
+    # Empty params need no "with".
+    new(tmp, ~w(npcs elk --extends open mine))
     assert npc(dir, "deer")["hp"] == @wild["hp"]
   end
 

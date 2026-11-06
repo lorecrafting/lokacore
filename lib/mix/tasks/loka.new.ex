@@ -8,8 +8,8 @@ defmodule Mix.Tasks.Loka.New do
   with what to fill (`bin/loka todo`'s list) and the next command. `--from` follows a `rooms` pair
   (`--from <cartridge dir>` a `cartridge` pair: a copy with its own id, checkpoints left out) and
   `--area` (the `areas/<area>/` folder for every new file of the pair) and `--extends` (the pair's
-  own file holds `"extends"` and only the fields the abstract parent of its kind lacks) any pair but
-  a scene or a cartridge;
+  own file holds `"extends"` and only the fields the abstract parent of its kind lacks; not a
+  population or a transport) any pair but a scene or a cartridge;
   `--cwd` is the directory relative paths resolve against. One line names what is missing and exits
   1, and then nothing is written: the files the earlier pairs wrote are put back.
   """
