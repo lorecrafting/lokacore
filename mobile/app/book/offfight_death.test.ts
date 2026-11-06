@@ -21,6 +21,8 @@ const RECEIPT = ['bleed.tick', 'death.fell', 'combat.death'];
 const DEATH = ['You bleed.', 'You die.', 'You wake at the shrine.'];
 const these = (h: ReturnType<typeof mounted>, of: string[]) =>
   h.texts().filter((t) => of.includes(t));
+const turn = (h: ReturnType<typeof mounted>) =>
+  h.node((n) => n.type?.name === 'PageTurn').props.turn as number;
 // A cellar with a line in its log, read on the World page.
 const cellar = () => {
   const h = mounted(view({ combat: undefined }));
@@ -125,8 +127,8 @@ test('an encounter ending the spirit state does not reread the death', () => {
   }
 });
 
-// Breaks (book-ui.md, Closure): a death that closes an encounter shows the dead page instead of
-// the Combat page.
+// Breaks (book-ui.md, Closure; Dead page, Turn): a death that closes an encounter shows the dead page
+// instead of the Combat page, or the foe's timed blow turns the Combat page.
 test('a death that closes a fight keeps the Combat page', () => {
   const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 };
   const h = cellar();
@@ -135,9 +137,11 @@ test('a death that closes a fight keeps the Combat page', () => {
       view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
       'combat.hit',
     );
+    const was = turn(h);
     h.publish(view(SHRINE), 'combat.death', 'combat.hit');
     const t = h.texts();
     assert.ok(t.includes(TITLE) && t.includes('Let go'));
+    assert.equal(turn(h), was);
     assert.equal(t.includes('The cellar') || t.includes('Water drips.'), false);
   } finally {
     h.close();
@@ -178,10 +182,9 @@ test('a reopen shows the recovery room solid; a scene shows after Let go', () =>
 
 // Breaks (book-ui.md, Dead page, Turn): a background death turns no page from Contents
 // (loka-kgd.216), or one on the World page, from the clock or a press there, turns the page
-// instead of changing it in place (loka-kgd.217).
+// instead of changing it in place (loka-kgd.217), or a press death on an NPC page that wakes in
+// the same room keeps that page.
 test('a death turns to the dead page from another page; on the World page it changes in place', () => {
-  const turn = (h: ReturnType<typeof mounted>) =>
-    h.node((n) => n.type?.name === 'PageTurn').props.turn as number;
   const stood = { kind: 'saved', decision: { kind: 'accepted', events: [], outcome: 'stood' } };
   const dies = { ...stood, decision: { ...stood.decision, narration: [{ key: 'combat.death' }] } };
   for (const [from, death] of [
@@ -205,5 +208,20 @@ test('a death turns to the dead page from another page; on the World page it cha
     } finally {
       h.close();
     }
+  }
+  const attack = { action_key: 'attack', label: 'action.attack', available: true, input: [] };
+  const entities = [
+    { ...view().entities[0], actions: [{ ...attack, target: { kind: 'entity' } }] },
+  ];
+  const h = mounted(view({ combat: undefined, entities }));
+  try {
+    h.tap('A marsh rat');
+    const was = turn(h);
+    h.answer(dies, view({ combat: undefined, entities, revival: SHRINE.revival }), 'combat.death');
+    h.tap('Attack a marsh rat');
+    assert.ok(h.texts().includes('Let go'));
+    assert.equal(turn(h), was + 1);
+  } finally {
+    h.close();
   }
 });

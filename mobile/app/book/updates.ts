@@ -103,7 +103,7 @@ function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubs
   const fell = pr.screen().died;
   const terminal = pr.update(update);
   const after = pr.screen();
-  const died = !!after.died && after.died !== fell; // the Book turns to the dead page from any page
+  const died = !!after.dead && after.died !== fell; // the dead page, not a fight's close: turn to it from any page
   let next = died ? [] : pagesAfter(before.stack, before.view, after.view);
   next = restoredCompletion(p, s, update, after, next);
   if (terminal) next = resultPages(next, after);
