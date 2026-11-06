@@ -1,4 +1,4 @@
-# size: allow 441, every whole-cartridge dialogue link check in one graph
+# size: allow 450, every whole-cartridge dialogue link check in one graph
 defmodule Loka.Content.DialogueLinks do
   @moduledoc "A dialogue choice's policy and narration variants as roots, and its then and then_failed checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -87,9 +87,18 @@ defmodule Loka.Content.DialogueLinks do
       guessed(open, next, live_keys(sorted)) ++
       fall_through(open, sorted, hidden?) ++
       unused(sorted, open, next) ++
-      return_closed(sorted, next) ++
+      closed(sorted, next) ++
       fall_through_spent(open, sorted) ++ sitting_spent(sorted)
   end
+
+  defp closed(sorted, next), do: return_closed(sorted, next) ++ hub_shut(sorted, next)
+
+  defp hub_shut(sorted, next),
+    do:
+      for(
+        {rel, k, d} <- Loka.Content.Hub.shut(sorted, next),
+        do: warning("HUB_SHUT", rel, ["choices", k], d)
+      )
 
   defp live_keys(sorted), do: for({_, d} <- live(sorted), do: d["key"])
 

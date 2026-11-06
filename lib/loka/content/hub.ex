@@ -85,6 +85,30 @@ defmodule Loka.Content.Hub do
       Enum.any?(choices, fn {_, c} -> is_map_key(c, "then") or is_map_key(c, "then_failed") end)
   end
 
+  # behavior.ts `hub` reopens after a plain answer without reading the dialogue's policy, so an answer
+  # that fails it leaves only refused choices and Leave. A `then` (`then: end`), `check` or `patrol` ends it.
+  @doc "Each `{rel, choice key, dialogue}` whose plain answer fails its own hub's policy (HUB_SHUT)."
+  @spec shut([{String.t(), map()}], map()) :: [{String.t(), String.t(), map()}]
+  def shut(sorted, next) do
+    linked = next |> Map.values() |> List.flatten()
+
+    for {rel, d} <- sorted,
+        reopens?(d, linked),
+        {k, c} <- Enum.sort(d["choices"]),
+        shuts?(d, c),
+        do: {rel, k, d}
+  end
+
+  defp shuts?(d, c),
+    do:
+      !c["then"] && !c["check"] && !c["patrol"] &&
+        self_gates(%{"policy" => d["policy"], "steps" => c["steps"] || []}) != []
+
+  defp reopens?(d, linked),
+    do:
+      d["policy"] && !d["quest"] && !d["riddle"] && map_size(d["choices"]) > 1 &&
+        d["key"] not in linked
+
   # The lowered `once`: the policy's condition (alone or under `all`) on a fact its steps last set
   # to a value the condition rules out: `not` around `equals v`, or `equals w` with w other than v.
   @doc "Whether a choice's own steps hide it for good (the lowered `once`)."
