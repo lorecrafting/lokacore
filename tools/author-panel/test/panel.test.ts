@@ -2,6 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
+// size: allow 540, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
