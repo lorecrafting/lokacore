@@ -11,6 +11,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: engine follow-ups (loka-vduxr.35, loka-vduxr.78, loka-wfrgk.51, loka-kgd.220)](2026-11-06-engine-followups-review.md): **CHANGES REQUIRED**
+- [Review: editor nit batch B2, story list, Flow and picker nits](2026-11-06-editor-nits-b2-review.md): **APPROVE WITH NOTES**
+- [Review: editor nit batch B, cards, lint and content-report nits](2026-11-06-editor-nits-b-review.md): **CHANGES REQUIRED**
 - [Review: Editor nit batch A, map, shell and Book death-page fixes (PR #677)](2026-11-06-editor-nits-a-review.md): **CHANGES REQUIRED**
 - [Review: editor world picker and New world (loka-vduxr.65)](2026-11-05-world-picker-review.md): **APPROVE WITH NOTES**
 - [Review: Story map S2, the List view and Trace in the map slot (PR #646, loka-wfrgk.18.2)](2026-11-05-story-map-s2-review.md): **APPROVE WITH NOTES**
