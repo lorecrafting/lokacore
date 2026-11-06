@@ -46,14 +46,14 @@ function useMeasured(story: Story, l: Layout, open: string[], reveal?: string) {
   const f = useMemo(() => {
     const start = performance.now();
     const f = layout(story, st);
-    performance.measure('flow:layout', { start });
+    (performance.clearMeasures('flow:layout'), performance.measure('flow:layout', { start }));
     return f;
   }, [story, JSON.stringify(st)]); // eslint-disable-line react-hooks/exhaustive-deps
   const start = performance.now();
   const first = useRef(true);
   const [ms, setMs] = useState<{ ms: number; budget: number }>();
   useLayoutEffect(() => {
-    const done = performance.measure('flow:commit', { start });
+    const done = (performance.clearMeasures('flow:commit'), performance.measure('flow:commit', { start }));
     const fetch = first.current ? (performance.getEntriesByName('flow:fetch').at(-1)?.duration ?? 0) : 0;
     const laid = performance.getEntriesByName('flow:layout').at(-1)?.duration ?? 0;
     setMs({ ms: Math.round(fetch + laid + done.duration), budget: first.current ? BUDGET.flowOpen : BUDGET.flowUpdate });

@@ -99,8 +99,9 @@ export function step(s: Story, f: Flow, id: string, k: string, shift = false): s
   const ofPart = (p?: Part) => p && top(f.columns.findIndex((c) => c.part === p.id));
   const partAt = f.parts.findIndex((p) => p.id === f.columns[from.col].part);
   if (k.startsWith('Arrow')) return nearest(drawn.map(room), room(from), k)?.key;
-  if (k === 'Home') return top(0);
-  if (k === 'End') return top(f.columns.length - 1);
+  const cols = drawn.map((c) => c.col);
+  if (k === 'Home') return top(Math.min(...cols));
+  if (k === 'End') return top(Math.max(...cols));
   if (k === 'PageUp') return ofPart(f.parts[partAt - 1]);
   if (k === 'PageDown') return ofPart(f.parts[partAt + 1]);
   const out = k === 'Enter' && shift && first(s.graph.edges.filter((e) => e.from === id), 'to');

@@ -166,6 +166,23 @@ test('keyboard: Tab in, Right twice, Shift-Enter', () => {
   assert.equal(read.step(s, fl, two, 'Enter'), undefined); // plain Enter selects, it does not move
 });
 
+// Breaks: Home or End aims at an empty first or last column and goes nowhere.
+test('Home and End skip empty beats at either end', () => {
+  const empty = (n: number) => ({ part: 0, n, title: 'Empty', status: 'built', nodes: [] });
+  const s = model([d1, d2], [], {
+    ...outline!,
+    beats: [
+      empty(1),
+      { ...outline!.beats[0]!, n: 2, nodes: [d1] },
+      { ...outline!.beats[1]!, n: 3, nodes: [d2] },
+      empty(4),
+    ],
+  });
+  const fl = layout(s, OPEN);
+  assert.equal(read.step(s, fl, d2, 'Home'), d1);
+  assert.equal(read.step(s, fl, d1, 'End'), d2);
+});
+
 // Breaks: a chip's name drops or swaps its edge counts.
 test("a chip's name ends with its edge counts", () => {
   const fl = layout(planted, OPEN);
