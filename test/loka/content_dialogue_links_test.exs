@@ -1,4 +1,4 @@
-# size: allow 547, every whole-cartridge dialogue link check has its case here
+# size: allow 572, every whole-cartridge dialogue link check has its case here
 defmodule Loka.ContentDialogueLinksTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/persuade_sampler")}
@@ -462,6 +462,31 @@ defmodule Loka.ContentDialogueLinksTest do
     assert entry_findings([d("a_x", "a"), d("b", "a"), d("c", "a")]) == [guess("a_x")]
     assert entry_findings([d("a_x", "a", [], %{"name" => "n"}), d("b", "a")]) == [guess("a_x")]
     assert entry_findings([d("a_x", "a", ["a_x"])]) == []
+  end
+
+  # Breaks: an answer that shuts its own hub not warned, or warned when a `then`, `check` or
+  # `patrol` ends the talk, another dialogue links in, the hub is a quest or riddle or has one choice, or
+  # the answer leaves the policy true. The reopen itself: dialogue_branching.test.ts.
+  test "HUB_SHUT names the answer that fails its own hub's policy" do
+    shut = %{"op" => "fact.assign", "fact" => "flag", "value" => true}
+    p = %{"policy" => %{"op" => "fact_compare", "fact" => "flag", "equals" => false}}
+    hub = fn a, z -> d("hub", "a", [], Map.put(p, "choices", %{"a" => a, "z" => z})) end
+    shuts = %{"steps" => [shut]}
+
+    found = fn all ->
+      for {_, "HUB_SHUT", path, _} <- entry_findings(all), do: path
+    end
+
+    assert found.([hub.(shuts, %{})]) == ["dialogues/hub.choices.a"]
+    assert found.([hub.(Map.put(shuts, "then", "end"), %{})]) == []
+    assert found.([hub.(Map.put(shuts, "check", %{}), %{})]) == []
+    assert found.([hub.(Map.put(shuts, "patrol", %{}), %{})]) == []
+    assert found.([hub.(%{"steps" => [%{shut | "value" => false}]}, %{})]) == []
+    assert found.([hub.(shuts, %{}), d("in", "a", ["hub"])]) == []
+    {rel, quest} = hub.(shuts, %{})
+    assert found.([{rel, Map.put(quest, "quest", %{})}]) == []
+    assert found.([{rel, Map.put(quest, "riddle", %{})}]) == []
+    assert found.([d("hub", "a", [], Map.put(p, "choices", %{"a" => shuts}))]) == []
   end
 
   # Breaks: the marker still warned as a guess, a second marker or a keyword marker compiled, a

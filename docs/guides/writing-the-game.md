@@ -226,7 +226,7 @@ What you can rely on when dialogues link with `then` (JSON dialogues today):
 
 - Put `"entry": true` on the dialogue Talk should open, and it opens there, whatever else leads to
   it. A person takes one; their other dialogues stop opening, except keyword ones. Without a marker Talk infers, as below, and the
-  compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess; when which one opens turns on a `when:`, it names each it can open, up to the first that always does.
+  compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess; when which one opens turns on a `when:`, it names each it can open, up to the first that always does, and on to what those lead to when none always does.
   A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
   no marker when each but the last by key has a `when:`.
 - A person's default Talk, when a dialogue's condition fails, passes on to what that dialogue leads
