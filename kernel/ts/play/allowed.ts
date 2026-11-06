@@ -46,6 +46,14 @@ const OWNERS: Record<string, string> = {
   'populations.hunts': 'fact',
   'actions.policy': 'policy', // its least `all` (resolve.ex:415)
   'reactions.when': 'policy',
+  'barriers.opens_when': 'policy',
+  'dialogues.policy': 'policy',
+  'populations.birth_when': 'policy',
+  'populations.wander_when': 'policy',
+  // emote@1 owns every room's, NPC's or item's ambient (emotes.ex:3-4, :25)
+  'npcs.ambient': 'emote',
+  'items.ambient': 'emote',
+  'rooms.ambient': 'emote',
 };
 
 // Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).

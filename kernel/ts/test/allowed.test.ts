@@ -69,3 +69,19 @@ test('a field waits for the field it needs; a seeded one carries every key the c
     pack_withdrew: t,
   });
 });
+
+// Break: a policy field or an ambient offered on a cartridge that does not lock policy or emote
+// (resolve.ex:415; emotes.ex:3-4, :25), which the compiler refuses as UNDECLARED_CAPABILITY.
+test('a policy field waits for policy and an ambient for emote', () => {
+  const rows = [
+    ['barriers', 'opens_when', 'policy'],
+    ['dialogues', 'policy', 'policy'],
+    ['populations', 'birth_when', 'policy'],
+    ['populations', 'wander_when', 'policy'],
+    ['npcs', 'ambient', 'emote'],
+    ['items', 'ambient', 'emote'],
+    ['rooms', 'ambient', 'emote'],
+  ];
+  const offered = (caps: object) => rows.filter(([k, f]) => allowed(k, [f], caps).length).length;
+  assert.deepEqual([offered({}), offered({ policy: 1, emote: 1 })], [0, rows.length]);
+});

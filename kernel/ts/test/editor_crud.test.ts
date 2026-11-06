@@ -18,7 +18,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
-import { added, definitionOf, diff } from '../play/card.ts';
+import { added, allowed, definitionOf, diff } from '../play/card.ts';
 import { compiled } from '../play/compiled.ts';
 import { placed, REPO, SCHEMAS } from '../play/guard.ts';
 import { writer } from '../play/write.ts';
@@ -44,40 +44,13 @@ const GAPS: Record<string, string> = {
   'treatment:reverie create': 'loka-wfrgk.86',
   'treatment:reverie delete': 'loka-wfrgk.86',
   // the add menu's least value (card.ts added) is one the compiler refuses
-  'items.edible edit': 'loka-wfrgk.62',
   'items.equip edit': 'loka-wfrgk.61',
   'items.block_chance edit': 'loka-wfrgk.84',
   'items.capacity edit': 'loka-wfrgk.84',
-  'items.intended_level edit': 'loka-wfrgk.84',
-  'liquids.amount edit': 'loka-wfrgk.84',
-  'npcs.ambient edit': 'loka-wfrgk.84',
-  'npcs.attack edit': 'loka-wfrgk.84',
-  'populations.floor edit': 'loka-wfrgk.84',
-  'populations.hunts edit': 'loka-wfrgk.84',
-  'populations.pack edit': 'loka-wfrgk.84',
-  'populations.sight edit': 'loka-wfrgk.84',
-  'populations.trail edit': 'loka-wfrgk.84',
   'quests.offer edit': 'loka-wfrgk.84',
-  'quests.repeatable edit': 'loka-wfrgk.84',
-  'skills.hidden edit': 'loka-wfrgk.84',
-  'skills.ranks edit': 'loka-wfrgk.84',
-  // the add menu offers a field whose capability the cartridge does not lock
-  'items.readable edit': 'loka-wfrgk.85',
-  'rooms.dark edit': 'loka-wfrgk.85',
-  'rooms.dark_description edit': 'loka-wfrgk.85',
-  // the same, on a fresh cartridge: the field needs a capability its kind's /new does not lock (policy)
-  'actions.policy edit': 'loka-wfrgk.85',
-  'barriers.opens_when edit': 'loka-wfrgk.85',
-  'dialogues.policy edit': 'loka-wfrgk.85',
-  'populations.birth_when edit': 'loka-wfrgk.85',
-  'populations.wander_when edit': 'loka-wfrgk.85',
-  'reactions.when edit': 'loka-wfrgk.85',
-  'items.ambient edit': 'loka-wfrgk.85', // emote
-  'rooms.ambient edit': 'loka-wfrgk.85', // emote
   // /new wrote a set of files that name each other (or a template only the deleted one names)
   'transports delete': 'loka-wfrgk.87',
   'services delete': 'loka-wfrgk.87',
-  'populations delete': 'loka-wfrgk.87',
   'npcs delete': 'loka-wfrgk.87', // still named by the services and transports sets
   'resources delete': 'loka-wfrgk.87', // still named by the services and transports sets
   'items delete': 'loka-wfrgk.87', // still named by the quest a cutscene's /new writes
@@ -209,6 +182,14 @@ test('every field a card draws takes its add-menu value through /change and comp
         .map((r) => r.slice(k.length + 1))) {
         const gap = GAPS[`${k}.${f} edit`];
         const { doc, was } = await open(file);
+        // the card's menu (Entity.tsx, Action.tsx: the whole cartridge.json as its world)
+        const cart = JSON.parse(read('cartridge.json'));
+        const caps = cart.requires?.capabilities ?? {};
+        if (!allowed(k, [f], caps, doc, k === 'actions' ? cart : cart.world).length) {
+          if (gap)
+            reds.push(`${k}.${f} edit: not offered now, stale gap: drop its GAPS row (${gap})`);
+          continue;
+        }
         const edited = added(doc, f, defs, definitionOf(defs, k, doc));
         if (!edited) continue; // present, or the author picks it (a string, an enum, a key)
         const r = await post('/change', { file, was, ops: diff(doc, edited) });
