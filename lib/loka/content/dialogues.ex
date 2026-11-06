@@ -1,4 +1,4 @@
-# size: allow 440, scene-triggered chapter point refs join dialogue trigger checks
+# size: allow 443, scene-triggered chapter point refs join dialogue trigger checks
 defmodule Loka.Content.Dialogues do
   @moduledoc "Compiled dialogue roles, consequences, riddle and chapter trigger checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -40,7 +40,10 @@ defmodule Loka.Content.Dialogues do
   defp wide(defs, settings, ctx),
     do:
       Loka.Content.DialogueLinks.loops(all(defs)) ++
-        Loka.Content.DialogueLinks.entry_checks(all(defs)) ++
+        Loka.Content.DialogueLinks.entry_checks(
+          all(defs),
+          &Loka.Content.Skills.hidden?(&1, ctx.m, ctx.defs)
+        ) ++
         Loka.Content.Keywords.check(defs, ctx.events) ++
         story_points(defs, ctx) ++ chapters(Map.get(settings, "chapters", []), ctx)
 
