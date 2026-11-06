@@ -31,7 +31,7 @@ export type MapProps = {
   selected?: string; // the selected definition's ref
   pick: (s: Selection) => void;
   go: (key: string) => void;
-  open: (key: string) => void;
+  open: (ref: string) => void;
   segment: React.ReactNode;
 };
 

@@ -581,6 +581,18 @@ test('Cmd-E asks to open the selected card’s file', async () => {
   await page.close();
 });
 
+// Breaks (App.tsx open, loka-wfrgk.69): a story row's Alt-click (the Flow and Map open share it) asks /open
+// with only a key, so the watcher, finding no source line for the key, opens nothing.
+test('Alt-click on a story row asks to open its file', async () => {
+  const page = await open({ ...QUEST, map: 'story' });
+  const sent: { file?: string }[] = [];
+  await page.route('**/__author/open', (r) => (sent.push(r.request().postDataJSON()), r.fulfill({ body: '{}' })));
+  await page.getByRole('treeitem', { name: 'barter, action', exact: true }).click({ modifiers: ['Alt'], timeout: boot });
+  for (let i = 0; i < 50 && !sent.length; i++) await page.waitForTimeout(100);
+  assert.deepEqual(sent.map((s) => s.file), ['actions/barter.json']);
+  await page.close();
+});
+
 // Breaks: the checkpoint name's refusal shows for a good name, or not for a bad one (sections.tsx).
 test('a bad checkpoint name is refused, a good one is not', async () => {
   const page = await open({ ...QUEST, leftOpen: true, tab: 'project' });

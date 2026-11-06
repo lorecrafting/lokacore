@@ -113,7 +113,7 @@ const cardAct = (p: P, g: Graph, ref: string): CardAct => {
   const go = (k: string, shift = false) => () => g.focusChip(step(p.story, g.f, ref, k, shift));
   const fact = fromRef(ref)?.kind === 'fact';
   return {
-    open: () => p.open(key(ref)),
+    open: () => p.open(ref),
     inbound: go('Backspace'),
     outbound: go('Enter', true),
     expand: () => g.setMark({ ref, hops: (g.mark?.ref === ref ? g.mark.hops : 1) + 1 }),

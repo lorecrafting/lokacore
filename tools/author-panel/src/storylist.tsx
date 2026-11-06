@@ -54,7 +54,7 @@ type Props = {
   set: SetLayout;
   segment: React.ReactNode;
   pick: (s: Selection) => void;
-  open: (key: string) => void;
+  open: (ref: string) => void;
 };
 
 function NodeCells({ row, tab, trace }: { row: L.Row; tab: boolean; trace: () => void }) {
@@ -141,7 +141,7 @@ function Cells({ row, a, tab }: { row: L.Row; a: Act; tab: boolean }) {
 // A row's click: a node selects (Alt opens its source), a part or beat opens or shuts.
 const click = (a: Act, row: L.Row, alt: boolean) => {
   const sel = row.ref ? fromRef(row.ref) : undefined;
-  if (sel && alt) return a.open(sel.key);
+  if (sel && alt) return a.open(row.ref!);
   if (sel) return (a.put({ ...a.st, focus: row.id }), a.pick(sel));
   if (row.open !== undefined) a.put({ ...L.toggle(a.st, row.id), focus: row.id });
 };
