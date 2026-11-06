@@ -222,7 +222,7 @@ test('knowledge at a beat: knows, may know (one choice of two), not yet', () => 
     graph: {
       nodes,
       edges: [
-        set(d2, fa, '.choices.yes.steps[0].fact'), // one choice of two
+        set(d2, fa, '.choices["Yes"].steps[0].fact'), // one choice of two, a key outside [a-z0-9_]
         set(d2, fb, '.choices.yes.steps[0].fact'),
         set(d2, fb, '.choices.no.steps[1].fact'), // every choice
         set(d2, fc, '.on_end.assign[0].fact'), // no choice scopes it
@@ -245,6 +245,7 @@ test('knowledge at a beat: knows, may know (one choice of two), not yet', () => 
   };
   assert.deepEqual(knowledge(s, 1), { knows: [fb, fc, t], may: [fa], not: [fd] });
   assert.deepEqual(knowledge(s, 2), { knows: [fa, fb, fc, fd, t], may: [], not: [] });
+  assert.deepEqual(knowledge(s, 9), { knows: [], may: [], not: [] }); // a beat gone from the outline
 });
 
 // Break: Pacing counts a node bound twice in a part twice, marks a part at half the median thin,

@@ -1,15 +1,15 @@
 // Knowledge and Pacing (docs/design/editor-map-and-story-rulings.md S2; gui-editor-design 5e, 6): what a
 // beat can know and each part's written mass. No React here: tested from kernel/ts/test/author_story.test.ts.
-import type { Story } from './author.ts';
-import { outlineOf, type Edge } from './storylist.ts';
+import { outlineOf, type Edge, type Story } from './storylist.ts';
 
 export type Known = { knows: string[]; may: string[]; not: string[] };
-const choiceOf = (e: Edge) => /^\.choices\.([^.[]+)/.exec(e.path)?.[1];
+const choiceOf = (e: Edge) => /^\.choices(?:\.([^.[]+)|\["([^"]+)"\])/.exec(e.path)?.slice(1).join('');
 /** Knowledge at beat `n` (design 5e): the facts set and topics granted by nodes bound to beats up to
  * it in outline order; `may` when one choice among several sets it, `not` when only a later beat does. */
 export function knowledge(s: Story, n: number): Known {
   const beats = outlineOf(s)?.beats ?? [];
   const upto = beats.findIndex((b) => b.n === n);
+  if (upto < 0) return { knows: [], may: [], not: [] }; // a beat gone from the outline knows nothing
   const first = new Map<string, number>(); // a node's first beat, by outline index
   beats.forEach((b, i) => b.nodes.forEach((r) => first.has(r) || first.set(r, i)));
   // ponytail: a set behind a dashed read and a readable item's topic are not told apart (design 5e); add when the outline has one

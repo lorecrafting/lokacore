@@ -16,7 +16,6 @@ import {
   Tag,
   TriangleAlert,
   User,
-  X,
   Zap,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
