@@ -96,7 +96,9 @@ test('at a 280 px inspector the quest card fits its width', async () => {
 test('a quest and a dialogue open their cards; a link to no dialogue is refused', async () => {
   const quest = await open(QUEST);
   await quest.locator('[aria-label="quest card"]').waitFor({ timeout: boot });
-  const book = quest.locator('[aria-label="quest card"] dl').getByRole('button', { name: 'Edit in Book' });
+  const book = quest
+    .locator('[aria-label="quest card"] dl')
+    .getByRole('button', { name: 'Edit in Book' });
   assert.equal(await book.count(), 1); // its own name opens in the Book, never a text input
   await quest.close();
   const bess = await open({ right: 280, selection: { kind: 'dialogue', key: 'bess_talk' } });
@@ -112,6 +114,13 @@ test('a quest and a dialogue open their cards; a link to no dialogue is refused'
     'lean then',
     'lean then_failed',
   ]);
+  // the tree, not the generic form: one folded block per choice; its key is never renamed
+  const tree = await bess.locator('[aria-label="choices"] summary').allTextContents();
+  assert.deepEqual(tree, ['praise', 'insult', 'boast', 'lean']);
+  const boast = bess.locator('[aria-label="choice boast"]');
+  await boast.locator('summary').click();
+  await boast.getByRole('button', { name: 'Rename' }).click();
+  await boast.getByText("a choice's key is its id").waitFor({ timeout: boot });
   await bess.close();
   const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
   const link = page.getByLabel('bounty then');

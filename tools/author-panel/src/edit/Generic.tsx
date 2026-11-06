@@ -3,7 +3,7 @@
 // POST /change (kernel/ts/play/write.ts), Undo posts /undo, the compiler's refusals show at their field.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Form from '@rjsf/core';
-import type { RJSFSchema, UiSchema } from '@rjsf/utils';
+import type { RegistryFieldsType, RJSFSchema, UiSchema } from '@rjsf/utils';
 import type { Op } from '../../../../kernel/ts/play/edit_model.ts';
 import { customizeValidator } from '@rjsf/validator-ajv8';
 import { Ajv2020 } from 'ajv/dist/2020.js';
@@ -80,7 +80,13 @@ export function useCard(rel: string, diag: Diag) {
 }
 
 /** The registry's fields this definition lacks: choosing one reveals its empty field. */
-export function AddMenu({ fields: menu, reveal }: { fields: string[]; reveal: (f: string) => void }) {
+export function AddMenu({
+  fields: menu,
+  reveal,
+}: {
+  fields: string[];
+  reveal: (f: string) => void;
+}) {
   if (!menu.length) return null;
   return (
     <select
@@ -116,7 +122,14 @@ export function Header({ rel, diag, undo }: { rel: string; diag: Diag; undo?: ()
 }
 
 type Card = ReturnType<typeof useCard>;
-type FormProps = { rel: string; card: Card; context: Context; diag: Diag; ui: UiSchema; fields?: typeof fields };
+type FormProps = {
+  rel: string;
+  card: Card;
+  context: Context;
+  diag: Diag;
+  ui: UiSchema;
+  fields?: RegistryFieldsType;
+};
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {

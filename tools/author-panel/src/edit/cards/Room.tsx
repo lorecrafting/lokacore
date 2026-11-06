@@ -1,7 +1,8 @@
 // The Room card (docs/rnd/gui-editor-design-2026-11-04.md §6, E6a): the room's words open in the
 // Book, its exits take the map's edits, its mechanics are added (here or from the Book) and removed;
 // every write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, type ReactNode, useEffect, useState } from 'react';
+import type { FieldProps } from '@rjsf/utils';
 import {
   addable,
   added,
@@ -17,13 +18,13 @@ import type { useDiagnostics } from '../../author.ts';
 import { addHere } from '../../book.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { mapCommand } from '../../mapwire.ts';
-import type { Context } from '../fields.tsx';
+import { fields, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 
 const OWN = ['name', 'description', 'exits']; // drawn above the form
-const HIDE = { 'ui:field': 'Hidden', 'ui:widget': 'hidden' };
+export const HIDE = { 'ui:field': 'Hidden', 'ui:widget': 'hidden' };
 const EXIT_EDITS = [
   ['map-unlink', 'Unlink'],
   ['map-one-way', 'One-way'],
@@ -154,12 +155,12 @@ export function RoomForm({
   diag,
   defs,
   own = OWN,
-  nested = {},
+  extra = {},
 }: Omit<Props, 'offer'> & {
   card: Card;
   defs: Record<string, never>;
   own?: string[];
-  nested?: Record<string, string[]>; // a map's entry fields drawn above: `{choices: ['then']}`
+  extra?: Record<string, (p: FieldProps) => ReactNode>; // a field the card draws itself, by its name
 }) {
   const saved = card.saved!;
   const ui = hidden(
@@ -170,11 +171,17 @@ export function RoomForm({
     card.revealed,
   );
   for (const f of own) ui[f] = HIDE;
-  for (const [m, fs] of Object.entries(nested)) {
-    const entry = ((ui[m] ??= {}).additionalProperties ??= {});
-    for (const f of fs) entry[f] = HIDE;
-  }
-  return <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />;
+  for (const f of Object.keys(extra)) ui[f] = { 'ui:field': f };
+  return (
+    <CardForm
+      rel={rel}
+      card={card}
+      context={context}
+      diag={diag}
+      ui={ui}
+      fields={{ ...fields, ...extra }}
+    />
+  );
 }
 
 /** cartridge.json (its `requires.capabilities` and `world`), read again when it changes. */

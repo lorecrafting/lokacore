@@ -67,7 +67,7 @@ const solo = (doc: Obj, by: string, not: string) =>
 const run = (doc: Obj) => Object.hasOwn(doc, 'patrol') || Object.hasOwn(doc, 'expedition');
 const choicesOf = (doc: Obj) => Object.values((doc.choices ?? {}) as Record<string, Obj>);
 // skills.ex:166-170 teaches?: a choice's top-level step acquires a hidden skill (`hidden` are its keys)
-const teaches = (doc: Obj, hidden: string[]) =>
+export const teaches = (doc: Obj, hidden: string[]) =>
   choicesOf(doc).some((c) =>
     ((c.steps ?? []) as Obj[]).some((s) => hidden.includes(s.skill as string)),
   );

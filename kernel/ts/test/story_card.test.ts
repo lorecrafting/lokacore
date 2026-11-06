@@ -5,7 +5,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { Ajv2020 } from 'ajv/dist/2020.js';
-import { added, allowed, awaits, pickKind } from '../play/card.ts';
+import { added, allowed, awaits, minimal, pickKind } from '../play/card.ts';
+import { choiceMenu, refuseChoices, refuseRemove } from '../play/choice.ts';
 import { refuseLink } from '../play/link.ts';
 import { hiddenSkills, unlinkable } from '../play/story_counts.ts';
 
@@ -89,6 +90,20 @@ test("a quest's and a dialogue's added fields are the least valid ones, their wo
       if (next) assert.ok(validate(next), `${f}: ${JSON.stringify(validate.errors)}`);
     }
   }
+  // the choice tree's adds (Choices.tsx): a new choice, then each field the folded block adds;
+  // all compiled into the showcase's bess_talk
+  const choice = minimal(defs.DialogueChoice, defs);
+  assert.deepEqual(choice, { label: tilde, narration: tilde });
+  const policy = { op: 'all', items: [] };
+  const fields = { once: true, asked: true, policy, steps: [], availability: {} };
+  const take = (f: string) => added(choice, f, defs, 'DialogueChoice')!;
+  assert.deepEqual(Object.fromEntries(Object.keys(fields).map((f) => [f, take(f)[f]])), fields);
+  const dialogues = new Ajv2020({ strict: false }).compile(served('dialogues'));
+  for (const f of Object.keys(fields))
+    assert.ok(
+      dialogues({ ...dialogue, choices: { a: take(f) } }),
+      `${f}: ${JSON.stringify(dialogues.errors)}`,
+    );
   assert.ok(awaits('source.QuestDefinition', 'offer'));
   assert.ok(!awaits('source.QuestDefinition', 'journal'));
   const target = { kind: 'npc', npc: 'bess' }; // the pick: compiled into the showcase's carry_letter
@@ -208,4 +223,66 @@ test('the hidden skills and the dialogues no then enters, by key', () => {
   };
   assert.deepEqual(hiddenSkills(c), ['joinery']);
   assert.deepEqual(unlinkable(c), { a: 'keyword', b: 'quest', c: 'riddle' });
+});
+
+// Break: the choice tree writes a dialogue the compiler refuses, or refuses one it accepts: each
+// pair beside its cite (dialogues.ex, dialogue_links.ex, dialogue_asked.ex, skills.ex), refused one
+// way and accepted with either side gone.
+test("a dialogue's choices are refused as the compiler refuses them, and only then", () => {
+  const one = (c: object, d: object = {}) => refuseChoices({ ...d, choices: { a: c } });
+  assert.equal(
+    one({ accept: 'q' }, { quest: 'q' }),
+    "a: accept would resolve this dialogue's own quest",
+  ); // dialogues.ex:367
+  assert.equal(one({ accept: 'q' }), undefined);
+  assert.equal(one({}, { quest: 'q' }), undefined);
+  assert.equal(one({ accept: 'q', hand_over: {} }), 'a: accept and hand_over do not go together'); // :368
+  assert.equal(one({ receive: {}, hand_over: {} }), 'a: receive and hand_over do not go together'); // :386
+  assert.equal(one({ receive: {} }), undefined);
+  assert.equal(one({ hand_over: {} }), undefined);
+  assert.equal(one({ then_failed: 'x' }), 'a: then_failed needs a check'); // dialogue_links.ex:45
+  assert.equal(one({ then_failed: 'x', check: {} }), undefined);
+  assert.equal(one({ patrol: {}, then: 'x' }), 'a: a patrol ends the talk: no then'); // :393
+  assert.equal(
+    one({ patrol: {}, then_failed: 'x', check: {} }),
+    'a: a patrol ends the talk: no then',
+  );
+  assert.equal(one({ patrol: {}, then: 'end' }), undefined);
+  assert.equal(one({ then: 'x' }), undefined);
+  const riddle = { riddle: { choice_id: 'a' } };
+  assert.equal(one({ asked: true }, riddle), "a: the riddle's answer is never asked"); // dialogue_asked.ex:32
+  assert.equal(one({ asked: true }, { riddle: { choice_id: 'b' } }), undefined);
+  assert.equal(one({}, riddle), undefined);
+  const teach = { steps: [{ op: 'skill.acquire', skill: 'joinery' }] };
+  assert.equal(
+    refuseChoices({ name: 'n', choices: { a: teach } }, ['joinery']),
+    'a dialogue with a name teaches no hidden skill',
+  ); // skills.ex:157-158
+  assert.equal(
+    refuseChoices({ riddle: {}, choices: { a: teach } }, ['joinery']),
+    'a dialogue with a riddle teaches no hidden skill',
+  );
+  assert.equal(refuseChoices({ name: 'n', choices: { a: teach } }, ['carving']), undefined);
+  assert.equal(refuseChoices({ choices: { a: teach } }, ['joinery']), undefined);
+});
+
+// Break: a choice's add menu offers a field the compiler refuses beside the dialogue's other parts,
+// hides one it accepts, re-offers one present, or offers `order` (the compiler's scene mark:
+// scene_merge.ex:56-57); or the last choice or the riddle's answer is removed (dialogues.ex:315, :288).
+test('a choice offers only the fields it can take, and keeps the ones the dialogue needs', () => {
+  const menu = ['accept', 'hand_over', 'receive', 'then_failed', 'asked', 'once', 'order', 'steps'];
+  const doc = { quest: 'q', riddle: { choice_id: 'b' }, choices: { a: { receive: {} }, b: {} } };
+  assert.deepEqual(choiceMenu(doc, 'a', menu), ['asked', 'once', 'steps']);
+  assert.deepEqual(choiceMenu(doc, 'b', menu), ['hand_over', 'receive', 'once', 'steps']);
+  assert.deepEqual(choiceMenu({ choices: { a: {} } }, 'a', menu), [
+    'accept',
+    'hand_over',
+    'receive',
+    'asked',
+    'once',
+    'steps',
+  ]);
+  assert.equal(refuseRemove(doc, 'b'), "the riddle's answer is b");
+  assert.equal(refuseRemove(doc, 'a'), undefined);
+  assert.equal(refuseRemove({ choices: { a: {} } }, 'a'), 'a dialogue keeps one choice at least');
 });
