@@ -945,8 +945,10 @@ build. The author tools below are reachable only in that bundle (a production ex
   `/edit {file, line, was, words}` replaces the words of one line (a JSON string literal, or a
   scene's `* ` line; a key line, a choice label and words with a newline or tab are refused);
   `/delete {file, was}` (a room's `layout.json` row goes with it); `/move {file, was, area}`;
-  `/new {kind, name, from?, area?}` runs `mix loka.new` (`area` its `--area`; refused while any
-  symlink is in the tree) and journals the files it wrote, from a snapshot diff; `/undo {id}`.
+  `/new {kind, name, from?, area?, extends?}` runs `mix loka.new` (`area` its `--area`, `extends`
+  its `--extends`; refused while any symlink is in the tree) and journals the files it wrote, from
+  a snapshot diff; `/undo {id}`. `GET /templates` lists the abstract NPC and item sources
+  (`dir`, `key`), which the compile drops.
   `GET /world` lists the sibling cartridge folders (`name`, the `cartridge.json` title) and the
   `current` one; `POST /world {name, new?, from?}` switches to a listed sibling, or with `new`
   first runs `mix loka.new cartridge` (`from` its `--from`, a listed sibling) for a free folder
