@@ -360,7 +360,7 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   await page.waitForTimeout(1500);
   assert.equal(await page.getByText('Changed outside').count(), 0);
   assert.ok(await page.getByRole('button', { name: 'Undo', exact: true }).isEnabled());
-  // Break: no sign while the fights run, and a retry keeps the last answer (loka-wfrgk.79).
+  // Break: no sign while the fights run, a click then starts another, a retry keeps the last answer (loka-wfrgk.79).
   await page.route('**/__author/numbers', async (r) => {
     await new Promise((d) => setTimeout(d, 800));
     await r.fulfill({ json: { fights: { why: 'no world' } } });
@@ -369,6 +369,7 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   for (const run of [1, 2]) {
     await combat.getByRole('button', { name: 'Run fights' }).click();
     await combat.getByText('running the fights').waitFor({ timeout: 500 });
+    assert.ok(await combat.getByRole('button', { name: 'Run fights' }).isDisabled(), `run ${run}: one at a time`);
     assert.equal(await combat.getByText('no world').count(), 0, `run ${run}`);
     await combat.getByText('no world').waitFor();
   }
@@ -584,76 +585,6 @@ test('level 0 opens whole, zooms out no further, and only a pill marks the selec
   await page.close();
 });
 
-// Last: it switches the world. Breaks: a `.scene` dialogue routed to no card or the generic one, a
-// value line without its picker or its verb's keys, a words line without its Book edit, an unknown
-// key or the line's own value sent, Enter not sending, a refusal or a write's Undo not shown, or a
-// modal scene's treatment shown as none, or then: offering an unlinkable dialogue (Scene.tsx's
-// context.unlinkable dropped).
-test('a .scene dialogue opens its text card: a picker per value line, words to the Book', async () => {
-  appendFileSync(join(dir, 'identity_sampler/scenes/stranger_talk.scene'), '  then: end\n'); // line 7
-  const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
-  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
-  const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
-  const npc = page.getByLabel('line 1 npc');
-  assert.equal(await npc.inputValue(), 'stranger');
-  const card = page.getByLabel('scene card');
-  assert.equal(await card.getByRole('button', { name: 'Edit in Book' }).count(), 2); // lines 3, 6
-  const sent: string[] = [];
-  page.on('request', (r) => void (r.url().includes('/set') && sent.push(r.url())));
-  await npc.fill('nobody');
-  await npc.press('Enter');
-  await card.getByText('no npc nobody').waitFor();
-  await npc.blur();
-  assert.deepEqual(sent, []); // refused here, never sent
-  const keys = page.locator('#scene-1-keys option');
-  assert.deepEqual(await keys.evaluateAll((os) => os.map((o) => o.getAttribute('value'))), [
-    'guard',
-    'stranger',
-  ]); // npc: an NPC key, never a dialogue or end
-  assert.equal(await card.locator('li label > span').first().textContent(), 'npc:');
-  await npc.fill('stranger');
-  await npc.blur(); // the line's own value: nothing to send
-  // /set answered here, never by the repo's file: first a refusal, then a write
-  const posted: unknown[] = [];
-  const answers = [
-    { status: 400, json: 'refused by the server' },
-    { status: 200, json: { id: 'u1' } },
-  ];
-  await page.route('**/__author/set', (r) => {
-    posted.push(r.request().postDataJSON());
-    return r.fulfill(answers.shift()!);
-  });
-  const undo = card.getByRole('button', { name: 'Undo' });
-  await npc.fill('guard');
-  await npc.press('Enter'); // Enter sends
-  await card.getByText('refused by the server').waitFor();
-  assert.equal(await undo.isEnabled(), false);
-  await npc.focus();
-  await npc.blur();
-  await card.getByText('refused by the server').waitFor({ state: 'detached' });
-  assert.equal(await undo.isEnabled(), true); // a write's id is the card's Undo
-  const one = { file: 'scenes/stranger_talk.scene', line: 1, was: 'npc: stranger', value: 'guard' };
-  assert.deepEqual(posted, [one, one]);
-  // then: offers no dialogue the story names unlinkable (a keyword one, dialogue_links.ex:387-394)
-  await page.route('**/__author/story', async (r) => {
-    const res = await r.fetch();
-    r.fulfill({
-      response: res,
-      json: { ...(await res.json()), unlinkable: { stranger_talk: 'keyword' } },
-    });
-  });
-  await page.reload();
-  const then = page.locator('#scene-7-keys option');
-  await page.getByLabel('line 7 then').waitFor();
-  assert.deepEqual(await then.evaluateAll((os) => os.map((o) => o.getAttribute('value'))), ['end']);
-  await page.close();
-  const sampler = { method: 'POST', body: JSON.stringify({ name: 'scene_sampler' }) };
-  assert.equal((await fetch(`http://localhost:${author}/world`, sampler)).status, 200);
-  const rope = await open({ selection: { kind: 'scene', key: 'rope_reverie' } });
-  assert.equal(await rope.getByLabel('treatment').inputValue(), 'reverie'); // the file's, not none
-  await rope.close();
-});
-
 // Breaks: an edit elsewhere in a status card writes its integer `duration` as the other anyOf
 // branch's `permanent` (loka-wfrgk.75); asserted on the file on disk.
 test('editing a status keeps its integer duration', async () => {
@@ -726,4 +657,74 @@ test("a one-way exit's reverse comes back by Undo on either room's card", async 
   await page.getByRole('button', { name: 'Undo' }).click();
   await toggle(false);
   await page.close();
+});
+
+// Last: it switches the world. Breaks: a `.scene` dialogue routed to no card or the generic one, a
+// value line without its picker or its verb's keys, a words line without its Book edit, an unknown
+// key or the line's own value sent, Enter not sending, a refusal or a write's Undo not shown, or a
+// modal scene's treatment shown as none, or then: offering an unlinkable dialogue (Scene.tsx's
+// context.unlinkable dropped).
+test('a .scene dialogue opens its text card: a picker per value line, words to the Book', async () => {
+  appendFileSync(join(dir, 'identity_sampler/scenes/stranger_talk.scene'), '  then: end\n'); // line 7
+  const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
+  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
+  const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
+  const npc = page.getByLabel('line 1 npc');
+  assert.equal(await npc.inputValue(), 'stranger');
+  const card = page.getByLabel('scene card');
+  assert.equal(await card.getByRole('button', { name: 'Edit in Book' }).count(), 2); // lines 3, 6
+  const sent: string[] = [];
+  page.on('request', (r) => void (r.url().includes('/set') && sent.push(r.url())));
+  await npc.fill('nobody');
+  await npc.press('Enter');
+  await card.getByText('no npc nobody').waitFor();
+  await npc.blur();
+  assert.deepEqual(sent, []); // refused here, never sent
+  const keys = page.locator('#scene-1-keys option');
+  assert.deepEqual(await keys.evaluateAll((os) => os.map((o) => o.getAttribute('value'))), [
+    'guard',
+    'stranger',
+  ]); // npc: an NPC key, never a dialogue or end
+  assert.equal(await card.locator('li label > span').first().textContent(), 'npc:');
+  await npc.fill('stranger');
+  await npc.blur(); // the line's own value: nothing to send
+  // /set answered here, never by the repo's file: first a refusal, then a write
+  const posted: unknown[] = [];
+  const answers = [
+    { status: 400, json: 'refused by the server' },
+    { status: 200, json: { id: 'u1' } },
+  ];
+  await page.route('**/__author/set', (r) => {
+    posted.push(r.request().postDataJSON());
+    return r.fulfill(answers.shift()!);
+  });
+  const undo = card.getByRole('button', { name: 'Undo' });
+  await npc.fill('guard');
+  await npc.press('Enter'); // Enter sends
+  await card.getByText('refused by the server').waitFor();
+  assert.equal(await undo.isEnabled(), false);
+  await npc.focus();
+  await npc.blur();
+  await card.getByText('refused by the server').waitFor({ state: 'detached' });
+  assert.equal(await undo.isEnabled(), true); // a write's id is the card's Undo
+  const one = { file: 'scenes/stranger_talk.scene', line: 1, was: 'npc: stranger', value: 'guard' };
+  assert.deepEqual(posted, [one, one]);
+  // then: offers no dialogue the story names unlinkable (a keyword one, dialogue_links.ex:387-394)
+  await page.route('**/__author/story', async (r) => {
+    const res = await r.fetch();
+    r.fulfill({
+      response: res,
+      json: { ...(await res.json()), unlinkable: { stranger_talk: 'keyword' } },
+    });
+  });
+  await page.reload();
+  const then = page.locator('#scene-7-keys option');
+  await page.getByLabel('line 7 then').waitFor();
+  assert.deepEqual(await then.evaluateAll((os) => os.map((o) => o.getAttribute('value'))), ['end']);
+  await page.close();
+  const sampler = { method: 'POST', body: JSON.stringify({ name: 'scene_sampler' }) };
+  assert.equal((await fetch(`http://localhost:${author}/world`, sampler)).status, 200);
+  const rope = await open({ selection: { kind: 'scene', key: 'rope_reverie' } });
+  assert.equal(await rope.getByLabel('treatment').inputValue(), 'reverie'); // the file's, not none
+  await rope.close();
 });

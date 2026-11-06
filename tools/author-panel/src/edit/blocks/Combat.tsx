@@ -10,6 +10,7 @@ import { Button } from '../../components/ui/button.tsx';
 import type { Context } from '../fields.tsx';
 
 type Shown = ReturnType<typeof fightOf> | Error;
+const RUNNING = 'running the fights…';
 
 /** The NPC's fight rows, measured on asking (the report runs the fights: seconds, not keystrokes). */
 function Fights({ npc }: { npc: string }) {
@@ -21,8 +22,9 @@ function Fights({ npc }: { npc: string }) {
         size="xs"
         variant="outline"
         className="justify-self-start"
+        disabled={shown === RUNNING} // one run at a time: each runs every fight
         onClick={() => {
-          show('running the fights…'); // the last answer goes while the next runs (loka-wfrgk.79)
+          show(RUNNING); // the last answer goes while the next runs (loka-wfrgk.79)
           numbers()
             .then((r) => show(fightOf(r.fights, npc)))
             .catch((e: Error) => show(e));

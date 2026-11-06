@@ -1,4 +1,4 @@
-// size: allow 727, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 729, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -255,8 +255,8 @@ test('a trigger and a check are drawn and switched by their event and kind', () 
 });
 
 // Break: picking another kind of an hour (an untagged union) writes nothing, so the hour hides and a
-// later write drops it (loka-wfrgk.74); a kind that already fits is rewritten; a case list is not one
-// case then the room it falls back to, or loses the old room.
+// later write drops it (loka-wfrgk.74); a fitting kind is rewritten; a room ref or a non-hour union
+// gets an invented value; a case list is not one case then its fallback room, or loses the room.
 test('an hour switched to another kind keeps its room', () => {
   const hour = defs[
     'source.NpcDefinition'
@@ -264,7 +264,9 @@ test('an hour switched to another kind keeps its room', () => {
     (b: any) => (b.$ref ? defs.Key : b), // rjsf hands the picker its branches resolved
   );
   assert.deepEqual(start(hour, 1, 'gate', defs), { room: 'gate', walks: true });
-  assert.deepEqual(start(hour, 2, 'gate', defs), { key: 'gate' });
+  assert.equal(start(hour, 2, 'gate', defs), 'gate'); // a room ref needs its cartridge, not invented
+  const duration = defs['source.StatusDefinition'].properties.duration.anyOf;
+  assert.equal(start(duration, 1, 1800, defs), undefined); // not an hour: no room carried
   assert.deepEqual(start(hour, 3, { room: 'gate', walks: true }, defs), [{ room: 'gate' }, 'gate']);
   const list = [{ room: 'green', when: { kind: 'luck', chance: 5 } }, 'gate'];
   assert.equal(start(hour, 3, list, defs), list);

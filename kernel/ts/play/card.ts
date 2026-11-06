@@ -1,4 +1,4 @@
-// size: allow 404, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
+// size: allow 407, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -242,17 +242,20 @@ const shape = (node: unknown) => {
 const roomOf = (v: unknown): unknown =>
   Array.isArray(v) ? roomOf(v.at(-1)) : plain(v) ? (v.room ?? v.key) : v;
 
-/** Untagged branch `b`'s value, carrying the old value's room key (an hour's kinds), never empty. */
-function untagged(b: Obj, old: unknown, defs: Record<string, Obj>): unknown {
+/** An hour's (source.ex) branch `i`, carrying the old value's room key; other untagged unions: rjsf's own. */
+function untagged(branches: Obj[], i: number, old: unknown, defs: Record<string, Obj>): unknown {
   const room = roomOf(old);
-  if (room === undefined) return undefined;
+  const b = branches[i];
+  if (room === undefined || !branches.some((h) => h.title === 'cases')) return undefined;
   if (b.type === 'array') return [{ room }, room]; // one case, then the room it falls back to (Schedules ordered?)
   if (b.type !== 'object') return room;
   const props = (b.properties ?? {}) as Record<string, Obj>;
+  const at = Object.hasOwn(props, 'room') ? 'room' : 'key';
   const least = ((b.required ?? []) as string[])
-    .map((f) => [f, minimal(props[f], defs)])
-    .filter(([, v]) => v !== undefined);
-  return { ...Object.fromEntries(least), [Object.hasOwn(props, 'room') ? 'room' : 'key']: room };
+    .filter((f) => f !== at)
+    .map((f) => [f, minimal(props[f], defs)]);
+  if (least.some(([, v]) => v === undefined)) return old; // a ref's cartridge is not invented: the hour stays
+  return { ...Object.fromEntries(least), [at]: room };
 }
 
 /**
@@ -268,7 +271,7 @@ export function start(
 ): unknown {
   const k = tagOf(branches);
   if (k === undefined)
-    return branchOf(branches, old) === i ? old : untagged(branches[i], old, defs);
+    return branchOf(branches, old) === i ? old : untagged(branches, i, old, defs);
   const tag = constOf(branches[i], k);
   if (tag === undefined) return {}; // `$ref Step`: picker asks
   const from = branches[branchOf(branches, old)];
