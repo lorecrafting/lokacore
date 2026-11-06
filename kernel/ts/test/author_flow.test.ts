@@ -199,9 +199,9 @@ test('the showcase: layout under 20 ms, equal across runs, loops exactly the bac
       const t = performance.now();
       second = layout(s, OPEN);
       ms = Math.min(ms, performance.now() - t);
+      assert.deepEqual(second, first);
     }
     assert.ok(ms < 20, `${ms.toFixed(1)} ms`);
-    assert.deepEqual(second, first);
     assert.ok(first.chips.length > 20, `${first.chips.length} chips`);
     const back = first.lines.filter((l) => col(first, l.from) > col(first, l.to)).map((l) => l.id);
     assert.deepEqual([...first.loops].sort(), back.sort());
