@@ -22,6 +22,14 @@
 - vduxr.71: `'close'` also fires after `'finish'` on a normal answer. The served test (`world_picker.test.ts`, `left` = `[d]`) still passes.
 - Size allows: test files keep the escape hatch, and 550 and 600 are both under 750. panel.test shares one booted panel, so a split would need a second boot. A split would be worse.
 - Left items: wfrgk.27/.28/.33/.34 are features, wfrgk.35 needs design calls, vduxr.77 needs the designer, vduxr.70 has no repro, and kgd.218 needs a ruling. The reasons hold.
+- Map hunks:
+  - The overview disc is `fill-input` (the stroke token used for `strong`), and selection keeps `stroke-2 stroke-ring` (`mapdraw.tsx:144,155`).
+  - A refusal now clears on the next successful command (`mapwire.ts:26`), not on a recompile (wfrgk.30).
+  - `shown.rooms` is set on fetch (`App.tsx:233`), so map commands work with the map closed.
+  - A same-cell drop writes nothing (`mapedit.ts:76`).
+  - The pill, pointercancel, palette debounce, Cmd-E `fileOf` with the `openAt` file guard (`prose.ts:71`), and Refusal adoption (`left.tsx`, `sections.tsx`) all held.
+- `inbook.ts:256`: a click inside a Book line, its open field included, re-asks as before. Only an off-line click no longer arms the menu.
+- The PR mutant table ran at `e2370496c`. Since then the PR's source moved only by main merges, so the table still applies.
 - The `fresh` skip (self-review item 2) is correct. `Body.tsx:73` draws DeadPage from `screen.dead` whatever the stack holds, and Let go clears the stack.
 
 ## Mutants
@@ -33,11 +41,12 @@ The full `bin/mutate_diff.sh` was not rerun because load averaged 11.7 and the P
 | `map.ts:109` `>= 502` → `> 502` | author_map | red, `not ok 11` (backs the PR claim) |
 | `worlds.ts:45` drop `name !== FROZEN` | world_picker | red (backs the PR claim) |
 | `editing.ts:74` `'close'` → `'finish'` | world_picker | red |
+| `mapedit.ts:76` drop the same-cell `return []` | author_mapedit (baseline 19/19 green here) | red, `not ok 2` |
 | `updates.ts:117` drop `(!died \|\| before.stack.length)` | offfight_death | red |
 
 ## Findings
 
-1. **Blocker**: `mobile/app/book/updates.ts:106-118`. `died` keys on `after.died`, the edge of any death, including a death that closes a fight. When the opponent's timed round lands a fatal blow, a background state update arrives with the stack at `[{kind:'combat'}]`. `died` is true, `next` is `[]` and `before.stack.length` is 1, so the page turns on the Combat page. A probe (`mounted`, then a fight opened by `combat.hit`, then a publish of `combat.death`) gave turn 0 → 1 at head and 0 → 0 on main. This breaks :1021 and :786. No test covers it. Fix: key on the dead-page predicate `after.dead` (spirit.ts:52), not `after.died`.
+1. **Blocker**: `mobile/app/book/updates.ts:106-118`. `died` keys on `after.died`, the edge of any death, including a death that closes a fight. When the opponent's timed round lands a fatal blow, a background state update arrives with the stack at `[{kind:'combat'}]`. `died` is true, `next` is `[]` and `before.stack.length` is 1, so the page turns on the Combat page. A probe (`mounted`, then a fight opened by `combat.hit`, then a publish of `combat.death`) gave turn 0 → 1 at head and 0 → 0 on main. This breaks :1021 and :786. No test covers it. Fix: `const died = !!after.dead && after.died !== fell`, which keeps the edge. Checked locally: with it the probe reads 0 → 0 and offfight_death stays green (7/7). Repro: `mounted(view({combat: undefined}))`; publish `view({combat: <rat fight>})` with `'combat.hit'`; publish `view(SHRINE)` with `'combat.death', 'combat.hit'`. Expect the PageTurn `turn` to be unchanged.
 2. **Should-fix**: `mobile/app/book/Book.tsx:81,103-105`. A press death on an NPC or item page, where the recovery room is the death room, keeps the stack (`pagesAfter`). `next === before.stack && inline` holds, so the Book only redraws and does not turn. A probe expected `was+1` and got `was`. This breaks must-be-true 1 and 3, because updates.ts clears the stack (`died ? []`) and Book.tsx does not. Fix: mirror updates.ts:107 (dead → `[]`). The same `after.dead` key covers a receipt that opens and closes a fight with one press on the World page.
 3. **Nit**: `kernel/ts/play/worlds.ts:45`. POST `/world` `{name:'lantern_proof'}` still opens the frozen fixture. Only a hand-made request reaches it, so it is an author-error guard. Optional.
 
