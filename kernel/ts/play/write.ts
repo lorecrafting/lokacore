@@ -17,7 +17,7 @@ import { files } from './todo.ts';
 import { type Bytes, current, DIRS, guarded, named, placed, refuse, Refused } from './guard.ts';
 import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
 import { apply } from './edit_model.ts';
-import { still, taken } from './find.ts';
+import { others, still, taken, users } from './find.ts';
 import { edit, located } from './prose.ts';
 import { compiledCartridge, ids, set } from './scene_card.ts';
 import { loka, opened, worlds } from './worlds.ts';
@@ -103,48 +103,51 @@ function change(t: Tree, { file, was, ops }: Sent) {
 }
 
 const ROWS = ['facts', 'resources', 'attributes']; // root files of `{"<name>": {"<key>": definition}}`
-/** Delete one definition: its file, or with `key` its row of a ROWS file; refused while another
- * definition still names it (the compile would refuse the dangling ref). */
-function remove(t: Tree, { file, was, key }: Sent, artifact = '') {
+/** Delete one definition: its file and the set it takes (find.ts taken), or with `key` its row of a
+ * ROWS file; refused while another definition still names it (the compile would refuse the dangling ref). */
+function remove(t: Tree, { file, was, key, also }: Sent, artifact = '') {
   const path = guarded(t.root, file, 'read');
   const section = String(file).replace(/\.json$/, '');
-  const row = key !== undefined && ROWS.includes(section);
-  if (!row && (!file.includes('/') || rootFile(file)))
+  if (key !== undefined && ROWS.includes(section))
+    return unrow(t, path, section, key, was, artifact);
+  if (!file.includes('/') || rootFile(file))
     refuse(400, `${file} is a root file: delete its rows, not the file`);
-  if (row && !named(key)) refuse(400, 'key: [a-z0-9_]+');
-  const at = row ? { dir: section, key } : placed(file);
+  const at = placed(file);
   const kind = file.endsWith('.scene') ? 'dialogues' : at?.dir; // .scene: a dialogue (source.ex)
   const { set, left } =
     at && kind ? taken(t.root, artifact, file, { dir: kind, key: at.key }) : { set: [], left: [] };
   if (left.length) refuse(400, `${set.map((m) => m.key).join(', ')} ${still(set, left)}`);
   const before = fresh(path, was);
-  if (row) {
-    let doc: any;
-    try {
-      doc = JSON.parse(before);
-    } catch {
-      refuse(400, `${file} is not JSON: fix it first`);
-    }
-    if (!Object.hasOwn(doc?.[section] ?? {}, key)) refuse(400, `${file} has no ${key}`);
-    delete doc[section][key];
-    return done(t, `delete ${section} ${key}`, [{ file, before, after: json(doc) }]);
-  }
-  const changes: Change[] = [{ file, before, after: null }];
-  for (const m of set.slice(1))
-    changes.push({ file: m.rel, before: current(join(t.root, m.rel)), after: null });
-  const room = placed(file)?.dir === 'rooms' ? placed(file)!.key : undefined;
-  const layout = current(join(t.root, 'layout.json')); // another file's room matches no row
-  try {
-    const rows = JSON.parse(layout ?? 'null');
-    const kept = Array.isArray(rows) ? rows.filter((r) => r?.room !== room) : rows;
-    if (kept?.length < rows?.length)
-      changes.push({ file: 'layout.json', before: layout, after: kept.length ? json(kept) : null });
-  } catch {
-    // a layout.json that is not JSON is the compile's to report
-  }
-  return done(t, `delete ${file}`, changes);
+  return done(t, `delete ${file}`, [
+    { file, before, after: null },
+    ...others(t.root, file, set, also),
+  ]);
 }
-
+/** A row takes no other file with it (a template only a row names is the compile's to report). */
+function unrow(
+  t: Tree,
+  path: string,
+  section: string,
+  key: unknown,
+  was: unknown,
+  artifact: string,
+) {
+  if (!named(key)) refuse(400, 'key: [a-z0-9_]+');
+  const left = users(t.root, artifact, section, key);
+  if (left.length) refuse(400, `${key} ${still([], left)}`);
+  const before = fresh(path, was);
+  let doc: any;
+  try {
+    doc = JSON.parse(before);
+  } catch {
+    refuse(400, `${section}.json is not JSON: fix it first`);
+  }
+  if (!Object.hasOwn(doc?.[section] ?? {}, key)) refuse(400, `${section}.json has no ${key}`);
+  delete doc[section][key];
+  return done(t, `delete ${section} ${key}`, [
+    { file: `${section}.json`, before, after: json(doc) },
+  ]);
+}
 function move(t: Tree, { file, was, area }: Sent) {
   const path = guarded(t.root, file, 'read');
   const at = placed(file) ?? refuse(400, `${file} is not a definition file`);

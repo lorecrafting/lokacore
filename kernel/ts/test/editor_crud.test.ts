@@ -262,9 +262,14 @@ function status() {
   });
 }
 
-/** author.ts drop(): the file's sha from /source, then /delete with the row key for a root file. */
+/** author.ts drop(): the file's sha from /source, then /delete with the row key for a root file,
+ * sent again with the shas of the other files it takes when the writer names them. */
 async function del(k: string) {
   const { file, key } = at.made.get(k)!;
   const { was } = await open(file);
-  return post('/delete', { file, was, ...(ROWS.includes(k) && { key }) });
+  const sent = { file, was, ...(ROWS.includes(k) && { key }) };
+  const r = await post('/delete', sent);
+  const set: { file: string; sha256: string }[] | undefined = r.told?.set;
+  if (!set) return r;
+  return post('/delete', { ...sent, also: Object.fromEntries(set.map((m) => [m.file, m.sha256])) });
 }

@@ -1,4 +1,4 @@
-// size: allow 623, the write path's guard, journal, /new and /delete cases share the tree helper above them
+// size: allow 690, the write path's guard, journal, /new and /delete cases share the tree helper above them
 // The editor's write path (docs/system/cartridge.md#author-preview): the one path guard, the Host
 // and Origin checks, the whole-file `was`, the journal and undo, on controlled source trees.
 import assert from 'node:assert/strict';
@@ -313,13 +313,30 @@ test('a delete takes the set a /new wrote with it, or refuses naming the set', a
     ['down', 'up'],
   ])
     put(`transports/${a}.json`, `{\n  "reverse": "${b}"\n}\n`);
-  const del = (file: string) => ask('/delete', { file, was: sha256(read(file)) });
+  const del = (file: string, also?: Record<string, string>) =>
+    ask('/delete', { file, was: sha256(read(file)), also });
   const files = async () =>
     (await ask('/journal')).body.find((e: { by: string }) => e.by === 'editor').files.sort();
-  assert.equal((await del('populations/p.json')).status, 200);
+  // each file the set takes is checked like the first: unsent or stale shas get a 409 naming them
+  const set = {
+    'items/i.json': sha256(read('items/i.json')),
+    'npcs/n.json': sha256(read('npcs/n.json')),
+  };
+  assert.deepEqual(await del('populations/p.json'), {
+    status: 409,
+    body: { set: Object.entries(set).map(([file, sha]) => ({ file, sha256: sha })) },
+  });
+  assert.equal(
+    (await del('populations/p.json', { ...set, 'items/i.json': sha256(TEMPLATE + ' ') })).status,
+    409,
+  );
+  assert.equal(read('populations/p.json'), '{}\n');
+  assert.equal(read('items/i.json'), TEMPLATE);
+  assert.equal((await del('populations/p.json', set)).status, 200);
   assert.deepEqual(await files(), ['items/i.json', 'npcs/n.json', 'populations/p.json']);
   assert.equal(read('items/k.json'), TEMPLATE);
-  assert.equal((await del('transports/up.json')).status, 200);
+  const down = { 'transports/down.json': sha256(read('transports/down.json')) };
+  assert.equal((await del('transports/up.json', down)).status, 200);
   assert.deepEqual(await files(), ['transports/down.json', 'transports/up.json']);
   assert.deepEqual(await del('transports/go.json'), {
     status: 400,
@@ -620,4 +637,44 @@ test('a new file may take only a place Source.classify reads; a taken or unliste
     [status('rooms/a.json', 'create'), status('rooms/z.json', 'read'), status('rooms', 'read')],
     [409, 404, 404],
   );
+});
+
+test('a delete takes a template only taken templates name, across folders; a row takes none', async (t) => {
+  // Breaks: one pass over the templates missing one named only by a template it reaches later
+  // (items/b sorts before npcs/z), a scripted action never owning the template it names
+  // (its ref is by scripted_actions/, its file under actions/), or a facts row delete
+  // reaching for a template only the row names, a file it never deletes.
+  const { ask, dir, src, read } = await tree(t);
+  const ref = (kind: string, key: string) => ({ cartridge_id: 'c', kind, key });
+  const canonical = {
+    populations: { 'c@1:population/p': { npc: ref('npc', 'z'), also: ref('npc', 'w') } },
+    npcs: { 'c@1:npc/z': { corpse: ref('item', 'b') }, 'c@1:npc/w': {} },
+    items: { 'c@1:item/b': {}, 'c@1:item/m': {}, 'c@1:item/r': {} },
+    scripted_actions: { 'c@1:scripted_action/s': { item: ref('item', 'm') } },
+    facts: { 'c@1:fact/f': { item: ref('item', 'r') } },
+  };
+  writeFileSync(join(dir, 'none.json'), JSON.stringify({ canonical: JSON.stringify(canonical) }));
+  const TEMPLATE = '{\n  "location": {\n    "in": "template"\n  }\n}\n';
+  const put = (rel: string, text: string) => {
+    mkdirSync(join(src, dirname(rel)), { recursive: true });
+    writeFileSync(join(src, rel), text);
+  };
+  put('populations/p.json', '{}\n');
+  put('npcs/z.json', '{\n  "spawn_template": true\n}\n');
+  put('areas/x/npcs/w.json', '{\n  "spawn_template": true\n}\n');
+  put('actions/s.json', '{}\n');
+  put('facts.json', '{\n  "facts": {\n    "f": {}\n  }\n}\n');
+  for (const k of ['b', 'm', 'r']) put(`items/${k}.json`, TEMPLATE);
+  const taken = async (file: string, key?: string) => {
+    const r = await ask('/delete', { file, was: sha256(read(file)), key });
+    return r.status === 409 ? r.body.set.map((m: { file: string }) => m.file).sort() : r.status;
+  };
+  assert.deepEqual(await taken('populations/p.json'), [
+    'areas/x/npcs/w.json',
+    'items/b.json',
+    'npcs/z.json',
+  ]);
+  assert.deepEqual(await taken('actions/s.json'), ['items/m.json']);
+  assert.equal(await taken('facts.json', 'f'), 200);
+  assert.equal(read('items/r.json'), TEMPLATE);
 });
