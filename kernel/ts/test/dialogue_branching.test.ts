@@ -600,12 +600,17 @@ test('a failed default Talk opens only what a free choice leads to: the shared c
     check: checked({}),
     payment: { payment: { from: 'guard', resource: ref('resource', 'pennies'), amount: 1 } },
     policy: { policy: is('flag', true) },
+    teach: { steps: [{ op: 'skill.acquire', skill: ref('skill', 'intimidate') }] },
   };
   for (const { name, dialogues, opens } of JSON.parse(readFileSync(file, 'utf8'))) {
     const g = play(
       content({}, {}, (c) => {
         const model = c.dialogues[`${P}:dialogue/guard`];
         delete c.dialogues[`${P}:dialogue/guard`];
+        Object.assign(c.skills[`${P}:skill/intimidate`], {
+          hidden: true,
+          prerequisite: is('flag', true),
+        });
         c.npcs[`${P}:npc/other`] = { ...structuredClone(c.npcs[`${P}:npc/guard`]), key: 'other' };
         for (const { key, npc, choices, entry, closed, name: label } of dialogues) {
           const made = Object.entries<any>(choices).map(([id, { gate, ...rest }]) => [
