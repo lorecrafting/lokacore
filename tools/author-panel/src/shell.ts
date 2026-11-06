@@ -4,6 +4,7 @@
 // kernel/ts/test/author_shell.test.ts.
 
 import type { ListState } from './storylist.ts';
+import NEW from './edit/new.json' with { type: 'json' };
 
 export type Selection = { file?: string; kind: string; key: string };
 /** The World card's selection: cartridge.json, which no graph node names (its card opens the root files). */
@@ -110,7 +111,9 @@ export type Item = {
   id: string;
 };
 export const COMMANDS: Item[] = [
-  ['new', 'New room'],
+  // a starter of every editable kind (`bin/loka new`; test/loka/content_starters_test.exs compiles each)
+  ...NEW.map((kind) => [`new-${kind}`, `New ${kind}`]),
+  ['delete', 'Delete the selected definition'],
   ['hold', 'Hold or release compiles'],
   ['undo', 'Undo the last edit'],
   ['go', 'Go to room'],

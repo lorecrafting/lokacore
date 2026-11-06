@@ -1,4 +1,4 @@
-// size: allow 511, the write path's guard, journal and /new cases share the tree helper above them
+// size: allow 570, the write path's guard, journal, /new and /delete cases share the tree helper above them
 // The editor's write path (docs/system/cartridge.md#author-preview): the one path guard, the Host
 // and Origin checks, the whole-file `was`, the journal and undo, on controlled source trees.
 import assert from 'node:assert/strict';
@@ -228,6 +228,47 @@ test('a delete touches layout.json only when it holds the room', async (t) => {
   }
 });
 
+test('a delete another definition still names is refused and writes nothing', async (t) => {
+  // Breaks: /delete writing a file or root row the compile would then refuse as a dangling ref
+  // (loka-wfrgk.58 walk B), or a row delete taking the root file or a neighbouring row with it, or
+  // a .scene file looked up as a cutscene (it compiles to a dialogue), so its referrers are missed.
+  const { ask, dir, src, read } = await tree(t);
+  const ref = (kind: string, key: string) => ({ cartridge_id: 'c', kind, key });
+  const rooms = { 'c@1:room/a': { lit: ref('fact', 'lit'), str: ref('attribute', 'str') } };
+  const facts = { 'c@1:fact/lit': {}, 'c@1:fact/spare': {} };
+  const attributes = { 'c@1:attribute/str': {} };
+  const dialogues = { 'c@1:dialogue/talk': {} };
+  const npcs = { 'c@1:npc/maud': { dialogues: [ref('dialogue', 'talk')] } };
+  const story_points = { 'c@1:story_point/p': { then: ref('dialogue', 'talk') } };
+  const canonical = { rooms, facts, attributes, dialogues, npcs, story_points };
+  writeFileSync(join(dir, 'none.json'), JSON.stringify({ canonical: JSON.stringify(canonical) }));
+  const ATTRS = '{\n  "attributes": {\n    "str": {}\n  }\n}\n';
+  writeFileSync(join(src, 'attributes.json'), ATTRS);
+  const str = await ask('/delete', { file: 'attributes.json', was: sha256(ATTRS), key: 'str' });
+  assert.deepEqual(str.body, 'str is still named by rooms/a: change those first');
+  mkdirSync(join(src, 'scenes'));
+  writeFileSync(join(src, 'scenes/talk.scene'), 'talk\n');
+  const talk = await ask('/delete', { file: 'scenes/talk.scene', was: sha256('talk\n') });
+  assert.deepEqual(
+    talk.body,
+    'talk is still named by npcs/maud, story_points/p: change those first',
+  );
+  assert.equal(read('scenes/talk.scene'), 'talk\n');
+  const FACTS = '{\n  "facts": {\n    "lit": {},\n    "spare": {}\n  }\n}\n';
+  writeFileSync(join(src, 'facts.json'), FACTS);
+  const lit = await ask('/delete', { file: 'facts.json', was: sha256(FACTS), key: 'lit' });
+  assert.deepEqual(lit, {
+    status: 400,
+    body: 'lit is still named by rooms/a: change those first',
+  });
+  assert.equal(read('facts.json'), FACTS);
+  assert.equal(
+    (await ask('/delete', { file: 'facts.json', was: sha256(FACTS), key: 'spare' })).status,
+    200,
+  );
+  assert.equal(read('facts.json'), '{\n  "facts": {\n    "lit": {}\n  }\n}\n');
+});
+
 test('undo puts the files back, refuses one changed since, and knows no other id', async (t) => {
   // Breaks: undo over a newer edit (losing it), or a delete's layout row not coming back; the
   // last row's delete leaving `[]`, which the layout schema refuses (minItems 1).
@@ -310,6 +351,8 @@ test('each refusal is a 400 that names its reason', async (t) => {
   writeFileSync(join(src, 'scenes/s.scene'), '* hello\n');
   writeFileSync(join(src, 'rooms/bad.json'), '{');
   writeFileSync(join(src, 'rooms/n.json'), '{"k": null}');
+  writeFileSync(join(src, 'facts.json'), '{');
+  writeFileSync(join(src, 'resources.json'), '{"resources": {}}');
   const TEXT = '{\n  "room.a": "old words"\n}\n';
   writeFileSync(join(src, 'text.json'), TEXT);
   mkdirSync(join(src, 'areas'));
@@ -340,8 +383,19 @@ test('each refusal is a 400 that names its reason', async (t) => {
     ['/change', { ...room, ops: [{ path: ['name'] }] }, 'an op sets a value or deletes'],
     [
       '/delete',
-      { file: 'text.json', was: sha256(TEXT) },
+      { file: 'text.json', was: sha256(TEXT), key: 'room.a' },
       'text.json is a root file: delete its rows, not the file',
+    ],
+    ['/delete', { file: 'facts.json', was: sha256('{'), key: 'Lit' }, 'key: [a-z0-9_]+'],
+    [
+      '/delete',
+      { file: 'facts.json', was: sha256('{'), key: 'lit' },
+      'facts.json is not JSON: fix it first',
+    ],
+    [
+      '/delete',
+      { file: 'resources.json', was: sha256('{"resources": {}}'), key: 'hp' },
+      'resources.json has no hp',
     ],
     [
       '/delete',

@@ -2,8 +2,9 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 665, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 709, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { appendFileSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
@@ -584,6 +585,49 @@ test("a one-way exit's reverse comes back by Undo on either room's card", async 
   await page.locator('[aria-label="Room card"] code', { hasText: 'cliff_top.json' }).waitFor();
   await page.getByRole('button', { name: 'Undo' }).click();
   await toggle(false);
+  await page.close();
+});
+
+// Breaks: palette New sends a kind the server does not know, hides its refusal (loka-wfrgk.60) or
+// asks for a plural key, or Delete sends another file, a row key with a definition file, an unread
+// `was`, or hides the refusal.
+test('palette New and Delete send the starter and the selected file; refusals show', async () => {
+  const page = await open(QUEST);
+  const sent: unknown[] = [];
+  const told: string[] = [];
+  const asked: string[] = [];
+  page.on('dialog', (d) => {
+    if (d.type() === 'prompt') return void (asked.push(d.message()), d.accept('zz'));
+    told.push(d.message());
+    void d.accept();
+  });
+  await page.route(/\/__author\/(new|delete)$/, (r) => {
+    sent.push([new URL(r.request().url()).pathname, r.request().postDataJSON()]);
+    return r.fulfill({ status: 400, json: 'refused here' });
+  });
+  const run = async (command: string, alerts: number) => {
+    await page.keyboard.press('Control+k');
+    await page.getByLabel('Find a key, a ~ or a command').fill(command);
+    await page.keyboard.press('Enter');
+    for (let i = 0; told.length < alerts; i++) {
+      assert.ok(i < 100, `alert ${alerts} never shown after ${command}: ${told}`);
+      await page.waitForTimeout(50);
+    }
+  };
+  await run('New room', 1);
+  await run('Delete the selected definition', 2);
+  await page.route('**/__author/source?file=*', (r) => r.fulfill({ status: 404, json: {} }));
+  await run('Delete the selected definition', 3);
+  const file = 'quests/carry_letter.json';
+  const was = createHash('sha256')
+    .update(readFileSync(join(dir, 'showcase', file)))
+    .digest('hex');
+  assert.deepEqual(sent, [
+    ['/__author/new', { kind: 'rooms', name: 'zz' }],
+    ['/__author/delete', { file, was }],
+  ]);
+  assert.deepEqual(told, ['refused here', 'refused here', `${file}: not found`]);
+  assert.deepEqual(asked, ['New room key']); // the starter is the plural dir
   await page.close();
 });
 

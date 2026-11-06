@@ -11,6 +11,22 @@ export const ask = (path: string, sent: object) =>
     told: (await r.json()) as unknown,
   }));
 
+/** The palette's Delete (POST /delete): the definition's file, or its row of a root file; a refusal
+ * (what still names it) shows as an alert, as the palette's New does. */
+export async function drop(key: string, file?: string) {
+  if (!file) return alert(`${key}: no source file`);
+  const { sha256 } = await fetch(`/__author/source?file=${encodeURIComponent(file)}`).then((r) =>
+    r.ok ? r.json() : { sha256: undefined },
+  );
+  if (!sha256) return alert(`${file}: not found`);
+  const { ok, told } = await ask('delete', {
+    file,
+    was: sha256,
+    ...(!file.includes('/') && { key }),
+  });
+  if (!ok) alert(typeof told === 'string' ? told : 'Changed outside: try again');
+}
+
 export const checkpoints = {
   list: () => fetch('/__author/checkpoints').then((r) => r.json() as Promise<string[]>),
   get: (name: string) =>

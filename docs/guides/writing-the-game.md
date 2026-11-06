@@ -44,6 +44,8 @@ http://localhost:19009: the Book fills the page and the panel is the pane on the
 then Compile with its lint notes folded behind their count, then Play, Write, State, Why, Find and Numbers;
 the source line at the foot). The globe at the left of the Book's toolbar switches worlds or makes a new one (blank, or a copy); `bin/author.sh` with no folder reopens the last world. It wears the Book's light palette and type. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book, 19006), `LOKA_PANEL_PORT` (panel, 19009).
 
+A dev save made before the Book kept its save across edits may still show "The save could not be opened": clear the preview's site data once (the browser's storage for http://localhost:19009) and it does not come back.
+
 ## Write a scene
 
 Edit `text.json` for any line the Book shows: the page updates as you save, no reload (a scene's words are in its `.scene` file instead, which reloads like JSON). Add a room,
