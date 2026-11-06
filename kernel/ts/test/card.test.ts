@@ -1,4 +1,4 @@
-// size: allow 570, one suite per card step; the generic, Room, World, NPC and item cards and the Rules block share the pure helpers
+// size: allow 575, one suite per card step; the generic, Room, World, NPC and item cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -220,7 +220,8 @@ test('absent fields are hidden until revealed; a revealed one keeps its card', (
 });
 
 // Break: a step is drawn as the wrong op (first branch, or by shape), a `wait` is not told apart
-// from a step, or a step whose op the outer union does not name falls out as -1.
+// from a step, a step whose op the outer union does not name falls out as -1, or picking `Step` over
+// a `wait` writes no object (a null array item).
 test('a value is drawn in the branch its op names', () => {
   const step = defs.Step.anyOf;
   assert.equal(branchOf(step, { op: 'quest.activate', quest: 'q' }), 2);
@@ -230,7 +231,7 @@ test('a value is drawn in the branch its op names', () => {
   assert.equal(branchOf(outer, undefined), -1);
   assert.equal(branchOf(step, { op: 'fact.assign' }), 0);
   assert.deepEqual(start(step, 2), { op: 'quest.activate' });
-  assert.equal(start(outer, 0), undefined);
+  assert.deepEqual(start(outer, 0, { op: 'wait', seconds: 5 }), {});
 });
 
 // Break: a trigger or check is drawn in the first branch whatever its event or kind (it names no
@@ -250,9 +251,11 @@ test('a trigger and a check are drawn and switched by their event and kind', () 
 
 // Break: an `extends` partial naming no kind (`check: {chance: 70}`) draws only the picker and
 // hides its fields; a switch from a value no branch fits drops its fields; a field whose schema
-// differs between the two branches is kept; an untagged union hides an `op` field.
+// differs between the two branches is kept; an untagged union hides an `op` field; a prototype key
+// (`constructor`) counts as a declared field.
 test('a tagless or unknown value keeps its fields', () => {
   assert.equal(branchOf(defs['partial.Check'].anyOf, { chance: 70 }), 0);
+  assert.equal(branchOf(defs['partial.Check'].anyOf, { constructor: 1 }), -1);
   assert.equal(branchOf([{ type: 'string' }, { properties: { a: {} } }], { a: 1 }), 1);
   assert.equal(branchOf(defs.Check.anyOf, null), -1);
   assert.deepEqual(start(defs.Check.anyOf, 1, { key: 'fish', zz: 1 }), {

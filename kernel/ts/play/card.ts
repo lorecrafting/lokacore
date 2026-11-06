@@ -289,7 +289,7 @@ export function branchOf(branches: Obj[], value: unknown): number {
   if (named >= 0) return named;
   const keys = plain(value) && tag === undefined ? Object.keys(value) : [];
   const fits = branches.findIndex(
-    (b) => keys.length && keys.every((f) => f in ((b.properties ?? {}) as Obj)),
+    (b) => keys.length && keys.every((f) => Object.hasOwn((b.properties ?? {}) as Obj, f)),
   );
   if (fits >= 0) return fits;
   const t = typeOf(value);
@@ -312,12 +312,12 @@ const shape = (node: unknown) => {
 export function start(branches: Obj[], i: number, old?: unknown): Obj | undefined {
   const k = tagOf(branches);
   const tag = constOf(branches[i], k);
-  if (k === undefined || tag === undefined) return undefined;
+  if (tag === undefined) return k === undefined ? undefined : {}; // `$ref Step`: its picker asks
   const from = branches[branchOf(branches, old)];
   const now = (branches[i].properties ?? {}) as Obj;
   const same = (f: string) => !from || shape(now[f]) === shape((from.properties as Obj)?.[f]);
   const kept = Object.entries(plain(old) ? old : {}).filter(
-    ([f]) => f !== k && f in now && same(f),
+    ([f]) => f !== k && Object.hasOwn(now, f) && same(f),
   );
   return { [k]: tag, ...Object.fromEntries(kept) };
 }

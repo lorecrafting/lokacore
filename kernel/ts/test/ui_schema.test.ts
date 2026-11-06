@@ -15,7 +15,8 @@ const ui = (kind: string, registry = {}) =>
   uiSchema(kind, read(`${kind}.schema.json`), defs, registry);
 
 // Breaks: the walker stops at the kind's if/then/else (abstract, extends) and claims nothing, keeps
-// the `partial.` prefix of an extending definition, or does not follow a $ref into a definition.
+// the `partial.` prefix of an extending definition, does not follow a $ref into a definition, or a
+// block's row replaces the walker's claims it draws through (the policy's definition, the events).
 test('a real kind claims its text keys, definition references, policies and steps', () => {
   const rooms = ui('rooms');
   assert.deepEqual(rooms.name, { 'ui:field': 'TextKey', 'ui:fieldReplacesAnyOrOneOf': true });
@@ -42,8 +43,7 @@ test('a real kind claims its text keys, definition references, policies and step
 });
 
 // Breaks: a hand-built card in the registry is not drawn, `generic` replaces rjsf's own field, the
-// card keeps its `.tsx` (rjsf's fields map has no such name), another kind's row lands here, or a
-// block's row replaces the walker's claims it draws through (the policy's definition, the events).
+// card keeps its `.tsx` (rjsf's fields map has no such name), or another kind's row lands here.
 test("the registry's hand-built edit card claims its field; generic and other kinds do not", () => {
   const rooms = ui('rooms', {
     'rooms.exits': card('ExitsCard.tsx'),
