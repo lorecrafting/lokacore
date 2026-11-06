@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, Filter, Maximize, Search, ZoomIn, ZoomOut } 
 import { Icon } from './areamap.tsx';
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from './components/ui/popover.tsx';
 import { Button } from './components/ui/button.tsx';
-import { FILTERS, key } from './flow.ts';
+import { FILTERS, inColumn, key } from './flow.ts';
 import type { Graph, Props as P } from './flow.tsx';
 import { Card, ChipButton, Lines, StubButton, type CardAct } from './flowcard.tsx';
 import { step } from './flowread.ts';
@@ -138,8 +138,9 @@ export function Graph({ p, g }: { p: P; g: Graph }) {
           <Lines f={g.f} on={(l) => lineOn(l.from) && lineOn(l.to)} accent={(l) => accent(l.from, l.to)} />
           {g.f.columns.map((c, col) => (
             <div key={c.id} role="group" aria-label={c.n === undefined ? key(c.id) : `beat ${c.n} ${c.title ?? ''}`.trim()}>
-              {g.f.chips.filter((x) => x.col === col).map((x) => <ChipButton key={x.id} c={x} s={p.story} a={g.act} />)}
-              {g.f.stubs.filter((x) => x.col === col).map((x) => <StubButton key={x.id} c={x} a={g.act} />)}
+              {inColumn(g.f, col).map((x) =>
+                'n' in x ? <StubButton key={x.id} c={x} a={g.act} /> : <ChipButton key={x.id} c={x} s={p.story} a={g.act} />,
+              )}
             </div>
           ))}
           <PopoverAnchor virtualRef={{ current: { getBoundingClientRect: () => g.chipEl(g.card)?.getBoundingClientRect() ?? new DOMRect() } }} />

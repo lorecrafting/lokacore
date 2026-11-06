@@ -305,12 +305,17 @@ test('each node names its own source file, a .json over its .scene', () => {
 });
 
 // Break: a bad outline.json throws (a 500 for the whole map) instead of a refusal in the model
-// that names the cause, or a cartridge with no outline.json reads as refused.
+// that names the cause, or a cartridge with no outline.json reads as refused, or two beats of one n
+// pass (duplicate row ids in the Story list).
 test('a bad outline.json is a refusal in the model, the graph still built', () => {
   const bads: [string, RegExp][] = [
     ['{"parts": [', /JSON/],
     ['{"parts": [{"beats": [{"n": "one"}]}]}', /not the shape/],
     ['{"parts": [{"beats": [{"n": 1, "nodes": "rooms/attic"}]}]}', /not the shape/],
+    [
+      '{"parts": [{"beats": [{"n": 1}]}, {"beats": [{"n": 2}, {"n": 1}]}]}',
+      /beat 1 is numbered twice/,
+    ],
   ];
   for (const [bad, why] of bads) {
     writeFileSync(join(src, 'outline.json'), bad);
