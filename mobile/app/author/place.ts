@@ -166,6 +166,8 @@ const LABEL: Record<Cheat['op'], string> = {
   set_fact: 'Set fact',
   set_level: 'Set level',
 };
+/** Whether the panel's message is a cheat the Book sends as an intent. */
+export const isCheat = (asked: { op: string }): asked is Cheat => Object.hasOwn(LABEL, asked.op);
 
 /** The author's plain words for a cheat's reply; empty when it was accepted. */
 export function cheatNote(op: Cheat['op'], reply: Reply) {

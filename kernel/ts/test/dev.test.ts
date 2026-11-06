@@ -296,6 +296,9 @@ test('set level writes the threshold and the allocated points', () => {
   const three = level(two.world, 3);
   assert.deepEqual(three.world.state.levelling?.[two.world.character]?.experience, 100);
   assert.equal(code(level(three.world, 2)), 'accepted'); // down while the points still fit
+  assert.equal(code(level(two.world, 3, { cha: 1 })), 'accepted'); // up with the count held
+  assert.equal(code(level(fresh(), 2, { cha: 0 })), 'accepted'); // a zero count on an empty row
+  assert.equal(code(level(level(fresh(), 2).world, 2, { cha: 1 })), 'accepted'); // a point at the same level
 });
 
 // Break: a refusal dropped lets the row hold negative unspent points, a falling count (a compose

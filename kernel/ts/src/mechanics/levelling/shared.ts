@@ -41,7 +41,7 @@ export function levelling(world: World, actor: CharacterId) {
 
 /** `ops` without the levelling writes of a set level cheat, which sets the row and nothing more (dev@1). */
 export const quiet = (command: { payload: object }, ops: readonly DeltaOp[]) =>
-  'type' in command.payload && command.payload.type === 'dev_set_level'
+  (command.payload as { type?: string }).type === 'dev_set_level'
     ? ops.filter((o) => o.op !== 'levelling.set')
     : ops;
 

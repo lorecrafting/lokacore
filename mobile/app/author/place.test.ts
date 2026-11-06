@@ -9,6 +9,7 @@ import {
   asRefs,
   cheatIntent,
   cheatNote,
+  isCheat,
   sendCheat,
   steps,
   caughtUp,
@@ -311,6 +312,16 @@ test('a cheat is the ordinary invocation, by definition ref', () => {
     input: { level: 2, allocated: [{ attribute: ref('attribute', 'cha'), points: 1 }] },
     view_freshness_token: 't',
   });
+});
+
+// Break: the Book drops a panel cheat (set_level never sent) or treats a panel op as a cheat.
+test('only the cheat ops are sent as cheats', () => {
+  assert.deepEqual(
+    ['go_to_room', 'set_fact', 'set_level', 'hello', 'jump', 'toString'].map((op) =>
+      isCheat({ op }),
+    ),
+    [true, true, true, false, false, false],
+  );
 });
 
 // Break: an accepted cheat shows a refusal, or a refusal comes back blank or as a bare code.

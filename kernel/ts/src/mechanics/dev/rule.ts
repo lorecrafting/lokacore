@@ -102,7 +102,7 @@ const setLevel = (
   const same =
     experience === row.experience && entries(next).every(([a, n]) => row.allocated[a] === n);
   if (same || spent > spec.points_per_level * (level - 1)) return rejected('invalid_state');
-  const ops = [...settleMaxima(world), write(world, actor_id, { experience, allocated: next }, 0)];
+  const ops = [...settleMaxima(world), write(world, actor_id, { experience, allocated: next }, 0)]; // mutate-skip: the decision's only write group
   return accepted(world, 'dev_level_set', ops, []);
 };
 
