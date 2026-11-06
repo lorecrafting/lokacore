@@ -85,11 +85,18 @@ type Props = {
   opener: RefObject<View | null>;
 };
 
-function SlotButton(p: { s: Slot; time: number; press: (b: Button) => void }) {
+// Rounds left, for a screen reader only: the visible count's wording is the designer's (loka-x6t.138).
+function roundsLeft(s: Slot, view: GameView) {
+  const n = view.combat?.interval;
+  if (s.ends_at === undefined || !s.duration || !n) return undefined;
+  return { min: 0, max: Math.ceil(s.duration / n), now: Math.ceil((s.ends_at - view.time) / n) };
+}
+
+function SlotButton(p: { s: Slot; view: GameView; press: (b: Button) => void }) {
   const [said, setSaid] = useState<string>();
   const press = usePress(p.s.reason ? undefined : 'selection');
   const thin = useThin(press, false);
-  const at = share(p.s, p.time);
+  const at = share(p.s, p.view.time);
   const sentence = reasonSentence(p.s.reason);
   // A refused press sends nothing and reads its sentence once, as an unavailable card does.
   const refuse = () => {
@@ -103,6 +110,7 @@ function SlotButton(p: { s: Slot; time: number; press: (b: Button) => void }) {
         {...press.handlers}
         {...(p.s.reason ? refusedProps('') : { accessibilityRole: 'button' as const })}
         accessibilityLabel={p.s.reason ? `${p.s.label}, ${p.s.reason}` : p.s.label}
+        accessibilityValue={roundsLeft(p.s, p.view)}
         onPress={p.s.reason ? refuse : press.commit(() => p.s.b && p.press(p.s.b))}
         style={thin}
       >
@@ -146,7 +154,7 @@ export function Hotbar(p: Props) {
     >
       {[0, 1, 2].map((i) =>
         slots[i] ? (
-          <SlotButton key={slots[i].key} s={slots[i]} time={p.view.time} press={p.press} />
+          <SlotButton key={slots[i].key} s={slots[i]} view={p.view} press={p.press} />
         ) : (
           <View key={i} aria-hidden>
             {drawing(OPENER, 'empty')}

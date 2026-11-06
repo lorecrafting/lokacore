@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import { globSync, readFileSync } from 'node:fs';
 import { registerHooks } from 'node:module';
+import { basename } from 'node:path';
 import { test } from 'node:test';
 import { validate } from '../../authority/local-story/__tests__/validate.ts';
 import { nodes, view } from './__tests__/combat-book.test.ts';
@@ -195,6 +196,9 @@ test("the opener's list and a foe's list share the one open list", () => {
   assert.ok(!h.texts().includes('action.shove'), "the foe's list closed the hotbar's");
   h.tap(LABEL.hotbarOpener);
   assert.deepEqual([expanded(), foe()], [true, false]);
+  h.tap(LABEL.hotbarOpener);
+  assert.equal(expanded(), false, 'a second press closes');
+  h.tap(LABEL.hotbarOpener);
   const kicks = all(h).filter(
     (n) => n.type === 'Pressable' && /kick|ward/.test(n.props.accessibilityLabel),
   );
@@ -203,28 +207,39 @@ test("the opener's list and a foe's list share the one open list", () => {
     [false, false, false, false],
     'barred and cooling: row and slot',
   );
+  let focused = 0;
+  h.control(LABEL.hotbarOpener).props.ref.current = { focus: () => focused++ };
   h.answer({ kind: 'pending' });
   h.tap('action.shove'); // the list's row: sends, closes, and the action is pending
+  assert.equal(focused, 1, 'closing puts focus back on the opener');
   h.tap(LABEL.hotbarOpener);
   h.tap('action.shove');
   assert.equal(expanded(), true, 'a row pressed while an action is pending keeps the list');
 });
 
-// Breaks: a share measured from the wrong end, a cooling slot drawn barred, or a wedge that tweens
-// under reduced motion or on a fresh cooldown.
+// Breaks: a share measured from the wrong end, a cooling slot drawn barred, rounds left not rounded up
+// or not from the fight's interval, or a wedge that tweens under reduced motion or on a fresh cooldown.
 test('a cooling slot draws the elapsed share; reduced motion steps it', () => {
   assert.equal(share({ ends_at: 40, duration: 20 }, 25), 0.25);
   assert.equal(share({ ends_at: 40, duration: 20 }, 50), 1);
   assert.equal(share({}, 25), undefined);
   assert.equal(share({ ends_at: 40, duration: 0 }, 25), undefined, 'no duration, no wedge');
-  const h = mounted(
-    fight(
-      [],
-      [{ word: 'ward', available: false, reason: { code: 'cooldown' }, ends_at: 20, duration: 40 }],
-    ),
-  );
+  const cooling = {
+    word: 'ward',
+    available: false,
+    reason: { code: 'cooldown' },
+    ends_at: 20,
+    duration: 40,
+  };
+  const combat = { ...(view() as any).combat, interval: 3 };
+  const h = mounted(fight([], [cooling], { combat }));
   const ward = all(h).find((n) => isGlyph(n) && n.props.d === glyphs['condition.warded']);
   assert.deepEqual([ward.props.state, ward.props.share], ['cooling', 0.75]); // time 10, from -20
+  // Rounds left at time 10: ceil(10 / 3) of ceil(40 / 3).
+  const slot = all(h).find(
+    (n) => n.type === 'Pressable' && /^ward/.test(n.props.accessibilityLabel),
+  );
+  assert.deepEqual(slot.props.accessibilityValue, { min: 0, max: 14, now: 4 });
   assert.ok(wedgeMs(0.25, 0.5, 500, false) > 0);
   assert.equal(wedgeMs(0.25, 0.5, 500, true), 0);
   assert.equal(wedgeMs(0.75, 0.1, 500, false), 0, 'a fresh cooldown jumps');
@@ -277,6 +292,12 @@ function points(d: string) {
   return { out, subpaths };
 }
 
+// The showcase's scripted actions drawn with the neutral mark until the designer draws them (loka-x6t.138).
+const neutral =
+  'carve_spoon chop cook_feast cook_stew cook_stew_croft disarm_cellar disarm_plate fish_croft force_grate force_hall_cupboard force_iron_door force_strongbox force_tollhouse_door gather_ash gather_attic_ash hide lift_store_bar look_about pick_hall_strongbox pick_strongbox play_fold_song play_song pull_a pull_b pull_c raise_timbered_hut saw search_cellar search_cleft search_floor search_pool_cleft shout_begone shout_begone_cellar shout_warning shove_drover think_hall_lectern think_lectern think_letter throw_bones throw_fold_bones turn_wheel_1 turn_wheel_2 turn_wheel_3 yard_hide'.split(
+    ' ',
+  );
+
 // Breaks: a drawing off statusGlyphs' frame (ink outside 3 to 21, more than four strokes), or a
 // showcase slot key with no drawing, which would fall back to the neutral mark at render.
 test('every action drawing keeps the frame, and every showcase slot key has one', () => {
@@ -286,14 +307,20 @@ test('every action drawing keeps the frame, and every showcase slot key has one'
     for (const [x, y] of out)
       assert.ok(x >= 3 && x <= 21 && y >= 3 && y <= 21, `${key}: ${x},${y} off the frame`);
   }
+  // slotsOf's fillers as the kernel projects them (commands/actions.ts cartridge, keyed): a scripted
+  // action (no registered `command`) not aimed by a held tool, by its file key; an unaimed spell, by its word.
   const root = new URL('../../../', import.meta.url);
-  const keys = globSync('cartridges/toolbox_showcase/**/actions/*.json', { cwd: root })
-    .map((f) => JSON.parse(readFileSync(new URL(f, root), 'utf8')).target)
-    .filter((t) => t?.kind === 'spell' && !t.aimed)
-    .map((t) => t.word as string);
-  assert.ok(keys.length > 0); // the glob found the showcase's unaimed words
+  const keys = globSync('cartridges/toolbox_showcase/**/actions/*.json', { cwd: root }).flatMap(
+    (f) => {
+      const { command, target = {} } = JSON.parse(readFileSync(new URL(f, root), 'utf8'));
+      if (command || target.kind === 'use') return [];
+      if (target.kind === 'spell') return target.aimed ? [] : [target.word as string];
+      return [basename(f, '.json')];
+    },
+  );
+  assert.ok(keys.includes('ward') && keys.includes('pull_a')); // the glob found words and scripted actions
   assert.deepEqual(
-    keys.filter((k) => !(k in actionGlyphs)),
+    keys.filter((k) => !(k in actionGlyphs) && !neutral.includes(k)),
     [],
   );
 });
