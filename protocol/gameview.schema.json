@@ -33,6 +33,15 @@
             },
             "reason": {
               "$ref": "#/$defs/UnavailableReason"
+            },
+            "ends_at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime",
+              "description": "loka-x6t.135: the projected time the running cooldown ends (the actor's last admitted attempt plus the scripted action's cooldown, commands/actions.ts cooling), the ConditionView clock; present only when reason.code is cooldown, and absent then too when that end passes 2^53 - 1."
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "loka-x6t.135: the scripted action's authored cooldown length; present exactly when ends_at is."
             }
           },
           "required": [
@@ -40,6 +49,14 @@
             "available",
             "reason"
           ],
+          "dependentRequired": {
+            "ends_at": [
+              "duration"
+            ],
+            "duration": [
+              "ends_at"
+            ]
+          },
           "additionalProperties": false
         }
       ],
@@ -134,6 +151,15 @@
             },
             "command": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "ends_at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime",
+              "description": "loka-x6t.135: the projected time the running cooldown ends (the actor's last admitted attempt plus the scripted action's cooldown, commands/actions.ts cooling), the ConditionView clock; present only when reason.code is cooldown, and absent then too when that end passes 2^53 - 1."
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "loka-x6t.135: the scripted action's authored cooldown length; present exactly when ends_at is."
             }
           },
           "required": [
@@ -144,6 +170,14 @@
             "target",
             "input"
           ],
+          "dependentRequired": {
+            "ends_at": [
+              "duration"
+            ],
+            "duration": [
+              "ends_at"
+            ]
+          },
           "additionalProperties": false
         }
       ],
@@ -2242,12 +2276,18 @@
             "additionalProperties": false
           },
           "description": "Exact current pack roster, in canonical EntityId order; absent for ordinary one-opponent combat."
+        },
+        "interval": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "loka-x6t.135: clock units between combat rounds, the cartridge's world.combat.interval that schedules each round job (mechanics/combat/rule.ts, round_flow.ts)."
         }
       },
       "required": [
         "encounter_id",
         "opponent_id",
-        "name"
+        "name",
+        "interval"
       ],
       "additionalProperties": false,
       "examples": [
@@ -2255,7 +2295,8 @@
           "encounter_id": "11111111-2222-4333-8444-555555555555",
           "opponent_id": "11111111-2222-4333-8444-555555555555",
           "name": "npc.rat",
-          "band": "few_bruises"
+          "band": "few_bruises",
+          "interval": 150
         }
       ],
       "description": "The current encounter and visible opponent presented to the player."
