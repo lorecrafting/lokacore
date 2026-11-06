@@ -413,7 +413,7 @@ const OWNERS: Record<string, string> = {
   'items.room_line_variants': VARIANT,
   'items.slot': 'equipment',
   'items.tags': 'tag',
-  'items.weapon': 'skill', // its skill is a skill definition (skills.ex weapon/4)
+  'items.weapon': 'skill', // its skill is a skill definition (skills.ex weapon)
   'rooms.cues': 'sense_cue',
   'rooms.dark': 'light',
   'rooms.dark_description': 'light',
@@ -426,8 +426,8 @@ const OWNERS: Record<string, string> = {
 // Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
 const NEEDS: Record<string, (doc: Obj, world: Obj) => boolean> = {
   'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
-  'npcs.daily_schedule': (doc) => doc.spawn_template !== true, // calendar.ex template_schedules/1
-  'items.weapon': (doc) => doc.slot === 'wield', // skills.ex weapon/4
+  'npcs.daily_schedule': (doc) => doc.spawn_template !== true, // calendar.ex template_schedules
+  'items.weapon': (doc) => doc.slot === 'wield', // skills.ex weapon
 };
 
 /** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs

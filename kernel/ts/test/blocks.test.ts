@@ -93,8 +93,8 @@ test("an hour's room keys are drawn by the room picker", () => {
   assert.deepEqual(ui.anyOf[3].items.anyOf[1], hour.anyOf[3].items.anyOf[1]);
 });
 
-// Break: the add menu offers a block's field the compiler refuses (skills.ex weapon/4: a weapon names
-// a skill and is wielded; calendar.ex template_schedules/1: a spawn template has no schedule), or an
+// Break: the add menu offers a block's field the compiler refuses (skills.ex weapon: a weapon names
+// a skill and is wielded; calendar.ex template_schedules: a spawn template has no schedule), or an
 // hour's own room key (a lone room, a case list's fallback) loses the room picker's kind.
 test("a block's fields are offered only where they compile", () => {
   assert.deepEqual(allowed('items', ['weapon'], { skill: 1 }, { slot: 'wield' }), ['weapon']);
