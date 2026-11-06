@@ -1,4 +1,4 @@
-// size: allow 400, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
+// size: allow 400, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -362,7 +362,7 @@ export function minimal(node: Obj, defs: Record<string, Obj>, seen: string[] = [
     const item = n ? minimal(node.items as Obj, defs, seen) : undefined;
     return n && item === undefined ? undefined : Array.from({ length: n }, () => item);
   }
-  if (node.type !== 'object') return undefined;
+  if (node.type !== 'object' || node.allOf) return undefined; // allOf: a required set the author picks (a craft's consume or yield)
   const props = (node.properties ?? {}) as Record<string, Obj>;
   const pairs = ((node.required ?? []) as string[]).map((k) => [k, minimal(props[k], defs, seen)]);
   return pairs.some(([, v]) => v === undefined) ? undefined : Object.fromEntries(pairs);
