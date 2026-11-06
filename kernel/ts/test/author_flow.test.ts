@@ -396,6 +396,10 @@ test('burst: the first story takes the last burst, a later one only what is newe
     ['b.json', 'c.json'],
   );
   assert.deepEqual(burst(changes, 20), []);
+  assert.deepEqual(
+    burst([c('d.json', 30), c('a.json', 10)]).map((x) => x.file),
+    ['d.json'],
+  );
   assert.deepEqual(burst([]), []);
 });
 

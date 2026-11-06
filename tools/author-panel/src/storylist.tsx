@@ -43,7 +43,7 @@ const SCROLL = 'loka.editor.story.scroll';
 let saving: ReturnType<typeof setTimeout> | undefined;
 // the scroll is kept once it rests, not on every scroll event
 const save = (el: HTMLElement) => {
-  const top = String(el.scrollTop); // read now: a list gone by the timer reads 0
+  const top = String(el.scrollTop); // read now: a list gone by the timer has lost its scroll
   clearTimeout(saving);
   saving = setTimeout(() => localStorage.setItem(SCROLL, top), 200);
 };
