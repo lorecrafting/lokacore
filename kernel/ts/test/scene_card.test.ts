@@ -93,13 +93,22 @@ test('/set refuses each thing that is not a real key on a value line', (t) => {
   assert.equal(read(), original); // nothing written by any refusal
 });
 
-// Break: the served /set reads no abstract NPC out (write.ts templates), or writes no journal.
+// Break: the served /set reads no abstract NPC out (write.ts templates), or writes no journal; a
+// `.scene`'s /source carries none of its last compile's words (the push has only changed ones).
 test('POST /set is served, refusing an abstract NPC and undone by /undo', async (t) => {
   const { root, read } = sampler(t);
   const original = read();
-  const live = serve(0, root, join(root, '../none.json'));
+  const artifact = join(root, '../dev.json');
+  writeFileSync(artifact, JSON.stringify(compiled(join(SAMPLER))));
+  const live = serve(0, root, artifact);
   t.after(() => live.close());
   const url = `http://localhost:${await live.port}`;
+  const source = (await (await fetch(`${url}/source?file=${SCENE}`)).json()) as { text: object };
+  assert.deepEqual(Object.keys(source.text).sort(), [
+    'dialogue.stranger_talk.choices.ask_their_name.label',
+    'dialogue.stranger_talk.choices.ask_their_name.narration',
+    'dialogue.stranger_talk.prompt',
+  ]);
   const post = async (path: string, sent: object) => {
     const res = await fetch(url + path, { method: 'POST', body: JSON.stringify(sent) });
     return [res.status, await res.json()] as [number, any];

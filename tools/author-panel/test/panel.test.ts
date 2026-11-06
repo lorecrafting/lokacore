@@ -22,12 +22,13 @@ const free = () =>
     });
   });
 
-let browser: Browser, url: string;
+let browser: Browser, url: string, author: number;
 let boot = 120_000; // the first compile and Vite's first optimise
 const procs: ChildProcess[] = [];
 const dir = mkdtempSync(join(tmpdir(), 'loka-panel-'));
 before(async () => {
-  const [author, panel, preview] = await Promise.all([free(), free(), free()]);
+  const [a, panel, preview] = await Promise.all([free(), free(), free()]);
+  author = a;
   const env = {
     ...process.env,
     LOKA_DEV_CARTRIDGE: join(dir, 'current.json'),
@@ -57,7 +58,7 @@ after(async () => {
 });
 
 /** The panel with this layout kept, once the inspector's card has its form (the first compile and Vite's first optimise included). */
-async function open(layout: object): Promise<Page> {
+async function open(layout: object, ready = 'Inspector'): Promise<Page> {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   await page.addInitScript(
     (l) => localStorage.setItem('loka.editor.layout', l),
@@ -72,7 +73,9 @@ async function open(layout: object): Promise<Page> {
       await new Promise((r) => setTimeout(r, 500));
     }
   }
-  await page.locator('[aria-label="Inspector"] form').waitFor({ timeout: boot }); // any card's form
+  // any card's form, or the named control (a `.scene` card has no form)
+  const at = ready === 'Inspector' ? page.locator('[aria-label="Inspector"] form') : page.getByLabel(ready);
+  await at.waitFor({ timeout: boot });
   return page;
 }
 const QUEST = { right: 280, selection: { kind: 'quest', key: 'carry_letter' } };
@@ -240,4 +243,24 @@ test('the flow graph refilters within 100 ms', async (t) => {
   const ms = await took(['flow:layout', 'flow:commit']);
   t.diagnostic(`flow refilter ${ms.map(Math.round).join(' + ')} ms`);
   assert.ok(sum(ms) <= 100, `refilter ${ms.join(' + ')} ms`);
+});
+
+// Last: it switches the world. Breaks: a `.scene` dialogue routed to no card or the generic one, a
+// value line without its picker, a words line without its Book edit, or an unknown key sent.
+test('a .scene dialogue opens its text card: a picker per value line, words to the Book', async () => {
+  const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
+  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
+  const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
+  const npc = page.getByLabel('line 1 npc');
+  assert.equal(await npc.inputValue(), 'stranger');
+  const card = page.getByLabel('scene card');
+  assert.equal(await card.getByRole('button', { name: 'Edit in Book' }).count(), 2); // lines 3, 6
+  const sent: string[] = [];
+  page.on('request', (r) => void (r.url().includes('/set') && sent.push(r.url())));
+  await npc.fill('nobody');
+  await npc.press('Enter');
+  await card.getByText('no npc nobody').waitFor();
+  await npc.blur();
+  assert.deepEqual(sent, []); // refused here, never sent
+  await page.close();
 });

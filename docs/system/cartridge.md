@@ -939,7 +939,8 @@ build. The author tools below are reachable only in that bundle (a production ex
 - **Editor write path** ([`write.ts`](../../kernel/ts/play/write.ts), [GUI editor design §11](../rnd/gui-editor-design-2026-11-04.md)): the only way the editor changes the source tree.
   Every request whose `Host` is not `localhost` or `127.0.0.1` (any port) is answered 403, and so is
   any non-GET whose `Origin` is not one of those. `GET /source?file=` answers the file's bytes, its
-  sha256 and its kind, key and area; `GET /schema/<dir>` the source schema with its `$defs` inlined;
+  sha256 and its kind, key and area, and for a `.scene` its dialogue's words in the last compile's
+  artifact (`text`, `dialogue.<key>.` and `dialogue.<key>_` keys); `GET /schema/<dir>` the source schema with its `$defs` inlined;
   `GET /journal` the entries, newest first. `POST /change {file, was, ops}` sets or deletes JSON
   fields by path and writes the file in the house format (two-space JSON, a final newline);
   `/edit {file, line, was, words}` replaces the words of one line (a JSON string literal, or a

@@ -20,7 +20,7 @@ const picks = (verb: string, nodes: Context['nodes']) =>
   verb === 'then' ? [...choices('dialogue', nodes), 'end'] : choices('npc', nodes);
 
 export function SceneText({ rel, context, diag }: Props) {
-  const [file, setFile] = useState<{ bytes: string; sha256: string }>();
+  const [file, setFile] = useState<{ bytes: string; sha256: string; text: Record<string, string> }>();
   const [undo, setUndo] = useState<string>();
   const [refused, setRefused] = useState<string>();
   const load = useCallback(
@@ -39,7 +39,8 @@ export function SceneText({ rel, context, diag }: Props) {
     if (ok) setUndo(path === 'set' ? (told as { id: string }).id : undefined); // a refusal keeps the last undo
     await load();
   };
-  const lines = sceneLines(rel, file.bytes, 'dialogue', diag.text ?? {}, diag.placeholders ?? {});
+  // the last compile's words (GET /source), then the push's changed ones
+  const lines = sceneLines(rel, file.bytes, 'dialogue', { ...file.text, ...diag.text }, diag.placeholders ?? {});
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="scene card">
       <Header rel={rel} diag={diag} undo={undo ? () => void post('undo', { id: undo }) : undefined} />

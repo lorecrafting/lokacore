@@ -2,7 +2,15 @@
 // and `/journal`, and the POST routes that change the source tree. Every path a body names goes
 // through `guarded` (guard.ts) once; every write is a `.tmp` and a rename, recorded in the journal
 // `/undo` puts back from. live.ts checks Host and Origin first.
-import { mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 import { files } from './todo.ts';
 import { type Bytes, current, DIRS, guarded, named, placed, refuse, Refused } from './guard.ts';
@@ -185,16 +193,27 @@ const templates = (root: string) =>
   });
 
 let defs: { $defs: unknown } | undefined;
-function get(t: Tree, url: string, places: Record<string, string>): Answer | undefined {
+/** A `.scene`'s dialogue words in the last compile (the push carries only changed keys), for the
+ * Scene card's Edit in Book: `dialogue.<key>.` and its nested sets' `dialogue.<key>_`. */
+function sceneText(artifact: string | undefined, key: string) {
+  if (!artifact || !existsSync(artifact)) return {};
+  const { text } = JSON.parse(JSON.parse(readFileSync(artifact, 'utf8')).canonical);
+  return Object.fromEntries(
+    Object.entries(text as Record<string, string>).filter(([k]) => k.startsWith(`dialogue.${key}`)),
+  );
+}
+type Last = { places: Record<string, string>; artifact?: string };
+function get(t: Tree, url: string, { places, artifact }: Last): Answer | undefined {
   const { pathname, searchParams } = new URL(url, 'http://localhost');
   if (pathname === '/source') {
     const rel = searchParams.get('file');
     const bytes = readFileSync(guarded(t.root, rel, 'read'), 'utf8');
     const at = placed(rel!);
     const kind = at?.dir ?? rel!.split(/[/.]/)[0];
+    const text = at?.ext === 'scene' ? { text: sceneText(artifact, at.key) } : {};
     return [
       200,
-      { bytes, sha256: sha256(bytes), kind, key: at?.key ?? null, area: at?.area ?? null },
+      { bytes, sha256: sha256(bytes), kind, key: at?.key ?? null, area: at?.area ?? null, ...text },
     ];
   }
   const schema = /^\/schema\/([a-z_]+)$/.exec(pathname)?.[1];
@@ -245,15 +264,16 @@ async function answered<A extends Answer | undefined>(run: () => A | Promise<A>)
 }
 
 /** The write path over one source tree; `push` carries each write's `changed` to the page and
- * `places` is the last compile's `~` key => file:line. */
+ * `places` is the last compile's `~` key => file:line and `artifact` its file. */
 export function writer(
   source: string,
   push: (changed: Changed[]) => void,
   places: () => Record<string, string> = () => ({}),
+  artifact?: string,
 ) {
   const t = tree(source, push);
   return {
-    get: (url: string) => answered(() => get(t, url, places())),
+    get: (url: string) => answered(() => get(t, url, { places: places(), artifact })),
     // a write during /new's seconds-long run would land in its snapshot diff, and so its undo
     post: (url: string, sent: Sent) =>
       answered(() => (t.busy ? refuse(409, 'a /new is running') : POSTS[url](t, sent))),
