@@ -4,10 +4,10 @@
 import { addable, allowed } from '../../../../../kernel/ts/play/card.ts';
 import type { useDiagnostics } from '../../author.ts';
 import type { Context } from '../fields.tsx';
-import { Header, useCard } from '../Generic.tsx';
+import { adder, Header, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
-import { adder, Mechanics, RoomForm, useCartridge } from './Room.tsx';
+import { Mechanics, RoomForm } from './Room.tsx';
 
 type Props = { rel: string; context: Context; diag: ReturnType<typeof useDiagnostics> };
 type Doc = Record<string, unknown>;

@@ -329,5 +329,27 @@ export const removed = (doc: Obj, f: string): Obj => {
 export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
   a.room === key && menu.includes(a.kind) ? a.kind : undefined;
 
-export { allowed } from './allowed.ts';
+import { allowed } from './allowed.ts';
+export { allowed };
+
+/** The generic card's add menu (a command action's, right.tsx's fallback): `only` narrows the
+ * registry's fields, then the cartridge's capabilities gate them as the compiler does
+ * (UNDECLARED_CAPABILITY); none until cartridge.json is read. */
+export const cardMenu = (
+  kind: string,
+  registry: Record<string, Surfaces>,
+  doc: unknown,
+  revealed: string[],
+  cart: { requires?: { capabilities?: object }; world?: Record<string, unknown> } | undefined,
+  only = (fields: string[]) => fields,
+) =>
+  cart
+    ? allowed(
+        kind,
+        only(addable(kind, registry, doc, revealed)),
+        cart.requires?.capabilities ?? {},
+        plain(doc) ? doc : {},
+        cart.world,
+      )
+    : [];
 export * from './world_card.ts';

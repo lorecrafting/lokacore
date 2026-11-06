@@ -22,8 +22,5 @@ export function paired(doc: Obj, defs: Record<string, Obj>): Obj {
 /** An action's add menu: only its own definition's fields and `abstract` (extends.ex), so a scripted
  * action is not offered a command action's (ActionDefinition: command, input, accessibility) nor a
  * command action a scripted one's (check, outcomes): UNKNOWN_FIELD. */
-export const scriptedMenu = (
-  menu: string[],
-  defs: Record<string, Obj>,
-  def = 'source.ScriptedAction',
-) => menu.filter((f) => f === 'abstract' || Object.hasOwn(defs[def].properties as Obj, f));
+export const menuOf = (menu: string[], defs: Record<string, Obj>, def = 'source.ScriptedAction') =>
+  menu.filter((f) => f === 'abstract' || Object.hasOwn(defs[def].properties as Obj, f));

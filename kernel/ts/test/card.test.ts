@@ -15,6 +15,7 @@ import {
   addedHere,
   definitionOf,
   allowed,
+  cardMenu,
   apart,
   applied,
   branchOf,
@@ -43,7 +44,7 @@ import {
   tagHidden,
   worldFile,
 } from '../play/card.ts';
-import { paired, scriptedMenu } from '../play/action.ts';
+import { paired, menuOf } from '../play/action.ts';
 import { change } from '../play/edit_model.ts';
 import { json } from '../play/write.ts';
 
@@ -577,21 +578,16 @@ test("an action's and a reaction's add menus offer only fields the compiler acce
 // Break: a scripted action's Add menu offers a command action's field (command, input,
 // accessibility), or a command action's a scripted one's (check), which the compiler refuses as UNKNOWN_FIELD.
 test("a scripted action's add menu offers only ScriptedAction fields", () => {
-  const registry = JSON.parse(
-    readFileSync(
-      join(import.meta.dirname, '../../../tools/author-panel/src/edit/registry.json'),
-      'utf8',
-    ),
-  );
+  const registry = read('../../tools/author-panel/src/edit/registry.json');
   const fields = Object.keys(defs['source.ScriptedAction'].properties);
-  const menu = scriptedMenu(addable('actions', registry, {}, []), defs);
+  const menu = menuOf(addable('actions', registry, {}, []), defs);
   assert.deepEqual(
     menu.filter((f) => f !== 'abstract' && !fields.includes(f)),
     [],
   ); // abstract: extends.ex
   assert.ok(menu.includes('check') && menu.includes('abstract'));
   // and a command action's offers no scripted field (check, outcomes): loka-wfrgk.54
-  const command = scriptedMenu(
+  const command = menuOf(
     addable('actions', registry, { command: 'x' }, []),
     defs,
     'source.ActionDefinition',
@@ -600,6 +596,11 @@ test("a scripted action's add menu offers only ScriptedAction fields", () => {
     ['check', 'outcomes', 'input', 'abstract'].map((f) => command.includes(f)),
     [false, false, true, true],
   );
+  // Break: the generic card offers an undeclared capability's field, or any before cartridge.json is read
+  const on = (c?: object) =>
+    cardMenu('actions', registry, {}, [], c && { requires: { capabilities: c } }, () => command);
+  const offered = [on({ policy: 1 }), on({}), on()].map((m) => m.includes('policy'));
+  assert.deepEqual(offered, [true, false, false]);
 });
 
 // Break: an action's check is added or removed but its failure outcome is not (OUTCOME_MISMATCH,
