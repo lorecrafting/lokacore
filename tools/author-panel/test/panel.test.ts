@@ -201,7 +201,7 @@ test('a held edit gives way to its undoing, Undo and a reselect', async () => {
   const mass = () => JSON.parse(readFileSync(file, 'utf8')).mass_grams;
   const field = page.locator('#root_mass_grams');
   const undo = page.getByRole('button', { name: 'Undo', exact: true });
-  const refusal = page.getByText('must be >= 0');
+  const refusal = page.getByText('mass_grams must be >= 0'); // the held line, not rjsf's own
   const set = async (v: string) => (await field.fill(v), await field.blur());
   await field.waitFor({ timeout: boot });
   await set('600');
