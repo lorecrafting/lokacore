@@ -2,10 +2,10 @@
 // a hand-built widget claims, read off the real schemas; the expected claims are hand-checked
 // against schemas/source/defs.schema.json.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { uiSchema } from '../play/ui_schema.ts';
+import { titles, uiSchema } from '../play/ui_schema.ts';
 
 const SOURCE = join(import.meta.dirname, '../../../schemas/source');
 const read = (f: string) => JSON.parse(readFileSync(join(SOURCE, f), 'utf8'));
@@ -64,7 +64,8 @@ test('a whole-kind, an array-file field and a treatment card are each claimed wh
 
 // Breaks: a recursive definition never ends, loses its claims below the first level (review 3:
 // depth 3 is drawn), or an anyOf branch shows rjsf's "Option 1" because
-// it has no title, or a oneOf's titles land under anyOf where rjsf does not read them.
+// it has no title, or a oneOf's titles land under anyOf where rjsf does not read them, or a branch is
+// named by its JSON type, by a required key where a discriminating const exists, or alike its sibling.
 test('a recursive definition ends and every anyOf branch is titled', () => {
   const tree = {
     $ref: '#/$defs/Node',
@@ -84,6 +85,13 @@ test('a recursive definition ends and every anyOf branch is titled', () => {
           ],
         },
         one: { oneOf: [{ title: 'A' }, {}] },
+        kind: {
+          anyOf: [
+            { properties: { kind: { const: 'opposed' } }, required: ['kind', 'a'] },
+            { properties: { kind: { const: 'luck' } }, required: ['kind'] },
+          ],
+        },
+        twin: { anyOf: [{ required: ['e'] }, { required: ['e'] }] },
       },
     },
     Gate: {},
@@ -101,7 +109,41 @@ test('a recursive definition ends and every anyOf branch is titled', () => {
   assert.equal(out.kids.items.kids.items.kids, undefined);
   assert.deepEqual(
     out.pick.anyOf.map((b: any) => b['ui:title']),
-    ['Named', 'Gate', 'door', 'string', 'option 5'],
+    ['Named', 'Gate', 'door', 'option 4', 'option 5'],
   );
   assert.deepEqual(out.one, { oneOf: [{ 'ui:title': 'A' }, { 'ui:title': 'option 2' }] });
+  // a const key distinct in every branch names it before its single required key; a shared name does not stand
+  assert.deepEqual(
+    out.kind.anyOf.map((b: any) => b['ui:title']),
+    ['opposed', 'luck'],
+  );
+  assert.deepEqual(
+    out.twin.anyOf.map((b: any) => b['ui:title']),
+    ['option 1', 'option 2'],
+  );
+});
+
+// Breaks: a kind picker names two branches alike or by a JSON type ("object") where they differ by
+// more than type, so the owner cannot tell them apart (docs/design/editor-chrome-rulings.md §7).
+// Every union in every real source schema and definition is named.
+test('every union picker in the real schemas names its branches distinctly, by type only when that is all they differ by', () => {
+  const unions: any[][] = [];
+  const collect = (n: unknown): void => {
+    if (typeof n !== 'object' || n === null) return;
+    for (const [k, v] of Object.entries(n)) {
+      if ((k === 'anyOf' || k === 'oneOf') && Array.isArray(v)) unions.push(v);
+      collect(v);
+    }
+  };
+  for (const f of readdirSync(SOURCE).filter((f) => f.endsWith('.schema.json'))) collect(read(f));
+  assert.ok(unions.length > 40, `${unions.length} unions found`);
+  const resolve = (b: any) => (b.$ref ? defs[b.$ref.split('/').pop()] : b);
+  const bad = unions.flatMap((u) => {
+    const names = titles(u, defs);
+    const types = u.map((b) => resolve(b).type);
+    const onlyType = new Set(types).size === u.length && types.every((t) => typeof t === 'string');
+    const typed = names.some((t) => /^(object|string|number|integer|boolean|array|null)$/.test(t));
+    return new Set(names).size < u.length || (typed && !onlyType) ? [names.join('|')] : [];
+  });
+  assert.deepEqual(bad, []);
 });
