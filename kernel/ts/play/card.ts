@@ -155,6 +155,23 @@ export function hidden(
 export const choices = (field: string, nodes: { ref: string; kind: string }[]) =>
   nodes.filter((n) => n.kind === field).map((n) => n.ref.slice(n.ref.lastIndexOf('/') + 1));
 
+/** The node kind a reference field at `path` picks: its last named step (`shop.offers.0.item`). */
+export function pickKind(path: (string | number)[]) {
+  const name = [...path].reverse().find((s) => typeof s === 'string' && !/^\d+$/.test(s));
+  return name === 'services' ? 'service' : name === 'items' ? 'item' : String(name ?? '');
+}
+
+/** Why `value` is refused: it names no node of the picker's kind (no keys known: free text). */
+export function refusePick(pick: { kind: string; keys: string[] } | undefined, value: string) {
+  return pick?.keys.length && value && !pick.keys.includes(value)
+    ? `no ${pick.kind} ${value}`
+    : undefined;
+}
+
+/** `doc` placed in `room`: an NPC's `room`, an item's whole `location`, so no `npc` or `item` stays. */
+export const placed = (doc: Obj, dir: string, room: string): Obj =>
+  dir === 'npcs' ? { ...doc, room } : { ...doc, location: { in: 'room', room } };
+
 const opOf = (branch: Obj): unknown => (branch.properties as any)?.op?.const;
 const typeOf = (v: unknown) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v);
 
@@ -245,21 +262,37 @@ export const removed = (doc: Obj, f: string): Obj => {
 export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
   a.room === key && menu.includes(a.kind) ? a.kind : undefined;
 
-// Each field's owning capability, as the compiler checks it (UNDECLARED_CAPABILITY: content/room_parts.ex
-// parts/1, cues.ex:54, construction.ex:101); a field it omits needs none.
+// Each field's owning capabilities, as the compiler checks them (UNDECLARED_CAPABILITY: content/room_parts.ex
+// and entities.ex parts/1, cues.ex:54, construction.ex:101, asks.ex:21); a field it omits needs none.
+const VARIANT = 'description_variant';
 const OWNERS: Record<string, string> = {
+  'npcs.ask': 'speech topic',
+  'npcs.cues': 'sense_cue',
+  'npcs.daily_schedule': 'schedule',
+  'npcs.description_variants': VARIANT,
+  'npcs.name_variants': VARIANT,
+  'npcs.shop': 'commerce',
+  'items.cues': 'sense_cue',
+  'items.description_variants': VARIANT,
+  'items.edible': 'food',
+  'items.fuel': 'light',
+  'items.name_variants': VARIANT,
+  'items.readable': 'readable',
+  'items.room_line_variants': VARIANT,
+  'items.slot': 'equipment',
+  'items.tags': 'tag',
   'rooms.cues': 'sense_cue',
   'rooms.dark': 'light',
   'rooms.dark_description': 'light',
   'rooms.details': 'inspectable_detail',
   'rooms.site': 'construction',
   'rooms.tags': 'tag',
-  'rooms.variants': 'description_variant',
+  'rooms.variants': VARIANT,
 };
 
 /** The menu's fields whose capability `requires.capabilities` (`caps`) declares; others would not compile. */
 export const allowed = (kind: string, menu: string[], caps: object) =>
   menu.filter((f) => {
-    const owner = OWNERS[`${kind}.${f}`];
-    return !owner || Object.hasOwn(caps, owner);
+    const owners = OWNERS[`${kind}.${f}`]?.split(' ') ?? [];
+    return owners.every((o) => Object.hasOwn(caps, o));
   });

@@ -22,8 +22,11 @@ import {
   fieldErrors,
   hidden,
   minimal,
+  pickKind,
+  placed,
   proseKey,
   rebase,
+  refusePick,
   removed,
   start,
 } from '../play/card.ts';
@@ -341,4 +344,82 @@ test("a room's add menu offers only fields the cartridge's capabilities allow", 
     'site',
     'variants',
   ]);
+});
+
+// Break: an NPC or item card's add menu offers a field whose capability the cartridge lacks (the
+// world stops compiling), or an ask that needs speech but not topic. Owners hand-copied from
+// lib/loka/content/entities.ex parts/1, cues.ex @holders, asks.ex:21 and capability_registry.json.
+test("an NPC's and an item's add menus offer only fields every owning capability allows", () => {
+  const npc = ['ask', 'daily_schedule', 'hp', 'name_variants', 'shop'];
+  assert.deepEqual(allowed('npcs', npc, { speech: 1 }), ['hp']);
+  assert.deepEqual(allowed('npcs', npc, { speech: 1, topic: 1, commerce: 1 }), [
+    'ask',
+    'hp',
+    'shop',
+  ]);
+  assert.deepEqual(allowed('npcs', npc, { schedule: 1, description_variant: 1 }), [
+    'daily_schedule',
+    'hp',
+    'name_variants',
+  ]);
+  const item = ['edible', 'fuel', 'mass_grams', 'readable', 'slot', 'tags'];
+  assert.deepEqual(allowed('items', item, {}), ['mass_grams']);
+  assert.deepEqual(allowed('items', item, { food: 1, light: 1, equipment: 1 }), [
+    'edible',
+    'fuel',
+    'mass_grams',
+    'slot',
+  ]);
+});
+
+// Break: a reorder, remove or add of shop offer rows diffs to ops that leave a moved row's field
+// behind (a stock on the wrong offer) or drop the wrong row, so the file is not the table drawn.
+test('offer rows reordered, removed or added write exactly the table drawn', () => {
+  const rope = { item: 'rope', buy: 3, sell: 1 };
+  const lamp = { item: 'lamp', buy: 5, sell: 2, stock: { items: ['lamp_1'] } };
+  const saved = { name: 'npc.smith.name', shop: { offers: [rope, lamp] } };
+  const shop = (offers: object[]) => ({ ...saved, shop: { offers } });
+  const at = (...p: (string | number)[]) => ['shop', 'offers', ...p];
+  assert.deepEqual(diff(saved, shop([lamp, rope])), [
+    { path: at(0, 'item'), value: 'lamp' },
+    { path: at(0, 'buy'), value: 5 },
+    { path: at(0, 'sell'), value: 2 },
+    { path: at(0, 'stock'), value: { items: ['lamp_1'] } },
+    { path: at(1, 'item'), value: 'rope' },
+    { path: at(1, 'buy'), value: 3 },
+    { path: at(1, 'sell'), value: 1 },
+    { path: at(1, 'stock'), delete: true },
+  ]);
+  const kit = { item: 'kit', buy: 9, sell: 4 };
+  for (const draft of [shop([lamp, rope]), shop([lamp]), shop([rope, lamp, kit])]) {
+    const doc = structuredClone(saved);
+    change(doc, diff(saved, draft));
+    assert.deepEqual(doc, draft);
+  }
+});
+
+// Break: placing an item in a room keeps its old holder (location.npc beside location.room, which
+// the schema refuses), or an NPC is placed through an item's location.
+test('placement writes the room and nothing of the old holder', () => {
+  const sword = { name: 'item.sword.name', location: { in: 'npc', npc: 'smith' } };
+  const draft = placed(sword, 'items', 'yard');
+  assert.deepEqual(draft, { name: 'item.sword.name', location: { in: 'room', room: 'yard' } });
+  const doc = structuredClone(sword);
+  change(doc, diff(sword, draft));
+  assert.deepEqual(doc, draft);
+  assert.deepEqual(placed({ room: 'start' }, 'npcs', 'yard'), { room: 'yard' });
+});
+
+// Break: a picker offers or accepts ids of another kind (an offer's item from the rooms), or an
+// unknown id is written to the file instead of refused at the field.
+test('a reference picker takes the kind its field names and refuses an unknown id', () => {
+  assert.equal(pickKind(['shop', 'offers', 0, 'item']), 'item');
+  assert.equal(pickKind(['daily_schedule', '8', 'room']), 'room');
+  assert.equal(pickKind(['services', 1]), 'service');
+  assert.equal(pickKind(['location', 'npc']), 'npc');
+  const items = { kind: 'item', keys: ['rope', 'lamp'] };
+  assert.ok(refusePick(items, 'ropes'));
+  assert.equal(refusePick(items, 'rope'), undefined);
+  assert.equal(refusePick(items, ''), undefined); // cleared: the field is removed, not refused
+  assert.equal(refusePick({ kind: 'fact', keys: [] }, 'any'), undefined); // no keys known: free text
 });
