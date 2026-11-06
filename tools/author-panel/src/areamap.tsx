@@ -3,6 +3,7 @@
 import {
   ChevronDown,
   ChevronUp,
+  CircleAlert,
   Lock,
   LockOpen,
   Maximize,
@@ -135,9 +136,6 @@ export function AreaMap(p: MapProps) {
   // owner plan: the whole map locks against drags, in browser storage, never in the cartridge; locked by default
   const [locked, lock] = useState(() => localStorage.getItem(LOCK) !== 'off');
   useEffect(() => localStorage.setItem(LOCK, locked ? 'on' : 'off'), [locked]);
-  shown.rooms = p.story.map;
-  shown.nodes = p.story.graph.nodes;
-  useEffect(() => tell(''), [p.story]); // a recompile clears the last refusal
   useEffect(() => ((shown.tell = tell), () => void (shown.tell = alone)), []);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -154,9 +152,10 @@ export function AreaMap(p: MapProps) {
       <Templates story={p.story} room={p.story.map.find((r) => r.ref === p.selected)} />
       <p
         role={told ? 'alert' : undefined}
-        className={`truncate px-2 py-1 text-xs ${told ? 'text-destructive' : 'text-muted-foreground'}`}
+        className={`flex items-center gap-1 px-2 py-1 text-xs ${told ? 'text-destructive' : 'text-muted-foreground'}`}
       >
-        {told || map.footer(p.story.map, reach.unreached, reach.locked)}
+        {told ? <CircleAlert className="size-3.5 shrink-0" aria-hidden /> : null}
+        <span className="truncate">{told || map.footer(p.story.map, reach.unreached, reach.locked)}</span>
       </p>
       <p aria-live="polite" className="sr-only">{`level ${l.z}, ${l.level.length} rooms`}</p>
     </div>

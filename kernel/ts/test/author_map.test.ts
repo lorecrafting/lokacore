@@ -118,6 +118,15 @@ test('labels: the key clipped to its box from zoom 1, none below', () => {
   assert.equal(map.label('village_green', 0.5), undefined);
 });
 
+// Breaks: the pill repeats a whole in-box key (loka-vduxr.73), or a clipped, hidden or current
+// room's key loses its pill.
+test('pill: only where the box shows no whole key, and always on the current room', () => {
+  assert.equal(map.pill('hut', 1, false), false);
+  assert.equal(map.pill('village_green', 1, false), true); // clipped
+  assert.equal(map.pill('hut', 0.5, false), true); // no label below zoom 1
+  assert.equal(map.pill('hut', 1, true), true); // its box draws the pin
+});
+
 // Breaks: fit leaves the level off-centre or past the zoom limits, keep lets the level leave the
 // view, a cursor zoom drifts the point under the cursor, or follow-here moves a visible room.
 test('the view: fit, keep one cell in, zoom about the cursor, show an off-screen room', () => {
@@ -203,4 +212,14 @@ test("a room's accessible name and the footer's counts", () => {
     '5 rooms · 2 areas · 2 unreached · 1 behind lock · 1 unplaced',
   );
   assert.equal(map.footer([A], new Set(), new Set()), '1 room · 1 area');
+});
+
+// Breaks: a /story failure with no answer or vite's 502 replaces the map, or the watcher's own
+// refusal (its 500) keeps the stale map (loka-vduxr.76).
+test('a /story failure keeps the map unless the watcher refused', () => {
+  const failed = (status?: number) => Object.assign(new Error('x'), { status });
+  assert.deepEqual(
+    [undefined, 502, 504, 500].map((s) => map.kept(failed(s))),
+    [true, true, true, false],
+  );
 });

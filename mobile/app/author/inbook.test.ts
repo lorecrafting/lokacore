@@ -1,4 +1,4 @@
-// size: allow 545, one editor's keys, saves, conflicts and add-here walked over one stubbed page
+// size: allow 550, one editor's keys, saves, conflicts and add-here walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -260,7 +260,8 @@ test('the selection marks its lines; the panel`s shortcuts and edits reach it fr
 
 // Breaks: a Book click on a room offers no add-here menu (when the card's offer follows the click, or
 // when the room is already selected), a pick tells another field or room, or an offer no Book click
-// asked for (the card's next list after a pick) or an empty one pops the menu.
+// asked for (the card's next list after a pick or a click off every line) or an empty one pops
+// the menu.
 test('a Book click on the selected room offers add-here; a pick tells the panel', async () => {
   const offer = () =>
     postMessage({ op: 'select', kind: 'room', key: 'hut', add: ['ambient', 'dark'] }, '*');
@@ -286,6 +287,10 @@ test('a Book click on the selected room offers add-here; a pick tells the panel'
   await noteSays('Add hereambientdark');
   await page.evaluate(() => postMessage({ op: 'select', kind: 'room', key: 'hut', add: [] }, '*'));
   await hut.click(); // a card with nothing to add offers no empty menu
+  await page.waitForTimeout(200);
+  assert.equal(await page.locator('.loka-note').isHidden(), true);
+  await page.mouse.click(1, 1); // off every line: the card's next offer is not asked for
+  await page.evaluate(offer);
   await page.waitForTimeout(200);
   assert.equal(await page.locator('.loka-note').isHidden(), true);
 });

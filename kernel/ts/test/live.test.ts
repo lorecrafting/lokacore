@@ -130,6 +130,13 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   for (let i = 0; i < 250 && !existsSync(log); i++) await new Promise((r) => setTimeout(r, 20));
   assert.equal(readFileSync(log, 'utf8'), `${join(dir, 'text.json')}:2`);
   assert.equal((await post('/open', { key: 'room.b', words: 'line five' })).status, 404);
+  // Break: Cmd-E on a selection whose file has no `"key":` line (a .scene, a room) answers 404,
+  // or a `file` outside the source tree is opened.
+  assert.equal(
+    await (await post('/open', { key: 'z', file: 'scenes/z.scene' })).json(),
+    'scenes/z.scene:1',
+  );
+  assert.equal((await post('/open', { key: 'room.b', file: '../none.json' })).status, 404);
   assert.equal((await fetch(`http://127.0.0.1:${port}/open`)).status, 404); // a GET is not a post
   const bad = await fetch(`http://127.0.0.1:${port}/open`, { method: 'POST', body: '{' });
   assert.equal(bad.status, 400);

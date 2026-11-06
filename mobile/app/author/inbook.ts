@@ -253,7 +253,7 @@ function offer() {
   );
 }
 const onClick = (e: Event) => {
-  asked = !note.contains(e.target as Node); // a pick from the menu asks for no second one
+  asked = lines().some((l) => l.contains(e.target as Node)); // a Book line asks; the menu, nothing
   hush(); // (it empties the note)
   if ((e.target as Element).closest?.('[data-loka-selected]')) offer();
   if (!landed) return;

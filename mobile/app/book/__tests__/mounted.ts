@@ -138,6 +138,7 @@ export function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarr
             lines: [{ key: line }, ...(ambient ? [{ key: ambient }] : [])],
             combat_lines: [0],
             ...(arrival && { arrival }),
+            ...(line === 'combat.death' && { died: true }),
           } as never;
         return reply;
       };

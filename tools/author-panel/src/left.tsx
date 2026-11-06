@@ -1,9 +1,10 @@
 // The shell's left column: the Hierarchy (every definition by kind, the current room marked, the
 // selection shared) and the map slot under it, its Map | Story segment (E3a and S2 fill them).
-import { CircleAlert, MapPin, Play } from 'lucide-react';
+import { MapPin, Play } from 'lucide-react';
 import { AreaMap, type MapProps } from './areamap.tsx';
 import type { Change, Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
+import { Refusal } from './edit/templates.tsx';
 import type { SetLayout } from './columns.tsx';
 import { fromRef, WORLD, type Layout, type Selection } from './shell.ts';
 import { FlowView } from './flow.tsx';
@@ -118,10 +119,9 @@ export function MapSlot({
       {refused ? (
         <div className="p-2">
           {segment}
-          <p className="mt-2 flex items-center gap-1 truncate text-destructive">
-            <CircleAlert className="size-4 shrink-0" />
-            {refused}
-          </p>
+          <div className="mt-2">
+            <Refusal>{refused}</Refusal>
+          </div>
         </div>
       ) : layout.map === 'map' && story ? (
         <AreaMap story={story} segment={segment} {...m} />
