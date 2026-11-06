@@ -3,6 +3,7 @@
 // unstyled. Inputs and selects keep rjsf's widgets (they own the value coercion) and take the
 // `form-control` rule in index.css.
 import {
+  errorId,
   getTemplate,
   getUiOptions,
   type DescriptionFieldProps,
@@ -11,15 +12,7 @@ import {
   type IconButtonProps,
   type TitleFieldProps,
 } from '@rjsf/utils';
-import {
-  ArrowDown,
-  ArrowUp,
-  CircleAlert,
-  Copy,
-  Plus,
-  X,
-  type LucideIcon,
-} from 'lucide-react';
+import { ArrowDown, ArrowUp, CircleAlert, Copy, Plus, X, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { FormProps } from '@rjsf/core';
 import { Button } from '../components/ui/button.tsx';
@@ -63,7 +56,7 @@ function FieldTemplate(p: FieldTemplateProps) {
   return (
     <Wrap {...p}>
       <div
-        className={`grid gap-0.5 ${rawErrors?.length ? '[&_:is(input,select,textarea)]:border-destructive' : ''}`}
+        className={`grid gap-0.5 ${rawErrors?.length ? '[&>.form-control]:border-destructive [&>label>input]:border-destructive' : ''}`}
       >
         {show ? (
           <label htmlFor={id} className={item ? 'sr-only' : 'text-xs text-muted-foreground'}>
@@ -80,9 +73,9 @@ function FieldTemplate(p: FieldTemplateProps) {
   );
 }
 
-/** An object's legend; an array item's (`attributes-1`) is for a reader only, as above. */
+/** An object's legend; an array item's is for a reader only, as above. */
 function TitleFieldTemplate({ id, title, required }: TitleFieldProps) {
-  const item = /-\d+$/.test(title);
+  const item = /_\d+__title$/.test(id); // rjsf's titleId of an array item: root_attributes_0__title
   return (
     <legend id={id} className={item ? 'sr-only' : 'text-xs font-medium'}>
       {title}
@@ -116,12 +109,12 @@ export const Refusal = ({ children, boxed }: { children: ReactNode; boxed?: bool
 );
 
 /** The refusals under their field. */
-const FieldErrorTemplate = ({ errors = [] }: FieldErrorProps) => (
-  <>
+const FieldErrorTemplate = ({ errors = [], fieldPathId }: FieldErrorProps) => (
+  <div id={errorId(fieldPathId)}>
     {errors.filter(Boolean).map((e, i) => (
       <Refusal key={i}>{e}</Refusal>
     ))}
-  </>
+  </div>
 );
 
 export const templates: FormProps['templates'] = {

@@ -1,130 +1,130 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 /* .dark follows the OS setting (main.tsx); docs/design/editor-chrome-rulings.md. */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    /* The chrome's type roles: text-xs its label, text-sm its body and code, text-base the Book's
+  /* The chrome's type roles: text-xs its label, text-sm its body and code, text-base the Book's
        prose (an inspector field only). */
-    --font-sans: var(--chrome-sans);
-    --font-mono: var(--chrome-mono);
-    --font-prose: var(--chrome-prose);
-    --text-xs: var(--chrome-label-size);
-    --text-xs--line-height: var(--chrome-label-leading);
-    --text-sm: var(--chrome-body-size);
-    --text-sm--line-height: var(--chrome-body-leading);
-    --text-base: var(--chrome-prose-size);
-    --text-base--line-height: var(--chrome-prose-leading);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --color-card: var(--card);
-    --color-card-foreground: var(--card-foreground);
-    --color-popover: var(--popover);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-muted: var(--muted);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-accent: var(--accent);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-destructive: var(--destructive);
-    --color-border: var(--border);
-    --color-input: var(--input);
-    --color-ring: var(--ring);
-    --color-outside: var(--outside);
-    --color-outside-soft: var(--outside-soft);
-    --color-refusal-soft: var(--refusal-soft);
-    --color-warning: var(--warning);
-    --color-warning-soft: var(--warning-soft);
-    --color-ok: var(--ok);
-    --color-sunken: var(--sunken);
-    --color-area-1: var(--area-1);
-    --color-area-2: var(--area-2);
-    --color-area-3: var(--area-3);
-    --color-area-4: var(--area-4);
-    --color-area-5: var(--area-5);
-    --color-area-6: var(--area-6);
+  --font-sans: var(--chrome-sans);
+  --font-mono: var(--chrome-mono);
+  --font-prose: var(--chrome-prose);
+  --text-xs: var(--chrome-label-size);
+  --text-xs--line-height: var(--chrome-label-leading);
+  --text-sm: var(--chrome-body-size);
+  --text-sm--line-height: var(--chrome-body-leading);
+  --text-base: var(--chrome-prose-size);
+  --text-base--line-height: var(--chrome-prose-leading);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-outside: var(--outside);
+  --color-outside-soft: var(--outside-soft);
+  --color-refusal-soft: var(--refusal-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-ok: var(--ok);
+  --color-sunken: var(--sunken);
+  --color-area-1: var(--area-1);
+  --color-area-2: var(--area-2);
+  --color-area-3: var(--area-3);
+  --color-area-4: var(--area-4);
+  --color-area-5: var(--area-5);
+  --color-area-6: var(--area-6);
 }
 
 /* Both palettes are inline variables from mobile/app/book/tokens.ts (main.tsx); these pick one. */
 :root {
-    --radius: var(--chrome-radius);
-    --background: var(--chrome-light-bg);
-    --foreground: var(--chrome-light-fg);
-    --card: var(--chrome-light-surface);
-    --card-foreground: var(--chrome-light-fg);
-    --popover: var(--chrome-light-surface);
-    --popover-foreground: var(--chrome-light-fg);
-    --primary: var(--chrome-light-accent);
-    --primary-foreground: var(--chrome-light-on-fill);
-    --secondary: var(--chrome-light-sunken);
-    --secondary-foreground: var(--chrome-light-fg);
-    --muted: var(--chrome-light-sunken);
-    --muted-foreground: var(--chrome-light-dim);
-    --accent: var(--chrome-light-accent-soft);
-    --accent-foreground: var(--chrome-light-fg);
-    --destructive: var(--chrome-light-refusal);
-    --border: var(--chrome-light-line);
-    --input: var(--chrome-light-strong);
-    --ring: var(--chrome-light-accent);
-    --outside: var(--chrome-light-outside);
-    --outside-soft: var(--chrome-light-outside-soft);
-    --refusal-soft: var(--chrome-light-refusal-soft);
-    --warning: var(--chrome-light-warning);
-    --warning-soft: var(--chrome-light-warning-soft);
-    --ok: var(--chrome-light-ok);
-    --sunken: var(--chrome-light-sunken);
-    --area-1: var(--chrome-light-area-1);
-    --area-2: var(--chrome-light-area-2);
-    --area-3: var(--chrome-light-area-3);
-    --area-4: var(--chrome-light-area-4);
-    --area-5: var(--chrome-light-area-5);
-    --area-6: var(--chrome-light-area-6);
+  --radius: var(--chrome-radius);
+  --background: var(--chrome-light-bg);
+  --foreground: var(--chrome-light-fg);
+  --card: var(--chrome-light-surface);
+  --card-foreground: var(--chrome-light-fg);
+  --popover: var(--chrome-light-surface);
+  --popover-foreground: var(--chrome-light-fg);
+  --primary: var(--chrome-light-accent);
+  --primary-foreground: var(--chrome-light-on-fill);
+  --secondary: var(--chrome-light-sunken);
+  --secondary-foreground: var(--chrome-light-fg);
+  --muted: var(--chrome-light-sunken);
+  --muted-foreground: var(--chrome-light-dim);
+  --accent: var(--chrome-light-accent-soft);
+  --accent-foreground: var(--chrome-light-fg);
+  --destructive: var(--chrome-light-refusal);
+  --border: var(--chrome-light-line);
+  --input: var(--chrome-light-strong);
+  --ring: var(--chrome-light-accent);
+  --outside: var(--chrome-light-outside);
+  --outside-soft: var(--chrome-light-outside-soft);
+  --refusal-soft: var(--chrome-light-refusal-soft);
+  --warning: var(--chrome-light-warning);
+  --warning-soft: var(--chrome-light-warning-soft);
+  --ok: var(--chrome-light-ok);
+  --sunken: var(--chrome-light-sunken);
+  --area-1: var(--chrome-light-area-1);
+  --area-2: var(--chrome-light-area-2);
+  --area-3: var(--chrome-light-area-3);
+  --area-4: var(--chrome-light-area-4);
+  --area-5: var(--chrome-light-area-5);
+  --area-6: var(--chrome-light-area-6);
 }
 
 .dark {
-    --background: var(--chrome-dark-bg);
-    --foreground: var(--chrome-dark-fg);
-    --card: var(--chrome-dark-surface);
-    --card-foreground: var(--chrome-dark-fg);
-    --popover: var(--chrome-dark-surface);
-    --popover-foreground: var(--chrome-dark-fg);
-    --primary: var(--chrome-dark-accent);
-    --primary-foreground: var(--chrome-dark-on-fill);
-    --secondary: var(--chrome-dark-sunken);
-    --secondary-foreground: var(--chrome-dark-fg);
-    --muted: var(--chrome-dark-sunken);
-    --muted-foreground: var(--chrome-dark-dim);
-    --accent: var(--chrome-dark-accent-soft);
-    --accent-foreground: var(--chrome-dark-fg);
-    --destructive: var(--chrome-dark-refusal);
-    --border: var(--chrome-dark-line);
-    --input: var(--chrome-dark-strong);
-    --ring: var(--chrome-dark-accent);
-    --outside: var(--chrome-dark-outside);
-    --outside-soft: var(--chrome-dark-outside-soft);
-    --refusal-soft: var(--chrome-dark-refusal-soft);
-    --warning: var(--chrome-dark-warning);
-    --warning-soft: var(--chrome-dark-warning-soft);
-    --ok: var(--chrome-dark-ok);
-    --sunken: var(--chrome-dark-sunken);
-    --area-1: var(--chrome-dark-area-1);
-    --area-2: var(--chrome-dark-area-2);
-    --area-3: var(--chrome-dark-area-3);
-    --area-4: var(--chrome-dark-area-4);
-    --area-5: var(--chrome-dark-area-5);
-    --area-6: var(--chrome-dark-area-6);
+  --background: var(--chrome-dark-bg);
+  --foreground: var(--chrome-dark-fg);
+  --card: var(--chrome-dark-surface);
+  --card-foreground: var(--chrome-dark-fg);
+  --popover: var(--chrome-dark-surface);
+  --popover-foreground: var(--chrome-dark-fg);
+  --primary: var(--chrome-dark-accent);
+  --primary-foreground: var(--chrome-dark-on-fill);
+  --secondary: var(--chrome-dark-sunken);
+  --secondary-foreground: var(--chrome-dark-fg);
+  --muted: var(--chrome-dark-sunken);
+  --muted-foreground: var(--chrome-dark-dim);
+  --accent: var(--chrome-dark-accent-soft);
+  --accent-foreground: var(--chrome-dark-fg);
+  --destructive: var(--chrome-dark-refusal);
+  --border: var(--chrome-dark-line);
+  --input: var(--chrome-dark-strong);
+  --ring: var(--chrome-dark-accent);
+  --outside: var(--chrome-dark-outside);
+  --outside-soft: var(--chrome-dark-outside-soft);
+  --refusal-soft: var(--chrome-dark-refusal-soft);
+  --warning: var(--chrome-dark-warning);
+  --warning-soft: var(--chrome-dark-warning-soft);
+  --ok: var(--chrome-dark-ok);
+  --sunken: var(--chrome-dark-sunken);
+  --area-1: var(--chrome-dark-area-1);
+  --area-2: var(--chrome-dark-area-2);
+  --area-3: var(--chrome-dark-area-3);
+  --area-4: var(--chrome-dark-area-4);
+  --area-5: var(--chrome-dark-area-5);
+  --area-6: var(--chrome-dark-area-6);
 }
 
 @layer base {
@@ -138,12 +138,13 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
-  [role='listbox'] :focus-visible, [role='tree'] :focus-visible {
+  [role='listbox'] :focus-visible,
+  [role='tree'] :focus-visible {
     outline-offset: -2px;
   }
   /* rjsf's own inputs, selects and textareas in the card (edit/templates.tsx) */
   .form-control {
-    @apply h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-sm;
+    @apply h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50;
   }
   textarea.form-control {
     @apply h-auto py-1;
