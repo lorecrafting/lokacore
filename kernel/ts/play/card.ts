@@ -1,4 +1,4 @@
-// size: allow 360, every card's logic lives here (cards hold no logic): the generic, Room and World cards' steps
+// size: allow 410, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -156,6 +156,12 @@ export function hidden(
 export const choices = (field: string, nodes: { ref: string; kind: string }[]) =>
   nodes.filter((n) => n.kind === field).map((n) => n.ref.slice(n.ref.lastIndexOf('/') + 1));
 
+/** The node kind a reference field at `path` picks: its last named step (`shop.offers.0.item`). */
+export function pickKind(path: (string | number)[]) {
+  const name = [...path].reverse().find((s) => typeof s === 'string' && !/^\d+$/.test(s));
+  return name === 'services' ? 'service' : name === 'items' ? 'item' : String(name ?? '');
+}
+
 /** What a world file's reference field names, by its field (a transport's `reverse` is a transport). */
 const PICKS: Record<string, string> = {
   ...Object.fromEntries(
@@ -242,6 +248,18 @@ export const rootStamp = (changes: { file: string; sha256: string }[]) =>
 export const entered = (text: string, number = false) =>
   text === '' ? undefined : number ? Number(text) : text;
 
+/** `doc` placed at `key` of kind `kind` (room, npc, item): an NPC's `room`, an item's whole `location`, so no old holder stays. */
+export const placed = (doc: Obj, dir: string, kind: string, key: string): Obj =>
+  dir === 'npcs' ? { ...doc, room: key } : { ...doc, location: { in: kind, [kind]: key } };
+
+/** Where `doc` starts as the file says: the holder's kind (room, npc, item, template) and key. */
+export function placement(doc: Obj, dir: string): { kind: string; key?: unknown } {
+  if (dir === 'npcs') return { kind: 'room', key: doc.room };
+  const loc = plain(doc.location) ? doc.location : {};
+  const kind = typeof loc.in === 'string' ? loc.in : 'room';
+  return { kind, key: loc[kind] };
+}
+
 const opOf = (branch: Obj): unknown => (branch.properties as any)?.op?.const;
 const typeOf = (v: unknown) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v);
 
@@ -309,6 +327,9 @@ export function minimal(node: Obj, defs: Record<string, Obj>, seen: string[] = [
   return pairs.some(([, v]) => v === undefined) ? undefined : Object.fromEntries(pairs);
 }
 
+// a field whose schema minimum does not compile starts at the sampler's value (resources.ex @defaults hp; BODY_BELOW_ZERO)
+const SEEDS: Record<string, unknown> = { hp: { minimum: 0, maximum: 20, start: 20, gain: 5 } };
+
 /** `doc` with field `f` of definition `def` at its least value; undefined when present or the author must choose it. */
 export function added(
   doc: Obj,
@@ -318,7 +339,7 @@ export function added(
 ): Obj | undefined {
   if (Object.hasOwn(doc, f)) return undefined; // a stale menu never overwrites a present field
   const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
-  const value = node && minimal(node, defs);
+  const value = node && (structuredClone(SEEDS[f]) ?? minimal(node, defs));
   return value === undefined ? undefined : { ...doc, [f]: value };
 }
 
@@ -332,21 +353,52 @@ export const removed = (doc: Obj, f: string): Obj => {
 export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
   a.room === key && menu.includes(a.kind) ? a.kind : undefined;
 
-// Each field's owning capability, as the compiler checks it (UNDECLARED_CAPABILITY: content/room_parts.ex
-// parts/1, cues.ex:54, construction.ex:101); a field it omits needs none.
+// Each field's owning capabilities, as UNDECLARED_CAPABILITY checks them (content/); a field it omits needs none.
+const VARIANT = 'description_variant';
 const OWNERS: Record<string, string> = {
+  'npcs.ask': 'speech topic',
+  'npcs.attack': 'combat', // world.combat needs it (combat.ex requirements); NEEDS has the rest
+  'npcs.cues': 'sense_cue',
+  'npcs.daily_schedule': 'schedule',
+  'npcs.description_variants': VARIANT,
+  'npcs.name_variants': VARIANT,
+  'npcs.shop': 'commerce',
+  'items.affects': 'attribute', // derived.ex owner/2
+  'items.bandage': 'bleed combat skill food', // bleed.ex gate/1
+  'items.cues': 'sense_cue',
+  'items.description_variants': VARIANT,
+  'items.edible': 'food',
+  'items.fuel': 'light',
+  'items.name_variants': VARIANT,
+  'items.readable': 'readable',
+  'items.room_line_variants': VARIANT,
+  'items.slot': 'equipment',
+  'items.tags': 'tag',
   'rooms.cues': 'sense_cue',
   'rooms.dark': 'light',
   'rooms.dark_description': 'light',
   'rooms.details': 'inspectable_detail',
   'rooms.site': 'construction',
   'rooms.tags': 'tag',
-  'rooms.variants': 'description_variant',
+  'rooms.variants': VARIANT,
 };
 
-/** The menu's fields whose capability `requires.capabilities` (`caps`) declares; others would not compile. */
-export const allowed = (kind: string, menu: string[], caps: object) =>
+// Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
+const NEEDS: Record<string, (doc: Obj, world: Obj) => boolean> = {
+  'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
+};
+
+/** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs
+ * the definition (`doc`) and cartridge.json's `world` meet; others would not compile. */
+export const allowed = (
+  kind: string,
+  menu: string[],
+  caps: object,
+  doc: Obj = {},
+  world: Obj = {},
+) =>
   menu.filter((f) => {
-    const owner = OWNERS[`${kind}.${f}`];
-    return !owner || Object.hasOwn(caps, owner);
+    const owners = OWNERS[`${kind}.${f}`]?.split(' ') ?? [];
+    const need = NEEDS[`${kind}.${f}`];
+    return owners.every((o) => Object.hasOwn(caps, o)) && (!need || need(doc, world));
   });

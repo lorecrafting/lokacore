@@ -1,3 +1,4 @@
+// size: allow 530, one suite per card step; the generic, Room, World, NPC and item cards share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -23,7 +24,10 @@ import {
   fieldErrors,
   hidden,
   minimal,
+  pickKind,
   pickable,
+  placed,
+  placement,
   proseKey,
   rebase,
   refuseKey,
@@ -374,15 +378,20 @@ test("a room mechanic's added value is the least valid one, its words `~`", () =
   }
 });
 
-// Break: the Room card's add overwrites a present field or writes one the author must choose, its
+// Break: the Room card's add overwrites a present field or writes one the author must choose, an NPC's hp
+// starts below zero, its
 // remove drops another field, or a Book "Add here" pick adds to another room or a field not offered.
-test('a room field is added once, removed alone, added here only in its room', () => {
+test('a field is added once (hp at the sampler pool), removed alone, added here only in its room', () => {
   const doc = { name: 'room.a.name', dark: false };
   const R = 'source.RoomDefinition';
   assert.deepEqual(added(doc, 'sanctuary', defs, R), { ...doc, sanctuary: true });
   assert.equal(added(doc, 'dark', defs, R), undefined); // present
   assert.equal(added(doc, 'sound', defs, R), undefined); // the author picks the tag
   assert.equal(added(doc, 'abstract', defs, R), undefined); // not a RoomDefinition field
+  // the schema's least hp (-2147483648) is BODY_BELOW_ZERO (resources.ex:246): the sampler's pool instead
+  const hp = { minimum: 0, maximum: 20, start: 20, gain: 5 };
+  assert.deepEqual(added({}, 'hp', defs, 'source.NpcDefinition'), { hp });
+  assert.equal(added({}, 'hp', defs, R), undefined); // no room hp
   assert.deepEqual(removed(doc, 'dark'), { name: 'room.a.name' });
   assert.equal(addedHere({ kind: 'dark', room: 'lane' }, 'lane', ['dark']), 'dark');
   assert.equal(addedHere({ kind: 'dark', room: 'well' }, 'lane', ['dark']), undefined);
@@ -418,4 +427,98 @@ test("a room's add menu offers only fields the cartridge's capabilities allow", 
     'site',
     'variants',
   ]);
+});
+
+// Break: an NPC or item card's add menu offers a field whose capability the cartridge lacks (the
+// world stops compiling), or an ask that needs speech but not topic. Owners hand-copied from
+// lib/loka/content/entities.ex parts/1, cues.ex @holders, asks.ex:21 and capability_registry.json.
+test("an NPC's and an item's add menus offer only fields every owning capability allows", () => {
+  const npc = ['ask', 'attack', 'daily_schedule', 'hp', 'name_variants', 'shop'];
+  assert.deepEqual(allowed('npcs', npc, { speech: 1 }), ['hp']);
+  const all = { speech: 1, topic: 1, commerce: 1, combat: 1 };
+  const combat = { combat: { round_seconds: 3 } };
+  assert.deepEqual(allowed('npcs', npc, all, { hp: 5 }, combat), ['ask', 'attack', 'hp', 'shop']);
+  // combat.ex npc_profiles: attack without world.combat, or without the NPC's hp, does not compile
+  assert.deepEqual(allowed('npcs', npc, all, { hp: 5 }, {}), ['ask', 'hp', 'shop']);
+  assert.deepEqual(allowed('npcs', npc, all, {}, combat), ['ask', 'hp', 'shop']);
+  assert.deepEqual(allowed('npcs', npc, { schedule: 1, description_variant: 1 }), [
+    'daily_schedule',
+    'hp',
+    'name_variants',
+  ]);
+  const item = ['affects', 'bandage', 'edible', 'fuel', 'mass_grams', 'readable', 'slot', 'tags'];
+  assert.deepEqual(allowed('items', item, {}), ['mass_grams']);
+  assert.deepEqual(
+    allowed('items', item, { food: 1, light: 1, equipment: 1, bleed: 1, combat: 1 }),
+    ['edible', 'fuel', 'mass_grams', 'slot'],
+  );
+  assert.deepEqual(
+    allowed('items', item, { bleed: 1, combat: 1, skill: 1, food: 1, attribute: 1 }),
+    ['affects', 'bandage', 'edible', 'mass_grams'],
+  );
+});
+
+// Break: a reorder, remove or add of shop offer rows diffs to ops that leave a moved row's field
+// behind (a stock on the wrong offer) or drop the wrong row, so the file is not the table drawn.
+test('offer rows reordered, removed or added write exactly the table drawn', () => {
+  const rope = { item: 'rope', buy: 3, sell: 1 };
+  const lamp = { item: 'lamp', buy: 5, sell: 2, stock: { items: ['lamp_1'] } };
+  const saved = { name: 'npc.smith.name', shop: { offers: [rope, lamp] } };
+  const shop = (offers: object[]) => ({ ...saved, shop: { offers } });
+  const at = (...p: (string | number)[]) => ['shop', 'offers', ...p];
+  assert.deepEqual(diff(saved, shop([lamp, rope])), [
+    { path: at(0, 'item'), value: 'lamp' },
+    { path: at(0, 'buy'), value: 5 },
+    { path: at(0, 'sell'), value: 2 },
+    { path: at(0, 'stock'), value: { items: ['lamp_1'] } },
+    { path: at(1, 'item'), value: 'rope' },
+    { path: at(1, 'buy'), value: 3 },
+    { path: at(1, 'sell'), value: 1 },
+    { path: at(1, 'stock'), delete: true },
+  ]);
+  const kit = { item: 'kit', buy: 9, sell: 4 };
+  for (const draft of [shop([lamp, rope]), shop([lamp]), shop([rope, lamp, kit])]) {
+    const doc = structuredClone(saved);
+    change(doc, diff(saved, draft));
+    assert.deepEqual(doc, draft);
+  }
+});
+
+// Break: placing an item keeps its old holder (location.npc beside location.room, which the schema
+// refuses), writes the key under the wrong kind, an NPC is placed through an item's location, or the
+// card shows a holder other than the file's (training_sword held by aldous over an empty room box).
+test('placement writes one holder of the kind picked and reads back the file', () => {
+  const sword = { name: 'item.sword.name', location: { in: 'npc', npc: 'smith' } };
+  const draft = placed(sword, 'items', 'room', 'yard');
+  assert.deepEqual(draft, { name: 'item.sword.name', location: { in: 'room', room: 'yard' } });
+  const doc = structuredClone(sword);
+  change(doc, diff(sword, draft));
+  assert.deepEqual(doc, draft);
+  assert.deepEqual(placed(draft, 'items', 'item', 'chest').location, { in: 'item', item: 'chest' });
+  assert.deepEqual(placed({ room: 'start' }, 'npcs', 'room', 'yard'), { room: 'yard' });
+  assert.deepEqual(placement(sword, 'items'), { kind: 'npc', key: 'smith' });
+  assert.deepEqual(placement({ location: { in: 'template' } }, 'items'), {
+    kind: 'template',
+    key: undefined,
+  });
+  assert.deepEqual(placement({}, 'items'), { kind: 'room', key: undefined });
+  assert.deepEqual(placement({ room: 'yard', location: sword.location }, 'npcs'), {
+    kind: 'room',
+    key: 'yard',
+  });
+});
+
+// Break: a picker offers or accepts ids of another kind (an offer's item from the rooms), or an
+// unknown id is written to the file instead of refused at the field.
+test('a reference picker takes the kind its field names and refuses an unknown id', () => {
+  assert.equal(pickKind(['shop', 'offers', 0, 'item']), 'item');
+  assert.equal(pickKind(['daily_schedule', '8', 'room']), 'room');
+  assert.equal(pickKind(['services', 1]), 'service');
+  assert.equal(pickKind(['items', '2']), 'item'); // a form's index arrives as a digit string
+  assert.equal(pickKind(['location', 'npc']), 'npc');
+  const items = { kind: 'item', keys: ['rope', 'lamp'] };
+  assert.ok(refusePick(items, 'ropes'));
+  assert.equal(refusePick(items, 'rope'), undefined);
+  assert.equal(refusePick(items, ''), undefined); // cleared: the field is removed, not refused
+  assert.equal(refusePick({ kind: 'fact', keys: [] }, 'any'), undefined); // no keys known: free text
 });

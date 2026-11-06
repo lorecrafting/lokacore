@@ -308,7 +308,8 @@
      },
      "band": "ready"
     }
-   ]
+   ],
+   "interval": 150
   },
   "place": {
    "id": "86b28f4e-f743-87f8-8375-2ead5c2c295c",

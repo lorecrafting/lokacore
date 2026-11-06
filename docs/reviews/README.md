@@ -20,9 +20,11 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: scene@1 opening scene, `on {start: true}` (PR #622, loka-g5hh.3)](2026-11-05-opening-scene-review.md): **APPROVE WITH NOTES**
 - [Review: a death outside a fight shows the dead page, then Let go (PR #634, loka-kgd.210)](2026-11-05-offfight-death-review.md): **CHANGES REQUIRED**
 - [Review: an open conversation re-words an edited line; stale `~` map by line count (PR #625, loka-wfrgk.19)](2026-11-05-loka-wfrgk.19-review.md): **APPROVE WITH NOTES**
+- [Review: hotbar engine data, cooldown end and length, round interval (PR #658, loka-x6t.135)](2026-11-05-hotbar-engine-data-review.md): **APPROVE WITH NOTES**
 - [Review: generic inspector card fits on long text keys (loka-wfrgk.40)](2026-11-05-generic-card-overflow-review.md): **APPROVE**
 - [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
 - [Review: Editor E6e, World inspector card (PR #651, loka-wfrgk.8)](2026-11-05-e6e-world-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6b, NPC and Item inspector cards (PR #656, loka-wfrgk.4)](2026-11-05-e6b-npc-item-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6a, Room inspector card and the Book's add-here (PR #649, loka-wfrgk.3)](2026-11-05-e6a-room-review.md): **CHANGES REQUIRED**
 - [Review: Editor E4b, generic inspector card on rjsf 6 (PR #645, loka-wfrgk.12)](2026-11-05-e4b-generic-card-review.md): **CHANGES REQUIRED**
 - [Review: Editor E4a, edit model, schema walker, registry and strict gate (PR #642, loka-wfrgk.11)](2026-11-05-e4a-edit-model-review.md): **APPROVE WITH NOTES**

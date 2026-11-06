@@ -2,10 +2,18 @@
 // draw only; the logic is kernel/ts/play/card.ts. The walker names them by `ui:field`.
 import { useState } from 'react';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
-import { branchOf, choices, proseKey, start } from '../../../../kernel/ts/play/card.ts';
+import {
+  branchOf,
+  choices,
+  pickKind,
+  proseKey,
+  refusePick,
+  start,
+} from '../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
 import { Button } from '../components/ui/button.tsx';
 import { Input } from '../components/ui/input.tsx';
+import { Refusal } from './templates.tsx';
 
 /** What the fields read beyond rjsf's props: the selection, the story's nodes and the Book. */
 export type Context = {
@@ -31,11 +39,17 @@ function TextKey(p: FieldProps) {
   );
 }
 
-/** Picker: a definition key, offered from the story's nodes of the kind the field names. */
+/** Picker: a definition key, offered from the story's nodes of the kind the field's path names; an
+ * unknown one is refused at the field and never reaches the draft. */
 function DefinitionRef(p: FieldProps) {
   const list = `${p.fieldPathId.$id}-keys`;
+  const kind = pickKind(p.fieldPathId.path);
+  const keys = choices(kind, context(p).nodes);
+  const [bad, setBad] = useState<string>(); // a refused id: shown, never sent
+  const [kept, keep] = useState<unknown>(); // the value at focus: a refused keystroke puts it back
   if (p.formData !== undefined && typeof p.formData !== 'string')
     return <code className="text-xs">{JSON.stringify(p.formData)}</code>; // a global ref: edit as text
+  const refused = bad === undefined ? undefined : refusePick({ kind, keys }, bad);
   return (
     <label className="grid gap-1 text-xs">
       <span className="text-muted-foreground">{p.name}</span>
@@ -43,15 +57,23 @@ function DefinitionRef(p: FieldProps) {
         id={p.fieldPathId.$id}
         list={list}
         className="h-7 text-xs"
-        value={p.formData ?? ''}
-        onChange={(e) => p.onChange(e.target.value || undefined, p.fieldPathId.path)}
+        value={bad ?? p.formData ?? ''}
+        aria-invalid={!!refused}
+        onChange={(e) => {
+          const v = e.target.value;
+          const no = refusePick({ kind, keys }, v);
+          setBad(no ? v : undefined);
+          p.onChange(no ? kept : v || undefined, p.fieldPathId.path);
+        }}
+        onFocus={() => keep(p.formData)}
         onBlur={(e) => p.onBlur(p.fieldPathId.$id, e.target.value)}
       />
       <datalist id={list}>
-        {choices(p.name, context(p).nodes).map((k) => (
+        {keys.map((k) => (
           <option key={k} value={k} />
         ))}
       </datalist>
+      {refused ? <Refusal>{refused}</Refusal> : null}
     </label>
   );
 }
