@@ -136,6 +136,33 @@ Hit area: the disc's bounding square, `size.touch`. The seam, wedge and ring are
 - Touch: one `size.touch` target per button; `space.xl` between them.
 - The drawing is `aria-hidden`; the pressable owns the name and state.
 
+## Drawings (designer, 2026-11-05, loka-x6t.138)
+
+The hotbar's family is drawn in [actionGlyphs.ts](../../mobile/app/book/actionGlyphs.ts) to the frame above, keyed
+by a scripted action's `action_key` or a spell word; the contact sheet (each distinct drawing on its disc at 44 and
+bare at 14) is the review artefact, rendered from the file, not kept in the repo. Keys sharing a motif share one
+drawing, as the status glyphs do, so the player learns one mark per idea. What is drawn:
+
+- **Spell words.** ward: warded's shield, by reference. mend: a needle with a thread loop.
+- **Showcase scripted actions, by motif.** shout_*: hushed's speech bubble, unstruck. hide and yard_hide: hidden's
+  struck eye, by reference. force_*: a pry bar, hooked head to the upper right. pick_*: a key, bow left and two
+  teeth down. think_*: a thought cloud with two trailing dots. search_* and look_about: a loupe, handle to the lower
+  right. pull_* and lift_store_bar: a lever with a knob, rising right off a base line. turn_wheel_*: a wheel, rim
+  and two spokes. throw_*: a rising curve ending short of a dot (the thing in flight). play_*: a quaver. cook_*:
+  fed's bowl and two steam curls, redrawn with a `q` curve because the frame check widens an arc's end by its
+  radius and fed's r7 rim fails it (the only drawing that differs from a status glyph by construction, not by
+  idea). gather_*: a mound on a ground line with a dot above.
+- **Left neutral on purpose** (the ring, on hotbar.test.ts's fallback list): carve_spoon, chop, saw, fish_croft,
+  disarm_cellar, disarm_plate, raise_timbered_hut, shove_drover. None is offered in a room a hostile NPC stands in,
+  so none reaches a slot today; the first of them a fight can reach gets drawn, and the missing-drawing check
+  fails until it does.
+- **Weakest reads**, for the owner's eye: throw reads as a hook at 14; wheel as a crosshair; pry as a cane. The
+  rest were recognised on the sheet at 14 without a caption.
+- **Frame check constraint.** hotbar.test.ts's path parser widens an `A`/`a` end point by its radius on both sides,
+  so an arc whose end ± r leaves 3..21 fails even when the ink is inside; keep circles with x ± r inside 3..21 at
+  their end points and draw large rims with `q`/`t` curves. A status drawing reused by reference must pass this
+  stricter frame too (warded and hidden do).
+
 ## Proposed checks (developer slice)
 
 - **Icon frame**: every `d` in the action glyph map keeps its ink inside 3..21 and has at most four

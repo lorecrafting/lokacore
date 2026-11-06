@@ -1154,10 +1154,17 @@ the presenter keeps no clock and projects from the confirmed view's `time`, as t
 (ConditionView `ends_at`, `duration`). The GameView gives the same pair on the slot's entry: an AdvertisedAction or
 SpellWord refused `cooldown` carries `ends_at` and `duration` (kernel_api 1.159, [protocol](protocol.md#gameview);
 the pair is together or absent, and absent when the end would overflow), and CombatView carries the round
-`interval`. The wedge's share is `(time - (ends_at - duration)) / duration`, clamped to 0..1; the screen reader's
-rounds-left count is `ceil((ends_at - time) / interval)`. A cooling entry with no pair (the overflow case) shows the
-barred form with its reason word and no count. The Book never estimates a cooldown from the cartridge or from the
-last press.
+`interval`. The wedge's share is `(time - (ends_at - duration)) / duration`, clamped to 0..1. A cooling entry with
+no pair (the overflow case) shows the barred form with its reason word. The Book never estimates a cooldown from
+the cartridge or from the last press.
+
+**Rounds left (designer, 2026-11-05, loka-x6t.138).** No visible count anywhere: not in the glyph frame (no digit,
+[icon style guide](../design/icon-style-guide.md#grid)), no caption or badge under the slot (owner 2026-11-05: no
+captions), no count on the opener's list rows. The wedge is the slot's only visible clock, read as the condition
+ring is: a share, not a number. The count exists only as the cooling slot's
+`accessibilityValue`: `min` 0, `max` `ceil(duration / interval)`, `now` `ceil((ends_at - time) / interval)`, so a
+screen reader says the slot's name, its reason word and "n of m". A ready slot, a barred slot and a cooling entry
+with no pair carry no value.
 
 **Keyboard and screen reader.** The strip is one group named by its label key (a `LABEL` key, proposed:
 `LABEL.hotbar`), after the scroll's last card in the Tab order; slots left to right; empty slots skipped; Enter or
