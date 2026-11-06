@@ -155,7 +155,7 @@ export function Generic({ rel, context, diag }: { rel: string; context: Context;
     card.revealed,
   );
   return (
-    <div className="grid gap-2 px-3 text-xs" aria-label="Card">
+    <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="Card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
