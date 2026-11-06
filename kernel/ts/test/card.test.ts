@@ -1,4 +1,4 @@
-// size: allow 650, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 700, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -13,7 +13,9 @@ import {
   addable,
   added,
   addedHere,
+  definitionOf,
   allowed,
+  cardMenu,
   apart,
   applied,
   branchOf,
@@ -24,6 +26,7 @@ import {
   fieldErrors,
   hidden,
   minimal,
+  newEntry,
   pickKind,
   pickable,
   placed,
@@ -41,7 +44,7 @@ import {
   tagHidden,
   worldFile,
 } from '../play/card.ts';
-import { paired, scriptedMenu } from '../play/action.ts';
+import { paired, menuOf } from '../play/action.ts';
 import { change } from '../play/edit_model.ts';
 import { json } from '../play/write.ts';
 
@@ -314,6 +317,11 @@ test('a World picker refuses an unknown id at the field; a new entry key must be
     [refusePick(coin, 'mv'), refusePick(coin, 'gold'), refusePick(pickable(['room'], [], {}), 'x')],
     [undefined, 'no resource gold', undefined],
   );
+  // a transport's `with` is the npc it travels with, its `reverse` the transport back
+  assert.deepEqual(
+    [pickable(['with'], nodes, {})?.kind, pickable(['reverse'], nodes, {})?.kind],
+    ['npc', 'transport'],
+  );
   assert.equal(pickable(['title'], nodes, {}), undefined);
   assert.equal(pickable(['room'], nodes, {}, { global: 'x' }), undefined); // a global ref's object
   assert.deepEqual(
@@ -328,7 +336,8 @@ test('a World picker refuses an unknown id at the field; a new entry key must be
 
 // Break: the World card opens the wrong files (a room, or a nested population folder missed), reads
 // its picker's keys from the wrong field, misses a root-file write (stale keys) or refetches on any
-// write, writes '' into an emptied field, or a new entry starts at an invented non-zero amount.
+// write, writes '' into an emptied field, a new entry starts at an invented non-zero amount, or a
+// new default pool (`ma`) writes numbers over the compiler's @defaults (resources.ex:15-19).
 test('the World card opens the world files, keys its pickers from the root files, and enters typed values', () => {
   assert.deepEqual(
     [
@@ -355,7 +364,11 @@ test('the World card opens the world files, keys its pickers from the root files
     [entered(''), entered('a'), entered('', true), entered('7', true)],
     [undefined, 'a', undefined, 7],
   );
-  assert.ok(ROOTS.every((r) => Object.values(r.blank).every((v) => v === 0)));
+  const [resources, attributes] = ROOTS;
+  assert.deepEqual(
+    [newEntry(resources, 'ma'), newEntry(resources, 'coin'), newEntry(attributes, 'hp')],
+    [{}, { minimum: 0, maximum: 0, start: 0, gain: 0 }, { start: 0 }],
+  );
 });
 
 // Break: a reference field offers another kind's keys, or the ref's cartridge prefix; a `.scene`
@@ -446,6 +459,18 @@ test('a field is added once (hp at the sampler pool), removed alone, added here 
   assert.equal(addedHere({ kind: 'tags', room: 'lane' }, 'lane', ['dark']), undefined);
 });
 
+// Break: the generic card's add seeds a field from the wrong definition (a prose field's key never
+// written, loka-wfrgk.24) or from a branch the file is not (an abstract, partial or command one).
+test("the generic card's file is the definition its present fields pick", () => {
+  assert.equal(definitionOf(defs, 'items', { name: 'item.a.name' }), 'source.ItemDefinition');
+  assert.equal(definitionOf(defs, 'items', { extends: 'b' }), 'partial.source.ItemDefinition');
+  assert.equal(definitionOf(defs, 'items', { abstract: true }), 'source.items');
+  assert.equal(definitionOf(defs, 'actions', { command: 'look' }), 'source.ActionDefinition');
+  assert.equal(definitionOf(defs, 'areas', {}), 'source.areas');
+  const doc = added({}, 'description', defs, definitionOf(defs, 'items', {}));
+  assert.deepEqual(doc, { description: { prose: '~' } });
+});
+
 // Break: the add menu offers a field whose owning capability the cartridge does not require, so the
 // world stops compiling (UNDECLARED_CAPABILITY), or hides one that needs none. Owners hand-copied
 // from lib/loka/content/room_parts.ex parts/1, cues.ex and construction.ex.
@@ -500,10 +525,23 @@ test("an NPC's and an item's add menus offer only fields every owning capability
     allowed('items', item, { food: 1, light: 1, equipment: 1, bleed: 1, combat: 1 }),
     ['edible', 'fuel', 'mass_grams', 'slot'],
   );
-  assert.deepEqual(
-    allowed('items', item, { bleed: 1, combat: 1, skill: 1, food: 1, attribute: 1 }),
-    ['affects', 'bandage', 'edible', 'mass_grams'],
-  );
+  const caps = { bleed: 1, combat: 1, skill: 1, food: 1, attribute: 1, equipment: 1 };
+  assert.deepEqual(allowed('items', item, caps), ['bandage', 'edible', 'mass_grams', 'slot']);
+  // affects need a slot (derived.ex:77); a bandage is not worn or eaten (bleed.ex:88-91)
+  assert.deepEqual(allowed('items', item, caps, { slot: 'head' }), [
+    'affects',
+    'edible',
+    'mass_grams',
+    'slot',
+  ]);
+  assert.deepEqual(allowed('items', item, caps, { edible: {} }), ['edible', 'mass_grams', 'slot']);
+  assert.deepEqual(allowed('items', item, caps, { container: true }), [
+    'edible',
+    'mass_grams',
+    'slot',
+  ]);
+  assert.deepEqual(allowed('items', item, caps, { bandage: {} }), ['bandage', 'mass_grams']);
+  assert.deepEqual(allowed('items', ['container'], caps, { bandage: {} }), []);
 });
 
 // Break: an action or reaction card's add menu offers a field the compiler refuses: a check without
@@ -538,21 +576,31 @@ test("an action's and a reaction's add menus offer only fields the compiler acce
 });
 
 // Break: a scripted action's Add menu offers a command action's field (command, input,
-// accessibility), which the form never draws and the compiler refuses as UNKNOWN_FIELD.
+// accessibility), or a command action's a scripted one's (check), which the compiler refuses as UNKNOWN_FIELD.
 test("a scripted action's add menu offers only ScriptedAction fields", () => {
-  const registry = JSON.parse(
-    readFileSync(
-      join(import.meta.dirname, '../../../tools/author-panel/src/edit/registry.json'),
-      'utf8',
-    ),
-  );
+  const registry = read('../../tools/author-panel/src/edit/registry.json');
   const fields = Object.keys(defs['source.ScriptedAction'].properties);
-  const menu = scriptedMenu(addable('actions', registry, {}, []), defs);
+  const menu = menuOf(addable('actions', registry, {}, []), defs);
   assert.deepEqual(
     menu.filter((f) => f !== 'abstract' && !fields.includes(f)),
     [],
   ); // abstract: extends.ex
   assert.ok(menu.includes('check') && menu.includes('abstract'));
+  // and a command action's offers no scripted field (check, outcomes): loka-wfrgk.54
+  const command = menuOf(
+    addable('actions', registry, { command: 'x' }, []),
+    defs,
+    'source.ActionDefinition',
+  );
+  assert.deepEqual(
+    ['check', 'outcomes', 'input', 'abstract'].map((f) => command.includes(f)),
+    [false, false, true, true],
+  );
+  // Break: the generic card offers an undeclared capability's field, or any before cartridge.json is read
+  const on = (c?: object) =>
+    cardMenu('actions', registry, {}, [], c && { requires: { capabilities: c } }, () => command);
+  const offered = [on({ policy: 1 }), on({}), on()].map((m) => m.includes('policy'));
+  assert.deepEqual(offered, [true, false, false]);
 });
 
 // Break: an action's check is added or removed but its failure outcome is not (OUTCOME_MISMATCH,
@@ -633,7 +681,7 @@ test('placement writes one holder of the kind picked and reads back the file', (
 });
 
 // Break: a picker offers or accepts ids of another kind (an offer's item from the rooms), or an
-// unknown id is written to the file instead of refused at the field.
+// unknown id is written to the file instead of refused at the field; a step's plan picks a room.
 test('a reference picker takes the kind its field names and refuses an unknown id', () => {
   assert.equal(pickKind(['shop', 'offers', 0, 'item']), 'item');
   assert.equal(pickKind(['daily_schedule', '8', 'room']), 'room');
@@ -641,6 +689,7 @@ test('a reference picker takes the kind its field names and refuses an unknown i
   assert.equal(pickKind(['items', '2']), 'item'); // a form's index arrives as a digit string
   assert.equal(pickKind(['location', 'npc']), 'npc');
   assert.equal(pickKind(['policy', 'with']), 'npc'); // leaf_refs.ex: a policy's `with` names an npc
+  assert.equal(pickKind(['outcome', 0, 'plan']), 'population'); // leaf_refs.ex:48 population.spawn
   assert.equal(pickKind(['constructor']), 'constructor'); // a field name is never read off the prototype
   const items = { kind: 'item', keys: ['rope', 'lamp'] };
   assert.ok(refusePick(items, 'ropes'));

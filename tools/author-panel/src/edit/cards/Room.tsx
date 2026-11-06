@@ -1,14 +1,12 @@
 // The Room card (docs/rnd/gui-editor-design-2026-11-04.md §6, E6a): the room's words open in the
 // Book, its exits take the map's edits, its mechanics are added (here or from the Book) and removed;
 // every write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
-import { Fragment, type ReactNode, useEffect, useState } from 'react';
+import { Fragment, type ReactNode, useEffect } from 'react';
 import type { FieldProps } from '@rjsf/utils';
 import {
   addable,
-  added,
   addedHere,
   allowed,
-  awaits,
   hidden,
   proseKey,
   removed,
@@ -19,7 +17,7 @@ import { addHere } from '../../book.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { mapCommand } from '../../mapwire.ts';
 import { fields, type Context } from '../fields.tsx';
-import { AddMenu, CardForm, Header, useCard } from '../Generic.tsx';
+import { AddMenu, CardForm, Header, adder, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 
@@ -140,13 +138,6 @@ export function Mechanics({
   );
 }
 
-/** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
-export const adder = (card: Card, defs: Record<string, never>, def: string) => (f: string) => {
-  const next = added((card.draft ?? {}) as Doc, f, defs, def);
-  card.reveal(f);
-  if (next) (card.change(next), awaits(def, f) || card.commit());
-};
-
 /** The other fields: the generic form, with the card's `own` fields (drawn above) hidden. */
 export function RoomForm({
   rel,
@@ -181,26 +172,6 @@ export function RoomForm({
       fields={{ ...fields, ...extra }}
     />
   );
-}
-
-/** cartridge.json (its `requires.capabilities` and `world`), read again when it changes. */
-export function useCartridge(diag: Props['diag']) {
-  return useSource(diag, 'cartridge.json') as
-    | { requires?: { capabilities?: object }; world?: Doc; calendar?: { hours_per_day?: number } }
-    | undefined;
-}
-
-/** A `.json` source `file`'s document, read again on each write to it (undefined: none). */
-export function useSource(diag: Props['diag'], file?: string) {
-  const [got, setGot] = useState<[string, Doc]>(); // the file read: a slower earlier read shows under no other
-  const sha = diag.changes.find((c) => c.file === file)?.sha256;
-  useEffect(() => {
-    if (file?.endsWith('.json'))
-      void fetch(`/__author/source?file=${encodeURIComponent(file)}`)
-        .then((r) => r.json())
-        .then((s) => setGot([file, JSON.parse(s.bytes)]));
-  }, [file, sha]);
-  return got && got[0] === file ? got[1] : undefined;
 }
 
 /** The definition's words as text keys; Edit opens each line in the Book (agents write no words). */

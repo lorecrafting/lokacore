@@ -290,7 +290,7 @@ link = fn
   v, href -> "[#{v}](#{href})"
 end
 
-# §7 check 3: what the editor offers for a row's declarations (a kind-wide one covers its fields)
+# §7 check 3: the editor rows under each declaration's kind.field (a kind-wide one takes its fields')
 editor_cell = fn
   paths when is_list(paths) ->
     for(

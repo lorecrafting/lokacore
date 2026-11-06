@@ -1,7 +1,7 @@
 // The generic inspector card (docs/rnd/gui-editor-design-2026-11-04.md §6, §11): rjsf draws the
 // definition's own file from its served schema; each blur posts the changed fields to
 // POST /change (kernel/ts/play/write.ts), Undo posts /undo, the compiler's refusals show at their field.
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Form from '@rjsf/core';
 import type { RegistryFieldsType, RJSFSchema, UiSchema } from '@rjsf/utils';
 import type { Op } from '../../../../kernel/ts/play/edit_model.ts';
@@ -9,9 +9,12 @@ import { customizeValidator } from '@rjsf/validator-ajv8';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import {
   FORM_DEFAULTS,
-  addable,
+  added,
   apart,
+  awaits,
   applied,
+  cardMenu,
+  definitionOf,
   diff,
   fieldErrors,
   hidden,
@@ -47,9 +50,8 @@ export function useCard(rel: string, diag: Diag) {
   const latest = useRef<unknown>(undefined);
   const load = useCallback(
     async (base?: unknown, sent: Op[] = []) => {
-      const s = await source(rel);
-      setSaved(s);
-      setDraft((latest.current = rebase(base, latest.current, s.doc, sent))); // keeps edits not yet sent
+      const s = await source(rel).catch((e: Error) => void setRefused(`${rel} not loaded: ${e.message}`));
+      if (s) (setSaved(s), setDraft((latest.current = rebase(base, latest.current, s.doc, sent)))); // keeps edits not yet sent
     },
     [rel],
   );
@@ -155,24 +157,52 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
   );
 }
 
-export function Generic({ rel, context, diag }: { rel: string; context: Context; diag: Diag }) {
+type GenericProps = { rel: string; context: Context; diag: Diag; only?: (fields: string[], defs: never) => string[] };
+/** A definition's card from its schema; `only` filters its add menu (a command action's, Action.tsx). */
+export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
   const card = useCard(rel, diag);
+  const cart = useCartridge(diag);
   const { saved, draft } = card;
-  if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
-  const defs = (saved.schema as { $defs: never }).$defs;
-  const ui = hidden(
-    uiSchema(saved.dir, saved.schema as never, defs, registry),
-    saved.dir,
-    registry,
-    draft,
-    card.revealed,
-  );
+  const defs = (saved?.schema as { $defs: never } | undefined)?.$defs as never;
+  const drawn = useMemo(() => saved && uiSchema(saved.dir, saved.schema as never, defs, registry), [saved]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!drawn) return <p className="px-3 text-xs text-muted-foreground">{card.refused ?? `Loading ${rel}`}</p>;
+  const { dir } = saved!; // drawn exactly when saved
+  const def = definitionOf(defs, dir, draft); // a prose field added writes its key `~`
+  const ui = hidden(drawn, dir, registry, draft, card.revealed);
+  const menu = cardMenu(dir, registry, draft, card.revealed, cart, (m) => only(m, defs));
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="Card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
-      <AddMenu fields={addable(saved.dir, registry, draft, card.revealed)} reveal={card.reveal} />
+      <AddMenu fields={menu} reveal={adder(card, defs, def)} />
     </div>
   );
+}
+
+/** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
+export const adder = (card: Card, defs: Record<string, never>, def: string) => (f: string) => {
+  const next = added((card.draft ?? {}) as Record<string, unknown>, f, defs, def);
+  card.reveal(f);
+  if (next) (card.change(next), awaits(def, f) || card.commit());
+};
+
+/** cartridge.json (its `requires.capabilities` and `world`), read again when it changes. */
+export function useCartridge(diag: Diag) {
+  return useSource(diag, 'cartridge.json') as
+    | { requires?: { capabilities?: object }; world?: Record<string, unknown>; calendar?: { hours_per_day?: number } }
+    | undefined;
+}
+
+/** A `.json` source `file`'s document, read again on each write to it (undefined: none). */
+export function useSource(diag: Diag, file?: string) {
+  const [got, setGot] = useState<[string, Record<string, unknown>]>(); // the file read: a slower earlier read shows under no other
+  const sha = diag.changes.find((c) => c.file === file)?.sha256;
+  useEffect(() => {
+    if (file?.endsWith('.json'))
+      void fetch(`/__author/source?file=${encodeURIComponent(file)}`)
+        .then((r) => r.json())
+        .then((s) => setGot([file, JSON.parse(s.bytes)]));
+  }, [file, sha]);
+  return got && got[0] === file ? got[1] : undefined;
 }

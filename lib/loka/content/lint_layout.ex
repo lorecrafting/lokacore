@@ -21,9 +21,12 @@ defmodule Loka.Content.LintLayout do
       unreachable(rooms, routes, entry) ++ astray(rooms, exits)
   end
 
-  @doc "Rewrites each finding's leading root address to the area-folder file it came from."
-  @spec at_real([String.t()], [{String.t(), term(), term()}]) :: [String.t()]
-  def at_real(lines, files) do
+  @doc """
+  Rewrites each finding's leading root address to the file it came from: the area-folder file, and
+  for a nested dialogue (loaded beside its scene, SceneFiles.rel/2) the scene file under `dir` and its key.
+  """
+  @spec at_real([String.t()], [{String.t(), term(), term()}], Path.t()) :: [String.t()]
+  def at_real(lines, files, dir) do
     real =
       for {"areas/" <> _ = rel, _, _} <- files,
           [_, _ | lr] = Path.split(rel),
@@ -31,7 +34,22 @@ defmodule Loka.Content.LintLayout do
           into: %{},
           do: {Path.join(lr), rel}
 
-    Enum.map(lines, &Regex.replace(~r/^[^ :]+/, &1, fn lr -> Map.get(real, lr, lr) end))
+    nested = nested(files, dir)
+    at = fn lr -> Map.get(real, lr, lr) |> then(&Map.get(nested, &1, &1)) end
+    Enum.map(lines, &Regex.replace(~r/^[^ :]+/, &1, at))
+  end
+
+  # Each nested dialogue's rel (no file under `dir`) to its scene file, the longest real stem it extends, and its key.
+  defp nested(files, dir) do
+    {scenes, made} =
+      for({rel, {:dialogue, _, []}, _} <- files, Path.extname(rel) == ".scene", do: rel)
+      |> Enum.split_with(&File.regular?(Path.join(dir, &1)))
+
+    for child <- made,
+        parents = Enum.filter(scenes, &String.starts_with?(child, Path.rootname(&1) <> "_")),
+        parents != [],
+        into: %{},
+        do: {child, "#{Enum.max_by(parents, &byte_size/1)} (#{Path.basename(child, ".scene")})"}
   end
 
   defp orphans(rooms, routes, files, entry) do
