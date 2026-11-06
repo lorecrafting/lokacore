@@ -63,9 +63,9 @@ defmodule Loka.Content.Starters.Scene do
 
   # A scene goes to its NPC's area folder (cartridge area layout design, section 7), else the root.
   defp area_of(dir, npc) do
-    case Path.split(holder(dir, npc)) do
-      ["areas", area | _] -> "areas/#{Path.rootname(area)}"
-      _ -> ""
+    case Loka.Content.Areas.area_of(holder(dir, npc)) do
+      nil -> ""
+      area -> "areas/#{area}"
     end
   end
 end
