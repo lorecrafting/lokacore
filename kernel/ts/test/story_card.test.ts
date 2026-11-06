@@ -106,6 +106,7 @@ test("a quest's and a dialogue's added fields are the least valid ones, their wo
     );
   assert.ok(awaits('source.QuestDefinition', 'offer'));
   assert.ok(!awaits('source.QuestDefinition', 'journal'));
+  assert.ok(awaits('source.ItemDefinition', 'edible')); // food.ex:21: its label and narration alone do not compile
   const target = { kind: 'npc', npc: 'bess' }; // the pick: compiled into the showcase's carry_letter
   const offered = added(quest, 'offer', defs, 'source.QuestDefinition')!;
   const picked = { ...offered, offer: { ...(offered.offer as object), target } };

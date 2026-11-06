@@ -15,7 +15,7 @@ const OWNERS: Record<string, string> = {
   'items.bandage': 'bleed combat skill food', // bleed.ex gate/1
   'items.cues': 'sense_cue',
   'items.description_variants': VARIANT,
-  'items.edible': 'food',
+  'items.edible': 'food resource containment', // food.ex:43-46 valid?
   'items.fuel': 'light',
   'items.name_variants': VARIANT,
   'items.readable': 'readable',
@@ -55,7 +55,14 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
   'items.bandage': (doc) =>
     doc.slot === undefined && doc.edible === undefined && doc.container !== true,
   'items.slot': (doc) => doc.bandage === undefined,
-  'items.edible': (doc) => doc.bandage === undefined,
+  // food.ex:43-46 valid?: nothing eaten is a container, worn, a weapon, a fuel or a vessel
+  'items.edible': (doc) =>
+    doc.bandage === undefined &&
+    doc.container !== true &&
+    !['capacity', 'slot', 'weapon', 'block_chance', 'fuel', 'vessel'].some((f) =>
+      Object.hasOwn(doc, f),
+    ),
+  'items.equip': (doc) => doc.slot !== undefined, // derived.ex:64
   'items.container': (doc) => doc.bandage === undefined,
   'actions.duration': (d, w) => !w.time_policy && !/"status\.apply"/.test(JSON.stringify(d)), // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json; duration_status (:94); ponytail: also hides it beside a permanent status, which status.ex:72 lets through
   'actions.craft': (doc) => (doc.target as Obj | undefined)?.kind !== 'spell', // replenish.ex:59

@@ -519,28 +519,23 @@ test("an NPC's and an item's add menus offer only fields every owning capability
     'hp',
     'name_variants',
   ]);
-  const item = ['affects', 'bandage', 'edible', 'fuel', 'mass_grams', 'readable', 'slot', 'tags'];
-  assert.deepEqual(allowed('items', item, {}), ['mass_grams']);
-  assert.deepEqual(
-    allowed('items', item, { food: 1, light: 1, equipment: 1, bleed: 1, combat: 1 }),
-    ['edible', 'fuel', 'mass_grams', 'slot'],
+  const item = 'affects bandage edible equip fuel mass_grams readable slot tags'.split(' ');
+  const on = (caps: object, doc = {}) => allowed('items', item, caps, doc).join(' ');
+  assert.equal(on({}), 'mass_grams');
+  assert.equal(
+    on({ food: 1, light: 1, equipment: 1, bleed: 1, combat: 1 }),
+    'fuel mass_grams slot',
   );
-  const caps = { bleed: 1, combat: 1, skill: 1, food: 1, attribute: 1, equipment: 1 };
-  assert.deepEqual(allowed('items', item, caps), ['bandage', 'edible', 'mass_grams', 'slot']);
-  // affects need a slot (derived.ex:77); a bandage is not worn or eaten (bleed.ex:88-91)
-  assert.deepEqual(allowed('items', item, caps, { slot: 'head' }), [
-    'affects',
-    'edible',
-    'mass_grams',
-    'slot',
-  ]);
-  assert.deepEqual(allowed('items', item, caps, { edible: {} }), ['edible', 'mass_grams', 'slot']);
-  assert.deepEqual(allowed('items', item, caps, { container: true }), [
-    'edible',
-    'mass_grams',
-    'slot',
-  ]);
-  assert.deepEqual(allowed('items', item, caps, { bandage: {} }), ['bandage', 'mass_grams']);
+  const caps = { bleed: 1, combat: 1, skill: 1, food: 1, attribute: 1, equipment: 1, resource: 1 };
+  Object.assign(caps, { containment: 1 });
+  assert.equal(on(caps), 'bandage edible mass_grams slot');
+  // affects and equip need a slot (derived.ex:64, :77); a bandage is not worn or eaten (bleed.ex:88-91);
+  // food is no container, worn thing or fuel (food.ex:43-46)
+  assert.equal(on(caps, { slot: 'head' }), 'affects equip mass_grams slot');
+  assert.equal(on({ ...caps, light: 1 }, { fuel: {} }), 'bandage fuel mass_grams slot');
+  assert.equal(on(caps, { edible: {} }), 'edible mass_grams slot');
+  assert.equal(on(caps, { container: true }), 'mass_grams slot');
+  assert.equal(on(caps, { bandage: {} }), 'bandage mass_grams');
   assert.deepEqual(allowed('items', ['container'], caps, { bandage: {} }), []);
 });
 

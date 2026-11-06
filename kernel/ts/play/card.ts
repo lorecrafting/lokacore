@@ -316,8 +316,10 @@ export function definitionOf(defs: Record<string, Obj>, kind: string, doc: unkno
   return name;
 }
 
-/** A field `added` seeds into the draft only: written with the author's pick (a targetless offer: quests.ex:63-66). */
-export const awaits = (def: string, f: string) => `${def}.${f}` === 'source.QuestDefinition.offer';
+/** A field `added` seeds into the draft only: written with the author's pick (a targetless offer: quests.ex:63-66;
+ * food without a restore, cure or status: food.ex:21 effect?). */
+export const awaits = (def: string, f: string) =>
+  ['source.QuestDefinition.offer', 'source.ItemDefinition.edible'].includes(`${def}.${f}`);
 
 /** `doc` without field `f`. */
 export const removed = (doc: Obj, f: string): Obj => {
