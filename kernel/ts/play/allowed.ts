@@ -50,6 +50,7 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
     doc.slot === undefined && doc.edible === undefined && doc.container !== true,
   'items.slot': (doc) => doc.bandage === undefined,
   'items.edible': (doc) => doc.bandage === undefined,
+  'items.container': (doc) => doc.bandage === undefined,
   'actions.duration': (d, w) => !w.time_policy && !/"status\.apply"/.test(JSON.stringify(d)), // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json; duration_status (:94); ponytail: also hides it beside a permanent status, which status.ex:72 lets through
   'actions.craft': (doc) => (doc.target as Obj | undefined)?.kind !== 'spell', // replenish.ex:59
   'reactions.zone': (doc) => (doc.on as Obj | undefined)?.room === undefined, // ReactionRule: a zone forbids on.room

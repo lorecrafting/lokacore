@@ -540,6 +540,7 @@ test("an NPC's and an item's add menus offer only fields every owning capability
     'slot',
   ]);
   assert.deepEqual(allowed('items', item, caps, { bandage: {} }), ['bandage', 'mass_grams']);
+  assert.deepEqual(allowed('items', ['container'], caps, { bandage: {} }), []);
 });
 
 // Break: an action or reaction card's add menu offers a field the compiler refuses: a check without
