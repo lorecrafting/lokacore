@@ -5,7 +5,6 @@
 import { useState } from 'react';
 import {
   addable,
-  added,
   allowed,
   choices,
   placed,
@@ -17,7 +16,7 @@ import type { Context } from '../fields.tsx';
 import { Header, useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
-import { Mechanics, RoomForm, useCapabilities, Words } from './Room.tsx';
+import { adder, Mechanics, RoomForm, useCartridge, Words } from './Room.tsx';
 
 const WORDS = ['name', 'room_line', 'description'];
 const DEF: Record<string, string> = {
@@ -36,18 +35,13 @@ export function Entity({ rel, context, diag }: Props) {
   const { saved } = card;
   const draft = (card.draft ?? {}) as Doc;
   const defs = (saved?.schema as { $defs?: Record<string, never> } | undefined)?.$defs ?? {};
-  const caps = useCapabilities(diag);
+  const cart = useCartridge(diag);
   if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
   const def = DEF[saved.dir];
   const at = saved.dir === 'npcs' ? 'room' : 'location';
-  const menu = caps
-    ? allowed(saved.dir, addable(saved.dir, registry, draft, card.revealed), caps)
-    : [];
-  const add = (f: string) => {
-    const next = added(draft, f, defs, def);
-    card.reveal(f);
-    if (next) (card.change(next), card.commit());
-  };
+  const caps = cart && (cart.requires?.capabilities ?? {});
+  const offered = addable(saved.dir, registry, draft, card.revealed);
+  const menu = caps ? allowed(saved.dir, offered, caps, draft, cart?.world) : [];
   const required = ((defs[def] as { required?: string[] } | undefined)?.required ?? []) as string[];
   return (
     <div
@@ -58,7 +52,12 @@ export function Entity({ rel, context, diag }: Props) {
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <Words draft={draft} context={context} fields={WORDS} />
       <Placement card={card} dir={saved.dir} rooms={choices('room', context.nodes)} />
-      <Mechanics card={card} menu={menu} add={add} fixed={[...WORDS, at, ...required]} />
+      <Mechanics
+        card={card}
+        menu={menu}
+        add={adder(card, defs, def)}
+        fixed={[...WORDS, at, ...required]}
+      />
       <RoomForm
         rel={rel}
         card={card}

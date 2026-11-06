@@ -429,12 +429,12 @@ test("a room's add menu offers only fields the cartridge's capabilities allow", 
 test("an NPC's and an item's add menus offer only fields every owning capability allows", () => {
   const npc = ['ask', 'attack', 'daily_schedule', 'hp', 'name_variants', 'shop'];
   assert.deepEqual(allowed('npcs', npc, { speech: 1 }), ['hp']);
-  assert.deepEqual(allowed('npcs', npc, { speech: 1, topic: 1, commerce: 1, combat: 1 }), [
-    'ask',
-    'attack',
-    'hp',
-    'shop',
-  ]);
+  const all = { speech: 1, topic: 1, commerce: 1, combat: 1 };
+  const combat = { combat: { round_seconds: 3 } };
+  assert.deepEqual(allowed('npcs', npc, all, { hp: 5 }, combat), ['ask', 'attack', 'hp', 'shop']);
+  // combat.ex npc_profiles: attack without world.combat, or without the NPC's hp, does not compile
+  assert.deepEqual(allowed('npcs', npc, all, { hp: 5 }, {}), ['ask', 'hp', 'shop']);
+  assert.deepEqual(allowed('npcs', npc, all, {}, combat), ['ask', 'hp', 'shop']);
   assert.deepEqual(allowed('npcs', npc, { schedule: 1, description_variant: 1 }), [
     'daily_schedule',
     'hp',

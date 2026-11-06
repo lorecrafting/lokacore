@@ -1,4 +1,4 @@
-// size: allow 390, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
+// size: allow 400, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC and item cards' steps
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -346,7 +346,7 @@ export const addedHere = (a: { kind: string; room: string }, key: string, menu: 
 const VARIANT = 'description_variant';
 const OWNERS: Record<string, string> = {
   'npcs.ask': 'speech topic',
-  'npcs.attack': 'combat', // world.combat needs it (combat.ex requirements), attack needs world.combat
+  'npcs.attack': 'combat', // world.combat needs it (combat.ex requirements); NEEDS has the rest
   'npcs.cues': 'sense_cue',
   'npcs.daily_schedule': 'schedule',
   'npcs.description_variants': VARIANT,
@@ -372,9 +372,22 @@ const OWNERS: Record<string, string> = {
   'rooms.variants': VARIANT,
 };
 
-/** The menu's fields whose capability `requires.capabilities` (`caps`) declares; others would not compile. */
-export const allowed = (kind: string, menu: string[], caps: object) =>
+// Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
+const NEEDS: Record<string, (doc: Obj, world: Obj) => boolean> = {
+  'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
+};
+
+/** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs
+ * the definition (`doc`) and cartridge.json's `world` meet; others would not compile. */
+export const allowed = (
+  kind: string,
+  menu: string[],
+  caps: object,
+  doc: Obj = {},
+  world: Obj = {},
+) =>
   menu.filter((f) => {
     const owners = OWNERS[`${kind}.${f}`]?.split(' ') ?? [];
-    return owners.every((o) => Object.hasOwn(caps, o));
+    const need = NEEDS[`${kind}.${f}`];
+    return owners.every((o) => Object.hasOwn(caps, o)) && (!need || need(doc, world));
   });

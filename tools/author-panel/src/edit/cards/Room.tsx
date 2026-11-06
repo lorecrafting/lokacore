@@ -46,17 +46,16 @@ export function Room({ rel, context, diag, offer }: Props) {
   const { saved } = card;
   const draft = (card.draft ?? {}) as Doc;
   const defs = (saved?.schema as { $defs?: Record<string, never> } | undefined)?.$defs ?? {};
-  const caps = useCapabilities(diag);
+  const cart = useCartridge(diag);
   const menu =
-    saved && caps
-      ? allowed(saved.dir, addable(saved.dir, registry, draft, card.revealed), caps)
+    saved && cart
+      ? allowed(
+          saved.dir,
+          addable(saved.dir, registry, draft, card.revealed),
+          cart.requires?.capabilities ?? {},
+        )
       : [];
-  /** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
-  const add = (f: string) => {
-    const next = added(draft, f, defs, 'source.RoomDefinition');
-    card.reveal(f);
-    if (next) (card.change(next), card.commit());
-  };
+  const add = adder(card, defs, 'source.RoomDefinition');
   useEffect(() => void (saved && offer(menu)), [rel, !!saved, menu.join()]);
   useEffect(() => () => offer([]), []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -139,6 +138,13 @@ export function Mechanics({
   );
 }
 
+/** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
+export const adder = (card: Card, defs: Record<string, never>, def: string) => (f: string) => {
+  const next = added(card.draft ?? {}, f, defs, def);
+  card.reveal(f);
+  if (next) (card.change(next), card.commit());
+};
+
 /** The other fields: the generic form, with the card's `own` fields (drawn above) hidden. */
 export function RoomForm({
   rel,
@@ -160,16 +166,16 @@ export function RoomForm({
   return <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />;
 }
 
-/** The cartridge's `requires.capabilities`, read again when cartridge.json changes. */
-export function useCapabilities(diag: Props['diag']) {
-  const [caps, setCaps] = useState<object>();
+/** cartridge.json (its `requires.capabilities` and `world`), read again when it changes. */
+export function useCartridge(diag: Props['diag']) {
+  const [cart, setCart] = useState<{ requires?: { capabilities?: object }; world?: Doc }>();
   const sha = diag.changes.find((c) => c.file === 'cartridge.json')?.sha256;
   useEffect(() => {
     void fetch('/__author/source?file=cartridge.json')
       .then((r) => r.json())
-      .then((s) => setCaps(JSON.parse(s.bytes).requires?.capabilities ?? {}));
+      .then((s) => setCart(JSON.parse(s.bytes)));
   }, [sha]);
-  return caps;
+  return cart;
 }
 
 /** The definition's words as text keys; Edit opens each line in the Book (agents write no words). */
