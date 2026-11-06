@@ -22,12 +22,13 @@ const free = () =>
     });
   });
 
-let browser: Browser, url: string;
+let browser: Browser, url: string, author: number;
 let boot = 120_000; // the first compile and Vite's first optimise
 const procs: ChildProcess[] = [];
 const dir = mkdtempSync(join(tmpdir(), 'loka-panel-'));
 before(async () => {
-  const [author, panel, preview] = await Promise.all([free(), free(), free()]);
+  const [a, panel, preview] = await Promise.all([free(), free(), free()]);
+  author = a;
   const env = {
     ...process.env,
     LOKA_DEV_CARTRIDGE: join(dir, 'current.json'),
@@ -38,6 +39,8 @@ before(async () => {
   const io: SpawnOptions = { env, detached: true, stdio: ['ignore', 'ignore', 'inherit'] };
   const showcase = join(dir, 'showcase'); // a copy: the block tests write
   cpSync(join(ROOT, 'cartridges/toolbox_showcase'), showcase, { recursive: true });
+  for (const w of ['identity_sampler', 'scene_sampler']) // the scene test's POST /world siblings
+    cpSync(join(ROOT, 'cartridges', w), join(dir, w), { recursive: true });
   procs.push(spawn(join(ROOT, 'bin/loka'), ['dev', showcase, '--watch'], io));
   procs.push(
     spawn(process.execPath, [join(PANEL, 'node_modules/vite/bin/vite.js')], { ...io, cwd: PANEL }),
@@ -58,7 +61,7 @@ after(async () => {
 });
 
 /** The panel with this layout kept, once the inspector's card has its form (the first compile and Vite's first optimise included). */
-async function open(layout: object): Promise<Page> {
+async function open(layout: object, ready = 'Inspector'): Promise<Page> {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   await page.addInitScript(
     (l) => localStorage.setItem('loka.editor.layout', l),
@@ -73,7 +76,9 @@ async function open(layout: object): Promise<Page> {
       await new Promise((r) => setTimeout(r, 500));
     }
   }
-  await page.locator('[aria-label="Inspector"] form').waitFor({ timeout: boot }); // any card's form
+  // any card's form, or the named control (a `.scene` card has no form)
+  const at = ready === 'Inspector' ? page.locator('[aria-label="Inspector"] form') : page.getByLabel(ready);
+  await at.waitFor({ timeout: boot });
   return page;
 }
 const QUEST = { right: 280, selection: { kind: 'quest', key: 'carry_letter' } };
@@ -277,6 +282,19 @@ test('a reaction and an action open their own cards', async () => {
   await barter.close();
 });
 
+// Breaks: a modal scene routed to the generic card, its treatment select missing or offering other
+// than the schema's (none, reverie), or the generic form drawing treatment a second time.
+test('a modal scene opens its card: one treatment picker, the schema’s', async () => {
+  const page = await open({ selection: { kind: 'scene', key: 'letter_ash' } });
+  const card = page.getByLabel('scene card');
+  await card.locator('form').waitFor({ timeout: boot });
+  assert.deepEqual(await card.getByLabel('treatment').locator('option').allTextContents(), [
+    'none',
+    'reverie',
+  ]);
+  await page.close();
+});
+
 /** The Flow graph in the left slot, warm: the first open compiles the story on the server (a cold open
  * measured 319 ms here), so the budget is read on a second. `took` reads the latest `flow:*` measures. */
 async function flow() {
@@ -323,4 +341,60 @@ test('the flow graph refilters within 100 ms', async (t) => {
   const ms = await took(['flow:layout', 'flow:commit']);
   t.diagnostic(`flow refilter ${ms.map(Math.round).join(' + ')} ms`);
   assert.ok(sum(ms) <= 100, `refilter ${ms.join(' + ')} ms`);
+});
+
+// Last: it switches the world. Breaks: a `.scene` dialogue routed to no card or the generic one, a
+// value line without its picker or its verb's keys, a words line without its Book edit, an unknown
+// key or the line's own value sent, Enter not sending, a refusal or a write's Undo not shown, or a
+// modal scene's treatment shown as none.
+test('a .scene dialogue opens its text card: a picker per value line, words to the Book', async () => {
+  const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
+  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
+  const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
+  const npc = page.getByLabel('line 1 npc');
+  assert.equal(await npc.inputValue(), 'stranger');
+  const card = page.getByLabel('scene card');
+  assert.equal(await card.getByRole('button', { name: 'Edit in Book' }).count(), 2); // lines 3, 6
+  const sent: string[] = [];
+  page.on('request', (r) => void (r.url().includes('/set') && sent.push(r.url())));
+  await npc.fill('nobody');
+  await npc.press('Enter');
+  await card.getByText('no npc nobody').waitFor();
+  await npc.blur();
+  assert.deepEqual(sent, []); // refused here, never sent
+  const keys = page.locator('#scene-1-keys option');
+  assert.deepEqual(await keys.evaluateAll((os) => os.map((o) => o.getAttribute('value'))), [
+    'guard',
+    'stranger',
+  ]); // npc: an NPC key, never a dialogue or end
+  assert.equal(await card.locator('li label > span').first().textContent(), 'npc:');
+  await npc.fill('stranger');
+  await npc.blur(); // the line's own value: nothing to send
+  // /set answered here, never by the repo's file: first a refusal, then a write
+  const posted: unknown[] = [];
+  const answers = [
+    { status: 400, json: 'refused by the server' },
+    { status: 200, json: { id: 'u1' } },
+  ];
+  await page.route('**/__author/set', (r) => {
+    posted.push(r.request().postDataJSON());
+    return r.fulfill(answers.shift()!);
+  });
+  const undo = card.getByRole('button', { name: 'Undo' });
+  await npc.fill('guard');
+  await npc.press('Enter'); // Enter sends
+  await card.getByText('refused by the server').waitFor();
+  assert.equal(await undo.isEnabled(), false);
+  await npc.focus();
+  await npc.blur();
+  await card.getByText('refused by the server').waitFor({ state: 'detached' });
+  assert.equal(await undo.isEnabled(), true); // a write's id is the card's Undo
+  const one = { file: 'scenes/stranger_talk.scene', line: 1, was: 'npc: stranger', value: 'guard' };
+  assert.deepEqual(posted, [one, one]);
+  await page.close();
+  const sampler = { method: 'POST', body: JSON.stringify({ name: 'scene_sampler' }) };
+  assert.equal((await fetch(`http://localhost:${author}/world`, sampler)).status, 200);
+  const rope = await open({ selection: { kind: 'scene', key: 'rope_reverie' } });
+  assert.equal(await rope.getByLabel('treatment').inputValue(), 'reverie'); // the file's, not none
+  await rope.close();
 });

@@ -118,9 +118,12 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   const byNode: Record<string, Diagnostic[]> = {};
   for (const d of diagnostics) add(byNode, nodeOf(d.rel, refs), d);
   const unreached = new Set(Object.values(report.unreachable).flat());
-  // each node's own `.json` source file, for the inspector's card (a `.scene` or `.cut` has none)
+  // each node's own source file, for the inspector's card: a `.json`, else its `.scene` (a `.cut` none)
   const sources: Record<string, string> = {};
-  for (const rel of files(source).filter((f) => f.endsWith('.json'))) {
+  const json = (f: string) => Number(f.endsWith('.json'));
+  for (const rel of files(source)
+    .filter((f) => /\.(json|scene)$/.test(f))
+    .sort((a, b) => json(a) - json(b))) {
     const ref = nodeOf(rel, refs);
     if (ref) sources[ref] = rel;
   }

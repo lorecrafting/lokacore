@@ -271,7 +271,7 @@ export function serve(port: number, source: string, artifact: string, on: Hooks 
     else if ('compiled' in message || 'diagnostics' in message || 'held' in message) map.stale();
     for (const client of clients) send(client);
   }, source);
-  const editor = editing(source, said, (once) => clients.forEach((c) => send(c, once)), on);
+  const editor = editing(source, said, (o) => clients.forEach((c) => send(c, o)), on, artifact);
   const route = async (request: IncomingMessage, response: ServerResponse) => {
     if (foreign(request, response) || (await editor.route(request, response))) return;
     if (request.url === '/story') return map.answer(request, response, last.diagnostics ?? []);

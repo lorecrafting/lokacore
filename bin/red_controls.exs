@@ -1,4 +1,4 @@
-# size: allow 379, one table per gate; the editor gate plants one file per control
+# size: allow 381, one table per gate; the editor gate plants one file per control
 # Red controls plant violations, require checks to fail, and clean their own files.
 # Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
@@ -249,6 +249,8 @@ editor_controls =
          "actions.cooldown.edit: generic but not in the baseline"},
         {"reaction-card", %{registry: uncard.(~r/^reactions\./)},
          "reactions.zone.edit: generic but not in the baseline"},
+        {"scene-card", %{registry: uncard.(~r/^(scenes\.treatment|treatment:reverie)$/)},
+         "scenes.treatment.edit: generic but not in the baseline"},
         {"escape", %{registry: card.("../App.tsx")}, "services.name: no edit surface"},
         {"bespoke", %{registry: card.("RedCard.tsx"), card: ""},
          "services.name.edit: no longer generic"},

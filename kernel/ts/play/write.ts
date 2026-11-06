@@ -2,13 +2,22 @@
 // and `/journal`, and the POST routes that change the source tree. Every path a body names goes
 // through `guarded` (guard.ts) once; every write is a `.tmp` and a rename, recorded in the journal
 // `/undo` puts back from. live.ts checks Host and Origin first.
-import { mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 import { files } from './todo.ts';
 import { type Bytes, current, DIRS, guarded, named, placed, refuse, Refused } from './guard.ts';
 import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
 import { apply } from './edit_model.ts';
 import { edit, located } from './prose.ts';
+import { compiledCartridge, ids, set } from './scene_card.ts';
 import { loka, opened, worlds } from './worlds.ts';
 
 type By = 'editor' | 'outside';
@@ -184,16 +193,27 @@ const templates = (root: string) =>
   });
 
 let defs: { $defs: unknown } | undefined;
-function get(t: Tree, url: string, places: Record<string, string>): Answer | undefined {
+/** A `.scene`'s dialogue words in the last compile (the push carries only changed keys), for the
+ * Scene card's Edit in Book: `dialogue.<key>.` and its nested sets' `dialogue.<key>_`. */
+function sceneText(artifact: string | undefined, key: string) {
+  if (!artifact || !existsSync(artifact)) return {};
+  const { text } = JSON.parse(JSON.parse(readFileSync(artifact, 'utf8')).canonical);
+  return Object.fromEntries(
+    Object.entries(text as Record<string, string>).filter(([k]) => k.startsWith(`dialogue.${key}`)),
+  );
+}
+type Last = { places: Record<string, string>; artifact?: string };
+function get(t: Tree, url: string, { places, artifact }: Last): Answer | undefined {
   const { pathname, searchParams } = new URL(url, 'http://localhost');
   if (pathname === '/source') {
     const rel = searchParams.get('file');
     const bytes = readFileSync(guarded(t.root, rel, 'read'), 'utf8');
     const at = placed(rel!);
     const kind = at?.dir ?? rel!.split(/[/.]/)[0];
+    const text = at?.ext === 'scene' ? { text: sceneText(artifact, at.key) } : {};
     return [
       200,
-      { bytes, sha256: sha256(bytes), kind, key: at?.key ?? null, area: at?.area ?? null },
+      { bytes, sha256: sha256(bytes), kind, key: at?.key ?? null, area: at?.area ?? null, ...text },
     ];
   }
   const schema = /^\/schema\/([a-z_]+)$/.exec(pathname)?.[1];
@@ -214,9 +234,17 @@ function get(t: Tree, url: string, places: Record<string, string>): Answer | und
     return [200, t.journal.map(({ files: fs, ...e }) => ({ ...e, files: fs.map((c) => c.file) }))];
 }
 
-const POSTS: Record<string, (t: Tree, sent: Sent) => Answer | Promise<Answer>> = {
+type Post = (t: Tree, sent: Sent, artifact?: string) => Answer | Promise<Answer>;
+const POSTS: Record<string, Post> = {
   '/change': change,
   '/edit': (t, sent) => edit(t.root, sent, (what, c) => done(t, what, [c])),
+  '/set': (t, sent, artifact) =>
+    set(
+      t.root,
+      sent,
+      () => ids(compiledCartridge(artifact)),
+      (what, c) => done(t, what, [c]),
+    ),
   '/delete': remove,
   '/move': move,
   '/undo': undo,
@@ -235,18 +263,19 @@ async function answered<A extends Answer | undefined>(run: () => A | Promise<A>)
 }
 
 /** The write path over one source tree; `push` carries each write's `changed` to the page and
- * `places` is the last compile's `~` key => file:line. */
+ * `places` is the last compile's `~` key => file:line and `artifact` its file. */
 export function writer(
   source: string,
   push: (changed: Changed[]) => void,
   places: () => Record<string, string> = () => ({}),
+  artifact?: string,
 ) {
   const t = tree(source, push);
   return {
-    get: (url: string) => answered(() => get(t, url, places())),
+    get: (url: string) => answered(() => get(t, url, { places: places(), artifact })),
     // a write during /new's seconds-long run would land in its snapshot diff, and so its undo
     post: (url: string, sent: Sent) =>
-      answered(() => (t.busy ? refuse(409, 'a /new is running') : POSTS[url](t, sent))),
+      answered(() => (t.busy ? refuse(409, 'a /new is running') : POSTS[url](t, sent, artifact))),
     /** After an fs burst: what changed outside the editor is journaled and pushed `outside`.
      * ponytail: rereads every source file per burst; fine at showcase size, hash by mtime when not. */
     busy: () => t.busy > 0,

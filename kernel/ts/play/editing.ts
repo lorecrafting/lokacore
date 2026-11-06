@@ -38,9 +38,9 @@ type Said = {
  * /world's answer is sent or its client is gone, with the world's folder (author.ts restarts on
  * it: a fresh guard root, journal and Hold). */
 export type Hooks = { release?: () => void; leave?: (world: string) => void };
-export function editing(source: string, said: Said, once: Push, on: Hooks) {
+export function editing(source: string, said: Said, once: Push, on: Hooks, artifact?: string) {
   const { push, tell, places } = said;
-  const editor = writer(source, (changed) => once({ changed }), places);
+  const editor = writer(source, (changed) => once({ changed }), places, artifact);
   let held = false;
   const hold = (sent: { on?: unknown }): Answer => {
     if (typeof sent?.on !== 'boolean') return [400, 'on: true or false'];
