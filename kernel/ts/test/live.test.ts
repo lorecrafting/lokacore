@@ -278,6 +278,9 @@ test('GET /numbers: reports on the dev artifact', async (t) => {
   const hunger = told.pacing.report.pools.pools.find((p) => p.pool.endsWith('resource/hunger'));
   assert.deepEqual(hunger?.empty, { seeds: 4, hour: 10 });
   assert.deepEqual(told.fights.report.targets, []);
+  // Break: Run fights waits on the pacing sim, minutes on the showcase (loka-wfrgk.79, review 683 #2)
+  const fought = await (await fetch(`http://127.0.0.1:${port}/fights`)).json();
+  assert.deepEqual(fought, { hash: sha256, fights: told.fights });
 });
 
 test('limited: a report past its limit is killed and says so; a failing one gives its words', async () => {

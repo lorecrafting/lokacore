@@ -1,4 +1,4 @@
-// size: allow 400, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
+// size: allow 410, every card's logic lives here (cards hold no logic): the generic, Room, World, NPC, item, Action and Reaction cards' steps; the Action pairing is in action.ts, the World card's in world_card.ts
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -59,6 +59,30 @@ export function applied(saved: unknown, draft: unknown): unknown {
   change(out, diff(saved, draft));
   return out;
 }
+
+/**
+ * `doc` without each optional list the author emptied whose schema wants at least one item: a
+ * room's last variant removed deletes the field (loka-wfrgk.78), which `[]` would hold refused.
+ */
+export function unlisted(doc: unknown, node: Obj, defs: Record<string, Obj>): unknown {
+  if (!plain(doc)) return doc;
+  const n = deref(node, defs);
+  const props = (n.properties ?? {}) as Record<string, Obj>;
+  const each = plain(n.additionalProperties) ? n.additionalProperties : {};
+  const required = (n.required ?? []) as string[];
+  return Object.fromEntries(
+    Object.entries(doc).flatMap(([k, v]) => {
+      const s = deref(props[k] ?? each, defs);
+      const gone =
+        Array.isArray(v) && !v.length && (s.minItems as number) >= 1 && !required.includes(k);
+      return gone ? [] : [[k, unlisted(v, s, defs)]];
+    }),
+  );
+}
+const deref = (s: Obj, defs: Record<string, Obj>): Obj => {
+  const ref = s.$ref as string | undefined;
+  return ref ? deref(defs[ref.slice(ref.lastIndexOf('/') + 1)] ?? {}, defs) : s;
+};
 
 /**
  * The draft after a reload: the reloaded `doc` with the edits from `base` to `now` that were not
@@ -214,14 +238,45 @@ const shape = (node: unknown) => {
   return JSON.stringify(rest);
 };
 
+// the room key an untagged union's value names: a key, a case's room, a ref's key, a case list's fallback
+const roomOf = (v: unknown): unknown =>
+  Array.isArray(v) ? roomOf(v.at(-1)) : plain(v) ? roomOf(v.room ?? v.key) : v;
+
+/** An hour's (source.ex) branch `i`, carrying the old value's room key; other untagged unions: below. */
+function untagged(branches: Obj[], i: number, old: unknown, defs: Record<string, Obj>): unknown {
+  const room = roomOf(old);
+  const b = branches[i];
+  // not an hour (a status duration): a const branch writes its const, a number its least; else the value stays
+  if (!branches.some((h) => h.title === 'cases'))
+    return 'const' in b ? b.const : (b.minimum ?? old);
+  if (room === undefined) return undefined;
+  if (b.type === 'array') return [{ room }, room]; // one case, then its fallback room (schedules.ex `fallback`)
+  if (b.type !== 'object') return room;
+  const props = (b.properties ?? {}) as Record<string, Obj>;
+  const at = Object.hasOwn(props, 'room') ? 'room' : 'key';
+  const least = ((b.required ?? []) as string[])
+    .filter((f) => f !== at)
+    .map((f) => [f, minimal(props[f], defs)]);
+  if (least.some(([, v]) => v === undefined)) return old; // a ref's cartridge is not invented: the hour stays
+  return { ...Object.fromEntries(least), [at]: room };
+}
+
 /**
  * Branch `i`'s value when the author picks it: its tag, plus each old field the new branch declares
- * with the same schema (a check's `key`; any schema when no branch held the old value).
+ * with the same schema (a check's `key`; any schema when no branch held the old value); in an
+ * untagged union, the old value when it fits, else one carrying its room key (loka-wfrgk.74).
  */
-export function start(branches: Obj[], i: number, old?: unknown): Obj | undefined {
+export function start(
+  branches: Obj[],
+  i: number,
+  old?: unknown,
+  defs: Record<string, Obj> = {},
+): unknown {
   const k = tagOf(branches);
+  if (k === undefined)
+    return branchOf(branches, old) === i ? old : untagged(branches, i, old, defs);
   const tag = constOf(branches[i], k);
-  if (k === undefined || tag === undefined) return k ? {} : undefined; // `$ref Step`: picker asks
+  if (tag === undefined) return {}; // `$ref Step`: picker asks
   const from = branches[branchOf(branches, old)];
   const now = (branches[i].properties ?? {}) as Obj;
   const same = (f: string) => !from || shape(now[f]) === shape((from.properties as Obj)?.[f]);

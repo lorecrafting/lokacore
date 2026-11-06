@@ -17,6 +17,9 @@ const ed = editor({
 export const alone = (why: string): void => void (why && alert(why));
 export const shown = { tell: alone, rooms: [] as MapRoom[], nodes: [] as Story['graph']['nodes'] };
 
+/** The last map edit's id if it read or wrote `file` (mapedit.ts `newest`). */
+export const mapNewest = (file: string) => ed.newest(file);
+
 let queue = Promise.resolve();
 /** Runs one map gesture after the ones before it (so undo stays in order); a refusal is told, not thrown. */
 export const edit = (gesture: (ed: Editor) => Promise<unknown>) =>
