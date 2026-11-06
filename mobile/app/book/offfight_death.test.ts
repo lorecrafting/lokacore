@@ -148,6 +148,7 @@ test('a death that closes a fight keeps the Combat page', () => {
   }
   const pressed = mounted(view()); // and from a press there: Flee into a death keeps it shown
   try {
+    const was = turn(pressed);
     pressed.answer(
       {
         kind: 'saved',
@@ -163,6 +164,7 @@ test('a death that closes a fight keeps the Combat page', () => {
     );
     pressed.tap('Flee');
     assert.ok(pressed.texts().includes(TITLE) && pressed.texts().includes('Let go'));
+    assert.equal(turn(pressed), was + 1); // a pressed closure turns, as on main; not the dead page's in-place change
   } finally {
     pressed.close();
   }
