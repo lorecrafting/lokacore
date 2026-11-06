@@ -42,6 +42,14 @@ function TextKey(p: FieldProps) {
   );
 }
 
+/** A picker's name, marked stale while the last compile failed: its keys are the last good compile's. */
+export const FieldName = (p: FieldProps) => (
+  <span className="text-muted-foreground">
+    {p.name}
+    {context(p).stale ? <span className="text-warning"> stale</span> : null}
+  </span>
+);
+
 /** Picker: a definition key, offered from the story's nodes of the kind the field's path names; an
  * unknown one is refused at the field and never reaches the draft. */
 function DefinitionRef(p: FieldProps) {
@@ -55,10 +63,7 @@ function DefinitionRef(p: FieldProps) {
   const refused = bad === undefined ? undefined : refusePick({ kind, keys }, bad);
   return (
     <label className="grid gap-1 text-xs">
-      <span className="text-muted-foreground">
-        {p.name}
-        {context(p).stale ? <span className="text-warning"> stale</span> : null}
-      </span>
+      <FieldName {...p} />
       <Input
         id={p.fieldPathId.$id}
         list={list}

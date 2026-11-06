@@ -21,7 +21,7 @@ import { uiSchema } from '../../../../../kernel/ts/play/ui_schema.ts';
 import type { useDiagnostics } from '../../author.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { Input } from '../../components/ui/input.tsx';
-import { fields, type Context } from '../fields.tsx';
+import { FieldName, fields, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
@@ -71,7 +71,7 @@ function Pick(p: FieldProps) {
   const list = `${p.fieldPathId.$id}-keys`;
   return (
     <label className="grid gap-1 text-xs">
-      <span className="text-muted-foreground">{p.name}</span>
+      <FieldName {...p} />
       <Input
         id={p.fieldPathId.$id}
         list={list}
