@@ -29,6 +29,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: editor drag a template into a room (loka-wfrgk.13)](2026-11-05-editor-drag-template-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6e, World inspector card (PR #651, loka-wfrgk.8)](2026-11-05-e6e-world-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6d part one, Quest and Dialogue cards (PR #669, loka-wfrgk.6)](2026-11-05-e6d-story-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6c part two, Reaction and Action inspector cards (PR #668, loka-wfrgk.46)](2026-11-05-e6c2-reaction-action-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6c part one, Rules block (PR #660, loka-wfrgk.5)](2026-11-05-e6c-rules-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6b, NPC and Item inspector cards (PR #656, loka-wfrgk.4)](2026-11-05-e6b-npc-item-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6a, Room inspector card and the Book's add-here (PR #649, loka-wfrgk.3)](2026-11-05-e6a-room-review.md): **CHANGES REQUIRED**
@@ -39,6 +40,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Editor E2, the three-column shell (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-review.md): **CHANGES REQUIRED**
 - [Review: Editor E2 shell, fix round and owner walk (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-fable-review.md): **APPROVE WITH NOTES**
 - [Review: dialogue warnings match Talk (loka-vduxr.32, loka-69yuw)](2026-11-05-dialogue-warning-parity-review.md): **APPROVE WITH NOTES**
+- [Review: dev cheat Set level and attribute points (loka-x6t.137 part 2)](2026-11-05-dev-set-level-review.md): **APPROVE WITH NOTES**
 - [Review: death and level bug batch (PR #623; loka-3tc7, loka-g5hh.2.11, loka-dbtxr (a))](2026-11-05-death-level-bugs-review.md): **CHANGES REQUIRED**
 - [Review: one cartridge format, drop v1 and `Topics.grants/2` (PR #635, loka-9x5y, loka-1b68q)](2026-11-05-compiler-one-format-review.md): **APPROVE WITH NOTES**
 - [Review: combat title names who started the fight (PR #621, loka-kgd.207)](2026-11-05-combat-title-review.md): **APPROVE**

@@ -1,0 +1,33 @@
+{
+  "name": "spell.mend",
+  "aliases": [
+    "mend"
+  ],
+  "target": {
+    "kind": "spell",
+    "word": "mend",
+    "learned": "mend_known"
+  },
+  "priority": 0,
+  "costs": [
+    {
+      "resource": "ma",
+      "amount": 1
+    }
+  ],
+  "cooldown": 900,
+  "outcomes": {
+    "success": {
+      "steps": [
+        {
+          "op": "resource.adjust",
+          "resource": "hp",
+          "by": 1
+        }
+      ],
+      "narration": {
+        "actor": "narration.mend"
+      }
+    }
+  }
+}
