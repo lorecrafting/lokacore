@@ -1,4 +1,4 @@
-# size: allow 562, one case per starter kind and refusal; the area placement cases join them
+# size: allow 612, one case per starter kind and refusal; the area placement and companion cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -494,6 +494,53 @@ defmodule Loka.ContentStartersTest do
     assert snapshot(dir) == before
     assert File.read!(Path.join(tmp, "x.json")) == "{}"
     refute File.exists?(Path.join(tmp, "rooms"))
+  end
+
+  # Breaks: an --area starter's companion files (a population's NPC, items and camp room, a
+  # transport's routes, actions and far room) written at the root; or a file that exists (the root
+  # NPC a transport stocks) copied into the area, a duplicate definition; or a scene for an area NPC
+  # written at the root instead of its area's scenes/ (layout design section 7).
+  test "--area puts every new file in the area; a scene goes to its NPC's area", %{tmp_dir: tmp} do
+    run = fn args -> ExUnit.CaptureIO.capture_io(fn -> Mix.Tasks.Loka.New.run(args) end) end
+    run.(~w(--cwd #{tmp} cartridge mine npcs keeper resources coin areas marsh))
+    run.(~w(--cwd #{tmp} populations wolves --area marsh transports ferry --area marsh mine))
+    run.(~w(--cwd #{tmp} npcs brennan --area marsh scene brennan hi scene keeper yo mine))
+    dir = Path.join(tmp, "mine")
+
+    assert dir
+           |> Path.join("{rooms,npcs,items,populations,transports,actions}/*")
+           |> Path.wildcard() ==
+             Enum.map(~w(npcs/keeper.json rooms/start.json), &Path.join(dir, &1))
+
+    assert MapSet.subset?(
+             MapSet.new(~w(actions/ferry.json actions/ferry_back.json items/wolves_corpse.json
+               items/wolves_item.json items/wolves_player_corpse.json npcs/wolves_npc.json
+               populations/wolves.json rooms/ferry_far.json rooms/wolves_camp.json
+               transports/ferry.json transports/ferry_back.json scenes/hi.scene)),
+             dir
+             |> Path.join("areas/marsh")
+             |> Path.join("*/*")
+             |> Path.wildcard()
+             |> MapSet.new(&Path.relative_to(&1, Path.join(dir, "areas/marsh")))
+           )
+
+    assert read(dir, "npcs/keeper.json")["resource_starts"] == %{"coin" => 10}
+    assert File.exists?(Path.join(dir, "scenes/yo.scene"))
+    refute File.exists?(Path.join(dir, "scenes/hi.scene"))
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+
+    # A bundled NPC's scene goes beside its bundle, in areas/<bundle>/scenes/.
+    bundle(dir, "fen")
+
+    edit(
+      dir,
+      "areas/fen.json",
+      &Map.put(&1, "npcs", %{"fenman" => read(dir, "npcs/keeper.json")})
+    )
+
+    run.(~w(--cwd #{tmp} scene fenman lo mine))
+    assert File.exists?(Path.join(dir, "areas/fen/scenes/lo.scene"))
+    assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
   # Break: a refusal after a pair merged into an author's file deletes it or leaves the merge.

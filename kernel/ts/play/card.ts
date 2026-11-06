@@ -1,3 +1,4 @@
+// size: allow 360, every card's logic lives here (cards hold no logic): the generic, Room and World cards' steps
 // The generic inspector card's logic (docs/rnd/gui-editor-design-2026-11-04.md sections 6 and 11;
 // owner decision 2026-11-04 "cards hold no logic"): the panel's rjsf form only draws, and every
 // value-to-ops, refusal-to-field and registry-to-menu step is a plain function here.
@@ -277,3 +278,75 @@ export const proseKey = (value: unknown, kind: string, key: string, path: Step[]
 
 /** Only a definition's `.json` source has a card; a `.scene` or `.cut` is edited as text. */
 export const editable = (rel: string | undefined) => rel?.endsWith('.json') === true;
+
+/**
+ * The least value of a newly added field the schema allows, nothing invented: each text key `~`
+ * (cartridge.md "Inline prose"), each `const`, `true`, each `minimum`, `minItems` copies; a
+ * string, enum or key leaves the whole field undefined: the card only reveals it for the author.
+ */
+export function minimal(node: Obj, defs: Record<string, Obj>, seen: string[] = []): unknown {
+  const ref = node.$ref as string | undefined;
+  if (ref) {
+    const name = ref.slice(ref.lastIndexOf('/') + 1);
+    if (name === 'TextKey') return { prose: '~' };
+    return seen.includes(name) ? undefined : minimal(defs[name], defs, [...seen, name]);
+  }
+  if ('const' in node) return node.const;
+  for (const branch of (node.anyOf ?? node.oneOf ?? []) as Obj[]) {
+    const v = minimal(branch, defs, seen);
+    if (v !== undefined) return v;
+  }
+  if (node.type === 'boolean') return true;
+  if (node.type === 'integer' || node.type === 'number') return node.minimum;
+  if (node.type === 'array') {
+    const n = (node.minItems as number) ?? 0;
+    const item = n ? minimal(node.items as Obj, defs, seen) : undefined;
+    return n && item === undefined ? undefined : Array.from({ length: n }, () => item);
+  }
+  if (node.type !== 'object') return undefined;
+  const props = (node.properties ?? {}) as Record<string, Obj>;
+  const pairs = ((node.required ?? []) as string[]).map((k) => [k, minimal(props[k], defs, seen)]);
+  return pairs.some(([, v]) => v === undefined) ? undefined : Object.fromEntries(pairs);
+}
+
+/** `doc` with field `f` of definition `def` at its least value; undefined when present or the author must choose it. */
+export function added(
+  doc: Obj,
+  f: string,
+  defs: Record<string, Obj>,
+  def: string,
+): Obj | undefined {
+  if (Object.hasOwn(doc, f)) return undefined; // a stale menu never overwrites a present field
+  const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
+  const value = node && minimal(node, defs);
+  return value === undefined ? undefined : { ...doc, [f]: value };
+}
+
+/** `doc` without field `f`. */
+export const removed = (doc: Obj, f: string): Obj => {
+  const { [f]: _gone, ...rest } = doc;
+  return rest;
+};
+
+/** The field a Book "Add here" pick adds to the room `key`: only its own room's, only one on offer. */
+export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
+  a.room === key && menu.includes(a.kind) ? a.kind : undefined;
+
+// Each field's owning capability, as the compiler checks it (UNDECLARED_CAPABILITY: content/room_parts.ex
+// parts/1, cues.ex:54, construction.ex:101); a field it omits needs none.
+const OWNERS: Record<string, string> = {
+  'rooms.cues': 'sense_cue',
+  'rooms.dark': 'light',
+  'rooms.dark_description': 'light',
+  'rooms.details': 'inspectable_detail',
+  'rooms.site': 'construction',
+  'rooms.tags': 'tag',
+  'rooms.variants': 'description_variant',
+};
+
+/** The menu's fields whose capability `requires.capabilities` (`caps`) declares; others would not compile. */
+export const allowed = (kind: string, menu: string[], caps: object) =>
+  menu.filter((f) => {
+    const owner = OWNERS[`${kind}.${f}`];
+    return !owner || Object.hasOwn(caps, owner);
+  });

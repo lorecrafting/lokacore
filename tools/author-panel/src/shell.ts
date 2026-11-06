@@ -3,6 +3,8 @@
 // timings against their budgets, and the OS colour scheme. No React here: tested from
 // kernel/ts/test/author_shell.test.ts.
 
+import type { ListState } from './storylist.ts';
+
 export type Selection = { file?: string; kind: string; key: string };
 /** The World card's selection: cartridge.json, which no graph node names (its card opens the root files). */
 export const WORLD: Selection = { file: 'cartridge.json', kind: 'cartridge', key: 'world' };
@@ -16,6 +18,7 @@ export type Layout = {
   tab: 'hierarchy' | 'project';
   map: 'map' | 'story';
   selection?: Selection;
+  story?: ListState; // the Story list's folds, focus and trace
 };
 type Side = 'left' | 'right' | 'slot';
 
@@ -97,7 +100,7 @@ export function places(sel: Selection | undefined, nodes: Node[]) {
 }
 
 export type Item = {
-  kind: 'command' | 'key' | 'text' | 'todo';
+  kind: 'command' | 'key' | 'text' | 'todo' | 'story';
   label: string;
   detail: string;
   id: string;

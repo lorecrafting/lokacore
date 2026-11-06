@@ -589,7 +589,7 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   UNREACHABLE_DETAIL.
 - **Orphans.** `orphan_items`: template items with no inbound edge. `orphan_facts`: `unused` (no
   inbound edge), `write_only` (every inbound edge a write), `read_only` (inbound edges, none a
-  write). A write is an edge with op `fact.assign` or `fact.adjust`, or at an engine write site
+  write). A write is an edge with op `fact.assign`, `fact.adjust` or `fact.stamp`, or at an engine write site
   with no op: `world.death_credit[n].fact`; a topic's `fact` (also a read: the codex lists known
   topics); a scene's `on_end.assign[n].fact` and `on.rest.credit`; a quest's
   `expedition.survived_fact`, `expedition.faction`, `exchange.contribution`, `exchange.faction`,

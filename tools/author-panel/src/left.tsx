@@ -6,6 +6,7 @@ import type { Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import type { SetLayout } from './columns.tsx';
 import { fromRef, WORLD, type Layout, type Selection } from './shell.ts';
+import { StoryList } from './storylist.tsx';
 
 type Pick = (s: Selection) => void;
 
@@ -97,7 +98,7 @@ export function Hierarchy({
   );
 }
 
-/** The map slot: Map | Story, both placeholders until E3a and S2; Story counts GET /story. */
+/** The map slot: Map | Story (the area map, or the Story list and Trace), both drawn from GET /story. */
 export function MapSlot({
   layout,
   set,
@@ -125,20 +126,17 @@ export function MapSlot({
         </div>
       ) : layout.map === 'map' && story ? (
         <AreaMap story={story} segment={segment} {...m} />
+      ) : story ? (
+        <StoryList story={story} layout={layout} set={set} segment={segment} pick={m.pick} open={m.open} />
       ) : (
         <div className="p-2">
           {segment}
-          <p className="mt-2 text-muted-foreground">
-            {story ? counts(story) : 'Waiting for the watcher.'}
-          </p>
+          <p className="mt-2 text-muted-foreground">Waiting for the watcher.</p>
         </div>
       )}
     </section>
   );
 }
-
-const counts = (story: Story) =>
-  `${story.graph.nodes.length} definitions · ${story.graph.edges.length} links · ${Object.values(story.todo).flat().length} ~ · ${Object.values(story.report.unreachable).flat().length} unreached`;
 
 /** The Map | Story segment (Esc in the map returns here). */
 function Segment({ layout, set }: { layout: Layout; set: SetLayout }) {

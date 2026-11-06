@@ -58,6 +58,10 @@ before(async () => {
   writeFileSync(join(src, 'rooms/b.json'), blank);
   writeFileSync(join(src, 'rooms/c.json'), blank);
   writeFileSync(join(src, 'layout.json'), '[\n  { "room": "start", "x": 0, "y": 0, "z": 0 }\n]\n');
+  writeFileSync(
+    join(src, 'outline.json'),
+    '{ "parts": [{ "beats": [{ "n": 1 }, { "n": 2, "nodes": ["rooms/b"] }] }] }\n',
+  );
   snapshot = Object.fromEntries(files().map((f) => [f, read(f)]));
   const live = serve(0, src, join(dir, 'none.json'));
   const port = await live.port;
@@ -212,6 +216,18 @@ test('a press that stays within 4 px is a click (it selects); one that leaves is
     ],
     [false, false, true, true],
   );
+});
+
+test("a bind appends the short ref to that beat's nodes, and refuses a missing beat or a repeat", async () => {
+  // Breaks: a bind that replaces the beat's nodes, writes another beat, or binds a ref twice.
+  await ed.bind(0, 1, 'rooms/c');
+  await ed.bind(0, 2, 'rooms/c');
+  assert.deepEqual(
+    json('outline.json').parts[0].beats.map((x: { nodes?: string[] }) => x.nodes),
+    [['rooms/c'], ['rooms/b', 'rooms/c']],
+  );
+  await assert.rejects(ed.bind(0, 3, 'rooms/c'), /part 1 has no beat 3/);
+  await assert.rejects(ed.bind(0, 2, 'rooms/b'), /beat 2 already binds rooms\/b/);
 });
 
 test('a refused put-back is told with the refusal that stopped the gesture', async () => {
