@@ -89,7 +89,8 @@ test('at a 280 px inspector the quest card fits its width', async () => {
 });
 
 // Breaks: the inspector column does not scroll (no overflow on the card's box, or a box that is not
-// positioned, which its absolute sr-only labels escape), so a tall room card stretches the page (loka-wfrgk.44).
+// positioned, which its absolute sr-only labels escape), so a tall room card stretches the page (loka-wfrgk.44);
+// or the tall card squeezes the console below it to nothing.
 test('a tall room card scrolls inside the inspector, not the page', async () => {
   const page = await open({ selection: { kind: 'room', key: 'tollhouse' } });
   const [page_, box] = await page
@@ -100,6 +101,7 @@ test('a tall room card scrolls inside the inspector, not the page', async () => 
     ]);
   assert.equal(page_, 0, 'the page scrolls');
   assert.ok(box > 0, 'the room card fits: this test no longer opens a tall card');
+  assert.ok((await page.getByLabel('Console').boundingBox())!.height > 0, 'the console is squeezed shut');
 });
 
 // Breaks: clicking the minutes field leaves its text, so typing appends (60 then 600 → 60600; loka-wfrgk.55).

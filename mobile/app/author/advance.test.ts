@@ -2,10 +2,11 @@
 // over it froze the tab, and the panel's restore replayed it on every boot.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { ADVANCE_BUDGET_MS, advanced, replay, type Replayable, type Step } from './place.ts';
+import { advanced, replay, type Replayable, type Step } from './place.ts';
 
 // Break: an advance over the budget reaches the clock, on record or on restore; or the budget
-// refuses the advance at it. The check passes no budget (kernel/ts/test/check.test.ts).
+// refuses the advance at it; or replay's default is not the budget (the panel's restore passes none).
+// The check passes Infinity (kernel/ts/test/check.test.ts).
 test('an advance over the budget is refused before the clock, recorded or replayed', () => {
   const moved: number[] = [];
   const steps: Step[] = [];
@@ -23,7 +24,6 @@ test('an advance over the budget is refused before the clock, recorded or replay
     [{ advance: 3_600_000 }, { advance: 3_600_001 }],
     game as unknown as Replayable,
     move,
-    ADVANCE_BUDGET_MS,
   );
   assert.deepEqual(restored, {
     done: 1,

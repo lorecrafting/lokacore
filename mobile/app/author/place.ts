@@ -35,7 +35,8 @@ export function caughtUp(game: Pulsed) {
 }
 
 // The browser's safety budget for one advance: delivery is synchronous, and on the toolbox showcase
-// 72,720,000 ms took 14 s and 1094 view emits while 3,600,000 ms took 0.3 s (loka-wfrgk.55). The check passes none.
+// 72,720,000 ms took 14 s and 1094 view emits while 3,600,000 ms took 0.3 s (loka-wfrgk.55). The check
+// replays checkpoints off the browser and passes Infinity.
 export const ADVANCE_BUDGET_MS = 3_600_000;
 
 /** The dev clock moved by `ms`, delivered now and recorded only if delivered; else what stopped it. */
@@ -254,7 +255,7 @@ export function replay(
   steps: Step[],
   game: Replayable,
   moveClock: (ms: number) => void,
-  budget = Infinity,
+  budget = ADVANCE_BUDGET_MS,
 ): Outcome {
   for (const [i, step] of steps.entries()) {
     if (!wellFormed(step))
