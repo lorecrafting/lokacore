@@ -146,6 +146,18 @@ test('a quest and a dialogue open their cards; a link to no dialogue is refused'
     'lean then',
     'lean then_failed',
   ]);
+  // the tree, not the generic form: one folded block per choice; its key is never renamed
+  const tree = await bess.locator('[aria-label="choices"] summary').allTextContents();
+  assert.deepEqual(tree, ['praise', 'insult', 'boast', 'lean']);
+  const boast = bess.locator('[aria-label="choice boast"]');
+  await boast.locator('summary').click();
+  // its words keep the form's widgets: Edit in Book, never a text input (fields.tsx TextKey)
+  await boast.getByRole('button', { name: 'Edit in Book' }).first().waitFor({ timeout: boot });
+  // bess_talk.json's boast: check and steps are removable rows; label and narration, its words, never
+  const shown = await boast.locator('span.flex-1').allTextContents();
+  assert.deepEqual(shown.sort(), ['check', 'steps']);
+  await boast.getByRole('button', { name: 'Rename' }).click();
+  await boast.getByText("a choice's key is its id").waitFor({ timeout: boot });
   await bess.close();
   const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
   const link = page.getByLabel('bounty then');
@@ -153,6 +165,7 @@ test('a quest and a dialogue open their cards; a link to no dialogue is refused'
   const words = await page.locator('[aria-label="dialogue card"] dl dt').allTextContents();
   assert.deepEqual(words, ['prompt']); // aldous_talk.json has a prompt and no name of its own
   const saved = await link.inputValue();
+  assert.equal(await page.getByRole('button', { name: 'Add choice' }).isDisabled(), true); // no key yet
   await link.fill('end'); // a known target is drafted
   assert.equal(await link.inputValue(), 'end');
   await link.fill(saved);
@@ -161,6 +174,85 @@ test('a quest and a dialogue open their cards; a link to no dialogue is refused'
   assert.equal(await link.getAttribute('aria-invalid'), 'true');
   await link.blur(); // a refused target was never drafted: the blur's commit leaves the saved link
   assert.notEqual(await link.inputValue(), 'nosuch');
+  await page.close();
+});
+
+// Breaks: a choice whose link leads to a nested set (entry: false, mechanics.md:504) loses the
+// set's read-only prompt and labels, folds a second level, or a link inside it no longer opens
+// that dialogue's own card.
+test('a link to a nested set shows its prompt and labels and opens its card', async () => {
+  const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
+  await page.route('**/__author/change', (r) => r.abort()); // nothing drafted here is written
+  await page.route('**/__author/source?file=*aldous_lesson*', async (r) => {
+    const s = await (await r.fetch()).json();
+    const doc = JSON.parse(s.bytes);
+    doc.entry = false;
+    doc.choices.learn.then = 'aldous_yard'; // a second level: its button, never a fold
+    doc.choices.leave = { label: 'k.leave', then: 'end' }; // the talk ends: no button
+    await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }) });
+  });
+  const bounty = page.locator('[aria-label="choice bounty"]');
+  await bounty.locator('summary').click();
+  await page.getByLabel('bounty then').fill('aldous_lesson');
+  const set = bounty.locator('[aria-label="nested aldous_lesson"]');
+  await set.waitFor({ timeout: boot });
+  const keys = await set.locator('code').allTextContents();
+  assert.deepEqual(keys.slice(0, 2), ['dialogue.aldous_lesson.prompt', 'dialogue.aldous_lesson.learn']);
+  assert.equal(await page.locator('[aria-label^="nested "]').count(), 1);
+  const opens = await set.getByRole('button').allTextContents();
+  assert.deepEqual(opens, ['Open aldous_lesson', 'Open aldous_yard']);
+  await set.getByRole('button', { name: 'Open aldous_yard' }).click();
+  const title = page.locator('[aria-label="Inspector"]').getByText('aldous_yard', { exact: true });
+  await title.waitFor({ timeout: boot }); // the inspector's title is the opened dialogue's key
+  await page.unrouteAll({ behavior: 'ignoreErrors' }); // its own card reads the source too
+  await page.close();
+});
+
+// Breaks: a dialogue already broken refuses every edit, its fix too, for the break it had
+// (Dialogue.tsx useGated); the review's record: praise holds receive and hand_over, insult a
+// then_failed with no check.
+test('a dialogue already broken takes the edit that fixes it', async () => {
+  const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'bess_talk' } });
+  await page.route('**/__author/change', (r) => r.abort());
+  await page.route('**/__author/source?file=*bess_talk*', async (r) => {
+    const s = await (await r.fetch()).json();
+    const doc = JSON.parse(s.bytes);
+    Object.assign(doc.choices.praise, { receive: { item: 'x' }, hand_over: { item: 'x' } });
+    doc.choices.insult.then_failed = 'end';
+    await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }) });
+  });
+  await page.reload(); // the card read its source before the route
+  const praise = page.locator('[aria-label="choice praise"]');
+  await praise.locator('summary').click();
+  const row = praise.locator('span.flex-1').getByText('hand_over', { exact: true });
+  await row.locator('..').getByRole('button', { name: 'Remove' }).click();
+  await row.waitFor({ state: 'detached', timeout: boot }); // the old gate kept it, refused
+  assert.equal(await page.getByText('then_failed needs a check').count(), 0);
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await page.close();
+});
+
+// Breaks: a nested set read late, after its link moved to another dialogue, shows under that one.
+test("a slow read of a link's old target never shows under its new one", async () => {
+  const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
+  await page.route('**/__author/change', (r) => r.abort());
+  let sent!: () => void;
+  const late = new Promise<void>((done) => (sent = done));
+  await page.route('**/__author/source?file=*aldous_lesson*', async (r) => {
+    const s = await (await r.fetch()).json();
+    await new Promise((t) => setTimeout(t, 1500)); // lands after aldous_yard's read
+    const bytes = JSON.stringify({ ...JSON.parse(s.bytes), entry: false });
+    await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes }) });
+    sent();
+  });
+  await page.locator('[aria-label="choice bounty"] summary').click();
+  const link = page.getByLabel('bounty then');
+  await link.fill('aldous_lesson');
+  await link.fill('aldous_yard');
+  await late;
+  await page.waitForTimeout(300); // the late read rendered, if it would
+  assert.equal(await page.locator('[aria-label^="nested "]').count(), 0);
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
   await page.close();
 });
 
