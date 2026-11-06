@@ -3,12 +3,8 @@
 // write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field); its
 // reference fields are pickers that refuse a key no definition (or root-file entry) has.
 import { useEffect, useState } from 'react';
-import Form from '@rjsf/core';
 import type { FieldProps } from '@rjsf/utils';
-import { customizeValidator } from '@rjsf/validator-ajv8';
-import { Ajv2020 } from 'ajv/dist/2020.js';
 import {
-  FORM_DEFAULTS,
   ROOTS,
   addable,
   entered,
@@ -26,11 +22,10 @@ import type { useDiagnostics } from '../../author.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { Input } from '../../components/ui/input.tsx';
 import { fields, type Context } from '../fields.tsx';
-import { AddMenu, Header, useCard } from '../Generic.tsx';
-import { Refusal, templates } from '../templates.tsx';
+import { AddMenu, CardForm, Header, useCard } from '../Generic.tsx';
+import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 
-const validator = customizeValidator({ AjvClass: Ajv2020 });
 type Diag = ReturnType<typeof useDiagnostics>;
 type Named = Record<string, string[]>; // resource and attribute keys, from the root files
 type Props = { rel: string; context: Context; diag: Diag };
@@ -110,28 +105,12 @@ function Settings({ rel, context, diag, named }: Props & { named: Named }) {
   const defs = (saved.schema as { $defs: never }).$defs;
   // an empty registry: the card's own fields draw as the generic walker draws them
   const ui = hidden(uiSchema(saved.dir, saved.schema as never, defs, {}), saved.dir, registry, draft, card.revealed);
+  const withNamed = { ...context, named };
   return (
     <section className="grid gap-2 px-3 text-xs" aria-label={rel}>
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
-      <div onBlur={card.commit}>
-        <Form
-          schema={saved.schema}
-          uiSchema={ui}
-          formData={draft}
-          validator={validator}
-          fields={picking}
-          templates={templates}
-          showErrorList={false}
-          formContext={{ ...context, named }}
-          experimental_defaultFormStateBehavior={FORM_DEFAULTS}
-          extraErrors={fieldErrors((diag.diagnostics ?? []) as never, rel) as never}
-          onChange={(e) => card.change(e.formData)}
-          onSubmit={card.commit}
-        >
-          <span />
-        </Form>
-      </div>
+      <CardForm rel={rel} card={card} context={withNamed} diag={diag} ui={ui} fields={picking} />
       <AddMenu fields={addable(saved.dir, registry, draft, card.revealed)} reveal={card.reveal} />
     </section>
   );
