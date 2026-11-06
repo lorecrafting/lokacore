@@ -56,14 +56,11 @@ function DefinitionRef(p: FieldProps) {
   );
 }
 
-/** A branch's name in the picker: its op, else its title. */
-const label = (b: RJSFSchema, ui: Record<string, unknown> | undefined, i: number) =>
-  (start(b as never)?.op as string) ?? (ui?.['ui:title'] as string) ?? `option ${i + 1}`;
-
 /**
  * Any union, and the Policy and Step blocks: an op picker, then the chosen branch's fields. A new
  * branch starts as `{op}` and nothing else (rjsf's own switch would drop `op` under our defaults);
- * a `wait` step draws the divider before the rules that run later.
+ * a `wait` step draws the divider before the rules that run later. The picker's label counts an
+ * array item from 1, as the owner does; its name ends in the 0-based index (chrome rulings §7).
  */
 function Union(p: FieldProps) {
   const { registry, schema, formData, fieldPathId } = p;
@@ -78,13 +75,12 @@ function Union(p: FieldProps) {
   const found = branchOf(branches as never, formData);
   const at = found >= 0 ? found : picked;
   const { SchemaField } = registry.fields;
+  const wait = formData?.op === 'wait';
   return (
-    <div className={formData?.op === 'wait' ? 'mt-1 border-t-2 border-dashed pt-1' : ''}>
-      {formData?.op === 'wait' ? (
-        <p className="text-xs text-muted-foreground">later rules</p>
-      ) : null}
+    <div className={wait ? 'mt-1 border-t-2 border-dashed pt-1' : ''}>
+      {wait ? <p className="text-xs text-muted-foreground">later rules</p> : null}
       <select
-        aria-label={`${p.name} kind`}
+        aria-label={`${p.name.replace(/-(\d+)$/, (_, n) => ` ${Number(n) + 1}`)} kind`}
         className="form-control"
         value={at}
         onChange={(e) => {
@@ -94,13 +90,15 @@ function Union(p: FieldProps) {
         }}
       >
         {at < 0 ? <option value={-1}>choose</option> : null}
-        {branches.map((b, i) => (
+        {branches.map((_, i) => (
           <option key={i} value={i}>
-            {label(b, each[i], i)}
+            {(each[i]?.['ui:title'] as string) ?? `option ${i + 1}`}
           </option>
         ))}
       </select>
-      {at >= 0 ? <SchemaField {...p} schema={branches[at]} uiSchema={{ ...each[at], 'ui:label': false }} /> : null}
+      {at >= 0 ? (
+        <SchemaField {...p} schema={branches[at]} uiSchema={{ ...each[at], 'ui:label': false }} />
+      ) : null}
     </div>
   );
 }

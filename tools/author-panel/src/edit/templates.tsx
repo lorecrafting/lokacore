@@ -37,7 +37,7 @@ const icon = (Icon: LucideIcon, name: string) =>
     );
   };
 
-/** The required mark: dim, and not read out (the input itself carries `required`). */
+/** The required mark: dim, and not read out (a native input carries `required`; a legend adds sr-only text). */
 const Required = () => (
   <span aria-hidden className="text-muted-foreground">
     {' *'}
@@ -56,7 +56,7 @@ function FieldTemplate(p: FieldTemplateProps) {
   return (
     <Wrap {...p}>
       <div
-        className={`grid gap-0.5 ${rawErrors?.length ? '[&>.form-control]:border-destructive [&>label>input]:border-destructive' : ''}`}
+        className={`grid gap-0.5 ${displayLabel ? 'group' : ''} ${rawErrors?.length ? '[&>.form-control]:border-destructive [&>label>input]:border-destructive' : ''}`}
       >
         {show ? (
           <label htmlFor={id} className={item ? 'sr-only' : 'text-xs text-muted-foreground'}>
@@ -79,18 +79,23 @@ function TitleFieldTemplate({ id, title, required }: TitleFieldProps) {
   return (
     <legend id={id} className={item ? 'sr-only' : 'text-xs font-medium'}>
       {title}
-      {required && !item ? <Required /> : null}
+      {required && !item ? (
+        <>
+          <Required />
+          <span className="sr-only"> required</span>
+        </>
+      ) : null}
     </legend>
   );
 }
 
-/** One dim line; the whole text in its tooltip and, by its id, the input's description. */
+/** One dim line, whole while its field has focus; the whole text in its tooltip and, by its id, the input's description. */
 function DescriptionFieldTemplate({ id, description }: DescriptionFieldProps) {
   if (!description) return null;
   return (
     <div
       id={id}
-      className="truncate text-xs text-muted-foreground"
+      className="truncate text-xs text-muted-foreground group-focus-within:whitespace-normal"
       title={typeof description === 'string' ? description : undefined}
     >
       {description}

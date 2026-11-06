@@ -10,11 +10,32 @@ const CLAIMED = /^(?:partial\.)?(TextKey|DefinitionRef|Policy|Step)$/;
 const DEPTH = 3;
 const named = (ref: string) => ref.slice(ref.lastIndexOf('/') + 1);
 
-function title(branch: Node, i: number): string {
-  if (branch.title) return branch.title;
-  if (branch.$ref) return named(branch.$ref);
-  if (branch.required?.length === 1) return branch.required[0];
-  return typeof branch.type === 'string' ? branch.type : `option ${i + 1}`;
+/**
+ * A union picker's branch names (docs/design/editor-chrome-rulings.md §7): each branch's title (a
+ * `$ref` is titled by its definition), else its value of the key that is a distinct `const` in every
+ * branch, else its single required key, else `option n`; a JSON type only when the branches differ
+ * only by type. A name two branches share falls back to `option n`.
+ */
+export function titles(branches: Node[], defs: Record<string, Node>): string[] {
+  const at = branches.map((b) => (b.$ref ? (defs[named(b.$ref)] ?? {}) : b));
+  const consts = (k: string) => at.map((b) => b.properties?.[k]?.const);
+  const key = Object.keys(at[0]?.properties ?? {}).find(
+    (k) => consts(k).every((c) => typeof c === 'string') && new Set(consts(k)).size === at.length,
+  );
+  const types = at.map((b) => b.type);
+  const byType = types.every((t) => typeof t === 'string') && new Set(types).size === at.length;
+  const names = branches.map(
+    (b, i): string | undefined =>
+      b.title ??
+      at[i].title ??
+      (b.$ref ? named(b.$ref) : undefined) ??
+      (key && at[i].properties[key].const) ??
+      (at[i].required?.length === 1 ? at[i].required[0] : undefined) ??
+      (byType ? types[i] : undefined),
+  );
+  return names.map((n, i) =>
+    n && names.indexOf(n) === names.lastIndexOf(n) ? n : `option ${i + 1}`,
+  );
 }
 
 function walk(node: unknown, defs: Record<string, Node>, seen: string[]): Ui {
@@ -38,11 +59,13 @@ function walk(node: unknown, defs: Record<string, Node>, seen: string[]): Ui {
   for (const b of [...(n.allOf ?? []), n.then, n.else])
     for (const [k, v] of Object.entries(walk(b, defs, seen))) put(k, v as Ui);
   const branches: Node[] | undefined = n.anyOf ?? n.oneOf;
-  if (branches)
+  if (branches) {
+    const t = titles(branches, defs);
     ui[n.anyOf ? 'anyOf' : 'oneOf'] = branches.map((b, i) => ({
       ...walk(b, defs, seen),
-      'ui:title': title(b, i),
+      'ui:title': t[i],
     }));
+  }
   return ui;
 }
 

@@ -144,7 +144,7 @@
   }
   /* rjsf's own inputs, selects and textareas in the card (edit/templates.tsx) */
   .form-control {
-    @apply h-7 w-full min-w-0 rounded-md border border-input bg-background px-2 text-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50;
+    @apply h-7 w-full min-w-0 rounded-md border border-input bg-card px-2 text-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50;
   }
   textarea.form-control {
     @apply h-auto py-1;
