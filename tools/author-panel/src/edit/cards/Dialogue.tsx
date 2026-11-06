@@ -67,7 +67,6 @@ function Links({ card, keys }: { card: Card; keys: string[] }) {
       (f) => [k, f] as const,
     ),
   );
-  if (!rows.length) return null;
   return (
     <section aria-label="links" className="grid gap-1">
       <h3 className="text-muted-foreground">Links</h3>
