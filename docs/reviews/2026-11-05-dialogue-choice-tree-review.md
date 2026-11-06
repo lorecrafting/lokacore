@@ -64,3 +64,40 @@ Nested repeats shell.ts's fold. All author-side, acceptable.
 for missing `axe-core`): 41 run, SURVIVED 3, red-narrow 38, the PR's table. Survivors Dialogue.tsx:30 and :36 are
 equivalent (above); Room.tsx:196 is loka-wfrgk.56 (ruled). Findings 1-4 are missing rules, which no mutant of
 the diff reaches; the fix must add a test per rule with the compiler's verdict as the expected value.
+
+## Fix round (2026-11-06)
+
+- Reviewed: `b1bbfbfdb..ce56ee2976db1b66e4fae1d4e164ea5ca35806c2` (fix ce56ee297, merge cf9d9123d)
+- CI at head (`gh run list --commit`): graph-diff success, ci success, book-e2e success
+- Verdict: **CHANGES REQUIRED** (finding 3 partly open; the branch conflicts with main again)
+
+| # | Disposition | Proof |
+|---|---|---|
+| 1 | Fixed | allowed.ts:36 `'dialogues.choices.check': 'check'` matches check_kinds.ex:26 `owned(.., "check_passed")`; story_card.test.ts `choiceMenu(.., ['check'], {})` → `[]`; deleting the row turns the test red |
+| 2 | Fixed | choice.ts PLAIN equals check_kinds.ex:18 `@plain` exactly; quest/riddle both ways (check offered on a quest dialogue: no; Mechanics `quest`/`riddle` beside a check choice: no, Dialogue.tsx:48). Mutants PLAIN-drops-policy and riddle-dropped: red |
+| 3 | **Partly fixed** | UNPATROLLED equals patrol.ex:166; doc quest :160 both ways. Open: patrol.ex:161-163 (see F1) |
+| 4 | Fixed | skills.ex:275 `!o["payment"]`; the TS rule is symmetric, menu tested both ways; mutant red |
+| 5 | Fixed, departure accepted | `refuseNew` (choice.ts) refuses only a reason `after` has that `before` has not. The PM's `why !== refuseChoices(base.draft)` compares first reasons only: fixing `b` first passes, fixing `a` first leaves `b:`'s reason ≠ `a:`'s and is refused (story_card.test.ts `fixA` case). Mutant `refuseNew = refuseChoices`: red |
+| 6 | Fixed for #672 | cf9d9123d keeps `blocks` (Entity.tsx:82) and `calendar?` (Room.tsx:188); `nested` has no user left on the head (`git grep 'nested='`: none; main's only user was Dialogue.tsx:55, which this PR rewrites) |
+| nit asked | Fixed | choice.ts matches `asked === true` (dialogue_asked.ex:32 via :41); test `asked: false` → undefined; mutant red |
+
+### Findings
+
+F1. **Should-fix** `kernel/ts/play/choice.ts:21-65` (refusedChoice): patrol.ex:161-163 refuses `accept` on a patrol
+choice whose `transition` is not `start`. Probe: `choiceMenu({choices:{a:{patrol:{quest:'q',transition:'end'}}}}, 'a',
+['accept','once'], caps)` → `['accept','once']`; adding it gives OUTCOME_MISMATCH. Fix: yield when
+`has(c,'patrol') && has(c,'accept') && c.patrol.transition !== 'start'`, with a test both ways.
+
+F2. **Should-fix** branch conflicts with main again: `git merge-tree origin/main ce56ee297` conflicts in
+`docs/TOOLBOX.gen.md`, `tools/author-panel/src/edit/cards/Room.tsx`, `tools/author-panel/src/right.tsx` (#673,
+7aed35d3d). Merge, rerun panel.test.
+
+Nits (author-side, acceptable):
+- `refuseNew` lets a worse edit through when the reason text repeats: `odd`/`off`/`around` name only the first
+  field, so `{check, accept}` + `escort`, or `{patrol, escort}` + `receive`, adds no new reason (probe: undefined).
+  A swap (`{check, accept}` → `{check, once}`) is refused. Only reachable from an already-broken dialogue.
+- check_kinds.ex:154 (no `skill.acquire` step on a check choice) is not modelled; probe returns undefined. Steps
+  contents, not the add menu; the compiler's diagnostic still shows.
+
+Mutants (story_card.test.ts only, load high): 6 narrow mutants on choice.ts and allowed.ts, all red. No mutate_diff
+rerun; panel.test not run locally (CI green).
