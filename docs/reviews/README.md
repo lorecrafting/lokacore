@@ -29,6 +29,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
 - [Review: editor drag a template into a room (loka-wfrgk.13)](2026-11-05-editor-drag-template-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6e, World inspector card (PR #651, loka-wfrgk.8)](2026-11-05-e6e-world-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6d.2 Scene cards, `.scene` lines via `/set` (loka-wfrgk.50)](2026-11-05-e6d2-scene-cards-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6d part one, Quest and Dialogue cards (PR #669, loka-wfrgk.6)](2026-11-05-e6d-story-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6c part two, Reaction and Action inspector cards (PR #668, loka-wfrgk.46)](2026-11-05-e6c2-reaction-action-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6c part one, Rules block (PR #660, loka-wfrgk.5)](2026-11-05-e6c-rules-review.md): **CHANGES REQUIRED**
