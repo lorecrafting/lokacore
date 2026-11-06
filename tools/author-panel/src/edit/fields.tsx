@@ -85,7 +85,7 @@ function Union(p: FieldProps) {
       ) : null}
       <select
         aria-label={`${p.name} kind`}
-        className="rounded-md border bg-background px-1 text-xs"
+        className="form-control"
         value={at}
         onChange={(e) => {
           const i = Number(e.target.value);
@@ -100,7 +100,7 @@ function Union(p: FieldProps) {
           </option>
         ))}
       </select>
-      {at >= 0 ? <SchemaField {...p} schema={branches[at]} uiSchema={each[at] ?? {}} /> : null}
+      {at >= 0 ? <SchemaField {...p} schema={branches[at]} uiSchema={{ ...each[at], 'ui:label': false }} /> : null}
     </div>
   );
 }
