@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 730, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
+// size: allow 700, every panel E2E shares this file's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { appendFileSync, cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -214,10 +214,7 @@ test('a link to a nested set shows its prompt and labels and opens its card', as
     doc.entry = false;
     doc.choices.learn.then = 'aldous_yard'; // a second level: its button, never a fold
     doc.choices.leave = { label: 'k.leave', then: 'end' }; // the talk ends: no button
-    await r.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }),
-    });
+    await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }) });
   });
   const bounty = page.locator('[aria-label="choice bounty"]');
   await bounty.locator('summary').click();
@@ -225,10 +222,7 @@ test('a link to a nested set shows its prompt and labels and opens its card', as
   const set = bounty.locator('[aria-label="nested aldous_lesson"]');
   await set.waitFor({ timeout: boot });
   const keys = await set.locator('code').allTextContents();
-  assert.deepEqual(keys.slice(0, 2), [
-    'dialogue.aldous_lesson.prompt',
-    'dialogue.aldous_lesson.learn',
-  ]);
+  assert.deepEqual(keys.slice(0, 2), ['dialogue.aldous_lesson.prompt', 'dialogue.aldous_lesson.learn']);
   assert.equal(await page.locator('[aria-label^="nested "]').count(), 1);
   const opens = await set.getByRole('button').allTextContents();
   assert.deepEqual(opens, ['Open aldous_lesson', 'Open aldous_yard']);
@@ -250,10 +244,7 @@ test('a dialogue already broken takes the edit that fixes it', async () => {
     const doc = JSON.parse(s.bytes);
     Object.assign(doc.choices.praise, { receive: { item: 'x' }, hand_over: { item: 'x' } });
     doc.choices.insult.then_failed = 'end';
-    await r.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }),
-    });
+    await r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...s, bytes: JSON.stringify(doc) }) });
   });
   await page.reload(); // the card read its source before the route
   const praise = page.locator('[aria-label="choice praise"]');
@@ -463,8 +454,7 @@ test('a reaction and an action open their own cards', async () => {
     if (kind === 'action') {
       // Break: an added prose field is only revealed, never written (loka-wfrgk.24): it writes its key `~`
       await page.getByLabel(`${kind} card`).getByLabel('Add a field').selectOption(field);
-      const tip = () =>
-        JSON.parse(readFileSync(join(dir, 'showcase/actions/fish.json'), 'utf8')).tip;
+      const tip = () => JSON.parse(readFileSync(join(dir, 'showcase/actions/fish.json'), 'utf8')).tip;
       for (let t = 0; tip() === undefined && t < 50; t++) await page.waitForTimeout(100);
       assert.deepEqual(tip(), { prose: '~' });
     }
@@ -531,10 +521,7 @@ test('the flow graph opens within 300 ms', async (t) => {
   await within(t, 300, async () => {
     if (run++) {
       await page.reload();
-      await page
-        .getByLabel('left column', { exact: true })
-        .locator('footer', { hasText: / ms$/ })
-        .waitFor();
+      await page.getByLabel('left column', { exact: true }).locator('footer', { hasText: / ms$/ }).waitFor();
     }
     return took(['flow:fetch', 'flow:layout', 'flow:commit']);
   });
@@ -546,14 +533,9 @@ test('the flow graph refilters within 100 ms', async (t) => {
   await left.getByLabel(/^~ Filters/).click();
   const filter = page.getByRole('dialog').locator('button[aria-pressed]').first(); // a filter: a relayout (the showcase has no parts to fold)
   const relayout = async () => {
-    const before = await page.evaluate(
-      () => performance.getEntriesByName('flow:commit').at(-1)!.startTime,
-    );
+    const before = await page.evaluate(() => performance.getEntriesByName('flow:commit').at(-1)!.startTime);
     await filter.click();
-    await page.waitForFunction(
-      (t) => performance.getEntriesByName('flow:commit').at(-1)!.startTime > t,
-      before,
-    );
+    await page.waitForFunction((t) => performance.getEntriesByName('flow:commit').at(-1)!.startTime > t, before);
   };
   // every run measures the filter turned on, then turns it off untimed
   await within(t, 100, async () => {
@@ -619,34 +601,19 @@ test('level 0 opens whole, zooms out no further, and only a pill marks the selec
   const page = await open({ selection: { kind: 'room', key: 'tollhouse' } });
   await page.emulateMedia({ reducedMotion: 'reduce' }); // each zoom lands at once
   const slot = page.getByLabel('Map slot');
-  const pills = slot.locator('g.pointer-events-none text'),
-    pill = pills.filter({ hasText: 'tollhouse' });
-  const zoom = async (name: string, n = 12) => {
-    for (let i = 0; i < n; i++) await slot.getByRole('button', { name }).click({ timeout: boot });
-  };
-  const seen = () =>
-    slot.locator('svg [data-key]').evaluateAll((gs) => {
-      // the width between room centres (zoom times cells); every room in the drawing
-      const s = gs[0].closest('svg')!.getBoundingClientRect(),
-        b = gs.map((g) => g.getBoundingClientRect()),
-        x = b.map((r) => r.x + r.width / 2);
-      return [
-        Math.round(Math.max(...x) - Math.min(...x)),
-        b.every(
-          (r) => r.left >= s.left && r.right <= s.right && r.top >= s.top && r.bottom <= s.bottom,
-        ),
-      ];
-    });
+  const pills = slot.locator('g.pointer-events-none text'), pill = pills.filter({ hasText: 'tollhouse' });
+  const zoom = async (name: string, n = 12) => { for (let i = 0; i < n; i++) await slot.getByRole('button', { name }).click({ timeout: boot }); };
+  const seen = () => slot.locator('svg [data-key]').evaluateAll((gs) => { // the width between room centres (zoom times cells); every room in the drawing
+    const s = gs[0].closest('svg')!.getBoundingClientRect(), b = gs.map((g) => g.getBoundingClientRect()), x = b.map((r) => r.x + r.width / 2);
+    return [Math.round(Math.max(...x) - Math.min(...x)), b.every((r) => r.left >= s.left && r.right <= s.right && r.top >= s.top && r.bottom <= s.bottom)];
+  });
   await slot.getByText(/^\d+ rooms/).waitFor({ timeout: boot });
-  const fit = await seen();
-  assert.equal(fit[1], true); // whole, below 0.25: a disc, no label
-  (await pill.waitFor(), assert.deepEqual(await pills.allTextContents(), ['tollhouse'])); // no other room is marked
-  (await zoom('Zoom in'), await pill.waitFor({ state: 'detached' })); // 3: the box shows the whole key
-  (await zoom('Zoom out'), assert.deepEqual(await seen(), fit));
+  const fit = await seen(); assert.equal(fit[1], true); // whole, below 0.25: a disc, no label
+  await pill.waitFor(), assert.deepEqual(await pills.allTextContents(), ['tollhouse']); // no other room is marked
+  await zoom('Zoom in'), await pill.waitFor({ state: 'detached' }); // 3: the box shows the whole key
+  await zoom('Zoom out'), assert.deepEqual(await seen(), fit);
   const b = (await slot.getByRole('group', { name: /^Area map/ }).boundingBox())!;
-  (await zoom('Zoom in', 1),
-    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2),
-    await page.keyboard.down('Meta'));
+  await zoom('Zoom in', 1), await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2), await page.keyboard.down('Meta');
   for (let i = 0; i < 6; i++) await page.mouse.wheel(0, 200); // Cmd-wheel out about the centre
   assert.deepEqual(await seen(), fit);
   await page.close();
@@ -705,10 +672,7 @@ test('a .scene dialogue opens its text card: a picker per value line, words to t
   // then: offers no dialogue the story names unlinkable (a keyword one, dialogue_links.ex:387-394)
   await page.route('**/__author/story', async (r) => {
     const res = await r.fetch();
-    r.fulfill({
-      response: res,
-      json: { ...(await res.json()), unlinkable: { stranger_talk: 'keyword' } },
-    });
+    r.fulfill({ response: res, json: { ...(await res.json()), unlinkable: { stranger_talk: 'keyword' } } });
   });
   await page.reload();
   const then = page.locator('#scene-7-keys option');
