@@ -178,6 +178,7 @@ test('a travel that moves riffles, unless the press killed', () => {
       screen: () => shown,
       press: () => (shown = { view: there, died }),
       recovered: () => false,
+      died: () => shown.died,
     };
     const flips: { riffle?: boolean }[] = [];
     const state = {

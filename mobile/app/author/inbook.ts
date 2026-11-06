@@ -3,20 +3,8 @@
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
 import type { Message } from './live.ts';
-import {
-  noFieldNote,
-  oneLine,
-  CSS,
-  paletteNear,
-  paper,
-  saving,
-  step,
-  textField,
-  unwritten,
-  walk,
-  selects,
-  shortcut,
-} from './prose_rules.ts';
+import { noFieldNote, oneLine, CSS, paletteNear, paper, saving, step } from './prose_rules.ts';
+import { textField, unwritten, walk, selects, shortcut } from './prose_rules.ts';
 
 export { tagged } from './prose_rules.ts';
 type Hooks = {
@@ -46,7 +34,7 @@ let landed: HTMLElement | undefined;
 let selected: { kind: string; key: string; add?: string[] } = { kind: '', key: '' }; // the panel's selection: its lines are marked
 let asked = false; // a Book click: the selection's add-here menu shows once the panel offers it
 let counted = '';
-let note: HTMLDivElement;
+let note: HTMLDivElement, spaced: HTMLElement | undefined; // spaced: the line the note sits under
 const observer =
   typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(reapply);
 const watch = () =>
@@ -66,9 +54,12 @@ function say(
   note.replaceChildren(text, ...buttons.map(([name, run]) => button(name, run)));
   note.toggleAttribute('data-warn', warn);
   note.hidden = !el || !text;
+  spaced?.style.removeProperty('margin-bottom');
+  spaced = note.hidden ? undefined : el; // book-ui.md, No field: the lines below make room
   if (!el) return;
   const r = el.getBoundingClientRect();
   Object.assign(note.style, { left: `${r.left + scrollX}px`, top: `${r.bottom + scrollY}px` });
+  if (spaced) el.style.marginBottom = `${note.offsetHeight}px`;
 }
 const button = (name: string, run: () => void) => {
   const b = document.createElement('button');

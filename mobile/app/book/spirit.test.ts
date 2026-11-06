@@ -70,3 +70,17 @@ test("the rise card's ring drains by the time elapsed over the total", () => {
     [1, 0.6],
   );
 });
+
+// Breaks (book-ui.md, A second death): a second fall retitles the dead page, moves where its lines
+// end or where the return's lines start, or keeps the first death's id, so its cue never plays.
+test('a second fall keeps the dead page and its marks, and moves the cue edge', () => {
+  const room = { title: 'room.cellar', log: [] };
+  const s = { log: [], room, projection: { view: { place: { title: { key: 'shrine' } } } } };
+  const logs = s as unknown as Logs;
+  fall(logs, 'first');
+  logs.down!.to = 3;
+  logs.woke = 1;
+  logs.room = { title: 'shrine', log: [] };
+  fall(logs, 'second');
+  assert.deepEqual([logs.died, logs.down, logs.woke], ['second', { ...room, to: 3 }, 1]);
+});

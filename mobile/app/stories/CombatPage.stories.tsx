@@ -125,31 +125,31 @@ export const FoeCast: StoryObj = {
 };
 
 // The Combat hotbar (book-ui.md, Combat hotbar): word slots under the scroll, day and night by the
-// palette toolbar. The showcase has no untargeted scripted action, so the slots are spell words; noctis
-// and umbra (no drawing yet) take the neutral mark. Breaks: no strip, a slot with no name, a barred or
-// cooling slot exposed as enabled.
+// palette toolbar. The showcase has no untargeted scripted action, so the slots are its spell words: ward
+// cools and mend is barred, under their own marks; flamma and lux (no drawing yet) take the neutral mark.
+// Breaks: no strip, a slot with no name, a barred or cooling slot exposed as enabled.
 const worded = (spell_words: object[]) => ({
   ...CombatOneFoeView,
   view: { ...CombatOneFoeView.view, spell_words },
 });
 const time = CombatOneFoeView.view.time;
-const ready = { word: 'ward', available: true };
+const ready = { word: 'flamma', available: true };
 const cooling = {
-  word: 'noctis',
+  word: 'ward',
   available: false,
   reason: { code: 'cooldown' },
   ends_at: time + 60,
   duration: 150,
 };
-const barred = { word: 'umbra', available: false, reason: { code: 'invalid_state' } };
+const barred = { word: 'mend', available: false, reason: { code: 'invalid_state' } };
 export const Hotbar: StoryObj = {
   ...pageStory(worded([ready, cooling, barred])),
   name: 'Hotbar',
   play: async ({ canvas }) => {
     const bar = await canvas.findByRole('group', { name: LABEL.hotbar });
     await expect(bar).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'ward, cast' })).toBeEnabled();
-    for (const name of [/^noctis, cast, /, /^umbra, cast, /])
+    await expect(canvas.getByRole('button', { name: 'flamma, cast' })).toBeEnabled();
+    for (const name of [/^ward, cast, /, /^mend, cast, /])
       await expect(canvas.getByRole('button', { name })).toHaveAttribute('aria-disabled', 'true');
   },
 };
@@ -171,7 +171,7 @@ export const HotbarOpen: StoryObj = {
     await userEvent.click(opener);
     await expect(opener).toHaveAttribute('aria-expanded', 'true');
     await expect(await canvas.findByRole('button', { name: 'lux, cast' })).toBeVisible();
-    await userEvent.click(canvas.getByRole('button', { name: /^umbra, cast, / }));
+    await userEvent.click(canvas.getByRole('button', { name: /^mend, cast, / }));
     const said = [...canvasElement.querySelectorAll('[aria-live="polite"]')].map(
       (n) => n.textContent,
     );

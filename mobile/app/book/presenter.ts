@@ -63,9 +63,7 @@ function background(
   s: Logs,
   text: Say,
 ) {
-  s.status = update.status;
-  s.returnWorld = false;
-  s.returnDetail = undefined;
+  [s.status, s.returnWorld, s.returnDetail] = [update.status, false, undefined];
   if (update.status.kind === 'error') s.fault = update.status.message;
   if (update.status.kind === 'fault') s.fault = `Time stopped: ${update.status.code}`;
   if (update.status.kind === 'replaced') s.fault = 'This game has been replaced; reopen it.';
@@ -87,7 +85,7 @@ function background(
   }
   if (last && last.command_id === s.narrationId) return;
   if (last) narrate(s, closing(last, was, now), was, now, away, text);
-  if (last?.died) s.woke = from; // the arrival's entries are the return's too (spirit state)
+  if (last?.died && s.down?.to === undefined) s.woke = from; // spirit state; a second death: fall
 }
 
 // A new receipt's lines: World (or the open settlement's lines), and its detail or conversation.
@@ -282,6 +280,7 @@ export function presenter(game: Game) {
       return terminal;
     },
     recovered: () => !!s.recovered,
+    died: () => s.died, // screen() moves the live region's mark: read the death bare
     // A pending retry keeps the original detail, even when retried from the world.
     press: (b: Button, detail?: string) => {
       newRound(s.combatLog);

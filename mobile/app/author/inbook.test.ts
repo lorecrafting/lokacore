@@ -77,6 +77,7 @@ afterEach(() => assert.deepEqual(thrown, []));
 
 const told = () => page.evaluate(() => (window as unknown as { told: object[] }).told);
 const note = () => page.locator('.loka-note').textContent();
+const hidden = async () => (await page.waitForTimeout(200), page.locator('.loka-note').isHidden());
 const noteSays = (text: string) =>
   page.waitForFunction((t) => document.querySelector('.loka-note')?.textContent === t, text);
 const told1 = async (act: () => Promise<unknown>) => {
@@ -258,41 +259,40 @@ test('the selection marks its lines; the panel`s shortcuts and edits reach it fr
   assert.deepEqual(posted('/open'), [{ key: 'b.gone', words: '' }]);
 });
 
-// Breaks: a Book click on a room offers no add-here menu (when the card's offer follows the click, or
-// when the room is already selected), a pick tells another field or room, or an offer no Book click
-// asked for (the card's next list after a pick or a click off every line) or an empty one pops
-// the menu.
+// Breaks: a Book click on a room offers no add-here menu (when the card's offer follows the click,
+// or when the room is already selected), a pick tells another field or room, or an offer no Book
+// click asked for (the card's next list after a pick or a click off every line) or an empty one
+// pops the menu; or the note covers the next line or leaves it moved (book-ui.md, No field).
 test('a Book click on the selected room offers add-here; a pick tells the panel', async () => {
   const offer = () =>
     postMessage({ op: 'select', kind: 'room', key: 'hut', add: ['ambient', 'dark'] }, '*');
   await page.evaluate(() => {
     const w = window as unknown as { seen: Map<string, string> };
     const el = document.querySelector('main')!.appendChild(document.createElement('p'));
-    el.dir = 'auto';
-    el.textContent = 'A hut.';
+    Object.assign(el, { dir: 'auto', textContent: 'A hut.' });
     w.seen.set('A hut.', 'room.hut.title');
+    el.insertAdjacentHTML('afterend', '<style>main p { margin: 0 0 4px }</style><p>Below.</p>'); // own
   });
   const hut = page.locator('p', { hasText: 'A hut.' });
+  const box = (s: string) => page.$eval(s, (e) => e.getBoundingClientRect().toJSON());
+  const at = (await box('main > :last-child')).top;
   await hut.click(); // the click selects in the panel first; its card's offer follows
   await page.evaluate(offer);
   await noteSays('Add hereambientdark');
-  assert.deepEqual(
-    await told1(() => page.locator('.loka-note button', { hasText: 'dark' }).click()),
-    { add: { kind: 'dark', room: 'hut' } },
-  );
+  assert.ok((await box('main > :last-child')).top >= (await box('.loka-note')).bottom);
+  const dark = page.locator('.loka-note button', { hasText: 'dark' });
+  assert.deepEqual(await told1(() => dark.click()), { add: { kind: 'dark', room: 'hut' } });
+  assert.equal((await box('main > :last-child')).top, at); // back with the note hidden
   await page.evaluate(offer);
-  await page.waitForTimeout(200); // the offer has landed
-  assert.equal(await page.locator('.loka-note').isHidden(), true);
+  assert.equal(await hidden(), true); // the offer has landed
   await hut.click();
   await noteSays('Add hereambientdark');
   await page.evaluate(() => postMessage({ op: 'select', kind: 'room', key: 'hut', add: [] }, '*'));
   await hut.click(); // a card with nothing to add offers no empty menu
-  await page.waitForTimeout(200);
-  assert.equal(await page.locator('.loka-note').isHidden(), true);
+  assert.equal(await hidden(), true);
   await page.mouse.click(1, 1); // off every line: the card's next offer is not asked for
   await page.evaluate(offer);
-  await page.waitForTimeout(200);
-  assert.equal(await page.locator('.loka-note').isHidden(), true);
+  assert.equal(await hidden(), true);
 });
 
 // Breaks: Cmd-Z puts back nothing, the wrong id, or hides a 409 behind a success note; or sends

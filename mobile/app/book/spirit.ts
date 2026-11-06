@@ -35,6 +35,7 @@ const since = (lines: DetailLine[], at: number) =>
 // it left (or is in) shows the dead page (book-ui.md, Dead page), whatever page was open.
 export function fall(s: Logs, command_id: string) {
   s.died = command_id;
+  if (s.down) return; // book-ui.md, A second death: the page keeps the first death
   s.woke = end(s.log); // before the receipt's own lines
   if (s.closing) s.fell = s.ended;
   else

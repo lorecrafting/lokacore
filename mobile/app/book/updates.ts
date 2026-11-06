@@ -100,7 +100,7 @@ export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
 function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubscription) {
   const { current, setStack, setFlip, redraw } = s;
   const before = current.current;
-  const fell = pr.screen().died;
+  const fell = pr.died();
   const terminal = pr.update(update);
   const after = pr.screen();
   const died = !!after.dead && after.died !== fell; // the dead page, not a fight's close: turn to it from any page
