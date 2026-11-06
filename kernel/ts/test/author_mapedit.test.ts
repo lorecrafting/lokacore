@@ -422,6 +422,27 @@ test("a bind appends the short ref to that beat's nodes, and refuses a missing b
   await assert.rejects(ed.bind(0, 2, 'rooms/b'), /beat 2 already binds rooms\/b/);
 });
 
+test('a beat is added, retitled and removed, and a number the outline already has is refused', async () => {
+  // Breaks: an add that writes a repeated n (readOutline then refuses the whole outline), a
+  // retitle or remove that lands on another beat, or an empty title written instead of removed.
+  await assert.rejects(ed.addBeat(0, 2), /outline.json already has beat 2/);
+  await ed.addBeat(0, 5);
+  await ed.titleBeat(0, 5, 'The well');
+  await ed.dropBeat(0, 1);
+  const beats = () =>
+    json('outline.json').parts[0].beats.map((b: { n: number; title?: string }) => [b.n, b.title]);
+  assert.deepEqual(beats(), [
+    [2, undefined],
+    [5, 'The well'],
+  ]);
+  await ed.titleBeat(0, 5, '');
+  assert.deepEqual(beats(), [
+    [2, undefined],
+    [5, undefined],
+  ]);
+  await assert.rejects(ed.dropBeat(0, 1), /part 1 has no beat 1/);
+});
+
 test('a refused put-back is told with the refusal that stopped the gesture', async () => {
   // Breaks: the put-back's refusal hiding why the gesture stopped, or a refusal sent as text
   // reported as a stale file.
