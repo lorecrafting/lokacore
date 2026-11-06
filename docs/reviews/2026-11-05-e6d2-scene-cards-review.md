@@ -88,3 +88,39 @@ Nits (no fix round):
 Fix round for A and C; re-check verifies `/set` and the picker share one key source (a nested-set
 `then:` and a bundle `npc:` round-trip), the role-line button or `/edit` agree, and cartridge.md
 states the accepted keys as implemented.
+
+## Fix round (head `0b963019075a2f897de9781c0b3b717791631f90`): **APPROVE**
+
+Scope: fix commits `1815a7bca` and `0b9630190` only (the merge of main `5e051cc42` ignored). CI at head
+(`gh run list --commit 0b9630190…`): ci success, book-e2e success, graph-diff success.
+
+- **A fixed.** `/set` keys come from the last good compile: `write.ts:241-245` passes the served
+  `artifact`; `scene_card.ts:14-21` loads it as `story.ts` does; `ids` (`:25-32`) is `picks` per verb
+  (`scene_lines.ts:12-15`), the same function the card calls (`Scene.tsx:58`), so one key source.
+  Trust boundary rechecked:
+  - Before any compile: `ids()`, `ids(compiledCartridge(undefined))` and a missing artifact path all
+    give `{npc:[], with:[], then:['end']}` (run in the worktree).
+  - A failed compile cannot widen the set: `author.ts:203-241` compiles into a fresh tmp dir and
+    publishes only on `status 0` and `loaded.ok`; the served `artifact` stays the last good one. A
+    stale one may offer a since-deleted key; the next compile refuses it and `/undo` reverts, the same
+    lag the World card has.
+  - Compile data only narrows: `guarded(root, file, 'read')` (`scene_card.ts:40`) and `named(value)`
+    (`:42`) run before `keys()` (`:48`); the written line is `head + value + end` from the real line
+    (`:49`). No path or byte of the write comes from the artifact.
+  - The `then:` filter: `unlinkable` (`story_counts.ts:45-51`) drops a dialogue with `keyword`,
+    `quest` or `riddle`, the `into` branch of `dialogue_links.ex:388-389`. `!== undefined` vs Elixir
+    truthiness differ only on `null`/`false`; the compiled speech_sampler and identity_sampler carry
+    neither in those fields (jq over both artifacts: 0). The `then_out_of` branch (source dialogue's
+    quest/riddle/patrol) is not a target filter; the compile refuses it, as before (author-error nit).
+- **C fixed.** `scene_lines.ts:45` keys only `* ` lines; a `<role>: ` line gets no `key`, so no
+  Edit in Book (`Scene.tsx:62`). The test pins line 6 (`stranger: Tamsin.`) as `null`
+  (`scene_card.test.ts:182`).
+- cartridge.md `:949-955` now states the implemented rule (last good compile's keys, `end` only
+  before a compile, keyword/quest/riddle dropped).
+- Red controls rerun with `bin/mutate.sh` (narrow `node --test test/scene_card.test.ts`, baseline 6
+  pass): the PR body's three rows (`ids()` without the compile; the old words regex; the
+  `unlinkable` filter dropped) plus two of mine (`npc` picks swapped to `then` in `ids`;
+  `unlinkable` test inverted `!==`→`===`) — all five red.
+- `0b9630190` only types the test's artifact (`as never` gone); no logic.
+
+Open items: none new. Nits from the first round stand as filed (loka-wfrgk.56 for the reload mutants).
