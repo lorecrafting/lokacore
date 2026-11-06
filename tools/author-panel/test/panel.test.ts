@@ -124,14 +124,11 @@ test("an NPC card draws its Combat and Schedule blocks", async () => {
     await page.locator(`[aria-label="Combat ${f}"]`).waitFor({ timeout: boot });
   const schedule = page.locator('fieldset[aria-label="Schedule"]');
   const hours = schedule.getByRole('textbox', { name: /^hour / });
-  assert.deepEqual(await hours.evaluateAll((es) => es.map((e) => (e as HTMLInputElement).value)), [
-    '13',
-    '14',
-  ]);
+  const read = await hours.all();
+  assert.deepEqual(await Promise.all(read.map((h) => h.inputValue())), ['13', '14']);
   const room = schedule.locator('input[id$="_14"]'); // hour 14's lone room
-  const offered = await page
-    .locator(`datalist#${await room.getAttribute('id')}-keys option`)
-    .evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+  const options = await page.locator(`datalist#${await room.getAttribute('id')}-keys option`).all();
+  const offered = await Promise.all(options.map((o) => o.getAttribute('value')));
   assert.ok(offered.includes('warden_gate'), `rooms offered: ${offered}`);
   await page.close();
 });

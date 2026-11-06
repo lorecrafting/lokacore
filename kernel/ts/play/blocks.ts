@@ -5,25 +5,22 @@ import type { Ui } from './ui_schema.ts';
 
 type Schedule = Record<string, unknown>;
 
-/** A schedule's hours in the order of the day (keys are hour numbers, not sorted as text). */
-export const hours = (schedule: Schedule) =>
-  Object.entries(schedule).sort(([a], [b]) => Number(a) - Number(b));
-
 /**
- * `schedule` with hour `from` moved to `to`, keeping its order, or why not: an hour is a whole number
- * below the calendar's `hours_per_day` (calendar.ex schedules/3) and not one the schedule has.
+ * `schedule` with hour `from` moved to `to`, or why not: an hour is a whole number below the
+ * calendar's `hours_per_day` (calendar.ex schedules/3; 24 when the cartridge sets none, calendar.ex
+ * hours_per_day) and not one the schedule has. Integer keys read in the order of the day.
  */
-export function rehour(schedule: Schedule, from: string, to: string, perDay?: number) {
+export function rehour(schedule: Schedule, from: string, to: string, perDay = 24) {
   if (!/^(0|[1-9][0-9]*)$/.test(to)) return 'an hour is a whole number';
-  if (perDay !== undefined && Number(to) >= perDay) return `an hour is below ${perDay}`;
+  if (Number(to) >= perDay) return `an hour is below ${perDay}`;
   if (to !== from && Object.hasOwn(schedule, to)) return `already ${to}`;
   return Object.fromEntries(Object.entries(schedule).map(([h, v]) => [h === from ? to : h, v]));
 }
 
 /** `schedule` with its first free hour sending the NPC to `room` (its own); undefined when none is free. */
-export function addHour(schedule: Schedule, room: unknown, perDay?: number) {
+export function addHour(schedule: Schedule, room: unknown, perDay = 24) {
   if (typeof room !== 'string' || !room) return undefined; // nothing invented: the author places it first
-  for (let h = 0; perDay === undefined || h < perDay; h++)
+  for (let h = 0; h < perDay; h++)
     if (!Object.hasOwn(schedule, String(h))) return { ...schedule, [String(h)]: room };
   return undefined;
 }

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { Ajv2020 } from 'ajv/dist/2020.js';
-import { addHour, fightOf, hours, rehour, roomPicks } from '../play/blocks.ts';
+import { addHour, fightOf, rehour, roomPicks } from '../play/blocks.ts';
 import { added, allowed, pickKind } from '../play/card.ts';
 import { uiSchema } from '../play/ui_schema.ts';
 
@@ -15,14 +15,8 @@ const stub = read('schemas/source/npcs.schema.json');
 const npcs = { ...stub, $ref: stub.$ref.replace(/^defs\.schema\.json/, ''), $defs: defs };
 const warden = read('cartridges/toolbox_showcase/areas/low_wardle/npcs/warden.json');
 
-// Break: the rows sort as text (13 before 8), so the day reads out of order.
-test("a schedule's hours read in the order of the day", () => {
-  const order = hours({ '13': 'a', '8': 'b', '0': 'c' }).map(([h]) => h);
-  assert.deepEqual(order, ['0', '8', '13']);
-});
-
 // Break: an hour the compiler refuses is written (calendar.ex schedules/3: not below hours_per_day;
-// SCHEMA: not a whole number), a moved hour overwrites another, or the move loses or reorders rows.
+// SCHEMA: not a whole number; 24 with no calendar), a moved hour overwrites another, or the move loses rows.
 test('an hour moves to a free whole hour below the day, keeping its value', () => {
   const s = { '8': 'gate', '13': 'green' };
   assert.deepEqual(rehour(s, '8', '9', 24), { '9': 'gate', '13': 'green' });
@@ -32,7 +26,8 @@ test('an hour moves to a free whole hour below the day, keeping its value', () =
   assert.equal(typeof rehour(s, '8', '13', 24), 'string');
   for (const bad of ['', '8.5', '08', '-1', 'x'])
     assert.equal(typeof rehour(s, '8', bad), 'string');
-  assert.deepEqual(rehour(s, '8', '30'), { '30': 'gate', '13': 'green' }); // no calendar read: no bound
+  assert.equal(typeof rehour(s, '8', '24'), 'string'); // no calendar: the compiler's 24
+  assert.deepEqual(rehour(s, '8', '23'), { '23': 'gate', '13': 'green' });
 });
 
 // Break: the add overwrites a present hour, invents a room, or runs past the day's last hour.
@@ -45,6 +40,8 @@ test("an added hour is the first free one, at the NPC's own room", () => {
   });
   assert.equal(addHour({ '0': 'a', '1': 'b' }, 'gate', 2), undefined);
   assert.equal(addHour({}, undefined, 24), undefined);
+  const day = Object.fromEntries(Array.from({ length: 24 }, (_, h) => [String(h), 'a']));
+  assert.equal(addHour(day, 'gate'), undefined); // no calendar: the compiler's 24
 });
 
 // Break: a block's write leaves the NPC schema (the compiler's SCHEMA_VIOLATION): an hour, a moved

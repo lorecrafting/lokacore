@@ -49,7 +49,6 @@ export function Combat(p: FieldProps) {
   const field = p.fieldPathId.path[0];
   return (
     <section aria-label={`Combat ${field}`} className="grid gap-1 rounded border p-2 text-xs">
-      <h3 className="font-medium">Combat: {field}</h3>
       <p.registry.fields.SchemaField {...p} uiSchema={ui} />
       {field === 'attack' && kind === 'npc' ? <Fights npc={key} /> : null}
     </section>

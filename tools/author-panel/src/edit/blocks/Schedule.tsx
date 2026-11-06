@@ -3,13 +3,17 @@
 // kernel/ts/play/blocks.ts.
 import { useState } from 'react';
 import { toFieldPathId, type FieldProps } from '@rjsf/utils';
-import { addHour, hours, rehour, roomPicks } from '../../../../../kernel/ts/play/blocks.ts';
+import { addHour, rehour, roomPicks } from '../../../../../kernel/ts/play/blocks.ts';
+import { removed } from '../../../../../kernel/ts/play/card.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { Input } from '../../components/ui/input.tsx';
 import type { Context } from '../fields.tsx';
 import { Refusal } from '../templates.tsx';
 
 type Schedule = Record<string, unknown>;
+
+// a click keeps focus (as cards/World.tsx): a blur's commit and the click's would post from one sha
+const keep = (e: { preventDefault: () => void }) => e.preventDefault();
 
 /** The hour's number, moved on leaving the field; a refused hour is shown, never written. */
 function Hour({ hour, move }: { hour: string; move: (to: string) => string | undefined }) {
@@ -24,7 +28,7 @@ function Hour({ hour, move }: { hour: string; move: (to: string) => string | und
         className="h-7 w-14 text-xs"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        onBlur={() => refuse(move(text))}
+        onBlur={(e) => (e.stopPropagation(), refuse(move(text)))} // the move commits; the card's blur would post it again
       />
       {refused ? <Refusal>{refused}</Refusal> : null}
     </label>
@@ -54,6 +58,7 @@ function Row({ hour: h, schedule, write, ...p }: RowProps) {
           schema={schema.additionalProperties as never}
           uiSchema={{ ...roomPicks(ui?.additionalProperties ?? {}), 'ui:label': false }}
           formData={schedule[h]}
+          errorSchema={p.errorSchema?.[h]}
           fieldPathId={toFieldPathId(h, registry.globalFormOptions, fieldPathId)}
           required
         />
@@ -63,7 +68,8 @@ function Row({ hour: h, schedule, write, ...p }: RowProps) {
         size="xs"
         variant="outline"
         aria-label={`remove hour ${h}`}
-        onClick={() => write(Object.fromEntries(hours(schedule).filter(([k]) => k !== h)))}
+        onMouseDown={keep}
+        onClick={() => write(removed(schedule, h))}
       >
         Remove
       </Button>
@@ -81,7 +87,7 @@ export function Schedule(p: FieldProps) {
   return (
     <fieldset aria-label="Schedule" className="grid gap-2 text-xs">
       <legend className="font-medium">Schedule</legend>
-      {hours(schedule).map(([h]) => (
+      {Object.keys(schedule).map((h) => (
         <Row key={h} {...p} hour={h} schedule={schedule} write={write} />
       ))}
       <Button
@@ -91,6 +97,7 @@ export function Schedule(p: FieldProps) {
         className="justify-self-start"
         disabled={!next}
         title={next ? undefined : 'place the NPC in a room first, or the day is full'}
+        onMouseDown={keep}
         onClick={() => next && write(next)}
       >
         Add hour
