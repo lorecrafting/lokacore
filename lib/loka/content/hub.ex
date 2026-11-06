@@ -93,7 +93,7 @@ defmodule Loka.Content.Hub do
     linked = next |> Map.values() |> List.flatten()
 
     for {rel, d} <- sorted,
-        reopens?(d, linked),
+        plain_hub?(d, linked),
         {k, c} <- Enum.sort(d["choices"]),
         shuts?(d, c),
         do: {rel, k, d}
@@ -104,7 +104,7 @@ defmodule Loka.Content.Hub do
       !c["then"] && !c["check"] && !c["patrol"] &&
         self_gates(%{"policy" => d["policy"], "steps" => c["steps"] || []}) != []
 
-  defp reopens?(d, linked),
+  defp plain_hub?(d, linked),
     do:
       d["policy"] && !d["quest"] && !d["riddle"] && map_size(d["choices"]) > 1 &&
         d["key"] not in linked
