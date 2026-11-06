@@ -17,7 +17,8 @@ const OWNERS: Record<string, string> = {
   'items.bandage': 'bleed combat skill food', // bleed.ex gate/1
   'items.cues': 'sense_cue',
   'items.description_variants': VARIANT,
-  'items.edible': 'food resource containment', // food.ex:43-46 valid?
+  // food.ex:43-46 valid?
+  'items.edible': 'food resource containment',
   'items.fuel': 'light',
   'items.name_variants': VARIANT,
   'items.readable': 'readable',
@@ -64,7 +65,8 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
     !['capacity', 'slot', 'weapon', 'block_chance', 'fuel', 'vessel'].some((f) =>
       Object.hasOwn(doc, f),
     ),
-  'items.equip': (doc) => doc.slot !== undefined, // derived.ex:64
+  // derived.ex:64
+  'items.equip': (doc) => doc.slot !== undefined,
   'items.container': (doc) => doc.bandage === undefined && doc.edible === undefined,
   ...Object.fromEntries(
     ['capacity', 'block_chance', 'fuel', 'vessel'].map((f) => [`items.${f}`, uneaten]),
@@ -89,7 +91,8 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
   'quests.patrol': (doc) => solo(doc, 'patrol', 'offer repeatable deadline exchange'),
 };
 function uneaten(doc: Obj) {
-  return doc.edible === undefined; // food.ex:43-46, the other way round
+  // food.ex:43-46, the other way round
+  return doc.edible === undefined;
 }
 const solo = (doc: Obj, by: string, not: string) =>
   (doc.objective as Obj | undefined)?.evidence === by &&

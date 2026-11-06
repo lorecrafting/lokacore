@@ -540,6 +540,7 @@ test("an NPC's and an item's add menus offer only fields every owning capability
   assert.equal(on(caps, { container: true }), 'mass_grams slot');
   assert.equal(on(caps, { bandage: {} }), 'bandage mass_grams');
   assert.deepEqual(allowed('items', ['container'], caps, { bandage: {} }), []);
+  assert.deepEqual(allowed('items', ['container'], caps, { edible: {} }), []);
 });
 
 // Break: an added capability row stays `newKey` (UNKNOWN_CAPABILITY, requires.ex:52), takes a key already
