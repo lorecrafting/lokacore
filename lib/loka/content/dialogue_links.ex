@@ -300,7 +300,7 @@ defmodule Loka.Content.DialogueLinks do
   end
 
   # What shut dialogues fall through to, as `tried` grows in `spokenBy`: their links. An `entry: false` one never
-  # opens: its links join the next level's, a named or link-less one is dropped, a level of only those passes on.
+  # opens: its links join the next level's, a named or dead-end one is dropped, a level of only those passes on.
   defp free_links(shut, by_key, seen, way?) do
     level = shut |> Enum.flat_map(&ways_on(&1, by_key, seen, way?)) |> Enum.uniq()
     seen = seen ++ level
@@ -309,7 +309,7 @@ defmodule Loka.Content.DialogueLinks do
     if all_sets?, do: free_links(Enum.map(level, &by_key[&1]), by_key, seen, way?), else: level
   end
 
-  defp on?(d, by_key, seen, way?), do: !d["name"] and ways_on(d, by_key, seen, way?) != []
+  defp on?(d, by_key, seen, way?), do: !d["name"] and free_links([d], by_key, seen, way?) != []
 
   defp ways_on(d, by_key, seen, way?) do
     for {_, c} <- Enum.sort(d["choices"]),
