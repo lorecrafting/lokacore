@@ -18,6 +18,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: retire hunger and thirst (PR #618, loka-vduxr.61)](2026-11-05-retire-hunger-review.md): **APPROVE WITH NOTES**
 - [Review: resident `mix loka.compile --serve` for the editor (loka-wfrgk.16)](2026-11-05-resident-compiler-review.md): **APPROVE WITH NOTES**
 - [Review: replay of failed and unknown commits, and a test hang (PR #627, loka-vduxr.42, loka-votey)](2026-11-05-replay-failed-unknown-review.md): **CHANGES REQUIRED**
+- [Review: author panel smoke in Chrome, `mutate-covers` (loka-wfrgk.41)](2026-11-05-panel-smoke-review.md): **APPROVE WITH NOTES**
 - [Review: scene@1 opening scene, `on {start: true}` (PR #622, loka-g5hh.3)](2026-11-05-opening-scene-review.md): **APPROVE WITH NOTES**
 - [Review: a death outside a fight shows the dead page, then Let go (PR #634, loka-kgd.210)](2026-11-05-offfight-death-review.md): **CHANGES REQUIRED**
 - [Review: `bin/loka new --extends <key>` (PR #659, loka-wfrgk.45)](2026-11-05-new-extends-review.md): **CHANGES REQUIRED**
@@ -25,6 +26,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: hotbar engine data, cooldown end and length, round interval (PR #658, loka-x6t.135)](2026-11-05-hotbar-engine-data-review.md): **APPROVE WITH NOTES**
 - [Review: generic inspector card fits on long text keys (loka-wfrgk.40)](2026-11-05-generic-card-overflow-review.md): **APPROVE**
 - [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
+- [Review: editor drag a template into a room (loka-wfrgk.13)](2026-11-05-editor-drag-template-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6e, World inspector card (PR #651, loka-wfrgk.8)](2026-11-05-e6e-world-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6b, NPC and Item inspector cards (PR #656, loka-wfrgk.4)](2026-11-05-e6b-npc-item-review.md): **CHANGES REQUIRED**
 - [Review: Editor E6a, Room inspector card and the Book's add-here (PR #649, loka-wfrgk.3)](2026-11-05-e6a-room-review.md): **CHANGES REQUIRED**
@@ -37,6 +39,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: death and level bug batch (PR #623; loka-3tc7, loka-g5hh.2.11, loka-dbtxr (a))](2026-11-05-death-level-bugs-review.md): **CHANGES REQUIRED**
 - [Review: one cartridge format, drop v1 and `Topics.grants/2` (PR #635, loka-9x5y, loka-1b68q)](2026-11-05-compiler-one-format-review.md): **APPROVE WITH NOTES**
 - [Review: combat title names who started the fight (PR #621, loka-kgd.207)](2026-11-05-combat-title-review.md): **APPROVE**
+- [Review: Combat hotbar, the Inked strip under the Combat page (loka-x6t.136)](2026-11-05-combat-hotbar-review.md): **APPROVE WITH NOTES**
 - [Review: Area layout S3, layout lint and `bin/loka new --area` (PR #624, loka-vduxr.58.3)](2026-11-05-area-layout-s3-review.md): **APPROVE WITH NOTES**
 - [Second review: revival contract and save effect, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-revival-second-review.md): **APPROVE WITH NOTES**
 - [Review: world.death.revival and the Wayside Shrine keeper, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-review.md): **APPROVE**

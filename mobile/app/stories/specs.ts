@@ -17,10 +17,12 @@ export function specs(file: string, src: string) {
   const components = [...src.matchAll(EXPORT)].map((m) => ({
     file,
     name: m[1] ?? m[2]!,
-    doc: (/\/\*\*((?:(?!\*\/)[^])*)\*\/\s*$/.exec(src.slice(0, m.index))?.[1] ?? '').replace(
-      /^ \*( |$)/gm,
-      '',
-    ),
+    // A `// size: allow` marker may sit between the comment and its export (check_ts_size.mjs).
+    doc: (
+      /\/\*\*((?:(?!\*\/)[^])*)\*\/\s*(?:\/\/ size: allow .*\n)?$/.exec(
+        src.slice(0, m.index),
+      )?.[1] ?? ''
+    ).replace(/^ \*( |$)/gm, ''),
   }));
   return { components, unknown };
 }

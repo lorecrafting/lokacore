@@ -1,12 +1,13 @@
 // C row Pages, Combat (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { useEffect, useState, type ReactNode } from 'react';
-import { expect, waitFor } from 'storybook/test';
+import { expect, waitFor, within } from 'storybook/test';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { Blow } from '../book/Blow.tsx';
 import { Combat } from '../book/Combat.tsx';
 import { useCues } from '../book/cues.ts';
 import { newRound, type DetailLine } from '../book/logs.ts';
+import { LABEL } from '../book/labels.ts';
 import { Control } from '../book/pages.tsx';
 import { opacity, size } from '../book/tokens.ts';
 import { pageStory } from './screen.tsx';
@@ -120,6 +121,61 @@ export const FoeCast: StoryObj = {
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Cast a spell on the boar…' }));
     await expect(canvas.getByRole('button', { name: /^Flamma, cast flamma on/ })).toBeVisible();
+  },
+};
+
+// The Combat hotbar (book-ui.md, Combat hotbar): word slots under the scroll, day and night by the
+// palette toolbar. The showcase has no untargeted scripted action, so the slots are spell words; noctis
+// and umbra (no drawing yet) take the neutral mark. Breaks: no strip, a slot with no name, a barred or
+// cooling slot exposed as enabled.
+const worded = (spell_words: object[]) => ({
+  ...CombatOneFoeView,
+  view: { ...CombatOneFoeView.view, spell_words },
+});
+const time = CombatOneFoeView.view.time;
+const ready = { word: 'ward', available: true };
+const cooling = {
+  word: 'noctis',
+  available: false,
+  reason: { code: 'cooldown' },
+  ends_at: time + 60,
+  duration: 150,
+};
+const barred = { word: 'umbra', available: false, reason: { code: 'invalid_state' } };
+export const Hotbar: StoryObj = {
+  ...pageStory(worded([ready, cooling, barred])),
+  name: 'Hotbar',
+  play: async ({ canvas }) => {
+    const bar = await canvas.findByRole('group', { name: LABEL.hotbar });
+    await expect(bar).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'ward, cast' })).toBeEnabled();
+    for (const name of [/^noctis, cast, /, /^umbra, cast, /])
+      await expect(canvas.getByRole('button', { name })).toHaveAttribute('aria-disabled', 'true');
+  },
+};
+// One filler: two hairline rings hold the empty slots, unfocusable.
+export const HotbarFew: StoryObj = {
+  ...pageStory(worded([ready])),
+  name: 'Hotbar, one filler',
+  play: async ({ canvas }) => {
+    const bar = await canvas.findByRole('group', { name: LABEL.hotbar });
+    await expect(within(bar).getAllByRole('button')).toHaveLength(2);
+  },
+};
+// The opener opens the list of every filler among the cards; a barred slot reads its reason.
+export const HotbarOpen: StoryObj = {
+  ...pageStory(worded([ready, cooling, barred, { word: 'lux', available: true }])),
+  name: 'Hotbar, opener open',
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    const opener = await canvas.findByRole('button', { name: LABEL.hotbarOpener });
+    await userEvent.click(opener);
+    await expect(opener).toHaveAttribute('aria-expanded', 'true');
+    await expect(await canvas.findByRole('button', { name: 'lux, cast' })).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: /^umbra, cast, / }));
+    const said = [...canvasElement.querySelectorAll('[aria-live="polite"]')].map(
+      (n) => n.textContent,
+    );
+    await expect(said).toContain("You can't do that—not now.");
   },
 };
 
