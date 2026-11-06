@@ -18,10 +18,12 @@ export const shown = { tell: alone, rooms: [] as MapRoom[] };
 let queue = Promise.resolve();
 /** Runs one map gesture after the ones before it (so undo stays in order); a refusal is told, not thrown. */
 export const edit = (gesture: (ed: Editor) => Promise<unknown>) =>
-  void (queue = queue.then(() => gesture(ed)).then(
-    () => shown.tell(''),
-    (e: Error) => shown.tell(e.message),
-  ));
+  void (queue = queue
+    .then(() => gesture(ed))
+    .then(
+      () => shown.tell(''),
+      (e: Error) => shown.tell(e.message),
+    ));
 
 /** A map command (shell.ts COMMANDS `map-*`) on the selected room, its arguments by `prompt` (the plainest; see the PR's list) unless given. */
 export function mapCommand(id: string, key: string | undefined, given?: string) {
@@ -31,6 +33,11 @@ export function mapCommand(id: string, key: string | undefined, given?: string) 
   if (id === 'map-area') {
     const area = prompt(`Move ${r.key} to area (empty: the root)`);
     return area === null ? undefined : edit((e) => e.move(r, area || null));
+  }
+  if (id === 'map-npc' || id === 'map-item') {
+    const kind = id === 'map-npc' ? 'npcs' : 'items';
+    const name = prompt(`New ${kind === 'npcs' ? 'NPC' : 'item'} key in ${r.key}`);
+    return name ? edit((e) => e.made(r, kind, name)) : undefined;
   }
   const dir = given ?? prompt(`${r.key}: which direction?`);
   if (!dir) return;

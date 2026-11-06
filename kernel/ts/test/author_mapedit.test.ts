@@ -181,6 +181,16 @@ test("a barrier between two rooms of one area is that area's; a refusal leaves n
   assert.equal(existsSync(join(src, 'barriers/gate.json')), false);
 });
 
+test("a new NPC or item lands in the selected room's area, placed in that room", async () => {
+  // Breaks: the area dropped (the file at the root), or the placement left as the scaffold's.
+  await ed.made(c, 'npcs', 'hen');
+  await ed.made(c, 'items', 'pail');
+  assert.equal(json('areas/yard/npcs/hen.json').room, 'c');
+  assert.deepEqual(json('areas/yard/items/pail.json').location, { in: 'room', room: 'c' });
+  assert.equal(existsSync(join(src, 'npcs/hen.json')), false);
+  assert.equal(existsSync(join(src, 'items/pail.json')), false);
+});
+
 test('a map point maps to its layout cell, and a drag between cells to a compass direction', () => {
   // Breaks: the cell size or pan offset wrong in the inverse of mapdraw.tsx; a diagonal or
   // cross-level drag read as an exit.
