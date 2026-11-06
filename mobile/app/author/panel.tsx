@@ -178,7 +178,16 @@ type Asked =
   | { op: 'drop' }
   | { op: 'trace'; id: number }
   | Cheat;
-const OPS = new Set(['hello', 'advance', 'jump', 'drop', 'trace', 'go_to_room', 'set_fact']); // any other local window is not the panel
+const OPS = new Set([
+  'hello',
+  'advance',
+  'jump',
+  'drop',
+  'trace',
+  'go_to_room',
+  'set_fact',
+  'set_level',
+]); // any other local window is not the panel
 let panel: { to: Window; origin: string } | undefined;
 const tell = (sent: object) => panel?.to.postMessage({ loka: 'author', ...sent }, panel.origin);
 const stateOf = (game: Opened) => ({
@@ -221,7 +230,8 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       if (e.data.op === 'hello') inBook?.recount(); // a new panel missed the `~` counts
       if (e.data.op === 'trace') return void tell({ trace: game.trace(), id: e.data.id });
       if (e.data.op === 'advance') advance(e.data.minutes, game);
-      if (e.data.op === 'go_to_room' || e.data.op === 'set_fact') askCheat(game, e.data);
+      if (e.data.op === 'go_to_room' || e.data.op === 'set_fact' || e.data.op === 'set_level')
+        askCheat(game, e.data);
       if (e.data.op === 'jump') {
         if (Array.isArray(e.data.steps)) return jumpTo(e.data.steps, latest.current); // the new game posts its state
         placeNote = 'Place: that checkpoint has no steps list; nothing changed.'; // checked before the start over wipes the save

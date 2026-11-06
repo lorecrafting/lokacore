@@ -440,7 +440,8 @@ defmodule Loka.Content.Resolve do
 
   # run_job is authority-internal (04 §1), dev_* the author preview's (cartridge.md): no action builds them.
   defp command(rel, name, required, elapsed?) do
-    if name in commands() and name not in ["run_job", "elapsed", "dev_go_to_room", "dev_set_fact"] and
+    if name in commands() and
+         name not in ["run_job", "elapsed", "dev_go_to_room", "dev_set_fact", "dev_set_level"] and
          not (elapsed? and name == "wait"),
        do: owned(at(rel, ["command"]), name, required),
        else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]

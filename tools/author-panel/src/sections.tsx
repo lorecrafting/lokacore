@@ -6,7 +6,7 @@ import type { Line, State, Step } from './book.ts';
 import { steps } from '../../../mobile/app/author/place.ts';
 import { Badge } from './components/ui/badge.tsx';
 import { Button } from './components/ui/button.tsx';
-import { GoToRoom, SetFact } from './cheats.tsx';
+import { GoToRoom, SetFact, SetLevel } from './cheats.tsx';
 import { Input } from './components/ui/input.tsx';
 import { Separator } from './components/ui/separator.tsx';
 import { START } from './shell.ts';
@@ -65,7 +65,8 @@ export type Send = (
     | { op: 'jump'; steps: Step[] }
     | { op: 'drop' }
     | { op: 'go_to_room'; room: string }
-    | { op: 'set_fact'; fact: string; value: boolean | number | string },
+    | { op: 'set_fact'; fact: string; value: boolean | number | string }
+    | { op: 'set_level'; level: number; points: Record<string, number> },
 ) => void;
 /** Game time and named checkpoints; both go through the Book's own replay path. */
 export function Play({ state, send }: { state?: State; send: Send }) {
@@ -87,6 +88,7 @@ function Cheats({ state, send }: { state?: State; send: Send }) {
       <Heading>Cheats</Heading>
       <GoToRoom state={state} send={send} />
       <SetFact state={state} send={send} />
+      <SetLevel state={state} send={send} />
     </div>
   );
 }
