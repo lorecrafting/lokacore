@@ -34,6 +34,10 @@ export function caughtUp(game: Pulsed) {
   return why ? `${last.kind} ${why}` : last.kind;
 }
 
+// The browser's safety budget for one advance: delivery is synchronous, and on the toolbox showcase
+// 72,720,000 ms took 14 s and 1094 view emits while 3,600,000 ms took 0.3 s (loka-wfrgk.55). The check passes none.
+export const ADVANCE_BUDGET_MS = 3_600_000;
+
 /** The dev clock moved by `ms`, delivered now and recorded only if delivered; else what stopped it. */
 export function advanced(
   ms: number,
@@ -41,6 +45,8 @@ export function advanced(
   game: Pulsed,
   keep: (step: Step) => void,
 ) {
+  if (ms > ADVANCE_BUDGET_MS)
+    return `Advance: ${ms} ms is over the ${ADVANCE_BUDGET_MS} ms budget for one advance; advance less.`;
   moveClock(ms);
   const how = caughtUp(game);
   if (how !== 'ready') return `Advance: ${how}; not recorded.`;
@@ -244,7 +250,12 @@ const wellFormed = (step: Step | null) =>
       step.intent.target_ids.every((t) => typeof t === 'string')));
 
 /** Sends the steps in order; the first the session does not save and accept stops the replay, named. */
-export function replay(steps: Step[], game: Replayable, moveClock: (ms: number) => void): Outcome {
+export function replay(
+  steps: Step[],
+  game: Replayable,
+  moveClock: (ms: number) => void,
+  budget = Infinity,
+): Outcome {
   for (const [i, step] of steps.entries()) {
     if (!wellFormed(step))
       return {
@@ -256,6 +267,8 @@ export function replay(steps: Step[], game: Replayable, moveClock: (ms: number) 
       const name = `step ${i + 1} (advance ${step.advance})`;
       if (!Number.isSafeInteger(step.advance) || step.advance < 0)
         return { done: i, failed: `${name}: not whole milliseconds`, refused: true };
+      if (step.advance > budget)
+        return { done: i, failed: `${name}: over the ${budget} ms budget`, refused: true };
       moveClock(step.advance);
       const after = caughtUp(game);
       if (after !== 'ready') return { done: i, failed: `${name}: ${after}` };

@@ -133,7 +133,7 @@ function Right({ layout, set, story, book, diag, offer }: Shell) {
         edit={(key) => book.send({ op: 'edit', key })}
         offer={offer}
       />
-      <ScrollArea className="min-h-0 flex-1 border-t" aria-label="Console">
+      <ScrollArea className="min-h-32 flex-1 border-t" aria-label="Console">
         <Compile said={said} compiled={compiled} lint={lint} state={book.state} send={book.send} />
         <section className="border-b px-3 pb-2">
           <Counts prose={book.prose} said={said} />

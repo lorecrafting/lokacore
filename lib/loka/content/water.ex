@@ -24,8 +24,13 @@ defmodule Loka.Content.Water do
   end
 
   defp validate(w, m, defs, settings, {_, text}) do
-    shape_checks(w, m, settings) ++ references(w, m, defs, text)
+    shape_checks(w, m, settings) ++
+      references(w, m, defs, text) ++ hp_floor(defs["resource"]["hp"])
   end
+
+  # Drowning lowers hp to 0 and passes that loss to the death sequence; a floor above 0 stops short.
+  defp hp_floor({_, _, %{"minimum" => min}}) when min > 0, do: [bad("cartridge.world.water")]
+  defp hp_floor(_), do: []
 
   defp shape_checks(w, m, settings) do
     path = "cartridge.world.water"
