@@ -162,8 +162,9 @@ test('the shell has no serious or critical axe violations', async () => {
 
 // Breaks: the NPC card loses its blocks (a field not claimed, the claim lost to hidden(), a block not
 // registered), so hp, attack and the schedule fall back to the generic rows; an hour's room is
-// free text again, not the room picker; or a second block write posts from the first's stale card
-// (rjsf keeps its first formContext: the server refuses it, Changed outside).
+// free text again, not the room picker; a second block write posts from the first's stale card
+// (rjsf keeps its first formContext: the server refuses it, Changed outside); a refused hour is
+// written or a moved one is not; or the fight rows' reason is hidden, or offered beside hp.
 test('an NPC card draws its Combat and Schedule blocks', async () => {
   const page = await open({ right: 420, selection: { kind: 'npc', key: 'warden' } });
   for (const f of ['hp', 'attack'])
@@ -181,11 +182,31 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   await add.click();
   await (await reread).finished();
   await page.waitForTimeout(50); // the reload rendered
+  const again = page.waitForResponse((r) => r.url().includes('/__author/schema/'));
   await add.click();
   const file = join(dir, 'showcase/areas/low_wardle/npcs/warden.json');
   const written = () => Object.keys(JSON.parse(readFileSync(file, 'utf8')).daily_schedule);
   for (let t = 0; written().length < 4 && t < 50; t++) await page.waitForTimeout(100);
   assert.deepEqual(written(), ['0', '1', '13', '14']);
+  await (await again).finished();
+  await page.waitForTimeout(50);
+  const hour = schedule.getByRole('textbox', { name: 'hour 14' });
+  await hour.fill('99');
+  await hour.blur();
+  await schedule.getByText('an hour is below 24').waitFor();
+  await hour.fill('15');
+  await hour.blur();
+  for (let t = 0; !written().includes('15') && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual(written(), ['0', '1', '13', '15']);
+  await page.route('**/__author/numbers', (r) =>
+    r.fulfill({ json: { fights: { why: 'no world' } } }),
+  );
+  await page
+    .locator('[aria-label="Combat attack"]')
+    .getByRole('button', { name: 'Run fights' })
+    .click();
+  await page.locator('[aria-label="Combat attack"]').getByText('no world').waitFor();
+  assert.equal(await page.getByRole('button', { name: 'Run fights' }).count(), 1); // not on hp
   await page.close();
 });
 
