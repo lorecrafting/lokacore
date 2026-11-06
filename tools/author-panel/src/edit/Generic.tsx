@@ -120,8 +120,9 @@ type FormProps = { rel: string; card: Card; context: Context; diag: Diag; ui: Ui
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui }: FormProps) {
+  // a field's grid track sizes to a long text key; minmax(0,1fr) lets it truncate inside the inspector
   return (
-    <div onBlur={card.commit}>
+    <div onBlur={card.commit} className="min-w-0 [&_.grid]:grid-cols-[minmax(0,1fr)]">
       <Form
         schema={card.saved!.schema}
         uiSchema={ui}
