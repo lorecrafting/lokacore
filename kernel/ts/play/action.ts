@@ -19,7 +19,9 @@ export function paired(doc: Obj, defs: Record<string, Obj>): Obj {
   return { ...doc, outcomes: { ...outcomes, failure } };
 }
 
-/** A scripted action's add menu: command, input and accessibility belong to a command action
- * (action.schema.json ActionDefinition) and are UNKNOWN_FIELD on a ScriptedAction. */
-export const scriptedMenu = (menu: string[]) =>
-  menu.filter((f) => !['command', 'input', 'accessibility'].includes(f));
+/** A scripted action's add menu: only ScriptedAction's own fields and `abstract` (extends.ex), so a
+ * command action's (ActionDefinition: command, input, accessibility) is not offered: UNKNOWN_FIELD. */
+export const scriptedMenu = (menu: string[], defs: Record<string, Obj>) =>
+  menu.filter(
+    (f) => f === 'abstract' || Object.hasOwn(defs['source.ScriptedAction'].properties as Obj, f),
+  );

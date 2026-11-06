@@ -25,7 +25,7 @@ export function Action({ rel, context, diag }: Props) {
   if (Object.hasOwn(draft, 'command')) return <Generic rel={rel} context={context} diag={diag} />;
   const card = { ...raw, change: (d: unknown) => raw.change(paired(d as Doc, defs)) };
   const caps = cart && (cart.requires?.capabilities ?? {});
-  const offered = scriptedMenu(addable('actions', registry, draft, card.revealed));
+  const offered = scriptedMenu(addable('actions', registry, draft, card.revealed), defs);
   // the whole cartridge.json: a duration's need is its top-level time_policy (card.ts NEEDS)
   const menu = caps ? allowed('actions', offered, caps, draft, cart) : [];
   const required = ((defs[DEF] as { required?: string[] } | undefined)?.required ?? []) as string[];

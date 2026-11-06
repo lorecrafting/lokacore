@@ -545,7 +545,7 @@ test("a scripted action's add menu offers only ScriptedAction fields", () => {
     ),
   );
   const fields = Object.keys(defs['source.ScriptedAction'].properties);
-  const menu = scriptedMenu(addable('actions', registry, {}, []));
+  const menu = scriptedMenu(addable('actions', registry, {}, []), defs);
   assert.deepEqual(
     menu.filter((f) => f !== 'abstract' && !fields.includes(f)),
     [],
