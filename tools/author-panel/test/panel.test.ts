@@ -72,7 +72,7 @@ async function open(layout: object): Promise<Page> {
       await new Promise((r) => setTimeout(r, 500));
     }
   }
-  await page.locator('[aria-label="Card"] form').waitFor({ timeout: boot });
+  await page.locator('[aria-label="Inspector"] form').waitFor({ timeout: boot }); // any card's form
   return page;
 }
 const QUEST = { right: 280, selection: { kind: 'quest', key: 'carry_letter' } };
@@ -86,6 +86,20 @@ test('at a 280 px inspector the quest card fits its width', async () => {
     .evaluate((e) => [e.scrollWidth, e.clientWidth]);
   assert.ok(client < 280, `inspector ${client} px wide: the kept 280 px layout was not applied`);
   assert.ok(scroll <= client, `card content ${scroll} px in a ${client} px inspector`);
+});
+
+// Breaks: a quest or dialogue opens the generic card (right.tsx's dispatch), or a choice's link
+// takes a dialogue the story lacks (refuseLink not wired): the compile's UNRESOLVED_REFERENCE.
+test('a quest and a dialogue open their cards; a link to no dialogue is refused', async () => {
+  const quest = await open(QUEST);
+  await quest.locator('[aria-label="quest card"]').waitFor({ timeout: boot });
+  await quest.close();
+  const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
+  const link = page.getByLabel('bounty then');
+  await link.fill('nosuch');
+  await page.getByText('no dialogue nosuch').waitFor({ timeout: boot });
+  assert.equal(await link.getAttribute('aria-invalid'), 'true');
+  await page.close();
 });
 
 // Breaks: a control in the shell loses its accessible name, label or contrast (axe serious or

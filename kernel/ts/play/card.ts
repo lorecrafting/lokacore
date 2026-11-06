@@ -157,10 +157,12 @@ export function hidden(
 export const choices = (field: string, nodes: { ref: string; kind: string }[]) =>
   nodes.filter((n) => n.kind === field).map((n) => n.ref.slice(n.ref.lastIndexOf('/') + 1));
 
-/** The node kind a reference field at `path` picks: its last named step (`shop.offers.0.item`). */
+/** The node kind a reference field at `path` picks: its last named step, parent first (`patrol.route.0`). */
 export function pickKind(path: (string | number)[]) {
-  const name = [...path].reverse().find((s) => typeof s === 'string' && !/^\d+$/.test(s));
-  return Object.hasOwn(PICK_NAMES, String(name)) ? PICK_NAMES[String(name)] : String(name ?? '');
+  const named = path.filter((s) => typeof s === 'string' && !/^\d+$/.test(s)).map(String);
+  const name = named.at(-1) ?? '';
+  const pick = [`${named.at(-2)}.${name}`, name].find((n) => Object.hasOwn(PICK_NAMES, n));
+  return pick ? PICK_NAMES[pick] : name;
 }
 
 /** What a world file's reference field names, by its field (a transport's `reverse` is a transport). */
@@ -368,6 +370,8 @@ export function minimal(node: Obj, defs: Record<string, Obj>, seen: string[] = [
 
 // a field whose schema minimum does not compile starts at the sampler's value (resources.ex @defaults hp; BODY_BELOW_ZERO)
 const SEEDS: Record<string, unknown> = { hp: { minimum: 0, maximum: 20, start: 20, gain: 5 } };
+// refused at its least value until the author picks more: only revealed (quests.ex:63-66; exchanges.ex:94-95)
+const CHOSEN = ['source.QuestDefinition.offer', 'source.QuestDefinition.repeatable'];
 
 /** `doc` with field `f` of definition `def` at its least value; undefined when present or the author must choose it. */
 export function added(
@@ -378,6 +382,7 @@ export function added(
 ): Obj | undefined {
   if (Object.hasOwn(doc, f)) return undefined; // a stale menu never overwrites a present field
   const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
+  if (CHOSEN.includes(`${def}.${f}`)) return undefined;
   const value = node && (structuredClone(SEEDS[f]) ?? minimal(node, defs));
   return value === undefined ? undefined : { ...doc, [f]: value };
 }
@@ -420,6 +425,8 @@ const OWNERS: Record<string, string> = {
   'rooms.site': 'construction',
   'rooms.tags': 'tag',
   'rooms.variants': VARIANT,
+  'quests.expedition': 'expedition movement quest fact combat death population', // expedition.ex:29-32
+  'quests.patrol': 'patrol movement quest dialogue fact death', // patrol.ex:31-33
 };
 
 // Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
