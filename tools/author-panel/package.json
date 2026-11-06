@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "node --test test/*.test.ts"
+    "test": "node --test --test-reporter=${TEST_REPORTER:-spec} test/*.test.ts"
   },
   "dependencies": {
     "@rjsf/core": "^6.11.1",

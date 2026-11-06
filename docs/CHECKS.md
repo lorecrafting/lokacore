@@ -44,7 +44,7 @@ their rules and red controls remain available for resumption.
   authority and Book tests), in CI's `kernel` and `mobile` jobs and `bin/check_all.sh` (Node's built-in test runner).
   CI's `mobile` job also runs `npm test` in `tools/author-panel` (`test/panel.test.ts`): the real panel in stable
   Chrome against `bin/loka dev --watch` on the toolbox showcase; the quest card fits a 280 px inspector, the shell's
-  serious or critical axe violations equal a pinned baseline, and a warm Flow graph open is within `BUDGET.flowOpen`.
+  serious or critical axe violations equal a pinned baseline, and a warm Flow graph open and a filter's relayout are within `BUDGET.flowOpen` and `flowUpdate`.
   `bin/check_all.sh` sets `TEST_REPORTER=dot` (the `npm test` scripts default to `spec`): one dot per
   passing test, failures printed in full.
 - Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
