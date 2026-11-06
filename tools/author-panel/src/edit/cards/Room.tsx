@@ -157,12 +157,7 @@ export function RoomForm({
     card.revealed,
   );
   for (const f of own) ui[f] = HIDE;
-  // a field's grid track sizes to a long text key; minmax(0,1fr) lets it truncate inside the inspector
-  return (
-    <div className="min-w-0 [&_.grid]:grid-cols-[minmax(0,1fr)]">
-      <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
-    </div>
-  );
+  return <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />;
 }
 
 /** The cartridge's `requires.capabilities`, read again when cartridge.json changes. */

@@ -5,7 +5,7 @@ import { AreaMap, type MapProps } from './areamap.tsx';
 import type { Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import type { SetLayout } from './columns.tsx';
-import { fromRef, type Layout, type Selection } from './shell.ts';
+import { fromRef, WORLD, type Layout, type Selection } from './shell.ts';
 import { StoryList } from './storylist.tsx';
 
 type Pick = (s: Selection) => void;
@@ -50,6 +50,13 @@ function Row({
   );
 }
 
+/** Opens the World card (cartridge.json, resources, attributes), from the Hierarchy and the Project tab. */
+export const WorldButton = ({ pick }: { pick: Pick }) => (
+  <Button size="xs" variant="outline" className="mx-2" onClick={() => pick(WORLD)}>
+    World
+  </Button>
+);
+
 /** Every definition of the last good compile, grouped by kind. */
 export function Hierarchy({
   story,
@@ -69,6 +76,7 @@ export function Hierarchy({
   for (const n of story.graph.nodes) kinds.set(n.kind, [...(kinds.get(n.kind) ?? []), n]);
   return (
     <div className="space-y-2 p-2">
+      <WorldButton pick={pick} />
       {[...kinds].map(([kind, nodes]) => (
         <section key={kind}>
           <h3 className="px-2 text-xs text-muted-foreground">{kind}</h3>

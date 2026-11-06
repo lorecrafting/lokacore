@@ -1,4 +1,4 @@
-# size: allow 364, one table per gate; the editor gate adds fourteen planted files
+# size: allow 366, one table per gate; the editor gate adds fourteen planted files
 # Red controls plant violations, require checks to fail, and clean their own files.
 # Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
@@ -205,12 +205,11 @@ editor = JSON.decode!(File.read!(Path.join(root, editor_registry)))
 base = File.read!(Path.join(root, editor_baseline))
 card = &Map.put(editor, "dialogues.name", Map.put(editor["dialogues.name"], "edit", &1))
 # a card unregistered: its rows generic again (as dialogues.name is), not in the shrunk baseline
-uncard = fn dir ->
-  Map.new(
-    editor,
-    &if(elem(&1, 0) =~ ~r/^#{dir}\./, do: {elem(&1, 0), editor["dialogues.name"]}, else: &1)
-  )
+uncard = fn re ->
+  Map.new(editor, &if(elem(&1, 0) =~ re, do: {elem(&1, 0), editor["dialogues.name"]}, else: &1))
 end
+
+world = ~r/^(cartridge|resources|attributes|populations|transports|barriers)\./
 
 editor_controls =
   for {name, planted, expect} <- [
@@ -228,12 +227,14 @@ editor_controls =
         {"component", %{registry: card.("nope.tsx")}, "dialogues.name: no edit surface"},
         {"unlisted", %{baseline: String.replace(base, "dialogues.name.edit\n", "")},
          "dialogues.name.edit: generic but not in the baseline"},
-        {"room-card", %{registry: uncard.("rooms")},
+        {"room-card", %{registry: uncard.(~r/^rooms\./)},
          "rooms.name.edit: generic but not in the baseline"},
-        {"npc-card", %{registry: uncard.("npcs")},
+        {"npc-card", %{registry: uncard.(~r/^npcs\./)},
          "npcs.name.edit: generic but not in the baseline"},
-        {"item-card", %{registry: uncard.("items")},
+        {"item-card", %{registry: uncard.(~r/^items\./)},
          "items.name.edit: generic but not in the baseline"},
+        {"world-card", %{registry: uncard.(world)},
+         "cartridge.title.edit: generic but not in the baseline"},
         {"escape", %{registry: card.("../App.tsx")}, "dialogues.name: no edit surface"},
         {"bespoke", %{registry: card.("RedCard.tsx"), card: ""},
          "dialogues.name.edit: no longer generic"},

@@ -6,6 +6,8 @@
 import type { ListState } from './storylist.ts';
 
 export type Selection = { file?: string; kind: string; key: string };
+/** The World card's selection: cartridge.json, which no graph node names (its card opens the root files). */
+export const WORLD: Selection = { file: 'cartridge.json', kind: 'cartridge', key: 'world' };
 export type Layout = {
   left: number;
   right: number;
@@ -85,6 +87,10 @@ export const fromTextKey = (textKey: string): Selection | undefined => {
   return key ? { kind, key } : undefined;
 };
 export type Node = { ref: string; kind: string };
+/** The source a selection's card edits: its node's file, or the World row's own (no node names cartridge.json). */
+export const fileOf = (sel: Selection, ref?: string, files?: Record<string, string>) =>
+  ref ? files?.[ref] : sel.kind === WORLD.kind ? sel.file : undefined;
+
 /** What each of the four places shows for one selection. */
 export function places(sel: Selection | undefined, nodes: Node[]) {
   const node = sel && nodes.find((n) => n.ref.endsWith(`:${sel.kind}/${sel.key}`));

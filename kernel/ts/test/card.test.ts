@@ -1,3 +1,4 @@
+// size: allow 530, one suite per card step; the generic, Room, World, NPC and item cards share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -19,16 +20,23 @@ import {
   choices,
   diff,
   editable,
+  entered,
   fieldErrors,
   hidden,
   minimal,
   pickKind,
+  pickable,
   placed,
   proseKey,
   rebase,
+  refuseKey,
   refusePick,
   removed,
+  rootNames,
+  rootStamp,
+  ROOTS,
   start,
+  worldFile,
 } from '../play/card.ts';
 import { change } from '../play/edit_model.ts';
 import { json } from '../play/write.ts';
@@ -230,6 +238,75 @@ test('a value with no op is drawn in the first branch its type fits', () => {
   assert.equal(branchOf(typed, null), 2);
   assert.equal(branchOf(typed, true), -1);
   assert.equal(branchOf([{}], true), 0);
+});
+
+// Break: the World card's picker takes a key no definition has (a typo'd room or resource is
+// written and only the compile refuses it), names the wrong kind for a field (an array item's
+// index, not its field, picks), or offers a story node for a root-file kind; a bad new key passes.
+test('a World picker refuses an unknown id at the field; a new entry key must be new and lowercase', () => {
+  const nodes = [
+    { ref: 'c@0.1:room/square', kind: 'room' },
+    { ref: 'c@0.1:npc/ada', kind: 'npc' },
+  ];
+  const room = pickable(['recovery_rooms', 0], nodes, {});
+  assert.deepEqual(room, { kind: 'room', keys: ['square'] });
+  assert.deepEqual(
+    [refusePick(room, 'squaer'), refusePick(room, 'square'), refusePick(room, '')],
+    ['no room squaer', undefined, undefined],
+  );
+  const theft = pickable(['world', 'theft', 'attribute'], nodes, { attribute: ['grit'] });
+  assert.deepEqual(
+    [refusePick(theft, 'grit'), refusePick(theft, 'ada')],
+    [undefined, 'no attribute ada'],
+  );
+  // a default pool is a resource with no resources.json entry; no keys yet (no compile) is free text
+  const coin = pickable(['currency'], nodes, { resource: ['coin'] });
+  assert.deepEqual(
+    [refusePick(coin, 'mv'), refusePick(coin, 'gold'), refusePick(pickable(['room'], [], {}), 'x')],
+    [undefined, 'no resource gold', undefined],
+  );
+  assert.equal(pickable(['title'], nodes, {}), undefined);
+  assert.equal(pickable(['room'], nodes, {}, { global: 'x' }), undefined); // a global ref's object
+  assert.deepEqual(
+    [refuseKey('gold', { coin: {} }), refuseKey('gold', { gold: {} }), refuseKey('Gold', {})],
+    [undefined, 'already gold', 'a key is up to 64 lowercase letters, digits and _'],
+  );
+  assert.deepEqual(
+    [refuseKey('g', {}), refuseKey('g'.repeat(64), {}), refuseKey('g'.repeat(65), {})],
+    [undefined, undefined, 'a key is up to 64 lowercase letters, digits and _'],
+  );
+});
+
+// Break: the World card opens the wrong files (a room, or a nested population folder missed), reads
+// its picker's keys from the wrong field, misses a root-file write (stale keys) or refetches on any
+// write, writes '' into an emptied field, or a new entry starts at an invented non-zero amount.
+test('the World card opens the world files, keys its pickers from the root files, and enters typed values', () => {
+  assert.deepEqual(
+    [
+      'cartridge.json',
+      'areas/a/populations/goblins.json',
+      'transports/boat.json',
+      'rooms/hut.json',
+      'npcs/cartridge.json',
+    ].map((r) => worldFile(r)),
+    [true, true, true, false, false],
+  );
+  assert.deepEqual(
+    [worldFile('resources.json', true), worldFile('barriers/gate.json', true)],
+    [true, false],
+  );
+  assert.deepEqual(rootNames([{ resources: { coin: {} } }, {}]), {
+    resource: ['coin'],
+    attribute: [],
+  });
+  const write = (file: string) => ({ file, sha256: file.length.toString() });
+  assert.equal(rootStamp([write('rooms/hut.json')]), '');
+  assert.notEqual(rootStamp([write('attributes.json')]), '');
+  assert.deepEqual(
+    [entered(''), entered('a'), entered('', true), entered('7', true)],
+    [undefined, 'a', undefined, 7],
+  );
+  assert.ok(ROOTS.every((r) => Object.values(r.blank).every((v) => v === 0)));
 });
 
 // Break: a reference field offers another kind's keys, or the ref's cartridge prefix; a `.scene`

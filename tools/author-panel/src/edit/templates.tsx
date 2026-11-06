@@ -55,8 +55,9 @@ function FieldTemplate(p: FieldTemplateProps) {
   const show = displayLabel && uiOptions.widget !== 'checkbox';
   return (
     <Wrap {...p}>
+      {/* grid-cols-1 is minmax(0,1fr): an auto track would widen to a long text key and push the card past the inspector */}
       <div
-        className={`grid gap-0.5 ${displayLabel ? 'group' : ''} ${rawErrors?.length ? '[&>.form-control]:border-destructive [&>label>input]:border-destructive' : ''}`}
+        className={`grid grid-cols-1 gap-0.5 ${displayLabel ? 'group' : ''} ${rawErrors?.length ? '[&>.form-control]:border-destructive [&>label>input]:border-destructive' : ''}`}
       >
         {show ? (
           <label htmlFor={id} className={item ? 'sr-only' : 'text-xs text-muted-foreground'}>

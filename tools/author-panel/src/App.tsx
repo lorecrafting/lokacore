@@ -12,7 +12,7 @@ import { Divider, Rail, useLayout, type SetLayout } from './columns.tsx';
 import { Button } from './components/ui/button.tsx';
 import { ScrollArea } from './components/ui/scroll-area.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs.tsx';
-import { Hierarchy, MapSlot } from './left.tsx';
+import { Hierarchy, MapSlot, WorldButton } from './left.tsx';
 import { Palette } from './palette.tsx';
 import { Project } from './project.tsx';
 import { Counts, Unconfirmed } from './prose.tsx';
@@ -111,6 +111,7 @@ function Left({ layout, set, story, book, diag, pick }: Shell) {
         </TabsContent>
         <TabsContent value="project" forceMount className="data-[state=inactive]:hidden">
           <Project state={book.state} send={book.send} trace={book.trace} said={diag.said} />
+          <WorldButton pick={pick} />
         </TabsContent>
       </ScrollArea>
     </Tabs>
