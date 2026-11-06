@@ -23,6 +23,7 @@ export type Context = {
   unlinkable?: Record<string, string>;
   files?: Record<string, string>; // each node's source file, by ref
   open?: (sel: { kind: string; key: string }) => void; // selects another definition's card
+  stale?: boolean; // the last compile failed: pickers offer the last good compile's keys
 };
 const context = (p: FieldProps) => p.registry.formContext as Context;
 
@@ -54,7 +55,10 @@ function DefinitionRef(p: FieldProps) {
   const refused = bad === undefined ? undefined : refusePick({ kind, keys }, bad);
   return (
     <label className="grid gap-1 text-xs">
-      <span className="text-muted-foreground">{p.name}</span>
+      <span className="text-muted-foreground">
+        {p.name}
+        {context(p).stale ? <span className="text-warning"> stale</span> : null}
+      </span>
       <Input
         id={p.fieldPathId.$id}
         list={list}
