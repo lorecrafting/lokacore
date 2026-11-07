@@ -4,6 +4,7 @@ import { ask, templates, type Story } from './author.ts';
 import type { MapRoom } from './map.ts';
 export { kept } from './map.ts'; // App's /story failure rule
 import { editor, freeKey, type Editor } from './mapedit.ts';
+import { nodeOf } from './shell.ts';
 
 const ed = editor({
   post: ask,
@@ -23,13 +24,12 @@ export const shown = {
   shorts: [] as string[],
 };
 
-const NODE: Record<string, string> = { cutscene: 'scene', areas: 'room' }; // the graph kind a palette kind compiles to
 const NAMED = ['text', 'behaviours']; // no graph node holds their keys: a reused one would merge silently, so the author names it
 
 /** The palette's New <kind>: a free `<kind>_<n>` key, then its card (an outline or layout has one fixed name). */
 export async function created(kind: string) {
   const one = kind.replace(/(us)es$|s$/, '$1');
-  const node = NODE[kind] ?? one;
+  const node = nodeOf(kind);
   const held = kind === 'npcs' || kind === 'items' ? (await templates()).filter((t) => t.dir === kind).map((t) => t.key) : [];
   const fixed = kind === 'outline' || kind === 'layout';
   const name = fixed ? kind : NAMED.includes(kind) ? prompt(`New ${one} key`) : freeKey(one, node, shown.nodes, held);
