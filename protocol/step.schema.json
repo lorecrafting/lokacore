@@ -291,7 +291,7 @@
           "additionalProperties": false
         },
         {
-          "description": "(decay): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.",
+          "description": "For decay rules: moves the event's item into room, unless it is already there or used up. Nothing is checked and nothing is told; any other subject is left alone.",
           "type": "object",
           "properties": {
             "op": {
@@ -330,7 +330,7 @@
           "additionalProperties": false
         },
         {
-          "description": "(phased world events): births one bundle of the population plan into its home, in the highest free slot up to cap, as the plan job's birth does; no free slot births nothing. No RNG draw (the plan's chance and targets govern its own job only).",
+          "description": "For timed world events: adds one group of the population to its home, in a free slot, as the population's own births do. With no free slot nothing is born. No dice are rolled.",
           "type": "object",
           "properties": {
             "op": {
@@ -627,7 +627,7 @@
             },
             "escrow": {
               "type": "object",
-              "description": "The first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70: output with no ready_after is a barter, handed from custody to the body with the inputs, no job.",
+              "description": "Items the player hands over with the order; they wait in the custody room. With ready_after and output, the order takes time and is claimed later, and cancelling returns the items but not the fee. With output and no ready_after it is an immediate trade.",
               "properties": {
                 "items": {"description":"The item definitions accepted as payment.",
                   "type": "array",
@@ -863,7 +863,7 @@
             },
             "escrow": {
               "type": "object",
-              "description": "The first quantity of these directly held items move to the custody room with the mend (spent at once).",
+              "description": "Items the player hands over with the order; they wait in the custody room. With ready_after and output, the order takes time and is claimed later, and cancelling returns the items but not the fee. With output and no ready_after it is an immediate trade.",
               "properties": {
                 "items": {"description":"The item definitions accepted as payment.",
                   "type": "array",
@@ -928,7 +928,7 @@
       ]
     },
     "Check": {
-      "description": "A check (check@1), discriminated by kind.",
+      "description": "A test the action makes before it succeeds; kind says which sort of test.",
       "examples": [
         {
           "key": "pry_lid",
@@ -1073,7 +1073,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A track check: passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
+          "description": "Passes while the named population has left a fresh trail in the player's room. It never rolls dice. On success, the outcome's lines are followed by a line pointing the way the trail leads.",
           "type": "object",
           "properties": {
             "key": {"description":"This check's key, unique across scripted actions and dialogue choices.",

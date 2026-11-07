@@ -110,7 +110,7 @@ Type: object.
 
 ### `item.move`
 
-(decay): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.
+For decay rules: moves the event's item into room, unless it is already there or used up. Nothing is checked and nothing is told; any other subject is left alone.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -128,7 +128,7 @@ Moves the named NPC (or the event's subject when it is an NPC) straight to room,
 
 ### `population.spawn`
 
-(phased world events): births one bundle of the population plan into its home, in the highest free slot up to cap, as the plan job's birth does; no free slot births nothing. No RNG draw (the plan's chance and targets govern its own job only).
+For timed world events: adds one group of the population to its home, in a free slot, as the population's own births do. With no free slot nothing is born. No dice are rolled.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -243,7 +243,7 @@ A service's benefit: the player is now owed something, such as a paid room, reco
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| escrow | object |  | The first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70: output with no ready_after is a barter, handed from custody to the body with the inputs, no job. |
+| escrow | object |  | Items the player hands over with the order; they wait in the custody room. With ready_after and output, the order takes time and is claimed later, and cancelling returns the items but not the fee. With output and no ready_after it is an immediate trade. |
 | escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding them. |
 | escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions accepted as payment. |
 | escrow.output | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item lying in custody the order hands over. |
@@ -325,7 +325,7 @@ Repairs the built room in direction from the site once it has fallen into ruin. 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | direction | `north` or `south` or `east` or `west` or `up` or `down` | yes | As build's direction. |
-| escrow | object |  | The first quantity of these directly held items move to the custody room with the mend (spent at once). |
+| escrow | object |  | Items the player hands over with the order; they wait in the custody room. With ready_after and output, the order takes time and is claimed later, and cancelling returns the items but not the fee. With output and no ready_after it is an immediate trade. |
 | escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding them. |
 | escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions accepted as payment. |
 | escrow.quantity | integer | yes | How many of them move. |
@@ -431,7 +431,7 @@ True while the player's attribute is at least this value.
 
 ### `level_compare`
 
-The actor's level is at least at_least. Owned by attribute@1.
+True while the player's level is at least at_least.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -450,7 +450,7 @@ Holds when the actor's resource (for example hp) is at least at_least, or at lea
 
 ### `escort_state`
 
-Escort@1: this actor’s typed escort for the named quest instance has this status.
+True while the player's escort for the named quest has this status.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -488,7 +488,7 @@ True while the sky is in this phase: a moon phase, season, tide or the day's wea
 
 ### `wearing`
 
-The actor's body wears an item whose definition declares tag: an item in one of the body's slot holders (equipment@1). False without a body. Owned by equipment@1.
+True while the player wears an item with this tag. False without a body.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -505,7 +505,7 @@ True once the player has entered the room at least this many times. The starting
 
 ### `skill_compare`
 
-The actor's level in the named skill (skill@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least. Derived on read. Owned by skill@1.
+True while the player's level in the named skill is at least at_least: 1 when learned, plus one for each growth step reached through use; 0 if not learned.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -514,7 +514,7 @@ The actor's level in the named skill (skill@1: 1 when acquired, plus each growth
 
 ### `population_count`
 
-The named population plan has at least at_least living members: slots 1 to cap whose row has a member_id and no replacement_due. Derived on read; reads no actor. Owned by population@1.
+True while the named population has at least at_least living members.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -532,7 +532,7 @@ True while someone has this status: the action's target (target), the player (se
 
 ### `item_present`
 
-An item carrying this property tag lies directly in the actor's current room: on its floor, not carried and not inside a container there. That is the actor's room (the only room the Book describes), as status_active subject room; in a reaction's when the reaction's actor's room. One query step per container row scanned. Owned by containment@1.
+True while an item with this tag lies on the floor of the player's room, not carried and not in a container. In a reaction, the room is the acting character's.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -548,7 +548,7 @@ Holds when this NPC is alive and in the actor's room.
 
 ### `cue_perceived`
 
-The NPC of this definition, alive, perceives a cue of sense: an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a scripted action outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1.
+True while this NPC, alive, can sense a cue of this sense: a cue whose source is within its range of the NPC's room, through exits the player can see. In a reaction to an action's outcome, only that outcome's cues count.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -557,7 +557,7 @@ The NPC of this definition, alive, perceives a cue of sense: an active Cue whose
 
 ### `fact_at_least`
 
-An int fact's value, read as fact_compare reads it, is at least at_least (a dialogue's relationship or count gate). Owned by fact@1.
+True while a number fact is at least at_least, such as a relationship or a count.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -570,7 +570,7 @@ An int fact's value, read as fact_compare reads it, is at least at_least (a dial
 
 ### `time_since`
 
-The world clock minus the int fact's value (as fact_compare reads it, at its named NPC or item) is at least at_least; a fact never stamped holds its default. Owned by fact@1.
+True once at least at_least time has passed since the time stored in a number fact, read at its named NPC or item. A fact never set holds its default.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -772,7 +772,7 @@ An attack hit or missed.
 |---|---|---|---|
 | attacker | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The attacker is this NPC's authored instance; a player's blow never matches. |
 | hit | boolean |  | Only hits, or only misses. |
-| target | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The target is this NPC's authored instance (row 39); a blow on the player never matches. |
+| target | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The target is this NPC itself; a blow on the player never matches. |
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `filled`
@@ -854,7 +854,7 @@ One option the player can pick in a conversation: its button text, the line it t
 | availability.from | [LogicalTime](source-kinds.gen.md#logicaltime) |  | First logical time the choice is offered. |
 | availability.through | [LogicalTime](source-kinds.gen.md#logicaltime) |  | Last logical time the choice is offered, inclusive. |
 | check | [Check](source-kinds.gen.md#check) |  | An opposed check made when chosen. |
-| escort | object |  | Escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest. |
+| escort | object |  | Starts, rejoins or completes an escort: npc names the NPC who follows the player. start and rejoin keep the conversation going; complete finishes the dialogue's quest. |
 | escort.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |
 | escort.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The escort quest. |
 | escort.transition | `start` or `rejoin` or `complete` | yes | The transition made. |

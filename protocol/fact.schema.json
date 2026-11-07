@@ -7,7 +7,7 @@
       "description": "What kind of value the fact holds and where it starts: true or false (bool), one of a list of words (enum), or a whole number with optional bounds (int).",
       "oneOf": [
         {
-          "description": "true or false.",
+          "description": "True or false.",
           "type": "object",
           "properties": {
             "type": {

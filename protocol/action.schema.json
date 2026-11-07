@@ -711,7 +711,7 @@
         "priority": {"description":"Presentation priority.",
           "type": "integer"
         },
-        "policy": {"description":"When the action is offered: a condition the player must meet, or it is refused.",
+        "policy": {"description":"A condition the player must meet; while it fails, the action is shown unavailable and refused.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
         "outcomes": {"description":"The outcomes a perform selects.",
@@ -1167,7 +1167,7 @@
       ]
     },
     "ActionCraft": {
-      "description": "What a crafting action uses up and makes. consume: the items taken from the player's hands into a holder on every try; yield: an item moved from a holder to the player when the action succeeds.",
+      "description": "What a crafting action uses up and makes. consume: the items taken from the player's hands into a holder on every try; yield: an item moved from a holder to the player unless the action fails.",
       "type": "object",
       "properties": {
         "consume": {"description":"What the actor gives up on every accepted perform, failure included.",

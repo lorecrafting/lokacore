@@ -413,7 +413,7 @@
                 },
                 "target": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The target is this NPC's authored instance (row 39); a blow on the player never matches."
+                  "description": "The target is this NPC itself; a blow on the player never matches."
                 }
               },
               "required": [
@@ -523,7 +523,7 @@
           "$ref": "policy.schema.json#/$defs/Policy"
         },
         "silent": {
-          "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it.",
+          "description": "Says the rule changes things without telling the player, on purpose, so the checker does not warn. Used only while writing; the finished game drops it.",
           "const": true
         },
         "after": {

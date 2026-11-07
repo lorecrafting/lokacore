@@ -38,7 +38,7 @@ An action the player can take, such as ring the bell: the words that start it, w
 | outcomes.success.cues | [Cues](source-kinds.gen.md#cues) |  | Transient cues of this outcome, from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown. |
 | outcomes.success.narration | [ActionNarration](source-kinds.gen.md#actionnarration) | yes | The line the player reads on success. |
 | outcomes.success.steps | list of [Step](vocabulary.gen.md#steps) | yes | What happens on success, in order. |
-| policy | [Policy](vocabulary.gen.md#policy-leaves) |  | When the action is offered: a condition the player must meet, or it is refused. |
+| policy | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition the player must meet; while it fails, the action is shown unavailable and refused. |
 | priority | integer | yes | Presentation priority. |
 | reason | [TextKey](source-kinds.gen.md#textkey) |  | The refusal text shown when the action's policy fails. |
 | target | [ScriptedTarget](source-kinds.gen.md#scriptedtarget) | yes | Its target. |
@@ -87,7 +87,7 @@ Shared mutable state for one logical door or gate (21 §5 Barrier), owned by bar
 | keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the barrier's short description. |
 | opens_when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected. |
-| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags, read by the has_tag policy leaf (tag@1). |
+| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its tags: words a condition can check for. |
 
 ## behaviours
 
@@ -117,8 +117,8 @@ A cartridge's manifest: identity, title, compatibility requirements and supporte
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| alternates | map of list of [TextKey](source-kinds.gen.md#textkey) |  | Narration variety: a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key, never the authority RNG. |
-| ancestries | map of [AncestrySpec](source-kinds.gen.md#ancestryspec) |  | Authored once-only character choices (attribute@1), keyed by choice Key. |
+| alternates | map of list of [TextKey](source-kinds.gen.md#textkey) |  | Variety for narration: for a text key, other keys to use in its place; each time the line is told, one of them is picked. |
+| ancestries | map of [AncestrySpec](source-kinds.gen.md#ancestryspec) |  | Choices a character makes once, such as an ancestry, each under its own name. |
 | api_version | [ApiVersion](source-kinds.gen.md#apiversion) | yes | The source format family this cartridge is written in; always loka/v3. |
 | calendar | [Calendar](source-kinds.gen.md#calendar) |  | The game's clock: hours in a day, parts of the day, moon, seasons and weather. |
 | chapters | list of [Chapter](source-kinds.gen.md#chapter) |  | Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning. |
@@ -140,8 +140,8 @@ A conversation with an NPC: who speaks (npc), when it is offered (policy), the q
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | choices | map of [DialogueChoice](vocabulary.gen.md#choice-fields) | yes | The options the player can pick, each with a short id, a button label and what happens. |
-| entry | boolean |  | An optional marker: true, talk to this speaker opens this dialogue and no other of theirs but keyword ones, over the inferred entry (dialogue@1), at most one per speaker and not on a keyword dialogue; false, talk never opens it, only a `then` does. |
-| keyword | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle. |
+| entry | boolean |  | Optional. true: talking to this speaker opens this dialogue instead of the one it would pick (at most one per speaker, not on a keyword dialogue). false: talking never opens it; only another dialogue's then does. |
+| keyword | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | A word that, said or whispered to the speaker, opens this dialogue. Talking never opens it. |
 | name | [TextKey](source-kinds.gen.md#textkey) |  | A distinct name (the Talk label) opts that authored control into exact dialogue selection; omission retains first-eligible Talk. |
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The speaker, also an npc role. |
 | policy | [Policy](vocabulary.gen.md#policy-leaves) |  | When this conversation is offered: a condition the player must meet. |
@@ -220,7 +220,7 @@ An item: something the player can pick up, carry, wear or open. It has names and
 | room_line | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line a room shows while it lies there. |
 | room_line_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Room line variants; first match wins. |
 | slot | [SlotKey](source-kinds.gen.md#slotkey) |  | The slot it is worn in. |
-| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags, read by the has_tag policy leaf (tag@1). |
+| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its tags: words a condition can check for. |
 | vessel | [VesselSpec](source-kinds.gen.md#vesselspec) |  | Makes the item hold liquid: how much, and what is in it at the start. |
 | weapon | [WeaponProfile](source-kinds.gen.md#weaponprofile) |  | Makes the item a weapon: the skill needed and its attack. |
 | words | [NameWords](source-kinds.gen.md#namewords) |  | The item's name words, such as the bare name lantern, its article and plural, used to build sentences. |
@@ -246,12 +246,12 @@ Cartridge-owned mass, integer serving and unit labels for a declared liquid.
 
 ## npcs
 
-A non-player character, as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours; dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP. Optional name_variants and description_variants vary its name and description, its mood; an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words.
+A character other than the player: its key, words, name, room line and description as for an item, the room it starts in, and optionally how many items it carries, its daily schedule, its health, and names and descriptions that change with conditions.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | ambient | [NpcAmbientSets](source-kinds.gen.md#npcambientsets) |  | Ambient lines or emotes told while the player is in this NPC's room and sees it: 1 to 4 of {lines \| emotes, every, chance?, when?}. |
-| ask | object |  | (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown. |
+| ask | object |  | What the NPC says when asked about a topic. The first answer whose topic matches and whose condition holds is told and teaches its grants topic; with none, the NPC does not know. |
 | ask.answers | list of object | yes | What the NPC answers, topic by topic. |
 | ask.answers[].grants | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Granted when this answer is given. |
 | ask.answers[].text | [TextKey](source-kinds.gen.md#textkey) | yes | What the NPC says when asked about this topic. |
@@ -259,7 +259,7 @@ A non-player character, as a holder of items so far: its key, keywords, name, ro
 | ask.answers[].when | [Policy](vocabulary.gen.md#policy-leaves) |  | This answer is used only while this condition holds. |
 | ask.unknown | [TextKey](source-kinds.gen.md#textkey) | yes | What the NPC says when no answer matches the topic. |
 | attack | [AttackProfile](source-kinds.gen.md#attackprofile) |  | How the NPC fights: chance to hit and damage range. |
-| attributes | list of object |  | This NPC's base attribute values (attribute@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start. |
+| attributes | list of object |  | This NPC's attribute values, used when a check is made against it and for its attack. An attribute left out has its starting value. |
 | attributes[].attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A cartridge attribute, read by opposed checks. |
 | attributes[].value | [ResourceInt](source-kinds.gen.md#resourceint) | yes | This NPC's value of the attribute. |
 | behaviours | list of [Key](source-kinds.gen.md#key) or object |  | Behaviours this entity takes on: each adds one copy of the behaviour's rules, with `{"param": "holder"}` replaced by this entity's key. |
@@ -297,7 +297,7 @@ A non-player character, as a holder of items so far: its key, keywords, name, ro
 | keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
 | locks | object |  | Get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied. |
 | locks.get | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition the player must meet to take an item this NPC holds. |
-| mount | object |  | (needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template. |
+| mount | object |  | This NPC can be ridden (needs mount in the world settings). While a character rides it, the character can only move into rooms with one of terrain, each move costs cost_percent of the usual (default 100), and the NPC moves along. Not on a spawn template. |
 | mount.cost_percent | integer |  | Percent, 0 to 1000, applied last to the rider's move cost, rounded down. Absent: the cost is not scaled. |
 | mount.terrain | list of [Tag](source-kinds.gen.md#tag) | yes | Room tags this mount carries a rider over; a move into a room with none of them is refused. 1 to 8 unique tags. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its short description. |
@@ -311,7 +311,7 @@ A non-player character, as a holder of items so far: its key, keywords, name, ro
 | services | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Services this NPC offers. |
 | shop | [Shop](source-kinds.gen.md#shop) |  | Makes the NPC a shopkeeper: the items offered, their prices and the lines told on buying and selling. |
 | spawn_template | `true` |  | Not placed in a fresh world; used as a population template. |
-| unattackable | boolean |  | this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile. |
+| unattackable | boolean |  | This NPC can never be attacked and never starts a fight. An arrest still applies. If absent, it can be attacked when it has an attack profile. |
 | words | [NameWords](source-kinds.gen.md#namewords) |  | The NPC's name words, such as the bare name guard, its article and plural, used to build sentences. |
 
 ## outline
@@ -455,7 +455,7 @@ A rule that runs steps when something happens in the game: when names the event 
 |---|---|---|---|
 | after | integer |  | The steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock. |
 | on | [event](vocabulary.gen.md#events) | yes | See the type. |
-| silent | `true` |  | Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it. |
+| silent | `true` |  | Says the rule changes things without telling the player, on purpose, so the checker does not warn. Used only while writing; the finished game drops it. |
 | steps | list of [Step](vocabulary.gen.md#steps) or object | yes | The steps in order; a `wait` splits them in time. |
 | steps[]{op=wait} | variant |  | Run the steps after it this many logical seconds later, as a sibling delayed rule with the same `on` and `when`; `when` is read again when they run. |
 | steps[]{op=wait}.seconds | integer | yes | Logical seconds, added to the rule's `after` and the waits before it. |
@@ -490,7 +490,7 @@ A place the player can be: its name, description, exits by direction (north, sou
 | actions | list of [ActionContribution](source-kinds.gen.md#actioncontribution) |  | Actions the player can do in this room, such as pray at the altar. |
 | ambient | [AmbientSets](source-kinds.gen.md#ambientsets) |  | Ambient lines told while the player is in this room: 1 to 4 of {lines, every, chance?, when?}. |
 | cues | [Cues](source-kinds.gen.md#cues) |  | Sense cues reaching nearby rooms: 1 to 4 of {sense, text, range, when?}. |
-| dark | `true` |  | The room is dark (light@1): a player without light, or blind, reads the engine line place.dark instead of the description and sees none of the room's entities. An authored dark_description wins over the engine line. |
+| dark | `true` |  | The room is dark: a player without light, or blind, sees the line place.dark instead of the description and none of the room's contents. A dark_description replaces that line. |
 | dark_description | [TextKey](source-kinds.gen.md#textkey) |  | Shown instead of the description while the room is dark; authoring it marks the room as having no light of its own. |
 | description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its description. |
 | details | map of [InspectableDetail](source-kinds.gen.md#inspectabledetail) |  | Things in the room the player can look at, by short name, such as altar or window. |
@@ -509,7 +509,7 @@ A place the player can be: its name, description, exits by direction (north, sou
 | site.directions | list of `north` or `south` or `east` or `west` or `up` or `down` | yes | Compass directions a built room may take from here. |
 | site.structures | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Structures that may be built from this room. |
 | sound | [Key](source-kinds.gen.md#key) |  | Its sound bed tag, projected as place.sound: the host plays that tag's bed and exploration piece. The cartridge owns the names; a tag with no file plays the wild bed. |
-| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags, read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice. |
+| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its tags: words a condition can check for, which also set the cost of moving in. Each tag once only, since a repeat would count its cost twice. |
 | variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | Other descriptions of the room, each used while its condition holds, such as at night. |
 | zones | list of [Key](source-kinds.gen.md#key) |  | The zones this room belongs to; a reaction with `zone` and no `on.room` gets one copy per member room. |
 
@@ -658,7 +658,7 @@ What the action costs the player each time, failure included: an amount of one p
 
 ### ActionCraft
 
-What a crafting action uses up and makes. consume: the items taken from the player's hands into a holder on every try; yield: an item moved from a holder to the player when the action succeeds.
+What a crafting action uses up and makes. consume: the items taken from the player's hands into a holder on every try; yield: an item moved from a holder to the player unless the action fails.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -695,7 +695,7 @@ Type: string.
 
 ### AmbientSet
 
-An ambient set: one of its lines is told, at most one per entity per advance, when the clock crosses a multiple of every and the chance roll passes, chosen by SHA-256 of "<entity ref>:<set index>:<boundary>", never the authority RNG.
+Lines told now and then: each time the clock passes a multiple of every and the chance passes, one of the lines is shown, at most one per room, item or NPC at a time.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -728,7 +728,7 @@ One authored character choice and its bounded initial effects.
 
 ### ApiVersion
 
-api_version: the authored source document/schema family.
+Which version of the game file format this file is written for.
 
 Type: `loka/v3`.
 
@@ -841,7 +841,7 @@ An ordered chapter marker: name is a catalog key; only chapter 0 lacks a story_p
 
 ### Check
 
-A check (check@1), discriminated by kind.
+A test the action makes before it succeeds; kind says which sort of test.
 
 Type: object.
 
@@ -865,7 +865,7 @@ Type: object.
 | {kind=opposed}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | With attribute, compares against this NPC's value of the attribute instead of a rating. |
 | {kind=opposed}.rating | integer |  | The target detail's rating; a scripted action refuses it. |
 | {kind=opposed}.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group | The skill whose level is compared; give this or attribute, not both. |
-| {kind=track} | variant |  | A track check: passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>]. |
+| {kind=track} | variant |  | Passes while the named population has left a fresh trail in the player's room. It never rolls dice. On success, the outcome's lines are followed by a line pointing the way the trail leads. |
 | {kind=track}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
 | {kind=track}.plan | [Key](source-kinds.gen.md#key) | yes | Key of the population plan whose trail is looked for; passes when that trail is fresh in the actor's room. |
 
@@ -925,7 +925,7 @@ Cartridge-owned attack profile, round interval, position multipliers and combat 
 
 ### CompatibilityRequirements
 
-requires: a kernel_api range, exact rule_ir and content_schema versions (published cartridges pin them exactly), exact capability versions and required client features. protocol_version is Realm-only and not here.
+Which engine versions and features this game needs to run. Published games pin each version exactly.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -969,7 +969,7 @@ An exit to another room of this game. Add a door with barrier; the room on the o
 
 ### Cue
 
-A sense cue: what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1. Its source is the room, detail, item or NPC, lit fuel source, active status or scripted action outcome that declares it.
+Something a listener hears, smells or feels from its source. sense: sound, smell or heat; text: the line, in that sense's words; range: how many rooms away it carries through exits, 0 (same room only) to 2; when: an optional condition on the listener. The room, detail, item, NPC, lit light, status or action outcome that declares it is its source.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1002,7 +1002,7 @@ Finite authored death credit linking one local attackable NPC, its authored room
 
 ### DeathSettings
 
-Fixed corpse templates, same-body return room and pool restoration; requires death@1.
+What happens at death: the corpse made for the player and for NPCs, the room the player wakes in, and how their pools are restored.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1015,13 +1015,13 @@ Fixed corpse templates, same-body return room and pool restoration; requires dea
 | penalty.experience | object |  | Experience lost on death; needs world.levelling. |
 | penalty.experience.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Told once when experience is lost. |
 | penalty.experience.percent | integer | yes | The body loses floor(experience * percent / 100), never below its current level's threshold. |
-| penalty.items | `corpse` or `kept` |  | corpse (the default) moves what the body held into the corpse; kept leaves it on the body. |
+| penalty.items | `corpse` or `kept` |  | What happens to what the body held: corpse (the default) moves it into the corpse; kept leaves it on the body. |
 | player_corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for a player. |
 | player_corpse_decay | integer |  | Logical units from a player's death until the corpse decays, as npc_corpse_decay. |
 | restore | object | yes | The values the dead body's pools are set to. |
 | restore.hp | integer | yes | HP after death; capped at the body's HP maximum. |
 | restore.mv | integer | yes | Movement after death; capped at the body's movement maximum. |
-| revival | [Revival](source-kinds.gen.md#revival) |  | What the player sees between dying and waking: lines shown in order over a few seconds. |
+| revival | [Revival](source-kinds.gen.md#revival) |  | What the player sees between dying and waking: lines shown in order, for its seconds. |
 | shrine | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room a dead player's body returns to. |
 
 ### DefinitionRef
@@ -1037,7 +1037,7 @@ Type: [Key](source-kinds.gen.md#key) or object.
 
 ### DerivedStat
 
-One stat's attribute bonus: floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.
+One stat's bonus from attributes: for each term, the attribute's value minus pivot, times per_point; the sum is divided by divisor (default 1) and rounded down.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1089,7 +1089,7 @@ Type: object.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| {type=bool} | variant |  | true or false. |
+| {type=bool} | variant |  | True or false. |
 | {type=bool}.default | boolean | yes | Value before any assignment. |
 | {type=enum} | variant |  | One of values (order and duplicates carry no meaning); default is one of them, which the compiler checks. |
 | {type=enum}.default | [Key](source-kinds.gen.md#key) | yes | Value before any assignment; one of values. |
@@ -1154,7 +1154,7 @@ Something in a room the player can look at, such as a well or a painting: the wo
 | harvest.tool.tag | [Tag](source-kinds.gen.md#tag) | yes | The tag a held item must carry for the harvest to be allowed. |
 | liquid_source | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The liquid a held vessel can be filled with at this detail. |
 | notice_board | object |  | Makes the detail a board that lists other readable details of the room. |
-| notice_board.notices | list of object | yes | 1 to 64 distinct notices, in order. |
+| notice_board.notices | list of object | yes | The notices on the board, in order: 1 to 64, all different. |
 | notice_board.notices[].detail | [Key](source-kinds.gen.md#key) | yes | A readable detail in the same room. |
 | notice_board.notices[].title | [TextKey](source-kinds.gen.md#textkey) | yes | The notice's title on the board. |
 | notice_board.title | [TextKey](source-kinds.gen.md#textkey) | yes | The board's title. |
@@ -1162,7 +1162,7 @@ Something in a room the player can look at, such as a well or a painting: the wo
 | perception.self_luminous | `true` | yes | Must be true: the detail gives light, so it is seen in a dark room. |
 | perception.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the detail's page. |
 | rating | integer |  | The value an opposed scripted action check against this detail must reach. |
-| readable | object |  | Optional readable@1 prose and its place-action label; both keys resolve in the text catalog. |
+| readable | object |  | Text the player can read here, and the label of the read action; both are text keys. |
 | readable.label | [TextKey](source-kinds.gen.md#textkey) | yes | The read action's label. |
 | readable.text | [TextKey](source-kinds.gen.md#textkey) | yes | The text read. |
 | readable.title | [TextKey](source-kinds.gen.md#textkey) |  | Text key of the title of the readable's page; without it the label is shown. |
@@ -1671,7 +1671,7 @@ Settings for the whole world, each optional with a default: what a move costs (m
 | gear_budget | object |  | Balance tool 6b: the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it. |
 | gear_budget.per_level | integer | yes | What each level above 1 adds to the slot's budget. Read only by the power report. |
 | gear_budget.per_slot | map of integer | yes | The gear budget for each equipment slot, such as head or hands; a slot not listed has no budget. |
-| group | object |  | 22a and 22b: member, stay and fight each name a bool pair fact read at each NPC; wage pays every member amount of a conserved resource each `every` clock units. |
+| group | object |  | Groups of NPCs: member, stay and fight each name a true-or-false fact read at each NPC; wage pays every member amount of a resource every `every` clock units. |
 | group.fight | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A bool pair fact, read at each NPC: the hireling order to fight. |
 | group.member | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A bool pair fact, read at each NPC: this NPC is in the player's group. |
 | group.stay | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A bool pair fact, read at each NPC: the hireling order to stay. |

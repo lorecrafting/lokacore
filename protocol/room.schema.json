@@ -151,7 +151,7 @@
           "type": "integer"
         },
         "readable": {
-          "description": "Optional readable@1 prose and its place-action label; both keys resolve in the text catalog.",
+          "description": "Text the player can read here, and the label of the read action; both are text keys.",
           "type": "object",
           "properties": {
             "label": {"description":"The read action's label.",
@@ -176,7 +176,7 @@
             "title": {"description":"The board's title.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "notices": {"description":"1 to 64 distinct notices, in order.",
+            "notices": {"description":"The notices on the board, in order: 1 to 64, all different.",
               "type": "array",
               "items": {
                 "type": "object",
@@ -473,7 +473,7 @@
           "type": "boolean"
         },
         "dark": {
-          "description": "The room is dark (light@1): a player without light, or blind, reads the engine line place.dark instead of the description and sees none of the room's entities. An authored dark_description wins over the engine line.",
+          "description": "The room is dark: a player without light, or blind, sees the line place.dark instead of the description and none of the room's contents. A dark_description replaces that line.",
           "const": true
         },
         "dark_description": {"description":"Shown instead of the description while the room is dark; authoring it marks the room as having no light of its own.",
@@ -483,7 +483,7 @@
           "$ref": "action.schema.json#/$defs/Key"
         },
         "tags": {
-          "description": "Its property tags, read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice.",
+          "description": "Its tags: words a condition can check for, which also set the cost of moving in. Each tag once only, since a repeat would count its cost twice.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -696,7 +696,7 @@
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "tags": {
-          "description": "Its property tags, read by the has_tag policy leaf (tag@1).",
+          "description": "Its tags: words a condition can check for.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,

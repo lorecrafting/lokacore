@@ -82,11 +82,11 @@
           "additionalProperties": false
         },
         "entry": {
-          "description": "An optional marker: true, talk to this speaker opens this dialogue and no other of theirs but keyword ones, over the inferred entry (dialogue@1), at most one per speaker and not on a keyword dialogue; false, talk never opens it, only a `then` does.",
+          "description": "Optional. true: talking to this speaker opens this dialogue instead of the one it would pick (at most one per speaker, not on a keyword dialogue). false: talking never opens it; only another dialogue's then does.",
           "type": "boolean"
         },
         "keyword": {
-          "description": "(speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle.",
+          "description": "A word that, said or whispered to the speaker, opens this dialogue. Talking never opens it.",
           "$ref": "#/$defs/SpokenKeyword"
         },
         "name": {
@@ -303,7 +303,7 @@
             "transition"
           ],
           "additionalProperties": false,
-          "description": "Escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest."
+          "description": "Starts, rejoins or completes an escort: npc names the NPC who follows the player. start and rejoin keep the conversation going; complete finishes the dialogue's quest."
         },
         "exchange": {"description":"A quest item exchange.",
           "const": true

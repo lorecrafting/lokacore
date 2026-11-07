@@ -98,7 +98,7 @@
           }
         },
         "ancestries": {
-          "description": "Authored once-only character choices (attribute@1), keyed by choice Key.",
+          "description": "Choices a character makes once, such as an ancestry, each under its own name.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]{0,63}$"
@@ -115,7 +115,7 @@
           "$ref": "text.schema.json#/$defs/TextCatalog"
         },
         "alternates": {
-          "description": "Narration variety: a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key, never the authority RNG.",
+          "description": "Variety for narration: for a text key, other keys to use in its place; each time the line is told, one of them is picked.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_.]{0,127}$"
@@ -1250,7 +1250,7 @@
           "additionalProperties": false
         },
         "group": {
-          "description": "22a and 22b: member, stay and fight each name a bool pair fact read at each NPC; wage pays every member amount of a conserved resource each `every` clock units.",
+          "description": "Groups of NPCs: member, stay and fight each name a true-or-false fact read at each NPC; wage pays every member amount of a resource every `every` clock units.",
           "type": "object",
           "properties": {
             "member": {"description":"A bool pair fact, read at each NPC: this NPC is in the player's group.",
@@ -1474,7 +1474,7 @@
       ]
     },
     "DerivedStat": {
-      "description": "One stat's attribute bonus: floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
+      "description": "One stat's bonus from attributes: for each term, the attribute's value minus pivot, times per_point; the sum is divided by divisor (default 1) and rounded down.",
       "type": "object",
       "properties": {
         "terms": {"description":"The attributes that make up the bonus; each adds per_point times (the attribute's value minus pivot).",
@@ -1614,7 +1614,7 @@
               ],
               "additionalProperties": false
             },
-            "items": {"description":"corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
+            "items": {"description":"What happens to what the body held: corpse (the default) moves it into the corpse; kept leaves it on the body.",
               "enum": [
                 "corpse",
                 "kept"
@@ -1636,7 +1636,7 @@
           },
           "additionalProperties": false
         },
-        "revival": {"description":"What the player sees between dying and waking: lines shown in order over a few seconds.",
+        "revival": {"description":"What the player sees between dying and waking: lines shown in order, for its seconds.",
           "$ref": "#/$defs/Revival"
         }
       },
@@ -1647,7 +1647,7 @@
         "restore"
       ],
       "additionalProperties": false,
-      "description": "Fixed corpse templates, same-body return room and pool restoration; requires death@1.",
+      "description": "What happens at death: the corpse made for the player and for NPCs, the room the player wakes in, and how their pools are restored.",
       "examples": [
         {
           "player_corpse": {

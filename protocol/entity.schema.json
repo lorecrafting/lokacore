@@ -279,7 +279,7 @@
           "$ref": "entity.schema.json#/$defs/ItemBandage"
         },
         "tags": {
-          "description": "Its property tags, read by the has_tag policy leaf (tag@1).",
+          "description": "Its tags: words a condition can check for.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -533,7 +533,7 @@
       ]
     },
     "NpcDefinition": {
-      "description": "A non-player character, as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours; dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP. Optional name_variants and description_variants vary its name and description, its mood; an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words.",
+      "description": "A character other than the player: its key, words, name, room line and description as for an item, the room it starts in, and optionally how many items it carries, its daily schedule, its health, and names and descriptions that change with conditions.",
       "type": "object",
       "properties": {
         "key": {
@@ -617,7 +617,7 @@
           "additionalProperties": false
         },
         "ask": {
-          "description": "(speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
+          "description": "What the NPC says when asked about a topic. The first answer whose topic matches and whose condition holds is told and teaches its grants topic; with none, the NPC does not know.",
           "type": "object",
           "properties": {
             "unknown": {"description":"What the NPC says when no answer matches the topic.",
@@ -674,7 +674,7 @@
           }
         },
         "unattackable": {
-          "description": "this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile.",
+          "description": "This NPC can never be attacked and never starts a fight. An arrest still applies. If absent, it can be attacked when it has an attack profile.",
           "type": "boolean"
         },
         "attack": {"description":"How the NPC fights: chance to hit and damage range.",
@@ -743,7 +743,7 @@
           }
         },
         "attributes": {
-          "description": "This NPC's base attribute values (attribute@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
+          "description": "This NPC's attribute values, used when a check is made against it and for its attack. An attribute left out has its starting value.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -781,7 +781,7 @@
           "additionalProperties": false
         },
         "mount": {
-          "description": "(needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template.",
+          "description": "This NPC can be ridden (needs mount in the world settings). While a character rides it, the character can only move into rooms with one of terrain, each move costs cost_percent of the usual (default 100), and the NPC moves along. Not on a spawn template.",
           "type": "object",
           "properties": {
             "terrain": {"description":"Room tags this mount carries a rider over; a move into a room with none of them is refused. 1 to 8 unique tags.",
@@ -1433,7 +1433,7 @@
       ]
     },
     "AppliedStatus": {
-      "description": "A status this food or drink puts on the player, with an optional duration in game seconds that replaces the status's own. Eating again restarts it.",
+      "description": "A status this food or drink puts on the player, with an optional duration in game time units that replaces the status's own. Eating again while it lasts keeps whichever end is later.",
       "type": "object",
       "properties": {
         "status": {"description":"The status it applies, such as poisoned.",
@@ -1562,7 +1562,7 @@
       "additionalProperties": false
     },
     "Cue": {
-      "description": "A sense cue: what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1. Its source is the room, detail, item or NPC, lit fuel source, active status or scripted action outcome that declares it.",
+      "description": "Something a listener hears, smells or feels from its source. sense: sound, smell or heat; text: the line, in that sense's words; range: how many rooms away it carries through exits, 0 (same room only) to 2; when: an optional condition on the listener. The room, detail, item, NPC, lit light, status or action outcome that declares it is its source.",
       "examples": [
         {
           "sense": "sound",
@@ -1617,7 +1617,7 @@
       }
     },
     "AmbientSet": {
-      "description": "An ambient set: one of its lines is told, at most one per entity per advance, when the clock crosses a multiple of every and the chance roll passes, chosen by SHA-256 of \"<entity ref>:<set index>:<boundary>\", never the authority RNG.",
+      "description": "Lines told now and then: each time the clock passes a multiple of every and the chance passes, one of the lines is shown, at most one per room, item or NPC at a time.",
       "examples": [
         {
           "lines": ["room.cave.drip"],

@@ -4,7 +4,7 @@
   "description": "Cartridge manifests and releases and their version fields (05 §3, §20, §22; 01 A5). Each version field owns one thing; none stands in for another (05 §3 'Version vocabulary').",
   "$defs": {
     "ApiVersion": {
-      "description": "api_version: the authored source document/schema family.",
+      "description": "Which version of the game file format this file is written for.",
       "type": "string",
       "const": "loka/v3",
       "examples": [
@@ -75,7 +75,7 @@
       ]
     },
     "CompatibilityRequirements": {
-      "description": "requires: a kernel_api range, exact rule_ir and content_schema versions (published cartridges pin them exactly), exact capability versions and required client features. protocol_version is Realm-only and not here.",
+      "description": "Which engine versions and features this game needs to run. Published games pin each version exactly.",
       "type": "object",
       "properties": {
         "kernel_api": {"description":"The range of engine versions this cartridge works with.",
