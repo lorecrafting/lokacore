@@ -68,3 +68,14 @@ export const shorts = (refs: Map<string, string>, defs: Map<string, unknown>) =>
     s,
     ...(s.startsWith('dialogues/') ? choicesOf(defs.get(ref)).map((c) => `${s}/${c}`) : []),
   ]);
+
+/** Each node's written name, as the map's room title reads it; none for no name or a `~` one. */
+export function names(defs: Map<string, unknown>, text: Obj) {
+  const out: Record<string, string> = {};
+  for (const [ref, def] of defs) {
+    const k = (def as Obj).name;
+    const name = typeof k === 'string' ? (text[k] ?? k) : undefined;
+    if (typeof name === 'string' && name.trim() !== '~') out[ref] = name;
+  }
+  return out;
+}

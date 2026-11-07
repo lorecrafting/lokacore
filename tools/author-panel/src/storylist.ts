@@ -37,6 +37,7 @@ export type Story = {
   bundled: Record<string, string>; // a bundle member's ref => its areas/<a>.json
   map: MapRoom[];
   words: Record<string, number>; // written words by node (Pacing)
+  names: Record<string, string>; // written name by node, none for `~` (shell.ts `named`)
   choices: Record<string, number>; // choice count by dialogue (Knowledge)
   hidden: string[]; // hidden skills' keys
   unlinkable: Record<string, string>; // dialogue key => the keyword, quest or riddle no then enters

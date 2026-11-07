@@ -164,21 +164,15 @@ async function made(s: Run, r: MapRoom, kind: 'npcs' | 'items', key: string, up?
   ]);
 }
 
-/** A dropped template's child key, no name chosen: the first `<template>_<n>` from 1 that no NPC
- * (or item) in the graph and no template holds. */
-export function freeKey(t: { dir: 'npcs' | 'items'; key: string }, nodes: { kind: string; ref: string }[], templates: string[]) {
-  const kind = t.dir === 'npcs' ? 'npc' : 'item';
+const minted = new Set<string>(); // `kind/key` handed out here: a second New before the recompile skips the first
+/** A new definition's key, no name asked: the first `<base>_<n>` from 1 that no `kind` node in the graph,
+ * no template and no key handed out before holds (a template's child: `<template>_<n>`). */
+export function freeKey(base: string, kind: string, nodes: { kind: string; ref: string }[], templates: string[]) {
   const taken = new Set([...templates, ...nodes.filter((o) => o.kind === kind).map((o) => o.ref.split('/')[1])]);
   let n = 1;
-  while (taken.has(`${t.key}_${n}`)) n++;
-  return `${t.key}_${n}`;
-}
-
-/** The palette's map-npc/map-item answer: `<key>`, or `~<template>` for that template's child at its free key. */
-export function childOf(answer: string, dir: 'npcs' | 'items', nodes: { kind: string; ref: string }[], templates: string[]): [string, string?] {
-  if (!answer.startsWith('~')) return [answer];
-  const up = answer.slice(1);
-  return [freeKey({ dir, key: up }, nodes, templates), up];
+  while (taken.has(`${base}_${n}`) || minted.has(`${kind}/${base}_${n}`)) n++;
+  minted.add(`${kind}/${base}_${n}`);
+  return `${base}_${n}`;
 }
 
 /** Move to area: the file moves to `areas/<area>/rooms/`, or to the root for null. */

@@ -3,7 +3,7 @@
 import { ask, templates, type Story } from './author.ts';
 import type { MapRoom } from './map.ts';
 export { kept } from './map.ts'; // App's /story failure rule
-import { childOf, editor, type Editor } from './mapedit.ts';
+import { editor, freeKey, type Editor } from './mapedit.ts';
 
 const ed = editor({
   post: ask,
@@ -13,9 +13,24 @@ const ed = editor({
     ),
 });
 /** The mounted map's footer line, else an alert; the last story's rooms (App.tsx useStory), so the
- * palette's and the Room card's map commands work with the map closed. */
+ * palette's and the Room card's map commands work with the map closed; App's selection (`pick`). */
 export const alone = (why: string): void => void (why && alert(why));
-export const shown = { tell: alone, rooms: [] as MapRoom[], nodes: [] as Story['graph']['nodes'], shorts: [] as string[] };
+export const shown = {
+  tell: alone,
+  pick: (_: { kind: string; key: string }): void => {},
+  rooms: [] as MapRoom[],
+  nodes: [] as Story['graph']['nodes'],
+  shorts: [] as string[],
+};
+
+/** The palette's New <kind>: a free `<kind>_<n>` key (an outline keeps its one name), then its card. */
+export async function created(kind: string) {
+  const one = kind.replace(/(us)es$|s$/, '$1');
+  const held = (await templates()).filter((t) => t.dir === kind).map((t) => t.key);
+  const name = kind === 'outline' ? kind : freeKey(one, one, shown.nodes, held);
+  const { ok, told } = await ask('new', { kind, name });
+  return ok ? shown.pick({ kind: one, key: name }) : alert(String(told));
+}
 
 /** The last map edit's id if it read or wrote `file` (mapedit.ts `newest`). */
 export const mapNewest = (file: string) => ed.newest(file);
@@ -40,20 +55,24 @@ export function mapCommand(id: string, key: string | undefined, given?: string) 
     return area === null ? undefined : edit((e) => e.move(r, area || null));
   }
   if (id === 'map-npc' || id === 'map-item') {
-    const kind = id === 'map-npc' ? 'npcs' : 'items';
-    const name = prompt(`New ${kind === 'npcs' ? 'NPC' : 'item'} key in ${r.key} (~<template>)`);
-    if (!name) return;
+    const [kind, one] = id === 'map-npc' ? (['npcs', 'npc'] as const) : (['items', 'item'] as const);
     return edit(async (e) => {
-      const [key, up] = childOf(name, kind, shown.nodes, name.startsWith('~') ? (await templates()).map((t) => t.key) : []);
-      return e.made(r, kind, key, up);
+      const key = freeKey(one, one, shown.nodes, (await templates()).map((t) => t.key));
+      await e.made(r, kind, key);
+      shown.pick({ kind: one, key });
     });
   }
   const dir = given ?? prompt(`${r.key}: which direction?`);
   if (!dir) return;
   if (id === 'map-unlink') return edit((e) => e.unlink(r, dir, shown.rooms));
   if (id === 'map-one-way') return edit((e) => e.oneWay(r, dir, shown.rooms));
-  const name = prompt(id === 'map-grow' ? 'New room key' : 'Barrier key');
+  if (id === 'map-grow')
+    return edit(async (e) => {
+      const key = freeKey('room', 'room', shown.nodes, []);
+      await e.grow(r, dir, key);
+      shown.pick({ kind: 'room', key });
+    });
+  const name = prompt('Barrier key');
   if (!name) return;
-  if (id === 'map-grow') return edit((e) => e.grow(r, dir, name));
   edit((e) => e.barrier(r, dir, shown.rooms, name, id === 'map-lock'));
 }
