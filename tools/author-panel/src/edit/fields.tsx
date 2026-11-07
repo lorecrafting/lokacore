@@ -1,6 +1,6 @@
 // The generic card's hand-built fields (docs/rnd/gui-editor-design-2026-11-04.md §4.5, §11): they
 // draw only; the logic is kernel/ts/play/card.ts. The walker names them by `ui:field`.
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import type { FieldProps } from '@rjsf/utils';
 import { choices, pickKind, proseKey, refusePick } from '../../../../kernel/ts/play/card.ts';
 import { oneLine, saving } from '../../../../mobile/app/author/prose_rules.ts';
@@ -32,7 +32,7 @@ const context = (p: FieldProps) => p.registry.formContext as Context;
 function TextKey(p: FieldProps) {
   const { kind, key } = context(p);
   const k = proseKey(p.formData, kind, key, p.fieldPathId.path);
-  return <WordsField label={p.name} k={k} words={inline(p.formData)} />;
+  return <WordsField key={k} label={p.name} k={k} words={inline(p.formData)} />;
 }
 /** An inline prose marker's words (docs/system/cartridge.md "Inline prose"): GET /line's hint. */
 export const inline = (value: unknown) => (value as { prose?: string } | undefined)?.prose ?? '';
@@ -45,10 +45,26 @@ async function api(path: string, sent?: object): Promise<[number, any]> {
 const lineOf = (key: string, words: string) =>
   api(`/line?key=${encodeURIComponent(key)}&words=${encodeURIComponent(words)}`);
 
+type Told = { say: string; theirs?: At };
+type Sets = { setAt: (a: At) => void; setDraft: Dispatch<SetStateAction<string>>; setTold: (t?: Told) => void };
+/** After a save: words typed while it was out stay the draft, over the line now on disk. */
+async function saved(k: string, sent: string, { setAt, setDraft, setTold }: Sets) {
+  const [status, line] = await lineOf(k, sent);
+  if (status !== 200) return;
+  setAt(line);
+  setDraft((d) => (d === sent ? line.words : d));
+  setTold(undefined);
+}
+async function conflict(k: string, mine: At): Promise<Told> {
+  const [s, theirs] = await lineOf(k, mine.words);
+  const say = 'Changed on disk since you opened it.';
+  return s === 200 ? { say: `${say} ${theirs.words}`, theirs } : { say };
+}
+
 function useLine(k: string, words: string) {
   const [at, setAt] = useState<At>();
   const [draft, setDraft] = useState('');
-  const [told, setTold] = useState<{ say: string; theirs?: At }>();
+  const [told, setTold] = useState<Told>();
   const busy = useRef(false); // Enter's save, then the blur after it, sends one /edit
   const dirty = at !== undefined && draft !== at.words;
   const kept = useRef(dirty);
@@ -66,17 +82,17 @@ function useLine(k: string, words: string) {
   const save = async (mine = at) => {
     if (!mine || busy.current) return;
     const choice = saving(draft, mine.words);
-    if (choice === 'unchanged') return;
+    if (choice === 'unchanged') return mine === at ? undefined : read(mine.words, true); // Keep mine == theirs
     if (choice === 'empty') return setTold({ say: 'Empty. Write ~ to leave it unwritten.' });
     busy.current = true;
-    const [status, answer] = await api('/edit', { ...mine, words: draft, key: k });
-    if (status === 200) await read(draft, true);
-    else if (status === 409) {
-      const [s, theirs] = await lineOf(k, mine.words);
-      const say = 'Changed on disk since you opened it.';
-      setTold(s === 200 ? { say: `${say} ${theirs.words}`, theirs } : { say });
-    } else setTold({ say: typeof answer === 'string' ? answer : `Not saved (${status}).` });
-    busy.current = false;
+    try {
+      const [status, answer] = await api('/edit', { ...mine, words: draft, key: k });
+      if (status === 200) await saved(k, draft, { setAt, setDraft, setTold });
+      else if (status === 409) setTold(await conflict(k, mine));
+      else setTold({ say: typeof answer === 'string' ? answer : `Not saved (${status}).` });
+    } finally {
+      busy.current = false;
+    }
   };
   return { at, draft, setDraft, told, theirs: told?.theirs, setTold, read, save };
 }
@@ -105,7 +121,7 @@ export function WordsField({ label, k, words }: { label: string; k: string; word
             if (e.key === 'Enter') {
               e.preventDefault(); // the card's form must not submit
               void save();
-            } else if (e.key === 'Escape' && at) {
+            } else if (e.key === 'Escape' && at && !theirs) {
               e.preventDefault();
               setDraft(at.words);
               setTold(undefined);

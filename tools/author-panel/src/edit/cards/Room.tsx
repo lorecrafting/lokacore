@@ -206,14 +206,10 @@ export function Words({
 }) {
   return (
     <div className="grid gap-1" aria-label="words">
-      {fields.map((f) => (
-        <WordsField
-          key={f}
-          label={f}
-          k={proseKey(draft[f], context.kind, context.key, [f])}
-          words={inline(draft[f])}
-        />
-      ))}
+      {fields.map((f) => {
+        const k = proseKey(draft[f], context.kind, context.key, [f]);
+        return <WordsField key={k} label={f} k={k} words={inline(draft[f])} />;
+      })}
     </div>
   );
 }

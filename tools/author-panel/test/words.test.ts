@@ -87,6 +87,33 @@ test("the generic card's words commit once, on Enter, never per keystroke", asyn
   }
 });
 
+// Breaks: words typed while a save is out replaced by the saved line's, or left unsaveable (the
+// field's `was` not moved to the line now on disk, so the next save is refused as a conflict).
+test('words typed while a save is out stay the draft and save next', async () => {
+  const before = readFileSync(TEXT, 'utf8');
+  const page = await open({ right: 420, selection: { kind: 'item', key: 'lute' } });
+  let release = () => {};
+  const held = new Promise<void>((r) => (release = r));
+  await page.route('**/__author/edit', async (r) => (await held, r.continue()), { times: 1 });
+  try {
+    const field = page.getByLabel('name words');
+    await shows(field, 'a lute');
+    await field.fill('~');
+    await field.press('Enter'); // its /edit held
+    await field.fill('a lute');
+    release();
+    await until(() => readFileSync(TEXT, 'utf8') !== before);
+    await page.waitForTimeout(300);
+    assert.equal(await field.inputValue(), 'a lute');
+    await field.blur();
+    await until(() => readFileSync(TEXT, 'utf8') === before);
+    assert.equal(readFileSync(TEXT, 'utf8'), before);
+  } finally {
+    writeFileSync(TEXT, before);
+    await page.close();
+  }
+});
+
 // Breaks: POST /edit's `was` guard bypassed (a fresh read's `was` sent, or none), so an outside save
 // is overwritten; or a refused save drops the author's draft.
 test('a line changed on disk since the card read it is refused and the draft kept', async () => {

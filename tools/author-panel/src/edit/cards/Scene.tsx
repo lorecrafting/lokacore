@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { refusePick } from '../../../../../kernel/ts/play/card.ts';
 import { picks, sceneLines, type Line } from '../../../../../kernel/ts/play/scene_lines.ts';
 import { ask, type useDiagnostics } from '../../author.ts';
-import { Button } from '../../components/ui/button.tsx';
 import { Input } from '../../components/ui/input.tsx';
 import { WordsField, type Context } from '../fields.tsx';
 import { Header, useCard } from '../Generic.tsx';
