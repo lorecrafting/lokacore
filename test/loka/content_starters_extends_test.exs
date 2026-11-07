@@ -79,6 +79,10 @@ defmodule Loka.ContentStartersExtendsTest do
     den = read(dir, "rooms/den.json")
     assert {den["extends"], den["exits"]["west"]["to"]} == {"cave", "start"}
     refute Map.has_key?(den, "description")
+    # The abstract cave gets no row from the layout starter either (the compiler refuses one).
+    File.rm!(Path.join(dir, "layout.json"))
+    {:ok, _} = Starters.write(dir, "layout", "layout")
+    assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
   # Breaks: a refused parent writing a child the compiler then rejects, a vague message, a room
