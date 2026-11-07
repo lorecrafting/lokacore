@@ -86,7 +86,7 @@ function NewMenu({ make, label }: Make) {
   return (
     <Popover open={open} onOpenChange={show}>
       <PopoverTrigger asChild>
-        <Button size="icon-xs" variant="outline" aria-label="New">
+        <Button size="icon-xs" variant="outline" title="New" aria-label="New">
           <Plus />
         </Button>
       </PopoverTrigger>
@@ -121,7 +121,7 @@ const Header = ({ kind, make, label }: Make & { kind: string }) => (
   <h3 className="flex items-center px-2 text-xs text-muted-foreground">
     {kind}
     {STARTER[kind] ? (
-      <Button variant="ghost" size="icon-xs" className="ml-auto" aria-label={label(STARTER[kind])} onClick={() => make(STARTER[kind])}>
+      <Button variant="ghost" size="icon-xs" className="ml-auto" title={label(STARTER[kind])} aria-label={label(STARTER[kind])} onClick={() => make(STARTER[kind])}>
         <Plus />
       </Button>
     ) : null}

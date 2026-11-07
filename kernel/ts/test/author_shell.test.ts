@@ -205,3 +205,12 @@ test('the Hierarchy + lists every starter once, and a kind header`s + makes its 
     ['rooms', 'cutscene', 'statuses', 'npcs', undefined],
   );
 });
+
+// Breaks: the npc header's + with a room selected makes an unplaced NPC (new-npcs) instead of New NPC here.
+test('with a room selected, the npc and item headers` + place the new one in that room', () => {
+  const room = { kind: 'room', key: 'smithy' } as const;
+  assert.deepEqual(
+    [shell.newCommand('npcs', room), shell.newCommand('items', room), shell.newCommand('npcs')],
+    ['map-npc', 'map-item', 'new-npcs'],
+  );
+});
