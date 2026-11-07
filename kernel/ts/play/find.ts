@@ -2,8 +2,8 @@
 // file:line, and each definition whose refs name that key. The refs come from the compiled artifact,
 // where the compiler has already expanded every short ref (lib/loka/content/leaf_refs.ex, resolve.ex).
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { placed } from './guard.ts';
+import { dirname, join } from 'node:path';
+import { current, placed, refuse, sha256 } from './guard.ts';
 import { files } from './todo.ts';
 
 const CAP = 100; // a one-letter search answers at once; `total` says how many there were
@@ -98,4 +98,74 @@ export function users(source: string, artifact: string, section: string, key: st
       r.by !== 'layout',
   );
   return [...refs, ...extending];
+}
+
+const read = (source: string, rel: string) => {
+  try {
+    return JSON.parse(readFileSync(join(source, rel), 'utf8'));
+  } catch {
+    return null; // a missing file, or one that is not JSON, is the compile's to report
+  }
+};
+export type Member = { rel: string; dir: string; key: string };
+// a ref's `by` names its artifact section; a scripted action's source dir is actions/
+// an extends referrer is its file (areas/<a>/ prefixed), an artifact one its section
+const own = (by: string) =>
+  by.replace(/^areas\/\w+\//, '').replace(/^scripted_actions\//, 'actions/');
+/** What a delete of `file` (`at`: its kind and key) takes with it in one entry, so it leaves nothing
+ * dangling, and what outside that set still names a member: a transport's return leg that names it
+ * back (each leg's `reverse` names the other), and each template only the set names (death.ex:121-131
+ * refuses a template item no population or death names), a template only another taken one names
+ * included. The deleted file is the set's first. */
+export function taken(
+  source: string,
+  artifact: string,
+  file: string,
+  at: { dir: string; key: string },
+) {
+  const set: Member[] = [{ rel: file, ...at }];
+  const add = (rel: string) => set.push({ rel, dir: placed(rel)!.dir, key: placed(rel)!.key });
+  const has = (by: string) => set.some((m) => `${m.dir}/${m.key}` === own(by));
+  const back = at.dir === 'transports' && read(source, file)?.reverse;
+  const leg = back && join(dirname(file), `${back}.json`);
+  if (leg && leg !== file && read(source, leg)?.reverse === at.key) add(leg);
+  const templates = files(source).filter((rel) => {
+    const p = placed(rel);
+    if (p?.ext !== 'json' || (p.dir !== 'npcs' && p.dir !== 'items')) return false;
+    const doc = read(source, rel);
+    return doc?.spawn_template === true || doc?.location?.in === 'template';
+  });
+  for (let grew = true; grew;) {
+    grew = false; // a template named only by one taken later in the same pass waits for the next
+    for (const rel of templates) {
+      if (set.some((m) => m.rel === rel)) continue;
+      const by = users(source, artifact, placed(rel)!.dir, placed(rel)!.key).map((r) => r.by);
+      if (by.length && by.every(has)) grew = add(rel) > 0;
+    }
+  }
+  const left = set.flatMap((m) => users(source, artifact, m.dir, m.key)).filter((r) => !has(r.by));
+  return { set, left };
+}
+export const still = (set: Member[], left: Referrer[]) =>
+  `${set[1] ? 'are' : 'is'} still named by ${left.map((r) => r.at ?? r.by).join(', ')}: change those first`;
+/** The other files a delete takes, each checked like the first (refused 409 with their shas unless
+ * `also` sent each one's current sha), and the layout.json row of a deleted room. */
+export function others(source: string, file: string, set: Member[], also?: Record<string, string>) {
+  const rest = set.slice(1).map((m) => ({ file: m.rel, before: current(join(source, m.rel)) }));
+  if (rest.some((o) => also?.[o.file] !== sha256(o.before)))
+    refuse(409, { set: rest.map((o) => ({ file: o.file, sha256: sha256(o.before) })) });
+  const gone = rest.map((o) => ({ ...o, after: null as string | null }));
+  const room = placed(file)?.dir === 'rooms' ? placed(file)!.key : undefined;
+  const layout = current(join(source, 'layout.json')); // another file's room matches no row
+  try {
+    const rows = JSON.parse(layout ?? 'null');
+    const kept = Array.isArray(rows) ? rows.filter((r) => r?.room !== room) : rows;
+    if (kept?.length < rows?.length) {
+      const after = kept.length ? `${JSON.stringify(kept, null, 2)}\n` : null;
+      return [...gone, { file: 'layout.json', before: layout, after }];
+    }
+  } catch {
+    // a layout.json that is not JSON is the compile's to report
+  }
+  return gone;
 }

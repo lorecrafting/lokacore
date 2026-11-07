@@ -10,10 +10,11 @@ import {
   type FieldErrorProps,
   type FieldTemplateProps,
   type IconButtonProps,
+  type ObjectFieldTemplateProps,
   type TitleFieldProps,
 } from '@rjsf/utils';
 import { ArrowDown, ArrowUp, CircleAlert, Copy, Plus, X, type LucideIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { FormProps } from '@rjsf/core';
 import { Button } from '../components/ui/button.tsx';
 
@@ -122,6 +123,35 @@ const FieldErrorTemplate = ({ errors = [], fieldPathId }: FieldErrorProps) => (
     ))}
   </div>
 );
+
+/** A map entry's fields with its optional absent ones folded (a new room detail, loka-wfrgk.76). */
+export function Folded(p: ObjectFieldTemplateProps) {
+  const Default = getTemplate('ObjectFieldTemplate', p.registry); // the registry's, not this one
+  const required = (p.schema.required ?? []) as string[];
+  const data = (p.formData ?? {}) as Record<string, unknown>;
+  // decided once: a field typed into stays in its fold, or it would remount and lose the focus
+  const [folded] = useState(
+    () =>
+      new Set(
+        p.properties
+          .filter((x) => !required.includes(x.name) && data[x.name] === undefined)
+          .map((x) => x.name),
+      ),
+  );
+  const open = p.properties.filter((x) => !folded.has(x.name));
+  const rest = p.properties.filter((x) => folded.has(x.name));
+  return (
+    <>
+      <Default {...p} properties={open} />
+      {rest.length ? (
+        <details className="text-muted-foreground">
+          <summary>Optional fields</summary>
+          {rest.map((x) => x.content)}
+        </details>
+      ) : null}
+    </>
+  );
+}
 
 export const templates: FormProps['templates'] = {
   FieldTemplate,

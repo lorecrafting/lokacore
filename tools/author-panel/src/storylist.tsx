@@ -11,9 +11,12 @@ import {
   Lightbulb,
   Link,
   MessageCircle,
+  Pencil,
+  Plus,
   Route,
   Scroll,
   Tag,
+  Trash2,
   TriangleAlert,
   User,
   Zap,
@@ -103,12 +106,30 @@ const bind = (row: L.Row) => {
   const short = prompt(`Bind beat ${row.n} to (a short ref, as outline.json writes it)`);
   if (short) edit((e) => e.bind(Number(row.parent!.slice('part:'.length)), row.n!, short, shown.shorts));
 };
+// Add, retitle and remove a beat (design 5c): /change on outline.json, as Bind; a prompt for the same reason.
+const partNo = (id: string) => Number(id.slice('part:'.length));
+const addBeat = (row: L.Row) => {
+  const n = prompt(`${row.label}: the new beat's number`);
+  if (n) edit((e) => e.addBeat(partNo(row.id), Number(n)));
+};
+const titleBeat = (row: L.Row) => {
+  const title = prompt(`Beat ${row.n}'s title (an author note; empty removes it)`, row.label);
+  if (title !== null) edit((e) => e.titleBeat(partNo(row.parent!), row.n!, title));
+};
+const dropBeat = (row: L.Row) =>
+  confirm(`Remove beat ${row.n} from outline.json?`) && edit((e) => e.dropBeat(partNo(row.parent!), row.n!));
 
 function Cells({ row, a, tab }: { row: L.Row; a: Act; tab: boolean }) {
   const at = { ...a.st, focus: row.id }; // a ghost's run moves the tab row to its row, where it gave focus
   if (row.kind === 'node')
     return <NodeCells row={row} tab={tab} trace={() => a.put({ ...at, lower: { panel: 'trace', at: row.ref! } })} />;
-  if (row.kind === 'part') return <span className="truncate text-xs font-medium uppercase">{row.label}</span>;
+  if (row.kind === 'part')
+    return (
+      <>
+        <span className="flex-1 truncate text-xs font-medium uppercase">{row.label}</span>
+        {row.id.startsWith('part:') && <Ghost label="Add beat" icon={Plus} tab={tab} run={() => (a.put(at), addBeat(row))} />}
+      </>
+    );
   if (row.kind === 'seed')
     return (
       <span className="flex items-center gap-1 truncate text-warning">
@@ -132,6 +153,8 @@ function Cells({ row, a, tab }: { row: L.Row; a: Act; tab: boolean }) {
         tab={tab}
         run={() => a.put({ ...at, lower: { panel: 'knowledge', n: row.n! } })}
       />
+      <Ghost label={`Retitle beat ${row.n}`} icon={Pencil} tab={tab} run={() => (a.put(at), titleBeat(row))} />
+      <Ghost label={`Remove beat ${row.n}`} icon={Trash2} tab={tab} run={() => (a.put(at), dropBeat(row))} />
       <span className="text-xs text-muted-foreground">{row.status === 'built' ? '' : row.status}</span>
     </>
   );

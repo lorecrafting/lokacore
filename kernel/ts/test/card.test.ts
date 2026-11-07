@@ -1,4 +1,4 @@
-// size: allow 745, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
+// size: allow 750, one suite per card step; the generic, Room, World, NPC, item, Action and Reaction cards and the Rules block share the pure helpers
 // The generic card's logic (play/card.ts): every expected answer is a hand-checked literal, the
 // diagnostics are copied from `mix loka.compile --json`, the branches from schemas/source.
 import assert from 'node:assert/strict';
@@ -488,6 +488,10 @@ test('a field is added once (hp at the sampler pool), removed alone, added here 
   const hp = { minimum: 0, maximum: 20, start: 20, gain: 5 };
   assert.deepEqual(added({}, 'hp', defs, 'source.NpcDefinition'), { hp });
   assert.equal(added({}, 'hp', defs, R), undefined); // no room hp
+  assert.deepEqual(added({}, 'hp', defs, 'partial.source.NpcDefinition'), { hp }); // an abstract NPC too
+  // a seed is the NPC's field, not every field of its name (loka-wfrgk.84)
+  const other = { ...defs, 'source.X': { properties: { hp: { type: 'integer', minimum: 3 } } } };
+  assert.deepEqual(added({}, 'hp', other, 'source.X'), { hp: 3 });
   assert.deepEqual(removed(doc, 'dark'), { name: 'room.a.name' });
   assert.equal(addedHere({ kind: 'dark', room: 'lane' }, 'lane', ['dark']), 'dark');
   assert.equal(addedHere({ kind: 'dark', room: 'well' }, 'lane', ['dark']), undefined);
@@ -574,6 +578,7 @@ test("an NPC's and an item's add menus offer only fields every owning capability
   assert.equal(on(caps, { container: true }), 'mass_grams slot');
   assert.equal(on(caps, { bandage: {} }), 'bandage mass_grams');
   assert.deepEqual(allowed('items', ['container'], caps, { bandage: {} }), []);
+  assert.deepEqual(allowed('items', ['readable'], { readable: 1 }), ['readable']); // the other way
   assert.deepEqual(allowed('items', ['container'], caps, { edible: {} }), []);
 });
 

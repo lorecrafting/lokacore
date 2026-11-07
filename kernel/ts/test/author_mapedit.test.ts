@@ -425,6 +425,41 @@ test("a bind appends the short ref to that beat's nodes, and refuses a missing b
   await assert.rejects(ed.bind(0, 2, 'rooms/b', known), /beat 2 already binds rooms\/b/);
 });
 
+test('a beat is added in number order, retitled and removed; a repeated or a below-1 number is refused', async () => {
+  // Breaks: an add that writes a repeated n (readOutline then refuses the whole outline) or a number
+  // below 1, appends out of number order, a retitle or remove that lands on another beat, an empty
+  // title written instead of removed, or an empty title on an untitled beat sent as a delete.
+  await assert.rejects(ed.addBeat(0, 2), /outline.json already has beat 2/);
+  await assert.rejects(ed.addBeat(0, 0), /a whole number from 1, not 0/);
+  await ed.addBeat(0, 5);
+  await ed.addBeat(0, 4);
+  let posts = 0;
+  await editor({ ...io, post: (route, sent) => (posts++, io.post(route, sent)) }).titleBeat(
+    0,
+    4,
+    '',
+  );
+  assert.equal(posts, 0);
+  await ed.titleBeat(0, 5, 'The well');
+  await ed.dropBeat(0, 1);
+  const beats = () =>
+    json('outline.json').parts[0].beats.map((b: { n: number; title?: string }) => [b.n, b.title]);
+  assert.deepEqual(beats(), [
+    [2, undefined],
+    [4, undefined],
+    [5, 'The well'],
+  ]);
+  await ed.titleBeat(0, 5, '');
+  assert.deepEqual(beats(), [
+    [2, undefined],
+    [4, undefined],
+    [5, undefined],
+  ]);
+  await assert.rejects(ed.dropBeat(0, 1), /part 1 has no beat 1/);
+  await ed.addBeat(0, 1); // 1 is the least number, and goes first
+  assert.deepEqual(beats()[0], [1, undefined]);
+});
+
 test('a refused put-back is told with the refusal that stopped the gesture', async () => {
   // Breaks: the put-back's refusal hiding why the gesture stopped, or a refusal sent as text
   // reported as a stale file.

@@ -19,11 +19,16 @@ export async function drop(key: string, file?: string) {
     r.ok ? r.json() : { sha256: undefined },
   );
   if (!sha256) return alert(`${file}: not found`);
-  const { ok, told } = await ask('delete', {
-    file,
-    was: sha256,
-    ...(!file.includes('/') && { key }),
-  });
+  const sent = { file, was: sha256, ...(!file.includes('/') && { key }) };
+  let { ok, told } = await ask('delete', sent);
+  // a delete that takes other files (a return leg, a template) names them with their shas once
+  const set = (told as { set?: { file: string; sha256: string }[] })?.set;
+  if (set && confirm(`Also deletes ${set.map((m) => m.file).join(', ')}`))
+    ({ ok, told } = await ask('delete', {
+      ...sent,
+      also: Object.fromEntries(set.map((m) => [m.file, m.sha256])),
+    }));
+  else if (set) return;
   if (!ok) alert(typeof told === 'string' ? told : 'Changed outside: try again');
 }
 

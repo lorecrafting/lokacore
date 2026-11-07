@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 630, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 664, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFileSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -193,8 +193,8 @@ test('a dialogue already broken takes the edit that fixes it', async () => {
 
 // Breaks (Generic.tsx useCard, loka-wfrgk.63): a held edit's refusal outliving the edit taken back;
 // Undo rebasing the held draft onto the undone file; reselecting the card dropping its Undo; a
-// refused write clearing the last write's Undo; an error the file already has holding every edit
-// to its field (the #675 rule: only a new error holds).
+// refused write clearing the last write's Undo; a failed save (500 text) not shown; an error the
+// file already has holding every edit to its field (the #675 rule: only a new error holds).
 test('a held edit gives way to its undoing, Undo and a reselect', async () => {
   const page = await open({ right: 420, selection: { kind: 'item', key: 'oilskin' } });
   const file = join(dir, 'showcase/areas/fell_road/items/oilskin.json');
@@ -218,6 +218,10 @@ test('a held edit gives way to its undoing, Undo and a reselect', async () => {
   await page.route('**/__author/change', (r) => r.fulfill({ status: 409, json: 'refused here' }));
   await set('700');
   await page.getByText('refused here').waitFor({ timeout: boot });
+  await page.route('**/__author/change', (r) => r.fulfill({ status: 500, body: 'boom' })); // not JSON
+  await set('800');
+  await page.getByText('"boom" is not valid JSON').waitFor({ timeout: boot }); // shown, not swallowed
+  assert.equal(await field.inputValue(), '800'); // the draft held, not reloaded
   await page.unroute('**/__author/change');
   assert.ok(await undo.isVisible()); // the refused write wrote nothing: the last Undo stands
   await set('-1');
@@ -476,6 +480,39 @@ test("removing a room's last variant writes it gone, and Undo brings it back", a
   await page.close();
 });
 
+// Breaks: a detail added on the Room card is held refused (no description or alias; the Book's
+// Edit answers "not on this page"), or opens with every optional sub-field drawn (loka-wfrgk.76), or
+// a folded field leaves its fold on the first keystroke and drops the next ones, or a write behind one
+// in flight (CPU slowed as on CI: the summary's blur writes `1` mid-typing) or an Undo sent stale.
+test('a new room detail saves with a `~` description, its optional fields folded', async () => {
+  const page = await open({ right: 420, selection: { kind: 'room', key: 'sea_cave' } });
+  await (await page.context().newCDPSession(page)).send('Emulation.setCPUThrottlingRate', { rate: 6 });
+  const file = join(dir, 'showcase/areas/tidewater/rooms/sea_cave.json');
+  const was = readFileSync(file, 'utf8');
+  const well = () => JSON.parse(readFileSync(file, 'utf8')).details.well;
+  await page.locator('#root_details__add').click();
+  await page.locator('#root_details_newKey-key').fill('well');
+  await page.keyboard.press('Tab');
+  for (let t = 0; !well() && t < 50; t++) await page.waitForTimeout(100);
+  assert.deepEqual(well(), { aliases: ['well'], description: { prose: '~' } });
+  assert.equal(await page.locator('#root_details_well_bed').isVisible(), false);
+  // a folded field typed into stays in its fold with the focus: each key lands
+  const rating = page.locator('#root_details_well_rating');
+  await page.locator('details', { has: rating }).locator('summary').click();
+  await rating.pressSequentially('12', { delay: 50 });
+  await page.keyboard.press('Tab');
+  for (let t = 0; well().rating !== 12 && t < 50; t++) await page.waitForTimeout(100);
+  assert.equal(well().rating, 12);
+  await rating.fill('123'); // and Undo clicked while its write is in flight undoes it once it lands
+  await page.keyboard.press('Tab');
+  const undo = page.getByRole('button', { name: 'Undo', exact: true });
+  await Promise.all([page.waitForResponse((r) => r.url().includes('/__author/undo')), undo.click()]);
+  await page.waitForTimeout(2000);
+  assert.equal(well().rating, 12);
+  writeFileSync(file, was);
+  await page.close();
+});
+
 // Breaks: a one-way toggle writes only the far room, so neither room's card Undo knew of it: Undo
 // did nothing or undid an older change, and the reverse exit stayed gone (loka-wfrgk.77).
 test("a one-way exit's reverse comes back by Undo on either room's card", async () => {
@@ -534,6 +571,7 @@ test('palette New and Delete send the starter and the selected file; refusals sh
   await run('Delete the selected definition', 2);
   await page.route('**/__author/source?file=*', (r) => r.fulfill({ status: 404, json: {} }));
   await run('Delete the selected definition', 3);
+  await run('New outline', 4); // one outline per world: no key asked
   const file = 'quests/carry_letter.json';
   const was = createHash('sha256')
     .update(readFileSync(join(dir, 'showcase', file)))
@@ -541,8 +579,9 @@ test('palette New and Delete send the starter and the selected file; refusals sh
   assert.deepEqual(sent, [
     ['/__author/new', { kind: 'rooms', name: 'zz' }],
     ['/__author/delete', { file, was }],
+    ['/__author/new', { kind: 'outline', name: 'outline' }],
   ]);
-  assert.deepEqual(told, ['refused here', 'refused here', `${file}: not found`]);
+  assert.deepEqual(told, ['refused here', 'refused here', `${file}: not found`, 'refused here']);
   assert.deepEqual(asked, ['New room key']); // the starter is the plural dir
   await page.close();
 });

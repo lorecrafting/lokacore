@@ -21,12 +21,13 @@ const OWNERS: Record<string, string> = {
   'items.edible': 'food resource containment',
   'items.fuel': 'light',
   'items.name_variants': VARIANT,
-  'items.readable': 'readable',
+  'items.readable': 'readable', // resolve.ex:338-344 via entities.ex:54; capability_registry.json:463
   'items.room_line_variants': VARIANT,
   'items.slot': 'equipment',
   'items.tags': 'tag',
   'items.weapon': 'skill', // its skill is a skill definition (skills.ex weapon)
   'rooms.cues': 'sense_cue',
+  // resolve.ex:391-394 via room_parts.ex:83 (darkness, capability_registry.json:428)
   'rooms.dark': 'light',
   'rooms.dark_description': 'light',
   'rooms.details': 'inspectable_detail',
@@ -44,8 +45,18 @@ const OWNERS: Record<string, string> = {
   'dialogues.choices.receive': 'containment',
   'actions.check': 'check', // its check_passed (scripted_actions.ex:125)
   'actions.tip': 'fact', // its fact_changed (action_tips.ex:40)
+  'populations.trail': 'fact', // its fact_changed (trails.ex:139; capability_registry.json:143)
+  'populations.hunts': 'fact',
   'actions.policy': 'policy', // its least `all` (resolve.ex:415)
   'reactions.when': 'policy',
+  'barriers.opens_when': 'policy',
+  'dialogues.policy': 'policy',
+  'populations.birth_when': 'policy',
+  'populations.wander_when': 'policy',
+  // emote@1 owns every room's, NPC's or item's ambient (emotes.ex:3-4, :25)
+  'npcs.ambient': 'emote',
+  'items.ambient': 'emote',
+  'rooms.ambient': 'emote',
 };
 
 // Beyond capabilities: an NPC's attack needs world.combat and the NPC's hp (combat.ex npc_profiles).
@@ -78,6 +89,14 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
   'quests.offer': (doc) => !run(doc),
   'quests.deadline': (doc) => !run(doc),
   'quests.exchange': (doc) => !run(doc),
+  'liquids.amount': (doc) => doc.resource !== undefined, // dependentRequired, defs.schema.json:11423
+  'skills.hidden': (doc) => doc.prerequisite !== undefined, // dependentRequired, defs.schema.json:13641
+  'skills.ranks': (doc) => Array.isArray(doc.growth), // skills.ex:107-108; card.ts SEEDS sizes it
+  'items.intended_level': (doc) => doc.affects !== undefined, // derived.ex:70-71
+  'populations.floor': (doc) => doc.chance === undefined && (doc.day_target as number) >= 1, // population.ex:117
+  'populations.sight': (doc) => doc.member_role === 'prey', // population.ex:153
+  'populations.trail': (_, world) => world.trails !== undefined, // trails.ex:140
+  'populations.hunts': (_, world) => world.trails !== undefined,
   'dialogues.entry': (doc) => doc.keyword === undefined, // dialogue_links.ex:205-206; one per npc: the compile's
   'dialogues.keyword': (doc) => doc.entry === undefined && doc.riddle === undefined, // keywords.ex:16
   'dialogues.name': (doc, _, hidden) => !teaches(doc, hidden), // skills.ex:157

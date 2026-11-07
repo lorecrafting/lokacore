@@ -2,11 +2,12 @@
 // Book, its exits take the map's edits, its mechanics are added (here or from the Book) and removed;
 // every write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
 import { Fragment, type ReactNode, useEffect } from 'react';
-import type { FieldProps } from '@rjsf/utils';
+import type { FieldProps, UiSchema } from '@rjsf/utils';
 import {
   addable,
   addedHere,
   allowed,
+  detailed,
   hidden,
   proseKey,
   removed,
@@ -18,7 +19,7 @@ import { Button } from '../../components/ui/button.tsx';
 import { mapCommand, mapNewest } from '../../mapwire.ts';
 import { fields, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, adder, useCard, useCartridge } from '../Generic.tsx';
-import { Refusal } from '../templates.tsx';
+import { Folded, Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 
 const OWN = ['name', 'description', 'exits']; // drawn above the form
@@ -73,7 +74,7 @@ export function Room({ rel, context, diag, offer }: Props) {
       <Words draft={draft} context={context} fields={['name', 'description']} />
       <Exits room={context.key} exits={draft.exits ?? {}} />
       <Mechanics card={card} menu={menu} add={add} />
-      <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} />
+      <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} details />
     </div>
   );
 }
@@ -82,7 +83,8 @@ export function Room({ rel, context, diag, offer }: Props) {
  * one-way toggle writes only the far room, loka-wfrgk.77), else the card's change. */
 const undoOf = (rel: string, card: Card) => {
   const map = mapNewest(rel);
-  if (map !== undefined && map > Number(card.undo ?? 0)) return () => mapCommand('map-undo', undefined);
+  if (map !== undefined && map > Number(card.undo ?? 0))
+    return () => mapCommand('map-undo', undefined);
   return card.undo ? card.back : undefined;
 };
 
@@ -146,6 +148,12 @@ export function Mechanics({
   );
 }
 
+/** A room's details, each folded (templates.tsx Folded). */
+const folded = (at: UiSchema | undefined): UiSchema => ({
+  ...at,
+  additionalProperties: { ...at?.additionalProperties, 'ui:ObjectFieldTemplate': Folded },
+});
+
 /** The other fields: the generic form, with the card's `own` fields (drawn above) hidden. */
 export function RoomForm({
   rel,
@@ -156,12 +164,14 @@ export function RoomForm({
   own = OWN,
   blocks = {},
   extra = {},
+  details = false,
 }: Omit<Props, 'offer'> & {
   card: Card;
   defs: Record<string, never>;
   own?: string[];
   blocks?: Record<string, string>; // a field drawn by its block (fields.tsx), when present or added
   extra?: Record<string, (p: FieldProps) => ReactNode>; // a field the card draws itself, by its name
+  details?: boolean; // the Room card's details: folded, and a new one filled (detailed)
 }) {
   const saved = card.saved!;
   const walked = uiSchema(saved.dir, saved.schema as never, defs, {});
@@ -170,10 +180,12 @@ export function RoomForm({
   // a union-rooted kind (a scene) draws its branch's uiSchema, not the root's (rjsf MultiSchemaField)
   for (const at of [ui, ...(ui.anyOf ?? [])]) for (const f of own) at[f] = HIDE;
   for (const f of Object.keys(extra)) ui[f] = { ...ui[f], 'ui:field': f }; // its items' widgets kept
+  if (details) ui.details = folded(ui.details);
+  const was = (card.draft ?? saved.doc) as Doc;
   return (
     <CardForm
       rel={rel}
-      card={card}
+      card={details ? { ...card, change: (d) => card.change(detailed(was, d as Doc, defs)) } : card}
       context={context}
       diag={diag}
       ui={ui}

@@ -6,7 +6,7 @@ defmodule Loka.Content.Starters.Templates do
   import Loka.Content.Starters.Parts
   alias Loka.Content.Starters.World
 
-  @names ~w(actions areas attributes barriers behaviours bleeds cutscene dialogues emotes facts items layout liquids npcs populations quests reactions replenish resources rooms services skills statuses structures text topics transports)
+  @names ~w(actions areas attributes barriers behaviours bleeds cutscene dialogues emotes facts items layout liquids npcs outline populations quests reactions replenish resources rooms services skills statuses structures text topics transports)
   @doc "kind => {capabilities it needs, kinds whose first key it references, name, context -> files}"
   def kinds, do: Map.new(@names, &{&1, kind(&1)})
 
@@ -25,6 +25,9 @@ defmodule Loka.Content.Starters.Templates do
   defp kind("layout"), do: {~w(knowledge), ~w(entry), &layout/2}
   defp kind("liquids"), do: {~w(liquid food), [], &liquid/2}
   defp kind("npcs"), do: {~w(containment), ~w(entry), &npc/2}
+  # one outline per cartridge: its beats are added in the Story list, so the name is unused
+  defp kind("outline"),
+    do: {[], [], fn _, _ -> %{"outline.json" => %{"parts" => [%{"beats" => []}]}} end}
 
   defp kind("populations"),
     do: {~w(population calendar combat schedule death position), ~w(rooms), &World.population/2}

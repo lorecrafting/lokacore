@@ -194,6 +194,31 @@ const bind = (s: Run, part: number, n: number, short: string, known: string[]) =
     return [{ path: ['parts', part, 'beats', j, 'nodes'], value: [...nodes, short] }];
   });
 
+// Beat edits (design 5c) on part `part` of outline.json.
+const partOf = (doc: Outline, part: number) => doc.parts[part]?.beats ?? no(`outline.json has no part ${part + 1}`);
+const beatOf = (doc: Outline, part: number, n: number) => {
+  const j = partOf(doc, part).findIndex((b) => b.n === n);
+  return j < 0 ? no(`part ${part + 1} has no beat ${n}`) : ['parts', part, 'beats', j];
+};
+// a beat's n is unique across the outline: readOutline (kernel/ts/play/story.ts) refuses a repeat
+const addBeat = (s: Run, part: number, n: number) =>
+  s.change<Outline>('outline.json', (doc) => {
+    if (!Number.isInteger(n) || n < 1) no(`a beat's number is a whole number from 1, not ${n}`);
+    if (doc.parts.some((p) => p.beats.some((b) => b.n === n))) no(`outline.json already has beat ${n}`);
+    const beats = partOf(doc, part);
+    const j = beats.findIndex((b) => b.n > n); // in number order, as play reads them
+    const at = j < 0 ? beats.length : j;
+    return [{ path: ['parts', part, 'beats'], value: [...beats.slice(0, at), { n }, ...beats.slice(at)] }];
+  });
+const titleBeat = (s: Run, part: number, n: number, title: string) =>
+  s.change<Outline>('outline.json', (doc) => {
+    const path = [...beatOf(doc, part, n), 'title'];
+    const had = partOf(doc, part).some((b) => b.n === n && 'title' in b);
+    return title ? [{ path, value: title }] : had ? [{ path, delete: true }] : []; // none: nothing to remove
+  });
+const dropBeat = (s: Run, part: number, n: number) =>
+  s.change<Outline>('outline.json', (doc) => [{ path: beatOf(doc, part, n), delete: true }]);
+
 /** Undoes `ids` newest first, dropping each as it goes, so a refusal leaves only what stands. */
 async function undo(io: Io, ids: number[]) {
   while (ids.length) {
@@ -261,6 +286,9 @@ export function editor(io: Io) {
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
     bind: (part: number, n: number, short: string, known: string[]) =>
       run((s) => bind(s, part, n, short, known)),
+    addBeat: (part: number, n: number) => run((s) => addBeat(s, part, n)),
+    titleBeat: (part: number, n: number, title: string) => run((s) => titleBeat(s, part, n, title)),
+    dropBeat: (part: number, n: number) => run((s) => dropBeat(s, part, n)),
   };
 }
 export type Editor = ReturnType<typeof editor>;
