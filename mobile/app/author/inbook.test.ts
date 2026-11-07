@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { after, afterEach, before, beforeEach, test } from 'node:test';
 import { build } from 'esbuild';
 import { chromium, type Browser, type Page } from 'playwright';
+import { cap } from '../book/words.ts';
 import type { start } from './inbook.ts';
 
 const ORIGIN = 'http://localhost:19999'; // the relay takes only a local origin; the route answers, no server
@@ -127,12 +128,11 @@ const STRANGER = {
 };
 const capitalised = (key: string, words: string) =>
   page.evaluate(
-    ([key, words]) => {
+    ([key, words, shown]) => {
       const w = window as unknown as { seen: Map<string, string>; said: Map<string, string> };
       const el = document.querySelector('main')!.appendChild(document.createElement('h1'));
       el.dir = 'auto';
-      const shown = words.charAt(0).toUpperCase() + words.slice(1),
-        cut = shown.lastIndexOf(' ');
+      const cut = shown.lastIndexOf(' ');
       const inner = Object.assign(document.createElement('span'), {
         textContent: shown.slice(0, cut),
       });
@@ -140,7 +140,7 @@ const capitalised = (key: string, words: string) =>
       w.seen.set(words, key);
       w.said.set(key, words);
     },
-    [key, words],
+    [key, words, cap(words)], // drawn as the Book's cap() draws a title
   );
 
 // Breaks: the lookup matches a drawn line's words exactly only, so a capitalised NPC title says
