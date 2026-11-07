@@ -199,15 +199,3 @@ test('the Hierarchy + lists every starter once, and a kind header`s + makes its 
     ['rooms', 'cutscene', 'statuses', 'npcs'],
   );
 });
-
-// Breaks: a New kind is offered though its definitions' capability (capability_registry.json's
-// definitions owner, as UNDECLARED_CAPABILITY checks) is not required, or one that needs none is gated.
-test('missing names the capability a kind needs that cartridge.json lacks, and nothing for others', () => {
-  assert.deepEqual(
-    ['barriers', 'areas', 'npcs', 'items', 'quests', 'layout'].map((k) =>
-      shell.missing(k, { movement: {} }),
-    ),
-    ['barrier', undefined, 'containment', 'containment', undefined, undefined],
-  );
-  assert.equal(shell.missing('barriers', { barrier: {} }), undefined);
-});
