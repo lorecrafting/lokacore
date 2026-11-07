@@ -68,3 +68,24 @@
 6. **question** `Trigger.tsx:20`: `triggers` is `undefined` while `story` is null (`right.tsx:36`), and `on` is
    hidden from the form for a modal scene (`Scene.tsx:153`), so the trigger is not editable until a compile
    loads. Intended?
+
+## Re-check: fix commits 46c2dd78c, 11c6e2acf (head `11c6e2acf92186204e8521b23260c440edc6a85b`)
+
+- Verdict: **APPROVE**
+- CI at head (`gh run list --commit`): ci, book-e2e and graph-diff all passed.
+- Scope: only the fix commits (`git diff c4c8aa8a3 11c6e2acf -- kernel tools`).
+
+| Finding | Disposition | Proof |
+|---|---|---|
+| 1 blocker `Trigger.tsx:46` | closed: `outcomesOf` (`scene_trigger.ts:91-92`), test with a second point `other` | `=== -> !==` red-narrow (scene_trigger.test.ts) |
+| 2 `Trigger.tsx:100` | closed: `outcomeRefused` (`scene_trigger.ts:96-97`); cards test gives `letter_read` `{carry_letter, read}` | `!== -> ===` at `Trigger.tsx:100` red-narrow (cards.test.ts); `bad={() => false}` red-narrow; `refused(...) -> false` red-narrow |
+| 3 `same` (`scene_trigger.ts:22-29`) | closed: any `start` on is `'start'`, as scenes.ex:278 | `? 'start' -> ? JSON.stringify(on)` red-narrow |
+| 4 nit Key check | closed: `validate('Key', ...)` reads the same generated schema as the compiler (`contracts.gen.ts`) | `validate(...) -> false` red-narrow |
+| 5 nit test comment | closed (`cards.test.ts:34-35`) | read |
+| 6 question | not raised again; trigger row is now a `div` | - |
+
+Both directions against the compiler:
+- Refused: the cases these gates now catch (another point's outcome, a quest pair another scene has, `Bad Key`, a second start) are the ones the compiler refused in the first round's probe.
+- Allowed: the cards test writes `{carry_letter, delivered}` through the author server, which writes only a change that compiles.
+- Added: the outcome now resets on a quest change (`[on.quest, on.outcome]`). Dropping `on.quest` is red-narrow (cards.test.ts).
+- The blur guard no longer has `outcome &&`, but an empty outcome fails the Key check, so it is still not written.

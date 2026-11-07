@@ -123,14 +123,15 @@ const bundledRefs = (source: string, refs: Map<string, string>) =>
     ),
   );
 
-/** Each node's own source file, for the inspector's card: a `.json`, else its `.scene` (a `.cut` none). */
-const ownFiles = (source: string, refs: Map<string, string>): Record<string, string> =>
-  Object.fromEntries(
-    files(source)
-      .filter((f) => /\.(json|scene)$/.test(f))
-      .sort((a, b) => Number(a.endsWith('.json')) - Number(b.endsWith('.json')))
-      .flatMap((rel) => (nodeOf(rel, refs) ? [[nodeOf(rel, refs), rel]] : [])),
-  );
+// each node's own source file, for the inspector's card: a `.json`, else its `.scene` (a `.cut` none)
+const ownFiles = (source: string, refs: Map<string, string>) => {
+  const json = (f: string) => Number(f.endsWith('.json'));
+  const pairs = files(source)
+    .filter((f) => /\.(json|scene)$/.test(f))
+    .sort((a, b) => json(a) - json(b))
+    .map((rel) => [nodeOf(rel, refs), rel]);
+  return Object.fromEntries(pairs.filter(([ref]) => ref)) as Record<string, string>;
+};
 
 /** The model for `source` compiled to `dev`, with the compile's diagnostics. */
 export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
