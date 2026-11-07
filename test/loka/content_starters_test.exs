@@ -1,4 +1,4 @@
-# size: allow 623, one case per starter kind and refusal; the area placement and companion cases join them
+# size: allow 690, one case per starter kind and refusal; the area placement, companion, provider start and key order and shape cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -58,6 +58,65 @@ defmodule Loka.ContentStartersTest do
     assert Path.wildcard(Path.join(dir, "**/*.json")) |> length() == 2
     assert {:error, "no cartridge.json in " <> _} = Starters.write(tmp, "rooms", "r")
     assert {:ok, _} = Starters.write(dir, "text", "a.b")
+  end
+
+  # Breaks: a starter re-sorting the keys of a file it adds to; the editor writes insertion
+  # order, so every file a starter touched churned whole (loka-wfrgk.68).
+  test "a starter keeps a file's own key order and adds after it", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+
+    fact =
+      ~s({"version": 1, "scopes": ["player"], "value_type": {"type": "bool", "default": false}})
+
+    File.write!(Path.join(dir, "facts.json"), ~s({"facts": {"zz": #{fact}}}))
+    {:ok, _} = Starters.write(dir, "facts", "aa")
+
+    assert File.read!(Path.join(dir, "facts.json")) =~ """
+           {
+             "facts": {
+               "zz": {
+                 "version": 1,
+                 "scopes": [
+                   "player"
+                 ],
+                 "value_type": {
+                   "type": "bool",
+                   "default": false
+                 }
+               },
+               "aa": {
+           """
+  end
+
+  # Break: a value whose shape differs from the file's (an object where the file has a list) is
+  # walked as the old list, which crashes or writes the object as a list.
+  test "a value of another shape than the file's is written as given", %{tmp_dir: tmp} do
+    path = Path.join(tmp, "f.json")
+    File.write!(path, ~s({"a": [1]}))
+    value = %{"a" => %{"b" => 1}}
+    assert JSON.decode!(Loka.Content.Starters.Parts.pretty_over(value, path)) == value
+  end
+
+  # Breaks: the service's provider seeded with a fixed 10 the resource's maximum refuses
+  # (RESOURCE_SPEC_INVALID, resources.ex:109-116) instead of the resource's own start.
+  test "a service's provider starts with the currency's own start", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    for k <- ~w(npcs resources), do: {:ok, _} = Starters.write(dir, k, "my_#{k}")
+
+    edit(
+      dir,
+      "resources.json",
+      &put_in(&1, ~w(resources my_resources), %{
+        "minimum" => 0,
+        "maximum" => 5,
+        "start" => 3,
+        "gain" => 0
+      })
+    )
+
+    {:ok, _} = Starters.write(dir, "services", "s")
+    assert read(dir, "npcs/my_npcs.json")["resource_starts"] == %{"my_resources" => 3}
+    assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
   # Breaks: a second service on the same npc replacing its first (list merge as replace); the

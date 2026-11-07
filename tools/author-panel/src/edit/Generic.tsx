@@ -1,7 +1,7 @@
 // The generic inspector card (docs/rnd/gui-editor-design-2026-11-04.md §6, §11): rjsf draws the
 // definition's own file from its served schema; each blur posts the changed fields to
 // POST /change (kernel/ts/play/write.ts), Undo posts /undo, the compiler's refusals show at their field.
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import Form from '@rjsf/core';
 import type { RegistryFieldsType, RJSFSchema, UiSchema } from '@rjsf/utils';
 import type { Op } from '../../../../kernel/ts/play/edit_model.ts';
@@ -23,6 +23,7 @@ import {
   unlisted,
 } from '../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
+import { capabilityRow, unfed } from '../../../../kernel/ts/play/allowed.ts';
 import { ask, type useDiagnostics } from '../author.ts';
 import { Button } from '../components/ui/button.tsx';
 import { fields, type Context } from './fields.tsx';
@@ -45,6 +46,23 @@ type Sent = { ops?: Op[]; [k: string]: unknown }; // the /change or /undo body
 
 type Diag = ReturnType<typeof useDiagnostics>;
 
+// The last write's undo id per file: reselecting a card keeps it (the server refuses a stale one).
+const undos = new Map<string, string>();
+function useUndo(rel: string) {
+  const [, tick] = useState({}); // a fresh object re-renders
+  const set = (id?: string) =>
+    void (id ? undos.set(rel, id) : undos.delete(rel), tick({}));
+  return [undos.get(rel), set] as const;
+}
+
+/** The schema's errors in `doc` the saved file does not already have: only those hold (PR 675). */
+function fresh(saved: Saved, doc: unknown) {
+  // rjsf's own live errors would name its `{}` fills; the schema's first error shows on top instead
+  const errors = (d: unknown) => validator.validateFormData(d, saved.schema).errors;
+  const was = errors(saved.doc).map((e) => e.stack);
+  return errors(doc).filter((e) => !was.includes(e.stack));
+}
+
 async function source(rel: string): Promise<Saved> {
   const s = await fetch(`/__author/source?file=${encodeURIComponent(rel)}`).then((r) => r.json());
   const schema = await fetch(`/__author/schema/${s.kind}`).then((r) => r.json());
@@ -57,13 +75,11 @@ const unlistedIn = ({ schema, dir }: Saved, doc: unknown) => {
   return unlisted(doc, defs[definitionOf(defs, dir, doc)] ?? {}, defs);
 };
 
-/** The card's file: loaded, reloaded on a write from outside (the Book's in-place edit too), changed by a blur and undone. */
-export function useCard(rel: string, diag: Diag) {
+/** The card's file: loaded, and reloaded on a write from outside (the Book's in-place edit too). */
+function useFile(rel: string, diag: Diag) {
   const [saved, setSaved] = useState<Saved>();
   const [draft, setDraft] = useState<unknown>();
-  const [revealed, setRevealed] = useState<string[]>([]);
-  const [undo, setUndo] = useState<string>();
-  const [refused, setRefused] = useState<string>();
+  const [refused, setRefused] = useState<string>(); // the server's: stays until the next write
   const latest = useRef<unknown>(undefined);
   const load = useCallback(
     async (base?: unknown, sent: Op[] = []) => {
@@ -72,30 +88,48 @@ export function useCard(rel: string, diag: Diag) {
     },
     [rel],
   );
-  useEffect(() => void (setRevealed([]), load()), [load]); // a new file starts with nothing revealed
+  useEffect(() => void load(), [load]);
   const outside = diag.changes.find((c) => c.file === rel);
   useEffect(() => {
     if (saved && outside?.file === rel && outside.sha256 !== saved.sha256) void load(saved.doc);
   }, [outside]); // eslint-disable-line react-hooks/exhaustive-deps
-  const post = async (path: string, sent: Sent, otherwise: string, held?: string) => {
+  return { saved, draft, setDraft, refused, setRefused, latest, load };
+}
+
+/** The card's file, changed by a blur and undone. */
+export function useCard(rel: string, diag: Diag) {
+  const { saved, draft, setDraft, refused, setRefused, latest, load } = useFile(rel, diag);
+  const [revealed, setRevealed] = useState<string[]>([]);
+  const [undo, setUndo] = useUndo(rel);
+  const [held, setHeld] = useState<string>(); // the schema's first new error: the draft not sent
+  useEffect(() => void (setRevealed([]), setHeld(undefined)), [rel]); // a new file starts with nothing revealed
+  const post = async (path: string, sent: Sent, otherwise: string) => {
     const { ok, told } = await ask(path, sent);
-    setRefused(ok ? held : typeof told === 'string' ? told : otherwise);
-    setUndo(ok && path === 'change' ? (told as { id: string }).id : undefined);
+    setRefused(ok ? undefined : typeof told === 'string' ? told : otherwise);
+    // a refused change wrote nothing, so the last write's Undo still stands
+    if (ok || path === 'undo')
+      setUndo(ok && path === 'change' ? (told as { id: string }).id : undefined);
     await load(saved!.doc, sent.ops);
   };
   const commit = () => {
-    // rjsf's own live errors would name its `{}` fills; the schema's first error shows on top instead
-    const errors = saved ? validator.validateFormData(latest.current, saved.schema).errors : [];
-    const held = errors[0] && `${errors[0].property} ${errors[0].message}`;
-    const ops = saved ? apart(diff(saved.doc, latest.current), errors) : [];
-    if (!ops.length) return void (held && setRefused(held)); // a refusal stays until the next write
-    void post('change', { file: rel, was: saved!.sha256, ops }, 'Changed outside: reloaded.', held);
+    if (!saved) return;
+    const errors = [...fresh(saved, latest.current), ...unfed(latest.current as never)];
+    const [first] = errors;
+    setHeld(first && `${first.property} ${first.message}`);
+    const ops = apart(diff(saved.doc, latest.current), errors);
+    if (ops.length)
+      void post('change', { file: rel, was: saved.sha256, ops }, 'Changed outside: reloaded.');
   };
   const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, unlistedIn(saved!, doc))));
-  const back = () => void post('undo', { id: undo }, 'Changed since: not undone.');
+  // Undo drops the held draft too: rebasing it onto the undone file would put the refusal straight back
+  const back = () =>
+    void (setHeld(undefined),
+    (latest.current = saved!.doc),
+    post('undo', { id: undo }, 'Changed since: not undone.'));
   const reveal = (f: string) => setRevealed([...revealed, f]);
   const unreveal = (f: string) => setRevealed(revealed.filter((r) => r !== f)); // back in the add menu
-  return { saved, draft, revealed, undo, refused, change, commit, back, reveal, unreveal };
+  const card = { saved, draft, revealed, undo, change, commit, back, reveal, unreveal };
+  return { ...card, refused: held ?? refused };
 }
 
 /** The registry's fields this definition lacks: choosing one reveals its empty field. */
@@ -154,10 +188,19 @@ const removes = (t: EventTarget) => !!(t as Element).closest?.('button[aria-labe
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
+  // rjsf keeps an added row's key in its own state: a renamed row redraws
+  const [rows, remount] = useReducer((n: number) => n + 1, 0); // mutate-skip: a redraw key; any start or step redraws
+  const change = (doc: unknown, row = capabilityRow(doc as never)) =>
+    void (row !== doc && remount(), card.change(row));
   return (
+    // after the blur's own change lands: rjsf sends a map key's rename after its setState, past the blur;
     // rjsf's Remove drops the focused button, so no blur follows: it commits once its change lands
-    <div onBlur={card.commit} onClick={(e) => removes(e.target) && setTimeout(card.commit)}>
+    <div
+      onBlur={() => setTimeout(card.commit)}
+      onClick={(e) => removes(e.target) && setTimeout(card.commit)}
+    >
       <CardFormBase
+        key={rows}
         schema={card.saved!.schema}
         uiSchema={ui}
         formData={card.draft}
@@ -168,7 +211,7 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
         formContext={{ ...context, stale: !diag.compiled }}
         experimental_defaultFormStateBehavior={FORM_DEFAULTS}
         extraErrors={fieldErrors((diag.diagnostics ?? []) as never, rel) as never}
-        onChange={(e) => card.change(e.formData)}
+        onChange={(e) => change(e.formData)}
         onSubmit={card.commit}
       >
         <span />

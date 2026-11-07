@@ -135,7 +135,7 @@ defmodule Loka.Content.Starters do
           {:halt, {:error, "no #{missing(kind)} yet: bin/loka new #{missing(kind)} <name> first"}}
 
         key ->
-          {:cont, {:ok, Map.put(acc, kind, key)}}
+          {:cont, {:ok, acc |> Map.put(kind, key) |> Map.merge(Parts.starts(dir, kind, key))}}
       end
     end)
   end
@@ -320,7 +320,7 @@ defmodule Loka.Content.Starters do
       merged ->
         hook.(path, if(File.exists?(path), do: File.read!(path)))
         File.mkdir_p!(Path.dirname(path))
-        File.write!(path, Parts.pretty(merged))
+        File.write!(path, Parts.pretty_over(merged, path))
         [path]
     end
   end

@@ -15,7 +15,7 @@ const ed = editor({
 /** The mounted map's footer line, else an alert; the last story's rooms (App.tsx useStory), so the
  * palette's and the Room card's map commands work with the map closed. */
 export const alone = (why: string): void => void (why && alert(why));
-export const shown = { tell: alone, rooms: [] as MapRoom[], nodes: [] as Story['graph']['nodes'] };
+export const shown = { tell: alone, rooms: [] as MapRoom[], nodes: [] as Story['graph']['nodes'], shorts: [] as string[] };
 
 /** The last map edit's id if it read or wrote `file` (mapedit.ts `newest`). */
 export const mapNewest = (file: string) => ed.newest(file);

@@ -20,7 +20,7 @@ export type Props = {
   set: SetLayout;
   segment: React.ReactNode;
   pick: (s: Selection) => void;
-  open: (key: string) => void;
+  open: (ref: string) => void;
   changes: Change[];
 };
 type Mark = { ref: string; hops: number };
@@ -187,8 +187,8 @@ function useGraph(p: Props, f: Flow, sel: string | undefined, setOpen: (u: (o: s
     selected: sel,
     dot,
     unreached: new Set(Object.values(p.story.report.unreachable).flat()),
-    click: (id, e) => (e.altKey && chip(id) ? p.open(key(id)) : enter(id)),
-    dbl: (ref) => p.open(key(ref)),
+    click: (id, e) => (e.altKey && chip(id) ? p.open(id) : enter(id)),
+    dbl: (ref) => p.open(ref),
     hover,
     focus: (id) => (setTab(id), chip(id) && setCard(id)),
   };

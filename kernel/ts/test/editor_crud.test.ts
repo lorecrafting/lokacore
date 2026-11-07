@@ -50,8 +50,6 @@ const GAPS: Record<string, string> = {
   'treatment:reverie create': 'loka-wfrgk.86',
   'treatment:reverie delete': 'loka-wfrgk.86',
   // the add menu's least value (card.ts added) is one the compiler refuses
-  'items.equip edit': 'loka-wfrgk.61',
-  'items.edible edit': 'loka-wfrgk.62',
   'items.block_chance edit': 'loka-wfrgk.84',
   'items.capacity edit': 'loka-wfrgk.84',
   'quests.offer edit': 'loka-wfrgk.84',
@@ -215,8 +213,7 @@ test('every field a card draws takes its add-menu value through /change and comp
     posted.size > 50,
     `only ${posted.size} add-menu values were sent: added() offers nothing`,
   );
-  for (const f of ['items.edible', 'items.readable', 'rooms.dark'])
-    assert.ok(posted.has(f), `${f} never sent`);
+  for (const f of ['items.readable', 'rooms.dark']) assert.ok(posted.has(f), `${f} never sent`);
 });
 
 test('a definition another names is refused, then every one deletes through /delete and compiles', async () => {

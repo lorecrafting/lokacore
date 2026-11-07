@@ -67,10 +67,12 @@ export function sourcesOf(source: string, key: string, words?: string) {
 }
 export const sourceOf = (source: string, key: string, words?: string) =>
   sourcesOf(source, key, words)[0];
-/** POST /open's line: the selection's own file (Cmd-E on a `.loka` or `.scene`), else its key's. */
+/** POST /open's line: the selection's own file (Cmd-E on a `.loka` or `.scene`) at its key's line
+ * there, else its first; with no file, its key's. */
 export const openAt = (source: string, sent: { key?: unknown; words?: string; file?: string }) =>
   sent.file && files(source).includes(sent.file)
-    ? `${sent.file}:1`
+    ? (sourcesOf(source, String(sent.key)).find((at) => at.startsWith(`${sent.file}:`)) ??
+      `${sent.file}:1`)
     : sourceOf(source, String(sent.key), sent.words);
 
 /** GET /line?key=&words=: the source line a Book line's field writes (the compile's `places` for

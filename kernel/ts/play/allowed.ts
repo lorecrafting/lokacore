@@ -1,4 +1,6 @@
 // The add menu's gates: which fields a card offers, as the compiler accepts them (split from card.ts).
+import REGISTRY from '../../../protocol/capability_registry.json' with { type: 'json' };
+
 type Obj = Record<string, unknown>;
 
 // Each field's owning capabilities, as UNDECLARED_CAPABILITY checks them (content/); a field it omits needs none.
@@ -15,7 +17,8 @@ const OWNERS: Record<string, string> = {
   'items.bandage': 'bleed combat skill food', // bleed.ex gate/1
   'items.cues': 'sense_cue',
   'items.description_variants': VARIANT,
-  'items.edible': 'food',
+  // food.ex:43-46 valid?
+  'items.edible': 'food resource containment',
   'items.fuel': 'light',
   'items.name_variants': VARIANT,
   'items.readable': 'readable', // resolve.ex:338-344 via entities.ex:54; capability_registry.json:463
@@ -60,14 +63,25 @@ const OWNERS: Record<string, string> = {
 const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean> = {
   'npcs.attack': (doc, world) => doc.hp !== undefined && world.combat !== undefined,
   'npcs.daily_schedule': (doc) => doc.spawn_template !== true, // calendar.ex template_schedules
-  'items.weapon': (doc) => doc.slot === 'wield', // skills.ex weapon
+  'items.weapon': (doc) => doc.slot === 'wield' && doc.edible === undefined, // skills.ex weapon
   // affects need a slot (derived.ex:77); a bandage is no container, worn or eaten thing (bleed.ex:88-91)
   'items.affects': (doc) => doc.slot !== undefined,
   'items.bandage': (doc) =>
     doc.slot === undefined && doc.edible === undefined && doc.container !== true,
-  'items.slot': (doc) => doc.bandage === undefined,
-  'items.edible': (doc) => doc.bandage === undefined,
-  'items.container': (doc) => doc.bandage === undefined,
+  'items.slot': (doc) => doc.bandage === undefined && doc.edible === undefined,
+  // food.ex:43-46 valid?: nothing eaten is a container, worn, a weapon, a fuel or a vessel
+  'items.edible': (doc) =>
+    doc.bandage === undefined &&
+    doc.container !== true &&
+    !['capacity', 'slot', 'weapon', 'block_chance', 'fuel', 'vessel'].some((f) =>
+      Object.hasOwn(doc, f),
+    ),
+  // derived.ex:64
+  'items.equip': (doc) => doc.slot !== undefined,
+  'items.container': (doc) => doc.bandage === undefined && doc.edible === undefined,
+  ...Object.fromEntries(
+    ['capacity', 'block_chance', 'fuel', 'vessel'].map((f) => [`items.${f}`, uneaten]),
+  ),
   'actions.duration': (d, w) => !w.time_policy && !/"status\.apply"/.test(JSON.stringify(d)), // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json; duration_status (:94); ponytail: also hides it beside a permanent status, which status.ex:72 lets through
   'actions.craft': (doc) => (doc.target as Obj | undefined)?.kind !== 'spell', // replenish.ex:59
   'reactions.zone': (doc) => (doc.on as Obj | undefined)?.room === undefined, // ReactionRule: a zone forbids on.room
@@ -95,6 +109,10 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
     solo(doc, 'expedition', 'offer repeatable deadline exchange patrol'),
   'quests.patrol': (doc) => solo(doc, 'patrol', 'offer repeatable deadline exchange'),
 };
+function uneaten(doc: Obj) {
+  // food.ex:43-46, the other way round
+  return doc.edible === undefined;
+}
 const solo = (doc: Obj, by: string, not: string) =>
   (doc.objective as Obj | undefined)?.evidence === by &&
   !not.split(' ').some((f) => Object.hasOwn(doc, f));
@@ -109,6 +127,20 @@ export const teaches = (doc: Obj, hidden: string[]) =>
 // a then or then_failed to a dialogue; `end` is never checked (dialogue_links.ex:402-404)
 const linked = (doc: Obj) =>
   choicesOf(doc).some((c) => ['then', 'then_failed'].some((f) => c[f] && c[f] !== 'end'));
+
+/** A field `added` seeds into the draft only: written with the author's pick (a targetless offer: quests.ex:63-66;
+ * food without a restore, cure or status: food.ex:21 effect?). */
+export const awaits = (def: string, f: string) =>
+  ['source.QuestDefinition.offer', 'source.ItemDefinition.edible'].includes(`${def}.${f}`);
+/** What the schema takes and the compiler refuses, as an error `apart` holds the field by: food
+ * with no restore, cure or status (food.ex:21 effect?, a `[]` none). */
+export const unfed = (doc: Obj) => {
+  const e = doc?.edible as Obj | undefined;
+  const some = (v: unknown) => v != null && !(Array.isArray(v) && !v.length);
+  return e && !['resource', 'cures', 'applies'].some((k) => some(e[k]))
+    ? [{ property: '.edible', message: 'needs a resource, cures or applies' }]
+    : [];
+};
 
 /** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs
  * the definition (`doc`), cartridge.json's `world` and the hidden skills' keys meet; others would not compile. */
@@ -125,3 +157,17 @@ export const allowed = (
     const need = NEEDS[`${kind}.${f}`];
     return owners.every((o) => Object.hasOwn(caps, o)) && (!need || need(doc, world, hidden));
   });
+
+// rjsf names an added map row `newKey`, which requires.capabilities refuses (requires.ex:52
+// UNKNOWN_CAPABILITY): the row takes the registry's first portable capability not yet listed, at its version
+export const capabilityRow = (doc: Obj) => {
+  const caps = ((doc.requires as Obj | undefined)?.capabilities ?? {}) as Obj;
+  if (!Object.hasOwn(caps, 'newKey')) return doc;
+  const { newKey: _row, ...rest } = caps;
+  const next = REGISTRY.find((c) => c.portability !== 'server_only' && !Object.hasOwn(rest, c.key));
+  if (!next) return doc; // every capability listed: the schema refuses newKey at the field
+  return {
+    ...doc,
+    requires: { ...(doc.requires as Obj), capabilities: { ...rest, [next.key]: next.version } },
+  };
+};

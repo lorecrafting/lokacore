@@ -216,7 +216,7 @@ function Slot({ layout, set, story, book, pick, diag, refused }: Shell & { refus
         selected={places(layout.selection, story?.graph.nodes ?? []).map}
         pick={pick}
         go={(room) => book.send({ op: 'go_to_room', room })}
-        open={(key) => void ask('open', { key })}
+        open={(ref) => void ask('open', { key: fromRef(ref)?.key ?? ref, file: story?.files[ref] ?? story?.bundled[ref] })}
         changes={diag.changes}
       />
     </>
@@ -230,7 +230,7 @@ function useStory(said: unknown[] | undefined) {
   useEffect(() => {
     let live = true; // a later compile's fetch supersedes this one
     void getStory().then(
-      (s) => live && ((shown.rooms = s.map), (shown.nodes = s.graph.nodes), setStory(s), setRefused(undefined)), // the map's commands work while it is closed
+      (s) => live && ((shown.rooms = s.map), (shown.nodes = s.graph.nodes), (shown.shorts = s.shorts), setStory(s), setRefused(undefined)), // the map's commands work while it is closed
       (e: Error) => live && !kept(e) && setRefused(said?.length ? e.message.split('\n')[0] : undefined), // no watcher yet: waiting
     );
     return () => void (live = false);

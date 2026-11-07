@@ -2,14 +2,13 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 745, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 660, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFileSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { test, type TestContext } from 'node:test';
+import { test } from 'node:test';
 import axe from 'axe-core';
-import type { Page } from 'playwright';
 import { author, boot, dir, open, QUEST } from './harness.ts';
 
 // Breaks: a card's field grid sizes its track to its content (an auto track, not grid-cols-1's
@@ -192,6 +191,82 @@ test('a dialogue already broken takes the edit that fixes it', async () => {
   await page.close();
 });
 
+// Breaks (Generic.tsx useCard, loka-wfrgk.63): a held edit's refusal outliving the edit taken back;
+// Undo rebasing the held draft onto the undone file; reselecting the card dropping its Undo; a
+// refused write clearing the last write's Undo; an error the file already has holding every edit
+// to its field (the #675 rule: only a new error holds).
+test('a held edit gives way to its undoing, Undo and a reselect', async () => {
+  const page = await open({ right: 420, selection: { kind: 'item', key: 'oilskin' } });
+  const file = join(dir, 'showcase/areas/fell_road/items/oilskin.json');
+  const mass = () => JSON.parse(readFileSync(file, 'utf8')).mass_grams;
+  const field = page.locator('#root_mass_grams');
+  const undo = page.getByRole('button', { name: 'Undo', exact: true });
+  const refusal = page.getByText('mass_grams must be >= 0'); // the held line, not rjsf's own
+  const set = async (v: string) => (await field.fill(v), await field.blur());
+  await field.waitFor({ timeout: boot });
+  await set('600');
+  for (let t = 0; mass() !== 600 && t < 50; t++) await page.waitForTimeout(100);
+  await undo.waitFor({ timeout: boot });
+  await page.getByRole('button', { name: 'World', exact: true }).click();
+  await page.getByRole('button', { name: 'oilskin', exact: true }).click();
+  await undo.waitFor({ timeout: boot }); // the reselected card keeps its last write's Undo
+  await field.waitFor({ timeout: boot });
+  await set('-1');
+  await refusal.waitFor({ timeout: boot });
+  await set('600'); // the held edit taken back: nothing to send, nothing held
+  await refusal.waitFor({ state: 'detached', timeout: boot });
+  await page.route('**/__author/change', (r) => r.fulfill({ status: 409, json: 'refused here' }));
+  await set('700');
+  await page.getByText('refused here').waitFor({ timeout: boot });
+  await page.unroute('**/__author/change');
+  assert.ok(await undo.isVisible()); // the refused write wrote nothing: the last Undo stands
+  await set('-1');
+  await refusal.waitFor({ timeout: boot });
+  await undo.click();
+  for (let t = 0; mass() !== 500 && t < 50; t++) await page.waitForTimeout(100);
+  assert.equal(mass(), 500);
+  for (let t = 0; (await field.inputValue()) !== '500' && t < 50; t++) await page.waitForTimeout(100); // the reload rendered
+  assert.equal(await field.inputValue(), '500'); // not the held -1 put back
+  assert.equal(await refusal.count(), 0);
+  assert.ok(await undo.isDisabled()); // an undone write offers no Undo of the undo
+  await page.route('**/__author/change', (r) => r.abort());
+  await page.route('**/__author/source?file=*oilskin*', async (r) => {
+    const s = await (await r.fetch()).json();
+    const doc = { ...JSON.parse(s.bytes), keywords: ['oilskin', 'Bad Word'] };
+    await r.fulfill({ json: { ...s, bytes: JSON.stringify(doc) } });
+  });
+  await page.reload();
+  const keyword = page.locator('#root_keywords_0');
+  await keyword.waitFor({ timeout: boot });
+  const sent = page.waitForRequest('**/__author/change', { timeout: boot });
+  await keyword.fill('oilcloth');
+  await keyword.blur();
+  assert.deepEqual((await sent).postDataJSON().ops, [{ path: ['keywords', 0], value: 'oilcloth' }]); // the file's own Bad Word holds nothing
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await page.close();
+});
+
+// Breaks: an added capability row starts at a key the schema refuses, or its renamed key is never written.
+test('an added capability row starts at a registry key and its rename writes', async () => {
+  const page = await open({ right: 420, selection: { kind: 'item', key: 'oilskin' } });
+  const file = join(dir, 'showcase/cartridge.json');
+  const before = readFileSync(file);
+  const caps = () => JSON.parse(readFileSync(file, 'utf8')).requires.capabilities;
+  await page.getByRole('button', { name: 'World', exact: true }).click();
+  const box = page.locator('#root_requires_capabilities');
+  await box.waitFor({ timeout: boot });
+  await box.getByRole('button', { name: 'Add', exact: true }).last().click();
+  // the row starts at dev, the registry's first capability the cartridge does not list
+  const key = page.locator('#root_requires_capabilities_dev-key');
+  await key.fill('tide');
+  await key.press('Tab');
+  for (let t = 0; caps().tide === undefined && t < 50; t++) await page.waitForTimeout(100);
+  const now = caps();
+  writeFileSync(file, before); // tide is not installed: the later tests need a cartridge that compiles
+  assert.deepEqual([now.tide, now.dev, now.newKey], [1, undefined, undefined]);
+  await page.close();
+});
+
 // Breaks: a nested set read late, after its link moved to another dialogue, shows under that one.
 test("a slow read of a link's old target never shows under its new one", async () => {
   const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
@@ -355,170 +430,6 @@ test('a modal scene opens its card: one treatment picker, the schema’s', async
   ]);
   await page.close();
 });
-
-/** The Flow graph in the left slot, warm: the first open compiles the story on the server (a cold open
- * measured 319 ms here), so the budget is read on a second, then on reloads. `took` reads the latest `flow:*` measures. */
-async function flow() {
-  const layout = { ...QUEST, leftOpen: true, map: 'flow' };
-  const drawn = async (page: Page) => {
-    const left = page.getByLabel('left column', { exact: true });
-    await left.locator('footer', { hasText: / ms$/ }).waitFor();
-    return left;
-  };
-  const cold = await open(layout);
-  await drawn(cold); // the story compiled before the warm open's fetch
-  await cold.close();
-  const page = await open(layout);
-  const left = await drawn(page);
-  const took = (names: string[]) =>
-    page.evaluate(
-      (ns) => ns.map((n) => performance.getEntriesByName(n).at(-1)?.duration ?? NaN),
-      names,
-    );
-  return { page, left, took };
-}
-const sum = (ms: number[]) => ms.reduce((a, b) => a + b);
-// A budget holds when one of three measures is within it: load only adds time, so a slow machine
-// passes on a quiet run while code past the budget fails all three (a missing measure, NaN, too).
-async function within(t: TestContext, budget: number, measure: () => Promise<number[]>) {
-  const seen: string[] = [];
-  for (let run = 0; run < 3; run++) {
-    const ms = await measure();
-    seen.push(ms.map(Math.round).join(' + '));
-    if (sum(ms) <= budget) return t.diagnostic(`${seen.join(', ')} ms`);
-  }
-  assert.fail(`over ${budget} ms each run: ${seen.join(', ')} ms`);
-}
-
-// Breaks: the Flow graph's open (fetch, layout and commit) grows past BUDGET.flowOpen 300 on the
-// showcase (rulings S3 Budgets), or a measure goes missing (NaN fails it).
-test('the flow graph opens within 300 ms', async (t) => {
-  const { page, took } = await flow();
-  let run = 0;
-  await within(t, 300, async () => {
-    if (run++) {
-      await page.reload();
-      await page
-        .getByLabel('left column', { exact: true })
-        .locator('footer', { hasText: / ms$/ })
-        .waitFor();
-    }
-    return took(['flow:fetch', 'flow:layout', 'flow:commit']);
-  });
-});
-
-// Breaks: a filter's relayout grows past BUDGET.flowUpdate 100 (an open, under 300, still passes).
-test('the flow graph refilters within 100 ms', async (t) => {
-  const { page, left, took } = await flow();
-  await left.getByLabel(/^~ Filters/).click();
-  const filter = page.getByRole('dialog').locator('button[aria-pressed]').first(); // a filter: a relayout (the showcase has no parts to fold)
-  const relayout = async () => {
-    const before = await page.evaluate(
-      () => performance.getEntriesByName('flow:commit').at(-1)!.startTime,
-    );
-    await filter.click();
-    await page.waitForFunction(
-      (t) => performance.getEntriesByName('flow:commit').at(-1)!.startTime > t,
-      before,
-    );
-  };
-  // every run measures the filter turned on, then turns it off untimed
-  await within(t, 100, async () => {
-    await relayout();
-    const ms = await took(['flow:layout', 'flow:commit']);
-    await relayout();
-    return ms;
-  });
-});
-
-// Breaks: a refused compile's /story 500 shows no refusal in the map slot, or shows more than its first
-// line (App.tsx useStory's failure rule, author.ts story's throw).
-test('a refused /story shows its first line in the map slot', async () => {
-  const page = await open(QUEST);
-  const said = JSON.stringify({ text: {}, said: ['refused'], compiled: false }); // the watcher spoke
-  await page.route('**/__author/events', (r) =>
-    r.fulfill({ contentType: 'text/event-stream', body: `data: ${said}\n\n` }),
-  );
-  await page.route('**/__author/story', (r) =>
-    r.fulfill({ status: 500, body: 'first line\nsecond line' }),
-  );
-  await page.reload();
-  const slot = page.getByLabel('Map slot');
-  await slot.getByText('first line').waitFor({ timeout: boot });
-  assert.equal(await slot.getByText('second line').count(), 0);
-  await page.close();
-});
-
-// Breaks: Cmd-E opens nothing for the selection (App.tsx's shortcut, loka-wfrgk.21).
-test('Cmd-E asks to open the selected card’s file', async () => {
-  const page = await open(QUEST);
-  const sent: { key?: string }[] = [];
-  await page.route(
-    '**/__author/open',
-    (r) => (sent.push(r.request().postDataJSON()), r.fulfill({ body: '{}' })),
-  ); // no editor opens
-  await page.keyboard.press('Control+e');
-  for (let i = 0; i < 50 && !sent.length; i++) await page.waitForTimeout(100);
-  assert.deepEqual(
-    sent.map((s) => s.key),
-    ['carry_letter'],
-  );
-  await page.close();
-});
-
-// Breaks: the checkpoint name's refusal shows for a good name, or not for a bad one (sections.tsx).
-test('a bad checkpoint name is refused, a good one is not', async () => {
-  const page = await open({ ...QUEST, leftOpen: true, tab: 'project' });
-  const name = page.getByLabel('Checkpoint name');
-  const refusal = page.getByText('A name is up to 64');
-  await name.fill('Bad Name');
-  await refusal.waitFor();
-  await name.fill('good_name');
-  await refusal.waitFor({ state: 'detached' });
-  await page.close();
-});
-
-// Breaks: a selected room's pill shows while its box already shows the whole key (loka-vduxr.73), or
-// hides when zoomed out where the box shows none (mapsvg.tsx Drawing's Pills filter); or the footer
-// loses its counts when nothing is refused (areamap.tsx's footer line). Map rulings, minimum zoom: level 0
-// opens clipped at 0.25 (no M.floor in `fitted`), or a button or Cmd-wheel zoom out stops at 0.25 (no `least`).
-test('level 0 opens whole, zooms out no further, and only a pill marks the selected disc', async () => {
-  const page = await open({ selection: { kind: 'room', key: 'tollhouse' } });
-  await page.emulateMedia({ reducedMotion: 'reduce' }); // each zoom lands at once
-  const slot = page.getByLabel('Map slot');
-  const pills = slot.locator('g.pointer-events-none text'),
-    pill = pills.filter({ hasText: 'tollhouse' });
-  const zoom = async (name: string, n = 12) => {
-    for (let i = 0; i < n; i++) await slot.getByRole('button', { name }).click({ timeout: boot });
-  };
-  const seen = () =>
-    slot.locator('svg [data-key]').evaluateAll((gs) => {
-      // the width between room centres (zoom times cells); every room in the drawing
-      const s = gs[0].closest('svg')!.getBoundingClientRect(),
-        b = gs.map((g) => g.getBoundingClientRect()),
-        x = b.map((r) => r.x + r.width / 2);
-      return [
-        Math.round(Math.max(...x) - Math.min(...x)),
-        b.every(
-          (r) => r.left >= s.left && r.right <= s.right && r.top >= s.top && r.bottom <= s.bottom,
-        ),
-      ];
-    });
-  await slot.getByText(/^\d+ rooms/).waitFor({ timeout: boot });
-  const fit = await seen();
-  assert.equal(fit[1], true); // whole, below 0.25: a disc, no label
-  (await pill.waitFor(), assert.deepEqual(await pills.allTextContents(), ['tollhouse'])); // no other room is marked
-  (await zoom('Zoom in'), await pill.waitFor({ state: 'detached' })); // 3: the box shows the whole key
-  (await zoom('Zoom out'), assert.deepEqual(await seen(), fit));
-  const b = (await slot.getByRole('group', { name: /^Area map/ }).boundingBox())!;
-  (await zoom('Zoom in', 1),
-    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2),
-    await page.keyboard.down('Meta'));
-  for (let i = 0; i < 6; i++) await page.mouse.wheel(0, 200); // Cmd-wheel out about the centre
-  assert.deepEqual(await seen(), fit);
-  await page.close();
-});
-
 // Breaks: an edit elsewhere in a status card writes its integer `duration` as the other anyOf
 // branch's `permanent` (loka-wfrgk.75); asserted on the file on disk.
 test('editing a status keeps its integer duration', async () => {

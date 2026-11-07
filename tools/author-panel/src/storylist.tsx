@@ -25,7 +25,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import type { SetLayout } from './columns.tsx';
-import { edit } from './mapwire.ts';
+import { edit, shown } from './mapwire.ts';
 import { fromRef, type Layout, type Selection } from './shell.ts';
 import * as L from './storylist.ts';
 import { ICONED, LowerPanel, PacingButton, type Act } from './storylower.tsx';
@@ -57,7 +57,7 @@ type Props = {
   set: SetLayout;
   segment: React.ReactNode;
   pick: (s: Selection) => void;
-  open: (key: string) => void;
+  open: (ref: string) => void;
 };
 
 function NodeCells({ row, tab, trace }: { row: L.Row; tab: boolean; trace: () => void }) {
@@ -104,7 +104,7 @@ function Ghost({ label, icon: Icon, tab, run }: { label: string; icon: typeof Fl
 // ponytail: a prompt, not the design's Picker (the panel has none until E4b, PR 645); swap in its Picker then
 const bind = (row: L.Row) => {
   const short = prompt(`Bind beat ${row.n} to (a short ref, as outline.json writes it)`);
-  if (short) edit((e) => e.bind(Number(row.parent!.slice('part:'.length)), row.n!, short));
+  if (short) edit((e) => e.bind(Number(row.parent!.slice('part:'.length)), row.n!, short, shown.shorts));
 };
 // Add, retitle and remove a beat (design 5c): /change on outline.json, as Bind; a prompt for the same reason.
 const partNo = (id: string) => Number(id.slice('part:'.length));
@@ -164,7 +164,7 @@ function Cells({ row, a, tab }: { row: L.Row; a: Act; tab: boolean }) {
 // A row's click: a node selects (Alt opens its source), a part or beat opens or shuts.
 const click = (a: Act, row: L.Row, alt: boolean) => {
   const sel = row.ref ? fromRef(row.ref) : undefined;
-  if (sel && alt) return a.open(sel.key);
+  if (sel && alt) return a.open(row.ref!);
   if (sel) return (a.put({ ...a.st, focus: row.id }), a.pick(sel));
   if (row.open !== undefined) a.put({ ...L.toggle(a.st, row.id), focus: row.id });
 };
