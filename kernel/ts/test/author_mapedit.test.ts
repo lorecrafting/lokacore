@@ -50,28 +50,9 @@ let ask: (path: string) => Promise<{ ok: boolean; told: any }>;
 let snapshot: Record<string, string>;
 let io: Io;
 
-before(async () => {
-  // CI has mix but no mise: the stub runs the command (as ci.yml's kernel job does)
-  mkdirSync(join(dir, 'bin'));
-  writeFileSync(join(dir, 'bin/mise'), '#!/bin/sh\nshift 2\nexec "$@"\n');
-  chmodSync(join(dir, 'bin/mise'), 0o755);
-  process.env.PATH = `${join(dir, 'bin')}:${process.env.PATH}`;
-  execFileSync('mix', ['loka.new', 'cartridge', src], { cwd: REPO, stdio: 'ignore' });
-  const cartridge = json('cartridge.json');
-  cartridge.requires.capabilities.knowledge = 1; // a layout needs it (Loka.Content.Layout)
-  writeFileSync(join(src, 'cartridge.json'), JSON.stringify(cartridge));
-  const blank = read('rooms/start.json');
-  writeFileSync(join(src, 'rooms/b.json'), blank);
-  writeFileSync(join(src, 'rooms/c.json'), blank);
-  writeFileSync(join(src, 'layout.json'), '[\n  { "room": "start", "x": 0, "y": 0, "z": 0 }\n]\n');
-  writeFileSync(
-    join(src, 'outline.json'),
-    '{ "parts": [{ "beats": [{ "n": 1 }, { "n": 2, "nodes": ["rooms/b"] }] }] }\n',
-  );
-  snapshot = Object.fromEntries(files().map((f) => [f, read(f)]));
-  const live = serve(0, src, join(dir, 'none.json'));
+const open = async (at: string) => {
+  const live = serve(0, at, join(dir, 'none.json'));
   const port = await live.port;
-  close = () => live.close();
   const http = (path: string, sent?: object) =>
     new Promise<{ ok: boolean; told: any }>((done, fail) => {
       const method = sent ? 'POST' : 'GET';
@@ -84,11 +65,29 @@ before(async () => {
       });
       req.end(sent && JSON.stringify(sent));
     });
-  ask = http;
-  io = {
+  const io: Io = {
     post: (route, sent) => http(`/${route}`, sent),
     source: async (file) => (await http(`/source?file=${encodeURIComponent(file)}`)).told,
   };
+  return { close: () => live.close(), http, io };
+};
+
+before(async () => {
+  // CI has mix but no mise: the stub runs the command (as ci.yml's kernel job does)
+  mkdirSync(join(dir, 'bin'));
+  writeFileSync(join(dir, 'bin/mise'), '#!/bin/sh\nshift 2\nexec "$@"\n');
+  chmodSync(join(dir, 'bin/mise'), 0o755);
+  process.env.PATH = `${join(dir, 'bin')}:${process.env.PATH}`;
+  execFileSync('mix', ['loka.new', 'cartridge', src], { cwd: REPO, stdio: 'ignore' });
+  const blank = read('rooms/start.json');
+  writeFileSync(join(src, 'rooms/b.json'), blank);
+  writeFileSync(join(src, 'rooms/c.json'), blank);
+  writeFileSync(
+    join(src, 'outline.json'),
+    '{ "parts": [{ "beats": [{ "n": 1 }, { "n": 2, "nodes": ["rooms/b"] }] }] }\n',
+  );
+  snapshot = Object.fromEntries(files().map((f) => [f, read(f)]));
+  ({ close, http: ask, io } = await open(src));
   ed = editor(io);
 });
 after(() => {
@@ -476,6 +475,21 @@ test('a refused put-back is told with the refusal that stopped the gesture', asy
     editor(io).link(x, 'east', y),
     /y already has an exit west; put back stopped: held$/,
   );
+});
+
+test('a drop on an empty map writes the first row at 0,0,0 and the knowledge it needs', async () => {
+  // Breaks: the drop refusing on an empty map (no cells to aim at); the row written without
+  // knowledge@1, so the compile refuses layout.json (lib/loka/content/layout.ex:62).
+  const old = (rel = '') => join(dir, 'old', rel);
+  execFileSync('mix', ['loka.new', 'cartridge', old()], { cwd: REPO, stdio: 'ignore' });
+  rmSync(old('layout.json')); // a world made before the starter placed its room
+  const cartridge = JSON.parse(readFileSync(old('cartridge.json'), 'utf8'));
+  delete cartridge.requires.capabilities.knowledge;
+  writeFileSync(old('cartridge.json'), JSON.stringify(cartridge));
+  const s = await open(old());
+  await editor(s.io).first().finally(s.close);
+  const layout = JSON.parse(readFileSync(old('layout.json'), 'utf8'));
+  assert.deepEqual(layout, [{ room: 'start', x: 0, y: 0, z: 0 }]);
 });
 
 test('undo puts every gesture back: the files are byte-identical to the start', async () => {

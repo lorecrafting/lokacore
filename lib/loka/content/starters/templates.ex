@@ -54,7 +54,7 @@ defmodule Loka.Content.Starters.Templates do
   defp kind("transports"),
     do: {~w(transport inspectable_detail), ~w(rooms npcs resources), &World.transport/2}
 
-  @doc "A new cartridge: manifest, one room `start`, nothing else."
+  @doc "A new cartridge: manifest, one room `start` placed at 0,0,0 (layout needs knowledge)."
   def cartridge(id) do
     %{
       "cartridge.json" => %{
@@ -72,12 +72,14 @@ defmodule Loka.Content.Starters.Templates do
             "movement" => 1,
             "containment" => 1,
             "fact" => 1,
-            "description_variant" => 1
+            "description_variant" => 1,
+            "knowledge" => 1
           },
           "client_features" => []
         },
         "supported_profiles" => ["offline_private"]
       },
+      "layout.json" => [%{"room" => "start", "x" => 0, "y" => 0, "z" => 0}],
       "rooms/start.json" => room()
     }
   end

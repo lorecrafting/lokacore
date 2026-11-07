@@ -179,12 +179,10 @@ defmodule Loka.Content.Starters do
 
   defp with_layout(files, dir, c, name) do
     if File.exists?(Path.join(dir, "layout.json")) do
-      rooms =
-        Enum.uniq(
-          c["room_list"] ++ Enum.flat_map(files, fn {rel, b} -> rooms_in(Path.split(rel), b) end)
-        )
-
-      Map.put(files, "layout.json", Templates.with_rows(c["layout"], rooms, name, c["from"]))
+      rooms = Enum.flat_map(files, fn {rel, b} -> rooms_in(Path.split(rel), b) end)
+      rows = Templates.with_rows(c["layout"], Enum.uniq(c["room_list"] ++ rooms), name, c["from"])
+      # Rows need knowledge@1 (lib/loka/content/layout.ex:62).
+      files |> Map.put("layout.json", rows) |> with_capabilities(~w(knowledge))
     else
       files
     end
@@ -195,18 +193,18 @@ defmodule Loka.Content.Starters do
   defp rooms_in(_, _), do: []
 
   defp rooms(dir) do
-    bundled =
-      for a <- Path.wildcard(Path.join(dir, "areas/*.json")),
-          r <- area_rooms(a),
-          do: r
+    bundled = for a <- Path.wildcard(Path.join(dir, "areas/*.json")), r <- area_rooms(a), do: r
 
-    plain = for r <- own_files(dir, "rooms"), do: Path.basename(r, ".json")
+    plain = for r <- own_files(dir, "rooms"), concrete?(read(r)), do: Path.basename(r, ".json")
     Enum.sort(bundled ++ plain)
   end
 
+  # An abstract room is no place: layout.json has no row for it (the compiler refuses one).
+  defp concrete?(room), do: not match?(%{"abstract" => true}, room)
+
   defp area_rooms(file) do
     case read(file) do
-      %{"rooms" => %{} = rooms} -> Map.keys(rooms)
+      %{"rooms" => %{} = rooms} -> for {k, r} <- rooms, concrete?(r), do: k
       area when is_map(area) and not is_map_key(area, "rooms") -> []
       _ -> throw({:bad_area, file})
     end

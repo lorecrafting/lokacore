@@ -342,7 +342,7 @@ when you run `mix loka.compile` by hand.
 | `barriers` | [`position_sampler`](../../cartridges/position_sampler/) | nothing |
 | `behaviours` | [`fishing_sampler`](../../cartridges/fishing_sampler/) | nothing |
 | `bleeds` | [`bleed_sampler`](../../cartridges/bleed_sampler/) | a resource |
-| `cartridge` | [`cellar_sampler`](../../cartridges/cellar_sampler/) | nothing: `bin/loka new cartridge cartridges/<id>` makes the manifest and a `start` room; `--from cartridges/<other>` copies that world under the new id |
+| `cartridge` | [`cellar_sampler`](../../cartridges/cellar_sampler/) | nothing: `bin/loka new cartridge cartridges/<id>` makes the manifest (with `knowledge`, which `layout.json` needs) and a `start` room placed at 0,0,0; `--from cartridges/<other>` copies that world under the new id |
 | `cutscene` | [`scene_sampler`](../../cartridges/scene_sampler/) | an item (it writes its own quest and `scenes/<name>.json`) |
 | `dialogues` | [`ask_sampler`](../../cartridges/ask_sampler/) | an NPC |
 | `emotes` | [`emote_sampler`](../../cartridges/emote_sampler/) | nothing |

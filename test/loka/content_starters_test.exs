@@ -24,10 +24,12 @@ defmodule Loka.ContentStartersTest do
   end
 
   # Breaks: a starter missing a field or capability the compiler requires, or two starters
-  # sharing a key (the service's entitlement once took the action's fact, which made it reserved).
+  # sharing a key (the service's entitlement once took the action's fact, which made it reserved);
+  # a new world's entry room off the map (the panel's first drop had no cell to aim at).
   test "a new cartridge with one starter of every kind compiles", %{tmp_dir: tmp} do
     dir = Path.join(tmp, "mine")
     assert {:ok, _} = Starters.write(dir, "cartridge", dir)
+    assert read(dir, "layout.json") == [%{"room" => "start", "x" => 0, "y" => 0, "z" => 0}]
     first = ~w(items npcs resources facts quests)
     rest = (Starters.kinds() -- first) -- ~w(cartridge layout)
 
@@ -55,7 +57,7 @@ defmodule Loka.ContentStartersTest do
              Starters.write(dir, "shop", "x")
 
     assert {:error, _} = Starters.write(dir, "cartridge", dir)
-    assert Path.wildcard(Path.join(dir, "**/*.json")) |> length() == 2
+    assert Path.wildcard(Path.join(dir, "**/*.json")) |> length() == 3
     assert {:error, "no cartridge.json in " <> _} = Starters.write(tmp, "rooms", "r")
     assert {:ok, _} = Starters.write(dir, "text", "a.b")
   end
@@ -216,9 +218,11 @@ defmodule Loka.ContentStartersTest do
   end
 
   # Breaks: look refused for a missing capability, an exit written one way, an NPC in the
-  # alphabetically first room. Literal answers from the real headless client.
+  # alphabetically first room; a grow's layout row without the knowledge@1 it needs (compile
+  # refuses). Literal answers from the real headless client.
   test "a fresh cartridge, a joined room and an NPC play headless", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
+    edit(dir, "cartridge.json", &elem(pop_in(&1, ~w(requires capabilities knowledge)), 1))
     {:ok, _} = Starters.write(dir, "rooms", "grove", {"start", "east"})
     {:ok, _} = Starters.write(dir, "npcs", "thera")
     assert read(dir, "npcs/thera.json")["room"] == "start"
@@ -337,7 +341,7 @@ defmodule Loka.ContentStartersTest do
     dir = cartridge(tmp)
     bundle(dir, "marsh")
     edit(dir, "cartridge.json", &Map.put(&1, "entry", "marsh"))
-    File.rm!(Path.join(dir, "rooms/start.json"))
+    for f <- ~w(rooms/start.json layout.json), do: File.rm!(Path.join(dir, f))
     assert {:ok, _} = Starters.write(dir, "layout", "x")
     assert ["marsh"] == for(r <- read(dir, "layout.json"), do: r["room"])
   end
@@ -382,6 +386,7 @@ defmodule Loka.ContentStartersTest do
   # cartridge that chose none, a bundled room's row missed.
   test "any starter adds only the rows an existing layout lacks", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
+    File.rm!(Path.join(dir, "layout.json"))
     {:ok, _} = Starters.write(dir, "rooms", "yard")
     refute File.exists?(Path.join(dir, "layout.json"))
     {:ok, _} = Starters.write(dir, "layout", "layout")
@@ -602,7 +607,8 @@ defmodule Loka.ContentStartersTest do
     refute File.exists?(Path.join(dir, "scenes/hi.scene"))
     assert {:ok, _, _} = Loka.Content.compile(dir)
 
-    # A bundled NPC's scene goes beside its bundle, in areas/<bundle>/scenes/.
+    # A bundled NPC's scene goes beside its bundle, in areas/<bundle>/scenes/ (no row: no layout).
+    File.rm!(Path.join(dir, "layout.json"))
     bundle(dir, "fen")
 
     edit(
