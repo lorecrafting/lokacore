@@ -91,7 +91,7 @@ function Room({
       onFocus={() => focus(r.key)}
       onPointerEnter={() => hover(r.key)}
       onPointerLeave={() => hover(undefined)}
-      onClick={(e) => (e.altKey ? d.p.open(r.key) : d.p.pick(map.select(r)))}
+      onClick={(e) => (e.altKey ? d.p.open(r.ref) : d.p.pick(map.select(r)))}
       onDoubleClick={() => d.p.go(r.key)}
     >
       <title>{map.name(r, {})}</title>

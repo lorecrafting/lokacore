@@ -14,8 +14,16 @@ import { encode, type Json } from '../src/foundation/canonical.ts';
 import { artifactBytes, compiled } from './compiled.ts';
 import { contentGraph, reachReport } from './reach.ts';
 import { placed } from './guard.ts';
-import { files, todo, type Todo } from './todo.ts';
-import { choiceCounts, hiddenSkills, keysIn, unlinkable, wordsByNode } from './story_counts.ts';
+import { bundled, files, todo, type Todo } from './todo.ts';
+import {
+  choiceCounts,
+  hiddenSkills,
+  keysIn,
+  resolve,
+  shorts,
+  unlinkable,
+  wordsByNode,
+} from './story_counts.ts';
 import { refString } from '../src/runtime/decision.ts';
 
 type Dev = { canonical: string; sha256: string };
@@ -105,6 +113,14 @@ function todoByNode(source: string, refs: Map<string, string>, defs: Map<string,
   return out;
 }
 
+/** A bundle's members by ref: not `files` (no card of their own), but their area's (reachable). */
+const bundledRefs = (source: string, refs: Map<string, string>) =>
+  Object.fromEntries(
+    Object.entries(bundled(source)).flatMap(([k, rel]) =>
+      refs.has(k) ? [[refs.get(k)!, rel]] : [],
+    ),
+  );
+
 /** The model for `source` compiled to `dev`, with the compile's diagnostics. */
 export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   const loaded = loadCartridge(artifactBytes(dev), INSTALLED);
@@ -127,43 +143,32 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     const ref = nodeOf(rel, refs);
     if (ref) sources[ref] = rel;
   }
+  const inBundle = bundledRefs(source, refs);
   return {
     hash: dev.sha256,
     graph,
     files: sources,
+    bundled: inBundle,
     report,
     todo: todos,
     diagnostics: byNode,
     outline: beats(source, { refs, defs, todos, unreached }),
-    map: rooms(source, c, refs),
+    map: rooms(c, sources, inBundle),
     words: wordsByNode(defs, (c.text ?? {}) as Record<string, unknown>),
     choices: choiceCounts(c),
     hidden: hiddenSkills(c), // the cards' add menus and links (allowed.ts, link.ts)
     unlinkable: unlinkable(c),
+    shorts: shorts(refs, defs), // what Bind may write
   };
 }
 
 /** The editor map's rooms (docs/design/editor-map-and-story-rulings.md E3a): each with its source
  * file, its area (the folder, or an `areas/<name>.json` bundle; null at the root), its title's
  * words, its exits and its layout.json cell (`at`, absent when unplaced). */
-function rooms(source: string, c: Obj, refs: Map<string, string>) {
+function rooms(c: Obj, own: Record<string, string>, inBundle: Record<string, string>) {
   const file = new Map<string, [string, string | null]>();
-  for (const rel of files(source)) {
-    const bundle = /^areas\/([a-z0-9_]+)\.json$/.exec(rel)?.[1];
-    if (!bundle) {
-      const ref = nodeOf(rel, refs);
-      if (ref) file.set(ref, [rel, placed(rel)!.area]);
-      continue;
-    }
-    let held: Obj;
-    try {
-      held = JSON.parse(readFileSync(join(source, rel), 'utf8')) as Obj;
-    } catch {
-      continue; // a half-typed bundle is the compiler's to report; its rooms keep no file
-    }
-    for (const key of Object.keys(held.rooms ?? {}))
-      file.set(refs.get(`rooms/${key}`) ?? '', [rel, bundle]);
-  }
+  for (const [ref, rel] of Object.entries(own)) file.set(ref, [rel, placed(rel)!.area]);
+  for (const [ref, rel] of Object.entries(inBundle)) file.set(ref, [rel, rel.slice(6, -5)]); // areas/<a>.json
   const at = new Map(
     ((c.layout ?? []) as Obj[]).map(({ room, x, y, z }) => [refString(room as never), { x, y, z }]),
   );
@@ -190,17 +195,6 @@ type Bound = {
   unreached: Set<string>;
 };
 
-// A short ref's node: a dialogue choice `dialogues/<d>/<c>` is its dialogue's, when it has that choice.
-function resolve(short: string, { refs, defs }: Bound) {
-  const [dir, key, choice] = short.split('/');
-  const ref = refs.get(`${dir}/${key}`);
-  if (choice === undefined || !ref) return ref;
-  const d = defs.get(ref);
-  return dir === 'dialogues' && isObj(d) && isObj(d.choices) && choice in d.choices
-    ? ref
-    : undefined;
-}
-
 function readOutline(source: string): Outline | { refused: string } | null {
   const file = join(source, 'outline.json');
   if (!existsSync(file)) return null;
@@ -225,7 +219,7 @@ function beats(source: string, bound: Bound) {
   if (!outline || 'refused' in outline) return outline;
   const all = outline.parts.flatMap((p, part) => p.beats.map((b) => ({ ...b, part })));
   const rows = all.map(({ part, n, title, nodes = [] }) => {
-    const refs = nodes.map((short) => resolve(short, bound));
+    const refs = nodes.map((short) => resolve(short, bound.refs, bound.defs));
     const missing = nodes.filter((_, i) => !refs[i]);
     const status =
       !nodes.length || missing.length

@@ -8,7 +8,7 @@ import * as K from './storyknow.ts';
 import * as L from './storylist.ts';
 
 export const ICONED = { className: 'size-3.5 shrink-0', strokeWidth: 1.5, absoluteStrokeWidth: true };
-export type Act = { st: L.ListState; put: (st: L.ListState) => void; pick: (s: Selection) => void; open: (key: string) => void };
+export type Act = { st: L.ListState; put: (st: L.ListState) => void; pick: (s: Selection) => void; open: (ref: string) => void };
 
 // A lower-section row: a node's key, a click selects it.
 function NodeButton({ r, a }: { r: L.TraceRow; a: Act }) {

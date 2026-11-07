@@ -34,11 +34,13 @@ export type Story = {
   todo: Record<string, Todo[]>;
   diagnostics: Record<string, { code?: string; path?: string }[]>;
   files: Record<string, string>;
+  bundled: Record<string, string>; // a bundle member's ref => its areas/<a>.json
   map: MapRoom[];
   words: Record<string, number>; // written words by node (Pacing)
   choices: Record<string, number>; // choice count by dialogue (Knowledge)
   hidden: string[]; // hidden skills' keys
   unlinkable: Record<string, string>; // dialogue key => the keyword, quest or riddle no then enters
+  shorts: string[]; // the short refs a beat may bind (story.ts resolve)
 };
 
 /** The kinds the list holds (design section 4.1); Trace opens on the fact, quest and story point. */

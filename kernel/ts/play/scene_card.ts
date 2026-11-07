@@ -8,6 +8,8 @@ import { guarded, named, placed, refuse, stale } from './guard.ts';
 import { contentGraph } from './reach.ts';
 import { picks, VALUE, type Verb } from './scene_lines.ts';
 import { unlinkable } from './story_counts.ts';
+import { bundled, files } from './todo.ts';
+import { crossed } from './world_card.ts';
 import type { Answer, Change } from './write.ts';
 
 /** The last good compile's cartridge, loaded as the panel's story model loads it (story.ts). */
@@ -31,6 +33,13 @@ export function ids(c: Obj = {}): Record<Verb, string[]> {
   };
 }
 
+/** The source file of the `dir` definition `key`, else its bundle (story.ts nodeOf: a `.scene` is a dialogue). */
+const home = (root: string, key: string, dir: string) =>
+  files(root).find((f) => {
+    const p = placed(f);
+    return p?.key === key && (p.ext === 'scene' ? 'dialogues' : p.dir) === dir;
+  }) ?? bundled(root)[`${dir}/${key}`];
+
 export function set(
   root: string,
   { file, line, was, value }: Record<string, any>,
@@ -46,6 +55,8 @@ export function set(
   if (lines[line - 1] !== was) stale(before);
   const [, head, verb, , end] = VALUE.exec(was) ?? refuse(400, 'not an npc:, with: or then: line');
   if (!keys()[verb as Verb].includes(value)) refuse(400, `${verb}: no such key ${value}`);
+  const area = crossed(file, home(root, value, verb === 'then' ? 'dialogues' : 'npcs'));
+  if (area) refuse(400, `${verb}: ${value} is area ${area}’s, not this file’s (area_rules.ex:27)`);
   lines[line - 1] = `${head}${value}${end}`;
   return done(`set ${file}:${line}`, { file, before, after: lines.join('\n') });
 }

@@ -144,6 +144,18 @@ test('a beat is missing with the refs not in the artifact, `~` while its node ha
       [6, 'built', undefined],
     ],
   );
+  // Break: Bind (mapedit.ts) is told a ref resolve() refuses is known, or a choice ref is not.
+  const { shorts } = story(src, dev, []) as { shorts: string[] };
+  assert.deepEqual(
+    [
+      'dialogues/greet/ask',
+      'rooms/village_green',
+      'items/nowhere',
+      'dialogues/greet/nope',
+      'rooms/village_green/door',
+    ].map((r) => shorts.includes(r)),
+    [true, true, false, false, false],
+  );
   const text = readFileSync(join(src, 'text.json'), 'utf8');
   const spoken = readFileSync(join(src, hub), 'utf8');
   put('text.json', { ...JSON.parse(text), 'room.village_green.description': '~' });
@@ -290,7 +302,7 @@ test("the compile's diagnostics by node", () => {
 test('each node names its own source file, a .json over its .scene', () => {
   const scene = join(src, 'scenes/greet.scene');
   writeFileSync(scene, '');
-  const { files } = story(src, dev, []);
+  const { files, bundled } = story(src, dev, []);
   const json = join(src, 'dialogues/greet.json');
   const twin = readFileSync(json);
   rmSync(json);
@@ -302,6 +314,16 @@ test('each node names its own source file, a .json over its .scene', () => {
   assert.equal(files[ref('dialogue', 'greet')], 'dialogues/greet.json');
   assert.equal(lone, 'scenes/greet.scene');
   assert.ok(!Object.values(files).includes('text.json'));
+  // Break: a bundle's room has no area for the pickers (reachable), or a card file of its own.
+  assert.deepEqual(bundled, { [ref('room', 'shed')]: 'areas/yard.json' });
+  assert.ok(!Object.values(files).includes('areas/yard.json'));
+  // Break: a bundle saved as `null` throws past the parse guard: a 500 for the whole story.
+  writeFileSync(join(src, 'areas/void.json'), 'null');
+  try {
+    assert.deepEqual(story(src, dev, []).bundled, bundled);
+  } finally {
+    rmSync(join(src, 'areas/void.json'));
+  }
 });
 
 // Break: a bad outline.json throws (a 500 for the whole map) instead of a refusal in the model

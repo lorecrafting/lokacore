@@ -182,9 +182,10 @@ const move = async (s: Run, r: MapRoom, area: string | null) =>
   s.call('move', { file: fileOf(r), was: (await s.read(fileOf(r))).was, area });
 
 type Outline = { parts: { beats: { n: number; nodes?: string[] }[] }[] };
-/** Bind (design 5c): `short` joins beat `n` of part `part` in outline.json. */
-const bind = (s: Run, part: number, n: number, short: string) =>
+/** Bind (design 5c): `short`, one of `known` (Story.shorts), joins beat `n` of part `part` in outline.json. */
+const bind = (s: Run, part: number, n: number, short: string, known: string[]) =>
   s.change<Outline>('outline.json', (doc) => {
+    if (!known.includes(short)) no(`${short} is no definition in the last compile`);
     const beats = doc.parts[part]?.beats ?? no(`outline.json has no part ${part + 1}`);
     const j = beats.findIndex((b) => b.n === n);
     if (j < 0) no(`part ${part + 1} has no beat ${n}`);
@@ -258,7 +259,8 @@ export function editor(io: Io) {
     made: (r: MapRoom, kind: 'npcs' | 'items', key: string, up?: string) =>
       run((s) => made(s, r, kind, key, up)),
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
-    bind: (part: number, n: number, short: string) => run((s) => bind(s, part, n, short)),
+    bind: (part: number, n: number, short: string, known: string[]) =>
+      run((s) => bind(s, part, n, short, known)),
   };
 }
 export type Editor = ReturnType<typeof editor>;

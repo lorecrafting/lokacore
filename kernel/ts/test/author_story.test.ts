@@ -56,6 +56,8 @@ const story = (outline: Story['outline']): Story => ({
   hidden: [],
   unlinkable: {},
   files: {},
+  bundled: {},
+  shorts: [],
 });
 const planted = story({
   parts: ['Arrival', null],

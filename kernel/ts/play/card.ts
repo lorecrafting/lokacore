@@ -371,9 +371,6 @@ export function definitionOf(defs: Record<string, Obj>, kind: string, doc: unkno
   return name;
 }
 
-/** A field `added` seeds into the draft only: written with the author's pick (a targetless offer: quests.ex:63-66). */
-export const awaits = (def: string, f: string) => `${def}.${f}` === 'source.QuestDefinition.offer';
-
 /** `doc` without field `f`. */
 export const removed = (doc: Obj, f: string): Obj => {
   const { [f]: _gone, ...rest } = doc;
@@ -384,8 +381,8 @@ export const removed = (doc: Obj, f: string): Obj => {
 export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
   a.room === key && menu.includes(a.kind) ? a.kind : undefined;
 
-import { allowed } from './allowed.ts';
-export { allowed };
+import { allowed, awaits } from './allowed.ts';
+export { allowed, awaits };
 
 /** The generic card's add menu (a command action's, right.tsx's fallback): `only` narrows the
  * registry's fields, then the cartridge's capabilities gate them as the compiler does

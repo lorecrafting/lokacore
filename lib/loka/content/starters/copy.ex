@@ -39,19 +39,10 @@ defmodule Loka.Content.Starters.Copy do
     to
   end
 
-  @ordered [
-    object_push: &__MODULE__.push/3,
-    object_finish: &__MODULE__.finish/2
-  ]
-  @doc false
-  def push(key, value, acc), do: [{key, value} | acc]
-  @doc false
-  def finish(acc, old), do: {{:obj, Enum.reverse(acc)}, old}
-
   # As data, not text: prose that happens to hold the id is untouched, and a file with no reference
   # keeps its bytes.
   defp renamed(bytes, rel, swap) do
-    with {tree, [], ""} <- JSON.decode(bytes, [], @ordered),
+    with {tree, [], ""} <- JSON.decode(bytes, [], Parts.ordered()),
          new when new != tree <- swapped(tree, swap, rel == "cartridge.json") do
       Parts.pretty(new)
     else
