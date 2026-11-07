@@ -23,13 +23,20 @@ export const shown = {
   shorts: [] as string[],
 };
 
-/** The palette's New <kind>: a free `<kind>_<n>` key (an outline keeps its one name), then its card. */
+const NODE: Record<string, string> = { cutscene: 'scene', areas: 'room' }; // the graph kind a palette kind compiles to
+const NAMED = ['text', 'behaviours']; // no graph node holds their keys: a reused one would merge silently, so the author names it
+
+/** The palette's New <kind>: a free `<kind>_<n>` key, then its card (an outline or layout has one fixed name). */
 export async function created(kind: string) {
   const one = kind.replace(/(us)es$|s$/, '$1');
-  const held = (await templates()).filter((t) => t.dir === kind).map((t) => t.key);
-  const name = kind === 'outline' ? kind : freeKey(one, one, shown.nodes, held);
+  const node = NODE[kind] ?? one;
+  const held = kind === 'npcs' || kind === 'items' ? (await templates()).filter((t) => t.dir === kind).map((t) => t.key) : [];
+  const fixed = kind === 'outline' || kind === 'layout';
+  const name = fixed ? kind : NAMED.includes(kind) ? prompt(`New ${one} key`) : freeKey(one, node, shown.nodes, held);
+  if (!name) return;
   const { ok, told } = await ask('new', { kind, name });
-  return ok ? shown.pick({ kind: one, key: name }) : alert(String(told));
+  if (!ok) alert(String(told));
+  else if (!fixed) shown.pick({ kind: node, key: name });
 }
 
 /** The last map edit's id if it read or wrote `file` (mapedit.ts `newest`). */

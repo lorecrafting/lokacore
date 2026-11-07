@@ -74,7 +74,7 @@ export function names(defs: Map<string, unknown>, text: Obj) {
   const out: Record<string, string> = {};
   for (const [ref, def] of defs) {
     const k = (def as Obj).name;
-    const name = typeof k === 'string' ? (text[k] ?? k) : undefined;
+    const name = typeof k === 'string' ? text[k] : undefined; // a rejected text.json: none
     if (typeof name === 'string' && name.trim() !== '~') out[ref] = name;
   }
   return out;
