@@ -47,12 +47,12 @@ const EXEMPT: Record<string, string> = {
 // Verbs the editor lacks today, each with its Beads issue.
 const GAPS: Record<string, string> = {
   // no palette New: the kind is written by hand or by its card's parent
-  'treatment:reverie create': 'loka-wfrgk.86',
-  'treatment:reverie delete': 'loka-wfrgk.86',
+  'treatment:reverie create': 'loka-wfrgk.86.1',
+  'treatment:reverie delete': 'loka-wfrgk.86.1',
   // the add menu's least value (card.ts added) is one the compiler refuses
-  'items.block_chance edit': 'loka-wfrgk.84',
-  'items.capacity edit': 'loka-wfrgk.84',
-  'quests.offer edit': 'loka-wfrgk.84',
+  'items.block_chance edit': 'loka-wfrgk.84.1',
+  'items.capacity edit': 'loka-wfrgk.84.1',
+  'quests.offer edit': 'loka-wfrgk.84.1',
 };
 
 const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-crud-')));
