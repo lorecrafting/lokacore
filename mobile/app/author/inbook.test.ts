@@ -1,4 +1,4 @@
-// size: allow 585, one editor's keys, saves, conflicts and add-here walked over one stubbed page
+// size: allow 635, one editor's keys, saves, conflicts, add-here and capitalised titles walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -116,6 +116,55 @@ test('a double-click opens the source words; Enter saves them to that line and c
       .first()
       .evaluate((el) => el === document.activeElement),
   );
+});
+
+// A line the Book draws through cap() (an NPC page title, a menu title): text() saw its file's words.
+const STRANGER = {
+  file: 'text.json',
+  line: 31,
+  was: 'a hooded stranger',
+  words: 'a hooded stranger',
+};
+const capitalised = (key: string, words: string) =>
+  page.evaluate(
+    ([key, words]) => {
+      const w = window as unknown as { seen: Map<string, string>; said: Map<string, string> };
+      const el = document.querySelector('main')!.appendChild(document.createElement('h1'));
+      el.dir = 'auto';
+      el.textContent = words.charAt(0).toUpperCase() + words.slice(1);
+      w.seen.set(words, key);
+      w.said.set(key, words);
+    },
+    [key, words],
+  );
+
+// Breaks: the lookup matches a drawn line's words exactly only, so a capitalised NPC title says
+// "Not a line of words", or the field shows and saves the capitalised form, not the file's.
+test("a capitalised title opens its key's field with the file's words; Enter saves that line", async () => {
+  await capitalised('npc.stranger.short', 'a hooded stranger');
+  answer = (path) => (path.startsWith('/line') ? [200, STRANGER] : [200, { id: 7 }]);
+  await page.locator('h1').dblclick();
+  const field = page.locator('[data-loka-field]');
+  assert.equal(await field.textContent(), 'a hooded stranger');
+  assert.equal(asked[0].path, '/line?key=npc.stranger.short&words=a%20hooded%20stranger');
+  await page.keyboard.type(', cloaked');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.deepEqual(posted('/edit'), [
+    { ...STRANGER, words: 'a hooded stranger, cloaked', key: 'npc.stranger.short' },
+  ]);
+  assert.equal(await page.locator('h1').textContent(), 'A hooded stranger');
+});
+
+// Breaks: the card's Edit in Book finds a capitalised menu title by exact words only, so it opens
+// the owner's editor although the line is on this page.
+test("the card's Edit in Book opens a capitalised menu title's field", async () => {
+  await capitalised('item.lantern.name', 'brass lantern');
+  answer = () => [200, { ...STRANGER, was: 'brass lantern', words: 'brass lantern' }];
+  await page.evaluate(() => postMessage({ op: 'edit', key: 'item.lantern.name' }, '*'));
+  await page.locator('h1[data-loka-field]').waitFor();
+  assert.equal(await page.locator('h1').textContent(), 'brass lantern');
+  assert.deepEqual(posted('/open'), []);
 });
 
 const TILDE = { file: 'a.loka', line: 4, was: '~', words: '~' };

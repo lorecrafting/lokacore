@@ -22,7 +22,7 @@ import {
   type Step,
 } from './place.ts';
 import { factRows, shown, type Canon } from './shown.ts';
-import { worded } from '../book/words.ts';
+import { lower, worded } from '../book/words.ts';
 
 export { frozenClock } from './place.ts';
 
@@ -214,7 +214,7 @@ const stateOf = (game: Opened) => ({
 // its source in the owner's editor.
 const onClick = (e: MouseEvent) => {
   const words = (e.target as HTMLElement).textContent ?? '';
-  const key = seen.get(words);
+  const key = seen.get(words) ?? seen.get(lower(words)); // a title cap() drew (inbook.ts drawn)
   if (key) tell({ select: key });
   if (!e.altKey) return;
   e.preventDefault();

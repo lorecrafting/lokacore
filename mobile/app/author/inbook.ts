@@ -40,9 +40,15 @@ const observer =
   typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(reapply);
 const watch = () =>
   observer?.observe(document.body, { childList: true, subtree: true, characterData: true });
+/** A drawn line's words as text() gave them: exact, or with the first letter the Book capitalised lowered. */
+function drawn(el: Node) {
+  const t = el.textContent ?? '';
+  return [t, t.charAt(0).toLowerCase() + t.slice(1)].find((w) => hooks.seen.has(w));
+}
+const keyOf = (el: Node) => hooks.seen.get(drawn(el)!);
 const lines = () =>
-  [...document.querySelectorAll<HTMLElement>('[dir="auto"]')].filter((el) =>
-    hooks.seen.has(el.textContent ?? ''),
+  [...document.querySelectorAll<HTMLElement>('[dir="auto"]')].filter(
+    (el) => drawn(el) !== undefined,
   );
 
 /** Writes `text` (and any buttons) under `el`; empty hides it. */
@@ -80,15 +86,12 @@ function reapply() {
   const todo = all.filter((el) => unwritten(el.textContent!));
   for (const el of all) {
     const marks = [
-      unconfirmed.has(hooks.seen.get(el.textContent!)!) && 'unconfirmed',
+      unconfirmed.has(keyOf(el)!) && 'unconfirmed',
       todo.includes(el) && 'still to write',
     ].filter(Boolean);
     el.toggleAttribute('data-loka-todo', todo.includes(el));
     el.toggleAttribute('data-loka-unconfirmed', marks.includes('unconfirmed'));
-    el.toggleAttribute(
-      'data-loka-selected',
-      selects(hooks.seen.get(el.textContent!), selected.kind, selected.key),
-    );
+    el.toggleAttribute('data-loka-selected', selects(keyOf(el), selected.kind, selected.key));
     if (marks.length) el.setAttribute('data-loka-a11y', marks.join(', '));
     else el.removeAttribute('data-loka-a11y');
   }
@@ -97,7 +100,7 @@ function reapply() {
   if (counts !== counted) hooks.tell({ todoHere: JSON.parse((counted = counts)) });
 }
 async function openField(el: HTMLElement) {
-  const key = hooks.seen.get(el.textContent ?? '');
+  const key = keyOf(el);
   if (!key || field || opening) return say(el, key ? '' : noFieldNote(undefined));
   opening = true;
   const [status, at] = await api(
@@ -106,7 +109,7 @@ async function openField(el: HTMLElement) {
   el = el.isConnected ? el : lineOf(key)!; // a click's select render can remount it while /line waits
   if (!el) return;
   if (status !== 200) return say(el, noFieldNote(key, typeof at === 'string' ? at : undefined));
-  field = { el, kept: [...el.childNodes], shown: el.textContent!, key, at }; // as drawn (a `~`'s marks too): React rewrites a change
+  field = { el, kept: [...el.childNodes], shown: drawn(el)!, key, at }; // as text() gave it (a `~`'s marks too): React rewrites a change
   observer?.disconnect(); // the field is not a Book render
   el.replaceChildren(at.words);
   el.contentEditable = 'plaintext-only';
@@ -237,7 +240,7 @@ function onKey(e: KeyboardEvent, inField = typing(e.target), relayed = false) {
 const onDouble = (e: MouseEvent) => {
   if (field?.el.contains(e.target as Node)) return; // a word picked in the field
   let el = e.target as HTMLElement | null;
-  while (el && el !== document.body && !hooks.seen.has(el.textContent ?? '')) el = el.parentElement;
+  while (el && el !== document.body && drawn(el) === undefined) el = el.parentElement;
   void openField(el && el !== document.body ? el : (e.target as HTMLElement));
 };
 const hush = () => field || say(undefined); // a note lasts until the next click or key
@@ -269,7 +272,7 @@ const onRelay = (e: MessageEvent) => {
   if (e.data?.op === 'select') ((selected = e.data), reapply(), offer()); // {kind, key, add?}
   if (e.data?.op === 'edit') edit(String(e.data.key));
 };
-const lineOf = (key: string) => lines().find((l) => hooks.seen.get(l.textContent!) === key);
+const lineOf = (key: string) => lines().find((l) => keyOf(l) === key);
 /** Opens the field of text key `key`'s line; one not on this page opens in the owner's editor. */
 function edit(key: string) {
   const el = lineOf(key);
