@@ -130,7 +130,6 @@ function Right({ layout, set, story, book, diag, offer, pick }: Shell) {
         sel={layout.selection}
         story={story}
         diag={diag}
-        edit={(key) => book.send({ op: 'edit', key })}
         {...{ offer, pick }}
       />
       <ScrollArea className="min-h-32 flex-1 border-t" aria-label="Console">
