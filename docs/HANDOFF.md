@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #688; written 2026-11-06 by Claude Code (Opus 5.5), the editor build session (parallel, five agents). `kernel_api` is 1.159 (no contract slice since). Lean default in force since #533.
+AS OF main after #689; written 2026-11-06 by Claude Code (Opus 5.5), the editor build session (parallel, five agents). `kernel_api` is 1.159 (no contract slice since). Lean default in force since #533.
 
 ## Direction (owner 2026-10-30 to 2026-11-06)
 
@@ -48,13 +48,12 @@ open, schedule, status, detail, add beat, failed save and reload all held.
 
 ## In flight at handoff
 
-- Nothing. This session merged 39 PRs (#651 to #688).
+- Nothing. This session merged 40 PRs (#651 to #689).
 
 ## Resume, in order
 
-1. **Owner feedback from the Part 1 build** comes first; file it in Beads, fix blockers. Branch
-   `docs/prologue-beat-review` (pushed at session end, never merged) holds the owner's 2026-10-31 Part 1 and NPC rulings
-   on the outline (trowel, Brennan glimpse, Dov's line, opening assembly); main's outline lacks them. Open its PR.
+1. **Owner feedback from the Part 1 build** comes first; file it in Beads, fix blockers. The owner's 2026-10-31
+   Part 1 and NPC rulings are on main's outline (#689).
 2. **Editor P2s:** loka-wfrgk.90 (a click-in edit saves the first keystroke early; cause is the queued
    `setTimeout(card.commit)` reading late, try field-to-field at CPU throttle 4; #688's attempt was reverted), .94
    (schedules and details hidden from add menus until World adds the capability), .68 (`bin/loka new` key churn),
@@ -81,7 +80,7 @@ open, schedule, status, detail, add beat, failed save and reload all held.
 
 - Part 1 build feedback (in the conversation).
 - Older: studio defaults, weapon proficiency shape, store fees, iOS first, the save guarantee, #574 acceptance, #564
-  calls, hosting (12uz). Retro items labelled `retro`/`housekeeping` for approval.
+  calls, hosting (12uz). Retro 2026-11-06: loka-ebnu3, jqxb8, grdiq and lvo9i approved for the next housekeeping PR; fs76w closed.
 
 ## Owner's writing list (prologue; text keys, no prose from agents)
 
