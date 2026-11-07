@@ -490,8 +490,7 @@ test('a drop on an empty map writes the first row at 0,0,0 and the knowledge it 
 });
 
 test('a key a file or an area bundle already holds is refused, compiled or not', async () => {
-  // Breaks: New room from here joining a room the last compile lacks (exits written into both);
-  // New NPC here writing a second npc_9 file in another area, or an item a bundle already holds.
+  // Breaks: New room from here joining an uncompiled room; a second npc_9 or bundled item_9 file.
   const planted = {
     'rooms/room_9.json': read('rooms/start.json'),
     'npcs/npc_9.json': '{}\n',
@@ -525,7 +524,8 @@ test('a key a file or an area bundle already holds is refused, compiled or not',
       ok: false,
       told: 'scenes/cut_9 exists in areas/zz.json',
     });
-    assert.match((await io.post('new', { kind: 'areas', name: 'yard' })).told, /in areas\/yard\//);
+    const area = (await io.post('new', { kind: 'areas', name: 'yard' })) as { told: string };
+    assert.match(area.told, /areas\/yard\//);
     await ed.made(start, 'items', 'npc_9');
   } finally {
     for (const f of Object.keys(planted)) rmSync(join(src, f));
