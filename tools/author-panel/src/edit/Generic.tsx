@@ -196,8 +196,6 @@ type FormProps = {
   fields?: RegistryFieldsType;
 };
 
-// a field of the card commits what it holds on its own blur: a button's blur into one would commit its first keystroke
-const typed = (t: EventTarget | null) => !!(t as Element | null)?.matches?.('input,textarea,select,[contenteditable]');
 const removes = (t: EventTarget) => !!(t as Element).closest?.('button[aria-label="Remove"]');
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
@@ -210,7 +208,7 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
     // after the blur's own change lands: rjsf sends a map key's rename after its setState, past the blur;
     // rjsf's Remove drops the focused button, so no blur follows: it commits once its change lands
     <div
-      onBlur={(e) => (typed(e.target) || !(typed(e.relatedTarget) && e.currentTarget.contains(e.relatedTarget))) && setTimeout(card.commit)}
+      onBlur={() => setTimeout(card.commit)}
       onClick={(e) => removes(e.target) && setTimeout(card.commit)}
     >
       <CardFormBase
