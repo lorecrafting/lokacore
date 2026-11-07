@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { added, allowed } from '../play/card.ts';
+import { added, allowed, held } from '../play/card.ts';
+import { contentGraph } from '../play/reach.ts';
 
 const defs = JSON.parse(
   readFileSync(join(import.meta.dirname, '../../../schemas/source/defs.schema.json'), 'utf8'),
@@ -101,4 +102,29 @@ test('a policy field waits for policy and an ambient for emote', () => {
   ];
   const offered = (caps: object) => rows.filter(([k, f]) => allowed(k, [f], caps).length).length;
   assert.deepEqual([offered({}), offered({ policy: 1, emote: 1 })], [0, rows.length]);
+});
+
+// Break: an added capacity is 1 on a container already holding two items, which the compiler refuses
+// (CAPACITY_EXCEEDED, entities.ex:250-253), or the count takes a room's items as the container's.
+test('an added capacity starts at the items the compiled graph places inside, at least 1', () => {
+  const ref = (kind: string, key: string) => ({
+    cartridge_id: 'c',
+    cartridge_version: '1',
+    kind,
+    key,
+  });
+  const inBox = { location: { in: 'item', item: ref('item', 'box') } };
+  const inHall = { location: { in: 'room', room: ref('room', 'hall') } };
+  const { edges } = contentGraph({
+    items: {
+      'c@1:item/box': inHall,
+      'c@1:item/jar': inHall,
+      'c@1:item/a': inBox,
+      'c@1:item/b': inBox,
+    },
+  });
+  const cap = (r: string) => added({}, 'capacity', defs, 'source.ItemDefinition', held(edges, r));
+  assert.deepEqual(cap('c@1:item/box'), { capacity: 2 });
+  assert.deepEqual(cap('c@1:item/a'), { capacity: 1 }); // holds nothing
+  assert.deepEqual(cap('c@1:room/hall'), { capacity: 1 }); // the box and jar are in the hall, not items in it
 });

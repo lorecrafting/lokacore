@@ -69,7 +69,7 @@ export function Entity({ rel, context, diag }: Props) {
       <Mechanics
         card={card}
         menu={menu}
-        add={adder(card, defs, def)}
+        add={adder(card, defs, def, context.held)}
         fixed={[...WORDS, at, ...required]}
       />
       <RoomForm

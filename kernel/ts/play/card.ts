@@ -343,7 +343,9 @@ const t = () => ({ prose: '~' });
 const away = () =>
   Object.fromEntries(['north', 'south', 'east', 'west', 'up', 'down'].map((d) => [d, t()]));
 // keyed by definition and field, as `awaits` is: an item's or a room's field of the same name is not an NPC's
-const SEEDS: Record<string, (doc: Obj) => unknown> = {
+const SEEDS: Record<string, (doc: Obj, held: number) => unknown> = {
+  // a capacity under the items already inside is CAPACITY_EXCEEDED (entities.ex:250-253)
+  'source.ItemDefinition.capacity': (_, held) => Math.max(1, held),
   'source.NpcDefinition.hp': () => ({ minimum: 0, maximum: 20, start: 20, gain: 5 }),
   // a set has exactly one of lines or emotes (emotes.ex:52)
   ...Object.fromEntries(
@@ -363,17 +365,22 @@ const SEEDS: Record<string, (doc: Obj) => unknown> = {
     ((doc.growth ?? []) as unknown[]).concat([0]).map(() => ({ name: t() })),
 };
 
+/** The items the compiled story graph places in `ref` (an edge per item's `location.item`). */
+export const held = (edges: { to: string; path: string }[] = [], ref?: string) =>
+  edges.filter((e) => e.to === ref && e.path === '.location.item').length;
+
 /** `doc` with field `f` of definition `def` at its least value; undefined when present or the author must choose it. */
 export function added(
   doc: Obj,
   f: string,
   defs: Record<string, Obj>,
   def: string,
+  held = 0, // the items the definition holds: a capacity's least value
 ): Obj | undefined {
   if (Object.hasOwn(doc, f)) return undefined; // a stale menu never overwrites a present field
   const node = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f]; // abstract fields only reveal
   const value =
-    node && (SEEDS[`${def.replace(/^partial\./, '')}.${f}`]?.(doc) ?? minimal(node, defs));
+    node && (SEEDS[`${def.replace(/^partial\./, '')}.${f}`]?.(doc, held) ?? minimal(node, defs));
   return value === undefined ? undefined : { ...doc, [f]: value };
 }
 

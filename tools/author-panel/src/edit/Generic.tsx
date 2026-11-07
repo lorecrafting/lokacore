@@ -256,8 +256,8 @@ export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
 }
 
 /** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
-export const adder = (card: Card, defs: Record<string, never>, def: string) => (f: string) => {
-  const next = added((card.draft ?? {}) as Record<string, unknown>, f, defs, def);
+export const adder = (card: Card, defs: Record<string, never>, def: string, held?: number) => (f: string) => {
+  const next = added((card.draft ?? {}) as Record<string, unknown>, f, defs, def, held);
   card.reveal(f);
   if (next) (card.change(next), awaits(def, f) || card.commit());
 };
