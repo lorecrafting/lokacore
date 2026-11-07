@@ -197,7 +197,7 @@ defmodule Loka.SourceReferenceTest do
   end
 
   # Breaks: a field's line not taken from the schema (own, else its type's), an example from a
-  # non-sampler cartridge or from an area folder missed, or a sampler edit the check does not see.
+  # non-sampler cartridge, from a later sampler or from an area folder missed, or a sampler edit the check does not see.
   test "the field guide lists each field's description and a sampler example", ctx do
     tmp = Path.dirname(ctx.out)
     carts = Path.join(tmp, "cartridges")
@@ -206,6 +206,7 @@ defmodule Loka.SourceReferenceTest do
 
     for {file, body} <- [
           {"b_sampler/notes/n.json", %{"title" => "t"}},
+          {"c_sampler/notes/p.json", %{"title" => "u"}},
           {"a_sampler/areas/v/notes/m.json", %{"a" => []}},
           {"other/notes/o.json", %{"ref" => "x"}}
         ] do

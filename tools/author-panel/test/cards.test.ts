@@ -72,3 +72,18 @@ test('a list item shows its description', async () => {
     await page.close();
   }
 });
+
+// Break (loka-wfrgk.102 B): the room card's Mechanics menu drops the descriptions the generic menu shows.
+test("the room's Mechanics menu shows each option's description", async () => {
+  const page = await open({ right: 420, selection: { kind: 'room', key: 'fell_top' } });
+  try {
+    const add = page.getByLabel('Mechanics').getByLabel('Add a field');
+    await add.waitFor({ timeout: boot });
+    await add.click();
+    const sanctuary = page.getByRole('menuitem').filter({ has: page.getByText('sanctuary', { exact: true }) });
+    const about = defs['source.RoomDefinition'].properties.sanctuary.description;
+    assert.equal(await sanctuary.locator('span').nth(1).textContent(), about);
+  } finally {
+    await page.close();
+  }
+});
