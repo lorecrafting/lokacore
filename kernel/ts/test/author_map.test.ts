@@ -218,6 +218,18 @@ test('Tab enters on the selected room, else here, else the first by key', () => 
   assert.equal(map.entry([D, B, A]).key, 'a');
 });
 
+// Breaks: a + on a side grow refuses (an exit there) or would misplace (a held cell, on any
+// level), a step with the wrong sign or axis, or a handle on an unplaced room.
+test('grow handles: every side with no exit and a free cell, up and down a level apart', () => {
+  const E = room('e', 'south', { x: 2, y: 1, z: 0 }, [{ dir: 'north', to: 'b' }]);
+  const G = room('g', 'north', { x: 1, y: 0, z: 1 });
+  const all = [...ROOMS, E, G];
+  assert.deepEqual(map.grows(E, all), ['east', 'south', 'up', 'down']); // north is an exit, west is D
+  assert.deepEqual(map.grows(D, all), ['south', 'west', 'up', 'down']); // B north, E east
+  assert.deepEqual(map.grows(B, all), ['north', 'east', 'down']); // G holds the cell above
+  assert.deepEqual(map.grows(U, all), []);
+});
+
 // Breaks: a screen reader loses a room's exits or marks, or the footer shows a zero count.
 test("a room's accessible name and the footer's counts", () => {
   assert.equal(
