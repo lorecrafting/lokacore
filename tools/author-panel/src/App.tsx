@@ -110,6 +110,7 @@ function Left({ layout, set, story, book, diag, pick }: Shell) {
             pick={pick}
             play={play}
             make={make}
+            diag={diag}
           />
         </TabsContent>
         <TabsContent value="project" forceMount className="data-[state=inactive]:hidden">

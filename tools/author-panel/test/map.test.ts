@@ -3,6 +3,7 @@
 // boot). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
@@ -279,4 +280,36 @@ test('the New list gives dialogues the first sentence of its schema description'
   const first = 'A conversation with an NPC: who speaks (npc), when it is offered (policy), the question shown (prompt) and the choices the player can pick.';
   assert.equal(await line.textContent(), first);
   await page.close();
+});
+
+// Breaks (shell.ts missing, left.tsx off, loka-wfrgk.108): the New list offers a kind whose capability
+// cartridge.json does not require, which the compiler refuses (UNDECLARED_CAPABILITY), or a click on it
+// writes a file; or it gates a kind whose capability is required (npcs, with containment).
+test('a kind whose capability cartridge.json lacks is disabled in the New list, naming it, as the compiler refuses it', async () => {
+  const showcase = join(dir, 'showcase');
+  const manifest = join(showcase, 'cartridge.json');
+  const kept = readFileSync(manifest, 'utf8');
+  const refused = () => spawnSync(join(import.meta.dirname, '../../../bin/loka'), ['story', showcase], { encoding: 'utf8' }).stderr.includes('does not lock (`barrier`)');
+  const files = () => readdirSync(showcase, { recursive: true }).length;
+  assert.equal(refused(), false, 'the showcase requires barrier: the compiler accepts its barriers');
+  const m = JSON.parse(kept);
+  delete m.requires.capabilities.barrier;
+  writeFileSync(manifest, JSON.stringify(m, null, 2));
+  const page = await open({ right: 280, leftOpen: true, tab: 'hierarchy', selection: { kind: 'room', key: 'smithy' } });
+  try {
+    assert.equal(refused(), true, 'without barrier the compiler refuses its barriers');
+    await page.getByRole('button', { name: 'New', exact: true }).click({ timeout: boot });
+    const row = page.getByRole('dialog').getByRole('button', { name: 'New barriers', exact: true });
+    await row.getByText('Needs the barrier capability in cartridge.json').waitFor({ timeout: boot });
+    const header = page.getByTitle('Needs the barrier capability in cartridge.json');
+    assert.deepEqual([await row.isDisabled(), await header.isDisabled()], [true, true]);
+    assert.equal(await page.getByRole('button', { name: 'New NPC here', exact: true }).first().isDisabled(), false);
+    const before = files();
+    await row.click({ force: true });
+    await page.waitForTimeout(1000);
+    assert.equal(files(), before, 'a disabled kind writes nothing');
+  } finally {
+    writeFileSync(manifest, kept);
+    await page.close();
+  }
 });

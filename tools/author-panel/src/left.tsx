@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { MapPin, Play, Plus } from 'lucide-react';
 import { definitionOf } from '../../../kernel/ts/play/card.ts';
 import { AreaMap, type MapProps } from './areamap.tsx';
-import type { Change, Story } from './author.ts';
+import type { Change, Story, useDiagnostics } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import { Popover, PopoverContent, PopoverTrigger } from './components/ui/popover.tsx';
+import { useCartridge } from './edit/Generic.tsx';
 import { Refusal } from './edit/templates.tsx';
 import type { SetLayout } from './columns.tsx';
-import { COMMANDS, fromRef, GROUPS, named, newCommand, STARTER, WORLD, type Layout, type Selection } from './shell.ts';
+import { COMMANDS, fromRef, GROUPS, missing, named, newCommand, STARTER, WORLD, type Layout, type Selection } from './shell.ts';
 import { FlowView } from './flow.tsx';
 import { StoryList } from './storylist.tsx';
 
@@ -74,9 +75,10 @@ const described = () =>
     )
     .catch(() => ((lines = undefined), {})));
 
-type Make = { make: (kind: string) => void; label: (kind: string) => string };
+// off: the capability a kind needs that cartridge.json lacks (shell.ts missing); its + is disabled.
+type Make = { make: (kind: string) => void; label: (kind: string) => string; off: (kind: string) => string | undefined };
 /** The + beside World: every starter, grouped, each with its plain line; runs the palette's New. */
-function NewMenu({ make, label }: Make) {
+function NewMenu({ make, label, off }: Make) {
   const [said, setSaid] = useState<Record<string, string>>({});
   const [open, setOpen] = useState(false);
   const show = (on: boolean) => {
@@ -101,11 +103,12 @@ function NewMenu({ make, label }: Make) {
                 size="xs"
                 className="h-auto w-full flex-col items-start gap-0 py-1"
                 aria-label={label(k)}
+                disabled={!!off(k)}
                 onClick={() => (setOpen(false), make(k))}
               >
                 {k}
                 <span className="w-full truncate text-left font-normal text-muted-foreground" title={said[k]}>
-                  {said[k]}
+                  {off(k) ? `Needs the ${off(k)} capability in cartridge.json` : said[k]}
                 </span>
               </Button>
             ))}
@@ -117,40 +120,53 @@ function NewMenu({ make, label }: Make) {
 }
 
 /** A kind's header; its + makes that kind's starter, if it has one. */
-const Header = ({ kind, make, label }: Make & { kind: string }) => (
+const Header = ({ kind, make, label, off }: Make & { kind: string }) => (
   <h3 className="flex items-center px-2 text-xs text-muted-foreground">
     {kind}
     {STARTER[kind] ? (
-      <Button variant="ghost" size="icon-xs" className="ml-auto" aria-label={label(STARTER[kind])} onClick={() => make(STARTER[kind])}>
+      <Button
+        variant="ghost"
+        size="icon-xs"
+        className="ml-auto"
+        aria-label={label(STARTER[kind])}
+        disabled={!!off(STARTER[kind])}
+        title={off(STARTER[kind]) && `Needs the ${off(STARTER[kind])} capability in cartridge.json`}
+        onClick={() => make(STARTER[kind])}
+      >
         <Plus />
       </Button>
     ) : null}
   </h3>
 );
 
-/** Every definition of the last good compile, grouped by kind; a + makes a new one (`make`). */
-export function Hierarchy({ story, picked, here, pick, play, make }: {
+type HierarchyProps = {
   story?: Story;
   picked?: string;
   here?: string;
   pick: Pick;
   play: (room: string) => void;
   make: (kind: string) => void;
-}) {
+  diag: ReturnType<typeof useDiagnostics>;
+};
+
+/** Every definition of the last good compile, grouped by kind; a + makes a new one (`make`). */
+export function Hierarchy({ story, picked, here, pick, play, make, diag }: HierarchyProps) {
+  const caps = useCartridge(diag)?.requires?.capabilities ?? {}; // nothing gated is offered while it loads
   if (!story) return <p className="p-3 text-muted-foreground">Waiting for the watcher.</p>;
   const sel = picked ? fromRef(picked) : undefined;
   const label = (k: string) => COMMANDS.find((c) => c.id === newCommand(k, sel))!.label; // New item here, in a room
+  const off = (k: string) => missing(k, caps);
   const kinds = new Map<string, Story['graph']['nodes']>();
   for (const n of story.graph.nodes) kinds.set(n.kind, [...(kinds.get(n.kind) ?? []), n]);
   return (
     <div className="space-y-2 p-2">
       <div className="flex items-center">
         <WorldButton pick={pick} />
-        <NewMenu make={make} label={label} />
+        <NewMenu make={make} label={label} off={off} />
       </div>
       {[...kinds].map(([kind, nodes]) => (
         <section key={kind}>
-          <Header kind={kind} make={make} label={label} />
+          <Header kind={kind} make={make} label={label} off={off} />
           <ul>
             {nodes.map((n) => (
               <Row

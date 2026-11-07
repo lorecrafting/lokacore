@@ -5,6 +5,7 @@
 
 import type { ListState } from './storylist.ts';
 import NEW from './edit/new.json' with { type: 'json' };
+import REGISTRY from '../../../protocol/capability_registry.json' with { type: 'json' };
 
 export type Selection = { file?: string; kind: string; key: string };
 /** The World card's selection: cartridge.json, which no graph node names (its card opens the root files). */
@@ -144,6 +145,13 @@ export const GROUPS: [string, string[]][] = [
 /** The palette command a New `kind` runs: an NPC or item goes in the selected room, as New NPC/item here. */
 export const newCommand = (kind: string, sel?: Selection) =>
   sel?.kind === 'room' && (kind === 'npcs' || kind === 'items') ? `map-${kind.slice(0, -1)}` : `new-${kind}`;
+
+/** The capability a New `kind` needs that `caps` (cartridge.json requires.capabilities) lacks: the
+ * registry owner of its definitions, as UNDECLARED_CAPABILITY checks them (refs.ex owned); most need none. */
+export const missing = (kind: string, caps: object) => {
+  const c = REGISTRY.find((r) => (r as { definitions?: string[] }).definitions?.includes(nodeOf(kind)))?.key;
+  return c && !Object.hasOwn(caps, c) ? c : undefined;
+};
 
 /** A definition's row label: `key · name`, the key alone with no written name. */
 export const named = (key: string, name?: string) => (name ? `${key} · ${name}` : key);
