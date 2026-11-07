@@ -44,6 +44,7 @@ test('a modal scene switched to Opening writes exactly start: true', async () =>
     await kind.selectOption('start');
     for (let t = 0; !on().start && t < 50; t++) await page.waitForTimeout(100);
     assert.deepEqual(on(), { start: true });
+    assert.equal(await page.getByLabel('on start').count(), 0); // Opening has no key to pick
   } finally {
     writeFileSync(file, before); // the other tests' showcase has no opening
     await page.close();
@@ -51,25 +52,29 @@ test('a modal scene switched to Opening writes exactly start: true', async () =>
 });
 
 // Break: a switch to a quest writes a key outside the compiled quests or no outcome (valid_source?,
-// scenes.ex:149-156), or a typed quest outcome never reaches the file (Enter, blur).
-test('a modal scene switched to a quest writes its key and completed, then the typed outcome', async () => {
+// scenes.ex:149-156), picking another quest writes the old one, or a typed quest outcome never
+// reaches the file (Enter, blur).
+test('a modal scene switched to a quest writes its key and completed, then the picked quest and typed outcome', async () => {
   const page = await open({ selection: { kind: 'scene', key: 'letter_ash' } });
   const file = join(dir, 'showcase/scenes/letter_ash.json');
   const before = readFileSync(file, 'utf8');
   const on = () => JSON.parse(readFileSync(file, 'utf8')).on;
-  const until = async (outcome: string) => {
-    for (let t = 0; on().outcome !== outcome && t < 50; t++) await page.waitForTimeout(100);
+  const until = async (field: string, value: string) => {
+    for (let t = 0; on()[field] !== value && t < 50; t++) await page.waitForTimeout(100);
   };
   try {
     const card = page.getByLabel('scene card');
     await card.getByLabel('on', { exact: true }).waitFor({ timeout: boot });
     await card.getByLabel('on', { exact: true }).selectOption('quest');
-    await until('completed');
+    await until('outcome', 'completed');
     assert.deepEqual(on(), { quest: 'bounty', outcome: 'completed' });
+    await card.getByLabel('on quest').selectOption('carry_letter');
+    await until('quest', 'carry_letter');
+    assert.deepEqual(on(), { quest: 'carry_letter', outcome: 'completed' });
     await card.getByLabel('outcome', { exact: true }).fill('delivered');
     await card.getByLabel('outcome', { exact: true }).press('Enter');
-    await until('delivered');
-    assert.deepEqual(on(), { quest: 'bounty', outcome: 'delivered' });
+    await until('outcome', 'delivered');
+    assert.deepEqual(on(), { quest: 'carry_letter', outcome: 'delivered' });
   } finally {
     writeFileSync(file, before);
     await page.close();
