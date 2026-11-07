@@ -96,13 +96,17 @@ export function guarded(root: string, rel: unknown, mode: 'read' | 'create'): st
 /** Why `/new` may not run loka.new. mix writes past guarded() (the area, its companions, --from's
  * folder): no link anywhere keeps every write inside the tree and in the snapshot the journal diffs
  * (a link reads as no file). A `<dir>/<name>` any file or area bundle holds is taken, compiled or not
- * (the starter would join that room, or write a second file in another area). */
+ * (the starter would join that room, or write a second file in another area); a New area's name is
+ * also its folder's. */
 export function newRefused(root: string, kind: string, name: string) {
   const all = files(root);
   const link = all.find((rel) => there(join(root, rel))?.isSymbolicLink());
   if (link) return `a symlink on the way to ${link}`;
-  const dir = kind === 'areas' ? 'rooms' : kind;
+  const dir = ({ areas: 'rooms', cutscene: 'scenes' } as Record<string, string>)[kind] ?? kind; // Starters.dir_of
+  const area =
+    kind === 'areas' &&
+    all.find((rel) => rel.startsWith(`areas/${name}/`) || rel === `areas/${name}.json`);
   const own = all.find((rel) => placed(rel)?.dir === dir && placed(rel)?.key === name);
-  const held = own ?? bundled(root)[`${dir}/${name}`];
+  const held = area || own || bundled(root)[`${dir}/${name}`];
   return held && `${dir}/${name} exists in ${held}`;
 }

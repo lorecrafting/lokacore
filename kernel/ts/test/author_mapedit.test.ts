@@ -495,7 +495,7 @@ test('a key a file or an area bundle already holds is refused, compiled or not',
   const planted = {
     'rooms/room_9.json': read('rooms/start.json'),
     'npcs/npc_9.json': '{}\n',
-    'areas/zz.json': '{ "items": { "item_9": {} } }\n',
+    'areas/zz.json': '{ "items": { "item_9": {} }, "scenes": { "cut_9": {} } }\n',
   };
   for (const [f, bytes] of Object.entries(planted)) writeFileSync(join(src, f), bytes);
   try {
@@ -520,6 +520,12 @@ test('a key a file or an area bundle already holds is refused, compiled or not',
       ok: false,
       told: 'rooms/room_9 exists in rooms/room_9.json',
     });
+    // Breaks: a cutscene checked under cutscene/ (not scenes/); a New area joining an area folder.
+    assert.deepEqual(await io.post('new', { kind: 'cutscene', name: 'cut_9' }), {
+      ok: false,
+      told: 'scenes/cut_9 exists in areas/zz.json',
+    });
+    assert.match((await io.post('new', { kind: 'areas', name: 'yard' })).told, /in areas\/yard\//);
     await ed.made(start, 'items', 'npc_9');
   } finally {
     for (const f of Object.keys(planted)) rmSync(join(src, f));
