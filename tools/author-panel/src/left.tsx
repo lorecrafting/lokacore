@@ -9,7 +9,7 @@ import { Button } from './components/ui/button.tsx';
 import { Popover, PopoverContent, PopoverTrigger } from './components/ui/popover.tsx';
 import { Refusal } from './edit/templates.tsx';
 import type { SetLayout } from './columns.tsx';
-import { fromRef, GROUPS, named, STARTER, WORLD, type Layout, type Selection } from './shell.ts';
+import { COMMANDS, fromRef, GROUPS, named, newCommand, STARTER, WORLD, type Layout, type Selection } from './shell.ts';
 import { FlowView } from './flow.tsx';
 import { StoryList } from './storylist.tsx';
 
@@ -74,11 +74,17 @@ const described = () =>
     )
     .catch(() => ((lines = undefined), {})));
 
+type Make = { make: (kind: string) => void; label: (kind: string) => string };
 /** The + beside World: every starter, grouped, each with its plain line; runs the palette's New. */
-function NewMenu({ make }: { make: (kind: string) => void }) {
+function NewMenu({ make, label }: Make) {
   const [said, setSaid] = useState<Record<string, string>>({});
+  const [open, setOpen] = useState(false);
+  const show = (on: boolean) => {
+    setOpen(on);
+    if (on) void described().then(setSaid);
+  };
   return (
-    <Popover onOpenChange={(open) => open && void described().then(setSaid)}>
+    <Popover open={open} onOpenChange={show}>
       <PopoverTrigger asChild>
         <Button size="icon-xs" variant="outline" aria-label="New">
           <Plus />
@@ -94,8 +100,8 @@ function NewMenu({ make }: { make: (kind: string) => void }) {
                 variant="ghost"
                 size="xs"
                 className="h-auto w-full flex-col items-start gap-0 py-1"
-                aria-label={`New ${k}`}
-                onClick={() => make(k)}
+                aria-label={label(k)}
+                onClick={() => (setOpen(false), make(k))}
               >
                 {k}
                 <span className="w-full truncate text-left font-normal text-muted-foreground" title={said[k]}>
@@ -111,11 +117,11 @@ function NewMenu({ make }: { make: (kind: string) => void }) {
 }
 
 /** A kind's header; its + makes that kind's starter, if it has one. */
-const Header = ({ kind, make }: { kind: string; make: (kind: string) => void }) => (
+const Header = ({ kind, make, label }: Make & { kind: string }) => (
   <h3 className="flex items-center px-2 text-xs text-muted-foreground">
     {kind}
     {STARTER[kind] ? (
-      <Button variant="ghost" size="icon-xs" className="ml-auto" aria-label={`New ${STARTER[kind]}`} onClick={() => make(STARTER[kind])}>
+      <Button variant="ghost" size="icon-xs" className="ml-auto" aria-label={label(STARTER[kind])} onClick={() => make(STARTER[kind])}>
         <Plus />
       </Button>
     ) : null}
@@ -132,17 +138,19 @@ export function Hierarchy({ story, picked, here, pick, play, make }: {
   make: (kind: string) => void;
 }) {
   if (!story) return <p className="p-3 text-muted-foreground">Waiting for the watcher.</p>;
+  const sel = picked ? fromRef(picked) : undefined;
+  const label = (k: string) => COMMANDS.find((c) => c.id === newCommand(k, sel))!.label; // New item here, in a room
   const kinds = new Map<string, Story['graph']['nodes']>();
   for (const n of story.graph.nodes) kinds.set(n.kind, [...(kinds.get(n.kind) ?? []), n]);
   return (
     <div className="space-y-2 p-2">
       <div className="flex items-center">
         <WorldButton pick={pick} />
-        <NewMenu make={make} />
+        <NewMenu make={make} label={label} />
       </div>
       {[...kinds].map(([kind, nodes]) => (
         <section key={kind}>
-          <Header kind={kind} make={make} />
+          <Header kind={kind} make={make} label={label} />
           <ul>
             {nodes.map((n) => (
               <Row

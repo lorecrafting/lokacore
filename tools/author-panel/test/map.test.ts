@@ -255,10 +255,12 @@ test('an Unplaced chip dropped on an empty map asks the layout starter for the f
 test('the item header`s + with a room selected makes an item in that room', async () => {
   const page = await open({ right: 280, leftOpen: true, tab: 'hierarchy', selection: { kind: 'room', key: 'smithy' } });
   const items = join(dir, 'showcase/areas/fell_road/items');
-  const made = () => readdirSync(items).filter((f) => /^item_\d+\.json$/.test(f));
+  const before = readdirSync(items);
+  const made = () => readdirSync(items).filter((f) => !before.includes(f));
   try {
-    await page.getByRole('button', { name: 'New items', exact: true }).click({ timeout: boot });
+    await page.getByRole('button', { name: 'New item here', exact: true }).click({ timeout: boot });
     for (let t = 0; !made().length && t < 100; t++) await page.waitForTimeout(100);
+    assert.equal(made().length, 1, 'one new item file in the room`s area');
     for (let t = 0; !readFileSync(join(items, made()[0]), 'utf8').includes('smithy') && t < 50; t++) await page.waitForTimeout(100);
     assert.deepEqual(JSON.parse(readFileSync(join(items, made()[0]), 'utf8')).location, { in: 'room', room: 'smithy' });
   } finally {
