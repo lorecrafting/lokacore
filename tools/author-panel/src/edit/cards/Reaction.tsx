@@ -4,7 +4,7 @@
 import { addable, allowed } from '../../../../../kernel/ts/play/card.ts';
 import type { useDiagnostics } from '../../author.ts';
 import type { Context } from '../fields.tsx';
-import { adder, Header, useCard, useCartridge } from '../Generic.tsx';
+import { adding, Header, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 import { Mechanics, RoomForm } from './Room.tsx';
@@ -28,7 +28,7 @@ export function Reaction({ rel, context, diag }: Props) {
       <Mechanics
         card={card}
         menu={menu}
-        add={adder(card, defs, 'source.ReactionRule')}
+        {...adding(card, defs, 'source.ReactionRule')}
         fixed={(defs['source.ReactionRule'] as { required?: string[] } | undefined)?.required ?? []}
       />
       <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} own={[]} />

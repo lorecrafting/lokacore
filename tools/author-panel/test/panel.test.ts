@@ -402,14 +402,14 @@ test('a reaction and an action open their own cards', async () => {
   ]) {
     const page = await open({ selection: { kind, key } });
     await page.locator(`[aria-label="${kind} card"] form`).waitFor({ timeout: boot });
-    const menu = page.getByLabel(`${kind} card`).getByLabel('Add a field').locator('option');
-    const options = await menu.allTextContents();
+    await page.getByLabel(`${kind} card`).getByLabel('Add a field').click();
+    const options = await page.getByRole('menuitem').locator('span:first-child').allTextContents();
     assert.ok(options.includes(field), `${kind} ${key} offers ${field}`);
     // a scripted action is never offered a command action's field (UNKNOWN_FIELD)
     assert.ok(!options.includes('accessibility'), `${kind} ${key} offers accessibility`);
     if (kind === 'action') {
       // Break: an added prose field is only revealed, never written (loka-wfrgk.24): it writes its key `~`
-      await page.getByLabel(`${kind} card`).getByLabel('Add a field').selectOption(field);
+      await page.getByRole('menuitem').filter({ has: page.getByText(field, { exact: true }) }).click();
       const tip = () =>
         JSON.parse(readFileSync(join(dir, 'showcase/actions/fish.json'), 'utf8')).tip;
       for (let t = 0; tip() === undefined && t < 50; t++) await page.waitForTimeout(100);

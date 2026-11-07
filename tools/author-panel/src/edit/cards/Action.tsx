@@ -6,7 +6,7 @@ import { paired, menuOf } from '../../../../../kernel/ts/play/action.ts';
 import { addable, allowed } from '../../../../../kernel/ts/play/card.ts';
 import type { useDiagnostics } from '../../author.ts';
 import type { Context } from '../fields.tsx';
-import { adder, Generic, Header, useCard, useCartridge } from '../Generic.tsx';
+import { adding, Generic, Header, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 import { Mechanics, RoomForm, Words } from './Room.tsx';
@@ -36,7 +36,7 @@ export function Action({ rel, context, diag }: Props) {
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <Words draft={draft} context={context} fields={['name']} />
-      <Mechanics card={card} menu={menu} add={adder(card, defs, DEF)} fixed={required} />
+      <Mechanics card={card} menu={menu} {...adding(card, defs, DEF)} fixed={required} />
       <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} own={['name']} />
     </div>
   );
