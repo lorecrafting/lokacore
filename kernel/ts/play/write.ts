@@ -19,7 +19,7 @@ import { newRefused, ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './gu
 import { apply } from './edit_model.ts';
 import { others, still, taken, users } from './find.ts';
 import { edit, located } from './prose.ts';
-import { compiledCartridge, ids, set } from './scene_card.ts';
+import { compiledCartridge, ids, restructure, set } from './scene_card.ts';
 import { loka, opened, worlds } from './worlds.ts';
 
 type By = 'editor' | 'outside';
@@ -275,6 +275,7 @@ const POSTS: Record<string, Post> = {
       () => ids(compiledCartridge(artifact)),
       (what, c) => done(t, what, [c]),
     ),
+  '/restructure': (t, sent) => restructure(t.root, sent, (what, cs) => done(t, what, cs)),
   '/delete': remove,
   '/move': move,
   '/undo': undo,

@@ -3,7 +3,7 @@
 // test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { boot, dir, open } from './harness.ts';
@@ -19,7 +19,10 @@ test('an added edible is held from the next write until it has an effect', async
     const field = page.locator('#root_mass_grams');
     await field.waitFor({ timeout: boot });
     await page.getByLabel('item card').getByLabel('Add a field').click();
-    await page.getByRole('menuitem').filter({ has: page.getByText('edible', { exact: true }) }).click();
+    await page
+      .getByRole('menuitem')
+      .filter({ has: page.getByText('edible', { exact: true }) })
+      .click();
     await field.fill('777');
     await field.blur();
     await page.getByText('.edible needs a resource, cures or applies').waitFor({ timeout: boot });
@@ -32,7 +35,9 @@ test('an added edible is held from the next write until it has an effect', async
   }
 });
 
-const defs = JSON.parse(readFileSync(join(import.meta.dirname, '../../../schemas/source/defs.schema.json'), 'utf8')).$defs;
+const defs = JSON.parse(
+  readFileSync(join(import.meta.dirname, '../../../schemas/source/defs.schema.json'), 'utf8'),
+).$defs;
 
 // Break (loka-wfrgk.102 B): the Add menu shows bare field names, the author cannot tell what `edible`
 // does; or the menu is reachable only by mouse (Enter opens it, arrows and Enter pick).
@@ -45,7 +50,9 @@ test("an Add menu option shows its field's description and is picked by keyboard
     await add.waitFor({ timeout: boot });
     await add.focus();
     await page.keyboard.press('Enter');
-    const edible = page.getByRole('menuitem').filter({ has: page.getByText('edible', { exact: true }) });
+    const edible = page
+      .getByRole('menuitem')
+      .filter({ has: page.getByText('edible', { exact: true }) });
     const about = defs['source.ItemDefinition'].properties.edible.description; // the schema's own words
     assert.equal(await edible.locator('span').nth(1).textContent(), about);
     await page.keyboard.type('edible'); // typeahead by name; Radix moves the focus a tick later
@@ -100,7 +107,9 @@ test("the room's Mechanics menu shows each option's description", async () => {
     const add = page.getByLabel('Mechanics').getByLabel('Add a field');
     await add.waitFor({ timeout: boot });
     await add.click();
-    const sanctuary = page.getByRole('menuitem').filter({ has: page.getByText('sanctuary', { exact: true }) });
+    const sanctuary = page
+      .getByRole('menuitem')
+      .filter({ has: page.getByText('sanctuary', { exact: true }) });
     const about = defs['source.RoomDefinition'].properties.sanctuary.description;
     assert.equal(await sanctuary.locator('span').nth(1).textContent(), about);
   } finally {
@@ -146,6 +155,37 @@ test('a modal scene switched to a quest writes its key and completed, then the p
   } finally {
     writeFileSync(read, readBefore);
     writeFileSync(file, before);
+    await page.close();
+  }
+});
+
+// Break (loka-wfrgk.100.5.2): a cut's page button the route refuses is offered (the `---` move,
+// scene_structure.ts), a page op writes more than its lines, or the header's Undo does not revert it.
+test("a modal scene's cut pages move by their buttons and one Undo restores the bytes", async () => {
+  const json = join(dir, 'showcase/scenes/letter_ash.json');
+  const cut = join(dir, 'showcase/scenes/letter_ash.cut');
+  const before = readFileSync(json, 'utf8');
+  const { steps: _, ...pages } = JSON.parse(before); // a twin's steps would replace the cut's pages
+  writeFileSync(json, JSON.stringify(pages, null, 2) + '\n');
+  writeFileSync(cut, 'One.\n\nTwo.\n---\n');
+  const page = await open({ selection: { kind: 'scene', key: 'letter_ash' } });
+  const until = async (bytes: string) => {
+    for (let t = 0; readFileSync(cut, 'utf8') !== bytes && t < 50; t++)
+      await page.waitForTimeout(100);
+    assert.equal(readFileSync(cut, 'utf8'), bytes);
+  };
+  try {
+    const card = page.getByLabel('scene card');
+    await card.getByLabel('Move down page 1').waitFor({ timeout: boot });
+    assert.ok(await card.getByLabel('Move down page 2').isDisabled()); // `---` stays last
+    assert.ok(await card.getByLabel('Move up page 1').isDisabled());
+    await card.getByLabel('Move down page 1').click();
+    await until('Two.\n\nOne.\n---\n');
+    await card.getByRole('button', { name: 'Undo' }).click();
+    await until('One.\n\nTwo.\n---\n');
+  } finally {
+    writeFileSync(json, before);
+    rmSync(cut, { force: true });
     await page.close();
   }
 });

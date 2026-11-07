@@ -4,9 +4,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 import { artifactBytes } from './compiled.ts';
-import { guarded, named, placed, refuse, stale } from './guard.ts';
+import { guarded, named, placed, refuse, sha256, stale } from './guard.ts';
 import { contentGraph } from './reach.ts';
 import { picks, VALUE, type Verb } from './scene_lines.ts';
+import { cut } from './scene_structure.ts';
 import { unlinkable } from './story_counts.ts';
 import { bundled, files } from './todo.ts';
 import { crossed } from './world_card.ts';
@@ -59,4 +60,28 @@ export function set(
   if (area) refuse(400, `${verb}: ${value} is area ${area}’s, not this file’s (area_rules.ex:27)`);
   lines[line - 1] = `${head}${value}${end}`;
   return done(`set ${file}:${line}`, { file, before, after: lines.join('\n') });
+}
+
+/** POST /restructure (docs/design/scene-structure-rulings.md §3): a `.cut` page op, recomputed from
+ * disk. A `.cut` op changes only its file, so a `carry` entry (a file the card showed changing) is a
+ * file that differs: 409 with its bytes. */
+export function restructure(
+  root: string,
+  { file, was, op, carry }: Record<string, any>,
+  done: (what: string, changes: Change[]) => Answer,
+) {
+  const path = guarded(root, file, 'read');
+  if (placed(file)?.ext !== 'cut') refuse(400, 'a page op is a .cut file’s');
+  if (!Array.isArray(carry)) refuse(400, 'carry: an array of {file, was}');
+  const before = readFileSync(path, 'utf8');
+  if (sha256(before) !== was) stale(before);
+  for (const c of carry) stale(readFileSync(guarded(root, c?.file, 'read'), 'utf8'));
+  const twin = path.replace(/\.cut$/, '.json');
+  let steps = false;
+  try {
+    steps = 'steps' in JSON.parse(readFileSync(twin, 'utf8'));
+  } catch {} // no twin, or one the compiler refuses on its own
+  const answer = cut(before, op, steps);
+  if ('refused' in answer) refuse(400, answer.refused);
+  return done(`restructure ${file}`, [{ file, before, after: answer.after }]);
 }
