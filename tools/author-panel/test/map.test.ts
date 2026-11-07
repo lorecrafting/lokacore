@@ -240,11 +240,10 @@ test('an Unplaced chip dropped on an empty map asks the layout starter for the f
   await page.reload();
   const slot = page.getByLabel('Map slot');
   await slot.getByText(/^Unplaced \(/).waitFor({ timeout: boot });
-  const dt = await page.evaluateHandle(() => {
-    const d = new DataTransfer();
-    d.setData('text/x-loka-room', 'tollhouse');
-    return d;
-  });
+  // A string: the test tsconfig has no DOM lib, so DataTransfer is a browser-only name.
+  const dt = await page.evaluateHandle(
+    "(() => { const d = new DataTransfer(); d.setData('text/x-loka-room', 'tollhouse'); return d; })()",
+  );
   await slot.locator('div.relative.flex-1').dispatchEvent('drop', { dataTransfer: dt });
   for (let t = 0; !posted.length && t < 50; t++) await new Promise((r) => setTimeout(r, 100));
   assert.deepEqual(posted, [{ kind: 'layout', name: 'layout' }]);
