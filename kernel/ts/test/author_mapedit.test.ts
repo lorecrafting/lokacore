@@ -478,18 +478,18 @@ test('a refused put-back is told with the refusal that stopped the gesture', asy
 });
 
 test('a drop on an empty map writes the first row at 0,0,0 and the knowledge it needs', async () => {
-  // Breaks: the drop refusing on an empty map (no cells to aim at); the row written without
-  // knowledge@1, so the compile refuses layout.json (lib/loka/content/layout.ex:62).
+  // Breaks: an empty map refusing the drop; a row without knowledge@1 (lib/loka/content/layout.ex:62).
   const old = (rel = '') => join(dir, 'old', rel);
+  const read = (rel: string) => JSON.parse(readFileSync(old(rel), 'utf8'));
   execFileSync('mix', ['loka.new', 'cartridge', old()], { cwd: REPO, stdio: 'ignore' });
   rmSync(old('layout.json')); // a world made before the starter placed its room
-  const cartridge = JSON.parse(readFileSync(old('cartridge.json'), 'utf8'));
+  const cartridge = read('cartridge.json');
   delete cartridge.requires.capabilities.knowledge;
   writeFileSync(old('cartridge.json'), JSON.stringify(cartridge));
   const s = await open(old());
   await editor(s.io).first().finally(s.close);
-  const layout = JSON.parse(readFileSync(old('layout.json'), 'utf8'));
-  assert.deepEqual(layout, [{ room: 'start', x: 0, y: 0, z: 0 }]);
+  const got = [read('layout.json'), read('cartridge.json').requires.capabilities.knowledge];
+  assert.deepEqual(got, [[{ room: 'start', x: 0, y: 0, z: 0 }], 1]);
 });
 
 test('undo puts every gesture back: the files are byte-identical to the start', async () => {
