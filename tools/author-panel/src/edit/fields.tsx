@@ -22,6 +22,7 @@ export type Context = {
   hidden?: string[]; // the story model's (kernel/ts/play/story_counts.ts)
   unlinkable?: Record<string, string>;
   files?: Record<string, string>; // each node's source file, by ref
+  held?: number; // the items placed in the selection (kernel/ts/play/card.ts held)
   open?: (sel: { kind: string; key: string }) => void; // selects another definition's card
   stale?: boolean; // the last compile failed: pickers offer the last good compile's keys
 };

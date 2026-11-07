@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import { added, allowed, apart, awaits, diff, minimal, pickKind } from '../play/card.ts';
-import { unfed } from '../play/allowed.ts';
+import { unready } from '../play/allowed.ts';
 import { choiceMenu, nested, refuseChoices, refuseNew, refuseRemove } from '../play/choice.ts';
 import { refuseLink } from '../play/link.ts';
 import { hiddenSkills, unlinkable } from '../play/story_counts.ts';
@@ -111,17 +111,23 @@ test("a quest's and a dialogue's added fields are the least valid ones, their wo
   // Breaks (food.ex:21 effect?): the seeded edible goes out with the next blur's edit elsewhere.
   const seeded = { mass_grams: 2, edible: { label: { prose: '~' }, narration: { prose: '~' } } };
   const ops = diff({ mass_grams: 1 }, seeded);
-  assert.deepEqual(apart(ops, unfed(seeded)), [ops.find((o) => o.path[0] === 'mass_grams')]);
-  assert.equal(unfed({ edible: { ...seeded.edible, cures: [] } }).length, 1);
+  assert.deepEqual(apart(ops, unready(seeded)), [ops.find((o) => o.path[0] === 'mass_grams')]);
+  assert.equal(unready({ edible: { ...seeded.edible, cures: [] } }).length, 1);
   for (const k of ['resource', 'cures', 'applies'])
     assert.deepEqual(
-      unfed({ edible: { ...seeded.edible, [k]: k === 'resource' ? 'hp' : ['x'] } }),
+      unready({ edible: { ...seeded.edible, [k]: k === 'resource' ? 'hp' : ['x'] } }),
       [],
     );
   const target = { kind: 'npc', npc: 'bess' }; // the pick: compiled into the showcase's carry_letter
   const offered = added(quest, 'offer', defs, 'source.QuestDefinition')!;
   const picked = { ...offered, offer: { ...(offered.offer as object), target } };
   assert.ok(new Ajv2020({ strict: false }).compile(served('quests'))(picked));
+  // Breaks (quests.ex:63-66): the seeded targetless offer goes out with the next blur's edit elsewhere.
+  const late = diff(quest, { ...offered, name: 'quest.x' });
+  assert.deepEqual(apart(late, unready({ ...offered, name: 'quest.x' })), [
+    late.find((o) => o.path[0] === 'name'),
+  ]);
+  assert.deepEqual(unready(picked), []);
 });
 
 // Break: the Quest card offers an expedition or patrol the cartridge's capabilities do not declare

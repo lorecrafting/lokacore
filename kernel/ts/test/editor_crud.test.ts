@@ -18,7 +18,8 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
-import { added, allowed, definitionOf, diff } from '../play/card.ts';
+import { unready } from '../play/allowed.ts';
+import { added, allowed, apart, definitionOf, diff } from '../play/card.ts';
 import { compiled } from '../play/compiled.ts';
 import { placed, REPO, SCHEMAS } from '../play/guard.ts';
 import { writer } from '../play/write.ts';
@@ -49,10 +50,6 @@ const GAPS: Record<string, string> = {
   // no palette New: the kind is written by hand or by its card's parent
   'treatment:reverie create': 'loka-wfrgk.86.1',
   'treatment:reverie delete': 'loka-wfrgk.86.1',
-  // the add menu's least value (card.ts added) is one the compiler refuses
-  'items.block_chance edit': 'loka-wfrgk.84.1',
-  'items.capacity edit': 'loka-wfrgk.84.1',
-  'quests.offer edit': 'loka-wfrgk.84.1',
 };
 
 const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-crud-')));
@@ -188,7 +185,11 @@ test('every field a card draws takes its add-menu value through /change and comp
         }
         const edited = added(doc, f, defs, definitionOf(defs, k, doc));
         if (!edited) continue; // present, or the author picks it (a string, an enum, a key)
-        const r = await post('/change', { file, was, ops: diff(doc, edited) });
+        // the card holds what the compiler refuses until the author picks it (Generic.tsx send)
+        const all = diff(doc, edited);
+        const ops = apart(all, unready(edited));
+        if (all.length && !ops.length) continue;
+        const r = await post('/change', { file, was, ops });
         posted.add(`${k}.${f}`);
         if (!r.ok) {
           if (!gap) reds.push(`${k}.${f} edit: ${String(r.told).slice(0, 200)}`);

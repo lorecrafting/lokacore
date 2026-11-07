@@ -23,7 +23,7 @@ import {
   unlisted,
 } from '../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
-import { capabilityRow, unfed } from '../../../../kernel/ts/play/allowed.ts';
+import { capabilityRow, unready } from '../../../../kernel/ts/play/allowed.ts';
 import { ask, type useDiagnostics } from '../author.ts';
 import { Button } from '../components/ui/button.tsx';
 import { fields, type Context } from './fields.tsx';
@@ -121,7 +121,7 @@ export function useCard(rel: string, diag: Diag) {
   const send = async () => {
     const saved = file.current;
     if (!saved) return;
-    const errors = [...fresh(saved, latest.current), ...unfed(latest.current as never)];
+    const errors = [...fresh(saved, latest.current), ...unready(latest.current as never)];
     const [first] = errors;
     setHeld(first && `${first.property} ${first.message}`);
     const ops = apart(diff(saved.doc, latest.current), errors);
@@ -256,8 +256,8 @@ export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
 }
 
 /** Writes the field's least value (its words `~`); one the author must choose is only revealed. */
-export const adder = (card: Card, defs: Record<string, never>, def: string) => (f: string) => {
-  const next = added((card.draft ?? {}) as Record<string, unknown>, f, defs, def);
+export const adder = (card: Card, defs: Record<string, never>, def: string, held?: number) => (f: string) => {
+  const next = added((card.draft ?? {}) as Record<string, unknown>, f, defs, def, held);
   card.reveal(f);
   if (next) (card.change(next), awaits(def, f) || card.commit());
 };
