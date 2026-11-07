@@ -245,6 +245,7 @@ export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
   if (!drawn) return <p className="px-3 text-xs text-muted-foreground">{card.refused ?? `Loading ${rel}`}</p>;
   const { dir } = saved!; // drawn exactly when saved
   const def = definitionOf(defs, dir, draft); // a prose field added writes its key `~`
+  const { add, about } = adding(card, defs, def);
   const ui = hidden(drawn, dir, registry, draft, card.revealed);
   const menu = cardMenu(dir, registry, draft, card.revealed, cart, (m) => only(m, defs));
   return (
@@ -252,7 +253,7 @@ export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
-      <AddMenu fields={menu} reveal={adder(card, defs, def)} about={(f) => described(defs, def, f)} />
+      <AddMenu fields={menu} reveal={add} about={about} />
     </div>
   );
 }
