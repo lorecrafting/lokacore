@@ -224,10 +224,11 @@ test('grow handles: every side with no exit and a free cell, up and down a level
   const E = room('e', 'south', { x: 2, y: 1, z: 0 }, [{ dir: 'north', to: 'b' }]);
   const G = room('g', 'north', { x: 1, y: 0, z: 1 });
   const H = room('h', 'west', { x: 2, y: 2, z: 0 });
-  const all = [...ROOMS, E, G, H];
+  const K = room('k', 'west', { x: 1, y: 0, z: -1 });
+  const all = [...ROOMS, E, G, H, K];
   assert.deepEqual(map.grows(E, all), ['east', 'up', 'down']); // north is an exit, west is D, south is H
   assert.deepEqual(map.grows(D, all), ['south', 'west', 'up', 'down']); // B north, E east
-  assert.deepEqual(map.grows(B, all), ['north', 'east', 'down']); // G holds the cell above
+  assert.deepEqual(map.grows(B, all), ['north', 'east']); // G above, K below
   assert.deepEqual(map.grows(U, all), []);
 });
 

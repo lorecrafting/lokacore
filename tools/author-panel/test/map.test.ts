@@ -251,7 +251,8 @@ test('an Unplaced chip dropped on an empty map asks the layout starter for the f
 });
 
 // Breaks (mapsvg.tsx Grow, map.ts grows): a + on the side with an exit, a handle click that pans
-// instead (pan()'s pointer capture), grows the wrong way or level, or does not select the new room.
+// instead (pan()'s pointer capture), grows the wrong way or level, a + over a room on the next
+// level, or does not select the new room.
 // Last: it writes rooms into the shared showcase copy.
 test('a + on a free side of the selected room makes and links a room there and selects it', async () => {
   const room = (k: string) =>
@@ -313,6 +314,7 @@ test('a + on a free side of the selected room makes and links a room there and s
   await page
     .getByRole('button', { name: 'room_3: new room north', exact: true })
     .waitFor({ timeout: boot }); // compiled: the next page's free key is room_4
+  assert.equal(await page.getByRole('button', { name: 'room_3: new room down' }).count(), 0); // pond below, no exit
   const ops = await page.evaluate('window.ops');
   assert.deepEqual(new Set(ops as string[]), new Set(['select'])); // the new room shown, no go_to_room
   await page.close();
