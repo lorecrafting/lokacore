@@ -317,6 +317,13 @@ test('each node names its own source file, a .json over its .scene', () => {
   // Break: a bundle's room has no area for the pickers (reachable), or a card file of its own.
   assert.deepEqual(bundled, { [ref('room', 'shed')]: 'areas/yard.json' });
   assert.ok(!Object.values(files).includes('areas/yard.json'));
+  // Break: a bundle saved as `null` throws past the parse guard: a 500 for the whole story.
+  writeFileSync(join(src, 'areas/void.json'), 'null');
+  try {
+    assert.deepEqual(story(src, dev, []).bundled, bundled);
+  } finally {
+    rmSync(join(src, 'areas/void.json'));
+  }
 });
 
 // Break: a bad outline.json throws (a 500 for the whole map) instead of a refusal in the model

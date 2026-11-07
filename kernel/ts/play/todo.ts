@@ -29,7 +29,7 @@ export function bundled(dir: string) {
     } catch {
       continue;
     }
-    for (const [section, defs] of Object.entries(held))
+    for (const [section, defs] of Object.entries(held ?? {}))
       for (const key of Object.keys(defs ?? {})) out[`${section}/${key}`] = rel;
   }
   return out;
