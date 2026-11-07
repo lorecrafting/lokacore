@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 692, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 696, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFileSync, existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import axe from 'axe-core';
 import { author, boot, dir, open, QUEST } from './harness.ts';
+import type { Route } from 'playwright';
 
 // Breaks: a card's field grid sizes its track to its content (an auto track, not grid-cols-1's
 // minmax(0,1fr)), so a long text key pushes the card past the narrowest inspector (loka-wfrgk.40.1).
@@ -603,10 +604,13 @@ test('palette Undo brings back the file palette Delete removed, once', async () 
   try {
     await run('Delete the selected definition', () => !existsSync(file));
     assert.equal(existsSync(file), false, `not deleted: ${told}`);
+    const refuse = (r: Route) => r.fulfill({ status: 409, body: '{}' }); // changed since: refused
+    await page.route('**/__author/undo', refuse, { times: 1 });
+    await run('Undo the last edit', () => told.length > 0);
+    assert.deepEqual([told, existsSync(file)], [['Changed outside: try again'], false]);
     await run('Undo the last edit', () => existsSync(file));
     assert.equal(readFileSync(file, 'utf8'), bytes, `not brought back: ${told}`);
-    await run('Undo the last edit', () => false); // the Book's Cmd-Z: nothing of its own to put back
-    await page.getByText('Nothing of yours to put back.').waitFor({ timeout: boot });
+    await run('Undo the last edit', () => !existsSync(file)); // the Book's Cmd-Z, not the journal's
     assert.equal(existsSync(file), true, 'the second Undo deleted it again');
   } finally {
     writeFileSync(file, bytes); // the later tests share this cartridge
