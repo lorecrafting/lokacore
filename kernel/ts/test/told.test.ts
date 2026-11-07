@@ -282,7 +282,23 @@ test('/line opens an inline prose key in its own definition, whoever else holds 
     await line('item.lamp.room', 'x'),
     at('items/lamp.json', 5, '  "room_line": {"prose": "x"}', 'x'),
   );
+  // inherited words (`extends`, flattened before lowering) are its parent's line
+  writeFileSync(join(src, 'rooms/g.json'), room('{"prose": "Gate"}', '{"prose": "Arch"}'));
+  writeFileSync(join(src, 'rooms/f.json'), '{\n  "extends": "g",\n  "exits": {}\n}\n');
+  assert.deepEqual(
+    await line('room.f.description', 'Arch'),
+    at('rooms/g.json', 3, '  "description": {"prose": "Arch"},', 'Arch'),
+  );
+  // a label whose key is its words: the words, not the key
+  writeFileSync(
+    join(src, 'items/bell.json'),
+    '{\n  "labels": {\n    "ring": {"prose": "ring"}\n  }\n}\n',
+  );
+  assert.deepEqual(
+    await line('item.bell.labels.ring', 'ring'),
+    at('items/bell.json', 3, '    "ring": {"prose": "ring"}', 'ring'),
+  );
   // words edited outside the Book before the compile: its own line is gone, so no other's line
   assert.equal((await line('room.b.name', 'Hall'))[0], 404);
-  assert.equal((await line('item.lamp.description', 'lamp'))[0], 404);
+  assert.equal((await line('item.lamp.name', 'x'))[0], 404);
 });

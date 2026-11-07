@@ -67,9 +67,27 @@ export function sourcesOf(source: string, key: string, words?: string) {
   return own(source, key, words!, hits, all);
 }
 const fileOf = (at: string) => at.slice(0, at.lastIndexOf(':'));
+const MARK = '\u0000line';
+/** JSON file `rel`'s value at `steps` (`room` a `room_line`'s, prose.ex step/1), with line `n`'s
+ * last `words` marked first; null while it does not parse (a half-saved file: cannot tell). */
+function valueAt(source: string, rel: string, steps: string[], words = '', n = -1) {
+  const lines = readFileSync(join(source, rel), 'utf8').split('\n');
+  const [was, i] = [JSON.stringify(words), lines[n]?.lastIndexOf(JSON.stringify(words))];
+  if (n >= 0)
+    lines[n] = lines[n].slice(0, i) + JSON.stringify(MARK) + lines[n].slice(i + was.length);
+  try {
+    return steps.reduce(
+      (at: any, step, k) =>
+        at?.[k === steps.length - 1 && step === 'room' && at?.room_line ? 'room_line' : step],
+      JSON.parse(lines.join('\n')),
+    );
+  } catch {
+    return null;
+  }
+}
 /** An inline prose key `<kind>.<key>.<path>`'s `hits` that its own definition holds at that path:
  * the same words elsewhere (a keyword, another room, its other fields) are not its line. With its
- * definition found but no such hit (words edited outside the Book), none: never another's line. */
+ * definition holding other words there (edited outside the Book), none: never another's line. */
 function own(source: string, key: string, words: string, hits: string[], all: string[]) {
   const [kind, name, ...path] = key.split('.');
   const fits = (dir: string, k: string) =>
@@ -78,29 +96,27 @@ function own(source: string, key: string, words: string, hits: string[], all: st
     const placing = placed(rel); // an area bundle places as `areas/<a>`: its members below
     return !!placing && fits(placing.ext === 'scene' ? 'dialogues' : placing.dir, placing.key);
   };
-  const mine = all.some(ownFile);
-  const [bundle] = mine
+  const mine = all.filter(ownFile);
+  const [bundle] = mine.length
     ? []
     : Object.entries(bundled(source)).filter(([ref]) =>
         fits(...(ref.split('/') as [string, string])),
       );
-  if (!mine && !bundle) return hits; // a kind with no file of its own: search them all
+  if (!mine.length && !bundle) return hits; // a kind with no file of its own: search them all
   const steps = (rel: string) =>
     ownFile(rel) ? path : rel === bundle?.[1] ? [bundle[0].split('/')[0], name, ...path] : null;
-  const MARK = '\u0000line';
   // a JSON hit is the key's when marking its words on that line marks the key's own words
   const holds = (at: string) => {
-    const [rel, n] = [fileOf(at), Number(at.slice(at.lastIndexOf(':') + 1)) - 1];
-    if (!steps(rel) || !rel.endsWith('.json')) return !!steps(rel); // a scene: its own file
-    const lines = readFileSync(join(source, rel), 'utf8').split('\n');
-    lines[n] = lines[n].replace(JSON.stringify(words), () => JSON.stringify(MARK));
-    const value = steps(rel)!.reduce(
-      (at: any, step) => at?.[step === 'room' && at?.room_line ? 'room_line' : step], // prose.ex step/1
-      JSON.parse(lines.join('\n')),
-    );
-    return value === MARK || value?.prose === MARK; // a plain string, or an inline `{"prose"}`
+    const [rel, s] = [fileOf(at), steps(fileOf(at))];
+    if (!s || !rel.endsWith('.json')) return !!s; // a scene: its own file
+    const value = valueAt(source, rel, s, words, Number(at.slice(at.lastIndexOf(':') + 1)) - 1);
+    return value === null || value === MARK || value?.prose === MARK; // a string or `{"prose"}`
   };
-  return hits.filter(holds);
+  const kept = hits.filter(holds);
+  const defines = (rel: string) =>
+    !rel.endsWith('.json') || valueAt(source, rel, steps(rel)!) !== undefined;
+  // nothing there: words it inherits (`extends`) are wherever they are found
+  return kept.length || [...mine, ...(bundle ? [bundle[1]] : [])].some(defines) ? kept : hits;
 }
 export const sourceOf = (source: string, key: string, words?: string) =>
   sourcesOf(source, key, words)[0];
