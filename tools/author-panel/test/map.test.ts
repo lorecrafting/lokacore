@@ -317,6 +317,13 @@ test('a + on a free side of the selected room makes and links a room there and s
   assert.deepEqual(new Set(ops as string[]), new Set(['select'])); // the new room shown, no go_to_room
   await page.close();
   page = await open({ selection: { kind: 'room', key: 'farm_kitchen' } });
+  await handles(page, 'farm_kitchen').first().focus({ timeout: boot });
+  await page.keyboard.press('Shift+Tab'); // back into the map's rooms: a + in the page's order, grows on no other key
+  const [inMap, name] = (await page.evaluate(
+    `[!!document.activeElement.closest('svg'), document.activeElement.getAttribute('aria-label')]`,
+  )) as [boolean, string];
+  assert.equal(inMap, true);
+  assert.doesNotMatch(name, /: new room /);
   await page
     .getByRole('button', { name: 'farm_kitchen: new room down', exact: true })
     .focus({ timeout: boot });

@@ -148,7 +148,7 @@ function Plus({ r, dir, at: [x, y, s] }: { r: MapRoom; dir: string; at: [number,
         className="fill-background stroke-input group-hover:stroke-ring"
       />
       <path d={`M${x - a},${y}H${x + a}M${x},${y - a}V${y + a}`} className="stroke-foreground" />
-      <circle cx={x} cy={y} r={s + 2} className={RING} />
+      <circle cx={x} cy={y} r={s + 2} className={RING} /> {/* mutate-skip: the focus ring's gap */}
     </g>
   );
 }
