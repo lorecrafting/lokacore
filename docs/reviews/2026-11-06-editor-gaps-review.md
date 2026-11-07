@@ -74,16 +74,3 @@ Ruled with the PM mid-review: loka-wfrgk.90 (Edit in Book, `21` + Tab saves `2` 
 comes from the pre-PR `onBlur={() => setTimeout(card.commit)}` at Generic.tsx:210 firing as focus enters the
 field; the queue turns the pre-PR lost keystrokes into two journal entries with the right bytes. Follows, P2.
 loka-wfrgk.87.1 (a cutscene's quest file left behind) and .84.1, .86.1 are filed follow-ups.
-
-## Re-check: fix round at `4ea7a8080`
-
-- CI at head: ci success, book-e2e success, graph-diff success. Diff: Generic.tsx (3 lines), panel.test.ts (10 lines).
-- Finding 1 (should-fix): Generic.tsx:101 `.catch((e) => setRefused(String(e)))`. The queue still settles after
-  the catch, so the next write runs; `refused` clears on the next 200 as for a 409. Fixed.
-- Test: panel.test.ts:221-224 routes `/__author/change` to 500 `boom` (not JSON), sets `800`, waits for
-  `"boom" is not valid JSON` and asserts the field keeps `800`; after unroute the last Undo still stands (the
-  failed write wrote nothing). Red control accepted by reading: the old `.catch(console.error)` never calls
-  `setRefused`, so the `getByText` wait times out. Expected text is Chrome's `JSON.parse` message, the E2E's only
-  browser.
-- Nothing else changed; nits 2-5 and loka-wfrgk.90 follow as filed.
-- Verdict: **APPROVE**.
