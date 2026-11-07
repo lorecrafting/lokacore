@@ -19,6 +19,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: editor nit batch B, cards, lint and content-report nits](2026-11-06-editor-nits-b-review.md): **CHANGES REQUIRED**
 - [Review: Editor nit batch A, map, shell and Book death-page fixes (PR #677)](2026-11-06-editor-nits-a-review.md): **CHANGES REQUIRED**
 - [Review: editor gaps, Story beats, room detail, New outline, set delete, add-menu gates and seeds](2026-11-06-editor-gaps-review.md): **APPROVE**
+- [Review: author panel, palette Undo brings back a palette Delete](2026-11-06-editor-delete-undo-review.md): **CHANGES REQUIRED**
 - [Review: editor coverage A, CRUD matrix, card round-trip, route-caller tests](2026-11-06-editor-coverage-a-review.md): **APPROVE**
 - [Review: editor world picker and New world (loka-vduxr.65)](2026-11-05-world-picker-review.md): **APPROVE WITH NOTES**
 - [Review: Story map S2, the List view and Trace in the map slot (PR #646, loka-wfrgk.18.2)](2026-11-05-story-map-s2-review.md): **APPROVE WITH NOTES**
