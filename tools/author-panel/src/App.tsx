@@ -4,7 +4,7 @@ import { PanelLeftClose, PanelRightClose } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { shortcut } from '../../../mobile/app/author/prose_rules.ts';
 import { kept, mapCommand, shown } from './mapwire.ts';
-import { ask, checkpoints, drop, story as getStory, useDiagnostics, type Story } from './author.ts';
+import { ask, checkpoints, drop, undoDelete, story as getStory, useDiagnostics, type Story } from './author.ts';
 import { useBook, type Heard } from './book.ts';
 import { BookStrip } from './centre.tsx';
 import { Divider, Rail, useLayout, type SetLayout } from './columns.tsx';
@@ -288,8 +288,7 @@ function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) =
     if (i.id.startsWith('map-'))
       return mapCommand(i.id, sel?.kind === 'room' ? sel.key : undefined);
     if (i.id === 'delete') return void (sel && drop(sel.key, fileOf(sel, places(sel, story?.graph.nodes ?? []).inspector?.ref, story?.files)));
-    if (i.id === 'undo')
-      return book.send({ op: 'key', key: 'z', metaKey: true, ctrlKey: false, altKey: false });
+    if (i.id === 'undo') return void undoDelete(book);
     const kind = i.id.startsWith('new-') ? i.id.slice(4) : undefined;
     const name = kind === 'outline' ? kind : i.id === 'go' && sel?.kind === 'room' ? sel.key : prompt(kind ? `New ${kind.replace(/(us)es$|s$/, '$1')} key` : 'Room key');
     if (!name) return;

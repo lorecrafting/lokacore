@@ -1,4 +1,4 @@
-// size: allow 320, the field's open, save, put-back, walk keys and add-here menu share its state
+// size: allow 325, the field's open, save, put-back (with a palette Delete's), walk keys and add-here menu share its state
 // E5, prose in the Book (docs/design/prose-in-the-book-rulings.md): a double-click turns a line
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
@@ -30,6 +30,7 @@ const edits: (At & { id: number; key: string; draft: string })[] = []; // /edit 
 let unconfirmed = new Set<string>();
 let field: Field | undefined;
 let opening = false; // a /line in flight: a second double-click opens nothing
+let putting = Promise.resolve(); // the Cmd-Z presses, in order
 let landed: HTMLElement | undefined;
 let selected: { kind: string; key: string; add?: string[] } = { kind: '', key: '' }; // the panel's selection: its lines are marked
 let asked = false; // a Book click: the selection's add-here menu shows once the panel offers it
@@ -189,6 +190,16 @@ async function conflict(f: Field) {
 }
 
 async function putBack() {
+  // a palette Delete leaves no line to put back from: undo it first, or Cmd-Z skips it (loka-wfrgk.92)
+  const [, journal] = await api('/journal');
+  const newest = Array.isArray(journal) ? journal[0] : undefined; // newest first
+  if (newest?.what.startsWith('delete ')) {
+    const file = newest.what.slice('delete '.length);
+    const [status] = await api('/undo', { id: newest.id });
+    return hooks.tell({
+      note: status === 200 ? `put back ${file}` : `${file} changed since; not put back.`,
+    });
+  }
   const last = edits.pop();
   if (!last) return hooks.tell({ note: 'Nothing of yours to put back.' });
   const [status] = await api('/undo', last); // its key and old words: the Book shows them at once
@@ -206,7 +217,7 @@ function onKey(e: KeyboardEvent, inField = typing(e.target), relayed = false) {
   if (asks) return void (e.preventDefault?.(), hooks.tell({ shortcut: asks }));
   if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 'z' && !inField) {
     e.preventDefault?.();
-    return void putBack();
+    return void (putting = putting.catch(() => {}).then(putBack)); // after the last press: its journal
   }
   const onLanded = relayed || e.target === document.body || e.target === landed; // not a choice's Enter
   if (e.key === 'Enter' && landed && !inField && onLanded) {
