@@ -69,9 +69,6 @@ defmodule Loka.ContentStartersExtendsTest do
 
     new(tmp, ~w(areas a npcs deer --area a --extends wild npcs elk --extends wild --area a mine))
     new(tmp, ~w(rooms den --from start east --extends cave mine))
-    # The abstract cave gets no row: the compiler refuses one (checked by npc/2's compile).
-    File.rm!(Path.join(dir, "layout.json"))
-    {:ok, _} = Starters.write(dir, "layout", "layout")
     put(dir, "items/box.json", %{"abstract" => true, "location" => %{"in" => "template"}})
     new(tmp, ~w(items crate --area a --extends box mine))
     assert read(dir, "areas/a/items/crate.json")["location"] == %{"in" => "room", "room" => "a"}
@@ -82,6 +79,10 @@ defmodule Loka.ContentStartersExtendsTest do
     den = read(dir, "rooms/den.json")
     assert {den["extends"], den["exits"]["west"]["to"]} == {"cave", "start"}
     refute Map.has_key?(den, "description")
+    # The abstract cave gets no row from the layout starter either (the compiler refuses one).
+    File.rm!(Path.join(dir, "layout.json"))
+    {:ok, _} = Starters.write(dir, "layout", "layout")
+    assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
   # Breaks: a refused parent writing a child the compiler then rejects, a vague message, a room
