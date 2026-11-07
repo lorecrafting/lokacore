@@ -487,7 +487,6 @@ test('a new room detail saves with a `~` description, its optional fields folded
   await page.locator('#root_details__add').click();
   await page.locator('#root_details_newKey-key').fill('well');
   await page.keyboard.press('Tab');
-  await page.keyboard.press('Tab'); // the second blur commits the rename the first one carried
   for (let t = 0; !well() && t < 50; t++) await page.waitForTimeout(100);
   assert.deepEqual(well(), { aliases: ['well'], description: { prose: '~' } });
   assert.equal(await page.locator('#root_details_well_bed').isVisible(), false);
