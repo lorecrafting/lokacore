@@ -160,9 +160,9 @@ test('the log has story words, never a kernel code, across both endings', () => 
   a.tap('Take a brass lantern');
   assert.equal(a.screen().log.at(-1), 'You take a brass lantern.');
   const look = a.find('Look');
-  const before = [...a.screen().log];
-  a.smoke.press(look);
-  assert.deepEqual(a.screen().log, before);
+  assert.ok(a.screen().log.length > 0);
+  a.smoke.press(look); // an accepted Look starts the room's log over, as arriving does
+  assert.deepEqual(a.screen().log, []);
   a.tap('Go west', 'Go west', 'Go south', 'Scan');
   const locked = {
     label: 'Go west',
