@@ -1,4 +1,4 @@
-// size: allow 530, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 540, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (tools/author-panel/src/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -515,6 +515,12 @@ test('a key a file or an area bundle already holds is refused, compiled or not',
       /items\/item_9 exists in areas\/zz.json/,
     );
     assert.equal(existsSync(join(src, 'items/item_9.json')), false);
+    // Breaks: a New area (its first room) not checked as a room; a key of another kind counted.
+    assert.deepEqual(await io.post('new', { kind: 'areas', name: 'room_9' }), {
+      ok: false,
+      told: 'rooms/room_9 exists in rooms/room_9.json',
+    });
+    await ed.made(start, 'items', 'npc_9');
   } finally {
     for (const f of Object.keys(planted)) rmSync(join(src, f));
   }
