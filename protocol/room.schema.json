@@ -84,7 +84,7 @@
           "$ref": "room.schema.json#/$defs/KnockResponse"
         },
         "locks": {
-          "description": "Traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
+          "description": "A condition the player must meet to go through this exit; otherwise the move is refused.",
           "type": "object",
           "properties": {
             "traverse": {"description":"A condition the player must meet to go through this exit.",
@@ -533,7 +533,7 @@
           "additionalProperties": false
         },
         "locks": {
-          "description": "Enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
+          "description": "A condition the player must meet to enter this room; otherwise the move is refused.",
           "type": "object",
           "properties": {
             "enter": {"description":"A condition the player must meet to come into this room.",

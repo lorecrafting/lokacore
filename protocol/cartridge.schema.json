@@ -203,7 +203,7 @@
           "additionalProperties": false
         },
         "chapters": {
-          "description": "Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning.",
+          "description": "Optional chapter markers, in order.",
           "type": "array",
           "minItems": 1,
           "items": {
@@ -1076,7 +1076,7 @@
               "$ref": "action.schema.json#/$defs/ActionCost"
             },
             "terrain": {
-              "description": "Extra move cost by room tag, in percent: for example 200 makes moves into rooms with that tag cost double.",
+              "description": "Move cost by room tag, in percent of the usual: 100 leaves it unchanged, 50 halves it and 200 doubles moves into rooms with that tag.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^(air|bed|burnable|chasm|cool|cursed|exposed|forge|fragile|lamp|liquid_holding|marsh|metal|road|rod|rug|sharp|silver|warm|water|waterproof|windproof|wooden)$"
@@ -1127,7 +1127,7 @@
           "additionalProperties": false
         },
         "gear_budget": {
-          "description": "Balance tool 6b: the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it.",
+          "description": "For balancing only: how much bonus an item in each slot may carry at level 1 (per_slot), and how much each level above 1 adds (per_level). It does not change play; only the power report reads it.",
           "type": "object",
           "properties": {
             "per_slot": {
@@ -1594,7 +1594,7 @@
         },
         "penalty": {
           "type": "object",
-          "description": "What dying costs the player: some experience (a percent, never below the current level) and whether held items stay on the corpse (the default) or are kept.",
+          "description": "What dying costs the player. experience: a percent of experience lost, but never below the start of the current level (needs levelling in the world settings). items: corpse (the default) moves what the player held into the corpse; kept leaves it with the player.",
           "properties": {
             "experience": {"description":"Experience lost on death; needs world.levelling.",
               "type": "object",

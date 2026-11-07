@@ -379,7 +379,7 @@ Effects and the effect registry's durability and idempotency classifications (04
 
 Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 §23; 00 §4.4; 00a §5, §12), owned by containment (capability_registry.json). R5 slice 4: what take, drop and give need. Each is a RuntimeEntity: a fresh world gives it an EntityId (numeric profile, Initial world ids) and one container, the only place its location is stored (03 §23); a holder's contents and an actor's inventory are derived from it. Text follows the four LegendMUD tiers (owner decision 2026-09-25, Q1): keywords the player types, a short description for action messages and the inventory, a room line for the room's contents, and a description for examine. An item's equipment slot joins with equipment@1 (chapter-one slice c1-equipment); stacking, weight and put join with their capabilities as optional fields.
 
-- **AmbientSet**: Lines told now and then: each time the clock passes a multiple of every and the chance passes, one of the lines is shown, at most one per room, item or NPC at a time.
+- **AmbientSet**: Lines told now and then: each time the clock passes a multiple of every and the chance passes, one of the lines is shown. A room, item or NPC shows at most one ambient line each time the clock moves on.
 - **AmbientSets**: The ambient lines of a room or item, in order.
 - **AppliedStatus**: A status this food or drink puts on the player, with an optional duration in game time units that replaces the status's own. Eating again while it lasts keeps whichever end is later.
 - **AttackProfile**: Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max.
@@ -470,11 +470,11 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
 
 FactSpec and scoped facts (03 §7, §13; 21 §3.9, §4 Fact).
 
-- **FactSpec**: A typed, namespaced fact declaration: key, versioned type, default, allowed scope kinds (a set) and meaning. Transition constraints and the reference graph are added with the compiler.
+- **FactSpec**: A fact: its type, starting value, what it can belong to, and what it means.
 - **FactType**: What kind of value the fact holds and where it starts: true or false (bool), one of a list of words (enum), or a whole number with optional bounds (int).
   - `bool`: True or false.
-  - `enum`: One of values (order and duplicates carry no meaning); default is one of them, which the compiler checks.
-  - `int`: A safe integer within the optional inclusive bounds; the compiler checks default against them.
+  - `enum`: One of a list of words; the starting value must be one of them.
+  - `int`: A whole number, optionally between a lowest and a highest value (both allowed); the starting value must be within them.
 - **ScopedFact**: One stored fact value (03 §13): unique by fact, scope and subject_id within its world context, the same identity as the fact MutationTarget (delta.schema.json). An unset fact has its FactSpec default and no record. Revision and timestamps are host persistence metadata, not portable state.
 
 ## Feature envelopes (`protocol/feature.schema.json`)
@@ -574,7 +574,7 @@ Cartridge manifests and releases and their version fields (05 §3, §20, §22; 0
 
 - **ApiVersion**: Which version of the game file format this file is written for.
 - **CampaignId**: A campaign identity (07 §15), lowercase snake_case, at most 64 characters.
-- **CartridgeManifest**: A cartridge's manifest: identity, title, compatibility requirements and supported profiles (at least one; order and duplicates carry no meaning). Fields that freeze with their feature (entry, locales, activation groups, continuity, time policy) are added then.
+- **CartridgeManifest**: The game's identity: its title, the engine versions it needs, and the profiles it supports (at least one).
 - **CartridgeRelease**: An exact immutable cartridge release: cartridge_id@version names exactly one semantic hash (05 §12).
 - **ClientFeature**: A presentation/input capability of the installed Loka app, lowercase snake_case, at most 64 characters.
 - **CompatibilityRequirements**: Which engine versions and features this game needs to run. Published games pin each version exactly.
@@ -676,7 +676,7 @@ QuestDefinition and its objective (06 §1, §2, §3 Objective credit/causation p
 
 - **QuestDefinition**: A quest: its name, how the player takes it on (offer or a dialogue choice), its objective, and its journal text.
 - **QuestJournal**: The journal text for each stage of the quest; all five stages are required. outcomes can replace the ending text per outcome, active_variants can replace the active text while a condition holds (the first that holds wins), and hints add text after a number of real minutes in a stage.
-- **QuestObjective**: A quest's one objective and its evidence policy. current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).
+- **QuestObjective**: What the player must do to finish the quest. current_state: met while the condition holds now, so an item counts only while the player still has it. post_activation_event: met when the player picks up the named item after the quest starts; picking it up earlier does not count.
   - `current_state`: Met while the policy holds for the actor now; nothing is stored.
   - `post_activation_event`: Met when the actor acquires the named item after the quest began.
   - `patrol`: Met when the quest's patrol completes.

@@ -361,11 +361,11 @@
         "policy": {"description":"When this option is shown: a condition the player must meet, checked with the speaker.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
-        "order": {"description":"Display position among this dialogue's choices, lowest first; a choice with none follows, and a tie or none sorts by key. The compiler writes it for a scene set in an unsorted order.",
+        "order": {"description":"Where this choice is listed, lowest first; choices without one come after, and ties are sorted by key.",
           "type": "integer",
           "minimum": 1
         },
-        "sitting": {"description":"Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest.",
+        "sitting": {"description":"Once taken, this choice is hidden until the conversation is next opened. Only on a plain answer in a dialogue that reopens.",
           "const": true
         },
         "then": {"description":"The conversation to go to next, or end to finish talking.",

@@ -7,7 +7,7 @@ defmodule Loka.ContentSourceSchemaTest do
 
   # The kinds prologue Part 1 uses (loka-wfrgk.102): their help texts are the editor's field help.
   # Spec cites and internal names an author cannot use: sections, decisions, toolbox rows, docs, issues.
-  @jargon ~r/§|ADR-|(?i:toolbox row|\brow \d|\btrap \d|\bpass-\d)|@\d|\bmix |\bRNG\b|SHA-|^[(a-z\d]|schema\.json|\b[A-Z]+_[A-Z_]+\b|\.md\b|\bloka-|\bAPI\d|\b[A-Z]{1,2}\d+(\.\d+)?\b|\b[A-Z][a-z]+[A-Z]\w*/u
+  @jargon ~r/§|ADR-|(?i:toolbox row|\brow \d|\btrap \d|\bpass-\d)|@\d|\bmix loka|(?i:balance tool)|\bstatus\.apply|\brefuses [a-z]+_[a-z_]+|\bcompiler\b|\bbytes\b|\bnamespaced\b|\badded then\b|\bversioned\b|\b[A-Z]\d[A-Z]\b|\bRNG\b|SHA-|^[(a-z\d]|schema\.json|\b[A-Z]+_[A-Z_]+\b|\.md\b|\bloka-|\bAPI\d|\b[A-Z]{1,2}\d+(\.\d+)?\b|\b[A-Z][a-z]+[A-Z]\w*/u
 
   @plain ~w(source.rooms source.npcs source.items source.reactions source.ScriptedAction
             source.dialogues source.scenes source.facts source.quests source.cartridge)

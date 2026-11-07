@@ -188,7 +188,7 @@
     },
     "AmbientSet": {
       "additionalProperties": false,
-      "description": "Lines told now and then: each time the clock passes a multiple of every and the chance passes, one of the lines is shown, at most one per room, item or NPC at a time.",
+      "description": "Lines told now and then: each time the clock passes a multiple of every and the chance passes, one of the lines is shown. A room, item or NPC shows at most one ambient line each time the clock moves on.",
       "properties": {
         "chance": {
           "description": "Percent chance it fires when due, 1 to 100; 100 when absent.",
@@ -1086,7 +1086,7 @@
         },
         "locks": {
           "additionalProperties": false,
-          "description": "Traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
+          "description": "A condition the player must meet to go through this exit; otherwise the move is refused.",
           "properties": {
             "traverse": {
               "$ref": "#/$defs/Policy",
@@ -1209,7 +1209,7 @@
         },
         "penalty": {
           "additionalProperties": false,
-          "description": "What dying costs the player: some experience (a percent, never below the current level) and whether held items stay on the corpse (the default) or are kept.",
+          "description": "What dying costs the player. experience: a percent of experience lost, but never below the start of the current level (needs levelling in the world settings). items: corpse (the default) moves what the player held into the corpse; kept leaves it with the player.",
           "properties": {
             "experience": {
               "additionalProperties": false,
@@ -1518,7 +1518,7 @@
           "type": "boolean"
         },
         "order": {
-          "description": "Display position among this dialogue's choices, lowest first; a choice with none follows, and a tie or none sorts by key. The compiler writes it for a scene set in an unsorted order.",
+          "description": "Where this choice is listed, lowest first; choices without one come after, and ties are sorted by key.",
           "minimum": 1,
           "type": "integer"
         },
@@ -1602,7 +1602,7 @@
         },
         "sitting": {
           "const": true,
-          "description": "Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest."
+          "description": "Once taken, this choice is hidden until the conversation is next opened. Only on a plain answer in a dialogue that reopens."
         },
         "steps": {
           "description": "What happens when the player picks this option, in order.",
@@ -1703,7 +1703,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "One of values (order and duplicates carry no meaning); default is one of them, which the compiler checks.",
+          "description": "One of a list of words; the starting value must be one of them.",
           "properties": {
             "default": {
               "$ref": "#/$defs/Key",
@@ -1726,7 +1726,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "A safe integer within the optional inclusive bounds; the compiler checks default against them.",
+          "description": "A whole number, optionally between a lowest and a highest value (both allowed); the starting value must be within them.",
           "properties": {
             "default": {
               "description": "Value before any assignment.",
@@ -3462,7 +3462,7 @@
           "type": "object"
         }
       ],
-      "description": "A quest's one objective and its evidence policy. current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet)."
+      "description": "What the player must do to finish the quest. current_state: met while the condition holds now, so an item counts only while the player still has it. post_activation_event: met when the player picks up the named item after the quest starts; picking it up earlier does not count."
     },
     "QuestState": {
       "description": "Where a quest stands for the player: active, completed, failed and so on.",
@@ -5056,7 +5056,7 @@
           "type": "object"
         }
       ],
-      "description": "Words shown to the player: write them inline as {\"prose\": \"...\"}, or give the key of a text in the text catalog, such as room.well.name (lowercase, dots and underscores)."
+      "description": "Words shown to the player: write them inline as {\"prose\": \"...\"}, or give the key of a text in the text catalog, such as room.well.name (lowercase letters, digits, dots and underscores)."
     },
     "TextVariants": {
       "description": "Other versions of this text, each used while its condition holds; the first that matches wins, else the base text shows.",
@@ -5411,7 +5411,7 @@
         },
         "gear_budget": {
           "additionalProperties": false,
-          "description": "Balance tool 6b: the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it.",
+          "description": "For balancing only: how much bonus an item in each slot may carry at level 1 (per_slot), and how much each level above 1 adds (per_level). It does not change play; only the power report reads it.",
           "properties": {
             "per_level": {
               "description": "What each level above 1 adds to the slot's budget. Read only by the power report.",
@@ -5591,7 +5591,7 @@
                 "minimum": 0,
                 "type": "integer"
               },
-              "description": "Extra move cost by room tag, in percent: for example 200 makes moves into rooms with that tag cost double.",
+              "description": "Move cost by room tag, in percent of the usual: 100 leaves it unchanged, 50 halves it and 200 doubles moves into rooms with that tag.",
               "propertyNames": { "pattern": "^(air|bed|burnable|chasm|cool|cursed|exposed|forge|fragile|lamp|liquid_holding|marsh|metal|road|rod|rug|sharp|silver|warm|water|waterproof|windproof|wooden)$" },
               "type": "object"
             }
@@ -6013,7 +6013,7 @@
         },
         "locks": {
           "additionalProperties": false,
-          "description": "Traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
+          "description": "A condition the player must meet to go through this exit; otherwise the move is refused.",
           "properties": {
             "traverse": {
               "$ref": "#/$defs/partial.Policy",
@@ -6174,7 +6174,7 @@
           "type": "boolean"
         },
         "order": {
-          "description": "Display position among this dialogue's choices, lowest first; a choice with none follows, and a tie or none sorts by key. The compiler writes it for a scene set in an unsorted order.",
+          "description": "Where this choice is listed, lowest first; choices without one come after, and ties are sorted by key.",
           "minimum": 1,
           "type": "integer"
         },
@@ -6244,7 +6244,7 @@
         },
         "sitting": {
           "const": true,
-          "description": "Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest."
+          "description": "Once taken, this choice is hidden until the conversation is next opened. Only on a plain answer in a dialogue that reopens."
         },
         "steps": {
           "description": "What happens when the player picks this option, in order.",
@@ -7496,7 +7496,7 @@
           "type": "object"
         }
       ],
-      "description": "A quest's one objective and its evidence policy. current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet)."
+      "description": "What the player must do to finish the quest. current_state: met while the condition holds now, so an item counts only while the player still has it. post_activation_event: met when the player picks up the named item after the quest starts; picking it up earlier does not count."
     },
     "partial.RestBinding": {
       "additionalProperties": false,
@@ -8427,7 +8427,7 @@
           "type": "object"
         }
       ],
-      "description": "Words shown to the player: write them inline as {\"prose\": \"...\"}, or give the key of a text in the text catalog, such as room.well.name (lowercase, dots and underscores)."
+      "description": "Words shown to the player: write them inline as {\"prose\": \"...\"}, or give the key of a text in the text catalog, such as room.well.name (lowercase letters, digits, dots and underscores)."
     },
     "partial.UseTool": {
       "additionalProperties": false,
@@ -8866,14 +8866,14 @@
           "description": "A true-or-false fact: the item counts as identified, and its bonuses show, while the fact is true."
         },
         "immune": {
-          "description": "Statuses that status.apply skips on this item's instance; each names a declared status.",
+          "description": "Statuses that never take hold on this item; each names a status of this game.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 16,
           "minItems": 1,
           "type": "array"
         },
         "intended_level": {
-          "description": "Balance tool 6b: the level the item is meant for, read only by the power report's gear budget (needs affects; the engine ignores it at runtime).",
+          "description": "For balancing only: the level this item is meant for, read by the power report (needs affects). It does not change play.",
           "maximum": 2147483647,
           "minimum": 1,
           "type": "integer"
@@ -9299,7 +9299,7 @@
           "description": "The NPC's hit points: minimum, maximum and starting value."
         },
         "immune": {
-          "description": "Statuses that status.apply skips on this NPC's instance; each names a declared status.",
+          "description": "Statuses that never take hold on this NPC; each names a status of this game.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 16,
           "minItems": 1,
@@ -9314,7 +9314,7 @@
         },
         "locks": {
           "additionalProperties": false,
-          "description": "Get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
+          "description": "A condition the player must meet to take an item this NPC holds; otherwise taking it is refused.",
           "properties": {
             "get": {
               "$ref": "#/$defs/partial.Policy",
@@ -10567,7 +10567,7 @@
         "extends": { "$ref": "#/$defs/Key" },
         "locks": {
           "additionalProperties": false,
-          "description": "Enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
+          "description": "A condition the player must meet to enter this room; otherwise the move is refused.",
           "properties": {
             "enter": {
               "$ref": "#/$defs/partial.Policy",
@@ -11756,14 +11756,14 @@
           "description": "A true-or-false fact: the item counts as identified, and its bonuses show, while the fact is true."
         },
         "immune": {
-          "description": "Statuses that status.apply skips on this item's instance; each names a declared status.",
+          "description": "Statuses that never take hold on this item; each names a status of this game.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 16,
           "minItems": 1,
           "type": "array"
         },
         "intended_level": {
-          "description": "Balance tool 6b: the level the item is meant for, read only by the power report's gear budget (needs affects; the engine ignores it at runtime).",
+          "description": "For balancing only: the level this item is meant for, read by the power report (needs affects). It does not change play.",
           "maximum": 2147483647,
           "minimum": 1,
           "type": "integer"
@@ -12224,7 +12224,7 @@
           "description": "The NPC's hit points: minimum, maximum and starting value."
         },
         "immune": {
-          "description": "Statuses that status.apply skips on this NPC's instance; each names a declared status.",
+          "description": "Statuses that never take hold on this NPC; each names a status of this game.",
           "items": { "$ref": "#/$defs/DefinitionRef" },
           "maxItems": 16,
           "minItems": 1,
@@ -12239,7 +12239,7 @@
         },
         "locks": {
           "additionalProperties": false,
-          "description": "Get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
+          "description": "A condition the player must meet to take an item this NPC holds; otherwise taking it is refused.",
           "properties": {
             "get": {
               "$ref": "#/$defs/Policy",
@@ -13742,7 +13742,7 @@
         },
         "locks": {
           "additionalProperties": false,
-          "description": "Enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
+          "description": "A condition the player must meet to enter this room; otherwise the move is refused.",
           "properties": {
             "enter": {
               "$ref": "#/$defs/Policy",
@@ -14919,7 +14919,7 @@
     },
     "source.cartridge": {
       "additionalProperties": false,
-      "description": "A cartridge's manifest: identity, title, compatibility requirements and supported profiles (at least one; order and duplicates carry no meaning). Fields that freeze with their feature (entry, locales, activation groups, continuity, time policy) are added then.",
+      "description": "The game's identity: its title, the engine versions it needs, and the profiles it supports (at least one).",
       "properties": {
         "alternates": {
           "additionalProperties": {
@@ -14946,7 +14946,7 @@
           "description": "The game's clock: hours in a day, parts of the day, moon, seasons and weather."
         },
         "chapters": {
-          "description": "Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning.",
+          "description": "Optional chapter markers, in order.",
           "items": { "$ref": "#/$defs/Chapter" },
           "minItems": 1,
           "type": "array"
@@ -15066,7 +15066,7 @@
         "facts": {
           "additionalProperties": {
             "additionalProperties": false,
-            "description": "A typed, namespaced fact declaration: key, versioned type, default, allowed scope kinds (a set) and meaning. Transition constraints and the reference graph are added with the compiler.",
+            "description": "A fact: its type, starting value, what it can belong to, and what it means.",
             "properties": {
               "meaning": {
                 "description": "What the fact means, for authors. The rules do not read it.",

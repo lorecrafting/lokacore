@@ -24,7 +24,7 @@
           "additionalProperties": false
         },
         {
-          "description": "One of values (order and duplicates carry no meaning); default is one of them, which the compiler checks.",
+          "description": "One of a list of words; the starting value must be one of them.",
           "type": "object",
           "properties": {
             "type": {
@@ -49,7 +49,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A safe integer within the optional inclusive bounds; the compiler checks default against them.",
+          "description": "A whole number, optionally between a lowest and a highest value (both allowed); the starting value must be within them.",
           "type": "object",
           "properties": {
             "type": {
@@ -99,7 +99,7 @@
       ]
     },
     "FactSpec": {
-      "description": "A typed, namespaced fact declaration: key, versioned type, default, allowed scope kinds (a set) and meaning. Transition constraints and the reference graph are added with the compiler.",
+      "description": "A fact: its type, starting value, what it can belong to, and what it means.",
       "type": "object",
       "properties": {
         "key": {

@@ -870,7 +870,7 @@ One option the player can pick in a conversation: its button text, the line it t
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of what the actor reads on choosing. |
 | narration_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Other lines read on choosing, each used while its condition holds. |
 | once | `true` |  | This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset. |
-| order | integer |  | Display position among this dialogue's choices, lowest first; a choice with none follows, and a tie or none sorts by key. The compiler writes it for a scene set in an unsorted order. |
+| order | integer |  | Where this choice is listed, lowest first; choices without one come after, and ties are sorted by key. |
 | patrol | object |  | A patrol transition. |
 | patrol.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |
 | patrol.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The patrol quest. |
@@ -883,7 +883,7 @@ One option the player can pick in a conversation: its button text, the line it t
 | receive | object |  | The bound NPC-held item transferred to the actor. |
 | receive.from | [Key](source-kinds.gen.md#key) | yes | The npc role holding it. |
 | receive.item | [Key](source-kinds.gen.md#key) | yes | The bound item transferred. |
-| sitting | `true` |  | Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest. |
+| sitting | `true` |  | Once taken, this choice is hidden until the conversation is next opened. Only on a plain answer in a dialogue that reopens. |
 | steps | list of [Step](vocabulary.gen.md#steps) |  | What happens when the player picks this option, in order. |
 | story_point | string |  | <story point>/<outcome>: the outcome this choice reaches; one per outcome. |
 | then | [Key](source-kinds.gen.md#key) |  | The conversation to go to next, or end to finish talking. |

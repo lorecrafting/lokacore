@@ -113,7 +113,7 @@ An authored body bleed duration, tick cadence and HP loss.
 
 ## cartridge
 
-A cartridge's manifest: identity, title, compatibility requirements and supported profiles (at least one; order and duplicates carry no meaning). Fields that freeze with their feature (entry, locales, activation groups, continuity, time policy) are added then.
+The game's identity: its title, the engine versions it needs, and the profiles it supports (at least one).
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -121,7 +121,7 @@ A cartridge's manifest: identity, title, compatibility requirements and supporte
 | ancestries | map of [AncestrySpec](source-kinds.gen.md#ancestryspec) |  | Choices a character makes once, such as an ancestry, each under its own name. |
 | api_version | [ApiVersion](source-kinds.gen.md#apiversion) | yes | The source format family this cartridge is written in; always loka/v3. |
 | calendar | [Calendar](source-kinds.gen.md#calendar) |  | The game's clock: hours in a day, parts of the day, moon, seasons and weather. |
-| chapters | list of [Chapter](source-kinds.gen.md#chapter) |  | Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning. |
+| chapters | list of [Chapter](source-kinds.gen.md#chapter) |  | Optional chapter markers, in order. |
 | entry | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The room a fresh world puts the player's body in. |
 | id | [CartridgeId](source-kinds.gen.md#cartridgeid) | yes | The cartridge's identity; every definition key and reference carries it. |
 | requires | [CompatibilityRequirements](source-kinds.gen.md#compatibilityrequirements) | yes | Which engine versions and features this cartridge needs. |
@@ -206,8 +206,8 @@ An item: something the player can pick up, carry, wear or open. It has names and
 | fuel | [FuelSpec](source-kinds.gen.md#fuelspec) |  | Makes the item a lightable fuel source that burns while lit, or a supply that refuels one. |
 | give_allowed | `false` |  | False prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal. |
 | identified | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A true-or-false fact: the item counts as identified, and its bonuses show, while the fact is true. |
-| immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses that status.apply skips on this item's instance; each names a declared status. |
-| intended_level | integer |  | Balance tool 6b: the level the item is meant for, read only by the power report's gear budget (needs affects; the engine ignores it at runtime). |
+| immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses that never take hold on this item; each names a status of this game. |
+| intended_level | integer |  | For balancing only: the level this item is meant for, read by the power report (needs affects). It does not change play. |
 | keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
 | location | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | Where a fresh world puts it. |
 | locks | object |  | Conditions to take this item (get) or put things into it (put); a player who fails one is refused. |
@@ -293,9 +293,9 @@ A character other than the player: its key, words, name, room line and descripti
 | drops[].chance | integer | yes | Percent chance, 1 to 100, that the item stays on the corpse; otherwise it is kept back. |
 | drops[].item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | An item of this cartridge held by this NPC. |
 | hp | [NpcHp](source-kinds.gen.md#npchp) |  | The NPC's hit points: minimum, maximum and starting value. |
-| immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses that status.apply skips on this NPC's instance; each names a declared status. |
+| immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses that never take hold on this NPC; each names a status of this game. |
 | keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
-| locks | object |  | Get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied. |
+| locks | object |  | A condition the player must meet to take an item this NPC holds; otherwise taking it is refused. |
 | locks.get | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition the player must meet to take an item this NPC holds. |
 | mount | object |  | This NPC can be ridden (needs mount in the world settings). While a character rides it, the character can only move into rooms with one of terrain, each move costs cost_percent of the usual (default 100), and the NPC moves along. Not on a spawn template. |
 | mount.cost_percent | integer |  | Percent, 0 to 1000, applied last to the rider's move cost, rounded down. Absent: the cost is not scaled. |
@@ -501,7 +501,7 @@ A place the player can be: its name, description, exits by direction (north, sou
 | exits.south | [Connection](source-kinds.gen.md#connection) |  | The exit to the south. |
 | exits.up | [Connection](source-kinds.gen.md#connection) |  | The exit up. |
 | exits.west | [Connection](source-kinds.gen.md#connection) |  | The exit to the west. |
-| locks | object |  | Enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target. |
+| locks | object |  | A condition the player must meet to enter this room; otherwise the move is refused. |
 | locks.enter | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition the player must meet to come into this room. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
 | sanctuary | boolean |  | Combat cannot be opened here and hostile NPCs do not engage on entry. |
@@ -695,7 +695,7 @@ Type: string.
 
 ### AmbientSet
 
-Lines told now and then: each time the clock passes a multiple of every and the chance passes, one of the lines is shown, at most one per room, item or NPC at a time.
+Lines told now and then: each time the clock passes a multiple of every and the chance passes, one of the lines is shown. A room, item or NPC shows at most one ambient line each time the clock moves on.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -963,7 +963,7 @@ An exit to another room of this game. Add a door with barrier; the room on the o
 | hidden_until.equals | [FactValue](source-kinds.gen.md#factvalue) | yes | The value that reveals the exit; of the fact's type. |
 | hidden_until.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A fact of this cartridge, normally a player bool; the exit stays hidden until it has the value. |
 | knock | [KnockResponse](source-kinds.gen.md#knockresponse) |  | The face's answer to a knock. |
-| locks | object |  | Traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target. |
+| locks | object |  | A condition the player must meet to go through this exit; otherwise the move is refused. |
 | locks.traverse | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition the player must meet to go through this exit. |
 | to | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room this exit leads to. |
 
@@ -1011,7 +1011,7 @@ What happens at death: the corpse made for the player and for NPCs, the room the
 | narration.woke | [TextKey](source-kinds.gen.md#textkey) |  | Told once after every player death, after the penalty line. |
 | npc_corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for an NPC, unless its population names its own. |
 | npc_corpse_decay | integer |  | Logical units from an NPC's death until its corpse decays: direct items spill to the room, the corpse leaves play. Omitted: never. |
-| penalty | object |  | What dying costs the player: some experience (a percent, never below the current level) and whether held items stay on the corpse (the default) or are kept. |
+| penalty | object |  | What dying costs the player. experience: a percent of experience lost, but never below the start of the current level (needs levelling in the world settings). items: corpse (the default) moves what the player held into the corpse; kept leaves it with the player. |
 | penalty.experience | object |  | Experience lost on death; needs world.levelling. |
 | penalty.experience.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Told once when experience is lost. |
 | penalty.experience.percent | integer | yes | The body loses floor(experience * percent / 100), never below its current level's threshold. |
@@ -1091,10 +1091,10 @@ Type: object.
 |---|---|---|---|
 | {type=bool} | variant |  | True or false. |
 | {type=bool}.default | boolean | yes | Value before any assignment. |
-| {type=enum} | variant |  | One of values (order and duplicates carry no meaning); default is one of them, which the compiler checks. |
+| {type=enum} | variant |  | One of a list of words; the starting value must be one of them. |
 | {type=enum}.default | [Key](source-kinds.gen.md#key) | yes | Value before any assignment; one of values. |
 | {type=enum}.values | list of [Key](source-kinds.gen.md#key) | yes | The keys the fact may hold. |
-| {type=int} | variant |  | A safe integer within the optional inclusive bounds; the compiler checks default against them. |
+| {type=int} | variant |  | A whole number, optionally between a lowest and a highest value (both allowed); the starting value must be within them. |
 | {type=int}.default | integer | yes | Value before any assignment. |
 | {type=int}.maximum | integer |  | Highest value allowed, inclusive. |
 | {type=int}.minimum | integer |  | Lowest value allowed, inclusive. |
@@ -1387,7 +1387,7 @@ The journal text for each stage of the quest; all five stages are required. outc
 
 ### QuestObjective
 
-A quest's one objective and its evidence policy. current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).
+What the player must do to finish the quest. current_state: met while the condition holds now, so an item counts only while the player still has it. post_activation_event: met when the player picks up the named item after the quest starts; picking it up earlier does not count.
 
 Type: object.
 
@@ -1555,7 +1555,7 @@ Type: map of string.
 
 ### TextKey
 
-Words shown to the player: write them inline as {"prose": "..."}, or give the key of a text in the text catalog, such as room.well.name (lowercase, dots and underscores).
+Words shown to the player: write them inline as {"prose": "..."}, or give the key of a text in the text catalog, such as room.well.name (lowercase letters, digits, dots and underscores).
 
 Type: string or object.
 
@@ -1668,7 +1668,7 @@ Settings for the whole world, each optional with a default: what a move costs (m
 | derived.damage | [DerivedStat](source-kinds.gen.md#derivedstat) |  | Bonus to the player's damage, by attribute value. |
 | derived.hit_chance | [DerivedStat](source-kinds.gen.md#derivedstat) |  | Bonus to the player's chance to hit, by attribute value. |
 | derived.hp_max | [DerivedStat](source-kinds.gen.md#derivedstat) |  | Bonus to the player's maximum hit points, by attribute value. |
-| gear_budget | object |  | Balance tool 6b: the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it. |
+| gear_budget | object |  | For balancing only: how much bonus an item in each slot may carry at level 1 (per_slot), and how much each level above 1 adds (per_level). It does not change play; only the power report reads it. |
 | gear_budget.per_level | integer | yes | What each level above 1 adds to the slot's budget. Read only by the power report. |
 | gear_budget.per_slot | map of integer | yes | The gear budget for each equipment slot, such as head or hands; a slot not listed has no budget. |
 | group | object |  | Groups of NPCs: member, stay and fight each name a true-or-false fact read at each NPC; wage pays every member amount of a resource every `every` clock units. |
@@ -1694,7 +1694,7 @@ Settings for the whole world, each optional with a default: what a move costs (m
 | mount.riding | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A bool pair fact, per subject and scoped to player: the player rides this NPC. |
 | movement | object |  | What a move costs the body, and how destination room tags scale it. |
 | movement.cost | [ActionCost](source-kinds.gen.md#actioncost) |  | What one move costs the body, such as 1 movement point. |
-| movement.terrain | map of integer |  | Extra move cost by room tag, in percent: for example 200 makes moves into rooms with that tag cost double. |
+| movement.terrain | map of integer |  | Move cost by room tag, in percent of the usual: 100 leaves it unchanged, 50 halves it and 200 doubles moves into rooms with that tag. |
 | theft | object |  | Take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen. |
 | theft.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The victim's attribute compared with the actor's skill level. Absent: 0. |
 | theft.narration | object | yes | Text keys told after a theft. |

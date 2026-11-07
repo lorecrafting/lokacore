@@ -140,7 +140,7 @@
       ]
     },
     "CartridgeManifest": {
-      "description": "A cartridge's manifest: identity, title, compatibility requirements and supported profiles (at least one; order and duplicates carry no meaning). Fields that freeze with their feature (entry, locales, activation groups, continuity, time policy) are added then.",
+      "description": "The game's identity: its title, the engine versions it needs, and the profiles it supports (at least one).",
       "type": "object",
       "properties": {
         "api_version": {

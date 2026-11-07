@@ -84,7 +84,7 @@ defmodule Loka.Content.SourceSchema do
     %{
       "description" =>
         "Words shown to the player: write them inline as {\"prose\": \"...\"}, or give the key " <>
-          "of a text in the text catalog, such as room.well.name (lowercase, dots and underscores).",
+          "of a text in the text catalog, such as room.well.name (lowercase letters, digits, dots and underscores).",
       "anyOf" => [Map.delete(text_key, "description"), @prose]
     }
   end

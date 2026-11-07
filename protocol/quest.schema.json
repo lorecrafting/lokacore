@@ -394,7 +394,7 @@
       ]
     },
     "QuestObjective": {
-      "description": "A quest's one objective and its evidence policy. current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).",
+      "description": "What the player must do to finish the quest. current_state: met while the condition holds now, so an item counts only while the player still has it. post_activation_event: met when the player picks up the named item after the quest starts; picking it up earlier does not count.",
       "oneOf": [
         {"description":"Met while the policy holds for the actor now; nothing is stored.",
           "type": "object",
