@@ -219,22 +219,23 @@ test('a 200 /undo shows the old words it sent at once, before the compile', asyn
 });
 
 test('/line opens an inline prose key in its own definition, whoever else holds its words', async (t) => {
-  // Breaks (loka-wfrgk.100.3): an item keyword, another room or a bundle holding the same words
-  // makes /line refuse two lines, or open the other one, so the Book cannot re-edit the words.
+  // Breaks (loka-wfrgk.100.3): an item keyword, another room, a bundle sibling or a nested field
+  // holding the same words makes /line refuse two lines or open the other one.
   const { call, src } = await served(t);
   const room = (name: string, description: string) =>
     `{\n  "name": ${name},\n  "description": ${description},\n  "exits": {}\n}\n`;
   mkdirSync(join(src, 'rooms'));
   writeFileSync(join(src, 'rooms/a.json'), room('{"prose": "Hall"}', '{"prose": "x"}'));
-  writeFileSync(join(src, 'rooms/b.json'), room('{"prose": "Yard"}', '{\n    "prose": "x"\n  }'));
+  writeFileSync(join(src, 'rooms/b.json'), room('{"prose": "Yard"}', '\n    {"prose": "x"}'));
   const detail = '{"prose": "z"},\n  "details": {"n": {\n    "description": {"prose": "z"}\n  }}';
   writeFileSync(join(src, 'rooms/c.json'), room('{"prose": "z"}', detail));
   mkdirSync(join(src, 'items'));
-  const lamp = '{\n  "keywords": ["x", "lamp"],\n  "name": {"prose": "lamp"}\n}\n';
+  const lamp =
+    '{\n  "keywords": ["x", "lamp"],\n  "name": {"prose": "lamp"},\n  "room": "a",\n  "room_line": {"prose": "x"}\n}\n';
   writeFileSync(join(src, 'items/lamp.json'), lamp);
   mkdirSync(join(src, 'areas'));
   const area =
-    '{"rooms": {"d": {\n  "description": {"prose": "x"}\n}, "e": {\n  "description": {"prose": "y"}\n}}}\n';
+    '{"rooms": {"d": {\n  "description": {"prose": "x"}\n}, "e": {\n  "description": {"prose": "x"}\n}}}\n';
   writeFileSync(join(src, 'areas/w.json'), area);
   const line = async (key: string, words: string) => {
     const { status, text } = await call(`/line?key=${key}&words=${words}`);
@@ -250,7 +251,7 @@ test('/line opens an inline prose key in its own definition, whoever else holds 
   );
   assert.deepEqual(
     await line('room.b.description', 'x'),
-    at('rooms/b.json', 4, '    "prose": "x"', 'x'),
+    at('rooms/b.json', 4, '    {"prose": "x"},', 'x'),
   );
   assert.deepEqual(
     await line('room.d.description', 'x'),
@@ -258,15 +259,30 @@ test('/line opens an inline prose key in its own definition, whoever else holds 
   );
   assert.deepEqual(
     await line('item.lamp.name', 'lamp'),
-    at('items/lamp.json', 3, '  "name": {"prose": "lamp"}', 'lamp'),
+    at('items/lamp.json', 3, '  "name": {"prose": "lamp"},', 'lamp'),
   );
   assert.deepEqual(
     await line('room.c.name', 'z'),
     at('rooms/c.json', 2, '  "name": {"prose": "z"},', 'z'),
   );
-  assert.equal((await line('room.c.description', 'z'))[0], 400); // two description lines: which?
+  assert.deepEqual(
+    await line('room.c.description', 'z'),
+    at('rooms/c.json', 3, '  "description": {"prose": "z"},', 'z'),
+  );
+  assert.deepEqual(
+    await line('room.c.details.n.description', 'z'),
+    at('rooms/c.json', 5, '    "description": {"prose": "z"}', 'z'),
+  );
+  assert.deepEqual(
+    await line('room.e.description', 'x'),
+    at('areas/w.json', 4, '  "description": {"prose": "x"}', 'x'),
+  );
+  // a `room_line` lowers to `<key>.room` (prose.ex step/1), beside an NPC's `room` field
+  assert.deepEqual(
+    await line('item.lamp.room', 'x'),
+    at('items/lamp.json', 5, '  "room_line": {"prose": "x"}', 'x'),
+  );
   // words edited outside the Book before the compile: its own line is gone, so no other's line
   assert.equal((await line('room.b.name', 'Hall'))[0], 404);
   assert.equal((await line('item.lamp.description', 'lamp'))[0], 404);
-  assert.equal((await line('room.e.description', 'x'))[0], 404);
 });
