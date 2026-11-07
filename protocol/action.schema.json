@@ -4,7 +4,7 @@
   "description": "Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, §2, §18, §19; 06 §20; 21 §7).",
   "$defs": {
     "Key": {
-      "description": "A stable semantic key: lowercase snake_case of at most 64 characters, the DefinitionRef segment rule (03 §2). Used for action keys, directions, choices, outcomes and key-valued facts.",
+      "description": "A name the game uses inside: lowercase letters, digits and underscores, at most 64 characters, such as north or old_well.",
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]*$",
       "maxLength": 64,
@@ -15,7 +15,7 @@
       ]
     },
     "Word": {
-      "description": "One spoken word (speech@1; toolbox row G9): 1 to 32 ASCII letters, the riddle answer's bound. The rule case-folds it and compares it only with authored keywords; it never reaches narration.",
+      "description": "One spoken word: 1 to 32 ASCII letters, the riddle answer's bound. The rule case-folds it and compares it only with authored keywords; it never reaches narration.",
       "type": "string",
       "pattern": "^[a-zA-Z]{1,32}$",
       "examples": ["ward", "WARD"]
@@ -459,7 +459,7 @@
       ]
     },
     "ActionContribution": {
-      "description": "One source's contribution to an actor's ActionSet (06 §19; ADR-016), applied to the set composed so far by stable action key: union adds the named actions whose keys the set lacks, override adds them and replaces those it has, replace makes the set exactly them, subtract removes them and intersect keeps only them. A key names an engine verb (a registered command type), a cartridge action or a cartridge scripted action; union, override and replace take its definition (a cartridge's own over the engine verb's). A room applies its contributions in order after the engine verbs and the cartridge's actions and scripted actions (kernel/ts/src/actions.ts).",
+      "description": "Changes the list of actions the player is offered here: union adds actions, override adds or replaces them, replace offers exactly these, subtract removes them, intersect keeps only these. Each key names a built-in verb or one of the game's actions.",
       "type": "object",
       "properties": {
         "op": {"description":"How the actions apply to the set so far: union, override, replace, subtract or intersect.",
@@ -565,7 +565,7 @@
       ]
     },
     "ScriptedTarget": {
-      "description": "What a ScriptedAction acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the scripted action keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them.",
+      "description": "What the action works on: a detail in a room (offered while the player is there), a tool used on another item, or a spell's word.",
       "oneOf": [
         {"description":"The action acts on one detail of a room, offered only while the actor is in that room.",
           "type": "object",
@@ -593,7 +593,7 @@
             "kind": {
               "const": "use"
             },
-            "tool": {
+            "tool": {"description":"What the tool must be: an item with a given tag, or a vessel holding a given liquid.",
               "$ref": "#/$defs/UseTool"
             }
           },
@@ -604,7 +604,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Toolbox row 29a (word bar S2): a spell, cast only by the cast command typing its word (no other spell scripted action has it), never offered by key or performed; it acts on the caster's body. With aimed (loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it.",
+          "description": "A spell, cast by typing its word. With aimed it is cast at someone or something nearby; learned names a true-or-false fact the player must have true to cast it.",
           "type": "object",
           "properties": {
             "kind": {
@@ -665,7 +665,7 @@
       ]
     },
     "UseTool": {
-      "description": "Toolbox row G4: what a use scripted action's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).",
+      "description": "What a use scripted action's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).",
       "type": "object",
       "properties": {
         "tag": {"description":"A tag the tool item definition declares.",
@@ -688,7 +688,7 @@
       ]
     },
     "ScriptedAction": {
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ScriptedAction; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit list of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (step.schema.json Check; check@1), whose result selects the outcome: success when it passes, failure when it fails; a scripted action has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a scripted action without a check has outcome performed. failure's steps may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (ActionCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the scripted action is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a scripted action with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target scripted action is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (ActionCraft), the items a station scripted action uses up and makes; a spell scripted action has none (SCHEMA_VIOLATION). Result bands join later.",
+      "description": "An action the player can take, such as ring the bell: the words that start it, what it acts on, when it is offered, what it costs, an optional check, and what happens on success or failure.",
       "type": "object",
       "properties": {
         "key": {
@@ -711,7 +711,7 @@
         "priority": {"description":"Presentation priority.",
           "type": "integer"
         },
-        "policy": {
+        "policy": {"description":"A condition the player must meet; while it fails, the action is shown unavailable and refused.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
         "outcomes": {"description":"The outcomes a perform selects.",
@@ -720,7 +720,7 @@
             "success": {"description":"Runs when the check passes, or when the action has no check.",
               "type": "object",
               "properties": {
-                "steps": {
+                "steps": {"description":"What happens on success, in order.",
                   "type": "array",
                   "items": {
                     "$ref": "step.schema.json#/$defs/Step"
@@ -728,11 +728,11 @@
                   "minItems": 1,
                   "maxItems": 16
                 },
-                "narration": {
+                "narration": {"description":"The line the player reads on success.",
                   "$ref": "#/$defs/ActionNarration"
                 },
                 "cues": {
-                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown.",
+                  "description": "Transient cues of this outcome, from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown.",
                   "$ref": "entity.schema.json#/$defs/Cues"
                 }
               },
@@ -745,7 +745,7 @@
             "failure": {"description":"Runs when the check fails.",
               "type": "object",
               "properties": {
-                "steps": {
+                "steps": {"description":"What happens on failure, in order.",
                   "type": "array",
                   "items": {
                     "$ref": "step.schema.json#/$defs/Step"
@@ -753,11 +753,11 @@
                   "minItems": 0,
                   "maxItems": 16
                 },
-                "narration": {
+                "narration": {"description":"The line the player reads on failure.",
                   "$ref": "#/$defs/ActionNarration"
                 },
                 "cues": {
-                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown.",
+                  "description": "Transient cues of this outcome, from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown.",
                   "$ref": "entity.schema.json#/$defs/Cues"
                 }
               },
@@ -778,7 +778,7 @@
           "type": "integer",
           "minimum": 1
         },
-        "costs": {
+        "costs": {"description":"What the action costs the player's body each time, such as 1 movement point; up to 8. If the player cannot pay, it is refused.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/ActionCost"
@@ -786,7 +786,7 @@
           "minItems": 1,
           "maxItems": 8
         },
-        "craft": {
+        "craft": {"description":"Makes the action a crafting recipe: the items it uses up, the item it makes, or both.",
           "$ref": "#/$defs/ActionCraft"
         },
         "cooldown": {"description":"The action is refused until this much logical time has passed since the actor's last admitted attempt.",
@@ -1069,7 +1069,7 @@
         "actor"
       ],
       "additionalProperties": false,
-      "description": "A scripted action outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
+      "description": "A scripted action outcome's narration: the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits.",
       "examples": [
         {
           "actor": "narration.coil_rope.actor"
@@ -1104,7 +1104,7 @@
       ]
     },
     "NarrationParticipant": {
-      "description": "An entity a scripted action's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE.",
+      "description": "Someone or something the narration names: an NPC or item of this game, or the player.",
       "oneOf": [
         {"description":"An NPC of this cartridge.",
           "type": "object",
@@ -1167,7 +1167,7 @@
       ]
     },
     "ActionCraft": {
-      "description": "What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
+      "description": "What a crafting action uses up and makes. consume: the items taken from the player's hands into a holder on every try; yield: an item moved from a holder to the player unless the action fails.",
       "type": "object",
       "properties": {
         "consume": {"description":"What the actor gives up on every accepted perform, failure included.",
@@ -1265,7 +1265,7 @@
       ]
     },
     "ActionCost": {
-      "description": "One resource cost of a ScriptedAction (21 §7 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 §5.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.",
+      "description": "What the action costs the player each time, failure included: an amount of one pool, such as 5 mv. Without enough, the action is refused and nothing happens.",
       "type": "object",
       "properties": {
         "resource": {"description":"The resource the body pays.",

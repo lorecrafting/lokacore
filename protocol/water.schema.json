@@ -132,7 +132,7 @@
         "routes"
       ],
       "additionalProperties": false,
-      "description": "D6 exact paired surface/bottom routes, usable skill, entry load/cost, absolute submersion duration and authored warning/death copy; real_elapsed content only.",
+      "description": "Exact paired surface/bottom routes, usable skill, entry load/cost, absolute submersion duration and authored warning/death copy; real_elapsed content only.",
       "examples": [
         {
           "skill": {

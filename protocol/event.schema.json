@@ -155,7 +155,7 @@
       ]
     },
     "Loudness": {
-      "description": "How a word was spoken (speech@1; toolbox row G9): whisper reaches the addressee, say the speaker's room, shout the rooms one exit away too.",
+      "description": "How a word was spoken: whisper reaches the addressee, say the speaker's room, shout the rooms one exit away too.",
       "enum": ["whisper", "say", "shout"],
       "examples": ["shout"]
     },
