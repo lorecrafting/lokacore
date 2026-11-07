@@ -43,8 +43,10 @@ export function triggers(c: Obj, edges: { from: string; to: string }[]): Trigger
       actions[a.key as string] = { room, detail };
   }
   const taken: Record<string, string> = {};
-  for (const s of of('scenes'))
-    if (!('rest' in ((s.on ?? {}) as Obj))) taken[s.key as string] = same(s.on as On);
+  for (const s of of('scenes')) {
+    const on = (s.on ?? {}) as On;
+    if (!('rest' in on)) taken[s.key as string] = same(on);
+  }
   const named: Record<string, string[]> = {};
   for (const q of of('quests')) named[q.key as string] = [];
   for (const e of edges)
@@ -75,8 +77,10 @@ export function offers(t: Triggers, scene: string, nodes: Nodes): Record<Kind, O
 }
 
 /** Another scene already starts on `on` (scenes.ex:274-292). */
-export const refused = (t: Triggers, scene: string, on: On) =>
-  Object.entries(t.taken).some(([k, s]) => k !== scene && s === same(on));
+export function refused(t: Triggers, scene: string, on: On) {
+  const sig = same(on);
+  return Object.entries(t.taken).some(([k, s]) => k !== scene && s === sig);
+}
 
 /** The starter's `<scene>_quest` (starters/templates.ex) when the scene no longer starts on it and
  * nothing else names it: the author may delete it (never deleted for them). */
