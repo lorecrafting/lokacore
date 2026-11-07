@@ -24,6 +24,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: author panel, palette Undo brings back a palette Delete](2026-11-06-editor-delete-undo-review.md): **APPROVE**
 - [Review: editor coverage A, CRUD matrix, card round-trip, route-caller tests](2026-11-06-editor-coverage-a-review.md): **APPROVE**
 - [Review: inline words field on every card words row (loka-wfrgk.100.1)](2026-11-06-card-words-field-review.md): **APPROVE WITH NOTES**
+- [Review: a blank world's first room is placed on the map](2026-11-06-blank-world-map-review.md): **APPROVE WITH NOTES**
 - [Review: editor world picker and New world (loka-vduxr.65)](2026-11-05-world-picker-review.md): **APPROVE WITH NOTES**
 - [Review: Story map S2, the List view and Trace in the map slot (PR #646, loka-wfrgk.18.2)](2026-11-05-story-map-s2-review.md): **APPROVE WITH NOTES**
 - [Review: Story map S1, the story model (PR #620, loka-wfrgk.18)](2026-11-05-story-map-s1-review.md): **APPROVE WITH NOTES**
