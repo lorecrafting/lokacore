@@ -221,3 +221,32 @@ test('level 0 opens whole, zooms out no further, and only a pill marks the selec
   await page.close();
 });
 
+
+// Breaks: an Unplaced chip dropped on an empty map refused or ignored (areamap.tsx's drop), or sent as
+// anything but the layout starter, which writes the first row and knowledge@1 (author_mapedit.test.ts).
+test('an Unplaced chip dropped on an empty map asks the layout starter for the first row', async () => {
+  const page = await open({ selection: { kind: 'room', key: 'tollhouse' } });
+  await page.route('**/__author/story', async (r) => {
+    const story = await (await r.fetch()).json();
+    const map = story.map.map(({ at: _, ...room }: { at?: unknown }) => room); // nothing placed
+    r.fulfill({ json: { ...story, map } });
+  });
+  const posted: unknown[] = [];
+  await page.route('**/__author/new', (r) => {
+    posted.push(r.request().postDataJSON());
+    return r.fulfill({ json: { id: 1 } });
+  });
+  await page.evaluate(() => localStorage.setItem('loka.author.mapLock', 'off'));
+  await page.reload();
+  const slot = page.getByLabel('Map slot');
+  await slot.getByText(/^Unplaced \(/).waitFor({ timeout: boot });
+  const dt = await page.evaluateHandle(() => {
+    const d = new DataTransfer();
+    d.setData('text/x-loka-room', 'tollhouse');
+    return d;
+  });
+  await slot.locator('div.relative.flex-1').dispatchEvent('drop', { dataTransfer: dt });
+  for (let t = 0; !posted.length && t < 50; t++) await new Promise((r) => setTimeout(r, 100));
+  assert.deepEqual(posted, [{ kind: 'layout', name: 'layout' }]);
+  await page.close();
+});
