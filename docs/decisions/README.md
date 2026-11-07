@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-11-06 [Owner decision: scene structure in the GUI](owner-decision-scene-structure-gui-2026-11-06.md): lines, pages and choice labels of `.scene` and `.cut` are edited in the Scene text card; reverses ruling 11, narrows ruling 9 to carry choice keys.
 - 2026-11-06 [Owner decision: NPC behaviours](owner-decision-npc-behaviours-2026-11-06.md): NPCs act through the player's own verb rules, a four-layer arbiter, bounded plans, canned behaviours as shortcuts; economy second; slices loka-ni2zd.1-16.
 - 2026-11-04 [Owner decision: the authoring editor plan](owner-decision-authoring-editor-plan-2026-11-04.md): six promises, three-column layout, live agent edits, named Book treatments, strict editor coverage, slice order.
 - 2026-11-04 [Owner decision: cartridge source by world area](owner-decision-area-layout-2026-11-04.md): area folders, the border rule (rooms cross, all else via the root), implicit zones, no area field or key prefix, no new DiagnosticCode.
