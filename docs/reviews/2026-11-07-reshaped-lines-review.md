@@ -25,8 +25,7 @@
 - 1: test `inbook.test.ts:150` (field "a hooded stranger", `/edit` posts it, `frozen` lowercase). Save posts
   `f.at` from `/line?key=` (`inbook.ts:174`), so the written line is chosen by key, not by drawn words.
 - 3 (embedded): `words.ts:222` `noted(shown, t.key, ...)` notes the whole speaker line: exact match, claim holds.
-- 4: diff is `mobile/app/author/` only; `ast-grep scan` reports no `mobile-book-*` finding; `panel.tsx` already
-  imported `book/words.ts`.
+- 4: diff is `mobile/app/author/` only; `panel.tsx` already imported `book/words.ts`.
 - Claim rerun: "`:243` `!==` -> `===` survives the tool": see Mutants. "lineWords notes the whole line": holds.
 - New path (lowered fallback onto a key from chrome `cap()`: slot, position, ancestry, state, untexted action
   labels, sentence-initial name links): scanned every cartridge's `text.json`; no instance in the tree.
@@ -49,8 +48,11 @@ Hand: `panel.tsx:217` fallback dropped (`seen.get(words)` only): every test file
    opens `quest.oar.title`; Enter writes the quest title's line. Reproduced with a scratch test on the PR's
    `capitalised()` harness: `/line?key=quest.oar.title`, expected `item.oar.short`. Same result with main's
    `inbook.ts`, so not introduced, but the slice claims Menu titles as covered and the PM's bar is "a wrong
-   key's field is a blocker". Fix (smallest): when `t` and its lowered form are both in `seen` under different
-   keys, `drawn()` returns nothing (no field, the existing note); pin it with a test seeding both.
+   key's field is a blocker". Required outcome: the item title never opens `quest.oar.title` (mechanism open:
+   tagging per the brief, or the cheap trade "both `t` and lowered `t` seen under different keys -> no field,
+   the existing note", which also costs the Journal quest title its field once the oar's short is seen; no
+   field beats a wrong write). Test both directions: the item title does not open the quest key; the quest
+   title's result when both are seen.
 2. **blocker** `inbook.ts:45`: exact-before-lowered is unpinned (hand mutant above stays green). The PR body
    accepts "exact wins" as a rule; finding 1's test would pin the ambiguous case.
 3. **should-fix** `mobile/app/author/panel.tsx:217`: the click-select / Alt-click fallback has no test (hand mutant
