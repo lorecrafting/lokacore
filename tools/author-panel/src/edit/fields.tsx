@@ -1,6 +1,6 @@
 // The generic card's hand-built fields (docs/rnd/gui-editor-design-2026-11-04.md §4.5, §11): they
 // draw only; the logic is kernel/ts/play/card.ts. The walker names them by `ui:field`.
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FieldProps } from '@rjsf/utils';
 import { choices, pickKind, proseKey, refusePick } from '../../../../kernel/ts/play/card.ts';
 import { oneLine, saving } from '../../../../mobile/app/author/prose_rules.ts';
@@ -46,15 +46,6 @@ const lineOf = (key: string, words: string) =>
   api(`/line?key=${encodeURIComponent(key)}&words=${encodeURIComponent(words)}`);
 
 type Told = { say: string; theirs?: At };
-type Sets = { setAt: (a: At) => void; setDraft: Dispatch<SetStateAction<string>>; setTold: (t?: Told) => void };
-/** After a save: words typed while it was out stay the draft, over the line now on disk. */
-async function saved(k: string, sent: string, { setAt, setDraft, setTold }: Sets) {
-  const [status, line] = await lineOf(k, sent);
-  if (status !== 200) return;
-  setAt(line);
-  setDraft((d) => (d === sent ? line.words : d));
-  setTold(undefined);
-}
 async function conflict(k: string, mine: At): Promise<Told> {
   const [s, theirs] = await lineOf(k, mine.words);
   const say = 'Changed on disk since you opened it.';
@@ -66,6 +57,7 @@ function useLine(k: string, words: string) {
   const [draft, setDraft] = useState('');
   const [told, setTold] = useState<Told>();
   const busy = useRef(false); // Enter's save, then the blur after it, sends one /edit
+  const [out, setOut] = useState(false); // read-only meanwhile: no words typed over the save
   const dirty = at !== undefined && draft !== at.words;
   const kept = useRef(dirty);
   kept.current = dirty;
@@ -85,16 +77,18 @@ function useLine(k: string, words: string) {
     if (choice === 'unchanged') return mine === at ? undefined : read(mine.words, true); // Keep mine == theirs
     if (choice === 'empty') return setTold({ say: 'Empty. Write ~ to leave it unwritten.' });
     busy.current = true;
+    setOut(true);
     try {
       const [status, answer] = await api('/edit', { ...mine, words: draft, key: k });
-      if (status === 200) await saved(k, draft, { setAt, setDraft, setTold });
+      if (status === 200) await read(draft, true);
       else if (status === 409) setTold(await conflict(k, mine));
       else setTold({ say: typeof answer === 'string' ? answer : `Not saved (${status}).` });
     } finally {
       busy.current = false;
+      setOut(false);
     }
   };
-  return { at, draft, setDraft, told, theirs: told?.theirs, setTold, read, save };
+  return { at, draft, setDraft, told, theirs: told?.theirs, setTold, read, save, out };
 }
 
 /**
@@ -104,7 +98,7 @@ function useLine(k: string, words: string) {
  * (a scene's or an inline marker's words; a `"key":` line needs none).
  */
 export function WordsField({ label, k, words }: { label: string; k: string; words: string }) {
-  const { at, draft, setDraft, told, theirs, setTold, read, save } = useLine(k, words);
+  const { at, draft, setDraft, told, theirs, setTold, read, save, out } = useLine(k, words);
   return (
     <div className="grid min-w-0 gap-1 text-xs">
       <div className="flex min-w-0 items-center gap-2">
@@ -114,6 +108,7 @@ export function WordsField({ label, k, words }: { label: string; k: string; word
           title={k}
           className="h-7 flex-1 text-xs"
           disabled={!at}
+          readOnly={out}
           value={draft}
           onChange={(e) => setDraft(oneLine(e.target.value))}
           onBlur={() => theirs || void save()} // a shown conflict waits for Keep mine
@@ -130,19 +125,20 @@ export function WordsField({ label, k, words }: { label: string; k: string; word
         />
       </div>
       {told ? <Refusal>{told.say}</Refusal> : null}
-      {theirs ? (
-        <div className="flex gap-1">
-          <Button type="button" size="xs" variant="outline" onClick={() => void save(theirs)}>
-            Keep mine
-          </Button>
-          <Button type="button" size="xs" variant="outline" onClick={() => void read(theirs.words, true)}>
-            Take theirs
-          </Button>
-        </div>
-      ) : null}
+      {theirs ? <Theirs keep={() => void save(theirs)} take={() => void read(theirs.words, true)} /> : null}
     </div>
   );
 }
+const Theirs = ({ keep, take }: { keep: () => void; take: () => void }) => (
+  <div className="flex gap-1">
+    <Button type="button" size="xs" variant="outline" onClick={keep}>
+      Keep mine
+    </Button>
+    <Button type="button" size="xs" variant="outline" onClick={take}>
+      Take theirs
+    </Button>
+  </div>
+);
 
 /** A picker's name, marked stale while the last compile failed: its keys are the last good compile's. */
 export const FieldName = (p: FieldProps) => (

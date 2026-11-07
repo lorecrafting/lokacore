@@ -87,9 +87,8 @@ test("the generic card's words commit once, on Enter, never per keystroke", asyn
   }
 });
 
-// Breaks: words typed while a save is out replaced by the saved line's, or left unsaveable (the
-// field's `was` not moved to the line now on disk, so the next save is refused as a conflict).
-test('words typed while a save is out stay the draft and save next', async () => {
+// Breaks: words typed while a save is out are lost (its re-read writes the saved line over them).
+test('the field is read-only while its save is out', async () => {
   const before = readFileSync(TEXT, 'utf8');
   const page = await open({ right: 420, selection: { kind: 'item', key: 'lute' } });
   let release = () => {};
@@ -100,14 +99,13 @@ test('words typed while a save is out stay the draft and save next', async () =>
     await shows(field, 'a lute');
     await field.fill('~');
     await field.press('Enter'); // its /edit held
-    await field.fill('a lute');
+    await page.waitForTimeout(100);
+    assert.equal(await field.isEditable(), false);
     release();
     await until(() => readFileSync(TEXT, 'utf8') !== before);
-    await page.waitForTimeout(300);
-    assert.equal(await field.inputValue(), 'a lute');
-    await field.blur();
-    await until(() => readFileSync(TEXT, 'utf8') === before);
-    assert.equal(readFileSync(TEXT, 'utf8'), before);
+    await shows(field, '~');
+    for (let t = 0; !(await field.isEditable()) && t < 50; t++) await page.waitForTimeout(100);
+    assert.equal(await field.isEditable(), true);
   } finally {
     writeFileSync(TEXT, before);
     await page.close();
