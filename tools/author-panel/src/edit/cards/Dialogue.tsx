@@ -10,7 +10,7 @@ import { refuseLink } from '../../../../../kernel/ts/play/link.ts';
 import type { useDiagnostics } from '../../author.ts';
 import { Input } from '../../components/ui/input.tsx';
 import type { Context } from '../fields.tsx';
-import { adder, Header, useCard, useCartridge } from '../Generic.tsx';
+import { adding, Header, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 import { Choices, LINKS, Tree } from './Choices.tsx';
@@ -71,7 +71,7 @@ export function Dialogue({ rel, context, diag }: Props) {
       <Mechanics
         card={card}
         menu={menu}
-        add={adder(card, defs, DEF)}
+        {...adding(card, defs, DEF)}
         fixed={required} // a name is removable
       />
       <Tree.Provider value={{ card, defs, hidden, caps, context, diag }}>

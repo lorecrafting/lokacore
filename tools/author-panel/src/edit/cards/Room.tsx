@@ -18,7 +18,7 @@ import { addHere } from '../../book.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { mapCommand, mapNewest } from '../../mapwire.ts';
 import { fields, inline, WordsField, type Context } from '../fields.tsx';
-import { AddMenu, CardForm, Header, adder, useCard, useCartridge } from '../Generic.tsx';
+import { AddMenu, CardForm, Header, adding, useCard, useCartridge } from '../Generic.tsx';
 import { Folded, Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 
@@ -56,7 +56,7 @@ export function Room({ rel, context, diag, offer }: Props) {
           cart.requires?.capabilities ?? {},
         )
       : [];
-  const add = adder(card, defs, 'source.RoomDefinition');
+  const { add, about } = adding(card, defs, 'source.RoomDefinition');
   useEffect(() => void (saved && offer(menu)), [rel, !!saved, menu.join()]);
   useEffect(() => () => offer([]), []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -73,7 +73,7 @@ export function Room({ rel, context, diag, offer }: Props) {
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <Words draft={draft} context={context} fields={['name', 'description']} />
       <Exits room={context.key} exits={draft.exits ?? {}} />
-      <Mechanics card={card} menu={menu} add={add} />
+      <Mechanics card={card} menu={menu} add={add} about={about} />
       <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} details />
     </div>
   );
@@ -121,11 +121,13 @@ export function Mechanics({
   card,
   menu,
   add,
+  about,
   fixed = OWN,
 }: {
   card: Card;
   menu: string[];
   add: (f: string) => void;
+  about: (f: string) => string | undefined;
   fixed?: string[];
 }) {
   const draft = card.draft as Doc;
@@ -143,7 +145,7 @@ export function Mechanics({
             </Button>
           </div>
         ))}
-      <AddMenu fields={menu} reveal={add} />
+      <AddMenu fields={menu} reveal={add} about={about} />
     </section>
   );
 }

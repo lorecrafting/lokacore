@@ -15,6 +15,7 @@ import {
   applied,
   cardMenu,
   definitionOf,
+  described,
   diff,
   fieldErrors,
   hidden,
@@ -26,6 +27,7 @@ import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
 import { capabilityRow, unready } from '../../../../kernel/ts/play/allowed.ts';
 import { ask, type useDiagnostics } from '../author.ts';
 import { Button } from '../components/ui/button.tsx';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu.tsx';
 import { fields, type Context } from './fields.tsx';
 import { Refusal, templates } from './templates.tsx';
 import registry from './registry.json';
@@ -144,29 +146,29 @@ export function useCard(rel: string, diag: Diag) {
   return { ...card, refused: held ?? refused };
 }
 
-/** The registry's fields this definition lacks: choosing one reveals its empty field. */
-export function AddMenu({
-  fields: menu,
-  reveal,
-}: {
+/** The registry's fields this definition lacks, each with its schema description: choosing one reveals its empty field. */
+export function AddMenu({ fields: menu, reveal, about = () => undefined }: {
   fields: string[];
   reveal: (f: string) => void;
+  about?: (f: string) => string | undefined;
 }) {
   if (!menu.length) return null;
   return (
-    <select
-      aria-label="Add a field"
-      className="form-control"
-      value=""
-      onChange={(e) => reveal(e.target.value)}
-    >
-      <option value="">Add…</option>
-      {menu.map((f) => (
-        <option key={f} value={f}>
-          {f}
-        </option>
-      ))}
-    </select>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button type="button" size="xs" variant="outline" aria-label="Add a field" className="justify-self-start">
+          Add…
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="max-w-80">
+        {menu.map((f) => (
+          <DropdownMenuItem key={f} textValue={f} onSelect={() => reveal(f)} className="grid gap-0 text-xs">
+            <span>{f}</span>
+            {about(f) ? <span className="text-muted-foreground">{about(f)}</span> : null}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -243,6 +245,7 @@ export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
   if (!drawn) return <p className="px-3 text-xs text-muted-foreground">{card.refused ?? `Loading ${rel}`}</p>;
   const { dir } = saved!; // drawn exactly when saved
   const def = definitionOf(defs, dir, draft); // a prose field added writes its key `~`
+  const { add, about } = adding(card, defs, def);
   const ui = hidden(drawn, dir, registry, draft, card.revealed);
   const menu = cardMenu(dir, registry, draft, card.revealed, cart, (m) => only(m, defs));
   return (
@@ -250,7 +253,7 @@ export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
-      <AddMenu fields={menu} reveal={adder(card, defs, def)} />
+      <AddMenu fields={menu} reveal={add} about={about} />
     </div>
   );
 }
@@ -261,6 +264,12 @@ export const adder = (card: Card, defs: Record<string, never>, def: string, held
   card.reveal(f);
   if (next) (card.change(next), awaits(def, f) || card.commit());
 };
+
+/** The Mechanics menu's props: the adder and each option's schema description. */
+export const adding = (card: Card, defs: Record<string, never>, def: string, held?: number) => ({
+  add: adder(card, defs, def, held),
+  about: (f: string) => described(defs, def, f),
+});
 
 /** cartridge.json (its `requires.capabilities` and `world`), read again when it changes. */
 export function useCartridge(diag: Diag) {
