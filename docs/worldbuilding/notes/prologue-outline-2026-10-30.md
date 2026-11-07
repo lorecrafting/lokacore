@@ -5,7 +5,7 @@ Not canon. Written by Fable from the v2 Seedship Forest design (lorecrafting/lok
 
 A free, complete short story of 3 to 5 hours, ending on the landing. Rebuilt under the owner's ruling of 2026-10-30: the story illustrates the three capacities (wanting happiness within the turning; wanting out of the turning; coming back down to help others out) through the Three Roots, in the world's own words only. Binding: the preserved sleeper; the three-step opening ending with "The sleeper has awakened"; no economy; mechanics unlock with the descent; no borrowed franchise names.
 
-Narration: second person, present tense; the opening dream (beat 2) is the one first-person passage. 48 beats, all main, five parts of about 45 minutes each (Part 3 under an hour).
+Narration: second person, present tense; the opening dream (beat 2) is the one first-person passage. 49 beats, all main, five parts of about 45 minutes each (Part 3 under an hour).
 
 ---
 
@@ -41,14 +41,14 @@ Narration: second person, present tense; the opening dream (beat 2) is the one f
 
 Mechanics: movement, looking, dialogue, gifts and trust, one quest, lore, effortless resonance. Ends with hunger.
 
-1. The Chronicler: "In the beginning of this great eon..." and the praises of those who refuse the quiet of the high places and come down into the burning house. Overtones resolve into words. — Purpose: the voice, and the Third Root sung before anyone can understand it.
+1. The opening, a fade cutscene ([text in §10](#10-opening-and-dedication-text-draft)): overtones resolve into "In the beginning of this great eon..."; the sphere of light; mind-born beings come down; the Radiant Ones look on; praise to those who come down among the many; the roll call of ten light-names; all of them looking, always, ready; "Listen." — Purpose: the voice and the sutra assembly; the Third Root sung before anyone can understand it. (owner 2026-10-31)
 2. The dream, first person: "I am light among lights. There is no I. Then there is." A hum, a lullaby; a brown sphere far below; "You're close now. Almost there." "I am falling—" — Purpose: the luminous state and the birth of "I"; seeds the lullaby and the sphere.
 3. The Awakening Clearing, a perfect oval. Tomas kneels with his trowel; his eyes focus: "The sleeper has awakened." The clarity drains. It is the first line of an old rite; every child knows the words. — Purpose: the homage; the rites begin.
 4. Thera: "Give them space. I'm here." The Healing Grove; her pendant swings over you: "My mother's. I never take it off." "We don't get visitors. But there is a rite for you." — Purpose: safety, the first face of care; pendant seed.
 5. First steps: no weight, no print in the moss, no sun to find. The Heartwood. Maren's look held too long. Kira, hands full of woven reed: "So you're the sleeper. Then it starts. Fine. Come." — Purpose: the pristine state; the community's unease; Kira as the one who makes.
 6. The Pulse, at the Spring. "Feel that rhythm? The heartbeat of the Grove." "The Pulse is strong today." You feel it without trying. She hums; you have heard it somewhere. "I feel like I was waiting for you." — Purpose: effortless resonance; lullaby paid half-way.
 7. The memorial: fresh flowers no one tends. Tomas: "She was smiling. Why won't anyone tell me why?" Dov picks fruit and gives you the best with both hands: "Not yet. Not till the rite." Thera: "Nothing here is owed. Everything is given." — Purpose: Lira; the gift rule; Dov's love of the fruit.
-8. Tending with Kira in the fields: soil that never tires. The trowel turns up in a furrow: the only metal thing you have ever seen, marked in a script no one reads. Tomas: "My father brought it from... before." — Purpose: the quest loop; the Hearth's script, seed for your cradle.
+8. Tending with Kira in the fields: soil that never tires. Tomas works beside you and shows you his trowel: the only metal thing you have ever seen, marked in a script no one reads. "My father brought it from... before." At the tree line, Brennan watches and says nothing. — Purpose: the quest loop; the Hearth's script, seed for your cradle; Brennan glimpsed before his warning at 13. (owner 2026-10-31)
 9. The Rite of First Fruit. Maren: "When the sleeper wakes, those who will come down, eat." Everyone eats. You eat. Hunger, like a second heart; behind every trunk, a shadow. On the High Terrace Maren watches the twilight: "It has begun." — Purpose: the first stair, chosen; hunger unlocked.
 
 ### Part 2: The Cold Wind (beats 10 to 17, about 45 min)
@@ -94,7 +94,7 @@ Mechanics: the Edge, hidden passages to the hull, the membrane sky, the revelati
 36. "Thera collapsed. In the Deep. She went alone." The Heartroot Chamber: roots branching like thought, light pulsing. "Thera. Listen to MY voice." Your memories together. She returns. — Purpose: you save her.
 37. The Small Grove again. "I always knew. I didn't want to know." Her dream spoken: "A morning no one needs me. A field I tend because it's a field. That's all. I never said it out loud." A pressed flower: "Remember I wanted to stay." You can no longer hear the Pulse here. "I need to understand what I'm becoming." — Purpose: what she gives up, plainly and without romance; resonance nearly gone. (owner 2026-10-30)
 
-### Part 5: Descent (beats 38 to 48, about 45 min)
+### Part 5: Descent (beats 38 to 49, about 45 min)
 
 Mechanics: the vow, fear, the first danger and combat, wounds and scars, the landing as a phased world event, grief.
 
@@ -108,7 +108,8 @@ Mechanics: the vow, fear, the first danger and combat, wounds and scars, the lan
 45. The ship phases in. The membrane goes clear; a yellow, poisoned sky; the Grove tilts; weight like a hand on your back. The Vowed go to their alcoves; Tomas touches the statue: "I'll ask her myself." Brennan comes up from the caves: Seren's lamp has gone out. No smoke. — Purpose: three ways in one hour: out, down, down and remaining.
 46. Her hands on the root. "You were the first voice that listened back. I looked for myself and couldn't find her. Isn't that strange? If you ever look for me and can't find me... that might not be as sad as it sounds." She laughs. Light. Gone. Impact: the taproots drive down, the alcoves blaze gold, the Tree roars, the hull splits. Where the Vowed sat, white ash; beside the root, her pendant. — Purpose: the Heart and the landing.
 47. Grief. The chamber is warm and she is not there. The survivors in the broken hull: Maren, Brennan, Kira, Dov silent. Kira counts the ash. At Lira's cracked statue, Maren: "Dov fell. The rest of us came down. The difference was only in the choosing." You speak, the pressed flower in your coat. — Purpose: grief; the teaching closed without a lecture.
-48. Kira steps first through the fractured hull, blade in hand, and you follow onto the alien stone: real stars, wind that smells of ash. Under your feet, through the dead stone, a warmth. The Pulse is strong today. "Listen for me." The Chronicler names the first step of the second wave. End. — Purpose: the hook; the First Root leads the second wave. (owner 2026-10-30)
+48. Kira steps first through the fractured hull, blade in hand, and you follow onto the alien stone: real stars, wind that smells of ash. Under your feet, through the dead stone, a warmth. The Pulse is strong today. "Listen for me." The Chronicler names the first step of the second wave. — Purpose: the hook; the First Root leads the second wave. (owner 2026-10-30)
+49. The dedication, a fade cutscene in the opening's form ([text in §10](#10-opening-and-dedication-text-draft)): whatever good was in this telling goes out to every sphere, a line for each Root, then to the ones who are not here to hear it; the Radiant Ones are looking still. End. — Purpose: the sutra's closing; the three capacities blessed without naming them. (owner 2026-10-31)
 
 ---
 
@@ -133,9 +134,9 @@ Unnamed Tenders fill the hearth, the fields and the Vowed.
 
 | Capacity | In the world's words | Beats |
 |---|---|---|
-| Lesser: happiness within the turning | First Root: the seed seeks soil, grows for itself, no shame | 5, 7, 9, 10, 12, 18, 20, 22 (Kira making); 14, 15, 22, 38, 42 (Dov's curdling); 48 |
-| Middle: wanting out of the turning | Second Root: the tree dreams of being soil, quiet, still | 17, 23, 24, 31, 37, 44 (the offer), 45 (Seren's lamp) |
-| Superior: coming back down for others | Third Root: the roots hold the ground; not rest, not reaching, remaining | 1, 33, 34, 35, 40, 44, 45, 46, 47 (Maren remains) |
+| Lesser: happiness within the turning | First Root: the seed seeks soil, grows for itself, no shame | 5, 7, 9, 10, 12, 18, 20, 22 (Kira making); 14, 15, 22, 38, 42 (Dov's curdling); 48; 49 |
+| Middle: wanting out of the turning | Second Root: the tree dreams of being soil, quiet, still | 17, 23, 24, 31, 37, 44 (the offer), 45 (Seren's lamp), 49 |
+| Superior: coming back down for others | Third Root: the roots hold the ground; not rest, not reaching, remaining | 1, 33, 34, 35, 40, 44, 45, 46, 47 (Maren remains), 49 |
 
 The Three Roots stone (23) states all three; the climax (44 to 46) lives them; the grief beat (47) closes them without a lecture.
 
@@ -184,12 +185,12 @@ The Three Roots stone (23) states all three; the climax (44 to 46) lives them; t
 
 ## 7. Scope and the first slice
 
-- **Beats:** 48, all main. Part 1: 9. Part 2: 8. Part 3: 10. Part 4: 10. Part 5: 11.
+- **Beats:** 49, all main. Part 1: 9. Part 2: 8. Part 3: 10. Part 4: 10. Part 5: 12.
 - **Playtime:** about 4 hours (45, 45, 55, 45, 50 min).
 - **Rooms: 18.** Awakening Clearing; Healing Grove; Heartwood (hearth and hall); the Spring; Lira's Memorial; Elder Hall records; High Terrace; Tending Fields; Understory (your hut and Dov's); Eastern Grove (the Blight line and the Watering Hollow); Small Grove; Deep threshold (the Three Roots stone); Deep caves (Seren); Heartroot Chamber; the Thinning; the Edge; hull corridor with the cradle room; the stone outside the hull.
 - **NPCs: 7 named plus Lira.** Thera, Maren, Brennan, Kira, Tomas, Seren, Dov.
 
-**First slice: Part 1, beats 1 to 9, about 45 minutes.** Eight rooms (Awakening Clearing, Healing Grove, Heartwood, the Spring, memorial, Tending Fields, Elder Hall exterior, High Terrace). Six NPCs (Thera, Maren, Kira, Tomas, Dov, Brennan as a glimpse). Mechanics: move, look, talk, give and receive, one quest (tending and the trowel), lore at the memorial and the hearth, "listen" that always answers. It proves the three-step opening, Tomas's line as the first words of a rite, the gift rule, effortless resonance, and the first stair at the feast, before any survival system exists.
+**First slice: Part 1, beats 1 to 9, about 45 minutes.** Seven rooms (Awakening Clearing, Healing Grove, Heartwood, the Spring, memorial, Tending Fields, High Terrace). Six NPCs (Thera, Maren, Kira, Tomas, Dov, Brennan as a glimpse). Mechanics: move, look, talk, give and receive, one quest (tending and the trowel), lore at the memorial and the hearth, "listen" that always answers. It proves the three-step opening, Tomas's line as the first words of a rite, the gift rule, effortless resonance, and the first stair at the feast, before any survival system exists.
 
 ---
 
@@ -202,3 +203,56 @@ The Three Roots stone (23) states all three; the climax (44 to 46) lives them; t
 5. Kira steps onto the stone first: accepted.
 
 Still PM defaults, not objected to: the Vowed are dozens with Tomas named first; the other cradles stay sealed.
+
+## 9. Beat review (owner, 2026-10-31)
+
+1. The opening (beat 1) is the sutra assembly, shown as a fade cutscene, not a scroll: the eon line; the luminous sphere and its radiance; beings appearing at a lower vibration; the Radiant Ones (the Book's analogue of the great awakened beings) looking upon them, named one by one with light-names only (Radiant Light, Boundless Light, Vast Light, ...; model: the twelve lights); closing on all of them looking upon the cosmos, always present, ready to intercede. Per the sutra framing in [narration voice](../00-foundations/narration-voice.md).
+2. The Radiant Ones are framing only: they do not visibly intercede in the prologue; their readiness is a promise held for the paid books.
+3. New beat 49: a closing dedication in the same cutscene form, after the Chronicler names the first step of the second wave.
+5. Part 1: Tomas's trowel is his own, shown in beat 8 (not dug up; it was in his hands at beat 3); Brennan is a wordless glimpse at the tree line in beat 8; Dov's "Not till the rite" (beat 7) stays as the first meeting of gift and rite. Elder Hall is not visited in Part 1, so the first slice has seven rooms.
+6. NPC pass, accepted; Fable writes these in the end-of-review batch: (a) Tomas gets one beat in Part 2 or 3 (a lucid moment at the memorial, Lira's voice through him) to earn "I was kept for this"; (b) Kira gets one beat in Part 4 where her world-as-it-is is under pressure before "There has to be another way!"; (c) reconcile Maren's "thirty years" (34) with "twenty years" (42); (d) spread the 33 to 35 reveal run, e.g. seed "Lira let go of the Hearth" at 31; (e) Kira's turn from "another way" (42) to leading at 48 gets one line at 47; (f) place Lira's statue (45, 47): the Heartroot Chamber or the memorial, for the map pass.
+4. Fable's draft accepted with the PM's suggestions: ten names; keep "Not to stop them. To see." and the "Listen." handoff; the dedication ends on "They are looking still." (no second hook). "The burning house" is replaced: the coming down carries no negative connotation.
+
+## 10. Opening and dedication text (draft)
+
+Fable, 2026-10-31, with the owner's edits. Fade cards: each fades in, holds and fades out on black; one card, one breath. Directions in square brackets are not game text.
+
+### Beat 1. The opening
+
+[Black. Sound only: overtones, a held chord that gains a second voice. Over card 1 the tone bends, finds consonants and becomes the Chronicler's voice mid-phrase.]
+
+1. In the beginning of this great eon...
+2. there was a sphere of light, and its radiance went out in every direction, and nothing in it had an edge or a name.
+3. And in that radiance there appeared beings born of mind alone. No womb bore them, no grave waited for them. They shone, and were fed by their own shining.
+4. And some of them turned toward a lower note, and listened, and grew a little heavy, and a little more. And they came down.
+5. And the Radiant Ones looked upon them. Not to stop them. To see.
+6. Praise to the ones who look on. And praise, above all, to those who leave the quiet of the high places and come down among the many.
+7. Radiant Light, who was the first to look down.
+8. Boundless Light, whom no edge has ever held.
+9. Vast Light, in whose hand the spheres are a handful of seed.
+10. Unfading Light, who did not dim when the first lights dimmed.
+11. Light Before the Sun, older than the first morning.
+12. Light That Passes Through Walls, for whom no door was ever shut.
+13. Patient Light, who has watched a thousand worlds burn and not turned away.
+14. Light That Remembers, who keeps every name that was ever let go.
+15. Light of the Smallest Spark, who honours one candle in a dark house.
+16. Light That Comes Down, who left the quiet and did not look back.
+17. All of them are looking now. They have always been looking. On every turning of every sphere their eyes are open, their hands are not far, and they are ready.
+18. They are looking at one light among the lights coming down, which has not yet learned to say I. / Listen.
+
+[Cut to black. Beat 2 begins in first person.]
+
+### Beat 49. The dedication
+
+[After beat 48, on black. Same form; the voice quieter, as if from further off, or nearer.]
+
+1. Whatever good there was in this telling, let it not stay here.
+2. Let it go out to every sphere, the high and the heavy, to all who are being born and all who are going out like lamps, and to every being that hurts.
+3. To those who reach for the world with both hands, who plant and weave and build and want: may what they reach for not burn.
+4. To those who have seen the turning and long only to rest: may their rest be true, and may no one call them wrong.
+5. To those who come down again among the many, when they could have stayed in the quiet: may they find the ground still warm.
+6. And to the ones who are not here to hear it: it was for them most of all.
+7. The Radiant Ones are looking on. They were looking when the sleeper woke, when the lamp went out, when the first foot touched the stone.
+8. They are looking still.
+
+[Hold on black. End of the free prologue.]
